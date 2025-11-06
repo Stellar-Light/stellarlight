@@ -5,6 +5,7 @@ const Q_REPO = `
     repository(owner: $owner, name: $name) {
       url
       issues(states: OPEN) { totalCount }
+      stargazerCount
       pushedAt
       defaultBranchRef { target { ... on Commit { committedDate } } }
     }
@@ -108,6 +109,7 @@ export async function fetchRepoInfo(owner: string, name: string) {
 			(r.defaultBranchRef?.target?.committedDate ??
 				r.pushedAt) as string,
 		openIssues: (r.issues?.totalCount ?? 0) as number,
+		stargazerCount: (r.stargazerCount ?? 0) as number,
 	};
 }
 

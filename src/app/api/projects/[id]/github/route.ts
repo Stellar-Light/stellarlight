@@ -79,6 +79,7 @@ export async function GET(
 				url: v.value.url,
 				lastCommitAt: v.value.lastCommitAt,
 				openIssues: v.value.openIssues,
+				stargazerCount: v.value.stargazerCount ?? 0,
 			};
 		}
 
@@ -92,6 +93,7 @@ export async function GET(
 			url: `https://github.com/${r.owner}/${r.name}`,
 			lastCommitAt: null,
 			openIssues: 0,
+			stargazerCount: 0,
 			error: errorMessage,
 			skipped: isPrivate,
 		};
@@ -106,6 +108,7 @@ export async function GET(
 	const payloadDoc = {
 		lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
 		openIssuesTotal: enriched.reduce((s, x) => s + (x.openIssues || 0), 0),
+		totalStars: enriched.reduce((s, x) => s + (x.stargazerCount || 0), 0),
 		repos: enriched,
 	};
 
