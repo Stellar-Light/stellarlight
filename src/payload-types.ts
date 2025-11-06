@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     projects: Project;
+    signals: Signal;
     entities: Entity;
     'transparency-logs': TransparencyLog;
     'sync-jobs': SyncJob;
@@ -83,6 +84,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    signals: SignalsSelect<false> | SignalsSelect<true>;
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     'sync-jobs': SyncJobsSelect<false> | SyncJobsSelect<true>;
@@ -199,6 +201,25 @@ export interface Project {
     twitter?: string | null;
     discord?: string | null;
   };
+  /**
+   * Link GitHub data to this project
+   */
+  github?: {
+    /**
+     * GitHub org login (optional), e.g. "stellar"
+     */
+    orgLogin?: string | null;
+    /**
+     * Specific repositories for this project (owner/name)
+     */
+    repos?:
+      | {
+          owner: string;
+          name: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   onchain?: {
     assetCode?: string | null;
     issuer?: string | null;
@@ -216,6 +237,32 @@ export interface Project {
     firstSeenAt?: string | null;
   };
   lastVerifiedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signals".
+ */
+export interface Signal {
+  id: string;
+  project: string | Project;
+  fetchedAt?: string | null;
+  github?: {
+    lastActivityAt?: string | null;
+    openIssuesTotal?: number | null;
+    repos?:
+      | {
+          owner?: string | null;
+          name?: string | null;
+          url?: string | null;
+          lastCommitAt?: string | null;
+          openIssues?: number | null;
+          error?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -323,6 +370,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'signals';
+        value: string | Signal;
       } | null)
     | ({
         relationTo: 'entities';
@@ -443,6 +494,18 @@ export interface ProjectsSelect<T extends boolean = true> {
         twitter?: T;
         discord?: T;
       };
+  github?:
+    | T
+    | {
+        orgLogin?: T;
+        repos?:
+          | T
+          | {
+              owner?: T;
+              name?: T;
+              id?: T;
+            };
+      };
   onchain?:
     | T
     | {
@@ -464,6 +527,33 @@ export interface ProjectsSelect<T extends boolean = true> {
         firstSeenAt?: T;
       };
   lastVerifiedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signals_select".
+ */
+export interface SignalsSelect<T extends boolean = true> {
+  project?: T;
+  fetchedAt?: T;
+  github?:
+    | T
+    | {
+        lastActivityAt?: T;
+        openIssuesTotal?: T;
+        repos?:
+          | T
+          | {
+              owner?: T;
+              name?: T;
+              url?: T;
+              lastCommitAt?: T;
+              openIssues?: T;
+              error?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

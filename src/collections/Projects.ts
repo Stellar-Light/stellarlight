@@ -123,6 +123,35 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			name: "github",
+			type: "group",
+			admin: {
+				description: "Link GitHub data to this project",
+			},
+			fields: [
+				{
+					name: "orgLogin",
+					type: "text",
+					admin: {
+						description: 'GitHub org login (optional), e.g. "stellar"',
+					},
+				},
+				{
+					name: "repos",
+					type: "array",
+					labels: { singular: "Repo", plural: "Repos" },
+					admin: {
+						description:
+							"Specific repositories for this project (owner/name)",
+					},
+					fields: [
+						{ name: "owner", type: "text", required: true },
+						{ name: "name", type: "text", required: true },
+					],
+				},
+			],
+		},
+		{
 			name: "onchain",
 			type: "group",
 			fields: [
@@ -264,6 +293,39 @@ export const Projects: CollectionConfig = {
 						timestamp: new Date().toISOString(),
 					},
 				});
+
+				// Invalidate GitHub cache if repos changed
+				if (operation === "update" && previousDoc) {
+					const currentRepos = doc.github?.repos || [];
+					const previousRepos = previousDoc.github?.repos || [];
+
+					const currentReposKey = JSON.stringify(
+						(currentRepos as any[])
+							.map((r: any) => `${r.owner}/${r.name}`)
+							.sort(),
+					);
+					const previousReposKey = JSON.stringify(
+						(previousRepos as any[])
+							.map((r: any) => `${r.owner}/${r.name}`)
+							.sort(),
+					);
+
+					if (currentReposKey !== previousReposKey) {
+						// Delete cache to force refresh on next request
+						const existing = await req.payload.find({
+							collection: "signals",
+							where: { project: { equals: doc.id } },
+							limit: 1,
+						});
+
+						if (existing.docs.length > 0) {
+							await req.payload.delete({
+								collection: "signals",
+								id: existing.docs[0].id,
+							});
+						}
+					}
+				}
 			},
 		],
 	},

@@ -19,7 +19,8 @@
 		"test": "vitest run",
 		"test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
 		"test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"cron:github": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec tsx jobs/refresh-github.ts"
 	},
 	"dependencies": {
 		"@next/font": "^14.2.15",
@@ -63,6 +64,7 @@
 		"tailwind-merge": "^3.3.1",
 		"tailwindcss": "^3.4.1",
 		"tailwindcss-animate": "^1.0.7",
+		"tsx": "^4.20.6",
 		"typescript": "5.7.3",
 		"vite-tsconfig-paths": "5.1.4",
 		"vitest": "3.2.3"

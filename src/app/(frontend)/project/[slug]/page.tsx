@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ProjectLogo } from "@/components/project-logo";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -60,6 +61,37 @@ export default async function ProjectDetailPage({
 
 	const project = result.docs[0];
 
+	// Fetch GitHub data
+	let gh: {
+		lastActivityAt: string | null;
+		openIssuesTotal: number;
+		repos: Array<{
+			owner: string;
+			name: string;
+			url: string;
+			lastCommitAt: string | null;
+			openIssues: number;
+			error?: string;
+			skipped?: boolean;
+		}>;
+	} | null = null;
+
+	if (project.github?.repos && project.github.repos.length > 0) {
+		try {
+			const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+			const ghRes = await fetch(
+				`${appUrl}/api/projects/${project.id}/github`,
+				{ cache: "no-store" },
+			);
+			if (ghRes.ok) {
+				gh = await ghRes.json();
+			}
+		} catch (error) {
+			// Silently fail - GitHub data is optional
+			console.error("Failed to fetch GitHub data:", error);
+		}
+	}
+
 	// Find entities that have this project
 	const entitiesResult = await payload.find({
 		collection: "entities",
@@ -101,6 +133,19 @@ export default async function ProjectDetailPage({
 		discord: MessageCircle,
 	};
 
+	const formatDate = (dateString: string | null | undefined): string => {
+		if (!dateString) return "—";
+		const date = new Date(dateString);
+		return date.toLocaleString("en-US", {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+			hour: "numeric",
+			minute: "2-digit",
+			hour12: true,
+		});
+	};
+
 	return (
 		<div className="container mx-auto px-6 py-12 max-w-5xl">
 			<Button asChild variant="ghost" className="mb-8">
@@ -111,34 +156,44 @@ export default async function ProjectDetailPage({
 			</Button>
 
 			<div className="mb-8 space-y-6">
-				<div className="space-y-4">
-					<h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-						{project.name}
-					</h1>
-					<div className="flex flex-wrap gap-3">
-						<Badge variant="secondary" className="text-sm px-3 py-1.5">
-							{project.category}
-						</Badge>
-						<Badge variant="outline" className="text-sm px-3 py-1.5">
-							{project.status}
-						</Badge>
-						{project.verificationLevel !== "Unverified" && (
-							<Badge
-								variant="default"
-								className="bg-primary/10 text-primary border-primary/20 text-sm px-3 py-1.5"
-							>
-								{project.verificationLevel}
+				<div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+					{project.logo && (
+						<ProjectLogo
+							logo={project.logo}
+							name={project.name}
+							size={120}
+							className="w-[120px] h-[120px]"
+						/>
+					)}
+					<div className="space-y-4 flex-1">
+						<h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
+							{project.name}
+						</h1>
+						<div className="flex flex-wrap gap-3">
+							<Badge variant="secondary" className="text-sm px-3 py-1.5">
+								{project.category}
 							</Badge>
+							<Badge variant="outline" className="text-sm px-3 py-1.5">
+								{project.status}
+							</Badge>
+							{project.verificationLevel !== "Unverified" && (
+								<Badge
+									variant="default"
+									className="bg-primary/10 text-primary border-primary/20 text-sm px-3 py-1.5"
+								>
+									{project.verificationLevel}
+								</Badge>
+							)}
+						</div>
+						{linkedEntities.length > 0 && (
+							<div className="flex items-center gap-2 p-4 rounded-xl bg-muted/50 border border-border/50">
+								<span className="text-sm font-semibold">Organization:</span>
+								<span className="text-sm">
+									{linkedEntities.map((e) => e.name).join(", ")}
+								</span>
+							</div>
 						)}
 					</div>
-					{linkedEntities.length > 0 && (
-						<div className="flex items-center gap-2 p-4 rounded-xl bg-muted/50 border border-border/50">
-							<span className="text-sm font-semibold">Organization:</span>
-							<span className="text-sm">
-								{linkedEntities.map((e) => e.name).join(", ")}
-							</span>
-						</div>
-					)}
 				</div>
 			</div>
 
@@ -250,6 +305,75 @@ export default async function ProjectDetailPage({
 						</CardContent>
 					</Card>
 				)}
+
+			{gh && (
+				<>
+					<div className="mt-6 grid gap-4 md:grid-cols-3 mb-8">
+						<div className="rounded border p-4">
+							<div className="text-sm text-muted-foreground">
+								Last Activity
+							</div>
+							<div className="text-lg">
+								{formatDate(gh.lastActivityAt)}
+							</div>
+						</div>
+						<div className="rounded border p-4">
+							<div className="text-sm text-muted-foreground">Open Issues</div>
+							<div className="text-lg">{gh.openIssuesTotal ?? 0}</div>
+						</div>
+					</div>
+
+					{gh.repos && gh.repos.length > 0 && (
+						<Card className="mb-8 border-2">
+							<CardHeader>
+								<CardTitle>Repositories</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<ul className="mt-2 divide-y rounded border">
+									{gh.repos.slice(0, 10).map((r) => (
+										<li
+											key={`${r.owner}/${r.name}`}
+											className="p-4 flex items-center justify-between"
+										>
+											<div className="flex-1">
+												<a
+													className="font-medium hover:underline"
+													href={r.url}
+													target="_blank"
+													rel="noreferrer"
+												>
+													{r.owner}/{r.name}
+												</a>
+												<div className="text-sm text-muted-foreground">
+													{r.error ? (
+														<span className="text-orange-600 dark:text-orange-400">
+															{r.error}
+														</span>
+													) : (
+														<>
+															Last commit:{" "}
+															{r.lastCommitAt
+																? formatDate(r.lastCommitAt)
+																: "—"}
+														</>
+													)}
+												</div>
+											</div>
+											<div className="text-sm">
+												{r.skipped ? (
+													<span className="text-muted-foreground">—</span>
+												) : (
+													`Open issues: ${r.openIssues ?? 0}`
+												)}
+											</div>
+										</li>
+									))}
+								</ul>
+							</CardContent>
+						</Card>
+					)}
+				</>
+			)}
 
 			<Card className="border-2">
 				<CardHeader>

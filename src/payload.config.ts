@@ -10,6 +10,7 @@ import sharp from "sharp";
 import { Entities } from "./collections/Entities";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
+import { Signals } from "./collections/Signals";
 import { SyncJobs } from "./collections/SyncJobs";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
@@ -35,7 +36,15 @@ export default buildConfig({
 			},
 		},
 	},
-	collections: [Users, Media, Projects, Entities, TransparencyLogs, SyncJobs],
+	collections: [
+		Users,
+		Media,
+		Projects,
+		Signals,
+		Entities,
+		TransparencyLogs,
+		SyncJobs,
+	],
 	editor: lexicalEditor(),
 	secret: process.env.PAYLOAD_SECRET || "",
 	typescript: {

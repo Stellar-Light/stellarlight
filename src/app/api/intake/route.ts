@@ -16,6 +16,19 @@ const intakeSchema = z.object({
 		"Protocol/Contract",
 		"Anchor",
 	]),
+	github: z
+		.object({
+			orgLogin: z.string().optional(),
+			repos: z
+				.array(
+					z.object({
+						owner: z.string().min(1),
+						name: z.string().min(1),
+					}),
+				)
+				.optional(),
+		})
+		.optional(),
 });
 
 export async function POST(request: Request) {
@@ -83,6 +96,17 @@ export async function POST(request: Request) {
 				links: {
 					website: validated.website || undefined,
 				},
+				github: validated.github?.repos && validated.github.repos.length > 0
+					? {
+							orgLogin: validated.github.orgLogin || undefined,
+							repos: validated.github.repos,
+						}
+					: validated.github?.orgLogin
+						? {
+								orgLogin: validated.github.orgLogin,
+								repos: [],
+							}
+						: undefined,
 				verificationLevel: "Unverified",
 				provenance: {
 					source: "UserSubmitted",
