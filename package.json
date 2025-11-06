@@ -1,63 +1,81 @@
 {
-  "name": "stellarlight",
-  "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
-  "license": "MIT",
-  "type": "module",
-  "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "test": "pnpm run test:int && pnpm run test:e2e",
-    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
-  },
-  "dependencies": {
-    "@payloadcms/db-mongodb": "3.62.0",
-    "@payloadcms/next": "3.62.0",
-    "@payloadcms/payload-cloud": "3.62.0",
-    "@payloadcms/richtext-lexical": "3.62.0",
-    "@payloadcms/ui": "3.62.0",
-    "cross-env": "^7.0.3",
-    "dotenv": "16.4.7",
-    "graphql": "^16.8.1",
-    "next": "15.4.4",
-    "payload": "3.62.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "sharp": "0.34.2"
-  },
-  "devDependencies": {
-    "@playwright/test": "1.54.1",
-    "@testing-library/react": "16.3.0",
-    "@types/node": "^22.5.4",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
-    "@vitejs/plugin-react": "4.5.2",
-    "eslint": "^9.16.0",
-    "eslint-config-next": "15.4.4",
-    "jsdom": "26.1.0",
-    "playwright": "1.54.1",
-    "playwright-core": "1.54.1",
-    "prettier": "^3.4.2",
-    "typescript": "5.7.3",
-    "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.2.3"
-  },
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ]
-  }
+	"name": "stellarlight",
+	"version": "1.0.0",
+	"description": "A blank template to get started with Payload 3.0",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+		"check": "biome check .",
+		"dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+		"devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+		"format": "biome format --write .",
+		"generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+		"generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+		"lint": "biome lint .",
+		"payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+		"start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+		"seed:lumenloop": "curl -X POST \"$NEXT_PUBLIC_APP_URL/api/sync/lumenloop\" -H \"Authorization: Bearer <ADMIN_TOKEN>\"",
+		"test": "vitest run",
+		"test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+		"test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"@next/font": "^14.2.15",
+		"@payloadcms/db-mongodb": "3.62.0",
+		"@payloadcms/next": "3.62.0",
+		"@payloadcms/payload-cloud": "3.62.0",
+		"@payloadcms/richtext-lexical": "3.62.0",
+		"@payloadcms/ui": "3.62.0",
+		"@radix-ui/react-slot": "^1.2.3",
+		"cross-env": "^7.0.3",
+		"dotenv": "16.4.7",
+		"graphql": "^16.8.1",
+		"next": "15.4.4",
+		"payload": "3.62.0",
+		"react": "19.1.0",
+		"react-dom": "19.1.0",
+		"sharp": "0.34.2",
+		"simple-git": "^3.29.0",
+		"zod": "^4.1.12"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.2",
+		"@playwright/test": "1.54.1",
+		"@testing-library/react": "16.3.0",
+		"@types/node": "^22.5.4",
+		"@types/react": "19.1.8",
+		"@types/react-dom": "19.1.6",
+		"@vitejs/plugin-react": "4.5.2",
+		"autoprefixer": "^10.4.21",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"eslint": "^9.16.0",
+		"eslint-config-next": "15.4.4",
+		"happy-dom": "^20.0.10",
+		"jsdom": "26.1.0",
+		"lucide-react": "^0.552.0",
+		"playwright": "1.54.1",
+		"playwright-core": "1.54.1",
+		"postcss": "^8.5.6",
+		"prettier": "^3.4.2",
+		"tailwind-merge": "^3.3.1",
+		"tailwindcss": "^3.4.1",
+		"tailwindcss-animate": "^1.0.7",
+		"typescript": "5.7.3",
+		"vite-tsconfig-paths": "5.1.4",
+		"vitest": "3.2.3"
+	},
+	"engines": {
+		"node": "^18.20.2 || >=20.9.0",
+		"pnpm": "^9 || ^10"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"sharp",
+			"esbuild",
+			"unrs-resolver"
+		]
+	}
 }

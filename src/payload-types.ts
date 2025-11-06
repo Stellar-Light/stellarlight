@@ -69,6 +69,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    projects: Project;
+    entities: Entity;
+    'transparency-logs': TransparencyLog;
+    'sync-jobs': SyncJob;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +82,11 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    entities: EntitiesSelect<false> | EntitiesSelect<true>;
+    'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
+    'sync-jobs': SyncJobsSelect<false> | SyncJobsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -158,6 +168,145 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  /**
+   * Project logo image. If not provided, a default logo will be used.
+   */
+  logo?: (string | null) | Media;
+  shortDescription?: string | null;
+  category:
+    | 'Infrastructure'
+    | 'Tooling'
+    | 'Partner Integration'
+    | 'User-Facing App'
+    | 'Asset'
+    | 'Protocol/Contract'
+    | 'Anchor';
+  types?: ('Wallet' | 'Anchor' | 'Bridge' | 'SDK' | 'Payment Rail' | 'DEX' | 'Indexer' | 'Explorer' | 'Other')[] | null;
+  /**
+   * Draft projects require admin approval before appearing on the frontend
+   */
+  status: 'Draft' | 'Development' | 'Pre-Release' | 'Live';
+  links?: {
+    website?: string | null;
+    github?: string | null;
+    docs?: string | null;
+    twitter?: string | null;
+    discord?: string | null;
+  };
+  onchain?: {
+    assetCode?: string | null;
+    issuer?: string | null;
+    contracts?:
+      | {
+          address?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
+  provenance: {
+    source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
+    sourceId?: string | null;
+    firstSeenAt?: string | null;
+  };
+  lastVerifiedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entities".
+ */
+export interface Entity {
+  id: string;
+  name: string;
+  slug: string;
+  domains?:
+    | {
+        domain: string;
+        id?: string | null;
+      }[]
+    | null;
+  links?: {
+    website?: string | null;
+    github?: string | null;
+    twitter?: string | null;
+  };
+  projects?: (string | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transparency-logs".
+ */
+export interface TransparencyLog {
+  id: string;
+  action: 'Create' | 'Update' | 'SyncImport' | 'Intake';
+  actorType: 'System' | 'User' | 'Admin';
+  targetCollection: string;
+  targetId: string;
+  diff?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  timestamp: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sync-jobs".
+ */
+export interface SyncJob {
+  id: string;
+  source: 'Lumenloop';
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  startedAt: string;
+  finishedAt?: string | null;
+  status: 'Running' | 'Completed' | 'Failed';
+  log?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -170,6 +319,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'entities';
+        value: string | Entity;
+      } | null)
+    | ({
+        relationTo: 'transparency-logs';
+        value: string | TransparencyLog;
+      } | null)
+    | ({
+        relationTo: 'sync-jobs';
+        value: string | SyncJob;
+      } | null)
+    | ({
+        relationTo: 'payload-kv';
+        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -252,6 +421,111 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  logo?: T;
+  shortDescription?: T;
+  category?: T;
+  types?: T;
+  status?: T;
+  links?:
+    | T
+    | {
+        website?: T;
+        github?: T;
+        docs?: T;
+        twitter?: T;
+        discord?: T;
+      };
+  onchain?:
+    | T
+    | {
+        assetCode?: T;
+        issuer?: T;
+        contracts?:
+          | T
+          | {
+              address?: T;
+              id?: T;
+            };
+      };
+  verificationLevel?: T;
+  provenance?:
+    | T
+    | {
+        source?: T;
+        sourceId?: T;
+        firstSeenAt?: T;
+      };
+  lastVerifiedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entities_select".
+ */
+export interface EntitiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  domains?:
+    | T
+    | {
+        domain?: T;
+        id?: T;
+      };
+  links?:
+    | T
+    | {
+        website?: T;
+        github?: T;
+        twitter?: T;
+      };
+  projects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transparency-logs_select".
+ */
+export interface TransparencyLogsSelect<T extends boolean = true> {
+  action?: T;
+  actorType?: T;
+  targetCollection?: T;
+  targetId?: T;
+  diff?: T;
+  timestamp?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sync-jobs_select".
+ */
+export interface SyncJobsSelect<T extends boolean = true> {
+  source?: T;
+  stats?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  status?: T;
+  log?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,0 +1,302 @@
+/* Stellar Light Admin Panel Customization */
+
+/* Override PayloadCMS CSS Variables with Stellar Light Dark Theme */
+:root {
+	/* Background colors */
+	--theme-elevation-0: #171717;
+	--theme-elevation-1: #262626;
+	--theme-elevation-2: #2F2F2F;
+	--theme-elevation-3: #404040;
+	--theme-elevation-4: #525252;
+	--theme-elevation-5: #737373;
+
+	/* Text colors */
+	--theme-text: #E5E5E5;
+	--theme-text-muted: #A3A3A3;
+	--theme-text-disabled: #737373;
+
+	/* Border colors */
+	--theme-border-color: #2F2F2F;
+	--theme-border-color-hover: #404040;
+
+	/* Button colors */
+	--theme-btn-primary: #FFFFFF;
+	--theme-btn-primary-hover: #F5F5F5;
+	--theme-btn-primary-text: #171717;
+	--theme-btn-secondary: #404040;
+	--theme-btn-secondary-hover: #525252;
+	--theme-btn-secondary-text: #E5E5E5;
+
+	/* Status colors */
+	--theme-error-500: hsl(0, 84%, 60%);
+	--theme-success-500: #10b981;
+	--theme-warning-500: #f59e0b;
+	--theme-info-500: #3b82f6;
+
+	/* Accent color */
+	--theme-accent: #FDDA24;
+}
+
+/* Ensure dark theme is applied */
+body {
+	background-color: var(--theme-elevation-0);
+	color: var(--theme-text);
+}
+
+/* Fix icon/image distortion */
+img[alt="Stellar Light Icon"],
+.app-header img,
+img[src="/logo.png"] {
+	object-fit: contain !important;
+	max-width: 100% !important;
+	height: auto !important;
+	display: block !important;
+}
+
+/* Reduce border opacity for general UI elements */
+.card,
+.panel,
+.field,
+[class*="field-"],
+[class*="card-"],
+[class*="panel-"] {
+	border-color: rgba(47, 47, 47, 0.5) !important;
+}
+
+/* Reset for elements that already have specific border colors */
+.btn.btn--style-primary,
+button.btn--style-primary,
+input:focus {
+	border-color: inherit !important;
+}
+
+/* Field Labels - Improved Contrast */
+.field-label,
+label.field-label,
+label[for^="field-"] {
+	color: #FFFFFF !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	letter-spacing: 0.01em;
+	margin-bottom: 8px !important;
+	display: block;
+}
+
+/* Specific to Email and Password labels for better visibility */
+label[for="field-email"],
+label[for="field-password"] {
+	color: #FFFFFF !important;
+	font-weight: 600 !important;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Primary Buttons - Enhanced Visibility */
+.btn.btn--style-primary,
+button.btn--style-primary,
+.btn--style-primary,
+.btn-primary,
+button[type="submit"].btn--style-primary {
+	background-color: #FFFFFF !important;
+	color: #171717 !important;
+	border: 2px solid rgba(255, 255, 255, 0.5) !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	padding: 12px 24px !important;
+	border-radius: 8px !important;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+	transition: all 150ms ease-out !important;
+	min-height: 44px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.btn.btn--style-primary:hover,
+button.btn--style-primary:hover,
+.btn--style-primary:hover,
+.btn-primary:hover,
+button[type="submit"].btn--style-primary:hover {
+	background-color: #F5F5F5 !important;
+	border-color: rgba(245, 245, 245, 0.5) !important;
+	color: #171717 !important;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+	transform: translateY(-1px);
+}
+
+.btn.btn--style-primary:active,
+button.btn--style-primary:active,
+.btn--style-primary:active,
+.btn-primary:active,
+button[type="submit"].btn--style-primary:active {
+	background-color: #E5E5E5 !important;
+	transform: translateY(0);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn.btn--style-primary:focus,
+button.btn--style-primary:focus,
+.btn--style-primary:focus,
+.btn-primary:focus,
+button[type="submit"].btn--style-primary:focus {
+	outline: none !important;
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Button without border variations */
+.btn.btn--withoutPopup.btn--style-primary,
+button.btn--withoutPopup.btn--style-primary {
+	border: 2px solid rgba(255, 255, 255, 0.5) !important;
+	background-color: #FFFFFF !important;
+	color: #171717 !important;
+}
+
+/* Large button size */
+.btn.btn--size-large,
+button.btn--size-large {
+	padding: 14px 32px !important;
+	font-size: 16px !important;
+	min-height: 48px !important;
+}
+
+/* Icon style buttons */
+.btn.btn--icon-style-without-border {
+	border: 2px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Input fields - Better visibility */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="number"] {
+	background-color: #262626 !important;
+	border: 1px solid rgba(64, 64, 64, 0.5) !important;
+	color: #E5E5E5 !important;
+	padding: 10px 12px !important;
+	border-radius: 6px !important;
+	font-size: 14px !important;
+	transition: all 150ms ease-out !important;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+	border-color: rgba(255, 255, 255, 0.5) !important;
+	outline: none !important;
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+	background-color: #2F2F2F !important;
+}
+
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="text"]:hover,
+input[type="number"]:hover {
+	border-color: rgba(82, 82, 82, 0.5) !important;
+}
+
+/* React Select - Standard styling */
+.rs__control {
+	background-color: #262626 !important;
+	border: 1px solid rgba(64, 64, 64, 0.5) !important;
+	border-radius: 6px !important;
+	min-height: 42px !important;
+	padding: 8px 12px !important;
+	cursor: text !important;
+}
+
+.rs__control--is-focused {
+	border-color: rgba(255, 255, 255, 0.5) !important;
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+	background-color: #2F2F2F !important;
+}
+
+.rs__control:hover {
+	border-color: rgba(82, 82, 82, 0.5) !important;
+}
+
+.rs__value-container {
+	padding: 0 !important;
+	gap: 4px !important;
+}
+
+.rs__input {
+	color: #E5E5E5 !important;
+}
+
+.rs__placeholder {
+	color: #A3A3A3 !important;
+}
+
+.rs__single-value {
+	color: #E5E5E5 !important;
+}
+
+/* Standard solution: Hide input when value is selected and menu is closed */
+.rs__control--has-value:not(.rs__control--menu-is-open) .rs__input {
+	display: none !important;
+}
+
+/* Hide empty input container when control is empty and not focused */
+.rs__input-container[data-value=""] {
+	display: none !important;
+}
+
+/* Show it when menu is open or control is focused */
+.rs__control--menu-is-open .rs__input-container,
+.rs__control--is-focused .rs__input-container {
+	display: block !important;
+}
+
+.rs__indicator {
+	color: #A3A3A3 !important;
+	padding: 8px !important;
+}
+
+.rs__indicator:hover {
+	color: #E5E5E5 !important;
+}
+
+.rs__menu {
+	background-color: #262626 !important;
+	border: 1px solid rgba(64, 64, 64, 0.5) !important;
+	border-radius: 6px !important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.rs__option {
+	background-color: transparent !important;
+	color: #E5E5E5 !important;
+	padding: 10px 12px !important;
+	cursor: pointer !important;
+}
+
+.rs__option:hover,
+.rs__option--is-focused {
+	background-color: #2F2F2F !important;
+	color: #E5E5E5 !important;
+}
+
+.rs__option--is-selected {
+	background-color: #404040 !important;
+	color: #E5E5E5 !important;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--theme-elevation-1);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--theme-elevation-3);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--theme-elevation-4);
+}
+
