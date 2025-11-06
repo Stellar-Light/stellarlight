@@ -1,8 +1,22 @@
 import React from "react";
 
 export const Logo: React.FC = () => {
+	const appUrl = typeof window !== "undefined" 
+		? window.location.origin 
+		: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 	return (
-		<div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+		<a 
+			href={`${appUrl}/`}
+			style={{ 
+				display: "flex", 
+				alignItems: "center", 
+				gap: "0.5rem",
+				textDecoration: "none",
+				cursor: "pointer",
+			}}
+			title="Go to Home"
+		>
 			<div style={{ height: "32px", width: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
 				<img
 					src="/logo.png"
@@ -20,7 +34,7 @@ export const Logo: React.FC = () => {
 			>
 				Stellar Light
 			</span>
-		</div>
+		</a>
 	);
 };
 

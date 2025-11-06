@@ -114,15 +114,16 @@
 	}
 
 	.idea-card {
-		transition: all 150ms ease-out;
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 		background: #262626;
 		border: 1px solid #2F2F2F;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 	}
 
 	.idea-card:hover {
-		transform: translateY(-1px);
-		border-color: rgba(255, 255, 255, 0.2);
+		transform: translateY(-2px);
+		border-color: rgba(255, 255, 255, 0.25);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(253, 218, 36, 0.1);
 	}
 
 	.stellar-input {
@@ -169,5 +170,74 @@
 
 	.animate-scroll:hover {
 		animation-play-state: paused;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-in-up {
+		animation: fadeInUp 0.6s ease-out forwards;
+	}
+
+	@keyframes shimmer {
+		0% {
+			background-position: -1000px 0;
+		}
+		100% {
+			background-position: 1000px 0;
+		}
+	}
+
+	.shimmer {
+		background: linear-gradient(
+			90deg,
+			rgba(255, 255, 255, 0) 0%,
+			rgba(255, 255, 255, 0.05) 50%,
+			rgba(255, 255, 255, 0) 100%
+		);
+		background-size: 1000px 100%;
+		animation: shimmer 3s infinite;
+	}
+
+	.text-stellar-gold {
+		color: #FDDA24;
+	}
+
+	.text-stellar-gold:hover {
+		color: #FFE55C;
+		transition: color 0.3s ease;
+	}
+
+	.gradient-border {
+		position: relative;
+		background: #262626;
+		border: 1px solid #2F2F2F;
+	}
+
+	.gradient-border::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		padding: 1px;
+		background: linear-gradient(135deg, rgba(253, 218, 36, 0.3), transparent);
+		border-radius: inherit;
+		mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		mask-composite: exclude;
+		-webkit-mask-composite: xor;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.gradient-border:hover::before {
+		opacity: 1;
 	}
 }

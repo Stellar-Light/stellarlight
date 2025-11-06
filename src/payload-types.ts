@@ -70,11 +70,13 @@ export interface Config {
     users: User;
     media: Media;
     projects: Project;
+    blog: Blog;
+    'rss-feeds': RssFeed;
     signals: Signal;
     entities: Entity;
     'transparency-logs': TransparencyLog;
-    'sync-jobs': SyncJob;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -84,11 +86,13 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    blog: BlogSelect<false> | BlogSelect<true>;
+    'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
     signals: SignalsSelect<false> | SignalsSelect<true>;
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
-    'sync-jobs': SyncJobsSelect<false> | SyncJobsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -103,7 +107,13 @@ export interface Config {
     collection: 'users';
   };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      'sync-rss-feed': SyncRSSFeedTask;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -242,6 +252,172 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog".
+ */
+export interface Blog {
+  id: string;
+  /**
+   * The main title of the blog post
+   */
+  title: string;
+  /**
+   * URL-friendly version of the title
+   */
+  slug: string;
+  /**
+   * Author name
+   */
+  author: string;
+  /**
+   * Short summary for preview cards (150-200 characters)
+   */
+  excerpt: string;
+  /**
+   * Hero image for the blog post
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * Image URL from RSS feed (for external posts)
+   */
+  rssImageUrl?: string | null;
+  /**
+   * Show in highlights section
+   */
+  featured?: boolean | null;
+  /**
+   * Choose how you want to create this post
+   */
+  contentType: 'richText' | 'markdown';
+  /**
+   * Rich text content (used when Content Type is Rich Text Editor)
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Markdown content (used when Content Type is Markdown)
+   */
+  markdownContent?: string | null;
+  /**
+   * If this post was imported from an RSS feed, link to the feed source
+   */
+  rssFeed?: (string | null) | RssFeed;
+  /**
+   * Unique identifier from RSS feed item (for duplicate detection)
+   */
+  rssItemId?: string | null;
+  /**
+   * If true, this post links to an external RSS article instead of displaying content here
+   */
+  isRSSExternal?: boolean | null;
+  /**
+   * Original URL of the RSS article (for external posts)
+   */
+  externalUrl?: string | null;
+  /**
+   * Description from RSS feed (for external posts)
+   */
+  rssDescription?: string | null;
+  category?: ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update') | null;
+  /**
+   * Add tags to help categorize this post
+   */
+  tags?: string[] | null;
+  /**
+   * Publication date
+   */
+  publishedAt?: string | null;
+  status: 'draft' | 'published';
+  /**
+   * SEO and social media metadata
+   */
+  meta?: {
+    /**
+     * Meta description for SEO
+     */
+    description?: string | null;
+    /**
+     * SEO keywords
+     */
+    keywords?: string[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Manage RSS feeds that automatically import blog posts. Visit the RSS Management page to sync feeds.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rss-feeds".
+ */
+export interface RssFeed {
+  id: string;
+  /**
+   * A friendly name for this RSS feed (e.g., 'Stellar Blog')
+   */
+  name: string;
+  /**
+   * The full URL of the RSS feed
+   */
+  feedUrl: string;
+  /**
+   * Enable or disable automatic syncing for this feed
+   */
+  enabled?: boolean | null;
+  /**
+   * How often to sync this feed
+   */
+  syncFrequency: '15min' | '30min' | 'hourly' | '6hours' | 'daily' | 'manual';
+  /**
+   * Default author name for posts from this feed (if not specified in RSS)
+   */
+  author?: string | null;
+  /**
+   * Default category for posts from this feed
+   */
+  category?: ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update') | null;
+  /**
+   * Default tags to add to all posts from this feed
+   */
+  tags?: string[] | null;
+  /**
+   * Automatically publish imported posts (otherwise they'll be drafts)
+   */
+  autoPublish?: boolean | null;
+  /**
+   * Last time this feed was successfully synced
+   */
+  lastSyncedAt?: string | null;
+  /**
+   * Status of the last sync attempt
+   */
+  lastSyncStatus?: ('Success' | 'Failed' | 'Never') | null;
+  /**
+   * Error message from the last failed sync (if any)
+   */
+  lastSyncError?: string | null;
+  /**
+   * Total number of posts imported from this feed
+   */
+  totalPostsImported?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals".
  */
 export interface Signal {
@@ -314,29 +490,6 @@ export interface TransparencyLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sync-jobs".
- */
-export interface SyncJob {
-  id: string;
-  source: 'Lumenloop';
-  stats?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  startedAt: string;
-  finishedAt?: string | null;
-  status: 'Running' | 'Completed' | 'Failed';
-  log?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -351,6 +504,98 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'sync-rss-feed';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'sync-rss-feed') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -372,6 +617,14 @@ export interface PayloadLockedDocument {
         value: string | Project;
       } | null)
     | ({
+        relationTo: 'blog';
+        value: string | Blog;
+      } | null)
+    | ({
+        relationTo: 'rss-feeds';
+        value: string | RssFeed;
+      } | null)
+    | ({
         relationTo: 'signals';
         value: string | Signal;
       } | null)
@@ -384,12 +637,12 @@ export interface PayloadLockedDocument {
         value: string | TransparencyLog;
       } | null)
     | ({
-        relationTo: 'sync-jobs';
-        value: string | SyncJob;
-      } | null)
-    | ({
         relationTo: 'payload-kv';
         value: string | PayloadKv;
+      } | null)
+    | ({
+        relationTo: 'payload-jobs';
+        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -532,6 +785,60 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog_select".
+ */
+export interface BlogSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  author?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  rssImageUrl?: T;
+  featured?: T;
+  contentType?: T;
+  content?: T;
+  markdownContent?: T;
+  rssFeed?: T;
+  rssItemId?: T;
+  isRSSExternal?: T;
+  externalUrl?: T;
+  rssDescription?: T;
+  category?: T;
+  tags?: T;
+  publishedAt?: T;
+  status?: T;
+  meta?:
+    | T
+    | {
+        description?: T;
+        keywords?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rss-feeds_select".
+ */
+export interface RssFeedsSelect<T extends boolean = true> {
+  name?: T;
+  feedUrl?: T;
+  enabled?: T;
+  syncFrequency?: T;
+  author?: T;
+  category?: T;
+  tags?: T;
+  autoPublish?: T;
+  lastSyncedAt?: T;
+  lastSyncStatus?: T;
+  lastSyncError?: T;
+  totalPostsImported?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals_select".
  */
 export interface SignalsSelect<T extends boolean = true> {
@@ -597,25 +904,42 @@ export interface TransparencyLogsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sync-jobs_select".
- */
-export interface SyncJobsSelect<T extends boolean = true> {
-  source?: T;
-  stats?: T;
-  startedAt?: T;
-  finishedAt?: T;
-  status?: T;
-  log?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -648,6 +972,17 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SyncRSSFeedTask".
+ */
+export interface SyncRSSFeedTask {
+  input: {
+    feedId?: string | null;
+    syncAll?: boolean | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

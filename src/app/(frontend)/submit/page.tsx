@@ -1,13 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +11,6 @@ import {
 	CheckCircle2,
 	AlertCircle,
 	Send,
-	Rocket,
 	Info,
 	ArrowLeft,
 	Plus,
@@ -26,6 +18,7 @@ import {
 	Github,
 } from "lucide-react";
 import Link from "next/link";
+import BaseFeeDisplay from "@/components/base-fee-display";
 
 export default function SubmitPage() {
 	const [formData, setFormData] = useState({
@@ -161,75 +154,77 @@ export default function SubmitPage() {
 
 	if (success) {
 		return (
-			<div className="container mx-auto px-6 py-16 max-w-2xl">
-				<Card className="border-2 border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent shadow-2xl">
-					<CardHeader className="text-center space-y-4">
-						<div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
-							<CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+			<div className="min-h-screen relative">
+				<BaseFeeDisplay />
+				<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+					<div className="max-w-2xl mx-auto">
+						<div className="idea-card rounded-xl p-8 border-2 border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent">
+							<div className="text-center space-y-6">
+								<div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
+									<CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+								</div>
+								<div>
+									<h1 className="text-3xl font-bold tracking-tight mb-3">
+										Thank You!
+									</h1>
+									<p className="text-lg text-muted-foreground">
+										Your project submission has been received and is pending review.
+									</p>
+								</div>
+								<p className="text-sm text-muted-foreground">
+									{successMessage ||
+										"Your project has been submitted and is pending admin approval. Once approved, it will appear in the public directory."}
+								</p>
+								<div className="flex flex-col gap-3 sm:flex-row sm:justify-center pt-4">
+									<Button asChild size="lg" className="px-8">
+										<Link href="/directory">Browse Directory</Link>
+									</Button>
+									<Button
+										variant="outline"
+										size="lg"
+										className="px-8"
+										onClick={() => setSuccess(false)}
+									>
+										Submit Another
+									</Button>
+								</div>
+							</div>
 						</div>
-						<CardTitle className="text-3xl">Thank You!</CardTitle>
-						<CardDescription className="text-base">
-							Your project submission has been received and is pending review.
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="text-center space-y-6">
-						<p className="text-sm text-muted-foreground">
-							{successMessage ||
-								"Your project has been submitted and is pending admin approval. Once approved, it will appear in the public directory."}
-						</p>
-						<div className="flex flex-col gap-3 sm:flex-row sm:justify-center pt-4">
-							<Button asChild size="lg" className="px-8">
-								<Link href="/directory">Browse Directory</Link>
-							</Button>
-							<Button
-								variant="outline"
-								size="lg"
-								className="px-8"
-								onClick={() => setSuccess(false)}
-							>
-								Submit Another
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
+					</div>
+				</main>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto px-6 py-12 max-w-2xl">
-			<Button asChild variant="ghost" className="mb-8">
-				<Link href="/directory">
-					<ArrowLeft className="mr-2 h-4 w-4" />
-					Back to Directory
-				</Link>
-			</Button>
+		<div className="min-h-screen relative">
+			<BaseFeeDisplay />
+			<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+				<div className="max-w-2xl mx-auto">
+					<Button asChild variant="ghost" className="mb-8">
+						<Link href="/directory">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Back to Directory
+						</Link>
+					</Button>
 
-			<div className="mb-8 space-y-4">
-				<div className="flex items-center gap-3">
-					<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-						<Rocket className="h-6 w-6 text-primary" />
-					</div>
-					<div>
-						<h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+					<div className="mb-8">
+						<h2 className="text-3xl font-medium tracking-tight mb-3">
 							Submit a Project
-						</h1>
-						<p className="mt-2 text-lg text-muted-foreground">
-							Share your Stellar ecosystem project to be included in the
-							directory
+						</h2>
+						<p className="text-lg text-muted-foreground">
+							Share your Stellar ecosystem project to be included in the directory
 						</p>
 					</div>
-				</div>
-			</div>
 
-			<Card className="border-2 shadow-xl">
-				<CardHeader className="space-y-2">
-					<CardTitle className="text-2xl">Project Information</CardTitle>
-					<CardDescription>
-						Fill out the form below to submit your project for review
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
+					<div className="idea-card rounded-xl p-6 border-2">
+					<div className="mb-6 space-y-2">
+						<h3 className="text-2xl font-semibold">Project Information</h3>
+						<p className="text-sm text-muted-foreground">
+							Fill out the form below to submit your project for review
+						</p>
+					</div>
+					<div>
 					<form onSubmit={handleSubmit} className="space-y-6">
 						<div className="space-y-2">
 							<Label htmlFor="name" className="text-base font-semibold">
@@ -573,8 +568,10 @@ export default function SubmitPage() {
 							)}
 						</Button>
 					</form>
-				</CardContent>
-			</Card>
+					</div>
+				</div>
+			</div>
+		</main>
 		</div>
 	);
 }
