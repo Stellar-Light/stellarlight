@@ -1,0 +1,17 @@
+{
+	"buildCommand": "pnpm build",
+	"devCommand": "pnpm dev",
+	"installCommand": "pnpm install",
+	"framework": "nextjs",
+	"crons": [
+		{
+			"path": "/api/cron/github-refresh",
+			"schedule": "0 */6 * * *"
+		},
+		{
+			"path": "/api/cron/rss-sync",
+			"schedule": "0 */4 * * *"
+		}
+	]
+}
+

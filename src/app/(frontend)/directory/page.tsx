@@ -26,7 +26,7 @@ export default async function DirectoryPage({
 	const limit = 24;
 
 	// Build where clause
-	const where: Record<string, unknown> = {
+	const where: any = {
 		status: {
 			in: ["Development", "Pre-Release", "Live"],
 		},

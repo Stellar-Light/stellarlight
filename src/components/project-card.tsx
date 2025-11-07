@@ -15,7 +15,7 @@ interface ProjectCardProps {
 		category: string;
 		status: string;
 		verificationLevel?: string;
-		logo?: string | { id: string; url?: string; filename?: string } | null;
+		logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
 	};
 	isFeatured?: boolean;
 }

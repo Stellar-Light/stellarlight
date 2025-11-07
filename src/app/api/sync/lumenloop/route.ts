@@ -21,17 +21,8 @@ export async function POST() {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	// Create sync job
-	const syncJob = await payload.create({
-		collection: "sync-jobs",
-		data: {
-			source: "Lumenloop",
-			status: "Running",
-			startedAt: new Date().toISOString(),
-			stats: { inserted: 0, updated: 0, skipped: 0, errors: 0 },
-			log: "Starting sync...",
-		},
-	});
+	// Note: We don't create a separate sync job record here
+	// The transparency logs will track all changes made during sync
 
 	const stats = { inserted: 0, updated: 0, skipped: 0, errors: 0 };
 	const errors: string[] = [];
@@ -150,18 +141,7 @@ export async function POST() {
 			}
 		}
 
-		// Update sync job
-		await payload.update({
-			collection: "sync-jobs",
-			id: syncJob.id,
-			data: {
-				status: "Completed",
-				finishedAt: new Date().toISOString(),
-				stats,
-				log:
-					errors.length > 0 ? errors.join("\n") : "Sync completed successfully",
-			},
-		});
+		// Sync completed - transparency logs track all changes
 
 		return Response.json({
 			success: true,
@@ -169,17 +149,7 @@ export async function POST() {
 			errors: errors.length > 0 ? errors : undefined,
 		});
 	} catch (error) {
-		// Update sync job with error
-		await payload.update({
-			collection: "sync-jobs",
-			id: syncJob.id,
-			data: {
-				status: "Failed",
-				finishedAt: new Date().toISOString(),
-				stats,
-				log: error instanceof Error ? error.message : String(error),
-			},
-		});
+		// Error occurred - log it
 
 		return Response.json(
 			{

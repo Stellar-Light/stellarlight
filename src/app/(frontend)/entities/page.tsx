@@ -23,7 +23,7 @@ export default async function EntitiesPage({
 	const limit = 24;
 
 	// Build where clause
-	const where: Record<string, unknown> = {};
+	const where: any = {};
 
 	if (searchQuery) {
 		where.or = [

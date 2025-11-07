@@ -13,11 +13,11 @@ interface BlogHighlightCardProps {
 		slug: string;
 		excerpt: string;
 		author: string;
-		publishedAt: string;
-		category?: string;
-		featuredImage?: string | { id: string; url?: string; filename?: string } | null;
+		publishedAt?: string | null | undefined;
+		category?: string | null | undefined;
+		featuredImage?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
 		rssImageUrl?: string | null;
-		featured?: boolean;
+		featured?: boolean | null | undefined;
 	};
 	isLarge?: boolean;
 }

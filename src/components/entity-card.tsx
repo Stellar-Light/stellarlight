@@ -9,12 +9,12 @@ interface EntityCardProps {
 		id: string;
 		name: string;
 		slug: string;
-		domains?: Array<{ domain: string }> | null;
-		projects?: Array<{
+		domains?: Array<{ domain: string }> | null | undefined;
+		projects?: Array<string | {
 			id: string;
-			name: string;
-			slug: string;
-		}> | null;
+			name?: string;
+			slug?: string;
+		}> | null | undefined;
 	};
 }
 
