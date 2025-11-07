@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -21,47 +20,56 @@ export default async function DirectoryPage({
 	searchParams: SearchParams;
 }) {
 	const params = await searchParams;
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
 	const searchQuery = params.q;
 	const categoryFilter = params.category;
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
 
-	// Build where clause
-	const where: any = {
-		status: {
-			in: ["Development", "Pre-Release", "Live"],
-		},
-	};
+	let result = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
-	if (searchQuery) {
-		where.or = [
-			{
-				name: {
-					contains: searchQuery,
+	if (payload) {
+		try {
+			// Build where clause
+			const where: any = {
+				status: {
+					in: ["Development", "Pre-Release", "Live"],
 				},
-			},
-			{
-				shortDescription: {
-					contains: searchQuery,
-				},
-			},
-		];
-	}
+			};
 
-	if (categoryFilter && categoryFilter !== "all") {
-		where.category = { equals: categoryFilter };
-	}
+			if (searchQuery) {
+				where.or = [
+					{
+						name: {
+							contains: searchQuery,
+						},
+					},
+					{
+						shortDescription: {
+							contains: searchQuery,
+						},
+					},
+				];
+			}
 
-	const result = await payload.find({
-		collection: "projects",
-		where,
-		limit,
-		page,
-		sort: "-lastVerifiedAt",
-		depth: 1, // Populate relationships including logo
-	});
+			if (categoryFilter && categoryFilter !== "all") {
+				where.category = { equals: categoryFilter };
+			}
+
+			result = await payload.find({
+				collection: "projects",
+				where,
+				limit,
+				page,
+				sort: "-lastVerifiedAt",
+				depth: 1, // Populate relationships including logo
+			});
+		} catch (error) {
+			console.error("Error fetching projects:", error);
+			// Continue with empty result
+		}
+	}
 
 	return (
 		<div className="min-h-screen relative">

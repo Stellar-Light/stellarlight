@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
@@ -33,27 +32,37 @@ export default async function BlogDetailPage({
 	params: Params;
 }) {
 	const { slug } = await params;
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
-	const result = await payload.find({
-		collection: "blog",
-		where: {
-			and: [
-				{
-					slug: {
-						equals: slug,
+	if (!payload) {
+		notFound();
+	}
+
+	let result;
+	try {
+		result = await payload.find({
+			collection: "blog",
+			where: {
+				and: [
+					{
+						slug: {
+							equals: slug,
+						},
 					},
-				},
-				{
-					status: {
-						equals: "published",
+					{
+						status: {
+							equals: "published",
+						},
 					},
-				},
-			],
-		},
-		limit: 1,
-		depth: 2, // Populate relationships including featuredImage and rssFeed
-	});
+				],
+			},
+			limit: 1,
+			depth: 2, // Populate relationships including featuredImage and rssFeed
+		});
+	} catch (error) {
+		console.error("Error fetching blog post:", error);
+		notFound();
+	}
 
 	if (result.docs.length === 0) {
 		notFound();

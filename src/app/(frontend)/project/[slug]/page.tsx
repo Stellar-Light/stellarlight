@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -41,27 +40,37 @@ export default async function ProjectDetailPage({
 	params: Params;
 }) {
 	const { slug } = await params;
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
-	const result = await payload.find({
-		collection: "projects",
-		where: {
-			and: [
-				{
-					slug: {
-						equals: slug,
+	if (!payload) {
+		notFound();
+	}
+
+	let result;
+	try {
+		result = await payload.find({
+			collection: "projects",
+			where: {
+				and: [
+					{
+						slug: {
+							equals: slug,
+						},
 					},
-				},
-				{
-					status: {
-						in: ["Development", "Pre-Release", "Live"],
+					{
+						status: {
+							in: ["Development", "Pre-Release", "Live"],
+						},
 					},
-				},
-			],
-		},
-		limit: 1,
-		depth: 1,
-	});
+				],
+			},
+			limit: 1,
+			depth: 1,
+		});
+	} catch (error) {
+		console.error("Error fetching project:", error);
+		notFound();
+	}
 
 	if (result.docs.length === 0) {
 		notFound();

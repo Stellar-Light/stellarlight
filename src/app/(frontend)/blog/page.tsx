@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BlogHighlightCard from "@/components/blog-highlight-card";
@@ -19,40 +18,50 @@ export default async function BlogPage({
 }: {
 	searchParams: SearchParams;
 }) {
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 	const resolvedSearchParams = await searchParams;
 
 	const page = Number(resolvedSearchParams.page) || 1;
 	const limit = 12;
 
-	const where: any = {
-		status: {
-			equals: "published",
-		},
-	};
+	let posts: any[] = [];
+	let result = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
-	if (resolvedSearchParams.category) {
-		where.category = {
-			equals: resolvedSearchParams.category,
-		};
+	if (payload) {
+		try {
+			const where: any = {
+				status: {
+					equals: "published",
+				},
+			};
+
+			if (resolvedSearchParams.category) {
+				where.category = {
+					equals: resolvedSearchParams.category,
+				};
+			}
+
+			if (resolvedSearchParams.tag) {
+				where.tags = {
+					contains: resolvedSearchParams.tag,
+				};
+			}
+
+			result = await payload.find({
+				collection: "blog",
+				where,
+				limit,
+				page,
+				sort: "-publishedAt",
+				depth: 2, // Populate featuredImage relationship
+			});
+
+			posts = result.docs;
+		} catch (error) {
+			console.error("Error fetching blog posts:", error);
+			// Continue with empty arrays
+		}
 	}
-
-	if (resolvedSearchParams.tag) {
-		where.tags = {
-			contains: resolvedSearchParams.tag,
-		};
-	}
-
-	const result = await payload.find({
-		collection: "blog",
-		where,
-		limit,
-		page,
-		sort: "-publishedAt",
-		depth: 2, // Populate featuredImage relationship
-	});
-
-	const posts = result.docs;
 	const categories = [
 		"Announcement",
 		"Tutorial",

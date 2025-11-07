@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles } from "lucide-react";
@@ -34,46 +33,56 @@ const categories = [
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
 	// Fetch featured blog posts for highlights carousel
-	const blogResult = await payload.find({
-		collection: "blog",
-		where: {
-			and: [
-				{
-					featured: {
-						equals: true,
-					},
+	let featuredPosts: any[] = [];
+	let projects: any[] = [];
+
+	if (payload) {
+		try {
+			const blogResult = await payload.find({
+				collection: "blog",
+				where: {
+					and: [
+						{
+							featured: {
+								equals: true,
+							},
+						},
+						{
+							status: {
+								equals: "published",
+							},
+						},
+					],
 				},
-				{
+				limit: 10,
+				sort: "-publishedAt",
+				depth: 2, // Populate featuredImage relationship
+			});
+
+			featuredPosts = blogResult.docs;
+
+			// Fetch projects (non-draft, approved projects)
+			const result = await payload.find({
+				collection: "projects",
+				where: {
 					status: {
-						equals: "published",
+						in: ["Development", "Pre-Release", "Live"],
 					},
 				},
-			],
-		},
-		limit: 10,
-		sort: "-publishedAt",
-		depth: 2, // Populate featuredImage relationship
-	});
+				limit: 12,
+				sort: "-lastVerifiedAt",
+				depth: 1, // Populate relationships including logo
+			});
 
-	const featuredPosts = blogResult.docs;
-
-	// Fetch projects (non-draft, approved projects)
-	const result = await payload.find({
-		collection: "projects",
-		where: {
-			status: {
-				in: ["Development", "Pre-Release", "Live"],
-			},
-		},
-		limit: 12,
-		sort: "-lastVerifiedAt",
-		depth: 1, // Populate relationships including logo
-	});
-
-	const projects = result.docs;
+			projects = result.docs;
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			// Continue with empty arrays
+		}
+	}
 
 	return (
 		<div className="min-h-screen relative">

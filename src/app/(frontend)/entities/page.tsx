@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -19,33 +18,42 @@ export default async function EntitiesPage({
 	searchParams: SearchParams;
 }) {
 	const params = await searchParams;
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
 	const searchQuery = params.q;
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
 
-	// Build where clause
-	const where: any = {};
+	let result = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
-	if (searchQuery) {
-		where.or = [
-			{
-				name: {
-					contains: searchQuery,
-				},
-			},
-		];
+	if (payload) {
+		try {
+			// Build where clause
+			const where: any = {};
+
+			if (searchQuery) {
+				where.or = [
+					{
+						name: {
+							contains: searchQuery,
+						},
+					},
+				];
+			}
+
+			result = await payload.find({
+				collection: "entities",
+				where,
+				limit,
+				page,
+				sort: "name",
+				depth: 1, // Populate relationships including projects
+			});
+		} catch (error) {
+			console.error("Error fetching entities:", error);
+			// Continue with empty result
+		}
 	}
-
-	const result = await payload.find({
-		collection: "entities",
-		where,
-		limit,
-		page,
-		sort: "name",
-		depth: 1, // Populate relationships including projects
-	});
 
 	return (
 		<div className="min-h-screen relative">

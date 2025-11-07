@@ -179,9 +179,36 @@ If you upgrade to Vercel Pro plan, you can update `vercel.json` to run more freq
 ### Runtime Errors
 
 **Database Connection Issues**
-- Verify `MONGODB_URI` is correct
-- Check MongoDB Atlas IP whitelist (allow all IPs: `0.0.0.0/0`)
-- Verify database user has correct permissions
+
+The most common MongoDB connection error is an SSL/TLS error. Here's how to fix it:
+
+1. **Verify MongoDB Connection String Format**
+   - Your `MONGODB_URI` should look like:
+     ```
+     mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority
+     ```
+   - For MongoDB Atlas, ensure the connection string includes SSL parameters
+   - The connection string should NOT include `ssl=true` explicitly (MongoDB Atlas handles this automatically)
+
+2. **Check MongoDB Atlas IP Whitelist**
+   - Go to MongoDB Atlas → Network Access
+   - Add `0.0.0.0/0` to allow all IPs (or add Vercel's IP ranges)
+   - Wait a few minutes for changes to propagate
+
+3. **Verify Database User Permissions**
+   - Ensure your database user has read/write permissions
+   - Check that the user can access the correct database
+
+4. **Connection String from MongoDB Atlas**
+   - In MongoDB Atlas, go to Database → Connect → Drivers
+   - Select "Node.js" and copy the connection string
+   - Replace `<password>` with your actual password
+   - Replace `<database>` with your database name
+
+5. **If Connection Still Fails**
+   - The app will now gracefully handle connection failures and show empty pages instead of crashing
+   - Check Vercel function logs for detailed error messages
+   - Verify the connection string works locally first
 
 **Cron Jobs Not Running**
 - Check Vercel Cron configuration in dashboard

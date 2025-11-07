@@ -1,5 +1,4 @@
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -35,18 +34,28 @@ export default async function EntityDetailPage({
 	params: Params;
 }) {
 	const { slug } = await params;
-	const payload = await getPayload({ config: configPromise });
+	const payload = await getPayloadSafe();
 
-	const result = await payload.find({
-		collection: "entities",
-		where: {
-			slug: {
-				equals: slug,
+	if (!payload) {
+		notFound();
+	}
+
+	let result;
+	try {
+		result = await payload.find({
+			collection: "entities",
+			where: {
+				slug: {
+					equals: slug,
+				},
 			},
-		},
-		limit: 1,
-		depth: 2, // Populate projects and their relationships
-	});
+			limit: 1,
+			depth: 2, // Populate projects and their relationships
+		});
+	} catch (error) {
+		console.error("Error fetching entity:", error);
+		notFound();
+	}
 
 	if (result.docs.length === 0) {
 		notFound();
