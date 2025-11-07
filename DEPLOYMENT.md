@@ -237,90 +237,126 @@ The most common MongoDB connection error is an SSL/TLS error. Here's how to fix 
 - Add appropriate indexes (Payload CMS handles this automatically)
 - Monitor database usage in MongoDB Atlas dashboard
 
-## Step 4: Set Up Vercel Blob Storage
+## Step 4: Set Up Cloudflare R2 Storage
 
-Media files cannot be stored on Vercel's read-only filesystem. This project uses **Vercel Blob Storage** for media uploads.
+Media files cannot be stored on Vercel's read-only filesystem. This project uses **Cloudflare R2** (S3-compatible storage) for media uploads.
 
-### ⚠️ CRITICAL: Deployment Order
+### Why Cloudflare R2?
 
-**You MUST follow this exact order or uploads will fail:**
+- ✅ **FREE**: 10GB storage + unlimited egress bandwidth
+- ✅ **Fast**: Global CDN delivery
+- ✅ **S3-Compatible**: Works with Payload CMS S3 adapter
+- ✅ **Reliable**: Production-ready storage solution
 
-1. **First**: Create Blob storage in Vercel (see below)
-2. **Second**: Verify `BLOB_READ_WRITE_TOKEN` is set in environment variables
-3. **Third**: Redeploy your application (push a new commit or trigger redeploy)
+### Setup Steps
 
-The token must be available at **both build time and runtime**. If you deployed before creating Blob storage, you must redeploy after creating it.
+1. **Create Cloudflare Account** (if you don't have one):
+   - Go to https://dash.cloudflare.com/sign-up
+   - Sign up and verify your email
 
-### Important Note
+2. **Create R2 Bucket**:
+   - In Cloudflare dashboard, click **R2** in sidebar
+   - Click **Create bucket**
+   - Name: `stellarlight-media` (or any name)
+   - Location: **Automatic** (recommended)
+   - Click **Create bucket**
 
-**You don't need to create custom API routes!** The Payload CMS storage adapter (`@payloadcms/storage-vercel-blob`) handles all uploads automatically through Payload's built-in API. The Vercel Blob documentation shows manual implementation examples, but Payload CMS abstracts all of that away.
+3. **Generate API Credentials**:
+   - In R2 dashboard, click **Manage R2 API Tokens**
+   - Click **Create API Token**
+   - Token name: `stellarlight-uploads`
+   - Permissions: **Object Read & Write**
+   - Specify bucket: Select your bucket
+   - Click **Create API Token**
+   - **SAVE THESE VALUES** (shown only once):
+     - Access Key ID
+     - Secret Access Key
+     - Endpoint (e.g., `https://abc123.r2.cloudflarestorage.com`)
 
-### Create Vercel Blob Storage
+4. **Add Environment Variables to Vercel**:
+   - Go to Vercel project → **Settings** → **Environment Variables**
+   - Add these 5 variables (for all environments):
+     - `R2_ACCESS_KEY_ID` = Your Access Key ID
+     - `R2_SECRET_ACCESS_KEY` = Your Secret Access Key
+     - `R2_ENDPOINT` = Your endpoint URL
+     - `R2_BUCKET` = Your bucket name (e.g., `stellarlight-media`)
+     - `R2_REGION` = `auto`
 
-1. Go to your Vercel project dashboard
-2. Navigate to the **Storage** tab
-3. Click **Create Database** and select **Blob**
-4. Provide a name (e.g., `stellarlight-media`) and click **Create**
-5. Vercel will automatically set the `BLOB_READ_WRITE_TOKEN` environment variable
-6. **IMPORTANT**: After creating Blob storage, you MUST redeploy your application
-
-### Verify Environment Variable
-
-After creating Blob storage:
-
-1. Go to **Settings** → **Environment Variables**
-2. Confirm `BLOB_READ_WRITE_TOKEN` exists
-3. It should be set for **Production**, **Preview**, and **Development** environments
-4. The value will be automatically populated by Vercel (starts with `vercel_blob_rw_`)
-
-### Environment Variable for Local Development
-
-**For local development:**
-- Pull environment variables from Vercel: `vercel env pull`
-- Or manually add `BLOB_READ_WRITE_TOKEN` to your `.env.local` file
+5. **Redeploy**:
+   - After adding environment variables, trigger a new deployment
+   - The R2 storage adapter will automatically enable
 
 ### How It Works
 
 Once configured, media uploads in the Payload CMS admin panel will automatically:
-- Upload files to Vercel Blob Storage
+- Upload files to Cloudflare R2
 - Store file metadata in MongoDB
 - Generate public URLs for uploaded files
-- Handle file serving through Vercel's CDN
+- Serve files via Cloudflare's global CDN
 
-### Configuration Details
+### Configuration
 
-The project is configured to use Vercel Blob with **conditional plugin loading** in `payload.config.ts`:
+The project uses the S3 storage adapter configured for R2 in `payload.config.ts`:
 
 ```typescript
 plugins: [
   payloadCloudPlugin(),
-  // IMPORTANT: Only add Vercel Blob plugin if token exists
-  // Without a valid token, initialization fails and breaks the admin panel
-  ...(process.env.BLOB_READ_WRITE_TOKEN
+  ...(process.env.R2_ACCESS_KEY_ID &&
+  process.env.R2_SECRET_ACCESS_KEY &&
+  process.env.R2_BUCKET &&
+  process.env.R2_ENDPOINT
     ? [
-        vercelBlobStorage({
-          enabled: true,
+        s3Storage({
           collections: {
-            media: true, // Enables Blob storage for the 'media' collection
+            media: true,
           },
-          token: process.env.BLOB_READ_WRITE_TOKEN,
+          bucket: process.env.R2_BUCKET || "",
+          config: {
+            credentials: {
+              accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+              secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+            },
+            region: process.env.R2_REGION || "auto",
+            endpoint: process.env.R2_ENDPOINT || "",
+            forcePathStyle: true, // Required for R2 compatibility
+          },
         }),
       ]
     : []),
 ]
 ```
 
-**Why conditional?** The Vercel Blob adapter requires a valid token to initialize. Even passing an empty string causes the `UploadHandlersProvider` error. By conditionally adding the plugin only when the token exists, the admin panel works both with and without Blob storage.
-
-This configuration follows [official Payload CMS documentation](https://payloadcms.com/docs/upload/storage-adapters).
+**Conditional Loading**: The adapter only loads when credentials are available, so the admin panel works even without R2 configured.
 
 ### Free Tier Limits
 
-- **Storage**: 1 GB free
-- **Bandwidth**: 100 GB/month free
-- **Pricing**: $0.15/GB storage, $0.40/GB bandwidth after free tier
+- **Storage**: 10 GB/month free
+- **Class A operations**: 1 million/month (uploads, lists)
+- **Class B operations**: 10 million/month (downloads)
+- **Egress**: **UNLIMITED** (this is huge - AWS charges for this!)
 
-**Note:** Vercel has a 4.5MB server-side upload limit. For larger files, enable client-side uploads by adding `clientUploads: true` to the adapter configuration.
+### Pricing After Free Tier
+
+- Storage: $0.015/GB/month
+- Class A: $4.50/million requests
+- Class B: $0.36/million requests
+- Egress: **FREE** (vs AWS: $0.09/GB)
+
+### Local Development
+
+Pull environment variables from Vercel:
+```bash
+vercel env pull
+```
+
+Or manually add to `.env.local`:
+```env
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_ENDPOINT=https://abc123.r2.cloudflarestorage.com
+R2_BUCKET=stellarlight-media
+R2_REGION=auto
+```
 
 ### Troubleshooting
 
@@ -331,61 +367,57 @@ This configuration follows [official Payload CMS documentation](https://payloadc
 
 **Error: "useUploadHandlers must be used within UploadHandlersProvider"**
 
-This error means the Vercel Blob adapter cannot initialize because `BLOB_READ_WRITE_TOKEN` is missing or empty.
+This error means the storage adapter cannot initialize because R2 credentials are missing or invalid.
 
 **Solution (follow in order):**
 
-1. **Verify Blob storage exists**:
-   - Go to Vercel dashboard → your project
-   - Click **Storage** tab
-   - Confirm you see a Blob storage instance (e.g., `stellarlight-media`)
-   - Note the Store ID and region
+1. **Verify R2 storage is set up**:
+   - Go to Cloudflare dashboard → R2
+   - Confirm your bucket exists
+   - Verify API token was created
 
-2. **Verify the token is set**:
-   - Go to **Settings** → **Environment Variables**
-   - Look for `BLOB_READ_WRITE_TOKEN`
-   - It should exist for all environments (Production, Preview, Development)
-   - The value should start with `vercel_blob_rw_`
+2. **Verify environment variables are set**:
+   - Go to Vercel → **Settings** → **Environment Variables**
+   - Check all 5 R2 variables exist:
+     - `R2_ACCESS_KEY_ID`
+     - `R2_SECRET_ACCESS_KEY`
+     - `R2_ENDPOINT`
+     - `R2_BUCKET`
+     - `R2_REGION`
+   - Ensure they're set for all environments (Production, Preview, Development)
 
-3. **If Blob storage exists but token is missing**:
-   - This is rare but can happen
-   - Delete and recreate the Blob storage
-   - Vercel will automatically set the token
+3. **Verify values are correct**:
+   - Access Key ID should not have spaces
+   - Secret Access Key should not have spaces
+   - Endpoint should include `https://`
+   - Bucket name should match exactly
 
-4. **CRITICAL: Redeploy after creating Blob storage**:
-   - The token must be available at build time
+4. **Redeploy after adding variables**:
    - Go to **Deployments** tab
-   - Click the three dots on the latest deployment → **Redeploy**
-   - OR push a new commit to trigger a deployment
+   - Click the three dots on latest deployment → **Redeploy**
+   - OR push a new commit to trigger deployment
 
 5. **Wait for deployment to complete**:
-   - The admin panel will only work after the new build completes
-   - Check build logs to confirm `BLOB_READ_WRITE_TOKEN` is detected
+   - Check build logs to confirm no errors
+   - Admin panel should work after build completes
 
-**Why this happens:**
-- The Vercel Blob adapter **cannot initialize without a valid token**
-- Even passing an empty string `""` causes the provider to fail
-- The adapter is **conditionally loaded** - only added to plugins when token exists
-- If you deployed before creating Blob storage, the plugin wasn't loaded at all
-- After creating Blob storage and redeploying, the token becomes available and the plugin loads
-
-**What happens without the token:**
+**What happens without R2 credentials:**
 - Admin panel works normally ✅
-- Media uploads fall back to local storage (won't persist on Vercel's read-only filesystem) ⚠️
+- Media uploads fall back to local storage (won't persist on Vercel) ⚠️
 - No `UploadHandlersProvider` error ✅
 
-**What happens with the token:**
+**What happens with R2 credentials:**
 - Admin panel works normally ✅
-- Media uploads go to Vercel Blob ✅
-- Files persist and are served via Vercel CDN ✅
+- Media uploads go to Cloudflare R2 ✅
+- Files persist and are served via Cloudflare CDN ✅
 
 **Verification:**
-After redeploying with the token, you should be able to:
+After redeploying with credentials, you should be able to:
 1. Access `/admin` without errors
 2. Upload images in the Media collection
-3. See uploaded files in Vercel Blob storage (Storage tab in Vercel dashboard)
+3. See uploaded files in Cloudflare R2 dashboard
 
-For more details, see: https://vercel.com/storage/blob
+For more details, see: https://developers.cloudflare.com/r2/
 
 ## Environment Variables Reference
 
@@ -395,12 +427,18 @@ For more details, see: https://vercel.com/storage/blob
 | `DATABASE_URI` | Yes* | Alternative to MONGODB_URI |
 | `PAYLOAD_SECRET` | Yes | Secret key for Payload CMS (min 32 chars) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Your deployed site URL |
-| `BLOB_READ_WRITE_TOKEN` | Yes | Vercel Blob storage token (auto-set when Blob storage is created) |
+| `R2_ACCESS_KEY_ID` | Yes* | Cloudflare R2 access key ID |
+| `R2_SECRET_ACCESS_KEY` | Yes* | Cloudflare R2 secret access key |
+| `R2_ENDPOINT` | Yes* | Cloudflare R2 endpoint URL |
+| `R2_BUCKET` | Yes* | Cloudflare R2 bucket name |
+| `R2_REGION` | Yes* | Cloudflare R2 region (use `auto`) |
 | `CRON_SECRET` | Yes | Secret for securing cron endpoints |
 | `GITHUB_TOKEN` | No | GitHub personal access token for API |
 | `LUMENLOOP_PATH` | No | Path to Lumenloop repo (for sync) |
 
 *Either `MONGODB_URI` or `DATABASE_URI` is required
+
+*R2 variables are required for media uploads. Admin panel works without them, but uploads won't persist.
 
 ## Cron Job Configuration Reference
 
