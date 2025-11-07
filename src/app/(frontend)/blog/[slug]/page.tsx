@@ -41,24 +41,24 @@ export default async function BlogDetailPage({
 	let result;
 	try {
 		result = await payload.find({
-			collection: "blog",
-			where: {
-				and: [
-					{
-						slug: {
-							equals: slug,
-						},
+		collection: "blog",
+		where: {
+			and: [
+				{
+					slug: {
+						equals: slug,
 					},
-					{
-						status: {
-							equals: "published",
-						},
+				},
+				{
+					status: {
+						equals: "published",
 					},
-				],
-			},
-			limit: 1,
-			depth: 2, // Populate relationships including featuredImage and rssFeed
-		});
+				},
+			],
+		},
+		limit: 1,
+		depth: 2, // Populate relationships including featuredImage and rssFeed
+	});
 	} catch (error) {
 		console.error("Error fetching blog post:", error);
 		notFound();

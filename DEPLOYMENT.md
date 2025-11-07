@@ -71,6 +71,10 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 
 # Cron Job Security
 CRON_SECRET=your-random-cron-secret-key-here
+
+# Vercel Blob Storage (auto-set when Blob storage is created in Vercel)
+# For local dev, run: vercel env pull
+BLOB_READ_WRITE_TOKEN=vercel_blob_xxxxx
 ```
 
 ### Optional Variables
@@ -233,6 +237,48 @@ The most common MongoDB connection error is an SSL/TLS error. Here's how to fix 
 - Add appropriate indexes (Payload CMS handles this automatically)
 - Monitor database usage in MongoDB Atlas dashboard
 
+## Step 4: Set Up Vercel Blob Storage
+
+Media files cannot be stored on Vercel's read-only filesystem. This project uses **Vercel Blob Storage** for media uploads.
+
+### Important Note
+
+**You don't need to create custom API routes!** The Payload CMS storage adapter (`@payloadcms/storage-vercel-blob`) handles all uploads automatically through Payload's built-in API. The Vercel Blob documentation shows manual implementation examples, but Payload CMS abstracts all of that away.
+
+### Create Vercel Blob Storage
+
+1. Go to your Vercel project dashboard
+2. Navigate to the **Storage** tab
+3. Click **Create Database** and select **Blob**
+4. Provide a name (e.g., `stellarlight-media`) and click **Create**
+5. Vercel will automatically set the `BLOB_READ_WRITE_TOKEN` environment variable
+
+### Environment Variable
+
+The `BLOB_READ_WRITE_TOKEN` is automatically added by Vercel when you create a Blob storage instance. You don't need to manually add it, but you can verify it exists in your project settings.
+
+**For local development:**
+- Pull environment variables from Vercel: `vercel env pull`
+- Or manually add `BLOB_READ_WRITE_TOKEN` to your `.env.local` file
+
+### How It Works
+
+Once configured, media uploads in the Payload CMS admin panel will automatically:
+- Upload files to Vercel Blob Storage
+- Store file metadata in MongoDB
+- Generate public URLs for uploaded files
+- Handle file serving through Vercel's CDN
+
+### Free Tier Limits
+
+- **Storage**: 1 GB free
+- **Bandwidth**: 100 GB/month free
+- **Pricing**: $0.15/GB storage, $0.40/GB bandwidth after free tier
+
+**Note:** Files larger than 4.5MB may need special handling. The Payload adapter should handle this, but if you encounter issues, you may need to configure client-side uploads in the adapter settings.
+
+For more details, see: https://vercel.com/storage/blob
+
 ## Environment Variables Reference
 
 | Variable | Required | Description |
@@ -241,6 +287,7 @@ The most common MongoDB connection error is an SSL/TLS error. Here's how to fix 
 | `DATABASE_URI` | Yes* | Alternative to MONGODB_URI |
 | `PAYLOAD_SECRET` | Yes | Secret key for Payload CMS (min 32 chars) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Your deployed site URL |
+| `BLOB_READ_WRITE_TOKEN` | Yes | Vercel Blob storage token (auto-set when Blob storage is created) |
 | `CRON_SECRET` | Yes | Secret for securing cron endpoints |
 | `GITHUB_TOKEN` | No | GitHub personal access token for API |
 | `LUMENLOOP_PATH` | No | Path to Lumenloop repo (for sync) |

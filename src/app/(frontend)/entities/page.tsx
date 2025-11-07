@@ -28,27 +28,27 @@ export default async function EntitiesPage({
 
 	if (payload) {
 		try {
-			// Build where clause
+	// Build where clause
 			const where: any = {};
 
-			if (searchQuery) {
-				where.or = [
-					{
-						name: {
-							contains: searchQuery,
-						},
-					},
-				];
-			}
+	if (searchQuery) {
+		where.or = [
+			{
+				name: {
+					contains: searchQuery,
+				},
+			},
+		];
+	}
 
 			result = await payload.find({
-				collection: "entities",
-				where,
-				limit,
-				page,
-				sort: "name",
-				depth: 1, // Populate relationships including projects
-			});
+		collection: "entities",
+		where,
+		limit,
+		page,
+		sort: "name",
+		depth: 1, // Populate relationships including projects
+	});
 		} catch (error) {
 			console.error("Error fetching entities:", error);
 			// Continue with empty result

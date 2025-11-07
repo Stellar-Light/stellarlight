@@ -43,41 +43,41 @@ export default async function HomePage() {
 
 	if (payload) {
 		try {
-			const blogResult = await payload.find({
-				collection: "blog",
-				where: {
-					and: [
-						{
-							featured: {
-								equals: true,
-							},
-						},
-						{
-							status: {
-								equals: "published",
-							},
-						},
-					],
+	const blogResult = await payload.find({
+		collection: "blog",
+		where: {
+			and: [
+				{
+					featured: {
+						equals: true,
+					},
 				},
-				limit: 10,
-				sort: "-publishedAt",
-				depth: 2, // Populate featuredImage relationship
-			});
+				{
+					status: {
+						equals: "published",
+					},
+				},
+			],
+		},
+		limit: 10,
+		sort: "-publishedAt",
+		depth: 2, // Populate featuredImage relationship
+	});
 
 			featuredPosts = blogResult.docs;
 
-			// Fetch projects (non-draft, approved projects)
-			const result = await payload.find({
-				collection: "projects",
-				where: {
-					status: {
-						in: ["Development", "Pre-Release", "Live"],
-					},
-				},
-				limit: 12,
-				sort: "-lastVerifiedAt",
-				depth: 1, // Populate relationships including logo
-			});
+	// Fetch projects (non-draft, approved projects)
+	const result = await payload.find({
+		collection: "projects",
+		where: {
+			status: {
+				in: ["Development", "Pre-Release", "Live"],
+			},
+		},
+		limit: 12,
+		sort: "-lastVerifiedAt",
+		depth: 1, // Populate relationships including logo
+	});
 
 			projects = result.docs;
 			totalProjects = result.totalDocs;

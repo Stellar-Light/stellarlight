@@ -29,32 +29,32 @@ export default async function BlogPage({
 
 	if (payload) {
 		try {
-			const where: any = {
-				status: {
-					equals: "published",
-				},
-			};
+	const where: any = {
+		status: {
+			equals: "published",
+		},
+	};
 
-			if (resolvedSearchParams.category) {
-				where.category = {
-					equals: resolvedSearchParams.category,
-				};
-			}
+	if (resolvedSearchParams.category) {
+		where.category = {
+			equals: resolvedSearchParams.category,
+		};
+	}
 
-			if (resolvedSearchParams.tag) {
-				where.tags = {
-					contains: resolvedSearchParams.tag,
-				};
-			}
+	if (resolvedSearchParams.tag) {
+		where.tags = {
+			contains: resolvedSearchParams.tag,
+		};
+	}
 
 			result = await payload.find({
-				collection: "blog",
-				where,
-				limit,
-				page,
-				sort: "-publishedAt",
-				depth: 2, // Populate featuredImage relationship
-			});
+		collection: "blog",
+		where,
+		limit,
+		page,
+		sort: "-publishedAt",
+		depth: 2, // Populate featuredImage relationship
+	});
 
 			posts = result.docs;
 		} catch (error) {

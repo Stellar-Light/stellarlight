@@ -49,24 +49,24 @@ export default async function ProjectDetailPage({
 	let result;
 	try {
 		result = await payload.find({
-			collection: "projects",
-			where: {
-				and: [
-					{
-						slug: {
-							equals: slug,
-						},
+		collection: "projects",
+		where: {
+			and: [
+				{
+					slug: {
+						equals: slug,
 					},
-					{
-						status: {
-							in: ["Development", "Pre-Release", "Live"],
-						},
+				},
+				{
+					status: {
+						in: ["Development", "Pre-Release", "Live"],
 					},
-				],
-			},
-			limit: 1,
-			depth: 1,
-		});
+				},
+			],
+		},
+		limit: 1,
+		depth: 1,
+	});
 	} catch (error) {
 		console.error("Error fetching project:", error);
 		notFound();

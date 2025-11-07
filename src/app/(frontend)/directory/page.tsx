@@ -31,40 +31,40 @@ export default async function DirectoryPage({
 
 	if (payload) {
 		try {
-			// Build where clause
+	// Build where clause
 			const where: any = {
-				status: {
-					in: ["Development", "Pre-Release", "Live"],
+		status: {
+			in: ["Development", "Pre-Release", "Live"],
+		},
+	};
+
+	if (searchQuery) {
+		where.or = [
+			{
+				name: {
+					contains: searchQuery,
 				},
-			};
+			},
+			{
+				shortDescription: {
+					contains: searchQuery,
+				},
+			},
+		];
+	}
 
-			if (searchQuery) {
-				where.or = [
-					{
-						name: {
-							contains: searchQuery,
-						},
-					},
-					{
-						shortDescription: {
-							contains: searchQuery,
-						},
-					},
-				];
-			}
-
-			if (categoryFilter && categoryFilter !== "all") {
-				where.category = { equals: categoryFilter };
-			}
+	if (categoryFilter && categoryFilter !== "all") {
+		where.category = { equals: categoryFilter };
+	}
 
 			result = await payload.find({
-				collection: "projects",
-				where,
-				limit,
-				page,
-				sort: "-lastVerifiedAt",
-				depth: 1, // Populate relationships including logo
-			});
+		collection: "projects",
+		where,
+		limit,
+		page,
+		sort: "-lastVerifiedAt",
+		depth: 1, // Populate relationships including logo
+	});
 		} catch (error) {
 			console.error("Error fetching projects:", error);
 			// Continue with empty result
