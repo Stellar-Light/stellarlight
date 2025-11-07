@@ -78,7 +78,7 @@ export default async function ProjectDetailPage({
 
 	const project = result.docs[0];
 
-	// Fetch GitHub data
+	// Fetch GitHub data directly (no HTTP call needed in server component)
 	let gh: {
 		lastActivityAt: string | null;
 		openIssuesTotal: number;
@@ -97,13 +97,113 @@ export default async function ProjectDetailPage({
 
 	if (project.github?.repos && project.github.repos.length > 0) {
 		try {
-			const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-			const ghRes = await fetch(
-				`${appUrl}/api/projects/${project.id}/github`,
-				{ cache: "no-store" },
+			// Import the GitHub fetching logic directly instead of HTTP call
+			const { fetchRepoInfo } = await import("@/lib/github");
+			const projectId = String(project.id);
+			const repos = project.github.repos || [];
+
+			// Check for cached data first
+			const cachedResult = await payload.find({
+				collection: "signals",
+				where: { project: { equals: projectId } },
+				limit: 1,
+			});
+
+			const cached = cachedResult.docs[0];
+			const reposKey = JSON.stringify(
+				repos.map((r: any) => `${r.owner}/${r.name}`).sort(),
 			);
-			if (ghRes.ok) {
-				gh = await ghRes.json();
+			const cachedReposKey = cached?.github?.repos
+				? JSON.stringify(
+						cached.github.repos
+							.map((r: any) => `${r.owner}/${r.name}`)
+							.sort(),
+					)
+				: null;
+
+			const reposChanged = reposKey !== cachedReposKey;
+			const fresh =
+				cached?.fetchedAt &&
+				Date.now() - new Date(cached.fetchedAt).getTime() <
+					6 * 60 * 60 * 1000 && // 6h
+				!reposChanged;
+
+			if (cached && fresh && cached.github) {
+				const cachedGh = cached.github as any;
+				gh = {
+					lastActivityAt: cachedGh.lastActivityAt ?? null,
+					openIssuesTotal: cachedGh.openIssuesTotal ?? 0,
+					totalStars: cachedGh.totalStars ?? 0,
+					repos: cachedGh.repos ?? [],
+				};
+			} else {
+				// Fetch live data
+				const results = await Promise.allSettled(
+					repos.map((r: any) => fetchRepoInfo(r.owner, r.name)),
+				);
+
+				const enriched = repos.map((r: any, i: number) => {
+					const v = results[i];
+
+					if (v.status === "fulfilled") {
+						return {
+							owner: r.owner,
+							name: r.name,
+							url: v.value.url,
+							lastCommitAt: v.value.lastCommitAt,
+							openIssues: v.value.openIssues,
+							stargazerCount: v.value.stargazerCount ?? 0,
+						};
+					}
+
+					const errorMessage = String((v as PromiseRejectedResult).reason);
+					const isPrivate = errorMessage.includes("Private repository");
+
+					return {
+						owner: r.owner,
+						name: r.name,
+						url: `https://github.com/${r.owner}/${r.name}`,
+						lastCommitAt: null,
+						openIssues: 0,
+						stargazerCount: 0,
+						error: errorMessage,
+						skipped: isPrivate,
+					};
+				});
+
+				const lastTs = Math.max(
+					...enriched.map((x) =>
+						x.lastCommitAt ? new Date(x.lastCommitAt).getTime() : 0,
+					),
+				);
+
+				gh = {
+					lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
+					openIssuesTotal: enriched.reduce((s, x) => s + (x.openIssues || 0), 0),
+					totalStars: enriched.reduce((s, x) => s + (x.stargazerCount || 0), 0),
+					repos: enriched,
+				};
+
+				// Update cache
+				if (cached) {
+					await payload.update({
+						collection: "signals",
+						id: cached.id,
+						data: {
+							fetchedAt: new Date().toISOString(),
+							github: gh,
+						},
+					});
+				} else {
+					await payload.create({
+						collection: "signals",
+						data: {
+							project: projectId,
+							fetchedAt: new Date().toISOString(),
+							github: gh,
+						},
+					});
+				}
 			}
 		} catch (error) {
 			console.error("Failed to fetch GitHub data:", error);
@@ -264,7 +364,7 @@ export default async function ProjectDetailPage({
 				</div>
 
 				{/* GitHub Stats - Beautiful Stat Cards */}
-				{gh && (
+				{project.github?.repos && project.github.repos.length > 0 && (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
 						<Card className="border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
 							<CardContent className="p-6">
@@ -276,12 +376,12 @@ export default async function ProjectDetailPage({
 										<div>
 											<p className="text-sm font-medium text-muted-foreground">Last Activity</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
-												{formatDate(gh.lastActivityAt)}
+												{gh ? formatDate(gh.lastActivityAt) : "—"}
 											</p>
 										</div>
 									</div>
 								</div>
-								{gh.lastActivityAt && (
+								{gh?.lastActivityAt && (
 									<p className="text-xs text-muted-foreground">
 										{formatDateLong(gh.lastActivityAt)}
 									</p>
@@ -299,13 +399,13 @@ export default async function ProjectDetailPage({
 										<div>
 											<p className="text-sm font-medium text-muted-foreground">Open Issues</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh.openIssuesTotal ?? 0}
+												{gh?.openIssuesTotal ?? 0}
 											</p>
 										</div>
 									</div>
 								</div>
 								<p className="text-xs text-muted-foreground">
-									Across {gh.repos?.length || 0} {gh.repos?.length === 1 ? 'repository' : 'repositories'}
+									Across {gh?.repos?.length || project.github?.repos?.length || 0} {gh?.repos?.length === 1 || project.github?.repos?.length === 1 ? 'repository' : 'repositories'}
 								</p>
 							</CardContent>
 						</Card>
@@ -320,7 +420,7 @@ export default async function ProjectDetailPage({
 										<div>
 											<p className="text-sm font-medium text-muted-foreground">Total Stars</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh.totalStars?.toLocaleString() ?? 0}
+												{gh?.totalStars?.toLocaleString() ?? 0}
 											</p>
 										</div>
 									</div>
@@ -396,17 +496,26 @@ export default async function ProjectDetailPage({
 				)}
 
 				{/* Repositories */}
-				{gh && gh.repos && gh.repos.length > 0 && (
+				{project.github?.repos && project.github.repos.length > 0 && (
 					<Card className="mb-8 border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Repositories</CardTitle>
 							<CardDescription>
-								{gh.repos.length} {gh.repos.length === 1 ? 'repository' : 'repositories'} linked to this project
+								{project.github.repos.length} {project.github.repos.length === 1 ? 'repository' : 'repositories'} linked to this project
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-2">
-								{gh.repos.slice(0, 10).map((r) => (
+								{(gh?.repos || project.github.repos.map((r: any) => ({
+									owner: r.owner,
+									name: r.name,
+									url: `https://github.com/${r.owner}/${r.name}`,
+									lastCommitAt: null,
+									openIssues: 0,
+									stargazerCount: 0,
+									error: undefined,
+									skipped: false,
+								}))).slice(0, 10).map((r: any) => (
 									<a
 										key={`${r.owner}/${r.name}`}
 										href={r.url}

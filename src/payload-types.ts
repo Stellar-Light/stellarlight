@@ -635,14 +635,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'transparency-logs';
         value: string | TransparencyLog;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
