@@ -25,7 +25,7 @@ export default async function BlogPage({
 	const limit = 12;
 
 	let posts: any[] = [];
-	let result = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
+	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
 	if (payload) {
 		try {

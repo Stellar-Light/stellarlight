@@ -24,7 +24,7 @@ export default async function EntitiesPage({
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
 
-	let result = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
+	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
 	if (payload) {
 		try {
