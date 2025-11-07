@@ -1,4 +1,4 @@
-gitgit git# Deployment Guide - Stellar Light
+# Deployment Guide - Stellar Light
 
 This guide will help you deploy Stellar Light to Vercel.
 
@@ -241,6 +241,16 @@ The most common MongoDB connection error is an SSL/TLS error. Here's how to fix 
 
 Media files cannot be stored on Vercel's read-only filesystem. This project uses **Vercel Blob Storage** for media uploads.
 
+### ⚠️ CRITICAL: Deployment Order
+
+**You MUST follow this exact order or uploads will fail:**
+
+1. **First**: Create Blob storage in Vercel (see below)
+2. **Second**: Verify `BLOB_READ_WRITE_TOKEN` is set in environment variables
+3. **Third**: Redeploy your application (push a new commit or trigger redeploy)
+
+The token must be available at **both build time and runtime**. If you deployed before creating Blob storage, you must redeploy after creating it.
+
 ### Important Note
 
 **You don't need to create custom API routes!** The Payload CMS storage adapter (`@payloadcms/storage-vercel-blob`) handles all uploads automatically through Payload's built-in API. The Vercel Blob documentation shows manual implementation examples, but Payload CMS abstracts all of that away.
@@ -252,10 +262,18 @@ Media files cannot be stored on Vercel's read-only filesystem. This project uses
 3. Click **Create Database** and select **Blob**
 4. Provide a name (e.g., `stellarlight-media`) and click **Create**
 5. Vercel will automatically set the `BLOB_READ_WRITE_TOKEN` environment variable
+6. **IMPORTANT**: After creating Blob storage, you MUST redeploy your application
 
-### Environment Variable
+### Verify Environment Variable
 
-The `BLOB_READ_WRITE_TOKEN` is automatically added by Vercel when you create a Blob storage instance. You don't need to manually add it, but you can verify it exists in your project settings.
+After creating Blob storage:
+
+1. Go to **Settings** → **Environment Variables**
+2. Confirm `BLOB_READ_WRITE_TOKEN` exists
+3. It should be set for **Production**, **Preview**, and **Development** environments
+4. The value will be automatically populated by Vercel (starts with `vercel_blob_rw_`)
+
+### Environment Variable for Local Development
 
 **For local development:**
 - Pull environment variables from Vercel: `vercel env pull`
@@ -269,13 +287,29 @@ Once configured, media uploads in the Payload CMS admin panel will automatically
 - Generate public URLs for uploaded files
 - Handle file serving through Vercel's CDN
 
+### Configuration Details
+
+The project is configured to use Vercel Blob with the following settings in `payload.config.ts`:
+
+```typescript
+vercelBlobStorage({
+  enabled: true,
+  collections: {
+    media: true, // Enables Blob storage for the 'media' collection
+  },
+  token: process.env.BLOB_READ_WRITE_TOKEN,
+})
+```
+
+This configuration follows [official Payload CMS documentation](https://payloadcms.com/docs/upload/storage-adapters).
+
 ### Free Tier Limits
 
 - **Storage**: 1 GB free
 - **Bandwidth**: 100 GB/month free
 - **Pricing**: $0.15/GB storage, $0.40/GB bandwidth after free tier
 
-**Note:** Files larger than 4.5MB may need special handling. The Payload adapter should handle this, but if you encounter issues, you may need to configure client-side uploads in the adapter settings.
+**Note:** Vercel has a 4.5MB server-side upload limit. For larger files, enable client-side uploads by adding `clientUploads: true` to the adapter configuration.
 
 ### Troubleshooting
 
@@ -285,13 +319,49 @@ Once configured, media uploads in the Payload CMS admin panel will automatically
 - The import map is automatically generated during the build process on Vercel
 
 **Error: "useUploadHandlers must be used within UploadHandlersProvider"**
-- This error occurs when `BLOB_READ_WRITE_TOKEN` is not set or not available at runtime
-- **Solution**: 
-  1. **Verify Blob storage is created**: Go to Vercel dashboard → Storage tab → Confirm Blob storage exists
-  2. **Check environment variable**: Go to Vercel project settings → Environment Variables → Verify `BLOB_READ_WRITE_TOKEN` exists
-  3. **Important**: The token is automatically set when you create Blob storage, but you must **redeploy** after creating it
-  4. **Redeploy**: After creating Blob storage, trigger a new deployment (push a commit or redeploy from Vercel dashboard)
-- **Note**: The token must be available at build time AND runtime. If you created Blob storage after the last deployment, you need to redeploy.
+
+This error means the Vercel Blob adapter cannot initialize because `BLOB_READ_WRITE_TOKEN` is missing or empty.
+
+**Solution (follow in order):**
+
+1. **Verify Blob storage exists**:
+   - Go to Vercel dashboard → your project
+   - Click **Storage** tab
+   - Confirm you see a Blob storage instance (e.g., `stellarlight-media`)
+   - Note the Store ID and region
+
+2. **Verify the token is set**:
+   - Go to **Settings** → **Environment Variables**
+   - Look for `BLOB_READ_WRITE_TOKEN`
+   - It should exist for all environments (Production, Preview, Development)
+   - The value should start with `vercel_blob_rw_`
+
+3. **If Blob storage exists but token is missing**:
+   - This is rare but can happen
+   - Delete and recreate the Blob storage
+   - Vercel will automatically set the token
+
+4. **CRITICAL: Redeploy after creating Blob storage**:
+   - The token must be available at build time
+   - Go to **Deployments** tab
+   - Click the three dots on the latest deployment → **Redeploy**
+   - OR push a new commit to trigger a deployment
+
+5. **Wait for deployment to complete**:
+   - The admin panel will only work after the new build completes
+   - Check build logs to confirm `BLOB_READ_WRITE_TOKEN` is detected
+
+**Why this happens:**
+- The Payload CMS adapter requires the token at initialization time
+- If you deployed before creating Blob storage, the token wasn't available
+- The build "baked in" an empty token value
+- Redeploying after creating Blob storage makes the token available
+
+**Verification:**
+After redeploying, you should be able to:
+1. Access `/admin` without errors
+2. Upload images in the Media collection
+3. See uploaded files in Vercel Blob storage
 
 For more details, see: https://vercel.com/storage/blob
 

@@ -112,13 +112,12 @@ export default buildConfig({
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		// Always add Vercel Blob storage adapter
-		// The adapter requires a valid token to initialize the provider
+		// Vercel Blob storage adapter for media uploads
+		// Requires BLOB_READ_WRITE_TOKEN from Vercel environment variables
 		vercelBlobStorage({
+			enabled: true, // Explicitly enable the adapter
 			collections: {
-				media: {
-					prefix: "media",
-				},
+				media: true, // Enable for 'media' collection (matches Media.ts slug)
 			},
 			token: process.env.BLOB_READ_WRITE_TOKEN || "",
 		}),
