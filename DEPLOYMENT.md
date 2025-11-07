@@ -277,6 +277,13 @@ Once configured, media uploads in the Payload CMS admin panel will automatically
 
 **Note:** Files larger than 4.5MB may need special handling. The Payload adapter should handle this, but if you encounter issues, you may need to configure client-side uploads in the adapter settings.
 
+### Troubleshooting
+
+**Error: "PayloadComponent not found in importMap"**
+- This is automatically resolved - the build script now runs `payload generate:importmap` before building
+- If you see this error locally, run: `pnpm generate:importmap`
+- The import map is automatically generated during the build process on Vercel
+
 For more details, see: https://vercel.com/storage/blob
 
 ## Environment Variables Reference

@@ -24,6 +24,7 @@ import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93
 import { Icon as Icon_6fe5e005b409233c7fca06cae1633729 } from '../../../components/payload/Icon'
 import { Logo as Logo_ac2a1ef35fe176856f14970b2c93f3f1 } from '../../../components/payload/Logo'
 import { AfterNavLinks as AfterNavLinks_2a1975f569d140d16ead92cd89c54064 } from '../../../components/payload/AfterNavLinks'
+import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -51,5 +52,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "./components/payload/Icon#Icon": Icon_6fe5e005b409233c7fca06cae1633729,
   "./components/payload/Logo#Logo": Logo_ac2a1ef35fe176856f14970b2c93f3f1,
-  "./components/payload/AfterNavLinks#AfterNavLinks": AfterNavLinks_2a1975f569d140d16ead92cd89c54064
+  "./components/payload/AfterNavLinks#AfterNavLinks": AfterNavLinks_2a1975f569d140d16ead92cd89c54064,
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e
 }

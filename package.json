@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
-		"build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+		"build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" payload generate:importmap && next build",
 		"check": "biome check .",
 		"dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
 		"dev:fresh": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && cross-env NODE_OPTIONS=--no-deprecation next dev",
