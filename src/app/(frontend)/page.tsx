@@ -38,6 +38,8 @@ export default async function HomePage() {
 	// Fetch featured blog posts for highlights carousel
 	let featuredPosts: any[] = [];
 	let projects: any[] = [];
+	let totalProjects = 0;
+	let totalPages = 1;
 
 	if (payload) {
 		try {
@@ -78,6 +80,8 @@ export default async function HomePage() {
 			});
 
 			projects = result.docs;
+			totalProjects = result.totalDocs;
+			totalPages = result.totalPages;
 		} catch (error) {
 			console.error("Error fetching data:", error);
 			// Continue with empty arrays
@@ -208,7 +212,7 @@ export default async function HomePage() {
 								Explore Projects
 							</h2>
 							<p className="text-muted-foreground">
-								{result.totalDocs} projects building on Stellar
+								{totalProjects} projects building on Stellar
 							</p>
 						</div>
 					</div>
@@ -257,7 +261,7 @@ export default async function HomePage() {
 								))}
 							</div>
 
-							{result.totalPages > 1 && (
+							{totalPages > 1 && (
 								<div className="text-center">
 									<Button
 										asChild
