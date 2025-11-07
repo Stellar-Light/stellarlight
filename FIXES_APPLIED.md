@@ -2,10 +2,11 @@
 
 ## 🔧 What Was Wrong
 
-Your configuration had an **incorrect format** that didn't match the official Payload CMS documentation:
+The configuration had **two critical issues**:
 
-### ❌ Previous Configuration (INCORRECT)
+### Issue 1: Incorrect Format
 ```typescript
+// ❌ INCORRECT - Wrong format
 vercelBlobStorage({
   collections: {
     media: {
@@ -16,15 +17,34 @@ vercelBlobStorage({
 })
 ```
 
+### Issue 2: Always Loading Plugin (Even Without Token)
+```typescript
+// ❌ ALSO INCORRECT - Loads even when token is empty
+vercelBlobStorage({
+  enabled: true,
+  collections: {
+    media: true,
+  },
+  token: process.env.BLOB_READ_WRITE_TOKEN || "",  // ❌ Empty string breaks it
+})
+```
+
+**The problem:** Even with `|| ""`, the adapter tries to initialize with an empty token, which causes the `UploadHandlersProvider` error and breaks the entire admin panel.
+
 ### ✅ Current Configuration (CORRECT)
 ```typescript
-vercelBlobStorage({
-  enabled: true,  // ✅ Explicitly enable the adapter
-  collections: {
-    media: true,  // ✅ Simple boolean - matches official docs
-  },
-  token: process.env.BLOB_READ_WRITE_TOKEN || "",
-})
+// Conditionally add plugin ONLY when token exists
+...(process.env.BLOB_READ_WRITE_TOKEN
+  ? [
+      vercelBlobStorage({
+        enabled: true,
+        collections: {
+          media: true,  // ✅ Simple boolean - matches official docs
+        },
+        token: process.env.BLOB_READ_WRITE_TOKEN,  // ✅ Only used when exists
+      }),
+    ]
+  : []),  // ✅ Empty array when no token - admin panel still works
 ```
 
 ## 📚 Sources Verified

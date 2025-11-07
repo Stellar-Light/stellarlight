@@ -289,17 +289,28 @@ Once configured, media uploads in the Payload CMS admin panel will automatically
 
 ### Configuration Details
 
-The project is configured to use Vercel Blob with the following settings in `payload.config.ts`:
+The project is configured to use Vercel Blob with **conditional plugin loading** in `payload.config.ts`:
 
 ```typescript
-vercelBlobStorage({
-  enabled: true,
-  collections: {
-    media: true, // Enables Blob storage for the 'media' collection
-  },
-  token: process.env.BLOB_READ_WRITE_TOKEN,
-})
+plugins: [
+  payloadCloudPlugin(),
+  // IMPORTANT: Only add Vercel Blob plugin if token exists
+  // Without a valid token, initialization fails and breaks the admin panel
+  ...(process.env.BLOB_READ_WRITE_TOKEN
+    ? [
+        vercelBlobStorage({
+          enabled: true,
+          collections: {
+            media: true, // Enables Blob storage for the 'media' collection
+          },
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }),
+      ]
+    : []),
+]
 ```
+
+**Why conditional?** The Vercel Blob adapter requires a valid token to initialize. Even passing an empty string causes the `UploadHandlersProvider` error. By conditionally adding the plugin only when the token exists, the admin panel works both with and without Blob storage.
 
 This configuration follows [official Payload CMS documentation](https://payloadcms.com/docs/upload/storage-adapters).
 
@@ -352,16 +363,27 @@ This error means the Vercel Blob adapter cannot initialize because `BLOB_READ_WR
    - Check build logs to confirm `BLOB_READ_WRITE_TOKEN` is detected
 
 **Why this happens:**
-- The Payload CMS adapter requires the token at initialization time
-- If you deployed before creating Blob storage, the token wasn't available
-- The build "baked in" an empty token value
-- Redeploying after creating Blob storage makes the token available
+- The Vercel Blob adapter **cannot initialize without a valid token**
+- Even passing an empty string `""` causes the provider to fail
+- The adapter is **conditionally loaded** - only added to plugins when token exists
+- If you deployed before creating Blob storage, the plugin wasn't loaded at all
+- After creating Blob storage and redeploying, the token becomes available and the plugin loads
+
+**What happens without the token:**
+- Admin panel works normally ✅
+- Media uploads fall back to local storage (won't persist on Vercel's read-only filesystem) ⚠️
+- No `UploadHandlersProvider` error ✅
+
+**What happens with the token:**
+- Admin panel works normally ✅
+- Media uploads go to Vercel Blob ✅
+- Files persist and are served via Vercel CDN ✅
 
 **Verification:**
-After redeploying, you should be able to:
+After redeploying with the token, you should be able to:
 1. Access `/admin` without errors
 2. Upload images in the Media collection
-3. See uploaded files in Vercel Blob storage
+3. See uploaded files in Vercel Blob storage (Storage tab in Vercel dashboard)
 
 For more details, see: https://vercel.com/storage/blob
 

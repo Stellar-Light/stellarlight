@@ -25,17 +25,31 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob';
 // Inside buildConfig
 plugins: [
   payloadCloudPlugin(),
-  vercelBlobStorage({
-    enabled: true,
-    collections: {
-      media: true, // Matches the 'media' collection slug
-    },
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  }),
+  // CRITICAL: Conditionally add plugin ONLY when token exists
+  ...(process.env.BLOB_READ_WRITE_TOKEN
+    ? [
+        vercelBlobStorage({
+          enabled: true,
+          collections: {
+            media: true, // Matches the 'media' collection slug
+          },
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }),
+      ]
+    : []),
 ]
 ```
 
 ✅ **Configuration matches official Payload CMS documentation**
+
+**Why conditional?** The Vercel Blob adapter requires a valid token to initialize. Without this conditional check:
+- ❌ Admin panel breaks with `UploadHandlersProvider` error
+- ❌ Even passing `""` empty string causes initialization to fail
+
+With conditional loading:
+- ✅ Admin panel works even without Blob storage
+- ✅ Blob storage enabled automatically when token is present
+- ✅ No errors during development or deployment
 
 ## 🔧 Setup Steps (IN THIS ORDER)
 
@@ -99,14 +113,29 @@ Option B - Manual redeploy in Vercel:
 
 ### Error: "useUploadHandlers must be used within UploadHandlersProvider"
 
-**Cause**: `BLOB_READ_WRITE_TOKEN` is not available at runtime
+**Cause**: The Vercel Blob adapter is trying to initialize without a valid token
+
+**Root Cause**: This happens when:
+- The plugin is loaded unconditionally (without the conditional check)
+- The token is empty, undefined, or an empty string `""`
+- The adapter attempts to initialize the provider and fails
 
 **Solution**:
-1. ✅ Verify Blob storage is created (Storage tab)
-2. ✅ Verify token exists (Settings → Environment Variables)
-3. ✅ **Redeploy the application** (this is usually the missing step)
-4. ✅ Wait for deployment to complete
-5. ✅ Clear browser cache and reload `/admin`
+1. ✅ Verify configuration uses **conditional plugin loading** (see Configuration section above)
+2. ✅ Verify Blob storage is created (Storage tab in Vercel dashboard)
+3. ✅ Verify token exists (Settings → Environment Variables → `BLOB_READ_WRITE_TOKEN`)
+4. ✅ **Redeploy the application** after creating Blob storage
+5. ✅ Wait for deployment to complete
+6. ✅ Clear browser cache and reload `/admin`
+
+**Without token (before creating Blob storage):**
+- Admin panel works normally ✅
+- Media uploads fall back to local storage (won't persist on Vercel) ⚠️
+
+**With token (after creating Blob storage and redeploying):**
+- Admin panel works normally ✅
+- Media uploads go to Vercel Blob ✅
+- Files persist and are served via CDN ✅
 
 ### Error: "Cannot find module '@payloadcms/storage-vercel-blob'"
 

@@ -112,14 +112,19 @@ export default buildConfig({
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		// Vercel Blob storage adapter for media uploads
-		// Requires BLOB_READ_WRITE_TOKEN from Vercel environment variables
-		vercelBlobStorage({
-			enabled: true, // Explicitly enable the adapter
-			collections: {
-				media: true, // Enable for 'media' collection (matches Media.ts slug)
-			},
-			token: process.env.BLOB_READ_WRITE_TOKEN || "",
-		}),
+		// Conditionally add Vercel Blob storage ONLY if token is available
+		// Without a valid token, the provider initialization fails and breaks the admin panel
+		// The token is automatically set by Vercel when you create Blob storage
+		...(process.env.BLOB_READ_WRITE_TOKEN
+			? [
+					vercelBlobStorage({
+						enabled: true,
+						collections: {
+							media: true, // Enable for 'media' collection (matches Media.ts slug)
+						},
+						token: process.env.BLOB_READ_WRITE_TOKEN,
+					}),
+				]
+			: []),
 	],
 });
