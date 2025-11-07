@@ -1,7 +1,7 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
-import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
+// import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"; // TEMPORARILY DISABLED
 import path from "path";
 import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
@@ -112,19 +112,18 @@ export default buildConfig({
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		// Conditionally add Vercel Blob storage ONLY if token is available
-		// Without a valid token, the provider initialization fails and breaks the admin panel
-		// The token is automatically set by Vercel when you create Blob storage
-		...(process.env.BLOB_READ_WRITE_TOKEN
-			? [
-					vercelBlobStorage({
-						enabled: true,
-						collections: {
-							media: true, // Enable for 'media' collection (matches Media.ts slug)
-						},
-						token: process.env.BLOB_READ_WRITE_TOKEN,
-					}),
-				]
-			: []),
+		// VERCEL BLOB TEMPORARILY DISABLED - Investigating import map / provider issues
+		// Media uploads will fall back to local storage (won't persist on Vercel's read-only filesystem)
+		// ...(process.env.BLOB_READ_WRITE_TOKEN
+		// 	? [
+		// 			vercelBlobStorage({
+		// 				enabled: true,
+		// 				collections: {
+		// 					media: true,
+		// 				},
+		// 				token: process.env.BLOB_READ_WRITE_TOKEN,
+		// 			}),
+		// 		]
+		// 	: []),
 	],
 });
