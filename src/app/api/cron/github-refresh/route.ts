@@ -4,7 +4,9 @@ import { getPayload } from "payload";
 
 /**
  * Vercel Cron Job: Refresh GitHub statistics for all projects
- * Runs every 6 hours
+ * 
+ * Current Schedule: Daily at 2:00 AM UTC (Hobby plan compatible)
+ * To run more frequently (e.g., every 6 hours), upgrade to Pro plan and update vercel.json
  * 
  * Security: Protected by Vercel Cron secret
  */

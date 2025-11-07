@@ -96,20 +96,48 @@ openssl rand -base64 32
 
 ## Step 5: Configure Vercel Cron Jobs
 
-Vercel Cron Jobs are configured in `vercel.json`. The cron jobs will automatically run:
+Vercel Cron Jobs are configured in `vercel.json`. 
 
-- **GitHub Refresh**: Every 6 hours (`/api/cron/github-refresh`)
-- **RSS Sync**: Every 4 hours (`/api/cron/rss-sync`)
+### ⚠️ Important: Vercel Plan Limitations
 
-### Important: Set CRON_SECRET
+**Hobby Plan (Free)**: Limited to **daily cron jobs** (once per day maximum)
 
-Vercel will automatically add an `Authorization` header to cron requests. You need to:
+**Current Configuration (Hobby-compatible)**:
+- **GitHub Refresh**: Daily at 2:00 AM UTC (`0 2 * * *`)
+- **RSS Sync**: Daily at 4:00 AM UTC (`0 4 * * *`)
+
+**Pro Plan**: Allows multiple runs per day (unlimited cron frequency)
+
+### Upgrading to More Frequent Cron Jobs
+
+If you upgrade to Vercel Pro plan, you can update `vercel.json` to run more frequently:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/github-refresh",
+      "schedule": "0 */6 * * *"  // Every 6 hours (4 times per day)
+    },
+    {
+      "path": "/api/cron/rss-sync",
+      "schedule": "0 */4 * * *"   // Every 4 hours (6 times per day)
+    }
+  ]
+}
+```
+
+**Recommended schedules for Pro plan**:
+- GitHub Refresh: `0 */6 * * *` (every 6 hours) - balances freshness with API rate limits
+- RSS Sync: `0 */4 * * *` (every 4 hours) - keeps blog content fresh
+
+### Setting Up Cron Jobs
 
 1. Set the `CRON_SECRET` environment variable in Vercel
-2. Vercel will send requests with `Authorization: Bearer ${CRON_SECRET}`
-3. The cron endpoints verify this secret
+2. Vercel will automatically send requests with `Authorization: Bearer ${CRON_SECRET}`
+3. The cron endpoints verify this secret for security
 
-**Note**: In Vercel, you can also use the built-in `VERCEL_CRON_SECRET` which is automatically set. Update the cron route files to use `VERCEL_CRON_SECRET` if you prefer.
+**Note**: In Vercel, you can also use the built-in `VERCEL_CRON_SECRET` which is automatically set. The cron routes support both `CRON_SECRET` and `VERCEL_CRON_SECRET`.
 
 ## Step 6: Verify Deployment
 
@@ -190,6 +218,35 @@ Vercel will automatically add an `Authorization` header to cron requests. You ne
 | `LUMENLOOP_PATH` | No | Path to Lumenloop repo (for sync) |
 
 *Either `MONGODB_URI` or `DATABASE_URI` is required
+
+## Cron Job Configuration Reference
+
+### Current Schedule (Hobby Plan Compatible)
+
+The cron jobs are configured in `vercel.json` with daily schedules:
+
+- **GitHub Refresh**: `0 2 * * *` (2:00 AM UTC daily)
+- **RSS Sync**: `0 4 * * *` (4:00 AM UTC daily)
+
+### Cron Expression Format
+
+Cron expressions use the format: `minute hour day month weekday`
+
+Examples:
+- `0 2 * * *` - Daily at 2:00 AM UTC
+- `0 */6 * * *` - Every 6 hours (requires Pro plan)
+- `0 */4 * * *` - Every 4 hours (requires Pro plan)
+- `0 0 * * *` - Daily at midnight UTC
+- `0 12 * * *` - Daily at noon UTC
+
+### Changing Cron Schedules
+
+1. Edit `vercel.json` in your repository
+2. Update the `schedule` field for the desired cron job
+3. Commit and push the changes
+4. Vercel will automatically update the cron schedule on the next deployment
+
+**Note**: Remember that Hobby plans are limited to daily cron jobs. If you need more frequent runs, upgrade to Pro plan first.
 
 ## Security Best Practices
 

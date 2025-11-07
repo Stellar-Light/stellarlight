@@ -6,11 +6,11 @@
 	"crons": [
 		{
 			"path": "/api/cron/github-refresh",
-			"schedule": "0 */6 * * *"
+			"schedule": "0 2 * * *"
 		},
 		{
 			"path": "/api/cron/rss-sync",
-			"schedule": "0 */4 * * *"
+			"schedule": "0 4 * * *"
 		}
 	]
 }

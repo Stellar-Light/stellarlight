@@ -4,7 +4,9 @@ import { getPayload } from "payload";
 
 /**
  * Vercel Cron Job: Sync all enabled RSS feeds
- * Runs every 4 hours
+ * 
+ * Current Schedule: Daily at 4:00 AM UTC (Hobby plan compatible)
+ * To run more frequently (e.g., every 4 hours), upgrade to Pro plan and update vercel.json
  * 
  * Security: Protected by Vercel Cron secret
  */
