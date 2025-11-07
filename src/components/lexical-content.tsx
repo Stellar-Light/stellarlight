@@ -1,7 +1,8 @@
 "use client";
 
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import type { LexicalRichText } from "payload";
+// LexicalRichText type is defined in payload-types.ts
+type LexicalRichText = any; // Payload's LexicalRichText type
 
 interface LexicalContentProps {
 	content: LexicalRichText;

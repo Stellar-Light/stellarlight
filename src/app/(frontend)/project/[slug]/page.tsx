@@ -477,13 +477,13 @@ export default async function ProjectDetailPage({
 									{project.onchain.contracts &&
 										project.onchain.contracts.length > 0 &&
 										project.onchain.contracts.map(
-											(contract: { address: string }, idx: number) => (
+											(contract: { address?: string | null }, idx: number) => (
 												<div key={idx}>
 													<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
 														Contract {idx + 1}
 													</div>
 													<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 hover:border-primary/30 transition-colors break-all">
-														{contract.address}
+														{contract.address || "Unknown"}
 													</code>
 												</div>
 											),

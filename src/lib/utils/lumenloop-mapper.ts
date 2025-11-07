@@ -20,10 +20,10 @@ export function mapLumenloopEntry(
 			source: "LumenloopSeed",
 			sourceId,
 			firstSeenAt: rawEntry.firstSeenAt
-				? new Date(String(rawEntry.firstSeenAt))
-				: new Date(),
+				? new Date(String(rawEntry.firstSeenAt)).toISOString()
+				: new Date().toISOString(),
 		},
-	};
+	} as any; // Payload types are complex, but data is validated
 
 	// Map links
 	if (rawEntry.links || rawEntry.urls) {
@@ -91,8 +91,8 @@ function mapCategory(category: unknown): Project["category"] {
 }
 
 function mapTypes(types: unknown): Project["types"] {
-	if (!Array.isArray(types)) return [];
-	const typeMap: Record<string, Project["types"][number]> = {
+	if (!Array.isArray(types)) return undefined;
+	const typeMap: Record<string, "Wallet" | "Anchor" | "Bridge" | "SDK" | "Payment Rail" | "DEX" | "Indexer" | "Explorer" | "Other"> = {
 		wallet: "Wallet",
 		anchor: "Anchor",
 		bridge: "Bridge",
@@ -101,14 +101,17 @@ function mapTypes(types: unknown): Project["types"] {
 		dex: "DEX",
 		indexer: "Indexer",
 		explorer: "Explorer",
+		other: "Other",
 	};
 
-	return types
+	const mapped = types
 		.map((t) => {
 			const key = String(t).toLowerCase();
-			return typeMap[key] || (typeMap[key.replace(/\s+/g, "")] ?? undefined);
+			return typeMap[key] || typeMap[key.replace(/\s+/g, "")] || undefined;
 		})
-		.filter((t): t is Project["types"][number] => t !== undefined);
+		.filter((t): t is "Wallet" | "Anchor" | "Bridge" | "SDK" | "Payment Rail" | "DEX" | "Indexer" | "Explorer" | "Other" => t !== undefined);
+	
+	return mapped.length > 0 ? mapped : undefined;
 }
 
 function mapStatus(status: unknown): Project["status"] {

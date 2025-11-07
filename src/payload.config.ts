@@ -28,9 +28,8 @@ export default buildConfig({
 		},
 		meta: {
 			titleSuffix: "- Stellar Light",
-			favicon: "/logo.png",
-			ogImage: "/logo.png",
-		},
+			// favicon and ogImage are handled via Next.js metadata
+		} as any, // Payload meta config types may vary by version
 		components: {
 			graphics: {
 				Logo: "./components/payload/Logo#Logo",

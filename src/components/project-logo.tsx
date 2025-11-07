@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 interface ProjectLogoProps {
-	logo?: string | { id: string; url?: string; filename?: string } | null;
+	logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
 	name: string;
 	size?: number;
 	className?: string;

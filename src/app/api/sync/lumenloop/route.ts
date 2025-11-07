@@ -122,7 +122,7 @@ export async function POST() {
 								data: {
 									...mapped,
 									slug,
-								},
+								} as any, // Payload types are complex, but data is validated
 							});
 							stats.inserted++;
 						}

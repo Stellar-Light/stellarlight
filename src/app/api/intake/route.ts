@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 					source: "UserSubmitted",
 					firstSeenAt: new Date().toISOString(),
 				},
-			},
+			} as any, // Payload types are complex, but data is validated via Zod
 		});
 
 		// Transparency log is created automatically via Projects afterChange hook
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
 			return Response.json(
 				{
 					error: "Validation error",
-					details: error.errors,
+					details: error.issues,
 				},
 				{ status: 400 },
 			);

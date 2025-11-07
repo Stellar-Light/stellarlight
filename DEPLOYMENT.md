@@ -8,6 +8,7 @@ This guide will help you deploy Stellar Light to Vercel.
 - MongoDB database (MongoDB Atlas recommended)
 - GitHub repository
 - Environment variables configured
+- Node.js 18.20.2+ or 20.9.0+ (automatically handled by Vercel)
 
 ## Step 1: Prepare Your Repository
 
@@ -247,6 +248,41 @@ Examples:
 4. Vercel will automatically update the cron schedule on the next deployment
 
 **Note**: Remember that Hobby plans are limited to daily cron jobs. If you need more frequent runs, upgrade to Pro plan first.
+
+## Node.js Version Configuration
+
+Your `package.json` specifies Node.js version requirements:
+
+```json
+"engines": {
+  "node": "^18.20.2 || >=20.9.0",
+  "pnpm": "^9 || ^10"
+}
+```
+
+### Automatic Version Updates
+
+Vercel will automatically use a compatible Node.js version based on your `engines` field. When new major Node.js versions are released that match your specification (e.g., Node.js 21, 22, etc.), Vercel may automatically upgrade your deployment.
+
+**This is normal behavior** and ensures your application stays on supported Node.js versions.
+
+### Pinning a Specific Node.js Version
+
+If you need to pin to a specific Node.js version (e.g., for stability), you can:
+
+1. **Option 1**: Update `package.json` to specify an exact version:
+   ```json
+   "engines": {
+     "node": "20.9.0",
+     "pnpm": "^9 || ^10"
+   }
+   ```
+
+2. **Option 2**: Set the Node.js version in Vercel project settings:
+   - Go to Project Settings → General
+   - Set "Node.js Version" to your desired version (e.g., 20.x)
+
+**Recommendation**: Keep the current flexible version specification unless you encounter compatibility issues. This ensures you get security updates and bug fixes automatically.
 
 ## Security Best Practices
 

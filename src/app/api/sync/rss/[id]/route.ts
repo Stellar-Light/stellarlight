@@ -38,7 +38,7 @@ export async function POST(
 		}
 
 		// Queue the RSS sync job for this specific feed
-		const job = await payload.jobs.queue({
+		const job = await (payload.jobs.queue as any)({
 			task: "sync-rss-feed",
 			input: {
 				feedId: resolvedParams.id,

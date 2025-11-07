@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 		const payload = await getPayload({ config: configPromise });
 
 		// Queue the RSS sync job using Payload's Jobs Queue
-		const job = await payload.jobs.queue({
+		const job = await (payload.jobs.queue as any)({
 			task: "sync-rss-feed",
 			input: {
 				syncAll: true,
