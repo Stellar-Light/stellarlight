@@ -2,6 +2,7 @@ import React from "react";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { Navigation } from "@/components/ui/navigation";
+import Footer from "@/components/footer";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -35,6 +36,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 			<body className="min-h-screen font-sans antialiased">
 				<Navigation />
 				<main className="min-h-[calc(100vh-4rem)]">{children}</main>
+				<Footer />
       </body>
     </html>
 	);

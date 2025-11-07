@@ -3,7 +3,6 @@ import configPromise from "@/payload.config";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BlogHighlightCard from "@/components/blog-highlight-card";
-import BaseFeeDisplay from "@/components/base-fee-display";
 import { ArrowLeft } from "lucide-react";
 
 type SearchParams = Promise<{
@@ -68,8 +67,6 @@ export default async function BlogPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<BaseFeeDisplay />
-
 			<main className="max-w-7xl mx-auto px-6 py-16 pt-28">
 				{/* Header */}
 				<div className="mb-12">

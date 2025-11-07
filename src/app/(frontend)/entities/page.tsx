@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import EntityCard from "@/components/entity-card";
-import BaseFeeDisplay from "@/components/base-fee-display";
 
 type SearchParams = Promise<{
 	q?: string;
@@ -47,8 +46,6 @@ export default async function EntitiesPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<BaseFeeDisplay />
-
 			<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
 				{/* Header */}
 				<div className="mb-8">

@@ -12,7 +12,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectLogo } from "@/components/project-logo";
-import BaseFeeDisplay from "@/components/base-fee-display";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -172,8 +171,6 @@ export default async function ProjectDetailPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<BaseFeeDisplay />
-			
 			<main className="max-w-6xl mx-auto px-6 py-16 pt-28">
 				{/* Back Button */}
 				<Link

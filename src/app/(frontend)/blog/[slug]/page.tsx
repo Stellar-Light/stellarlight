@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import { format } from "date-fns";
-import BaseFeeDisplay from "@/components/base-fee-display";
 import { LexicalContent } from "@/components/lexical-content";
 import { MarkdownContent } from "@/components/markdown-content";
 
@@ -120,8 +119,6 @@ export default async function BlogDetailPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<BaseFeeDisplay />
-
 			<main className="max-w-4xl mx-auto px-6 py-16 pt-28">
 				{/* Back Button */}
 				<Link
