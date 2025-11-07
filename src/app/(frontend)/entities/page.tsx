@@ -10,6 +10,9 @@ type SearchParams = Promise<{
 	page?: string;
 }>;
 
+// Force dynamic rendering to prevent build-time MongoDB connection errors
+export const dynamic = "force-dynamic";
+
 export default async function EntitiesPage({
 	searchParams,
 }: {

@@ -30,6 +30,9 @@ const categories = [
 	{ id: "Anchor", label: "Anchor" },
 ];
 
+// Force dynamic rendering to prevent build-time MongoDB connection errors
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
 	const payload = await getPayload({ config: configPromise });
 

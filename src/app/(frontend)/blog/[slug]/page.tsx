@@ -24,6 +24,9 @@ const categoryColors: Record<string, string> = {
 	Update: "bg-gray-500/20 text-gray-400 border-gray-500/30",
 };
 
+// Force dynamic rendering to prevent build-time MongoDB connection errors
+export const dynamic = "force-dynamic";
+
 export default async function BlogDetailPage({
 	params,
 }: {
