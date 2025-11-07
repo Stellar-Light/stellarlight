@@ -176,7 +176,7 @@ export default async function HomePage() {
 							className="w-full"
 						>
 							<CarouselContent className="-ml-2 md:-ml-4">
-								{featuredPosts.map((post) => (
+								{featuredPosts.map((post: any) => (
 									<CarouselItem
 										key={post.id}
 										className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
@@ -245,7 +245,7 @@ export default async function HomePage() {
 					) : (
 						<>
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-								{projects.map((project, index) => (
+								{projects.map((project: any, index: number) => (
 									<ProjectCard
 										key={project.id}
 										project={project}

@@ -94,7 +94,7 @@ export default async function EntitiesPage({
 				) : (
 					<>
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-							{result.docs.map((entity) => (
+							{result.docs.map((entity: any) => (
 								<EntityCard key={entity.id} entity={entity} />
 							))}
 						</div>
