@@ -24,12 +24,16 @@
 		"cron:github": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec tsx jobs/refresh-github.ts"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.926.0",
+		"@aws-sdk/lib-storage": "^3.926.0",
+		"@aws-sdk/s3-request-presigner": "^3.926.0",
 		"@next/font": "^14.2.15",
 		"@payloadcms/db-mongodb": "3.62.0",
 		"@payloadcms/next": "3.62.0",
 		"@payloadcms/payload-cloud": "3.62.0",
 		"@payloadcms/plugin-cloud-storage": "^3.63.0",
 		"@payloadcms/richtext-lexical": "3.62.0",
+		"@payloadcms/storage-s3": "^3.63.0",
 		"@payloadcms/storage-vercel-blob": "^3.63.0",
 		"@payloadcms/ui": "3.62.0",
 		"@radix-ui/react-dropdown-menu": "^2.1.16",

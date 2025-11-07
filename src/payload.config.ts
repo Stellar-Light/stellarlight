@@ -1,7 +1,7 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
-// import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"; // TEMPORARILY DISABLED
+import { s3Storage } from "@payloadcms/storage-s3";
 import path from "path";
 import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
@@ -108,22 +108,38 @@ export default buildConfig({
 			serverSelectionTimeoutMS: 5000,
 			socketTimeoutMS: 45000,
 		},
+		// Disable file storage in MongoDB - files stored on disk in /media directory
+		// On Vercel (read-only filesystem), uploads will fail but admin panel works
+		// For persistent storage, use external storage like Cloudflare R2 or AWS S3
+		disableIndexHints: false,
 	}),
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		// VERCEL BLOB TEMPORARILY DISABLED - Investigating import map / provider issues
-		// Media uploads will fall back to local storage (won't persist on Vercel's read-only filesystem)
-		// ...(process.env.BLOB_READ_WRITE_TOKEN
-		// 	? [
-		// 			vercelBlobStorage({
-		// 				enabled: true,
-		// 				collections: {
-		// 					media: true,
-		// 				},
-		// 				token: process.env.BLOB_READ_WRITE_TOKEN,
-		// 			}),
-		// 		]
-		// 	: []),
+		// Cloudflare R2 storage for media uploads
+		// R2 is S3-compatible with free egress bandwidth
+		// Conditionally enabled when credentials are available
+		...(process.env.R2_ACCESS_KEY_ID &&
+		process.env.R2_SECRET_ACCESS_KEY &&
+		process.env.R2_BUCKET &&
+		process.env.R2_ENDPOINT
+			? [
+					s3Storage({
+						collections: {
+							media: true, // Enable R2 storage for media collection
+						},
+						bucket: process.env.R2_BUCKET,
+						config: {
+							credentials: {
+								accessKeyId: process.env.R2_ACCESS_KEY_ID,
+								secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+							},
+							region: process.env.R2_REGION || "auto",
+							endpoint: process.env.R2_ENDPOINT,
+							forcePathStyle: true, // Required for R2 compatibility
+						},
+					}),
+				]
+			: []),
 	],
 });
