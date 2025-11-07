@@ -116,8 +116,8 @@ export default buildConfig({
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		// Cloudflare R2 storage for media uploads
-		// R2 is S3-compatible with free egress bandwidth
+		// Cloudflare R2 storage for media uploads (using S3-compatible adapter)
+		// R2 is S3-compatible, so we use the S3 storage adapter
 		// Conditionally enabled when credentials are available
 		...(process.env.R2_ACCESS_KEY_ID &&
 		process.env.R2_SECRET_ACCESS_KEY &&
@@ -128,14 +128,14 @@ export default buildConfig({
 						collections: {
 							media: true, // Enable R2 storage for media collection
 						},
-						bucket: process.env.R2_BUCKET,
+						bucket: process.env.R2_BUCKET || "",
 						config: {
 							credentials: {
-								accessKeyId: process.env.R2_ACCESS_KEY_ID,
-								secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+								accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+								secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
 							},
 							region: process.env.R2_REGION || "auto",
-							endpoint: process.env.R2_ENDPOINT,
+							endpoint: process.env.R2_ENDPOINT || "",
 							forcePathStyle: true, // Required for R2 compatibility
 						},
 					}),
