@@ -112,13 +112,19 @@ export default buildConfig({
 	sharp,
 	plugins: [
 		payloadCloudPlugin(),
-		vercelBlobStorage({
-			collections: {
-				media: {
-					prefix: "media",
-				},
-			},
-			token: process.env.BLOB_READ_WRITE_TOKEN,
-		}),
+		// Only enable Vercel Blob storage if token is available
+		// This prevents errors when Blob storage hasn't been created yet
+		...(process.env.BLOB_READ_WRITE_TOKEN
+			? [
+					vercelBlobStorage({
+						collections: {
+							media: {
+								prefix: "media",
+							},
+						},
+						token: process.env.BLOB_READ_WRITE_TOKEN,
+					}),
+				]
+			: []),
 	],
 });
