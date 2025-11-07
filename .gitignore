@@ -48,3 +48,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Payload import map (generated during build based on active plugins)
+src/app/(payload)/admin/importMap.js
