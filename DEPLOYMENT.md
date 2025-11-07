@@ -1,4 +1,4 @@
-gitgit # Deployment Guide - Stellar Light
+gitgit git# Deployment Guide - Stellar Light
 
 This guide will help you deploy Stellar Light to Vercel.
 
@@ -285,13 +285,13 @@ Once configured, media uploads in the Payload CMS admin panel will automatically
 - The import map is automatically generated during the build process on Vercel
 
 **Error: "useUploadHandlers must be used within UploadHandlersProvider"**
-- This error has been fixed! The Vercel Blob adapter is now conditionally enabled only when `BLOB_READ_WRITE_TOKEN` is available
-- **If you see this error**: It means the token isn't set yet
+- This error occurs when `BLOB_READ_WRITE_TOKEN` is not set or not available at runtime
 - **Solution**: 
-  1. Create the Blob storage in Vercel (see "Create Vercel Blob Storage" above)
-  2. Verify `BLOB_READ_WRITE_TOKEN` is set in your Vercel project environment variables
-  3. Redeploy your application
-- **Note**: Without the token, the admin panel will load but media uploads won't work (they'll fall back to local storage which doesn't work on Vercel)
+  1. **Verify Blob storage is created**: Go to Vercel dashboard → Storage tab → Confirm Blob storage exists
+  2. **Check environment variable**: Go to Vercel project settings → Environment Variables → Verify `BLOB_READ_WRITE_TOKEN` exists
+  3. **Important**: The token is automatically set when you create Blob storage, but you must **redeploy** after creating it
+  4. **Redeploy**: After creating Blob storage, trigger a new deployment (push a commit or redeploy from Vercel dashboard)
+- **Note**: The token must be available at build time AND runtime. If you created Blob storage after the last deployment, you need to redeploy.
 
 For more details, see: https://vercel.com/storage/blob
 
