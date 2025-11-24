@@ -115,6 +115,10 @@ export const Projects: CollectionConfig = {
 				{
 					name: "twitter",
 					type: "text",
+					admin: {
+						description: "X (formerly Twitter) profile URL (e.g., https://x.com/username)",
+					},
+					label: "X (Twitter)",
 				},
 				{
 					name: "discord",
@@ -205,6 +209,14 @@ export const Projects: CollectionConfig = {
 		{
 			name: "lastVerifiedAt",
 			type: "date",
+		},
+		{
+			name: "communityPick",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				description: "Mark this project as a community pick",
+			},
 		},
 	],
 	// Unique index on slug is handled by unique: true on the field

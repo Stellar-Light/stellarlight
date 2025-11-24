@@ -53,7 +53,7 @@ export function DirectoryFilters() {
 				<input
 					type="text"
 					name="q"
-					placeholder="Search projects..."
+					placeholder="Search projects or organizations..."
 					defaultValue={searchQuery}
 					className="w-full h-11 pl-12 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
 				/>

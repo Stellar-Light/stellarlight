@@ -3,6 +3,7 @@ import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { Navigation } from "@/components/ui/navigation";
 import Footer from "@/components/footer";
+import { Providers } from "@/components/providers";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -34,9 +35,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
 		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
 			<body className="min-h-screen font-sans antialiased">
-				<Navigation />
-				<main className="min-h-[calc(100vh-4rem)]">{children}</main>
-				<Footer />
+				<Providers>
+					<Navigation />
+					<main className="min-h-[calc(100vh-4rem)]">{children}</main>
+					<Footer />
+				</Providers>
       </body>
     </html>
 	);

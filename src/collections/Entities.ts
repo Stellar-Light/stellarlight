@@ -58,6 +58,10 @@ export const Entities: CollectionConfig = {
 				{
 					name: "twitter",
 					type: "text",
+					admin: {
+						description: "X (formerly Twitter) profile URL (e.g., https://x.com/username)",
+					},
+					label: "X (Twitter)",
 				},
 			],
 		},

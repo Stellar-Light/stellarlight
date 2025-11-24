@@ -168,7 +168,7 @@
 		animation: scroll 30s linear infinite;
 	}
 
-	.animate-scroll:hover {
+	.carousel-container:hover .animate-scroll {
 		animation-play-state: paused;
 	}
 

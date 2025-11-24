@@ -2,17 +2,10 @@
 
 import { ExternalLink } from "lucide-react";
 import NumberTicker from "@/components/fancy/text/basic-number-ticker";
-
-interface ChainData {
-	name: string;
-	tvl: number;
-	tokenSymbol: string;
-}
+import { useStellarTVL } from "@/hooks/useStellarTVL";
 
 export default function TVLStats() {
-	// For now, we'll use static values or fetch from API
-	// In production, you'd use React Query or similar
-	const stellarTVL = 50000000; // Placeholder - in production fetch from API
+	const { data: stellarTVL = 0, isLoading } = useStellarTVL();
 	const rwaTVL = 608800000;
 
 	const getTVLValue = (value: number) => {
@@ -50,14 +43,20 @@ export default function TVLStats() {
 					</a>
 				</div>
 				<p className="text-2xl font-semibold text-foreground">
-					$
-					<NumberTicker
-						from={0}
-						target={getTVLValue(stellarTVL)}
-						autoStart={true}
-						transition={{ duration: 2, type: "tween", ease: "easeInOut" }}
-					/>
-					{getTVLSuffix(stellarTVL)}
+					{isLoading ? (
+						<span className="text-muted-foreground">Loading...</span>
+					) : (
+						<>
+							$
+							<NumberTicker
+								from={0}
+								target={getTVLValue(stellarTVL)}
+								autoStart={true}
+								transition={{ duration: 2, type: "tween", ease: "easeInOut" }}
+							/>
+							{getTVLSuffix(stellarTVL)}
+						</>
+					)}
 				</p>
 			</div>
 

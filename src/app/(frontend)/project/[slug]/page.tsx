@@ -17,7 +17,7 @@ import {
 	Globe,
 	Github,
 	FileText,
-	Twitter,
+	X,
 	MessageCircle,
 	Calendar,
 	Activity,
@@ -247,7 +247,7 @@ export default async function ProjectDetailPage({
 		website: Globe,
 		github: Github,
 		docs: FileText,
-		twitter: Twitter,
+		twitter: X,
 		discord: MessageCircle,
 	};
 

@@ -75,6 +75,7 @@ export interface Config {
     signals: Signal;
     entities: Entity;
     'transparency-logs': TransparencyLog;
+    carousel: Carousel;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -91,6 +92,7 @@ export interface Config {
     signals: SignalsSelect<false> | SignalsSelect<true>;
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
+    carousel: CarouselSelect<false> | CarouselSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -208,6 +210,9 @@ export interface Project {
     website?: string | null;
     github?: string | null;
     docs?: string | null;
+    /**
+     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
+     */
     twitter?: string | null;
     discord?: string | null;
   };
@@ -247,6 +252,10 @@ export interface Project {
     firstSeenAt?: string | null;
   };
   lastVerifiedAt?: string | null;
+  /**
+   * Mark this project as a community pick
+   */
+  communityPick?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -459,6 +468,9 @@ export interface Entity {
   links?: {
     website?: string | null;
     github?: string | null;
+    /**
+     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
+     */
     twitter?: string | null;
   };
   projects?: (string | Project)[] | null;
@@ -485,6 +497,35 @@ export interface TransparencyLog {
     | boolean
     | null;
   timestamp: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel".
+ */
+export interface Carousel {
+  id: string;
+  /**
+   * Name/identifier for this carousel item
+   */
+  name: string;
+  /**
+   * Logo/image to display in the carousel
+   */
+  image: string | Media;
+  /**
+   * Optional URL to link to when clicked
+   */
+  url?: string | null;
+  /**
+   * Display order (lower numbers appear first)
+   */
+  order?: number | null;
+  /**
+   * Show this item in the carousel
+   */
+  active?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -635,6 +676,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'transparency-logs';
         value: string | TransparencyLog;
+      } | null)
+    | ({
+        relationTo: 'carousel';
+        value: string | Carousel;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -772,6 +817,7 @@ export interface ProjectsSelect<T extends boolean = true> {
         firstSeenAt?: T;
       };
   lastVerifiedAt?: T;
+  communityPick?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -891,6 +937,19 @@ export interface TransparencyLogsSelect<T extends boolean = true> {
   targetId?: T;
   diff?: T;
   timestamp?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel_select".
+ */
+export interface CarouselSelect<T extends boolean = true> {
+  name?: T;
+  image?: T;
+  url?: T;
+  order?: T;
+  active?: T;
   updatedAt?: T;
   createdAt?: T;
 }
