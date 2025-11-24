@@ -51,13 +51,37 @@ export async function POST(request: NextRequest) {
 
 				// Map Airtable fields to PayloadCMS Projects schema
 				// Adjust field names based on actual Airtable schema
+				const getName = (): string => {
+					const name = fields.Name || fields.name;
+					if (typeof name === "string") return name;
+					return `Project ${record.id}`;
+				};
+
+				const getSlug = (name: string): string => {
+					const slug = fields.Slug || fields.slug;
+					if (typeof slug === "string") return slug;
+					if (name) {
+						return name.toLowerCase().replace(/\s+/g, "-");
+					}
+					return `project-${record.id}`;
+				};
+
+				const name = getName();
 				const projectData: any = {
-					name: fields.Name || fields.name || `Project ${record.id}`,
-					slug: fields.Slug || fields.slug || fields.Name?.toLowerCase().replace(/\s+/g, "-") || `project-${record.id}`,
-					shortDescription: fields.Description || fields.description || fields.ShortDescription || fields.shortDescription || "",
-					category: fields.Category || fields.category || "Infrastructure",
-					status: fields.Status || fields.status || "Draft",
-					verificationLevel: fields.VerificationLevel || fields.verificationLevel || "Unverified",
+					name,
+					slug: getSlug(name),
+					shortDescription: (typeof (fields.Description || fields.description || fields.ShortDescription || fields.shortDescription) === "string") 
+						? (fields.Description || fields.description || fields.ShortDescription || fields.shortDescription) 
+						: "",
+					category: (typeof (fields.Category || fields.category) === "string")
+						? (fields.Category || fields.category)
+						: "Infrastructure",
+					status: (typeof (fields.Status || fields.status) === "string")
+						? (fields.Status || fields.status)
+						: "Draft",
+					verificationLevel: (typeof (fields.VerificationLevel || fields.verificationLevel) === "string")
+						? (fields.VerificationLevel || fields.verificationLevel)
+						: "Unverified",
 					provenance: {
 						source: "AdminEdit",
 						sourceId: record.id,
@@ -65,35 +89,34 @@ export async function POST(request: NextRequest) {
 					},
 				};
 
-				// Handle links
-				if (fields.Website || fields.website || fields.URL || fields.url) {
-					projectData.links = {
-						website: fields.Website || fields.website || fields.URL || fields.url,
-					};
-				}
-				if (fields.GitHub || fields.github || fields.GitHubURL || fields.githubUrl) {
-					projectData.links = {
-						...projectData.links,
-						github: fields.GitHub || fields.github || fields.GitHubURL || fields.githubUrl,
-					};
-				}
-				if (fields.Twitter || fields.twitter || fields.TwitterURL || fields.twitterUrl) {
-					projectData.links = {
-						...projectData.links,
-						twitter: fields.Twitter || fields.twitter || fields.TwitterURL || fields.twitterUrl,
-					};
-				}
-				if (fields.Docs || fields.docs || fields.Documentation || fields.documentation) {
-					projectData.links = {
-						...projectData.links,
-						docs: fields.Docs || fields.docs || fields.Documentation || fields.documentation,
-					};
+				// Handle links - ensure they're strings
+				const getStringField = (...options: any[]): string | undefined => {
+					for (const option of options) {
+						if (typeof option === "string" && option.trim()) {
+							return option;
+						}
+					}
+					return undefined;
+				};
+
+				const website = getStringField(fields.Website, fields.website, fields.URL, fields.url);
+				const github = getStringField(fields.GitHub, fields.github, fields.GitHubURL, fields.githubUrl);
+				const twitter = getStringField(fields.Twitter, fields.twitter, fields.TwitterURL, fields.twitterUrl);
+				const docs = getStringField(fields.Docs, fields.docs, fields.Documentation, fields.documentation);
+				const orgLogin = getStringField(fields.OrgLogin, fields.orgLogin, fields.GitHubOrg, fields.githubOrg);
+
+				if (website || github || twitter || docs) {
+					projectData.links = {};
+					if (website) projectData.links.website = website;
+					if (github) projectData.links.github = github;
+					if (twitter) projectData.links.twitter = twitter;
+					if (docs) projectData.links.docs = docs;
 				}
 
 				// Handle GitHub org
-				if (fields.OrgLogin || fields.orgLogin || fields.GitHubOrg || fields.githubOrg) {
+				if (orgLogin) {
 					projectData.github = {
-						orgLogin: fields.OrgLogin || fields.orgLogin || fields.GitHubOrg || fields.githubOrg,
+						orgLogin,
 					};
 				}
 
