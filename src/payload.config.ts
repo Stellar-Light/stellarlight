@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import sharp from "sharp";
 
 import { Blog } from "./collections/Blog";
+import { Carousel } from "./collections/Carousel";
 import { Entities } from "./collections/Entities";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
@@ -49,6 +50,7 @@ export default buildConfig({
 		Signals,
 		Entities,
 		TransparencyLogs,
+		Carousel,
 	],
 	jobs: {
 		tasks: [

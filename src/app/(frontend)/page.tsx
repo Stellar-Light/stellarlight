@@ -1,90 +1,37 @@
+import { Suspense } from "react";
 import { getPayloadSafe } from "@/lib/payload-client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Search, Sparkles } from "lucide-react";
 import Typewriter from "@/components/fancy/text/typewriter";
-import CompanyTicker from "@/components/company-ticker";
 import TVLStats from "@/components/tvl-stats";
+import CarouselSection from "@/components/carousel-section";
 import BaseFeeDisplay from "@/components/base-fee-display";
-import ProjectCard from "@/components/project-card";
-import BlogHighlightCard from "@/components/blog-highlight-card";
-import { Select } from "@/components/ui/select";
 import { FlickeringGrid } from "@/components/flickering-grid";
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
-} from "@/components/ui/carousel";
-
-const categories = [
-	{ id: "all", label: "All Categories" },
-	{ id: "Infrastructure", label: "Infrastructure" },
-	{ id: "Tooling", label: "Tooling" },
-	{ id: "Partner Integration", label: "Partner Integration" },
-	{ id: "User-Facing App", label: "User-Facing App" },
-	{ id: "Asset", label: "Asset" },
-	{ id: "Protocol/Contract", label: "Protocol/Contract" },
-	{ id: "Anchor", label: "Anchor" },
-];
+import BlogHighlights, { BlogHighlightsSkeleton } from "@/components/blog-highlights";
+import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
+import { HomepageSearch } from "@/components/homepage-search";
+import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
 	const payload = await getPayloadSafe();
-
-	// Fetch featured blog posts for highlights carousel
-	let featuredPosts: any[] = [];
-	let projects: any[] = [];
 	let totalProjects = 0;
-	let totalPages = 1;
 
+	// Fetch total projects count for display
 	if (payload) {
 		try {
-	const blogResult = await payload.find({
-		collection: "blog",
-		where: {
-			and: [
-				{
-					featured: {
-						equals: true,
-					},
-				},
-				{
+			const result = await payload.find({
+				collection: "projects",
+				where: {
 					status: {
-						equals: "published",
+						in: ["Development", "Pre-Release", "Live"],
 					},
 				},
-			],
-		},
-		limit: 10,
-		sort: "-publishedAt",
-		depth: 2, // Populate featuredImage relationship
-	});
-
-			featuredPosts = blogResult.docs;
-
-	// Fetch projects (non-draft, approved projects)
-	const result = await payload.find({
-		collection: "projects",
-		where: {
-			status: {
-				in: ["Development", "Pre-Release", "Live"],
-			},
-		},
-		limit: 12,
-		sort: "-lastVerifiedAt",
-		depth: 1, // Populate relationships including logo
-	});
-
-			projects = result.docs;
+				limit: 1,
+			});
 			totalProjects = result.totalDocs;
-			totalPages = result.totalPages;
 		} catch (error) {
-			console.error("Error fetching data:", error);
-			// Continue with empty arrays
+			console.error("Error fetching project count:", error);
 		}
 	}
 
@@ -99,18 +46,15 @@ export default async function HomePage() {
 						<div className="space-y-6">
 							<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
 								<div className="text-foreground mb-2">Explore</div>
-								<div className="relative">
-									<Typewriter
-										text={["Stellar", "Stablecoins", "Lending", "AMMs", "Wallets"]}
-										speed={80}
-										className="text-[#FDDA24]"
-										waitTime={1800}
-										deleteSpeed={50}
-										cursorChar="_"
-										whiteTextWords={["Stellar"]}
-									/>
-									<div className="absolute -bottom-2 left-0 h-1 w-24 bg-gradient-to-r from-[#FDDA24] to-transparent opacity-60" />
-								</div>
+							<Typewriter
+								text={["Stellar", "Stablecoins", "Lending", "AMMs", "Wallets"]}
+								speed={80}
+								className="text-[#FDDA24]"
+								waitTime={1800}
+								deleteSpeed={50}
+								cursorChar="_"
+								whiteTextWords={["Stellar"]}
+							/>
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground max-w-[65ch] leading-relaxed">
 								Explore the apps and services built on Stellar. From wallets to DeFi
@@ -139,70 +83,14 @@ export default async function HomePage() {
 					</div>
 				</div>
 
-				<CompanyTicker
-					companies={[
-						"Blend",
-						"MoneyGram",
-						"Circle",
-						"Lobstr",
-						"Decaf",
-						"Franklin Templeton",
-						"PayPal",
-						"Skyhitz",
-						"Etherfuse",
-					]}
-					className="mb-24"
-				/>
+				<Suspense fallback={null}>
+					<CarouselSection />
+				</Suspense>
 
 				{/* Highlights Carousel Section */}
-				{featuredPosts.length > 0 && (
-					<section className="mb-24">
-						<div className="flex items-center justify-between mb-8">
-							<div className="flex items-center gap-3">
-								<Sparkles className="w-6 h-6 text-[#FDDA24]" />
-								<h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-									Highlights
-								</h2>
-							</div>
-							<Button
-								asChild
-								variant="outline"
-								className="hidden sm:flex px-6 py-2 rounded-xl font-medium border-border hover:border-white/20 transition-all duration-300"
-							>
-								<Link href="/blog">View All Posts</Link>
-							</Button>
-						</div>
-						<Carousel
-							opts={{
-								align: "start",
-								loop: true,
-							}}
-							className="w-full"
-						>
-							<CarouselContent className="-ml-2 md:-ml-4">
-								{featuredPosts.map((post: any) => (
-									<CarouselItem
-										key={post.id}
-										className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
-									>
-										<BlogHighlightCard post={post} />
-									</CarouselItem>
-								))}
-							</CarouselContent>
-							<CarouselPrevious className="hidden md:flex" />
-							<CarouselNext className="hidden md:flex" />
-						</Carousel>
-						<div className="mt-6 text-center sm:hidden">
-							<Button
-								asChild
-								variant="outline"
-								className="px-8 py-3 rounded-xl font-semibold border-border hover:border-white/20 transition-all duration-300"
-							>
-								<Link href="/blog">View All Posts</Link>
-							</Button>
-						</div>
-					</section>
-				)}
+				<Suspense fallback={<BlogHighlightsSkeleton />}>
+					<BlogHighlights />
+				</Suspense>
 
 				{/* Projects Section */}
 				<section className="mb-16">
@@ -219,61 +107,19 @@ export default async function HomePage() {
 
 					{/* Search and Filter */}
 					<div className="mb-10">
-						<div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-							<div className="relative w-full md:max-w-[600px]">
-								<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-								<input
-									type="text"
-									placeholder="Search projects..."
-									className="w-full h-12 pl-12 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.1)]"
-								/>
-							</div>
-
-							<Select className="h-12 min-w-[200px] bg-card text-foreground border border-border rounded-xl focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.1)]">
-								{categories.map((category) => (
-									<option key={category.id} value={category.id}>
-										{category.label}
-									</option>
-								))}
-							</Select>
-						</div>
+						<HomepageSearch />
 					</div>
 
 					{/* Projects Grid */}
-					{projects.length === 0 ? (
-						<div className="text-center py-20">
-							<p className="text-lg text-muted-foreground">
-								No projects found. Projects will appear here once approved.
-							</p>
-						</div>
-					) : (
-						<>
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-								{projects.map((project: any, index: number) => (
-									<ProjectCard
-										key={project.id}
-										project={project}
-										isFeatured={
-											index === 0 &&
-											!project.verificationLevel?.includes("Unverified")
-										}
-									/>
-								))}
-							</div>
-
-							{totalPages > 1 && (
-								<div className="text-center">
-									<Button
-										asChild
-										className="px-10 py-3.5 rounded-xl font-semibold bg-[#404040] text-foreground border border-border hover:bg-[#525252] hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-xl"
-									>
-										<Link href="/directory">View All Projects</Link>
-									</Button>
-								</div>
-							)}
-						</>
-					)}
+					<Suspense fallback={<ProjectsGridSkeleton />}>
+						<ProjectsGrid limit={12} />
+					</Suspense>
 				</section>
+
+				{/* Community Picks Section */}
+				<Suspense fallback={<CommunityPicksSectionSkeleton />}>
+					<CommunityPicksSection />
+				</Suspense>
 			</main>
 		</div>
 	);

@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import BlogHighlightCard from "@/components/blog-highlight-card";
 import { ArrowLeft } from "lucide-react";
+import BlogPostsGrid, { BlogPostsGridSkeleton } from "@/components/blog-posts-grid";
 
 type SearchParams = Promise<{
 	page?: string;
@@ -22,46 +23,9 @@ export default async function BlogPage({
 	const resolvedSearchParams = await searchParams;
 
 	const page = Number(resolvedSearchParams.page) || 1;
-	const limit = 12;
+	const category = resolvedSearchParams.category;
+	const tag = resolvedSearchParams.tag;
 
-	let posts: any[] = [];
-	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
-
-	if (payload) {
-		try {
-	const where: any = {
-		status: {
-			equals: "published",
-		},
-	};
-
-	if (resolvedSearchParams.category) {
-		where.category = {
-			equals: resolvedSearchParams.category,
-		};
-	}
-
-	if (resolvedSearchParams.tag) {
-		where.tags = {
-			contains: resolvedSearchParams.tag,
-		};
-	}
-
-			result = await payload.find({
-		collection: "blog",
-		where,
-		limit,
-		page,
-		sort: "-publishedAt",
-		depth: 2, // Populate featuredImage relationship
-	});
-
-			posts = result.docs;
-		} catch (error) {
-			console.error("Error fetching blog posts:", error);
-			// Continue with empty arrays
-		}
-	}
 	const categories = [
 		"Announcement",
 		"Tutorial",
@@ -72,10 +36,27 @@ export default async function BlogPage({
 		"Update",
 	];
 
-	// Get all unique tags from posts
-	const allTags = Array.from(
-		new Set(posts.flatMap((post) => post.tags || [])),
-	) as string[];
+	// Fetch all tags from all published posts (not filtered)
+	let allTags: string[] = [];
+	if (payload) {
+		try {
+			const allPostsResult = await payload.find({
+				collection: "blog",
+				where: {
+					status: {
+						equals: "published",
+					},
+				},
+				limit: 1000, // Get enough to collect all tags
+				depth: 0,
+			});
+			allTags = Array.from(
+				new Set(allPostsResult.docs.flatMap((post: any) => post.tags || [])),
+			) as string[];
+		} catch (error) {
+			console.error("Error fetching tags:", error);
+		}
+	}
 
 	return (
 		<div className="min-h-screen relative">
@@ -102,7 +83,7 @@ export default async function BlogPage({
 
 				{/* Filters */}
 				<div className="mb-12 flex flex-wrap gap-4">
-					{(resolvedSearchParams.category || resolvedSearchParams.tag) && (
+					{(category || tag) && (
 						<Button
 							asChild
 							variant="outline"
@@ -111,70 +92,38 @@ export default async function BlogPage({
 							<Link href="/blog">Clear Filters</Link>
 						</Button>
 					)}
-					{categories.map((category) => (
+					{categories.map((cat) => (
 						<Button
-							key={category}
+							key={cat}
 							asChild
-							variant={
-								resolvedSearchParams.category === category ? "default" : "outline"
-							}
+							variant={category === cat ? "default" : "outline"}
 							className="rounded-xl"
 						>
-							<Link href={`/blog?category=${category}`}>{category}</Link>
+							<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>{cat}</Link>
 						</Button>
 					))}
+					{allTags.length > 0 && (
+						<>
+							{allTags.map((t) => (
+								<Button
+									key={t}
+									asChild
+									variant={tag === t ? "default" : "outline"}
+									className="rounded-xl"
+								>
+									<Link href={`/blog?tag=${t}${category ? `&category=${category}` : ""}`}>
+										{t}
+									</Link>
+								</Button>
+							))}
+						</>
+					)}
 				</div>
 
 				{/* Posts Grid */}
-				{posts.length === 0 ? (
-					<div className="text-center py-20">
-						<p className="text-lg text-muted-foreground">
-							No posts found.
-							{resolvedSearchParams.category || resolvedSearchParams.tag
-								? " Try adjusting your filters."
-								: " Check back soon for updates!"}
-						</p>
-					</div>
-				) : (
-					<>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-							{posts.map((post: any, index: number) => (
-								<BlogHighlightCard
-									key={post.id}
-									post={post}
-									isLarge={index === 0 && !resolvedSearchParams.category && !resolvedSearchParams.tag}
-								/>
-							))}
-						</div>
-
-						{/* Pagination */}
-						{result.totalPages > 1 && (
-							<div className="flex items-center justify-center gap-4">
-								{page > 1 && (
-									<Button
-										asChild
-										variant="outline"
-										className="rounded-xl"
-									>
-										<Link href={`/blog?page=${page - 1}`}>Previous</Link>
-									</Button>
-								)}
-								<span className="text-sm text-muted-foreground">
-									Page {page} of {result.totalPages}
-								</span>
-								{page < result.totalPages && (
-									<Button
-										asChild
-										variant="outline"
-										className="rounded-xl"
-									>
-										<Link href={`/blog?page=${page + 1}`}>Next</Link>
-									</Button>
-								)}
-							</div>
-						)}
-					</>
-				)}
+				<Suspense fallback={<BlogPostsGridSkeleton />}>
+					<BlogPostsGrid page={page} category={category} tag={tag} />
+				</Suspense>
 			</main>
 		</div>
 	);

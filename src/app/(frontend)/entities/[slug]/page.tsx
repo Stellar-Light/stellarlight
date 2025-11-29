@@ -16,7 +16,7 @@ import {
 	ExternalLink,
 	Globe,
 	Github,
-	Twitter,
+	X,
 	Building2,
 	Code,
 } from "lucide-react";
@@ -176,8 +176,8 @@ export default async function EntityDetailPage({
 											target="_blank"
 											rel="noopener noreferrer"
 										>
-											<Twitter className="w-4 h-4" />
-											Twitter
+											<X className="w-4 h-4" />
+											X
 											<ExternalLink className="w-3 h-3" />
 										</a>
 									</Button>
