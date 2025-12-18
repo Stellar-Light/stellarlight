@@ -22,15 +22,11 @@ export async function POST() {
 			waitUntil: new Date(Date.now() + 1000), // Start immediately
 		});
 
-		console.log(`[RSS Sync] Job queued: ${job.id}`);
-
 		// Execute the job immediately
-		const runResult = await payload.jobs.run({
+		await payload.jobs.run({
 			queue: job.queue || "default",
 			limit: 1,
 		});
-
-		console.log(`[RSS Sync] Job execution result:`, runResult);
 
 		return Response.json({
 			success: true,

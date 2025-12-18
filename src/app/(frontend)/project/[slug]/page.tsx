@@ -1,6 +1,7 @@
 import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import {
 	Card,
 	CardContent,
@@ -31,8 +32,116 @@ type Params = Promise<{
 	slug: string;
 }>;
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.io";
+
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Params;
+}): Promise<Metadata> {
+	const { slug } = await params;
+	const payload = await getPayloadSafe();
+
+	if (!payload) {
+		return {
+			title: "Project Not Found",
+		};
+	}
+
+	let result;
+	try {
+		result = await payload.find({
+			collection: "projects",
+			where: {
+				and: [
+					{
+						slug: {
+							equals: slug,
+						},
+					},
+					{
+						status: {
+							in: ["Development", "Pre-Release", "Live"],
+						},
+					},
+				],
+			},
+			limit: 1,
+			depth: 1,
+		});
+	} catch {
+		return {
+			title: "Project Not Found",
+		};
+	}
+
+	if (result.docs.length === 0) {
+		return {
+			title: "Project Not Found",
+		};
+	}
+
+	const project = result.docs[0];
+
+	// Get logo/image URL
+	let imageUrl = "/opengraph.png";
+	if (project.logo) {
+		if (typeof project.logo === "object" && project.logo.url) {
+			imageUrl = project.logo.url;
+		} else if (
+			typeof project.logo === "object" &&
+			project.logo.filename
+		) {
+			imageUrl = `${appUrl}/media/${project.logo.filename}`;
+		}
+	}
+
+	const description =
+		project.shortDescription ||
+		`${project.name} - ${project.status} project on Stellar blockchain`;
+
+	const categoryTags = project.category ? String(project.category) : "";
+
+	return {
+		title: project.name,
+		description,
+		keywords: [
+			project.name,
+			"Stellar",
+			"Stellar blockchain",
+			project.status,
+			categoryTags,
+		].filter(Boolean),
+		openGraph: {
+			title: project.name,
+			description,
+			type: "website",
+			images: [
+				{
+					url: imageUrl.startsWith("http")
+						? imageUrl
+						: `${appUrl}${imageUrl}`,
+					width: 1200,
+					height: 630,
+					alt: project.name,
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: project.name,
+			description,
+			images: [
+				imageUrl.startsWith("http")
+					? imageUrl
+					: `${appUrl}${imageUrl}`,
+			],
+		},
+	};
+}
 
 export default async function ProjectDetailPage({
 	params,
@@ -67,8 +176,7 @@ export default async function ProjectDetailPage({
 		limit: 1,
 		depth: 1,
 	});
-	} catch (error) {
-		console.error("Error fetching project:", error);
+		} catch (error) {
 		notFound();
 	}
 
@@ -122,11 +230,17 @@ export default async function ProjectDetailPage({
 				: null;
 
 			const reposChanged = reposKey !== cachedReposKey;
+			// Also invalidate cache if it contains authentication errors (401, etc.)
+			const hasAuthErrors = cached?.github?.repos?.some((r: any) => r.error && (r.error.includes("401") || r.error.includes("Unauthorized")));
+			// Invalidate if totalStars is missing, null, or undefined (indicates incomplete data)
+			const hasInvalidStars = (cached?.github as any)?.totalStars == null; // null or undefined
 			const fresh =
 				cached?.fetchedAt &&
 				Date.now() - new Date(cached.fetchedAt).getTime() <
 					6 * 60 * 60 * 1000 && // 6h
-				!reposChanged;
+				!reposChanged && // Also invalidate if repos changed
+				!hasAuthErrors && // Invalidate if cache contains auth errors
+				!hasInvalidStars; // Invalidate if cache has invalid/missing stars data
 
 			if (cached && fresh && cached.github) {
 				const cachedGh = cached.github as any;
@@ -158,7 +272,6 @@ export default async function ProjectDetailPage({
 
 					const errorMessage = String((v as PromiseRejectedResult).reason);
 					const isPrivate = errorMessage.includes("Private repository");
-
 					return {
 						owner: r.owner,
 						name: r.name,
@@ -177,10 +290,13 @@ export default async function ProjectDetailPage({
 					),
 				);
 
+				const totalStars = enriched.reduce((s, x) => s + (x.stargazerCount || 0), 0);
+				const openIssuesTotal = enriched.reduce((s, x) => s + (x.openIssues || 0), 0);
+				
 				gh = {
 					lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
-					openIssuesTotal: enriched.reduce((s, x) => s + (x.openIssues || 0), 0),
-					totalStars: enriched.reduce((s, x) => s + (x.stargazerCount || 0), 0),
+					openIssuesTotal,
+					totalStars,
 					repos: enriched,
 				};
 
@@ -206,7 +322,7 @@ export default async function ProjectDetailPage({
 				}
 			}
 		} catch (error) {
-			console.error("Failed to fetch GitHub data:", error);
+			// Silently handle GitHub fetch errors
 		}
 	}
 
@@ -293,171 +409,122 @@ export default async function ProjectDetailPage({
 					<span className="text-sm font-medium">Back to Directory</span>
 				</Link>
 
-				{/* Hero Section */}
-				<div className="mb-12">
-					<div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-8">
-						{project.logo && (
-							<div className="relative flex-shrink-0">
-								<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#FDDA24]/20 via-transparent to-transparent blur-xl opacity-50" />
-								<ProjectLogo
-									logo={project.logo}
-									name={project.name}
-									size={140}
-									className="relative w-[140px] h-[140px] rounded-2xl shadow-2xl border border-border/50"
-								/>
+				{/* Hero Section - Card with Flex Layout */}
+				<Card className="mb-12 border border-border/50 bg-card shadow-lg">
+					<CardContent className="p-8">
+						<div className="flex flex-col gap-6">
+							{/* First Row - Logo and Title/Tags */}
+							<div className="flex flex-col md:flex-row items-start gap-4">
+								{/* Logo */}
+								{project.logo ? (
+									<div className="relative flex-shrink-0">
+										<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#FDDA24]/20 via-transparent to-transparent blur-xl opacity-50" />
+										<ProjectLogo
+											logo={project.logo}
+											name={project.name}
+											size={140}
+											className="relative w-[140px] h-[140px] rounded-2xl shadow-2xl border border-border/50"
+										/>
+									</div>
+								) : (
+									<div className="relative w-[140px] h-[140px] rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-2xl border border-border/50 flex-shrink-0">
+										<Activity className="w-16 h-16 text-primary" />
+									</div>
+								)}
+
+								{/* Title and Tags */}
+								<div className="flex flex-col gap-4 items-start flex-1 min-w-0">
+									{/* Title */}
+									<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-left">
+										{project.name}
+									</h1>
+
+									{/* Status and Verification Tags */}
+									<div className="flex flex-wrap items-center gap-3">
+										<Badge 
+											variant="outline" 
+											className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm flex items-center gap-1.5"
+										>
+											{project.status === "Live" && (
+												<span className="w-2 h-2 rounded-full bg-green-500"></span>
+											)}
+											{project.status === "Pre-Release" && (
+												<span className="w-2 h-2 rounded-full bg-blue-500"></span>
+											)}
+											{project.status === "Development" && (
+												<span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+											)}
+											{project.status}
+										</Badge>
+										{project.verificationLevel !== "Unverified" && (
+											<Badge
+												className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm"
+											>
+												<CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+												{project.verificationLevel}
+											</Badge>
+										)}
+									</div>
+
+									{/* Category Tags */}
+									<div className="flex flex-wrap items-center gap-3">
+										<Badge 
+											variant="secondary" 
+											className="text-sm px-4 py-1.5 font-semibold border border-border/50 shadow-sm"
+										>
+											{project.category}
+										</Badge>
+										{project.types && project.types.length > 0 && (
+											project.types.slice(0, 3).map((type: string, idx: number) => (
+												<Badge
+													key={idx}
+													variant="outline"
+													className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm"
+												>
+													{type}
+												</Badge>
+											))
+										)}
+									</div>
+								</div>
 							</div>
-						)}
-						<div className="flex-1 space-y-6">
-							<div>
-								<h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 bg-gradient-to-r from-foreground via-foreground to-[#FDDA24] bg-clip-text text-transparent">
-									{project.name}
-								</h1>
-								{project.shortDescription && (
-									<p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl">
+
+							{/* Second Row - About the Project Section */}
+							<div className="space-y-4 pt-4 border-t border-border/50">
+								<h2 className="text-xl font-bold text-foreground">About {project.name}</h2>
+								{project.shortDescription ? (
+									<p className="text-base text-muted-foreground leading-relaxed">
 										{project.shortDescription}
 									</p>
-								)}
-							</div>
-							
-							{/* Badges */}
-							<div className="flex flex-wrap items-center gap-3">
-								<Badge 
-									variant="secondary" 
-									className="text-sm px-4 py-1.5 font-semibold border border-border/50 shadow-sm"
-								>
-									{project.category}
-								</Badge>
-								<Badge 
-									variant="outline" 
-									className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm"
-								>
-									{project.status}
-								</Badge>
-								{project.verificationLevel !== "Unverified" && (
-									<Badge
-										className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm"
-									>
-										<CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-										{project.verificationLevel}
-									</Badge>
-								)}
-							</div>
-
-							{/* Linked Entities */}
-							{linkedEntities.length > 0 && (
-								<div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-card via-card/80 to-card border border-border/50 backdrop-blur-sm">
-									<span className="text-sm font-semibold text-muted-foreground">Organization:</span>
-									<div className="flex flex-wrap gap-2">
-										{linkedEntities.map((e, idx) => (
-											<span 
-												key={e.id}
-												className="text-sm font-medium text-foreground px-3 py-1 rounded-lg bg-background/50 border border-border/30"
-											>
-												{e.name}
-											</span>
-										))}
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-
-				{/* GitHub Stats - Beautiful Stat Cards */}
-				{project.github?.repos && project.github.repos.length > 0 && (
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-						<Card className="border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-							<CardContent className="p-6">
-								<div className="flex items-center justify-between mb-4">
-									<div className="flex items-center gap-3">
-										<div className="p-2.5 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/10 border border-blue-500/20">
-											<Activity className="w-5 h-5 text-blue-400" />
-										</div>
-										<div>
-											<p className="text-sm font-medium text-muted-foreground">Last Activity</p>
-											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh ? formatDate(gh.lastActivityAt) : "—"}
-											</p>
-										</div>
-									</div>
-								</div>
-								{gh?.lastActivityAt && (
-									<p className="text-xs text-muted-foreground">
-										{formatDateLong(gh.lastActivityAt)}
+								) : (
+									<p className="text-base text-muted-foreground italic">
+										No description available.
 									</p>
 								)}
-							</CardContent>
-						</Card>
-
-						<Card className="border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-							<CardContent className="p-6">
-								<div className="flex items-center justify-between mb-4">
-									<div className="flex items-center gap-3">
-										<div className="p-2.5 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/10 border border-orange-500/20">
-											<AlertCircle className="w-5 h-5 text-orange-400" />
-										</div>
-										<div>
-											<p className="text-sm font-medium text-muted-foreground">Open Issues</p>
-											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh?.openIssuesTotal ?? 0}
-											</p>
-										</div>
-									</div>
-								</div>
-								<p className="text-xs text-muted-foreground">
-									Across {gh?.repos?.length || project.github?.repos?.length || 0} {gh?.repos?.length === 1 || project.github?.repos?.length === 1 ? 'repository' : 'repositories'}
-								</p>
-							</CardContent>
-						</Card>
-
-						<Card className="border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-							<CardContent className="p-6">
-								<div className="flex items-center justify-between mb-4">
-									<div className="flex items-center gap-3">
-										<div className="p-2.5 rounded-lg bg-gradient-to-br from-[#FDDA24]/20 to-[#FDDA24]/10 border border-[#FDDA24]/20">
-											<Star className="w-5 h-5 text-[#FDDA24]" />
-										</div>
-										<div>
-											<p className="text-sm font-medium text-muted-foreground">Total Stars</p>
-											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh?.totalStars?.toLocaleString() ?? 0}
-											</p>
-										</div>
-									</div>
-								</div>
-								<p className="text-xs text-muted-foreground">
-									GitHub community engagement
-								</p>
-							</CardContent>
-						</Card>
-					</div>
-				)}
-
-				{/* Project Types */}
-				{project.types && project.types.length > 0 && (
-					<Card className="mb-8 border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
-						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Project Types</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="flex flex-wrap gap-2.5">
-								{project.types.map((type: string, idx: number) => (
-									<Badge
-										key={idx}
-										variant="outline"
-										className="text-sm px-4 py-2 font-medium border-border/50 hover:border-primary/50 transition-colors"
+								{project.links?.website && (
+									<Button
+										asChild
+										className="mt-4"
 									>
-										{type}
-									</Badge>
-								))}
+										<a
+											href={project.links.website}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-2"
+										>
+											Visit {project.name}
+											<ExternalLink className="w-4 h-4" />
+										</a>
+									</Button>
+								)}
 							</div>
-						</CardContent>
-					</Card>
-				)}
+						</div>
+					</CardContent>
+				</Card>
 
 				{/* Links & Resources */}
 				{project.links && Object.values(project.links).some(Boolean) && (
-					<Card className="mb-8 border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
+					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Links & Resources</CardTitle>
 						</CardHeader>
@@ -495,9 +562,79 @@ export default async function ProjectDetailPage({
 					</Card>
 				)}
 
+				{/* Project Stats - GitHub Stats */}
+				{project.github?.repos && project.github.repos.length > 0 && (
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between mb-4">
+									<div className="flex items-center gap-3">
+										<div className="p-2.5 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/10 border border-blue-500/20">
+											<Activity className="w-5 h-5 text-blue-400" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-muted-foreground">Last Activity</p>
+											<p className="text-2xl font-bold text-foreground mt-1">
+												{gh ? formatDate(gh.lastActivityAt) : "—"}
+											</p>
+										</div>
+									</div>
+								</div>
+								{gh?.lastActivityAt && (
+									<p className="text-xs text-muted-foreground">
+										{formatDateLong(gh.lastActivityAt)}
+									</p>
+								)}
+							</CardContent>
+						</Card>
+
+						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between mb-4">
+									<div className="flex items-center gap-3">
+										<div className="p-2.5 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/10 border border-orange-500/20">
+											<AlertCircle className="w-5 h-5 text-orange-400" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-muted-foreground">Open Issues</p>
+											<p className="text-2xl font-bold text-foreground mt-1">
+												{gh?.openIssuesTotal ?? 0}
+											</p>
+										</div>
+									</div>
+								</div>
+								<p className="text-xs text-muted-foreground">
+									Across {gh?.repos?.length || project.github?.repos?.length || 0} {gh?.repos?.length === 1 || project.github?.repos?.length === 1 ? 'repository' : 'repositories'}
+								</p>
+							</CardContent>
+						</Card>
+
+						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between mb-4">
+									<div className="flex items-center gap-3">
+										<div className="p-2.5 rounded-lg bg-gradient-to-br from-[#FDDA24]/20 to-[#FDDA24]/10 border border-[#FDDA24]/20">
+											<Star className="w-5 h-5 text-[#FDDA24]" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-muted-foreground">Total Stars</p>
+											<p className="text-2xl font-bold text-foreground mt-1">
+												{gh?.totalStars != null ? gh.totalStars.toLocaleString() : 0}
+											</p>
+										</div>
+									</div>
+								</div>
+								<p className="text-xs text-muted-foreground">
+									GitHub community engagement
+								</p>
+							</CardContent>
+						</Card>
+					</div>
+				)}
+
 				{/* Repositories */}
 				{project.github?.repos && project.github.repos.length > 0 && (
-					<Card className="mb-8 border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
+					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Repositories</CardTitle>
 							<CardDescription>
@@ -573,7 +710,7 @@ export default async function ProjectDetailPage({
 						project.onchain.issuer ||
 						(project.onchain.contracts &&
 							project.onchain.contracts.length > 0)) && (
-						<Card className="mb-8 border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
+						<Card className="mb-8 border border-border/50 bg-card shadow-lg">
 							<CardHeader className="pb-4">
 								<CardTitle className="text-xl font-bold">On-Chain Information</CardTitle>
 							</CardHeader>
@@ -614,53 +751,55 @@ export default async function ProjectDetailPage({
 						</Card>
 					)}
 
-				{/* Transparency Log */}
-				<Card className="border border-border/50 bg-gradient-to-br from-card via-card to-card/80 shadow-lg">
-					<CardHeader className="pb-4">
-						<CardTitle className="text-xl font-bold">Transparency Log</CardTitle>
-						<CardDescription>
-							Recent changes to this project entry for accountability and trust
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						{logsResult.docs.length === 0 ? (
-							<div className="text-center py-12">
-								<Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-								<p className="text-muted-foreground italic">
-									No transparency logs yet
-								</p>
-							</div>
-						) : (
-							<div className="space-y-2">
-								{logsResult.docs.map((log, idx) => (
-									<div
-										key={log.id}
-										className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-200 group"
-									>
-										<div className="flex items-center gap-4">
-											<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-colors">
-												<Calendar className="h-5 w-5 text-primary" />
+				{/* Transparency Log - Only show in debug mode */}
+				{process.env.NODE_ENV === "development" && (
+					<Card className="border border-border/50 bg-card shadow-lg">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold">Transparency Log</CardTitle>
+							<CardDescription>
+								Recent changes to this project entry for accountability and trust
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							{logsResult.docs.length === 0 ? (
+								<div className="text-center py-12">
+									<Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+									<p className="text-muted-foreground italic">
+										No transparency logs yet
+									</p>
+								</div>
+							) : (
+								<div className="space-y-2">
+									{logsResult.docs.map((log, idx) => (
+										<div
+											key={log.id}
+											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-200 group"
+										>
+											<div className="flex items-center gap-4">
+												<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-colors">
+													<Calendar className="h-5 w-5 text-primary" />
+												</div>
+												<div>
+													<span className="font-semibold text-foreground block">
+														{log.action}
+													</span>
+													<span className="text-sm text-muted-foreground">
+														by {log.actorType}
+													</span>
+												</div>
 											</div>
-											<div>
-												<span className="font-semibold text-foreground block">
-													{log.action}
-												</span>
-												<span className="text-sm text-muted-foreground">
-													by {log.actorType}
-												</span>
-											</div>
+											<span className="text-sm text-muted-foreground font-medium">
+												{log.timestamp
+													? formatDateLong(log.timestamp)
+													: "Unknown date"}
+											</span>
 										</div>
-										<span className="text-sm text-muted-foreground font-medium">
-											{log.timestamp
-												? formatDateLong(log.timestamp)
-												: "Unknown date"}
-										</span>
-									</div>
-								))}
-							</div>
-						)}
-					</CardContent>
-				</Card>
+									))}
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				)}
 			</main>
 		</div>
 	);

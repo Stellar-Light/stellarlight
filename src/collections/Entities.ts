@@ -33,6 +33,21 @@ export const Entities: CollectionConfig = {
 			},
 		},
 		{
+			name: "logo",
+			type: "upload",
+			relationTo: "media",
+			admin: {
+				description: "Entity logo image. If not provided, a default icon will be used.",
+			},
+		},
+		{
+			name: "description",
+			type: "textarea",
+			admin: {
+				description: "Description of the entity/organization.",
+			},
+		},
+		{
 			name: "domains",
 			type: "array",
 			fields: [

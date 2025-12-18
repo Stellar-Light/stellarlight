@@ -88,11 +88,6 @@ export function FlickeringGrid({
 
 		const setupCanvas = () => {
 			if (!logoImg.naturalWidth || !logoImg.naturalHeight) {
-				console.warn("Logo image not loaded properly", {
-					naturalWidth: logoImg.naturalWidth,
-					naturalHeight: logoImg.naturalHeight,
-					src: logoImg.src,
-				});
 				return;
 			}
 
@@ -163,7 +158,6 @@ export function FlickeringGrid({
 
 			// Fallback: create a grid pattern if no squares were created
 			if (squares.length === 0) {
-				console.warn("No squares created from image, using fallback pattern");
 				for (let y = 0; y < height; y += blockSizeWithGap) {
 					for (let x = 0; x < width; x += blockSizeWithGap) {
 						// Create a pattern that covers about 30% of the grid
@@ -340,7 +334,7 @@ export function FlickeringGrid({
 						};
 						logoImg.onerror = (error) => {
 							clearTimeout(timeout);
-							console.error("Image load error:", error, logoImg.src);
+							// Silently handle image load errors
 							reject(new Error("Image failed to load"));
 						};
 					});
@@ -349,7 +343,7 @@ export function FlickeringGrid({
 					}
 				}
 			} catch (error) {
-				console.error("Failed to initialize FlickeringGrid:", error);
+				// Silently handle initialization errors
 			}
 		};
 
@@ -388,10 +382,10 @@ export function FlickeringGrid({
 				className="absolute opacity-0 pointer-events-none w-0 h-0"
 				crossOrigin={logoSrc.startsWith("http") ? "anonymous" : undefined}
 				onLoad={() => {
-					console.log("Logo image loaded:", logoSrc);
+					// Image loaded successfully
 				}}
-				onError={(e) => {
-					console.error("Logo image failed to load:", logoSrc, e);
+				onError={() => {
+					// Silently handle image load errors
 				}}
 			/>
 			<canvas

@@ -32,15 +32,11 @@ export async function GET(request: Request) {
 			waitUntil: new Date(Date.now() + 1000), // Start immediately
 		});
 
-		console.log(`[RSS Sync Cron] Job queued: ${job.id}`);
-
 		// Execute the job immediately
-		const runResult = await payload.jobs.run({
+		await payload.jobs.run({
 			queue: job.queue || "default",
 			limit: 1,
 		});
-
-		console.log(`[RSS Sync Cron] Job execution result:`, runResult);
 
 		return NextResponse.json({
 			success: true,
@@ -48,7 +44,6 @@ export async function GET(request: Request) {
 			message: "RSS sync job queued and executed successfully",
 		});
 	} catch (error) {
-		console.error("RSS sync cron job error:", error);
 		return NextResponse.json(
 			{
 				success: false,

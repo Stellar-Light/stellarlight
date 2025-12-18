@@ -253,7 +253,7 @@ export interface Project {
   };
   lastVerifiedAt?: string | null;
   /**
-   * Mark this project as a community pick
+   * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
   communityPick?: boolean | null;
   updatedAt: string;
@@ -459,6 +459,14 @@ export interface Entity {
   id: string;
   name: string;
   slug: string;
+  /**
+   * Entity logo image. If not provided, a default icon will be used.
+   */
+  logo?: (string | null) | Media;
+  /**
+   * Description of the entity/organization.
+   */
+  description?: string | null;
   domains?:
     | {
         domain: string;
@@ -909,6 +917,8 @@ export interface SignalsSelect<T extends boolean = true> {
 export interface EntitiesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  logo?: T;
+  description?: T;
   domains?:
     | T
     | {

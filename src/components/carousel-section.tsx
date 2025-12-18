@@ -20,7 +20,7 @@ export default async function CarouselSection() {
 
 			items = result.docs;
 		} catch (error) {
-			console.error("Error fetching carousel items:", error);
+			// Silently handle fetch errors
 		}
 	}
 

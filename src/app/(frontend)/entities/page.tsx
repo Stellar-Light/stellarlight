@@ -50,7 +50,6 @@ export default async function EntitiesPage({
 		depth: 1, // Populate relationships including projects
 	});
 		} catch (error) {
-			console.error("Error fetching entities:", error);
 			// Continue with empty result
 		}
 	}

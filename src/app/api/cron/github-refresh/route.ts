@@ -64,19 +64,12 @@ export async function GET(request: Request) {
 					successCount++;
 				} else {
 					errorCount++;
-					console.error(
-						`Failed to refresh GitHub data for project ${project.id}: ${response.status}`,
-					);
 				}
 
 				// Rate limiting: wait 250ms between requests
 				await new Promise((resolve) => setTimeout(resolve, 250));
 			} catch (error) {
 				errorCount++;
-				console.error(
-					`Error refreshing GitHub data for project ${project.id}:`,
-					error,
-				);
 			}
 		}
 
@@ -90,7 +83,6 @@ export async function GET(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("GitHub refresh cron job error:", error);
 		return NextResponse.json(
 			{
 				success: false,

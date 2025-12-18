@@ -63,7 +63,7 @@ export default async function DirectoryProjectsGrid({
 				depth: 1,
 			});
 		} catch (error) {
-			console.error("Error fetching projects:", error);
+			// Silently handle fetch errors
 		}
 	}
 

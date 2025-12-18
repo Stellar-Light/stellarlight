@@ -52,8 +52,6 @@ export const syncRSSFeedTask: any = async (args: any) => {
 
 		const feeds = feedsResult.docs;
 
-		console.log(`[RSS Sync] Found ${feeds.length} feed(s) to sync`);
-
 		const feedStats: FeedStats[] = [];
 		const errorLog: string[] = [];
 		let totalImported = 0;
@@ -71,10 +69,8 @@ export const syncRSSFeedTask: any = async (args: any) => {
 			};
 
 			try {
-				console.log(`[RSS Sync] Processing feed: ${feed.name} (${feed.feedUrl})`);
 				// Parse RSS feed
 				const rssFeed = await parser.parseURL(feed.feedUrl);
-				console.log(`[RSS Sync] Found ${rssFeed.items?.length || 0} items in feed ${feed.name}`);
 
 				// Process each item
 				for (const item of rssFeed.items || []) {
@@ -168,7 +164,6 @@ export const syncRSSFeedTask: any = async (args: any) => {
 								} as any, // Payload types are complex, but data is validated
 							});
 
-							console.log(`Created blog post: ${blogPost.id} - ${rssItem.title}`);
 							feedStat.postsImported++;
 						} catch (createError) {
 							throw createError; // Re-throw to be caught by outer catch
@@ -178,7 +173,6 @@ export const syncRSSFeedTask: any = async (args: any) => {
 						const rssItem = item as any;
 						const errorMsg = `[${feed.name}] Item "${rssItem.title}": ${itemError instanceof Error ? itemError.message : String(itemError)}`;
 						errorLog.push(errorMsg);
-						console.error(errorMsg, itemError);
 					}
 				}
 
@@ -201,7 +195,6 @@ export const syncRSSFeedTask: any = async (args: any) => {
 				feedStat.errors++;
 				const errorMsg = `[${feed.name}] Feed sync failed: ${feedError instanceof Error ? feedError.message : String(feedError)}`;
 				errorLog.push(errorMsg);
-				console.error(errorMsg, feedError);
 
 				// Update feed with error status
 				await payload.update({
@@ -263,8 +256,6 @@ export const syncRSSFeedTask: any = async (args: any) => {
 			log: comprehensiveLog,
 		} as any; // PayloadHandler return type is flexible
 	} catch (error) {
-		console.error("RSS sync task failed:", error);
-
 		const errorMessage =
 			error instanceof Error ? error.message : String(error);
 

@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../Downloads/ecosystem"
+		}
+	],
+	"settings": {
+		"terminal.integrated.fontFamily": "'DepartureMono Nerd Font', monospace"
+	}
+}

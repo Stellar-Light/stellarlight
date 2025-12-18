@@ -1,8 +1,6 @@
 import { getPayloadSafe } from "@/lib/payload-client";
-import ProjectCard from "@/components/project-card";
+import ProjectsGridClient from "@/components/projects-grid-client";
 import ProjectCardSkeleton from "@/components/project-card-skeleton";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 interface ProjectsGridProps {
 	limit?: number;
@@ -19,6 +17,7 @@ export default async function ProjectsGrid({
 	let projects: any[] = [];
 	let totalProjects = 0;
 	let totalPages = 1;
+	let page = 1;
 
 	if (payload) {
 		try {
@@ -56,54 +55,29 @@ export default async function ProjectsGrid({
 				collection: "projects",
 				where,
 				limit,
+				page: 1,
 				sort: "-lastVerifiedAt",
 				depth: 1,
 			});
 
 			projects = result.docs;
 			totalProjects = result.totalDocs;
-			totalPages = result.totalPages;
+			totalPages = result.totalPages ?? 1;
+			page = result.page ?? 1;
 		} catch (error) {
-			console.error("Error fetching projects:", error);
+			// Silently handle fetch errors
 		}
 	}
 
-	if (projects.length === 0) {
-		return (
-			<div className="text-center py-20">
-				<p className="text-lg text-muted-foreground">
-					No projects found. {searchQuery ? "Try adjusting your search terms." : "Projects will appear here once approved."}
-				</p>
-			</div>
-		);
-	}
-
 	return (
-		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-				{projects.map((project: any, index: number) => (
-					<ProjectCard
-						key={project.id}
-						project={project}
-						isFeatured={
-							index === 0 &&
-							!project.verificationLevel?.includes("Unverified")
-						}
-					/>
-				))}
-			</div>
-
-			{totalPages > 1 && (
-				<div className="text-center">
-					<Button
-						asChild
-						className="px-10 py-3.5 rounded-xl font-semibold bg-[#404040] text-foreground border border-border hover:bg-[#525252] hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-xl"
-					>
-						<Link href="/directory">View All Projects</Link>
-					</Button>
-				</div>
-			)}
-		</>
+		<ProjectsGridClient
+			initialProjects={projects}
+			initialTotalPages={totalPages}
+			initialPage={page}
+			limit={limit}
+			searchQuery={searchQuery}
+			categoryFilter={categoryFilter}
+		/>
 	);
 }
 

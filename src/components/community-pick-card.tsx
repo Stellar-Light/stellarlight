@@ -75,13 +75,13 @@ export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 							}}
 						/>
 					</div>
-					<h3 className="text-sm md:text-base font-semibold text-foreground group-hover:text-white transition-colors duration-150 leading-tight">
+					<h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-white transition-colors duration-150 leading-tight">
 						{project.name}
 					</h3>
 				</div>
 
 				{/* Description */}
-				<p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3 group-hover:text-foreground/80 transition-colors duration-150 flex-1">
+				<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3 group-hover:text-foreground/80 transition-colors duration-150 flex-1">
 					{project.shortDescription || "No description available."}
 				</p>
 
