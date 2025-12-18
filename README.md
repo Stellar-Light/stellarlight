@@ -1,6 +1,6 @@
 # Stellar Light
 
-A comprehensive directory and discovery platform for the Stellar ecosystem. Explore projects, organizations, and resources built on Stellar.
+A new and comprehensive directory and discovery platform for the Stellar ecosystem. Explore projects, organizations, and resources built on Stellar.
 
 ## Overview
 
