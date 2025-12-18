@@ -33,7 +33,7 @@ export default function RSSManagementPage() {
 				const data = await response.json();
 				setFeeds(data.docs || []);
 			} catch (error) {
-				console.error("Failed to fetch feeds:", error);
+				// Silently handle fetch errors
 			} finally {
 				setIsLoading(false);
 			}

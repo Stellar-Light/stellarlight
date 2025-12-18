@@ -4,14 +4,41 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings } from "lucide-react";
+import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2 } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function Navigation() {
 	const pathname = usePathname();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [isExploreOpen, setIsExploreOpen] = useState(false);
+	const [isVisible, setIsVisible] = useState(true);
+	const [hasScrolled, setHasScrolled] = useState(false);
+	const lastScrollY = useRef(0);
+
+	// Auto-hide navbar on scroll
+	useEffect(() => {
+		const handleScroll = () => {
+			const currentScrollY = window.scrollY;
+			
+			setHasScrolled(currentScrollY > 20);
+			
+			if (currentScrollY < lastScrollY.current || currentScrollY < 100) {
+				setIsVisible(true);
+			} 
+			else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+				setIsVisible(false);
+				setIsExploreOpen(false);
+				setMobileMenuOpen(false);
+			}
+			
+			lastScrollY.current = currentScrollY;
+		};
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
 
 	// Check if user is authenticated (only admins should see admin links)
 	// This MUST be strict - only show admin links if user is actually logged in
@@ -64,35 +91,109 @@ export function Navigation() {
 	}, []);
 
 	const navItems = [
-		{ href: "/directory", label: "Projects" },
-		{ href: "/entities", label: "Entities" },
 		{ href: "/blog", label: "Blog" },
 		{ href: "/submit", label: "Submit" },
 	];
 
+	const exploreItems = [
+		{ name: "Projects", href: "/directory", description: "Discover Stellar projects", icon: Layers },
+		{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
+		{ name: "Ideas", href: "https://ideas.stellarlight.xyz/", description: "Browse project ideas", icon: Lightbulb },
+		{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
+	];
+
 	return (
-		<nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm">
-			<div className="container mx-auto flex h-20 items-center justify-between px-6">
-				<Link
-					href="/"
-					className="flex items-center space-x-3 group transition-transform hover:scale-105"
-				>
-					<div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden">
-						<Image
-							src="/logo.png"
-							alt="Stellar Light Logo"
-							width={40}
-							height={40}
-							className="object-contain"
-						/>
-					</div>
-					<span className="text-2xl font-bold tracking-tight">
-						<span className="text-gradient">Stellar</span>
-						<span className="text-foreground">Light</span>
-					</span>
-				</Link>
+		<nav 
+			className={cn(
+				"fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-all duration-300 ease-in-out border-border/40",
+				hasScrolled ? 'shadow-[0_1px_3px_rgba(0,0,0,0.3)]' : 'shadow-sm',
+				isVisible ? 'translate-y-0' : '-translate-y-full'
+			)}
+		>
+			<div className="container mx-auto flex h-16 items-center justify-between px-6">
+				<div className="opacity-100 animate-in fade-in slide-in-from-top-2 duration-400">
+					<Link
+						href="/"
+						className="flex items-center space-x-3 group transition-transform hover:scale-105"
+						data-testid="logo-stellar-light"
+					>
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
+							<Image
+								src="/logo.png"
+								alt="Stellar Light Logo"
+								width={32}
+								height={32}
+								className="object-contain"
+							/>
+						</div>
+						<span className="text-lg font-semibold text-foreground">
+							Stellar Light
+						</span>
+					</Link>
+				</div>
 
 				<div className="hidden md:flex items-center space-x-1">
+					<div 
+						className="relative opacity-100 animate-in fade-in slide-in-from-top-2 duration-400 delay-200"
+						onMouseEnter={() => setIsExploreOpen(true)}
+						onMouseLeave={() => setIsExploreOpen(false)}
+					>
+						<button
+							className="flex items-center gap-1.5 px-4 py-2 text-sm text-foreground transition-all duration-150 rounded-lg hover:bg-accent/50"
+							data-testid="nav-explore"
+						>
+							Explore
+							<ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", isExploreOpen && 'rotate-180')} />
+						</button>
+
+						{isExploreOpen && (
+							<div className="absolute right-0 top-full pt-2">
+								<div className="w-[260px] bg-popover border border-border rounded-xl shadow-lg p-1 animate-in fade-in slide-in-from-top-1 duration-200">
+									{exploreItems.map((item) => {
+										const Icon = item.icon;
+										const isExternal = item.href.startsWith('http');
+										
+										const content = (
+											<div className="flex items-center gap-3">
+												<Icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+												<div className="flex-1">
+													<div className="text-sm font-medium text-foreground mb-1 group-hover:text-foreground transition-colors">
+														{item.name}
+													</div>
+													<div className="text-xs text-muted-foreground leading-relaxed">
+														{item.description}
+													</div>
+												</div>
+											</div>
+										);
+										
+										return isExternal ? (
+											<a
+												key={item.name}
+												href={item.href}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="block px-3 py-3 rounded-lg hover:bg-accent/50 transition-all duration-150 group"
+												data-testid={`nav-link-${item.name.toLowerCase()}`}
+											>
+												{content}
+											</a>
+										) : (
+											<Link
+												key={item.name}
+												href={item.href}
+												className="block px-3 py-3 rounded-lg hover:bg-accent/50 transition-all duration-150 group"
+												data-testid={`nav-link-${item.name.toLowerCase()}`}
+											>
+												{content}
+											</Link>
+										);
+									})}
+								</div>
+							</div>
+						)}
+					</div>
+
 					{navItems.map((item) => (
 						<Link
 							key={item.href}
@@ -134,26 +235,61 @@ export function Navigation() {
 					)}
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="md:hidden h-10 w-10"
-						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-						type="button"
-					>
-						{mobileMenuOpen ? (
-							<X className="h-5 w-5" />
-						) : (
-							<Menu className="h-5 w-5" />
-						)}
-					</Button>
-				</div>
+				<button
+					onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+					className="md:hidden p-2 rounded-lg hover:bg-accent/50 transition-all duration-150 opacity-100 animate-in fade-in slide-in-from-top-2 duration-400 delay-200"
+					aria-label="Toggle menu"
+					data-testid="button-mobile-menu"
+				>
+					{mobileMenuOpen ? (
+						<X className="w-5 h-5 text-foreground" />
+					) : (
+						<Menu className="w-5 h-5 text-foreground" />
+					)}
+				</button>
 			</div>
 
 			{mobileMenuOpen && (
-				<div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl">
+				<div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
 					<div className="container mx-auto px-6 py-4 space-y-1">
+						{exploreItems.map((item) => {
+							const Icon = item.icon;
+							const isExternal = item.href.startsWith('http');
+							
+							const content = (
+								<div className="flex items-center gap-3">
+									<Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+									<div className="flex-1">
+										<div className="font-medium text-foreground mb-1">{item.name}</div>
+										<div className="text-xs text-muted-foreground leading-relaxed">{item.description}</div>
+									</div>
+								</div>
+							);
+							
+							return isExternal ? (
+								<a
+									key={item.name}
+									href={item.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="block px-3 py-3 rounded-xl text-sm hover:bg-accent/50 transition-all duration-150 active:bg-accent"
+									onClick={() => setMobileMenuOpen(false)}
+									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
+								>
+									{content}
+								</a>
+							) : (
+								<Link
+									key={item.name}
+									href={item.href}
+									className="block px-3 py-3 rounded-xl text-sm hover:bg-accent/50 transition-all duration-150 active:bg-accent"
+									onClick={() => setMobileMenuOpen(false)}
+									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
+								>
+									{content}
+								</Link>
+							);
+						})}
 						{navItems.map((item) => (
 							<Link
 								key={item.href}

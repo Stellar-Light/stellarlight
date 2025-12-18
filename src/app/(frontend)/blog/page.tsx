@@ -54,7 +54,7 @@ export default async function BlogPage({
 				new Set(allPostsResult.docs.flatMap((post: any) => post.tags || [])),
 			) as string[];
 		} catch (error) {
-			console.error("Error fetching tags:", error);
+			// Silently handle fetch errors
 		}
 	}
 

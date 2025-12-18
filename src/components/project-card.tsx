@@ -55,15 +55,14 @@ export default function ProjectCard({
 		<Link href={`/project/${project.slug}`} className="block h-full group">
 			<div className="idea-card rounded-xl p-6 cursor-pointer flex flex-col h-full min-h-[200px]">
 				{/* Tag row - occupies its own horizontal space */}
-				<div className="flex justify-end mb-4">
-					{isFeatured ? (
+				<div className="flex justify-between items-center mb-4">
+					<span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm">
+						{displayCategory}
+					</span>
+					{isFeatured && (
 						<Badge className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white text-[#171717] border-0 shadow-sm">
 							Featured
 						</Badge>
-					) : (
-						<span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm">
-							{displayCategory}
-						</span>
 					)}
 				</div>
 
@@ -80,7 +79,6 @@ export default function ProjectCard({
 								setLogoError(true);
 							}}
 						/>
-						<div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FDDA24]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 					</div>
 					<h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-white transition-colors duration-300 leading-tight">
 						{project.name}
@@ -97,7 +95,7 @@ export default function ProjectCard({
 					<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors duration-300">
 						View Details
 					</span>
-					<ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-[#FDDA24] group-hover:translate-x-1 transition-all duration-300" />
+					<ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" />
 				</div>
 			</div>
 		</Link>

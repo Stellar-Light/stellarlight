@@ -13,40 +13,78 @@ const Q_REPO = `
 `;
 
 export async function fetchRepoInfo(owner: string, name: string) {
-	const token = process.env.GITHUB_TOKEN;
+	const token = process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+	
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+		"User-Agent": "stellar-ecosystem-directory",
+	};
+	
+	if (token) {
+		headers.Authorization = `Bearer ${token.trim()}`;
+	}
+	
+	const requestBody = JSON.stringify({ query: Q_REPO, variables: { owner, name } });
+	
 	const res = await fetch(GQL, {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"User-Agent": "stellar-ecosystem-directory",
-			...(token ? { Authorization: `Bearer ${token}` } : {}),
-		},
-		body: JSON.stringify({ query: Q_REPO, variables: { owner, name } }),
+		headers,
+		body: requestBody,
 	});
 
 	// Parse response even if status is not OK to check GraphQL errors
 	let data: any;
+	let responseText: string | null = null;
+	
 	try {
-		data = await res.json();
-	} catch {
+		responseText = await res.text();
+		data = JSON.parse(responseText);
+	} catch (parseError) {
 		// If we can't parse JSON, it's a real HTTP error
 		if (!res.ok) {
 			const isRateLimit =
 				res.status === 403 &&
 				res.headers.get("x-ratelimit-remaining") === "0";
+			
+			// Handle 401 Unauthorized specifically
+			if (res.status === 401) {
+				const isFineGrained = token?.startsWith("github_pat_");
+				throw new Error(
+					`GitHub API error: 401 Unauthorized - Token authentication failed. ` +
+					(isFineGrained 
+						? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories", 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired.`
+						: `Please verify your GITHUB_TOKEN is valid and has not expired.`)
+				);
+			}
+			
 			throw new Error(
 				isRateLimit
 					? "GitHub API rate limit exceeded"
-					: `GitHub API error: ${res.status}`,
+					: `GitHub API error: ${res.status} - ${responseText || res.statusText}`,
 			);
 		}
-		throw new Error("Failed to parse GitHub API response");
+		throw new Error(`Failed to parse GitHub API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
 	}
 
 	// Check for GraphQL errors first (these can occur even with 200 OK)
 	if (data.errors) {
 		const errorMsg = data.errors[0]?.message || "GraphQL error";
 		const errorType = data.errors[0]?.type || "";
+
+		// Handle authentication errors
+		if (
+			errorMsg.includes("Bad credentials") ||
+			errorMsg.includes("401") ||
+			errorType === "UNAUTHENTICATED"
+		) {
+			const isFineGrained = token?.startsWith("github_pat_");
+			throw new Error(
+				`GitHub API error: 401 Unauthorized - ${errorMsg}. ` +
+				(isFineGrained
+					? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories" (not just specific repos), 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired. Repository: ${owner}/${name}`
+					: `Please verify your GITHUB_TOKEN is valid and has not expired.`)
+			);
+		}
 
 		// Only mark as private if GraphQL explicitly says so
 		if (
@@ -86,6 +124,13 @@ export async function fetchRepoInfo(owner: string, name: string) {
 			throw new Error(`GitHub API error: ${errorMsg}`);
 		}
 
+		// Handle 401 Unauthorized
+		if (res.status === 401) {
+			throw new Error(
+				"GitHub API error: 401 Unauthorized - Invalid or expired token. Please verify your GITHUB_TOKEN environment variable is set correctly and the token is valid."
+			);
+		}
+		
 		throw new Error(
 			isRateLimit
 				? "GitHub API rate limit exceeded"
@@ -103,13 +148,16 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		throw new Error("Repository not found");
 	}
 
+	const stargazerCount = typeof r.stargazerCount === 'number' ? r.stargazerCount : (parseInt(String(r.stargazerCount || 0), 10) || 0);
+	const openIssues = typeof r.issues?.totalCount === 'number' ? r.issues.totalCount : (parseInt(String(r.issues?.totalCount || 0), 10) || 0);
+
 	return {
 		url: r.url as string,
 		lastCommitAt:
 			(r.defaultBranchRef?.target?.committedDate ??
 				r.pushedAt) as string,
-		openIssues: (r.issues?.totalCount ?? 0) as number,
-		stargazerCount: (r.stargazerCount ?? 0) as number,
+		openIssues,
+		stargazerCount,
 	};
 }
 

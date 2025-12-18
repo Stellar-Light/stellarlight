@@ -52,7 +52,7 @@ export default async function BlogPostsGrid({
 
 			posts = result.docs;
 		} catch (error) {
-			console.error("Error fetching blog posts:", error);
+			// Silently handle fetch errors
 		}
 	}
 

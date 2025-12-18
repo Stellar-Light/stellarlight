@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import Airtable from "airtable";
 import { getPayloadSafe } from "@/lib/payload-client";
 
-// Airtable configuration from the provided URL
-// URL: https://airtable.com/appnaTSKcxJfsgTQy/tblWf69pEPyhW8ntO/viwVVnH1gnbI9Fa7t
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID || "appnaTSKcxJfsgTQy";
-const AIRTABLE_TABLE_ID = process.env.AIRTABLE_TABLE_ID || "tblWf69pEPyhW8ntO";
-const AIRTABLE_VIEW_ID = process.env.AIRTABLE_VIEW_ID || "viwVVnH1gnbI9Fa7t";
+// Airtable configuration - must be set via environment variables
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_TABLE_ID = process.env.AIRTABLE_TABLE_ID;
+const AIRTABLE_VIEW_ID = process.env.AIRTABLE_VIEW_ID;
 
 export async function POST(request: NextRequest) {
 	try {
@@ -14,6 +13,13 @@ export async function POST(request: NextRequest) {
 		if (!apiKey) {
 			return NextResponse.json(
 				{ error: "AIRTABLE_API_KEY environment variable is not set" },
+				{ status: 500 },
+			);
+		}
+
+		if (!AIRTABLE_BASE_ID || !AIRTABLE_TABLE_ID || !AIRTABLE_VIEW_ID) {
+			return NextResponse.json(
+				{ error: "AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID, and AIRTABLE_VIEW_ID environment variables must be set" },
 				{ status: 500 },
 			);
 		}
@@ -164,7 +170,6 @@ export async function POST(request: NextRequest) {
 					stats.inserted++;
 				}
 			} catch (error) {
-				console.error(`Error processing record ${record.id}:`, error);
 				stats.errors++;
 			}
 		}
@@ -175,7 +180,6 @@ export async function POST(request: NextRequest) {
 			message: `Import completed: ${stats.inserted} inserted, ${stats.updated} updated, ${stats.skipped} skipped, ${stats.errors} errors`,
 		});
 	} catch (error) {
-		console.error("Airtable import error:", error);
 		return NextResponse.json(
 			{
 				error: error instanceof Error ? error.message : "Unknown error during import",

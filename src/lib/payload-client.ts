@@ -9,7 +9,6 @@ export async function getPayloadSafe() {
 	try {
 		return await getPayload({ config: configPromise });
 	} catch (error) {
-		console.error("Failed to connect to MongoDB:", error);
 		// Return null to allow pages to render with empty data
 		return null;
 	}

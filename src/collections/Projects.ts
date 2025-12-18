@@ -215,7 +215,7 @@ export const Projects: CollectionConfig = {
 			type: "checkbox",
 			defaultValue: false,
 			admin: {
-				description: "Mark this project as a community pick",
+				description: "Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.",
 			},
 		},
 	],

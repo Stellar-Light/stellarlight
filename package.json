@@ -1,11 +1,12 @@
 {
   "name": "stellarlight",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A comprehensive directory and discovery platform for the Stellar ecosystem",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" payload generate:importmap && next build",
+    "typecheck": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap && pnpm exec tsc --noEmit",
+    "build": "pnpm typecheck && cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build --webpack",
     "check": "biome check .",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:fresh": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && cross-env NODE_OPTIONS=--no-deprecation next dev",
@@ -47,10 +48,11 @@
     "dotenv": "16.4.7",
     "embla-carousel-react": "^8.6.0",
     "graphql": "^16.8.1",
-    "next": "15.4.10",
+    "next": "16.0.10",
     "payload": "3.63.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-icons": "^5.4.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "rss-parser": "^3.13.0",
@@ -70,7 +72,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eslint": "^9.16.0",
-    "eslint-config-next": "15.4.4",
+    "eslint-config-next": "16.0.10",
     "happy-dom": "^20.0.10",
     "jsdom": "26.1.0",
     "lucide-react": "^0.552.0",
@@ -87,7 +89,7 @@
     "vitest": "3.2.3"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
+    "node": "24.12.0",
     "pnpm": "^9 || ^10"
   },
   "pnpm": {

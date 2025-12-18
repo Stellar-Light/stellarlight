@@ -31,7 +31,7 @@ export default async function HomePage() {
 			});
 			totalProjects = result.totalDocs;
 		} catch (error) {
-			console.error("Error fetching project count:", error);
+			// Silently handle fetch errors
 		}
 	}
 
@@ -92,6 +92,11 @@ export default async function HomePage() {
 					<BlogHighlights />
 				</Suspense>
 
+				{/* Community Picks Section */}
+				<Suspense fallback={<CommunityPicksSectionSkeleton />}>
+					<CommunityPicksSection />
+				</Suspense>
+
 				{/* Projects Section */}
 				<section className="mb-16">
 					<div className="flex items-center justify-between mb-10">
@@ -115,11 +120,6 @@ export default async function HomePage() {
 						<ProjectsGrid limit={12} />
 					</Suspense>
 				</section>
-
-				{/* Community Picks Section */}
-				<Suspense fallback={<CommunityPicksSectionSkeleton />}>
-					<CommunityPicksSection />
-				</Suspense>
 			</main>
 		</div>
 	);

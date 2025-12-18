@@ -2,6 +2,7 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
@@ -23,8 +24,112 @@ const categoryColors: Record<string, string> = {
 	Update: "bg-gray-500/20 text-gray-400 border-gray-500/30",
 };
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.io";
+
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Params;
+}): Promise<Metadata> {
+	const { slug } = await params;
+	const payload = await getPayloadSafe();
+
+	if (!payload) {
+		return {
+			title: "Post Not Found",
+		};
+	}
+
+	let result;
+	try {
+		result = await payload.find({
+			collection: "blog",
+			where: {
+				and: [
+					{
+						slug: {
+							equals: slug,
+						},
+					},
+					{
+						status: {
+							equals: "published",
+						},
+					},
+				],
+			},
+			limit: 1,
+			depth: 1,
+		});
+	} catch {
+		return {
+			title: "Post Not Found",
+		};
+	}
+
+	if (result.docs.length === 0) {
+		return {
+			title: "Post Not Found",
+		};
+	}
+
+	const post = result.docs[0];
+
+	// Get featured image URL
+	let imageUrl = "/opengraph.png";
+	if (post.rssImageUrl) {
+		imageUrl = post.rssImageUrl;
+	} else if (post.featuredImage) {
+		if (typeof post.featuredImage === "object" && post.featuredImage.url) {
+			imageUrl = post.featuredImage.url;
+		} else if (
+			typeof post.featuredImage === "object" &&
+			post.featuredImage.filename
+		) {
+			imageUrl = `${appUrl}/media/${post.featuredImage.filename}`;
+		}
+	}
+
+	const publishedDate = post.publishedAt
+		? new Date(post.publishedAt).toISOString()
+		: undefined;
+
+	return {
+		title: post.title,
+		description: post.excerpt || "Read more on StellarLight",
+		authors: post.author ? [{ name: post.author }] : undefined,
+		openGraph: {
+			title: post.title,
+			description: post.excerpt || "Read more on StellarLight",
+			type: "article",
+			publishedTime: publishedDate,
+			authors: post.author ? [post.author] : undefined,
+			images: [
+				{
+					url: imageUrl.startsWith("http")
+						? imageUrl
+						: `${appUrl}${imageUrl}`,
+					width: 1200,
+					height: 630,
+					alt: post.title,
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: post.title,
+			description: post.excerpt || "Read more on StellarLight",
+			images: [
+				imageUrl.startsWith("http")
+					? imageUrl
+					: `${appUrl}${imageUrl}`,
+			],
+		},
+	};
+}
 
 export default async function BlogDetailPage({
 	params,
@@ -60,7 +165,6 @@ export default async function BlogDetailPage({
 		depth: 2, // Populate relationships including featuredImage and rssFeed
 	});
 	} catch (error) {
-		console.error("Error fetching blog post:", error);
 		notFound();
 	}
 
