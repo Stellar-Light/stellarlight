@@ -31,8 +31,8 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 
 	useEffect(() => {
 		setIsMounted(true);
-		// Check if banner was previously dismissed
-		const isDismissed = localStorage.getItem(storageKey);
+		// Check if banner was previously dismissed in this session only
+		const isDismissed = sessionStorage.getItem(storageKey);
 		if (isDismissed) {
 			setIsVisible(false);
 		}
@@ -54,9 +54,11 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 		};
 	}, [isVisible, isMounted]);
 
-	const handleClose = () => {
+	const handleClose = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
 		setIsVisible(false);
-		localStorage.setItem(storageKey, "true");
+		sessionStorage.setItem(storageKey, "true");
 	};
 
 	// Don't render anything until mounted (prevents hydration mismatch)
@@ -66,15 +68,33 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 
 	const bgColorClass = colorMap[backgroundColor] || colorMap.primary;
 
-	const content = (
-		<div className={`fixed top-0 left-0 right-0 z-[60] w-full ${bgColorClass} px-4`} style={{ height: `${BANNER_HEIGHT}px` }}>
+	return (
+		<div
+			className={`fixed top-0 left-0 right-0 z-[60] w-full ${bgColorClass} px-4`}
+			style={{
+				height: `${BANNER_HEIGHT}px`,
+				transform: 'translateZ(0)', // Force GPU acceleration and prevent jank
+				willChange: 'auto', // Optimize rendering
+			}}
+		>
 			<div className="container mx-auto h-full flex items-center justify-between gap-4">
-				<div className="flex-1 text-center text-sm sm:text-base">
-					{message}
-				</div>
+				{linkUrl ? (
+					<a
+						href={linkUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="flex-1 text-center text-sm sm:text-base hover:underline cursor-pointer"
+					>
+						{message}
+					</a>
+				) : (
+					<div className="flex-1 text-center text-sm sm:text-base">
+						{message}
+					</div>
+				)}
 				<button
 					onClick={handleClose}
-					className="flex-shrink-0 rounded-md p-1 hover:bg-black/10 transition-colors"
+					className="flex-shrink-0 rounded-md p-1 hover:bg-black/10 transition-colors z-10"
 					aria-label="Close banner"
 				>
 					<X className="h-4 w-4" />
@@ -82,19 +102,4 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 			</div>
 		</div>
 	);
-
-	if (linkUrl) {
-		return (
-			<a
-				href={linkUrl}
-				target="_blank"
-				rel="noopener noreferrer"
-				className="block hover:opacity-90 transition-opacity"
-			>
-				{content}
-			</a>
-		);
-	}
-
-	return content;
 }

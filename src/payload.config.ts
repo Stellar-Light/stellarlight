@@ -107,10 +107,9 @@ export default buildConfig({
 	db: mongooseAdapter({
 		url: process.env.MONGODB_URI || process.env.DATABASE_URI || "",
 		connectOptions: {
-			// Ensure SSL/TLS is properly configured for MongoDB Atlas
-			// These options help with connection stability
-			serverSelectionTimeoutMS: 5000,
-			socketTimeoutMS: 45000,
+			// MongoDB Atlas recommended options
+			retryWrites: true,
+			w: 'majority',
 		},
 		// Disable file storage in MongoDB - files stored on disk in /media directory
 		// On Vercel (read-only filesystem), uploads will fail but admin panel works
