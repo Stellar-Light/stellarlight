@@ -16,6 +16,7 @@ import { RSSFeeds } from "./collections/RSSFeeds";
 import { Signals } from "./collections/Signals";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
+import { Banner } from "./globals/Banner";
 import { syncRSSFeedTask } from "./jobs/syncRSSFeed";
 
 const filename = fileURLToPath(import.meta.url);
@@ -52,6 +53,7 @@ export default buildConfig({
 		TransparencyLogs,
 		Carousel,
 	],
+	globals: [Banner],
 	jobs: {
 		tasks: [
 			{

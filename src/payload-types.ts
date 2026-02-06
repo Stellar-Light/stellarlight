@@ -102,8 +102,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    banner: Banner;
+  };
+  globalsSelect: {
+    banner: BannerSelect<false> | BannerSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -1033,6 +1037,46 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Configure the site-wide top banner
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banner".
+ */
+export interface Banner {
+  id: string;
+  /**
+   * Turn the banner ON or OFF
+   */
+  enabled?: boolean | null;
+  /**
+   * Banner message to display
+   */
+  message?: string | null;
+  /**
+   * Optional URL - when set, the banner becomes clickable
+   */
+  linkUrl?: string | null;
+  /**
+   * Choose a background color for the banner
+   */
+  backgroundColor?: ('primary' | 'blue' | 'green' | 'amber' | 'red' | 'gray') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banner_select".
+ */
+export interface BannerSelect<T extends boolean = true> {
+  enabled?: T;
+  message?: T;
+  linkUrl?: T;
+  backgroundColor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

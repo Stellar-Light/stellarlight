@@ -5,6 +5,7 @@ import "../globals.css";
 import { Navigation } from "@/components/ui/navigation";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
+import { BannerWrapper } from "@/components/banner-wrapper";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -111,7 +112,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
 			<body className="min-h-screen font-sans antialiased">
 				<Providers>
+					<BannerWrapper />
 					<Navigation />
+					{/* Spacer for fixed banner and navigation */}
+					<div style={{ height: 'calc(var(--banner-height, 0px) + 4rem)' }} />
 					<main className="min-h-[calc(100vh-4rem)]">{children}</main>
 					<Footer />
 				</Providers>

@@ -103,12 +103,13 @@ export function Navigation() {
 	];
 
 	return (
-		<nav 
+		<nav
 			className={cn(
-				"fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-all duration-300 ease-in-out border-border/40",
+				"fixed left-0 right-0 z-50 border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-all duration-300 ease-in-out border-border/40",
 				hasScrolled ? 'shadow-[0_1px_3px_rgba(0,0,0,0.3)]' : 'shadow-sm',
 				isVisible ? 'translate-y-0' : '-translate-y-full'
 			)}
+			style={{ top: 'var(--banner-height, 0px)' }}
 		>
 			<div className="container mx-auto flex h-16 items-center justify-between px-6">
 				<div className="opacity-100 animate-in fade-in slide-in-from-top-2 duration-400">
