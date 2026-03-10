@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 			where,
 			limit,
 			page,
-			sort: "-lastVerifiedAt",
+			sort: "name",
 			depth: 1,
 		});
 

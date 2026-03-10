@@ -2,30 +2,49 @@ import { readFile, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import { join } from "path";
 import { simpleGit } from "simple-git";
+import yaml from "js-yaml";
 import configPromise from "@/payload.config";
 import { getPayload } from "payload";
 import { headers } from "next/headers";
 import {
 	extractEntryId,
 	mapLumenloopEntry,
+	type LumenloopEntry,
 } from "@/lib/utils/lumenloop-mapper";
 import { generateSlug } from "@/lib/utils/normalize";
 
-export async function POST() {
+interface SyncStats {
+	projects: { inserted: number; updated: number; skipped: number; errors: number };
+	entities: { created: number; linked: number; skipped: number; errors: number };
+	total_files: number;
+}
+
+export async function POST(request: Request) {
 	const headersList = await headers();
 	const payload = await getPayload({ config: configPromise });
 
-	// Authenticate admin user (in PayloadCMS, authenticated users are admins)
+	// Authenticate admin user
 	const { user } = await payload.auth({ headers: headersList });
 	if (!user) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	// Note: We don't create a separate sync job record here
-	// The transparency logs will track all changes made during sync
+	// Check for dry-run mode
+	const url = new URL(request.url);
+	const dryRun = url.searchParams.get("dryRun") === "true";
 
-	const stats = { inserted: 0, updated: 0, skipped: 0, errors: 0 };
+	const stats: SyncStats = {
+		projects: { inserted: 0, updated: 0, skipped: 0, errors: 0 },
+		entities: { created: 0, linked: 0, skipped: 0, errors: 0 },
+		total_files: 0,
+	};
 	const errors: string[] = [];
+	const dryRunLog: Array<{
+		action: string;
+		type: string;
+		name: string;
+		details?: string;
+	}> = [];
 
 	try {
 		// Determine source path
@@ -33,15 +52,12 @@ export async function POST() {
 		if (process.env.LUMENLOOP_PATH && existsSync(process.env.LUMENLOOP_PATH)) {
 			repoPath = process.env.LUMENLOOP_PATH;
 		} else {
-			// Clone repo to /tmp
 			repoPath = "/tmp/stellar-ecosystem-db";
 			const git = simpleGit();
 
 			if (existsSync(repoPath)) {
-				// Pull latest if exists
 				await git.cwd(repoPath).pull();
 			} else {
-				// Clone shallow
 				await git.clone(
 					"https://github.com/lumenloop/stellar-ecosystem-db.git",
 					repoPath,
@@ -50,107 +66,228 @@ export async function POST() {
 			}
 		}
 
-		// Find and parse data files (JSON/YAML)
-		const dataFiles = await findDataFiles(repoPath);
+		// Only scan the projects/ directory
+		const projectsDir = join(repoPath, "projects");
+		if (!existsSync(projectsDir)) {
+			return Response.json(
+				{ error: "projects/ directory not found in repo" },
+				{ status: 500 },
+			);
+		}
 
-		for (const filePath of dataFiles) {
+		const yamlFiles = await findYamlFiles(projectsDir);
+		stats.total_files = yamlFiles.length;
+
+		// Phase 1: Collect all unique parent entities and create them
+		const entityMap = new Map<string, string>(); // entity slug → entity ID
+		const parentNames = new Set<string>();
+
+		// First pass: collect parent names
+		for (const filePath of yamlFiles) {
 			try {
 				const rawData = await readFile(filePath, "utf-8");
-				const entries = parseDataFile(rawData, filePath);
+				const entry = yaml.load(rawData) as LumenloopEntry;
+				if (entry?.parent) {
+					parentNames.add(entry.parent);
+				}
+			} catch {
+				// Skip files that can't be parsed in first pass
+			}
+		}
 
-				for (const [index, entry] of entries.entries()) {
-					try {
-						const entryId = extractEntryId(entry, index);
-						const mapped = mapLumenloopEntry(entry, entryId);
+		// Create or find entities
+		for (const parentName of parentNames) {
+			try {
+				const entitySlug = generateSlug(parentName);
 
-						if (!mapped.name) {
-							stats.skipped++;
-							continue;
-						}
+				// Check if entity already exists
+				const existing = await payload.find({
+					collection: "entities",
+					where: { slug: { equals: entitySlug } },
+					limit: 1,
+				});
 
-						// Check if project exists by slug or normalized domain
-						const slug = generateSlug(mapped.name);
-						const existing = await payload.find({
-							collection: "projects",
-							where: {
-								or: [
-									{ slug: { equals: slug } },
-									...(mapped.links?.website
-										? [
-												{
-													"links.website": {
-														contains: mapped.links.website,
-													},
-												},
-											]
-										: []),
-								],
-							},
-							limit: 1,
+				if (existing.docs.length > 0) {
+					entityMap.set(entitySlug, existing.docs[0].id);
+					stats.entities.skipped++;
+					if (dryRun) {
+						dryRunLog.push({
+							action: "skip",
+							type: "entity",
+							name: parentName,
+							details: "Already exists",
 						});
-
-						if (existing.docs.length > 0) {
-							// Update existing
-							const existingDoc = existing.docs[0];
-							// Only update if source is LumenloopSeed or it's unverified
-							if (
-								existingDoc.provenance?.source === "LumenloopSeed" ||
-								existingDoc.verificationLevel === "Unverified"
-							) {
-								await payload.update({
-									collection: "projects",
-									id: existingDoc.id,
-									data: {
-										...mapped,
-										slug, // Preserve slug
-										provenance: {
-											...mapped.provenance,
-											firstSeenAt:
-												existingDoc.provenance?.firstSeenAt ||
-												mapped.provenance?.firstSeenAt,
-										},
-									},
-								});
-								stats.updated++;
-							} else {
-								stats.skipped++;
-							}
-						} else {
-							// Create new
-							await payload.create({
-								collection: "projects",
-								data: {
-									...mapped,
-									slug,
-								} as any, // Payload types are complex, but data is validated
-							});
-							stats.inserted++;
-						}
-					} catch (error) {
-						stats.errors++;
-						errors.push(
-							`Entry ${index} in ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
-						);
 					}
+				} else if (dryRun) {
+					entityMap.set(entitySlug, `dry-run-${entitySlug}`);
+					stats.entities.created++;
+					dryRunLog.push({
+						action: "create",
+						type: "entity",
+						name: parentName,
+					});
+				} else {
+					const created = await payload.create({
+						collection: "entities",
+						data: {
+							name: parentName,
+							slug: entitySlug,
+						},
+					});
+					entityMap.set(entitySlug, created.id);
+					stats.entities.created++;
 				}
 			} catch (error) {
-				stats.errors++;
+				stats.entities.errors++;
 				errors.push(
-					`File ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+					`Entity "${parentName}": ${error instanceof Error ? error.message : String(error)}`,
 				);
 			}
 		}
 
-		// Sync completed - transparency logs track all changes
+		// Phase 2: Process projects
+		for (const filePath of yamlFiles) {
+			const fileName = filePath.split("/").pop() || filePath;
+			try {
+				const rawData = await readFile(filePath, "utf-8");
+				const entry = yaml.load(rawData) as LumenloopEntry;
+
+				if (!entry || !entry.title) {
+					stats.projects.skipped++;
+					continue;
+				}
+
+				const entryId = extractEntryId(entry);
+				const { project: mapped, parentEntity } =
+					mapLumenloopEntry(entry, entryId);
+				const slug = generateSlug(mapped.name!);
+
+				// Check if project exists by slug
+				const existing = await payload.find({
+					collection: "projects",
+					where: { slug: { equals: slug } },
+					limit: 1,
+				});
+
+				if (existing.docs.length > 0) {
+					const existingDoc = existing.docs[0];
+
+					// Only update if source is LumenloopSeed or it's unverified
+					if (
+						existingDoc.provenance?.source === "LumenloopSeed" ||
+						existingDoc.verificationLevel === "Unverified"
+					) {
+						if (dryRun) {
+							dryRunLog.push({
+								action: "update",
+								type: "project",
+								name: mapped.name!,
+								details: `Existing slug: ${slug}`,
+							});
+							stats.projects.updated++;
+						} else {
+							await payload.update({
+								collection: "projects",
+								id: existingDoc.id,
+								data: {
+									...mapped,
+									slug,
+									provenance: {
+										...mapped.provenance,
+										firstSeenAt:
+											existingDoc.provenance?.firstSeenAt ||
+											mapped.provenance?.firstSeenAt,
+									},
+								},
+							});
+							stats.projects.updated++;
+						}
+
+						// Link entity if parent exists
+						if (parentEntity) {
+							await linkEntity(
+								payload,
+								parentEntity,
+								existing.docs[0].id,
+								entityMap,
+								stats,
+								errors,
+								dryRun,
+								dryRunLog,
+							);
+						}
+					} else {
+						stats.projects.skipped++;
+						if (dryRun) {
+							dryRunLog.push({
+								action: "skip",
+								type: "project",
+								name: mapped.name!,
+								details: `Source: ${existingDoc.provenance?.source}, Verified: ${existingDoc.verificationLevel}`,
+							});
+						}
+					}
+				} else {
+					// Create new project
+					if (dryRun) {
+						dryRunLog.push({
+							action: "create",
+							type: "project",
+							name: mapped.name!,
+							details: `Category: ${mapped.category}`,
+						});
+						stats.projects.inserted++;
+
+						if (parentEntity) {
+							stats.entities.linked++;
+							dryRunLog.push({
+								action: "link",
+								type: "entity",
+								name: parentEntity,
+								details: `→ ${mapped.name}`,
+							});
+						}
+					} else {
+						const created = await payload.create({
+							collection: "projects",
+							data: {
+								...mapped,
+								slug,
+							} as any,
+						});
+						stats.projects.inserted++;
+
+						// Link entity if parent exists
+						if (parentEntity) {
+							await linkEntity(
+								payload,
+								parentEntity,
+								created.id,
+								entityMap,
+								stats,
+								errors,
+								dryRun,
+								dryRunLog,
+							);
+						}
+					}
+				}
+			} catch (error) {
+				stats.projects.errors++;
+				errors.push(
+					`File ${fileName}: ${error instanceof Error ? error.message : String(error)}`,
+				);
+			}
+		}
 
 		return Response.json({
 			success: true,
+			dryRun,
 			stats,
 			errors: errors.length > 0 ? errors : undefined,
+			...(dryRun ? { log: dryRunLog } : {}),
 		});
 	} catch (error) {
-		// Error occurred - log it
-
 		return Response.json(
 			{
 				success: false,
@@ -163,71 +300,71 @@ export async function POST() {
 }
 
 /**
- * Find data files (JSON/YAML) in the repo
+ * Link a parent entity to a project
  */
-async function findDataFiles(rootPath: string): Promise<string[]> {
-	const files: string[] = [];
-	const extensions = [".json", ".yaml", ".yml"];
+async function linkEntity(
+	payload: any,
+	parentName: string,
+	projectId: string,
+	entityMap: Map<string, string>,
+	stats: SyncStats,
+	errors: string[],
+	dryRun: boolean,
+	dryRunLog: Array<{ action: string; type: string; name: string; details?: string }>,
+) {
+	try {
+		const entitySlug = generateSlug(parentName);
+		const entityId = entityMap.get(entitySlug);
 
-	async function walkDir(dir: string): Promise<void> {
-		try {
-			const entries = await readdir(dir, { withFileTypes: true });
-			for (const entry of entries) {
-				const fullPath = join(dir, entry.name);
-
-				if (
-					entry.isDirectory() &&
-					!entry.name.startsWith(".") &&
-					entry.name !== "node_modules"
-				) {
-					await walkDir(fullPath);
-				} else if (entry.isFile()) {
-					const ext = entry.name.toLowerCase();
-					if (extensions.some((e) => ext.endsWith(e))) {
-						files.push(fullPath);
-					}
-				}
-			}
-		} catch {
-			// Skip directories we can't read
+		if (!entityId) {
+			return; // Entity wasn't created (error during creation)
 		}
-	}
 
-	await walkDir(rootPath);
-	return files;
+		if (dryRun) {
+			stats.entities.linked++;
+			return;
+		}
+
+		// Get current entity to check existing project links
+		const entity = await payload.findByID({
+			collection: "entities",
+			id: entityId,
+		});
+
+		const existingProjects: string[] = Array.isArray(entity.projects)
+			? entity.projects.map((p: any) => (typeof p === "string" ? p : p.id))
+			: [];
+
+		// Only add if not already linked
+		if (!existingProjects.includes(projectId)) {
+			await payload.update({
+				collection: "entities",
+				id: entityId,
+				data: {
+					projects: [...existingProjects, projectId],
+				},
+			});
+			stats.entities.linked++;
+		}
+	} catch (error) {
+		stats.entities.errors++;
+		errors.push(
+			`Link entity "${parentName}": ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
 }
 
 /**
- * Parse a data file (JSON or YAML) into an array of entries
+ * Find YAML files in a directory (non-recursive, since all projects are flat)
  */
-function parseDataFile(
-	content: string,
-	filePath: string,
-): Record<string, unknown>[] {
-	const ext = filePath.toLowerCase();
-
-	if (ext.endsWith(".json")) {
-		try {
-			const parsed = JSON.parse(content);
-			// If it's an array, return it; if it's an object, wrap it
-			return Array.isArray(parsed) ? parsed : [parsed];
-		} catch {
-			return [];
-		}
-	}
-
-	if (ext.endsWith(".yaml") || ext.endsWith(".yml")) {
-		// For MVP, we'll handle YAML as JSON-compatible or skip
-		// In production, you'd use a YAML parser like js-yaml
-		try {
-			// Try parsing as JSON first (some YAML is JSON-compatible)
-			const parsed = JSON.parse(content);
-			return Array.isArray(parsed) ? parsed : [parsed];
-		} catch {
-			// Skip YAML files for now (can add js-yaml later if needed)
-			return [];
-		}
-	}
-
-	return [];
+async function findYamlFiles(dir: string): Promise<string[]> {
+	const entries = await readdir(dir, { withFileTypes: true });
+	return entries
+		.filter(
+			(e) =>
+				e.isFile() &&
+				(e.name.endsWith(".yaml") || e.name.endsWith(".yml")),
+		)
+		.map((e) => join(dir, e.name))
+		.sort();
 }

@@ -20,11 +20,7 @@ export const RSSSyncButton: React.FC = () => {
 		setResult(null);
 
 		try {
-			const appUrl =
-				typeof window !== "undefined"
-					? window.location.origin
-					: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-			const response = await fetch(`${appUrl}/api/sync/rss`, {
+			const response = await fetch(`/api/sync/rss`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

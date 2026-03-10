@@ -77,7 +77,7 @@ export default async function EntityDetailPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-6xl mx-auto px-6 py-16 pt-28">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
 				{/* Back Button */}
 				<Link
 					href="/entities"

@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { lexicalEditor, BlocksFeature } from "@payloadcms/richtext-lexical";
+import { SocialEmbedBlock } from "../blocks/SocialEmbed";
+import { HtmlSnippetBlock } from "../blocks/HtmlSnippet";
 
 export const Blog: CollectionConfig = {
 	slug: "blog",
@@ -8,7 +10,8 @@ export const Blog: CollectionConfig = {
 		defaultColumns: ["title", "author", "publishedAt", "featured", "status"],
 		preview: (doc) => {
 			if (doc?.slug) {
-				return `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/blog/${doc.slug}`;
+				const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+				return `${base}/api/preview?secret=${process.env.PAYLOAD_SECRET}&slug=${doc.slug}`;
 			}
 			return null;
 		},
@@ -127,7 +130,7 @@ export const Blog: CollectionConfig = {
 			editor: lexicalEditor({
 				features: ({ defaultFeatures }) => [
 					...defaultFeatures,
-					// Add any custom features here if needed
+					BlocksFeature({ blocks: [SocialEmbedBlock, HtmlSnippetBlock] }),
 				],
 			}),
 		},

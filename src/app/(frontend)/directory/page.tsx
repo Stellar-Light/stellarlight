@@ -25,7 +25,7 @@ export default async function DirectoryPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 				{/* Header */}
 				<div className="mb-8">
 					<h2 className="text-3xl font-medium tracking-tight mb-6">

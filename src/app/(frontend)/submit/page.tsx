@@ -154,7 +154,7 @@ export default function SubmitPage() {
 	if (success) {
 		return (
 			<div className="min-h-screen relative">
-				<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+				<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 					<div className="max-w-2xl mx-auto">
 						<div className="idea-card rounded-xl p-8 border-2 border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent">
 							<div className="text-center space-y-6">
@@ -196,7 +196,7 @@ export default function SubmitPage() {
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 				<div className="max-w-2xl mx-auto">
 					<Button asChild variant="ghost" className="mb-8">
 						<Link href="/directory">
