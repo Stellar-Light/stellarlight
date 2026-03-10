@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectLogo } from "@/components/project-logo";
+import EntityCard from "@/components/entity-card";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -327,37 +328,47 @@ export default async function ProjectDetailPage({
 	}
 
 	// Find entities that have this project
-	const entitiesResult = await payload.find({
-		collection: "entities",
-		where: {
-			projects: {
-				contains: project.id,
+	let linkedEntities: any[] = [];
+	try {
+		const entitiesResult = await payload.find({
+			collection: "entities",
+			where: {
+				projects: {
+					contains: String(project.id),
+				},
 			},
-		},
-	});
-
-	const linkedEntities = entitiesResult.docs;
+			depth: 1,
+		});
+		linkedEntities = entitiesResult.docs;
+	} catch {
+		// Silently handle entities fetch errors
+	}
 
 	// Fetch transparency logs
-	const logsResult = await payload.find({
-		collection: "transparency-logs",
-		where: {
-			and: [
-				{
-					targetCollection: {
-						equals: "projects",
+	let logsResult: { docs: any[] } = { docs: [] };
+	try {
+		logsResult = await payload.find({
+			collection: "transparency-logs",
+			where: {
+				and: [
+					{
+						targetCollection: {
+							equals: "projects",
+						},
 					},
-				},
-				{
-					targetId: {
-						equals: project.id.toString(),
+					{
+						targetId: {
+							equals: project.id.toString(),
+						},
 					},
-				},
-			],
-		},
-		limit: 10,
-		sort: "-timestamp",
-	});
+				],
+			},
+			limit: 10,
+			sort: "-timestamp",
+		});
+	} catch {
+		// Silently handle transparency logs fetch errors
+	}
 
 	const linkIcons = {
 		website: Globe,
@@ -399,7 +410,7 @@ export default async function ProjectDetailPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-6xl mx-auto px-6 py-16 pt-28">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
 				{/* Back Button */}
 				<Link
 					href="/directory"
@@ -557,6 +568,25 @@ export default async function ProjectDetailPage({
 										</a>
 									);
 								})}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Built By - Linked Entities */}
+				{linkedEntities.length > 0 && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold">Built By</CardTitle>
+							<CardDescription>
+								{linkedEntities.length === 1 ? "Organization" : "Organizations"} behind this project
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className={`grid gap-4 ${linkedEntities.length === 1 ? "grid-cols-1 max-w-sm" : "grid-cols-1 md:grid-cols-2"}`}>
+								{linkedEntities.map((entity) => (
+									<EntityCard key={entity.id} entity={entity} />
+								))}
 							</div>
 						</CardContent>
 					</Card>

@@ -60,7 +60,7 @@ export default async function BlogPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-7xl mx-auto px-6 py-16 pt-28">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 pt-28">
 				{/* Header */}
 				<div className="mb-12">
 					<Link
@@ -82,41 +82,51 @@ export default async function BlogPage({
 				</div>
 
 				{/* Filters */}
-				<div className="mb-12 flex flex-wrap gap-4">
+				<div className="mb-12 space-y-4">
 					{(category || tag) && (
-						<Button
-							asChild
-							variant="outline"
-							className="rounded-xl border-border hover:border-white/20"
-						>
-							<Link href="/blog">Clear Filters</Link>
-						</Button>
+						<div>
+							<Button
+								asChild
+								variant="outline"
+								className="rounded-xl border-border hover:border-white/20"
+							>
+								<Link href="/blog">Clear Filters</Link>
+							</Button>
+						</div>
 					)}
-					{categories.map((cat) => (
-						<Button
-							key={cat}
-							asChild
-							variant={category === cat ? "default" : "outline"}
-							className="rounded-xl"
-						>
-							<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>{cat}</Link>
-						</Button>
-					))}
+					<div className="flex flex-wrap items-center gap-3">
+						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
+							Categories
+						</span>
+						{categories.map((cat) => (
+							<Button
+								key={cat}
+								asChild
+								variant={category === cat ? "default" : "outline"}
+								className="rounded-xl"
+							>
+								<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>{cat}</Link>
+							</Button>
+						))}
+					</div>
 					{allTags.length > 0 && (
-						<>
+						<div className="flex flex-wrap items-center gap-3">
+							<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
+								Tags
+							</span>
 							{allTags.map((t) => (
 								<Button
 									key={t}
 									asChild
 									variant={tag === t ? "default" : "outline"}
-									className="rounded-xl"
+									className="rounded-xl text-sm"
 								>
-									<Link href={`/blog?tag=${t}${category ? `&category=${category}` : ""}`}>
-										{t}
+									<Link href={`/blog?tag=${encodeURIComponent(t)}${category ? `&category=${category}` : ""}`}>
+										#{t}
 									</Link>
 								</Button>
 							))}
-						</>
+						</div>
 					)}
 				</div>
 

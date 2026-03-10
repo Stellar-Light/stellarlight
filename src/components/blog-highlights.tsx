@@ -75,17 +75,15 @@ export default async function BlogHighlights() {
 					{featuredPosts.map((post: any) => (
 						<CarouselItem
 							key={post.id}
-							className="pl-2 md:pl-4 basis-1/2"
+							className="pl-2 md:pl-4 basis-full sm:basis-1/2"
 						>
 							<BlogHighlightCard post={post} />
 						</CarouselItem>
 					))}
 				</CarouselContent>
 				{/* Navigation arrows below the carousel */}
-				<div className="flex items-center justify-center gap-10 mt-6">
-					<CarouselPrevious className="relative left-0 top-0 translate-x-0 translate-y-0 hidden md:flex bg-card border-border hover:border-white/30" />
-					<CarouselNext className="relative right-0 top-0 translate-x-0 translate-y-0 hidden md:flex bg-card border-border hover:border-white/30" />
-				</div>
+				<CarouselPrevious className="bg-card/80 backdrop-blur-sm border-border hover:border-white/30" />
+				<CarouselNext className="bg-card/80 backdrop-blur-sm border-border hover:border-white/30" />
 			</Carousel>
 			<div className="mt-6 text-center sm:hidden">
 				<Button

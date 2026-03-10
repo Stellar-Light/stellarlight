@@ -19,11 +19,7 @@ export const AirtableSyncButton: React.FC = () => {
 		setResult(null);
 
 		try {
-			const appUrl =
-				typeof window !== "undefined"
-					? window.location.origin
-					: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-			const response = await fetch(`${appUrl}/api/import/airtable`, {
+			const response = await fetch(`/api/import/airtable`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

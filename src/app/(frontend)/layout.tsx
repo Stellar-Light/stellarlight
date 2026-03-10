@@ -110,7 +110,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
 		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
-			<body className="min-h-screen font-sans antialiased">
+			<body className="min-h-screen font-sans antialiased overflow-x-hidden">
 				<Providers>
 					<BannerWrapper />
 					<Navigation />

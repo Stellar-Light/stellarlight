@@ -39,7 +39,7 @@ export default async function HomePage() {
 		<div className="min-h-screen relative">
 			<BaseFeeDisplay />
 
-			<main className="max-w-7xl mx-auto px-6 py-16 pt-16">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-16">
 				{/* Hero Section */}
 				<div className="mb-20 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[600px] relative">
 					<div className="flex-1 text-left relative z-10 space-y-8">

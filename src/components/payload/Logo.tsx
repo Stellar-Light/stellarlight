@@ -1,13 +1,9 @@
 import React from "react";
 
 export const Logo: React.FC = () => {
-	const appUrl = typeof window !== "undefined" 
-		? window.location.origin 
-		: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
 	return (
-		<a 
-			href={`${appUrl}/`}
+		<a
+			href="/"
 			style={{ 
 				display: "flex", 
 				alignItems: "center", 

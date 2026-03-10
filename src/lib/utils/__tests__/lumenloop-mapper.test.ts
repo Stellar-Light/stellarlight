@@ -1,121 +1,171 @@
 import { describe, it, expect } from "vitest";
-import { mapLumenloopEntry, extractEntryId } from "../lumenloop-mapper";
+import {
+	mapLumenloopEntry,
+	extractEntryId,
+	type LumenloopEntry,
+} from "../lumenloop-mapper";
 
 describe("lumenloop-mapper", () => {
-	const sampleEntry1 = {
-		name: "Stellar Wallet",
+	// Matches the actual YAML schema from stellar-ecosystem-db
+	const sampleEntry1: LumenloopEntry = {
+		title: "Stellar Wallet",
+		parent: "Stellar Dev Co",
 		description: "A secure wallet for Stellar assets",
-		category: "Infrastructure",
-		types: ["Wallet", "SDK"],
-		status: "Live",
 		links: {
-			website: "https://stellarwallet.com",
-			github: "https://github.com/stellar/wallet",
+			website: ["stellarwallet.com"],
+			github: ["github.com/stellar/wallet"],
+			x: ["stellarwallet"],
+			discord: ["discord.gg/abc123"],
 		},
-		onchain: {
-			assetCode: "XLM",
-			issuer: "GDQERENWDDSQZSZX",
+		attributes: {
+			category: "Applications",
+			tags: ["Wallet", "SDK"],
 		},
 	};
 
-	const sampleEntry2 = {
+	const sampleEntry2: LumenloopEntry = {
 		title: "Anchor Service",
-		summary: "Payment anchor for XLM",
-		type: "Anchor",
-		tags: ["Anchor", "Payment Rail"],
-		stage: "Pre-Release",
-		urls: {
-			homepage: "http://www.anchor.example",
+		description: "Payment anchor for XLM",
+		attributes: {
+			category: "Infrastructure & Services",
+			tags: ["Anchor", "Payments"],
+		},
+		links: {
+			website: ["anchor.example.com"],
 		},
 	};
 
-	const sampleEntry3 = {
-		name: "DEX Protocol",
+	const sampleEntry3: LumenloopEntry = {
+		title: "DEX Protocol",
+		parent: "Some Labs",
 		description: "Decentralized exchange",
-		category: "Protocol/Contract",
-		status: "Development",
-		links: {
-			website: "https://www.dex.stellar",
+		attributes: {
+			category: "Financial Protocols",
+			tags: ["DEX"],
 		},
-		onchain: {
+		links: {
+			website: ["dex.stellar.com"],
+			github: ["github.com/somelabs/dex-protocol"],
+		},
+		mainnet: {
 			contracts: ["CAAA...", "CBBB..."],
 		},
 	};
 
 	describe("mapLumenloopEntry", () => {
 		it("should map a complete entry correctly", () => {
-			const mapped = mapLumenloopEntry(sampleEntry1, "stellar-wallet");
+			const { project, parentEntity, githubRepos } = mapLumenloopEntry(
+				sampleEntry1,
+				"stellar-wallet",
+			);
 
-			expect(mapped.name).toBe("Stellar Wallet");
-			expect(mapped.shortDescription).toBe(
+			expect(project.name).toBe("Stellar Wallet");
+			expect(project.shortDescription).toBe(
 				"A secure wallet for Stellar assets",
 			);
-			expect(mapped.category).toBe("Infrastructure");
-			expect(mapped.types).toContain("Wallet");
-			expect(mapped.types).toContain("SDK");
-			expect(mapped.status).toBe("Live");
-			expect(mapped.links?.website).toBeTruthy();
-			expect(mapped.links?.github).toBeTruthy();
-			expect(mapped.onchain?.assetCode).toBe("XLM");
-			expect(mapped.onchain?.issuer).toBe("GDQERENWDDSQZSZX");
-			expect(mapped.provenance?.source).toBe("LumenloopSeed");
-			expect(mapped.provenance?.sourceId).toBe("stellar-wallet");
+			expect(project.category).toBe("User-Facing App"); // "Applications" → "User-Facing App"
+			expect(project.types).toContain("Wallet");
+			expect(project.types).toContain("SDK");
+			expect(project.status).toBe("Live");
+			expect(project.links?.website).toBe("https://stellarwallet.com");
+			expect(project.links?.github).toBe("https://github.com/stellar/wallet");
+			expect(project.links?.twitter).toBe("https://x.com/stellarwallet");
+			expect(project.links?.discord).toBe("https://discord.gg/abc123");
+			expect(project.provenance?.source).toBe("LumenloopSeed");
+			expect(project.provenance?.sourceId).toBe("stellar-wallet");
+			expect(parentEntity).toBe("Stellar Dev Co");
+			expect(githubRepos).toEqual([{ owner: "stellar", name: "wallet" }]);
 		});
 
-		it("should handle alternative field names", () => {
-			const mapped = mapLumenloopEntry(sampleEntry2, "anchor-service");
+		it("should map github repos to github.repos array", () => {
+			const { project } = mapLumenloopEntry(sampleEntry1, "stellar-wallet");
 
-			expect(mapped.name).toBe("Anchor Service");
-			expect(mapped.shortDescription).toBe("Payment anchor for XLM");
-			expect(mapped.category).toBe("Anchor");
-			expect(mapped.types).toContain("Anchor");
-			expect(mapped.types).toContain("Payment Rail");
-			expect(mapped.status).toBe("Pre-Release");
-			expect(mapped.links?.website).toBeTruthy();
+			expect(project.github?.repos).toEqual([
+				{ owner: "stellar", name: "wallet" },
+			]);
+		});
+
+		it("should handle Infrastructure & Services category", () => {
+			const { project, parentEntity } = mapLumenloopEntry(
+				sampleEntry2,
+				"anchor-service",
+			);
+
+			expect(project.name).toBe("Anchor Service");
+			expect(project.shortDescription).toBe("Payment anchor for XLM");
+			expect(project.category).toBe("Infrastructure");
+			expect(project.types).toContain("Anchor");
+			expect(project.types).toContain("Payment Rail"); // "Payments" → "Payment Rail"
+			expect(project.links?.website).toBe("https://anchor.example.com");
+			expect(parentEntity).toBeNull();
 		});
 
 		it("should map contracts array correctly", () => {
-			const mapped = mapLumenloopEntry(sampleEntry3, "dex-protocol");
+			const { project } = mapLumenloopEntry(sampleEntry3, "dex-protocol");
 
-			expect(mapped.onchain?.contracts).toBeDefined();
-			expect(Array.isArray(mapped.onchain?.contracts)).toBe(true);
-			if (mapped.onchain?.contracts) {
-				expect(mapped.onchain.contracts.length).toBe(2);
-				expect(mapped.onchain.contracts[0].address).toBe("CAAA...");
+			expect(project.onchain?.contracts).toBeDefined();
+			expect(Array.isArray(project.onchain?.contracts)).toBe(true);
+			if (project.onchain?.contracts) {
+				expect(project.onchain.contracts.length).toBe(2);
+				expect(project.onchain.contracts[0].address).toBe("CAAA...");
 			}
 		});
 
-		it("should set default values when fields are missing", () => {
-			const minimalEntry = { name: "Minimal Project" };
-			const mapped = mapLumenloopEntry(minimalEntry, "minimal");
+		it("should extract parent entity name", () => {
+			const { parentEntity } = mapLumenloopEntry(sampleEntry3, "dex-protocol");
+			expect(parentEntity).toBe("Some Labs");
+		});
 
-			expect(mapped.name).toBe("Minimal Project");
-			expect(mapped.verificationLevel).toBe("Unverified");
-			expect(mapped.provenance?.source).toBe("LumenloopSeed");
-			expect(mapped.status).toBe("Development"); // default
-			expect(mapped.category).toBe("Infrastructure"); // default
+		it("should set default values when fields are missing", () => {
+			const minimalEntry: LumenloopEntry = { title: "Minimal Project" };
+			const { project } = mapLumenloopEntry(minimalEntry, "minimal");
+
+			expect(project.name).toBe("Minimal Project");
+			expect(project.verificationLevel).toBe("Unverified");
+			expect(project.provenance?.source).toBe("LumenloopSeed");
+			expect(project.status).toBe("Live"); // lumenloop entries default to Live
+			expect(project.category).toBe("Infrastructure"); // null category defaults
+		});
+
+		it("should handle Financial Protocols category", () => {
+			const { project } = mapLumenloopEntry(sampleEntry3, "dex-protocol");
+			expect(project.category).toBe("Protocol/Contract");
+			expect(project.types).toContain("DEX");
+		});
+
+		it("should extract multiple GitHub repos", () => {
+			const entry: LumenloopEntry = {
+				title: "Multi Repo",
+				links: {
+					github: [
+						"github.com/org/repo1",
+						"github.com/org/repo2",
+					],
+				},
+			};
+			const { githubRepos, project } = mapLumenloopEntry(entry, "multi-repo");
+			expect(githubRepos).toEqual([
+				{ owner: "org", name: "repo1" },
+				{ owner: "org", name: "repo2" },
+			]);
+			expect(project.github?.orgLogin).toBe("org");
 		});
 	});
 
 	describe("extractEntryId", () => {
-		it("should extract domain from website URL", () => {
-			const id = extractEntryId(
-				{
-					links: { website: "https://www.example.com/path" },
-				},
-				0,
-			);
-			expect(id).toBe("example.com");
-		});
-
-		it("should fallback to slug from name when no website", () => {
-			const id = extractEntryId({ name: "My Awesome Project" }, 0);
+		it("should create slug from title", () => {
+			const id = extractEntryId({ title: "My Awesome Project" });
 			expect(id).toBe("my-awesome-project");
 		});
 
-		it("should handle index fallback for unnamed entries", () => {
-			const id = extractEntryId({}, 42);
-			expect(id).toBe("entry-42");
+		it("should handle missing title", () => {
+			const id = extractEntryId({});
+			expect(id).toBe("unknown");
+		});
+
+		it("should handle special characters", () => {
+			const id = extractEntryId({ title: "Protocol/Contract (v2)" });
+			expect(id).toBe("protocolcontract-v2");
 		});
 	});
 });

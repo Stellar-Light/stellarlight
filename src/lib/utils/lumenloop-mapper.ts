@@ -1,152 +1,264 @@
 import type { Project } from "@/payload-types";
-import { normalizeUrl } from "./normalize";
+import { generateSlug } from "./normalize";
 
 /**
- * Map a raw project entry from Lumenloop repo to Payload Projects format
- * This is a pure function that transforms data structures
+ * Raw entry shape from Lumenloop YAML files
+ */
+export interface LumenloopEntry {
+	title?: string;
+	other_names?: string[] | null;
+	parent?: string | null;
+	description?: string | null;
+	links?: {
+		website?: string[];
+		blog?: string[];
+		x?: string[];
+		linkedin?: string[];
+		discord?: string[];
+		telegram?: string[];
+		youtube?: string[];
+		instagram?: string[];
+		reddit?: string[];
+		tiktok?: string[];
+		linktree?: string[];
+		github?: string[];
+	};
+	attributes?: {
+		category?: string | null;
+		tags?: string[];
+		operating_region?: string[];
+		based_in?: string | null;
+	};
+	mainnet?: {
+		tokens?: unknown[];
+		contracts?: unknown[];
+		audits?: unknown[];
+	};
+	scf?: {
+		awarded_total?: number;
+		awarded_round?: unknown[];
+		submission_urls?: string[];
+	};
+}
+
+/**
+ * Mapped project data ready for Payload CMS
+ */
+export interface MappedProject {
+	project: Partial<Project>;
+	parentEntity: string | null;
+	githubRepos: Array<{ owner: string; name: string }>;
+}
+
+/**
+ * Map a raw Lumenloop YAML entry to Payload Projects format
  */
 export function mapLumenloopEntry(
-	rawEntry: Record<string, unknown>,
+	rawEntry: LumenloopEntry,
 	sourceId: string,
-): Partial<Project> {
+): MappedProject {
+	const name = rawEntry.title || "";
+
 	const mapped: Partial<Project> = {
-		name: String(rawEntry.name || rawEntry.title || ""),
-		shortDescription: String(rawEntry.description || rawEntry.summary || ""),
-		category: mapCategory(rawEntry.category || rawEntry.type),
-		types: mapTypes(rawEntry.types || rawEntry.tags || []),
-		status: mapStatus(rawEntry.status || rawEntry.stage),
+		name,
+		shortDescription: rawEntry.description?.trim() || "",
+		category: mapCategory(rawEntry.attributes?.category),
+		types: mapTypes(rawEntry.attributes?.tags || []),
+		status: "Live", // Lumenloop entries are established projects
 		verificationLevel: "Unverified",
 		provenance: {
 			source: "LumenloopSeed",
 			sourceId,
-			firstSeenAt: rawEntry.firstSeenAt
-				? new Date(String(rawEntry.firstSeenAt)).toISOString()
-				: new Date().toISOString(),
+			firstSeenAt: new Date().toISOString(),
 		},
-	} as any; // Payload types are complex, but data is validated
+	} as any;
 
-	// Map links
-	if (rawEntry.links || rawEntry.urls) {
-		const links = (rawEntry.links || rawEntry.urls) as Record<string, unknown>;
-		mapped.links = {
-			website:
-				links.website || links.homepage
-					? String(links.website || links.homepage)
-					: undefined,
-			github:
-				links.github || links.repository
-					? String(links.github || links.repository)
-					: undefined,
-			docs:
-				links.docs || links.documentation
-					? String(links.docs || links.documentation)
-					: undefined,
-			twitter: links.twitter ? String(links.twitter) : undefined,
-			discord: links.discord ? String(links.discord) : undefined,
-		};
-	}
-
-	// Map onchain data
-	if (rawEntry.onchain || rawEntry.onChain) {
-		const onchain = (rawEntry.onchain || rawEntry.onChain) as Record<
-			string,
-			unknown
-		>;
-		mapped.onchain = {
-			assetCode: onchain.assetCode ? String(onchain.assetCode) : undefined,
-			issuer: onchain.issuer ? String(onchain.issuer) : undefined,
-			contracts: Array.isArray(onchain.contracts)
-				? onchain.contracts.map((c: unknown) => ({ address: String(c) }))
-				: undefined,
-		};
-	}
-
-	return mapped;
-}
-
-function mapCategory(category: unknown): Project["category"] {
-	const cat = String(category || "").toLowerCase();
-	const categories: Project["category"][] = [
-		"Infrastructure",
-		"Tooling",
-		"Partner Integration",
-		"User-Facing App",
-		"Asset",
-		"Protocol/Contract",
-		"Anchor",
-	];
-
-	// Simple mapping - could be enhanced
-	if (cat.includes("infrastructure")) return "Infrastructure";
-	if (cat.includes("tool")) return "Tooling";
-	if (cat.includes("partner")) return "Partner Integration";
-	if (cat.includes("app") || cat.includes("application"))
-		return "User-Facing App";
-	if (cat.includes("asset")) return "Asset";
-	if (cat.includes("protocol") || cat.includes("contract"))
-		return "Protocol/Contract";
-	if (cat.includes("anchor")) return "Anchor";
-
-	return "Infrastructure"; // default
-}
-
-function mapTypes(types: unknown): Project["types"] {
-	if (!Array.isArray(types)) return undefined;
-	const typeMap: Record<string, "Wallet" | "Anchor" | "Bridge" | "SDK" | "Payment Rail" | "DEX" | "Indexer" | "Explorer" | "Other"> = {
-		wallet: "Wallet",
-		anchor: "Anchor",
-		bridge: "Bridge",
-		sdk: "SDK",
-		"payment rail": "Payment Rail",
-		dex: "DEX",
-		indexer: "Indexer",
-		explorer: "Explorer",
-		other: "Other",
+	// Map links - YAML has arrays of bare domains/handles
+	mapped.links = {
+		website: pickFirst(rawEntry.links?.website, "https://"),
+		github: pickFirst(rawEntry.links?.github, "https://"),
+		docs: undefined,
+		twitter: mapTwitterHandle(rawEntry.links?.x),
+		discord: pickFirst(rawEntry.links?.discord, "https://"),
 	};
 
-	const mapped = types
-		.map((t) => {
-			const key = String(t).toLowerCase();
-			return typeMap[key] || typeMap[key.replace(/\s+/g, "")] || undefined;
-		})
-		.filter((t): t is "Wallet" | "Anchor" | "Bridge" | "SDK" | "Payment Rail" | "DEX" | "Indexer" | "Explorer" | "Other" => t !== undefined);
-	
-	return mapped.length > 0 ? mapped : undefined;
-}
+	// Extract GitHub repos from links.github URLs
+	const githubRepos = extractGithubRepos(rawEntry.links?.github || []);
 
-function mapStatus(status: unknown): Project["status"] {
-	const stat = String(status || "").toLowerCase();
-	if (stat.includes("development") || stat.includes("dev"))
-		return "Development";
-	if (stat.includes("pre-release") || stat.includes("beta"))
-		return "Pre-Release";
-	if (stat.includes("live") || stat.includes("production")) return "Live";
-	return "Development"; // default
+	// Set github.orgLogin if we can infer it
+	if (githubRepos.length > 0) {
+		const owners = [...new Set(githubRepos.map((r) => r.owner.toLowerCase()))];
+		mapped.github = {
+			orgLogin: owners.length === 1 ? owners[0] : undefined,
+			repos: githubRepos,
+		};
+	}
+
+	// Map onchain data (tokens/contracts are currently empty in the dataset)
+	if (rawEntry.mainnet?.contracts && rawEntry.mainnet.contracts.length > 0) {
+		mapped.onchain = {
+			contracts: rawEntry.mainnet.contracts.map((c: unknown) => ({
+				address: String(c),
+			})),
+		};
+	}
+
+	return {
+		project: mapped,
+		parentEntity: rawEntry.parent || null,
+		githubRepos,
+	};
 }
 
 /**
- * Extract a unique identifier from an entry (normalized domain or slug)
+ * Pick first item from a URL array, optionally prefixing protocol
  */
-export function extractEntryId(
-	entry: Record<string, unknown>,
-	index: number,
-): string {
-	// Try to get domain from website URL
-	if (entry.links || entry.urls) {
-		const links = (entry.links || entry.urls) as Record<string, unknown>;
-		const website = links.website || links.homepage;
-		if (website) {
-			const domain = normalizeUrl(String(website));
-			if (domain) return domain;
-		}
-	}
+function pickFirst(
+	arr: string[] | undefined,
+	prefix: string,
+): string | undefined {
+	if (!arr || arr.length === 0) return undefined;
+	const val = arr[0].trim();
+	if (!val) return undefined;
+	// If already has protocol, return as-is
+	if (val.startsWith("http://") || val.startsWith("https://")) return val;
+	return `${prefix}${val}`;
+}
 
-	// Fallback to slug from name
-	const name = String(entry.name || entry.title || `entry-${index}`);
-	return name
-		.toLowerCase()
-		.trim()
-		.replace(/[^\w\s-]/g, "")
-		.replace(/[\s_-]+/g, "-")
-		.replace(/^-+|-+$/g, "");
+/**
+ * Map X/Twitter handles to full URLs
+ */
+function mapTwitterHandle(handles: string[] | undefined): string | undefined {
+	if (!handles || handles.length === 0) return undefined;
+	const handle = handles[0].trim();
+	if (!handle) return undefined;
+	// If it's already a URL
+	if (handle.startsWith("http")) return handle;
+	// If it includes domain already
+	if (handle.includes("x.com") || handle.includes("twitter.com")) {
+		return `https://${handle}`;
+	}
+	// It's just a handle
+	return `https://x.com/${handle}`;
+}
+
+/**
+ * Extract owner/name pairs from GitHub URLs like "github.com/org/repo"
+ */
+function extractGithubRepos(
+	urls: string[],
+): Array<{ owner: string; name: string }> {
+	const repos: Array<{ owner: string; name: string }> = [];
+	for (const url of urls) {
+		const cleaned = url
+			.replace(/^https?:\/\//, "")
+			.replace(/^github\.com\//, "")
+			.replace(/\/$/, "");
+		const parts = cleaned.split("/").filter(Boolean);
+		if (parts.length >= 2) {
+			// Has specific repo: owner/repo
+			repos.push({ owner: parts[0], name: parts[1] });
+		}
+		// If only org (e.g., "github.com/stellar"), we set orgLogin but no specific repo
+	}
+	return repos;
+}
+
+/**
+ * Map Lumenloop categories to our schema categories
+ */
+function mapCategory(category: string | null | undefined): Project["category"] {
+	if (!category) return "Infrastructure"; // default for null
+
+	const cat = category.toLowerCase();
+
+	if (cat.includes("application") || cat === "applications")
+		return "User-Facing App";
+	if (cat.includes("end-user")) return "User-Facing App";
+	if (cat.includes("developer tool") || cat.includes("tooling"))
+		return "Tooling";
+	if (
+		cat.includes("infrastructure") ||
+		cat.includes("services") ||
+		cat === "infrastructure & services"
+	)
+		return "Infrastructure";
+	if (
+		cat.includes("financial") ||
+		cat.includes("protocol") ||
+		cat.includes("defi")
+	)
+		return "Protocol/Contract";
+	if (cat.includes("education") || cat.includes("community"))
+		return "Infrastructure"; // closest match
+	if (cat.includes("anchor")) return "Anchor";
+	if (cat.includes("asset")) return "Asset";
+	if (cat.includes("partner")) return "Partner Integration";
+
+	return "Infrastructure"; // fallback
+}
+
+/**
+ * Map Lumenloop tags to our types
+ */
+function mapTypes(
+	tags: string[],
+): Project["types"] {
+	if (!tags || tags.length === 0) return undefined;
+
+	const typeMap: Record<
+		string,
+		| "Wallet"
+		| "Anchor"
+		| "Bridge"
+		| "SDK"
+		| "Payment Rail"
+		| "DEX"
+		| "Indexer"
+		| "Explorer"
+		| "Other"
+	> = {
+		wallet: "Wallet",
+		"software wallet": "Wallet",
+		"hardware wallet": "Wallet",
+		anchor: "Anchor",
+		bridge: "Bridge",
+		"cross-chain": "Bridge",
+		sdk: "SDK",
+		"payment rail": "Payment Rail",
+		payments: "Payment Rail",
+		"cross-border payments": "Payment Rail",
+		p2p: "Payment Rail",
+		dex: "DEX",
+		indexer: "Indexer",
+		explorer: "Explorer",
+	};
+
+	const mapped = tags
+		.map((t) => typeMap[t.toLowerCase()])
+		.filter(
+			(
+				t,
+			): t is
+				| "Wallet"
+				| "Anchor"
+				| "Bridge"
+				| "SDK"
+				| "Payment Rail"
+				| "DEX"
+				| "Indexer"
+				| "Explorer"
+				| "Other" => t !== undefined,
+		);
+
+	// Deduplicate
+	const unique = [...new Set(mapped)];
+	return unique.length > 0 ? unique : undefined;
+}
+
+/**
+ * Extract a unique identifier from an entry (slug from title)
+ */
+export function extractEntryId(entry: LumenloopEntry): string {
+	return generateSlug(entry.title || "unknown");
 }

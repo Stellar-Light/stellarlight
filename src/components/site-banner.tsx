@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 interface SiteBannerProps {
@@ -18,12 +18,10 @@ const colorMap = {
 	gray: "bg-gray-700 text-white",
 };
 
-// Height of the banner in pixels
-const BANNER_HEIGHT = 48;
-
 export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProps) {
 	const [isVisible, setIsVisible] = useState(true);
 	const [isMounted, setIsMounted] = useState(false);
+	const bannerRef = useRef<HTMLDivElement>(null);
 
 	// Generate a storage key based on the message content
 	// This ensures the banner shows again if the admin changes the message
@@ -31,26 +29,35 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 
 	useEffect(() => {
 		setIsMounted(true);
-		// Check if banner was previously dismissed in this session only
 		const isDismissed = sessionStorage.getItem(storageKey);
 		if (isDismissed) {
 			setIsVisible(false);
 		}
 	}, [storageKey]);
 
-	// Update CSS variable when visibility changes
+	// Measure actual banner height and update CSS variable
 	useEffect(() => {
-		if (isMounted) {
-			document.documentElement.style.setProperty(
-				'--banner-height',
-				isVisible ? `${BANNER_HEIGHT}px` : '0px'
-			);
+		if (!isMounted) return;
+
+		if (!isVisible) {
+			document.documentElement.style.setProperty('--banner-height', '0px');
+			return;
 		}
 
-		return () => {
-			if (isMounted) {
-				document.documentElement.style.setProperty('--banner-height', '0px');
+		const updateHeight = () => {
+			if (bannerRef.current) {
+				const height = bannerRef.current.offsetHeight;
+				document.documentElement.style.setProperty('--banner-height', `${height}px`);
 			}
+		};
+
+		updateHeight();
+
+		// Re-measure on resize (text reflow may change height)
+		window.addEventListener('resize', updateHeight);
+		return () => {
+			window.removeEventListener('resize', updateHeight);
+			document.documentElement.style.setProperty('--banner-height', '0px');
 		};
 	}, [isVisible, isMounted]);
 
@@ -70,25 +77,25 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 
 	return (
 		<div
-			className={`fixed top-0 left-0 right-0 z-[60] w-full ${bgColorClass} px-4`}
+			ref={bannerRef}
+			className={`fixed top-0 left-0 right-0 z-[60] w-full ${bgColorClass} px-4 py-2`}
 			style={{
-				height: `${BANNER_HEIGHT}px`,
-				transform: 'translateZ(0)', // Force GPU acceleration and prevent jank
-				willChange: 'auto', // Optimize rendering
+				transform: 'translateZ(0)',
+				willChange: 'auto',
 			}}
 		>
-			<div className="container mx-auto h-full flex items-center justify-between gap-4">
+			<div className="container mx-auto flex items-center justify-between gap-3">
 				{linkUrl ? (
 					<a
 						href={linkUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex-1 text-center text-sm sm:text-base hover:underline cursor-pointer"
+						className="flex-1 text-center text-xs sm:text-sm hover:underline cursor-pointer leading-snug line-clamp-2"
 					>
 						{message}
 					</a>
 				) : (
-					<div className="flex-1 text-center text-sm sm:text-base">
+					<div className="flex-1 text-center text-xs sm:text-sm leading-snug line-clamp-2">
 						{message}
 					</div>
 				)}
