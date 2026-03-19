@@ -21,17 +21,18 @@ export function Navigation() {
 	useEffect(() => {
 		const handleScroll = () => {
 			const currentScrollY = window.scrollY;
-
+			
 			setHasScrolled(currentScrollY > 20);
-
+			
 			if (currentScrollY < lastScrollY.current || currentScrollY < 100) {
 				setIsVisible(true);
-			} else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+			} 
+			else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
 				setIsVisible(false);
 				setIsExploreOpen(false);
 				setMobileMenuOpen(false);
 			}
-
+			
 			lastScrollY.current = currentScrollY;
 		};
 
@@ -104,40 +105,42 @@ export function Navigation() {
 	return (
 		<nav
 			className={cn(
-				"fixed left-0 w-screen z-50 border-b bg-[#171717] border-[#2F2F2F] transition-all duration-300 ease-in-out overflow-visible",
-				hasScrolled ? 'shadow-[0_1px_3px_rgba(0,0,0,0.3)]' : '',
+				"fixed left-0 right-0 z-50 border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-all duration-300 ease-in-out border-border/40",
+				hasScrolled ? 'shadow-[0_1px_3px_rgba(0,0,0,0.3)]' : 'shadow-sm',
 				isVisible ? 'translate-y-0' : '-translate-y-full'
 			)}
 			style={{ top: 'var(--banner-height, 0px)' }}
 		>
-			<div className="w-full max-w-6xl mx-auto flex h-16 items-center justify-between px-6">
-				<div>
+			<div className="container mx-auto flex h-16 items-center justify-between px-6">
+				<div className="opacity-100 animate-in fade-in slide-in-from-top-2 duration-400">
 					<Link
 						href="/"
-						className="flex items-center space-x-3"
+						className="flex items-center space-x-3 group transition-transform hover:scale-105"
 						data-testid="logo-stellar-light"
 					>
-						<Image
-							src="/logo.png"
-							alt="Stellar Light Logo"
-							width={32}
-							height={32}
-							className="w-8 h-8 object-contain"
-						/>
-						<span className="text-sm font-semibold text-[#E5E5E5] stellar-light-logo">
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
+							<Image
+								src="/logo.png"
+								alt="Stellar Light Logo"
+								width={32}
+								height={32}
+								className="object-contain"
+							/>
+						</div>
+						<span className="text-lg font-semibold text-foreground">
 							Stellar Light
 						</span>
 					</Link>
 				</div>
 
 				<div className="hidden md:flex items-center space-x-1">
-					<div
-						className="relative"
+					<div 
+						className="relative opacity-100 animate-in fade-in slide-in-from-top-2 duration-400 delay-200"
 						onMouseEnter={() => setIsExploreOpen(true)}
 						onMouseLeave={() => setIsExploreOpen(false)}
 					>
 						<button
-							className="flex items-center gap-1.5 px-4 py-2 text-sm text-[#E5E5E5] transition-all duration-150 rounded-lg hover:bg-white/5"
+							className="flex items-center gap-1.5 px-4 py-2 text-sm text-foreground transition-all duration-150 rounded-lg hover:bg-accent/50"
 							data-testid="nav-explore"
 						>
 							Explore
@@ -145,33 +148,33 @@ export function Navigation() {
 						</button>
 
 						{isExploreOpen && (
-							<div className="absolute right-0 top-full pt-2 z-50">
-								<div className="w-[260px] bg-[#262626] border border-[#2F2F2F] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-1 animate-in fade-in slide-in-from-top-1 duration-200">
+							<div className="absolute right-0 top-full pt-2">
+								<div className="w-[260px] bg-popover border border-border rounded-xl shadow-lg p-1 animate-in fade-in slide-in-from-top-1 duration-200">
 									{exploreItems.map((item) => {
 										const Icon = item.icon;
 										const isExternal = item.href.startsWith('http');
-
+										
 										const content = (
 											<div className="flex items-center gap-3">
-												<Icon className="w-4 h-4 text-[#A3A3A3] group-hover:text-white transition-colors flex-shrink-0" />
+												<Icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
 												<div className="flex-1">
-													<div className="text-sm font-medium text-[#E5E5E5] mb-1 group-hover:text-white transition-colors">
+													<div className="text-sm font-medium text-foreground mb-1 group-hover:text-foreground transition-colors">
 														{item.name}
 													</div>
-													<div className="text-xs text-[#A3A3A3] leading-relaxed">
+													<div className="text-xs text-muted-foreground leading-relaxed">
 														{item.description}
 													</div>
 												</div>
 											</div>
 										);
-
+										
 										return isExternal ? (
 											<a
 												key={item.name}
 												href={item.href}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="block px-3 py-3 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+												className="block px-3 py-3 rounded-lg hover:bg-accent/50 transition-all duration-150 group"
 												data-testid={`nav-link-${item.name.toLowerCase()}`}
 											>
 												{content}
@@ -180,7 +183,7 @@ export function Navigation() {
 											<Link
 												key={item.name}
 												href={item.href}
-												className="block px-3 py-3 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+												className="block px-3 py-3 rounded-lg hover:bg-accent/50 transition-all duration-150 group"
 												data-testid={`nav-link-${item.name.toLowerCase()}`}
 											>
 												{content}
@@ -199,20 +202,23 @@ export function Navigation() {
 							className={cn(
 								"relative px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
 								pathname === item.href
-									? "text-white bg-white/10"
-									: "text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5",
+									? "text-primary bg-primary/10"
+									: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
 							)}
 						>
 							{item.label}
+							{pathname === item.href && (
+								<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-[#FDDA24] to-primary/60 rounded-full" />
+							)}
 						</Link>
 					))}
 
 					{isAuthenticated && (
 						<>
-							<div className="mx-2 h-6 w-px bg-[#2F2F2F]" />
+							<div className="mx-2 h-6 w-px bg-border" />
 							<Link
 								href="/"
-								className="relative px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5 flex items-center gap-2"
+								className="relative px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
 								title="Home"
 							>
 								<Home className="w-4 h-4" />
@@ -220,7 +226,7 @@ export function Navigation() {
 							</Link>
 							<Link
 								href="/admin"
-								className="relative px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5 flex items-center gap-2"
+								className="relative px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
 								title="Admin Panel"
 							>
 								<Settings className="w-4 h-4" />
@@ -232,42 +238,42 @@ export function Navigation() {
 
 				<button
 					onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-					className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-all duration-150"
+					className="md:hidden p-2 rounded-lg hover:bg-accent/50 transition-all duration-150 opacity-100 animate-in fade-in slide-in-from-top-2 duration-400 delay-200"
 					aria-label="Toggle menu"
 					data-testid="button-mobile-menu"
 				>
 					{mobileMenuOpen ? (
-						<X className="w-5 h-5 text-[#E5E5E5]" />
+						<X className="w-5 h-5 text-foreground" />
 					) : (
-						<Menu className="w-5 h-5 text-[#E5E5E5]" />
+						<Menu className="w-5 h-5 text-foreground" />
 					)}
 				</button>
 			</div>
 
 			{mobileMenuOpen && (
-				<div className="md:hidden border-t border-[#2F2F2F] animate-in slide-in-from-top duration-200">
-					<div className="px-6 py-4 space-y-1">
+				<div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
+					<div className="container mx-auto px-6 py-4 space-y-1">
 						{exploreItems.map((item) => {
 							const Icon = item.icon;
 							const isExternal = item.href.startsWith('http');
-
+							
 							const content = (
 								<div className="flex items-center gap-3">
-									<Icon className="w-4 h-4 text-[#A3A3A3] flex-shrink-0" />
+									<Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 									<div className="flex-1">
-										<div className="font-medium text-[#E5E5E5] mb-1">{item.name}</div>
-										<div className="text-xs text-[#A3A3A3] leading-relaxed">{item.description}</div>
+										<div className="font-medium text-foreground mb-1">{item.name}</div>
+										<div className="text-xs text-muted-foreground leading-relaxed">{item.description}</div>
 									</div>
 								</div>
 							);
-
+							
 							return isExternal ? (
 								<a
 									key={item.name}
 									href={item.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="block px-3 py-3 rounded-xl text-sm hover:bg-white/5 transition-all duration-150 active:bg-white/10"
+									className="block px-3 py-3 rounded-xl text-sm hover:bg-accent/50 transition-all duration-150 active:bg-accent"
 									onClick={() => setMobileMenuOpen(false)}
 									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
 								>
@@ -277,7 +283,7 @@ export function Navigation() {
 								<Link
 									key={item.name}
 									href={item.href}
-									className="block px-3 py-3 rounded-xl text-sm hover:bg-white/5 transition-all duration-150 active:bg-white/10"
+									className="block px-3 py-3 rounded-xl text-sm hover:bg-accent/50 transition-all duration-150 active:bg-accent"
 									onClick={() => setMobileMenuOpen(false)}
 									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
 								>
@@ -293,8 +299,8 @@ export function Navigation() {
 								className={cn(
 									"block px-4 py-3 text-sm font-medium rounded-lg transition-colors",
 									pathname === item.href
-										? "text-white bg-white/10"
-										: "text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5",
+										? "text-primary bg-primary/10"
+										: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
 								)}
 							>
 								{item.label}
@@ -302,11 +308,11 @@ export function Navigation() {
 						))}
 						{isAuthenticated && (
 							<>
-								<div className="my-2 h-px bg-[#2F2F2F]" />
+								<div className="my-2 h-px bg-border" />
 								<Link
 									href="/"
 									onClick={() => setMobileMenuOpen(false)}
-									className="block px-4 py-3 text-sm font-medium rounded-lg transition-colors text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5 flex items-center gap-2"
+									className="block px-4 py-3 text-sm font-medium rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
 								>
 									<Home className="w-4 h-4" />
 									Home
@@ -314,7 +320,7 @@ export function Navigation() {
 								<Link
 									href="/admin"
 									onClick={() => setMobileMenuOpen(false)}
-									className="block px-4 py-3 text-sm font-medium rounded-lg transition-colors text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/5 flex items-center gap-2"
+									className="block px-4 py-3 text-sm font-medium rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
 								>
 									<Settings className="w-4 h-4" />
 									Admin Panel
