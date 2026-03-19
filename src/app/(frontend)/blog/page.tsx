@@ -82,19 +82,19 @@ export default async function BlogPage({
 				</div>
 
 				{/* Filters */}
-				<div className="mb-12 space-y-4">
+				<div className="mb-8 sm:mb-12 space-y-3 sm:space-y-4">
 					{(category || tag) && (
 						<div>
 							<Button
 								asChild
 								variant="outline"
-								className="rounded-xl border-border hover:border-white/20"
+								className="rounded-xl border-border hover:border-white/20 h-9 text-sm sm:h-10"
 							>
 								<Link href="/blog">Clear Filters</Link>
 							</Button>
 						</div>
 					)}
-					<div className="flex flex-wrap items-center gap-3">
+					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
 							Categories
 						</span>
@@ -103,14 +103,14 @@ export default async function BlogPage({
 								key={cat}
 								asChild
 								variant={category === cat ? "default" : "outline"}
-								className="rounded-xl"
+								className="rounded-xl h-8 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm"
 							>
 								<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>{cat}</Link>
 							</Button>
 						))}
 					</div>
 					{allTags.length > 0 && (
-						<div className="flex flex-wrap items-center gap-3">
+						<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 							<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
 								Tags
 							</span>
@@ -119,7 +119,7 @@ export default async function BlogPage({
 									key={t}
 									asChild
 									variant={tag === t ? "default" : "outline"}
-									className="rounded-xl text-sm"
+									className="rounded-xl h-8 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm"
 								>
 									<Link href={`/blog?tag=${encodeURIComponent(t)}${category ? `&category=${category}` : ""}`}>
 										#{t}
