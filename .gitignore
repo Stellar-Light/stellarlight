@@ -51,3 +51,5 @@ node_modules/
 
 # Payload import map (generated during build based on active plugins)
 src/app/(payload)/admin/importMap.js
+.claude/
+package-lock.json
