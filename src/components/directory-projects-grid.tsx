@@ -79,7 +79,7 @@ export default async function DirectoryProjectsGrid({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 				{result.docs.map((project: any, index: number) => (
 					<ProjectCard
 						key={project.id}
@@ -91,13 +91,12 @@ export default async function DirectoryProjectsGrid({
 
 			{/* Pagination */}
 			{result.totalPages > 1 && (
-				<div className="flex items-center justify-center gap-4">
+				<div className="flex items-center justify-center gap-2 sm:gap-4">
 					{page > 1 ? (
 						<Button
 							asChild
 							variant="outline"
-							size="lg"
-							className="shadow-sm hover:shadow-md"
+							className="shadow-sm hover:shadow-md h-10 px-3 sm:h-12 sm:px-8"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
@@ -106,23 +105,22 @@ export default async function DirectoryProjectsGrid({
 									page: String(page - 1),
 								}).toString()}`}
 							>
-								<ChevronLeft className="mr-2 h-4 w-4" />
-								Previous
+								<ChevronLeft className="h-4 w-4 sm:mr-2" />
+								<span className="hidden sm:inline">Previous</span>
 							</Link>
 						</Button>
 					) : (
 						<Button
 							variant="outline"
-							size="lg"
 							disabled
-							className="shadow-sm"
+							className="shadow-sm h-10 px-3 sm:h-12 sm:px-8"
 						>
-							<ChevronLeft className="mr-2 h-4 w-4" />
-							Previous
+							<ChevronLeft className="h-4 w-4 sm:mr-2" />
+							<span className="hidden sm:inline">Previous</span>
 						</Button>
 					)}
-					<div className="flex items-center gap-2 px-6 py-3 rounded-lg bg-muted/50 border-2">
-						<span className="text-sm font-semibold">
+					<div className="flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg bg-muted/50 border-2">
+						<span className="text-xs sm:text-sm font-semibold">
 							Page <span className="text-primary">{page}</span> of{" "}
 							<span className="text-primary">{result.totalPages}</span>
 						</span>
@@ -131,8 +129,7 @@ export default async function DirectoryProjectsGrid({
 						<Button
 							asChild
 							variant="outline"
-							size="lg"
-							className="shadow-sm hover:shadow-md"
+							className="shadow-sm hover:shadow-md h-10 px-3 sm:h-12 sm:px-8"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
@@ -141,19 +138,18 @@ export default async function DirectoryProjectsGrid({
 									page: String(page + 1),
 								}).toString()}`}
 							>
-								Next
-								<ChevronRight className="ml-2 h-4 w-4" />
+								<span className="hidden sm:inline">Next</span>
+								<ChevronRight className="h-4 w-4 sm:ml-2" />
 							</Link>
 						</Button>
 					) : (
 						<Button
 							variant="outline"
-							size="lg"
 							disabled
-							className="shadow-sm"
+							className="shadow-sm h-10 px-3 sm:h-12 sm:px-8"
 						>
-							Next
-							<ChevronRight className="ml-2 h-4 w-4" />
+							<span className="hidden sm:inline">Next</span>
+							<ChevronRight className="h-4 w-4 sm:ml-2" />
 						</Button>
 					)}
 				</div>
@@ -164,7 +160,7 @@ export default async function DirectoryProjectsGrid({
 
 export function DirectoryProjectsGridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<ProjectCardSkeleton key={i} />
 			))}
