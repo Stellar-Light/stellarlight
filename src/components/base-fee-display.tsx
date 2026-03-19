@@ -2,28 +2,33 @@
 
 import { useEffect, useState } from "react";
 
-const USDC_ISSUER = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
-const ORDERBOOK_URL = `https://horizon.stellar.org/order_book?selling_asset_type=native&buying_asset_type=credit_alphanum4&buying_asset_code=USDC&buying_asset_issuer=${USDC_ISSUER}&limit=1`;
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 interface PriceData {
 	price: number;
-	bid: number;
-	ask: number;
+	volume24h: number;
+	marketCap: number;
 }
 
-async function fetchXLMPrice(): Promise<PriceData | null> {
+function formatCompact(value: number): string {
+	if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
+	if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
+	if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
+	return `$${value.toFixed(0)}`;
+}
+
+async function fetchXLMData(): Promise<PriceData | null> {
 	try {
-		const res = await fetch(ORDERBOOK_URL);
+		const res = await fetch("/api/xlm-price");
 		if (!res.ok) return null;
 		const data = await res.json();
+		if (!data?.price) return null;
 
-		const bid = parseFloat(data.bids?.[0]?.price || "0");
-		const ask = parseFloat(data.asks?.[0]?.price || "0");
-
-		if (bid === 0 && ask === 0) return null;
-
-		return { price: (bid + ask) / 2, bid, ask };
+		return {
+			price: data.price,
+			volume24h: data.volume24h || 0,
+			marketCap: data.marketCap || 0,
+		};
 	} catch {
 		return null;
 	}
@@ -38,9 +43,9 @@ export default function BaseFeeDisplay() {
 	const baseFeeUSD = baseFeeXLM * xlmPrice;
 
 	useEffect(() => {
-		fetchXLMPrice().then(setPriceData);
+		fetchXLMData().then(setPriceData);
 		const interval = setInterval(() => {
-			fetchXLMPrice().then(setPriceData);
+			fetchXLMData().then(setPriceData);
 		}, POLL_INTERVAL);
 		return () => clearInterval(interval);
 	}, []);
@@ -60,18 +65,18 @@ export default function BaseFeeDisplay() {
 			</div>
 
 			<div className="absolute top-full right-0 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-				<div className="bg-card border border-border rounded-lg px-4 py-3 shadow-xl min-w-[200px]">
+				<div className="bg-card border border-border rounded-lg px-4 py-3 shadow-xl min-w-[220px]">
 					<div className="space-y-1.5">
 						<div className="flex justify-between items-baseline">
-							<span className="text-xs text-muted-foreground">Bid</span>
+							<span className="text-xs text-muted-foreground">Market Cap</span>
 							<span className="text-sm font-semibold text-foreground">
-								{priceData ? `$${priceData.bid.toFixed(4)}` : "–"}
+								{priceData ? formatCompact(priceData.marketCap) : "–"}
 							</span>
 						</div>
 						<div className="flex justify-between items-baseline">
-							<span className="text-xs text-muted-foreground">Ask</span>
+							<span className="text-xs text-muted-foreground">24h Volume</span>
 							<span className="text-sm font-semibold text-foreground">
-								{priceData ? `$${priceData.ask.toFixed(4)}` : "–"}
+								{priceData ? formatCompact(priceData.volume24h) : "–"}
 							</span>
 						</div>
 						<div className="flex justify-between items-baseline pt-1.5 border-t border-border/50">
