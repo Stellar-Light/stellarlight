@@ -3,11 +3,6 @@
 import React from "react";
 
 export const AfterNavLinks: React.FC = () => {
-	const appUrl =
-		typeof window !== "undefined"
-			? window.location.origin
-			: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
 	const linkStyle = {
 		display: "flex",
 		alignItems: "center",
@@ -52,7 +47,7 @@ export const AfterNavLinks: React.FC = () => {
 				<span style={{ fontWeight: 500 }}>RSS Management</span>
 			</a>
 			<a
-				href={`${appUrl}/`}
+				href="/"
 				style={linkStyle}
 				onMouseEnter={(e) => {
 					e.currentTarget.style.backgroundColor = "var(--theme-elevation-2)";

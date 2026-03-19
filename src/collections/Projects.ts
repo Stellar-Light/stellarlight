@@ -218,6 +218,15 @@ export const Projects: CollectionConfig = {
 				description: "Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.",
 			},
 		},
+		{
+			name: "relatedEntities",
+			type: "join",
+			collection: "entities",
+			on: "projects",
+			admin: {
+				description: "Entities/organizations linked to this project. Edit from either side.",
+			},
+		},
 	],
 	// Unique index on slug is handled by unique: true on the field
 	hooks: {

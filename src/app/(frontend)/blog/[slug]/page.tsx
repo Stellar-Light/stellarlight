@@ -9,6 +9,7 @@ import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { LexicalContent } from "@/components/lexical-content";
 import { MarkdownContent } from "@/components/markdown-content";
+import { draftMode } from "next/headers";
 
 type Params = Promise<{
 	slug: string;
@@ -23,8 +24,6 @@ const categoryColors: Record<string, string> = {
 	Partnership: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
 	Update: "bg-gray-500/20 text-gray-400 border-gray-500/30",
 };
-
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.io";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -78,19 +77,17 @@ export async function generateMetadata({
 
 	const post = result.docs[0];
 
-	// Get featured image URL
+	// Get featured image URL for OG tags
+	// metadataBase in layout.tsx resolves relative URLs automatically
 	let imageUrl = "/opengraph.png";
-	if (post.rssImageUrl) {
-		imageUrl = post.rssImageUrl;
-	} else if (post.featuredImage) {
-		if (typeof post.featuredImage === "object" && post.featuredImage.url) {
+	if (post.featuredImage && typeof post.featuredImage === "object") {
+		if (post.featuredImage.url) {
 			imageUrl = post.featuredImage.url;
-		} else if (
-			typeof post.featuredImage === "object" &&
-			post.featuredImage.filename
-		) {
-			imageUrl = `${appUrl}/media/${post.featuredImage.filename}`;
+		} else if (post.featuredImage.filename) {
+			imageUrl = `/media/${post.featuredImage.filename}`;
 		}
+	} else if (post.rssImageUrl) {
+		imageUrl = post.rssImageUrl;
 	}
 
 	const publishedDate = post.publishedAt
@@ -109,9 +106,7 @@ export async function generateMetadata({
 			authors: post.author ? [post.author] : undefined,
 			images: [
 				{
-					url: imageUrl.startsWith("http")
-						? imageUrl
-						: `${appUrl}${imageUrl}`,
+					url: imageUrl,
 					width: 1200,
 					height: 630,
 					alt: post.title,
@@ -122,11 +117,7 @@ export async function generateMetadata({
 			card: "summary_large_image",
 			title: post.title,
 			description: post.excerpt || "Read more on StellarLight",
-			images: [
-				imageUrl.startsWith("http")
-					? imageUrl
-					: `${appUrl}${imageUrl}`,
-			],
+			images: [imageUrl],
 		},
 	};
 }
@@ -143,27 +134,22 @@ export default async function BlogDetailPage({
 		notFound();
 	}
 
+	const { isEnabled: isDraft } = await draftMode();
+
 	let result;
 	try {
+		const where: any = { slug: { equals: slug } };
+		if (!isDraft) {
+			where.and = [{ slug: { equals: slug } }, { status: { equals: "published" } }];
+			delete where.slug;
+		}
 		result = await payload.find({
-		collection: "blog",
-		where: {
-			and: [
-				{
-					slug: {
-						equals: slug,
-					},
-				},
-				{
-					status: {
-						equals: "published",
-					},
-				},
-			],
-		},
-		limit: 1,
-		depth: 2, // Populate relationships including featuredImage and rssFeed
-	});
+			collection: "blog",
+			where,
+			draft: isDraft,
+			limit: 1,
+			depth: 2,
+		});
 	} catch (error) {
 		notFound();
 	}
@@ -235,7 +221,19 @@ export default async function BlogDetailPage({
 
 	return (
 		<div className="min-h-screen relative">
-			<main className="max-w-4xl mx-auto px-6 py-16 pt-28">
+			{isDraft && (
+				<div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full border border-yellow-500/40 bg-yellow-500/10 px-5 py-2.5 text-sm font-medium text-yellow-400 backdrop-blur-sm shadow-lg">
+					<span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+					Draft Preview
+					<a
+						href={`/api/disable-draft?slug=${post.slug}`}
+						className="ml-2 underline text-yellow-300 hover:text-yellow-100 transition-colors"
+					>
+						Exit Preview
+					</a>
+				</div>
+			)}
+			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
 				{/* Back Button */}
 				<Link
 					href="/blog"
@@ -275,9 +273,13 @@ export default async function BlogDetailPage({
 							<div className="flex items-center gap-2 flex-wrap">
 								<Tag className="w-4 h-4" />
 								{post.tags.map((tag, index) => (
-									<span key={index} className="px-2 py-0.5 rounded bg-card border border-border">
+									<Link
+										key={index}
+										href={`/blog?tag=${encodeURIComponent(tag)}`}
+										className="px-2 py-0.5 rounded bg-card border border-border hover:border-white/30 hover:text-foreground transition-colors"
+									>
 										{tag}
-									</span>
+									</Link>
 								))}
 							</div>
 						)}
@@ -285,19 +287,19 @@ export default async function BlogDetailPage({
 
 					{/* Featured Image */}
 					{imageUrl && (
-						<div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden mb-12">
+						<div className="relative w-full h-[240px] sm:h-[400px] md:h-[500px] rounded-2xl overflow-hidden mb-12 bg-card">
 							{isExternalImage ? (
 								<img
 									src={imageUrl}
 									alt={post.title}
-									className="absolute inset-0 w-full h-full object-cover"
+									className="absolute inset-0 w-full h-full object-contain sm:object-cover"
 								/>
 							) : (
 								<Image
 									src={imageUrl}
 									alt={post.title}
 									fill
-									className="object-cover"
+									className="object-contain sm:object-cover"
 									priority
 								/>
 							)}

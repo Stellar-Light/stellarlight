@@ -82,7 +82,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    projects: {
+      relatedEntities: 'entities';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -260,6 +264,48 @@ export interface Project {
    * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
   communityPick?: boolean | null;
+  /**
+   * Entities/organizations linked to this project. Edit from either side.
+   */
+  relatedEntities?: {
+    docs?: (string | Entity)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entities".
+ */
+export interface Entity {
+  id: string;
+  name: string;
+  slug: string;
+  /**
+   * Entity logo image. If not provided, a default icon will be used.
+   */
+  logo?: (string | null) | Media;
+  /**
+   * Description of the entity/organization.
+   */
+  description?: string | null;
+  domains?:
+    | {
+        domain: string;
+        id?: string | null;
+      }[]
+    | null;
+  links?: {
+    website?: string | null;
+    github?: string | null;
+    /**
+     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
+     */
+    twitter?: string | null;
+  };
+  projects?: (string | Project)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -452,40 +498,6 @@ export interface Signal {
         }[]
       | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entities".
- */
-export interface Entity {
-  id: string;
-  name: string;
-  slug: string;
-  /**
-   * Entity logo image. If not provided, a default icon will be used.
-   */
-  logo?: (string | null) | Media;
-  /**
-   * Description of the entity/organization.
-   */
-  description?: string | null;
-  domains?:
-    | {
-        domain: string;
-        id?: string | null;
-      }[]
-    | null;
-  links?: {
-    website?: string | null;
-    github?: string | null;
-    /**
-     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
-     */
-    twitter?: string | null;
-  };
-  projects?: (string | Project)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -830,6 +842,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   lastVerifiedAt?: T;
   communityPick?: T;
+  relatedEntities?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1051,7 +1064,7 @@ export interface Banner {
    */
   enabled?: boolean | null;
   /**
-   * Banner message to display
+   * Banner message to display (max 150 characters)
    */
   message?: string | null;
   /**

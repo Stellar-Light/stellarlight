@@ -22,8 +22,9 @@ export const Banner: GlobalConfig = {
 			name: "message",
 			type: "textarea",
 			required: true,
+			maxLength: 150,
 			admin: {
-				description: "Banner message to display",
+				description: "Banner message to display (max 150 characters)",
 				condition: (data) => data.enabled,
 			},
 		},

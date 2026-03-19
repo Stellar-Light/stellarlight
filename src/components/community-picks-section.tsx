@@ -79,7 +79,7 @@ export default async function CommunityPicksSection() {
 					{filteredProjects.map((project: any) => (
 						<CarouselItem
 							key={project.id}
-							className="pl-2 md:pl-4 basis-1/2"
+							className="pl-2 md:pl-4 basis-full md:basis-1/2"
 						>
 							<CommunityPickCard project={project} />
 						</CarouselItem>
@@ -102,7 +102,7 @@ export function CommunityPicksSectionSkeleton() {
 				<div className="h-10 w-48 bg-[#262626] rounded animate-pulse mb-2" />
 				<div className="h-4 w-64 bg-[#262626] rounded animate-pulse" />
 			</div>
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				{Array.from({ length: 4 }).map((_, i) => (
 					<CommunityPickCardSkeleton key={i} />
 				))}

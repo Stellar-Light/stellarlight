@@ -41,7 +41,7 @@ export default function ProjectsGridClient({
 				params.set("category", categoryFilter);
 			}
 
-			const response = await fetch(`/api/projects?${params.toString()}`);
+			const response = await fetch(`/api/public/projects?${params.toString()}`);
 			if (!response.ok) throw new Error("Failed to load projects");
 
 			const data = await response.json();
