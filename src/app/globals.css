@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+:root { --ease-swift-out: cubic-bezier(0.15, 0.85, 0.3, 1); }
+[data-radix-popper-content-wrapper] {
+	animation-timing-function: var(--ease-swift-out) !important;
+	animation-duration: 200ms !important;
+}
+[data-state="open"][data-side="bottom"] {
+	animation: slideDownAndFade 200ms var(--ease-swift-out);
+}
+@keyframes slideDownAndFade {
+	from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @layer base {
 	:root {
 		--background: #171717;
