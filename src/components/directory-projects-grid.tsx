@@ -8,13 +8,30 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
 	categoryFilter?: string;
+	sortOption?: string;
 	page: number;
 	limit: number;
+}
+
+/** Map sort option to Payload sort string */
+function getPayloadSort(sortOption: string): string {
+	switch (sortOption) {
+		case "name-asc":
+			return "name";
+		case "name-desc":
+			return "-name";
+		case "newest":
+			return "-lastVerifiedAt";
+		case "featured":
+		default:
+			return "name";
+	}
 }
 
 export default async function DirectoryProjectsGrid({
 	searchQuery,
 	categoryFilter,
+	sortOption = "featured",
 	page,
 	limit,
 }: DirectoryProjectsGridProps) {
@@ -24,44 +41,64 @@ export default async function DirectoryProjectsGrid({
 
 	if (payload) {
 		try {
-			const where: any = {
+			const baseWhere: any = {
 				status: {
 					in: ["Development", "Pre-Release", "Live"],
 				},
 			};
 
-			if (searchQuery) {
-				where.or = [
-					{
-						name: {
-							contains: searchQuery,
-						},
-					},
-					{
-						shortDescription: {
-							contains: searchQuery,
-						},
-					},
-					{
-						"github.orgLogin": {
-							contains: searchQuery,
-						},
-					},
-				];
-			}
-
 			if (categoryFilter && categoryFilter !== "all") {
-				where.category = { equals: categoryFilter };
+				baseWhere.category = { equals: categoryFilter };
 			}
 
-			result = await payload.find({
-				collection: "projects",
-				where,
-				limit,
-				page,
-				sort: "-lastVerifiedAt",
-				depth: 1,
-			});
+			if (searchQuery) {
+				baseWhere.or = [
+					{ name: { contains: searchQuery } },
+					{ shortDescription: { contains: searchQuery } },
+					{ "github.orgLogin": { contains: searchQuery } },
+				];
+
+				result = await payload.find({
+					collection: "projects",
+					where: baseWhere,
+					limit,
+					page,
+					sort: getPayloadSort(sortOption),
+					depth: 1,
+				});
+			} else if (sortOption === "featured") {
+				// Two-pass: featured projects first, then the rest alphabetically
+				const featuredWhere = { ...baseWhere, featured: { equals: true } };
+				const restWhere = { ...baseWhere, featured: { not_equals: true } };
+
+				const [featuredResults, restResults] = await Promise.all([
+					payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
+					payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
+				]);
+
+				const allDocs = [...featuredResults.docs, ...restResults.docs];
+				const totalDocs = allDocs.length;
+				const totalPages = Math.ceil(totalDocs / limit);
+				const start = (page - 1) * limit;
+
+				result = {
+					docs: allDocs.slice(start, start + limit),
+					totalDocs,
+					totalPages,
+					page,
+					hasNextPage: page < totalPages,
+					hasPrevPage: page > 1,
+				};
+			} else {
+				result = await payload.find({
+					collection: "projects",
+					where: baseWhere,
+					limit,
+					page,
+					sort: getPayloadSort(sortOption),
+					depth: 1,
+				});
+			}
 		} catch (error) {
 			// Silently handle fetch errors
 		}
@@ -80,11 +117,11 @@ export default async function DirectoryProjectsGrid({
 	return (
 		<>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-				{result.docs.map((project: any, index: number) => (
+				{result.docs.map((project: any) => (
 					<ProjectCard
 						key={project.id}
 						project={project}
-						isFeatured={index === 0 && !project.verificationLevel?.includes("Unverified")}
+						isFeatured={project.featured === true}
 					/>
 				))}
 			</div>
@@ -103,6 +140,7 @@ export default async function DirectoryProjectsGrid({
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page - 1),
 								}).toString()}`}
 							>
@@ -137,6 +175,7 @@ export default async function DirectoryProjectsGrid({
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page + 1),
 								}).toString()}`}
 							>
