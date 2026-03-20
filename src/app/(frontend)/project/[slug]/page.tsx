@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectLogo } from "@/components/project-logo";
 import EntityCard from "@/components/entity-card";
+import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -575,6 +576,9 @@ export default async function ProjectDetailPage({
 						</CardContent>
 					</Card>
 				)}
+
+				{/* TVL Stats & Chart (DeFi protocols only) */}
+				<ProjectTVLChart projectName={project.name} />
 
 				{/* Built By - Linked Entities */}
 				{linkedEntities.length > 0 && (
