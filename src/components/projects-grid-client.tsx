@@ -67,12 +67,15 @@ export default function ProjectsGridClient({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-				{projects.map((project: any) => (
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+				{projects.map((project: any, index: number) => (
 					<ProjectCard
 						key={project.id}
 						project={project}
-						isFeatured={project.featured === true}
+						isFeatured={
+							index === 0 &&
+							!project.verificationLevel?.includes("Unverified")
+						}
 					/>
 				))}
 				{isLoading &&
@@ -86,7 +89,7 @@ export default function ProjectsGridClient({
 					<Button
 						onClick={loadMore}
 						disabled={isLoading}
-						className="px-10 py-3.5 rounded-xl font-semibold bg-[#404040] text-foreground border border-border hover:bg-[#525252] hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+						className="btn-secondary rounded-lg px-8 py-2.5 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{isLoading ? "Loading..." : "Load More"}
 					</Button>

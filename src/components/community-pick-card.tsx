@@ -69,7 +69,7 @@ export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 							alt={`${project.name} logo`}
 							width={40}
 							height={40}
-							className="rounded-full object-cover w-10 h-10 border border-border/50 transition-transform duration-300 group-hover:scale-110 group-hover:border-white/30"
+							className="rounded-full object-cover w-10 h-10 border border-border/50 transition-transform duration-150 group-hover:scale-110 group-hover:border-white/30"
 							onError={() => {
 								setLogoError(true);
 							}}
