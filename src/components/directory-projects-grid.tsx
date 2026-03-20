@@ -1,4 +1,5 @@
 import { getPayloadSafe } from "@/lib/payload-client";
+import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
 import ProjectCard from "@/components/project-card";
 import ProjectCardSkeleton from "@/components/project-card-skeleton";
 import Link from "next/link";
@@ -52,19 +53,12 @@ export default async function DirectoryProjectsGrid({
 			}
 
 			if (searchQuery) {
-				baseWhere.or = [
-					{ name: { contains: searchQuery } },
-					{ shortDescription: { contains: searchQuery } },
-					{ "github.orgLogin": { contains: searchQuery } },
-				];
-
-				result = await payload.find({
-					collection: "projects",
-					where: baseWhere,
-					limit,
+				result = await rankedProjectSearch(payload, {
+					query: searchQuery,
+					category: categoryFilter,
 					page,
+					limit,
 					sort: getPayloadSort(sortOption),
-					depth: 1,
 				});
 			} else if (sortOption === "featured") {
 				// Two-pass: featured projects first, then the rest alphabetically
@@ -209,4 +203,3 @@ export function DirectoryProjectsGridSkeleton() {
 		</div>
 	);
 }
-

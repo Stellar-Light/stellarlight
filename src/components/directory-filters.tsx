@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, ArrowUpDown } from "lucide-react";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -45,8 +46,10 @@ export function DirectoryFilters() {
 	const sortFilter = searchParams.get("sort") || "featured";
 	const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
 	const [sortDrawerOpen, setSortDrawerOpen] = useState(false);
+	const [inputValue, setInputValue] = useState(searchQuery);
+	const debouncedSearch = useDebounce(inputValue, 300);
 
-	const buildUrl = (overrides: Record<string, string>) => {
+	const buildUrl = useCallback((overrides: Record<string, string>) => {
 		const params = new URLSearchParams();
 		const q = overrides.q ?? searchQuery;
 		const cat = overrides.category ?? categoryFilter;
@@ -55,7 +58,26 @@ export function DirectoryFilters() {
 		if (cat !== "all") params.set("category", cat);
 		if (sort !== "featured") params.set("sort", sort);
 		return `/directory?${params.toString()}`;
-	};
+	}, [searchQuery, categoryFilter, sortFilter]);
+
+	// Search-as-you-type: update URL when debounced value changes
+	useEffect(() => {
+		if (debouncedSearch !== searchQuery) {
+			router.replace(buildUrl({ q: debouncedSearch }));
+		}
+	}, [debouncedSearch, searchQuery, router, buildUrl]);
+
+	// Instant reset when input is cleared (skip debounce)
+	useEffect(() => {
+		if (inputValue === "" && searchQuery !== "") {
+			router.replace(buildUrl({ q: "" }));
+		}
+	}, [inputValue, searchQuery, router, buildUrl]);
+
+	// Sync input with URL when navigating back/forward
+	useEffect(() => {
+		setInputValue(searchQuery);
+	}, [searchQuery]);
 
 	const handleCategoryChange = (value: string) => {
 		router.push(buildUrl({ category: value }));
@@ -69,9 +91,7 @@ export function DirectoryFilters() {
 
 	const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const formData = new FormData(e.currentTarget);
-		const query = (formData.get("q") as string) || "";
-		router.push(buildUrl({ q: query }));
+		router.replace(buildUrl({ q: inputValue }));
 	};
 
 	const selectedCategoryLabel = categories.find((c) => c.id === categoryFilter)?.label ?? "All Categories";
@@ -85,7 +105,8 @@ export function DirectoryFilters() {
 					type="text"
 					name="q"
 					placeholder="Search projects or organizations..."
-					defaultValue={searchQuery}
+					value={inputValue}
+					onChange={(e) => setInputValue(e.target.value)}
 					className="w-full h-11 pl-12 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
 				/>
 			</div>
