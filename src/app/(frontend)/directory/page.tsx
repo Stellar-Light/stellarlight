@@ -40,8 +40,8 @@ export default async function DirectoryPage({
 					<DirectoryFilters />
 				</div>
 
-				{/* Projects Grid */}
-				<Suspense fallback={<DirectoryProjectsGridSkeleton />}>
+				{/* Projects Grid — key forces skeleton to show immediately on param change */}
+				<Suspense key={`${searchQuery}-${categoryFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
 					<DirectoryProjectsGrid
 						searchQuery={searchQuery}
 						categoryFilter={categoryFilter}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ChevronDown, ArrowUpDown } from "lucide-react";
+import { Search, ChevronDown, ArrowUpDown, X } from "lucide-react";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -45,8 +46,10 @@ export function DirectoryFilters() {
 	const sortFilter = searchParams.get("sort") || "featured";
 	const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
 	const [sortDrawerOpen, setSortDrawerOpen] = useState(false);
+	const [inputValue, setInputValue] = useState(searchQuery);
+	const debouncedSearch = useDebounce(inputValue, 300);
 
-	const buildUrl = (overrides: Record<string, string>) => {
+	const buildUrl = useCallback((overrides: Record<string, string>) => {
 		const params = new URLSearchParams();
 		const q = overrides.q ?? searchQuery;
 		const cat = overrides.category ?? categoryFilter;
@@ -55,6 +58,23 @@ export function DirectoryFilters() {
 		if (cat !== "all") params.set("category", cat);
 		if (sort !== "featured") params.set("sort", sort);
 		return `/directory?${params.toString()}`;
+	}, [searchQuery, categoryFilter, sortFilter]);
+
+	// Single effect for search-as-you-type
+	useEffect(() => {
+		// Skip if URL already matches what we'd navigate to
+		if (debouncedSearch === searchQuery) return;
+		router.replace(buildUrl({ q: debouncedSearch }));
+	}, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	// Sync input with URL when navigating back/forward
+	useEffect(() => {
+		setInputValue(searchQuery);
+	}, [searchQuery]);
+
+	const clearSearch = () => {
+		setInputValue("");
+		router.replace(buildUrl({ q: "" }));
 	};
 
 	const handleCategoryChange = (value: string) => {
@@ -69,9 +89,7 @@ export function DirectoryFilters() {
 
 	const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const formData = new FormData(e.currentTarget);
-		const query = (formData.get("q") as string) || "";
-		router.push(buildUrl({ q: query }));
+		router.replace(buildUrl({ q: inputValue }));
 	};
 
 	const selectedCategoryLabel = categories.find((c) => c.id === categoryFilter)?.label ?? "All Categories";
@@ -85,9 +103,19 @@ export function DirectoryFilters() {
 					type="text"
 					name="q"
 					placeholder="Search projects or organizations..."
-					defaultValue={searchQuery}
-					className="w-full h-11 pl-12 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
+					value={inputValue}
+					onChange={(e) => setInputValue(e.target.value)}
+					className="w-full h-11 pl-12 pr-10 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
 				/>
+				{inputValue && (
+					<button
+						type="button"
+						onClick={clearSearch}
+						className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-muted-foreground hover:text-foreground transition-colors duration-150"
+					>
+						<X className="w-4 h-4" />
+					</button>
+				)}
 			</div>
 
 			{/* Desktop: Category Dropdown */}
