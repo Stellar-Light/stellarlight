@@ -64,22 +64,27 @@ export async function GET(request: NextRequest) {
 			});
 		}
 
-		const result = await payload.find({
-			collection: "projects",
-			where: baseWhere,
-			limit,
-			page,
-			sort: "-featured,name",
-			depth: 1,
-		});
+		// Two-pass: featured first, then rest alphabetically
+		const featuredWhere = { ...baseWhere, featured: { equals: true } };
+		const restWhere = { ...baseWhere, featured: { not_equals: true } };
+
+		const [featuredResults, restResults] = await Promise.all([
+			payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
+			payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
+		]);
+
+		const allDocs = [...featuredResults.docs, ...restResults.docs];
+		const totalDocs = allDocs.length;
+		const totalPages = Math.ceil(totalDocs / limit);
+		const start = (page - 1) * limit;
 
 		return NextResponse.json({
-			docs: result.docs,
-			totalDocs: result.totalDocs,
-			totalPages: result.totalPages,
-			page: result.page,
-			hasNextPage: result.hasNextPage,
-			hasPrevPage: result.hasPrevPage,
+			docs: allDocs.slice(start, start + limit),
+			totalDocs,
+			totalPages,
+			page,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
 		});
 	} catch (error) {
 		return NextResponse.json(

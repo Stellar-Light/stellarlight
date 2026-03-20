@@ -13,19 +13,18 @@ interface DirectoryProjectsGridProps {
 	limit: number;
 }
 
-/** Map sort option to Payload sort string */
+/** Map sort option to Payload sort string (single-field only — Payload doesn't support multi-field) */
 function getPayloadSort(sortOption: string): string {
 	switch (sortOption) {
-		case "featured":
-			return "-featured,name";
 		case "name-asc":
 			return "name";
 		case "name-desc":
 			return "-name";
 		case "newest":
 			return "-lastVerifiedAt";
+		case "featured":
 		default:
-			return "-featured,name";
+			return "name";
 	}
 }
 
@@ -94,6 +93,29 @@ export default async function DirectoryProjectsGrid({
 
 				result = {
 					docs: paginatedDocs,
+					totalDocs,
+					totalPages,
+					page,
+					hasNextPage: page < totalPages,
+					hasPrevPage: page > 1,
+				};
+			} else if (sortOption === "featured") {
+				// Two-pass: featured projects first, then the rest alphabetically
+				const featuredWhere = { ...baseWhere, featured: { equals: true } };
+				const restWhere = { ...baseWhere, featured: { not_equals: true } };
+
+				const [featuredResults, restResults] = await Promise.all([
+					payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
+					payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
+				]);
+
+				const allDocs = [...featuredResults.docs, ...restResults.docs];
+				const totalDocs = allDocs.length;
+				const totalPages = Math.ceil(totalDocs / limit);
+				const start = (page - 1) * limit;
+
+				result = {
+					docs: allDocs.slice(start, start + limit),
 					totalDocs,
 					totalPages,
 					page,
