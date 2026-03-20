@@ -56,7 +56,7 @@ export default async function ProjectsGrid({
 				where,
 				limit,
 				page: 1,
-				sort: "-lastVerifiedAt",
+				sort: "-featured,name",
 				depth: 1,
 			});
 

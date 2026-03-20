@@ -7,7 +7,7 @@ import BaseFeeDisplay from "@/components/base-fee-display";
 import { FlickeringGrid } from "@/components/flickering-grid";
 import BlogHighlights, { BlogHighlightsSkeleton } from "@/components/blog-highlights";
 import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
-import { HomepageSearch } from "@/components/homepage-search";
+import { DirectoryFilters } from "@/components/directory-filters";
 import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
@@ -112,7 +112,7 @@ export default async function HomePage() {
 
 					{/* Search and Filter */}
 					<div className="mb-10">
-						<HomepageSearch />
+						<DirectoryFilters />
 					</div>
 
 					{/* Projects Grid */}
