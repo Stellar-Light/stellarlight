@@ -8,30 +8,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
 	categoryFilter?: string;
-	sortOption?: string;
 	page: number;
 	limit: number;
-}
-
-/** Map sort option to Payload sort string (single-field only — Payload doesn't support multi-field) */
-function getPayloadSort(sortOption: string): string {
-	switch (sortOption) {
-		case "name-asc":
-			return "name";
-		case "name-desc":
-			return "-name";
-		case "newest":
-			return "-lastVerifiedAt";
-		case "featured":
-		default:
-			return "name";
-	}
 }
 
 export default async function DirectoryProjectsGrid({
 	searchQuery,
 	categoryFilter,
-	sortOption = "featured",
 	page,
 	limit,
 }: DirectoryProjectsGridProps) {
@@ -41,97 +24,44 @@ export default async function DirectoryProjectsGrid({
 
 	if (payload) {
 		try {
-			const baseWhere: any = {
+			const where: any = {
 				status: {
 					in: ["Development", "Pre-Release", "Live"],
 				},
 			};
 
-			if (categoryFilter && categoryFilter !== "all") {
-				baseWhere.category = { equals: categoryFilter };
-			}
-
 			if (searchQuery) {
-				// Two-pass search: exact name matches first, then description/org matches
-				// This ensures "Blend" appears before projects that mention Blend in descriptions
-				const nameWhere = {
-					...baseWhere,
-					name: { contains: searchQuery },
-				};
-
-				const descWhere = {
-					...baseWhere,
-					and: [
-						{
-							name: { not_equals: "" }, // placeholder to combine with or
-							or: [
-								{ shortDescription: { contains: searchQuery } },
-								{ "github.orgLogin": { contains: searchQuery } },
-							],
+				where.or = [
+					{
+						name: {
+							contains: searchQuery,
 						},
-						{
-							// Exclude projects already matched by name
-							name: { not_contains: searchQuery },
+					},
+					{
+						shortDescription: {
+							contains: searchQuery,
 						},
-					],
-				};
-
-				const sort = getPayloadSort(sortOption);
-
-				// Fetch both sets (overfetch to handle pagination correctly)
-				const [nameResults, descResults] = await Promise.all([
-					payload.find({ collection: "projects", where: nameWhere, limit: 0, depth: 1, sort }),
-					payload.find({ collection: "projects", where: descWhere, limit: 0, depth: 1, sort }),
-				]);
-
-				// Merge: name matches first, then description matches
-				const allDocs = [...nameResults.docs, ...descResults.docs];
-				const totalDocs = allDocs.length;
-				const totalPages = Math.ceil(totalDocs / limit);
-				const start = (page - 1) * limit;
-				const paginatedDocs = allDocs.slice(start, start + limit);
-
-				result = {
-					docs: paginatedDocs,
-					totalDocs,
-					totalPages,
-					page,
-					hasNextPage: page < totalPages,
-					hasPrevPage: page > 1,
-				};
-			} else if (sortOption === "featured") {
-				// Two-pass: featured projects first, then the rest alphabetically
-				const featuredWhere = { ...baseWhere, featured: { equals: true } };
-				const restWhere = { ...baseWhere, featured: { not_equals: true } };
-
-				const [featuredResults, restResults] = await Promise.all([
-					payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
-					payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
-				]);
-
-				const allDocs = [...featuredResults.docs, ...restResults.docs];
-				const totalDocs = allDocs.length;
-				const totalPages = Math.ceil(totalDocs / limit);
-				const start = (page - 1) * limit;
-
-				result = {
-					docs: allDocs.slice(start, start + limit),
-					totalDocs,
-					totalPages,
-					page,
-					hasNextPage: page < totalPages,
-					hasPrevPage: page > 1,
-				};
-			} else {
-				result = await payload.find({
-					collection: "projects",
-					where: baseWhere,
-					limit,
-					page,
-					sort: getPayloadSort(sortOption),
-					depth: 1,
-				});
+					},
+					{
+						"github.orgLogin": {
+							contains: searchQuery,
+						},
+					},
+				];
 			}
+
+			if (categoryFilter && categoryFilter !== "all") {
+				where.category = { equals: categoryFilter };
+			}
+
+			result = await payload.find({
+				collection: "projects",
+				where,
+				limit,
+				page,
+				sort: "-lastVerifiedAt",
+				depth: 1,
+			});
 		} catch (error) {
 			// Silently handle fetch errors
 		}
@@ -149,79 +79,80 @@ export default async function DirectoryProjectsGrid({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-				{result.docs.map((project: any) => (
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+				{result.docs.map((project: any, index: number) => (
 					<ProjectCard
 						key={project.id}
 						project={project}
-						isFeatured={project.featured === true}
+						isFeatured={index === 0 && !project.verificationLevel?.includes("Unverified")}
 					/>
 				))}
 			</div>
 
 			{/* Pagination */}
 			{result.totalPages > 1 && (
-				<div className="flex items-center justify-center gap-2 sm:gap-4">
+				<div className="flex items-center justify-center gap-2">
 					{page > 1 ? (
 						<Button
 							asChild
-							variant="outline"
-							className="shadow-sm hover:shadow-md h-10 px-3 sm:h-12 sm:px-8"
+							variant="ghost"
+							size="default"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
-									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page - 1),
 								}).toString()}`}
 							>
-								<ChevronLeft className="h-4 w-4 sm:mr-2" />
-								<span className="hidden sm:inline">Previous</span>
+								<ChevronLeft className="h-3.5 w-3.5" />
+								Previous
 							</Link>
 						</Button>
 					) : (
 						<Button
-							variant="outline"
+							variant="ghost"
+							size="default"
 							disabled
-							className="shadow-sm h-10 px-3 sm:h-12 sm:px-8"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
-							<ChevronLeft className="h-4 w-4 sm:mr-2" />
-							<span className="hidden sm:inline">Previous</span>
+							<ChevronLeft className="h-3.5 w-3.5" />
+							Previous
 						</Button>
 					)}
-					<div className="flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg bg-muted/50 border-2">
-						<span className="text-xs sm:text-sm font-semibold">
-							Page <span className="text-primary">{page}</span> of{" "}
-							<span className="text-primary">{result.totalPages}</span>
+					<div className="flex items-center px-4 py-2 rounded-lg bg-[#262626] border border-[#2F2F2F]">
+						<span className="text-xs font-medium text-muted-foreground">
+							{page} / {result.totalPages}
 						</span>
 					</div>
 					{page < result.totalPages ? (
 						<Button
 							asChild
-							variant="outline"
-							className="shadow-sm hover:shadow-md h-10 px-3 sm:h-12 sm:px-8"
+							variant="ghost"
+							size="default"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
-									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page + 1),
 								}).toString()}`}
 							>
-								<span className="hidden sm:inline">Next</span>
-								<ChevronRight className="h-4 w-4 sm:ml-2" />
+								Next
+								<ChevronRight className="h-3.5 w-3.5" />
 							</Link>
 						</Button>
 					) : (
 						<Button
-							variant="outline"
+							variant="ghost"
+							size="default"
 							disabled
-							className="shadow-sm h-10 px-3 sm:h-12 sm:px-8"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
-							<span className="hidden sm:inline">Next</span>
-							<ChevronRight className="h-4 w-4 sm:ml-2" />
+							Next
+							<ChevronRight className="h-3.5 w-3.5" />
 						</Button>
 					)}
 				</div>
@@ -232,7 +163,7 @@ export default async function DirectoryProjectsGrid({
 
 export function DirectoryProjectsGridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<ProjectCardSkeleton key={i} />
 			))}

@@ -414,14 +414,14 @@ export default async function ProjectDetailPage({
 				{/* Back Button */}
 				<Link
 					href="/directory"
-					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200 mb-10 group"
+					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-10 group"
 				>
-					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
 					<span className="text-sm font-medium">Back to Directory</span>
 				</Link>
 
 				{/* Hero Section - Card with Flex Layout */}
-				<Card className="mb-12 border border-border/50 bg-card shadow-lg">
+				<Card className="mb-12 border border-border/50 bg-card shadow-sm">
 					<CardContent className="p-8">
 						<div className="flex flex-col gap-6">
 							{/* First Row - Logo and Title/Tags */}
@@ -535,38 +535,41 @@ export default async function ProjectDetailPage({
 
 				{/* Links & Resources */}
 				{project.links && Object.values(project.links).some(Boolean) && (
-					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Links & Resources</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-								{Object.entries(project.links).map(([key, url]) => {
-									if (!url) return null;
+								{Object.entries(project.links).flatMap(([key, url]) => {
+									if (!url) return [];
 									const Icon =
 										linkIcons[key as keyof typeof linkIcons] || ExternalLink;
-									return (
+									// Split multiple URLs that were pasted into one field
+									const urls = String(url).split(/\s+/).filter(u => u.startsWith('http'));
+									if (urls.length === 0) urls.push(String(url));
+									return urls.map((singleUrl, idx) => (
 										<a
-											key={key}
-											href={String(url)}
+											key={`${key}-${idx}`}
+											href={singleUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+											className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5 overflow-hidden"
 										>
-											<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/20 transition-all duration-200">
+											<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/20 transition-all duration-150 flex-shrink-0">
 												<Icon className="h-6 w-6 text-primary" />
 											</div>
-											<div className="flex-1">
-												<span className="block capitalize font-semibold text-foreground group-hover:text-primary transition-colors">
+											<div className="flex-1 min-w-0">
+												<span className="block capitalize font-semibold text-foreground group-hover:text-primary transition-colors truncate">
 													{key}
 												</span>
-												<span className="text-xs text-muted-foreground truncate">
-													{String(url).replace(/^https?:\/\//, '').replace(/\/$/, '')}
+												<span className="block text-xs text-muted-foreground truncate">
+													{singleUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
 												</span>
 											</div>
 											<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
 										</a>
-									);
+									));
 								})}
 							</div>
 						</CardContent>
@@ -575,7 +578,7 @@ export default async function ProjectDetailPage({
 
 				{/* Built By - Linked Entities */}
 				{linkedEntities.length > 0 && (
-					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Built By</CardTitle>
 							<CardDescription>
@@ -595,7 +598,7 @@ export default async function ProjectDetailPage({
 				{/* Project Stats - GitHub Stats */}
 				{project.github?.repos && project.github.repos.length > 0 && (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -618,7 +621,7 @@ export default async function ProjectDetailPage({
 							</CardContent>
 						</Card>
 
-						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -639,7 +642,7 @@ export default async function ProjectDetailPage({
 							</CardContent>
 						</Card>
 
-						<Card className="border border-border/50 bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -664,7 +667,7 @@ export default async function ProjectDetailPage({
 
 				{/* Repositories */}
 				{project.github?.repos && project.github.repos.length > 0 && (
-					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Repositories</CardTitle>
 							<CardDescription>
@@ -688,7 +691,7 @@ export default async function ProjectDetailPage({
 										href={r.url}
 										target="_blank"
 										rel="noreferrer"
-										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-200 hover:shadow-md"
+										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
 									>
 										<div className="flex-1 min-w-0">
 											<div className="flex items-center gap-3 mb-2">
@@ -697,7 +700,7 @@ export default async function ProjectDetailPage({
 													{r.owner}/{r.name}
 												</span>
 											</div>
-											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8">
+											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
 												{r.error ? (
 													<span className="text-orange-400 font-medium">
 														{r.error}
@@ -740,7 +743,7 @@ export default async function ProjectDetailPage({
 						project.onchain.issuer ||
 						(project.onchain.contracts &&
 							project.onchain.contracts.length > 0)) && (
-						<Card className="mb-8 border border-border/50 bg-card shadow-lg">
+						<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 							<CardHeader className="pb-4">
 								<CardTitle className="text-xl font-bold">On-Chain Information</CardTitle>
 							</CardHeader>
@@ -783,7 +786,7 @@ export default async function ProjectDetailPage({
 
 				{/* Transparency Log - Only show in debug mode */}
 				{process.env.NODE_ENV === "development" && (
-					<Card className="border border-border/50 bg-card shadow-lg">
+					<Card className="border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Transparency Log</CardTitle>
 							<CardDescription>
@@ -803,7 +806,7 @@ export default async function ProjectDetailPage({
 									{logsResult.docs.map((log, idx) => (
 										<div
 											key={log.id}
-											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-200 group"
+											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-150 group"
 										>
 											<div className="flex items-center gap-4">
 												<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-colors">

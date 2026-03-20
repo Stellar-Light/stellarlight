@@ -74,28 +74,28 @@ export default function ProjectCard({
 							alt={`${project.name} logo`}
 							width={52}
 							height={52}
-							className="rounded-full object-cover w-[52px] h-[52px] border border-border/50 transition-transform duration-300 group-hover:scale-110 group-hover:border-white/30"
+							className="rounded-full object-cover w-[52px] h-[52px] border border-border/50 transition-transform duration-150 group-hover:scale-110 group-hover:border-white/30"
 							onError={() => {
 								setLogoError(true);
 							}}
 						/>
 					</div>
-					<h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-white transition-colors duration-300 leading-tight">
+					<h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-white transition-all duration-150 leading-tight">
 						{project.name}
 					</h3>
 				</div>
 
 				{/* Description - flex-1 to fill remaining space */}
-				<p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 mb-5 group-hover:text-foreground/80 transition-colors duration-300">
+				<p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 mb-5 group-hover:text-foreground/80 transition-all duration-150">
 					{project.shortDescription || "No description available."}
 				</p>
 
 				{/* View Details with Arrow */}
-				<div className="flex items-center justify-between pt-4 border-t border-border group-hover:border-white/20 transition-colors duration-300">
-					<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors duration-300">
+				<div className="flex items-center justify-between pt-4 border-t border-border group-hover:border-white/20 transition-all duration-150">
+					<span className="text-sm font-medium text-foreground group-hover:text-white transition-all duration-150">
 						View Details
 					</span>
-					<ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" />
+					<ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-150" />
 				</div>
 			</div>
 		</Link>

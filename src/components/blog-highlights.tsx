@@ -58,8 +58,8 @@ export default async function BlogHighlights() {
 				</div>
 				<Button
 					asChild
-					variant="outline"
-					className="hidden sm:flex px-6 py-2 rounded-xl font-medium border-border hover:border-white/20 transition-all duration-300"
+					variant="ghost"
+					className="hidden sm:flex rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150 px-6 font-medium"
 				>
 					<Link href="/blog">View All Posts</Link>
 				</Button>
@@ -88,8 +88,8 @@ export default async function BlogHighlights() {
 			<div className="mt-6 text-center sm:hidden">
 				<Button
 					asChild
-					variant="outline"
-					className="px-8 py-3 rounded-xl font-semibold border-border hover:border-white/20 transition-all duration-300"
+					variant="ghost"
+					className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150 px-8 font-medium"
 				>
 					<Link href="/blog">View All Posts</Link>
 				</Button>

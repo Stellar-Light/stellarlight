@@ -44,7 +44,7 @@ export default function BlogHighlightCard({
 
 	return (
 		<Link href={`/blog/${post.slug}`} className="group block h-full">
-			<div className="rounded-xl bg-card border border-border hover:border-white/30 transition-all duration-200 h-full flex flex-col cursor-pointer overflow-hidden">
+			<div className="rounded-xl bg-card border border-border hover:border-white/30 transition-all duration-150 h-full flex flex-col cursor-pointer overflow-hidden">
 				{/* Image - Top Row */}
 				{imageUrl ? (
 					<div className="relative w-full h-36 overflow-hidden">
@@ -70,7 +70,7 @@ export default function BlogHighlightCard({
 				{/* Content - Bottom Row */}
 				<div className="flex-1 flex flex-col p-5">
 					{/* Title */}
-					<h3 className="text-base md:text-lg font-semibold mb-2 text-foreground group-hover:text-white transition-colors duration-200 leading-tight line-clamp-2">
+					<h3 className="text-base md:text-lg font-semibold mb-2 text-foreground group-hover:text-white transition-colors duration-150 leading-tight line-clamp-2">
 						{post.title}
 					</h3>
 
@@ -81,10 +81,10 @@ export default function BlogHighlightCard({
 
 					{/* Learn More with External Link Icon */}
 					<div className="mt-auto flex items-center gap-2">
-						<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors duration-200">
+						<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors duration-150">
 							Learn more
 						</span>
-						<ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+						<ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-150" />
 					</div>
 				</div>
 			</div>
