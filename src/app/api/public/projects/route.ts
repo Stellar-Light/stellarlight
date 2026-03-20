@@ -18,42 +18,58 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		const where: any = {
+		const baseWhere: any = {
 			status: {
 				in: ["Development", "Pre-Release", "Live"],
 			},
 		};
 
-		if (searchQuery) {
-			where.or = [
-				{
-					name: {
-						contains: searchQuery,
-					},
-				},
-				{
-					shortDescription: {
-						contains: searchQuery,
-					},
-				},
-				{
-					"github.orgLogin": {
-						contains: searchQuery,
-					},
-				},
-			];
+		if (categoryFilter && categoryFilter !== "all") {
+			baseWhere.category = { equals: categoryFilter };
 		}
 
-		if (categoryFilter && categoryFilter !== "all") {
-			where.category = { equals: categoryFilter };
+		if (searchQuery) {
+			// Two-pass: name matches first, then description/org matches
+			const nameWhere = { ...baseWhere, name: { contains: searchQuery } };
+			const descWhere = {
+				...baseWhere,
+				and: [
+					{
+						or: [
+							{ shortDescription: { contains: searchQuery } },
+							{ "github.orgLogin": { contains: searchQuery } },
+						],
+					},
+					{ name: { not_contains: searchQuery } },
+				],
+			};
+
+			const [nameResults, descResults] = await Promise.all([
+				payload.find({ collection: "projects", where: nameWhere, limit: 0, depth: 1, sort: "name" }),
+				payload.find({ collection: "projects", where: descWhere, limit: 0, depth: 1, sort: "name" }),
+			]);
+
+			const allDocs = [...nameResults.docs, ...descResults.docs];
+			const totalDocs = allDocs.length;
+			const totalPages = Math.ceil(totalDocs / limit);
+			const start = (page - 1) * limit;
+
+			return NextResponse.json({
+				docs: allDocs.slice(start, start + limit),
+				totalDocs,
+				totalPages,
+				page,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
+			});
 		}
 
 		const result = await payload.find({
 			collection: "projects",
-			where,
+			where: baseWhere,
 			limit,
 			page,
-			sort: "name",
+			sort: "-featured,name",
 			depth: 1,
 		});
 

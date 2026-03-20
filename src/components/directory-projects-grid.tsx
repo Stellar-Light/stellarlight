@@ -42,44 +42,74 @@ export default async function DirectoryProjectsGrid({
 
 	if (payload) {
 		try {
-			const where: any = {
+			const baseWhere: any = {
 				status: {
 					in: ["Development", "Pre-Release", "Live"],
 				},
 			};
 
-			if (searchQuery) {
-				where.or = [
-					{
-						name: {
-							contains: searchQuery,
-						},
-					},
-					{
-						shortDescription: {
-							contains: searchQuery,
-						},
-					},
-					{
-						"github.orgLogin": {
-							contains: searchQuery,
-						},
-					},
-				];
-			}
-
 			if (categoryFilter && categoryFilter !== "all") {
-				where.category = { equals: categoryFilter };
+				baseWhere.category = { equals: categoryFilter };
 			}
 
-			result = await payload.find({
-				collection: "projects",
-				where,
-				limit,
-				page,
-				sort: getPayloadSort(sortOption),
-				depth: 1,
-			});
+			if (searchQuery) {
+				// Two-pass search: exact name matches first, then description/org matches
+				// This ensures "Blend" appears before projects that mention Blend in descriptions
+				const nameWhere = {
+					...baseWhere,
+					name: { contains: searchQuery },
+				};
+
+				const descWhere = {
+					...baseWhere,
+					and: [
+						{
+							name: { not_equals: "" }, // placeholder to combine with or
+							or: [
+								{ shortDescription: { contains: searchQuery } },
+								{ "github.orgLogin": { contains: searchQuery } },
+							],
+						},
+						{
+							// Exclude projects already matched by name
+							name: { not_contains: searchQuery },
+						},
+					],
+				};
+
+				const sort = getPayloadSort(sortOption);
+
+				// Fetch both sets (overfetch to handle pagination correctly)
+				const [nameResults, descResults] = await Promise.all([
+					payload.find({ collection: "projects", where: nameWhere, limit: 0, depth: 1, sort }),
+					payload.find({ collection: "projects", where: descWhere, limit: 0, depth: 1, sort }),
+				]);
+
+				// Merge: name matches first, then description matches
+				const allDocs = [...nameResults.docs, ...descResults.docs];
+				const totalDocs = allDocs.length;
+				const totalPages = Math.ceil(totalDocs / limit);
+				const start = (page - 1) * limit;
+				const paginatedDocs = allDocs.slice(start, start + limit);
+
+				result = {
+					docs: paginatedDocs,
+					totalDocs,
+					totalPages,
+					page,
+					hasNextPage: page < totalPages,
+					hasPrevPage: page > 1,
+				};
+			} else {
+				result = await payload.find({
+					collection: "projects",
+					where: baseWhere,
+					limit,
+					page,
+					sort: getPayloadSort(sortOption),
+					depth: 1,
+				});
+			}
 		} catch (error) {
 			// Silently handle fetch errors
 		}
