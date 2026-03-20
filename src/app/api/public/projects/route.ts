@@ -18,52 +18,73 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		const where: any = {
+		const baseWhere: any = {
 			status: {
 				in: ["Development", "Pre-Release", "Live"],
 			},
 		};
 
-		if (searchQuery) {
-			where.or = [
-				{
-					name: {
-						contains: searchQuery,
-					},
-				},
-				{
-					shortDescription: {
-						contains: searchQuery,
-					},
-				},
-				{
-					"github.orgLogin": {
-						contains: searchQuery,
-					},
-				},
-			];
-		}
-
 		if (categoryFilter && categoryFilter !== "all") {
-			where.category = { equals: categoryFilter };
+			baseWhere.category = { equals: categoryFilter };
 		}
 
-		const result = await payload.find({
-			collection: "projects",
-			where,
-			limit,
-			page,
-			sort: "name",
-			depth: 1,
-		});
+		if (searchQuery) {
+			// Two-pass: name matches first, then description/org matches
+			const nameWhere = { ...baseWhere, name: { contains: searchQuery } };
+			const descWhere = {
+				...baseWhere,
+				and: [
+					{
+						or: [
+							{ shortDescription: { contains: searchQuery } },
+							{ "github.orgLogin": { contains: searchQuery } },
+						],
+					},
+					{ name: { not_contains: searchQuery } },
+				],
+			};
+
+			const [nameResults, descResults] = await Promise.all([
+				payload.find({ collection: "projects", where: nameWhere, limit: 0, depth: 1, sort: "name" }),
+				payload.find({ collection: "projects", where: descWhere, limit: 0, depth: 1, sort: "name" }),
+			]);
+
+			const allDocs = [...nameResults.docs, ...descResults.docs];
+			const totalDocs = allDocs.length;
+			const totalPages = Math.ceil(totalDocs / limit);
+			const start = (page - 1) * limit;
+
+			return NextResponse.json({
+				docs: allDocs.slice(start, start + limit),
+				totalDocs,
+				totalPages,
+				page,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
+			});
+		}
+
+		// Two-pass: featured first, then rest alphabetically
+		const featuredWhere = { ...baseWhere, featured: { equals: true } };
+		const restWhere = { ...baseWhere, featured: { not_equals: true } };
+
+		const [featuredResults, restResults] = await Promise.all([
+			payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
+			payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
+		]);
+
+		const allDocs = [...featuredResults.docs, ...restResults.docs];
+		const totalDocs = allDocs.length;
+		const totalPages = Math.ceil(totalDocs / limit);
+		const start = (page - 1) * limit;
 
 		return NextResponse.json({
-			docs: result.docs,
-			totalDocs: result.totalDocs,
-			totalPages: result.totalPages,
-			page: result.page,
-			hasNextPage: result.hasNextPage,
-			hasPrevPage: result.hasPrevPage,
+			docs: allDocs.slice(start, start + limit),
+			totalDocs,
+			totalPages,
+			page,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
 		});
 	} catch (error) {
 		return NextResponse.json(

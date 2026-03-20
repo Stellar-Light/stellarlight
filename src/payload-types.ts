@@ -261,6 +261,10 @@ export interface Project {
   };
   lastVerifiedAt?: string | null;
   /**
+   * Featured projects appear first in the directory when sorted by Featured.
+   */
+  featured?: boolean | null;
+  /**
    * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
   communityPick?: boolean | null;
@@ -841,6 +845,7 @@ export interface ProjectsSelect<T extends boolean = true> {
         firstSeenAt?: T;
       };
   lastVerifiedAt?: T;
+  featured?: T;
   communityPick?: T;
   relatedEntities?: T;
   updatedAt?: T;

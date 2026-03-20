@@ -71,7 +71,7 @@ export default async function BlogPostsGrid({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-12">
 				{posts.map((post: any, index: number) => (
 					<BlogHighlightCard
 						key={post.id}
@@ -83,7 +83,7 @@ export default async function BlogPostsGrid({
 
 			{/* Pagination */}
 			{result.totalPages > 1 && (
-				<div className="flex items-center justify-center gap-4">
+				<div className="flex items-center justify-center gap-2 sm:gap-4">
 					{page > 1 && (
 						<Button
 							asChild
@@ -117,7 +117,7 @@ export default async function BlogPostsGrid({
 
 export function BlogPostsGridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-12">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<BlogCardSkeleton key={i} isLarge={i === 0} />
 			))}

@@ -51,14 +51,22 @@ export default async function ProjectsGrid({
 				where.category = { equals: categoryFilter };
 			}
 
-			const result = await payload.find({
-				collection: "projects",
-				where,
-				limit,
+			// Two-pass: featured first, then rest alphabetically
+			const featuredWhere = { ...where, featured: { equals: true } };
+			const restWhere = { ...where, featured: { not_equals: true } };
+
+			const [featuredResults, restResults] = await Promise.all([
+				payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
+				payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
+			]);
+
+			const allDocs = [...featuredResults.docs, ...restResults.docs];
+			const result = {
+				docs: allDocs.slice(0, limit),
+				totalDocs: allDocs.length,
+				totalPages: Math.ceil(allDocs.length / limit),
 				page: 1,
-				sort: "-lastVerifiedAt",
-				depth: 1,
-			});
+			};
 
 			projects = result.docs;
 			totalProjects = result.totalDocs;

@@ -260,7 +260,7 @@ export default async function BlogDetailPage({
 					</h1>
 
 					{/* Meta Information */}
-					<div className="flex flex-wrap items-center gap-6 mb-8 text-sm text-muted-foreground">
+					<div className="flex flex-wrap items-center gap-3 sm:gap-6 mb-8 text-sm text-muted-foreground">
 						<div className="flex items-center gap-2">
 							<User className="w-4 h-4" />
 							<span>{post.author}</span>
@@ -344,7 +344,7 @@ export default async function BlogDetailPage({
 						<h2 className="text-2xl md:text-3xl font-bold mb-8 text-foreground">
 							Related Posts
 						</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 							{relatedPosts.docs.map((relatedPost) => {
 								let relatedImageUrl = null;
 								let isRelatedExternal = false;

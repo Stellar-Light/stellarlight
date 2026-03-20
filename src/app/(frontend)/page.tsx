@@ -7,7 +7,7 @@ import BaseFeeDisplay from "@/components/base-fee-display";
 import { FlickeringGrid } from "@/components/flickering-grid";
 import BlogHighlights, { BlogHighlightsSkeleton } from "@/components/blog-highlights";
 import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
-import { HomepageSearch } from "@/components/homepage-search";
+import { DirectoryFilters } from "@/components/directory-filters";
 import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
@@ -42,7 +42,7 @@ export default async function HomePage() {
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-16">
 				{/* Hero Section */}
 				<div className="mb-20 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[600px] relative">
-					<div className="flex-1 text-left relative z-10 space-y-8">
+					<div className="flex-1 text-left relative z-20 space-y-8">
 						<div className="space-y-6">
 							<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
 								<div className="text-foreground mb-2">Explore</div>
@@ -112,7 +112,7 @@ export default async function HomePage() {
 
 					{/* Search and Filter */}
 					<div className="mb-10">
-						<HomepageSearch />
+						<DirectoryFilters />
 					</div>
 
 					{/* Projects Grid */}

@@ -1,8 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
-import { Select } from "@/components/ui/select";
+import { Search, ChevronDown, ArrowUpDown } from "lucide-react";
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+	Drawer,
+	DrawerTrigger,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerDescription,
+} from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 const categories = [
 	{ id: "all", label: "All Categories" },
@@ -15,36 +30,52 @@ const categories = [
 	{ id: "Anchor", label: "Anchor" },
 ];
 
+const sortOptions = [
+	{ id: "featured", label: "Featured" },
+	{ id: "name-asc", label: "Name (A–Z)" },
+	{ id: "name-desc", label: "Name (Z–A)" },
+	{ id: "newest", label: "Newest" },
+];
+
 export function DirectoryFilters() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const searchQuery = searchParams.get("q") || "";
 	const categoryFilter = searchParams.get("category") || "all";
+	const sortFilter = searchParams.get("sort") || "featured";
+	const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+	const [sortDrawerOpen, setSortDrawerOpen] = useState(false);
 
-	const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const buildUrl = (overrides: Record<string, string>) => {
 		const params = new URLSearchParams();
-		if (searchQuery) {
-			params.set("q", searchQuery);
-		}
-		if (e.target.value !== "all") {
-			params.set("category", e.target.value);
-		}
-		router.push(`/directory?${params.toString()}`);
+		const q = overrides.q ?? searchQuery;
+		const cat = overrides.category ?? categoryFilter;
+		const sort = overrides.sort ?? sortFilter;
+		if (q) params.set("q", q);
+		if (cat !== "all") params.set("category", cat);
+		if (sort !== "featured") params.set("sort", sort);
+		return `/directory?${params.toString()}`;
+	};
+
+	const handleCategoryChange = (value: string) => {
+		router.push(buildUrl({ category: value }));
+		setCategoryDrawerOpen(false);
+	};
+
+	const handleSortChange = (value: string) => {
+		router.push(buildUrl({ sort: value }));
+		setSortDrawerOpen(false);
 	};
 
 	const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const formData = new FormData(e.currentTarget);
-		const params = new URLSearchParams();
-		const query = formData.get("q") as string;
-		if (query) {
-			params.set("q", query);
-		}
-		if (categoryFilter !== "all") {
-			params.set("category", categoryFilter);
-		}
-		router.push(`/directory?${params.toString()}`);
+		const query = (formData.get("q") as string) || "";
+		router.push(buildUrl({ q: query }));
 	};
+
+	const selectedCategoryLabel = categories.find((c) => c.id === categoryFilter)?.label ?? "All Categories";
+	const selectedSortLabel = sortOptions.find((s) => s.id === sortFilter)?.label ?? "Featured";
 
 	return (
 		<form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
@@ -59,19 +90,135 @@ export function DirectoryFilters() {
 				/>
 			</div>
 
-			<Select
-				name="category"
-				value={categoryFilter}
-				onChange={handleCategoryChange}
-				className="h-11 min-w-[180px] bg-card text-foreground border border-border rounded-xl focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
-			>
-				{categories.map((category) => (
-					<option key={category.id} value={category.id}>
-						{category.label}
-					</option>
-				))}
-			</Select>
+			{/* Desktop: Category Dropdown */}
+			<div className="hidden md:block">
+				<DropdownMenu>
+					<DropdownMenuTrigger className="h-11 px-4 min-w-[180px] bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]">
+						<span className="flex-1 text-left text-sm truncate">
+							{selectedCategoryLabel}
+						</span>
+						<ChevronDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-[200px]">
+						{categories.map((category) => (
+							<DropdownMenuItem
+								key={category.id}
+								onClick={() => handleCategoryChange(category.id)}
+								className={
+									categoryFilter === category.id
+										? "bg-white/10 text-foreground"
+										: "text-foreground hover:bg-white/5"
+								}
+							>
+								{category.label}
+							</DropdownMenuItem>
+						))}
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
+
+			{/* Desktop: Sort Dropdown */}
+			<div className="hidden md:block">
+				<DropdownMenu>
+					<DropdownMenuTrigger className="h-11 px-4 min-w-[150px] bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]">
+						<ArrowUpDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+						<span className="flex-1 text-left text-sm truncate">
+							{selectedSortLabel}
+						</span>
+						<ChevronDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-[180px]">
+						{sortOptions.map((option) => (
+							<DropdownMenuItem
+								key={option.id}
+								onClick={() => handleSortChange(option.id)}
+								className={
+									sortFilter === option.id
+										? "bg-white/10 text-foreground"
+										: "text-foreground hover:bg-white/5"
+								}
+							>
+								{option.label}
+							</DropdownMenuItem>
+						))}
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
+
+			{/* Mobile: Category + Sort Drawers */}
+			<div className="md:hidden flex gap-3">
+				<Drawer open={categoryDrawerOpen} onOpenChange={setCategoryDrawerOpen}>
+					<DrawerTrigger asChild>
+						<button
+							type="button"
+							className="flex-1 h-11 px-4 bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
+						>
+							<span className="flex-1 text-left text-sm truncate">
+								{selectedCategoryLabel}
+							</span>
+							<ChevronDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+						</button>
+					</DrawerTrigger>
+					<DrawerContent>
+						<DrawerHeader>
+							<DrawerTitle>Category</DrawerTitle>
+							<DrawerDescription>Filter projects by category</DrawerDescription>
+						</DrawerHeader>
+						<div className="mt-4 space-y-1 pb-4">
+							{categories.map((category) => (
+								<button
+									key={category.id}
+									type="button"
+									onClick={() => handleCategoryChange(category.id)}
+									className={cn(
+										"w-full text-left px-3 py-3 rounded-xl text-sm transition-all duration-150",
+										categoryFilter === category.id
+											? "bg-[#262626] text-[#E5E5E5]"
+											: "text-[#A3A3A3] hover:bg-[#222222] hover:text-[#E5E5E5]",
+									)}
+								>
+									{category.label}
+								</button>
+							))}
+						</div>
+					</DrawerContent>
+				</Drawer>
+
+				<Drawer open={sortDrawerOpen} onOpenChange={setSortDrawerOpen}>
+					<DrawerTrigger asChild>
+						<button
+							type="button"
+							className="h-11 px-4 bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
+						>
+							<ArrowUpDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+							<span className="text-sm truncate">{selectedSortLabel}</span>
+						</button>
+					</DrawerTrigger>
+					<DrawerContent>
+						<DrawerHeader>
+							<DrawerTitle>Sort by</DrawerTitle>
+							<DrawerDescription>Choose how to sort projects</DrawerDescription>
+						</DrawerHeader>
+						<div className="mt-4 space-y-1 pb-4">
+							{sortOptions.map((option) => (
+								<button
+									key={option.id}
+									type="button"
+									onClick={() => handleSortChange(option.id)}
+									className={cn(
+										"w-full text-left px-3 py-3 rounded-xl text-sm transition-all duration-150",
+										sortFilter === option.id
+											? "bg-[#262626] text-[#E5E5E5]"
+											: "text-[#A3A3A3] hover:bg-[#222222] hover:text-[#E5E5E5]",
+									)}
+								>
+									{option.label}
+								</button>
+							))}
+						</div>
+					</DrawerContent>
+				</Drawer>
+			</div>
 		</form>
 	);
 }
-
