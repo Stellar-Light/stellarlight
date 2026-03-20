@@ -545,10 +545,12 @@ export default async function ProjectDetailPage({
 									if (!url) return [];
 									const Icon =
 										linkIcons[key as keyof typeof linkIcons] || ExternalLink;
-									// Split multiple URLs that were pasted into one field
-									const urls = String(url).split(/\s+/).filter(u => u.startsWith('http'));
+									// Extract first valid URL from fields that may contain multiple pasted URLs
+									const decoded = decodeURIComponent(String(url));
+									const urls = decoded.split(/[\s,;|]+/).filter(u => u.startsWith('http'));
 									if (urls.length === 0) urls.push(String(url));
-									return urls.map((singleUrl, idx) => (
+									// Only show the first URL
+									return [urls[0]].map((singleUrl, idx) => (
 										<a
 											key={`${key}-${idx}`}
 											href={singleUrl}
