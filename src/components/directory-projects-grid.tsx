@@ -97,7 +97,7 @@ export default async function DirectoryProjectsGrid({
 							asChild
 							variant="ghost"
 							size="default"
-							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 transition-all duration-150"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
@@ -106,7 +106,7 @@ export default async function DirectoryProjectsGrid({
 									page: String(page - 1),
 								}).toString()}`}
 							>
-								<ChevronLeft className="mr-1.5 h-4 w-4" />
+								<ChevronLeft className="h-3.5 w-3.5" />
 								Previous
 							</Link>
 						</Button>
@@ -117,7 +117,7 @@ export default async function DirectoryProjectsGrid({
 							disabled
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
-							<ChevronLeft className="mr-1.5 h-4 w-4" />
+							<ChevronLeft className="h-3.5 w-3.5" />
 							Previous
 						</Button>
 					)}
@@ -131,7 +131,7 @@ export default async function DirectoryProjectsGrid({
 							asChild
 							variant="ghost"
 							size="default"
-							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 transition-all duration-150"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
 								href={`/directory?${new URLSearchParams({
@@ -141,7 +141,7 @@ export default async function DirectoryProjectsGrid({
 								}).toString()}`}
 							>
 								Next
-								<ChevronRight className="ml-1.5 h-4 w-4" />
+								<ChevronRight className="h-3.5 w-3.5" />
 							</Link>
 						</Button>
 					) : (
@@ -152,7 +152,7 @@ export default async function DirectoryProjectsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
 							Next
-							<ChevronRight className="ml-1.5 h-4 w-4" />
+							<ChevronRight className="h-3.5 w-3.5" />
 						</Button>
 					)}
 				</div>

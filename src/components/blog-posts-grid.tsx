@@ -71,7 +71,7 @@ export default async function BlogPostsGrid({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-12">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
 				{posts.map((post: any, index: number) => (
 					<BlogHighlightCard
 						key={post.id}
@@ -83,30 +83,52 @@ export default async function BlogPostsGrid({
 
 			{/* Pagination */}
 			{result.totalPages > 1 && (
-				<div className="flex items-center justify-center gap-2 sm:gap-4">
-					{page > 1 && (
+				<div className="flex items-center justify-center gap-2">
+					{page > 1 ? (
 						<Button
 							asChild
-							variant="outline"
-							className="rounded-xl"
+							variant="ghost"
+							size="default"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
 								Previous
 							</Link>
 						</Button>
+					) : (
+						<Button
+							variant="ghost"
+							size="default"
+							disabled
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
+						>
+							Previous
+						</Button>
 					)}
-					<span className="text-sm text-muted-foreground">
-						Page {page} of {result.totalPages}
-					</span>
-					{page < result.totalPages && (
+					<div className="flex items-center px-4 py-2 rounded-lg bg-[#262626] border border-[#2F2F2F]">
+						<span className="text-xs font-medium text-muted-foreground">
+							{page} / {result.totalPages}
+						</span>
+					</div>
+					{page < result.totalPages ? (
 						<Button
 							asChild
-							variant="outline"
-							className="rounded-xl"
+							variant="ghost"
+							size="default"
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
 								Next
 							</Link>
+						</Button>
+					) : (
+						<Button
+							variant="ghost"
+							size="default"
+							disabled
+							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
+						>
+							Next
 						</Button>
 					)}
 				</div>
@@ -117,7 +139,7 @@ export default async function BlogPostsGrid({
 
 export function BlogPostsGridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-12">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<BlogCardSkeleton key={i} isLarge={i === 0} />
 			))}

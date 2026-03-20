@@ -541,32 +541,35 @@ export default async function ProjectDetailPage({
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-								{Object.entries(project.links).map(([key, url]) => {
-									if (!url) return null;
+								{Object.entries(project.links).flatMap(([key, url]) => {
+									if (!url) return [];
 									const Icon =
 										linkIcons[key as keyof typeof linkIcons] || ExternalLink;
-									return (
+									// Split multiple URLs that were pasted into one field
+									const urls = String(url).split(/\s+/).filter(u => u.startsWith('http'));
+									if (urls.length === 0) urls.push(String(url));
+									return urls.map((singleUrl, idx) => (
 										<a
-											key={key}
-											href={String(url)}
+											key={`${key}-${idx}`}
+											href={singleUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-md hover:-translate-y-0.5"
+											className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5 overflow-hidden"
 										>
-											<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/20 transition-all duration-150">
+											<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/20 transition-all duration-150 flex-shrink-0">
 												<Icon className="h-6 w-6 text-primary" />
 											</div>
-											<div className="flex-1">
-												<span className="block capitalize font-semibold text-foreground group-hover:text-primary transition-colors">
+											<div className="flex-1 min-w-0">
+												<span className="block capitalize font-semibold text-foreground group-hover:text-primary transition-colors truncate">
 													{key}
 												</span>
-												<span className="text-xs text-muted-foreground truncate">
-													{String(url).replace(/^https?:\/\//, '').replace(/\/$/, '')}
+												<span className="block text-xs text-muted-foreground truncate">
+													{singleUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
 												</span>
 											</div>
 											<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
 										</a>
-									);
+									));
 								})}
 							</div>
 						</CardContent>
@@ -595,7 +598,7 @@ export default async function ProjectDetailPage({
 				{/* Project Stats - GitHub Stats */}
 				{project.github?.repos && project.github.repos.length > 0 && (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-xl transition-all duration-150 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -618,7 +621,7 @@ export default async function ProjectDetailPage({
 							</CardContent>
 						</Card>
 
-						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-xl transition-all duration-150 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -639,7 +642,7 @@ export default async function ProjectDetailPage({
 							</CardContent>
 						</Card>
 
-						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-xl transition-all duration-150 hover:-translate-y-1">
+						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
@@ -688,7 +691,7 @@ export default async function ProjectDetailPage({
 										href={r.url}
 										target="_blank"
 										rel="noreferrer"
-										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-md"
+										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
 									>
 										<div className="flex-1 min-w-0">
 											<div className="flex items-center gap-3 mb-2">
@@ -697,7 +700,7 @@ export default async function ProjectDetailPage({
 													{r.owner}/{r.name}
 												</span>
 											</div>
-											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8">
+											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
 												{r.error ? (
 													<span className="text-orange-400 font-medium">
 														{r.error}

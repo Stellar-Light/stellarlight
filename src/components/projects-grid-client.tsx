@@ -87,9 +87,10 @@ export default function ProjectsGridClient({
 			{hasMore && (
 				<div className="text-center">
 					<Button
+						variant="ghost"
 						onClick={loadMore}
 						disabled={isLoading}
-						className="btn-secondary rounded-lg px-8 py-2.5 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+						className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150 px-8 py-2.5 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{isLoading ? "Loading..." : "Load More"}
 					</Button>
