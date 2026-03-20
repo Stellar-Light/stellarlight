@@ -81,7 +81,7 @@ interface TooltipItem {
 function HoverCard({ items, label, totalCount }: { items: TooltipItem[]; label: string; totalCount: number }) {
 	return (
 		<div
-			className="absolute left-0 top-full mt-2 z-50 w-[300px] rounded-xl border border-[#2F2F2F] shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 animate-in fade-in slide-in-from-top-1 duration-200"
+			className="absolute left-0 bottom-full mb-2 sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2 z-50 w-[280px] sm:w-[300px] rounded-xl border border-[#2F2F2F] shadow-[0_8px_24px_rgba(0,0,0,0.6)] p-4 animate-in fade-in slide-in-from-top-1 duration-200"
 			style={{ backgroundColor: '#262626' }}
 		>
 			<p className="text-xs font-medium text-[#A3A3A3] mb-3">{label}</p>
