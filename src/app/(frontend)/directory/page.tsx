@@ -6,6 +6,7 @@ type SearchParams = Promise<{
 	q?: string;
 	page?: string;
 	category?: string;
+	sort?: string;
 }>;
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
@@ -20,6 +21,7 @@ export default async function DirectoryPage({
 
 	const searchQuery = params.q;
 	const categoryFilter = params.category;
+	const sortOption = params.sort || "featured";
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
 
@@ -43,6 +45,7 @@ export default async function DirectoryPage({
 					<DirectoryProjectsGrid
 						searchQuery={searchQuery}
 						categoryFilter={categoryFilter}
+						sortOption={sortOption}
 						page={page}
 						limit={limit}
 					/>

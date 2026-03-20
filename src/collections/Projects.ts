@@ -211,6 +211,14 @@ export const Projects: CollectionConfig = {
 			type: "date",
 		},
 		{
+			name: "featured",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				description: "Featured projects appear first in the directory when sorted by Featured.",
+			},
+		},
+		{
 			name: "communityPick",
 			type: "checkbox",
 			defaultValue: false,

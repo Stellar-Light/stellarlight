@@ -8,13 +8,31 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
 	categoryFilter?: string;
+	sortOption?: string;
 	page: number;
 	limit: number;
+}
+
+/** Map sort option to Payload sort string */
+function getPayloadSort(sortOption: string): string {
+	switch (sortOption) {
+		case "featured":
+			return "-featured,name";
+		case "name-asc":
+			return "name";
+		case "name-desc":
+			return "-name";
+		case "newest":
+			return "-lastVerifiedAt";
+		default:
+			return "-featured,name";
+	}
 }
 
 export default async function DirectoryProjectsGrid({
 	searchQuery,
 	categoryFilter,
+	sortOption = "featured",
 	page,
 	limit,
 }: DirectoryProjectsGridProps) {
@@ -59,7 +77,7 @@ export default async function DirectoryProjectsGrid({
 				where,
 				limit,
 				page,
-				sort: "-lastVerifiedAt",
+				sort: getPayloadSort(sortOption),
 				depth: 1,
 			});
 		} catch (error) {
@@ -80,11 +98,11 @@ export default async function DirectoryProjectsGrid({
 	return (
 		<>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-				{result.docs.map((project: any, index: number) => (
+				{result.docs.map((project: any) => (
 					<ProjectCard
 						key={project.id}
 						project={project}
-						isFeatured={index === 0 && !project.verificationLevel?.includes("Unverified")}
+						isFeatured={project.featured === true}
 					/>
 				))}
 			</div>
@@ -102,6 +120,7 @@ export default async function DirectoryProjectsGrid({
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page - 1),
 								}).toString()}`}
 							>
@@ -135,6 +154,7 @@ export default async function DirectoryProjectsGrid({
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
 									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page + 1),
 								}).toString()}`}
 							>
