@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
-	categoryFilter?: string;
+	typeFilter?: string;
 	sortOption?: string;
 	page: number;
 	limit: number;
@@ -31,7 +31,7 @@ function getPayloadSort(sortOption: string): string {
 
 export default async function DirectoryProjectsGrid({
 	searchQuery,
-	categoryFilter,
+	typeFilter,
 	sortOption = "featured",
 	page,
 	limit,
@@ -48,14 +48,14 @@ export default async function DirectoryProjectsGrid({
 				},
 			};
 
-			if (categoryFilter && categoryFilter !== "all") {
-				baseWhere.category = { equals: categoryFilter };
+			if (typeFilter && typeFilter !== "all") {
+				baseWhere.types = { in: [typeFilter] };
 			}
 
 			if (searchQuery) {
 				result = await rankedProjectSearch(payload, {
 					query: searchQuery,
-					category: categoryFilter,
+					typeFilter,
 					page,
 					limit,
 					sort: getPayloadSort(sortOption),
@@ -133,7 +133,7 @@ export default async function DirectoryProjectsGrid({
 							<Link
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
-									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(typeFilter && typeFilter !== "all" ? { type: typeFilter } : {}),
 									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page - 1),
 								}).toString()}`}
@@ -168,7 +168,7 @@ export default async function DirectoryProjectsGrid({
 							<Link
 								href={`/directory?${new URLSearchParams({
 									...(searchQuery ? { q: searchQuery } : {}),
-									...(categoryFilter && categoryFilter !== "all" ? { category: categoryFilter } : {}),
+									...(typeFilter && typeFilter !== "all" ? { type: typeFilter } : {}),
 									...(sortOption && sortOption !== "featured" ? { sort: sortOption } : {}),
 									page: String(page + 1),
 								}).toString()}`}

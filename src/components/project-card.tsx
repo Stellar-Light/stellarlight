@@ -13,6 +13,7 @@ interface ProjectCardProps {
 		slug: string;
 		shortDescription?: string | null;
 		category: string;
+		types?: string[] | null;
 		status: string;
 		verificationLevel?: string;
 		logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
@@ -20,23 +21,13 @@ interface ProjectCardProps {
 	isFeatured?: boolean;
 }
 
-const categoryLabels: Record<string, string> = {
-	Infrastructure: "Infrastructure",
-	Tooling: "Tooling",
-	"Partner Integration": "Partner Integration",
-	"User-Facing App": "User-Facing App",
-	Asset: "Asset",
-	"Protocol/Contract": "Protocol/Contract",
-	Anchor: "Anchor",
-};
-
 export default function ProjectCard({
 	project,
 	isFeatured = false,
 }: ProjectCardProps) {
-	const displayCategory = categoryLabels[project.category] || project.category;
 	const [logoError, setLogoError] = useState(false);
-	
+	const types = project.types && project.types.length > 0 ? project.types : null;
+
 	// Get logo URL - handle both string ID and populated object
 	let logoUrl = "/logo.png"; // Default fallback
 	if (project.logo && !logoError) {
@@ -54,13 +45,26 @@ export default function ProjectCard({
 	return (
 		<Link href={`/project/${project.slug}`} className="block h-full group">
 			<div className="idea-card rounded-xl p-6 cursor-pointer flex flex-col h-full min-h-[200px]">
-				{/* Tag row - occupies its own horizontal space */}
+				{/* Tag row */}
 				<div className="flex justify-between items-center mb-4">
-					<span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm">
-						{displayCategory}
-					</span>
+					<div className="flex items-center gap-1.5 flex-wrap">
+						{types ? (
+							types.map((type) => (
+								<span
+									key={type}
+									className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm"
+								>
+									{type}
+								</span>
+							))
+						) : (
+							<span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm">
+								{project.category}
+							</span>
+						)}
+					</div>
 					{isFeatured && (
-						<Badge className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white text-[#171717] border-0 shadow-sm">
+						<Badge className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white text-[#171717] border-0 shadow-sm flex-shrink-0">
 							Featured
 						</Badge>
 					)}
@@ -101,4 +105,3 @@ export default function ProjectCard({
 		</Link>
 	);
 }
-

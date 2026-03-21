@@ -209,7 +209,26 @@ export interface Project {
     | 'Asset'
     | 'Protocol/Contract'
     | 'Anchor';
-  types?: ('Wallet' | 'Anchor' | 'Bridge' | 'SDK' | 'Payment Rail' | 'DEX' | 'Indexer' | 'Explorer' | 'Other')[] | null;
+  types?:
+    | (
+        | 'Wallet'
+        | 'DEX'
+        | 'Lending'
+        | 'Bridge'
+        | 'Payment Rail'
+        | 'Anchor'
+        | 'SDK'
+        | 'Indexer'
+        | 'Explorer'
+        | 'Analytics'
+        | 'AI'
+        | 'Gaming'
+        | 'Education'
+        | 'Security'
+        | 'NFT'
+        | 'RWA'
+      )[]
+    | null;
   /**
    * Draft projects require admin approval before appearing on the frontend
    */
