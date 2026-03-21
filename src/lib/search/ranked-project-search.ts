@@ -2,7 +2,7 @@ import type { Payload } from "payload";
 
 interface RankedSearchOptions {
 	query: string;
-	category?: string;
+	typeFilter?: string;
 	page: number;
 	limit: number;
 	sort?: string;
@@ -30,7 +30,7 @@ export async function rankedProjectSearch(
 	payload: Payload,
 	options: RankedSearchOptions,
 ): Promise<SearchResult> {
-	const { query, category, page, limit, sort = "name" } = options;
+	const { query, typeFilter, page, limit, sort = "name" } = options;
 
 	const baseWhere: any = {
 		status: {
@@ -38,8 +38,8 @@ export async function rankedProjectSearch(
 		},
 	};
 
-	if (category && category !== "all") {
-		baseWhere.category = { equals: category };
+	if (typeFilter && typeFilter !== "all") {
+		baseWhere.types = { in: [typeFilter] };
 	}
 
 	const where = {

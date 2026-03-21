@@ -20,15 +20,24 @@ import {
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 
-const categories = [
-	{ id: "all", label: "All Categories" },
-	{ id: "Infrastructure", label: "Infrastructure" },
-	{ id: "Tooling", label: "Tooling" },
-	{ id: "Partner Integration", label: "Partner Integration" },
-	{ id: "User-Facing App", label: "User-Facing App" },
-	{ id: "Asset", label: "Asset" },
-	{ id: "Protocol/Contract", label: "Protocol/Contract" },
+const projectTypes = [
+	{ id: "all", label: "All Types" },
+	{ id: "Wallet", label: "Wallet" },
+	{ id: "DEX", label: "DEX" },
+	{ id: "Lending", label: "Lending" },
+	{ id: "Bridge", label: "Bridge" },
+	{ id: "Payment Rail", label: "Payment Rail" },
 	{ id: "Anchor", label: "Anchor" },
+	{ id: "SDK", label: "SDK" },
+	{ id: "Indexer", label: "Indexer" },
+	{ id: "Explorer", label: "Explorer" },
+	{ id: "Analytics", label: "Analytics" },
+	{ id: "AI", label: "AI" },
+	{ id: "Gaming", label: "Gaming" },
+	{ id: "Education", label: "Education" },
+	{ id: "Security", label: "Security" },
+	{ id: "NFT", label: "NFT" },
+	{ id: "RWA", label: "RWA" },
 ];
 
 const sortOptions = [
@@ -42,9 +51,9 @@ export function DirectoryFilters() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const searchQuery = searchParams.get("q") || "";
-	const categoryFilter = searchParams.get("category") || "all";
+	const typeFilter = searchParams.get("type") || "all";
 	const sortFilter = searchParams.get("sort") || "featured";
-	const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+	const [typeDrawerOpen, setTypeDrawerOpen] = useState(false);
 	const [sortDrawerOpen, setSortDrawerOpen] = useState(false);
 	const [inputValue, setInputValue] = useState(searchQuery);
 	const debouncedSearch = useDebounce(inputValue, 300);
@@ -52,13 +61,13 @@ export function DirectoryFilters() {
 	const buildUrl = useCallback((overrides: Record<string, string>) => {
 		const params = new URLSearchParams();
 		const q = overrides.q ?? searchQuery;
-		const cat = overrides.category ?? categoryFilter;
+		const typ = overrides.type ?? typeFilter;
 		const sort = overrides.sort ?? sortFilter;
 		if (q) params.set("q", q);
-		if (cat !== "all") params.set("category", cat);
+		if (typ !== "all") params.set("type", typ);
 		if (sort !== "featured") params.set("sort", sort);
 		return `/directory?${params.toString()}`;
-	}, [searchQuery, categoryFilter, sortFilter]);
+	}, [searchQuery, typeFilter, sortFilter]);
 
 	// Single effect for search-as-you-type
 	useEffect(() => {
@@ -77,9 +86,9 @@ export function DirectoryFilters() {
 		router.replace(buildUrl({ q: "" }));
 	};
 
-	const handleCategoryChange = (value: string) => {
-		router.push(buildUrl({ category: value }));
-		setCategoryDrawerOpen(false);
+	const handleTypeChange = (value: string) => {
+		router.push(buildUrl({ type: value }));
+		setTypeDrawerOpen(false);
 	};
 
 	const handleSortChange = (value: string) => {
@@ -92,7 +101,7 @@ export function DirectoryFilters() {
 		router.replace(buildUrl({ q: inputValue }));
 	};
 
-	const selectedCategoryLabel = categories.find((c) => c.id === categoryFilter)?.label ?? "All Categories";
+	const selectedTypeLabel = projectTypes.find((t) => t.id === typeFilter)?.label ?? "All Types";
 	const selectedSortLabel = sortOptions.find((s) => s.id === sortFilter)?.label ?? "Featured";
 
 	return (
@@ -118,27 +127,27 @@ export function DirectoryFilters() {
 				)}
 			</div>
 
-			{/* Desktop: Category Dropdown */}
+			{/* Desktop: Type Dropdown */}
 			<div className="hidden md:block">
 				<DropdownMenu>
-					<DropdownMenuTrigger className="h-11 px-4 min-w-[180px] bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]">
+					<DropdownMenuTrigger className="h-11 px-4 min-w-[150px] bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]">
 						<span className="flex-1 text-left text-sm truncate">
-							{selectedCategoryLabel}
+							{selectedTypeLabel}
 						</span>
 						<ChevronDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="w-[200px]">
-						{categories.map((category) => (
+					<DropdownMenuContent className="w-[180px]">
+						{projectTypes.map((type) => (
 							<DropdownMenuItem
-								key={category.id}
-								onClick={() => handleCategoryChange(category.id)}
+								key={type.id}
+								onClick={() => handleTypeChange(type.id)}
 								className={
-									categoryFilter === category.id
+									typeFilter === type.id
 										? "bg-white/10 text-foreground"
 										: "text-foreground hover:bg-white/5"
 								}
 							>
-								{category.label}
+								{type.label}
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>
@@ -173,39 +182,39 @@ export function DirectoryFilters() {
 				</DropdownMenu>
 			</div>
 
-			{/* Mobile: Category + Sort Drawers */}
+			{/* Mobile: Type + Sort Drawers */}
 			<div className="md:hidden flex gap-3">
-				<Drawer open={categoryDrawerOpen} onOpenChange={setCategoryDrawerOpen}>
+				<Drawer open={typeDrawerOpen} onOpenChange={setTypeDrawerOpen}>
 					<DrawerTrigger asChild>
 						<button
 							type="button"
 							className="flex-1 h-11 px-4 bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2 outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
 						>
 							<span className="flex-1 text-left text-sm truncate">
-								{selectedCategoryLabel}
+								{selectedTypeLabel}
 							</span>
 							<ChevronDown className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
 						</button>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
-							<DrawerTitle>Category</DrawerTitle>
-							<DrawerDescription>Filter projects by category</DrawerDescription>
+							<DrawerTitle>Type</DrawerTitle>
+							<DrawerDescription>Filter projects by type</DrawerDescription>
 						</DrawerHeader>
 						<div className="mt-4 space-y-1 pb-4">
-							{categories.map((category) => (
+							{projectTypes.map((type) => (
 								<button
-									key={category.id}
+									key={type.id}
 									type="button"
-									onClick={() => handleCategoryChange(category.id)}
+									onClick={() => handleTypeChange(type.id)}
 									className={cn(
 										"w-full text-left px-3 py-3 rounded-xl text-sm transition-all duration-150",
-										categoryFilter === category.id
+										typeFilter === type.id
 											? "bg-[#262626] text-[#E5E5E5]"
 											: "text-[#A3A3A3] hover:bg-[#222222] hover:text-[#E5E5E5]",
 									)}
 								>
-									{category.label}
+									{type.label}
 								</button>
 							))}
 						</div>

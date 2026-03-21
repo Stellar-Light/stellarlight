@@ -5,7 +5,7 @@ import DirectoryProjectsGrid, { DirectoryProjectsGridSkeleton } from "@/componen
 type SearchParams = Promise<{
 	q?: string;
 	page?: string;
-	category?: string;
+	type?: string;
 	sort?: string;
 }>;
 
@@ -20,7 +20,7 @@ export default async function DirectoryPage({
 	const params = await searchParams;
 
 	const searchQuery = params.q;
-	const categoryFilter = params.category;
+	const typeFilter = params.type;
 	const sortOption = params.sort || "featured";
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
@@ -41,10 +41,10 @@ export default async function DirectoryPage({
 				</div>
 
 				{/* Projects Grid — key forces skeleton to show immediately on param change */}
-				<Suspense key={`${searchQuery}-${categoryFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
+				<Suspense key={`${searchQuery}-${typeFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
 					<DirectoryProjectsGrid
 						searchQuery={searchQuery}
-						categoryFilter={categoryFilter}
+						typeFilter={typeFilter}
 						sortOption={sortOption}
 						page={page}
 						limit={limit}

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 	const page = parseInt(searchParams.get("page") || "1", 10);
 	const limit = parseInt(searchParams.get("limit") || "12", 10);
 	const searchQuery = searchParams.get("q") || undefined;
-	const categoryFilter = searchParams.get("category") || undefined;
+	const typeFilter = searchParams.get("type") || undefined;
 
 	const payload = await getPayloadSafe();
 
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 		if (searchQuery) {
 			const result = await rankedProjectSearch(payload, {
 				query: searchQuery,
-				category: categoryFilter,
+				typeFilter,
 				page,
 				limit,
 			});
@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
 			},
 		};
 
-		if (categoryFilter && categoryFilter !== "all") {
-			baseWhere.category = { equals: categoryFilter };
+		if (typeFilter && typeFilter !== "all") {
+			baseWhere.types = { in: [typeFilter] };
 		}
 
 		const featuredWhere = { ...baseWhere, featured: { equals: true } };
