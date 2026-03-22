@@ -39,7 +39,11 @@ export async function rankedProjectSearch(
 	};
 
 	if (typeFilter && typeFilter !== "all") {
-		baseWhere.types = { in: [typeFilter] };
+		// Handle legacy "Payment Rail" → "Payments" rename in DB
+		const typeValues = typeFilter === "Payments"
+			? ["Payments", "Payment Rail"]
+			: [typeFilter];
+		baseWhere.types = { in: typeValues };
 	}
 
 	const where = {

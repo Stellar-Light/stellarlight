@@ -212,7 +212,7 @@ function mapTypes(
 		| "DEX"
 		| "Lending"
 		| "Bridge"
-		| "Payment Rail"
+		| "Payments"
 		| "Anchor"
 		| "SDK"
 		| "Indexer"
@@ -235,10 +235,10 @@ function mapTypes(
 		borrowing: "Lending",
 		bridge: "Bridge",
 		"cross-chain": "Bridge",
-		"payment rail": "Payment Rail",
-		payments: "Payment Rail",
-		"cross-border payments": "Payment Rail",
-		p2p: "Payment Rail",
+		"payment rail": "Payments",
+		payments: "Payments",
+		"cross-border payments": "Payments",
+		p2p: "Payments",
 		anchor: "Anchor",
 		sdk: "SDK",
 		indexer: "Indexer",

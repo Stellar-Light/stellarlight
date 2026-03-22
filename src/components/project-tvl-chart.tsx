@@ -52,21 +52,25 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 			</CardHeader>
 			<CardContent>
 				{/* Stats Row */}
-				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+				<div className={`grid grid-cols-1 ${chartData.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-sm"} gap-4 mb-6`}>
 					<div className="rounded-lg bg-background/50 border border-border/50 p-4">
-						<p className="text-sm text-muted-foreground mb-1">Current TVL</p>
+						<p className="text-sm text-muted-foreground mb-1">Current TVL on Stellar</p>
 						<p className="text-2xl font-bold text-foreground">
 							{formatTVL(data.currentTVL)}
 						</p>
 					</div>
-					<div className="rounded-lg bg-background/50 border border-border/50 p-4">
-						<p className="text-sm text-muted-foreground mb-1">24h Change</p>
-						<ChangeIndicator value={data.change1d} />
-					</div>
-					<div className="rounded-lg bg-background/50 border border-border/50 p-4">
-						<p className="text-sm text-muted-foreground mb-1">7d Change</p>
-						<ChangeIndicator value={data.change7d} />
-					</div>
+					{chartData.length > 0 && (
+						<>
+							<div className="rounded-lg bg-background/50 border border-border/50 p-4">
+								<p className="text-sm text-muted-foreground mb-1">24h Change</p>
+								<ChangeIndicator value={data.change1d} />
+							</div>
+							<div className="rounded-lg bg-background/50 border border-border/50 p-4">
+								<p className="text-sm text-muted-foreground mb-1">7d Change</p>
+								<ChangeIndicator value={data.change7d} />
+							</div>
+						</>
+					)}
 				</div>
 
 				{/* Chart */}
@@ -101,16 +105,35 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 				)}
 
 				<p className="text-xs text-muted-foreground mt-3">
-					Data from{" "}
-					<a
-						href={`https://defillama.com/protocol/${data.slug}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="underline hover:text-foreground transition-colors"
-					>
-						DeFi Llama
-					</a>
-					{" "}· Stellar chain only
+					{data.historicalTVL.length > 0 ? (
+						<>
+							Data from{" "}
+							<a
+								href={`https://defillama.com/protocol/${data.slug}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline hover:text-foreground transition-colors"
+							>
+								DeFi Llama
+							</a>
+							{" "}· Stellar chain only
+						</>
+					) : data.sourceUrl ? (
+						<>
+							Data from{" "}
+							<a
+								href={data.sourceUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline hover:text-foreground transition-colors"
+							>
+								rwa.xyz
+							</a>
+							{" "}· Stellar chain only
+						</>
+					) : (
+						"TVL based on publicly reported AUM"
+					)}
 				</p>
 			</CardContent>
 		</Card>

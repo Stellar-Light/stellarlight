@@ -364,7 +364,7 @@ export default async function ProjectDetailPage({
 					},
 				],
 			},
-			limit: 10,
+			limit: 3,
 			sort: "-timestamp",
 		});
 	} catch {
