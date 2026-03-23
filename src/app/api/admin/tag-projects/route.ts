@@ -52,7 +52,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	Hermes: ["DEX"],
 	"Sushi Swap": ["DEX"], // SushiSwap — live on Stellar (sushi.com/stellar/swap)
 	"Dex Tools": ["DEX"],
-	DeFindex: ["DEX"],
 	Spinach: ["DEX"],
 	Normal: ["DEX"],
 	"Stellars Finance": ["DEX"],
@@ -63,8 +62,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"Block Time Financial": ["DEX"],
 	"Meria DeFi": ["DEX", "Analytics"],
 	"One Click": ["DEX"],
-	Constellation: ["DEX"],
-
 	// Lending
 	Blend: ["Lending"],
 	"YieldBack.Cash": ["Lending"],
@@ -101,18 +98,12 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"Wirex Pay": ["Payments"],
 	Verseprop: ["Payments", "RWA"],
 	Utoken: ["Payments"],
-	uils: ["Payments"],
 	TransferMole: ["Payments"],
-	"Trustless Work": ["Payments"],
-	TAP4Change: ["Payments"],
 	Sytemap: ["Payments", "RWA"],
-	"The Give Hub": ["Payments"],
 	StellarPay: ["Payments"],
 	Tracee: ["Payments"],
 	Trace: ["Payments"],
 	Tipper: ["Payments"],
-	"tip me": ["Payments"],
-	Venerez: ["Payments"],
 	TuCambio: ["Payments", "Anchor"],
 	TheXBank: ["Payments", "Anchor"],
 	Zentra: ["Payments"],
@@ -140,7 +131,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	CashAbroad: ["Payments"],
 	BravePay: ["Payments"],
 	Alfred: ["Payments"],
-	Axal: ["Payments"],
 	Rigel: ["Payments"],
 	Clear: ["Payments"],
 	DCM: ["Payments"],
@@ -150,7 +140,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	Hurupay: ["Payments"],
 	"Coins.ph": ["Payments"],
 	Cartwey: ["Payments"],
-	ApiCharge: ["Payments"],
 	Bousol: ["Payments"],
 	Rozo: ["Payments"],
 	RemittEase: ["Payments"],
@@ -187,15 +176,11 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	Komunitin: ["Social Impact"], // local currency exchange communities — low relevance, not payments
 
 	// Marketplaces / Platforms — NOT Payments
-	DEB: ["Payments"], // ride-share app (does use payments)
-	Fastbuka: ["Payments"], // food delivery platform
 	Gearup: ["NFT", "Payments"], // P2P marketplace for creators
-	TYPIQO: ["Payments"], // food supply chain
 	Eascrow: ["SDK"], // escrow-as-a-service smart contracts
 	"Trustless Work": ["SDK"], // escrows-as-a-service
 	SoroSplits: ["SDK"], // smart contract for split payments
 	Dropzey: ["SDK"], // airdrop management
-	Qolaq: ["Lending"], // mutual aid / insurance
 	Lumenaut: ["SDK"], // inflation pool
 	"Stellar Tip": ["Payments"], // tipping platform
 	"tip me": ["Payments"], // tipping platform
@@ -396,7 +381,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	// RWA
 	ZET: ["RWA"],
 	"Storehouse Gold": ["RWA"],
-	TrustedPlastic: ["RWA"],
 	TRAK: ["RWA"],
 	Stellarcarbon: ["RWA"],
 	WisdomTree: ["RWA"],
@@ -446,7 +430,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	Flashback: ["Indexer"], // decentralized multi-cloud storage / infrastructure
 	AIDA: ["DEX", "AI"],
 	IRL: ["NFT", "Payments"],
-	Juntta: ["Social Impact"], // crowdfunding platform — keep Social Impact
 	Legasi: ["Lending", "RWA"],
 	Seevcash: ["Payments"],
 	"human.tech": ["Wallet"],
@@ -583,7 +566,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"BES Metaverse": ["Gaming"],
 	BTQ: ["SDK"],
 	Benkiko: ["SDK"],
-	Boundless: ["Social Impact"], // web3 funding platform
 	Canfy: ["AI", "SDK"],
 	Catalyst: ["RWA"],
 	ChainCred: ["Analytics"],
@@ -596,12 +578,10 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"Command Robotics": ["SDK"], // robotics + blockchain integration
 	"Cosmic.vote": ["SDK"], // decentralized governance voting
 	Cryptix: ["SDK"],
-	DEB: ["Payments"],
 	"DID:STELLAR": ["SDK"],
 	idOS: ["Security"], // decentralized identity & storage layer
 	DappRadar: ["Analytics"],
 	DeFarm: ["RWA"],
-	Dropzey: ["SDK"], // airdrop management tool
 	"EA Kazi": ["Payments"], // freelancer platform with payments
 	EQLab: ["SDK"],
 	Eara: ["RWA"],
@@ -614,44 +594,31 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"Free Voting Platform": ["SDK"],
 	GalacticTalk: ["Education"],
 	GetBlockCard: ["Payments"],
-	GiveCredit: ["Payments", "RWA"],
 	GrantFox: ["SDK"], // collaboration platform for Stellar ecosystem
-	GrantPicks: ["Social Impact"], // funding platform
 	Greeppay: ["Payments"],
 	"Haciendo Stellar": ["Education"],
 	Ichi: ["DEX"],
-	Idunu: ["Social Impact"], // fundraising/charity platform
 	InstantDAO: ["SDK"],
 	"K3 Labs": ["SDK"],
 	Kryptos: ["Analytics"],
 	Lantern: ["Lending"],
-	"Legacy Suite": ["Wallet"],
 	Lettuce: ["Payments"],
 	Liquify: ["SDK"],
-	LocalCoin: ["Social Impact"], // social good orgs
-	Lumenaut: ["SDK"], // inflation pool tool
-	"Lumens for Charity": ["Social Impact"], // charity donations
 	LumosDAO: ["SDK"],
 	MultiClique: ["SDK", "Security"],
 	Neovestor: ["RWA"],
 	NiceTrade: ["DEX"],
 	Nodies: ["SDK"],
-	OpenSolar: ["Social Impact"], // solar energy crowdfunding
 	"PAYGO Crypto": ["Payments"],
-	POMA: ["SDK"], // web3 platform collective
 	"Planet Pay": ["SDK"],
 	Prophe: ["SDK"],
 	Puenta: ["Payments"],
-	Qolaq: ["Lending"], // mutual aid / insurance
 	Quidroo: ["Payments"],
-	Rahat: ["Social Impact"], // humanitarian financial access
 	RaumFi: ["DEX", "Lending"],
 	"Redstone Finance": ["SDK"],
-	Relax: ["RWA"], // HR asset tracking on blockchain
 	"SGF Solutions": ["Payments", "Anchor"],
 	Sanctum: ["SDK", "Security"],
 	Scorechain: ["Security", "Analytics"],
-	SecuRx: ["RWA"], // medical prescriptions on blockchain
 	Sendit: ["Payments"],
 	"Simple Signer": ["SDK", "Wallet"],
 	"Smart Deploy": ["SDK"],
@@ -712,8 +679,6 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	MugglePay: ["Payments"], // merchant crypto acceptance, not SDK
 	GiveCredit: ["Social Impact"], // carbon offset donations, not payment rail/RWA
 	Qolaq: ["Social Impact"], // mutual aid / insurance, not lending
-	Answerly: ["Social Impact"], // content rewards platform
-	QSTN: ["Social Impact"], // survey marketplace with rewards
 	Constellation: ["RWA", "DEX"], // tokenized indexes
 	"Legacy Suite": ["Wallet", "RWA"], // estate planning with digital assets
 	SecuRx: ["SDK"], // medical prescriptions on blockchain, not RWA
