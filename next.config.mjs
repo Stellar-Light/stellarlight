@@ -2,6 +2,13 @@ import { withPayload } from "@payloadcms/next/withPayload";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	// Disable client-side router cache so filter changes always fetch fresh data
+	experimental: {
+		staleTimes: {
+			dynamic: 0,
+			static: 180,
+		},
+	},
 	// Exclude problematic packages from server-side bundling
 	// This prevents Next.js from trying to bundle these packages
 	serverExternalPackages: [
