@@ -68,7 +68,8 @@ export function DirectoryFilters() {
 		if (q) params.set("q", q);
 		if (typ !== "all") params.set("type", typ);
 		if (sort !== "featured") params.set("sort", sort);
-		return `/directory?${params.toString()}`;
+		const qs = params.toString();
+		return qs ? `/directory?${qs}` : "/directory";
 	}, [searchQuery, typeFilter, sortFilter]);
 
 	// Single effect for search-as-you-type
