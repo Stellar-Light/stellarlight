@@ -191,6 +191,37 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			name: "scf",
+			type: "group",
+			admin: {
+				description: "Stellar Community Fund data",
+			},
+			fields: [
+				{
+					name: "awarded",
+					type: "checkbox",
+					defaultValue: false,
+					admin: {
+						description: "Whether this project has received SCF funding",
+					},
+				},
+				{
+					name: "lastAwardedRound",
+					type: "number",
+					admin: {
+						description: "Last SCF round this project was awarded in",
+					},
+				},
+				{
+					name: "slug",
+					type: "text",
+					admin: {
+						description: "SCF project slug (used for linking to communityfund.stellar.org)",
+					},
+				},
+			],
+		},
+		{
 			name: "verificationLevel",
 			type: "select",
 			required: true,
