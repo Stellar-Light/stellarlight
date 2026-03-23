@@ -95,7 +95,7 @@ describe("lumenloop-mapper", () => {
 			expect(project.shortDescription).toBe("Payment anchor for XLM");
 			expect(project.category).toBe("Infrastructure");
 			expect(project.types).toContain("Anchor");
-			expect(project.types).toContain("Payment Rail"); // "Payments" → "Payment Rail"
+			expect(project.types).toContain("Payments"); // "Payments" → "Payments"
 			expect(project.links?.website).toBe("https://anchor.example.com");
 			expect(parentEntity).toBeNull();
 		});

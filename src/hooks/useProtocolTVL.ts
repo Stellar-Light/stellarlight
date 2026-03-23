@@ -12,6 +12,7 @@ export interface ProtocolTVLData {
 	change1d: number;
 	change7d: number;
 	historicalTVL: { date: number; tvl: number }[];
+	sourceUrl?: string; // for manual overrides (e.g. rwa.xyz)
 }
 
 export function useProtocolTVL(projectName: string | null) {

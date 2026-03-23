@@ -88,10 +88,10 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
           {/* Month stack */}
           <div className="relative h-6 overflow-hidden">
             <motion.div className="flex flex-col" style={{ y: monthY }}>
-              {monthIndices.uniqueMonths.map((month) => (
+              {monthIndices.uniqueMonths.map((month, i) => (
                 <div
                   className="flex h-6 shrink-0 items-center justify-center"
-                  key={month}
+                  key={`${month}-${i}`}
                 >
                   <span className="whitespace-nowrap font-medium text-sm">
                     {month}
@@ -104,10 +104,10 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
           {/* Day stack */}
           <div className="relative h-6 overflow-hidden">
             <motion.div className="flex flex-col" style={{ y: dayY }}>
-              {parsedLabels.map((label) => (
+              {parsedLabels.map((label, i) => (
                 <div
                   className="flex h-6 shrink-0 items-center justify-center"
-                  key={label.full}
+                  key={`${label.full}-${i}`}
                 >
                   <span className="whitespace-nowrap font-medium text-sm">
                     {label.day}

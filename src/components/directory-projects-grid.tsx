@@ -25,7 +25,7 @@ function getPayloadSort(sortOption: string): string {
 			return "-lastVerifiedAt";
 		case "featured":
 		default:
-			return "name";
+			return "-relevanceScore";
 	}
 }
 
@@ -49,7 +49,11 @@ export default async function DirectoryProjectsGrid({
 			};
 
 			if (typeFilter && typeFilter !== "all") {
-				baseWhere.types = { in: [typeFilter] };
+				// Handle legacy "Payment Rail" → "Payments" rename in DB
+				const typeValues = typeFilter === "Payments"
+					? ["Payments", "Payment Rail"]
+					: [typeFilter];
+				baseWhere.types = { in: typeValues };
 			}
 
 			if (searchQuery) {
@@ -60,29 +64,6 @@ export default async function DirectoryProjectsGrid({
 					limit,
 					sort: getPayloadSort(sortOption),
 				});
-			} else if (sortOption === "featured") {
-				// Two-pass: featured projects first, then the rest alphabetically
-				const featuredWhere = { ...baseWhere, featured: { equals: true } };
-				const restWhere = { ...baseWhere, featured: { not_equals: true } };
-
-				const [featuredResults, restResults] = await Promise.all([
-					payload.find({ collection: "projects", where: featuredWhere, limit: 0, depth: 1, sort: "name" }),
-					payload.find({ collection: "projects", where: restWhere, limit: 0, depth: 1, sort: "name" }),
-				]);
-
-				const allDocs = [...featuredResults.docs, ...restResults.docs];
-				const totalDocs = allDocs.length;
-				const totalPages = Math.ceil(totalDocs / limit);
-				const start = (page - 1) * limit;
-
-				result = {
-					docs: allDocs.slice(start, start + limit),
-					totalDocs,
-					totalPages,
-					page,
-					hasNextPage: page < totalPages,
-					hasPrevPage: page > 1,
-				};
 			} else {
 				result = await payload.find({
 					collection: "projects",

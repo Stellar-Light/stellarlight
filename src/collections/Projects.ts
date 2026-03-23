@@ -7,7 +7,9 @@ export const Projects: CollectionConfig = {
 	admin: {
 		useAsTitle: "name",
 	},
-	versions: true,
+	versions: {
+		maxPerDoc: 3,
+	},
 	access: {
 		read: () => true,
 		create: ({ data, req }) => {
@@ -79,7 +81,7 @@ export const Projects: CollectionConfig = {
 				"DEX",
 				"Lending",
 				"Bridge",
-				"Payment Rail",
+				"Payments",
 				"Anchor",
 				"SDK",
 				"Indexer",
@@ -91,6 +93,8 @@ export const Projects: CollectionConfig = {
 				"Security",
 				"NFT",
 				"RWA",
+				"Stablecoin",
+				"Social Impact",
 			],
 		},
 		{
@@ -223,6 +227,16 @@ export const Projects: CollectionConfig = {
 			defaultValue: false,
 			admin: {
 				description: "Featured projects appear first in the directory when sorted by Featured.",
+			},
+		},
+		{
+			name: "relevanceScore",
+			type: "number",
+			defaultValue: 0,
+			admin: {
+				description:
+					"Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.",
+				position: "sidebar",
 			},
 		},
 		{

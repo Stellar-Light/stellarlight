@@ -26,7 +26,7 @@ const projectTypes = [
 	{ id: "DEX", label: "DEX" },
 	{ id: "Lending", label: "Lending" },
 	{ id: "Bridge", label: "Bridge" },
-	{ id: "Payment Rail", label: "Payment Rail" },
+	{ id: "Payments", label: "Payments" },
 	{ id: "Anchor", label: "Anchor" },
 	{ id: "SDK", label: "SDK" },
 	{ id: "Indexer", label: "Indexer" },
@@ -38,10 +38,12 @@ const projectTypes = [
 	{ id: "Security", label: "Security" },
 	{ id: "NFT", label: "NFT" },
 	{ id: "RWA", label: "RWA" },
+	{ id: "Stablecoin", label: "Stablecoin" },
+	{ id: "Social Impact", label: "Social Impact" },
 ];
 
 const sortOptions = [
-	{ id: "featured", label: "Featured" },
+	{ id: "featured", label: "Relevant" },
 	{ id: "name-asc", label: "Name (A–Z)" },
 	{ id: "name-desc", label: "Name (Z–A)" },
 	{ id: "newest", label: "Newest" },
@@ -102,7 +104,7 @@ export function DirectoryFilters() {
 	};
 
 	const selectedTypeLabel = projectTypes.find((t) => t.id === typeFilter)?.label ?? "All Types";
-	const selectedSortLabel = sortOptions.find((s) => s.id === sortFilter)?.label ?? "Featured";
+	const selectedSortLabel = sortOptions.find((s) => s.id === sortFilter)?.label ?? "Relevant";
 
 	return (
 		<form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">

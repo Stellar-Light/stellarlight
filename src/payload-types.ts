@@ -215,7 +215,7 @@ export interface Project {
         | 'DEX'
         | 'Lending'
         | 'Bridge'
-        | 'Payment Rail'
+        | 'Payments'
         | 'Anchor'
         | 'SDK'
         | 'Indexer'
@@ -227,6 +227,8 @@ export interface Project {
         | 'Security'
         | 'NFT'
         | 'RWA'
+        | 'Stablecoin'
+        | 'Social Impact'
       )[]
     | null;
   /**
@@ -283,6 +285,10 @@ export interface Project {
    * Featured projects appear first in the directory when sorted by Featured.
    */
   featured?: boolean | null;
+  /**
+   * Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.
+   */
+  relevanceScore?: number | null;
   /**
    * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
@@ -865,6 +871,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   lastVerifiedAt?: T;
   featured?: T;
+  relevanceScore?: T;
   communityPick?: T;
   relatedEntities?: T;
   updatedAt?: T;
