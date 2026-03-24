@@ -148,8 +148,9 @@ export const syncRSSFeedTask: any = async (args: any) => {
 									publishedAt: rssItem.pubDate
 										? new Date(rssItem.pubDate).toISOString()
 										: new Date().toISOString(),
-									category: feed.category || undefined,
+									category: feed.category || "News",
 									tags: feed.tags || [],
+									source: (feed as any).sourceTag || "sdf-blog",
 									rssFeed: feed.id,
 									rssItemId: rssItem.guid || rssItem.link || slug,
 									isRSSExternal: true,

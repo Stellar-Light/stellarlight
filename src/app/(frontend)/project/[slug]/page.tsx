@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectLogo } from "@/components/project-logo";
 import EntityCard from "@/components/entity-card";
+import ChangelogFeed from "@/components/changelog-feed";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import {
 	ArrowLeft,
@@ -852,55 +853,18 @@ export default async function ProjectDetailPage({
 						</Card>
 					)}
 
-				{/* Transparency Log - Only show in debug mode */}
-				{process.env.NODE_ENV === "development" && (
-					<Card className="border border-border/50 bg-card shadow-sm">
-						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Transparency Log</CardTitle>
-							<CardDescription>
-								Recent changes to this project entry for accountability and trust
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{logsResult.docs.length === 0 ? (
-								<div className="text-center py-12">
-									<Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-									<p className="text-muted-foreground italic">
-										No transparency logs yet
-									</p>
-								</div>
-							) : (
-								<div className="space-y-2">
-									{logsResult.docs.map((log, idx) => (
-										<div
-											key={log.id}
-											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-150 group"
-										>
-											<div className="flex items-center gap-4">
-												<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-colors">
-													<Calendar className="h-5 w-5 text-primary" />
-												</div>
-												<div>
-													<span className="font-semibold text-foreground block">
-														{log.action}
-													</span>
-													<span className="text-sm text-muted-foreground">
-														by {log.actorType}
-													</span>
-												</div>
-											</div>
-											<span className="text-sm text-muted-foreground font-medium">
-												{log.timestamp
-													? formatDateLong(log.timestamp)
-													: "Unknown date"}
-											</span>
-										</div>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-				)}
+				{/* Project Activity */}
+				<Card className="border border-border/50 bg-card shadow-sm">
+					<CardHeader className="pb-4">
+						<CardTitle className="text-xl font-bold">Project Activity</CardTitle>
+						<CardDescription>
+							Recent updates and milestones for this project
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ChangelogFeed projectSlug={project.slug} limit={5} />
+					</CardContent>
+				</Card>
 			</main>
 		</div>
 	);

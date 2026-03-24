@@ -4,6 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 
+const sourceLabels: Record<string, string> = {
+	"sdf-blog": "SDF",
+	medium: "Medium",
+	"stablecoin-report": "Stablecoin",
+	"rwa-report": "RWA",
+	editorial: "",
+	changelog: "Changelog",
+};
+
 interface BlogHighlightCardProps {
 	post: {
 		id: string;
@@ -13,6 +22,7 @@ interface BlogHighlightCardProps {
 		author: string;
 		publishedAt?: string | null | undefined;
 		category?: string | null | undefined;
+		source?: string | null | undefined;
 		featuredImage?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
 		rssImageUrl?: string | null;
 		featured?: boolean | null | undefined;
@@ -69,6 +79,21 @@ export default function BlogHighlightCard({
 
 				{/* Content - Bottom Row */}
 				<div className="flex-1 flex flex-col p-5">
+					{/* Source + Category badges */}
+					{(post.source || post.category) && (
+						<div className="flex items-center gap-1.5 mb-2">
+							{post.source && sourceLabels[post.source] && (
+								<span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/10 text-muted-foreground">
+									{sourceLabels[post.source]}
+								</span>
+							)}
+							{post.category && (
+								<span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/5 text-muted-foreground">
+									{post.category}
+								</span>
+							)}
+						</div>
+					)}
 					{/* Title */}
 					<h3 className="text-base md:text-lg font-semibold mb-2 text-foreground group-hover:text-white transition-colors duration-150 leading-tight line-clamp-2">
 						{post.title}
