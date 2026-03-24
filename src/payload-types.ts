@@ -398,13 +398,9 @@ export interface Blog {
    */
   featured?: boolean | null;
   /**
-   * Content source for filtering
-   */
-  source?: ('editorial' | 'sdf-blog' | 'medium' | 'stablecoin-report' | 'rwa-report' | 'changelog') | null;
-  /**
    * Choose how you want to create this post
    */
-  contentType: 'richText' | 'markdown' | 'changelog';
+  contentType: 'richText' | 'markdown';
   /**
    * Rich text content (used when Content Type is Rich Text Editor)
    */
@@ -447,18 +443,6 @@ export interface Blog {
    * Description from RSS feed (for external posts)
    */
   rssDescription?: string | null;
-  /**
-   * Auto-generated changelog metadata
-   */
-  changelogData?: {
-    projectSlug?: string | null;
-    projectName?: string | null;
-    changeType?: ('scf-funding' | 'status-change' | 'new-project') | null;
-    oldValue?: string | null;
-    newValue?: string | null;
-    numericValue?: number | null;
-    round?: number | null;
-  };
   category?: ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update') | null;
   /**
    * Add tags to help categorize this post
@@ -522,10 +506,6 @@ export interface RssFeed {
    * Default tags to add to all posts from this feed
    */
   tags?: string[] | null;
-  /**
-   * Source tag for filtering on the blog page
-   */
-  sourceTag?: ('sdf-blog' | 'medium' | 'stablecoin-report' | 'rwa-report') | null;
   /**
    * Automatically publish imported posts (otherwise they'll be drafts)
    */
@@ -943,7 +923,6 @@ export interface BlogSelect<T extends boolean = true> {
   featuredImage?: T;
   rssImageUrl?: T;
   featured?: T;
-  source?: T;
   contentType?: T;
   content?: T;
   markdownContent?: T;
@@ -952,17 +931,6 @@ export interface BlogSelect<T extends boolean = true> {
   isRSSExternal?: T;
   externalUrl?: T;
   rssDescription?: T;
-  changelogData?:
-    | T
-    | {
-        projectSlug?: T;
-        projectName?: T;
-        changeType?: T;
-        oldValue?: T;
-        newValue?: T;
-        numericValue?: T;
-        round?: T;
-      };
   category?: T;
   tags?: T;
   publishedAt?: T;
@@ -989,7 +957,6 @@ export interface RssFeedsSelect<T extends boolean = true> {
   author?: T;
   category?: T;
   tags?: T;
-  sourceTag?: T;
   autoPublish?: T;
   lastSyncedAt?: T;
   lastSyncStatus?: T;

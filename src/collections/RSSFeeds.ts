@@ -105,19 +105,6 @@ export const RSSFeeds: CollectionConfig = {
 			},
 		},
 		{
-			name: "sourceTag",
-			type: "select",
-			options: [
-				{ label: "SDF Blog", value: "sdf-blog" },
-				{ label: "Medium", value: "medium" },
-				{ label: "Stablecoin Report", value: "stablecoin-report" },
-				{ label: "RWA Report", value: "rwa-report" },
-			],
-			admin: {
-				description: "Source tag for filtering on the blog page",
-			},
-		},
-		{
 			name: "autoPublish",
 			type: "checkbox",
 			defaultValue: false,

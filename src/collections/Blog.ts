@@ -101,23 +101,6 @@ export const Blog: CollectionConfig = {
 			},
 		},
 		{
-			name: "source",
-			type: "select",
-			defaultValue: "editorial",
-			options: [
-				{ label: "Editorial", value: "editorial" },
-				{ label: "SDF Blog", value: "sdf-blog" },
-				{ label: "Medium", value: "medium" },
-				{ label: "Stablecoin Report", value: "stablecoin-report" },
-				{ label: "RWA Report", value: "rwa-report" },
-				{ label: "Changelog", value: "changelog" },
-			],
-			admin: {
-				position: "sidebar",
-				description: "Content source for filtering",
-			},
-		},
-		{
 			name: "contentType",
 			type: "select",
 			required: true,
@@ -130,10 +113,6 @@ export const Blog: CollectionConfig = {
 				{
 					label: "Markdown",
 					value: "markdown",
-				},
-				{
-					label: "Changelog (auto-generated)",
-					value: "changelog",
 				},
 			],
 			admin: {
@@ -210,31 +189,6 @@ export const Blog: CollectionConfig = {
 				readOnly: true,
 				condition: (data) => data.isRSSExternal === true,
 			},
-		},
-		{
-			name: "changelogData",
-			type: "group",
-			admin: {
-				description: "Auto-generated changelog metadata",
-				condition: (data) => data.contentType === "changelog",
-			},
-			fields: [
-				{ name: "projectSlug", type: "text" },
-				{ name: "projectName", type: "text" },
-				{
-					name: "changeType",
-					type: "select",
-					options: [
-						{ label: "SCF Funding", value: "scf-funding" },
-						{ label: "Status Change", value: "status-change" },
-						{ label: "New Project", value: "new-project" },
-					],
-				},
-				{ name: "oldValue", type: "text" },
-				{ name: "newValue", type: "text" },
-				{ name: "numericValue", type: "number" },
-				{ name: "round", type: "number" },
-			],
 		},
 		{
 			name: "category",
