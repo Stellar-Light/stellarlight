@@ -23,6 +23,7 @@ const stats = {
   matched: 0,
   unmatched: 0,
   enriched: 0,
+  scfDataUpdated: 0,
   thumbnailsFetched: 0,
   descriptionsAdded: 0,
   linksAdded: 0,
@@ -213,8 +214,25 @@ async function main() {
 
   // 5. Enrich matched projects
   for (const { scf, ours } of matched) {
-    console.log(`  ${ours.name} ← SCF "${scf.title}"`);
+    console.log(`  ${ours.name} ← SCF "${scf.title}" (round ${scf.lastAwardedRound})`);
     const updateData: any = {};
+
+    // --- SCF round data: always update ---
+    const isAwarded = scf.lastAwardedRound > 0;
+    const currentScf = ours.scf || {};
+    if (
+      currentScf.awarded !== isAwarded ||
+      currentScf.lastAwardedRound !== scf.lastAwardedRound ||
+      currentScf.slug !== scf.slug
+    ) {
+      updateData.scf = {
+        awarded: isAwarded,
+        lastAwardedRound: scf.lastAwardedRound,
+        slug: scf.slug,
+      };
+      console.log(`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}`);
+      stats.scfDataUpdated++;
+    }
 
     // --- Thumbnail: use SCF image if project has no logo ---
     if (!ours.logo && scf.thumbnail) {
@@ -305,6 +323,7 @@ async function main() {
   console.log(`Matched to DB:      ${stats.matched}`);
   console.log(`Unmatched:          ${stats.unmatched}`);
   console.log(`Enriched:           ${stats.enriched}`);
+  console.log(`  SCF data:         ${stats.scfDataUpdated}`);
   console.log(`  Thumbnails:       ${stats.thumbnailsFetched}`);
   console.log(`  Descriptions:     ${stats.descriptionsAdded}`);
   console.log(`  Links:            ${stats.linksAdded}`);

@@ -7,7 +7,9 @@ export const Projects: CollectionConfig = {
 	admin: {
 		useAsTitle: "name",
 	},
-	versions: true,
+	versions: {
+		maxPerDoc: 3,
+	},
 	access: {
 		read: () => true,
 		create: ({ data, req }) => {
@@ -76,14 +78,23 @@ export const Projects: CollectionConfig = {
 			hasMany: true,
 			options: [
 				"Wallet",
-				"Anchor",
-				"Bridge",
-				"SDK",
-				"Payment Rail",
 				"DEX",
+				"Lending",
+				"Bridge",
+				"Payments",
+				"Anchor",
+				"SDK",
 				"Indexer",
 				"Explorer",
-				"Other",
+				"Analytics",
+				"AI",
+				"Gaming",
+				"Education",
+				"Security",
+				"NFT",
+				"RWA",
+				"Stablecoin",
+				"Social Impact",
 			],
 		},
 		{
@@ -180,6 +191,37 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			name: "scf",
+			type: "group",
+			admin: {
+				description: "Stellar Community Fund data",
+			},
+			fields: [
+				{
+					name: "awarded",
+					type: "checkbox",
+					defaultValue: false,
+					admin: {
+						description: "Whether this project has received SCF funding",
+					},
+				},
+				{
+					name: "lastAwardedRound",
+					type: "number",
+					admin: {
+						description: "Last SCF round this project was awarded in",
+					},
+				},
+				{
+					name: "slug",
+					type: "text",
+					admin: {
+						description: "SCF project slug (used for linking to communityfund.stellar.org)",
+					},
+				},
+			],
+		},
+		{
 			name: "verificationLevel",
 			type: "select",
 			required: true,
@@ -216,6 +258,16 @@ export const Projects: CollectionConfig = {
 			defaultValue: false,
 			admin: {
 				description: "Featured projects appear first in the directory when sorted by Featured.",
+			},
+		},
+		{
+			name: "relevanceScore",
+			type: "number",
+			defaultValue: 0,
+			admin: {
+				description:
+					"Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.",
+				position: "sidebar",
 			},
 		},
 		{

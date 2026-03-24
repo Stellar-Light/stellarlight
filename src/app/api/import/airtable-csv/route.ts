@@ -38,7 +38,7 @@ const typeMapping: Record<string, string[]> = {
 	Bridge: ["Bridge"],
 	DEX: ["DEX"],
 	Indexing: ["Indexer"],
-	Payments: ["Payment Rail", "Anchor"],
+	Payments: ["Payments", "Anchor"],
 	Wallet: ["Wallet"],
 	"RPC & Nodes": ["Other"],
 	Oracle: ["Other"],

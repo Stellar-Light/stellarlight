@@ -39,6 +39,25 @@
 		--ring-offset: #171717;
 		--radius: 0.75rem;
 
+		/* Chart tokens */
+		--chart-background: #171717;
+		--chart-foreground: #E5E5E5;
+		--chart-foreground-muted: #A3A3A3;
+		--chart-label: #A3A3A3;
+		--chart-line-primary: #FDDA24;
+		--chart-line-secondary: #525252;
+		--chart-crosshair: #525252;
+		--chart-grid: #2F2F2F;
+		--chart-indicator-color: #FDDA24;
+		--chart-indicator-secondary-color: #525252;
+		--chart-marker-background: #262626;
+		--chart-marker-border: #2F2F2F;
+		--chart-marker-foreground: #E5E5E5;
+		--chart-marker-badge-background: #404040;
+		--chart-marker-badge-foreground: #E5E5E5;
+		--chart-segment-background: rgba(253, 218, 36, 0.1);
+		--chart-segment-line: rgba(253, 218, 36, 0.3);
+
 		--font-sans: Inter, sans-serif;
 		--font-serif: Source Serif 4, serif;
 		--font-mono: JetBrains Mono, monospace;

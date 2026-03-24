@@ -209,7 +209,28 @@ export interface Project {
     | 'Asset'
     | 'Protocol/Contract'
     | 'Anchor';
-  types?: ('Wallet' | 'Anchor' | 'Bridge' | 'SDK' | 'Payment Rail' | 'DEX' | 'Indexer' | 'Explorer' | 'Other')[] | null;
+  types?:
+    | (
+        | 'Wallet'
+        | 'DEX'
+        | 'Lending'
+        | 'Bridge'
+        | 'Payments'
+        | 'Anchor'
+        | 'SDK'
+        | 'Indexer'
+        | 'Explorer'
+        | 'Analytics'
+        | 'AI'
+        | 'Gaming'
+        | 'Education'
+        | 'Security'
+        | 'NFT'
+        | 'RWA'
+        | 'Stablecoin'
+        | 'Social Impact'
+      )[]
+    | null;
   /**
    * Draft projects require admin approval before appearing on the frontend
    */
@@ -264,6 +285,10 @@ export interface Project {
    * Featured projects appear first in the directory when sorted by Featured.
    */
   featured?: boolean | null;
+  /**
+   * Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.
+   */
+  relevanceScore?: number | null;
   /**
    * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
@@ -846,6 +871,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   lastVerifiedAt?: T;
   featured?: T;
+  relevanceScore?: T;
   communityPick?: T;
   relatedEntities?: T;
   updatedAt?: T;

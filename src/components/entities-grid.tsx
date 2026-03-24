@@ -1,69 +1,54 @@
 import { getPayloadSafe } from "@/lib/payload-client";
-import BlogHighlightCard from "@/components/blog-highlight-card";
-import BlogCardSkeleton from "@/components/blog-card-skeleton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import EntityCard from "@/components/entity-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface BlogPostsGridProps {
-	page?: number;
-	category?: string;
-	tag?: string;
+interface EntitiesGridProps {
+	searchQuery?: string;
+	page: number;
+	limit: number;
 }
 
-export default async function BlogPostsGrid({
-	page = 1,
-	category,
-	tag,
-}: BlogPostsGridProps) {
+export default async function EntitiesGrid({
+	searchQuery,
+	page,
+	limit,
+}: EntitiesGridProps) {
 	const payload = await getPayloadSafe();
-	const limit = 12;
 
-	let posts: any[] = [];
 	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
 
 	if (payload) {
 		try {
-			const where: any = {
-				status: {
-					equals: "published",
-				},
-			};
+			const where: any = {};
 
-			if (category) {
-				where.category = {
-					equals: category,
-				};
-			}
-
-			if (tag) {
-				where.tags = {
-					in: [tag],
-				};
+			if (searchQuery) {
+				where.or = [
+					{ name: { contains: searchQuery } },
+					{ description: { contains: searchQuery } },
+				];
 			}
 
 			result = await payload.find({
-				collection: "blog",
+				collection: "entities",
 				where,
 				limit,
 				page,
-				sort: "-publishedAt",
-				depth: 2,
+				sort: "name",
+				depth: 1,
 			});
-
-			posts = result.docs;
 		} catch (error) {
-			// Silently handle fetch errors
+			// Continue with empty result
 		}
 	}
 
-	if (posts.length === 0) {
+	if (result.docs.length === 0) {
 		return (
-			<div className="text-center py-20">
+			<div className="text-center py-16">
 				<p className="text-lg text-muted-foreground">
-					No posts found.
-					{category || tag
-						? " Try adjusting your filters."
-						: " Check back soon for updates!"}
+					No entities found. {searchQuery ? "Try adjusting your search terms." : "Entities will appear here once added."}
 				</p>
 			</div>
 		);
@@ -71,13 +56,9 @@ export default async function BlogPostsGrid({
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-				{posts.map((post: any, index: number) => (
-					<BlogHighlightCard
-						key={post.id}
-						post={post}
-						isLarge={index === 0 && !category && !tag}
-					/>
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+				{result.docs.map((entity: any) => (
+					<EntityCard key={entity.id} entity={entity} />
 				))}
 			</div>
 
@@ -91,7 +72,13 @@ export default async function BlogPostsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
+							<Link
+								href={`/entities?${new URLSearchParams({
+									...(searchQuery ? { q: searchQuery } : {}),
+									page: String(page - 1),
+								}).toString()}`}
+							>
+								<ChevronLeft className="h-3.5 w-3.5" />
 								Previous
 							</Link>
 						</Button>
@@ -102,6 +89,7 @@ export default async function BlogPostsGrid({
 							disabled
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
+							<ChevronLeft className="h-3.5 w-3.5" />
 							Previous
 						</Button>
 					)}
@@ -117,8 +105,14 @@ export default async function BlogPostsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
+							<Link
+								href={`/entities?${new URLSearchParams({
+									...(searchQuery ? { q: searchQuery } : {}),
+									page: String(page + 1),
+								}).toString()}`}
+							>
 								Next
+								<ChevronRight className="h-3.5 w-3.5" />
 							</Link>
 						</Button>
 					) : (
@@ -129,6 +123,7 @@ export default async function BlogPostsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] opacity-40"
 						>
 							Next
+							<ChevronRight className="h-3.5 w-3.5" />
 						</Button>
 					)}
 				</div>
@@ -137,13 +132,12 @@ export default async function BlogPostsGrid({
 	);
 }
 
-export function BlogPostsGridSkeleton() {
+export function EntitiesGridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
 			{Array.from({ length: 6 }).map((_, i) => (
-				<BlogCardSkeleton key={i} isLarge={i === 0} />
+				<Skeleton key={i} className="h-48 rounded-xl" />
 			))}
 		</div>
 	);
 }
-

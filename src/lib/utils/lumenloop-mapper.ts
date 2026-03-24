@@ -209,46 +209,62 @@ function mapTypes(
 	const typeMap: Record<
 		string,
 		| "Wallet"
-		| "Anchor"
-		| "Bridge"
-		| "SDK"
-		| "Payment Rail"
 		| "DEX"
+		| "Lending"
+		| "Bridge"
+		| "Payments"
+		| "Anchor"
+		| "SDK"
 		| "Indexer"
 		| "Explorer"
-		| "Other"
+		| "Analytics"
+		| "AI"
+		| "Gaming"
+		| "Education"
+		| "Security"
+		| "NFT"
+		| "RWA"
 	> = {
 		wallet: "Wallet",
 		"software wallet": "Wallet",
 		"hardware wallet": "Wallet",
-		anchor: "Anchor",
+		dex: "DEX",
+		amm: "DEX",
+		lending: "Lending",
+		"lending protocol": "Lending",
+		borrowing: "Lending",
 		bridge: "Bridge",
 		"cross-chain": "Bridge",
+		"payment rail": "Payments",
+		payments: "Payments",
+		"cross-border payments": "Payments",
+		p2p: "Payments",
+		anchor: "Anchor",
 		sdk: "SDK",
-		"payment rail": "Payment Rail",
-		payments: "Payment Rail",
-		"cross-border payments": "Payment Rail",
-		p2p: "Payment Rail",
-		dex: "DEX",
 		indexer: "Indexer",
 		explorer: "Explorer",
+		analytics: "Analytics",
+		"data analytics": "Analytics",
+		ai: "AI",
+		"artificial intelligence": "AI",
+		gaming: "Gaming",
+		game: "Gaming",
+		education: "Education",
+		learn: "Education",
+		security: "Security",
+		audit: "Security",
+		nft: "NFT",
+		rwa: "RWA",
+		"real world assets": "RWA",
+		tokenization: "RWA",
 	};
+
+	type ValidType = typeof typeMap[keyof typeof typeMap];
 
 	const mapped = tags
 		.map((t) => typeMap[t.toLowerCase()])
 		.filter(
-			(
-				t,
-			): t is
-				| "Wallet"
-				| "Anchor"
-				| "Bridge"
-				| "SDK"
-				| "Payment Rail"
-				| "DEX"
-				| "Indexer"
-				| "Explorer"
-				| "Other" => t !== undefined,
+			(t): t is ValidType => t !== undefined,
 		);
 
 	// Deduplicate

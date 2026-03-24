@@ -4,8 +4,8 @@ export default function ProjectCardSkeleton() {
 	return (
 		<div className="idea-card rounded-xl p-6 flex flex-col h-full min-h-[200px]">
 			{/* Badge skeleton */}
-			<div className="flex justify-end mb-4">
-				<Skeleton className="h-6 w-20 rounded-full" />
+			<div className="flex justify-between items-center mb-4">
+				<Skeleton className="h-6 w-24 rounded-full" />
 			</div>
 
 			{/* Logo and title skeleton */}
