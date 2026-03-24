@@ -85,6 +85,7 @@ async function scrapeDetailPage(slug: string): Promise<{
   twitter?: string;
   github?: string;
   totalAwarded?: number;
+  awardedRounds?: number[];
 } | null> {
   try {
     const res = await fetch(`https://communityfund.stellar.org/project/${slug}`, {
@@ -96,34 +97,45 @@ async function scrapeDetailPage(slug: string): Promise<{
     if (!res.ok) return null;
     const html = await res.text();
 
-    // Extract __NEXT_DATA__ JSON which contains the full project data
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s);
-    if (!nextDataMatch) return null;
-
-    const nextData = JSON.parse(nextDataMatch[1]);
-    const pageProps = nextData?.props?.pageProps;
-    if (!pageProps) return null;
-
-    // The project data may be in different locations depending on the page structure
-    const project = pageProps.project || pageProps.data || pageProps;
-
     const result: any = {};
 
-    // Description - look for various field names
-    const desc = project.description || project.projectDescription || project.shortDescription;
-    if (desc && typeof desc === "string" && desc.length > 20) {
-      result.description = desc.slice(0, 500); // Cap at 500 chars for shortDescription
+    // Try __NEXT_DATA__ (Pages Router) first
+    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s);
+    if (nextDataMatch) {
+      try {
+        const nextData = JSON.parse(nextDataMatch[1]);
+        const pageProps = nextData?.props?.pageProps;
+        const project = pageProps?.project || pageProps?.data || pageProps;
+        if (project) {
+          const desc = project.description || project.projectDescription || project.shortDescription;
+          if (desc && typeof desc === "string" && desc.length > 20) {
+            result.description = desc.slice(0, 500);
+          }
+          const urls = project.siteUrls || project.urls || project.links || {};
+          if (urls.website) result.website = urls.website;
+          if (urls.x || urls.twitter) result.twitter = urls.x || urls.twitter;
+          if (urls.github) result.github = urls.github;
+          if (project.totalAwarded && typeof project.totalAwarded === "number") {
+            result.totalAwarded = project.totalAwarded;
+          }
+        }
+      } catch { /* ignore parse errors */ }
     }
 
-    // Links
-    const urls = project.siteUrls || project.urls || project.links || {};
-    if (urls.website) result.website = urls.website;
-    if (urls.x || urls.twitter) result.twitter = urls.x || urls.twitter;
-    if (urls.github) result.github = urls.github;
+    // Try __next_f streaming data (App Router) — extract totalAwarded
+    // Data is in escaped JSON like: totalAwarded\":115000
+    if (!result.totalAwarded) {
+      const awardedMatch = html.match(/totalAwarded\\?"?\s*:\s*(\d+(?:\.\d+)?)/);
+      if (awardedMatch) {
+        result.totalAwarded = parseFloat(awardedMatch[1]);
+      }
+    }
 
-    // Funding
-    if (project.totalAwarded && typeof project.totalAwarded === "number") {
-      result.totalAwarded = project.totalAwarded;
+    // Extract all funded rounds from "SCF #N" patterns on the page
+    const roundMatches = html.matchAll(/SCF #(\d+)/g);
+    const rounds = [...new Set([...roundMatches].map(m => parseInt(m[1], 10)))].sort((a, b) => a - b);
+    if (rounds.length > 0) {
+      result.awardedRounds = rounds;
     }
 
     return Object.keys(result).length > 0 ? result : null;
@@ -220,17 +232,26 @@ async function main() {
     // --- SCF round data: always update ---
     const isAwarded = scf.lastAwardedRound > 0;
     const currentScf = ours.scf || {};
-    if (
+
+    // Scrape detail page early so we can include totalAwarded in SCF data
+    const detail = await scrapeDetailPage(scf.slug);
+
+    const hasNewData =
       currentScf.awarded !== isAwarded ||
       currentScf.lastAwardedRound !== scf.lastAwardedRound ||
-      currentScf.slug !== scf.slug
-    ) {
+      currentScf.slug !== scf.slug ||
+      (detail?.totalAwarded && currentScf.totalAwarded !== detail.totalAwarded) ||
+      (detail?.awardedRounds && JSON.stringify(currentScf.awardedRounds) !== JSON.stringify(detail.awardedRounds));
+
+    if (hasNewData) {
       updateData.scf = {
         awarded: isAwarded,
         lastAwardedRound: scf.lastAwardedRound,
         slug: scf.slug,
+        ...(detail?.totalAwarded ? { totalAwarded: detail.totalAwarded } : {}),
+        ...(detail?.awardedRounds ? { awardedRounds: detail.awardedRounds } : {}),
       };
-      console.log(`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}`);
+      console.log(`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}, totalAwarded=${detail?.totalAwarded ?? "N/A"}`);
       stats.scfDataUpdated++;
     }
 
@@ -262,8 +283,7 @@ async function main() {
       }
     }
 
-    // --- Scrape detail page for richer data ---
-    const detail = await scrapeDetailPage(scf.slug);
+    // --- Use scraped detail page for richer data ---
     if (detail) {
       // Add description if we don't have one
       if (detail.description && !ours.shortDescription) {

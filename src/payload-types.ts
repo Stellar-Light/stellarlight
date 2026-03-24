@@ -274,6 +274,31 @@ export interface Project {
         }[]
       | null;
   };
+  /**
+   * Stellar Community Fund data
+   */
+  scf?: {
+    /**
+     * Whether this project has received SCF funding
+     */
+    awarded?: boolean | null;
+    /**
+     * Last SCF round this project was awarded in
+     */
+    lastAwardedRound?: number | null;
+    /**
+     * SCF project slug (used for linking to communityfund.stellar.org)
+     */
+    slug?: string | null;
+    /**
+     * Total funding amount awarded from SCF (in USD)
+     */
+    totalAwarded?: number | null;
+    /**
+     * Round numbers this project was funded in, e.g. 2, 17, 22
+     */
+    awardedRounds?: number[] | null;
+  };
   verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
   provenance: {
     source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
@@ -860,6 +885,15 @@ export interface ProjectsSelect<T extends boolean = true> {
               address?: T;
               id?: T;
             };
+      };
+  scf?:
+    | T
+    | {
+        awarded?: T;
+        lastAwardedRound?: T;
+        slug?: T;
+        totalAwarded?: T;
+        awardedRounds?: T;
       };
   verificationLevel?: T;
   provenance?:
