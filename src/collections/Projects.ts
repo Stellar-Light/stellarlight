@@ -219,6 +219,21 @@ export const Projects: CollectionConfig = {
 						description: "SCF project slug (used for linking to communityfund.stellar.org)",
 					},
 				},
+				{
+					name: "totalAwarded",
+					type: "number",
+					admin: {
+						description: "Total funding amount awarded from SCF (in USD)",
+					},
+				},
+				{
+					name: "awardedRounds",
+					type: "number",
+					hasMany: true,
+					admin: {
+						description: "Round numbers this project was funded in, e.g. 2, 17, 22",
+					},
+				},
 			],
 		},
 		{

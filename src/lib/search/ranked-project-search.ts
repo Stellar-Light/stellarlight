@@ -3,6 +3,7 @@ import type { Payload } from "payload";
 interface RankedSearchOptions {
 	query: string;
 	typeFilter?: string;
+	scfFilter?: string;
 	page: number;
 	limit: number;
 	sort?: string;
@@ -15,6 +16,29 @@ interface SearchResult {
 	page: number;
 	hasNextPage: boolean;
 	hasPrevPage: boolean;
+}
+
+/** Apply type filter to a Payload where clause */
+function applyTypeFilter(baseWhere: any, typeFilter?: string) {
+	if (!typeFilter || typeFilter === "all") return;
+
+	const typeValues = typeFilter === "Payments"
+		? ["Payments", "Payment Rail"]
+		: [typeFilter];
+	baseWhere.types = { in: typeValues };
+}
+
+/** Apply SCF filter to a Payload where clause (combinable with type) */
+function applyScfFilter(baseWhere: any, scfFilter?: string) {
+	if (!scfFilter) return;
+
+	baseWhere["scf.awarded"] = { equals: true };
+	if (scfFilter !== "all") {
+		const round = parseInt(scfFilter, 10);
+		if (!isNaN(round)) {
+			baseWhere["scf.awardedRounds"] = { in: [round] };
+		}
+	}
 }
 
 /**
@@ -30,7 +54,7 @@ export async function rankedProjectSearch(
 	payload: Payload,
 	options: RankedSearchOptions,
 ): Promise<SearchResult> {
-	const { query, typeFilter, page, limit, sort = "name" } = options;
+	const { query, typeFilter, scfFilter, page, limit, sort = "name" } = options;
 
 	const baseWhere: any = {
 		status: {
@@ -38,13 +62,8 @@ export async function rankedProjectSearch(
 		},
 	};
 
-	if (typeFilter && typeFilter !== "all") {
-		// Handle legacy "Payment Rail" → "Payments" rename in DB
-		const typeValues = typeFilter === "Payments"
-			? ["Payments", "Payment Rail"]
-			: [typeFilter];
-		baseWhere.types = { in: typeValues };
-	}
+	applyTypeFilter(baseWhere, typeFilter);
+	applyScfFilter(baseWhere, scfFilter);
 
 	const where = {
 		...baseWhere,

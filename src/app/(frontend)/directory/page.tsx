@@ -6,6 +6,7 @@ type SearchParams = Promise<{
 	q?: string;
 	page?: string;
 	type?: string;
+	scf?: string;
 	sort?: string;
 }>;
 
@@ -21,6 +22,7 @@ export default async function DirectoryPage({
 
 	const searchQuery = params.q;
 	const typeFilter = params.type;
+	const scfFilter = params.scf;
 	const sortOption = params.sort || "featured";
 	const page = parseInt(params.page || "1", 10);
 	const limit = 24;
@@ -41,10 +43,11 @@ export default async function DirectoryPage({
 				</div>
 
 				{/* Projects Grid — key forces skeleton to show immediately on param change */}
-				<Suspense key={`${searchQuery}-${typeFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
+				<Suspense key={`${searchQuery}-${typeFilter}-${scfFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
 					<DirectoryProjectsGrid
 						searchQuery={searchQuery}
 						typeFilter={typeFilter}
+						scfFilter={scfFilter}
 						sortOption={sortOption}
 						page={page}
 						limit={limit}
