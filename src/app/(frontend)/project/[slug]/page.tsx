@@ -579,6 +579,68 @@ export default async function ProjectDetailPage({
 					</Card>
 				)}
 
+				{/* SCF Funding Info */}
+				{project.scf?.awarded && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold">Stellar Community Fund</CardTitle>
+							<CardDescription>This project received funding from the SCF</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								{(() => {
+									const rounds: number[] = Array.isArray(project.scf.awardedRounds)
+										? (project.scf.awardedRounds as number[])
+										: project.scf.lastAwardedRound && project.scf.lastAwardedRound > 0
+											? [project.scf.lastAwardedRound]
+											: [];
+									return rounds.length > 0 ? (
+										<div className="p-4 rounded-xl border border-border/50 bg-background/50">
+											<p className="text-sm font-medium text-muted-foreground mb-2">
+												{rounds.length > 1 ? "Funded Rounds" : "Funded Round"}
+											</p>
+											<div className="flex flex-wrap gap-2">
+												{rounds.map((r: number) => (
+													<span
+														key={r}
+														className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-white/10 text-sm font-bold text-foreground border border-border/50"
+													>
+														{r}
+													</span>
+												))}
+											</div>
+										</div>
+									) : null;
+								})()}
+								{project.scf.totalAwarded && project.scf.totalAwarded > 0 && (
+									<div className="p-4 rounded-xl border border-border/50 bg-background/50">
+										<p className="text-sm font-medium text-muted-foreground mb-1">Total Funded</p>
+										<p className="text-2xl font-bold text-foreground">
+											${project.scf.totalAwarded.toLocaleString()}
+										</p>
+									</div>
+								)}
+								{project.scf.slug && (
+									<a
+										href={`https://communityfund.stellar.org/project/${project.scf.slug}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-border transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
+									>
+										<div className="flex-1 min-w-0">
+											<p className="text-sm font-medium text-muted-foreground mb-1">SCF Page</p>
+											<p className="text-sm font-semibold text-foreground group-hover:text-foreground transition-colors truncate">
+												View on Community Fund
+											</p>
+										</div>
+										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+									</a>
+								)}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
 				{/* TVL Stats & Chart (DeFi protocols only) */}
 				<ProjectTVLChart projectName={project.name} />
 
