@@ -476,6 +476,12 @@ export default async function ProjectDetailPage({
 												{project.verificationLevel}
 											</Badge>
 										)}
+										{(project as any).hackathon && (
+											<Badge className="bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border-purple-500/30 text-sm px-4 py-1.5 font-semibold shadow-sm">
+												Hackathon Project
+												{(project as any).hackathonStatus && ` \u2014 ${(project as any).hackathonStatus}`}
+											</Badge>
+										)}
 									</div>
 
 									{/* Category Tags */}
@@ -814,23 +820,46 @@ export default async function ProjectDetailPage({
 						<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 							<CardHeader className="pb-4">
 								<CardTitle className="text-xl font-bold">On-Chain Information</CardTitle>
+								<CardDescription>Stellar network data for this project</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-5">
 									{project.onchain.assetCode && (
 										<div>
 											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">Asset Code</div>
-											<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 hover:border-primary/30 transition-colors">
-												{project.onchain.assetCode}
-											</code>
+											{project.onchain.issuer ? (
+												<a
+													href={`https://stellar.expert/explorer/public/asset/${project.onchain.assetCode}-${project.onchain.issuer}`}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+												>
+													<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors">
+														{project.onchain.assetCode}
+													</code>
+													<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+												</a>
+											) : (
+												<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50">
+													{project.onchain.assetCode}
+												</code>
+											)}
 										</div>
 									)}
 									{project.onchain.issuer && (
 										<div>
 											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">Issuer</div>
-											<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 hover:border-primary/30 transition-colors break-all">
-												{project.onchain.issuer}
-											</code>
+											<a
+												href={`https://stellar.expert/explorer/public/account/${project.onchain.issuer}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+											>
+												<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
+													{project.onchain.issuer}
+												</code>
+												<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
+											</a>
 										</div>
 									)}
 									{project.onchain.contracts &&
@@ -839,11 +868,25 @@ export default async function ProjectDetailPage({
 											(contract: { address?: string | null }, idx: number) => (
 												<div key={idx}>
 													<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
-														Contract {idx + 1}
+														Contract{(project.onchain?.contracts?.length ?? 0) > 1 ? ` ${idx + 1}` : ""}
 													</div>
-													<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 hover:border-primary/30 transition-colors break-all">
-														{contract.address || "Unknown"}
-													</code>
+													{contract.address ? (
+														<a
+															href={`https://stellar.expert/explorer/public/contract/${contract.address}`}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+														>
+															<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
+																{contract.address}
+															</code>
+															<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
+														</a>
+													) : (
+														<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 break-all">
+															Unknown
+														</code>
+													)}
 												</div>
 											),
 										)}

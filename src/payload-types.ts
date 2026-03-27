@@ -76,6 +76,7 @@ export interface Config {
     entities: Entity;
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
+    hackathons: Hackathon;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +86,9 @@ export interface Config {
   collectionsJoins: {
     projects: {
       relatedEntities: 'entities';
+    };
+    hackathons: {
+      projects: 'projects';
     };
   };
   collectionsSelect: {
@@ -97,6 +101,7 @@ export interface Config {
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
+    hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -326,6 +331,14 @@ export interface Project {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Hackathon this project originated from (if applicable)
+   */
+  hackathon?: (string | null) | Hackathon;
+  /**
+   * Post-hackathon project status
+   */
+  hackathonStatus?: ('Built' | 'In Progress' | 'Abandoned') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -360,6 +373,37 @@ export interface Entity {
     twitter?: string | null;
   };
   projects?: (string | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathons".
+ */
+export interface Hackathon {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  /**
+   * The organization running this hackathon
+   */
+  organizer?: (string | null) | Entity;
+  /**
+   * Link to the hackathon's external page
+   */
+  externalUrl?: string | null;
+  status: 'upcoming' | 'active' | 'completed';
+  /**
+   * Projects that originated from this hackathon
+   */
+  projects?: {
+    docs?: (string | Project)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -540,6 +584,7 @@ export interface Signal {
   github?: {
     lastActivityAt?: string | null;
     openIssuesTotal?: number | null;
+    totalStars?: number | null;
     repos?:
       | {
           owner?: string | null;
@@ -547,6 +592,7 @@ export interface Signal {
           url?: string | null;
           lastCommitAt?: string | null;
           openIssues?: number | null;
+          stargazerCount?: number | null;
           error?: string | null;
           id?: string | null;
         }[]
@@ -758,6 +804,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'carousel';
         value: string | Carousel;
+      } | null)
+    | ({
+        relationTo: 'hackathons';
+        value: string | Hackathon;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -908,6 +958,8 @@ export interface ProjectsSelect<T extends boolean = true> {
   relevanceScore?: T;
   communityPick?: T;
   relatedEntities?: T;
+  hackathon?: T;
+  hackathonStatus?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -977,6 +1029,7 @@ export interface SignalsSelect<T extends boolean = true> {
     | {
         lastActivityAt?: T;
         openIssuesTotal?: T;
+        totalStars?: T;
         repos?:
           | T
           | {
@@ -985,6 +1038,7 @@ export interface SignalsSelect<T extends boolean = true> {
               url?: T;
               lastCommitAt?: T;
               openIssues?: T;
+              stargazerCount?: T;
               error?: T;
               id?: T;
             };
@@ -1042,6 +1096,23 @@ export interface CarouselSelect<T extends boolean = true> {
   url?: T;
   order?: T;
   active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathons_select".
+ */
+export interface HackathonsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  organizer?: T;
+  externalUrl?: T;
+  status?: T;
+  projects?: T;
   updatedAt?: T;
   createdAt?: T;
 }
