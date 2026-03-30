@@ -33,6 +33,10 @@ export const Signals: CollectionConfig = {
 					type: "number",
 				},
 				{
+					name: "totalStars",
+					type: "number",
+				},
+				{
 					name: "repos",
 					type: "array",
 					fields: [
@@ -57,6 +61,10 @@ export const Signals: CollectionConfig = {
 							type: "number",
 						},
 						{
+							name: "stargazerCount",
+							type: "number",
+						},
+						{
 							name: "error",
 							type: "text",
 						},
@@ -66,4 +74,3 @@ export const Signals: CollectionConfig = {
 		},
 	],
 };
-

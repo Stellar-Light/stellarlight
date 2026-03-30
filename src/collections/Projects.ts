@@ -302,6 +302,27 @@ export const Projects: CollectionConfig = {
 				description: "Entities/organizations linked to this project. Edit from either side.",
 			},
 		},
+		{
+			name: "hackathon",
+			type: "relationship",
+			relationTo: "hackathons",
+			admin: {
+				description: "Hackathon this project originated from (if applicable)",
+			},
+		},
+		{
+			name: "hackathonStatus",
+			type: "select",
+			options: [
+				{ label: "Built", value: "Built" },
+				{ label: "In Progress", value: "In Progress" },
+				{ label: "Abandoned", value: "Abandoned" },
+			],
+			admin: {
+				description: "Post-hackathon project status",
+				condition: (data) => !!data?.hackathon,
+			},
+		},
 	],
 	// Unique index on slug is handled by unique: true on the field
 	hooks: {
