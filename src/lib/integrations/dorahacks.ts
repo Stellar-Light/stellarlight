@@ -46,6 +46,7 @@ async function fetchOrgHackathons(orgId: number): Promise<DoraHacksHackathon[]> 
       headers: {
         'Accept': 'application/json',
         'Referer': 'https://dorahacks.io/org/stellar',
+        'User-Agent': 'Mozilla/5.0 (compatible; StellarLight/1.0)',
       },
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
