@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       synced: 0,
       created: 0,
       updated: 0,
-      errors: [],
+      errors: [] as Array<{ username: string | null; error: string }>,
     };
 
     // Process each builder

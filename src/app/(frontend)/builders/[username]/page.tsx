@@ -8,11 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  GitHubLogoIcon, 
-  GlobeIcon, 
-  TwitterLogoIcon 
-} from '@radix-ui/react-icons';
-import { 
   MapPin, 
   Briefcase, 
   MessageCircle,
@@ -21,7 +16,10 @@ import {
   Code2,
   Star,
   GitFork,
-  ExternalLink
+  ExternalLink,
+  Github,
+  Globe,
+  Twitter
 } from 'lucide-react';
 
 interface BuilderPageProps {
@@ -117,7 +115,7 @@ export default async function BuilderProfilePage({ params }: BuilderPageProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <GitHubLogoIcon className="mr-2" />
+                    <Github className="w-4 h-4 mr-2" />
                     GitHub
                   </a>
                 </Button>
@@ -129,7 +127,7 @@ export default async function BuilderProfilePage({ params }: BuilderPageProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <GlobeIcon className="mr-2" />
+                    <Globe className="w-4 h-4 mr-2" />
                     Website
                   </a>
                 </Button>
@@ -141,7 +139,7 @@ export default async function BuilderProfilePage({ params }: BuilderPageProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <TwitterLogoIcon className="mr-2" />
+                    <Twitter className="w-4 h-4 mr-2" />
                     Twitter
                   </a>
                 </Button>
@@ -280,7 +278,7 @@ export default async function BuilderProfilePage({ params }: BuilderPageProps) {
                             rel="noopener noreferrer"
                             className="text-primary hover:underline flex items-center"
                           >
-                            <GitHubLogoIcon className="mr-2" />
+                            <Github className="w-4 h-4 mr-2" />
                             {repo.full_name}
                           </a>
                           <div className="flex items-center space-x-3 text-muted-foreground">

@@ -163,7 +163,7 @@ export function transformBuilderForPayload(builder: PassportBuilder) {
     github_id: builder.github_id || '',
     discord_username: builder.discord_username || '',
     scf_tier: builder.scf_tier || '',
-    visibility: builder.visibility || 'public',
+    visibility: (builder.visibility || 'public') as 'public' | 'private',
     projects: (builder.projects || []).map(project => ({
       name: project.name,
       slug: project.slug,

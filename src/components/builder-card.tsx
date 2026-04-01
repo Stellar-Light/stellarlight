@@ -1,15 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { GitHubLogoIcon, GlobeIcon, TwitterLogoIcon } from '@radix-ui/react-icons';
-import { MapPin, Briefcase } from 'lucide-react';
+import { MapPin, Briefcase, Github, Globe, Twitter } from 'lucide-react';
 
 interface BuilderCardProps {
   builder: {
     id: string;
     github_username: string;
     display_name: string;
-    avatar_url?: string;
+    avatar_url?: string | null;
     bio?: string;
     role_title?: string;
     location?: string;
@@ -78,14 +77,14 @@ export function BuilderCard({ builder }: BuilderCardProps) {
               )}
               
               {/* Stats */}
-              {builder.stats && (builder.stats.totalCommits30d > 0 || builder.stats.activeDays30d > 0) && (
+              {builder.stats && ((builder.stats.totalCommits30d ?? 0) > 0 || (builder.stats.activeDays30d ?? 0) > 0) && (
                 <div className="flex items-center space-x-4 mt-3">
-                  {builder.stats.totalCommits30d > 0 && (
+                  {(builder.stats.totalCommits30d ?? 0) > 0 && (
                     <div className="text-xs text-muted-foreground">
                       <span className="font-semibold">{builder.stats.totalCommits30d}</span> commits
                     </div>
                   )}
-                  {builder.stats.activeDays30d > 0 && (
+                  {(builder.stats.activeDays30d ?? 0) > 0 && (
                     <div className="text-xs text-muted-foreground">
                       <span className="font-semibold">{builder.stats.activeDays30d}</span> active days
                     </div>
@@ -110,7 +109,7 @@ export function BuilderCard({ builder }: BuilderCardProps) {
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <GitHubLogoIcon className="w-4 h-4" />
+                    <Github className="w-4 h-4" />
                   </a>
                 )}
                 {builder.website_url && (
@@ -121,7 +120,7 @@ export function BuilderCard({ builder }: BuilderCardProps) {
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <GlobeIcon className="w-4 h-4" />
+                    <Globe className="w-4 h-4" />
                   </a>
                 )}
                 {builder.twitter_handle && (
@@ -132,7 +131,7 @@ export function BuilderCard({ builder }: BuilderCardProps) {
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <TwitterLogoIcon className="w-4 h-4" />
+                    <Twitter className="w-4 h-4" />
                   </a>
                 )}
               </div>
