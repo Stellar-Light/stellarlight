@@ -11,6 +11,7 @@ import { DirectoryFilters } from "@/components/directory-filters";
 import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
 import TopBuildersSection, { TopBuildersSkeleton } from "@/components/top-builders-section";
 import TrendingProjectsSection, { TrendingProjectsSkeleton } from "@/components/trending-projects-section";
+import HackathonsSection, { HackathonsSkeleton } from "@/components/hackathons-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -107,6 +108,11 @@ export default async function HomePage() {
 				{/* Top Repositories Section */}
 				<Suspense fallback={<TrendingProjectsSkeleton />}>
 					<TrendingProjectsSection />
+				</Suspense>
+
+				{/* Hackathons Section */}
+				<Suspense fallback={<HackathonsSkeleton />}>
+					<HackathonsSection />
 				</Suspense>
 
 				{/* Projects Section */}

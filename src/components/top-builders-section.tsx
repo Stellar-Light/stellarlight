@@ -8,7 +8,6 @@ export default async function TopBuildersSection() {
 
 	try {
 		const all = await fetchAllBuilders();
-		// Show builders with activity first, then by project count, cap at 6
 		builders = all
 			.filter((b) => b.github_username)
 			.sort((a, b) => {
@@ -43,59 +42,59 @@ export default async function TopBuildersSection() {
 				</Link>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				{builders.map((builder) => (
-					<Link
-						key={builder.github_username}
-						href={`/builders`}
-						className="group flex items-center gap-4 p-5 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
-					>
-						{/* Avatar */}
-						<div className="flex-shrink-0">
-							{builder.avatar_url ? (
-								<Image
-									src={builder.avatar_url}
-									alt={builder.display_name}
-									width={40}
-									height={40}
-									className="rounded-full"
-								/>
-							) : (
-								<div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-									{builder.display_name.charAt(0).toUpperCase()}
-								</div>
-							)}
-						</div>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+				{builders.map((builder) => {
+					const commits = builder.stats?.totalCommits30d ?? 0;
+					const projectCount = builder.projects?.length ?? 0;
 
-						<div className="flex-1 min-w-0">
-							<p className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-								{builder.display_name}
-							</p>
-							<div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-								{(builder.stats?.totalCommits30d ?? 0) > 0 && (
-									<span className="flex items-center gap-1">
-										<GitBranch className="w-3.5 h-3.5" />
-										{builder.stats!.totalCommits30d}
-									</span>
-								)}
-								{builder.projects && builder.projects.length > 0 && (
-									<span className="flex items-center gap-1">
-										<Code2 className="w-3.5 h-3.5" />
-										{builder.projects.length} project{builder.projects.length !== 1 ? "s" : ""}
-									</span>
-								)}
-								{builder.role_title && (builder.stats?.totalCommits30d ?? 0) === 0 && (
-									<span className="truncate text-xs">{builder.role_title}</span>
+					return (
+						<Link
+							key={builder.github_username}
+							href="/builders"
+							className="group flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
+						>
+							<div className="flex-shrink-0">
+								{builder.avatar_url ? (
+									<Image
+										src={builder.avatar_url}
+										alt={builder.display_name}
+										width={36}
+										height={36}
+										className="rounded-full"
+									/>
+								) : (
+									<div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+										{builder.display_name.charAt(0).toUpperCase()}
+									</div>
 								)}
 							</div>
-						</div>
 
-						<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-					</Link>
-				))}
+							<div className="flex-1 min-w-0">
+								<p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+									{builder.display_name}
+								</p>
+								<div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 whitespace-nowrap">
+									{commits > 0 && (
+										<span className="flex items-center gap-1">
+											<GitBranch className="w-3 h-3" />
+											{commits} commits
+										</span>
+									)}
+									{projectCount > 0 && (
+										<span className="flex items-center gap-1">
+											<Code2 className="w-3 h-3" />
+											{projectCount} project{projectCount !== 1 ? "s" : ""}
+										</span>
+									)}
+								</div>
+							</div>
+
+							<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+						</Link>
+					);
+				})}
 			</div>
 
-			{/* Mobile "View All" link */}
 			<Link
 				href="/builders"
 				className="sm:hidden flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mt-6"
@@ -114,9 +113,9 @@ export function TopBuildersSkeleton() {
 				<div className="h-10 w-40 bg-[#262626] rounded animate-pulse mb-2" />
 				<div className="h-4 w-64 bg-[#262626] rounded animate-pulse" />
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={i} className="h-[76px] rounded-xl bg-[#262626] animate-pulse" />
+					<div key={i} className="h-[68px] rounded-xl bg-[#262626] animate-pulse" />
 				))}
 			</div>
 		</section>
