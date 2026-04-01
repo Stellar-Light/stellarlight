@@ -22,15 +22,11 @@ import {
   Twitter
 } from 'lucide-react';
 
-interface BuilderPageProps {
-  params: {
-    username: string;
-  };
-}
+type Params = Promise<{ username: string }>;
 
 async function getBuilder(username: string) {
   const payload = await getPayload({ config });
-  
+
   const result = await payload.find({
     collection: 'builders',
     where: {
@@ -44,9 +40,10 @@ async function getBuilder(username: string) {
   return result.docs[0] || null;
 }
 
-export async function generateMetadata({ params }: BuilderPageProps): Promise<Metadata> {
-  const builder = await getBuilder(params.username);
-  
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { username } = await params;
+  const builder = await getBuilder(username);
+
   if (!builder) {
     return {
       title: 'Builder Not Found',
@@ -59,8 +56,9 @@ export async function generateMetadata({ params }: BuilderPageProps): Promise<Me
   };
 }
 
-export default async function BuilderProfilePage({ params }: BuilderPageProps) {
-  const builder = await getBuilder(params.username);
+export default async function BuilderProfilePage({ params }: { params: Params }) {
+  const { username } = await params;
+  const builder = await getBuilder(username);
 
   if (!builder) {
     notFound();
