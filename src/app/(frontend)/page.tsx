@@ -10,9 +10,7 @@ import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
 import { DirectoryFilters } from "@/components/directory-filters";
 import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
 import TopBuildersSection, { TopBuildersSkeleton } from "@/components/top-builders-section";
-import EmergingAppsSection, { EmergingAppsSkeleton } from "@/components/emerging-apps-section";
 import TrendingProjectsSection, { TrendingProjectsSkeleton } from "@/components/trending-projects-section";
-import FeaturedBuildersSection, { FeaturedBuildersSkeleton } from "@/components/featured-builders-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -106,19 +104,9 @@ export default async function HomePage() {
 					<TopBuildersSection />
 				</Suspense>
 
-				{/* Featured Builders Section */}
-				<Suspense fallback={<FeaturedBuildersSkeleton />}>
-					<FeaturedBuildersSection />
-				</Suspense>
-
-				{/* Trending Projects Section */}
+				{/* Top Repositories Section */}
 				<Suspense fallback={<TrendingProjectsSkeleton />}>
 					<TrendingProjectsSection />
-				</Suspense>
-
-				{/* Emerging Apps Section */}
-				<Suspense fallback={<EmergingAppsSkeleton />}>
-					<EmergingAppsSection />
 				</Suspense>
 
 				{/* Projects Section */}
