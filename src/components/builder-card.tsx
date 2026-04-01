@@ -2,32 +2,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Briefcase, Github, Globe, Twitter } from 'lucide-react';
+import type { Builder } from '@/payload-types';
 
 interface BuilderCardProps {
-  builder: {
-    id: string;
-    github_username: string;
-    display_name: string;
-    avatar_url?: string | null;
-    bio?: string | null;
-    role_title?: string | null;
-    location?: string | null;
-    website_url?: string | null;
-    twitter_handle?: string | null;
-    projects?: Array<{
-      name: string;
-      slug: string;
-    }> | null;
-    stats?: {
-      totalCommits30d?: number;
-      activeDays30d?: number;
-    } | null;
-  };
+  builder: Builder;
 }
 
 export function BuilderCard({ builder }: BuilderCardProps) {
   const profileUrl = `/builders/${builder.github_username}`;
-  
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
       <Link href={profileUrl}>
@@ -49,33 +32,33 @@ export function BuilderCard({ builder }: BuilderCardProps) {
                 </div>
               )}
             </div>
-            
+
             {/* Content */}
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                 {builder.display_name}
               </h3>
-              
+
               {builder.role_title && (
                 <div className="flex items-center text-sm text-muted-foreground mt-1">
                   <Briefcase className="w-3 h-3 mr-1" />
                   <span className="truncate">{builder.role_title}</span>
                 </div>
               )}
-              
+
               {builder.location && (
                 <div className="flex items-center text-sm text-muted-foreground mt-1">
                   <MapPin className="w-3 h-3 mr-1" />
                   <span>{builder.location}</span>
                 </div>
               )}
-              
+
               {builder.bio && (
                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                   {builder.bio}
                 </p>
               )}
-              
+
               {/* Stats */}
               {builder.stats && ((builder.stats.totalCommits30d ?? 0) > 0 || (builder.stats.activeDays30d ?? 0) > 0) && (
                 <div className="flex items-center space-x-4 mt-3">
@@ -91,14 +74,14 @@ export function BuilderCard({ builder }: BuilderCardProps) {
                   )}
                 </div>
               )}
-              
+
               {/* Projects count */}
               {builder.projects && builder.projects.length > 0 && (
                 <div className="text-xs text-muted-foreground mt-2">
                   {builder.projects.length} project{builder.projects.length !== 1 ? 's' : ''}
                 </div>
               )}
-              
+
               {/* Social links */}
               <div className="flex items-center space-x-3 mt-3">
                 {builder.github_username && (
