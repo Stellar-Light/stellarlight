@@ -9,11 +9,11 @@ interface BuilderCardProps {
     github_username: string;
     display_name: string;
     avatar_url?: string | null;
-    bio?: string;
-    role_title?: string;
-    location?: string;
-    website_url?: string;
-    twitter_handle?: string;
+    bio?: string | null;
+    role_title?: string | null;
+    location?: string | null;
+    website_url?: string | null;
+    twitter_handle?: string | null;
     projects?: Array<{
       name: string;
       slug: string;
