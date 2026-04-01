@@ -23,7 +23,7 @@ export default async function TrendingProjectsSection() {
 			collection: "signals",
 			sort: "-github.totalStars",
 			limit: 20,
-			depth: 1,
+			depth: 2,
 		});
 
 		repos = signalsResult.docs
@@ -40,8 +40,12 @@ export default async function TrendingProjectsSection() {
 				if (totalStars === 0) return null;
 
 				let logoUrl: string | null = null;
-				if (project.logo && typeof project.logo === "object" && project.logo.url) {
-					logoUrl = project.logo.url;
+				if (project.logo && typeof project.logo === "object") {
+					if (project.logo.url) {
+						logoUrl = project.logo.url;
+					} else if (project.logo.filename) {
+						logoUrl = `/media/${project.logo.filename}`;
+					}
 				}
 
 				return {
