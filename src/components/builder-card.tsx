@@ -17,11 +17,11 @@ interface BuilderCardProps {
     projects?: Array<{
       name: string;
       slug: string;
-    }>;
+    }> | null;
     stats?: {
       totalCommits30d?: number;
       activeDays30d?: number;
-    };
+    } | null;
   };
 }
 
