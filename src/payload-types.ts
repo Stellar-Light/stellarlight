@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     projects: Project;
     blog: Blog;
+    builders: Builder;
     'rss-feeds': RssFeed;
     signals: Signal;
     entities: Entity;
@@ -96,6 +97,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
+    builders: BuildersSelect<false> | BuildersSelect<true>;
     'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
     signals: SignalsSelect<false> | SignalsSelect<true>;
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
@@ -574,6 +576,139 @@ export interface RssFeed {
   createdAt: string;
 }
 /**
+ * Builder profiles from Stellar Passport
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "builders".
+ */
+export interface Builder {
+  id: string;
+  /**
+   * GitHub username for the builder
+   */
+  github_username: string;
+  /**
+   * Display name of the builder
+   */
+  display_name: string;
+  /**
+   * URL to the builder avatar image
+   */
+  avatar_url?: string | null;
+  /**
+   * Builder biography
+   */
+  bio?: string | null;
+  /**
+   * Professional role or title
+   */
+  role_title?: string | null;
+  /**
+   * Geographic location
+   */
+  location?: string | null;
+  /**
+   * Personal or professional website
+   */
+  website_url?: string | null;
+  /**
+   * Twitter/X handle
+   */
+  twitter_handle?: string | null;
+  /**
+   * Telegram handle
+   */
+  telegram_handle?: string | null;
+  /**
+   * Discord handle
+   */
+  discord_handle?: string | null;
+  /**
+   * Stellar blockchain address
+   */
+  stellar_address?: string | null;
+  /**
+   * Featured builder on homepage
+   */
+  is_featured?: boolean | null;
+  /**
+   * GitHub user ID
+   */
+  github_id?: string | null;
+  /**
+   * Discord username
+   */
+  discord_username?: string | null;
+  /**
+   * SCF funding tier
+   */
+  scf_tier?: string | null;
+  /**
+   * Profile visibility
+   */
+  visibility?: ('public' | 'private') | null;
+  projects?:
+    | {
+        name: string;
+        slug: string;
+        short_description?: string | null;
+        status?: ('building' | 'live' | 'deprecated') | null;
+        website_url?: string | null;
+        demo_url?: string | null;
+        docs_url?: string | null;
+        contract_address?: string | null;
+        repos?:
+          | {
+              full_name: string;
+              html_url: string;
+              primary_language?: string | null;
+              stars?: number | null;
+              forks?: number | null;
+              description?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Activity heatmap data
+         */
+        heatmap?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  stats?: {
+    /**
+     * Total commits in last 30 days
+     */
+    totalCommits30d?: number | null;
+    /**
+     * Active days in last 30 days
+     */
+    activeDays30d?: number | null;
+    /**
+     * Last active date
+     */
+    lastActiveDate?: string | null;
+  };
+  /**
+   * When the passport profile was created
+   */
+  passport_created_at?: string | null;
+  /**
+   * Last sync from Stellar Passport API
+   */
+  last_synced?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals".
  */
@@ -786,6 +921,10 @@ export interface PayloadLockedDocument {
         value: string | Blog;
       } | null)
     | ({
+        relationTo: 'builders';
+        value: string | Builder;
+      } | null)
+    | ({
         relationTo: 'rss-feeds';
         value: string | RssFeed;
       } | null)
@@ -996,6 +1135,64 @@ export interface BlogSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "builders_select".
+ */
+export interface BuildersSelect<T extends boolean = true> {
+  github_username?: T;
+  display_name?: T;
+  avatar_url?: T;
+  bio?: T;
+  role_title?: T;
+  location?: T;
+  website_url?: T;
+  twitter_handle?: T;
+  telegram_handle?: T;
+  discord_handle?: T;
+  stellar_address?: T;
+  is_featured?: T;
+  github_id?: T;
+  discord_username?: T;
+  scf_tier?: T;
+  visibility?: T;
+  projects?:
+    | T
+    | {
+        name?: T;
+        slug?: T;
+        short_description?: T;
+        status?: T;
+        website_url?: T;
+        demo_url?: T;
+        docs_url?: T;
+        contract_address?: T;
+        repos?:
+          | T
+          | {
+              full_name?: T;
+              html_url?: T;
+              primary_language?: T;
+              stars?: T;
+              forks?: T;
+              description?: T;
+              id?: T;
+            };
+        heatmap?: T;
+        id?: T;
+      };
+  stats?:
+    | T
+    | {
+        totalCommits30d?: T;
+        activeDays30d?: T;
+        lastActiveDate?: T;
+      };
+  passport_created_at?: T;
+  last_synced?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

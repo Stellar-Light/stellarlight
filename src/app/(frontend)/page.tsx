@@ -12,6 +12,7 @@ import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/componen
 import TopBuildersSection, { TopBuildersSkeleton } from "@/components/top-builders-section";
 import EmergingAppsSection, { EmergingAppsSkeleton } from "@/components/emerging-apps-section";
 import TrendingProjectsSection, { TrendingProjectsSkeleton } from "@/components/trending-projects-section";
+import FeaturedBuildersSection, { FeaturedBuildersSkeleton } from "@/components/featured-builders-section";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -103,6 +104,11 @@ export default async function HomePage() {
 				{/* Top Builders Section */}
 				<Suspense fallback={<TopBuildersSkeleton />}>
 					<TopBuildersSection />
+				</Suspense>
+
+				{/* Featured Builders Section */}
+				<Suspense fallback={<FeaturedBuildersSkeleton />}>
+					<FeaturedBuildersSection />
 				</Suspense>
 
 				{/* Trending Projects Section */}

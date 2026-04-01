@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { BuildersSyncButton } from "./BuildersSyncButton";
 
 export const AfterNavLinks: React.FC = () => {
 	const linkStyle = {
@@ -73,6 +74,9 @@ export const AfterNavLinks: React.FC = () => {
 				</svg>
 				<span style={{ fontWeight: 500 }}>Home</span>
 			</a>
+			<div style={{ padding: "0.75rem 1rem", marginTop: "0.5rem" }}>
+				<BuildersSyncButton />
+			</div>
 		</>
 	);
 };
