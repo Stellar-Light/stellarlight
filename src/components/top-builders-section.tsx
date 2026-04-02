@@ -1,56 +1,21 @@
-import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
-import { Star, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, GitBranch, Code2 } from "lucide-react";
+import { fetchAllBuilders, type PassportBuilder } from "@/lib/integrations/stellar-passport";
 
 export default async function TopBuildersSection() {
-	const payload = await getPayloadSafe();
-	if (!payload) return null;
-
-	let builders: Array<{
-		id: string;
-		name: string;
-		slug: string;
-		totalStars: number;
-		lastActivityAt: string | null;
-		repoCount: number;
-	}> = [];
+	let builders: PassportBuilder[] = [];
 
 	try {
-		// Fetch signals with project data, sorted by totalStars
-		// Note: totalStars may also be stored per-repo as stargazerCount
-		const signalsResult = await payload.find({
-			collection: "signals",
-			sort: "-github.totalStars",
-			limit: 20,
-			depth: 1,
-		});
-
-		builders = signalsResult.docs
-			.map((signal: any) => {
-				const project = signal.project;
-				if (!project || typeof project === "string") return null;
-				if (!["Development", "Pre-Release", "Live"].includes(project.status)) return null;
-				// Calculate totalStars from repos if the top-level field is missing
-				const repoStars = (signal.github?.repos || []).reduce(
-					(sum: number, r: any) => sum + (r.stargazerCount || 0),
-					0,
-				);
-				const totalStars = signal.github?.totalStars || repoStars;
-				if (totalStars === 0) return null;
-				return {
-					id: project.id,
-					name: project.name,
-					slug: project.slug,
-					totalStars,
-					lastActivityAt: signal.github?.lastActivityAt ?? null,
-					repoCount: signal.github?.repos?.length ?? 0,
-				};
+		const all = await fetchAllBuilders();
+		builders = all
+			.filter((b) => b.github_username)
+			.sort((a, b) => {
+				const aScore = (a.stats?.totalCommits30d ?? 0) * 2 + (a.projects?.length ?? 0);
+				const bScore = (b.stats?.totalCommits30d ?? 0) * 2 + (b.projects?.length ?? 0);
+				return bScore - aScore;
 			})
-			.filter(Boolean) as typeof builders;
-
-		// Sort client-side since totalStars may have been computed from repos
-		builders.sort((a, b) => b.totalStars - a.totalStars);
-		builders = builders.slice(0, 6);
+			.slice(0, 6);
 	} catch {
 		return null;
 	}
@@ -65,44 +30,78 @@ export default async function TopBuildersSection() {
 						Top Builders
 					</h2>
 					<p className="text-muted-foreground">
-						Most starred projects in the ecosystem
+						Active developers in the Stellar ecosystem
 					</p>
 				</div>
 				<Link
-					href="/leaderboard"
+					href="/builders"
 					className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 				>
-					View Leaderboard
+					View All Builders
 					<ArrowRight className="w-4 h-4" />
 				</Link>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				{builders.map((builder, idx) => (
-					<Link
-						key={builder.id}
-						href={`/project/${builder.slug}`}
-						className="group flex items-center gap-4 p-5 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
-					>
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#FDDA24]/20 to-[#FDDA24]/10 border border-[#FDDA24]/20 text-lg font-bold text-[#FDDA24] flex-shrink-0">
-							{idx + 1}
-						</div>
-						<div className="flex-1 min-w-0">
-							<p className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-								{builder.name}
-							</p>
-							<div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-								<span className="flex items-center gap-1">
-									<Star className="w-3.5 h-3.5 text-[#FDDA24]" />
-									{builder.totalStars.toLocaleString()}
-								</span>
-								<span>{builder.repoCount} {builder.repoCount === 1 ? "repo" : "repos"}</span>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+				{builders.map((builder) => {
+					const commits = builder.stats?.totalCommits30d ?? 0;
+					const projectCount = builder.projects?.length ?? 0;
+
+					return (
+						<Link
+							key={builder.github_username}
+							href="/builders"
+							className="group flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
+						>
+							<div className="flex-shrink-0">
+								{builder.avatar_url ? (
+									<Image
+										src={builder.avatar_url}
+										alt={builder.display_name}
+										width={36}
+										height={36}
+										className="rounded-full"
+									/>
+								) : (
+									<div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+										{builder.display_name.charAt(0).toUpperCase()}
+									</div>
+								)}
 							</div>
-						</div>
-						<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-					</Link>
-				))}
+
+							<div className="flex-1 min-w-0">
+								<p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+									{builder.display_name}
+								</p>
+								<div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 whitespace-nowrap">
+									{commits > 0 && (
+										<span className="flex items-center gap-1">
+											<GitBranch className="w-3 h-3" />
+											{commits} commits
+										</span>
+									)}
+									{projectCount > 0 && (
+										<span className="flex items-center gap-1">
+											<Code2 className="w-3 h-3" />
+											{projectCount} project{projectCount !== 1 ? "s" : ""}
+										</span>
+									)}
+								</div>
+							</div>
+
+							<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+						</Link>
+					);
+				})}
 			</div>
+
+			<Link
+				href="/builders"
+				className="sm:hidden flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mt-6"
+			>
+				View All Builders
+				<ArrowRight className="w-4 h-4" />
+			</Link>
 		</section>
 	);
 }
@@ -114,9 +113,9 @@ export function TopBuildersSkeleton() {
 				<div className="h-10 w-40 bg-[#262626] rounded animate-pulse mb-2" />
 				<div className="h-4 w-64 bg-[#262626] rounded animate-pulse" />
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={i} className="h-[76px] rounded-xl bg-[#262626] animate-pulse" />
+					<div key={i} className="h-[68px] rounded-xl bg-[#262626] animate-pulse" />
 				))}
 			</div>
 		</section>

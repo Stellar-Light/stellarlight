@@ -1,209 +1,246 @@
-import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+  fetchAllDoraHacksHackathons,
+  formatShortDate,
+  formatPrize,
+  getHackathonUrl,
+  isHackathonActive,
+  getDaysRemaining,
+  parseTags,
+} from "@/lib/integrations/dorahacks";
 import { Badge } from "@/components/ui/badge";
 import {
-	ArrowLeft,
-	Calendar,
-	ExternalLink,
-	Building2,
-	Code2,
+  ArrowLeft,
+  Calendar,
+  ExternalLink,
+  Building2,
+  Code2,
+  Trophy,
+  Users,
+  Clock,
+  DollarSign,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Hackathons | Stellar Light",
-	description: "Stellar ecosystem hackathon events calendar",
+  title: "Hackathons | Stellar Light",
+  description: "Active and past hackathons in the Stellar ecosystem",
 };
 
-type SearchParams = Promise<{
-	status?: string;
-}>;
+export default async function HackathonsPage() {
+  const hackathons = await fetchAllDoraHacksHackathons();
+  const activeHackathons = hackathons.filter((h) => isHackathonActive(h));
+  const pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
 
-export default async function HackathonsPage({
-	searchParams,
-}: {
-	searchParams: SearchParams;
-}) {
-	const params = await searchParams;
-	const statusFilter = params.status || "all";
+  return (
+    <div className="min-h-screen relative">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-10 group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
+          <span className="text-sm font-medium">Back to Home</span>
+        </Link>
 
-	const payload = await getPayloadSafe();
-	let hackathons: any[] = [];
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-2">
+            <Code2 className="w-8 h-8 text-[#FDDA24]" />
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Stellar Hackathons
+            </h1>
+          </div>
+          <p className="text-muted-foreground">
+            Build the future of finance on Stellar
+          </p>
+        </div>
 
-	if (payload) {
-		try {
-			const where: any =
-				statusFilter !== "all"
-					? { status: { equals: statusFilter } }
-					: {};
+        {/* Active Hackathons */}
+        {activeHackathons.length > 0 && (
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <h2 className="text-2xl font-bold">Open for Submissions</h2>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                {activeHackathons.length} Active
+              </Badge>
+            </div>
 
-			const result = await payload.find({
-				collection: "hackathons",
-				where,
-				sort: "-startDate",
-				limit: 50,
-				depth: 1,
-			});
+            <div className="space-y-6">
+              {activeHackathons.map((hackathon) => {
+                const daysRemaining = getDaysRemaining(hackathon.end_time);
+                const tags = parseTags(hackathon.field);
 
-			hackathons = result.docs;
-		} catch {
-			// Handle silently
-		}
-	}
+                return (
+                  <a
+                    key={hackathon.id}
+                    href={getHackathonUrl(hackathon.uname)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <div className="rounded-xl border border-primary/30 bg-card overflow-hidden hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                      {/* Banner — full width, aspect-ratio for consistency */}
+                      {hackathon.image_url && (
+                        <div className="relative w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden">
+                          <Image
+                            src={hackathon.image_url}
+                            alt={hackathon.title}
+                            fill
+                            className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                          <Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
+                            OPEN
+                          </Badge>
+                        </div>
+                      )}
 
-	const formatDateRange = (start: string, end: string): string => {
-		const s = new Date(start);
-		const e = new Date(end);
-		const opts: Intl.DateTimeFormatOptions = {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		};
-		return `${s.toLocaleDateString("en-US", opts)} — ${e.toLocaleDateString("en-US", opts)}`;
-	};
+                      <div className="p-5 sm:p-6">
+                        {/* Title + Org */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            {hackathon.title}
+                          </h3>
+                          {hackathon.organization && (
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground flex-shrink-0">
+                              {hackathon.organization.logo && (
+                                <Image
+                                  src={hackathon.organization.logo}
+                                  alt={hackathon.organization.name}
+                                  width={16}
+                                  height={16}
+                                  className="rounded-full"
+                                />
+                              )}
+                              <span>{hackathon.organization.name}</span>
+                            </div>
+                          )}
+                        </div>
 
-	const statusColors: Record<string, string> = {
-		upcoming: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-		active: "bg-green-500/20 text-green-400 border-green-500/30",
-		completed: "bg-muted text-muted-foreground border-border/50",
-	};
+                        {/* Stats row — wraps naturally on mobile */}
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
+                          <span className="flex items-center gap-1.5">
+                            <DollarSign className="w-4 h-4 text-[#FDDA24]" />
+                            <span className="font-semibold text-foreground">
+                              {formatPrize(hackathon.bonus_price)}
+                            </span>
+                          </span>
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Clock className="w-4 h-4" />
+                            {daysRemaining > 0
+                              ? `${daysRemaining} days left`
+                              : "Ending soon"}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Users className="w-4 h-4" />
+                            {hackathon.hackers_count} participants
+                          </span>
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            Ends {formatShortDate(hackathon.end_time)}
+                          </span>
+                        </div>
 
-	const filterOptions = [
-		{ value: "all", label: "All" },
-		{ value: "upcoming", label: "Upcoming" },
-		{ value: "active", label: "Active" },
-		{ value: "completed", label: "Past" },
-	];
+                        {/* Tags */}
+                        {tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {tags.slice(0, 6).map((tag, i) => (
+                              <span
+                                key={i}
+                                className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-	return (
-		<div className="min-h-screen relative">
-			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
-				<Link
-					href="/"
-					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-10 group"
-				>
-					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
-					<span className="text-sm font-medium">Back to Home</span>
-				</Link>
+        {/* Empty active state */}
+        {activeHackathons.length === 0 && (
+          <div className="mb-16 py-16 text-center rounded-xl border border-border/50 bg-card">
+            <Code2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No active hackathons right now — check back soon
+            </p>
+          </div>
+        )}
 
-				<div className="mb-10">
-					<div className="flex items-center gap-3 mb-2">
-						<Code2 className="w-8 h-8 text-[#FDDA24]" />
-						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-							Hackathons
-						</h1>
-					</div>
-					<p className="text-muted-foreground">
-						Stellar ecosystem hackathon events
-					</p>
-				</div>
+        {/* Past Hackathons */}
+        {pastHackathons.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-bold mb-6 text-foreground">
+              Past Hackathons
+            </h2>
 
-				{/* Filters */}
-				<div className="flex items-center gap-1 p-1 rounded-lg bg-card border border-border/50 w-fit mb-8">
-					{filterOptions.map((option) => (
-						<Link
-							key={option.value}
-							href={`/hackathons${option.value !== "all" ? `?status=${option.value}` : ""}`}
-							className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-								statusFilter === option.value
-									? "bg-white/10 text-foreground"
-									: "text-muted-foreground hover:text-foreground hover:bg-white/5"
-							}`}
-						>
-							{option.label}
-						</Link>
-					))}
-				</div>
+            {/* Table header — hidden on mobile */}
+            <div className="hidden sm:grid grid-cols-[1fr_160px_100px_120px_40px] gap-4 px-4 pb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider border-b border-border/50 mb-1">
+              <span>Hackathon</span>
+              <span>Organizer</span>
+              <span className="text-right">Prize</span>
+              <span className="text-right">Ended</span>
+              <span />
+            </div>
 
-				{/* Hackathons List */}
-				{hackathons.length === 0 ? (
-					<Card className="border border-border/50 bg-card">
-						<CardContent className="py-16 text-center">
-							<Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-							<p className="text-muted-foreground">
-								No hackathons found{statusFilter !== "all" ? ` with status "${statusFilter}"` : ""}.
-							</p>
-						</CardContent>
-					</Card>
-				) : (
-					<div className="space-y-4">
-						{hackathons.map((hackathon: any) => {
-							const organizer =
-								hackathon.organizer &&
-								typeof hackathon.organizer !== "string"
-									? hackathon.organizer
-									: null;
+            <div className="divide-y divide-border/50">
+              {pastHackathons.map((hackathon) => (
+                <a
+                  key={hackathon.id}
+                  href={getHackathonUrl(hackathon.uname)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group grid grid-cols-1 sm:grid-cols-[1fr_160px_100px_120px_40px] gap-2 sm:gap-4 items-center px-4 py-3 hover:bg-white/[0.02] transition-colors"
+                >
+                  {/* Title + winner badge */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                      {hackathon.title}
+                    </span>
+                    {hackathon.winner_announced && (
+                      <Badge className="bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/30 text-[10px] px-1.5 flex-shrink-0">
+                        <Trophy className="w-3 h-3 mr-0.5" />
+                        Winners
+                      </Badge>
+                    )}
+                  </div>
 
-							return (
-								<Card
-									key={hackathon.id}
-									className="border border-border/50 bg-card shadow-sm hover:shadow-sm hover:-translate-y-0.5 transition-all duration-150"
-								>
-									<CardContent className="p-6">
-										<div className="flex flex-col md:flex-row md:items-center gap-4">
-											<div className="flex-1 min-w-0">
-												<div className="flex items-center gap-3 mb-2">
-													<h3 className="text-lg font-bold text-foreground truncate">
-														{hackathon.name}
-													</h3>
-													<Badge
-														className={`text-xs capitalize ${statusColors[hackathon.status] || ""}`}
-													>
-														{hackathon.status}
-													</Badge>
-												</div>
-												{hackathon.description && (
-													<p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-														{hackathon.description}
-													</p>
-												)}
-												<div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-													<span className="flex items-center gap-1.5">
-														<Calendar className="w-4 h-4" />
-														{formatDateRange(
-															hackathon.startDate,
-															hackathon.endDate,
-														)}
-													</span>
-													{organizer && (
-														<Link
-															href={`/entities/${organizer.slug}`}
-															className="flex items-center gap-1.5 hover:text-foreground transition-colors"
-														>
-															<Building2 className="w-4 h-4" />
-															{organizer.name}
-														</Link>
-													)}
-												</div>
-											</div>
-											{hackathon.externalUrl && (
-												<a
-													href={hackathon.externalUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-border/50 hover:bg-white/5 hover:border-primary/30 transition-all duration-150 flex-shrink-0"
-												>
-													Visit
-													<ExternalLink className="w-4 h-4" />
-												</a>
-											)}
-										</div>
-									</CardContent>
-								</Card>
-							);
-						})}
-					</div>
-				)}
-			</main>
-		</div>
-	);
+                  {/* Org — visible on mobile too */}
+                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Building2 className="w-3 h-3 sm:hidden" />
+                    {hackathon.organization?.name ?? "—"}
+                  </span>
+
+                  {/* Prize */}
+                  <span className="text-sm text-muted-foreground sm:text-right">
+                    <span className="sm:hidden text-xs mr-1">Prize:</span>
+                    {formatPrize(hackathon.bonus_price)}
+                  </span>
+
+                  {/* End date */}
+                  <span className="text-sm text-muted-foreground sm:text-right">
+                    <span className="sm:hidden text-xs mr-1">Ended:</span>
+                    {formatShortDate(hackathon.end_time)}
+                  </span>
+
+                  {/* Arrow */}
+                  <ExternalLink className="hidden sm:block w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
+  );
 }
