@@ -73,6 +73,7 @@ export default function RSSManagementPage() {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: "include",
 			});
 
 			const result = await response.json();
@@ -105,6 +106,7 @@ export default function RSSManagementPage() {
 						headers: {
 							"Content-Type": "application/json",
 						},
+						credentials: "include",
 					});
 					return response.json();
 				}),
