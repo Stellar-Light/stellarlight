@@ -89,7 +89,7 @@ export async function fetchAllBuilders(): Promise<PassportBuilder[]> {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -120,7 +120,7 @@ export async function fetchBuilder(username: string): Promise<PassportBuilder | 
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (response.status === 404) {

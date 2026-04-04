@@ -16,20 +16,24 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check authorization
     const headersList = await headers();
+    const payload = await getPayload({ config });
+
+    // Check authorization: accept Bearer token OR admin session cookie
     const authHeader = headersList.get('authorization');
     const expectedKey = process.env.CRON_SECRET || process.env.SYNC_API_KEY;
-    
-    // Allow access from admin panel or with correct API key
-    if (authHeader !== `Bearer ${expectedKey}` && process.env.NODE_ENV === 'production') {
+    const hasBearerAuth = expectedKey && authHeader === `Bearer ${expectedKey}`;
+
+    // Check Payload admin session
+    const { user } = await payload.auth({ headers: headersList });
+    const hasSessionAuth = !!user;
+
+    if (!hasBearerAuth && !hasSessionAuth) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
-
-    const payload = await getPayload({ config });
     const searchParams = request.nextUrl.searchParams;
     const username = searchParams.get('username');
 
