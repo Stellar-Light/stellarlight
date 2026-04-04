@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Builders | Stellar Light',
