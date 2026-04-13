@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ProjectLogo } from "@/components/project-logo";
 import EntityCard from "@/components/entity-card";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
+import ShareButton from "@/components/share-button";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -422,7 +423,10 @@ export default async function ProjectDetailPage({
 				</Link>
 
 				{/* Hero Section - Card with Flex Layout */}
-				<Card className="mb-12 border border-border/50 bg-card shadow-sm">
+				<Card className="mb-12 border border-border/50 bg-card shadow-sm relative">
+					<div className="absolute top-6 right-6 z-10">
+						<ShareButton slug={project.slug} />
+					</div>
 					<CardContent className="p-8">
 						<div className="flex flex-col gap-6">
 							{/* First Row - Logo and Title/Tags */}
