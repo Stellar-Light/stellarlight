@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import configPromise from "@/payload.config";
 import { getPayload } from "payload";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 /**
  * Vercel Cron Job: Refresh GitHub statistics for all projects
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
 			limit: 500,
 		});
 
-		const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+		const appUrl = getAppUrl();
 		let successCount = 0;
 		let errorCount = 0;
 

@@ -15,6 +15,7 @@ import { ProjectLogo } from "@/components/project-logo";
 import EntityCard from "@/components/entity-card";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import ShareButton from "@/components/share-button";
+import { getAppUrl } from "@/lib/utils/app-url";
 import {
 	ArrowLeft,
 	ExternalLink,
@@ -35,7 +36,7 @@ type Params = Promise<{
 	slug: string;
 }>;
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.io";
+const appUrl = getAppUrl();
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";

@@ -44,7 +44,9 @@ export function Navigation() {
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+				// Always use window.location.origin in the browser — NEXT_PUBLIC_APP_URL
+				// is inlined at build time and may not match the live origin.
+				const appUrl = window.location.origin;
 				// Use Payload's auth endpoint - if this returns 200, user is authenticated
 				const response = await fetch(`${appUrl}/api/users/me`, {
 					credentials: "include",
