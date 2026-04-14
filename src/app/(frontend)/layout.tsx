@@ -6,6 +6,7 @@ import { Navigation } from "@/components/ui/navigation";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
 import { BannerWrapper } from "@/components/banner-wrapper";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -25,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 	display: "swap",
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.io";
+const appUrl = getAppUrl();
 
 export const metadata: Metadata = {
 	metadataBase: new URL(appUrl),
