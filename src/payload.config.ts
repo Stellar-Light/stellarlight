@@ -15,6 +15,7 @@ import { Projects } from "./collections/Projects";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { Signals } from "./collections/Signals";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
+import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { Users } from "./collections/Users";
 import { Banner } from "./globals/Banner";
 import { syncRSSFeedTask } from "./jobs/syncRSSFeed";
@@ -52,6 +53,7 @@ export default buildConfig({
 		Entities,
 		TransparencyLogs,
 		Carousel,
+		IdeaSubmissions,
 	],
 	globals: [Banner],
 	jobs: {

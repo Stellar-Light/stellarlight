@@ -76,6 +76,7 @@ export interface Config {
     entities: Entity;
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
+    'idea-submissions': IdeaSubmission;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -97,6 +98,7 @@ export interface Config {
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
+    'idea-submissions': IdeaSubmissionsSelect<false> | IdeaSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -609,6 +611,21 @@ export interface Carousel {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "idea-submissions".
+ */
+export interface IdeaSubmission {
+  id: string;
+  name: string;
+  email?: string | null;
+  ecosystemNeed: string;
+  needSize: 'critical' | 'important' | 'nice-to-have';
+  approach: 'net-new-rfp' | 'existing-team' | 'unsure';
+  additionalContext?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -758,6 +775,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'carousel';
         value: string | Carousel;
+      } | null)
+    | ({
+        relationTo: 'idea-submissions';
+        value: string | IdeaSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1042,6 +1063,20 @@ export interface CarouselSelect<T extends boolean = true> {
   url?: T;
   order?: T;
   active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "idea-submissions_select".
+ */
+export interface IdeaSubmissionsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  ecosystemNeed?: T;
+  needSize?: T;
+  approach?: T;
+  additionalContext?: T;
   updatedAt?: T;
   createdAt?: T;
 }
