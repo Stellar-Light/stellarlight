@@ -112,37 +112,15 @@ export function RecentWinnersCarousel() {
 						{LATEST_WINNERS.hackathonName}
 					</p>
 				</div>
-				<div className="flex items-center gap-3 mt-1">
-					<a
-						href={`https://dorahacks.io/hackathon/${LATEST_WINNERS.hackathonUname}/winner`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
-					>
-						See all on DoraHacks
-						<ArrowUpRight className="w-3.5 h-3.5" />
-					</a>
-					<div className="flex items-center gap-1.5 ml-2">
-						<button
-							type="button"
-							onClick={() => api?.scrollPrev()}
-							disabled={!canPrev}
-							aria-label="Previous winners"
-							className="w-8 h-8 rounded-full border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
-						>
-							<ChevronLeft className="w-4 h-4" />
-						</button>
-						<button
-							type="button"
-							onClick={() => api?.scrollNext()}
-							disabled={!canNext}
-							aria-label="Next winners"
-							className="w-8 h-8 rounded-full border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
-						>
-							<ChevronRight className="w-4 h-4" />
-						</button>
-					</div>
-				</div>
+				<a
+					href={`https://dorahacks.io/hackathon/${LATEST_WINNERS.hackathonUname}/winner`}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors mt-1"
+				>
+					See all on DoraHacks
+					<ArrowUpRight className="w-3.5 h-3.5" />
+				</a>
 			</div>
 
 			{/* Carousel */}
@@ -163,22 +141,44 @@ export function RecentWinnersCarousel() {
 				</CarouselContent>
 			</Carousel>
 
-			{/* Pagination dots */}
+			{/* Carousel controls — arrows + pagination dots together, below the slides */}
 			{scrollSnaps.length > 1 && (
-				<div className="flex items-center justify-center gap-2 mt-5">
-					{scrollSnaps.map((_, i) => (
-						<button
-							key={i}
-							type="button"
-							onClick={() => api?.scrollTo(i)}
-							aria-label={`Go to slide ${i + 1}`}
-							className={`h-2 rounded-full transition-all ${
-								i === selectedIndex
-									? "w-8 bg-foreground"
-									: "w-2 bg-muted-foreground/70 hover:bg-foreground"
-							}`}
-						/>
-					))}
+				<div className="flex items-center justify-center gap-4 mt-6">
+					<button
+						type="button"
+						onClick={() => api?.scrollPrev()}
+						disabled={!canPrev}
+						aria-label="Previous winners"
+						className="w-9 h-9 rounded-full border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
+					>
+						<ChevronLeft className="w-4 h-4" />
+					</button>
+
+					<div className="flex items-center gap-2">
+						{scrollSnaps.map((_, i) => (
+							<button
+								key={i}
+								type="button"
+								onClick={() => api?.scrollTo(i)}
+								aria-label={`Go to slide ${i + 1}`}
+								className={`h-2 rounded-full transition-all ${
+									i === selectedIndex
+										? "w-8 bg-foreground"
+										: "w-2 bg-zinc-500 hover:bg-zinc-300"
+								}`}
+							/>
+						))}
+					</div>
+
+					<button
+						type="button"
+						onClick={() => api?.scrollNext()}
+						disabled={!canNext}
+						aria-label="Next winners"
+						className="w-9 h-9 rounded-full border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
+					>
+						<ChevronRight className="w-4 h-4" />
+					</button>
 				</div>
 			)}
 		</section>
