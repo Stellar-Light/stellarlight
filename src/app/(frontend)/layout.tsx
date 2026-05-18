@@ -1,5 +1,5 @@
 import React from "react";
-import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import { Inter, Source_Serif_4, JetBrains_Mono, VT323 } from "next/font/google";
 import type { Metadata } from "next";
 import "../globals.css";
 import { Navigation } from "@/components/ui/navigation";
@@ -23,6 +23,14 @@ const sourceSerif = Source_Serif_4({
 const jetbrainsMono = JetBrains_Mono({
 	subsets: ["latin"],
 	variable: "--font-mono",
+	display: "swap",
+});
+
+// Retro pixel display font, used for the Hackathons hero.
+const vt323 = VT323({
+	subsets: ["latin"],
+	weight: "400",
+	variable: "--font-pixel",
 	display: "swap",
 });
 
@@ -110,7 +118,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 	const { children } = props;
 
   return (
-		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
+		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} ${vt323.variable}`}>
 			<body className="min-h-screen font-sans antialiased overflow-x-hidden">
 				<Providers>
 					<BannerWrapper />
