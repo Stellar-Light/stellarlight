@@ -10,6 +10,7 @@ import {
   getDaysRemaining,
   parseTags,
 } from "@/lib/integrations/dorahacks";
+import { getPayloadSafe } from "@/lib/payload-client";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
@@ -30,10 +31,72 @@ export const metadata: Metadata = {
   description: "Active and past hackathons in the Stellar ecosystem",
 };
 
+/**
+ * Normalize a hackathon name to a comparable key so we can match a DoraHacks
+ * entry to a curated Payload Hackathon (which has its own slug + tracks
+ * post-hackathon project status).
+ */
+function normalizeForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+interface CuratedHackathon {
+  id: string;
+  name: string;
+  slug: string;
+  trackedProjectCount: number;
+}
+
+async function fetchCuratedHackathons(): Promise<Map<string, CuratedHackathon>> {
+  const map = new Map<string, CuratedHackathon>();
+  const payload = await getPayloadSafe();
+  if (!payload) return map;
+  try {
+    const result = await payload.find({
+      collection: "hackathons",
+      limit: 200,
+      depth: 0,
+    });
+    for (const h of result.docs as any[]) {
+      // Count linked projects to surface "tracked" badge
+      let count = 0;
+      try {
+        const projRes = await payload.find({
+          collection: "projects",
+          where: { hackathon: { equals: h.id } },
+          limit: 0,
+          depth: 0,
+        });
+        count = projRes.totalDocs ?? 0;
+      } catch {
+        // ignore
+      }
+      const key = normalizeForMatch(h.name);
+      map.set(key, {
+        id: String(h.id),
+        name: h.name,
+        slug: h.slug,
+        trackedProjectCount: count,
+      });
+    }
+  } catch (err) {
+    console.error("fetchCuratedHackathons error:", err);
+  }
+  return map;
+}
+
 export default async function HackathonsPage() {
-  const hackathons = await fetchAllDoraHacksHackathons();
+  const [hackathons, curatedMap] = await Promise.all([
+    fetchAllDoraHacksHackathons(),
+    fetchCuratedHackathons(),
+  ]);
   const activeHackathons = hackathons.filter((h) => isHackathonActive(h));
   const pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
+
+  const findCurated = (title: string) => curatedMap.get(normalizeForMatch(title));
 
   return (
     <div className="min-h-screen relative">
@@ -194,49 +257,71 @@ export default async function HackathonsPage() {
             </div>
 
             <div className="divide-y divide-border/50">
-              {pastHackathons.map((hackathon) => (
-                <a
-                  key={hackathon.id}
-                  href={getHackathonUrl(hackathon.uname)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group grid grid-cols-1 sm:grid-cols-[1fr_160px_100px_120px_40px] gap-2 sm:gap-4 items-center px-4 py-3 hover:bg-white/[0.02] transition-colors"
-                >
-                  {/* Title + winner badge */}
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                      {hackathon.title}
+              {pastHackathons.map((hackathon) => {
+                const curated = findCurated(hackathon.title);
+                const innerRow = (
+                  <>
+                    {/* Title + badges */}
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                      <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                        {hackathon.title}
+                      </span>
+                      {hackathon.winner_announced && (
+                        <Badge className="bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/30 text-[10px] px-1.5 flex-shrink-0">
+                          <Trophy className="w-3 h-3 mr-0.5" />
+                          Winners
+                        </Badge>
+                      )}
+                      {curated && curated.trackedProjectCount > 0 && (
+                        <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 flex-shrink-0">
+                          {curated.trackedProjectCount} tracked
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Org */}
+                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <Building2 className="w-3 h-3 sm:hidden" />
+                      {hackathon.organization?.name ?? "—"}
                     </span>
-                    {hackathon.winner_announced && (
-                      <Badge className="bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/30 text-[10px] px-1.5 flex-shrink-0">
-                        <Trophy className="w-3 h-3 mr-0.5" />
-                        Winners
-                      </Badge>
-                    )}
-                  </div>
 
-                  {/* Org — visible on mobile too */}
-                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <Building2 className="w-3 h-3 sm:hidden" />
-                    {hackathon.organization?.name ?? "—"}
-                  </span>
+                    {/* Prize */}
+                    <span className="text-sm text-muted-foreground sm:text-right">
+                      <span className="sm:hidden text-xs mr-1">Prize:</span>
+                      {formatPrize(hackathon.bonus_price)}
+                    </span>
 
-                  {/* Prize */}
-                  <span className="text-sm text-muted-foreground sm:text-right">
-                    <span className="sm:hidden text-xs mr-1">Prize:</span>
-                    {formatPrize(hackathon.bonus_price)}
-                  </span>
+                    {/* End date */}
+                    <span className="text-sm text-muted-foreground sm:text-right">
+                      <span className="sm:hidden text-xs mr-1">Ended:</span>
+                      {formatShortDate(hackathon.end_time)}
+                    </span>
 
-                  {/* End date */}
-                  <span className="text-sm text-muted-foreground sm:text-right">
-                    <span className="sm:hidden text-xs mr-1">Ended:</span>
-                    {formatShortDate(hackathon.end_time)}
-                  </span>
+                    {/* Arrow */}
+                    <ExternalLink className="hidden sm:block w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
+                  </>
+                );
 
-                  {/* Arrow */}
-                  <ExternalLink className="hidden sm:block w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
-                </a>
-              ))}
+                const className =
+                  "group grid grid-cols-1 sm:grid-cols-[1fr_160px_100px_120px_40px] gap-2 sm:gap-4 items-center px-4 py-3 hover:bg-white/[0.02] transition-colors";
+
+                // If we have a curated Payload hackathon for this entry, link internally.
+                return curated ? (
+                  <Link key={hackathon.id} href={`/hackathons/${curated.slug}`} className={className}>
+                    {innerRow}
+                  </Link>
+                ) : (
+                  <a
+                    key={hackathon.id}
+                    href={getHackathonUrl(hackathon.uname)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={className}
+                  >
+                    {innerRow}
+                  </a>
+                );
+              })}
             </div>
           </section>
         )}

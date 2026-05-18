@@ -477,12 +477,30 @@ export default async function ProjectDetailPage({
 												{project.verificationLevel}
 											</Badge>
 										)}
-										{(project as any).hackathon && (
-											<Badge className="bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border-purple-500/30 text-sm px-4 py-1.5 font-semibold shadow-sm">
-												Hackathon Project
-												{(project as any).hackathonStatus && ` \u2014 ${(project as any).hackathonStatus}`}
-											</Badge>
-										)}
+										{(project as any).hackathon && (() => {
+											const h = (project as any).hackathon;
+											const hackathon = typeof h === "object" ? h : null;
+											const status = (project as any).hackathonStatus;
+											const inner = (
+												<>
+													From {hackathon?.name ?? "Hackathon"}
+													{status && (
+														<span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/10 text-purple-300">
+															{status}
+														</span>
+													)}
+												</>
+											);
+											const className =
+												"inline-flex items-center bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border border-purple-500/30 hover:border-purple-500/60 text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors";
+											return hackathon?.slug ? (
+												<Link href={`/hackathons/${hackathon.slug}`} className={className}>
+													{inner}
+												</Link>
+											) : (
+												<span className={className}>{inner}</span>
+											);
+										})()}
 									</div>
 
 									{/* Category Tags */}
