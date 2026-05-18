@@ -8,11 +8,12 @@ import {
   getHackathonUrl,
   isHackathonActive,
   getDaysRemaining,
-  parseTags,
+  parseThemes,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { HackathonsFilterDropdown } from "@/components/hackathons-filter-dropdown";
 import { HackathonsSearchInput } from "@/components/hackathons-search-input";
+import { RecentWinnersCarousel } from "@/components/recent-winners-carousel";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
@@ -185,7 +186,7 @@ export default async function HackathonsPage({ searchParams }: HackathonsPagePro
     ),
   ).sort();
   const tagCounts = pastHackathons.reduce<Record<string, number>>((acc, h) => {
-    for (const tag of parseTags(h.field)) {
+    for (const tag of parseThemes(h.field)) {
       acc[tag] = (acc[tag] ?? 0) + 1;
     }
     return acc;
@@ -207,7 +208,7 @@ export default async function HackathonsPage({ searchParams }: HackathonsPagePro
   if (filterTag) {
     const needle = filterTag.toLowerCase();
     pastHackathons = pastHackathons.filter((h) =>
-      parseTags(h.field).some((t) => t.toLowerCase() === needle),
+      parseThemes(h.field).some((t) => t.toLowerCase() === needle),
     );
   }
   if (searchQuery) {
@@ -289,6 +290,9 @@ export default async function HackathonsPage({ searchParams }: HackathonsPagePro
           </p>
         </div>
 
+        {/* Recent winners highlight */}
+        <RecentWinnersCarousel />
+
         {/* Cross-hackathon stats banner */}
         <div
           className={`grid grid-cols-2 ${showTrackedStat ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4 mb-12`}
@@ -336,7 +340,7 @@ export default async function HackathonsPage({ searchParams }: HackathonsPagePro
             <div className="space-y-6">
               {activeHackathons.map((hackathon) => {
                 const daysRemaining = getDaysRemaining(hackathon.end_time);
-                const tags = parseTags(hackathon.field);
+                const tags = parseThemes(hackathon.field);
 
                 return (
                   <a
@@ -555,7 +559,7 @@ export default async function HackathonsPage({ searchParams }: HackathonsPagePro
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {pastHackathons.map((hackathon) => {
                 const curated = findCurated(hackathon.title);
-                const tagsForCard = parseTags(hackathon.field).slice(0, 3);
+                const tagsForCard = parseThemes(hackathon.field).slice(0, 3);
                 const cardInner = (
                   <>
                     {hackathon.image_url && (
