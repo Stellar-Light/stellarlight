@@ -323,6 +323,41 @@ export const Projects: CollectionConfig = {
 				condition: (data) => !!data?.hackathon,
 			},
 		},
+		{
+			name: "hackathonPlacement",
+			type: "select",
+			options: [
+				{ label: "Grand Prize", value: "grand-prize" },
+				{ label: "1st Place", value: "1st" },
+				{ label: "2nd Place", value: "2nd" },
+				{ label: "3rd Place", value: "3rd" },
+				{ label: "Honorable Mention", value: "honorable-mention" },
+				{ label: "Track Winner", value: "track-winner" },
+			],
+			admin: {
+				description:
+					"If this project won a placement at the hackathon, surface it in the Winners section",
+				condition: (data) => !!data?.hackathon,
+			},
+		},
+		{
+			name: "hackathonPrize",
+			type: "number",
+			admin: {
+				description: "Prize amount won (USD)",
+				condition: (data) => !!data?.hackathon && !!data?.hackathonPlacement,
+				step: 100,
+			},
+		},
+		{
+			name: "hackathonPrizeTrack",
+			type: "text",
+			admin: {
+				description:
+					"Track or sponsor that awarded the prize (e.g. 'Best DeFi', 'Coinbase Track')",
+				condition: (data) => !!data?.hackathon && !!data?.hackathonPlacement,
+			},
+		},
 	],
 	// Unique index on slug is handled by unique: true on the field
 	hooks: {

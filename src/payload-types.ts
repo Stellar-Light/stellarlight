@@ -341,6 +341,18 @@ export interface Project {
    * Post-hackathon project status
    */
   hackathonStatus?: ('Built' | 'In Progress' | 'Abandoned') | null;
+  /**
+   * If this project won a placement at the hackathon, surface it in the Winners section
+   */
+  hackathonPlacement?: ('grand-prize' | '1st' | '2nd' | '3rd' | 'honorable-mention' | 'track-winner') | null;
+  /**
+   * Prize amount won (USD)
+   */
+  hackathonPrize?: number | null;
+  /**
+   * Track or sponsor that awarded the prize (e.g. 'Best DeFi', 'Coinbase Track')
+   */
+  hackathonPrizeTrack?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1099,6 +1111,9 @@ export interface ProjectsSelect<T extends boolean = true> {
   relatedEntities?: T;
   hackathon?: T;
   hackathonStatus?: T;
+  hackathonPlacement?: T;
+  hackathonPrize?: T;
+  hackathonPrizeTrack?: T;
   updatedAt?: T;
   createdAt?: T;
 }

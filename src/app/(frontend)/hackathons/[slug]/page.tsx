@@ -135,6 +135,114 @@ function StatBlock({
 	);
 }
 
+const PLACEMENT_META: Record<
+	string,
+	{ label: string; classes: string; rank: number }
+> = {
+	"grand-prize": {
+		label: "Grand Prize",
+		classes: "bg-[#FDDA24] text-[#171717] border-[#FDDA24]",
+		rank: 0,
+	},
+	"1st": {
+		label: "1st",
+		classes: "bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/40",
+		rank: 1,
+	},
+	"2nd": {
+		label: "2nd",
+		classes: "bg-zinc-300/15 text-zinc-200 border-zinc-300/30",
+		rank: 2,
+	},
+	"3rd": {
+		label: "3rd",
+		classes: "bg-amber-700/20 text-amber-400 border-amber-700/40",
+		rank: 3,
+	},
+	"track-winner": {
+		label: "Track Winner",
+		classes: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+		rank: 4,
+	},
+	"honorable-mention": {
+		label: "Honorable Mention",
+		classes: "bg-white/5 text-muted-foreground border-border/50",
+		rank: 5,
+	},
+};
+
+function WinnerCard({ p }: { p: any }) {
+	const logo = getLogoUrl(p.logo);
+	const placement = p.hackathonPlacement as keyof typeof PLACEMENT_META;
+	const meta = PLACEMENT_META[placement];
+	return (
+		<Link
+			href={`/project/${p.slug}`}
+			className="group block rounded-2xl border border-border/50 hover:border-border bg-card p-5 transition-colors"
+		>
+			<div className="flex items-start justify-between gap-3 mb-3">
+				<div className="flex items-center gap-3 min-w-0 flex-1">
+					{logo ? (
+						<Image
+							src={logo}
+							alt={p.name}
+							width={48}
+							height={48}
+							className="w-12 h-12 rounded-xl object-cover border border-border/50 flex-shrink-0"
+						/>
+					) : (
+						<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
+							<Trophy className="w-5 h-5 text-[#FDDA24]" />
+						</div>
+					)}
+					<div className="min-w-0">
+						<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
+							{p.name}
+						</h3>
+						<div className="text-xs text-muted-foreground truncate">
+							{p.category}
+							{p.types && p.types.length > 0 && (
+								<>
+									<span className="mx-1">·</span>
+									{p.types.slice(0, 2).join(", ")}
+								</>
+							)}
+						</div>
+					</div>
+				</div>
+				{meta && (
+					<span
+						className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border ${meta.classes} flex-shrink-0`}
+					>
+						{meta.label}
+					</span>
+				)}
+			</div>
+
+			{p.shortDescription && (
+				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+					{p.shortDescription}
+				</p>
+			)}
+
+			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
+				{p.hackathonPrize ? (
+					<span className="inline-flex items-center gap-1 text-foreground font-semibold">
+						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />${p.hackathonPrize.toLocaleString()}
+					</span>
+				) : (
+					<span className="text-muted-foreground">Prize awarded</span>
+				)}
+				{p.hackathonPrizeTrack && (
+					<span className="text-muted-foreground truncate ml-2">
+						{p.hackathonPrizeTrack}
+					</span>
+				)}
+			</div>
+		</Link>
+	);
+}
+
 function ProjectCard({ p }: { p: any }) {
 	const logo = getLogoUrl(p.logo);
 	const status = p.hackathonStatus as HackathonStatusKey | undefined;
@@ -231,6 +339,15 @@ export default async function HackathonDetailPage({
 			? Math.round(((builtCount + inProgressCount) / trackedCount) * 100)
 			: 0;
 
+	// Winners — projects with a `hackathonPlacement` set, ordered by placement rank.
+	const winners = projects
+		.filter((p: any) => !!p.hackathonPlacement)
+		.sort(
+			(a: any, b: any) =>
+				(PLACEMENT_META[a.hackathonPlacement]?.rank ?? 99) -
+				(PLACEMENT_META[b.hackathonPlacement]?.rank ?? 99),
+		);
+
 	const organizer =
 		typeof hackathon.organizer === "object" && hackathon.organizer
 			? hackathon.organizer
@@ -306,6 +423,26 @@ export default async function HackathonDetailPage({
 						</p>
 					)}
 				</div>
+
+				{/* Winners highlight */}
+				{winners.length > 0 && (
+					<section className="mb-12">
+						<div className="flex items-baseline gap-3 mb-5">
+							<h2 className="text-2xl font-bold text-foreground tracking-tight inline-flex items-center gap-2">
+								<Trophy className="w-5 h-5 text-[#FDDA24]" />
+								Winners
+							</h2>
+							<span className="text-sm text-muted-foreground">
+								{winners.length} {winners.length === 1 ? "project" : "projects"}
+							</span>
+						</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+							{winners.slice(0, 6).map((p: any) => (
+								<WinnerCard key={p.id} p={p} />
+							))}
+						</div>
+					</section>
+				)}
 
 				{/* Stats banner */}
 				{totalProjects > 0 && (
