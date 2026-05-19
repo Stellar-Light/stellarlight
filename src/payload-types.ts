@@ -71,11 +71,13 @@ export interface Config {
     media: Media;
     projects: Project;
     blog: Blog;
+    builders: Builder;
     'rss-feeds': RssFeed;
     signals: Signal;
     entities: Entity;
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
+    hackathons: Hackathon;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -86,17 +88,22 @@ export interface Config {
     projects: {
       relatedEntities: 'entities';
     };
+    hackathons: {
+      projects: 'projects';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
+    builders: BuildersSelect<false> | BuildersSelect<true>;
     'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
     signals: SignalsSelect<false> | SignalsSelect<true>;
     entities: EntitiesSelect<false> | EntitiesSelect<true>;
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
+    hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -326,6 +333,26 @@ export interface Project {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Hackathon this project originated from (if applicable)
+   */
+  hackathon?: (string | null) | Hackathon;
+  /**
+   * Post-hackathon project status
+   */
+  hackathonStatus?: ('Built' | 'In Progress' | 'Abandoned') | null;
+  /**
+   * If this project won a placement at the hackathon, surface it in the Winners section
+   */
+  hackathonPlacement?: ('grand-prize' | '1st' | '2nd' | '3rd' | 'honorable-mention' | 'track-winner') | null;
+  /**
+   * Prize amount won (USD)
+   */
+  hackathonPrize?: number | null;
+  /**
+   * Track or sponsor that awarded the prize (e.g. 'Best DeFi', 'Coinbase Track')
+   */
+  hackathonPrizeTrack?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -360,6 +387,37 @@ export interface Entity {
     twitter?: string | null;
   };
   projects?: (string | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathons".
+ */
+export interface Hackathon {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  /**
+   * The organization running this hackathon
+   */
+  organizer?: (string | null) | Entity;
+  /**
+   * Link to the hackathon's external page
+   */
+  externalUrl?: string | null;
+  status: 'upcoming' | 'active' | 'completed';
+  /**
+   * Projects that originated from this hackathon
+   */
+  projects?: {
+    docs?: (string | Project)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -530,6 +588,139 @@ export interface RssFeed {
   createdAt: string;
 }
 /**
+ * Builder profiles from Stellar Passport
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "builders".
+ */
+export interface Builder {
+  id: string;
+  /**
+   * GitHub username for the builder
+   */
+  github_username: string;
+  /**
+   * Display name of the builder
+   */
+  display_name: string;
+  /**
+   * URL to the builder avatar image
+   */
+  avatar_url?: string | null;
+  /**
+   * Builder biography
+   */
+  bio?: string | null;
+  /**
+   * Professional role or title
+   */
+  role_title?: string | null;
+  /**
+   * Geographic location
+   */
+  location?: string | null;
+  /**
+   * Personal or professional website
+   */
+  website_url?: string | null;
+  /**
+   * Twitter/X handle
+   */
+  twitter_handle?: string | null;
+  /**
+   * Telegram handle
+   */
+  telegram_handle?: string | null;
+  /**
+   * Discord handle
+   */
+  discord_handle?: string | null;
+  /**
+   * Stellar blockchain address
+   */
+  stellar_address?: string | null;
+  /**
+   * Featured builder on homepage
+   */
+  is_featured?: boolean | null;
+  /**
+   * GitHub user ID
+   */
+  github_id?: string | null;
+  /**
+   * Discord username
+   */
+  discord_username?: string | null;
+  /**
+   * SCF funding tier
+   */
+  scf_tier?: string | null;
+  /**
+   * Profile visibility
+   */
+  visibility?: ('public' | 'private') | null;
+  projects?:
+    | {
+        name: string;
+        slug: string;
+        short_description?: string | null;
+        status?: ('building' | 'live' | 'deprecated') | null;
+        website_url?: string | null;
+        demo_url?: string | null;
+        docs_url?: string | null;
+        contract_address?: string | null;
+        repos?:
+          | {
+              full_name: string;
+              html_url: string;
+              primary_language?: string | null;
+              stars?: number | null;
+              forks?: number | null;
+              description?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Activity heatmap data
+         */
+        heatmap?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  stats?: {
+    /**
+     * Total commits in last 30 days
+     */
+    totalCommits30d?: number | null;
+    /**
+     * Active days in last 30 days
+     */
+    activeDays30d?: number | null;
+    /**
+     * Last active date
+     */
+    lastActiveDate?: string | null;
+  };
+  /**
+   * When the passport profile was created
+   */
+  passport_created_at?: string | null;
+  /**
+   * Last sync from Stellar Passport API
+   */
+  last_synced?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals".
  */
@@ -540,6 +731,7 @@ export interface Signal {
   github?: {
     lastActivityAt?: string | null;
     openIssuesTotal?: number | null;
+    totalStars?: number | null;
     repos?:
       | {
           owner?: string | null;
@@ -547,6 +739,7 @@ export interface Signal {
           url?: string | null;
           lastCommitAt?: string | null;
           openIssues?: number | null;
+          stargazerCount?: number | null;
           error?: string | null;
           id?: string | null;
         }[]
@@ -740,6 +933,10 @@ export interface PayloadLockedDocument {
         value: string | Blog;
       } | null)
     | ({
+        relationTo: 'builders';
+        value: string | Builder;
+      } | null)
+    | ({
         relationTo: 'rss-feeds';
         value: string | RssFeed;
       } | null)
@@ -758,6 +955,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'carousel';
         value: string | Carousel;
+      } | null)
+    | ({
+        relationTo: 'hackathons';
+        value: string | Hackathon;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -908,6 +1109,11 @@ export interface ProjectsSelect<T extends boolean = true> {
   relevanceScore?: T;
   communityPick?: T;
   relatedEntities?: T;
+  hackathon?: T;
+  hackathonStatus?: T;
+  hackathonPlacement?: T;
+  hackathonPrize?: T;
+  hackathonPrizeTrack?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -947,6 +1153,64 @@ export interface BlogSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "builders_select".
+ */
+export interface BuildersSelect<T extends boolean = true> {
+  github_username?: T;
+  display_name?: T;
+  avatar_url?: T;
+  bio?: T;
+  role_title?: T;
+  location?: T;
+  website_url?: T;
+  twitter_handle?: T;
+  telegram_handle?: T;
+  discord_handle?: T;
+  stellar_address?: T;
+  is_featured?: T;
+  github_id?: T;
+  discord_username?: T;
+  scf_tier?: T;
+  visibility?: T;
+  projects?:
+    | T
+    | {
+        name?: T;
+        slug?: T;
+        short_description?: T;
+        status?: T;
+        website_url?: T;
+        demo_url?: T;
+        docs_url?: T;
+        contract_address?: T;
+        repos?:
+          | T
+          | {
+              full_name?: T;
+              html_url?: T;
+              primary_language?: T;
+              stars?: T;
+              forks?: T;
+              description?: T;
+              id?: T;
+            };
+        heatmap?: T;
+        id?: T;
+      };
+  stats?:
+    | T
+    | {
+        totalCommits30d?: T;
+        activeDays30d?: T;
+        lastActiveDate?: T;
+      };
+  passport_created_at?: T;
+  last_synced?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rss-feeds_select".
  */
 export interface RssFeedsSelect<T extends boolean = true> {
@@ -977,6 +1241,7 @@ export interface SignalsSelect<T extends boolean = true> {
     | {
         lastActivityAt?: T;
         openIssuesTotal?: T;
+        totalStars?: T;
         repos?:
           | T
           | {
@@ -985,6 +1250,7 @@ export interface SignalsSelect<T extends boolean = true> {
               url?: T;
               lastCommitAt?: T;
               openIssues?: T;
+              stargazerCount?: T;
               error?: T;
               id?: T;
             };
@@ -1042,6 +1308,23 @@ export interface CarouselSelect<T extends boolean = true> {
   url?: T;
   order?: T;
   active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathons_select".
+ */
+export interface HackathonsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  organizer?: T;
+  externalUrl?: T;
+  status?: T;
+  projects?: T;
   updatedAt?: T;
   createdAt?: T;
 }

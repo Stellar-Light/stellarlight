@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2 } from "lucide-react";
+import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
@@ -98,7 +98,10 @@ export function Navigation() {
 
 	const exploreItems = [
 		{ name: "Projects", href: "/directory", description: "Discover Stellar projects", icon: Layers },
+		{ name: "Builders", href: "/builders", description: "Meet Stellar developers", icon: Users },
 		{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
+		{ name: "Leaderboard", href: "/leaderboard", description: "GitHub activity rankings", icon: Trophy },
+		{ name: "Hackathons", href: "/hackathons", description: "Ecosystem hackathon events", icon: Code2 },
 		{ name: "Ideas", href: "https://ideas.stellarlight.xyz/", description: "Browse project ideas", icon: Lightbulb },
 		{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
 	];

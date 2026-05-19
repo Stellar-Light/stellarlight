@@ -8,8 +8,10 @@ import { fileURLToPath } from "url";
 import sharp from "sharp";
 
 import { Blog } from "./collections/Blog";
+import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
 import { Entities } from "./collections/Entities";
+import { Hackathons } from "./collections/Hackathons";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { RSSFeeds } from "./collections/RSSFeeds";
@@ -47,11 +49,13 @@ export default buildConfig({
 		Media,
 		Projects,
 		Blog,
+		Builders,
 		RSSFeeds,
 		Signals,
 		Entities,
 		TransparencyLogs,
 		Carousel,
+		Hackathons,
 	],
 	globals: [Banner],
 	jobs: {

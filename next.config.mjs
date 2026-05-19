@@ -9,6 +9,22 @@ const nextConfig = {
 			static: 180,
 		},
 	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "cdn.dorahacks.io",
+			},
+			{
+				protocol: "https",
+				hostname: "avatars.githubusercontent.com",
+			},
+			{
+				protocol: "https",
+				hostname: "demo.stellarpassport.xyz",
+			},
+		],
+	},
 	// Exclude problematic packages from server-side bundling
 	// This prevents Next.js from trying to bundle these packages
 	serverExternalPackages: [
