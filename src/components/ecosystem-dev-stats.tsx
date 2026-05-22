@@ -52,6 +52,28 @@ interface ECStats {
 		unknown: number;
 		topCountries: Array<{ country: string; devs: number }>;
 	};
+	peers?: Array<{
+		id: number;
+		name: string;
+		current: number;
+		series: Array<{ date: string; mad: number }>;
+	}>;
+}
+
+/** Per-chain colors + render order for the comparison chart.
+ *  Peers come first so Stellar's gold line/fill renders on top of them. */
+const CHAIN_STYLE: Record<string, { color: string; label: string }> = {
+	stellar: { color: "#FDDA24", label: "Stellar" },
+	ethereum: { color: "#8A92B2", label: "Ethereum" },
+	solana: { color: "#9945FF", label: "Solana" },
+	bitcoin: { color: "#F7931A", label: "Bitcoin" },
+	polygon: { color: "#8247E5", label: "Polygon" },
+	near: { color: "#9CA3AF", label: "NEAR" },
+	cardano: { color: "#3B82F6", label: "Cardano" },
+};
+
+function peerKey(name: string): string {
+	return name.toLowerCase();
 }
 
 function deltaPct(current: number, previous: number): number {
@@ -127,10 +149,51 @@ export function EcosystemDevStats() {
 		}
 	};
 
-	const series = (d.series365d ?? []).map((p) => ({
-		date: new Date(p.date),
-		mad: p.mad,
-	}));
+	// Merge Stellar series + each peer's series into one row-per-date dataset.
+	// Each row: { date, stellar, ethereum, solana, ... }
+	const stellarPoints = d.series365d ?? [];
+	const mergedByDate = new Map<string, Record<string, number | Date>>();
+	for (const p of stellarPoints) {
+		mergedByDate.set(p.date, { date: new Date(p.date), stellar: p.mad });
+	}
+	for (const peer of d.peers ?? []) {
+		const k = peerKey(peer.name);
+		for (const pt of peer.series) {
+			const row = mergedByDate.get(pt.date) ?? { date: new Date(pt.date) };
+			row[k] = pt.mad;
+			mergedByDate.set(pt.date, row);
+		}
+	}
+	const series = Array.from(mergedByDate.values()).sort(
+		(a, b) => (a.date as Date).getTime() - (b.date as Date).getTime(),
+	);
+
+	// Chains rendered in chart: peers first (background lines), Stellar last
+	// so the gold area paints on top of everyone.
+	const chains = [
+		...(d.peers ?? []).map((p) => ({
+			key: peerKey(p.name),
+			label: CHAIN_STYLE[peerKey(p.name)]?.label ?? p.name,
+			color: CHAIN_STYLE[peerKey(p.name)]?.color ?? "#666",
+			strokeWidth: 1.25,
+			filled: false,
+		})),
+		{
+			key: "stellar",
+			label: "Stellar",
+			color: CHAIN_STYLE.stellar.color,
+			strokeWidth: 2.5,
+			filled: true,
+		},
+	];
+
+	// Legend: Stellar + peers sorted by current MAD desc, with Stellar rank.
+	const legendEntries = [
+		{ name: "Stellar", current: d.mad.total },
+		...(d.peers ?? []).map((p) => ({ name: p.name, current: p.current })),
+	].sort((a, b) => b.current - a.current);
+	const stellarRank =
+		legendEntries.findIndex((e) => e.name === "Stellar") + 1;
 
 	return (
 		<section className="mb-8">
@@ -193,24 +256,68 @@ export function EcosystemDevStats() {
 			{series.length > 1 && (
 				<div className="rounded-xl border border-border/50 bg-card p-4 mb-2">
 					<div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
-						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-							Monthly active devs over the last year
+						<div>
+							<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+								Active devs over the last year — Stellar vs L1 peers
+							</div>
+							{stellarRank > 0 && (
+								<div className="text-xs text-muted-foreground mt-0.5">
+									Stellar ranks{" "}
+									<span className="text-foreground font-semibold">
+										#{stellarRank}
+									</span>{" "}
+									of {legendEntries.length} tracked L1s by active devs
+								</div>
+							)}
 						</div>
 						<div className="text-[11px] text-muted-foreground/70 tabular-nums">
-							{series[0].date.toLocaleDateString("en-US", {
+							{(series[0].date as Date).toLocaleDateString("en-US", {
 								month: "short",
 								year: "numeric",
 							})}{" "}
 							→{" "}
-							{series[series.length - 1].date.toLocaleDateString("en-US", {
-								month: "short",
-								year: "numeric",
-							})}
+							{(series[series.length - 1].date as Date).toLocaleDateString(
+								"en-US",
+								{ month: "short", year: "numeric" },
+							)}
 						</div>
 					</div>
-					<EcosystemMadChart data={series} />
+					<EcosystemMadChart data={series} chains={chains} />
+					<div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 mb-1">
+						{legendEntries.map((e) => {
+							const style = CHAIN_STYLE[peerKey(e.name)];
+							const isStellar = e.name === "Stellar";
+							return (
+								<div
+									key={e.name}
+									className="inline-flex items-center gap-1.5 text-[11px]"
+								>
+									<span
+										className="inline-block rounded-sm"
+										style={{
+											width: isStellar ? 12 : 10,
+											height: isStellar ? 3 : 2,
+											background: style?.color ?? "#666",
+										}}
+									/>
+									<span
+										className={
+											isStellar
+												? "text-foreground font-medium"
+												: "text-muted-foreground"
+										}
+									>
+										{e.name}
+									</span>
+									<span className="text-muted-foreground/70 tabular-nums">
+										{e.current.toLocaleString()}
+									</span>
+								</div>
+							);
+						})}
+					</div>
 					<div className="text-[11px] text-muted-foreground/60 mt-1">
-						“Active dev” = at least one commit to a Stellar ecosystem repo in the trailing 28 days. Hover for daily values.
+						“Active dev” = at least one commit to an ecosystem repo in the trailing 28 days. Hover for daily values across all chains.
 					</div>
 				</div>
 			)}

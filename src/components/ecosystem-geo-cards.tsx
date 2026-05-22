@@ -90,17 +90,17 @@ function CountryCard({
 	devs: number;
 	share: number;
 }) {
-	void rank;
 	return (
 		<div className="rounded-xl border border-border/50 bg-card p-4">
-			<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
-				#{rank} · {country.country}
+			<div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
+				<span>#{rank}</span>
+				<span className="text-sm leading-none">
+					{flagEmoji(country.country)}
+				</span>
+				<span className="truncate">{country.country}</span>
 			</div>
-			<div className="flex items-baseline gap-2 mb-1">
-				<span className="text-2xl leading-none">{flagEmoji(country.country)}</span>
-				<div className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
-					{devs.toLocaleString()}
-				</div>
+			<div className="text-2xl font-bold text-foreground tabular-nums tracking-tight mb-1">
+				{devs.toLocaleString()}
 			</div>
 			<div className="text-xs text-muted-foreground">
 				{share.toFixed(1)}% of located devs

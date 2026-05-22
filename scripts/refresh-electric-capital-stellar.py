@@ -28,6 +28,17 @@ except ImportError:
 
 MANIFEST_URL = "https://data.opendevdata.org/manifest.json"
 STELLAR_ECOSYSTEM_ID = 7
+# Peer L1s we benchmark against in the dashboard chart. Ordered roughly by
+# how visitors will recognize them. Stellar is rendered separately (gold,
+# bold); everyone else is a muted comparison line.
+PEER_ECOSYSTEMS = [
+    {"id": 2, "name": "Ethereum"},
+    {"id": 391, "name": "Solana"},
+    {"id": 1, "name": "Bitcoin"},
+    {"id": 2692, "name": "Polygon"},
+    {"id": 2817, "name": "NEAR"},
+    {"id": 8, "name": "Cardano"},
+]
 OUT_FILE = Path(__file__).resolve().parent.parent / "src" / "data" / "electric-capital-stellar.json"
 
 
@@ -141,6 +152,36 @@ def main() -> None:
         if r[0] != "__unknown__"
     ]
 
+    # Peer ecosystem comparison: for each peer L1, fetch the same 365-day MAD
+    # series + current 28d total. Used to render multi-line comparison chart.
+    peer_ids = tuple(p["id"] for p in PEER_ECOSYSTEMS)
+    peer_rows = con.execute(
+        f"""
+        SELECT ecosystem_id, day, all_devs
+        FROM '{eco_mads_url}'
+        WHERE ecosystem_id IN {peer_ids}
+          AND day >= ((SELECT MAX(day) FROM '{eco_mads_url}' WHERE ecosystem_id = {STELLAR_ECOSYSTEM_ID}) - INTERVAL 365 DAY)::DATE
+        ORDER BY ecosystem_id, day ASC
+        """
+    ).fetchall()
+    peer_series: dict[int, list[dict]] = {p["id"]: [] for p in PEER_ECOSYSTEMS}
+    for eco_id, day, devs in peer_rows:
+        peer_series[eco_id].append({"date": str(day), "mad": int(devs or 0)})
+
+    peers = [
+        {
+            "id": p["id"],
+            "name": p["name"],
+            "current": (
+                peer_series[p["id"]][-1]["mad"]
+                if peer_series[p["id"]]
+                else 0
+            ),
+            "series": peer_series[p["id"]],
+        }
+        for p in PEER_ECOSYSTEMS
+    ]
+
     snapshot = {
         "source": "Electric Capital — Open Dev Data",
         "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
@@ -178,6 +219,7 @@ def main() -> None:
             "unknown": geo_unknown,
             "topCountries": geo_located[:10],
         },
+        "peers": peers,
     }
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)

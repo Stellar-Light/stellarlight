@@ -226,13 +226,31 @@ export default async function LeaderboardPage({
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				<div className="mb-8">
-					<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-						Developer Activity
-					</h1>
-					<p className="text-sm text-muted-foreground mt-2">
-						Stellar projects ranked by recent developer activity.
-					</p>
+				<div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+					<div>
+						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+							Developer Activity
+						</h1>
+						<p className="text-sm text-muted-foreground mt-2">
+							Stellar projects ranked by recent developer activity.
+						</p>
+					</div>
+					<div className="flex items-center gap-2 text-xs">
+						<a
+							href={`/api/leaderboard?sort=${sortBy}&range=${range}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+						>
+							JSON
+						</a>
+						<a
+							href={`/api/leaderboard?format=csv&sort=${sortBy}&range=${range}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
+							className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+						>
+							CSV
+						</a>
+					</div>
 				</div>
 
 				<EcosystemDevStats />
