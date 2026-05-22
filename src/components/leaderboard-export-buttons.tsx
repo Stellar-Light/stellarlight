@@ -35,60 +35,46 @@ export function LeaderboardExportButtons({
 		try {
 			const { toPng } = await import("html-to-image");
 
-			// Capture without ever painting the card on-screen.
+			// The shareable card is permanently parked off-screen at
+			// left: -2000px (see EcosystemShareableCard). We don't touch
+			// its style here — that previously caused forced reflows which
+			// flickered the on-page chart's ResizeObserver. html-to-image
+			// captures using the explicit width/height options below rather
+			// than the off-screen bounding rect.
 			//
-			// Earlier we briefly moved the card to top:0/left:0/zIndex:-1 so
-			// html-to-image would see a correctly-positioned bounding rect —
-			// but z-index:-1 doesn't reliably hide it (the dark theme leaves
-			// transparent regions where the card briefly peeks through). The
-			// user reported a ~1s flash.
-			//
-			// New approach: move it to top:0/left:0 BUT also set
-			// visibility:"hidden". `visibility:hidden` keeps the element in
-			// layout (ResizeObserver fires, getBoundingClientRect works) but
-			// never paints. We then override visibility to "visible" *only on
-			// the cloned snapshot* via html-to-image's `style` option, so the
-			// captured PNG renders normally while the user sees nothing.
-			const saved = {
-				position: target.style.position,
-				top: target.style.top,
-				left: target.style.left,
-				zIndex: target.style.zIndex,
-				visibility: target.style.visibility,
-			};
-			target.style.position = "fixed";
-			target.style.top = "0";
-			target.style.left = "0";
-			target.style.zIndex = "-1";
-			target.style.visibility = "hidden";
-
-			// Two animation frames + a tick so the chart's ResizeObserver
-			// has fired and any SVG paths are committed.
+			// One RAF + tick to ensure any pending paint / font load has
+			// settled before we walk the DOM.
 			await new Promise((r) =>
 				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
 			);
-			await new Promise((r) => setTimeout(r, 80));
 
 			const dataUrl = await toPng(target, {
-				cacheBust: true,
+				// cacheBust appends ?cacheBust=... query strings — fine locally
+				// but some production CDNs return CORS errors on those URLs.
+				// Disabling avoids the entire class of fetch failures since
+				// our card now uses an inline data URI for the Stellar logo.
+				cacheBust: false,
 				backgroundColor: "#0a0a0a",
 				pixelRatio: 2,
 				width: 1200,
 				height: 675,
 				canvasWidth: 1200,
 				canvasHeight: 675,
-				// Override the cloned root's styles so the snapshot renders
-				// fully visible even though the source on the page is hidden.
-				style: { transform: "none", visibility: "visible" },
-				skipFonts: false,
+				style: { transform: "none" },
+				// skipFonts: true skips html-to-image's fontEmbedCSS step,
+				// which otherwise tries to fetch every CSS @font-face rule on
+				// the page and inline it. Production deploys often serve fonts
+				// with strict CORS / from cross-origin CDNs, which makes that
+				// fetch fail and crashes the whole capture. Our card uses only
+				// system fonts (-apple-system, BlinkMacSystemFont, …) so we
+				// don't need any external font embedding.
+				skipFonts: true,
+				// If any image fails to inline (shouldn't happen now that the
+				// only <img> uses a data URI, but defensive), substitute a 1×1
+				// transparent pixel rather than aborting the whole capture.
+				imagePlaceholder:
+					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=",
 			});
-
-			// Restore previous style values so the card returns to off-screen.
-			target.style.position = saved.position;
-			target.style.top = saved.top;
-			target.style.left = saved.left;
-			target.style.zIndex = saved.zIndex;
-			target.style.visibility = saved.visibility;
 
 			const link = document.createElement("a");
 			const date = new Date().toISOString().slice(0, 10);

@@ -1,6 +1,7 @@
 "use client";
 
 import { EcosystemMadChart, type ChainLine } from "@/components/ecosystem-mad-chart";
+import { STELLAR_LOGO_DATA_URI } from "@/lib/stellar-logo";
 
 /** Inline Electric Capital lightning-bolt mark — cyan square + white bolt.
  *  Duplicated from `ecosystem-dev-stats.tsx` so the off-screen card has
@@ -70,15 +71,20 @@ export function EcosystemShareableCard({
 		<div
 			id="shareable-snapshot"
 			aria-hidden="true"
-			// Off-screen via horizontal offset (not negative top) so the element
-			// still gets normal layout + ResizeObserver fires for the chart.
-			// Extreme negative coords like `top: -9999px` cause some browsers
-			// to defer layout/paint, which leaves the chart blank when
-			// html-to-image captures it.
+			// Permanently parked off-screen to the left at a moderate offset
+			// (not extreme negatives like -9999px, which caused some browsers
+			// to defer layout/paint and left the chart blank during export).
+			// - Chart's ResizeObserver fires correctly because the element has
+			//   full layout (visibility:hidden would prevent that)
+			// - Element never paints in the viewport (no flash)
+			// - No DOM mutation needed at export time → no forced reflows
+			//   that would flicker the on-page chart
+			// - html-to-image uses explicit width/height options for capture
+			//   so off-screen bounding rect doesn't crop the snapshot
 			style={{
 				position: "fixed",
 				top: 0,
-				left: "100vw",
+				left: -2000,
 				width: 1200,
 				height: 675,
 				background: "#0a0a0a",
@@ -113,7 +119,7 @@ export function EcosystemShareableCard({
 				>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
-						src="/stellar-xlm-logo.png"
+						src={STELLAR_LOGO_DATA_URI}
 						alt=""
 						width={32}
 						height={32}
@@ -217,7 +223,7 @@ export function EcosystemShareableCard({
 				>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
-						src="/stellar-xlm-logo.png"
+						src={STELLAR_LOGO_DATA_URI}
 						alt=""
 						width={16}
 						height={16}
