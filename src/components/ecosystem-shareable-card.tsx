@@ -120,7 +120,6 @@ export function EcosystemShareableCard({
 				<StatBlock
 					label="Active devs (28d)"
 					value={stats.activeDevs.toLocaleString()}
-					accent
 				/>
 				<StatBlock label="Commits (28d)" value={stats.commits28d.toLocaleString()} />
 				<StatBlock label="YoY growth" value={yoyStr} positive={yoy >= 0} />
@@ -182,26 +181,16 @@ function StatBlock({
 	label,
 	value,
 	positive,
-	accent,
 }: {
 	label: string;
 	value: string;
 	positive?: boolean;
-	/** Gold accent treatment — used for the lead "Active devs" card. */
-	accent?: boolean;
 }) {
-	const valueColor = accent
-		? "#FDDA24"
-		: positive === false
-			? "#FB7185"
-			: "#E5E5E5";
 	return (
 		<div
 			style={{
-				background: accent ? "rgba(253,218,36,0.08)" : "#171717",
-				border: accent
-					? "1px solid rgba(253,218,36,0.35)"
-					: "1px solid rgba(255,255,255,0.06)",
+				background: "#171717",
+				border: "1px solid rgba(255,255,255,0.06)",
 				borderRadius: 12,
 				padding: "14px 16px",
 			}}
@@ -211,7 +200,7 @@ function StatBlock({
 					fontSize: 11,
 					letterSpacing: "0.06em",
 					textTransform: "uppercase",
-					color: accent ? "rgba(253,218,36,0.85)" : "#A3A3A3",
+					color: "#A3A3A3",
 					marginBottom: 6,
 				}}
 			>
@@ -221,7 +210,7 @@ function StatBlock({
 				style={{
 					fontSize: 26,
 					fontWeight: 700,
-					color: valueColor,
+					color: positive === false ? "#FB7185" : "#E5E5E5",
 				}}
 			>
 				{value}
