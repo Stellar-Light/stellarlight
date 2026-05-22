@@ -170,7 +170,7 @@ export function EcosystemShareableCard({
 						marginBottom: 4,
 					}}
 				>
-					Active devs over the last year — Stellar vs L1 peers
+					Monthly active devs over the last year
 				</div>
 				<EcosystemMadChart
 					data={data}
