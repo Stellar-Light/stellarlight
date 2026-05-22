@@ -169,41 +169,27 @@ export function EcosystemDevStats() {
 		(a, b) => (a.date as Date).getTime() - (b.date as Date).getTime(),
 	);
 
-	// Chains rendered in chart: peers first (background lines), Stellar last
-	// so the gold area paints on top of everyone. We deliberately exclude
-	// Ethereum from the chart (it's ~5x Stellar's MAD — its line pushes the
-	// y-axis ceiling so high every other chain gets compressed and Stellar
-	// reads as buried mid-pack). It still appears in the legend below so
-	// nothing's hidden — just visually scoped to comparable peers.
-	const chartPeers = (d.peers ?? []).filter(
-		(p) => peerKey(p.name) !== "ethereum",
-	);
+	// Chart: just Stellar's monthly active devs over the last year. We pulled
+	// peer L1 data into the JSON snapshot (it's still queryable via the JSON
+	// export, and the PNG card's footer surfaces Stellar's rank among L1s)
+	// but rendering multiple chains overlaid in the chart didn't read well
+	// at this size, so we keep the on-page chart focused on Stellar.
 	const chains = [
-		...chartPeers.map((p) => ({
-			key: peerKey(p.name),
-			label: CHAIN_STYLE[peerKey(p.name)]?.label ?? p.name,
-			color: CHAIN_STYLE[peerKey(p.name)]?.color ?? "#666",
-			strokeWidth: 1,
-			filled: false,
-		})),
 		{
 			key: "stellar",
-			label: "Stellar",
+			label: "Active devs",
 			color: CHAIN_STYLE.stellar.color,
-			strokeWidth: 3,
+			strokeWidth: 2.5,
 			filled: true,
 		},
 	];
 
-	// Legend: Stellar + ALL peers (including Ethereum) sorted by current MAD
-	// desc — so visitors still see the full L1 ranking without the chart's
-	// y-axis getting wrecked by it.
-	const legendEntries = [
+	// Rank info — used by the off-screen PNG card's footer, not on-page.
+	const rankedChains = [
 		{ name: "Stellar", current: d.mad.total },
 		...(d.peers ?? []).map((p) => ({ name: p.name, current: p.current })),
 	].sort((a, b) => b.current - a.current);
-	const stellarRank =
-		legendEntries.findIndex((e) => e.name === "Stellar") + 1;
+	const stellarRank = rankedChains.findIndex((e) => e.name === "Stellar") + 1;
 
 	return (
 		<section className="mb-8">
@@ -219,7 +205,7 @@ export function EcosystemDevStats() {
 				}}
 				asOf={d.asOf}
 				stellarRank={stellarRank}
-				totalRanked={legendEntries.length}
+				totalRanked={rankedChains.length}
 			/>
 			<div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
 				<h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
@@ -280,19 +266,8 @@ export function EcosystemDevStats() {
 			{series.length > 1 && (
 				<div className="rounded-xl border border-border/50 bg-card p-4 mb-2">
 					<div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
-						<div>
-							<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-								Active devs over the last year — Stellar vs L1 peers
-							</div>
-							{stellarRank > 0 && (
-								<div className="text-xs text-muted-foreground mt-0.5">
-									Stellar ranks{" "}
-									<span className="text-foreground font-semibold">
-										#{stellarRank}
-									</span>{" "}
-									of {legendEntries.length} tracked L1s by active devs
-								</div>
-							)}
+						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+							Monthly active devs over the last year
 						</div>
 						<div className="text-[11px] text-muted-foreground/70 tabular-nums">
 							{(series[0].date as Date).toLocaleDateString("en-US", {
@@ -307,41 +282,8 @@ export function EcosystemDevStats() {
 						</div>
 					</div>
 					<EcosystemMadChart data={series} chains={chains} />
-					<div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 mb-1">
-						{legendEntries.map((e) => {
-							const style = CHAIN_STYLE[peerKey(e.name)];
-							const isStellar = e.name === "Stellar";
-							return (
-								<div
-									key={e.name}
-									className="inline-flex items-center gap-1.5 text-[11px]"
-								>
-									<span
-										className="inline-block rounded-sm"
-										style={{
-											width: isStellar ? 12 : 10,
-											height: isStellar ? 3 : 2,
-											background: style?.color ?? "#666",
-										}}
-									/>
-									<span
-										className={
-											isStellar
-												? "text-foreground font-medium"
-												: "text-muted-foreground"
-										}
-									>
-										{e.name}
-									</span>
-									<span className="text-muted-foreground/70 tabular-nums">
-										{e.current.toLocaleString()}
-									</span>
-								</div>
-							);
-						})}
-					</div>
 					<div className="text-[11px] text-muted-foreground/60 mt-1">
-						“Active dev” = at least one commit to an ecosystem repo in the trailing 28 days. Hover for daily values. Ethereum (8.5k MAD) is omitted from the chart for scale but shown in the legend below.
+						“Active dev” = at least one commit to a Stellar ecosystem repo in the trailing 28 days. Hover for daily values.
 					</div>
 				</div>
 			)}
