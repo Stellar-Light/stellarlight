@@ -51,12 +51,15 @@ export function EcosystemShareableCard({
 		<div
 			id="shareable-snapshot"
 			aria-hidden="true"
-			// position fixed off-screen so the card renders with real dimensions
-			// (html-to-image needs real layout boxes) but doesn't affect the page.
+			// Off-screen via horizontal offset (not negative top) so the element
+			// still gets normal layout + ResizeObserver fires for the chart.
+			// Extreme negative coords like `top: -9999px` cause some browsers
+			// to defer layout/paint, which leaves the chart blank when
+			// html-to-image captures it.
 			style={{
 				position: "fixed",
-				top: "-9999px",
-				left: "-9999px",
+				top: 0,
+				left: "100vw",
 				width: 1200,
 				height: 675,
 				background: "#0a0a0a",
@@ -69,6 +72,8 @@ export function EcosystemShareableCard({
 				flexDirection: "column",
 				border: "1px solid rgba(255,255,255,0.06)",
 				borderRadius: 24,
+				pointerEvents: "none",
+				zIndex: -1,
 			}}
 		>
 			{/* Header */}
@@ -139,7 +144,11 @@ export function EcosystemShareableCard({
 				>
 					Active devs over the last year — Stellar vs L1 peers
 				</div>
-				<EcosystemMadChart data={data} chains={chains} />
+				<EcosystemMadChart
+					data={data}
+					chains={chains}
+					animationDuration={0}
+				/>
 			</div>
 
 			{/* Footer */}

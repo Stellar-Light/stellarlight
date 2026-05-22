@@ -21,15 +21,22 @@ interface Props {
 	data: Array<Record<string, Date | number>>;
 	/** Chain configs. Render order matters: peers first (background), Stellar last (on top) */
 	chains: ChainLine[];
+	/** Animation duration in ms. Pass 0 for the off-screen PNG card so it renders instantly. */
+	animationDuration?: number;
 }
 
-export function EcosystemMadChart({ data, chains }: Props) {
+export function EcosystemMadChart({
+	data,
+	chains,
+	animationDuration,
+}: Props) {
 	return (
 		<AreaChart
 			data={data as unknown as Record<string, unknown>[]}
 			xDataKey="date"
 			aspectRatio="4 / 1"
 			margin={{ top: 8, right: 0, bottom: 24, left: 0 }}
+			animationDuration={animationDuration}
 		>
 			{chains.map((c) => (
 				<Area

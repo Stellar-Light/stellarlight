@@ -33,15 +33,24 @@ export function LeaderboardExportButtons({
 		if (!target) return;
 		setPngBusy(true);
 		try {
-			// Dynamic import keeps html-to-image out of the initial bundle —
-			// it's only needed when the user actually clicks the button.
+			// Dynamic import keeps html-to-image out of the initial bundle.
 			const { toPng } = await import("html-to-image");
+
+			// Wait two animation frames + a tick so the off-screen chart's
+			// ResizeObserver has fired and any SVG paths are committed before
+			// we walk the DOM for the snapshot. Without this the PNG renders
+			// blank because the chart hasn't been sized yet.
+			await new Promise((r) =>
+				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
+			);
+			await new Promise((r) => setTimeout(r, 50));
+
 			const dataUrl = await toPng(target, {
 				cacheBust: true,
 				backgroundColor: "#0a0a0a",
 				pixelRatio: 2,
-				// Skip lucide icons with currentColor + foreignObject quirks if
-				// any element fails to render — keep going rather than throwing.
+				width: target.offsetWidth,
+				height: target.offsetHeight,
 				skipFonts: false,
 			});
 			const link = document.createElement("a");
