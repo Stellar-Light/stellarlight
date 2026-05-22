@@ -32,27 +32,43 @@ export function LeaderboardExportButtons({
 	range,
 	category,
 }: Props) {
-	const [skillCopied, setSkillCopied] = useState(false);
+	const [skillDone, setSkillDone] = useState(false);
 
-	// Skill content is inlined as a JS constant (no fetch, no Safari
-	// user-activation timing issues, no async before writeText).
-	const handleSkillCopy = () => {
-		if (!navigator.clipboard?.writeText) {
-			// Insecure context or ancient browser — fall back to opening the
-			// hosted file so the user can copy manually.
-			window.open("/skills/stellar-developer-activity.md", "_blank");
-			return;
+	// Skill button does two things in parallel:
+	// 1. ALWAYS triggers a download of stellar-developer-activity.md — the
+	//    user can attach this file to Claude/ChatGPT, drop it into a project's
+	//    .claude/skills/ folder, or read it locally. This works in every
+	//    browser, no permissions needed.
+	// 2. ATTEMPTS to also write the markdown to the clipboard, so the user
+	//    can immediately paste it into a chat. This is best-effort — if the
+	//    browser rejects (insecure context, permissions, etc.) the user
+	//    still has the downloaded file.
+	const handleSkill = () => {
+		// Best-effort clipboard write — synchronous call to preserve user
+		// activation, no await beforehand, silent on failure.
+		if (navigator.clipboard?.writeText) {
+			navigator.clipboard
+				.writeText(STELLAR_DEVELOPER_ACTIVITY_SKILL)
+				.catch(() => {
+					/* clipboard rejected — download still happens below */
+				});
 		}
-		navigator.clipboard
-			.writeText(STELLAR_DEVELOPER_ACTIVITY_SKILL)
-			.then(() => {
-				setSkillCopied(true);
-				setTimeout(() => setSkillCopied(false), 2000);
-			})
-			.catch((err) => {
-				console.error("Skill copy failed", err);
-				window.open("/skills/stellar-developer-activity.md", "_blank");
-			});
+
+		// Always trigger the file download.
+		const blob = new Blob([STELLAR_DEVELOPER_ACTIVITY_SKILL], {
+			type: "text/markdown;charset=utf-8",
+		});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.download = "stellar-developer-activity.md";
+		link.href = url;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		URL.revokeObjectURL(url);
+
+		setSkillDone(true);
+		setTimeout(() => setSkillDone(false), 2000);
 	};
 
 	const baseBtn =
@@ -82,14 +98,14 @@ export function LeaderboardExportButtons({
 			</a>
 			<button
 				type="button"
-				onClick={handleSkillCopy}
+				onClick={handleSkill}
 				className={baseBtn}
-				title="Copy the Claude / AI agent skill manifest to your clipboard"
+				title="Download stellar-developer-activity.md (also copied to clipboard). Attach to Claude/ChatGPT or drop into .claude/skills/ to give an AI agent native access to Stellar dev data."
 			>
-				{skillCopied ? (
+				{skillDone ? (
 					<>
 						<Check className="w-3.5 h-3.5 text-emerald-400" />
-						Copied
+						Got it
 					</>
 				) : (
 					<>
