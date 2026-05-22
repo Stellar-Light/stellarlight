@@ -13,26 +13,10 @@
 
 import { ImageResponse } from "next/og";
 import { NextResponse, type NextRequest } from "next/server";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import ecData from "@/data/electric-capital-stellar.json";
+import { STELLAR_LOGO_DATA_URI } from "@/lib/stellar-logo-data-uri";
 
 export const runtime = "nodejs";
-
-/** Read the Stellar PNG from /public at module load, embed as data URI.
- *  Satori (ImageResponse) doesn't render `<img src="/foo.png">` unless
- *  the src is a fully-resolved URL or data URI. Reading once at module
- *  init keeps the per-request render fast. */
-const STELLAR_LOGO_DATA_URI = (() => {
-	try {
-		const buf = readFileSync(
-			join(process.cwd(), "public", "stellar-xlm-logo.png"),
-		);
-		return `data:image/png;base64,${buf.toString("base64")}`;
-	} catch {
-		return null;
-	}
-})();
 
 const STELLAR_GOLD = "#FDDA24";
 const BG = "#0a0a0a";
