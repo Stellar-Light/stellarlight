@@ -82,24 +82,18 @@ export function EcosystemShareableCard({
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "baseline",
-					marginBottom: 24,
+					marginBottom: 20,
 				}}
 			>
-				<div>
-					<div
-						style={{
-							fontSize: 13,
-							letterSpacing: "0.08em",
-							textTransform: "uppercase",
-							color: "#A3A3A3",
-							marginBottom: 6,
-						}}
-					>
-						Stellar Ecosystem · Developer Activity
-					</div>
-					<div style={{ fontSize: 36, fontWeight: 700, color: "#FDDA24" }}>
-						{stats.activeDevs.toLocaleString()} active devs (28d)
-					</div>
+				<div
+					style={{
+						fontSize: 18,
+						fontWeight: 600,
+						color: "#E5E5E5",
+						letterSpacing: "-0.01em",
+					}}
+				>
+					Stellar Developer Activity
 				</div>
 				<div
 					style={{
@@ -114,15 +108,20 @@ export function EcosystemShareableCard({
 				</div>
 			</div>
 
-			{/* Headline stats strip */}
+			{/* Headline stats strip — active devs is the lead card, in gold. */}
 			<div
 				style={{
 					display: "grid",
-					gridTemplateColumns: "1fr 1fr 1fr",
-					gap: 16,
+					gridTemplateColumns: "1fr 1fr 1fr 1fr",
+					gap: 14,
 					marginBottom: 20,
 				}}
 			>
+				<StatBlock
+					label="Active devs (28d)"
+					value={stats.activeDevs.toLocaleString()}
+					accent
+				/>
 				<StatBlock label="Commits (28d)" value={stats.commits28d.toLocaleString()} />
 				<StatBlock label="YoY growth" value={yoyStr} positive={yoy >= 0} />
 				<StatBlock
@@ -183,18 +182,28 @@ function StatBlock({
 	label,
 	value,
 	positive,
+	accent,
 }: {
 	label: string;
 	value: string;
 	positive?: boolean;
+	/** Gold accent treatment — used for the lead "Active devs" card. */
+	accent?: boolean;
 }) {
+	const valueColor = accent
+		? "#FDDA24"
+		: positive === false
+			? "#FB7185"
+			: "#E5E5E5";
 	return (
 		<div
 			style={{
-				background: "#171717",
-				border: "1px solid rgba(255,255,255,0.06)",
+				background: accent ? "rgba(253,218,36,0.08)" : "#171717",
+				border: accent
+					? "1px solid rgba(253,218,36,0.35)"
+					: "1px solid rgba(255,255,255,0.06)",
 				borderRadius: 12,
-				padding: "14px 18px",
+				padding: "14px 16px",
 			}}
 		>
 			<div
@@ -202,7 +211,7 @@ function StatBlock({
 					fontSize: 11,
 					letterSpacing: "0.06em",
 					textTransform: "uppercase",
-					color: "#A3A3A3",
+					color: accent ? "rgba(253,218,36,0.85)" : "#A3A3A3",
 					marginBottom: 6,
 				}}
 			>
@@ -210,9 +219,9 @@ function StatBlock({
 			</div>
 			<div
 				style={{
-					fontSize: 28,
+					fontSize: 26,
 					fontWeight: 700,
-					color: positive === false ? "#FB7185" : "#E5E5E5",
+					color: valueColor,
 				}}
 			>
 				{value}
