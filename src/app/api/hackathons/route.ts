@@ -6,7 +6,7 @@
  *   GET /api/hackathons?organizer=stellar-development-foundation
  *
  * Returns curated Stellar hackathons + their project counts + winners.
- * Powers the Stellar Hackathon Copilot SKILL.md so AI agents can answer
+ * Powers the Stellar Scout SKILL.md so AI agents can answer
  * questions like "what Stellar hackathons happened in 2025" or "who won
  * the soroban track at Stellar Hacks Agents".
  */

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
-import { STELLAR_HACKATHON_COPILOT_SKILL } from "@/lib/stellar-hackathon-copilot-skill";
+import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 
 /** Legacy execCommand-based copy. Returns true on success. */
 function legacyCopy(text: string): boolean {
@@ -28,11 +28,11 @@ interface Props {
 	label?: string;
 }
 
-export function CopilotCopyButton({ className, label = "Copy skill" }: Props) {
+export function ScoutCopyButton({ className, label = "Copy skill" }: Props) {
 	const [copied, setCopied] = useState(false);
 
 	const handle = () => {
-		const text = STELLAR_HACKATHON_COPILOT_SKILL;
+		const text = STELLAR_SCOUT_SKILL;
 		const onSuccess = () => {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
@@ -42,12 +42,12 @@ export function CopilotCopyButton({ className, label = "Copy skill" }: Props) {
 			navigator.clipboard.writeText(text).then(onSuccess, () => {
 				if (legacyCopy(text)) onSuccess();
 				else
-					window.open("/skills/stellar-hackathon-copilot.md", "_blank");
+					window.open("/skills/stellar-scout.md", "_blank");
 			});
 			return;
 		}
 		if (legacyCopy(text)) onSuccess();
-		else window.open("/skills/stellar-hackathon-copilot.md", "_blank");
+		else window.open("/skills/stellar-scout.md", "_blank");
 	};
 
 	return (
@@ -58,7 +58,7 @@ export function CopilotCopyButton({ className, label = "Copy skill" }: Props) {
 				className ??
 				"inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border/50 bg-card text-sm font-medium text-foreground hover:bg-white/[0.04] transition-colors"
 			}
-			title="Copy the Stellar Hackathon Copilot skill manifest to your clipboard"
+			title="Copy the Stellar Scout skill manifest to your clipboard"
 		>
 			{copied ? (
 				<>

@@ -8,7 +8,7 @@
  *   GET /api/builders?featured=1
  *
  * Returns curated Stellar builder profiles (synced from Stellar Passport).
- * Used by the Hackathon Copilot SKILL.md so AI agents can answer
+ * Used by the Stellar Scout SKILL.md so AI agents can answer
  * teammate-matching questions like "show me Stellar devs in Lagos who've
  * worked on Soroban".
  */

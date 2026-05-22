@@ -10,12 +10,12 @@ import {
 	Terminal,
 	ExternalLink,
 } from "lucide-react";
-import { CopilotCopyButton } from "@/components/copilot-copy-button";
+import { ScoutCopyButton } from "@/components/scout-copy-button";
 
 export const metadata: Metadata = {
-	title: "Stellar Hackathon Copilot | Stellar Light",
+	title: "Stellar Scout | Stellar Light",
 	description:
-		"A skill for deep Stellar ecosystem research. Validate ideas, find prior art, surface teammates, and recommend SDK tracks — installed into Claude Code, Codex, or any agent that loads SKILL.md.",
+		"Scout the Stellar ecosystem before you build. Validate ideas, find prior art, surface teammates, and recommend SDK tracks — installed into Claude, Claude Code, Codex, or any agent that loads SKILL.md.",
 };
 
 const SAMPLE_PROMPTS = [
@@ -110,7 +110,7 @@ function Section({
 	);
 }
 
-export default function CopilotPage() {
+export default function ScoutPage() {
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -127,21 +127,22 @@ export default function CopilotPage() {
 					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[#FDDA24]/30 bg-[#FDDA24]/5">
 						<Sparkles className="w-3.5 h-3.5 text-[#FDDA24]" />
 						<span className="text-xs font-medium text-[#FDDA24]">
-							A skill for deep Stellar ecosystem research
+							Scout the Stellar landscape before you build
 						</span>
 					</div>
 					<h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-						Stellar Hackathon Copilot
+						Stellar Scout
 					</h1>
 					<p className="text-lg text-muted-foreground max-w-2xl mb-8">
-						Validate ideas before you build. Surface prior art across Stellar
-						hackathons, SCF rounds, and the project directory. Find teammates
-						with the right skills. Get pointed to the right SDK.
+						An AI skill that scouts the Stellar ecosystem for you. Validate
+						ideas before you build. Surface prior art across Stellar hackathons,
+						SCF rounds, and the project directory. Find teammates with the right
+						skills. Get pointed to the right SDK.
 					</p>
 					<div className="flex flex-wrap items-center gap-3">
-						<CopilotCopyButton label="Copy skill" />
+						<ScoutCopyButton label="Copy skill" />
 						<a
-							href="/skills/stellar-hackathon-copilot.md"
+							href="/skills/stellar-scout.md"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border/50 bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
@@ -174,7 +175,7 @@ export default function CopilotPage() {
 									loads <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">SKILL.md</code> files.
 									For Claude Code, drop the file into{" "}
 									<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
-										.claude/skills/stellar-hackathon-copilot/SKILL.md
+										.claude/skills/stellar-scout/SKILL.md
 									</code>
 									.
 								</div>
@@ -260,7 +261,7 @@ export default function CopilotPage() {
 						</div>
 						<p className="text-xs text-muted-foreground border-t border-border/40 pt-4">
 							<strong className="text-foreground">Evidence floor:</strong> if
-							the data doesn't support a claim, the copilot says so. It won't
+							the data doesn't support a claim, Scout says so. It won't
 							invent competitors, prize amounts, or builder profiles. Missing
 							data is reported as "not indexed" — never papered over.
 						</p>
@@ -363,7 +364,7 @@ export default function CopilotPage() {
 				{/* Topic clusters */}
 				<Section
 					eyebrow="Stellar-native"
-					title="Topic clusters the copilot understands"
+					title="Topic clusters Scout understands"
 				>
 					<div className="grid sm:grid-cols-2 gap-3">
 						{TOPIC_CLUSTERS.map((t) => (
@@ -391,7 +392,7 @@ export default function CopilotPage() {
 							skills.stellar.org <ExternalLink className="w-3 h-3" />
 						</a>{" "}
 						— the Stellar Foundation's official skill catalog covering{" "}
-						<em>how</em> to build. This copilot covers <em>what</em> to build
+						<em>how</em> to build. Scout covers <em>what</em> to build
 						and <em>with whom</em>. They compose.
 					</p>
 				</Section>
@@ -452,7 +453,7 @@ export default function CopilotPage() {
 						Copy the skill, paste it into your agent, ask{" "}
 						<em>"should I build X on Stellar?"</em>
 					</p>
-					<CopilotCopyButton label="Copy the skill" />
+					<ScoutCopyButton label="Copy the skill" />
 				</div>
 			</main>
 		</div>

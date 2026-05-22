@@ -1,6 +1,6 @@
 /**
  * Public read-only projects search — the prior-art / competitor lookup
- * endpoint that powers the Hackathon Copilot's "has anyone built this?"
+ * endpoint that powers Stellar Scout's "has anyone built this?"
  * questions.
  *
  *   GET /api/projects/search?q=stablecoin
