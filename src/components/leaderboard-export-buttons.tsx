@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileJson, FileText, ImageDown, Loader2 } from "lucide-react";
+import { FileJson, ImageDown, Loader2, Sparkles } from "lucide-react";
 
 interface Props {
 	sort: string;
@@ -35,18 +35,24 @@ export function LeaderboardExportButtons({
 		try {
 			const { toPng } = await import("html-to-image");
 
-			// The shareable card is permanently parked off-screen at
-			// left: -2000px (see EcosystemShareableCard). We don't touch
-			// its style here — that previously caused forced reflows which
-			// flickered the on-page chart's ResizeObserver. html-to-image
-			// captures using the explicit width/height options below rather
-			// than the off-screen bounding rect.
-			//
-			// One RAF + tick to ensure any pending paint / font load has
-			// settled before we walk the DOM.
+			// Briefly move the card to top:0/left:0 with visibility:hidden so
+			// html-to-image gets a correct bounding rect AND the chart's
+			// ResizeObserver has definitely fired with the right dimensions.
+			// `visibility: hidden` keeps it invisible to the user. We override
+			// `visibility: visible` on the cloned snapshot via the `style`
+			// option so the captured PNG renders fully.
+			const saved = {
+				left: target.style.left,
+				visibility: target.style.visibility,
+			};
+			target.style.left = "0px";
+			target.style.visibility = "hidden";
+
+			// Two animation frames + a tick to let any pending layout settle.
 			await new Promise((r) =>
 				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
 			);
+			await new Promise((r) => setTimeout(r, 100));
 
 			const dataUrl = await toPng(target, {
 				// cacheBust appends ?cacheBust=... query strings — fine locally
@@ -60,21 +66,19 @@ export function LeaderboardExportButtons({
 				height: 675,
 				canvasWidth: 1200,
 				canvasHeight: 675,
-				style: { transform: "none" },
-				// skipFonts: true skips html-to-image's fontEmbedCSS step,
-				// which otherwise tries to fetch every CSS @font-face rule on
-				// the page and inline it. Production deploys often serve fonts
-				// with strict CORS / from cross-origin CDNs, which makes that
-				// fetch fail and crashes the whole capture. Our card uses only
-				// system fonts (-apple-system, BlinkMacSystemFont, …) so we
-				// don't need any external font embedding.
-				skipFonts: true,
+				// Override the cloned root's styles so the snapshot renders
+				// fully visible even though the source on the page is hidden.
+				style: { transform: "none", visibility: "visible" },
 				// If any image fails to inline (shouldn't happen now that the
 				// only <img> uses a data URI, but defensive), substitute a 1×1
 				// transparent pixel rather than aborting the whole capture.
 				imagePlaceholder:
 					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=",
 			});
+
+			// Restore off-screen position.
+			target.style.left = saved.left;
+			target.style.visibility = saved.visibility;
 
 			const link = document.createElement("a");
 			const date = new Date().toISOString().slice(0, 10);
@@ -120,12 +124,14 @@ export function LeaderboardExportButtons({
 				JSON
 			</a>
 			<a
-				href={`/api/leaderboard?${qs(sort, range, category, { format: "csv" })}`}
+				href="/skills/stellar-developer-activity.md"
+				target="_blank"
+				rel="noopener noreferrer"
 				className={baseBtn}
-				title="Download the leaderboard as a CSV"
+				title="Open the Claude / AI agent skill manifest for Stellar developer activity"
 			>
-				<FileText className="w-3.5 h-3.5" />
-				CSV
+				<Sparkles className="w-3.5 h-3.5" />
+				Skill
 			</a>
 		</div>
 	);
