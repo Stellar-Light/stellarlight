@@ -1,0 +1,31 @@
+{
+  "source": "Electric Capital \u2014 Open Dev Data",
+  "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
+  "ecosystem": "Stellar",
+  "asOf": "2026-05-13",
+  "refreshedAt": "2026-05-22T03:43:34.826348+00:00",
+  "mad": {
+    "total": 1679,
+    "exclusive": 948,
+    "multichain": 731,
+    "thirtyDaysAgo": 1521,
+    "ninetyDaysAgo": 1098,
+    "oneYearAgo": 1166,
+    "allTimePeak": 1734,
+    "allTimePeakDay": "2026-04-29"
+  },
+  "commits28d": {
+    "total": 37353,
+    "thirtyDaysAgo": 39032
+  },
+  "tenure": {
+    "fullTime": 221,
+    "partTime": 1236,
+    "oneTime": 222
+  },
+  "experience": {
+    "lessThan1Year": 979,
+    "oneToTwoYears": 396,
+    "twoYearsPlus": 304
+  }
+}
