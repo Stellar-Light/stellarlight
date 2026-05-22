@@ -1,5 +1,25 @@
 import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import ecData from "@/data/electric-capital-stellar.json";
+import { AreaChart, Area } from "@/components/charts/area-chart";
+
+/** Electric Capital lightning-bolt mark, recreated inline so we don't ship
+ *  an external image. The brand color is their cyan. */
+function ElectricCapitalLogo({ className }: { className?: string }) {
+	return (
+		<svg
+			viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-label="Electric Capital"
+			className={className}
+		>
+			<rect width="100" height="100" rx="10" fill="#00BFE9" />
+			<path
+				d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z"
+				fill="#FFFFFF"
+			/>
+		</svg>
+	);
+}
 
 interface ECStats {
 	source: string;
@@ -24,6 +44,7 @@ interface ECStats {
 		oneToTwoYears: number;
 		twoYearsPlus: number;
 	};
+	series365d?: Array<{ date: string; mad: number }>;
 }
 
 function deltaPct(current: number, previous: number): number {
@@ -99,6 +120,11 @@ export function EcosystemDevStats() {
 		}
 	};
 
+	const series = (d.series365d ?? []).map((p) => ({
+		date: new Date(p.date),
+		mad: p.mad,
+	}));
+
 	return (
 		<section className="mb-8">
 			<div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
@@ -109,8 +135,9 @@ export function EcosystemDevStats() {
 					href={d.sourceUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
+					className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
 				>
+					<ElectricCapitalLogo className="w-4 h-4 rounded-sm" />
 					{d.source}
 					<ArrowUpRight className="w-3 h-3" />
 				</a>
@@ -155,6 +182,40 @@ export function EcosystemDevStats() {
 					}
 				/>
 			</div>
+
+			{series.length > 1 && (
+				<div className="rounded-xl border border-border/50 bg-card p-4 mb-2">
+					<div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
+						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+							MAD over the last year
+						</div>
+						<div className="text-[11px] text-muted-foreground/70 tabular-nums">
+							{series[0].date.toLocaleDateString("en-US", {
+								month: "short",
+								year: "numeric",
+							})}{" "}
+							→{" "}
+							{series[series.length - 1].date.toLocaleDateString("en-US", {
+								month: "short",
+								year: "numeric",
+							})}
+						</div>
+					</div>
+					<AreaChart
+						data={series}
+						xDataKey="date"
+						aspectRatio="4 / 1"
+						margin={{ top: 8, right: 0, bottom: 4, left: 0 }}
+					>
+						<Area
+							dataKey="mad"
+							stroke="#FDDA24"
+							fill="#FDDA24"
+							strokeWidth={2}
+						/>
+					</AreaChart>
+				</div>
+			)}
 
 			<div className="text-[11px] text-muted-foreground/70">
 				As of {formatDate(d.asOf)} · Snapshot refreshed{" "}

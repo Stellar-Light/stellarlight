@@ -92,6 +92,21 @@ def main() -> None:
     columns = [d[0] for d in con.description]
     raw = dict(zip(columns, res))
 
+    # Also fetch the full daily MAD series for the last year so the dashboard
+    # can render a time-series chart.
+    series_rows = con.execute(
+        f"""
+        SELECT day, all_devs
+        FROM '{eco_mads_url}'
+        WHERE ecosystem_id = {STELLAR_ECOSYSTEM_ID}
+          AND day >= ((SELECT MAX(day) FROM '{eco_mads_url}' WHERE ecosystem_id = {STELLAR_ECOSYSTEM_ID}) - INTERVAL 365 DAY)::DATE
+        ORDER BY day ASC
+        """
+    ).fetchall()
+    series = [
+        {"date": str(row[0]), "mad": int(row[1] or 0)} for row in series_rows
+    ]
+
     snapshot = {
         "source": "Electric Capital — Open Dev Data",
         "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
@@ -122,6 +137,7 @@ def main() -> None:
             "oneToTwoYears": int(raw["today_devs_1_2y"]) if raw["today_devs_1_2y"] else 0,
             "twoYearsPlus": int(raw["today_devs_2y_plus"]) if raw["today_devs_2y_plus"] else 0,
         },
+        "series365d": series,
     }
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
