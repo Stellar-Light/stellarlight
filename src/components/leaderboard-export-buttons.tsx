@@ -33,26 +33,53 @@ export function LeaderboardExportButtons({
 		if (!target) return;
 		setPngBusy(true);
 		try {
-			// Dynamic import keeps html-to-image out of the initial bundle.
 			const { toPng } = await import("html-to-image");
 
-			// Wait two animation frames + a tick so the off-screen chart's
-			// ResizeObserver has fired and any SVG paths are committed before
-			// we walk the DOM for the snapshot. Without this the PNG renders
-			// blank because the chart hasn't been sized yet.
+			// Temporarily move the card on-screen so html-to-image gets correct
+			// bounding-rect dimensions. Capturing an element positioned off-
+			// screen (left: 100vw) was producing cropped PNGs because the
+			// browser's getBoundingClientRect() clamped against the document
+			// width in some cases. Restoring position after capture means the
+			// user sees at most a single frame's flicker.
+			const saved = {
+				position: target.style.position,
+				top: target.style.top,
+				left: target.style.left,
+				zIndex: target.style.zIndex,
+				opacity: target.style.opacity,
+			};
+			target.style.position = "fixed";
+			target.style.top = "0";
+			target.style.left = "0";
+			target.style.zIndex = "-1";
+			target.style.opacity = "1";
+
+			// Two animation frames + a tick so the chart's ResizeObserver
+			// has fired and any SVG paths are committed.
 			await new Promise((r) =>
 				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
 			);
-			await new Promise((r) => setTimeout(r, 50));
+			await new Promise((r) => setTimeout(r, 80));
 
 			const dataUrl = await toPng(target, {
 				cacheBust: true,
 				backgroundColor: "#0a0a0a",
 				pixelRatio: 2,
-				width: target.offsetWidth,
-				height: target.offsetHeight,
+				width: 1200,
+				height: 675,
+				canvasWidth: 1200,
+				canvasHeight: 675,
+				style: { transform: "none" },
 				skipFonts: false,
 			});
+
+			// Restore off-screen state.
+			target.style.position = saved.position;
+			target.style.top = saved.top;
+			target.style.left = saved.left;
+			target.style.zIndex = saved.zIndex;
+			target.style.opacity = saved.opacity;
+
 			const link = document.createElement("a");
 			const date = new Date().toISOString().slice(0, 10);
 			link.download = `stellar-dev-activity-${date}.png`;
