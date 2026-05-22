@@ -35,24 +35,32 @@ export function LeaderboardExportButtons({
 		try {
 			const { toPng } = await import("html-to-image");
 
-			// Temporarily move the card on-screen so html-to-image gets correct
-			// bounding-rect dimensions. Capturing an element positioned off-
-			// screen (left: 100vw) was producing cropped PNGs because the
-			// browser's getBoundingClientRect() clamped against the document
-			// width in some cases. Restoring position after capture means the
-			// user sees at most a single frame's flicker.
+			// Capture without ever painting the card on-screen.
+			//
+			// Earlier we briefly moved the card to top:0/left:0/zIndex:-1 so
+			// html-to-image would see a correctly-positioned bounding rect —
+			// but z-index:-1 doesn't reliably hide it (the dark theme leaves
+			// transparent regions where the card briefly peeks through). The
+			// user reported a ~1s flash.
+			//
+			// New approach: move it to top:0/left:0 BUT also set
+			// visibility:"hidden". `visibility:hidden` keeps the element in
+			// layout (ResizeObserver fires, getBoundingClientRect works) but
+			// never paints. We then override visibility to "visible" *only on
+			// the cloned snapshot* via html-to-image's `style` option, so the
+			// captured PNG renders normally while the user sees nothing.
 			const saved = {
 				position: target.style.position,
 				top: target.style.top,
 				left: target.style.left,
 				zIndex: target.style.zIndex,
-				opacity: target.style.opacity,
+				visibility: target.style.visibility,
 			};
 			target.style.position = "fixed";
 			target.style.top = "0";
 			target.style.left = "0";
 			target.style.zIndex = "-1";
-			target.style.opacity = "1";
+			target.style.visibility = "hidden";
 
 			// Two animation frames + a tick so the chart's ResizeObserver
 			// has fired and any SVG paths are committed.
@@ -69,16 +77,18 @@ export function LeaderboardExportButtons({
 				height: 675,
 				canvasWidth: 1200,
 				canvasHeight: 675,
-				style: { transform: "none" },
+				// Override the cloned root's styles so the snapshot renders
+				// fully visible even though the source on the page is hidden.
+				style: { transform: "none", visibility: "visible" },
 				skipFonts: false,
 			});
 
-			// Restore off-screen state.
+			// Restore previous style values so the card returns to off-screen.
 			target.style.position = saved.position;
 			target.style.top = saved.top;
 			target.style.left = saved.left;
 			target.style.zIndex = saved.zIndex;
-			target.style.opacity = saved.opacity;
+			target.style.visibility = saved.visibility;
 
 			const link = document.createElement("a");
 			const date = new Date().toISOString().slice(0, 10);
