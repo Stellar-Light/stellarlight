@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, FileJson, ImageDown, Sparkles } from "lucide-react";
+import { Check, Copy, FileJson, ImageDown } from "lucide-react";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 
 interface Props {
@@ -123,7 +123,7 @@ export function LeaderboardExportButtons({
 					</>
 				) : (
 					<>
-						<Sparkles className="w-3.5 h-3.5" />
+						<Copy className="w-3.5 h-3.5" />
 						Skill
 					</>
 				)}
