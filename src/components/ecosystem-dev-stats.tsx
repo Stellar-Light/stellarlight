@@ -2,6 +2,7 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import ecData from "@/data/electric-capital-stellar.json";
 import { EcosystemMadChart } from "@/components/ecosystem-mad-chart";
 import { EcosystemGeoCards } from "@/components/ecosystem-geo-cards";
+import { EcosystemShareableCard } from "@/components/ecosystem-shareable-card";
 
 /** Electric Capital lightning-bolt mark, recreated inline so we don't ship
  *  an external image. The brand color is their cyan. */
@@ -169,25 +170,34 @@ export function EcosystemDevStats() {
 	);
 
 	// Chains rendered in chart: peers first (background lines), Stellar last
-	// so the gold area paints on top of everyone.
+	// so the gold area paints on top of everyone. We deliberately exclude
+	// Ethereum from the chart (it's ~5x Stellar's MAD — its line pushes the
+	// y-axis ceiling so high every other chain gets compressed and Stellar
+	// reads as buried mid-pack). It still appears in the legend below so
+	// nothing's hidden — just visually scoped to comparable peers.
+	const chartPeers = (d.peers ?? []).filter(
+		(p) => peerKey(p.name) !== "ethereum",
+	);
 	const chains = [
-		...(d.peers ?? []).map((p) => ({
+		...chartPeers.map((p) => ({
 			key: peerKey(p.name),
 			label: CHAIN_STYLE[peerKey(p.name)]?.label ?? p.name,
 			color: CHAIN_STYLE[peerKey(p.name)]?.color ?? "#666",
-			strokeWidth: 1.25,
+			strokeWidth: 1,
 			filled: false,
 		})),
 		{
 			key: "stellar",
 			label: "Stellar",
 			color: CHAIN_STYLE.stellar.color,
-			strokeWidth: 2.5,
+			strokeWidth: 3,
 			filled: true,
 		},
 	];
 
-	// Legend: Stellar + peers sorted by current MAD desc, with Stellar rank.
+	// Legend: Stellar + ALL peers (including Ethereum) sorted by current MAD
+	// desc — so visitors still see the full L1 ranking without the chart's
+	// y-axis getting wrecked by it.
 	const legendEntries = [
 		{ name: "Stellar", current: d.mad.total },
 		...(d.peers ?? []).map((p) => ({ name: p.name, current: p.current })),
@@ -196,7 +206,21 @@ export function EcosystemDevStats() {
 		legendEntries.findIndex((e) => e.name === "Stellar") + 1;
 
 	return (
-		<section id="dev-activity-snapshot" className="mb-8 p-4 -m-4 rounded-2xl">
+		<section className="mb-8">
+			{/* Off-screen export-only render — captured by the PNG button. */}
+			<EcosystemShareableCard
+				data={series}
+				chains={chains}
+				stats={{
+					activeDevs: d.mad.total,
+					commits28d: d.commits28d.total,
+					yoyPct: madDelta1y,
+					fullTimeDevs: d.tenure.fullTime,
+				}}
+				asOf={d.asOf}
+				stellarRank={stellarRank}
+				totalRanked={legendEntries.length}
+			/>
 			<div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
 				<h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
 					Ecosystem developer activity
@@ -317,7 +341,7 @@ export function EcosystemDevStats() {
 						})}
 					</div>
 					<div className="text-[11px] text-muted-foreground/60 mt-1">
-						“Active dev” = at least one commit to an ecosystem repo in the trailing 28 days. Hover for daily values across all chains.
+						“Active dev” = at least one commit to an ecosystem repo in the trailing 28 days. Hover for daily values. Ethereum (8.5k MAD) is omitted from the chart for scale but shown in the legend below.
 					</div>
 				</div>
 			)}

@@ -68,7 +68,7 @@ export function LeaderboardExportButtons({
 				onClick={handlePng}
 				disabled={pngBusy}
 				className={`${baseBtn} disabled:opacity-50`}
-				title="Download the dev-activity dashboard as a PNG image"
+				title="Download a Twitter-friendly snapshot (1200×675) of Stellar's dev activity"
 			>
 				{pngBusy ? (
 					<Loader2 className="w-3.5 h-3.5 animate-spin" />

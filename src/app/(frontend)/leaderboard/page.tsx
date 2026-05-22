@@ -240,7 +240,7 @@ export default async function LeaderboardPage({
 						sort={sortBy}
 						range={range}
 						category={categoryFilter}
-						snapshotTargetId="dev-activity-snapshot"
+						snapshotTargetId="shareable-snapshot"
 					/>
 				</div>
 
