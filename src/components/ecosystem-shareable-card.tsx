@@ -100,19 +100,35 @@ export function EcosystemShareableCard({
 				style={{
 					display: "flex",
 					justifyContent: "space-between",
-					alignItems: "baseline",
+					alignItems: "center",
 					marginBottom: 20,
 				}}
 			>
 				<div
 					style={{
-						fontSize: 18,
-						fontWeight: 600,
-						color: "#E5E5E5",
-						letterSpacing: "-0.01em",
+						display: "flex",
+						alignItems: "center",
+						gap: 12,
 					}}
 				>
-					Stellar Developer Activity
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						src="/stellar-xlm-logo.png"
+						alt=""
+						width={32}
+						height={32}
+						style={{ filter: "invert(1)", display: "block" }}
+					/>
+					<div
+						style={{
+							fontSize: 18,
+							fontWeight: 600,
+							color: "#E5E5E5",
+							letterSpacing: "-0.01em",
+						}}
+					>
+						Stellar Developer Activity
+					</div>
 				</div>
 				<div
 					style={{
@@ -192,12 +208,28 @@ export function EcosystemShareableCard({
 					color: "#A3A3A3",
 				}}
 			>
-				<span>
-					Stellar ranks{" "}
-					<span style={{ color: "#FDDA24", fontWeight: 600 }}>
-						#{stellarRank}
-					</span>{" "}
-					of {totalRanked} tracked L1s by active devs
+				<span
+					style={{
+						display: "inline-flex",
+						alignItems: "center",
+						gap: 8,
+					}}
+				>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						src="/stellar-xlm-logo.png"
+						alt=""
+						width={16}
+						height={16}
+						style={{ filter: "invert(1)", display: "block" }}
+					/>
+					<span>
+						Stellar ranks{" "}
+						<span style={{ color: "#FDDA24", fontWeight: 600 }}>
+							#{stellarRank}
+						</span>{" "}
+						of {totalRanked} tracked L1s by active devs
+					</span>
 				</span>
 				<span style={{ color: "#E5E5E5", fontWeight: 600 }}>
 					stellarlight.xyz
