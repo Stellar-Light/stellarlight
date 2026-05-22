@@ -2,6 +2,25 @@
 
 import { EcosystemMadChart, type ChainLine } from "@/components/ecosystem-mad-chart";
 
+/** Inline Electric Capital lightning-bolt mark — cyan square + white bolt.
+ *  Duplicated from `ecosystem-dev-stats.tsx` so the off-screen card has
+ *  zero external image dependencies (html-to-image inlines this cleanly). */
+function ElectricCapitalLogo({ size = 16 }: { size?: number }) {
+	return (
+		<svg
+			viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg"
+			width={size}
+			height={size}
+			style={{ borderRadius: 3, flexShrink: 0 }}
+			aria-label="Electric Capital"
+		>
+			<rect width="100" height="100" rx="10" fill="#00BFE9" />
+			<path d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z" fill="#FFFFFF" />
+		</svg>
+	);
+}
+
 interface Props {
 	data: Array<Record<string, Date | number>>;
 	chains: ChainLine[];
@@ -99,12 +118,23 @@ export function EcosystemShareableCard({
 					style={{
 						fontSize: 12,
 						color: "#737373",
-						textAlign: "right",
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "flex-end",
+						gap: 4,
 					}}
 				>
-					{dateLabel}
-					<br />
-					Source: Electric Capital
+					<span>{dateLabel}</span>
+					<span
+						style={{
+							display: "inline-flex",
+							alignItems: "center",
+							gap: 6,
+						}}
+					>
+						<ElectricCapitalLogo size={14} />
+						<span>Source: Electric Capital</span>
+					</span>
 				</div>
 			</div>
 
