@@ -13,9 +13,26 @@
 
 import { ImageResponse } from "next/og";
 import { NextResponse, type NextRequest } from "next/server";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import ecData from "@/data/electric-capital-stellar.json";
 
 export const runtime = "nodejs";
+
+/** Read the Stellar PNG from /public at module load, embed as data URI.
+ *  Satori (ImageResponse) doesn't render `<img src="/foo.png">` unless
+ *  the src is a fully-resolved URL or data URI. Reading once at module
+ *  init keeps the per-request render fast. */
+const STELLAR_LOGO_DATA_URI = (() => {
+	try {
+		const buf = readFileSync(
+			join(process.cwd(), "public", "stellar-xlm-logo.png"),
+		);
+		return `data:image/png;base64,${buf.toString("base64")}`;
+	} catch {
+		return null;
+	}
+})();
 
 const STELLAR_GOLD = "#FDDA24";
 const BG = "#0a0a0a";
@@ -76,24 +93,24 @@ function StatBlock({ label, value }: { label: string; value: string }) {
 				flex: 1,
 				background: CARD_BG,
 				border: `1px solid ${BORDER}`,
-				borderRadius: 12,
-				padding: "14px 16px",
+				borderRadius: 14,
+				padding: "20px 22px",
 			}}
 		>
 			<div
 				style={{
-					fontSize: 11,
+					fontSize: 14,
 					letterSpacing: "0.06em",
 					textTransform: "uppercase",
 					color: MUTED,
-					marginBottom: 6,
+					marginBottom: 8,
 				}}
 			>
 				{label}
 			</div>
 			<div
 				style={{
-					fontSize: 26,
+					fontSize: 34,
 					fontWeight: 700,
 					color: FG,
 				}}
@@ -130,9 +147,9 @@ export async function GET(req: NextRequest) {
 	].sort((a, b) => b.current - a.current);
 	const stellarRank = ranked.findIndex((e) => e.name === "Stellar") + 1;
 
-	// Chart geometry inside the card.
-	const chartW = 1104;
-	const chartH = 240;
+	// Chart geometry inside the card. Card is 1600×900 with 64px padding.
+	const chartW = 1472;
+	const chartH = 320;
 	const { line, area } = buildChartPaths(d.series365d, chartW, chartH);
 
 	const dateLabel = (() => {
@@ -155,12 +172,12 @@ export async function GET(req: NextRequest) {
 					style={{
 						display: "flex",
 						flexDirection: "column",
-						width: 1200,
-						height: 675,
+						width: 1600,
+						height: 900,
 						background: BG,
 						color: FG,
 						fontFamily: "system-ui, -apple-system, sans-serif",
-						padding: 48,
+						padding: 64,
 						border: `1px solid ${BORDER}`,
 					}}
 				>
@@ -180,32 +197,18 @@ export async function GET(req: NextRequest) {
 								gap: 12,
 							}}
 						>
-							{/* Inline Stellar mark — simplified SVG so no fetch dependency */}
-							<svg
-								width="32"
-								height="32"
-								viewBox="0 0 40 40"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<circle
-									cx="20"
-									cy="20"
-									r="18.5"
-									fill="none"
-									stroke={FG}
-									strokeWidth="1.5"
+							{STELLAR_LOGO_DATA_URI ? (
+								<img
+									src={STELLAR_LOGO_DATA_URI}
+									width={42}
+									height={42}
+									style={{ filter: "invert(1)" }}
+									alt=""
 								/>
-								<path
-									d="M 6 13 L 33 25 M 6 22 L 33 10"
-									stroke={FG}
-									strokeWidth="2.4"
-									fill="none"
-									strokeLinecap="round"
-								/>
-							</svg>
+							) : null}
 							<div
 								style={{
-									fontSize: 22,
+									fontSize: 30,
 									fontWeight: 600,
 									color: FG,
 									letterSpacing: "-0.01em",
@@ -219,9 +222,9 @@ export async function GET(req: NextRequest) {
 								display: "flex",
 								flexDirection: "column",
 								alignItems: "flex-end",
-								fontSize: 12,
+								fontSize: 16,
 								color: "#737373",
-								gap: 4,
+								gap: 6,
 							}}
 						>
 							<span>{dateLabel}</span>
@@ -234,8 +237,8 @@ export async function GET(req: NextRequest) {
 							>
 								{/* Electric Capital lightning bolt mark */}
 								<svg
-									width="14"
-									height="14"
+									width="18"
+									height="18"
 									viewBox="0 0 100 100"
 									xmlns="http://www.w3.org/2000/svg"
 								>
@@ -283,11 +286,11 @@ export async function GET(req: NextRequest) {
 					>
 						<div
 							style={{
-								fontSize: 11,
+								fontSize: 14,
 								letterSpacing: "0.06em",
 								textTransform: "uppercase",
 								color: MUTED,
-								marginBottom: 4,
+								marginBottom: 6,
 							}}
 						>
 							Monthly active devs over the last year
@@ -330,36 +333,23 @@ export async function GET(req: NextRequest) {
 							display: "flex",
 							justifyContent: "space-between",
 							alignItems: "center",
-							marginTop: 16,
-							paddingTop: 16,
+							marginTop: 20,
+							paddingTop: 20,
 							borderTop: `1px solid ${BORDER}`,
-							fontSize: 13,
+							fontSize: 17,
 							color: MUTED,
 						}}
 					>
 						<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 40 40"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<circle
-									cx="20"
-									cy="20"
-									r="18.5"
-									fill="none"
-									stroke={FG}
-									strokeWidth="1.5"
+							{STELLAR_LOGO_DATA_URI ? (
+								<img
+									src={STELLAR_LOGO_DATA_URI}
+									width={18}
+									height={18}
+									style={{ filter: "invert(1)" }}
+									alt=""
 								/>
-								<path
-									d="M 6 13 L 33 25 M 6 22 L 33 10"
-									stroke={FG}
-									strokeWidth="2.4"
-									fill="none"
-									strokeLinecap="round"
-								/>
-							</svg>
+							) : null}
 							<span>
 								Stellar ranks{" "}
 								<span style={{ color: STELLAR_GOLD, fontWeight: 600 }}>
@@ -375,8 +365,8 @@ export async function GET(req: NextRequest) {
 				</div>
 			),
 			{
-				width: 1200,
-				height: 675,
+				width: 1600,
+				height: 900,
 			},
 		);
 	} catch (err) {

@@ -13,6 +13,25 @@ interface Props {
 	snapshotTargetId?: string;
 }
 
+/** Legacy execCommand-based copy. Returns true on success. */
+function legacyCopy(text: string): boolean {
+	try {
+		const ta = document.createElement("textarea");
+		ta.value = text;
+		ta.style.position = "fixed";
+		ta.style.top = "-1000px";
+		ta.style.opacity = "0";
+		document.body.appendChild(ta);
+		ta.focus();
+		ta.select();
+		const ok = document.execCommand("copy");
+		ta.remove();
+		return ok;
+	} catch {
+		return false;
+	}
+}
+
 function qs(
 	sort: string,
 	range: string,
@@ -32,43 +51,38 @@ export function LeaderboardExportButtons({
 	range,
 	category,
 }: Props) {
-	const [skillDone, setSkillDone] = useState(false);
+	const [skillCopied, setSkillCopied] = useState(false);
 
-	// Skill button does two things in parallel:
-	// 1. ALWAYS triggers a download of stellar-developer-activity.md — the
-	//    user can attach this file to Claude/ChatGPT, drop it into a project's
-	//    .claude/skills/ folder, or read it locally. This works in every
-	//    browser, no permissions needed.
-	// 2. ATTEMPTS to also write the markdown to the clipboard, so the user
-	//    can immediately paste it into a chat. This is best-effort — if the
-	//    browser rejects (insecure context, permissions, etc.) the user
-	//    still has the downloaded file.
-	const handleSkill = () => {
-		// Best-effort clipboard write — synchronous call to preserve user
-		// activation, no await beforehand, silent on failure.
+	/**
+	 * Copy the skill markdown to clipboard. Three-tier fallback:
+	 *
+	 *   1. navigator.clipboard.writeText (modern Async Clipboard API).
+	 *      Called synchronously here — no awaited fetches beforehand —
+	 *      so user activation is preserved on Safari.
+	 *   2. document.execCommand("copy") via a temporary textarea
+	 *      (legacy but widely supported, works in non-secure contexts).
+	 *   3. Open the .md file in a new tab so the user can copy manually.
+	 */
+	const handleSkillCopy = () => {
+		const text = STELLAR_DEVELOPER_ACTIVITY_SKILL;
+		const onSuccess = () => {
+			setSkillCopied(true);
+			setTimeout(() => setSkillCopied(false), 2000);
+		};
+
+		// Try modern API first.
 		if (navigator.clipboard?.writeText) {
-			navigator.clipboard
-				.writeText(STELLAR_DEVELOPER_ACTIVITY_SKILL)
-				.catch(() => {
-					/* clipboard rejected — download still happens below */
-				});
+			navigator.clipboard.writeText(text).then(onSuccess, () => {
+				// Fall through to execCommand on rejection.
+				if (legacyCopy(text)) onSuccess();
+				else window.open("/skills/stellar-developer-activity.md", "_blank");
+			});
+			return;
 		}
 
-		// Always trigger the file download.
-		const blob = new Blob([STELLAR_DEVELOPER_ACTIVITY_SKILL], {
-			type: "text/markdown;charset=utf-8",
-		});
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.download = "stellar-developer-activity.md";
-		link.href = url;
-		document.body.appendChild(link);
-		link.click();
-		link.remove();
-		URL.revokeObjectURL(url);
-
-		setSkillDone(true);
-		setTimeout(() => setSkillDone(false), 2000);
+		// No modern API at all → try legacy directly.
+		if (legacyCopy(text)) onSuccess();
+		else window.open("/skills/stellar-developer-activity.md", "_blank");
 	};
 
 	const baseBtn =
@@ -98,14 +112,14 @@ export function LeaderboardExportButtons({
 			</a>
 			<button
 				type="button"
-				onClick={handleSkill}
+				onClick={handleSkillCopy}
 				className={baseBtn}
-				title="Download stellar-developer-activity.md (also copied to clipboard). Attach to Claude/ChatGPT or drop into .claude/skills/ to give an AI agent native access to Stellar dev data."
+				title="Copy the Stellar developer-activity skill manifest to your clipboard. Paste it into Claude / any AI agent to give it native access to Stellar dev data."
 			>
-				{skillDone ? (
+				{skillCopied ? (
 					<>
 						<Check className="w-3.5 h-3.5 text-emerald-400" />
-						Got it
+						Copied
 					</>
 				) : (
 					<>
