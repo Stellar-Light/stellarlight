@@ -4,15 +4,28 @@
  *   GET /api/hackathons
  *   GET /api/hackathons?status=upcoming|active|completed
  *   GET /api/hackathons?organizer=stellar-development-foundation
+ *   GET /api/hackathons?source=curated  // exclude DoraHacks live feed
  *
- * Returns curated Stellar hackathons + their project counts + winners.
- * Powers the Stellar Scout SKILL.md so AI agents can answer
- * questions like "what Stellar hackathons happened in 2025" or "who won
- * the soroban track at Stellar Hacks Agents".
+ * Returns a merged feed of:
+ *   1. **Curated** hackathons from the Payload Hackathons collection
+ *      (rich detail: winners, organizer, internal page).
+ *   2. **Live** hackathons from DoraHacks (Stellar org IDs 3096 + 3853).
+ *      Surfaces upcoming + active events that curators haven't yet
+ *      mirrored into Payload.
+ *
+ * De-duplicated by external URL when possible. Powers the Stellar Scout
+ * SKILL.md so AI agents can answer questions like "what Stellar
+ * hackathons are coming up" or "who won the soroban track at Stellar
+ * Hacks Agents".
  */
 
 import { NextResponse, type NextRequest } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	fetchAllDoraHacksHackathons,
+	getHackathonUrl,
+	type DoraHacksHackathon,
+} from "@/lib/integrations/dorahacks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -28,84 +41,182 @@ interface HackathonRow {
 	externalUrl: string | null;
 	organizer: { id: string; name: string; slug: string } | null;
 	url: string;
+	source: "curated" | "dorahacks";
+	prizePoolUSD?: number;
+	hackersCount?: number;
+}
+
+/** Map a DoraHacks status code + timing into our status enum. */
+function doraStatus(h: DoraHacksHackathon): "upcoming" | "active" | "completed" {
+	const now = Math.floor(Date.now() / 1000);
+	if (h.start_time > now) return "upcoming";
+	if (h.end_time < now) return "completed";
+	return "active";
+}
+
+function doraToRow(h: DoraHacksHackathon): HackathonRow {
+	const startDate = new Date(h.start_time * 1000).toISOString().slice(0, 10);
+	const endDate = new Date(h.end_time * 1000).toISOString().slice(0, 10);
+	const url = getHackathonUrl(h.uname);
+	return {
+		id: `dorahacks-${h.id}`,
+		name: h.title,
+		slug: h.uname,
+		description: h.description ?? null,
+		startDate,
+		endDate,
+		status: doraStatus(h),
+		externalUrl: url,
+		organizer: h.organization
+			? {
+					id: `dorahacks-org-${h.organization.id}`,
+					name: h.organization.name,
+					slug: h.organization.name.toLowerCase().replace(/\s+/g, "-"),
+				}
+			: null,
+		url,
+		source: "dorahacks",
+		prizePoolUSD: h.bonus_price || undefined,
+		hackersCount: h.hackers_count || undefined,
+	};
 }
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
 	const statusFilter = sp.get("status");
 	const organizerFilter = sp.get("organizer");
+	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
 	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 300);
 
-	const payload = await getPayloadSafe();
-	let hackathons: HackathonRow[] = [];
+	let curated: HackathonRow[] = [];
+	let dora: HackathonRow[] = [];
 
-	if (payload) {
-		try {
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = {};
-			if (statusFilter && ["upcoming", "active", "completed"].includes(statusFilter)) {
-				where.status = { equals: statusFilter };
+	// 1. Curated hackathons (Payload).
+	if (sourceFilter !== "dorahacks") {
+		const payload = await getPayloadSafe();
+		if (payload) {
+			try {
+				// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
+				const where: any = {};
+				if (statusFilter && ["upcoming", "active", "completed"].includes(statusFilter)) {
+					where.status = { equals: statusFilter };
+				}
+
+				const result = await payload.find({
+					collection: "hackathons",
+					where,
+					limit: 300,
+					depth: 1,
+					sort: "-startDate",
+				});
+
+				curated = (
+					result.docs as Array<{
+						id: string;
+						name: string;
+						slug: string;
+						description?: string;
+						startDate?: string;
+						endDate?: string;
+						status: string;
+						externalUrl?: string;
+						organizer?: { id: string; name: string; slug: string } | string;
+					}>
+				).map((h) => {
+					const org =
+						h.organizer && typeof h.organizer === "object"
+							? {
+									id: String(h.organizer.id),
+									name: h.organizer.name,
+									slug: h.organizer.slug,
+								}
+							: null;
+					return {
+						id: String(h.id),
+						name: h.name,
+						slug: h.slug,
+						description: h.description ?? null,
+						startDate: h.startDate ?? null,
+						endDate: h.endDate ?? null,
+						status: h.status,
+						externalUrl: h.externalUrl ?? null,
+						organizer: org,
+						url: `https://stellarlight.xyz/hackathons/${h.slug}`,
+						source: "curated",
+					};
+				});
+			} catch {
+				// fall through
 			}
-
-			const result = await payload.find({
-				collection: "hackathons",
-				where,
-				limit,
-				depth: 1,
-				sort: "-startDate",
-			});
-
-			hackathons = (
-				result.docs as Array<{
-					id: string;
-					name: string;
-					slug: string;
-					description?: string;
-					startDate?: string;
-					endDate?: string;
-					status: string;
-					externalUrl?: string;
-					organizer?: { id: string; name: string; slug: string } | string;
-				}>
-			).map((h) => {
-				const org =
-					h.organizer && typeof h.organizer === "object"
-						? {
-								id: String(h.organizer.id),
-								name: h.organizer.name,
-								slug: h.organizer.slug,
-							}
-						: null;
-				return {
-					id: String(h.id),
-					name: h.name,
-					slug: h.slug,
-					description: h.description ?? null,
-					startDate: h.startDate ?? null,
-					endDate: h.endDate ?? null,
-					status: h.status,
-					externalUrl: h.externalUrl ?? null,
-					organizer: org,
-					url: `https://stellarlight.xyz/hackathons/${h.slug}`,
-				};
-			});
-
-			if (organizerFilter) {
-				hackathons = hackathons.filter(
-					(h) => h.organizer?.slug === organizerFilter,
-				);
-			}
-		} catch {
-			// fall through with empty list
 		}
 	}
+
+	// 2. Live DoraHacks feed.
+	if (sourceFilter !== "curated") {
+		try {
+			const doraHackathons = await fetchAllDoraHacksHackathons();
+			dora = doraHackathons.map(doraToRow);
+		} catch {
+			// fall through
+		}
+	}
+
+	// 3. Merge. De-duplicate by externalUrl — if a curated entry already
+	// points at a DoraHacks event, the curated one wins (richer detail).
+	const curatedExternalUrls = new Set(
+		curated.map((c) => c.externalUrl).filter(Boolean) as string[],
+	);
+	const dedupedDora = dora.filter(
+		(d) => !d.externalUrl || !curatedExternalUrls.has(d.externalUrl),
+	);
+
+	let hackathons = [...curated, ...dedupedDora];
+
+	// Apply filters that span both sources.
+	if (
+		statusFilter &&
+		["upcoming", "active", "completed"].includes(statusFilter)
+	) {
+		hackathons = hackathons.filter((h) => h.status === statusFilter);
+	}
+	if (organizerFilter) {
+		hackathons = hackathons.filter(
+			(h) => h.organizer?.slug === organizerFilter,
+		);
+	}
+
+	// Sort: upcoming → active → completed; within each bucket, most recent
+	// startDate first.
+	const bucketOrder = { upcoming: 0, active: 1, completed: 2 } as const;
+	hackathons.sort((a, b) => {
+		const ab =
+			bucketOrder[a.status as keyof typeof bucketOrder] ?? 3;
+		const bb =
+			bucketOrder[b.status as keyof typeof bucketOrder] ?? 3;
+		if (ab !== bb) return ab - bb;
+		const at = a.startDate ? new Date(a.startDate).getTime() : 0;
+		const bt = b.startDate ? new Date(b.startDate).getTime() : 0;
+		return bt - at;
+	});
+
+	hackathons = hackathons.slice(0, limit);
 
 	return NextResponse.json(
 		{
 			meta: {
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
-				filters: { status: statusFilter, organizer: organizerFilter, limit },
+				filters: {
+					status: statusFilter,
+					organizer: organizerFilter,
+					source: sourceFilter,
+					limit,
+				},
+				counts: {
+					curated: curated.length,
+					dorahacks: dora.length,
+					returned: hackathons.length,
+				},
 			},
 			hackathons,
 		},

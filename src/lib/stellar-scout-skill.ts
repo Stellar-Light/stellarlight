@@ -80,9 +80,14 @@ Params: \`sort=activity|stars|issues\`, \`range=7d|30d|90d|1y|all\`, \`category=
 Returns: \`.ecosystem.activeDevs28d\`, \`.ecosystem.commits28d\`, \`.projects[*]\`.
 
 ### \`GET /api/hackathons\`
-All curated Stellar hackathons.
-Params: \`status=upcoming|active|completed\`, \`organizer={slug}\`.
-Returns: \`.hackathons[*]\` with name, dates, organizer, externalUrl.
+A merged feed of:
+  - **Curated** Stellar hackathons (rich detail, internal pages)
+  - **Live** DoraHacks events for Stellar (org IDs 3096 + 3853)
+
+Each row has a \`source\` field (\`"curated"\` or \`"dorahacks"\`) so you can tell them apart. Curated entries win on de-duplication when a DoraHacks event has already been mirrored.
+
+Params: \`status=upcoming|active|completed\`, \`organizer={slug}\`, \`source=curated|dorahacks\` (optional, to restrict to one feed).
+Returns: \`.hackathons[*]\` with name, dates, status, externalUrl, source, prizePoolUSD (DoraHacks only), hackersCount (DoraHacks only). \`.meta.counts.{curated,dorahacks,returned}\` for quick coverage stats.
 
 ### \`GET /api/hackathons/{slug}\`
 Single-hackathon detail.
