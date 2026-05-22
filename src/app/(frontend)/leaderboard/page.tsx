@@ -9,9 +9,9 @@ import { EcosystemDevStats } from "@/components/ecosystem-dev-stats";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Leaderboard | Stellar Light",
+	title: "Developer Activity | Stellar Light",
 	description:
-		"GitHub activity leaderboard for Stellar ecosystem projects.",
+		"Developer activity rankings and ecosystem metrics for Stellar projects.",
 };
 
 type SearchParams = Promise<{
@@ -228,10 +228,10 @@ export default async function LeaderboardPage({
 
 				<div className="mb-8">
 					<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-						GitHub Activity
+						Developer Activity
 					</h1>
 					<p className="text-sm text-muted-foreground mt-2">
-						Stellar projects ranked by recent GitHub activity.
+						Stellar projects ranked by recent developer activity.
 					</p>
 				</div>
 
