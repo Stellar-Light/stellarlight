@@ -1,6 +1,7 @@
 import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import ecData from "@/data/electric-capital-stellar.json";
-import { AreaChart, Area } from "@/components/charts/area-chart";
+import { EcosystemMadChart } from "@/components/ecosystem-mad-chart";
+import { EcosystemGeoCards } from "@/components/ecosystem-geo-cards";
 
 /** Electric Capital lightning-bolt mark, recreated inline so we don't ship
  *  an external image. The brand color is their cyan. */
@@ -45,6 +46,12 @@ interface ECStats {
 		twoYearsPlus: number;
 	};
 	series365d?: Array<{ date: string; mad: number }>;
+	geo?: {
+		totalActive28d: number;
+		located: number;
+		unknown: number;
+		topCountries: Array<{ country: string; devs: number }>;
+	};
 }
 
 function deltaPct(current: number, previous: number): number {
@@ -145,11 +152,11 @@ export function EcosystemDevStats() {
 
 			<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
 				<StatCard
-					label="Monthly active devs"
+					label="Active devs (28d)"
 					value={d.mad.total.toLocaleString()}
 					sub={
 						<>
-							{d.mad.exclusive.toLocaleString()} exclusive ·{" "}
+							{d.mad.exclusive.toLocaleString()} Stellar-only ·{" "}
 							{d.mad.multichain.toLocaleString()} multichain
 						</>
 					}
@@ -172,7 +179,7 @@ export function EcosystemDevStats() {
 					}
 				/>
 				<StatCard
-					label="YoY MAD growth"
+					label="Active devs YoY"
 					value={`${madDelta1y >= 0 ? "+" : ""}${madDelta1y}%`}
 					sub={
 						<>
@@ -187,7 +194,7 @@ export function EcosystemDevStats() {
 				<div className="rounded-xl border border-border/50 bg-card p-4 mb-2">
 					<div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
 						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-							MAD over the last year
+							Monthly active devs over the last year
 						</div>
 						<div className="text-[11px] text-muted-foreground/70 tabular-nums">
 							{series[0].date.toLocaleDateString("en-US", {
@@ -201,20 +208,19 @@ export function EcosystemDevStats() {
 							})}
 						</div>
 					</div>
-					<AreaChart
-						data={series}
-						xDataKey="date"
-						aspectRatio="4 / 1"
-						margin={{ top: 8, right: 0, bottom: 4, left: 0 }}
-					>
-						<Area
-							dataKey="mad"
-							stroke="#FDDA24"
-							fill="#FDDA24"
-							strokeWidth={2}
-						/>
-					</AreaChart>
+					<EcosystemMadChart data={series} />
+					<div className="text-[11px] text-muted-foreground/60 mt-1">
+						“Active dev” = at least one commit to a Stellar ecosystem repo in the trailing 28 days. Hover for daily values.
+					</div>
 				</div>
+			)}
+
+			{d.geo && d.geo.topCountries.length > 0 && (
+				<EcosystemGeoCards
+					topCountries={d.geo.topCountries}
+					located={d.geo.located}
+					totalActive={d.geo.totalActive28d}
+				/>
 			)}
 
 			<div className="text-[11px] text-muted-foreground/70">

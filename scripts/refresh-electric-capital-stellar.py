@@ -107,6 +107,40 @@ def main() -> None:
         {"date": str(row[0]), "mad": int(row[1] or 0)} for row in series_rows
     ]
 
+    # Geographic breakdown: country of currently-active (28d) Stellar devs.
+    # Many devs have no public location, so we report counts among the
+    # _located_ subset and surface the coverage rate separately.
+    base = eco_mads_url.rsplit("/", 1)[0]
+    geo_rows = con.execute(
+        f"""
+        WITH latest AS (
+          SELECT MAX(day) AS d FROM '{base}/eco_developer_28d_activities.parquet'
+          WHERE ecosystem_id = {STELLAR_ECOSYSTEM_ID}
+        ), active_devs AS (
+          SELECT DISTINCT a.canonical_developer_id
+          FROM '{base}/eco_developer_28d_activities.parquet' a, latest l
+          WHERE a.ecosystem_id = {STELLAR_ECOSYSTEM_ID} AND a.day = l.d
+        ), dev_country AS (
+          SELECT a.canonical_developer_id, loc.country
+          FROM active_devs a
+          LEFT JOIN '{base}/canonical_developer_locations.parquet' loc
+            ON loc.canonical_developer_id = a.canonical_developer_id
+        )
+        SELECT COALESCE(country, '__unknown__') AS country, COUNT(*) AS devs
+        FROM dev_country
+        GROUP BY 1
+        ORDER BY devs DESC
+        """
+    ).fetchall()
+
+    geo_total_active = sum(int(r[1]) for r in geo_rows)
+    geo_unknown = sum(int(r[1]) for r in geo_rows if r[0] == "__unknown__")
+    geo_located = [
+        {"country": r[0], "devs": int(r[1])}
+        for r in geo_rows
+        if r[0] != "__unknown__"
+    ]
+
     snapshot = {
         "source": "Electric Capital — Open Dev Data",
         "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
@@ -138,6 +172,12 @@ def main() -> None:
             "twoYearsPlus": int(raw["today_devs_2y_plus"]) if raw["today_devs_2y_plus"] else 0,
         },
         "series365d": series,
+        "geo": {
+            "totalActive28d": geo_total_active,
+            "located": geo_total_active - geo_unknown,
+            "unknown": geo_unknown,
+            "topCountries": geo_located[:10],
+        },
     }
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)

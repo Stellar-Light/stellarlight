@@ -3,7 +3,7 @@
   "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
   "ecosystem": "Stellar",
   "asOf": "2026-05-13",
-  "refreshedAt": "2026-05-22T03:52:06.224831+00:00",
+  "refreshedAt": "2026-05-22T04:13:51.320364+00:00",
   "mad": {
     "total": 1679,
     "exclusive": 948,
@@ -1493,5 +1493,52 @@
       "date": "2026-05-13",
       "mad": 1679
     }
-  ]
+  ],
+  "geo": {
+    "totalActive28d": 1679,
+    "located": 391,
+    "unknown": 1288,
+    "topCountries": [
+      {
+        "country": "Nigeria",
+        "devs": 192
+      },
+      {
+        "country": "United States",
+        "devs": 48
+      },
+      {
+        "country": "India",
+        "devs": 39
+      },
+      {
+        "country": "Costa Rica",
+        "devs": 14
+      },
+      {
+        "country": "Argentina",
+        "devs": 10
+      },
+      {
+        "country": "Canada",
+        "devs": 7
+      },
+      {
+        "country": "Germany",
+        "devs": 6
+      },
+      {
+        "country": "Brazil",
+        "devs": 6
+      },
+      {
+        "country": "T\u00fcrkiye",
+        "devs": 5
+      },
+      {
+        "country": "Kenya",
+        "devs": 4
+      }
+    ]
+  }
 }
