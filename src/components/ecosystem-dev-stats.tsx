@@ -196,7 +196,7 @@ export function EcosystemDevStats() {
 		legendEntries.findIndex((e) => e.name === "Stellar") + 1;
 
 	return (
-		<section className="mb-8">
+		<section id="dev-activity-snapshot" className="mb-8 p-4 -m-4 rounded-2xl">
 			<div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
 				<h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
 					Ecosystem developer activity

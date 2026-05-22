@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Star, GitFork, ExternalLink } from "lucide-react";
 import { LeaderboardFilters } from "@/components/leaderboard-filters";
 import { EcosystemDevStats } from "@/components/ecosystem-dev-stats";
+import { LeaderboardExportButtons } from "@/components/leaderboard-export-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -235,22 +236,12 @@ export default async function LeaderboardPage({
 							Stellar projects ranked by recent developer activity.
 						</p>
 					</div>
-					<div className="flex items-center gap-2 text-xs">
-						<a
-							href={`/api/leaderboard?sort=${sortBy}&range=${range}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
-						>
-							JSON
-						</a>
-						<a
-							href={`/api/leaderboard?format=csv&sort=${sortBy}&range=${range}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
-							className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/50 bg-card text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
-						>
-							CSV
-						</a>
-					</div>
+					<LeaderboardExportButtons
+						sort={sortBy}
+						range={range}
+						category={categoryFilter}
+						snapshotTargetId="dev-activity-snapshot"
+					/>
 				</div>
 
 				<EcosystemDevStats />
