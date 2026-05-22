@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileJson, ImageDown, Loader2, Sparkles } from "lucide-react";
+import { Check, FileJson, ImageDown, Loader2, Sparkles } from "lucide-react";
 
 interface Props {
 	sort: string;
@@ -27,6 +27,21 @@ export function LeaderboardExportButtons({
 	snapshotTargetId,
 }: Props) {
 	const [pngBusy, setPngBusy] = useState(false);
+	const [skillCopied, setSkillCopied] = useState(false);
+
+	const handleSkillCopy = async () => {
+		try {
+			const res = await fetch("/skills/stellar-developer-activity.md");
+			const text = await res.text();
+			await navigator.clipboard.writeText(text);
+			setSkillCopied(true);
+			setTimeout(() => setSkillCopied(false), 2000);
+		} catch (err) {
+			console.error("Skill copy failed", err);
+			// Fall back to opening the file in a new tab if clipboard fails
+			window.open("/skills/stellar-developer-activity.md", "_blank");
+		}
+	};
 
 	const handlePng = async () => {
 		const target = document.getElementById(snapshotTargetId);
@@ -35,49 +50,47 @@ export function LeaderboardExportButtons({
 		try {
 			const { toPng } = await import("html-to-image");
 
-			// Briefly move the card to top:0/left:0 with visibility:hidden so
-			// html-to-image gets a correct bounding rect AND the chart's
-			// ResizeObserver has definitely fired with the right dimensions.
-			// `visibility: hidden` keeps it invisible to the user. We override
-			// `visibility: visible` on the cloned snapshot via the `style`
-			// option so the captured PNG renders fully.
+			// This is the exact PR #74 working flow. Card is permanently at
+			// `left: 100vw`; here we briefly move it to top:0/left:0 with
+			// visibility:hidden so html-to-image gets a correct bounding rect
+			// while the user sees nothing. The clone's visibility is
+			// overridden to "visible" via the `style` option below so the
+			// captured PNG renders fully.
 			const saved = {
+				position: target.style.position,
+				top: target.style.top,
 				left: target.style.left,
+				zIndex: target.style.zIndex,
 				visibility: target.style.visibility,
 			};
-			target.style.left = "0px";
+			target.style.position = "fixed";
+			target.style.top = "0";
+			target.style.left = "0";
+			target.style.zIndex = "-1";
 			target.style.visibility = "hidden";
 
-			// Two animation frames + a tick to let any pending layout settle.
 			await new Promise((r) =>
 				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
 			);
-			await new Promise((r) => setTimeout(r, 100));
+			await new Promise((r) => setTimeout(r, 80));
 
 			const dataUrl = await toPng(target, {
-				// cacheBust appends ?cacheBust=... query strings — fine locally
-				// but some production CDNs return CORS errors on those URLs.
-				// Disabling avoids the entire class of fetch failures since
-				// our card now uses an inline data URI for the Stellar logo.
-				cacheBust: false,
+				cacheBust: true,
 				backgroundColor: "#0a0a0a",
 				pixelRatio: 2,
 				width: 1200,
 				height: 675,
 				canvasWidth: 1200,
 				canvasHeight: 675,
-				// Override the cloned root's styles so the snapshot renders
-				// fully visible even though the source on the page is hidden.
 				style: { transform: "none", visibility: "visible" },
-				// If any image fails to inline (shouldn't happen now that the
-				// only <img> uses a data URI, but defensive), substitute a 1×1
-				// transparent pixel rather than aborting the whole capture.
-				imagePlaceholder:
-					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=",
+				skipFonts: false,
 			});
 
-			// Restore off-screen position.
+			// Restore previous style values so the card returns off-screen.
+			target.style.position = saved.position;
+			target.style.top = saved.top;
 			target.style.left = saved.left;
+			target.style.zIndex = saved.zIndex;
 			target.style.visibility = saved.visibility;
 
 			const link = document.createElement("a");
@@ -123,16 +136,24 @@ export function LeaderboardExportButtons({
 				<FileJson className="w-3.5 h-3.5" />
 				JSON
 			</a>
-			<a
-				href="/skills/stellar-developer-activity.md"
-				target="_blank"
-				rel="noopener noreferrer"
+			<button
+				type="button"
+				onClick={handleSkillCopy}
 				className={baseBtn}
-				title="Open the Claude / AI agent skill manifest for Stellar developer activity"
+				title="Copy the Claude / AI agent skill manifest to your clipboard — paste it into Claude or any LLM workflow"
 			>
-				<Sparkles className="w-3.5 h-3.5" />
-				Skill
-			</a>
+				{skillCopied ? (
+					<>
+						<Check className="w-3.5 h-3.5 text-emerald-400" />
+						Copied
+					</>
+				) : (
+					<>
+						<Sparkles className="w-3.5 h-3.5" />
+						Skill
+					</>
+				)}
+			</button>
 		</div>
 	);
 }

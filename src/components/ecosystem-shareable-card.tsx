@@ -71,20 +71,17 @@ export function EcosystemShareableCard({
 		<div
 			id="shareable-snapshot"
 			aria-hidden="true"
-			// Permanently parked off-screen to the left at a moderate offset
-			// (not extreme negatives like -9999px, which caused some browsers
-			// to defer layout/paint and left the chart blank during export).
-			// - Chart's ResizeObserver fires correctly because the element has
-			//   full layout (visibility:hidden would prevent that)
-			// - Element never paints in the viewport (no flash)
-			// - No DOM mutation needed at export time → no forced reflows
-			//   that would flicker the on-page chart
-			// - html-to-image uses explicit width/height options for capture
-			//   so off-screen bounding rect doesn't crop the snapshot
+			// Off-screen via left:100vw (this is the exact positioning that
+			// worked in PR #74; do not change without testing both local AND
+			// production). The element gets full layout so the chart's
+			// ResizeObserver fires, but renders outside the viewport.
+			// The click handler in leaderboard-export-buttons.tsx briefly
+			// moves it to left:0/visibility:hidden during capture so
+			// html-to-image gets a correct bounding rect.
 			style={{
 				position: "fixed",
 				top: 0,
-				left: -2000,
+				left: "100vw",
 				width: 1200,
 				height: 675,
 				background: "#0a0a0a",
