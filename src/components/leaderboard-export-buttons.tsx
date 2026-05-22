@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, FileJson, ImageDown, Loader2, Sparkles } from "lucide-react";
 
 interface Props {
@@ -28,19 +28,40 @@ export function LeaderboardExportButtons({
 }: Props) {
 	const [pngBusy, setPngBusy] = useState(false);
 	const [skillCopied, setSkillCopied] = useState(false);
+	const [skillContent, setSkillContent] = useState<string | null>(null);
 
-	const handleSkillCopy = async () => {
-		try {
-			const res = await fetch("/skills/stellar-developer-activity.md");
-			const text = await res.text();
-			await navigator.clipboard.writeText(text);
-			setSkillCopied(true);
-			setTimeout(() => setSkillCopied(false), 2000);
-		} catch (err) {
-			console.error("Skill copy failed", err);
-			// Fall back to opening the file in a new tab if clipboard fails
+	// Pre-fetch the skill markdown at mount so the click handler can call
+	// navigator.clipboard.writeText() synchronously. Awaiting fetch inside
+	// the click handler breaks user activation in Safari, which makes the
+	// clipboard write reject and we end up in the fallback opening the file
+	// in a new tab.
+	useEffect(() => {
+		fetch("/skills/stellar-developer-activity.md")
+			.then((r) => (r.ok ? r.text() : null))
+			.then((text) => {
+				if (text) setSkillContent(text);
+			})
+			.catch(() => {
+				/* fallback path will open the file */
+			});
+	}, []);
+
+	const handleSkillCopy = () => {
+		if (!skillContent || !navigator.clipboard?.writeText) {
 			window.open("/skills/stellar-developer-activity.md", "_blank");
+			return;
 		}
+		// No await before writeText — preserves user activation in Safari.
+		navigator.clipboard
+			.writeText(skillContent)
+			.then(() => {
+				setSkillCopied(true);
+				setTimeout(() => setSkillCopied(false), 2000);
+			})
+			.catch((err) => {
+				console.error("Skill copy failed", err);
+				window.open("/skills/stellar-developer-activity.md", "_blank");
+			});
 	};
 
 	const handlePng = async () => {
