@@ -2,7 +2,6 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import ecData from "@/data/electric-capital-stellar.json";
 import { EcosystemMadChart } from "@/components/ecosystem-mad-chart";
 import { EcosystemGeoCards } from "@/components/ecosystem-geo-cards";
-import { EcosystemShareableCard } from "@/components/ecosystem-shareable-card";
 
 /** Electric Capital lightning-bolt mark, recreated inline so we don't ship
  *  an external image. The brand color is their cyan. */
@@ -184,29 +183,8 @@ export function EcosystemDevStats() {
 		},
 	];
 
-	// Rank info — used by the off-screen PNG card's footer, not on-page.
-	const rankedChains = [
-		{ name: "Stellar", current: d.mad.total },
-		...(d.peers ?? []).map((p) => ({ name: p.name, current: p.current })),
-	].sort((a, b) => b.current - a.current);
-	const stellarRank = rankedChains.findIndex((e) => e.name === "Stellar") + 1;
-
 	return (
 		<section className="mb-8">
-			{/* Off-screen export-only render — captured by the PNG button. */}
-			<EcosystemShareableCard
-				data={series}
-				chains={chains}
-				stats={{
-					activeDevs: d.mad.total,
-					commits28d: d.commits28d.total,
-					yoyPct: madDelta1y,
-					fullTimeDevs: d.tenure.fullTime,
-				}}
-				asOf={d.asOf}
-				stellarRank={stellarRank}
-				totalRanked={rankedChains.length}
-			/>
 			<div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
 				<h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
 					Ecosystem developer activity

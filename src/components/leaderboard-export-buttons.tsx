@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, FileJson, ImageDown, Loader2, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Check, FileJson, ImageDown, Sparkles } from "lucide-react";
+import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 
 interface Props {
 	sort: string;
 	range: string;
 	category: string | null;
-	/** DOM id of the element to snapshot for the PNG export */
-	snapshotTargetId: string;
+	/** Legacy — no longer used. Kept so the page doesn't break if it still
+	 * passes the prop. PNG now renders server-side via /api/og-card. */
+	snapshotTargetId?: string;
 }
 
-function qs(sort: string, range: string, category: string | null, extra?: Record<string, string>): string {
+function qs(
+	sort: string,
+	range: string,
+	category: string | null,
+	extra?: Record<string, string>,
+): string {
 	const sp = new URLSearchParams();
 	sp.set("sort", sort);
 	sp.set("range", range);
@@ -24,36 +31,20 @@ export function LeaderboardExportButtons({
 	sort,
 	range,
 	category,
-	snapshotTargetId,
 }: Props) {
-	const [pngBusy, setPngBusy] = useState(false);
 	const [skillCopied, setSkillCopied] = useState(false);
-	const [skillContent, setSkillContent] = useState<string | null>(null);
 
-	// Pre-fetch the skill markdown at mount so the click handler can call
-	// navigator.clipboard.writeText() synchronously. Awaiting fetch inside
-	// the click handler breaks user activation in Safari, which makes the
-	// clipboard write reject and we end up in the fallback opening the file
-	// in a new tab.
-	useEffect(() => {
-		fetch("/skills/stellar-developer-activity.md")
-			.then((r) => (r.ok ? r.text() : null))
-			.then((text) => {
-				if (text) setSkillContent(text);
-			})
-			.catch(() => {
-				/* fallback path will open the file */
-			});
-	}, []);
-
+	// Skill content is inlined as a JS constant (no fetch, no Safari
+	// user-activation timing issues, no async before writeText).
 	const handleSkillCopy = () => {
-		if (!skillContent || !navigator.clipboard?.writeText) {
+		if (!navigator.clipboard?.writeText) {
+			// Insecure context or ancient browser — fall back to opening the
+			// hosted file so the user can copy manually.
 			window.open("/skills/stellar-developer-activity.md", "_blank");
 			return;
 		}
-		// No await before writeText — preserves user activation in Safari.
 		navigator.clipboard
-			.writeText(skillContent)
+			.writeText(STELLAR_DEVELOPER_ACTIVITY_SKILL)
 			.then(() => {
 				setSkillCopied(true);
 				setTimeout(() => setSkillCopied(false), 2000);
@@ -64,89 +55,21 @@ export function LeaderboardExportButtons({
 			});
 	};
 
-	const handlePng = async () => {
-		const target = document.getElementById(snapshotTargetId);
-		if (!target) return;
-		setPngBusy(true);
-		try {
-			const { toPng } = await import("html-to-image");
-
-			// This is the exact PR #74 working flow. Card is permanently at
-			// `left: 100vw`; here we briefly move it to top:0/left:0 with
-			// visibility:hidden so html-to-image gets a correct bounding rect
-			// while the user sees nothing. The clone's visibility is
-			// overridden to "visible" via the `style` option below so the
-			// captured PNG renders fully.
-			const saved = {
-				position: target.style.position,
-				top: target.style.top,
-				left: target.style.left,
-				zIndex: target.style.zIndex,
-				visibility: target.style.visibility,
-			};
-			target.style.position = "fixed";
-			target.style.top = "0";
-			target.style.left = "0";
-			target.style.zIndex = "-1";
-			target.style.visibility = "hidden";
-
-			await new Promise((r) =>
-				requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
-			);
-			await new Promise((r) => setTimeout(r, 80));
-
-			const dataUrl = await toPng(target, {
-				cacheBust: true,
-				backgroundColor: "#0a0a0a",
-				pixelRatio: 2,
-				width: 1200,
-				height: 675,
-				canvasWidth: 1200,
-				canvasHeight: 675,
-				style: { transform: "none", visibility: "visible" },
-				skipFonts: false,
-			});
-
-			// Restore previous style values so the card returns off-screen.
-			target.style.position = saved.position;
-			target.style.top = saved.top;
-			target.style.left = saved.left;
-			target.style.zIndex = saved.zIndex;
-			target.style.visibility = saved.visibility;
-
-			const link = document.createElement("a");
-			const date = new Date().toISOString().slice(0, 10);
-			link.download = `stellar-dev-activity-${date}.png`;
-			link.href = dataUrl;
-			document.body.appendChild(link);
-			link.click();
-			link.remove();
-		} catch (err) {
-			console.error("PNG export failed", err);
-		} finally {
-			setPngBusy(false);
-		}
-	};
-
 	const baseBtn =
 		"inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border/50 bg-card text-xs text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors";
 
 	return (
 		<div className="flex items-center gap-2">
-			<button
-				type="button"
-				onClick={handlePng}
-				disabled={pngBusy}
-				className={`${baseBtn} disabled:opacity-50`}
-				title="Download a Twitter-friendly snapshot (1200×675) of Stellar's dev activity"
+			{/* PNG: server-rendered via /api/og-card. download=1 triggers
+			    the file-download Content-Disposition header. */}
+			<a
+				href="/api/og-card?download=1"
+				className={baseBtn}
+				title="Download a Twitter-friendly 1200×675 snapshot of Stellar's dev activity"
 			>
-				{pngBusy ? (
-					<Loader2 className="w-3.5 h-3.5 animate-spin" />
-				) : (
-					<ImageDown className="w-3.5 h-3.5" />
-				)}
+				<ImageDown className="w-3.5 h-3.5" />
 				PNG
-			</button>
+			</a>
 			<a
 				href={`/api/leaderboard?${qs(sort, range, category)}`}
 				target="_blank"
@@ -161,7 +84,7 @@ export function LeaderboardExportButtons({
 				type="button"
 				onClick={handleSkillCopy}
 				className={baseBtn}
-				title="Copy the Claude / AI agent skill manifest to your clipboard — paste it into Claude or any LLM workflow"
+				title="Copy the Claude / AI agent skill manifest to your clipboard"
 			>
 				{skillCopied ? (
 					<>
