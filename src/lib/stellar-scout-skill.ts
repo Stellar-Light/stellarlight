@@ -35,12 +35,14 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
 #### The 8-step workflow
 
-1. **Restate the idea** in one sentence. Confirm with the user before proceeding.
+1. **Restate the idea** in one sentence. Confirm with the user before proceeding. **Reframe if the assumption is off** — if prior art suggests the user has the wrong layer ("I want to build a DEX" but the gap is actually in execution infrastructure), surface that *before* you start searching. Don't validate an idea just because they're excited about it. Example: *"You said DEX, but every Stellar DEX project is well-funded — the real gap your prior art reveals is order-routing infra. Want me to vet that instead?"*
 2. **Prior-art search.** Hit \`/api/projects/search?q={keywords}&limit=20\`. Surface every match with score ≥ 1.
-3. **Gap classification.** Based on the prior-art set:
-   - **Full gap** — zero prior projects in our directory, no winning hackathon submissions, no SCF-funded teams. *Highest opportunity.*
-   - **Partial gap** — 1–3 adjacent projects exist but none cover the user's specific angle. *Medium opportunity.*
-   - **False gap** — 4+ direct competitors, or a category leader is already funded. *Low opportunity unless the user has a clear differentiator.*
+3. **Gap classification + crowdedness score.** Based on the prior-art set:
+   - **Full gap** — zero prior projects in our directory, no winning hackathon submissions, no SCF-funded teams. *Crowdedness 0/10. Highest opportunity.*
+   - **Partial gap** — 1–3 adjacent projects exist but none cover the user's specific angle. *Crowdedness 3–5/10. Medium opportunity.*
+   - **False gap** — 4+ direct competitors, or a category leader is already funded. *Crowdedness 7–10/10. Low opportunity unless the user has a clear differentiator.*
+
+   **Crowdedness score** (1–10): combine \`count(adjacent projects) + 2 × count(SCF-funded in this area) + 1 × count(hackathon winners in this area)\`, then clip to 1–10. Surface the score with one-line justification: *"Crowdedness 6/10 — 4 adjacent projects, 2 SCF-funded (Kulipa $150k, StellarPay $148k), 1 hackathon winner."* This gives a concrete numeric anchor beyond the gap label.
 4. **Competitor list.** Top 3–5 from step 2, with: name, what they shipped, hackathon they came from (if any), SCF funding (if any), GitHub link. Distinguish *direct* vs *adjacent*.
 5. **SDK / skill recommendation.** Map the idea to the right \`skills.stellar.org\` track (Soroban / dapp / assets / data / agentic-payments / zk-proofs / standards). Tell the user to grab that skill next.
 6. **Teammate candidates.** Hit \`/api/builders?q={skill_keyword}\` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport — currently in the dozens, not hundreds). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*

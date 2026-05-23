@@ -9,6 +9,7 @@ import {
 	Lightbulb,
 	Terminal,
 	ExternalLink,
+	ChevronDown,
 } from "lucide-react";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { CopyCommand } from "@/components/copy-command";
@@ -84,6 +85,156 @@ const TOPIC_CLUSTERS = [
 	{
 		name: "Data infrastructure",
 		blurb: "Indexers, Horizon clients, RPC infra, analytics",
+	},
+];
+
+const FAQ: Array<{ q: string; a: React.ReactNode }> = [
+	{
+		q: "Which AI agents does Scout work with?",
+		a: (
+			<>
+				Any agent that loads <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">SKILL.md</code>{" "}
+				files — Claude (claude.ai), Claude Code, Codex, Cursor, OpenClaw, and dozens
+				more (the underlying{" "}
+				<a
+					href="https://github.com/vercel-labs/skills"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="underline hover:text-foreground"
+				>
+					skills CLI
+				</a>{" "}
+				supports 55+ agents). The npx install handles per-agent placement automatically.
+			</>
+		),
+	},
+	{
+		q: "Does Scout write code for me?",
+		a: (
+			<>
+				No. Scout is a <strong>research skill</strong> — it tells you what's been
+				built, who's building it, what got funded, and which SDK skill to install
+				next. For the actual code work, install the relevant skill from{" "}
+				<a
+					href="https://skills.stellar.org/"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="underline hover:text-foreground"
+				>
+					skills.stellar.org
+				</a>{" "}
+				(soroban, dapp, assets, etc.) — those are the technical execution layer.
+			</>
+		),
+	},
+	{
+		q: "What if Scout returns no results for my query?",
+		a: (
+			<>
+				It'll tell you so explicitly rather than fabricating answers. Try broader
+				keywords, drop filters (e.g. remove <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">scfAwarded=1</code>),
+				or check that the topic is one we index (curated Stellar projects, hackathons,
+				SCF rounds, RFPs, dev stats). For raw GitHub searches across all of Stellar,
+				use GitHub directly — Scout only covers projects in the stellarlight directory.
+			</>
+		),
+	},
+	{
+		q: "How does Scout differ from just asking ChatGPT/Claude about Stellar?",
+		a: (
+			<>
+				Scout doesn't bring its own brain — it brings <strong>structured Stellar data</strong>.
+				The skill teaches whatever agent you use (Claude, ChatGPT, etc.) how to query
+				our public APIs to get cited, evidence-backed answers grounded in real
+				numbers: SCF dollars raised, hackathon prize pools, project counts, dev
+				activity. Without Scout the agent guesses; with Scout it cites.
+			</>
+		),
+	},
+	{
+		q: "How current is the data?",
+		a: (
+			<>
+				Varies by source. Project + Hackathons + Builders metadata: refreshed
+				continuously by curators. Live DoraHacks events: cached 1 hour. Ecosystem
+				dev stats (Electric Capital snapshot): daily at 06:00 UTC. SDF skill catalog
+				proxy: 24h. RFPs: live from <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">src/data/ideas.ts</code>.
+				Hit <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">/api/status</code> for exact{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">lastUpdatedAt</code> per source.
+			</>
+		),
+	},
+	{
+		q: "Is the API really free? No auth, no rate limits?",
+		a: (
+			<>
+				Yes — all endpoints are public, read-only, no auth, no rate limits. Edge-
+				cached for 5 minutes (24h for the SDF skill proxy). Hit them from your
+				agent, your Dune query, your dashboard, or anywhere else. If usage ever
+				gets large enough to need rate limiting, we'll publish that ahead of time
+				on the API reference page.
+			</>
+		),
+	},
+	{
+		q: "How does Scout relate to skills.stellar.org?",
+		a: (
+			<>
+				They compose. <strong>Scout</strong> answers <em>"what should I build, with
+				whom, for what funding?"</em> — strategy. <strong>skills.stellar.org</strong>{" "}
+				(the Stellar Development Foundation's 7 official skills — soroban, dapp,
+				assets, data, agentic-payments, zk-proofs, standards) answers{" "}
+				<em>"how do I actually build it?"</em> — execution. Scout cross-links to
+				those skills in its responses; install both when you move from research
+				into building.
+			</>
+		),
+	},
+	{
+		q: "What if I find a bug, missing data, or want to suggest a source?",
+		a: (
+			<>
+				Open an issue in the{" "}
+				<a
+					href="https://github.com/Stellar-Light/stellar-scout"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="underline hover:text-foreground"
+				>
+					stellar-scout repo
+				</a>{" "}
+				or the{" "}
+				<a
+					href="https://github.com/alexanderkoh/stellarlight"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="underline hover:text-foreground"
+				>
+					main stellarlight repo
+				</a>
+				. For missing projects in the directory, use the Submit form at{" "}
+				<a
+					href="https://stellarlight.xyz/submit"
+					className="underline hover:text-foreground"
+				>
+					stellarlight.xyz/submit
+				</a>
+				.
+			</>
+		),
+	},
+	{
+		q: "What does Scout do when my idea already exists?",
+		a: (
+			<>
+				It tells you. Scout classifies every idea as a <strong>full gap</strong>{" "}
+				(zero prior projects), <strong>partial gap</strong> (1–3 adjacent
+				projects), or <strong>false gap</strong> (4+ direct competitors or a
+				funded category leader), with a crowdedness score (1–10) and a list of
+				the existing players. If the gap is false, it'll suggest where the
+				whitespace actually is rather than just affirming your idea.
+			</>
+		),
 	},
 ];
 
@@ -471,6 +622,33 @@ export default function ScoutPage() {
 					>
 						Full API reference (9 endpoints, params, response shapes) →
 					</Link>
+				</Section>
+
+				{/* FAQ */}
+				<Section eyebrow="FAQ" title="Common questions">
+					<div className="space-y-3">
+						{FAQ.map((qa) => (
+							<details
+								key={qa.q}
+								className="group rounded-xl border border-border/50 bg-card p-5 open:bg-white/[0.02] transition-colors"
+							>
+								<summary className="cursor-pointer list-none flex items-start justify-between gap-4">
+									<span className="text-sm font-medium text-foreground">
+										{qa.q}
+									</span>
+									<span
+										className="flex-shrink-0 mt-0.5 text-muted-foreground group-open:rotate-180 transition-transform duration-150"
+										aria-hidden="true"
+									>
+										<ChevronDown className="w-4 h-4" />
+									</span>
+								</summary>
+								<div className="text-sm text-muted-foreground leading-relaxed mt-3">
+									{qa.a}
+								</div>
+							</details>
+						))}
+					</div>
 				</Section>
 
 				{/* Footer CTA */}
