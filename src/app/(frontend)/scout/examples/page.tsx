@@ -15,7 +15,7 @@ const SAMPLE_PROMPTS = [
 			'"I want to build a privacy-preserving stablecoin on Stellar. Vet this idea."',
 	},
 	{
-		title: "Find prior art",
+		title: "Find existing projects",
 		prompt:
 			'"What Stellar projects have built stablecoin off-ramps? Show me the SCF-funded ones first."',
 	},
@@ -43,7 +43,7 @@ const SAMPLE_PROMPTS = [
 
 const SESSIONS = [
 	{
-		title: "Conversational — prior-art lookup",
+		title: "Conversational — check what's been built",
 		eyebrow: "Example 1",
 		mode: "conversational" as const,
 		userPrompt:
@@ -146,7 +146,7 @@ const SESSIONS = [
 		},
 	},
 	{
-		title: "Funding-first prior art",
+		title: "Funding-first project search",
 		eyebrow: "Example 5",
 		mode: "deepdive" as const,
 		userPrompt:

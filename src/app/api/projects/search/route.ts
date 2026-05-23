@@ -1,6 +1,6 @@
 /**
- * Public read-only projects search — the prior-art / competitor lookup
- * endpoint that powers Stellar Scout's "has anyone built this?"
+ * Public read-only projects search — find existing Stellar projects.
+ * Powers Stellar Scout's "has anyone built this?" / competitor-lookup
  * questions.
  *
  *   GET /api/projects/search?q=stablecoin

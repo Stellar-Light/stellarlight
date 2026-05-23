@@ -17,7 +17,7 @@ import { CopyCommand } from "@/components/copy-command";
 export const metadata: Metadata = {
 	title: "Stellar Scout | Stellar Light",
 	description:
-		"Scout the Stellar ecosystem before you build. Validate ideas, find prior art, surface teammates, and recommend SDK tracks — installed into Claude, Claude Code, Codex, or any agent that loads SKILL.md.",
+		"Scout the Stellar ecosystem before you build. Validate ideas, find existing projects, surface teammates, and recommend SDK tracks — installed into Claude, Claude Code, Codex, or any agent that loads SKILL.md.",
 };
 
 const SAMPLE_PROMPTS = [
@@ -27,7 +27,7 @@ const SAMPLE_PROMPTS = [
 			'"I want to build a privacy-preserving stablecoin on Stellar. Vet this idea."',
 	},
 	{
-		title: "Find prior art",
+		title: "Find existing projects",
 		prompt:
 			'"What Stellar projects have built stablecoin off-ramps? Show me the SCF-funded ones first."',
 	},
@@ -287,7 +287,7 @@ export default function ScoutPage() {
 					</h1>
 					<p className="text-lg text-muted-foreground max-w-2xl mb-8">
 						An AI skill that scouts the Stellar ecosystem for you. Validate
-						ideas before you build. Surface prior art across Stellar hackathons,
+						ideas before you build. See what's been built across Stellar hackathons,
 						SCF rounds, and the project directory. Find teammates with the right
 						skills. Get pointed to the right SDK.
 					</p>
@@ -411,8 +411,8 @@ export default function ScoutPage() {
 							</div>
 							<p className="text-sm text-muted-foreground leading-relaxed">
 								Triggered by <em>"vet this idea"</em> /{" "}
-								<em>"should I build"</em>. Runs an 8-step workflow: prior-art
-								search → gap classification → competitors → SDK
+								<em>"should I build"</em>. Runs an 8-step workflow: search
+								existing projects → gap classification → competitors → SDK
 								recommendation → teammates → funding signal → next steps.
 							</p>
 						</div>
@@ -466,9 +466,9 @@ export default function ScoutPage() {
 						{[
 							{
 								icon: Search,
-								title: "Prior-art lookup",
+								title: "Has anyone built this?",
 								blurb:
-									"Has anyone built this on Stellar? Across hackathons, SCF, and the directory.",
+									"Search for existing Stellar projects, hackathon submissions, and SCF-funded work that overlaps your idea.",
 							},
 							{
 								icon: Award,
@@ -597,7 +597,7 @@ export default function ScoutPage() {
 							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/projects/search</span>{" "}
 							<span className="text-muted-foreground">
-								— prior-art lookup
+								— search existing projects
 							</span>
 						</div>
 						<div>

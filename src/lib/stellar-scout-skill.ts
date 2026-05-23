@@ -8,7 +8,7 @@
 export const STELLAR_SCOUT_SKILL = `
 ---
 name: stellar-scout
-description: A skill for scouting the Stellar ecosystem landscape before you build. Helps hackers, founders, and grant applicants validate ideas — surfaces prior art across Stellar hackathons, SCF rounds, and the curated project directory; recommends teammates from the Stellar Builders network; and points to the right SDK / skill track. Use when the user asks about who's building on Stellar, what's been tried, what won prizes, or whether they should build a specific idea.
+description: A skill for scouting the Stellar ecosystem landscape before you build. Helps hackers, founders, and grant applicants validate ideas — surfaces existing projects across Stellar hackathons, SCF rounds, and the curated project directory; recommends teammates from the Stellar Builders network; and points to the right SDK / skill track. Use when the user asks about who's building on Stellar, what's been tried, what won prizes, or whether they should build a specific idea.
 ---
 
 # Stellar Scout
@@ -35,9 +35,9 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
 #### The 8-step workflow
 
-1. **Restate the idea** in one sentence. Confirm with the user before proceeding. **Reframe if the assumption is off** — if prior art suggests the user has the wrong layer ("I want to build a DEX" but the gap is actually in execution infrastructure), surface that *before* you start searching. Don't validate an idea just because they're excited about it. Example: *"You said DEX, but every Stellar DEX project is well-funded — the real gap your prior art reveals is order-routing infra. Want me to vet that instead?"*
-2. **Prior-art search.** Hit \`/api/projects/search?q={keywords}&limit=20\`. Surface every match with score ≥ 1.
-3. **Gap classification + crowdedness score.** Based on the prior-art set:
+1. **Restate the idea** in one sentence. Confirm with the user before proceeding. **Reframe if the assumption is off** — if existing projects in our directory suggest the user has the wrong layer ("I want to build a DEX" but the gap is actually in execution infrastructure), surface that *before* you start searching. Don't validate an idea just because they're excited about it. Example: *"You said DEX, but every Stellar DEX project is well-funded — the real gap the existing projects reveal is order-routing infra. Want me to vet that instead?"*
+2. **Search existing projects.** Hit \`/api/projects/search?q={keywords}&limit=20\`. Surface every match with score ≥ 1.
+3. **Gap classification + crowdedness score.** Based on the matched projects:
    - **Full gap** — zero prior projects in our directory, no winning hackathon submissions, no SCF-funded teams. *Crowdedness 0/10. Highest opportunity.*
    - **Partial gap** — 1–3 adjacent projects exist but none cover the user's specific angle. *Crowdedness 3–5/10. Medium opportunity.*
    - **False gap** — 4+ direct competitors, or a category leader is already funded. *Crowdedness 7–10/10. Low opportunity unless the user has a clear differentiator.*
@@ -53,7 +53,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
 **Do not speculate.** If a step can't be answered from the endpoints below, say so explicitly. Sample language:
 
-> "I couldn't find prior art for this specific angle in the stellarlight directory. That doesn't mean nothing exists on Stellar — it means we don't have it indexed. Worth a manual GitHub search before assuming a full gap."
+> "I couldn't find an existing Stellar project matching this specific angle in the stellarlight directory. That doesn't mean nothing exists on Stellar — it means we don't have it indexed. Worth a manual GitHub search before assuming a full gap."
 
 If no Builders match a skill query, say *"no public Builders in our directory match {skill}; try posting in the Stellar Discord #builders channel"* — don't invent profiles.
 
@@ -61,7 +61,7 @@ If a hackathon's prize pool isn't documented, say *"prize pool not published; ch
 
 ## Stellar-native topic clusters
 
-When framing prior art or suggesting tracks, use these — they map to \`skills.stellar.org\`'s taxonomy and Stellar's actual ecosystem:
+When framing existing projects or suggesting tracks, use these — they map to \`skills.stellar.org\`'s taxonomy and Stellar's actual ecosystem:
 
 - **Soroban smart contracts** — Rust contracts on Soroban, DeFi protocols, AMMs, lending
 - **Anchors & off-ramps** — SEP-24 / SEP-31 deployments, regional payment corridors
@@ -108,7 +108,7 @@ Returns: \`.builders[*]\` with githubUsername, displayName, bio, roleTitle, loca
 When you return fewer than 3 matches for a skill query, **say so explicitly** and recommend fallback channels: Stellar Discord #builders, the Stellar GitHub org, and SCF Round project pages.
 
 ### \`GET /api/projects/search\`
-Prior-art / competitor lookup. The workhorse for Deep Dive step 2.
+Search existing Stellar projects (competitor / overlap lookup). The workhorse for Deep Dive step 2.
 Params: \`q={keywords}\`, \`category={cat}\`, \`hackathon={slug}\`, \`scfAwarded=1\`, \`limit=N\`.
 Returns: \`.projects[*]\` scored by keyword overlap, sorted by relevance.
 
@@ -141,7 +141,7 @@ Self-check — returns Scout skill version, current timestamp, and freshness (\`
 **Agent action:**
 1. Restate: *"You're proposing a stablecoin with confidential transactions / hidden balances, built on Stellar."*
 2. \`GET /api/projects/search?q=privacy+stablecoin+confidential\` → 1 adjacent match (XLM shielded prototype, abandoned).
-3. **Partial gap** — adjacent prior art exists but abandoned; user's angle is fresh.
+3. **Partial gap** — adjacent project exists but abandoned; user's angle is fresh.
 4. List the abandoned project + 2 ZK-adjacent projects.
 5. SDK rec: \`GET /api/skills/zk-proofs\` → quote relevant section inline. Tell user to install \`https://skills.stellar.org/skills/zk-proofs/SKILL.md\` for ongoing use. Also recommend \`soroban\`.
 6. Builders search: \`GET /api/builders?q=zk\` → surface candidates. **If < 3 hits, note the directory is small + growing and recommend Stellar Discord #builders.**
@@ -164,7 +164,7 @@ Self-check — returns Scout skill version, current timestamp, and freshness (\`
 4. Surface top 5 tracks with prize totals + which hackathons paid them out.
 5. If track data is sparse (curators haven't tagged submissions), say so — don't infer tracks from project descriptions.
 
-### Example 5 — Funding-first prior art
+### Example 5 — Funding-first project search
 **User:** "What SCF-funded projects work on payments? Which raised the most?"
 **Agent action:**
 1. \`GET /api/projects/search?q=payments&scfAwarded=1&limit=20\` → SCF-awarded payments projects.

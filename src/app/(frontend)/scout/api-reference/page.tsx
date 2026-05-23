@@ -70,7 +70,7 @@ const ENDPOINTS: Endpoint[] = [
 		method: "GET",
 		path: "/api/projects/search",
 		summary:
-			"Prior-art / competitor lookup. Keyword-scored matches across name + short description + category. The workhorse for Deep Dive step 2.",
+			"Search existing Stellar projects. Keyword-scored matches across name + short description + category. The workhorse for Deep Dive step 2 (\"has anyone built this?\").",
 		params: [
 			{ name: "q", type: "string", description: "Keywords to score against" },
 			{ name: "category", type: "string", description: "Filter by project category" },
