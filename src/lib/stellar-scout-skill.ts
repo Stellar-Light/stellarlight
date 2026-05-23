@@ -8,19 +8,21 @@
 export const STELLAR_SCOUT_SKILL = `
 ---
 name: stellar-scout
-description: A skill for scouting the Stellar ecosystem landscape before you build. Helps hackers, founders, and grant applicants validate ideas — surfaces existing projects across Stellar hackathons, SCF rounds, and the curated project directory; recommends teammates from the Stellar Builders network; and points to the right SDK / skill track. Use when the user asks about who's building on Stellar, what's been tried, what won prizes, or whether they should build a specific idea.
+description: A skill for Stellar builders. Validate ideas before you build, surface existing projects, match open SCF-funded RFPs, and get pointed to the right SDK — whether you're entering a hackathon, applying for a Stellar Community Fund grant, or shipping independently. Use when the user is exploring what to build on Stellar, vetting an idea, checking what's been tried, or asking who has shipped in a category.
 ---
 
 # Stellar Scout
 
-Scout the landscape before you build on Stellar. A research skill for **the strategic layer** of building on Stellar: what's been built, who's building it, what won prizes, and whether a new idea has a real gap to fill. For *how to build*, defer to the official Stellar Foundation skills at **https://skills.stellar.org/** (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards).
+A research skill for **the strategic layer** of building on Stellar: what's already been shipped, what got funded, what RFPs are open right now, and whether a new idea has a real gap. Works for hackathon entrants, SCF grant applicants, and independent builders alike.
+
+For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/** (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Scout chains into them via \`/api/skills\` when the user moves from "what should I build" to "how do I build it".
 
 ## When to use this skill
 
 Trigger phrases:
 - *"vet this idea"* / *"should I build X"* / *"deep dive on Y"* → run **Deep Dive Mode**
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
-- *"find me a teammate / mentor / dev"* → Builders search
+- *"find me a teammate / mentor / dev"* → Builders search (small + growing — see caveats below; for IRL hackathons the local team often isn't in the directory)
 - *"what won at Stellar Hacks {name}"* / *"who placed in {hackathon}"* → hackathon results
 - *"what got funded in SCF round X"* / *"what SCF projects do Y"* → SCF history
 - *"what's the prize pool for the next Stellar hackathon"* → upcoming hackathons
@@ -125,8 +127,8 @@ Returns: \`.rfps[*]\` with \`id, title, description, technicalRequirements, cate
 
 **Active RFPs vs closed RFPs:**
 - \`status: "open"\` RFPs are in the current SCF round (\`activeQuarter\`) and are **ready to be funded and built** — winners get an SCF grant. These are the actionable opportunities. Surface these first.
-- \`status: "closed"\` RFPs are past rounds — useful context for what's been done, but no longer fundable. Don't recommend building against them.
-- Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call \`GET /api/rfps?status=open\` first and lead with the active set. Mention the count from \`.counts.open\`.
+- \`status: "closed"\` RFPs are from past quarters. **Surface them with a clear warning: "this RFP was from {quarterLabel} — someone is likely already building it."** It's not a dead lane — the user can still build a competing/better take, or reach out to the original author (\`.authorName\`) — but they should know the lane has prior takers and isn't in the active SCF funding round.
+- Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call \`GET /api/rfps?status=open\` first and lead with the active set. Mention the count from \`.counts.open\`. When you include closed RFPs as additional context, label them as past-quarter every time.
 
 **Important framing when there are 0 open matches:**
 - 0 open RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round (\`.activeQuarter\`) covers this lane yet."*

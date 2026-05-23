@@ -84,7 +84,7 @@ async function getShowcaseProjects(): Promise<ShowcaseProject[]> {
 export const metadata: Metadata = {
 	title: "Stellar Scout | Stellar Light",
 	description:
-		"Scout the Stellar ecosystem before you build. Validate ideas, find existing projects, surface teammates, and recommend SDK tracks — installed into Claude, Claude Code, Codex, or any agent that loads SKILL.md.",
+		"An AI skill for Stellar builders — validate ideas, surface existing projects, match SCF-funded RFPs. For hackathon entrants, grant applicants, and independent builders. Installs into Claude Code, Codex, Cursor, or any agent that loads SKILL.md.",
 };
 
 const SAMPLE_PROMPTS = [
@@ -366,10 +366,11 @@ export default async function ScoutPage() {
 
 					{/* Positioning paragraph */}
 					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
-						Stellar Scout is an AI skill for validating Stellar hackathon ideas
-						before you build. It surfaces existing projects, finds teammates,
-						points to the right SDK, and matches open SCF-funded briefs — all
-						from inside Claude Code, Codex, Cursor, or any agent that loads{" "}
+						Stellar Scout is an AI skill for builders on Stellar. Validate
+						ideas before you build, surface what's been shipped, and match
+						open SCF-funded briefs — whether you're entering a hackathon,
+						applying for a grant, or shipping independently. Installed into
+						Claude Code, Codex, Cursor, or any agent that loads{" "}
 						<code className="font-mono text-foreground/90 text-sm px-1.5 py-0.5 rounded bg-white/[0.04] border border-border/30">
 							SKILL.md
 						</code>
