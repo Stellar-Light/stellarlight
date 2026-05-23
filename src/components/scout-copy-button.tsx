@@ -56,13 +56,13 @@ export function ScoutCopyButton({ className, label = "Copy skill" }: Props) {
 			onClick={handle}
 			className={
 				className ??
-				"inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border/50 bg-card text-sm font-medium text-foreground hover:bg-white/[0.04] transition-colors"
+				"inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-white/5 transition-colors"
 			}
 			title="Copy the Stellar Scout skill manifest to your clipboard"
 		>
 			{copied ? (
 				<>
-					<Check className="w-4 h-4 text-emerald-400" />
+					<Check className="w-4 h-4" />
 					Copied
 				</>
 			) : (

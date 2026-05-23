@@ -294,13 +294,13 @@ export default function ScoutPage() {
 					<div className="flex flex-wrap items-center gap-3">
 						<ScoutCopyButton
 							label="Copy skill"
-							className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-white text-[#171717] text-sm font-medium hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
+							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-[#171717] text-sm font-medium hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
 						/>
 						<a
 							href="/skills/stellar-scout.md"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-medium text-foreground hover:bg-white/5 transition-colors"
+							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-white/5 transition-colors"
 						>
 							View raw <ExternalLink className="w-3.5 h-3.5" />
 						</a>
