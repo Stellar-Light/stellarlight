@@ -11,6 +11,7 @@ import {
 	ExternalLink,
 } from "lucide-react";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
+import { CopyCommand } from "@/components/copy-command";
 
 export const metadata: Metadata = {
 	title: "Stellar Scout | Stellar Light",
@@ -161,9 +162,10 @@ export default function ScoutPage() {
 						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
 							Install via npx
 						</div>
-						<div className="rounded-lg bg-black/40 border border-border/30 p-4 mb-2 font-mono text-sm text-foreground overflow-x-auto">
-							npx skills add Stellar-Light/stellar-scout
-						</div>
+						<CopyCommand
+							command="npx skills add Stellar-Light/stellar-scout"
+							className="flex items-center gap-3 rounded-lg bg-black/40 border border-border/30 p-4 mb-2 font-mono text-sm text-foreground overflow-hidden"
+						/>
 						<p className="text-xs text-muted-foreground mb-5">
 							For Codex or OpenClaw, append{" "}
 							<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
