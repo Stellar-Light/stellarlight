@@ -30,9 +30,9 @@ const SAMPLE_PROMPTS = [
 			'"What Stellar projects have built stablecoin off-ramps? Show me the SCF-funded ones first."',
 	},
 	{
-		title: "Search for teammates",
+		title: "Spot Stellar builders",
 		prompt:
-			'"Find me Stellar builders who\'ve worked on Soroban smart contracts."',
+			'"Find Stellar builders who\'ve shipped Soroban contracts (small directory — flag any gaps)."',
 	},
 	{
 		title: "Surface SCF history",
@@ -286,9 +286,9 @@ export default function ScoutPage() {
 							},
 							{
 								icon: Users,
-								title: "Teammate matching",
+								title: "Spot Stellar builders",
 								blurb:
-									"Find Stellar builders by skill, location, SCF tier, or project history.",
+									"Search the Stellar Passport directory by skill, location, SCF tier. Small and growing — Scout flags gaps and points to Discord/GitHub when results are thin.",
 							},
 							{
 								icon: Lightbulb,

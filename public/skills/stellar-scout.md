@@ -35,7 +35,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
    - **False gap** — 4+ direct competitors, or a category leader is already funded. *Low opportunity unless the user has a clear differentiator.*
 4. **Competitor list.** Top 3–5 from step 2, with: name, what they shipped, hackathon they came from (if any), SCF funding (if any), GitHub link. Distinguish *direct* vs *adjacent*.
 5. **SDK / skill recommendation.** Map the idea to the right `skills.stellar.org` track (Soroban / dapp / assets / data / agentic-payments / zk-proofs / standards). Tell the user to grab that skill next.
-6. **Teammate candidates.** Hit `/api/builders?q={skill_keyword}` for 3–5 builders who've shipped in this category. Surface name, GitHub, what they built, location.
+6. **Teammate candidates.** Hit `/api/builders?q={skill_keyword}` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport — currently in the dozens, not hundreds). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
 7. **Funding signal.** What's been funded in this area? Filter `/api/projects/search?q={keywords}&scfAwarded=1` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete: (a) which upcoming hackathon to enter (`/api/hackathons?status=upcoming`), (b) which prize track if any sponsor RFP matches (point to https://ideas.stellarlight.xyz/ for current sponsor briefs / RFPs), (c) which SDK skill to install next from `skills.stellar.org`.
 
@@ -90,9 +90,12 @@ Returns:
 - `.submissions[*]` — every submission with placement, prize, track
 
 ### `GET /api/builders`
-Stellar builder directory (synced from Stellar Passport).
+Stellar builder directory (synced from Stellar Passport). **Small and growing dataset — opt-in profiles only, currently in the dozens.** Useful for spot-matches but not exhaustive of every Stellar dev.
+
 Params: `q={text}`, `location={city}`, `scfTier={tier}`, `featured=1`.
 Returns: `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, scfTier, projects[].
+
+When you return fewer than 3 matches for a skill query, **say so explicitly** and recommend fallback channels: Stellar Discord #builders, the Stellar GitHub org, and SCF Round project pages.
 
 ### `GET /api/projects/search`
 Prior-art / competitor lookup. The workhorse for Deep Dive step 2.
