@@ -13,7 +13,7 @@ description: A skill for Stellar builders. Validate ideas before you build, surf
 
 # Stellar Scout
 
-A research skill for **the strategic layer** of building on Stellar: what's already been shipped, what got funded, what RFPs are open right now, and whether a new idea has a real gap. Works for hackathon entrants, SCF grant applicants, and independent builders alike.
+A research skill for **the strategic layer** of building on Stellar: what's already been shipped, what got funded, what RFPs are open right now, and whether a new idea has a real gap. Works for hackathon entrants, SCF grant applicants, and independent builders or teams alike.
 
 For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/** (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Scout chains into them via \`/api/skills\` when the user moves from "what should I build" to "how do I build it".
 
@@ -23,7 +23,7 @@ For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.),
 
 When a user opens with a broad question (*"I want to build something on Stellar"*, *"what should I work on?"*, *"help me find an idea"*), **don't dive in yet**. Ask one clarifying question first:
 
-> *"Quick question to point you the right direction — are you (a) entering a Stellar hackathon, (b) preparing an SCF grant application, or (c) building an independent product / startup?"*
+> *"Quick question to point you the right direction — are you (a) entering a Stellar hackathon, (b) preparing an SCF grant application, or (c) building independently as a solo dev or team?"*
 
 Their answer determines which endpoints you lead with — see the user-type routing table below. If they've already made it clear in their question (e.g. *"I'm preparing my SCF grant"*), skip the ask and route directly.
 
@@ -33,7 +33,7 @@ Their answer determines which endpoints you lead with — see the user-type rout
 |---|---|---|---|
 | **Hackathon entrant** | \`/api/hackathons?status=upcoming\` (find an event to enter) | \`/api/rfps?status=open\` (track / sponsor briefs) | \`/api/projects/search?q={idea}\` (prior projects) |
 | **SCF grant applicant** | \`/api/rfps?status=open\` (briefs are SCF-funded — winners get the grant) | \`/api/projects/search?scfAwarded=1&q={idea}\` (similar funded work) | \`/api/skills/{track}\` (SDF skill for the technical layer) |
-| **Independent builder** | \`/api/projects/search?q={idea}\` (what's been shipped) | \`/api/leaderboard\` (ecosystem traction / momentum) | \`/api/rfps?status=open\` (paid opportunities they may not know about) |
+| **Independent builder or team** | \`/api/projects/search?q={idea}\` (what's been shipped) | \`/api/leaderboard\` (ecosystem traction / momentum) | \`/api/rfps?status=open\` (paid opportunities they may not know about) |
 
 ### Trigger phrases (any user type)
 
@@ -60,7 +60,7 @@ When the agent introduces Scout, suggest these starter prompts depending on user
 - *"Is there an open RFP in {category} for the current SCF round?"*
 - *"Vet my SCF idea: {description}"*
 
-**For independent builders:**
+**For independent builders or teams:**
 - *"What's been shipped on Stellar in {category}?"*
 - *"Show me the most active Stellar projects right now."*
 - *"Vet this idea: {description}"*
@@ -265,14 +265,14 @@ Self-check — returns Scout skill version, current timestamp, and freshness (\`
 7. Suggest checking \`https://communityfund.stellar.org\` for current round dates.
 8. Honest close: *"SCF reviewers care about (a) clear gap, (b) feasibility on Soroban, (c) regional / use-case clarity. Your application should cite the {N} similar funded projects and explain your differentiator explicitly."*
 
-### Example 9 — Independent builder, no hackathon / no grant
+### Example 9 — Independent builder or team, no hackathon / no grant
 **User:** "I'm a Solidity dev moving to Stellar to ship a real-time settlement product. What's the state of the ecosystem?"
 **Agent action:**
-1. **Confirm user type:** *"Independent builder — so I'll lead with ecosystem traction + adjacent projects, not hackathon/grant specifics."*
+1. **Confirm user type:** *"Independent builder or team — so I'll lead with ecosystem traction + adjacent projects, not hackathon/grant specifics."*
 2. \`GET /api/leaderboard\` → ecosystem snapshot. Surface \`.ecosystem.activeDevs28d\`, \`.ecosystem.commits28d\`, and Stellar's rank in \`.peers\` vs Ethereum/Solana. Gives the user the macro picture.
 3. \`GET /api/projects/search?q=settlement+payment\` → adjacent existing projects. Note which are SCF-funded vs not, which are abandoned.
 4. SDK rec: \`GET /api/skills/soroban\` + \`/api/skills/agentic-payments\` (settlement infra often touches both).
-5. Honest close: *"Independent builders on Stellar typically still chase SCF funding eventually — even without a grant target now, vet your idea against the open RFPs at \`https://stellarlight.xyz/ideas\` to see if there's an aligned brief for the next round."*
+5. Honest close: *"Independent builder or teams on Stellar typically still chase SCF funding eventually — even without a grant target now, vet your idea against the open RFPs at \`https://stellarlight.xyz/ideas\` to see if there's an aligned brief for the next round."*
 
 ## Data freshness
 
