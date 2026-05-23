@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 /** Legacy execCommand-based copy. Returns true on success. */
 function legacyCopy(text: string): boolean {
@@ -57,15 +57,15 @@ export function CopyCommand({ command, className }: Props) {
 				"flex items-center gap-3 rounded-lg bg-black/40 border border-border/30 p-4 font-mono text-sm text-foreground overflow-hidden"
 			}
 		>
-			<span className="flex-1 truncate select-all" aria-label="Install command">
-				{command}
-			</span>
+			<span className="flex-1 truncate select-all">{command}</span>
 			<button
 				type="button"
 				onClick={handle}
 				className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
 				title={copied ? "Copied!" : "Copy command"}
-				aria-label={copied ? "Command copied to clipboard" : "Copy command to clipboard"}
+				aria-label={
+					copied ? "Command copied to clipboard" : "Copy command to clipboard"
+				}
 			>
 				{copied ? (
 					<Check className="w-4 h-4 text-emerald-400" />

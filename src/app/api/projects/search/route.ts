@@ -12,9 +12,9 @@
  * by how many query tokens hit each project.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -103,7 +103,8 @@ export async function GET(req: NextRequest) {
 					hackathonPrizeTrack?: string;
 				}>
 			).map((p) => {
-				const hay = `${p.name} ${p.shortDescription ?? ""} ${p.category}`.toLowerCase();
+				const hay =
+					`${p.name} ${p.shortDescription ?? ""} ${p.category}`.toLowerCase();
 				const score = tokens.length
 					? tokens.reduce((s, t) => s + (hay.includes(t) ? 1 : 0), 0)
 					: 1;
@@ -160,7 +161,12 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/projects/search",
 		query: q,
-		filters: { category, hackathon: hackathonSlug, scfAwarded: scfAwardedOnly, limit },
+		filters: {
+			category,
+			hackathon: hackathonSlug,
+			scfAwarded: scfAwardedOnly,
+			limit,
+		},
 	});
 
 	return NextResponse.json(
@@ -168,7 +174,13 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				filters: { q, category, hackathon: hackathonSlug, scfAwardedOnly, limit },
+				filters: {
+					q,
+					category,
+					hackathon: hackathonSlug,
+					scfAwardedOnly,
+					limit,
+				},
 			},
 			projects,
 		},

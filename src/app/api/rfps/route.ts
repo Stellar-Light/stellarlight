@@ -13,19 +13,19 @@
  * upcoming RFPs match my idea?" without an external lookup.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
 	ACTIVE_QUARTER,
 	CATEGORIES,
 	CATEGORY_LABELS,
-	IDEAS,
-	QUARTERS,
-	QUARTER_LABELS,
-	rfpStatus,
 	type Category,
+	IDEAS,
 	type Idea,
+	QUARTER_LABELS,
+	QUARTERS,
 	type Quarter,
 	type RfpStatus,
+	rfpStatus,
 } from "@/data/ideas";
 import { logApiHit } from "@/lib/api-usage";
 
@@ -62,10 +62,16 @@ export async function GET(req: NextRequest) {
 
 	let rfps: RfpRow[] = IDEAS.map(toRow);
 
-	if (categoryFilter && (CATEGORIES as readonly string[]).includes(categoryFilter)) {
+	if (
+		categoryFilter &&
+		(CATEGORIES as readonly string[]).includes(categoryFilter)
+	) {
 		rfps = rfps.filter((r) => r.category === categoryFilter);
 	}
-	if (quarterFilter && (QUARTERS as readonly string[]).includes(quarterFilter)) {
+	if (
+		quarterFilter &&
+		(QUARTERS as readonly string[]).includes(quarterFilter)
+	) {
 		rfps = rfps.filter((r) => r.quarter === quarterFilter);
 	}
 	if (statusFilter === "open" || statusFilter === "closed") {
@@ -74,7 +80,8 @@ export async function GET(req: NextRequest) {
 	if (q) {
 		const tokens = q.split(/\s+/).filter(Boolean);
 		rfps = rfps.filter((r) => {
-			const hay = `${r.title} ${r.description} ${r.technicalRequirements ?? ""} ${r.categoryLabel}`.toLowerCase();
+			const hay =
+				`${r.title} ${r.description} ${r.technicalRequirements ?? ""} ${r.categoryLabel}`.toLowerCase();
 			return tokens.every((t) => hay.includes(t));
 		});
 	}

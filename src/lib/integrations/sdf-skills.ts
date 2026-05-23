@@ -56,7 +56,8 @@ function parseFrontmatter(md: string): {
 		const m = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
 		if (!m) continue;
 		let value: string | boolean = m[2].trim();
-		if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+		if (value.startsWith('"') && value.endsWith('"'))
+			value = value.slice(1, -1);
 		if (value === "true") value = true;
 		else if (value === "false") value = false;
 		fm[m[1]] = value;

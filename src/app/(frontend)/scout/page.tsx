@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import {
 	ArrowLeft,
-	Sparkles,
-	Search,
-	Users,
 	Award,
-	Lightbulb,
-	Terminal,
-	ExternalLink,
 	ChevronDown,
+	ExternalLink,
+	Lightbulb,
+	Search,
+	Sparkles,
+	Terminal,
+	Users,
 } from "lucide-react";
-import { ScoutCopyButton } from "@/components/scout-copy-button";
+import type { Metadata } from "next";
+import Link from "next/link";
 import { CopyCommand } from "@/components/copy-command";
+import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const revalidate = 300;
@@ -50,10 +50,7 @@ async function getShowcaseProjects(): Promise<ShowcaseProject[]> {
 			limit: SHOWCASE_SLUGS.length,
 		});
 
-		const bySlug = new Map<
-			string,
-			{ name: string; logoUrl: string | null }
-		>();
+		const bySlug = new Map<string, { name: string; logoUrl: string | null }>();
 		for (const p of result.docs as Array<{
 			name: string;
 			slug: string;
@@ -128,9 +125,12 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "Which AI agents does Scout work with?",
 		a: (
 			<>
-				Any agent that loads <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">SKILL.md</code>{" "}
-				files — Claude (claude.ai), Claude Code, Codex, Cursor, OpenClaw, and dozens
-				more (the underlying{" "}
+				Any agent that loads{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+					SKILL.md
+				</code>{" "}
+				files — Claude (claude.ai), Claude Code, Codex, Cursor, OpenClaw, and
+				dozens more (the underlying{" "}
 				<a
 					href="https://github.com/vercel-labs/skills"
 					target="_blank"
@@ -139,7 +139,8 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				>
 					skills CLI
 				</a>{" "}
-				supports 55+ agents). The npx install handles per-agent placement automatically.
+				supports 55+ agents). The npx install handles per-agent placement
+				automatically.
 			</>
 		),
 	},
@@ -147,9 +148,9 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "Does Scout write code for me?",
 		a: (
 			<>
-				No. Scout is a <strong>research skill</strong> — it tells you what's been
-				built, who's building it, what got funded, and which SDK skill to install
-				next. For the actual code work, install the relevant skill from{" "}
+				No. Scout is a <strong>research skill</strong> — it tells you what's
+				been built, who's building it, what got funded, and which SDK skill to
+				install next. For the actual code work, install the relevant skill from{" "}
 				<a
 					href="https://skills.stellar.org/"
 					target="_blank"
@@ -166,11 +167,15 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "What if Scout returns no results for my query?",
 		a: (
 			<>
-				It'll tell you so explicitly rather than fabricating answers. Try broader
-				keywords, drop filters (e.g. remove <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">scfAwarded=1</code>),
-				or check that the topic is one we index (curated Stellar projects, hackathons,
-				SCF rounds, RFPs, dev stats). For raw GitHub searches across all of Stellar,
-				use GitHub directly — Scout only covers projects in the stellarlight directory.
+				It'll tell you so explicitly rather than fabricating answers. Try
+				broader keywords, drop filters (e.g. remove{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+					scfAwarded=1
+				</code>
+				), or check that the topic is one we index (curated Stellar projects,
+				hackathons, SCF rounds, RFPs, dev stats). For raw GitHub searches across
+				all of Stellar, use GitHub directly — Scout only covers projects in the
+				stellarlight directory.
 			</>
 		),
 	},
@@ -178,11 +183,12 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "How does Scout differ from just asking ChatGPT/Claude about Stellar?",
 		a: (
 			<>
-				Scout doesn't bring its own brain — it brings <strong>structured Stellar data</strong>.
-				The skill teaches whatever agent you use (Claude, ChatGPT, etc.) how to query
-				our public APIs to get cited, evidence-backed answers grounded in real
-				numbers: SCF dollars raised, hackathon prize pools, project counts, dev
-				activity. Without Scout the agent guesses; with Scout it cites.
+				Scout doesn't bring its own brain — it brings{" "}
+				<strong>structured Stellar data</strong>. The skill teaches whatever
+				agent you use (Claude, ChatGPT, etc.) how to query our public APIs to
+				get cited, evidence-backed answers grounded in real numbers: SCF dollars
+				raised, hackathon prize pools, project counts, dev activity. Without
+				Scout the agent guesses; with Scout it cites.
 			</>
 		),
 	},
@@ -191,11 +197,21 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		a: (
 			<>
 				Varies by source. Project + Hackathons + Builders metadata: refreshed
-				continuously by curators. Live DoraHacks events: cached 1 hour. Ecosystem
-				dev stats (Electric Capital snapshot): daily at 06:00 UTC. SDF skill catalog
-				proxy: 24h. RFPs: live from <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">src/data/ideas.ts</code>.
-				Hit <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">/api/status</code> for exact{" "}
-				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">lastUpdatedAt</code> per source.
+				continuously by curators. Live DoraHacks events: cached 1 hour.
+				Ecosystem dev stats (Electric Capital snapshot): daily at 06:00 UTC. SDF
+				skill catalog proxy: 24h. RFPs: live from{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+					src/data/ideas.ts
+				</code>
+				. Hit{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+					/api/status
+				</code>{" "}
+				for exact{" "}
+				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+					lastUpdatedAt
+				</code>{" "}
+				per source.
 			</>
 		),
 	},
@@ -203,11 +219,11 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "Is the API really free? No auth, no rate limits?",
 		a: (
 			<>
-				Yes — all endpoints are public, read-only, no auth, no rate limits. Edge-
-				cached for 5 minutes (24h for the SDF skill proxy). Hit them from your
-				agent, your Dune query, your dashboard, or anywhere else. If usage ever
-				gets large enough to need rate limiting, we'll publish that ahead of time
-				on the API reference page.
+				Yes — all endpoints are public, read-only, no auth, no rate limits.
+				Edge- cached for 5 minutes (24h for the SDF skill proxy). Hit them from
+				your agent, your Dune query, your dashboard, or anywhere else. If usage
+				ever gets large enough to need rate limiting, we'll publish that ahead
+				of time on the API reference page.
 			</>
 		),
 	},
@@ -215,10 +231,11 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "How does Scout relate to skills.stellar.org?",
 		a: (
 			<>
-				They compose. <strong>Scout</strong> answers <em>"what should I build, with
-				whom, for what funding?"</em> — strategy. <strong>skills.stellar.org</strong>{" "}
-				(the Stellar Development Foundation's 7 official skills — soroban, dapp,
-				assets, data, agentic-payments, zk-proofs, standards) answers{" "}
+				They compose. <strong>Scout</strong> answers{" "}
+				<em>"what should I build, with whom, for what funding?"</em> — strategy.{" "}
+				<strong>skills.stellar.org</strong> (the Stellar Development
+				Foundation's 7 official skills — soroban, dapp, assets, data,
+				agentic-payments, zk-proofs, standards) answers{" "}
 				<em>"how do I actually build it?"</em> — execution. Scout cross-links to
 				those skills in its responses; install both when you move from research
 				into building.
@@ -286,10 +303,9 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				>
 					stellarlight.xyz/ideas
 				</a>{" "}
-				via the <strong>"Suggest a Need"</strong> button. Community
-				submissions go through curators and graduate to confirmed RFPs in
-				upcoming rounds. Scout will tell you this directly when its RFP
-				search comes up empty.
+				via the <strong>"Suggest a Need"</strong> button. Community submissions
+				go through curators and graduate to confirmed RFPs in upcoming rounds.
+				Scout will tell you this directly when its RFP search comes up empty.
 			</>
 		),
 	},
@@ -482,6 +498,7 @@ export default async function ScoutPage() {
 										className="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50 hover:bg-white/10 hover:border-white/20 hover:text-foreground transition-colors"
 									>
 										{p.logoUrl ? (
+											// biome-ignore lint/performance/noImgElement: Payload media URLs are dynamic — avoiding next/image's remotePatterns config burden
 											// eslint-disable-next-line @next/next/no-img-element
 											<img
 												src={p.logoUrl}
@@ -529,8 +546,8 @@ export default async function ScoutPage() {
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
 								Confirmed problem statements that get funded by the Stellar
-								Community Fund when winners are picked. Match an idea to an
-								open brief.
+								Community Fund when winners are picked. Match an idea to an open
+								brief.
 							</p>
 						</div>
 
@@ -555,8 +572,8 @@ export default async function ScoutPage() {
 								))}
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
-								Live DoraHacks feed (SDF + Tellus orgs) + curated Stellar
-								events with prize pools, tracks, winners, and outcome funnels.
+								Live DoraHacks feed (SDF + Tellus orgs) + curated Stellar events
+								with prize pools, tracks, winners, and outcome funnels.
 							</p>
 						</div>
 					</div>
@@ -591,8 +608,8 @@ export default async function ScoutPage() {
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
 								Stellar-native categories aligned to skills.stellar.org's
-								taxonomy. Scout uses these to frame what to build and which
-								SDK to install next.
+								taxonomy. Scout uses these to frame what to build and which SDK
+								to install next.
 							</p>
 						</div>
 
@@ -624,8 +641,8 @@ export default async function ScoutPage() {
 								))}
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
-								The Stellar Foundation's 7 official skills — the "how to
-								build" layer. Scout chains into them via{" "}
+								The Stellar Foundation's 7 official skills — the "how to build"
+								layer. Scout chains into them via{" "}
 								<code className="text-[11px] px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 									/api/skills
 								</code>{" "}
@@ -668,7 +685,10 @@ export default async function ScoutPage() {
 				</Section>
 
 				{/* Gap classification */}
-				<Section eyebrow="The strict part" title="Gap classification, no speculation">
+				<Section
+					eyebrow="The strict part"
+					title="Gap classification, no speculation"
+				>
 					<div className="grid sm:grid-cols-3 gap-3 mb-3">
 						{[
 							{
@@ -873,9 +893,7 @@ export default async function ScoutPage() {
 						<div>
 							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/skills</span>{" "}
-							<span className="text-muted-foreground">
-								— SDF skill catalog
-							</span>
+							<span className="text-muted-foreground">— SDF skill catalog</span>
 						</div>
 						<div className="text-muted-foreground/70 pt-1">…and 5 more</div>
 					</div>

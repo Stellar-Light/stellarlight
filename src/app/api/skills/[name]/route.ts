@@ -14,8 +14,8 @@
  * Server-cached for 24h via the upstream fetch's revalidate hint.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-import { SDF_SKILL_NAMES, fetchSdfSkill } from "@/lib/integrations/sdf-skills";
+import { type NextRequest, NextResponse } from "next/server";
+import { fetchSdfSkill, SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
 
 export const dynamic = "force-static";
 export const revalidate = 86_400;
@@ -55,8 +55,7 @@ export async function GET(
 		},
 		{
 			headers: {
-				"Cache-Control":
-					"public, s-maxage=86400, stale-while-revalidate=43200",
+				"Cache-Control": "public, s-maxage=86400, stale-while-revalidate=43200",
 			},
 		},
 	);

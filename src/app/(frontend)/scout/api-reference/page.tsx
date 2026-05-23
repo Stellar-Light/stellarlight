@@ -1,6 +1,6 @@
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
 	title: "API Reference · Stellar Scout | Stellar Light",
@@ -24,10 +24,26 @@ const ENDPOINTS: Endpoint[] = [
 		summary:
 			"Merged feed of curated Stellar hackathons (from the Payload directory) and live DoraHacks events (SDF + Tellus orgs). Each row tagged with `source: 'curated' | 'dorahacks'`.",
 		params: [
-			{ name: "status", type: "string", description: "upcoming | active | completed" },
-			{ name: "organizer", type: "string", description: "Slug of organizer entity" },
-			{ name: "source", type: "string", description: "curated | dorahacks (restrict to one feed)" },
-			{ name: "limit", type: "number", description: "Max rows (default 100, max 300)" },
+			{
+				name: "status",
+				type: "string",
+				description: "upcoming | active | completed",
+			},
+			{
+				name: "organizer",
+				type: "string",
+				description: "Slug of organizer entity",
+			},
+			{
+				name: "source",
+				type: "string",
+				description: "curated | dorahacks (restrict to one feed)",
+			},
+			{
+				name: "limit",
+				type: "number",
+				description: "Max rows (default 100, max 300)",
+			},
 		],
 		returns: [
 			".hackathons[*] — id, name, slug, dates, status, externalUrl, organizer, source, prizePoolUSD (DoraHacks only), hackersCount (DoraHacks only), url",
@@ -54,11 +70,23 @@ const ENDPOINTS: Endpoint[] = [
 		summary:
 			"Stellar builder directory (synced from Stellar Passport). Small + growing dataset — opt-in profiles only.",
 		params: [
-			{ name: "q", type: "string", description: "Free-text match across bio + role + project names" },
-			{ name: "location", type: "string", description: "Substring match against location field" },
+			{
+				name: "q",
+				type: "string",
+				description: "Free-text match across bio + role + project names",
+			},
+			{
+				name: "location",
+				type: "string",
+				description: "Substring match against location field",
+			},
 			{ name: "scfTier", type: "string", description: "Filter by SCF tier" },
 			{ name: "featured", type: "1", description: "Featured profiles only" },
-			{ name: "limit", type: "number", description: "Max rows (default 50, max 200)" },
+			{
+				name: "limit",
+				type: "number",
+				description: "Max rows (default 50, max 200)",
+			},
 		],
 		returns: [
 			".builders[*] — githubUsername, displayName, bio, roleTitle, location, scfTier, projects[], url",
@@ -70,13 +98,29 @@ const ENDPOINTS: Endpoint[] = [
 		method: "GET",
 		path: "/api/projects/search",
 		summary:
-			"Search existing Stellar projects. Keyword-scored matches across name + short description + category. The workhorse for Deep Dive step 2 (\"has anyone built this?\").",
+			'Search existing Stellar projects. Keyword-scored matches across name + short description + category. The workhorse for Deep Dive step 2 ("has anyone built this?").',
 		params: [
 			{ name: "q", type: "string", description: "Keywords to score against" },
-			{ name: "category", type: "string", description: "Filter by project category" },
-			{ name: "hackathon", type: "string", description: "Filter to one hackathon by slug" },
-			{ name: "scfAwarded", type: "1", description: "Only SCF-funded projects" },
-			{ name: "limit", type: "number", description: "Max rows (default 20, max 100)" },
+			{
+				name: "category",
+				type: "string",
+				description: "Filter by project category",
+			},
+			{
+				name: "hackathon",
+				type: "string",
+				description: "Filter to one hackathon by slug",
+			},
+			{
+				name: "scfAwarded",
+				type: "1",
+				description: "Only SCF-funded projects",
+			},
+			{
+				name: "limit",
+				type: "number",
+				description: "Max rows (default 20, max 100)",
+			},
 		],
 		returns: [
 			".projects[*] — scored by keyword overlap, sorted by relevance; includes scfAwarded flag, scfTotalAwardedUSD, hackathon (if any), hackathonPlacement, hackathonPrize, hackathonPrizeTrack",
@@ -86,12 +130,30 @@ const ENDPOINTS: Endpoint[] = [
 		method: "GET",
 		path: "/api/rfps",
 		summary:
-			"Confirmed Stellar RFPs / sponsor briefs — problem statements that get funded by the Stellar Community Fund when winners are picked. Native source for \"is there an open RFP matching my idea?\" Backed by src/data/ideas.ts (curated). Mirrors what's on /ideas.",
+			'Confirmed Stellar RFPs / sponsor briefs — problem statements that get funded by the Stellar Community Fund when winners are picked. Native source for "is there an open RFP matching my idea?" Backed by src/data/ideas.ts (curated). Mirrors what\'s on /ideas.',
 		params: [
-			{ name: "q", type: "string", description: "Free-text match across title + description + technical requirements + category" },
-			{ name: "category", type: "string", description: "ai | consumer-dapps | defi | developer-tooling | gaming | infrastructure | nfts | payments | scf | web3-social" },
-			{ name: "quarter", type: "string", description: "q1-2026 | q2-2026 (more added as new rounds open)" },
-			{ name: "limit", type: "number", description: "Max rows (default 100, max 200)" },
+			{
+				name: "q",
+				type: "string",
+				description:
+					"Free-text match across title + description + technical requirements + category",
+			},
+			{
+				name: "category",
+				type: "string",
+				description:
+					"ai | consumer-dapps | defi | developer-tooling | gaming | infrastructure | nfts | payments | scf | web3-social",
+			},
+			{
+				name: "quarter",
+				type: "string",
+				description: "q1-2026 | q2-2026 (more added as new rounds open)",
+			},
+			{
+				name: "limit",
+				type: "number",
+				description: "Max rows (default 100, max 200)",
+			},
 		],
 		returns: [
 			".rfps[*] — id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url",
@@ -125,9 +187,21 @@ const ENDPOINTS: Endpoint[] = [
 		summary:
 			"Stellar ecosystem developer-activity stats and ranked project leaderboard. Backed by the daily Electric Capital snapshot + GitHub Signals.",
 		params: [
-			{ name: "sort", type: "string", description: "activity | stars | issues" },
-			{ name: "range", type: "string", description: "7d | 30d | 90d | 1y | all" },
-			{ name: "category", type: "string", description: "Filter by project category" },
+			{
+				name: "sort",
+				type: "string",
+				description: "activity | stars | issues",
+			},
+			{
+				name: "range",
+				type: "string",
+				description: "7d | 30d | 90d | 1y | all",
+			},
+			{
+				name: "category",
+				type: "string",
+				description: "Filter by project category",
+			},
 			{ name: "limit", type: "number", description: "Max rows (default 50)" },
 			{ name: "format", type: "string", description: "json (default) | csv" },
 		],
@@ -281,9 +355,7 @@ export default function ApiReferencePage() {
 				</div>
 
 				<div className="mt-12 rounded-xl border border-border/50 bg-card p-6">
-					<h3 className="text-sm font-semibold text-foreground mb-2">
-						Source
-					</h3>
+					<h3 className="text-sm font-semibold text-foreground mb-2">Source</h3>
 					<p className="text-sm text-muted-foreground leading-relaxed">
 						All endpoints live in{" "}
 						<a

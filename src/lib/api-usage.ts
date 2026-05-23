@@ -33,7 +33,8 @@ export function bucketUserAgent(ua: string | null): UaBucket {
 	if (/node-fetch|axios|got|undici|httpie|python-requests|ruby/.test(s))
 		return "agent";
 	if (/curl|wget/.test(s)) return "curl";
-	if (/bot|crawler|spider|googlebot|bingbot|slack|twitter/.test(s)) return "bot";
+	if (/bot|crawler|spider|googlebot|bingbot|slack|twitter/.test(s))
+		return "bot";
 	if (/mozilla|chrome|safari|firefox|edge/.test(s)) return "browser";
 	return "other";
 }
@@ -129,7 +130,10 @@ export async function getUsageStats(): Promise<{
 		});
 		const byEndpointMap = new Map<string, number>();
 		for (const row of sample.docs as Array<{ endpoint: string }>) {
-			byEndpointMap.set(row.endpoint, (byEndpointMap.get(row.endpoint) ?? 0) + 1);
+			byEndpointMap.set(
+				row.endpoint,
+				(byEndpointMap.get(row.endpoint) ?? 0) + 1,
+			);
 		}
 		const byEndpoint = [...byEndpointMap.entries()]
 			.map(([endpoint, count]) => ({ endpoint, count }))

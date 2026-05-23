@@ -20,7 +20,13 @@ export const ApiUsage: CollectionConfig = {
 	slug: "api-usage",
 	admin: {
 		useAsTitle: "endpoint",
-		defaultColumns: ["endpoint", "uaBucket", "scoutVersion", "country", "createdAt"],
+		defaultColumns: [
+			"endpoint",
+			"uaBucket",
+			"scoutVersion",
+			"country",
+			"createdAt",
+		],
 		group: "Analytics",
 		description:
 			"Public-API hit log. Append-only, used to measure Scout skill adoption.",
@@ -76,14 +82,16 @@ export const ApiUsage: CollectionConfig = {
 			name: "country",
 			type: "text",
 			admin: {
-				description: "ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)",
+				description:
+					"ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)",
 			},
 		},
 		{
 			name: "filtersJson",
 			type: "text",
 			admin: {
-				description: "Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}",
+				description:
+					"Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}",
 			},
 		},
 	],

@@ -19,14 +19,14 @@
  * Hacks Agents".
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { type NextRequest, NextResponse } from "next/server";
+import { logApiHit } from "@/lib/api-usage";
 import {
+	type DoraHacksHackathon,
 	fetchAllDoraHacksHackathons,
 	getHackathonUrl,
-	type DoraHacksHackathon,
 } from "@/lib/integrations/dorahacks";
-import { logApiHit } from "@/lib/api-usage";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -48,7 +48,9 @@ interface HackathonRow {
 }
 
 /** Map a DoraHacks status code + timing into our status enum. */
-function doraStatus(h: DoraHacksHackathon): "upcoming" | "active" | "completed" {
+function doraStatus(
+	h: DoraHacksHackathon,
+): "upcoming" | "active" | "completed" {
 	const now = Math.floor(Date.now() / 1000);
 	if (h.start_time > now) return "upcoming";
 	if (h.end_time < now) return "completed";
@@ -99,7 +101,10 @@ export async function GET(req: NextRequest) {
 			try {
 				// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 				const where: any = {};
-				if (statusFilter && ["upcoming", "active", "completed"].includes(statusFilter)) {
+				if (
+					statusFilter &&
+					["upcoming", "active", "completed"].includes(statusFilter)
+				) {
 					where.status = { equals: statusFilter };
 				}
 
@@ -190,10 +195,8 @@ export async function GET(req: NextRequest) {
 	// startDate first.
 	const bucketOrder = { upcoming: 0, active: 1, completed: 2 } as const;
 	hackathons.sort((a, b) => {
-		const ab =
-			bucketOrder[a.status as keyof typeof bucketOrder] ?? 3;
-		const bb =
-			bucketOrder[b.status as keyof typeof bucketOrder] ?? 3;
+		const ab = bucketOrder[a.status as keyof typeof bucketOrder] ?? 3;
+		const bb = bucketOrder[b.status as keyof typeof bucketOrder] ?? 3;
 		if (ab !== bb) return ab - bb;
 		const at = a.startDate ? new Date(a.startDate).getTime() : 0;
 		const bt = b.startDate ? new Date(b.startDate).getTime() : 0;

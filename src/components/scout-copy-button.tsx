@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 
 /** Legacy execCommand-based copy. Returns true on success. */
@@ -41,8 +41,7 @@ export function ScoutCopyButton({ className, label = "Copy skill" }: Props) {
 		if (navigator.clipboard?.writeText) {
 			navigator.clipboard.writeText(text).then(onSuccess, () => {
 				if (legacyCopy(text)) onSuccess();
-				else
-					window.open("/skills/stellar-scout.md", "_blank");
+				else window.open("/skills/stellar-scout.md", "_blank");
 			});
 			return;
 		}

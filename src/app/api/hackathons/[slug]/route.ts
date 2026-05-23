@@ -9,9 +9,9 @@
  * and post-hack status (Built / In Progress / Abandoned).
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -58,7 +58,7 @@ export async function GET(
 					status: string;
 					externalUrl?: string;
 					organizer?: { id: string; name: string; slug: string } | string;
-			}
+			  }
 			| undefined;
 
 		if (!hackathon) {
@@ -127,7 +127,12 @@ export async function GET(
 		// Hackathons collection itself.
 		const tracksMap = new Map<
 			string,
-			{ name: string; winnerCount: number; submissionCount: number; totalPrizeUSD: number }
+			{
+				name: string;
+				winnerCount: number;
+				submissionCount: number;
+				totalPrizeUSD: number;
+			}
 		>();
 		for (const s of submissions) {
 			const name = s.hackathonPrizeTrack?.trim();
