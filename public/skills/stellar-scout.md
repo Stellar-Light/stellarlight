@@ -11,14 +11,51 @@ For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.),
 
 ## When to use this skill
 
-Trigger phrases:
+### Step 0 — Disambiguate the user type first
+
+When a user opens with a broad question (*"I want to build something on Stellar"*, *"what should I work on?"*, *"help me find an idea"*), **don't dive in yet**. Ask one clarifying question first:
+
+> *"Quick question to point you the right direction — are you (a) entering a Stellar hackathon, (b) preparing an SCF grant application, or (c) building an independent product / startup?"*
+
+Their answer determines which endpoints you lead with — see the user-type routing table below. If they've already made it clear in their question (e.g. *"I'm preparing my SCF grant"*), skip the ask and route directly.
+
+### User-type routing — lead with these first
+
+| User type | Lead endpoint #1 | Lead endpoint #2 | Lead endpoint #3 |
+|---|---|---|---|
+| **Hackathon entrant** | `/api/hackathons?status=upcoming` (find an event to enter) | `/api/rfps?status=open` (track / sponsor briefs) | `/api/projects/search?q={idea}` (prior projects) |
+| **SCF grant applicant** | `/api/rfps?status=open` (briefs are SCF-funded — winners get the grant) | `/api/projects/search?scfAwarded=1&q={idea}` (similar funded work) | `/api/skills/{track}` (SDF skill for the technical layer) |
+| **Independent builder** | `/api/projects/search?q={idea}` (what's been shipped) | `/api/leaderboard` (ecosystem traction / momentum) | `/api/rfps?status=open` (paid opportunities they may not know about) |
+
+### Trigger phrases (any user type)
+
 - *"vet this idea"* / *"should I build X"* / *"deep dive on Y"* → run **Deep Dive Mode**
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
-- *"find me a teammate / mentor / dev"* → Builders search (small + growing — see caveats below; for IRL hackathons the local team often isn't in the directory)
-- *"what won at Stellar Hacks {name}"* / *"who placed in {hackathon}"* → hackathon results
-- *"what got funded in SCF round X"* / *"what SCF projects do Y"* → SCF history
-- *"what's the prize pool for the next Stellar hackathon"* → upcoming hackathons
 - *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (`/api/rfps?status=open`)
+- *"what got funded in SCF round X"* / *"prior SCF projects in {category}"* → SCF history via `/api/projects/search?scfAwarded=1`
+- *"how does Stellar compare on dev activity"* → `/api/leaderboard` (peer L1 data in `.peers`)
+- *"find me a teammate / mentor / dev"* → Builders search (small + growing — for IRL hackathons the local team often isn't in the directory; fall back to Stellar Discord)
+- *"what won at Stellar Hacks {name}"* / *"who placed in {hackathon}"* → hackathon results
+- *"what's the prize pool for the next Stellar hackathon"* → upcoming hackathons
+
+### Good first questions for new users
+
+When the agent introduces Scout, suggest these starter prompts depending on user type:
+
+**For hackathon entrants:**
+- *"What Stellar hackathons are open right now and what's their prize pool?"*
+- *"Has anyone built {my idea} at a past Stellar hackathon?"*
+- *"Which SCF-funded RFPs match my hackathon idea?"*
+
+**For SCF grant applicants:**
+- *"What SCF-funded projects work on {my category}? How much have they raised total?"*
+- *"Is there an open RFP in {category} for the current SCF round?"*
+- *"Vet my SCF idea: {description}"*
+
+**For independent builders:**
+- *"What's been shipped on Stellar in {category}?"*
+- *"Show me the most active Stellar projects right now."*
+- *"Vet this idea: {description}"*
 
 ## Two modes
 
@@ -119,7 +156,10 @@ Returns: `.rfps[*]` with `id, title, description, technicalRequirements, categor
 
 **Active RFPs vs closed RFPs:**
 - `status: "open"` RFPs are in the current SCF round (`activeQuarter`) and are **ready to be funded and built** — winners get an SCF grant. These are the actionable opportunities. Surface these first.
-- `status: "closed"` RFPs are from past quarters. **Surface them with a clear warning: "this RFP was from {quarterLabel} — someone is likely already building it."** It's not a dead lane — the user can still build a competing/better take, or reach out to the original author (`.authorName`) — but they should know the lane has prior takers and isn't in the active SCF funding round.
+- `status: "closed"` RFPs are from past quarters. **Surface them with a clear warning: *"This RFP was from {quarterLabel} — someone is likely already building it."*** It's not a dead lane. Always pair the warning with a concrete next step:
+  - **Surface the `.authorName` field** and recommend the user reach out to coordinate (*"The original author was {authorName} — DM them on Stellar Discord or check the Stellar GitHub org to see who picked it up"*).
+  - **Suggest competing/better takes** if the user has a clear differentiator (*"If your angle adds {X} the original brief didn't cover, that's still a viable build."*).
+  - Make clear they can't claim SCF funding for this RFP in the current round, but the work might still ship as an SCF grant in a future round.
 - Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call `GET /api/rfps?status=open` first and lead with the active set. Mention the count from `.counts.open`. When you include closed RFPs as additional context, label them as past-quarter every time.
 
 **Important framing when there are 0 open matches:**
@@ -196,6 +236,28 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 3. Lead with: *"There are {open} confirmed RFPs open for SCF funding in {activeQuarterLabel}. Winners get an SCF grant."*
 4. List each open RFP with title, category, one-line description, and link. Group by category if helpful.
 5. Close with the submission CTA: *"None match what you want to build? Propose your own at `https://stellarlight.xyz/ideas` — community submissions graduate into future rounds."*
+
+### Example 8 — SCF grant applicant prep (full builder-type flow)
+**User:** "I'm planning to apply for an SCF grant for a Stellar-native invoice factoring product for SMEs. What should I know going in?"
+**Agent action:**
+1. **Confirm user type:** *"You're an SCF grant applicant — so I'll lead with what's been funded in this lane, then open briefs, then a technical-skill rec."*
+2. `GET /api/projects/search?q=invoice+factoring&scfAwarded=1` → prior funded work.
+   - If 0–2 matches: lane is open, signal that to the user.
+   - If 3+: surface the leaders, their funding amounts, and what they shipped. *"Be prepared to differentiate from {top names}."*
+3. `GET /api/projects/search?q=invoice+factoring` (broader) → unfunded competitors / hackathon submissions that didn't get SCF money. Signal whether the unfunded ones abandoned (`hackathonStatus`) — useful for the user's pitch ("X tried this and shelved it because…").
+4. `GET /api/rfps?status=open&q=invoice` → check if there's a direct open RFP. **If yes** — pitch becomes "applying against the {RFP title} brief", which is a stronger SCF application than a cold pitch. **If no, also fetch** `GET /api/rfps?status=closed&q=invoice` to surface past RFPs (warn about prior takers per closed-RFP rules above).
+5. SDK rec: `GET /api/skills/soroban` and `/api/skills/assets` — required reading for a Soroban-based SME finance product. Tell user to install both for the build phase.
+6. Suggest the user check `https://communityfund.stellar.org` for current round dates + application format.
+7. Honest close: *"SCF reviewers care about (a) clear gap, (b) feasibility on Soroban, (c) regional / use-case clarity. Your application should cite the {N} similar funded projects and explain your differentiator explicitly."*
+
+### Example 9 — Independent builder, no hackathon / no grant
+**User:** "I'm a Solidity dev moving to Stellar to ship a real-time settlement product. What's the state of the ecosystem?"
+**Agent action:**
+1. **Confirm user type:** *"Independent builder — so I'll lead with ecosystem traction + adjacent projects, not hackathon/grant specifics."*
+2. `GET /api/leaderboard` → ecosystem snapshot. Surface `.ecosystem.activeDevs28d`, `.ecosystem.commits28d`, and Stellar's rank in `.peers` vs Ethereum/Solana. Gives the user the macro picture.
+3. `GET /api/projects/search?q=settlement+payment` → adjacent existing projects. Note which are SCF-funded vs not, which are abandoned.
+4. SDK rec: `GET /api/skills/soroban` + `/api/skills/agentic-payments` (settlement infra often touches both).
+5. Honest close: *"Independent builders on Stellar typically still chase SCF funding eventually — even without a grant target now, vet your idea against the open RFPs at `https://stellarlight.xyz/ideas` to see if there's an aligned brief for the next round."*
 
 ## Data freshness
 
