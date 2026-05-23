@@ -27,27 +27,27 @@ const SAMPLE_PROMPTS = [
 	{
 		title: "Find prior art",
 		prompt:
-			'"What Stellar hackathon projects have built stablecoin off-ramps in West Africa?"',
+			'"What Stellar projects have built stablecoin off-ramps? Show me the SCF-funded ones first."',
 	},
 	{
 		title: "Search for teammates",
 		prompt:
-			'"Find me Stellar builders in Lagos who\'ve worked on Soroban smart contracts."',
+			'"Find me Stellar builders who\'ve worked on Soroban smart contracts."',
 	},
 	{
 		title: "Surface SCF history",
 		prompt:
-			'"What SCF-funded projects work on agentic payments? How much have they raised total?"',
+			'"What SCF-funded projects work on payments? How much have they raised total?"',
 	},
 	{
-		title: "Discover upcoming hackathons",
+		title: "Recent hackathon winners",
 		prompt:
-			'"What Stellar hackathons are coming up in the next 3 months and what are the prize pools?"',
+			'"Show me the most recent Stellar Hacks events and what prize tracks they had."',
 	},
 	{
-		title: "Pick a winning track",
+		title: "Map an idea to a track",
 		prompt:
-			'"I have a soroban DeFi protocol idea. Which prize tracks at the next hackathon would it fit?"',
+			'"I have a soroban DeFi protocol idea. What past Stellar hackathon tracks paid out for similar work?"',
 	},
 ];
 

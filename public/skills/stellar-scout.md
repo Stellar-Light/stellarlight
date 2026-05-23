@@ -83,7 +83,11 @@ Returns: `.hackathons[*]` with name, dates, status, externalUrl, source, prizePo
 
 ### `GET /api/hackathons/{slug}`
 Single-hackathon detail.
-Returns: `.hackathon.stats` (totalSubmissions, totalPrizeUSD, winners count, outcome funnel: built/inProgress/abandoned/unknown), `.winners[*]`, `.submissions[*]`.
+Returns:
+- `.hackathon.stats` — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown)
+- `.hackathon.tracks[*]` — prize tracks derived from past submissions, each with `{name, winnerCount, submissionCount, totalPrizeUSD}`. Use for "which tracks did this hackathon pay out for?"
+- `.winners[*]` — projects that placed
+- `.submissions[*]` — every submission with placement, prize, track
 
 ### `GET /api/builders`
 Stellar builder directory (synced from Stellar Passport).

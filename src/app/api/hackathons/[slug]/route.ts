@@ -119,6 +119,33 @@ export async function GET(
 			0,
 		);
 
+		// Derive tracks from past submissions — group every project's
+		// `hackathonPrizeTrack` value and aggregate prize $ + winner counts.
+		// Closes the "what tracks did this event have / pay out" gap for
+		// the Scout SKILL.md without requiring editorial track data on the
+		// Hackathons collection itself.
+		const tracksMap = new Map<
+			string,
+			{ name: string; winnerCount: number; submissionCount: number; totalPrizeUSD: number }
+		>();
+		for (const s of submissions) {
+			const name = s.hackathonPrizeTrack?.trim();
+			if (!name) continue;
+			const entry = tracksMap.get(name) ?? {
+				name,
+				winnerCount: 0,
+				submissionCount: 0,
+				totalPrizeUSD: 0,
+			};
+			entry.submissionCount += 1;
+			if (s.hackathonPlacement) entry.winnerCount += 1;
+			entry.totalPrizeUSD += s.hackathonPrize ?? 0;
+			tracksMap.set(name, entry);
+		}
+		const tracks = Array.from(tracksMap.values()).sort(
+			(a, b) => b.totalPrizeUSD - a.totalPrizeUSD,
+		);
+
 		const org =
 			hackathon.organizer && typeof hackathon.organizer === "object"
 				? {
@@ -150,6 +177,7 @@ export async function GET(
 						winners: winners.length,
 						outcomes,
 					},
+					tracks,
 				},
 				winners,
 				submissions,
