@@ -16,6 +16,7 @@ Trigger phrases:
 - *"what won at Stellar Hacks {name}"* / *"who placed in {hackathon}"* → hackathon results
 - *"what got funded in SCF round X"* / *"what SCF projects do Y"* → SCF history
 - *"what's the prize pool for the next Stellar hackathon"* → upcoming hackathons
+- *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (`/api/rfps?status=open`)
 
 ## Two modes
 
@@ -41,7 +42,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 7. **Funding signal.** What's been funded in this area? Filter `/api/projects/search?q={keywords}&scfAwarded=1` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete:
    - (a) Which upcoming hackathon to enter (`/api/hackathons?status=upcoming`).
-   - (b) Whether an open RFP / sponsor brief matches the idea (`/api/rfps?q={keywords}` — these are SCF-funded sponsor briefs). **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
+   - (b) Whether an **open RFP** (currently fundable) matches the idea (`/api/rfps?status=open&q={keywords}`). Open RFPs are ready to be built — winners get SCF grant funding. **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
    - (c) Which SDK skill to install next from `skills.stellar.org`.
 
 ## Evidence floor
@@ -108,16 +109,21 @@ Params: `q={keywords}`, `category={cat}`, `hackathon={slug}`, `scfAwarded=1`, `l
 Returns: `.projects[*]` scored by keyword overlap, sorted by relevance.
 
 ### `GET /api/rfps`
-Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"is there an open RFP matching my idea?"*. Use in Deep Dive step 8 (next steps).
+Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"what's currently fundable?"*. Use in Deep Dive step 8 (next steps) AND lead with this when the user asks generally what to build.
 
-Params: `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gaming|infrastructure|nfts|payments|scf|web3-social}`, `quarter={q1-2026|q2-2026|...}`, `limit=N`.
+Params: `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gaming|infrastructure|nfts|payments|scf|web3-social}`, `quarter={q1-2026|q2-2026|...}`, **`status={open|closed}`**, `limit=N`.
 
-Returns: `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url`. `.funding` field clarifies the SCF connection.
+Returns: `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, quarter, quarterLabel, **status** (open/closed), authorName, url`. Meta includes `.activeQuarter`, `.counts.{open,closed,total}`, and `.submitNewBriefAt`. `.funding` clarifies the SCF connection.
 
-**Important framing when there are 0 matches:**
-- 0 RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round covers this lane yet."*
-- **Anyone can propose an RFP** at `https://stellarlight.xyz/ideas` via the "Suggest a Need" button — community submissions go through curators and graduate to confirmed briefs in upcoming rounds.
-- When you find no matching RFP, tell the user this explicitly and surface the submission CTA. Don't frame it as a dead end; frame it as an invitation to define the brief themselves.
+**Active RFPs vs closed RFPs:**
+- `status: "open"` RFPs are in the current SCF round (`activeQuarter`) and are **ready to be funded and built** — winners get an SCF grant. These are the actionable opportunities. Surface these first.
+- `status: "closed"` RFPs are past rounds — useful context for what's been done, but no longer fundable. Don't recommend building against them.
+- Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call `GET /api/rfps?status=open` first and lead with the active set. Mention the count from `.counts.open`.
+
+**Important framing when there are 0 open matches:**
+- 0 open RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round (`.activeQuarter`) covers this lane yet."*
+- **Anyone can propose an RFP** at `https://stellarlight.xyz/ideas` (`.meta.submitNewBriefAt`) via the "Suggest a Need" button. Community submissions go through curators and graduate to confirmed briefs in upcoming rounds.
+- When you find no matching open RFP, tell the user this explicitly and surface the submission CTA. Don't frame it as a dead end; frame it as an invitation to define the brief themselves.
 
 ### `GET /api/skills`
 Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h.
@@ -175,10 +181,19 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 ### Example 6 — Match an idea to an open RFP (and what to do when there isn't one)
 **User:** "Is there an open Stellar RFP that matches my idea — a real-time price API for Soroban tokens?"
 **Agent action:**
-1. `GET /api/rfps?q=price+api+soroban` → filter the curated RFP list by keyword overlap.
+1. `GET /api/rfps?status=open&q=price+api+soroban` → only open / fundable briefs.
 2. **If matches** → surface title, description, technical requirements, quarter, link (e.g., `https://stellarlight.xyz/ideas/prices-api`), and the SCF-funding note (`.funding`).
 3. **If zero matches** → frame it as opportunity, not a dead end: *"No current SCF-round brief covers this lane yet — but anyone can propose one. Submit your idea as a sponsor brief at `https://stellarlight.xyz/ideas` (the 'Suggest a Need' button). Community submissions go through curators and graduate to confirmed RFPs in upcoming rounds."*
 4. **If partial matches** → call out which RFP is closest + what's different about the user's angle. Suggest submitting a sibling brief if the gap is meaningful.
+
+### Example 7 — Surface active RFPs ("what's ready to be funded?")
+**User:** "What Stellar RFPs are open right now? What can I build and get SCF-funded for?"
+**Agent action:**
+1. `GET /api/rfps?status=open` → the currently-fundable briefs.
+2. Read `.meta.activeQuarter` (e.g., "q2-2026") and `.meta.counts.open` (e.g., 5).
+3. Lead with: *"There are {open} confirmed RFPs open for SCF funding in {activeQuarterLabel}. Winners get an SCF grant."*
+4. List each open RFP with title, category, one-line description, and link. Group by category if helpful.
+5. Close with the submission CTA: *"None match what you want to build? Propose your own at `https://stellarlight.xyz/ideas` — community submissions graduate into future rounds."*
 
 ## Data freshness
 
