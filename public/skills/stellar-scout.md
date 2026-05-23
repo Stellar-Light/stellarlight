@@ -39,7 +39,10 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 5. **SDK / skill recommendation.** Map the idea to the right `skills.stellar.org` track (Soroban / dapp / assets / data / agentic-payments / zk-proofs / standards). Tell the user to grab that skill next.
 6. **Teammate candidates.** Hit `/api/builders?q={skill_keyword}` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport — currently in the dozens, not hundreds). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
 7. **Funding signal.** What's been funded in this area? Filter `/api/projects/search?q={keywords}&scfAwarded=1` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
-8. **Suggested next steps.** Concrete: (a) which upcoming hackathon to enter (`/api/hackathons?status=upcoming`), (b) which open RFP / sponsor brief matches the idea (`/api/rfps?q={keywords}` — these are SCF-funded sponsor briefs), (c) which SDK skill to install next from `skills.stellar.org`.
+8. **Suggested next steps.** Concrete:
+   - (a) Which upcoming hackathon to enter (`/api/hackathons?status=upcoming`).
+   - (b) Whether an open RFP / sponsor brief matches the idea (`/api/rfps?q={keywords}` — these are SCF-funded sponsor briefs). **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
+   - (c) Which SDK skill to install next from `skills.stellar.org`.
 
 ## Evidence floor
 
@@ -111,6 +114,11 @@ Params: `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gami
 
 Returns: `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url`. `.funding` field clarifies the SCF connection.
 
+**Important framing when there are 0 matches:**
+- 0 RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round covers this lane yet."*
+- **Anyone can propose an RFP** at `https://stellarlight.xyz/ideas` via the "Suggest a Need" button — community submissions go through curators and graduate to confirmed briefs in upcoming rounds.
+- When you find no matching RFP, tell the user this explicitly and surface the submission CTA. Don't frame it as a dead end; frame it as an invitation to define the brief themselves.
+
 ### `GET /api/skills`
 Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h.
 
@@ -164,13 +172,13 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 3. Surface top 5 with name, SCF $, category, link.
 4. Optionally cross-reference recent hackathon submissions: filter results where `.hackathon` is set, to see which won prizes en route to SCF funding.
 
-### Example 6 — Match an idea to an open RFP
+### Example 6 — Match an idea to an open RFP (and what to do when there isn't one)
 **User:** "Is there an open Stellar RFP that matches my idea — a real-time price API for Soroban tokens?"
 **Agent action:**
 1. `GET /api/rfps?q=price+api+soroban` → filter the curated RFP list by keyword overlap.
-2. If matches → surface title, description, technical requirements, quarter, link (e.g., `https://stellarlight.xyz/ideas/prices-api`), and the SCF-funding note (`.funding`).
-3. If zero matches → tell the user honestly *"no published RFP matches your idea right now"*, and suggest submitting it themselves at `https://stellarlight.xyz/ideas` via the "Suggest a Need" button.
-4. If partial matches → call out which RFP is closest + what's different about the user's angle.
+2. **If matches** → surface title, description, technical requirements, quarter, link (e.g., `https://stellarlight.xyz/ideas/prices-api`), and the SCF-funding note (`.funding`).
+3. **If zero matches** → frame it as opportunity, not a dead end: *"No current SCF-round brief covers this lane yet — but anyone can propose one. Submit your idea as a sponsor brief at `https://stellarlight.xyz/ideas` (the 'Suggest a Need' button). Community submissions go through curators and graduate to confirmed RFPs in upcoming rounds."*
+4. **If partial matches** → call out which RFP is closest + what's different about the user's angle. Suggest submitting a sibling brief if the gap is meaningful.
 
 ## Data freshness
 

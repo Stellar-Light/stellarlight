@@ -271,6 +271,28 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 			</>
 		),
 	},
+	{
+		q: "What if there's no RFP / sponsor brief matching my idea?",
+		a: (
+			<>
+				Zero RFPs in a category doesn't mean <em>"no opportunity"</em> — it
+				means no sponsor brief in the current SCF round covers that lane yet.
+				Anyone can propose an RFP at{" "}
+				<a
+					href="https://stellarlight.xyz/ideas"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="underline hover:text-foreground"
+				>
+					stellarlight.xyz/ideas
+				</a>{" "}
+				via the <strong>"Suggest a Need"</strong> button. Community
+				submissions go through curators and graduate to confirmed RFPs in
+				upcoming rounds. Scout will tell you this directly when its RFP
+				search comes up empty.
+			</>
+		),
+	},
 ];
 
 function Section({
