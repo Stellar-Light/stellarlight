@@ -334,12 +334,12 @@ export default async function ScoutPage() {
 
 				{/* Hero — skills.sh-style retro wordmark + Colosseum-style positioning */}
 				<div className="mb-16 text-center relative">
-					{/* Eyebrow — pixel font, sized so the pixels are clearly visible */}
+					{/* Eyebrow — pixel font, large enough to read distinctly as pixel */}
 					<div
-						className="text-foreground/70 leading-none mb-2"
+						className="text-foreground/85 leading-none mb-2"
 						style={{
 							fontFamily: "var(--font-pixel)",
-							fontSize: "clamp(2rem, 5vw, 3.5rem)",
+							fontSize: "clamp(3.5rem, 10vw, 7rem)",
 							letterSpacing: "0.05em",
 						}}
 					>
