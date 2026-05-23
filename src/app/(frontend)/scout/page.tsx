@@ -342,12 +342,10 @@ export default async function ScoutPage() {
 						</span>
 					</div>
 
-					{/* Statement headline — three short lines, big and confident */}
+					{/* Statement headline — two short lines, big and confident */}
 					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6 max-w-4xl">
-						Know what's been built.
-						<br className="hidden sm:block" />{" "}
-						<span className="text-muted-foreground">Find your gap.</span>{" "}
-						<span className="text-muted-foreground">Get funded.</span>
+						Know what's been built.{" "}
+						<span className="text-muted-foreground">Find your gap.</span>
 					</h1>
 
 					{/* Positioning paragraph */}
