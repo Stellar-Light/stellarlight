@@ -102,7 +102,7 @@ export function Navigation() {
 		{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
 		{ name: "Developer Activity", href: "/leaderboard", description: "Stellar dev rankings & ecosystem metrics", icon: Trophy },
 		{ name: "Hackathons", href: "/hackathons", description: "Ecosystem hackathon events", icon: Code2 },
-		{ name: "Ideas", href: "https://ideas.stellarlight.xyz/", description: "Browse project ideas", icon: Lightbulb },
+		{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
 		{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
 	];
 
