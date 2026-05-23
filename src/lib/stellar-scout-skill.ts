@@ -118,6 +118,9 @@ Full content of one SDF skill — returns JSON with \`.skill.content\` containin
 
 Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant SDF skill inline. After recommending it, tell the user to install the skill themselves at \`https://skills.stellar.org/skills/{name}/SKILL.md\` for ongoing use.
 
+### \`GET /api/status\`
+Self-check — returns Scout skill version, current timestamp, and freshness (\`lastUpdatedAt\`) + counts for every data source. Call this on first use to surface data freshness in your answers, e.g. *"as of {lastUpdatedAt}, there are {count} curated Stellar projects in the directory."*
+
 ## Example sessions
 
 ### Example 1 — Conversational
@@ -131,10 +134,34 @@ Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize 
 2. \`GET /api/projects/search?q=privacy+stablecoin+confidential\` → 1 adjacent match (XLM shielded prototype, abandoned).
 3. **Partial gap** — adjacent prior art exists but abandoned; user's angle is fresh.
 4. List the abandoned project + 2 ZK-adjacent projects.
-5. SDK rec: install \`https://skills.stellar.org/skills/zk-proofs/SKILL.md\` and \`https://skills.stellar.org/skills/soroban/SKILL.md\`.
-6. Builders search: \`GET /api/builders?q=zk+stellar\` → surface candidates.
-7. Funding: filter SCF-awarded ZK projects, report total funded.
-8. Next steps: target upcoming Stellar Hacks hackathon, check ideas.stellarlight.xyz for sponsor RFPs matching ZK/privacy.
+5. SDK rec: \`GET /api/skills/zk-proofs\` → quote relevant section inline. Tell user to install \`https://skills.stellar.org/skills/zk-proofs/SKILL.md\` for ongoing use. Also recommend \`soroban\`.
+6. Builders search: \`GET /api/builders?q=zk\` → surface candidates. **If < 3 hits, note the directory is small + growing and recommend Stellar Discord #builders.**
+7. Funding: \`GET /api/projects/search?q=privacy+zk&scfAwarded=1\` → report total SCF-funded $.
+8. Next steps: target upcoming Stellar Hacks hackathon (\`GET /api/hackathons?status=upcoming\`), check ideas.stellarlight.xyz for sponsor RFPs matching ZK/privacy.
+
+### Example 3 — SDF skill discovery
+**User:** "I want to write a Soroban contract. What do I need to know?"
+**Agent action:**
+1. \`GET /api/skills/soroban\` → load the full SDF Soroban skill content.
+2. Use it to answer the user's question with cited references to the actual skill sections.
+3. Tell the user: *"For ongoing work, install this skill at \`.claude/skills/stellar-soroban/SKILL.md\` from \`https://skills.stellar.org/skills/soroban/SKILL.md\`."*
+
+### Example 4 — Hackathon track research
+**User:** "What prize tracks paid out the most at past Stellar Hacks events?"
+**Agent action:**
+1. \`GET /api/hackathons?status=completed\` → list past events.
+2. For each, \`GET /api/hackathons/{slug}\` → read \`.hackathon.tracks[*]\` (each has \`name\`, \`winnerCount\`, \`submissionCount\`, \`totalPrizeUSD\`).
+3. Aggregate tracks across events; rank by \`totalPrizeUSD\` desc.
+4. Surface top 5 tracks with prize totals + which hackathons paid them out.
+5. If track data is sparse (curators haven't tagged submissions), say so — don't infer tracks from project descriptions.
+
+### Example 5 — Funding-first prior art
+**User:** "What SCF-funded projects work on payments? Which raised the most?"
+**Agent action:**
+1. \`GET /api/projects/search?q=payments&scfAwarded=1&limit=20\` → SCF-awarded payments projects.
+2. Sort by \`.scfTotalAwardedUSD\` desc. Sum total raised.
+3. Surface top 5 with name, SCF $, category, link.
+4. Optionally cross-reference recent hackathon submissions: filter results where \`.hackathon\` is set, to see which won prizes en route to SCF funding.
 
 ## Data freshness
 

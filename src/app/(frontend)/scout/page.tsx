@@ -451,6 +451,13 @@ export default function ScoutPage() {
 								— full content of one SDF skill
 							</span>
 						</div>
+						<div>
+							<span className="text-emerald-400">GET</span>{" "}
+							<span className="text-foreground">/api/status</span>{" "}
+							<span className="text-muted-foreground">
+								— self-check: version + data freshness + counts
+							</span>
+						</div>
 					</div>
 					<p className="text-xs text-muted-foreground mt-3">
 						All endpoints are public, read-only, edge-cached for 5 minutes
