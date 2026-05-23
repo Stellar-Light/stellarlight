@@ -12,6 +12,7 @@ import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
 import { Entities } from "./collections/Entities";
 import { Hackathons } from "./collections/Hackathons";
+import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { RSSFeeds } from "./collections/RSSFeeds";
@@ -56,6 +57,7 @@ export default buildConfig({
 		TransparencyLogs,
 		Carousel,
 		Hackathons,
+		IdeaSubmissions,
 	],
 	globals: [Banner],
 	jobs: {

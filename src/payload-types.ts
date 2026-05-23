@@ -78,6 +78,7 @@ export interface Config {
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
     hackathons: Hackathon;
+    'idea-submissions': IdeaSubmission;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -104,6 +105,7 @@ export interface Config {
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
+    'idea-submissions': IdeaSubmissionsSelect<false> | IdeaSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -802,6 +804,21 @@ export interface Carousel {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "idea-submissions".
+ */
+export interface IdeaSubmission {
+  id: string;
+  name: string;
+  email?: string | null;
+  ecosystemNeed: string;
+  needSize: 'critical' | 'important' | 'nice-to-have';
+  approach: 'net-new-rfp' | 'existing-team' | 'unsure';
+  additionalContext?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -959,6 +976,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hackathons';
         value: string | Hackathon;
+      } | null)
+    | ({
+        relationTo: 'idea-submissions';
+        value: string | IdeaSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1325,6 +1346,20 @@ export interface HackathonsSelect<T extends boolean = true> {
   externalUrl?: T;
   status?: T;
   projects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "idea-submissions_select".
+ */
+export interface IdeaSubmissionsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  ecosystemNeed?: T;
+  needSize?: T;
+  approach?: T;
+  additionalContext?: T;
   updatedAt?: T;
   createdAt?: T;
 }
