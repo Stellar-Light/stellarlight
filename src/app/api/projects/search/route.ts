@@ -26,6 +26,7 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	logoUrl: string | null;
 	scfAwarded: boolean;
 	scfTotalAwardedUSD: number | null;
 	hackathon: { id: string; name: string; slug: string } | null;
@@ -91,6 +92,7 @@ export async function GET(req: NextRequest) {
 					category: string;
 					shortDescription?: string;
 					status: string;
+					logo?: { url?: string; filename?: string } | string | null;
 					scf?: { awarded?: boolean; totalAwarded?: number };
 					hackathon?:
 						| { id: string; name: string; slug: string }
@@ -113,6 +115,15 @@ export async function GET(req: NextRequest) {
 								slug: p.hackathon.slug,
 							}
 						: null;
+				// Resolve logo URL: prefer Payload's .url (S3/R2 storage adapter
+				// resolves it automatically), fall back to /media/{filename}
+				// for legacy or local-filesystem uploads.
+				let logoUrl: string | null = null;
+				if (p.logo && typeof p.logo === "object") {
+					if (p.logo.url) logoUrl = p.logo.url;
+					else if (p.logo.filename)
+						logoUrl = `/api/media/file/${p.logo.filename}`;
+				}
 				return {
 					id: String(p.id),
 					name: p.name,
@@ -120,6 +131,7 @@ export async function GET(req: NextRequest) {
 					category: p.category,
 					shortDescription: p.shortDescription ?? null,
 					status: p.status,
+					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 					hackathon: hk,
