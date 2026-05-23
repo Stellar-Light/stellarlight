@@ -771,35 +771,30 @@ export default async function ScoutPage() {
 								title: "Has anyone built this?",
 								blurb:
 									"Search for existing Stellar projects, hackathon submissions, and SCF-funded work that overlaps your idea.",
-								href: "/directory",
 							},
 							{
 								icon: Award,
 								title: "Hackathon results",
 								blurb:
 									"Winners, placements, prize tracks, post-hack survival rates per event.",
-								href: "/hackathons",
 							},
 							{
 								icon: Users,
 								title: "Spot Stellar builders",
 								blurb:
 									"Search the Stellar Passport directory by skill, location, SCF tier. Small and growing — Scout flags gaps and points to Discord/GitHub when results are thin.",
-								href: "/builders",
 							},
 							{
 								icon: Lightbulb,
 								title: "Idea validation",
 								blurb:
 									"Full Deep Dive workflow with gap classification and SDK recommendations.",
-								href: null,
 							},
 							{
 								icon: Terminal,
 								title: "Dev metrics",
 								blurb:
 									"Active dev counts, commit volume, country breakdown via the dev-activity skill.",
-								href: "/leaderboard",
 							},
 							{
 								icon: ExternalLink,
@@ -807,20 +802,17 @@ export default async function ScoutPage() {
 								blurb:
 									"Native query of confirmed Stellar RFPs (SCF-funded sponsor briefs) via /api/rfps. Match an idea to an open brief, or propose a new brief at stellarlight.xyz/ideas.",
 								href: "https://ideas.stellarlight.xyz/",
-								external: true,
 							},
 						].map((cap) => {
 							const Icon = cap.icon;
-							const cardClasses =
-								"rounded-xl border border-border bg-card p-4 transition-colors hover:bg-white/[0.03] hover:border-white/20 group";
 							const inner = (
 								<>
 									<div className="flex items-center gap-2 mb-2">
-										<Icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+										<Icon className="w-4 h-4 text-muted-foreground" />
 										<h3 className="text-sm font-semibold text-foreground">
 											{cap.title}
 										</h3>
-										{cap.external && (
+										{cap.href && (
 											<ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
 										)}
 									</div>
@@ -829,31 +821,26 @@ export default async function ScoutPage() {
 									</p>
 								</>
 							);
-							if (!cap.href) {
+							if (cap.href) {
 								return (
-									<div key={cap.title} className={cardClasses}>
+									<a
+										key={cap.title}
+										href={cap.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="rounded-xl border border-border bg-card p-4 transition-colors hover:bg-white/[0.03] hover:border-white/20"
+									>
 										{inner}
-									</div>
+									</a>
 								);
 							}
-							return cap.external ? (
-								<a
+							return (
+								<div
 									key={cap.title}
-									href={cap.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className={cardClasses}
+									className="rounded-xl border border-border bg-card p-4"
 								>
 									{inner}
-								</a>
-							) : (
-								<Link
-									key={cap.title}
-									href={cap.href}
-									className={cardClasses}
-								>
-									{inner}
-								</Link>
+								</div>
 							);
 						})}
 					</div>
