@@ -391,14 +391,6 @@ export default async function ScoutPage() {
 						>
 							View raw <ExternalLink className="w-3.5 h-3.5" />
 						</a>
-						<a
-							href="https://www.skills.sh/Stellar-Light/stellar-scout"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-						>
-							On skills.sh <ExternalLink className="w-3 h-3" />
-						</a>
 					</div>
 				</div>
 
