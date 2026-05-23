@@ -370,12 +370,23 @@ export default function ScoutPage() {
 								Stellar projects
 							</div>
 							<div className="flex flex-wrap gap-1.5 mb-3">
-								{["Soroswap", "Aquarius", "Blend", "Kulipa"].map((n) => (
+								{[
+									{ name: "Soroswap", letter: "S" },
+									{ name: "Aquarius", letter: "A" },
+									{ name: "Blend", letter: "B" },
+									{ name: "Kulipa", letter: "K" },
+								].map((p) => (
 									<span
-										key={n}
-										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+										key={p.name}
+										className="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
 									>
-										{n}
+										<span
+											className="inline-flex items-center justify-center w-4 h-4 rounded bg-white/10 text-[9px] font-semibold text-foreground"
+											aria-hidden="true"
+										>
+											{p.letter}
+										</span>
+										{p.name}
 									</span>
 								))}
 							</div>
