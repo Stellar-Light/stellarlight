@@ -13,6 +13,76 @@ import {
 } from "lucide-react";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { CopyCommand } from "@/components/copy-command";
+import { getPayloadSafe } from "@/lib/payload-client";
+
+export const revalidate = 300;
+
+interface ShowcaseProject {
+	name: string;
+	slug: string;
+	logoUrl: string | null;
+}
+
+const SHOWCASE_SLUGS = ["soroswap", "aquarius", "blend", "kulipa"];
+
+/**
+ * Fetch the four showcase projects (Soroswap, Aquarius, Blend, Kulipa)
+ * with their Payload logo URLs for the "What's inside" card. Returns
+ * an entry for each slug — null logoUrl if the project isn't in the
+ * directory or has no logo uploaded (we'll fall back to a letter
+ * avatar in render).
+ */
+async function getShowcaseProjects(): Promise<ShowcaseProject[]> {
+	const payload = await getPayloadSafe();
+	if (!payload) {
+		return SHOWCASE_SLUGS.map((slug) => ({
+			name: slug.charAt(0).toUpperCase() + slug.slice(1),
+			slug,
+			logoUrl: null,
+		}));
+	}
+
+	try {
+		const result = await payload.find({
+			collection: "projects",
+			where: { slug: { in: SHOWCASE_SLUGS } },
+			depth: 1,
+			limit: SHOWCASE_SLUGS.length,
+		});
+
+		const bySlug = new Map<
+			string,
+			{ name: string; logoUrl: string | null }
+		>();
+		for (const p of result.docs as Array<{
+			name: string;
+			slug: string;
+			logo?: { url?: string; filename?: string } | string;
+		}>) {
+			let logoUrl: string | null = null;
+			if (p.logo && typeof p.logo === "object") {
+				if (p.logo.url) logoUrl = p.logo.url;
+				else if (p.logo.filename) logoUrl = `/media/${p.logo.filename}`;
+			}
+			bySlug.set(p.slug, { name: p.name, logoUrl });
+		}
+
+		return SHOWCASE_SLUGS.map((slug) => {
+			const hit = bySlug.get(slug);
+			return {
+				name: hit?.name ?? slug.charAt(0).toUpperCase() + slug.slice(1),
+				slug,
+				logoUrl: hit?.logoUrl ?? null,
+			};
+		});
+	} catch {
+		return SHOWCASE_SLUGS.map((slug) => ({
+			name: slug.charAt(0).toUpperCase() + slug.slice(1),
+			slug,
+			logoUrl: null,
+		}));
+	}
+}
 
 export const metadata: Metadata = {
 	title: "Stellar Scout | Stellar Light",
@@ -227,7 +297,8 @@ function Section({
 	);
 }
 
-export default function ScoutPage() {
+export default async function ScoutPage() {
+	const showcaseProjects = await getShowcaseProjects();
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -353,7 +424,7 @@ export default function ScoutPage() {
 				</Section>
 
 				{/* What's inside */}
-				<Section eyebrow="The corpus" title="What's inside">
+				<Section title="What's inside">
 					<p className="text-sm text-muted-foreground mb-6 max-w-2xl">
 						Curated Stellar ecosystem data + the Stellar Foundation's official
 						skill catalog — all queryable from inside Claude Code, Codex,
@@ -370,22 +441,26 @@ export default function ScoutPage() {
 								Stellar projects
 							</div>
 							<div className="flex flex-wrap gap-1.5 mb-3">
-								{[
-									{ name: "Soroswap", letter: "S" },
-									{ name: "Aquarius", letter: "A" },
-									{ name: "Blend", letter: "B" },
-									{ name: "Kulipa", letter: "K" },
-								].map((p) => (
+								{showcaseProjects.map((p) => (
 									<span
-										key={p.name}
+										key={p.slug}
 										className="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
 									>
-										<span
-											className="inline-flex items-center justify-center w-4 h-4 rounded bg-white/10 text-[9px] font-semibold text-foreground"
-											aria-hidden="true"
-										>
-											{p.letter}
-										</span>
+										{p.logoUrl ? (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={p.logoUrl}
+												alt=""
+												className="w-4 h-4 rounded object-cover flex-shrink-0"
+											/>
+										) : (
+											<span
+												className="inline-flex items-center justify-center w-4 h-4 rounded bg-white/10 text-[9px] font-semibold text-foreground"
+												aria-hidden="true"
+											>
+												{p.name.charAt(0).toUpperCase()}
+											</span>
+										)}
 										{p.name}
 									</span>
 								))}
