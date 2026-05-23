@@ -332,48 +332,38 @@ export default async function ScoutPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				{/* Hero — skills.sh-style retro wordmark + Colosseum-style positioning */}
-				<div className="mb-16 text-center relative">
-					{/* Eyebrow — pixel font, large enough to read distinctly as pixel */}
-					<div
-						className="text-foreground/85 leading-none mb-2"
-						style={{
-							fontFamily: "var(--font-pixel)",
-							fontSize: "clamp(3.5rem, 10vw, 7rem)",
-							letterSpacing: "0.05em",
-						}}
-					>
-						STELLAR
+				{/* Hero — clean statement-led, design-system typography */}
+				<div className="mb-16">
+					{/* Eyebrow tag */}
+					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-border bg-card">
+						<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+						<span className="text-xs font-medium text-muted-foreground">
+							Stellar ecosystem · AI skill
+						</span>
 					</div>
 
-					{/* Massive single-word pixel wordmark, skills.sh-style */}
-					<h1
-						className="text-foreground leading-[0.85] tracking-tight select-none mb-6"
-						style={{
-							fontFamily: "var(--font-pixel)",
-							fontSize: "clamp(5rem, 18vw, 14rem)",
-							textShadow:
-								"3px 3px 0 rgba(255,255,255,0.04), 6px 6px 0 rgba(255,255,255,0.02)",
-						}}
-					>
-						SCOUT
+					{/* Statement headline — three short lines, big and confident */}
+					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6 max-w-4xl">
+						Know what's been built.
+						<br className="hidden sm:block" />{" "}
+						<span className="text-muted-foreground">Find your gap.</span>{" "}
+						<span className="text-muted-foreground">Get funded.</span>
 					</h1>
 
-					{/* Tagline — design-system sans, no divider lines */}
-					<div className="text-xs md:text-sm uppercase text-muted-foreground tracking-[0.2em] font-medium mb-8">
-						The Stellar Ecosystem AI Skill
-					</div>
-
-					{/* Confident, Colosseum-style positioning */}
-					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-						Validate Stellar hackathon ideas before you build. See what's been
-						shipped, find teammates with the right skills, and get pointed at
-						the right SDK — all from inside Claude Code, Codex, Cursor, or any
-						agent that loads <code className="font-mono text-foreground/90">SKILL.md</code>.
+					{/* Positioning paragraph */}
+					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
+						Stellar Scout is an AI skill for validating Stellar hackathon ideas
+						before you build. It surfaces existing projects, finds teammates,
+						points to the right SDK, and matches open SCF-funded briefs — all
+						from inside Claude Code, Codex, Cursor, or any agent that loads{" "}
+						<code className="font-mono text-foreground/90 text-sm px-1.5 py-0.5 rounded bg-white/[0.04] border border-border/30">
+							SKILL.md
+						</code>
+						.
 					</p>
 
 					{/* CTAs */}
-					<div className="flex flex-wrap items-center justify-center gap-3">
+					<div className="flex flex-wrap items-center gap-3">
 						<ScoutCopyButton
 							label="Copy skill"
 							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-[#171717] text-sm font-semibold hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
