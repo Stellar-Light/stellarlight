@@ -103,6 +103,7 @@ export async function GET() {
 				"/api/hackathons/{slug}",
 				"/api/builders",
 				"/api/projects/search",
+				"/api/rfps",
 				"/api/skills",
 				"/api/skills/{name}",
 				"/api/status",
