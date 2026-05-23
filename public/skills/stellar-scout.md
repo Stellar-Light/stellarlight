@@ -154,6 +154,10 @@ Params: `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gami
 
 Returns: `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, quarter, quarterLabel, **status** (open/closed), authorName, url`. Meta includes `.activeQuarter`, `.counts.{open,closed,total}`, and `.submitNewBriefAt`. `.funding` clarifies the SCF connection.
 
+**Always pair RFP results with these two external references so the user has the full picture:**
+- **SCF Handbook** — `https://stellar.gitbook.io/scf-handbook` — covers how SCF rounds work, application format, governance, award tiers, and verified-member rules. Recommend it for any user asking *"how does the funding work?"* or preparing an application.
+- **stellarlight.xyz/ideas** — the live RFP listing + the "Suggest a Need" form. Always link here when surfacing RFPs so the user can browse the full set, see quarter tabs, or submit their own.
+
 **Active RFPs vs closed RFPs:**
 - `status: "open"` RFPs are in the current SCF round (`activeQuarter`) and are **ready to be funded and built** — winners get an SCF grant. These are the actionable opportunities. Surface these first.
 - `status: "closed"` RFPs are from past quarters. **Surface them with a clear warning: *"This RFP was from {quarterLabel} — someone is likely already building it."*** It's not a dead lane. Always pair the warning with a concrete next step:
@@ -247,8 +251,11 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 3. `GET /api/projects/search?q=invoice+factoring` (broader) → unfunded competitors / hackathon submissions that didn't get SCF money. Signal whether the unfunded ones abandoned (`hackathonStatus`) — useful for the user's pitch ("X tried this and shelved it because…").
 4. `GET /api/rfps?status=open&q=invoice` → check if there's a direct open RFP. **If yes** — pitch becomes "applying against the {RFP title} brief", which is a stronger SCF application than a cold pitch. **If no, also fetch** `GET /api/rfps?status=closed&q=invoice` to surface past RFPs (warn about prior takers per closed-RFP rules above).
 5. SDK rec: `GET /api/skills/soroban` and `/api/skills/assets` — required reading for a Soroban-based SME finance product. Tell user to install both for the build phase.
-6. Suggest the user check `https://communityfund.stellar.org` for current round dates + application format.
-7. Honest close: *"SCF reviewers care about (a) clear gap, (b) feasibility on Soroban, (c) regional / use-case clarity. Your application should cite the {N} similar funded projects and explain your differentiator explicitly."*
+6. Point them at the two essential references:
+   - **SCF Handbook** (`https://stellar.gitbook.io/scf-handbook`) — read the application format, governance, award tiers, and verified-member rules before submitting.
+   - **stellarlight.xyz/ideas** — full RFP listing + quarter tabs + the "Suggest a Need" form if no open RFP fits.
+7. Suggest checking `https://communityfund.stellar.org` for current round dates.
+8. Honest close: *"SCF reviewers care about (a) clear gap, (b) feasibility on Soroban, (c) regional / use-case clarity. Your application should cite the {N} similar funded projects and explain your differentiator explicitly."*
 
 ### Example 9 — Independent builder, no hackathon / no grant
 **User:** "I'm a Solidity dev moving to Stellar to ship a real-time settlement product. What's the state of the ecosystem?"
