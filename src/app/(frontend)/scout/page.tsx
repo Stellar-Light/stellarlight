@@ -437,10 +437,24 @@ export default function ScoutPage() {
 								— ecosystem dev stats
 							</span>
 						</div>
+						<div>
+							<span className="text-emerald-400">GET</span>{" "}
+							<span className="text-foreground">/api/skills</span>{" "}
+							<span className="text-muted-foreground">
+								— SDF skill catalog from skills.stellar.org
+							</span>
+						</div>
+						<div>
+							<span className="text-emerald-400">GET</span>{" "}
+							<span className="text-foreground">/api/skills/{"{name}"}</span>{" "}
+							<span className="text-muted-foreground">
+								— full content of one SDF skill
+							</span>
+						</div>
 					</div>
 					<p className="text-xs text-muted-foreground mt-3">
-						All endpoints are public, read-only, edge-cached for 5 minutes. No
-						auth required.
+						All endpoints are public, read-only, edge-cached for 5 minutes
+						(24h for SDF skill proxy). No auth required.
 					</p>
 				</Section>
 

@@ -99,6 +99,14 @@ Prior-art / competitor lookup. The workhorse for Deep Dive step 2.
 Params: `q={keywords}`, `category={cat}`, `hackathon={slug}`, `scfAwarded=1`, `limit=N`.
 Returns: `.projects[*]` scored by keyword overlap, sorted by relevance.
 
+### `GET /api/skills`
+Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h.
+
+### `GET /api/skills/{name}`
+Full content of one SDF skill — returns JSON with `.skill.content` containing the entire SKILL.md (frontmatter included).
+
+Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant SDF skill inline. After recommending it, tell the user to install the skill themselves at `https://skills.stellar.org/skills/{name}/SKILL.md` for ongoing use.
+
 ## Example sessions
 
 ### Example 1 — Conversational
