@@ -14,6 +14,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
 import ecData from "@/data/electric-capital-stellar.json";
+import { logApiHit } from "@/lib/api-usage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -196,6 +197,12 @@ export async function GET(req: NextRequest) {
 			// fall through with empty rows
 		}
 	}
+
+	logApiHit({
+		req,
+		endpoint: "/api/leaderboard",
+		filters: { sort, range, category, limit, format },
+	});
 
 	if (format === "csv") {
 		return new NextResponse(toCsv(rows), {

@@ -14,6 +14,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { logApiHit } from "@/lib/api-usage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -142,6 +143,13 @@ export async function GET(req: NextRequest) {
 			// fall through
 		}
 	}
+
+	logApiHit({
+		req,
+		endpoint: "/api/projects/search",
+		query: q,
+		filters: { category, hackathon: hackathonSlug, scfAwarded: scfAwardedOnly, limit },
+	});
 
 	return NextResponse.json(
 		{

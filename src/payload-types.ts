@@ -78,6 +78,7 @@ export interface Config {
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
     hackathons: Hackathon;
+    'api-usage': ApiUsage;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -104,6 +105,7 @@ export interface Config {
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
+    'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -801,6 +803,38 @@ export interface Carousel {
   createdAt: string;
 }
 /**
+ * Public-API hit log. Append-only, used to measure Scout skill adoption.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-usage".
+ */
+export interface ApiUsage {
+  id: string;
+  /**
+   * Endpoint path (e.g. /api/projects/search)
+   */
+  endpoint: string;
+  /**
+   * Query keywords (truncated to 100 chars, lowercased)
+   */
+  query?: string | null;
+  uaBucket?: ('claude' | 'codex' | 'cursor' | 'agent' | 'curl' | 'browser' | 'bot' | 'other') | null;
+  /**
+   * Value of the X-Scout-Version header, if sent
+   */
+  scoutVersion?: string | null;
+  /**
+   * ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)
+   */
+  country?: string | null;
+  /**
+   * Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}
+   */
+  filtersJson?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -959,6 +993,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hackathons';
         value: string | Hackathon;
+      } | null)
+    | ({
+        relationTo: 'api-usage';
+        value: string | ApiUsage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1325,6 +1363,20 @@ export interface HackathonsSelect<T extends boolean = true> {
   externalUrl?: T;
   status?: T;
   projects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-usage_select".
+ */
+export interface ApiUsageSelect<T extends boolean = true> {
+  endpoint?: T;
+  query?: T;
+  uaBucket?: T;
+  scoutVersion?: T;
+  country?: T;
+  filtersJson?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -11,6 +11,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { logApiHit } from "@/lib/api-usage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -30,7 +31,7 @@ interface SubmissionRow {
 }
 
 export async function GET(
-	_req: NextRequest,
+	req: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	const { slug } = await params;
@@ -154,6 +155,8 @@ export async function GET(
 						slug: hackathon.organizer.slug,
 					}
 				: null;
+
+		logApiHit({ req, endpoint: "/api/hackathons/[slug]", filters: { slug } });
 
 		return NextResponse.json(
 			{

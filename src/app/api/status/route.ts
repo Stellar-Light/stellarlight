@@ -16,6 +16,7 @@ import { NextResponse } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
 import ecData from "@/data/electric-capital-stellar.json";
 import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { getUsageStats } from "@/lib/api-usage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -90,6 +91,8 @@ export async function GET() {
 			"Proxied from skills.stellar.org (server-cached 24h). Live freshness shown on the upstream site.",
 	};
 
+	const usage = await getUsageStats();
+
 	return NextResponse.json(
 		{
 			ok: true,
@@ -97,6 +100,13 @@ export async function GET() {
 			version: SCOUT_SKILL_VERSION,
 			generatedAt,
 			sources: [projects, hackathons, builders, ecosystemStats, sdfSkills],
+			usage: usage ?? {
+				total: null,
+				last24h: null,
+				last7d: null,
+				byEndpoint: [],
+				note: "Usage stats unavailable (Payload not reachable).",
+			},
 			endpoints: [
 				"/api/leaderboard",
 				"/api/hackathons",

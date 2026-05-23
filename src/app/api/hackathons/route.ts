@@ -26,6 +26,7 @@ import {
 	getHackathonUrl,
 	type DoraHacksHackathon,
 } from "@/lib/integrations/dorahacks";
+import { logApiHit } from "@/lib/api-usage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -200,6 +201,12 @@ export async function GET(req: NextRequest) {
 	});
 
 	hackathons = hackathons.slice(0, limit);
+
+	logApiHit({
+		req,
+		endpoint: "/api/hackathons",
+		filters: { status: statusFilter, source: sourceFilter, limit },
+	});
 
 	return NextResponse.json(
 		{

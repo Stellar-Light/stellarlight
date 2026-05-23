@@ -24,6 +24,7 @@ import {
 	type Idea,
 	type Quarter,
 } from "@/data/ideas";
+import { logApiHit } from "@/lib/api-usage";
 
 // force-dynamic so the query-param filters (q, category, quarter) actually
 // apply — static generation collapses params at build time and would
@@ -70,6 +71,13 @@ export async function GET(req: NextRequest) {
 	}
 
 	rfps = rfps.slice(0, limit);
+
+	logApiHit({
+		req,
+		endpoint: "/api/rfps",
+		query: q,
+		filters: { category: categoryFilter, quarter: quarterFilter, limit },
+	});
 
 	return NextResponse.json(
 		{
