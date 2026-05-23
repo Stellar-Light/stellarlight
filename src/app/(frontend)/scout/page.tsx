@@ -53,41 +53,6 @@ const SAMPLE_PROMPTS = [
 	},
 ];
 
-const TOPIC_CLUSTERS = [
-	{
-		name: "Soroban smart contracts",
-		blurb: "Rust contracts on Soroban — DeFi protocols, AMMs, lending markets",
-	},
-	{
-		name: "Anchors & off-ramps",
-		blurb: "SEP-24 / SEP-31 deployments, regional payment corridors",
-	},
-	{
-		name: "Agentic payments",
-		blurb: "x402, MPP, AI-agent payment rails — Stellar's emerging differentiator",
-	},
-	{
-		name: "Asset issuance",
-		blurb: "SAC issuance, stablecoins, RWA tokenization",
-	},
-	{
-		name: "Wallets & dapps",
-		blurb: "Freighter, Lobstr integrations, browser wallets, mobile dapps",
-	},
-	{
-		name: "ZK proofs",
-		blurb: "Privacy primitives, confidential transactions",
-	},
-	{
-		name: "SEP standards",
-		blurb: "Protocol-level work, new SEPs / CAPs",
-	},
-	{
-		name: "Data infrastructure",
-		blurb: "Indexers, Horizon clients, RPC infra, analytics",
-	},
-];
-
 const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 	{
 		q: "Which AI agents does Scout work with?",
@@ -387,6 +352,168 @@ export default function ScoutPage() {
 					</div>
 				</Section>
 
+				{/* What's inside */}
+				<Section eyebrow="The corpus" title="What's inside">
+					<p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+						Curated Stellar ecosystem data + the Stellar Foundation's official
+						skill catalog — all queryable from inside Claude Code, Codex,
+						Cursor, or any agent that loads SKILL.md.
+					</p>
+
+					{/* Top row: count cards */}
+					<div className="grid md:grid-cols-3 gap-3 mb-3">
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="text-3xl font-bold text-foreground mb-1">
+								670+
+							</div>
+							<div className="text-sm font-semibold text-foreground mb-3">
+								Stellar projects
+							</div>
+							<div className="flex flex-wrap gap-1.5 mb-3">
+								{["Soroswap", "Aquarius", "Blend", "Kulipa"].map((n) => (
+									<span
+										key={n}
+										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+									>
+										{n}
+									</span>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								Curated projects with category, hackathon history, SCF funding,
+								and GitHub activity. Keyword search across name, description,
+								category.
+							</p>
+						</div>
+
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="text-3xl font-bold text-foreground mb-1">14</div>
+							<div className="text-sm font-semibold text-foreground mb-3">
+								Sponsor briefs (RFPs)
+							</div>
+							<div className="flex flex-wrap gap-1.5 mb-3">
+								{[
+									"Prices API",
+									"Passkey UI Kit",
+									"DeFi Positions",
+									"Trustline Onboarder",
+								].map((n) => (
+									<span
+										key={n}
+										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+									>
+										{n}
+									</span>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								Confirmed problem statements that get funded by the Stellar
+								Community Fund when winners are picked. Match an idea to an
+								open brief.
+							</p>
+						</div>
+
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="text-3xl font-bold text-foreground mb-1">11</div>
+							<div className="text-sm font-semibold text-foreground mb-3">
+								Hackathons
+							</div>
+							<div className="flex flex-wrap gap-1.5 mb-3">
+								{[
+									"Stellar Hacks: Agents",
+									"KALE × Reflector",
+									"ZK Gaming",
+									"Scaffold Stellar",
+								].map((n) => (
+									<span
+										key={n}
+										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+									>
+										{n}
+									</span>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								Live DoraHacks feed (SDF + Tellus orgs) + curated Stellar
+								events with prize pools, tracks, winners, and outcome funnels.
+							</p>
+						</div>
+					</div>
+
+					{/* Bottom row: taxonomies */}
+					<div className="grid md:grid-cols-2 gap-3">
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-7 h-7 rounded-lg bg-white/5 border border-border flex items-center justify-center flex-shrink-0">
+									<Search className="w-3.5 h-3.5 text-muted-foreground" />
+								</div>
+								<div className="text-sm font-semibold text-foreground">
+									Topic clusters
+								</div>
+							</div>
+							<div className="flex flex-wrap gap-1.5 mb-3">
+								{[
+									"Soroban",
+									"Anchors",
+									"Agentic Payments",
+									"Assets",
+									"ZK Proofs",
+									"SEPs",
+								].map((n) => (
+									<span
+										key={n}
+										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+									>
+										{n}
+									</span>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								Stellar-native categories aligned to skills.stellar.org's
+								taxonomy. Scout uses these to frame what to build and which
+								SDK to install next.
+							</p>
+						</div>
+
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-7 h-7 rounded-lg bg-white/5 border border-border flex items-center justify-center flex-shrink-0">
+									<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+								</div>
+								<div className="text-sm font-semibold text-foreground">
+									Companion skills (from SDF)
+								</div>
+							</div>
+							<div className="flex flex-wrap gap-1.5 mb-3">
+								{[
+									"soroban",
+									"dapp",
+									"assets",
+									"data",
+									"agentic-payments",
+									"zk-proofs",
+									"standards",
+								].map((n) => (
+									<span
+										key={n}
+										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50 font-mono"
+									>
+										{n}
+									</span>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								The Stellar Foundation's 7 official skills — the "how to
+								build" layer. Scout chains into them via{" "}
+								<code className="text-[11px] px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+									/api/skills
+								</code>{" "}
+								when the user moves from research to execution.
+							</p>
+						</div>
+					</div>
+				</Section>
+
 				{/* Two modes */}
 				<Section eyebrow="Two modes" title="Conversational + Deep Dive">
 					<div className="grid md:grid-cols-2 gap-4">
@@ -545,42 +672,6 @@ export default function ScoutPage() {
 					>
 						See all 6 prompts + 5 worked sessions →
 					</Link>
-				</Section>
-
-				{/* Topic clusters */}
-				<Section
-					eyebrow="Stellar-native"
-					title="Topic clusters Scout understands"
-				>
-					<div className="grid sm:grid-cols-2 gap-3">
-						{TOPIC_CLUSTERS.map((t) => (
-							<div
-								key={t.name}
-								className="rounded-xl border border-border/50 bg-card p-4"
-							>
-								<div className="text-sm font-semibold text-foreground mb-1">
-									{t.name}
-								</div>
-								<div className="text-xs text-muted-foreground leading-relaxed">
-									{t.blurb}
-								</div>
-							</div>
-						))}
-					</div>
-					<p className="text-xs text-muted-foreground mt-4">
-						These map directly to{" "}
-						<a
-							href="https://skills.stellar.org/"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="underline hover:text-foreground inline-flex items-center gap-0.5"
-						>
-							skills.stellar.org <ExternalLink className="w-3 h-3" />
-						</a>{" "}
-						— the Stellar Foundation's official skill catalog covering{" "}
-						<em>how</em> to build. Scout covers <em>what</em> to build
-						and <em>with whom</em>. They compose.
-					</p>
 				</Section>
 
 				{/* Endpoints teaser → /scout/api-reference */}
