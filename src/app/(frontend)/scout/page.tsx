@@ -124,9 +124,9 @@ export default function ScoutPage() {
 
 				{/* Hero */}
 				<div className="mb-14">
-					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[#FDDA24]/30 bg-[#FDDA24]/5">
-						<Sparkles className="w-3.5 h-3.5 text-[#FDDA24]" />
-						<span className="text-xs font-medium text-[#FDDA24]">
+					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-border/50 bg-white/5">
+						<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+						<span className="text-xs font-medium text-muted-foreground">
 							Scout the Stellar landscape before you build
 						</span>
 					</div>
@@ -140,12 +140,15 @@ export default function ScoutPage() {
 						skills. Get pointed to the right SDK.
 					</p>
 					<div className="flex flex-wrap items-center gap-3">
-						<ScoutCopyButton label="Copy skill" />
+						<ScoutCopyButton
+							label="Copy skill"
+							className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-white text-[#171717] text-sm font-medium hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
+						/>
 						<a
 							href="/skills/stellar-scout.md"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border/50 bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+							className="inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-medium text-foreground hover:bg-white/5 transition-colors"
 						>
 							View raw <ExternalLink className="w-3.5 h-3.5" />
 						</a>
@@ -234,7 +237,7 @@ export default function ScoutPage() {
 				{/* Two modes */}
 				<Section eyebrow="Two modes" title="Conversational + Deep Dive">
 					<div className="grid md:grid-cols-2 gap-4">
-						<div className="rounded-xl border border-border/50 bg-card p-5">
+						<div className="rounded-xl border border-border bg-card p-5">
 							<div className="flex items-center gap-2 mb-3">
 								<Search className="w-4 h-4 text-muted-foreground" />
 								<h3 className="text-sm font-semibold text-foreground">
@@ -246,9 +249,9 @@ export default function ScoutPage() {
 								surface the data, link the source.
 							</p>
 						</div>
-						<div className="rounded-xl border border-[#FDDA24]/40 bg-[#FDDA24]/[0.03] p-5">
+						<div className="rounded-xl border border-border bg-card p-5">
 							<div className="flex items-center gap-2 mb-3">
-								<Lightbulb className="w-4 h-4 text-[#FDDA24]" />
+								<Lightbulb className="w-4 h-4 text-muted-foreground" />
 								<h3 className="text-sm font-semibold text-foreground">
 									Deep Dive
 								</h3>
