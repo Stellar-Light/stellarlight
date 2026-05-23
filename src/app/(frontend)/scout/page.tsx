@@ -334,12 +334,13 @@ export default async function ScoutPage() {
 
 				{/* Hero — skills.sh-style retro wordmark + Colosseum-style positioning */}
 				<div className="mb-16 text-center relative">
-					{/* Eyebrow context */}
+					{/* Eyebrow context — pixel font, smaller scale, sits just above the wordmark */}
 					<div
 						aria-hidden="true"
-						className="font-mono text-[10px] md:text-xs uppercase text-muted-foreground/80 tracking-[0.4em] mb-3"
+						className="font-[family-name:var(--font-pixel)] uppercase text-muted-foreground/80 tracking-[0.2em] mb-1"
+						style={{ fontSize: "clamp(1rem, 2.5vw, 1.75rem)" }}
 					>
-						Stellar
+						STELLAR
 					</div>
 
 					{/* Massive single-word pixel wordmark, skills.sh-style */}
@@ -354,13 +355,13 @@ export default async function ScoutPage() {
 						SCOUT
 					</h1>
 
-					{/* Tagline with horizontal divider rules — skills.sh style */}
+					{/* Tagline with horizontal divider rules — uses design-system sans (Inter) */}
 					<div className="flex items-center justify-center gap-4 mb-8 max-w-xl mx-auto">
 						<span
 							aria-hidden="true"
 							className="flex-1 h-px bg-gradient-to-r from-transparent to-border"
 						/>
-						<span className="font-mono text-[10px] md:text-xs uppercase text-muted-foreground tracking-[0.25em] whitespace-nowrap">
+						<span className="text-xs md:text-sm uppercase text-muted-foreground tracking-[0.2em] whitespace-nowrap font-medium">
 							The Stellar Ecosystem AI Skill
 						</span>
 						<span
