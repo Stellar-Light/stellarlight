@@ -334,19 +334,23 @@ export default async function ScoutPage() {
 
 				{/* Hero — skills.sh-style retro wordmark + Colosseum-style positioning */}
 				<div className="mb-16 text-center relative">
-					{/* Eyebrow context — pixel font, smaller scale, sits just above the wordmark */}
+					{/* Eyebrow — pixel font, sized so the pixels are clearly visible */}
 					<div
-						aria-hidden="true"
-						className="font-[family-name:var(--font-pixel)] uppercase text-muted-foreground/80 tracking-[0.2em] mb-1"
-						style={{ fontSize: "clamp(1rem, 2.5vw, 1.75rem)" }}
+						className="text-foreground/70 leading-none mb-2"
+						style={{
+							fontFamily: "var(--font-pixel)",
+							fontSize: "clamp(2rem, 5vw, 3.5rem)",
+							letterSpacing: "0.05em",
+						}}
 					>
 						STELLAR
 					</div>
 
 					{/* Massive single-word pixel wordmark, skills.sh-style */}
 					<h1
-						className="font-[family-name:var(--font-pixel)] text-foreground leading-[0.85] tracking-tight select-none mb-6"
+						className="text-foreground leading-[0.85] tracking-tight select-none mb-6"
 						style={{
+							fontFamily: "var(--font-pixel)",
 							fontSize: "clamp(5rem, 18vw, 14rem)",
 							textShadow:
 								"3px 3px 0 rgba(255,255,255,0.04), 6px 6px 0 rgba(255,255,255,0.02)",
@@ -355,19 +359,9 @@ export default async function ScoutPage() {
 						SCOUT
 					</h1>
 
-					{/* Tagline with horizontal divider rules — uses design-system sans (Inter) */}
-					<div className="flex items-center justify-center gap-4 mb-8 max-w-xl mx-auto">
-						<span
-							aria-hidden="true"
-							className="flex-1 h-px bg-gradient-to-r from-transparent to-border"
-						/>
-						<span className="text-xs md:text-sm uppercase text-muted-foreground tracking-[0.2em] whitespace-nowrap font-medium">
-							The Stellar Ecosystem AI Skill
-						</span>
-						<span
-							aria-hidden="true"
-							className="flex-1 h-px bg-gradient-to-l from-transparent to-border"
-						/>
+					{/* Tagline — design-system sans, no divider lines */}
+					<div className="text-xs md:text-sm uppercase text-muted-foreground tracking-[0.2em] font-medium mb-8">
+						The Stellar Ecosystem AI Skill
 					</div>
 
 					{/* Confident, Colosseum-style positioning */}
