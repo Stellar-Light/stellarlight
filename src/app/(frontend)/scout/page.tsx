@@ -341,20 +341,8 @@ export default function ScoutPage() {
 							{
 								icon: ExternalLink,
 								title: "RFP discovery",
-								blurb: (
-									<>
-										Points to{" "}
-										<a
-											href="https://ideas.stellarlight.xyz/"
-											target="_blank"
-											rel="noopener noreferrer"
-											className="underline hover:text-foreground"
-										>
-											ideas.stellarlight.xyz
-										</a>{" "}
-										for current sponsor briefs and prize tracks.
-									</>
-								),
+								blurb:
+									"Native query of confirmed Stellar RFPs (SCF-funded sponsor briefs) via /api/rfps. Match an idea to an open brief, or surface that no RFP exists yet.",
 							},
 						].map((cap) => {
 							const Icon = cap.icon;
@@ -458,6 +446,13 @@ export default function ScoutPage() {
 						</div>
 						<div>
 							<span className="text-emerald-400">GET</span>{" "}
+							<span className="text-foreground">/api/rfps</span>{" "}
+							<span className="text-muted-foreground">
+								— SCF-funded sponsor briefs
+							</span>
+						</div>
+						<div>
+							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/skills</span>{" "}
 							<span className="text-muted-foreground">
 								— SDF skill catalog
@@ -469,7 +464,7 @@ export default function ScoutPage() {
 						href="/scout/api-reference"
 						className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
-						Full API reference (8 endpoints, params, response shapes) →
+						Full API reference (9 endpoints, params, response shapes) →
 					</Link>
 				</Section>
 

@@ -37,7 +37,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 5. **SDK / skill recommendation.** Map the idea to the right `skills.stellar.org` track (Soroban / dapp / assets / data / agentic-payments / zk-proofs / standards). Tell the user to grab that skill next.
 6. **Teammate candidates.** Hit `/api/builders?q={skill_keyword}` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport — currently in the dozens, not hundreds). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
 7. **Funding signal.** What's been funded in this area? Filter `/api/projects/search?q={keywords}&scfAwarded=1` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
-8. **Suggested next steps.** Concrete: (a) which upcoming hackathon to enter (`/api/hackathons?status=upcoming`), (b) which prize track if any sponsor RFP matches (point to https://ideas.stellarlight.xyz/ for current sponsor briefs / RFPs), (c) which SDK skill to install next from `skills.stellar.org`.
+8. **Suggested next steps.** Concrete: (a) which upcoming hackathon to enter (`/api/hackathons?status=upcoming`), (b) which open RFP / sponsor brief matches the idea (`/api/rfps?q={keywords}` — these are SCF-funded sponsor briefs), (c) which SDK skill to install next from `skills.stellar.org`.
 
 ## Evidence floor
 
@@ -102,6 +102,13 @@ Prior-art / competitor lookup. The workhorse for Deep Dive step 2.
 Params: `q={keywords}`, `category={cat}`, `hackathon={slug}`, `scfAwarded=1`, `limit=N`.
 Returns: `.projects[*]` scored by keyword overlap, sorted by relevance.
 
+### `GET /api/rfps`
+Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"is there an open RFP matching my idea?"*. Use in Deep Dive step 8 (next steps).
+
+Params: `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gaming|infrastructure|nfts|payments|scf|web3-social}`, `quarter={q1-2026|q2-2026|...}`, `limit=N`.
+
+Returns: `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url`. `.funding` field clarifies the SCF connection.
+
 ### `GET /api/skills`
 Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h.
 
@@ -129,7 +136,7 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 5. SDK rec: `GET /api/skills/zk-proofs` → quote relevant section inline. Tell user to install `https://skills.stellar.org/skills/zk-proofs/SKILL.md` for ongoing use. Also recommend `soroban`.
 6. Builders search: `GET /api/builders?q=zk` → surface candidates. **If < 3 hits, note the directory is small + growing and recommend Stellar Discord #builders.**
 7. Funding: `GET /api/projects/search?q=privacy+zk&scfAwarded=1` → report total SCF-funded $.
-8. Next steps: target upcoming Stellar Hacks hackathon (`GET /api/hackathons?status=upcoming`), check ideas.stellarlight.xyz for sponsor RFPs matching ZK/privacy.
+8. Next steps: `GET /api/hackathons?status=upcoming` for events to target; `GET /api/rfps?q=zk+privacy` for open sponsor briefs that match (SCF-funded).
 
 ### Example 3 — SDF skill discovery
 **User:** "I want to write a Soroban contract. What do I need to know?"
@@ -154,6 +161,14 @@ Self-check — returns Scout skill version, current timestamp, and freshness (`l
 2. Sort by `.scfTotalAwardedUSD` desc. Sum total raised.
 3. Surface top 5 with name, SCF $, category, link.
 4. Optionally cross-reference recent hackathon submissions: filter results where `.hackathon` is set, to see which won prizes en route to SCF funding.
+
+### Example 6 — Match an idea to an open RFP
+**User:** "Is there an open Stellar RFP that matches my idea — a real-time price API for Soroban tokens?"
+**Agent action:**
+1. `GET /api/rfps?q=price+api+soroban` → filter the curated RFP list by keyword overlap.
+2. If matches → surface title, description, technical requirements, quarter, link (e.g., `https://stellarlight.xyz/ideas/prices-api`), and the SCF-funding note (`.funding`).
+3. If zero matches → tell the user honestly *"no published RFP matches your idea right now"*, and suggest submitting it themselves at `https://stellarlight.xyz/ideas` via the "Suggest a Need" button.
+4. If partial matches → call out which RFP is closest + what's different about the user's angle.
 
 ## Data freshness
 

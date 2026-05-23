@@ -84,6 +84,23 @@ const ENDPOINTS: Endpoint[] = [
 	},
 	{
 		method: "GET",
+		path: "/api/rfps",
+		summary:
+			"Confirmed Stellar RFPs / sponsor briefs — problem statements that get funded by the Stellar Community Fund when winners are picked. Native source for \"is there an open RFP matching my idea?\" Backed by src/data/ideas.ts (curated). Mirrors what's on /ideas.",
+		params: [
+			{ name: "q", type: "string", description: "Free-text match across title + description + technical requirements + category" },
+			{ name: "category", type: "string", description: "ai | consumer-dapps | defi | developer-tooling | gaming | infrastructure | nfts | payments | scf | web3-social" },
+			{ name: "quarter", type: "string", description: "q1-2026 | q2-2026 (more added as new rounds open)" },
+			{ name: "limit", type: "number", description: "Max rows (default 100, max 200)" },
+		],
+		returns: [
+			".rfps[*] — id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url",
+			".meta.categories, .meta.quarters — full enums for client-side filtering",
+			".funding — clarifies that winners are SCF-funded",
+		],
+	},
+	{
+		method: "GET",
 		path: "/api/skills",
 		summary:
 			"Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards).",
