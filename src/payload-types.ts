@@ -79,6 +79,7 @@ export interface Config {
     carousel: Carousel;
     hackathons: Hackathon;
     'api-usage': ApiUsage;
+    'research-docs': ResearchDoc;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -106,6 +107,7 @@ export interface Config {
     carousel: CarouselSelect<false> | CarouselSelect<true>;
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
     'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
+    'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -835,6 +837,71 @@ export interface ApiUsage {
   createdAt: string;
 }
 /**
+ * Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research-docs".
+ */
+export interface ResearchDoc {
+  id: string;
+  source: 'sdf-blog' | 'scf-handbook' | 'sep' | 'dev-docs' | 'paper' | 'scf-proposal' | 'lumenloop';
+  /**
+   * Parent doc title (e.g. SEP name, blog post title, paper title)
+   */
+  title: string;
+  /**
+   * Section heading this chunk lives under (H2/H3) — used to scope citations
+   */
+  section?: string | null;
+  /**
+   * Canonical source URL for citation
+   */
+  url: string;
+  /**
+   * Stable ID for the parent document (used to dedupe + delete obsolete chunks)
+   */
+  parentDocId: string;
+  /**
+   * 0-based index of this chunk within its parent document
+   */
+  chunkIndex: number;
+  /**
+   * The actual text content of this chunk (≤ 1500 tokens, markdown preserved)
+   */
+  content: string;
+  /**
+   * SHA-256 of `content` — used by ingestion scripts to skip re-embedding unchanged chunks
+   */
+  contentHash?: string | null;
+  /**
+   * Topic tags inferred from the source (e.g. soroban, anchor, sep-24)
+   */
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Original publish date of the parent doc, if known
+   */
+  publishedAt?: string | null;
+  /**
+   * Voyage AI voyage-3 vector (1024 floats). Atlas $vectorSearch is configured on this field.
+   */
+  embedding?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -997,6 +1064,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'api-usage';
         value: string | ApiUsage;
+      } | null)
+    | ({
+        relationTo: 'research-docs';
+        value: string | ResearchDoc;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1377,6 +1448,30 @@ export interface ApiUsageSelect<T extends boolean = true> {
   scoutVersion?: T;
   country?: T;
   filtersJson?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research-docs_select".
+ */
+export interface ResearchDocsSelect<T extends boolean = true> {
+  source?: T;
+  title?: T;
+  section?: T;
+  url?: T;
+  parentDocId?: T;
+  chunkIndex?: T;
+  content?: T;
+  contentHash?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  publishedAt?: T;
+  embedding?: T;
   updatedAt?: T;
   createdAt?: T;
 }
