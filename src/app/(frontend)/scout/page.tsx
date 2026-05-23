@@ -153,16 +153,49 @@ export default function ScoutPage() {
 				</div>
 
 				{/* How it works */}
-				<Section eyebrow="How it works" title="Install once, use forever">
+				<Section eyebrow="How it works" title="One command, then ask away">
 					<div className="rounded-xl border border-border/50 bg-card p-6">
-						<ol className="space-y-4 text-sm text-foreground">
+						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
+							Install via npx
+						</div>
+						<div className="rounded-lg bg-black/40 border border-border/30 p-4 mb-2 font-mono text-sm text-foreground overflow-x-auto">
+							npx skills add Stellar-Light/stellar-scout
+						</div>
+						<p className="text-xs text-muted-foreground mb-5">
+							For Codex or OpenClaw, append{" "}
+							<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+								-a codex
+							</code>{" "}
+							or{" "}
+							<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+								-a openclaw
+							</code>
+							. Powered by the open-source{" "}
+							<a
+								href="https://github.com/vercel-labs/skills"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline hover:text-foreground"
+							>
+								vercel-labs/skills
+							</a>{" "}
+							CLI.
+						</p>
+						<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2 mt-6">
+							Or copy/paste manually
+						</div>
+						<ol className="space-y-3 text-sm text-foreground">
 							<li className="flex gap-3">
 								<span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 border border-border/50 text-xs text-muted-foreground inline-flex items-center justify-center font-mono">
 									1
 								</span>
 								<div>
-									<strong>Copy the skill manifest</strong> using the button
-									above (or download the raw <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">.md</code>).
+									<strong>Copy the skill manifest</strong> using the button at
+									the top of this page (or view the raw{" "}
+									<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+										.md
+									</code>
+									).
 								</div>
 							</li>
 							<li className="flex gap-3">
@@ -172,8 +205,11 @@ export default function ScoutPage() {
 								<div>
 									<strong>Paste it into your AI agent</strong> — Claude
 									(claude.ai), Claude Code, Codex, Cursor, or any client that
-									loads <code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">SKILL.md</code> files.
-									For Claude Code, drop the file into{" "}
+									loads{" "}
+									<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
+										SKILL.md
+									</code>
+									files. For Claude Code, drop the file into{" "}
 									<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 										.claude/skills/stellar-scout/SKILL.md
 									</code>
@@ -342,10 +378,10 @@ export default function ScoutPage() {
 					</div>
 				</Section>
 
-				{/* Sample prompts */}
+				{/* Sample prompts teaser → /scout/examples */}
 				<Section eyebrow="Sample prompts" title="Try these in your agent">
-					<div className="space-y-2">
-						{SAMPLE_PROMPTS.map((p) => (
+					<div className="space-y-2 mb-3">
+						{SAMPLE_PROMPTS.slice(0, 3).map((p) => (
 							<div
 								key={p.title}
 								className="rounded-xl border border-border/50 bg-card p-4"
@@ -359,6 +395,12 @@ export default function ScoutPage() {
 							</div>
 						))}
 					</div>
+					<Link
+						href="/scout/examples"
+						className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+					>
+						See all 6 prompts + 5 worked sessions →
+					</Link>
 				</Section>
 
 				{/* Topic clusters */}
@@ -397,72 +439,38 @@ export default function ScoutPage() {
 					</p>
 				</Section>
 
-				{/* Endpoints */}
+				{/* Endpoints teaser → /scout/api-reference */}
 				<Section eyebrow="Under the hood" title="Public APIs the skill calls">
-					<div className="rounded-xl border border-border/50 bg-card p-6 font-mono text-xs space-y-2">
+					<div className="rounded-xl border border-border/50 bg-card p-6 font-mono text-xs space-y-2 mb-3">
 						<div>
 							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/hackathons</span>{" "}
 							<span className="text-muted-foreground">
-								— list curated Stellar hackathons
-							</span>
-						</div>
-						<div>
-							<span className="text-emerald-400">GET</span>{" "}
-							<span className="text-foreground">
-								/api/hackathons/{"{slug}"}
-							</span>{" "}
-							<span className="text-muted-foreground">
-								— submissions, winners, outcomes
-							</span>
-						</div>
-						<div>
-							<span className="text-emerald-400">GET</span>{" "}
-							<span className="text-foreground">/api/builders</span>{" "}
-							<span className="text-muted-foreground">
-								— builder directory search
+								— curated + DoraHacks live
 							</span>
 						</div>
 						<div>
 							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/projects/search</span>{" "}
 							<span className="text-muted-foreground">
-								— prior-art / competitor lookup
-							</span>
-						</div>
-						<div>
-							<span className="text-emerald-400">GET</span>{" "}
-							<span className="text-foreground">/api/leaderboard</span>{" "}
-							<span className="text-muted-foreground">
-								— ecosystem dev stats
+								— prior-art lookup
 							</span>
 						</div>
 						<div>
 							<span className="text-emerald-400">GET</span>{" "}
 							<span className="text-foreground">/api/skills</span>{" "}
 							<span className="text-muted-foreground">
-								— SDF skill catalog from skills.stellar.org
+								— SDF skill catalog
 							</span>
 						</div>
-						<div>
-							<span className="text-emerald-400">GET</span>{" "}
-							<span className="text-foreground">/api/skills/{"{name}"}</span>{" "}
-							<span className="text-muted-foreground">
-								— full content of one SDF skill
-							</span>
-						</div>
-						<div>
-							<span className="text-emerald-400">GET</span>{" "}
-							<span className="text-foreground">/api/status</span>{" "}
-							<span className="text-muted-foreground">
-								— self-check: version + data freshness + counts
-							</span>
-						</div>
+						<div className="text-muted-foreground/70 pt-1">…and 5 more</div>
 					</div>
-					<p className="text-xs text-muted-foreground mt-3">
-						All endpoints are public, read-only, edge-cached for 5 minutes
-						(24h for SDF skill proxy). No auth required.
-					</p>
+					<Link
+						href="/scout/api-reference"
+						className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+					>
+						Full API reference (8 endpoints, params, response shapes) →
+					</Link>
 				</Section>
 
 				{/* Footer CTA */}
