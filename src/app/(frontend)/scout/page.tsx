@@ -332,35 +332,72 @@ export default async function ScoutPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				{/* Hero */}
-				<div className="mb-14">
-					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-border/50 bg-white/5">
-						<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-						<span className="text-xs font-medium text-muted-foreground">
-							Scout the Stellar landscape before you build
-						</span>
+				{/* Hero — skills.sh-style retro wordmark + Colosseum-style positioning */}
+				<div className="mb-16 text-center relative">
+					{/* Eyebrow context */}
+					<div
+						aria-hidden="true"
+						className="font-mono text-[10px] md:text-xs uppercase text-muted-foreground/80 tracking-[0.4em] mb-3"
+					>
+						Stellar
 					</div>
-					<h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-						Stellar Scout
+
+					{/* Massive single-word pixel wordmark, skills.sh-style */}
+					<h1
+						className="font-[family-name:var(--font-pixel)] text-foreground leading-[0.85] tracking-tight select-none mb-6"
+						style={{
+							fontSize: "clamp(5rem, 18vw, 14rem)",
+							textShadow:
+								"3px 3px 0 rgba(255,255,255,0.04), 6px 6px 0 rgba(255,255,255,0.02)",
+						}}
+					>
+						SCOUT
 					</h1>
-					<p className="text-lg text-muted-foreground max-w-2xl mb-8">
-						An AI skill that scouts the Stellar ecosystem for you. Validate
-						ideas before you build. See what's been built across Stellar hackathons,
-						SCF rounds, and the project directory. Find teammates with the right
-						skills. Get pointed to the right SDK.
+
+					{/* Tagline with horizontal divider rules — skills.sh style */}
+					<div className="flex items-center justify-center gap-4 mb-8 max-w-xl mx-auto">
+						<span
+							aria-hidden="true"
+							className="flex-1 h-px bg-gradient-to-r from-transparent to-border"
+						/>
+						<span className="font-mono text-[10px] md:text-xs uppercase text-muted-foreground tracking-[0.25em] whitespace-nowrap">
+							The Stellar Ecosystem AI Skill
+						</span>
+						<span
+							aria-hidden="true"
+							className="flex-1 h-px bg-gradient-to-l from-transparent to-border"
+						/>
+					</div>
+
+					{/* Confident, Colosseum-style positioning */}
+					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+						Validate Stellar hackathon ideas before you build. See what's been
+						shipped, find teammates with the right skills, and get pointed at
+						the right SDK — all from inside Claude Code, Codex, Cursor, or any
+						agent that loads <code className="font-mono text-foreground/90">SKILL.md</code>.
 					</p>
-					<div className="flex flex-wrap items-center gap-3">
+
+					{/* CTAs */}
+					<div className="flex flex-wrap items-center justify-center gap-3">
 						<ScoutCopyButton
 							label="Copy skill"
-							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-[#171717] text-sm font-medium hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
+							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-[#171717] text-sm font-semibold hover:bg-[#F5F5F5] active:bg-[#E5E5E5] transition-colors"
 						/>
 						<a
 							href="/skills/stellar-scout.md"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-white/5 transition-colors"
+							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-white/5 hover:border-white/20 transition-colors"
 						>
 							View raw <ExternalLink className="w-3.5 h-3.5" />
+						</a>
+						<a
+							href="https://www.skills.sh/Stellar-Light/stellar-scout"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+						>
+							On skills.sh <ExternalLink className="w-3 h-3" />
 						</a>
 					</div>
 				</div>
@@ -464,9 +501,10 @@ export default async function ScoutPage() {
 							</div>
 							<div className="flex flex-wrap gap-1.5 mb-3">
 								{showcaseProjects.map((p) => (
-									<span
+									<Link
 										key={p.slug}
-										className="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50"
+										href={`/project/${p.slug}`}
+										className="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50 hover:bg-white/10 hover:border-white/20 hover:text-foreground transition-colors"
 									>
 										{p.logoUrl ? (
 											// eslint-disable-next-line @next/next/no-img-element
@@ -484,7 +522,7 @@ export default async function ScoutPage() {
 											</span>
 										)}
 										{p.name}
-									</span>
+									</Link>
 								))}
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
@@ -656,47 +694,76 @@ export default async function ScoutPage() {
 
 				{/* Gap classification */}
 				<Section eyebrow="The strict part" title="Gap classification, no speculation">
-					<div className="rounded-xl border border-border/50 bg-card p-6">
-						<div className="grid sm:grid-cols-3 gap-4 mb-5">
-							<div>
-								<div className="text-emerald-400 font-semibold text-sm mb-1">
-									Full gap
+					<div className="grid sm:grid-cols-3 gap-3 mb-3">
+						{[
+							{
+								range: "0–2",
+								title: "Full gap",
+								signal: "Highest opportunity",
+								blurb:
+									"Zero prior projects on Stellar. No winning hackathon submissions. No SCF-funded teams in this lane.",
+							},
+							{
+								range: "3–5",
+								title: "Partial gap",
+								signal: "Medium opportunity",
+								blurb:
+									"1–3 adjacent projects exist but none cover the specific angle. The user's wedge is fresh.",
+							},
+							{
+								range: "7–10",
+								title: "False gap",
+								signal: "Low opportunity",
+								blurb:
+									"4+ direct competitors or a funded category leader already exists. Recommend a differentiator or reframe.",
+							},
+						].map((c) => (
+							<div
+								key={c.title}
+								className="rounded-xl border border-border bg-card p-5"
+							>
+								<div className="flex items-baseline justify-between mb-3">
+									<span className="font-mono text-2xl font-bold text-foreground tracking-tight">
+										{c.range}
+									</span>
+									<span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
+										Crowdedness
+									</span>
+								</div>
+								<div className="text-sm font-semibold text-foreground mb-1">
+									{c.title}
+								</div>
+								<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
+									{c.signal}
 								</div>
 								<p className="text-xs text-muted-foreground leading-relaxed">
-									Zero prior projects, no winning hackathon submissions, no SCF
-									funding. Highest opportunity.
+									{c.blurb}
 								</p>
 							</div>
-							<div>
-								<div className="text-amber-300 font-semibold text-sm mb-1">
-									Partial gap
-								</div>
-								<p className="text-xs text-muted-foreground leading-relaxed">
-									1–3 adjacent projects exist but none cover the specific
-									angle. Medium opportunity.
-								</p>
+						))}
+					</div>
+					<div className="rounded-xl border border-border bg-card p-5">
+						<div className="flex items-start gap-3">
+							<div className="w-7 h-7 rounded-lg bg-white/5 border border-border flex items-center justify-center flex-shrink-0 mt-0.5">
+								<Award className="w-3.5 h-3.5 text-muted-foreground" />
 							</div>
 							<div>
-								<div className="text-rose-400 font-semibold text-sm mb-1">
-									False gap
+								<div className="text-sm font-semibold text-foreground mb-1">
+									Evidence floor
 								</div>
 								<p className="text-xs text-muted-foreground leading-relaxed">
-									4+ direct competitors or a funded leader already exists. Low
-									opportunity unless clear differentiator.
+									If the data doesn't support a claim, Scout says so. It won't
+									invent competitors, prize amounts, or builder profiles.
+									Missing data is reported as <em>"not indexed"</em> — never
+									papered over.
 								</p>
 							</div>
 						</div>
-						<p className="text-xs text-muted-foreground border-t border-border/40 pt-4">
-							<strong className="text-foreground">Evidence floor:</strong> if
-							the data doesn't support a claim, Scout says so. It won't
-							invent competitors, prize amounts, or builder profiles. Missing
-							data is reported as "not indexed" — never papered over.
-						</p>
 					</div>
 				</Section>
 
 				{/* Capabilities */}
-				<Section eyebrow="What it can answer" title="Five core capabilities">
+				<Section eyebrow="What it can answer" title="Six core capabilities">
 					<div className="grid sm:grid-cols-2 gap-3">
 						{[
 							{
@@ -704,54 +771,89 @@ export default async function ScoutPage() {
 								title: "Has anyone built this?",
 								blurb:
 									"Search for existing Stellar projects, hackathon submissions, and SCF-funded work that overlaps your idea.",
+								href: "/directory",
 							},
 							{
 								icon: Award,
 								title: "Hackathon results",
 								blurb:
 									"Winners, placements, prize tracks, post-hack survival rates per event.",
+								href: "/hackathons",
 							},
 							{
 								icon: Users,
 								title: "Spot Stellar builders",
 								blurb:
 									"Search the Stellar Passport directory by skill, location, SCF tier. Small and growing — Scout flags gaps and points to Discord/GitHub when results are thin.",
+								href: "/builders",
 							},
 							{
 								icon: Lightbulb,
 								title: "Idea validation",
 								blurb:
 									"Full Deep Dive workflow with gap classification and SDK recommendations.",
+								href: null,
 							},
 							{
 								icon: Terminal,
 								title: "Dev metrics",
 								blurb:
 									"Active dev counts, commit volume, country breakdown via the dev-activity skill.",
+								href: "/leaderboard",
 							},
 							{
 								icon: ExternalLink,
 								title: "RFP discovery",
 								blurb:
-									"Native query of confirmed Stellar RFPs (SCF-funded sponsor briefs) via /api/rfps. Match an idea to an open brief, or surface that no RFP exists yet.",
+									"Native query of confirmed Stellar RFPs (SCF-funded sponsor briefs) via /api/rfps. Match an idea to an open brief, or propose a new brief at stellarlight.xyz/ideas.",
+								href: "https://ideas.stellarlight.xyz/",
+								external: true,
 							},
 						].map((cap) => {
 							const Icon = cap.icon;
-							return (
-								<div
-									key={cap.title}
-									className="rounded-xl border border-border/50 bg-card p-4"
-								>
+							const cardClasses =
+								"rounded-xl border border-border bg-card p-4 transition-colors hover:bg-white/[0.03] hover:border-white/20 group";
+							const inner = (
+								<>
 									<div className="flex items-center gap-2 mb-2">
-										<Icon className="w-4 h-4 text-muted-foreground" />
+										<Icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
 										<h3 className="text-sm font-semibold text-foreground">
 											{cap.title}
 										</h3>
+										{cap.external && (
+											<ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
+										)}
 									</div>
 									<p className="text-xs text-muted-foreground leading-relaxed">
 										{cap.blurb}
 									</p>
-								</div>
+								</>
+							);
+							if (!cap.href) {
+								return (
+									<div key={cap.title} className={cardClasses}>
+										{inner}
+									</div>
+								);
+							}
+							return cap.external ? (
+								<a
+									key={cap.title}
+									href={cap.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									className={cardClasses}
+								>
+									{inner}
+								</a>
+							) : (
+								<Link
+									key={cap.title}
+									href={cap.href}
+									className={cardClasses}
+								>
+									{inner}
+								</Link>
 							);
 						})}
 					</div>
