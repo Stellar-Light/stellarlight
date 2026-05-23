@@ -145,7 +145,14 @@ export async function GET(req: NextRequest) {
 			});
 
 			if (tokens.length) {
-				projects = projects.filter((p) => p.score > 0);
+				// Require ALL query tokens to match — strict AND. Permissive OR
+				// scoring (score > 0) returned too many false positives for
+				// multi-word queries like "privacy stablecoin" or "tiktok video".
+				// Score still equals token-hit count so it acts as a relevance
+				// tiebreaker between equally-strict matches (e.g. when one
+				// project contains a token twice — currently we count unique
+				// tokens but this leaves room to weight density later).
+				projects = projects.filter((p) => p.score >= tokens.length);
 				projects.sort((a, b) => b.score - a.score);
 			} else {
 				projects.sort((a, b) => Number(b.scfAwarded) - Number(a.scfAwarded));
