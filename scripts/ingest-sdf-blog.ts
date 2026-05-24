@@ -170,7 +170,9 @@ async function run() {
 	);
 }
 
-run().catch((e) => {
+run()
+	.then(() => process.exit(0))
+	.catch((e) => {
 	console.error("FATAL:", e);
 	process.exit(1);
 });
