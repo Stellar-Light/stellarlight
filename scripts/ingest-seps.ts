@@ -329,7 +329,9 @@ async function run() {
 	console.log(`  errors: ${stats.errors}`);
 }
 
-run().catch((err) => {
+run()
+	.then(() => process.exit(0))
+	.catch((err) => {
 	console.error("FATAL:", err);
 	process.exit(1);
 });

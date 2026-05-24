@@ -76,7 +76,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 #### The 8-step workflow
 
 1. **Restate the idea** in one sentence. Confirm with the user before proceeding. **Reframe if the assumption is off** — if existing projects in our directory suggest the user has the wrong layer ("I want to build a DEX" but the gap is actually in execution infrastructure), surface that *before* you start searching. Don't validate an idea just because they're excited about it. Example: *"You said DEX, but every Stellar DEX project is well-funded — the real gap the existing projects reveal is order-routing infra. Want me to vet that instead?"*
-2. **Search existing projects.** Hit \`/api/projects/search?q={keywords}&limit=20\`. Surface every match with score ≥ 1.
+2. **Search existing projects.** Hit \`/api/projects/search?q={keywords}&limit=20\`. Surface every match with score ≥ 1. **For thesis / design-tradeoff aspects** of the idea (not just "does this exist"), also call \`/api/research?q={keywords}\` and surface primary-source citations from the corpus — SEP design rationales, SDF blog posts, SCF Handbook guidance, etc. Cite the source URL on every claim grounded in research.
 3. **Gap classification + crowdedness score.** Based on the matched projects:
    - **Full gap** — zero prior projects in our directory, no winning hackathon submissions, no SCF-funded teams. *Crowdedness 0/10. Highest opportunity.*
    - **Partial gap** — 1–3 adjacent projects exist but none cover the user's specific angle. *Crowdedness 3–5/10. Medium opportunity.*
@@ -186,6 +186,23 @@ Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (sor
 Full content of one SDF skill — returns JSON with \`.skill.content\` containing the entire SKILL.md (frontmatter included).
 
 Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant SDF skill inline. After recommending it, tell the user to install the skill themselves at \`https://skills.stellar.org/skills/{name}/SKILL.md\` for ongoing use.
+
+### \`GET /api/research\`
+**The thesis-grounding endpoint.** Semantic search across a curated corpus of primary Stellar sources — SDF blog posts, the SCF Handbook, SEPs, developers.stellar.org, foundational papers (Mazieres SCP), and the lumenloop awesome-scf playbooks. ~3,500+ chunks total, embedded with Voyage AI \`voyage-3\`.
+
+Use this when the user asks a **conceptual / thesis / design-tradeoff question** that the other structured endpoints can't answer alone. Examples:
+- *"How does SCP federated consensus actually work?"*
+- *"What's the design rationale behind SEP-24?"*
+- *"What's the SCF prescreen process?"*
+- *"How do anchors handle KYC?"*
+
+Always cite the source URL from each returned chunk — that's the whole point.
+
+Params: \`q={query}\` (required), \`source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop}\` (optional filter), \`limit=N\` (default 8, max 25).
+
+Returns: \`.results[*]\` with \`{id, source, title, section, url, content, chunkIndex, score}\`. \`.meta.mode\` indicates \`"vector"\` (semantic search via Atlas $vectorSearch) or \`"keyword"\` (fallback when the vector index isn't ready). \`.meta.model\` reports the embedding model used.
+
+**Rate limit:** 60 requests / minute / IP. Don't loop the endpoint.
 
 ### \`GET /api/status\`
 Self-check — returns Scout skill version, current timestamp, and freshness (\`lastUpdatedAt\`) + counts for every data source. Call this on first use to surface data freshness in your answers, e.g. *"as of {lastUpdatedAt}, there are {count} curated Stellar projects in the directory."*
