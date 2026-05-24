@@ -22,7 +22,8 @@ export type ResearchSource =
 	| "dev-docs"
 	| "paper"
 	| "scf-proposal"
-	| "lumenloop";
+	| "lumenloop"
+	| "lumenloop-research";
 
 export interface ResearchChunk {
 	parentDocId: string;

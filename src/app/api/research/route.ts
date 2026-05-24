@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
 					"paper",
 					"scf-proposal",
 					"lumenloop",
+					"lumenloop-research",
 				],
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },

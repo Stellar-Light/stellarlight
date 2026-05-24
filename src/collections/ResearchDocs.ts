@@ -63,6 +63,10 @@ export const ResearchDocs: CollectionConfig = {
 					label: "Lumenloop (community SCF playbooks + AI skills)",
 					value: "lumenloop",
 				},
+				{
+					label: "Lumenloop Research (ecosystem analyses + weekly roundups)",
+					value: "lumenloop-research",
+				},
 			],
 		},
 		{

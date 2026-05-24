@@ -844,7 +844,15 @@ export interface ApiUsage {
  */
 export interface ResearchDoc {
   id: string;
-  source: 'sdf-blog' | 'scf-handbook' | 'sep' | 'dev-docs' | 'paper' | 'scf-proposal' | 'lumenloop';
+  source:
+    | 'sdf-blog'
+    | 'scf-handbook'
+    | 'sep'
+    | 'dev-docs'
+    | 'paper'
+    | 'scf-proposal'
+    | 'lumenloop'
+    | 'lumenloop-research';
   /**
    * Parent doc title (e.g. SEP name, blog post title, paper title)
    */
