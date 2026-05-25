@@ -98,6 +98,8 @@ export function Navigation() {
 
 	// Grouped explore items — laid out side-by-side on desktop, accordion-style
 	// section headers on mobile. Keeps the menu scannable as it grows.
+	// Ideas link now points to the local /ideas page (replaced the external
+	// ideas.stellarlight.xyz redirect when the RFPs platform shipped in PR #77).
 	const exploreGroups = [
 		{
 			label: "Directory",
@@ -112,7 +114,7 @@ export function Navigation() {
 			label: "Build & Insights",
 			items: [
 				{ name: "Scout", href: "/scout", description: "AI skill for Stellar ecosystem research", icon: Sparkles },
-				{ name: "Ideas", href: "https://ideas.stellarlight.xyz/", description: "Browse project ideas", icon: Lightbulb },
+				{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
 				{ name: "Developer Activity", href: "/leaderboard", description: "Developer and ecosystem metrics", icon: Trophy },
 				{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
 			],

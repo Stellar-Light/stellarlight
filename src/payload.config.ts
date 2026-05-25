@@ -13,6 +13,7 @@ import { Carousel } from "./collections/Carousel";
 import { Entities } from "./collections/Entities";
 import { ApiUsage } from "./collections/ApiUsage";
 import { Hackathons } from "./collections/Hackathons";
+import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { Media } from "./collections/Media";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
@@ -59,6 +60,7 @@ export default buildConfig({
 		TransparencyLogs,
 		Carousel,
 		Hackathons,
+		IdeaSubmissions,
 		ApiUsage,
 		ResearchDocs,
 		ScoutFeedback,
