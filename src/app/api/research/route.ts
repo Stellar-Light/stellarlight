@@ -213,6 +213,14 @@ export async function GET(req: NextRequest) {
 		);
 	} catch {
 		// Fall back to keyword search using Payload's standard find.
+		// Ranking is BM25-lite: term frequency × field-position weight,
+		// with length normalization and a phrase-proximity bonus.
+		//
+		// The previous scoring just counted unique tokens appearing AT
+		// LEAST ONCE in title+content — so a chunk mentioning "oracle"
+		// 50 times got the same score as one mentioning it incidentally.
+		// That made vector-fallback retrieval near-random, which is
+		// exactly what production exhibits when VOYAGE_API_KEY is unset.
 		mode = "keyword";
 		try {
 			const tokens = q
@@ -232,48 +240,90 @@ export async function GET(req: NextRequest) {
 				}));
 			}
 
+			// Pull a wider candidate pool (200) so ranking has room to
+			// surface high-relevance chunks past position 50 — Mongo
+			// returns matches in storage order, not relevance order.
 			const result = await payload.find({
 				collection: "research-docs",
 				where,
-				limit: 50,
+				limit: 200,
 				depth: 0,
 			});
 
-			chunks = (
-				result.docs as unknown as Array<{
-					id: string;
-					source: string;
-					title: string;
-					section?: string;
-					url: string;
-					content: string;
-					chunkIndex: number;
-					publishedAt?: string;
-					auditor?: string;
-					protocol?: string;
-					severity?: string;
-				}>
-			)
-				.map((d) => {
-					const hay = `${d.title} ${d.content}`.toLowerCase();
-					const score = tokens.length
-						? tokens.reduce((s, t) => s + (hay.includes(t) ? 1 : 0), 0)
-						: 1;
-					return {
-						id: String(d.id),
-						source: d.source,
-						title: d.title,
-						section: d.section ?? null,
-						url: d.url,
-						content: d.content,
-						chunkIndex: d.chunkIndex,
-						publishedAt: d.publishedAt ?? null,
-						auditor: d.auditor ?? null,
-						protocol: d.protocol ?? null,
-						severity: d.severity ?? null,
-						score,
-					};
-				})
+			const allDocs = result.docs as unknown as Array<{
+				id: string;
+				source: string;
+				title: string;
+				section?: string;
+				url: string;
+				content: string;
+				chunkIndex: number;
+				publishedAt?: string;
+				auditor?: string;
+				protocol?: string;
+				severity?: string;
+			}>;
+
+			// Compute mean content length for length-normalization
+			const meanLen = allDocs.length
+				? allDocs.reduce((s, d) => s + d.content.length, 0) / allDocs.length
+				: 1;
+
+			function escapeRe(s: string) {
+				return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			}
+
+			function score(d: { title: string; section?: string; content: string }) {
+				if (!tokens.length) return 1;
+				const title = d.title.toLowerCase();
+				const section = (d.section ?? "").toLowerCase();
+				const body = d.content.toLowerCase();
+
+				let s = 0;
+				let matchedTokens = 0;
+				for (const t of tokens) {
+					const re = new RegExp(`\\b${escapeRe(t)}\\b`, "g");
+					const tfTitle = (title.match(re) || []).length;
+					const tfSection = (section.match(re) || []).length;
+					const tfBody = (body.match(re) || []).length;
+					const tfTotal = tfTitle + tfSection + tfBody;
+					if (tfTotal === 0) continue;
+					matchedTokens += 1;
+					// log(1+tf) avoids one mega-frequent token swamping
+					// everything; field weights: title 3×, section 2×, body 1×.
+					s += Math.log(1 + tfBody) + 2 * Math.log(1 + tfSection) + 3 * Math.log(1 + tfTitle);
+				}
+				if (matchedTokens === 0) return 0;
+				// All-tokens-matched bonus (favors strict over partial)
+				if (matchedTokens === tokens.length) s *= 1.5;
+				// Phrase-proximity bonus: full query as a substring is a
+				// strong signal — bump 1.8× when present in body
+				if (tokens.length >= 2) {
+					const phrase = tokens.join(" ");
+					if (body.includes(phrase)) s *= 1.8;
+				}
+				// Length normalization: penalize chunks much longer than
+				// the mean so a 6000-char chunk doesn't dominate over a
+				// 1500-char chunk just by surface area.
+				const lenPenalty = 1 / Math.sqrt(d.content.length / meanLen);
+				return s * lenPenalty;
+			}
+
+			chunks = allDocs
+				.map((d) => ({
+					id: String(d.id),
+					source: d.source,
+					title: d.title,
+					section: d.section ?? null,
+					url: d.url,
+					content: d.content,
+					chunkIndex: d.chunkIndex,
+					publishedAt: d.publishedAt ?? null,
+					auditor: d.auditor ?? null,
+					protocol: d.protocol ?? null,
+					severity: d.severity ?? null,
+					score: score(d),
+				}))
 				.filter((d) => (d.score ?? 0) > 0)
 				.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 				.slice(0, limitParam);
