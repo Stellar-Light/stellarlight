@@ -1,0 +1,229 @@
+# Stellar Scout — API reference
+
+Full endpoint docs for the stellar-scout skill. SKILL.md keeps the quick-reference table; this file is the deep dive. Load on demand when the user asks how an endpoint behaves or when an answer needs an unusual filter combo.
+
+All endpoints hosted at `https://stellarlight.xyz`. Public read-only, no auth. Edge-cached. Rate-limited per IP.
+
+---
+
+## `GET /api/leaderboard`
+Stellar dev-activity stats + ranked projects.
+
+**Params:** `sort=activity|stars|issues`, `range=7d|30d|90d|1y|all`, `category={cat}`, `limit=N`.
+
+**Returns:** `.ecosystem.activeDevs28d`, `.ecosystem.commits28d`, `.ecosystem.multichainDevs28d`, `.ecosystem.stellarOnlyDevs28d`, `.projects[*]`.
+
+For *cross-chain peer comparison* (Ethereum / Solana / etc.), chain a second call: `GET /api/research?source=ec-developer-report&q=stellar+L1+comparison`. The leaderboard endpoint itself does not return peer-L1 data.
+
+---
+
+## `GET /api/hackathons`
+A merged feed of:
+- **Live** DoraHacks events for Stellar (org IDs 3096 + 3853) — primary feed today
+- **Curated** Stellar hackathons (richer detail, internal pages) — currently sparse; treat as a future capability. Check `.meta.counts.curated` before assuming richer detail is available.
+
+Each row has a `source` field (`"curated"` or `"dorahacks"`). When `.meta.counts.curated === 0` (common right now), every hackathon's detail comes from DoraHacks and follows the DoraHacks-only response shape (see `/api/hackathons/{slug}` below).
+
+**Params:** `status=upcoming|active|completed`, `organizer={slug}`, `source=curated|dorahacks` (optional). Invalid `status` or `source` returns 400 with the valid enum list.
+
+**Returns:** `.hackathons[*]` with name, dates, status, externalUrl, source, prizePoolUSD (DoraHacks only), hackersCount (DoraHacks only). `.meta.counts.{curated,dorahacks,returned}` for quick coverage stats.
+
+**Empty-result fallback (very important):** when `?status=upcoming` or `?status=active` returns 0 hackathons, the response includes a `.meta.fallbackChannels` object pointing the user at live sources outside our DB:
+- **`@BuildOnStellar`** on X/Twitter (`https://x.com/BuildOnStellar`) — first to announce
+- **`https://stellarlight.xyz/hackathons`** — live page; curators add events here before they fully populate the API
+- **DoraHacks — Stellar Development Foundation** (`https://dorahacks.io/org/3096`) — registration goes live here
+
+**Do not say *"no Stellar hackathons exist"*** when this happens — say *"there are no upcoming/active hackathons in stellarlight's feed right now (we're between events). The next one will land at @BuildOnStellar or stellarlight.xyz/hackathons — follow those for the announcement."* Then pivot the user to RFPs (`/api/rfps?status=open`) since those are continuously fundable.
+
+---
+
+## `GET /api/hackathons/{slug}`
+Single-hackathon detail. **Two response shapes** depending on the data source:
+
+**(a) Curated** (slug resolves to a Payload Hackathons row) — full detail:
+- `.hackathon.stats` — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown)
+- `.hackathon.tracks[*]` — prize tracks derived from past submissions, each with `{name, winnerCount, submissionCount, totalPrizeUSD}`. Use for "which tracks did this hackathon pay out for?"
+- `.winners[*]` — projects that placed
+- `.submissions[*]` — every submission with placement, prize, track
+
+**(b) DoraHacks-only** (slug matches a live DoraHacks event we haven't curated) — metadata + headline numbers only:
+- `.hackathon.source = "dorahacks"`, `.hackathon.prizePoolUSD`, `.hackathon.hackersCount`
+- `.winners`, `.submissions`, `.tracks` all empty; `.meta.note` explains why
+- Tell the user to visit `.hackathon.externalUrl` for the per-submission detail (DoraHacks doesn't expose submissions via API for stellarlight to mirror)
+
+---
+
+## `GET /api/hackathons/compare`
+Side-by-side comparison of 2–5 hackathons. Returns each hackathon's snapshot plus a `deltas` block highlighting prize-pool spread, submission-count spread, and per-winner economics.
+
+**Params (GET):** `?slugs=a,b,c` (2–5 slugs, comma-separated).
+**Body (POST):** `{ "slugs": ["a", "b", "c"] }` — identical schema, both verbs accepted.
+
+**Returns:** `.hackathons[*]` snapshot (curated detail or DoraHacks metadata), `.deltas.notes[*]` agent-readable strings like *"prize pool: stellar-agents-x402-stripe-mpp = 10,000 vs buildonstellarchile = 1,000 (10.0× spread)"*. Per-stat `highest`/`lowest` keys also available under `.deltas.{prizePoolUSD,submissionCount,prizePerWinnerUSD,hackersCount}`.
+
+Use this when the user wants to choose between two upcoming events ("which Stellar Hacks should I enter?") or compare past hackathons for category fit. Not for comparing 2 across-ecosystem hackathons.
+
+---
+
+## `GET /api/analyze`
+Cross-event analytics — the macro picture across all Stellar hackathons + funding + projects.
+
+**Params:** `dimension=all|hackathons|categories|funding` (default `all`).
+
+**Returns:**
+- `.hackathons.totalEvents`, `.hackathons.byStatus`, `.hackathons.totalPrizePoolUSD`, `.hackathons.totalRegisteredHackers`
+- `.categories.distribution[*]` — per-category project counts + SCF totals + hackathon-winner counts (sorted desc by project count)
+- `.funding.scfAwardedProjects`, `.funding.scfTotalDistributedUSD`, `.funding.meanAwardUSD`, `.funding.postHackathonStatusFunnel`, `.funding.byRound[*]`
+
+Use this when the user asks "*what's the state of Stellar's hackathon scene*" or "*how much SCF money has been distributed to date*" — these can't be answered from single-event detail.
+
+---
+
+## `GET /api/clusters`
+Topic clustering across active Stellar projects with crowdedness scoring.
+
+**Params:** `dimension=category|types` (default `category`), `minSize=N` (default 1).
+
+**Returns:** `.clusters[*]` with:
+- `.key` — the category or type name
+- `.size` — project count in this cluster
+- `.crowdedness` — 1–10, log-scaled: `round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1))`, clipped to [1,10]. Log scaling means a cluster of 200 projects scores ~8/10 vs 6 projects ~3/10 — actually differentiates, unlike a linear formula. Cross-reference `.size` + `.scfFundedCount` for raw numbers.
+- `.scfFundedCount`, `.scfTotalUSD`, `.hackathonWinnerCount`
+- `.sampleProjects[]` — up to 5 ranked by SCF funding + hackathon prize
+
+Default sort: crowdedness desc (most crowded first).
+
+Use this to answer *"what's the most crowded category on Stellar?"* (lead with the top 3) or *"what category is underbuilt?"* (sort by crowdedness asc, or filter `minSize=3` then read bottom).
+
+---
+
+## `GET /api/builders`
+Stellar builder directory (synced from Stellar Passport). **Opt-in only, currently empty pending the next Passport sync — treat as future capability today.** When this endpoint returns 0 results, **do not retry with different queries** — surface the limitation to the user and route them to fallback channels immediately.
+
+**Params:** `q={text}`, `location={city}`, `scfTier={tier}`, `featured=1`.
+
+**Returns:** `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, scfTier, projects[]. When `.meta.counts.returned === 0`, the response also includes `.meta.advisory` with a one-line summary + 2 fallback channels (Stellar Discord + GitHub topic:stellar) — relay these verbatim to the user. The advisory exists specifically so you don't confabulate ecosystem-level claims from an empty directory.
+
+---
+
+## `GET /api/projects/search`
+Search existing Stellar projects (competitor / overlap lookup). The workhorse for Deep Dive step 2.
+
+**Params:** `q={keywords}`, `category={cat}`, `hackathon={slug}`, `scfAwarded=1`, `limit=N`.
+
+**Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance.
+
+**Tiered keyword matching — read `.meta.matchMode` before framing results:**
+- `strict` — every query token matched (highest confidence; lead with "I found N exact matches for {q}")
+- `loose-1` — all but one token matched (treat as adjacent; lead with "I couldn't find an exact match, but these are close — N of M keywords match")
+- `majority` — at least ⌈N/2⌉ tokens matched (broadest interpretation; lead with "broader interpretation of {q} — these projects overlap on the main themes")
+- `all` — no `q` was supplied; results are unfiltered
+
+This fallback chain means **a multi-word natural query like *"real-time price API for Soroban tokens"* will not dead-end at 0** — the endpoint relaxes to looser tiers until it finds something. Honesty matters: tell the user which tier returned the results so they can judge relevance themselves (`.meta.matchModeLabel` gives a pre-formatted human-readable version).
+
+When `matchMode === "majority"` still returns 0, the response includes `.meta.advisory` pointing you at `/api/research` (for thesis-level questions) and suggesting a synonym retry.
+
+---
+
+## `GET /api/rfps`
+Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"what's currently fundable?"*. Use in Deep Dive step 8 (next steps) AND lead with this when the user asks generally what to build.
+
+**Params:** `q={keywords}`, `category={ai|consumer-dapps|defi|developer-tooling|gaming|infrastructure|nfts|payments|scf|web3-social}`, `quarter={q1-2026|q2-2026|...}`, **`status={open|closed}`**, `limit=N`.
+
+**Returns:** `.rfps[*]` with `id, title, description, technicalRequirements, category, categoryLabel, quarter, quarterLabel, **status** (open/closed), authorName, url`. Meta includes `.activeQuarter`, `.counts.{open,closed,total}`, and `.submitNewBriefAt`. `.funding` clarifies the SCF connection.
+
+**Always pair RFP results with these two external references so the user has the full picture:**
+- **SCF Handbook** — `https://stellar.gitbook.io/scf-handbook` — covers how SCF rounds work, application format, governance, award tiers, and verified-member rules. Recommend it for any user asking *"how does the funding work?"* or preparing an application.
+- **stellarlight.xyz/ideas** — the live RFP listing + the "Suggest a Need" form. Always link here when surfacing RFPs so the user can browse the full set, see quarter tabs, or submit their own.
+
+**Active RFPs vs closed RFPs:**
+- `status: "open"` RFPs are in the current SCF round (`activeQuarter`) and are **ready to be funded and built** — winners get an SCF grant. These are the actionable opportunities. Surface these first.
+- `status: "closed"` RFPs are from past quarters. **Surface them with a clear warning: *"This RFP was from {quarterLabel} — someone is likely already building it."*** It's not a dead lane. Always pair the warning with a concrete next step:
+  - **Surface the `.authorName` field** and recommend the user reach out to coordinate (*"The original author was {authorName} — DM them on Stellar Discord or check the Stellar GitHub org to see who picked it up"*).
+  - **Suggest competing/better takes** if the user has a clear differentiator (*"If your angle adds {X} the original brief didn't cover, that's still a viable build."*).
+  - Make clear they can't claim SCF funding for this RFP in the current round, but the work might still ship as an SCF grant in a future round.
+- Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call `GET /api/rfps?status=open` first and lead with the active set. Mention the count from `.counts.open`. When you include closed RFPs as additional context, label them as past-quarter every time.
+
+**Important framing when there are 0 open matches:**
+- 0 open RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round (`.activeQuarter`) covers this lane yet."*
+- **Anyone can propose an RFP** at `https://stellarlight.xyz/ideas` (`.meta.submitNewBriefAt`) via the "Suggest a Need" button. Community submissions go through curators and graduate to confirmed briefs in upcoming rounds.
+- When you find no matching open RFP, tell the user this explicitly and surface the submission CTA. Don't frame it as a dead end; frame it as an invitation to define the brief themselves.
+
+---
+
+## `GET /api/skills`
+Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h. `.meta.counts.returned` reports total.
+
+---
+
+## `GET /api/skills/{name}`
+Full content of one SDF skill — returns JSON with `.skill.content` containing the entire SKILL.md (frontmatter included).
+
+Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant SDF skill inline. After recommending it, tell the user to install the skill themselves at `https://skills.stellar.org/skills/{name}/SKILL.md` for ongoing use.
+
+---
+
+## `GET /api/research`
+**The thesis-grounding endpoint.** Semantic search across a curated corpus of primary Stellar sources — SDF blog posts, the SCF Handbook, SEPs, developers.stellar.org, foundational papers (Mazieres SCP), the lumenloop awesome-scf playbooks + research articles, **Soroban protocol audit reports** (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, et al. via sorobansecurity.com), and the **Electric Capital Developer Reports** (annual + geographic dev-activity analyses, 2019–2023). ~4,500+ chunks total, embedded with Voyage AI `voyage-3` (1024-dim) and indexed in MongoDB Atlas Vector Search.
+
+Use this when the user asks a **conceptual / thesis / design-tradeoff / security question** that the other structured endpoints can't answer alone. Examples:
+- *"How does SCP federated consensus actually work?"*
+- *"What's the design rationale behind SEP-24?"*
+- *"What's the SCF prescreen process?"*
+- *"How do anchors handle KYC?"*
+- *"What audit findings have been reported for Blend's oracle?"*
+- *"Has any Soroban protocol been hit with an inflation attack?"*
+- *"How has Stellar's developer count changed since 2019?"*
+- *"What L1s does Electric Capital group Stellar with by dev-activity?"*
+
+Always cite the source URL from each returned chunk — that's the whole point. **Audit chunks** carry extra metadata: `.auditor`, `.protocol`, and `.severity` (`critical | high | medium | low | informational | unknown`) — surface these inline ("per a HIGH-severity finding in the Certora audit of Blend Protocol V2…"). **EC Developer Report chunks** are historical (2019–2023 PDFs); for the most recent year cross-reference `developerreport.com/ecosystems/stellar`.
+
+**Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`.
+
+**Returns:** `.results[*]` with `{id, source, title, section, url, content, chunkIndex, score}`. `.meta.mode` indicates `"vector"` (semantic search via Atlas $vectorSearch) or `"keyword"` (fallback when the vector index isn't ready). `.meta.model` reports the embedding model used.
+
+**Read the `score` before citing.** Vector search always returns the top-K nearest chunks even if none are truly relevant. Calibrated from real query patterns:
+- `score ≥ 0.78` → direct hit, cite confidently (e.g. SCP query → Mazières paper)
+- `score 0.72–0.78` → relevant, cite normally (e.g. "soroban storage" → dev-docs)
+- `score 0.68–0.72` → adjacent / partial — lead with *"broadly related, not a direct answer"*
+- `score < 0.68` → weak match; **don't cite as authoritative** — say *"the closest thing in the corpus is X, but it doesn't directly answer your question"*
+
+When all returned chunks score below 0.68, treat the topic as outside our corpus and tell the user explicitly — don't confabulate.
+
+**Rate limit:** 60 requests / minute / IP. Don't loop the endpoint.
+
+---
+
+## `POST /api/feedback`
+In-skill feedback channel — agents can report a bug, missing data, wrong answer, or suggestion without leaving the workflow.
+
+**Body:**
+```json
+{
+  "kind": "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other",
+  "message": "10–4000 chars describing the issue concretely",
+  "context": {
+    "query": "optional — the user query that triggered the issue",
+    "endpoint": "optional — the /api/* endpoint that misbehaved",
+    "skillVersion": "optional — SKILL.md frontmatter version",
+    "agentName": "optional — claude-code | codex | openclaw | etc."
+  }
+}
+```
+
+**Returns:** `{ok: true, id, message}` on 201; `{error, validKinds?, hint?, example?}` on 400; `{error, hint}` on 429.
+
+**Rate limit:** 6 requests / minute / IP (lower than read endpoints — feedback shouldn't fire-hose).
+
+**When to call this:** whenever you (the agent) detect a quality issue worth a curator's eye — bad citation, missing protocol, wrong tag, unexpected 0-result for a real question. Don't fire on every empty response; reserve for things a human reviewer should investigate.
+
+Submitting feedback is **explicitly encouraged** and contributes to improving the skill for everyone. Mention to the user when you submit one: *"I've also flagged this as a quality issue via /api/feedback so curators can fix it."*
+
+A `GET /api/feedback` returns the schema in case you want to discover the shape without reading this doc.
+
+---
+
+## `GET /api/status`
+Self-check — returns Scout skill version, current timestamp, and freshness (`lastUpdatedAt`) + counts for every data source. Call this on first use to surface data freshness in your answers, e.g. *"as of {lastUpdatedAt}, there are {count} curated Stellar projects in the directory."*
+
+Also useful as a sanity check that the API is reachable before running a Deep Dive — saves dropping into a workflow only to fail halfway through.

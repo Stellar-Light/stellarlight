@@ -33,6 +33,21 @@ export const QUARTER_LABELS: Record<Quarter, string> = {
 	"q2-2026": "Q2 2026",
 };
 
+/**
+ * The currently-fundable quarter — RFPs in this quarter are "open" for
+ * builders to claim, with winners eligible for SCF grant funding. Prior
+ * quarters are closed (already funded or moved on). Bump this when a
+ * new SCF round opens.
+ */
+export const ACTIVE_QUARTER: Quarter = "q2-2026";
+
+/** Status of an RFP relative to ACTIVE_QUARTER. */
+export type RfpStatus = "open" | "closed";
+
+export function rfpStatus(quarter: Quarter): RfpStatus {
+	return quarter === ACTIVE_QUARTER ? "open" : "closed";
+}
+
 export interface Idea {
 	id: string;
 	title: string;

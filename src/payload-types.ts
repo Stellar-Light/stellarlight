@@ -79,6 +79,9 @@ export interface Config {
     carousel: Carousel;
     hackathons: Hackathon;
     'idea-submissions': IdeaSubmission;
+    'api-usage': ApiUsage;
+    'research-docs': ResearchDoc;
+    'scout-feedback': ScoutFeedback;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -106,6 +109,9 @@ export interface Config {
     carousel: CarouselSelect<false> | CarouselSelect<true>;
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
     'idea-submissions': IdeaSubmissionsSelect<false> | IdeaSubmissionsSelect<true>;
+    'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
+    'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
+    'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -818,6 +824,165 @@ export interface IdeaSubmission {
   createdAt: string;
 }
 /**
+ * Public-API hit log. Append-only, used to measure Scout skill adoption.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-usage".
+ */
+export interface ApiUsage {
+  id: string;
+  /**
+   * Endpoint path (e.g. /api/projects/search)
+   */
+  endpoint: string;
+  /**
+   * Query keywords (truncated to 100 chars, lowercased)
+   */
+  query?: string | null;
+  uaBucket?: ('claude' | 'codex' | 'cursor' | 'agent' | 'curl' | 'browser' | 'bot' | 'other') | null;
+  /**
+   * Value of the X-Scout-Version header, if sent
+   */
+  scoutVersion?: string | null;
+  /**
+   * ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)
+   */
+  country?: string | null;
+  /**
+   * Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}
+   */
+  filtersJson?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research-docs".
+ */
+export interface ResearchDoc {
+  id: string;
+  source:
+    | 'sdf-blog'
+    | 'scf-handbook'
+    | 'sep'
+    | 'dev-docs'
+    | 'paper'
+    | 'scf-proposal'
+    | 'lumenloop'
+    | 'lumenloop-research'
+    | 'audit'
+    | 'ec-developer-report';
+  /**
+   * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
+   */
+  auditor?: string | null;
+  /**
+   * Protocol audited (Blend, Soroswap, …). Only set when source='audit'.
+   */
+  protocol?: string | null;
+  /**
+   * Severity bucket inferred from the chunk's section heading. Only set when source='audit'.
+   */
+  severity?: ('critical' | 'high' | 'medium' | 'low' | 'informational' | 'unknown') | null;
+  /**
+   * Parent doc title (e.g. SEP name, blog post title, paper title)
+   */
+  title: string;
+  /**
+   * Section heading this chunk lives under (H2/H3) — used to scope citations
+   */
+  section?: string | null;
+  /**
+   * Canonical source URL for citation
+   */
+  url: string;
+  /**
+   * Stable ID for the parent document (used to dedupe + delete obsolete chunks)
+   */
+  parentDocId: string;
+  /**
+   * 0-based index of this chunk within its parent document
+   */
+  chunkIndex: number;
+  /**
+   * The actual text content of this chunk (≤ 1500 tokens, markdown preserved)
+   */
+  content: string;
+  /**
+   * SHA-256 of `content` — used by ingestion scripts to skip re-embedding unchanged chunks
+   */
+  contentHash?: string | null;
+  /**
+   * Topic tags inferred from the source (e.g. soroban, anchor, sep-24)
+   */
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Original publish date of the parent doc, if known
+   */
+  publishedAt?: string | null;
+  /**
+   * Voyage AI voyage-3 vector (1024 floats). Atlas $vectorSearch is configured on this field.
+   */
+  embedding?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scout-feedback".
+ */
+export interface ScoutFeedback {
+  id: string;
+  kind: 'bug' | 'missing-data' | 'wrong-answer' | 'suggestion' | 'other';
+  /**
+   * The freeform feedback text from the agent.
+   */
+  message: string;
+  /**
+   * The user query the agent was answering, if it was forwarded.
+   */
+  query?: string | null;
+  /**
+   * Which /api/* endpoint was being called.
+   */
+  endpoint?: string | null;
+  /**
+   * SKILL.md frontmatter version (e.g. 1.0.0).
+   */
+  skillVersion?: string | null;
+  /**
+   * Agent harness (claude-code, codex, openclaw).
+   */
+  agentName?: string | null;
+  /**
+   * Raw User-Agent header (best-effort).
+   */
+  userAgent?: string | null;
+  /**
+   * SHA-256(ip + secret). De-duplicate floods without logging raw IPs.
+   */
+  ipHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -980,6 +1145,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'idea-submissions';
         value: string | IdeaSubmission;
+      } | null)
+    | ({
+        relationTo: 'api-usage';
+        value: string | ApiUsage;
+      } | null)
+    | ({
+        relationTo: 'research-docs';
+        value: string | ResearchDoc;
+      } | null)
+    | ({
+        relationTo: 'scout-feedback';
+        value: string | ScoutFeedback;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1360,6 +1537,63 @@ export interface IdeaSubmissionsSelect<T extends boolean = true> {
   needSize?: T;
   approach?: T;
   additionalContext?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-usage_select".
+ */
+export interface ApiUsageSelect<T extends boolean = true> {
+  endpoint?: T;
+  query?: T;
+  uaBucket?: T;
+  scoutVersion?: T;
+  country?: T;
+  filtersJson?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research-docs_select".
+ */
+export interface ResearchDocsSelect<T extends boolean = true> {
+  source?: T;
+  auditor?: T;
+  protocol?: T;
+  severity?: T;
+  title?: T;
+  section?: T;
+  url?: T;
+  parentDocId?: T;
+  chunkIndex?: T;
+  content?: T;
+  contentHash?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  publishedAt?: T;
+  embedding?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scout-feedback_select".
+ */
+export interface ScoutFeedbackSelect<T extends boolean = true> {
+  kind?: T;
+  message?: T;
+  query?: T;
+  endpoint?: T;
+  skillVersion?: T;
+  agentName?: T;
+  userAgent?: T;
+  ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
 }

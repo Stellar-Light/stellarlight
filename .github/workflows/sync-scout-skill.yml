@@ -1,0 +1,76 @@
+name: Sync Stellar Scout skill to distribution repo
+
+# Mirrors public/skills/stellar-scout.md to github.com/Stellar-Light/
+# stellar-scout on every push to main that touches the file. The
+# distribution repo is what `npx skills add Stellar-Light/stellar-scout`
+# clones, so without this sync the published skill silently drifts from
+# the version this repo serves on stellarlight.xyz/scout.
+#
+# One-time setup:
+#   1. Create a fine-grained PAT at github.com/settings/tokens?type=beta:
+#        Resource owner:  Stellar-Light
+#        Repositories:    Only select repositories → stellar-scout
+#        Permissions:     Contents (Read and write), Metadata (Read)
+#        Expiration:      1 year (mark a renewal calendar entry)
+#   2. Add it as a repo secret:
+#        gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R theboycoder/stellarlight \
+#          -b 'github_pat_...'
+#   3. Push this workflow. It runs automatically next time the SKILL.md
+#      changes; trigger manually via `gh workflow run sync-scout-skill.yml`
+#      to test.
+#
+# The workflow is a no-op when the SKILL.md content is byte-identical to
+# what's already in Stellar-Light/stellar-scout — `git diff --quiet` skips
+# the commit. Safe to run on every push without spamming the history.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/skills/stellar-scout.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout stellarlight-main
+        uses: actions/checkout@v4
+
+      - name: Push SKILL.md to Stellar-Light/stellar-scout
+        env:
+          GH_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::STELLAR_LIGHT_SCOUT_TOKEN secret is missing."
+            echo "Set it via: gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R ${{ github.repository }} -b '<PAT>'"
+            exit 1
+          fi
+
+          git clone --depth 1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/Stellar-Light/stellar-scout.git" \
+            out
+
+          cp public/skills/stellar-scout.md out/SKILL.md
+
+          cd out
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+
+          if git diff --quiet; then
+            echo "SKILL.md is already in sync — nothing to push."
+            exit 0
+          fi
+
+          git add SKILL.md
+          # Commit message kept to one line — multi-line strings inside a
+          # YAML literal block are fragile (a blank line at lower indent
+          # ends the block). The commit SHA + workflow trigger live in the
+          # auto-generated GitHub Actions log, so we don't lose context.
+          git commit -m "sync: SKILL.md from stellarlight@${{ github.sha }} (${{ github.event_name }})"
+          git push

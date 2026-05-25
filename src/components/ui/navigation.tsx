@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users } from "lucide-react";
+import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
@@ -96,15 +96,31 @@ export function Navigation() {
 		{ href: "/submit", label: "Submit" },
 	];
 
-	const exploreItems = [
-		{ name: "Projects", href: "/directory", description: "Discover Stellar projects", icon: Layers },
-		{ name: "Builders", href: "/builders", description: "Meet Stellar developers", icon: Users },
-		{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
-		{ name: "Developer Activity", href: "/leaderboard", description: "Stellar dev rankings & ecosystem metrics", icon: Trophy },
-		{ name: "Hackathons", href: "/hackathons", description: "Ecosystem hackathon events", icon: Code2 },
-		{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
-		{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
+	// Grouped explore items — laid out side-by-side on desktop, accordion-style
+	// section headers on mobile. Keeps the menu scannable as it grows.
+	// Ideas link now points to the local /ideas page (replaced the external
+	// ideas.stellarlight.xyz redirect when the RFPs platform shipped in PR #77).
+	const exploreGroups = [
+		{
+			label: "Directory",
+			items: [
+				{ name: "Projects", href: "/directory", description: "Discover Stellar projects", icon: Layers },
+				{ name: "Builders", href: "/builders", description: "Meet Stellar developers", icon: Users },
+				{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
+				{ name: "Hackathons", href: "/hackathons", description: "Ecosystem hackathon events", icon: Code2 },
+			],
+		},
+		{
+			label: "Build & Insights",
+			items: [
+				{ name: "Scout", href: "/scout", description: "AI skill for Stellar ecosystem research", icon: Sparkles },
+				{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
+				{ name: "Developer Activity", href: "/leaderboard", description: "Developer and ecosystem metrics", icon: Trophy },
+				{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
+			],
+		},
 	];
+	const exploreItems = exploreGroups.flatMap((g) => g.items);
 
 	return (
 		<nav
@@ -151,47 +167,56 @@ export function Navigation() {
 
 						{isExploreOpen && (
 							<div className="absolute right-0 top-full pt-2 z-50">
-								<div className="w-[260px] bg-[#262626] border border-[#2F2F2F] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-1 animate-in fade-in slide-in-from-top-1 duration-200">
-									{exploreItems.map((item) => {
-										const Icon = item.icon;
-										const isExternal = item.href.startsWith('http');
-
-										const content = (
-											<div className="flex items-center gap-3">
-												<Icon className="w-4 h-4 text-[#A3A3A3] group-hover:text-white transition-colors flex-shrink-0" />
-												<div className="flex-1">
-													<div className="text-sm font-medium text-[#E5E5E5] mb-1 group-hover:text-white transition-colors">
-														{item.name}
-													</div>
-													<div className="text-xs text-[#A3A3A3] leading-relaxed">
-														{item.description}
-													</div>
-												</div>
+								<div className="w-[540px] bg-[#262626] border border-[#2F2F2F] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-3 grid grid-cols-2 gap-x-2 animate-in fade-in slide-in-from-top-1 duration-200">
+									{exploreGroups.map((group) => (
+										<div key={group.label}>
+											<div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-[#737373] font-medium">
+												{group.label}
 											</div>
-										);
+											<div className="space-y-0.5">
+												{group.items.map((item) => {
+													const Icon = item.icon;
+													const isExternal = item.href.startsWith('http');
 
-										return isExternal ? (
-											<a
-												key={item.name}
-												href={item.href}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="block px-3 py-3 rounded-lg hover:bg-white/5 transition-all duration-150 group"
-												data-testid={`nav-link-${item.name.toLowerCase()}`}
-											>
-												{content}
-											</a>
-										) : (
-											<Link
-												key={item.name}
-												href={item.href}
-												className="block px-3 py-3 rounded-lg hover:bg-white/5 transition-all duration-150 group"
-												data-testid={`nav-link-${item.name.toLowerCase()}`}
-											>
-												{content}
-											</Link>
-										);
-									})}
+													const content = (
+														<div className="flex items-start gap-3">
+															<Icon className="w-4 h-4 text-[#A3A3A3] group-hover:text-white transition-colors flex-shrink-0 mt-0.5" />
+															<div className="flex-1 min-w-0">
+																<div className="text-sm font-medium text-[#E5E5E5] mb-0.5 group-hover:text-white transition-colors">
+																	{item.name}
+																</div>
+																<div className="text-xs text-[#A3A3A3] leading-snug">
+																	{item.description}
+																</div>
+															</div>
+														</div>
+													);
+
+													return isExternal ? (
+														<a
+															key={item.name}
+															href={item.href}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+															data-testid={`nav-link-${item.name.toLowerCase()}`}
+														>
+															{content}
+														</a>
+													) : (
+														<Link
+															key={item.name}
+															href={item.href}
+															className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+															data-testid={`nav-link-${item.name.toLowerCase()}`}
+														>
+															{content}
+														</Link>
+													);
+												})}
+											</div>
+										</div>
+									))}
 								</div>
 							</div>
 						)}
@@ -251,45 +276,58 @@ export function Navigation() {
 
 			{mobileMenuOpen && (
 				<div className="md:hidden border-t border-[#2F2F2F] animate-in slide-in-from-top duration-200">
-					<div className="px-6 py-4 space-y-1">
-						{exploreItems.map((item) => {
-							const Icon = item.icon;
-							const isExternal = item.href.startsWith('http');
+					<div className="px-6 py-3 space-y-1">
+						{exploreGroups.map((group, idx) => (
+							<details
+								key={group.label}
+								open={idx === 0}
+								className="group"
+							>
+								<summary className="cursor-pointer list-none flex items-center justify-between px-3 py-2.5 rounded-lg text-xs uppercase tracking-wider text-[#A3A3A3] font-semibold hover:bg-white/5 active:bg-white/10 transition-colors">
+									<span>{group.label}</span>
+									<ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open:rotate-180" />
+								</summary>
+								<div className="space-y-0.5 pb-2">
+									{group.items.map((item) => {
+										const Icon = item.icon;
+										const isExternal = item.href.startsWith('http');
 
-							const content = (
-								<div className="flex items-center gap-3">
-									<Icon className="w-4 h-4 text-[#A3A3A3] flex-shrink-0" />
-									<div className="flex-1">
-										<div className="font-medium text-[#E5E5E5] mb-1">{item.name}</div>
-										<div className="text-xs text-[#A3A3A3] leading-relaxed">{item.description}</div>
-									</div>
+										const content = (
+											<div className="flex items-center gap-3">
+												<Icon className="w-4 h-4 text-[#A3A3A3] flex-shrink-0" />
+												<span className="text-sm font-medium text-[#E5E5E5]">
+													{item.name}
+												</span>
+											</div>
+										);
+
+										return isExternal ? (
+											<a
+												key={item.name}
+												href={item.href}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="block px-6 py-2 rounded-lg hover:bg-white/5 transition-all duration-150 active:bg-white/10"
+												onClick={() => setMobileMenuOpen(false)}
+												data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
+											>
+												{content}
+											</a>
+										) : (
+											<Link
+												key={item.name}
+												href={item.href}
+												className="block px-6 py-2 rounded-lg hover:bg-white/5 transition-all duration-150 active:bg-white/10"
+												onClick={() => setMobileMenuOpen(false)}
+												data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
+											>
+												{content}
+											</Link>
+										);
+									})}
 								</div>
-							);
-
-							return isExternal ? (
-								<a
-									key={item.name}
-									href={item.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="block px-3 py-3 rounded-xl text-sm hover:bg-white/5 transition-all duration-150 active:bg-white/10"
-									onClick={() => setMobileMenuOpen(false)}
-									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
-								>
-									{content}
-								</a>
-							) : (
-								<Link
-									key={item.name}
-									href={item.href}
-									className="block px-3 py-3 rounded-xl text-sm hover:bg-white/5 transition-all duration-150 active:bg-white/10"
-									onClick={() => setMobileMenuOpen(false)}
-									data-testid={`mobile-nav-link-${item.name.toLowerCase()}`}
-								>
-									{content}
-								</Link>
-							);
-						})}
+							</details>
+						))}
 						{navItems.map((item) => (
 							<Link
 								key={item.href}

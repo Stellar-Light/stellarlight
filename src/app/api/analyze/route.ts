@@ -1,0 +1,226 @@
+/**
+ * Cross-hackathon + cross-ecosystem analytics rollup.
+ *
+ *   GET /api/analyze                          — full rollup
+ *   GET /api/analyze?dimension=hackathons     — per-hackathon stats only
+ *   GET /api/analyze?dimension=categories     — category distribution only
+ *   GET /api/analyze?dimension=funding        — SCF funding distribution
+ *
+ * Mirrors Colosseum Copilot's /analyze. Returns the macro picture that
+ * `/api/hackathons/{slug}` (single-event detail) and `/api/clusters`
+ * (project clustering) can't answer alone:
+ *
+ *   - How many total hackathons / submissions / prize $$ to date
+ *   - Which categories produce the most winners
+ *   - SCF funding distribution by round + category
+ *   - Build-status funnel across all post-hackathon projects
+ *
+ * Use this when the user asks "what's the state of Stellar hackathons /
+ * grants overall" rather than "tell me about hackathon X".
+ */
+
+import { type NextRequest, NextResponse } from "next/server";
+import { logApiHit } from "@/lib/api-usage";
+import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
+import { getPayloadSafe } from "@/lib/payload-client";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 600;
+
+const VALID_DIMENSIONS = ["all", "hackathons", "categories", "funding"] as const;
+
+interface CategoryStats {
+	category: string;
+	projectCount: number;
+	scfFundedCount: number;
+	scfTotalUSD: number;
+	hackathonWinnerCount: number;
+}
+
+interface ProjectDoc {
+	id: string;
+	category?: string;
+	status?: string;
+	hackathonStatus?: string;
+	hackathonPlacement?: string;
+	hackathonPrize?: number;
+	scf?: { awarded?: boolean; totalAwarded?: number; rounds?: string[] };
+}
+
+export async function GET(req: NextRequest) {
+	const sp = req.nextUrl.searchParams;
+	const dimensionParam = sp.get("dimension") ?? "all";
+	if (!VALID_DIMENSIONS.includes(dimensionParam as never)) {
+		return NextResponse.json(
+			{
+				error: `unknown dimension: '${dimensionParam}'`,
+				validDimensions: VALID_DIMENSIONS,
+			},
+			{ status: 400 },
+		);
+	}
+
+	const includeHackathons =
+		dimensionParam === "all" || dimensionParam === "hackathons";
+	const includeCategories =
+		dimensionParam === "all" || dimensionParam === "categories";
+	const includeFunding =
+		dimensionParam === "all" || dimensionParam === "funding";
+
+	const payload = await getPayloadSafe();
+
+	const result: Record<string, unknown> = {};
+
+	// ── Hackathon rollup
+	if (includeHackathons) {
+		let hackCount = 0;
+		let totalPrizeUSD = 0;
+		let totalHackersCount = 0;
+		let upcomingCount = 0;
+		let activeCount = 0;
+		let completedCount = 0;
+		try {
+			const dora = await fetchAllDoraHacksHackathons();
+			const now = Math.floor(Date.now() / 1000);
+			hackCount = dora.length;
+			for (const h of dora) {
+				totalPrizeUSD += h.bonus_price || 0;
+				totalHackersCount += h.hackers_count || 0;
+				if (h.start_time > now) upcomingCount += 1;
+				else if (h.end_time < now) completedCount += 1;
+				else activeCount += 1;
+			}
+		} catch {
+			// fall through with zeros
+		}
+		result.hackathons = {
+			totalEvents: hackCount,
+			byStatus: {
+				upcoming: upcomingCount,
+				active: activeCount,
+				completed: completedCount,
+			},
+			totalPrizePoolUSD: totalPrizeUSD,
+			totalRegisteredHackers: totalHackersCount,
+		};
+	}
+
+	// ── Categories + funding share a projects fetch
+	let projects: ProjectDoc[] = [];
+	if (payload && (includeCategories || includeFunding)) {
+		try {
+			const r = await payload.find({
+				collection: "projects",
+				where: {
+					status: { in: ["Development", "Pre-Release", "Live"] },
+				},
+				limit: 500,
+				depth: 0,
+			});
+			projects = r.docs as unknown as ProjectDoc[];
+		} catch {
+			// fall through with empty
+		}
+	}
+
+	if (includeCategories) {
+		const map = new Map<string, CategoryStats>();
+		for (const p of projects) {
+			const cat = p.category ?? "Uncategorized";
+			if (!map.has(cat)) {
+				map.set(cat, {
+					category: cat,
+					projectCount: 0,
+					scfFundedCount: 0,
+					scfTotalUSD: 0,
+					hackathonWinnerCount: 0,
+				});
+			}
+			const s = map.get(cat) as CategoryStats;
+			s.projectCount += 1;
+			if (p.scf?.awarded) {
+				s.scfFundedCount += 1;
+				s.scfTotalUSD += p.scf.totalAwarded ?? 0;
+			}
+			if (
+				p.hackathonPlacement === "grand-prize" ||
+				p.hackathonPlacement === "1st" ||
+				p.hackathonPlacement === "2nd" ||
+				p.hackathonPlacement === "3rd" ||
+				p.hackathonPlacement === "track-winner"
+			) {
+				s.hackathonWinnerCount += 1;
+			}
+		}
+		const sorted = [...map.values()].sort(
+			(a, b) => b.projectCount - a.projectCount,
+		);
+		result.categories = {
+			totalProjects: projects.length,
+			distribution: sorted,
+		};
+	}
+
+	if (includeFunding) {
+		const scfProjects = projects.filter((p) => p.scf?.awarded);
+		const totalUSD = scfProjects.reduce(
+			(s, p) => s + (p.scf?.totalAwarded ?? 0),
+			0,
+		);
+		// Build status funnel (Built / In Progress / Abandoned) for post-hackathon projects
+		const funnel: Record<string, number> = {
+			Built: 0,
+			"In Progress": 0,
+			Abandoned: 0,
+			Unknown: 0,
+		};
+		for (const p of projects) {
+			const k = p.hackathonStatus ?? "Unknown";
+			funnel[k] = (funnel[k] ?? 0) + 1;
+		}
+		// Per-round funding
+		const byRound = new Map<string, { count: number; totalUSD: number }>();
+		for (const p of scfProjects) {
+			for (const r of p.scf?.rounds ?? []) {
+				if (!byRound.has(r)) byRound.set(r, { count: 0, totalUSD: 0 });
+				const stat = byRound.get(r) as { count: number; totalUSD: number };
+				stat.count += 1;
+				stat.totalUSD += p.scf?.totalAwarded ?? 0;
+			}
+		}
+		result.funding = {
+			scfAwardedProjects: scfProjects.length,
+			scfTotalDistributedUSD: totalUSD,
+			meanAwardUSD: scfProjects.length
+				? Math.round(totalUSD / scfProjects.length)
+				: 0,
+			postHackathonStatusFunnel: funnel,
+			byRound: [...byRound.entries()]
+				.map(([round, stat]) => ({ round, ...stat }))
+				.sort((a, b) => b.totalUSD - a.totalUSD),
+		};
+	}
+
+	logApiHit({
+		req,
+		endpoint: "/api/analyze",
+		filters: { dimension: dimensionParam },
+	});
+
+	return NextResponse.json(
+		{
+			meta: {
+				source: "https://stellarlight.xyz",
+				generatedAt: new Date().toISOString(),
+				dimension: dimensionParam,
+				validDimensions: VALID_DIMENSIONS,
+			},
+			...result,
+		},
+		{
+			headers: {
+				"Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+			},
+		},
+	);
+}
