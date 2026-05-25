@@ -28,7 +28,10 @@ export async function GET() {
 				source: "https://skills.stellar.org/",
 				operator: "Stellar Development Foundation",
 				generatedAt: new Date().toISOString(),
-				count: skills.length,
+				// `counts.returned` matches the envelope used by every other
+				// list endpoint (/api/hackathons, /api/projects/search, etc.)
+				// so agents can rely on a single field name across endpoints.
+				counts: { returned: skills.length },
 			},
 			skills,
 		},

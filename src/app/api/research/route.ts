@@ -39,6 +39,10 @@ interface ResearchRow {
 	chunkIndex: number;
 	publishedAt: string | null;
 	score?: number;
+	// Audit-specific (only present when source === "audit")
+	auditor?: string | null;
+	protocol?: string | null;
+	severity?: string | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -71,21 +75,42 @@ export async function GET(req: NextRequest) {
 	const sourceFilter = sp.get("source");
 	const limitParam = Math.min(Number(sp.get("limit") || "8") || 8, 25);
 
+	// Single source of truth for valid `source` values. Kept in sync with
+	// the ResearchSource type in src/lib/research-ingest.ts.
+	const VALID_SOURCES = [
+		"sdf-blog",
+		"scf-handbook",
+		"sep",
+		"dev-docs",
+		"paper",
+		"scf-proposal",
+		"lumenloop",
+		"lumenloop-research",
+		"audit",
+		"ec-developer-report",
+	] as const;
+
 	if (!q) {
 		return NextResponse.json(
 			{
 				error:
 					"missing required `q` parameter (e.g. /api/research?q=soroban+authorization)",
-				validSources: [
-					"sdf-blog",
-					"scf-handbook",
-					"sep",
-					"dev-docs",
-					"paper",
-					"scf-proposal",
-					"lumenloop",
-					"lumenloop-research",
-				],
+				validSources: VALID_SOURCES,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+
+	// Reject unknown source values with a helpful error rather than silently
+	// returning 0 results. Agents otherwise can't tell whether a 0-result
+	// response means "wrong source name" or "no matching content in the
+	// real source" — surface the distinction.
+	if (sourceFilter && !VALID_SOURCES.includes(sourceFilter as never)) {
+		return NextResponse.json(
+			{
+				error: `unknown source: '${sourceFilter}'`,
+				hint: "see validSources for the full list",
+				validSources: VALID_SOURCES,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -114,17 +139,24 @@ export async function GET(req: NextRequest) {
 		const collection = db?.collection("research-docs");
 		if (!collection) throw new Error("research-docs collection unavailable");
 
+		// NOTE: source filter is applied as a post-pipeline $match rather
+		// than $vectorSearch.filter. The latter requires `source` to be
+		// declared as a filter field in the vector index definition, which
+		// our minimal index doesn't have. We over-fetch (3x) and post-filter
+		// instead so callers can use ?source= without an index rebuild.
+		const overfetch = sourceFilter ? limitParam * 4 : limitParam;
 		const pipeline: Record<string, unknown>[] = [
 			{
 				$vectorSearch: {
 					index: "research_vector_index",
 					path: "embedding",
 					queryVector: queryEmbedding,
-					numCandidates: 200,
-					limit: limitParam,
-					...(sourceFilter ? { filter: { source: sourceFilter } } : {}),
+					numCandidates: Math.max(200, overfetch * 10),
+					limit: overfetch,
 				},
 			},
+			...(sourceFilter ? [{ $match: { source: sourceFilter } }] : []),
+			{ $limit: limitParam },
 			{
 				$project: {
 					_id: 1,
@@ -135,6 +167,9 @@ export async function GET(req: NextRequest) {
 					content: 1,
 					chunkIndex: 1,
 					publishedAt: 1,
+					auditor: 1,
+					protocol: 1,
+					severity: 1,
 					score: { $meta: "vectorSearchScore" },
 				},
 			},
@@ -157,6 +192,9 @@ export async function GET(req: NextRequest) {
 				content: string;
 				chunkIndex: number;
 				publishedAt?: string;
+				auditor?: string;
+				protocol?: string;
+				severity?: string;
 				score?: number;
 			}) => ({
 				id: String(d._id),
@@ -167,6 +205,9 @@ export async function GET(req: NextRequest) {
 				content: d.content,
 				chunkIndex: d.chunkIndex,
 				publishedAt: d.publishedAt ?? null,
+				auditor: d.auditor ?? null,
+				protocol: d.protocol ?? null,
+				severity: d.severity ?? null,
 				score: d.score,
 			}),
 		);
@@ -208,6 +249,9 @@ export async function GET(req: NextRequest) {
 					content: string;
 					chunkIndex: number;
 					publishedAt?: string;
+					auditor?: string;
+					protocol?: string;
+					severity?: string;
 				}>
 			)
 				.map((d) => {
@@ -224,6 +268,9 @@ export async function GET(req: NextRequest) {
 						content: d.content,
 						chunkIndex: d.chunkIndex,
 						publishedAt: d.publishedAt ?? null,
+						auditor: d.auditor ?? null,
+						protocol: d.protocol ?? null,
+						severity: d.severity ?? null,
 						score,
 					};
 				})

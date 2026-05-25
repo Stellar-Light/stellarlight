@@ -15,6 +15,15 @@ import type { CollectionConfig } from "payload";
  *   - scf-proposal   : past SCF grant proposals from communityfund.stellar.org
  *   - lumenloop      : community SCF playbooks + companion AI skills from
  *                      github.com/lumenloop/awesome-stellar-community-fund
+ *   - audit          : Soroban protocol audit reports from
+ *                      sorobansecurity.com/api/v1/reports (Certora, OtterSec,
+ *                      Halborn, OpenZeppelin, Code4rena, etc.) — chunked by
+ *                      severity heading, tagged with auditor + protocol
+ *   - ec-developer-report : Annual + geographic developer reports published
+ *                      by Electric Capital (github.com/electric-capital/
+ *                      developer-reports) — macro ecosystem stats, peer-L1
+ *                      comparisons, geographic developer concentration.
+ *                      PDFs 2019–2023; 2024+ are web-only and not yet ingested.
  *
  * Retrieval: /api/research?q={query} does Atlas $vectorSearch over
  * `embedding` and returns the top-K chunks with content + sourceUrl.
@@ -67,7 +76,46 @@ export const ResearchDocs: CollectionConfig = {
 					label: "Lumenloop Research (ecosystem analyses + weekly roundups)",
 					value: "lumenloop-research",
 				},
+				{
+					label: "Audit (sorobansecurity.com)",
+					value: "audit",
+				},
+				{
+					label: "Electric Capital Developer Report",
+					value: "ec-developer-report",
+				},
 			],
+		},
+		{
+			name: "auditor",
+			type: "text",
+			index: true,
+			admin: {
+				description: "Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.",
+			},
+		},
+		{
+			name: "protocol",
+			type: "text",
+			index: true,
+			admin: {
+				description: "Protocol audited (Blend, Soroswap, …). Only set when source='audit'.",
+			},
+		},
+		{
+			name: "severity",
+			type: "select",
+			options: [
+				{ label: "Critical", value: "critical" },
+				{ label: "High", value: "high" },
+				{ label: "Medium", value: "medium" },
+				{ label: "Low", value: "low" },
+				{ label: "Informational", value: "informational" },
+				{ label: "Unknown / Mixed", value: "unknown" },
+			],
+			admin: {
+				description: "Severity bucket inferred from the chunk's section heading. Only set when source='audit'.",
+			},
 		},
 		{
 			name: "title",

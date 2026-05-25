@@ -11,6 +11,10 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import {
+	fetchAllDoraHacksHackathons,
+	getHackathonUrl,
+} from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
@@ -61,10 +65,80 @@ export async function GET(
 			  }
 			| undefined;
 
+		// Fallback: live DoraHacks feed. The list endpoint merges DoraHacks
+		// rows in by `uname` slug — without this, the detail endpoint 404s
+		// on every uncurated event.
 		if (!hackathon) {
+			const dora = (await fetchAllDoraHacksHackathons()).find(
+				(h) => h.uname === slug,
+			);
+			if (!dora) {
+				return NextResponse.json(
+					{ error: `hackathon not found: ${slug}` },
+					{ status: 404 },
+				);
+			}
+			const now = Math.floor(Date.now() / 1000);
+			const status =
+				dora.start_time > now
+					? "upcoming"
+					: dora.end_time < now
+						? "completed"
+						: "active";
+			logApiHit({
+				req,
+				endpoint: "/api/hackathons/[slug]",
+				filters: { slug, source: "dorahacks" },
+			});
 			return NextResponse.json(
-				{ error: `hackathon not found: ${slug}` },
-				{ status: 404 },
+				{
+					meta: {
+						source: getHackathonUrl(dora.uname),
+						generatedAt: new Date().toISOString(),
+						note: "DoraHacks-sourced — submissions/winners/tracks not in stellarlight DB; visit externalUrl for full detail",
+					},
+					hackathon: {
+						id: `dorahacks-${dora.id}`,
+						name: dora.title,
+						slug: dora.uname,
+						description: dora.description ?? null,
+						startDate: new Date(dora.start_time * 1000)
+							.toISOString()
+							.slice(0, 10),
+						endDate: new Date(dora.end_time * 1000)
+							.toISOString()
+							.slice(0, 10),
+						status,
+						externalUrl: getHackathonUrl(dora.uname),
+						organizer: dora.organization
+							? {
+									id: `dorahacks-org-${dora.organization.id}`,
+									name: dora.organization.name,
+									slug: dora.organization.name
+										.toLowerCase()
+										.replace(/\s+/g, "-"),
+								}
+							: null,
+						prizePoolUSD: dora.bonus_price || null,
+						hackersCount: dora.hackers_count || null,
+						source: "dorahacks",
+						stats: {
+							totalSubmissions: 0,
+							totalPrizeUSD: dora.bonus_price || 0,
+							winners: 0,
+							outcomes: { built: 0, inProgress: 0, abandoned: 0, unknown: 0 },
+						},
+						tracks: [],
+					},
+					winners: [],
+					submissions: [],
+				},
+				{
+					headers: {
+						"Cache-Control":
+							"public, s-maxage=3600, stale-while-revalidate=7200",
+					},
+				},
 			);
 		}
 

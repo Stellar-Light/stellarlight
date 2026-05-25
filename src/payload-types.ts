@@ -80,6 +80,7 @@ export interface Config {
     hackathons: Hackathon;
     'api-usage': ApiUsage;
     'research-docs': ResearchDoc;
+    'scout-feedback': ScoutFeedback;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -108,6 +109,7 @@ export interface Config {
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
     'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
+    'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -852,7 +854,21 @@ export interface ResearchDoc {
     | 'paper'
     | 'scf-proposal'
     | 'lumenloop'
-    | 'lumenloop-research';
+    | 'lumenloop-research'
+    | 'audit'
+    | 'ec-developer-report';
+  /**
+   * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
+   */
+  auditor?: string | null;
+  /**
+   * Protocol audited (Blend, Soroswap, …). Only set when source='audit'.
+   */
+  protocol?: string | null;
+  /**
+   * Severity bucket inferred from the chunk's section heading. Only set when source='audit'.
+   */
+  severity?: ('critical' | 'high' | 'medium' | 'low' | 'informational' | 'unknown') | null;
   /**
    * Parent doc title (e.g. SEP name, blog post title, paper title)
    */
@@ -906,6 +922,46 @@ export interface ResearchDoc {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scout-feedback".
+ */
+export interface ScoutFeedback {
+  id: string;
+  kind: 'bug' | 'missing-data' | 'wrong-answer' | 'suggestion' | 'other';
+  /**
+   * The freeform feedback text from the agent.
+   */
+  message: string;
+  /**
+   * The user query the agent was answering, if it was forwarded.
+   */
+  query?: string | null;
+  /**
+   * Which /api/* endpoint was being called.
+   */
+  endpoint?: string | null;
+  /**
+   * SKILL.md frontmatter version (e.g. 1.0.0).
+   */
+  skillVersion?: string | null;
+  /**
+   * Agent harness (claude-code, codex, openclaw).
+   */
+  agentName?: string | null;
+  /**
+   * Raw User-Agent header (best-effort).
+   */
+  userAgent?: string | null;
+  /**
+   * SHA-256(ip + secret). De-duplicate floods without logging raw IPs.
+   */
+  ipHash?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1076,6 +1132,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'research-docs';
         value: string | ResearchDoc;
+      } | null)
+    | ({
+        relationTo: 'scout-feedback';
+        value: string | ScoutFeedback;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1465,6 +1525,9 @@ export interface ApiUsageSelect<T extends boolean = true> {
  */
 export interface ResearchDocsSelect<T extends boolean = true> {
   source?: T;
+  auditor?: T;
+  protocol?: T;
+  severity?: T;
   title?: T;
   section?: T;
   url?: T;
@@ -1480,6 +1543,22 @@ export interface ResearchDocsSelect<T extends boolean = true> {
       };
   publishedAt?: T;
   embedding?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scout-feedback_select".
+ */
+export interface ScoutFeedbackSelect<T extends boolean = true> {
+  kind?: T;
+  message?: T;
+  query?: T;
+  endpoint?: T;
+  skillVersion?: T;
+  agentName?: T;
+  userAgent?: T;
+  ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
 }

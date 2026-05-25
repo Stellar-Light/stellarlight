@@ -142,12 +142,39 @@ export async function GET(req: NextRequest) {
 		filters: { location, scfTier, featured, limit },
 	});
 
+	// When the underlying collection is empty (it currently is — pending
+	// Stellar Passport sync), surface an explicit advisory so agents don't
+	// silently report "no Stellar builders found" as if it were a finding
+	// about the ecosystem. Same envelope pattern as /api/hackathons'
+	// fallbackChannels.
+	const builderAdvisory =
+		builders.length === 0
+			? {
+					summary:
+						"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
+					channels: [
+						{
+							name: "Stellar Discord — Looking for Collaborators",
+							url: "https://discord.gg/stellardev",
+							why: "The active channel where Stellar devs post 'looking for X' calls",
+						},
+						{
+							name: "GitHub topic:stellar",
+							url: "https://github.com/topics/stellar",
+							why: "Browse repos by Stellar dev contributions",
+						},
+					],
+				}
+			: undefined;
+
 	return NextResponse.json(
 		{
 			meta: {
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
 				filters: { q, location, scfTier, featured, limit },
+				counts: { returned: builders.length },
+				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},
 			builders,
 		},

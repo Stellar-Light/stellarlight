@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let projects: ProjectRow[] = [];
+	let matchMode: "strict" | "loose-1" | "majority" | "all" = "all";
 
 	if (payload) {
 		try {
@@ -144,17 +145,33 @@ export async function GET(req: NextRequest) {
 				};
 			});
 
+			// Tiered match modes. Strict AND first (avoids false positives
+			// from common words like "stablecoin" matching every payments
+			// project). If a strict AND query yields 0 hits we relax in two
+			// stages so multi-word natural queries don't dead-end:
+			//
+			//   strict   = all N tokens must match (default for ≤2 tokens)
+			//   loose-1  = N-1 of N tokens match (only kicks in for 3+ tokens)
+			//   majority = ⌈N/2⌉ tokens match (last resort)
+			//
+			// The .meta.matchMode field tells the caller which tier returned
+			// the results so they can convey relevance honestly to the user.
 			if (tokens.length) {
-				// Require ALL query tokens to match — strict AND. Permissive OR
-				// scoring (score > 0) returned too many false positives for
-				// multi-word queries like "privacy stablecoin" or "tiktok video".
-				// Score still equals token-hit count so it acts as a relevance
-				// tiebreaker between equally-strict matches (e.g. when one
-				// project contains a token twice — currently we count unique
-				// tokens but this leaves room to weight density later).
-				projects = projects.filter((p) => p.score >= tokens.length);
-				projects.sort((a, b) => b.score - a.score);
+				matchMode = "strict";
+				let filtered = projects.filter((p) => p.score >= tokens.length);
+				if (filtered.length === 0 && tokens.length >= 3) {
+					matchMode = "loose-1";
+					filtered = projects.filter((p) => p.score >= tokens.length - 1);
+				}
+				if (filtered.length === 0 && tokens.length >= 2) {
+					matchMode = "majority";
+					const need = Math.ceil(tokens.length / 2);
+					filtered = projects.filter((p) => p.score >= need);
+				}
+				filtered.sort((a, b) => b.score - a.score);
+				projects = filtered;
 			} else {
+				matchMode = "all";
 				projects.sort((a, b) => Number(b.scfAwarded) - Number(a.scfAwarded));
 			}
 
@@ -188,6 +205,41 @@ export async function GET(req: NextRequest) {
 					scfAwardedOnly,
 					limit,
 				},
+				matchMode,
+				// Hint to the caller (agent) so they can frame results honestly:
+				//   strict   → "every keyword matched"
+				//   loose-1  → "all but one keyword matched"
+				//   majority → "most of your keywords matched — broader interpretation"
+				//   all      → no keyword query was supplied
+				matchModeLabel: {
+					strict: "all keywords matched",
+					"loose-1": "all but one keyword matched",
+					majority: "majority of keywords matched (broader scope)",
+					all: "no keyword filter",
+				}[matchMode],
+				counts: { returned: projects.length },
+				// When tiered matching ran the full strict→loose-1→majority
+				// chain and still got nothing, point the agent at thesis-level
+				// retrieval. Project-name matching can't answer "is x402
+				// possible on Stellar?" — /api/research can.
+				...(projects.length === 0 && q
+					? {
+							advisory: {
+								summary: `No projects match '${q}' even after broadening the search. This could be a real gap, a naming/tag mismatch, or a thesis-level question that's better answered against the research corpus.`,
+								suggestions: [
+									{
+										action: "research-corpus",
+										url: `/api/research?q=${encodeURIComponent(q)}&limit=5`,
+										why: "If the question is design / feasibility / 'has this concept been discussed', /api/research surfaces SEPs, papers, audit findings, SCF Handbook chunks — content the project directory doesn't index.",
+									},
+									{
+										action: "synonym-retry",
+										why: `Try a single-word category or technology synonym (e.g. 'oracle' instead of 'price feed', 'soroban' instead of 'smart contract') — projects tend to be tagged by category, not by application descriptions.`,
+									},
+								],
+							},
+						}
+					: {}),
 			},
 			projects,
 		},

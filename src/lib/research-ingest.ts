@@ -23,7 +23,17 @@ export type ResearchSource =
 	| "paper"
 	| "scf-proposal"
 	| "lumenloop"
-	| "lumenloop-research";
+	| "lumenloop-research"
+	| "audit"
+	| "ec-developer-report";
+
+export type AuditSeverity =
+	| "critical"
+	| "high"
+	| "medium"
+	| "low"
+	| "informational"
+	| "unknown";
 
 export interface ResearchChunk {
 	parentDocId: string;
@@ -35,6 +45,10 @@ export interface ResearchChunk {
 	contentHash: string;
 	tags: string[];
 	publishedAt?: string;
+	// Audit-specific (only set when source='audit')
+	auditor?: string;
+	protocol?: string;
+	severity?: AuditSeverity;
 }
 
 export function sha256(s: string): string {
@@ -220,6 +234,9 @@ export async function upsertChunks(opts: {
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
 			publishedAt: chunk.publishedAt,
+			auditor: chunk.auditor,
+			protocol: chunk.protocol,
+			severity: chunk.severity,
 			embedding,
 		};
 		try {

@@ -15,6 +15,7 @@ import { ApiUsage } from "./collections/ApiUsage";
 import { Hackathons } from "./collections/Hackathons";
 import { Media } from "./collections/Media";
 import { ResearchDocs } from "./collections/ResearchDocs";
+import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Projects } from "./collections/Projects";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { Signals } from "./collections/Signals";
@@ -60,6 +61,7 @@ export default buildConfig({
 		Hackathons,
 		ApiUsage,
 		ResearchDocs,
+		ScoutFeedback,
 	],
 	globals: [Banner],
 	jobs: {

@@ -91,6 +91,30 @@ export async function GET(req: NextRequest) {
 	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
 	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 300);
 
+	// Validate enumerated params before doing work — silently returning the
+	// unfiltered feed for `?status=garbage` confuses agents (they think the
+	// filter applied + got empty results, but actually it was discarded).
+	const VALID_STATUSES = ["upcoming", "active", "completed"] as const;
+	if (statusFilter && !VALID_STATUSES.includes(statusFilter as never)) {
+		return NextResponse.json(
+			{
+				error: `unknown status: '${statusFilter}'`,
+				validStatuses: VALID_STATUSES,
+			},
+			{ status: 400 },
+		);
+	}
+	const VALID_SOURCES = ["curated", "dorahacks"] as const;
+	if (sourceFilter && !VALID_SOURCES.includes(sourceFilter as never)) {
+		return NextResponse.json(
+			{
+				error: `unknown source: '${sourceFilter}'`,
+				validSources: VALID_SOURCES,
+			},
+			{ status: 400 },
+		);
+	}
+
 	let curated: HackathonRow[] = [];
 	let dora: HackathonRow[] = [];
 
@@ -211,6 +235,38 @@ export async function GET(req: NextRequest) {
 		filters: { status: statusFilter, source: sourceFilter, limit },
 	});
 
+	// When a status-scoped query (e.g. ?status=upcoming) returns nothing,
+	// tell the caller where else to look. DoraHacks publishes new Stellar
+	// hackathons sporadically and our DB is curator-driven, so "0 upcoming"
+	// is common between events. The agent should redirect the user to the
+	// live channels rather than dead-end.
+	const isForwardLookingQuery =
+		statusFilter === "upcoming" || statusFilter === "active";
+	const fallbackChannels =
+		isForwardLookingQuery && hackathons.length === 0
+			? {
+					summary:
+						"No upcoming or active hackathons in stellarlight's feed right now — between events. Check live channels for the next announcement.",
+					channels: [
+						{
+							name: "@BuildOnStellar on X/Twitter",
+							url: "https://x.com/BuildOnStellar",
+							why: "Official Stellar Foundation builder channel — first to announce hackathons + sponsor briefs",
+						},
+						{
+							name: "stellarlight.xyz/hackathons",
+							url: "https://stellarlight.xyz/hackathons",
+							why: "Live page including any curated upcoming events not yet in the API feed",
+						},
+						{
+							name: "DoraHacks — Stellar Development Foundation",
+							url: "https://dorahacks.io/org/3096",
+							why: "DoraHacks org page where SDF posts new Stellar Hacks; prizes appear the moment registration opens",
+						},
+					],
+				}
+			: undefined;
+
 	return NextResponse.json(
 		{
 			meta: {
@@ -227,6 +283,7 @@ export async function GET(req: NextRequest) {
 					dorahacks: dora.length,
 					returned: hackathons.length,
 				},
+				...(fallbackChannels ? { fallbackChannels } : {}),
 			},
 			hackathons,
 		},

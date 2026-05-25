@@ -1,6 +1,6 @@
 name: Refresh Scout research corpus
 
-# Daily run hits all 7 ingest scripts. Each script is idempotent via
+# Daily run hits all 9 ingest scripts. Each script is idempotent via
 # per-chunk SHA-256 contentHash — only NEW or CHANGED chunks get
 # embedded by Voyage, so a "nothing changed" run costs ~$0.
 #
@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper). Leave empty to run all."
+        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|ec-developer-report). Leave empty to run all."
         required: false
         default: ""
 
@@ -89,3 +89,13 @@ jobs:
         if: inputs.source == '' || inputs.source == 'paper'
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-papers.ts --execute
+
+      - name: Ingest Soroban audit reports (sorobansecurity.com)
+        if: inputs.source == '' || inputs.source == 'audit'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-soroban-security.ts --execute
+
+      - name: Ingest Electric Capital Developer Reports
+        if: inputs.source == '' || inputs.source == 'ec-developer-report'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute
