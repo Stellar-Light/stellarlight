@@ -1,6 +1,7 @@
 import React from "react";
 import { Inter, Source_Serif_4, JetBrains_Mono, VT323 } from "next/font/google";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "../globals.css";
 import { Navigation } from "@/components/ui/navigation";
 import Footer from "@/components/footer";
@@ -128,6 +129,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 					<main className="min-h-[calc(100vh-4rem)]">{children}</main>
 					<Footer />
 				</Providers>
+				<Analytics />
       </body>
     </html>
 	);
