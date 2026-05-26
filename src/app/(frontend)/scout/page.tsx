@@ -342,14 +342,6 @@ export default async function ScoutPage() {
 
 				{/* Hero — clean statement-led, design-system typography */}
 				<div className="mb-16">
-					{/* Eyebrow tag */}
-					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-border bg-card">
-						<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-						<span className="text-xs font-medium text-muted-foreground">
-							Stellar ecosystem · AI skill
-						</span>
-					</div>
-
 					{/* Statement headline — two short lines, big and confident */}
 					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6 max-w-4xl">
 						Know what's been built.{" "}
