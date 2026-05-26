@@ -55,6 +55,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Ensure Atlas Vector Search index exists
+        # Idempotent: the script checks listSearchIndexes() and skips if
+        # `research_vector_index` is already present + READY. First run on
+        # a fresh cluster creates it (~30s); subsequent runs no-op.
+        # Without this index, /api/research's $vectorSearch silently
+        # returns 0 docs and falls back to keyword mode.
+        continue-on-error: true
+        run: pnpm exec tsx scripts/create-vector-index.ts
+
       - name: Ingest SEPs (stellar/stellar-protocol)
         if: inputs.source == '' || inputs.source == 'sep'
         continue-on-error: true
