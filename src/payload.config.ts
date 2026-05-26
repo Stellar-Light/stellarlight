@@ -11,8 +11,12 @@ import { Blog } from "./collections/Blog";
 import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
 import { Entities } from "./collections/Entities";
+import { ApiUsage } from "./collections/ApiUsage";
 import { Hackathons } from "./collections/Hackathons";
+import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { Media } from "./collections/Media";
+import { ResearchDocs } from "./collections/ResearchDocs";
+import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Projects } from "./collections/Projects";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { Signals } from "./collections/Signals";
@@ -56,6 +60,10 @@ export default buildConfig({
 		TransparencyLogs,
 		Carousel,
 		Hackathons,
+		IdeaSubmissions,
+		ApiUsage,
+		ResearchDocs,
+		ScoutFeedback,
 	],
 	globals: [Banner],
 	jobs: {

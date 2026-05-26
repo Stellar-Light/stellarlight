@@ -161,9 +161,96 @@ export function getDaysRemaining(endTime: number): number {
 }
 
 /**
- * Parses field tags into an array
+ * Parses field tags into an array (raw, no normalization).
  */
 export function parseTags(field?: string): string[] {
   if (!field) return [];
   return field.split(',').map(tag => tag.trim()).filter(Boolean);
+}
+
+/**
+ * Map of raw tag (lowercased) → canonical theme name.
+ * Anything not in this map is dropped — keeps the theme list curated and
+ * meaningful. Update this when new themes emerge.
+ */
+const THEME_ALIASES: Record<string, string> = {
+  // AI cluster
+  ai: 'AI',
+  claude: 'AI',
+  agents: 'AI',
+  openclaw: 'AI',
+  x402: 'AI',
+  llm: 'AI',
+  // DeFi cluster
+  defi: 'DeFi',
+  'borrowing and lending': 'DeFi',
+  amms: 'DeFi',
+  amm: 'DeFi',
+  swaps: 'DeFi',
+  vaults: 'DeFi',
+  finance: 'DeFi',
+  // Wallets
+  wallets: 'Wallets',
+  wallet: 'Wallets',
+  // ZK
+  zk: 'ZK',
+  'zero knowledge': 'ZK',
+  noir: 'ZK',
+  'risc zero': 'ZK',
+  // Categories
+  gaming: 'Gaming',
+  oracle: 'Oracles',
+  oracles: 'Oracles',
+  memes: 'Memes',
+  sustainability: 'Sustainability',
+  'ui/ux': 'UI/UX',
+  composability: 'Composability',
+  rwa: 'RWA',
+  // Languages worth keeping
+  rust: 'Rust',
+};
+
+/**
+ * Tags we explicitly drop because they're noise or too generic to be useful
+ * as themes (every Stellar hackathon involves Stellar / Soroban / blockchain).
+ */
+const DROP_TAGS = new Set([
+  'stellar',
+  'soroban',
+  'blockchain',
+  'crypto',
+  'web3',
+  'smart contracts',
+  'smart contract',
+  'tooling',
+  'ideathon',
+  'students',
+  'universities',
+  'latam',
+  'pitch',
+  'ideas',
+  'content',
+  'javascript',
+  'python',
+]);
+
+/**
+ * Parse + normalize a hackathon's tags into a deduplicated list of canonical
+ * theme names. Filters out noise (Stellar, Soroban, Blockchain, etc.) and
+ * consolidates synonyms (Claude/AI/Agents → AI, Defi/Defi → DeFi, etc.).
+ */
+export function parseThemes(field?: string): string[] {
+  const raw = parseTags(field);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const tag of raw) {
+    const key = tag.toLowerCase().trim();
+    if (DROP_TAGS.has(key)) continue;
+    const canonical = THEME_ALIASES[key];
+    if (!canonical) continue; // unknown tag → drop
+    if (seen.has(canonical)) continue;
+    seen.add(canonical);
+    out.push(canonical);
+  }
+  return out;
 }

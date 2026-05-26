@@ -1,0 +1,101 @@
+name: Refresh Scout research corpus
+
+# Daily run hits all 9 ingest scripts. Each script is idempotent via
+# per-chunk SHA-256 contentHash — only NEW or CHANGED chunks get
+# embedded by Voyage, so a "nothing changed" run costs ~$0.
+#
+# Cadence reasoning:
+#   - lumenloop-research + sdf-blog are time-sensitive (weekly roundups,
+#     ecosystem posts) → daily picks them up the day they ship
+#   - sep / scf-handbook / dev-docs / lumenloop (github) / paper change
+#     slowly but the dedup cost is so low (~50ms per chunk to hash) it's
+#     fine to refresh them daily too
+#   - Worst-case daily cost: ~$0.05 in Voyage embeddings if something
+#     large changed (e.g. a whole dev-docs rewrite)
+#
+# Failure isolation: each step uses `continue-on-error: true` so one
+# source failing doesn't abort the rest. Errors land in the job log.
+
+on:
+  schedule:
+    # 06:00 UTC daily — quiet hours for most regions
+    - cron: "0 6 * * *"
+  # Allow manual trigger from the Actions UI
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|ec-developer-report). Leave empty to run all."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+  DATABASE_URI: ${{ secrets.DATABASE_URI }}
+  PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Ingest SEPs (stellar/stellar-protocol)
+        if: inputs.source == '' || inputs.source == 'sep'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-seps.ts --execute
+
+      - name: Ingest lumenloop (awesome-stellar-community-fund)
+        if: inputs.source == '' || inputs.source == 'lumenloop'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-lumenloop.ts --execute
+
+      - name: Ingest lumenloop research (ecosystem analyses)
+        if: inputs.source == '' || inputs.source == 'lumenloop-research'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-lumenloop-research.ts --execute
+
+      - name: Ingest SCF Handbook
+        if: inputs.source == '' || inputs.source == 'scf-handbook'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-scf-handbook.ts --execute
+
+      - name: Ingest SDF Blog
+        if: inputs.source == '' || inputs.source == 'sdf-blog'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-sdf-blog.ts --execute
+
+      - name: Ingest developers.stellar.org
+        if: inputs.source == '' || inputs.source == 'dev-docs'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-developers-docs.ts --execute
+
+      - name: Ingest foundational papers (Mazieres SCP + others)
+        if: inputs.source == '' || inputs.source == 'paper'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-papers.ts --execute
+
+      - name: Ingest Soroban audit reports (sorobansecurity.com)
+        if: inputs.source == '' || inputs.source == 'audit'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-soroban-security.ts --execute
+
+      - name: Ingest Electric Capital Developer Reports
+        if: inputs.source == '' || inputs.source == 'ec-developer-report'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute
