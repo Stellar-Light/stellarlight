@@ -4,15 +4,14 @@
  * works on Atlas M0+ clusters running MongoDB 7.0+. If the user's tier
  * doesn't support it, prints the JSON to paste into the Atlas UI.
  */
-// mongodb isn't a direct dep — pull it from the pnpm flat store at runtime.
-// Static `import` would need a `@types/mongodb` install; `createRequire` keeps
-// this script dependency-free.
+// mongodb is a transitive dep via @payloadcms/db-mongodb. Use createRequire
+// so we don't need a static import (which would need `@types/mongodb`
+// installed), AND so it works in both local dev (hoisted pnpm store) and
+// CI (clean checkout where lockfile resolution picks the same version).
 import { createRequire } from "node:module";
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
-const { MongoClient } = req(
-	"/Users/shubhbrar/Downloads/stellarlight-main/node_modules/.pnpm/mongodb@6.16.0_@aws-sdk+credential-providers@3.921.0/node_modules/mongodb",
-) as any;
+const { MongoClient } = req("mongodb") as any;
 
 const URI = process.env.DATABASE_URI || process.env.MONGODB_URI;
 if (!URI) {
