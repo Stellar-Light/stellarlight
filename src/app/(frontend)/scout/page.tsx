@@ -255,15 +255,6 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 					className="underline hover:text-foreground"
 				>
 					stellar-scout repo
-				</a>{" "}
-				or the{" "}
-				<a
-					href="https://github.com/alexanderkoh/stellarlight"
-					target="_blank"
-					rel="noopener noreferrer"
-					className="underline hover:text-foreground"
-				>
-					main stellarlight repo
 				</a>
 				. For missing projects in the directory, use the Submit form at{" "}
 				<a
@@ -351,14 +342,6 @@ export default async function ScoutPage() {
 
 				{/* Hero — clean statement-led, design-system typography */}
 				<div className="mb-16">
-					{/* Eyebrow tag */}
-					<div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-border bg-card">
-						<Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-						<span className="text-xs font-medium text-muted-foreground">
-							Stellar ecosystem · AI skill
-						</span>
-					</div>
-
 					{/* Statement headline — two short lines, big and confident */}
 					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6 max-w-4xl">
 						Know what's been built.{" "}
@@ -400,15 +383,6 @@ export default async function ScoutPage() {
 						>
 							<Github className="w-4 h-4" />
 							Skill repo
-						</a>
-						<a
-							href="https://github.com/alexanderkoh/stellarlight"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-white/5 hover:border-white/20 transition-colors"
-						>
-							<Github className="w-4 h-4" />
-							Source
 						</a>
 					</div>
 				</div>
