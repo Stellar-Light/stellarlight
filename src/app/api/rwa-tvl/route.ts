@@ -81,41 +81,67 @@ export async function GET() {
 				)
 				.slice(0, 5);
 
-			// Normalize issuer names and replace SocGen with RedSwan
-			const NAME_MAP: Record<string, string> = {
+			// Normalize issuer names. rwa.xyz splits some issuers into multiple
+			// rows (e.g. "Franklin Templeton Trust" + "Franklin Templeton Benji
+			// Investments" are the same brand). Consolidating gives us a true
+			// top-N that matches what the rwa.xyz UI shows.
+			//
+			// Exact-match map first, then fuzzy substring match as fallback so
+			// new variants are caught automatically without a code change.
+			const EXACT_NAME_MAP: Record<string, string> = {
 				"Circle International": "Circle",
 				"Ondo USDY": "Ondo Finance",
-				"Societe Generale - FORGE": null as any, // exclude
+				"Ondo": "Ondo Finance",
+				// Issuers that have non-zero bridged value in rwa.xyz's data
+				// but are excluded from their public top-N display. They're
+				// usually fund-level entities (registered but not actively
+				// distributed yet). We mirror rwa.xyz's display choices so
+				// our card matches what users see on the source.
+				"Societe Generale - FORGE": null as any,
+				"Realiz Digital Assets Fund": null as any,
 			};
+			const FUZZY_CANONICAL: Array<{ match: string; name: string }> = [
+				{ match: "franklin templeton", name: "Franklin Templeton" },
+				{ match: "spiko", name: "Spiko" },
+				{ match: "wisdomtree", name: "WisdomTree" },
+				{ match: "ondo", name: "Ondo Finance" },
+				{ match: "circle", name: "Circle" },
+				{ match: "redswan", name: "RedSwan Digital" },
+				{ match: "realiz", name: "Realiz" },
+			];
 
-			const REDSWAN_ENTRY: RWAIssuer = {
-				name: "RedSwan Digital",
-				value: 71_700_000,
-				assetCount: 7,
-			};
-
-			// Find RedSwan in the full list if it exists
-			const redswanFromData = issuerStats.find((i: any) =>
-				(i.name || "").toLowerCase().includes("redswan")
-			);
-			if (redswanFromData) {
-				REDSWAN_ENTRY.value = redswanFromData.bridged_token_value_dollar?.val || REDSWAN_ENTRY.value;
-				REDSWAN_ENTRY.assetCount = redswanFromData.asset_count || REDSWAN_ENTRY.assetCount;
+			function canonicalName(raw: string): string | null {
+				if (raw in EXACT_NAME_MAP) return EXACT_NAME_MAP[raw];
+				const lower = raw.toLowerCase();
+				for (const { match, name } of FUZZY_CANONICAL) {
+					if (lower.includes(match)) return name;
+				}
+				return raw;
 			}
 
-			let topIssuers: RWAIssuer[] = sorted
-				.filter((issuer: any) => NAME_MAP[issuer.name] !== null)
-				.map((issuer: any) => ({
-					name: NAME_MAP[issuer.name] ?? issuer.name ?? "Unknown",
-					value: issuer.bridged_token_value_dollar?.val || 0,
-					assetCount: issuer.asset_count || 0,
-				}));
-
-			// If we removed SocGen, add RedSwan
-			if (topIssuers.length < 5) {
-				topIssuers.push(REDSWAN_ENTRY);
+			// Aggregate by canonical name — sum value, sum asset count
+			const agg = new Map<string, RWAIssuer>();
+			for (const issuer of issuerStats as Array<{
+				name?: string;
+				bridged_token_value_dollar?: { val?: number };
+				asset_count?: number;
+			}>) {
+				const name = canonicalName(issuer.name || "Unknown");
+				if (name === null) continue; // excluded
+				const value = issuer.bridged_token_value_dollar?.val || 0;
+				const assetCount = issuer.asset_count || 0;
+				const existing = agg.get(name);
+				if (existing) {
+					existing.value += value;
+					existing.assetCount += assetCount;
+				} else {
+					agg.set(name, { name, value, assetCount });
+				}
 			}
-			topIssuers = topIssuers.slice(0, 5);
+
+			const topIssuers: RWAIssuer[] = Array.from(agg.values())
+				.sort((a, b) => b.value - a.value)
+				.slice(0, 5);
 
 			if (tvl > 0) {
 				cachedData = { tvl, topIssuers, totalAssets, timestamp: Date.now() };
