@@ -1,0 +1,60 @@
+{
+  "name": "@stellar-light/scout-mcp",
+  "version": "1.0.0",
+  "description": "Stellar Scout MCP server — agentic ecosystem research for Stellar builders, callable from Claude.ai / ChatGPT / Cursor / Gemini and any MCP client.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "stellar",
+    "soroban",
+    "agent",
+    "ai",
+    "ecosystem",
+    "scf",
+    "audit",
+    "research"
+  ],
+  "homepage": "https://stellarlight.xyz/scout",
+  "bugs": {
+    "url": "https://github.com/Stellar-Light/scout-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stellar-Light/scout-mcp.git"
+  },
+  "license": "MIT",
+  "author": "stellarlight.xyz",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "scout-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --target node20 --clean",
+    "dev": "tsup src/index.ts --format esm --target node20 --watch --onSuccess 'node dist/index.js'",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && node test/smoke.mjs",
+    "prepublishOnly": "pnpm build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

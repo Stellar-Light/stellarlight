@@ -86,7 +86,7 @@ export default function Footer() {
 					</div>
 				</div>
 				<div className="mt-8 pt-8 text-center text-sm text-muted-foreground">
-					<p>&copy; 2025 Stellar Light</p>
+					<p>&copy; {new Date().getFullYear()} Stellar Light</p>
 				</div>
 			</div>
 		</footer>

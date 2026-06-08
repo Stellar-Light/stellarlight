@@ -288,8 +288,8 @@ const SESSIONS = [
 			rows: [
 				{
 					label: "Prices API & Indexing Service",
-					value: "Q1 2026 · Infrastructure",
-					meta: "stellarlight.xyz/ideas/prices-api",
+					value: "Q1 2026",
+					meta: "Infrastructure · stellarlight.xyz/ideas/prices-api",
 				},
 				{
 					label: "Author",
@@ -298,13 +298,12 @@ const SESSIONS = [
 				},
 				{
 					label: "Tech requirements",
-					value:
-						"Asset coverage (Classic + SEP-41), VWAP, real-time + historical endpoints, low-latency",
-					meta: "Full spec on the RFP page",
+					value: "VWAP · SEP-41",
+					meta: "Asset coverage (Classic + SEP-41), VWAP weighting, real-time + historical endpoints, low-latency. Full spec on the RFP page.",
 				},
 				{
 					label: "Funding",
-					value: "SCF-funded for the winning team",
+					value: "SCF-funded",
 					meta: "Apply via the Stellar Community Fund",
 				},
 			],

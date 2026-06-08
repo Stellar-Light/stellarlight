@@ -8,17 +8,45 @@ import { useStellarTVL } from "@/hooks/useStellarTVL";
 import { useDeFiProtocols } from "@/hooks/useDeFiProtocols";
 import { useRWATVL } from "@/hooks/useRWATVL";
 
+// Exact-name → local logo path. Names that came back from the rwa.xyz
+// scraper as variants are aliased to the same file.
 const ISSUER_LOGOS: Record<string, string> = {
 	"Franklin Templeton": "/issuers/franklin-templeton.png",
+	"Franklin Templeton Trust": "/issuers/franklin-templeton.png",
+	"Franklin Templeton Benji Investments": "/issuers/franklin-templeton.png",
 	"Spiko": "/issuers/spiko.jpg",
 	"Ondo Finance": "/issuers/ondo.jpg",
 	"Ondo": "/issuers/ondo.jpg",
 	"Ondo USDY": "/issuers/ondo.jpg",
 	"Circle": "/issuers/circle.png",
 	"Circle International": "/issuers/circle.png",
+	"WisdomTree": "/issuers/wisdomtree.png",
 	"RedSwan Digital": "/issuers/redswan.jpg",
 	"RedSwan": "/issuers/redswan.jpg",
+	"Realiz": "/issuers/realiz.png",
+	"Realiz Digital Assets Fund": "/issuers/realiz.png",
 };
+
+// Fuzzy match as fallback — keeps logos working when the scraper returns
+// a new variant we haven't explicitly added to ISSUER_LOGOS yet.
+const FUZZY_LOGO: Array<{ match: string; src: string }> = [
+	{ match: "franklin", src: "/issuers/franklin-templeton.png" },
+	{ match: "spiko", src: "/issuers/spiko.jpg" },
+	{ match: "ondo", src: "/issuers/ondo.jpg" },
+	{ match: "circle", src: "/issuers/circle.png" },
+	{ match: "wisdomtree", src: "/issuers/wisdomtree.png" },
+	{ match: "redswan", src: "/issuers/redswan.jpg" },
+	{ match: "realiz", src: "/issuers/realiz.png" },
+];
+
+function resolveIssuerLogo(name: string): string | null {
+	if (name in ISSUER_LOGOS) return ISSUER_LOGOS[name];
+	const lower = name.toLowerCase();
+	for (const { match, src } of FUZZY_LOGO) {
+		if (lower.includes(match)) return src;
+	}
+	return null;
+}
 
 function formatValue(value: number): string {
 	if (value >= 1_000_000_000) {
@@ -87,7 +115,7 @@ function HoverCard({ items, label, totalCount }: { items: TooltipItem[]; label: 
 			<p className="text-xs font-medium text-[#A3A3A3] mb-3">{label}</p>
 			<div className="space-y-3">
 				{items.map((item, i) => {
-					const localLogo = ISSUER_LOGOS[item.name];
+					const localLogo = resolveIssuerLogo(item.name);
 					const logoSrc = localLogo || item.logo;
 					return (
 						<div key={item.name} className="flex items-center justify-between gap-3">

@@ -1,0 +1,79 @@
+name: Refresh Electric Capital developer snapshot
+
+# Runs scripts/refresh-electric-capital-stellar.py daily and commits the
+# fresh src/data/electric-capital-stellar.json if EC has published a new
+# day. Powers /leaderboard, /api/leaderboard, /api/status, /api/og-card,
+# and the stellar-developer-activity SKILL.md.
+#
+# Why daily:
+#   - Electric Capital's open dev dataset (opendevdata.org) publishes daily
+#   - MAD is a rolling 30d window — small daily moves cumulate; a weekly
+#     refresh would surface a 30+ swing without context
+#   - Cost is effectively $0 (duckdb against public S3 parquet, no API key)
+#   - The stellar-developer-activity skill manifest claims this cadence;
+#     this is what makes that claim true
+#
+# Idempotency:
+#   - `git diff --quiet` short-circuits the commit when EC hasn't shipped
+#     a new day (Sundays / holidays sometimes lag). No noise in git log.
+#   - Loop prevention: commits pushed by GITHUB_TOKEN do NOT re-trigger
+#     workflows that watch `push` events, by GitHub's design.
+#   - Vercel still picks up the push via its git webhook → leaderboard
+#     redeploys within a few minutes of a successful refresh.
+
+on:
+  schedule:
+    # 06:00 UTC daily — matches refresh-research-corpus + sits in quiet
+    # hours for US / EU
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  # contents:write lets the built-in GITHUB_TOKEN push the commit back
+  # to main without needing a PAT
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install duckdb
+        run: pip install --quiet duckdb
+
+      - name: Refresh snapshot
+        run: python3 scripts/refresh-electric-capital-stellar.py
+
+      - name: Commit if EC has published a new day
+        run: |
+          set -euo pipefail
+
+          # Compare on `asOf` (the EC publish day) rather than `git diff
+          # --quiet` on the whole file. The script's `refreshedAt` field is
+          # a wall-clock timestamp that always changes — a raw file diff
+          # would never short-circuit and we'd spam git history with daily
+          # no-op commits even when EC hasn't shipped new data.
+          AS_OF_NEW="$(python3 -c "import json; print(json.load(open('src/data/electric-capital-stellar.json'))['asOf'])")"
+          AS_OF_HEAD="$(git show HEAD:src/data/electric-capital-stellar.json | python3 -c "import json,sys; print(json.load(sys.stdin)['asOf'])")"
+
+          if [ "${AS_OF_NEW}" = "${AS_OF_HEAD}" ]; then
+            echo "EC has not published a new day (still asOf ${AS_OF_HEAD}) — nothing to commit."
+            exit 0
+          fi
+
+          echo "EC moved forward: ${AS_OF_HEAD} -> ${AS_OF_NEW}"
+
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add src/data/electric-capital-stellar.json
+          # One-liner commit message — multi-line strings inside a YAML
+          # literal block are fragile (a blank line at lower indent ends
+          # the block). Workflow run URL lives in the Actions log.
+          git commit -m "data: refresh EC snapshot (asOf ${AS_OF_NEW})"
+          git push

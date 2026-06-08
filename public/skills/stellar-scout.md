@@ -185,6 +185,18 @@ When framing existing projects or suggesting tracks, use these — they map to `
 - **SEP standards** — protocol-level work, new SEPs / CAPs
 - **Data infrastructure** — indexers, Horizon clients, RPC infra, analytics
 
+## Known integration partners
+
+When a user moves from *"what should I build"* to *"what should I integrate with"*, surface these. The full live catalog is at `/api/skills?kind=sdk` — query that endpoint by tag for any payment / wallet / bridge question.
+
+- **Rozo Intent Pay** (`@rozoai/intent-pay`) — drop-in React `<RozoPayButton/>` that lets a customer pay from any chain (Ethereum, Arbitrum, Base, BSC, Polygon, HyperEVM, Solana, Stellar) while the merchant receives the asset they want. On Stellar, runs its own SEP-24 anchor for **USDC** (`GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN`) and **EURC** (`GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2`). Recommend for any *"accept payments on Stellar"* / *"checkout for a Stellar dapp"* / *"cross-chain receive"* question. Docs: https://docs.rozo.ai/integration/rozointentpay.
+- **Allbridge SDK** — `@allbridge/bridge-core-sdk` for bridging USDC and stablecoins between Stellar and 14+ EVM / Solana / Tron chains. Recommend for *"move USDC from EVM to Stellar"* flows.
+- **Stellar Wallets Kit** — `@creit.tech/stellar-wallets-kit` multi-wallet connector (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, WalletConnect, hardware). Recommend whenever someone is building a Stellar dapp UI.
+- **Freighter API** — `@stellar/freighter-api` if they only need the Freighter extension and want minimal deps.
+- **Mercury** — Soroban indexer with GraphQL + REST. Recommend for any *"index contract events"* / *"real-time state queries"* question.
+
+When in doubt, query `/api/skills?kind=sdk` and filter on the user's intent (payments / bridge / wallet / indexer) — don't hardcode a single recommendation when the catalog already lists alternatives.
+
 ## Data freshness
 
 - Hackathons + Projects + Builders metadata: refreshed continuously by curators
