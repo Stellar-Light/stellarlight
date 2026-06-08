@@ -140,7 +140,11 @@ def main() -> None:
         SELECT COALESCE(country, '__unknown__') AS country, COUNT(*) AS devs
         FROM dev_country
         GROUP BY 1
-        ORDER BY devs DESC
+        -- Tiebreak by country name so ties (e.g. Canada / Germany both at 6 devs)
+        -- don't flip-flop between runs. The workflow's `git diff --quiet`
+        -- no-op short-circuit depends on the JSON being byte-identical when
+        -- the underlying EC data hasn't changed.
+        ORDER BY devs DESC, country ASC
         """
     ).fetchall()
 
