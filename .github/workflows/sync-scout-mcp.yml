@@ -1,0 +1,88 @@
+name: Sync scout-mcp to distribution repo
+
+# Mirrors scout-mcp/ in this monorepo to github.com/Stellar-Light/scout-mcp
+# on every push to main that touches the directory. The distribution repo is
+# what gets published to npm as @stellar-light/scout-mcp — without this sync
+# the published package silently drifts from the canonical source here.
+#
+# One-time setup:
+#   1. Create a fine-grained PAT at github.com/settings/tokens?type=beta:
+#        Resource owner:  Stellar-Light
+#        Repositories:    Only select repositories → scout-mcp
+#        Permissions:     Contents (Read and write), Metadata (Read)
+#        Expiration:      1 year (mark a renewal calendar entry)
+#   2. Add it as a repo secret:
+#        gh secret set STELLAR_LIGHT_SCOUT_MCP_TOKEN -R theboycoder/stellarlight \
+#          -b 'github_pat_...'
+#   3. Push this workflow. It runs automatically next time scout-mcp/ changes;
+#      trigger manually via `gh workflow run sync-scout-mcp.yml` to smoke-test.
+#
+# The workflow is a no-op when the scout-mcp/ contents are byte-identical to
+# what's already in Stellar-Light/scout-mcp — `git diff --quiet` skips the
+# commit. Safe to run on every push without spamming the history.
+#
+# node_modules/ and dist/ are NOT mirrored — the standalone repo regenerates
+# them via `pnpm install` + `pnpm build` on its own. .gitignore'd in both.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scout-mcp/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout stellarlight-main
+        uses: actions/checkout@v4
+
+      - name: Push scout-mcp/ to Stellar-Light/scout-mcp
+        env:
+          GH_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::STELLAR_LIGHT_SCOUT_MCP_TOKEN secret is missing."
+            echo "Set it via: gh secret set STELLAR_LIGHT_SCOUT_MCP_TOKEN -R ${{ github.repository }} -b '<PAT>'"
+            exit 1
+          fi
+
+          # Shallow clone the destination, mirror the source over the top,
+          # commit the diff. rsync --delete keeps the destination a pure
+          # mirror — files removed in the monorepo also get removed in the
+          # distribution repo.
+          git clone --depth 1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/Stellar-Light/scout-mcp.git" \
+            out
+
+          # Preserve the destination's .git dir while replacing all other
+          # contents. --exclude protects against ever syncing build artifacts
+          # or node_modules even if a contributor accidentally commits them.
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='.DS_Store' \
+            scout-mcp/ out/
+
+          cd out
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+
+          if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
+            echo "scout-mcp/ is already in sync — nothing to push."
+            exit 0
+          fi
+
+          git add -A
+          # One-liner commit message — multi-line strings inside a YAML
+          # literal block are fragile. Workflow run URL + monorepo SHA below
+          # are enough to trace back; full context lives in the Actions log.
+          git commit -m "sync: scout-mcp from stellarlight@${{ github.sha }} (${{ github.event_name }})"
+          git push
