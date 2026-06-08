@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles } from "lucide-react";
+import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles, Terminal } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
@@ -114,6 +114,7 @@ export function Navigation() {
 			label: "Build & Insights",
 			items: [
 				{ name: "Scout", href: "/scout", description: "AI skill for Stellar ecosystem research", icon: Sparkles },
+				{ name: "Skills", href: "/skills", description: "AI tool marketplace for Stellar builders", icon: Terminal },
 				{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
 				{ name: "Developer Activity", href: "/leaderboard", description: "Developer and ecosystem metrics", icon: Trophy },
 				{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
