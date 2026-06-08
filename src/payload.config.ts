@@ -10,6 +10,7 @@ import sharp from "sharp";
 import { Blog } from "./collections/Blog";
 import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
+import { CommunitySkills } from "./collections/CommunitySkills";
 import { Entities } from "./collections/Entities";
 import { ApiUsage } from "./collections/ApiUsage";
 import { Hackathons } from "./collections/Hackathons";
@@ -64,6 +65,7 @@ export default buildConfig({
 		ApiUsage,
 		ResearchDocs,
 		ScoutFeedback,
+		CommunitySkills,
 	],
 	globals: [Banner],
 	jobs: {

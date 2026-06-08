@@ -82,6 +82,7 @@ export interface Config {
     'api-usage': ApiUsage;
     'research-docs': ResearchDoc;
     'scout-feedback': ScoutFeedback;
+    'community-skills': CommunitySkill;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -112,6 +113,7 @@ export interface Config {
     'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
     'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
+    'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -983,6 +985,94 @@ export interface ScoutFeedback {
   createdAt: string;
 }
 /**
+ * Community-submitted AI skills for the Stellar marketplace. POST submissions land here as 'pending' — review and approve to publish.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-skills".
+ */
+export interface CommunitySkill {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  /**
+   * Display name shown on the skill card (e.g. 'Soroban Audit Helper').
+   */
+  name: string;
+  /**
+   * URL-safe slug (kebab-case). Used as the dedup key.
+   */
+  slug: string;
+  /**
+   * One-line tagline (≤ 160 chars).
+   */
+  tagline: string;
+  /**
+   * Longer description (1-2 paragraphs).
+   */
+  description: string;
+  kind: 'skill-md' | 'mcp-server' | 'sdk' | 'cli' | 'agent-kit' | 'tool';
+  /**
+   * Install command shown on the card (e.g. "npx skills add user/skill").
+   */
+  install: string;
+  /**
+   * GitHub repo URL.
+   */
+  repository?: string | null;
+  /**
+   * Homepage / landing page URL.
+   */
+  homepage?: string | null;
+  /**
+   * Documentation URL.
+   */
+  docs?: string | null;
+  /**
+   * Compatible agents (Claude Code, Cursor, ChatGPT, etc.).
+   */
+  compatibility?:
+    | {
+        agent?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  targetUser?: ('dev' | 'founder' | 'agent')[] | null;
+  /**
+   * Topic tags shown as chips on the card.
+   */
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Submitter contact info (collected on the submission form).
+   */
+  submittedBy?: {
+    name?: string | null;
+    email?: string | null;
+    githubHandle?: string | null;
+  };
+  /**
+   * When the submission landed.
+   */
+  submittedAt?: string | null;
+  /**
+   * When the submission was approved.
+   */
+  approvedAt?: string | null;
+  /**
+   * Why it was rejected (shown to submitter if they ask).
+   */
+  rejectionReason?: string | null;
+  /**
+   * SHA-256(ip + secret). De-duplicate spam without logging raw IPs.
+   */
+  ipHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1157,6 +1247,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'scout-feedback';
         value: string | ScoutFeedback;
+      } | null)
+    | ({
+        relationTo: 'community-skills';
+        value: string | CommunitySkill;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1593,6 +1687,48 @@ export interface ScoutFeedbackSelect<T extends boolean = true> {
   skillVersion?: T;
   agentName?: T;
   userAgent?: T;
+  ipHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-skills_select".
+ */
+export interface CommunitySkillsSelect<T extends boolean = true> {
+  status?: T;
+  name?: T;
+  slug?: T;
+  tagline?: T;
+  description?: T;
+  kind?: T;
+  install?: T;
+  repository?: T;
+  homepage?: T;
+  docs?: T;
+  compatibility?:
+    | T
+    | {
+        agent?: T;
+        id?: T;
+      };
+  targetUser?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  submittedBy?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        githubHandle?: T;
+      };
+  submittedAt?: T;
+  approvedAt?: T;
+  rejectionReason?: T;
   ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
