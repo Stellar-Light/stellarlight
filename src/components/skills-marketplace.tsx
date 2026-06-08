@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	ArrowRight,
 	Box,
 	Cpu,
 	ExternalLink,
@@ -13,6 +14,7 @@ import {
 	TerminalSquare,
 	Wrench,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CopyCommand } from "@/components/copy-command";
 
@@ -364,7 +366,12 @@ function SkillCard({ skill }: { skill: UnifiedSkill }) {
 					</div>
 					<div className="min-w-0">
 						<h3 className="text-sm font-semibold text-foreground truncate">
-							{skill.name}
+							<Link
+								href={`/skills/${skill.slug}`}
+								className="hover:underline focus:outline-none focus:underline"
+							>
+								{skill.name}
+							</Link>
 						</h3>
 						{skill.tagline && (
 							<p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
@@ -422,7 +429,7 @@ function SkillCard({ skill }: { skill: UnifiedSkill }) {
 						</span>
 					))}
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-3">
 					{skill.repository && (
 						<a
 							href={skill.repository}
@@ -435,16 +442,12 @@ function SkillCard({ skill }: { skill: UnifiedSkill }) {
 							<Github className="w-3.5 h-3.5" />
 						</a>
 					)}
-					{skill.homepage && (
-						<a
-							href={skill.homepage}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-muted-foreground hover:text-foreground transition-colors text-[11px] font-medium inline-flex items-center gap-1"
-						>
-							Learn more <ExternalLink className="w-3 h-3" />
-						</a>
-					)}
+					<Link
+						href={`/skills/${skill.slug}`}
+						className="text-muted-foreground hover:text-foreground transition-colors text-[11px] font-medium inline-flex items-center gap-1"
+					>
+						Details <ArrowRight className="w-3 h-3" />
+					</Link>
 				</div>
 			</div>
 		</div>
@@ -467,7 +470,12 @@ function FeaturedCard({ skill }: { skill: UnifiedSkill }) {
 				</div>
 				<div className="min-w-0 flex-1">
 					<h3 className="text-base font-semibold text-foreground mb-1">
-						{skill.name}
+						<Link
+							href={`/skills/${skill.slug}`}
+							className="hover:underline focus:outline-none focus:underline"
+						>
+							{skill.name}
+						</Link>
 					</h3>
 					{skill.tagline && (
 						<p className="text-xs text-muted-foreground leading-relaxed">
@@ -550,16 +558,12 @@ function FeaturedCard({ skill }: { skill: UnifiedSkill }) {
 							<span className="hidden sm:inline">Repo</span>
 						</a>
 					)}
-					{skill.homepage && (
-						<a
-							href={skill.homepage}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-foreground font-medium hover:text-foreground/80 transition-colors inline-flex items-center gap-1"
-						>
-							Learn more <ExternalLink className="w-3 h-3" />
-						</a>
-					)}
+					<Link
+						href={`/skills/${skill.slug}`}
+						className="text-foreground font-medium hover:text-foreground/80 transition-colors inline-flex items-center gap-1"
+					>
+						Details <ArrowRight className="w-3 h-3" />
+					</Link>
 				</div>
 			</div>
 		</div>
