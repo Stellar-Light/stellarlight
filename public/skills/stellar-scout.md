@@ -1,10 +1,10 @@
 ---
 name: stellar-scout
-version: 1.0.0
+version: 1.1.0
 homepage: https://stellarlight.xyz/scout
 license: MIT
 compatibility: Claude Code, Codex, OpenClaw, Cursor, Amp, Antigravity, Cline, plus 50+ others via vercel-labs/skills
-description: Scouts the Stellar ecosystem before you build. Validates ideas against existing projects, matches open SCF-funded RFPs, recommends Soroban SDK skills, and cites primary sources (audits, SEPs, papers). Use whenever someone asks what to build on Stellar, vets an idea, preps for an SCF grant or hackathon, or needs prior-art / security findings on a Soroban protocol.
+description: Scouts the Stellar ecosystem before you build. Validates ideas against existing projects, matches open SCF-funded RFPs, drafts SCF pitches, finds audit firms, compares RFPs, recommends Soroban SDK skills, and cites primary sources (audits, SEPs, papers). Use whenever someone asks what to build on Stellar, vets an idea, preps an SCF grant application or hackathon entry, needs an auditor, or needs prior-art / security findings on a Soroban protocol.
 ---
 
 # Stellar Scout
@@ -34,6 +34,9 @@ Their answer determines which endpoints you lead with — see the user-type rout
 ### Trigger phrases (any user type)
 
 - *"vet this idea"* / *"should I build X"* / *"deep dive on Y"* → run **Deep Dive Mode**
+- *"draft my SCF pitch"* / *"help with my SCF application"* / *"how do I pitch this to SCF"* → run the **Draft SCF Pitch** workflow
+- *"who should audit my contract"* / *"find me an auditor"* / *"which audit firm"* → run the **Find Audit Firm** workflow
+- *"which RFP should I go for"* / *"compare the open RFPs"* / *"rank the RFPs for my team"* → run the **Compare RFPs** workflow
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
 - *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (`/api/rfps?status=open`)
 - *"what got funded in SCF round X"* / *"prior SCF projects in {category}"* → SCF history via `/api/projects/search?scfAwarded=1`
@@ -87,6 +90,61 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
    - (a) Which upcoming hackathon to enter (`/api/hackathons?status=upcoming`).
    - (b) Whether an **open RFP** (currently fundable) matches the idea (`/api/rfps?status=open&q={keywords}`). Open RFPs are ready to be built — winners get SCF grant funding. **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
    - (c) Which SDK skill to install next from `skills.stellar.org`.
+
+## Specialized workflows
+
+Three structured workflows for high-stakes moments. Like Deep Dive, run every step in order and skip only when data is unavailable — and say so.
+
+### Draft SCF Pitch
+
+Triggered by *"draft my SCF pitch"*, *"help with my SCF application"*, *"how do I pitch this to SCF"*. The user has an idea and wants a fundable proposal; your job is to ground their pitch in what SCF actually funds.
+
+1. **Confirm idea + stage.** Working prototype or just a concept? Solo or team? Prior SCF funding? Stage determines which award type fits — don't draft a build-award pitch for a concept-stage idea.
+2. **Funded precedents.** `/api/projects/search?q={keywords}&scfAwarded=1` — what similar work got funded and at what amounts. These are your budget anchor AND your proof the category is fundable. Surface 2–4 with dollar amounts.
+3. **Open RFP targeting.** `/api/rfps?status=open&q={keywords}` — if an open RFP matches, the pitch should target it explicitly (sponsor briefs have far better hit rates than cold submissions). If none match, say so and frame for the general round.
+4. **Handbook grounding.** `/api/research?source=scf-handbook&q={milestones budget structure}` — pull what reviewers actually evaluate: milestone shape, deliverable format, budget justification norms. Cite the chunks.
+5. **Differentiation framing.** Use the competitor list from step 2 + `/api/clusters?dimension=types` crowdedness. The pitch must answer *"why you, why now, why this lane"* against the real landscape — not pretend the lane is empty.
+
+**Output skeleton (every section mandatory):**
+- **Positioning statement** — one sentence, specific, no hype
+- **Why this lane** — crowdedness + gap framing with count math
+- **Funded precedents** — 2–4 with amounts (budget benchmark: cite the median)
+- **RFP target** — name the open RFP if one matches; else *"general round"*
+- **Suggested milestones** — 3–4, deliverable-shaped, per Handbook norms
+- **Budget benchmark** — anchored to comparable awards, not wishes
+- **Hard questions reviewers will ask** — name 2–3 with suggested answers (regulatory, cold-start, sustainability)
+- **What not to claim** — flag any over-reach in the user's framing; SCF reviewers are technical and hype backfires
+
+### Find Audit Firm
+
+Triggered by *"who should audit my contract"*, *"find me an auditor"*, *"which audit firm for Soroban"*. The audit corpus (sorobansecurity.com aggregation — Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, et al.) is the evidence base.
+
+1. **Clarify protocol type.** Lending? AMM? Payments? Token issuance? Audit relevance is per-domain — a firm great at AMM math may have no SEP-24 anchor experience.
+2. **Pull relevant audits.** `/api/research?source=audit&q={protocol type keywords}&limit=15` — each chunk carries the firm name + severity metadata.
+3. **Aggregate by firm.** Which firms audited similar Soroban protocols, how recently, what severity classes they caught. A firm that found criticals in a similar protocol is signal — they know where the bodies are buried in this domain.
+4. **Rank 2–4 candidates** with: relevant Soroban audit count, example protocols audited, notable finding classes (cite finding + severity), link to a sample report.
+5. **State the coverage limit.** The corpus only contains *published* audits. Firms with strong private-engagement track records won't appear. Say so explicitly — this is a ranked list of *evidenced* firms, not a market census.
+
+**Output skeleton:**
+- Ranked firms (2–4), each with: relevant audit count, example protocols, finding-severity profile, one line on domain fit
+- Coverage caveat verbatim: *"based on published Soroban audits only"*
+- Next step: most firms quote on scope (LOC + complexity) — suggest the user prepare a scope summary before outreach
+
+### Compare RFPs
+
+Triggered by *"which RFP should I go for"*, *"compare the open RFPs"*, *"rank the RFPs for my team"*. Fit is relative to the team — never rank in a vacuum.
+
+1. **Get the field.** `/api/rfps?status=open` — every currently fundable brief. If the user hasn't said what their team is good at, ask one question: *"what's your team's edge — Rust/Soroban, frontend/dapp, payments infra, data?"*
+2. **Competition density per RFP.** For each open RFP: `/api/projects/search?q={rfp topic}&limit=10` — how many existing projects could credibly pivot to claim it. An RFP with 6 adjacent funded teams is a different bet than one with zero.
+3. **Crowdedness context.** `/api/clusters?dimension=types` for the lane each RFP sits in.
+4. **Score each RFP** on four axes: team-skill fit, competition density, scope realism for the quarter timeline, award size vs effort.
+5. **Rank with reasoning.** Best fit first. Include the one to *skip* and why — honest elimination is more useful than ranking everything positively.
+
+**Output skeleton:**
+- Ranked open RFPs: title + one-line fit reasoning + competition note + award context
+- Per top pick: what the winning submission likely needs to include
+- **The skip** — one RFP this team shouldn't chase, with the reason
+- Next step: offer to run Draft SCF Pitch on the top pick
 
 ## Evidence floor
 

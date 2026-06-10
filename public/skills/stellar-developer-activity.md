@@ -41,7 +41,7 @@ Returns ranked projects + ecosystem-wide developer stats. Cached for 5 minutes a
     "source": "https://stellarlight.xyz/leaderboard",
     "generatedAt": "2026-05-22T16:30:00Z",
     "filters": { "sort": "activity", "range": "all", "category": null, "limit": 50 },
-    "docs": "https://stellarlight.xyz/methodology"
+    "docs": "https://stellarlight.xyz/scout/api-reference"
   },
   "ecosystem": {
     "asOf": "2026-05-22",

@@ -228,7 +228,10 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/leaderboard",
 				generatedAt: new Date().toISOString(),
 				filters: { sort, range, category, limit },
-				docs: "https://stellarlight.xyz/methodology",
+				// /scout/api-reference is the live API docs page. A /methodology
+				// page was referenced here historically but never built — caught
+				// by scripts/verify-claims.ts.
+				docs: "https://stellarlight.xyz/scout/api-reference",
 			},
 			ecosystem: {
 				asOf: ec.asOf,
