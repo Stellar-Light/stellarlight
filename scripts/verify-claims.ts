@@ -75,6 +75,7 @@ const ENDPOINT_PROBES = [
 	"/api/hackathons?limit=1",
 	"/api/hackathons/compare?slugs=__probe__", // expect 400 (route alive, validates)
 	"/api/builders?limit=1",
+	"/api/partners?limit=1",
 	"/api/rfps?limit=1",
 	"/api/research?q=test&limit=1",
 	"/api/skills",
