@@ -59,6 +59,7 @@ export async function GET(req: NextRequest) {
 	const quarterFilter = sp.get("quarter") as Quarter | null;
 	const statusFilter = sp.get("status") as RfpStatus | null;
 	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 200);
+	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	let rfps: RfpRow[] = IDEAS.map(toRow);
 
@@ -86,7 +87,10 @@ export async function GET(req: NextRequest) {
 		});
 	}
 
-	rfps = rfps.slice(0, limit);
+	// Matched count is post-filter, pre-slice — paging consumers compare it
+	// against offset+returned to know when they've reached the end.
+	const matchedCount = rfps.length;
+	rfps = rfps.slice(offset, offset + limit);
 
 	const allRows = IDEAS.map(toRow);
 	const openCount = allRows.filter((r) => r.status === "open").length;
@@ -115,11 +119,13 @@ export async function GET(req: NextRequest) {
 					quarter: quarterFilter,
 					status: statusFilter,
 					limit,
+					offset,
 				},
 				counts: {
 					total: IDEAS.length,
 					open: openCount,
 					closed: closedCount,
+					matched: matchedCount,
 					returned: rfps.length,
 				},
 				activeQuarter: ACTIVE_QUARTER,

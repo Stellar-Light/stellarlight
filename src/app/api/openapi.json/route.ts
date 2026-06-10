@@ -10,7 +10,9 @@
  *
  * The spec is the contract. Every public endpoint listed here is:
  *   - Read-only (GET) or moderated submission (POST)
- *   - No auth, no rate limits today
+ *   - No auth, no rate limits today (see info.description: Rate limits)
+ *   - CORS-enabled (Access-Control-Allow-Origin: *) + X-API-Version: 1,
+ *     set in next.config.mjs headers() for the public endpoint list
  *   - Edge-cached (varies per endpoint, see individual descriptions)
  *
  * If you change a route's params or response shape, update this file in
@@ -50,6 +52,18 @@ const spec: OpenAPISpec = {
 			"All endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).",
 			"",
 			"Data sources merged behind these endpoints: the Stellarlight directory (~741 curated Stellar projects), Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook).",
+			"",
+			"## Versioning",
+			"Every response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.",
+			"",
+			"## Rate limits",
+			"None enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.",
+			"",
+			"## Pagination",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.",
+			"",
+			"## Ordering & relevance",
+			"`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority`) so you know how much the query was relaxed. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		].join("\n"),
 		contact: {
 			name: "Stellar Light",
@@ -139,6 +153,7 @@ const spec: OpenAPISpec = {
 						schema: { type: "boolean" },
 					},
 					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/offset" },
 				],
 				responses: {
 					"200": {
@@ -284,6 +299,7 @@ const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/offset" },
 				],
 				responses: {
 					"200": {
@@ -313,6 +329,7 @@ const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/offset" },
 				],
 				responses: {
 					"200": {
@@ -574,8 +591,15 @@ const spec: OpenAPISpec = {
 			limit: {
 				name: "limit",
 				in: "query",
-				description: "Max results returned",
+				description: "Max results returned (per-page)",
 				schema: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+			},
+			offset: {
+				name: "offset",
+				in: "query",
+				description:
+					"Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total.",
+				schema: { type: "integer", minimum: 0, default: 0 },
 			},
 		},
 		schemas: {
@@ -588,7 +612,19 @@ const spec: OpenAPISpec = {
 					filters: { type: "object", additionalProperties: true },
 					counts: {
 						type: "object",
-						properties: { returned: { type: "integer", minimum: 0 } },
+						properties: {
+							returned: {
+								type: "integer",
+								minimum: 0,
+								description: "Rows in this page (post limit/offset slice)",
+							},
+							total: {
+								type: "integer",
+								minimum: 0,
+								description:
+									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total.",
+							},
+						},
 					},
 				},
 			},
