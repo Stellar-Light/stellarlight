@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    partners: PartnerAuthOperations;
   };
   blocks: {};
   collections: {
@@ -83,6 +84,7 @@ export interface Config {
     'research-docs': ResearchDoc;
     'scout-feedback': ScoutFeedback;
     'community-skills': CommunitySkill;
+    partners: Partner;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -114,6 +116,7 @@ export interface Config {
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
     'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -130,9 +133,13 @@ export interface Config {
     banner: BannerSelect<false> | BannerSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (Partner & {
+        collection: 'partners';
+      });
   jobs: {
     tasks: {
       'sync-rss-feed': SyncRSSFeedTask;
@@ -145,6 +152,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PartnerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -1073,6 +1098,135 @@ export interface CommunitySkill {
   createdAt: string;
 }
 /**
+ * Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: string;
+  name: string;
+  /**
+   * Auto-generated from name if left empty.
+   */
+  slug?: string | null;
+  partnerType:
+    | 'anchor'
+    | 'on-off-ramp'
+    | 'infrastructure'
+    | 'tooling'
+    | 'protocol'
+    | 'wallet'
+    | 'audit-firm'
+    | 'legal'
+    | 'agency'
+    | 'other';
+  /**
+   * One line a builder sees first (≤140 chars).
+   */
+  tagline?: string | null;
+  description?: string | null;
+  /**
+   * Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)
+   */
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  foundedYear?: number | null;
+  /**
+   * Granular, searchable service tags — e.g. 'sep-24-ngn', 'soroban-audit-rust', 'usdc-off-ramp-mexico'. The AI matchmaker matches on these.
+   */
+  services?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  sectors?: ('defi' | 'payments' | 'rwa' | 'stablecoins' | 'identity' | 'data' | 'ai' | 'gaming' | 'other')[] | null;
+  regions?: ('global' | 'north-america' | 'latam' | 'europe' | 'africa' | 'mena' | 'asia' | 'oceania')[] | null;
+  /**
+   * Currently taking new integrations/clients?
+   */
+  acceptingClients?: boolean | null;
+  /**
+   * e.g. '2-6 week integration', 'self-serve API', 'retainer'
+   */
+  typicalEngagement?: string | null;
+  /**
+   * How fast can a new team start? e.g. 'same week', '2-4 weeks'
+   */
+  leadTime?: string | null;
+  pricingModel?:
+    | ('free' | 'freemium' | 'subscription' | 'usage-based' | 'fixed' | 'hourly' | 'rev-share' | 'custom')
+    | null;
+  pricingNotes?: string | null;
+  docsUrl?: string | null;
+  /**
+   * GitHub org/user (e.g. 'paltalabs'). Drives the verified GitHub signals below.
+   */
+  githubOrg?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Preferred channel — Discord handle, Telegram, lead form URL…
+   */
+  contactChannel?: string | null;
+  /**
+   * e.g. 'within 24h on weekdays'
+   */
+  responseSla?: string | null;
+  caseStudies?:
+    | {
+        title: string;
+        url?: string | null;
+        /**
+         * Slug in the stellarlight projects directory, if listed.
+         */
+        projectSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Auto-computed from GitHub / on-chain / SCF data. Partners can see but not edit — this is what makes profiles trustworthy to agents and the matchmaker.
+   */
+  verified?: {
+    githubLastCommitAt?: string | null;
+    githubCommits90d?: number | null;
+    /**
+     * Mainnet activity detected for their contracts/accounts.
+     */
+    onchainActive?: boolean | null;
+    onchainNote?: string | null;
+    /**
+     * e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.
+     */
+    scfInvolvement?: string | null;
+    lastAutoVerifyAt?: string | null;
+  };
+  freshnessStatus?: ('fresh' | 'aging' | 'stale' | 'archived') | null;
+  /**
+   * Last time the PARTNER touched their profile. Drives the freshness loop.
+   */
+  lastPartnerUpdateAt?: string | null;
+  nextReminderAt?: string | null;
+  status: 'draft' | 'published' | 'archived';
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1251,12 +1405,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'community-skills';
         value: string | CommunitySkill;
+      } | null)
+    | ({
+        relationTo: 'partners';
+        value: string | Partner;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'partners';
+        value: string | Partner;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1266,10 +1429,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'partners';
+        value: string | Partner;
+      };
   key?: string | null;
   value?:
     | {
@@ -1732,6 +1900,76 @@ export interface CommunitySkillsSelect<T extends boolean = true> {
   ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  partnerType?: T;
+  tagline?: T;
+  description?: T;
+  logoUrl?: T;
+  websiteUrl?: T;
+  foundedYear?: T;
+  services?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  sectors?: T;
+  regions?: T;
+  acceptingClients?: T;
+  typicalEngagement?: T;
+  leadTime?: T;
+  pricingModel?: T;
+  pricingNotes?: T;
+  docsUrl?: T;
+  githubOrg?: T;
+  contactEmail?: T;
+  contactChannel?: T;
+  responseSla?: T;
+  caseStudies?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        projectSlug?: T;
+        id?: T;
+      };
+  verified?:
+    | T
+    | {
+        githubLastCommitAt?: T;
+        githubCommits90d?: T;
+        onchainActive?: T;
+        onchainNote?: T;
+        scfInvolvement?: T;
+        lastAutoVerifyAt?: T;
+      };
+  freshnessStatus?: T;
+  lastPartnerUpdateAt?: T;
+  nextReminderAt?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
