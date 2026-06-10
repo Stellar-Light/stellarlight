@@ -50,9 +50,11 @@ export async function GET(req: NextRequest) {
 	const scfTier = sp.get("scfTier");
 	const featured = sp.get("featured") === "1";
 	const limit = Math.min(Number(sp.get("limit") || "50") || 50, 200);
+	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
 	let builders: BuilderRow[] = [];
+	let totalMatching = 0;
 
 	if (payload) {
 		try {
@@ -129,7 +131,8 @@ export async function GET(req: NextRequest) {
 				});
 			}
 
-			builders = builders.slice(0, limit);
+			totalMatching = builders.length;
+			builders = builders.slice(offset, offset + limit);
 		} catch {
 			// fall through
 		}
@@ -172,8 +175,8 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
-				filters: { q, location, scfTier, featured, limit },
-				counts: { returned: builders.length },
+				filters: { q, location, scfTier, featured, limit, offset },
+				counts: { returned: builders.length, total: totalMatching },
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},
 			builders,
