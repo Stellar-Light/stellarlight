@@ -44,8 +44,10 @@ export async function GET(req: NextRequest) {
 	const hackathonSlug = sp.get("hackathon");
 	const scfAwardedOnly = sp.get("scfAwarded") === "1";
 	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
+	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
+	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
 	let matchMode: "strict" | "loose-1" | "majority" | "all" = "all";
 
@@ -175,7 +177,8 @@ export async function GET(req: NextRequest) {
 				projects.sort((a, b) => Number(b.scfAwarded) - Number(a.scfAwarded));
 			}
 
-			projects = projects.slice(0, limit);
+			totalMatching = projects.length;
+			projects = projects.slice(offset, offset + limit);
 		} catch {
 			// fall through
 		}
@@ -204,6 +207,7 @@ export async function GET(req: NextRequest) {
 					hackathon: hackathonSlug,
 					scfAwardedOnly,
 					limit,
+					offset,
 				},
 				matchMode,
 				// Hint to the caller (agent) so they can frame results honestly:
@@ -217,7 +221,9 @@ export async function GET(req: NextRequest) {
 					majority: "majority of keywords matched (broader scope)",
 					all: "no keyword filter",
 				}[matchMode],
-				counts: { returned: projects.length },
+				// total = matches before offset/limit slicing — lets paging
+				// consumers know when they've seen everything.
+				counts: { returned: projects.length, total: totalMatching },
 				// When tiered matching ran the full strict→loose-1→majority
 				// chain and still got nothing, point the agent at thesis-level
 				// retrieval. Project-name matching can't answer "is x402

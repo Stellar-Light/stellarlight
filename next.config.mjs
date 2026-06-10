@@ -58,6 +58,44 @@ const nextConfig = {
 
 		return webpackConfig;
 	},
+	async headers() {
+		// CORS + version header for the PUBLIC Scout API only.
+		//
+		// We deliberately enumerate the public read endpoints instead of a
+		// blanket `/api/:path*` — Payload mounts its own admin REST under
+		// /api/* (users, media, auth, collections), and we must NOT open
+		// those to cross-origin reads. Add new public endpoints here as they
+		// ship (the verify-claims gate + SHIPPING.md track this).
+		//
+		// X-API-Version lets aggregators detect breaking changes: the value
+		// bumps when a response shape changes incompatibly. Today: 1.
+		const publicApi = [
+			"/api/openapi.json",
+			"/api/status",
+			"/api/projects/search",
+			"/api/hackathons",
+			"/api/hackathons/:slug",
+			"/api/hackathons/compare",
+			"/api/builders",
+			"/api/rfps",
+			"/api/research",
+			"/api/skills",
+			"/api/skills/:name",
+			"/api/skills/:name/og",
+			"/api/clusters",
+			"/api/analyze",
+			"/api/leaderboard",
+			"/api/feedback",
+		];
+		const corsHeaders = [
+			{ key: "Access-Control-Allow-Origin", value: "*" },
+			{ key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
+			{ key: "Access-Control-Allow-Headers", value: "Content-Type" },
+			{ key: "Access-Control-Max-Age", value: "86400" },
+			{ key: "X-API-Version", value: "1" },
+		];
+		return publicApi.map((source) => ({ source, headers: corsHeaders }));
+	},
 };
 
 export default withPayload(nextConfig, { devBundleServerPackages: false });
