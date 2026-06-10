@@ -1,0 +1,63 @@
+name: Verify advertised claims
+
+# Runs scripts/verify-claims.ts — the automated gate born from the
+# npx-before-npm-publish incident (we shipped install commands for a
+# package that didn't exist yet and an external partner hit the 404).
+#
+# Checks that every publicly advertised artifact actually works:
+#   - npm packages we advertise exist on the registry (+ version drift)
+#   - every install command / repo / homepage / docs URL in the curated
+#     skills catalog resolves
+#   - every URL in the public SKILL.md files resolves
+#   - every /api/* endpoint the docs advertise responds on production
+#   - distribution mirrors (Stellar-Light/stellar-scout) haven't drifted
+#     from their monorepo source (the auto-sync PAT is broken, so drift
+#     is a real risk)
+#
+# Triggers:
+#   - weekly (links rot externally even when we change nothing)
+#   - PRs that touch marketing surfaces
+#   - manual dispatch
+#
+# A red run means a stranger following one of our claims hits a wall —
+# treat it like a broken build.
+
+on:
+  schedule:
+    # Mondays 07:00 UTC — after the weekend, before the work week
+    - cron: "0 7 * * 1"
+  pull_request:
+    paths:
+      - "src/lib/integrations/curated-skills.ts"
+      - "public/skills/**"
+      - "scout-mcp/**"
+      - "api-client/**"
+      - "src/components/scout-install-picker.tsx"
+      - "src/app/api/openapi.json/**"
+      - "scripts/verify-claims.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify every advertised artifact
+        run: pnpm exec tsx scripts/verify-claims.ts

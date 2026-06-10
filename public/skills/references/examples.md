@@ -114,7 +114,7 @@ Load when the user query matches one of these shapes — the patterns here show 
    - `GET /api/research?q=inflation+attack+share+price+deposit&source=audit&limit=5`
 3. **Cite each finding inline with auditor + severity + protocol metadata.** Don't just say *"there were oracle findings"* — say *"per the Certora audit of Blend Protocol V2 (HIGH severity), the oracle price feed can be manipulated when …"* with the URL. The chunks carry `.auditor`, `.protocol`, `.severity` — use them.
 4. **Filter by severity when the user is doing risk triage.** *"Show me only critical/high findings"* → re-query with the same `q` but mentally rank: chunks tagged `critical` or `high` first, then `medium`. Note: ~43% of audit chunks carry an inferred severity tag; the rest are TOC / scope / methodology sections and don't get a bucket.
-5. **Cross-link to skills.stellar.org** for the *how-to-fix* layer: `https://skills.stellar.org/soroban` covers safe oracle integration patterns; Scout surfaces what's been broken before, the SDF skill covers how to build it correctly. They compose.
+5. **Cross-link to skills.stellar.org** for the *how-to-fix* layer: `https://skills.stellar.org/skills/soroban/SKILL.md` covers safe oracle integration patterns; Scout surfaces what's been broken before, the SDF skill covers how to build it correctly. They compose.
 6. **Honesty floor:** if zero findings come back for a specific attack class, say so — *"no Soroban audit in the corpus has documented a finding for X — that means either it's a real gap or our corpus doesn't cover the relevant protocols yet."* Don't invent risk.
 
 ---
