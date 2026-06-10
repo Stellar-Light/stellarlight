@@ -77,6 +77,8 @@ const nextConfig = {
 			"/api/hackathons/:slug",
 			"/api/hackathons/compare",
 			"/api/builders",
+			"/api/partners",
+			"/api/partners/:slug",
 			"/api/rfps",
 			"/api/research",
 			"/api/skills",

@@ -83,6 +83,11 @@ const spec: OpenAPISpec = {
 		{ name: "Projects", description: "Curated Stellar project directory" },
 		{ name: "Hackathons", description: "Stellar Hacks events + DoraHacks feed" },
 		{ name: "Builders", description: "Stellar Passport builder profiles" },
+		{
+			name: "Partners",
+			description:
+				"Ecosystem partner directory (anchors, ramps, infra, tooling) with verified signals + freshness",
+		},
 		{ name: "Funding", description: "SCF history + open RFPs" },
 		{
 			name: "Research",
@@ -305,6 +310,93 @@ const spec: OpenAPISpec = {
 					"200": {
 						description: "Builder list",
 						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
+		"/api/partners": {
+			get: {
+				tags: ["Partners"],
+				summary: "List ecosystem partners",
+				description:
+					"Published partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first.",
+				parameters: [
+					{
+						name: "type",
+						in: "query",
+						description: "Filter by partner type",
+						schema: {
+							type: "string",
+							enum: [
+								"anchor",
+								"on-off-ramp",
+								"infrastructure",
+								"tooling",
+								"protocol",
+								"wallet",
+								"audit-firm",
+								"legal",
+								"agency",
+								"other",
+							],
+						},
+					},
+					{
+						name: "sector",
+						in: "query",
+						description: "Filter by sector served (defi, payments, rwa, stablecoins, …)",
+						schema: { type: "string" },
+					},
+					{
+						name: "region",
+						in: "query",
+						description: "Filter by region served (global, latam, africa, …)",
+						schema: { type: "string" },
+					},
+					{
+						name: "accepting",
+						in: "query",
+						description: "Set to 1 to return only partners currently accepting new clients",
+						schema: { type: "string", enum: ["1"] },
+					},
+					{ $ref: "#/components/parameters/q" },
+					{ $ref: "#/components/parameters/limit" },
+				],
+				responses: {
+					"200": {
+						description: "Partner directory",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
+		"/api/partners/{slug}": {
+			get: {
+				tags: ["Partners"],
+				summary: "Get one partner's full profile",
+				description:
+					"Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs.",
+				parameters: [
+					{
+						name: "slug",
+						in: "path",
+						required: true,
+						description: "Partner slug",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Partner profile",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"404": {
+						description: "Partner not found or not published",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
 					},
 				},
 			},
