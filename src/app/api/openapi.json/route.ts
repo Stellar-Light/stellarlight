@@ -237,15 +237,17 @@ const spec: OpenAPISpec = {
 						name: "slugs",
 						in: "query",
 						required: true,
-						description: "2–5 hackathon slugs",
+						description: "2–5 hackathon slugs, comma-separated (?slugs=a,b)",
 						schema: {
 							type: "array",
 							items: { type: "string" },
 							minItems: 2,
 							maxItems: 5,
 						},
+						// The API parses ?slugs=a,b — comma-separated, NOT repeated
+						// params. explode:false is the OpenAPI encoding for that.
 						style: "form",
-						explode: true,
+						explode: false,
 					},
 				],
 				responses: {
