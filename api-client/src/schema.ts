@@ -65,8 +65,10 @@ export interface paths {
                     hackathon?: string;
                     /** @description Filter to SCF-funded projects only */
                     scfAwarded?: boolean;
-                    /** @description Max results returned */
+                    /** @description Max results returned (per-page) */
                     limit?: components["parameters"]["limit"];
+                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                    offset?: components["parameters"]["offset"];
                 };
                 header?: never;
                 path?: never;
@@ -113,7 +115,7 @@ export interface paths {
                     organizer?: string;
                     /** @description Restrict to one feed (curated vs DoraHacks) */
                     source?: "curated" | "dorahacks";
-                    /** @description Max results returned */
+                    /** @description Max results returned (per-page) */
                     limit?: components["parameters"]["limit"];
                 };
                 header?: never;
@@ -206,7 +208,7 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    /** @description 2–5 hackathon slugs */
+                    /** @description 2–5 hackathon slugs, comma-separated (?slugs=a,b) */
                     slugs: string[];
                 };
                 header?: never;
@@ -254,8 +256,10 @@ export interface paths {
                     skill?: string;
                     /** @description Filter by SCF tier */
                     scfTier?: string;
-                    /** @description Max results returned */
+                    /** @description Max results returned (per-page) */
                     limit?: components["parameters"]["limit"];
+                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                    offset?: components["parameters"]["offset"];
                 };
                 header?: never;
                 path?: never;
@@ -300,8 +304,10 @@ export interface paths {
                     status?: "open" | "closed";
                     /** @description Filter by quarter slug (e.g. 'q1-2026') */
                     quarter?: string;
-                    /** @description Max results returned */
+                    /** @description Max results returned (per-page) */
                     limit?: components["parameters"]["limit"];
+                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                    offset?: components["parameters"]["offset"];
                 };
                 header?: never;
                 path?: never;
@@ -676,7 +682,10 @@ export interface components {
                 [key: string]: unknown;
             };
             counts?: {
+                /** @description Rows in this page (post limit/offset slice) */
                 returned?: number;
+                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. */
+                total?: number;
             };
         };
         ErrorResponse: {
@@ -774,8 +783,10 @@ export interface components {
     parameters: {
         /** @description Keyword query (free text) */
         q: string;
-        /** @description Max results returned */
+        /** @description Max results returned (per-page) */
         limit: number;
+        /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+        offset: number;
     };
     requestBodies: never;
     headers: never;
