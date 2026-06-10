@@ -121,7 +121,13 @@ export async function GET(
 				)}
 			</div>
 
-			{/* Bottom — URL */}
+			{/* Bottom — URL. Satori gotchas, both hit in prod (500 on every
+			    render until fixed):
+			    1. JSX interpolation ("text" + {expr}) creates MULTIPLE child
+			       nodes, and Satori requires explicit display:flex on any
+			       multi-child element — use a single template literal.
+			    2. Non-Latin glyphs (★) trigger a dynamic font fetch that 400s
+			       in the Vercel runtime — draw shapes with CSS instead. */}
 			<div
 				style={{
 					display: "flex",
@@ -132,8 +138,18 @@ export async function GET(
 					color: "#9ca3af",
 				}}
 			>
-				<div>stellarlight.xyz/skills/{skill.slug}</div>
-				<div style={{ color: "#FDDA24" }}>★</div>
+				<div style={{ display: "flex" }}>
+					{`stellarlight.xyz/skills/${skill.slug}`}
+				</div>
+				<div
+					style={{
+						display: "flex",
+						width: 14,
+						height: 14,
+						background: "#FDDA24",
+						borderRadius: 3,
+					}}
+				/>
 			</div>
 		</div>,
 		{
