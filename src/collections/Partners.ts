@@ -90,7 +90,13 @@ const autoField = (field: Field): Field =>
 	}) as Field;
 
 export const Partners: CollectionConfig = {
-	slug: "partners",
+	// Slug is "partner-accounts", NOT "partners", on purpose: Payload
+	// auto-mounts auth + CRUD REST under /api/{slug}/* (login, me, logout,
+	// :id). If the slug were "partners" those would collide with — and be
+	// shadowed by — our public read routes at /api/partners and
+	// /api/partners/[slug]. Keeping the slug distinct frees the clean
+	// public namespace for agents while auth lives at /api/partner-accounts/*.
+	slug: "partner-accounts",
 	labels: { singular: "Partner", plural: "Partners" },
 	auth: true, // email + password login; admins create accounts for the pilot
 	admin: {
@@ -105,7 +111,7 @@ export const Partners: CollectionConfig = {
 		// own (any status); admins see everything.
 		read: ({ req }) => {
 			if (isAdmin(req.user)) return true;
-			if (req.user?.collection === "partners") {
+			if (req.user?.collection === "partner-accounts") {
 				const ownOrPublished: Where = {
 					or: [
 						{ id: { equals: req.user.id } },
@@ -121,7 +127,7 @@ export const Partners: CollectionConfig = {
 		create: ({ req }) => isAdmin(req.user),
 		update: ({ req, id }) => {
 			if (isAdmin(req.user)) return true;
-			return req.user?.collection === "partners" && req.user.id === id;
+			return req.user?.collection === "partner-accounts" && req.user.id === id;
 		},
 		delete: ({ req }) => isAdmin(req.user),
 		// Partners must not see each other in the admin list UI.
@@ -142,7 +148,7 @@ export const Partners: CollectionConfig = {
 				// stamp it and reset the freshness clock. Admin/cron writes
 				// (signal refreshes, status flips) must NOT reset the clock —
 				// only the partner's own attention counts as freshness.
-				if (operation === "update" && req.user?.collection === "partners") {
+				if (operation === "update" && req.user?.collection === "partner-accounts") {
 					data.lastPartnerUpdateAt = new Date().toISOString();
 					data.freshnessStatus = "fresh";
 				}

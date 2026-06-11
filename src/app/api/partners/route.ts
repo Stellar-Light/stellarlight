@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
 			if (accepting === "1") where.acceptingClients = { equals: true };
 
 			const result = await payload.find({
-				collection: "partners",
+				collection: "partner-accounts",
 				where,
 				limit: 200,
 				depth: 0,
