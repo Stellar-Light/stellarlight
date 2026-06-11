@@ -70,7 +70,7 @@ async function main() {
 
 	for (const p of PILOT) {
 		const existing = await payload.find({
-			collection: "partners",
+			collection: "partner-accounts",
 			where: { slug: { equals: p.slug } },
 			limit: 1,
 			depth: 0,
@@ -82,7 +82,7 @@ async function main() {
 
 		const password = randomBytes(12).toString("base64url");
 		await payload.create({
-			collection: "partners",
+			collection: "partner-accounts",
 			data: {
 				email: p.email,
 				password,

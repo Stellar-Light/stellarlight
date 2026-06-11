@@ -83,7 +83,7 @@ export async function GET(
 
 	try {
 		const result = await payload.find({
-			collection: "partners",
+			collection: "partner-accounts",
 			where: {
 				and: [{ slug: { equals: slug } }, { status: { equals: "published" } }],
 			},
