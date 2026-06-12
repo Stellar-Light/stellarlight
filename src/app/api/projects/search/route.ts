@@ -14,6 +14,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { projectConfidence } from "@/lib/confidence";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
@@ -184,6 +185,21 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Attach a confidence signal to each result — same trust scale as
+	// /api/research, with project-appropriate signals (keyword relevance,
+	// lifecycle status as freshness, SCF/hackathon vetting as authority).
+	const projMax = projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0);
+	const scored = projects.map((p) => ({
+		...p,
+		confidence: projectConfidence({
+			score: p.score,
+			maxScore: projMax,
+			status: p.status,
+			scfAwarded: p.scfAwarded,
+			hackathonPlacement: p.hackathonPlacement,
+		}),
+	}));
+
 	logApiHit({
 		req,
 		endpoint: "/api/projects/search",
@@ -247,7 +263,7 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 			},
-			projects,
+			projects: scored,
 		},
 		{
 			headers: {

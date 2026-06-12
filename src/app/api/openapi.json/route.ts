@@ -81,7 +81,10 @@ const spec: OpenAPISpec = {
 	tags: [
 		{ name: "Discovery", description: "Service health + endpoint enumeration" },
 		{ name: "Projects", description: "Curated Stellar project directory" },
-		{ name: "Hackathons", description: "Stellar Hacks events + DoraHacks feed" },
+		{
+			name: "Hackathons",
+			description: "Stellar Hacks events + DoraHacks feed",
+		},
 		{ name: "Builders", description: "Stellar Passport builder profiles" },
 		{
 			name: "Partners",
@@ -91,14 +94,18 @@ const spec: OpenAPISpec = {
 		{ name: "Funding", description: "SCF history + open RFPs" },
 		{
 			name: "Research",
-			description: "Vector search over the 4,541-chunk corpus (SEPs, audits, papers, dev docs, etc.)",
+			description:
+				"Vector search over the 4,541-chunk corpus (SEPs, audits, papers, dev docs, etc.)",
 		},
 		{
 			name: "Skills",
 			description: "AI skill marketplace (SKILL.md / MCP / SDK / CLI catalog)",
 		},
 		{ name: "Analytics", description: "Cross-event rollups + topic clusters" },
-		{ name: "Ecosystem", description: "Developer activity + ecosystem dev stats" },
+		{
+			name: "Ecosystem",
+			description: "Developer activity + ecosystem dev stats",
+		},
 		{ name: "Feedback", description: "Curator feedback loop" },
 	],
 	paths: {
@@ -183,7 +190,10 @@ const spec: OpenAPISpec = {
 						name: "status",
 						in: "query",
 						description: "Filter by event status",
-						schema: { type: "string", enum: ["upcoming", "active", "completed"] },
+						schema: {
+							type: "string",
+							enum: ["upcoming", "active", "completed"],
+						},
 					},
 					{
 						name: "organizer",
@@ -231,7 +241,9 @@ const spec: OpenAPISpec = {
 						description: "Hackathon detail",
 						content: {
 							"application/json": {
-								schema: { $ref: "#/components/schemas/HackathonDetailResponse" },
+								schema: {
+									$ref: "#/components/schemas/HackathonDetailResponse",
+								},
 							},
 						},
 					},
@@ -288,7 +300,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "location",
 						in: "query",
-						description: "Filter by location substring (e.g. 'Lagos', 'Brazil')",
+						description:
+							"Filter by location substring (e.g. 'Lagos', 'Brazil')",
 						schema: { type: "string" },
 					},
 					{
@@ -344,7 +357,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "sector",
 						in: "query",
-						description: "Filter by sector served (defi, payments, rwa, stablecoins, …)",
+						description:
+							"Filter by sector served (defi, payments, rwa, stablecoins, …)",
 						schema: { type: "string" },
 					},
 					{
@@ -356,7 +370,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "accepting",
 						in: "query",
-						description: "Set to 1 to return only partners currently accepting new clients",
+						description:
+							"Set to 1 to return only partners currently accepting new clients",
 						schema: { type: "string", enum: ["1"] },
 					},
 					{ $ref: "#/components/parameters/q" },
@@ -411,7 +426,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "status",
 						in: "query",
-						description: "Open RFPs are fundable for the current SCF quarter; closed are prior rounds",
+						description:
+							"Open RFPs are fundable for the current SCF quarter; closed are prior rounds",
 						schema: { type: "string", enum: ["open", "closed"] },
 					},
 					{
@@ -436,7 +452,7 @@ const spec: OpenAPISpec = {
 				tags: ["Research"],
 				summary: "Vector search over the Stellar research corpus",
 				description:
-					"Vector search over a 4,541-chunk corpus of primary Stellar sources: SEPs, SCF Handbook, dev docs, foundational papers (Mazières SCP), lumenloop community playbooks, Soroban audit reports (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, etc.), Electric Capital Developer Reports, SDF blog. Returns top-K chunks with severity metadata for audit chunks. Score field is cosine similarity (0–1, higher = more relevant).",
+					"Vector search over a 4,541-chunk corpus of primary Stellar sources: SEPs, SCF Handbook, dev docs, foundational papers (Mazières SCP), lumenloop community playbooks, Soroban audit reports (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, etc.), Electric Capital Developer Reports, SDF blog. Returns top-K chunks with severity metadata for audit chunks. Each result carries a `confidence` object — `{ score (0-1), label (high/medium/low), relevance, freshness, authority, ageDays }` — blending match strength, source-aware recency, and source authority so an agent can tell a strong, fresh, canonical hit from a weak or stale one. Sort by `confidence.score` for trust-ranked results; `meta.scoreModel.version` identifies the model. The raw `score` field remains cosine similarity (0–1, higher = more relevant).",
 				parameters: [
 					{
 						name: "q",
@@ -448,7 +464,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "source",
 						in: "query",
-						description: "Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
+						description:
+							"Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
 						schema: {
 							type: "string",
 							enum: [
@@ -493,7 +510,13 @@ const spec: OpenAPISpec = {
 						description: "Filter by source",
 						schema: {
 							type: "string",
-							enum: ["sdf", "stellarlight", "lumenloop", "external", "community"],
+							enum: [
+								"sdf",
+								"stellarlight",
+								"lumenloop",
+								"external",
+								"community",
+							],
 						},
 					},
 					{
@@ -502,7 +525,14 @@ const spec: OpenAPISpec = {
 						description: "Filter by skill kind",
 						schema: {
 							type: "string",
-							enum: ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"],
+							enum: [
+								"skill-md",
+								"mcp-server",
+								"sdk",
+								"cli",
+								"agent-kit",
+								"tool",
+							],
 						},
 					},
 				],
@@ -525,7 +555,8 @@ const spec: OpenAPISpec = {
 						name: "name",
 						in: "path",
 						required: true,
-						description: "Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay')",
+						description:
+							"Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay')",
 						schema: { type: "string" },
 					},
 				],
@@ -556,7 +587,11 @@ const spec: OpenAPISpec = {
 						name: "dimension",
 						in: "query",
 						description: "Cluster by category (coarse 7-cat) or types (finer)",
-						schema: { type: "string", enum: ["category", "types"], default: "category" },
+						schema: {
+							type: "string",
+							enum: ["category", "types"],
+							default: "category",
+						},
 					},
 					{
 						name: "minSize",
@@ -609,7 +644,8 @@ const spec: OpenAPISpec = {
 					{
 						name: "include",
 						in: "query",
-						description: "Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context)",
+						description:
+							"Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context)",
 						schema: { type: "string" },
 					},
 				],
@@ -743,7 +779,11 @@ const spec: OpenAPISpec = {
 							properties: {
 								name: { type: "string" },
 								count: { type: "integer" },
-								lastUpdatedAt: { type: "string", format: "date-time", nullable: true },
+								lastUpdatedAt: {
+									type: "string",
+									format: "date-time",
+									nullable: true,
+								},
 								notes: { type: "string" },
 							},
 						},
@@ -791,7 +831,10 @@ const spec: OpenAPISpec = {
 						],
 					},
 					shortDescription: { type: "string" },
-					status: { type: "string", enum: ["Live", "Development", "Abandoned"] },
+					status: {
+						type: "string",
+						enum: ["Live", "Development", "Abandoned"],
+					},
 					logoUrl: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
 					scfTotalAwardedUSD: { type: "number", nullable: true },
@@ -801,7 +844,8 @@ const spec: OpenAPISpec = {
 					hackathonPrizeTrack: { type: "string", nullable: true },
 					score: {
 						type: "number",
-						description: "Relevance score for the current query (higher = better match)",
+						description:
+							"Relevance score for the current query (higher = better match)",
 					},
 					url: { type: "string", format: "uri" },
 				},
@@ -819,14 +863,18 @@ const spec: OpenAPISpec = {
 									matchMode: {
 										type: "string",
 										enum: ["strict", "loose", "majority"],
-										description: "Tier of match relaxation that produced these results",
+										description:
+											"Tier of match relaxation that produced these results",
 									},
 									matchModeLabel: { type: "string" },
 								},
 							},
 						],
 					},
-					projects: { type: "array", items: { $ref: "#/components/schemas/Project" } },
+					projects: {
+						type: "array",
+						items: { $ref: "#/components/schemas/Project" },
+					},
 				},
 			},
 			HackathonsResponse: {
@@ -840,7 +888,8 @@ const spec: OpenAPISpec = {
 								properties: {
 									fallbackChannels: {
 										type: "array",
-										description: "Live announcement channels when query returns 0 events",
+										description:
+											"Live announcement channels when query returns 0 events",
 										items: {
 											type: "object",
 											properties: {
@@ -869,7 +918,13 @@ const spec: OpenAPISpec = {
 				properties: {
 					kind: {
 						type: "string",
-						enum: ["bug", "missing-data", "wrong-answer", "suggestion", "other"],
+						enum: [
+							"bug",
+							"missing-data",
+							"wrong-answer",
+							"suggestion",
+							"other",
+						],
 					},
 					message: { type: "string", minLength: 10, maxLength: 4000 },
 					query: { type: "string" },

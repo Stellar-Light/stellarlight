@@ -56,6 +56,55 @@ export function sha256(s: string): string {
 }
 
 /**
+ * Reject chunks that carry no answerable content — the kind that pollute
+ * vector results (a query matches them on a stray token, but a synthesizer
+ * gets nothing). Seen in the wild from HTML doc scrapes: breadcrumb/TOC
+ * stubs ("# x402 on Stellar\n- Agentic Payments\nOn this page"), tag-index
+ * listings ("58 posts tagged developer"), and bare date archive headers.
+ *
+ * Deliberately conservative: it only drops chunks with essentially no prose.
+ * Real sections — even short ones, code samples, bulleted how-tos — keep
+ * enough sentence text to clear the bar. Used at ingest (addChunk) AND by
+ * the prune-low-value-chunks maintenance script, so the rule is one place.
+ */
+export function isLowValueChunk(content: string): boolean {
+	const raw = content.trim();
+	if (!raw) return true;
+
+	// Tag-index / archive listing pages — pure navigation, never answerable.
+	if (/\b\d+\s+posts?\s+tagged\b/i.test(raw)) return true;
+
+	// Docusaurus auto-generated index "card" link teasers (📄 marker). These
+	// are navigation to a sub-page (which we ingest separately), not content —
+	// short, keyword-dense, duplicated across every category page, and they
+	// out-rank the real how-to they point at. A block with 2+ cards is a card
+	// grid; a single short card is a teaser stub. Real prose pages run
+	// thousands of chars and don't carry the marker.
+	const cardMarkers = (raw.match(/📄/g) ?? []).length;
+	if (cardMarkers >= 2) return true;
+	if (cardMarkers === 1 && raw.length < 400) return true;
+
+	// Count UNIQUE word tokens, keeping list/heading TEXT (strip only the
+	// markdown markers themselves + TOC scaffolding). This is the key to not
+	// nuking real content: a breadcrumb stub repeats the page title a few
+	// times ("x402 on Stellar" ×3 → ~4 unique words); a genuine bulleted
+	// section (event lists, audit methodology steps, code diffs) carries many
+	// distinct words even when every line is a bullet. So count distinct, not
+	// total, and keep the bullet text in the count.
+	const text = raw
+		.replace(/^#{1,6}\s+/gm, "") // heading hashes
+		.replace(/^[-*+]\s+/gm, "") // bullet markers
+		.replace(/^\d+\.\s+/gm, "") // numbered-list markers
+		.replace(/on this page/gi, ""); // GitBook/docs TOC scaffold
+	const words = text.toLowerCase().match(/[a-z0-9][a-z0-9_-]*/gi) ?? [];
+	const unique = new Set(words);
+
+	// Header-only, breadcrumb-only, and date-only chunks land below this;
+	// any real section — even a short one — clears it comfortably.
+	return unique.size < 6;
+}
+
+/**
  * Chunk markdown on H2 boundaries; further-split any section that
  * exceeds MAX_CHARS by packing paragraphs greedily.
  */
@@ -92,6 +141,8 @@ export function chunkMarkdown(opts: {
 	function addChunk(section: string | null, content: string) {
 		const trimmed = content.trim();
 		if (!trimmed) return;
+		// Drop nav/breadcrumb/date-only chunks before they ever get embedded.
+		if (isLowValueChunk(trimmed)) return;
 		chunks.push({
 			parentDocId,
 			chunkIndex: chunkIndex++,
@@ -139,9 +190,7 @@ export function chunkMarkdown(opts: {
 export async function loadExistingChunks(
 	payload: Payload,
 	source: ResearchSource,
-): Promise<
-	Map<string, Map<number, { id: string; contentHash: string }>>
-> {
+): Promise<Map<string, Map<number, { id: string; contentHash: string }>>> {
 	const map = new Map<
 		string,
 		Map<number, { id: string; contentHash: string }>
@@ -215,7 +264,7 @@ export async function upsertChunks(opts: {
 		0,
 	);
 	console.log(
-		`    ~${stats.embedTokens} tokens (~$${(stats.embedTokens * 0.06 / 1_000_000).toFixed(4)})`,
+		`    ~${stats.embedTokens} tokens (~$${((stats.embedTokens * 0.06) / 1_000_000).toFixed(4)})`,
 	);
 
 	console.log("  Upserting to Payload…");
@@ -290,9 +339,9 @@ export async function fetchSitemapUrls(
 
 	const isIndex = /<sitemapindex/i.test(xml);
 	if (isIndex) {
-		const children = [...xml.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/g)].map(
-			(m) => m[1].trim(),
-		);
+		const children = [
+			...xml.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/g),
+		].map((m) => m[1].trim());
 		const all: string[] = [];
 		for (const child of children) {
 			const cx = await fetchXml(child);

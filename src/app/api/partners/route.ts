@@ -17,6 +17,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { partnerTrust } from "@/lib/confidence";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +54,9 @@ function toPublic(p: any) {
 		logoUrl: p.logoUrl ?? null,
 		websiteUrl: p.websiteUrl ?? null,
 		foundedYear: p.foundedYear ?? null,
-		services: (p.services ?? []).map((s: { tag: string }) => s.tag).filter(Boolean),
+		services: (p.services ?? [])
+			.map((s: { tag: string }) => s.tag)
+			.filter(Boolean),
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
 		acceptingClients: p.acceptingClients ?? null,
@@ -90,6 +93,18 @@ function toPublic(p: any) {
 			// archived = partner went dark >1y; usable for display, never for AI matches
 			excludeFromMatching: freshnessStatus === "archived",
 		},
+		// Single profile-trust score (0–1 + label) blending freshness with how
+		// much of the profile is system-verified (on-chain, recent commits,
+		// SCF) — so a consumer gets one number instead of interpreting five
+		// fields. Same trust vocabulary as /api/research confidence.
+		trust: partnerTrust({
+			freshnessStatus,
+			verified: {
+				onchainActive: verified.onchainActive ?? null,
+				githubCommits90d: verified.githubCommits90d ?? null,
+				scfInvolvement: verified.scfInvolvement ?? null,
+			},
+		}),
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};
 }
@@ -138,7 +153,8 @@ export async function GET(req: NextRequest) {
 			if (q) {
 				const tokens = q.split(/\s+/).filter(Boolean);
 				mapped = mapped.filter((m) => {
-					const hay = `${m.name} ${m.tagline ?? ""} ${m.description ?? ""} ${m.services.join(" ")}`.toLowerCase();
+					const hay =
+						`${m.name} ${m.tagline ?? ""} ${m.description ?? ""} ${m.services.join(" ")}`.toLowerCase();
 					return tokens.every((t) => hay.includes(t));
 				});
 			}
@@ -172,7 +188,15 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/partners",
 				generatedAt: new Date().toISOString(),
-				filters: { type, sector, region, accepting, q: q ?? null, limit, offset },
+				filters: {
+					type,
+					sector,
+					region,
+					accepting,
+					q: q ?? null,
+					limit,
+					offset,
+				},
 				counts: { returned: partners.length, total: totalMatching },
 				validTypes: PARTNER_TYPES,
 				note: "Published partners only. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
