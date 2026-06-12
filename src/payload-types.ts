@@ -64,7 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    partners: PartnerAuthOperations;
+    'partner-accounts': PartnerAccountAuthOperations;
   };
   blocks: {};
   collections: {
@@ -84,7 +84,7 @@ export interface Config {
     'research-docs': ResearchDoc;
     'scout-feedback': ScoutFeedback;
     'community-skills': CommunitySkill;
-    partners: Partner;
+    'partner-accounts': PartnerAccount;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -116,7 +116,7 @@ export interface Config {
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
     'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
-    partners: PartnersSelect<false> | PartnersSelect<true>;
+    'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -137,8 +137,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (Partner & {
-        collection: 'partners';
+    | (PartnerAccount & {
+        collection: 'partner-accounts';
       });
   jobs: {
     tasks: {
@@ -169,7 +169,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PartnerAuthOperations {
+export interface PartnerAccountAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -1101,9 +1101,9 @@ export interface CommunitySkill {
  * Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partners".
+ * via the `definition` "partner-accounts".
  */
-export interface Partner {
+export interface PartnerAccount {
   id: string;
   name: string;
   /**
@@ -1407,8 +1407,8 @@ export interface PayloadLockedDocument {
         value: string | CommunitySkill;
       } | null)
     | ({
-        relationTo: 'partners';
-        value: string | Partner;
+        relationTo: 'partner-accounts';
+        value: string | PartnerAccount;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1417,8 +1417,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'partners';
-        value: string | Partner;
+        relationTo: 'partner-accounts';
+        value: string | PartnerAccount;
       };
   updatedAt: string;
   createdAt: string;
@@ -1435,8 +1435,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'partners';
-        value: string | Partner;
+        relationTo: 'partner-accounts';
+        value: string | PartnerAccount;
       };
   key?: string | null;
   value?:
@@ -1903,9 +1903,9 @@ export interface CommunitySkillsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partners_select".
+ * via the `definition` "partner-accounts_select".
  */
-export interface PartnersSelect<T extends boolean = true> {
+export interface PartnerAccountsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   partnerType?: T;

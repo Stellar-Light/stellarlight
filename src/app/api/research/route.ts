@@ -18,10 +18,12 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { embed, EMBEDDING_MODEL } from "@/lib/embed";
-import { getPayloadSafe } from "@/lib/payload-client";
 import { logApiHit } from "@/lib/api-usage";
+import { researchConfidence, SCORE_MODEL_VERSION } from "@/lib/confidence";
+import { EMBEDDING_MODEL, embed } from "@/lib/embed";
+import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { isLowValueChunk } from "@/lib/research-ingest";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -62,9 +64,7 @@ export async function GET(req: NextRequest) {
 				status: 429,
 				headers: {
 					...rateLimitHeaders(limit),
-					"Retry-After": String(
-						Math.ceil((limit.resetAt - Date.now()) / 1000),
-					),
+					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
 				},
 			},
 		);
@@ -144,7 +144,11 @@ export async function GET(req: NextRequest) {
 		// declared as a filter field in the vector index definition, which
 		// our minimal index doesn't have. We over-fetch (3x) and post-filter
 		// instead so callers can use ?source= without an index rebuild.
-		const overfetch = sourceFilter ? limitParam * 4 : limitParam;
+		// Over-fetch generously: low-value chunks (nav cards, breadcrumb stubs)
+		// are filtered out of the results below, so we need headroom to still
+		// return `limitParam` real chunks. The early $limit is dropped for the
+		// same reason — trimming happens after the low-value filter.
+		const overfetch = Math.max(limitParam * 4, 24);
 		const pipeline: Record<string, unknown>[] = [
 			{
 				$vectorSearch: {
@@ -156,7 +160,6 @@ export async function GET(req: NextRequest) {
 				},
 			},
 			...(sourceFilter ? [{ $match: { source: sourceFilter } }] : []),
-			{ $limit: limitParam },
 			{
 				$project: {
 					_id: 1,
@@ -233,10 +236,7 @@ export async function GET(req: NextRequest) {
 			if (sourceFilter) where.source = { equals: sourceFilter };
 			if (tokens.length) {
 				where.or = tokens.map((t) => ({
-					or: [
-						{ title: { contains: t } },
-						{ content: { contains: t } },
-					],
+					or: [{ title: { contains: t } }, { content: { contains: t } }],
 				}));
 			}
 
@@ -291,7 +291,10 @@ export async function GET(req: NextRequest) {
 					matchedTokens += 1;
 					// log(1+tf) avoids one mega-frequent token swamping
 					// everything; field weights: title 3×, section 2×, body 1×.
-					s += Math.log(1 + tfBody) + 2 * Math.log(1 + tfSection) + 3 * Math.log(1 + tfTitle);
+					s +=
+						Math.log(1 + tfBody) +
+						2 * Math.log(1 + tfSection) +
+						3 * Math.log(1 + tfTitle);
 				}
 				if (matchedTokens === 0) return 0;
 				// All-tokens-matched bonus (favors strict over partial)
@@ -326,11 +329,38 @@ export async function GET(req: NextRequest) {
 				}))
 				.filter((d) => (d.score ?? 0) > 0)
 				.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-				.slice(0, limitParam);
+				.slice(0, Math.max(limitParam * 4, 24));
 		} catch {
 			chunks = [];
 		}
 	}
+
+	// Drop low-value chunks (Docusaurus nav cards, breadcrumb/date stubs) that
+	// either path may surface on a stray token match — the SAME rule the
+	// ingester uses. Applied at read time so chunks embedded before the filter
+	// existed never reach a caller, WITHOUT a destructive corpus delete: the
+	// rows stay in Atlas, fully reversible. Both paths over-fetch above, so we
+	// still return up to `limitParam` real results after trimming.
+	chunks = chunks
+		.filter((c) => !isLowValueChunk(c.content))
+		.slice(0, limitParam);
+
+	// Attach a confidence signal to every result so a consuming agent can tell
+	// a strong, fresh, authoritative hit from a weak/stale one — not just read
+	// the raw cosine. Keyword mode needs the set max to normalize relevance.
+	const now = Date.now();
+	const maxScore = chunks.reduce((m, c) => Math.max(m, c.score ?? 0), 0);
+	const results = chunks.map((c) => ({
+		...c,
+		confidence: researchConfidence({
+			score: c.score,
+			source: c.source,
+			mode,
+			maxScore,
+			publishedAt: c.publishedAt,
+			now,
+		}),
+	}));
 
 	logApiHit({
 		req,
@@ -348,9 +378,17 @@ export async function GET(req: NextRequest) {
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
 				filters: { source: sourceFilter, limit: limitParam },
-				counts: { returned: chunks.length },
+				counts: { returned: results.length },
+				// Per-result `confidence`: a 0–1 score + label (high/medium/low)
+				// blending relevance, source-aware freshness, and source
+				// authority. Deterministic + versioned so agents can rely on it.
+				scoreModel: {
+					version: SCORE_MODEL_VERSION,
+					fields: ["relevance", "freshness", "authority"],
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Sort by it for trust-ranked results.",
+				},
 			},
-			results: chunks,
+			results,
 		},
 		{
 			headers: {
