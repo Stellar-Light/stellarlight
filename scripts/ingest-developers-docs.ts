@@ -9,11 +9,11 @@
  *   npx tsx scripts/ingest-developers-docs.ts --limit=20  # cap pages
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
@@ -21,6 +21,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -44,18 +45,50 @@ interface PageData {
 	body: string;
 }
 
+/**
+ * A page title that tells a reader nothing about the content — bare dates
+ * ("2026-04-16"), tag-index listings ("58 posts tagged developer"), generic
+ * section indexes ("Meeting Notes"). These come from listing/archive pages
+ * whose <title> is navigation, not a description. When we hit one we salvage
+ * a real title from the page's first content heading instead, so a retrieved
+ * chunk carries a usable citation (the "artifact" Tyler's agent needs).
+ */
+function isJunkyDocTitle(t: string): boolean {
+	const s = t.trim();
+	return (
+		s.length < 3 ||
+		/^\d{4}-\d{2}-\d{2}$/.test(s) ||
+		/^\d+\s+posts?\s+tagged/i.test(s) ||
+		/^meeting notes$/i.test(s)
+	);
+}
+
+function firstHeading(body: string): string | null {
+	const m = body.match(/^#{1,6}\s+(.+)$/m);
+	if (!m) return null;
+	return m[1].trim().replace(/​/g, "").trim() || null;
+}
+
 async function fetchPage(url: string): Promise<PageData> {
 	const html = await fetchHtml(url);
 	const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
 	const rawTitle = titleMatch ? titleMatch[1].trim() : url;
-	const title = rawTitle
+	let title = rawTitle
 		.split(/\s+[|\-—]\s+/)[0]
 		.replace(/\s+\|.*$/, "")
 		.trim();
 
-	const main = html.match(/<main[\s\S]*?<\/main>/i)
-		|| html.match(/<article[\s\S]*?<\/article>/i);
+	const main =
+		html.match(/<main[\s\S]*?<\/main>/i) ||
+		html.match(/<article[\s\S]*?<\/article>/i);
 	const body = stripHtml(main ? main[0] : html);
+
+	// Salvage a descriptive title from the body when the <title> is nav junk.
+	if (isJunkyDocTitle(title)) {
+		const h = firstHeading(body);
+		if (h && !isJunkyDocTitle(h)) title = h;
+	}
+
 	return { url, title, body };
 }
 
@@ -85,13 +118,13 @@ async function run() {
 		try {
 			const page = await fetchPage(url);
 			if (page.body.length < 150) continue;
-			const slug = url
-				.replace(BASE, "")
-				.replace(/^\//, "")
-				.replace(/\/$/, "")
-				.replace(/[^a-z0-9-/]/gi, "-")
-				.toLowerCase()
-				|| "index";
+			const slug =
+				url
+					.replace(BASE, "")
+					.replace(/^\//, "")
+					.replace(/\/$/, "")
+					.replace(/[^a-z0-9-/]/gi, "-")
+					.toLowerCase() || "index";
 			const chunks = chunkMarkdown({
 				md: `# ${page.title}\n\n${page.body}`,
 				parentDocId: slug,
@@ -120,7 +153,9 @@ async function run() {
 	}
 
 	console.log(`\nChunks: ${allChunks.length} total`);
-	console.log(`  new: ${stats.new} | updated: ${stats.updated} | unchanged: ${stats.unchanged}`);
+	console.log(
+		`  new: ${stats.new} | updated: ${stats.updated} | unchanged: ${stats.unchanged}`,
+	);
 	console.log(`  to embed: ${stats.toEmbed} | page errors: ${pageErrors}`);
 
 	if (!execute || !payload) {
@@ -142,6 +177,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((e) => {
-	console.error("FATAL:", e);
-	process.exit(1);
-});
+		console.error("FATAL:", e);
+		process.exit(1);
+	});
