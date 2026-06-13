@@ -65,8 +65,15 @@ async function semanticProjectRows(
 		},
 	];
 	// biome-ignore lint/suspicious/noExplicitAny: aggregate result shape
-	const docs: any[] = await collection.aggregate(pipeline).toArray();
-	if (docs.length === 0) return []; // index not built yet → caller keeps keyword
+	const raw: any[] = await collection.aggregate(pipeline).toArray();
+	// Relevance floor: $vectorSearch always returns the nearest neighbours,
+	// however far — so an off-distribution query ("reentrancy vulnerability",
+	// which is a research/audit concept, not a project) would otherwise pull in
+	// noise. Drop anything below a cosine threshold; if nothing clears it, return
+	// [] and let the caller's /api/research advisory take over. Tunable.
+	const SCORE_FLOOR = 0.55;
+	const docs = raw.filter((p) => (p.score ?? 0) >= SCORE_FLOOR);
+	if (docs.length === 0) return []; // no genuinely-close match (or index unbuilt)
 	const max = docs.reduce((m, p) => Math.max(m, p.score ?? 0), 0) || 1;
 	return docs.map((p) => {
 		let logoUrl: string | null = null;
