@@ -35,6 +35,7 @@ import {
 	SDF_SKILL_NAMES,
 } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { generateSlug } from "@/lib/utils/normalize";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 
@@ -55,7 +56,12 @@ export async function GET(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ name: string }> },
 ) {
-	const { name: slug } = await params;
+	const { name: rawName } = await params;
+	// Accept either the slug ('stellar-scout') or the display name ('Stellar
+	// Scout') — agents naturally pass whatever the user said. generateSlug is
+	// idempotent on real slugs, so this is a no-op for correct slugs and a fix
+	// for display names that previously 404'd.
+	const slug = generateSlug(rawName);
 
 	// 1. SDF skill? Fetch full content live from skills.stellar.org.
 	if ((SDF_SKILL_NAMES as readonly string[]).includes(slug)) {
