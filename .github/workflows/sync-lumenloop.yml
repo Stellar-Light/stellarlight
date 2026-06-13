@@ -19,9 +19,8 @@ name: Sync Lumenloop ecosystem projects
 #   Trigger manually via "Run workflow" (workflow_dispatch) and read the
 #   dry-run step output before trusting the schedule.
 #
-# Prerequisite (one-time): set repo Action secrets MONGODB_URI and
-# PAYLOAD_SECRET (same values prod uses). Without them the run fails at
-# connect with no writes.
+# Secrets: reuses DATABASE_URI + PAYLOAD_SECRET — already configured for the
+# refresh-research-corpus cron. Nothing new to set.
 
 on:
   schedule:
@@ -37,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      # Reuse the secrets the research-corpus cron already uses — nothing new
+      # to set. payload.config reads MONGODB_URI || DATABASE_URI.
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
     steps:
       - uses: actions/checkout@v4
