@@ -244,6 +244,15 @@ export const Projects: CollectionConfig = {
 			options: ["Unverified", "Verified (SDF)", "Verified (Community)"],
 		},
 		{
+			// Voyage (voyage-3, 1024-dim) embedding of name + description +
+			// category, for semantic project search via Atlas $vectorSearch.
+			// Backfilled by scripts/embed-projects.ts, read raw by the search
+			// route. Hidden from admin; large numeric array, not display data.
+			name: "embedding",
+			type: "json",
+			admin: { hidden: true },
+		},
+		{
 			name: "provenance",
 			type: "group",
 			fields: [

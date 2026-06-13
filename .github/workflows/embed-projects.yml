@@ -1,0 +1,53 @@
+name: Embed projects (semantic search backfill)
+
+# Creates the project_vector_index and backfills Voyage embeddings onto
+# projects for semantic search. Runs against PROD via repo secrets. Manual.
+#
+# Safety: the backfill DRY-RUNS by default (reports counts + verifies the
+# pipeline on one sample, no writes). Set execute=true to actually write.
+# Additive only — adds an `embedding` field; does not change search behavior
+# (the semantic search PATH ships separately). Idempotent: skips already-
+# embedded projects unless you also need a re-embed.
+#
+# Run with execute=false first; read the log; then execute=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write embeddings? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  embed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Ensure project vector index exists
+        if: ${{ inputs.execute }}
+        run: pnpm exec tsx scripts/create-project-vector-index.ts
+
+      - name: Backfill embeddings${{ inputs.execute && '' || ' (dry run)' }}
+        run: pnpm exec tsx scripts/embed-projects.ts ${{ inputs.execute && '--execute' || '' }}
