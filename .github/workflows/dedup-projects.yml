@@ -1,0 +1,49 @@
+name: Dedup projects (manual)
+
+# Detects + (optionally) hides duplicate project records, running against the
+# PROD database via the repo DATABASE_URI secret. Manual-only.
+#
+# Safety:
+#   - Defaults to DRY RUN (read-only). Set the `execute` input to true to act.
+#   - "Hiding" = set status=Draft (the public API filters Draft out). Records
+#     are PRESERVED and reversible — nothing is deleted.
+#   - High-confidence only: exact normalized-name match or identical GitHub
+#     owner/repo. Fuzzy/near-name pairs are reported for review, never actioned.
+#
+# Always run with execute=false first, read the log, THEN re-run execute=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually hide dupes (Draft)? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  dedup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect duplicates${{ inputs.execute && ' + hide (Draft)' || ' (dry run)' }}
+        run: pnpm exec tsx scripts/detect-duplicate-projects.ts ${{ inputs.execute && '--execute' || '' }}
