@@ -15,7 +15,92 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
+import { embed } from "@/lib/embed";
 import { getPayloadSafe } from "@/lib/payload-client";
+
+/**
+ * Semantic project search via Atlas $vectorSearch over project embeddings
+ * (voyage-3, populated by scripts/embed-projects.ts). Used as the
+ * keyword→semantic rung: when a keyword search comes back thin, this finds
+ * conceptually-related projects the literal `like` match misses (the
+ * x402-class question: "charge AI agents per API call" → agentic-payments
+ * projects, even with no literal term overlap). Returns [] and never throws
+ * past the caller's try/catch if the index isn't READY yet or VOYAGE_API_KEY
+ * is unset — so the route degrades gracefully to keyword-only.
+ */
+async function semanticProjectRows(
+	// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+	payload: any,
+	q: string,
+	limit: number,
+) {
+	const queryEmbedding = await embed(q);
+	const db = payload.db?.connection?.db;
+	const collection = db?.collection("projects");
+	if (!collection) return [];
+	const pipeline = [
+		{
+			$vectorSearch: {
+				index: "project_vector_index",
+				path: "embedding",
+				queryVector: queryEmbedding,
+				numCandidates: Math.max(200, limit * 15),
+				limit: limit * 3,
+			},
+		},
+		{ $match: { status: { $in: ["Development", "Pre-Release", "Live"] } } },
+		{
+			$project: {
+				_id: 1,
+				name: 1,
+				slug: 1,
+				category: 1,
+				shortDescription: 1,
+				status: 1,
+				logo: 1,
+				scf: 1,
+				hackathonPlacement: 1,
+				score: { $meta: "vectorSearchScore" },
+			},
+		},
+	];
+	// biome-ignore lint/suspicious/noExplicitAny: aggregate result shape
+	const docs: any[] = await collection.aggregate(pipeline).toArray();
+	if (docs.length === 0) return []; // index not built yet → caller keeps keyword
+	const max = docs.reduce((m, p) => Math.max(m, p.score ?? 0), 0) || 1;
+	return docs.map((p) => {
+		let logoUrl: string | null = null;
+		if (p.logo && typeof p.logo === "object") {
+			if (p.logo.url) logoUrl = p.logo.url;
+			else if (p.logo.filename) logoUrl = `/api/media/file/${p.logo.filename}`;
+		}
+		return {
+			id: String(p._id),
+			name: p.name,
+			slug: p.slug,
+			category: p.category,
+			shortDescription: p.shortDescription ?? null,
+			status: p.status,
+			logoUrl,
+			scfAwarded: !!p.scf?.awarded,
+			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
+			hackathon: null,
+			hackathonPlacement: p.hackathonPlacement ?? null,
+			hackathonPrize: null,
+			hackathonPrizeTrack: null,
+			score: p.score ?? 0,
+			via: "semantic" as const,
+			url: `https://stellarlight.xyz/project/${p.slug}`,
+			confidence: projectConfidence({
+				score: p.score ?? 0,
+				maxScore: max,
+				status: p.status,
+				scfAwarded: !!p.scf?.awarded,
+				hackathonPlacement: p.hackathonPlacement,
+			}),
+		};
+	});
+}
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -227,6 +312,7 @@ export async function GET(req: NextRequest) {
 	const projMax = projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0);
 	const scored = projects.map((p) => ({
 		...p,
+		via: "keyword" as const,
 		confidence: projectConfidence({
 			score: p.score,
 			maxScore: projMax,
@@ -235,6 +321,26 @@ export async function GET(req: NextRequest) {
 			hackathonPlacement: p.hackathonPlacement,
 		}),
 	}));
+
+	// Keyword→semantic rung: when the keyword pass came back thin (didn't fill
+	// the page), augment with semantic $vectorSearch matches the literal `like`
+	// missed — conceptually-related projects (the x402-class question).
+	// First page + query only. Fault-tolerant: if the index isn't READY yet or
+	// VOYAGE_API_KEY is unset, semanticProjectRows yields nothing / throws and
+	// we silently keep keyword-only.
+	let semanticAdds: Awaited<ReturnType<typeof semanticProjectRows>> = [];
+	if (q && offset === 0 && scored.length < limit && payload) {
+		try {
+			const sem = await semanticProjectRows(payload, q, limit);
+			const have = new Set(scored.map((r) => r.id));
+			semanticAdds = sem
+				.filter((r) => !have.has(r.id))
+				.slice(0, limit - scored.length);
+		} catch {
+			// index not ready / no embedding key — degrade to keyword-only
+		}
+	}
+	const usedSemantic = semanticAdds.length > 0;
 
 	logApiHit({
 		req,
@@ -275,12 +381,18 @@ export async function GET(req: NextRequest) {
 				}[matchMode],
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything.
-				counts: { returned: projects.length, total: totalMatching },
-				// When tiered matching ran the full strict→loose-1→majority
-				// chain and still got nothing, point the agent at thesis-level
-				// retrieval. Project-name matching can't answer "is x402
+				counts: {
+					returned: projects.length + semanticAdds.length,
+					total: totalMatching + semanticAdds.length,
+				},
+				// `semantic: true` means the keyword pass was thin and we filled
+				// the page with vector-search matches the literal filter missed
+				// (each such row is tagged `via: "semantic"`).
+				semantic: usedSemantic,
+				// When BOTH keyword and semantic came back empty, point the agent
+				// at thesis-level retrieval. Project search can't answer "is x402
 				// possible on Stellar?" — /api/research can.
-				...(projects.length === 0 && q
+				...(projects.length === 0 && semanticAdds.length === 0 && q
 					? {
 							advisory: {
 								summary: `No projects match '${q}' even after broadening the search. This could be a real gap, a naming/tag mismatch, or a thesis-level question that's better answered against the research corpus.`,
@@ -299,7 +411,7 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 			},
-			projects: scored,
+			projects: [...scored, ...semanticAdds],
 		},
 		{
 			headers: {
