@@ -76,17 +76,31 @@ export async function GET(req: NextRequest) {
 				where["scf.awarded"] = { equals: true };
 			}
 
+			const tokens = q
+				.toLowerCase()
+				.split(/\s+/)
+				.filter((t) => t.length > 1);
+
+			// Push the keyword match INTO the DB query (OR over tokens) so EVERY
+			// matching project is a candidate — not just whichever 500 load first
+			// by default sort. Without this, search fetched the first 500 docs and
+			// scored them in memory, leaving the tail (older seed records like
+			// Soroswap/Aquarius) permanently unsearchable once the directory grew
+			// past 500. The in-memory tiering below still ranks the candidates.
+			if (tokens.length) {
+				where.or = tokens.flatMap((t) => [
+					{ name: { like: t } },
+					{ shortDescription: { like: t } },
+					{ category: { like: t } },
+				]);
+			}
+
 			const result = await payload.find({
 				collection: "projects",
 				where,
 				limit: 500,
 				depth: 1,
 			});
-
-			const tokens = q
-				.toLowerCase()
-				.split(/\s+/)
-				.filter((t) => t.length > 1);
 
 			projects = (
 				result.docs as Array<{
