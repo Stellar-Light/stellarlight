@@ -1,0 +1,59 @@
+name: Sync Lumenloop ecosystem projects
+
+# Pulls the latest projects + entities from lumenloop/stellar-ecosystem-db into
+# the Scout projects collection so the directory never goes stale.
+#
+# Why this exists:
+#   The sync was manual-only (scripts/sync-lumenloop.ts) and had drifted ~17
+#   days, so flagship DEXes already present in the upstream repo (Soroswap,
+#   Aquarius, SushiSwap) never reached prod — and Tyler's Pallet agent missed
+#   them. Automating the pull closes that class of gap for good.
+#
+# Idempotency / safety:
+#   - scripts/sync-lumenloop.ts upserts by slug (insert / update / skip). It
+#     does NOT delete records, so a scheduled run can't wipe data.
+#   - Each run logs a DRY-RUN diff first, then executes — so every run leaves
+#     a visible record in the Actions log of exactly what changed.
+#
+# First-time catch-up:
+#   Trigger manually via "Run workflow" (workflow_dispatch) and read the
+#   dry-run step output before trusting the schedule.
+#
+# Prerequisite (one-time): set repo Action secrets MONGODB_URI and
+# PAYLOAD_SECRET (same values prod uses). Without them the run fails at
+# connect with no writes.
+
+on:
+  schedule:
+    # 07:00 UTC daily — just after the EC snapshot + research-corpus refreshes
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Dry run — log what would change (no writes)
+        run: pnpm exec tsx scripts/sync-lumenloop.ts
+
+      - name: Execute sync — upsert projects + entities
+        run: pnpm exec tsx scripts/sync-lumenloop.ts --execute
