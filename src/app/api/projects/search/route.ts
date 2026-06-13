@@ -185,7 +185,29 @@ export async function GET(req: NextRequest) {
 					const need = Math.ceil(tokens.length / 2);
 					filtered = projects.filter((p) => p.score >= need);
 				}
-				filtered.sort((a, b) => b.score - a.score);
+				// Primary rank = keyword-match count. Tiebreak by composite
+				// confidence (status-freshness + SCF/hackathon authority) so on a
+				// broad query like "swap" the flagship audited/funded DEXes lead
+				// instead of falling back to arbitrary DB order behind same-score
+				// newcomers. Precompute once (O(n)) to avoid re-scoring in compare.
+				const fMax = filtered.reduce((m, p) => Math.max(m, p.score ?? 0), 0);
+				const confByName = new Map(
+					filtered.map((p) => [
+						p.id,
+						projectConfidence({
+							score: p.score,
+							maxScore: fMax,
+							status: p.status,
+							scfAwarded: p.scfAwarded,
+							hackathonPlacement: p.hackathonPlacement,
+						}).score,
+					]),
+				);
+				filtered.sort(
+					(a, b) =>
+						b.score - a.score ||
+						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
+				);
 				projects = filtered;
 			} else {
 				matchMode = "all";
