@@ -282,9 +282,9 @@ server.registerTool(
 server.registerTool(
 	"search_projects",
 	{
-		title: "Search Stellar projects (prior art / competitor lookup)",
+		title: "Find Stellar projects, protocols & services (ecosystem directory)",
 		description:
-			"Search 741+ curated Stellar projects with tiered match-mode (strict → loose → majority). Tier surfaced as .meta.matchMode so agents can convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions.",
+			"The Stellar ecosystem directory — search 740+ curated projects, protocols, and services by keyword or category: DEXes/AMMs/swap services, wallets, anchors, lending, tooling, infrastructure, assets. Use this for ANY 'find / list / what are the … on Stellar' lookup (e.g. 'swap services', 'wallets', 'lending protocols') AND for prior-art / 'has anyone already built this?' gap checks. Tiered match-mode (strict → loose → majority) surfaced as .meta.matchMode; results carry confidence scores.",
 		inputSchema: {
 			q: z.string().optional().describe("Keyword query."),
 			category: z
