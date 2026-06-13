@@ -66,12 +66,13 @@ async function semanticProjectRows(
 	];
 	// biome-ignore lint/suspicious/noExplicitAny: aggregate result shape
 	const raw: any[] = await collection.aggregate(pipeline).toArray();
-	// Relevance floor: $vectorSearch always returns the nearest neighbours,
-	// however far — so an off-distribution query ("reentrancy vulnerability",
-	// which is a research/audit concept, not a project) would otherwise pull in
-	// noise. Drop anything below a cosine threshold; if nothing clears it, return
-	// [] and let the caller's /api/research advisory take over. Tunable.
-	const SCORE_FLOOR = 0.55;
+	// Relevance floor (calibrated 2026-06-13 against real voyage-3 cosines):
+	// off-distribution concept queries top out ~0.63-0.68 ("reentrancy" → 0.676,
+	// "frontrunning" → 0.629) while genuine project matches sit 0.687-0.80
+	// ("send money abroad" → 0.736, "explore soroban contract" → 0.80). 0.68 sits
+	// in that gap: cuts the concept-noise, keeps real matches. Below it we return
+	// [] and defer to the /api/research advisory.
+	const SCORE_FLOOR = 0.68;
 	const docs = raw.filter((p) => (p.score ?? 0) >= SCORE_FLOOR);
 	if (docs.length === 0) return []; // no genuinely-close match (or index unbuilt)
 	const max = docs.reduce((m, p) => Math.max(m, p.score ?? 0), 0) || 1;
