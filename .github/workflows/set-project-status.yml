@@ -1,0 +1,25 @@
+name: Set project status (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      slug: { description: "project slug (e.g. styx)", required: true, type: string }
+      status: { description: "Draft / Development / Pre-Release / Live", required: true, type: string, default: "Draft" }
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  setstatus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      SLUG: ${{ inputs.slug }}
+      STATUS: ${{ inputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/set-project-status.ts ${{ inputs.execute && '--execute' || '' }}
