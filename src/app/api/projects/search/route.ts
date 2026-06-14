@@ -129,6 +129,7 @@ interface ProjectRow {
 	hackathonPrizeTrack: string | null;
 	prominence: number;
 	verificationLevel: string | null;
+	types: string[];
 	score: number;
 	url: string;
 }
@@ -176,12 +177,53 @@ function termsForToken(t: string): string[] {
 	return [...out];
 }
 
-// Authority boost layered under keyword-match count: a curated `prominence`
-// (0-100, set on canonical/flagship records) dominates, then SDF/community
-// verification, SCF funding, and live status. This is what lifts Freighter /
-// Soroswap / Reflector above tail records that merely contain the query word.
-function rankBoost(p: ProjectRow): number {
+// Map a query token to the `types` value it implies, so ranking can boost
+// records that ARE the queried category over records that merely mention it.
+// Prominence is global; this scopes it to intent — e.g. DFNS is a top *custody*
+// play but shouldn't lead q=wallet, and Soroswap should lead q=dex over a wallet
+// that happens to do swaps. Tokens not mapped here (oracle, custody, yield…)
+// fall back to plain prominence, which already orders them well.
+const INTENT_TYPE: Record<string, string> = {
+	wallet: "Wallet",
+	dex: "DEX",
+	amm: "DEX",
+	swap: "DEX",
+	lending: "Lending",
+	lend: "Lending",
+	borrow: "Lending",
+	bridge: "Bridge",
+	payments: "Payments",
+	payment: "Payments",
+	remittance: "Payments",
+	anchor: "Anchor",
+	sdk: "SDK",
+	indexer: "Indexer",
+	explorer: "Explorer",
+	nft: "NFT",
+	rwa: "RWA",
+	gaming: "Gaming",
+	game: "Gaming",
+	stablecoin: "Stablecoin",
+};
+function intentTypesFor(tokens: string[]): Set<string> {
+	const s = new Set<string>();
+	for (const t of tokens) {
+		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
+		for (const syn of SYNONYMS[t] ?? []) if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+	}
+	return s;
+}
+
+// Authority boost layered under keyword-match count. When the query implies a
+// category (intentTypes), a record whose own `types` match it gets the dominant
+// boost — so the actual wallets/DEXes/lenders lead, not a high-prominence record
+// from another category that merely contains the word. Then curated `prominence`,
+// SDF/community verification, SCF funding, and live status.
+function rankBoost(p: ProjectRow, intentTypes: Set<string>): number {
+	const typeMatch =
+		intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t));
 	return (
+		(typeMatch ? 60 : 0) +
 		(p.prominence || 0) +
 		(p.verificationLevel === "Verified (SDF)"
 			? 18
@@ -235,6 +277,7 @@ export async function GET(req: NextRequest) {
 				.toLowerCase()
 				.split(/\s+/)
 				.filter((t) => t.length > 1);
+			const intentTypes = intentTypesFor(tokens);
 
 			// Push the keyword match INTO the DB query (OR over tokens) so EVERY
 			// matching project is a candidate — not just whichever 500 load first
@@ -278,6 +321,7 @@ export async function GET(req: NextRequest) {
 					hackathonPrizeTrack?: string;
 					prominence?: number;
 					verificationLevel?: string;
+					types?: string[];
 				}>
 			).map((p) => {
 				const hay =
@@ -322,6 +366,7 @@ export async function GET(req: NextRequest) {
 					hackathonPrizeTrack: p.hackathonPrizeTrack ?? null,
 					prominence: typeof p.prominence === "number" ? p.prominence : 0,
 					verificationLevel: p.verificationLevel ?? null,
+					types: Array.isArray(p.types) ? p.types : [],
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
 				};
@@ -371,13 +416,15 @@ export async function GET(req: NextRequest) {
 				filtered.sort(
 					(a, b) =>
 						b.score - a.score ||
-						rankBoost(b) - rankBoost(a) ||
+						rankBoost(b, intentTypes) - rankBoost(a, intentTypes) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
 				projects = filtered;
 			} else {
 				matchMode = "all";
-				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
+				projects.sort(
+					(a, b) => rankBoost(b, intentTypes) - rankBoost(a, intentTypes),
+				);
 			}
 
 			totalMatching = projects.length;
