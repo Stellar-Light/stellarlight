@@ -1,106 +1,320 @@
 {
   "descUpdates": [
     {
-      "slug": "yieldblox",
-      "shortDescription": "YieldBlox is a DAO-managed money-market protocol on Stellar, built on the Blend Protocol with Soroban governance for lending and borrowing digital assets. In February 2026 one of its Blend lending pools was drained of roughly $10.8M via oracle manipulation: an attacker inflated an illiquid USTRY market on the Stellar DEX (the Reflector oracle source) to borrow out the pool's reserves. Root cause was a pool-operator oracle misconfiguration, not a Blend core flaw; ~$7.2M was frozen by Stellar validators."
+      "slug": "freighter",
+      "shortDescription": "Freighter is the Stellar Development Foundation's official non-custodial Stellar wallet: a browser extension (Chrome, Firefox, Brave) and iOS/Android apps. Users self-custody their private keys to hold, send and receive XLM and Stellar assets and sign Stellar and Soroban transactions, across Mainnet, Testnet and Futurenet (Friendbot funding)."
     },
     {
-      "slug": "templar-protocol",
-      "shortDescription": "Templar is a decentralized 'cypher lending' protocol that lets Stellar users borrow USDC against XLM collateral directly from their Stellar wallets, without bridges or wrapped tokens. It uses NEAR's multi-party-computation (MPC) network and Chain Signatures to custody deposits and settle cross-chain. On Stellar the collateral asset is XLM (not Bitcoin); USDC borrowing is also available on Ethereum, Solana, NEAR and other chains. The Stellar integration was announced November 2025."
+      "slug": "lobstr",
+      "shortDescription": "LOBSTR is a widely used non-custodial Stellar wallet on iOS, Android, web and a browser extension. Users hold, send, receive, buy and swap XLM, USDC and Stellar assets, make peer-to-peer payments, trade on the DEX/SDEX, use fiat on/off-ramps, and claim a federation address (username*lobstr.co) resolving to their account. LOBSTR Vault adds multisig."
     },
     {
-      "slug": "zkliquid",
-      "shortDescription": "ZKLiquid has rebranded to LiquidsFi (liquids.fi). It is a decentralized cross-chain liquidity protocol and interoperability/oracle network that aims to eliminate liquidity fragmentation by securely transmitting on-chain data and liquidity across blockchains. The LiquidsFi Interoperability Protocol (LIP) targets connectivity between EVM and non-EVM chains, making it one of the first protocols enabling production-grade interoperability between Stellar's Soroban and EVM chains."
+      "slug": "xbull",
+      "shortDescription": "xBull is an open-source, non-custodial Stellar wallet available as a browser extension, web app, and iOS and Android mobile apps. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps."
     },
     {
-      "slug": "steepx",
-      "shortDescription": "Steepx is a ledger explorer for the Stellar network that provides detailed insights into operations, transactions, assets, and exchanges. It supports multiple networks and offers features like transaction history and real-time asset data to help users navigate the Stellar ecosystem. Steepx received Stellar Community Fund support across SCF rounds 16 and 20, totaling $31,100."
+      "slug": "albedo",
+      "shortDescription": "Albedo is a non-custodial Stellar wallet and delegated signer, delivered as a web app and browser extension. It lets users hold a Stellar account to hold, send and receive assets, sign transactions, message-sign arbitrary data, and authenticate to dApps without exposing secret keys, acting as a keystore that other Stellar apps integrate for in-browser signing."
     },
     {
-      "slug": "trustswap",
-      "shortDescription": "TrustSwap (a.k.a. Team Finance) is a DeFi token-management platform offering token minting, token and liquidity locks, NFT locks, multisender, staking and vesting-as-a-service. It received a Stellar Community Fund award (SCF #36, Financial Protocols track) to bring its token-management and locking tooling to Stellar/Soroban. Note: TrustSwap originated on EVM chains, and no live Soroban mainnet deployment is independently confirmed beyond the SCF award; its earlier listing was generic Team Finance copy with no Stellar specifics."
+      "slug": "rabet",
+      "shortDescription": "Open-source, non-custodial end-user wallet for the Stellar network. Available as a browser extension for Chrome, Firefox, Edge, and Brave, with desktop and mobile apps. Lets users hold, send, and receive XLM and Stellar assets, transfer and exchange assets, and connect to and sign for Stellar dApps. Source: rabet.io, github.com/rabetofficial/rabet-extension."
     },
     {
-      "slug": "bridge",
-      "shortDescription": "Bridge is a stablecoin infrastructure company (co-founded 2022 by Zach Abrams and Sean Yu). Stripe's ~$1.1B acquisition of Bridge \u2014 its largest ever \u2014 was announced October 2024 and CLOSED on February 4, 2025 (not 2024). On Stellar, Bridge issues MGUSD, MoneyGram's U.S.-dollar-backed stablecoin native to the Stellar blockchain, with tokens minted/burned via M0's smart-contract infrastructure."
+      "slug": "hana",
+      "shortDescription": "Hana is a non-custodial multi-chain wallet with Stellar support, available as a browser extension and mobile app. Users hold, send and receive XLM and Stellar assets and connect to Stellar and Soroban dApps via Stellar Wallets Kit and the Freighter API, alongside chains like Ethereum, Sui, ICON and Avalanche."
     },
     {
-      "slug": "allbridge",
-      "shortDescription": "Allbridge enables users to access the Stellar ecosystem through cross-chain bridge swaps. Via Allbridge Core, Stellar joined as a supported chain (using Soroban) to offer native USDC and stablecoin cross-chain swaps without token wrapping, connecting Stellar to chains like Ethereum, Solana, Polygon, Base, Arbitrum and OP Mainnet \u2014 letting Stellar protocols tap cross-chain stablecoin liquidity."
+      "slug": "circle",
+      "shortDescription": "Circle is the issuer of USDC (native on Stellar since 2021) and EURC (native since 2023), the two flagship fiat-backed, full-reserve, MiCA-compliant stablecoins on Stellar. They serve as base settlement currency across Stellar anchors, DeFi, payments and on/off-ramps, with native USDC cross-chain transfer via Circle's CCTP, live on Stellar."
     },
     {
-      "slug": "honey-coin",
-      "shortDescription": "African fiat-to-stablecoin anchor (HoneyCoin) headquartered in Nairobi, Kenya, settling USDC/USDT on/off-ramps across 18+ markets (Kenya, Nigeria, Ghana, Tanzania, Uganda, etc.) via mobile money and bank rails, including USDC cash-out at MoneyGram on Stellar."
+      "slug": "moneygram",
+      "shortDescription": "MoneyGram Access (MoneyGram Ramps) is a fiat on- and off-ramp anchor on Stellar. Via the SEP-24 standard, users deposit and withdraw cash to and from USDC at ~500K retail locations across 170+ cash-out countries, with no bank account required. In June 2026 MoneyGram launched MGUSD, a self-custodial USD stablecoin issued by Bridge on Stellar."
     },
     {
-      "slug": "coins-ph",
-      "shortDescription": "BSP-regulated Philippine anchor and exchange providing PHP fiat on/off-ramps and remittances on Stellar, with 33,000+ cash-in/cash-out locations; an early Stellar PHP anchor and issuer of the peso-backed PHPC stablecoin."
+      "slug": "brale",
+      "shortDescription": "Brale is a regulated stablecoin issuance and orchestration platform supporting Stellar, providing the compliance (KYC/KYB, sanctions screening), minting and redemption, and reserve-management infrastructure banks and institutions use to launch and operate their own fiat-backed stablecoins and tokenized assets."
     },
     {
-      "slug": "cash-abroad",
-      "shortDescription": "LATAM cross-border payments anchor (cashabroad.one) enabling businesses to send and receive instant, low-cost international payments via USDC on Stellar."
+      "slug": "glo-dollar",
+      "shortDescription": "Glo Dollar (USDGLO) is a fiat-backed USD stablecoin issued and used on Stellar (via issuer Brale), fully reserved by cash and US Treasuries and redeemable 1:1. It directs 100% of the interest earned on its reserves to charity (GiveDirectly), and serves standard payments and settlement use cases alongside stablecoins like USDC and EURC."
     },
     {
-      "slug": "trace-finance",
-      "shortDescription": "Brazil-focused, Stellar-backed anchor offering BRL stablecoin on/off-ramps and FX liquidity for cross-border payments, processing deposits and withdrawals via PIX with full compliance."
+      "slug": "ondo",
+      "shortDescription": "Ondo Finance issues USDY on Stellar, a yield-bearing tokenized US-dollar token backed by short-term US Treasuries and bank deposits. Launched on Stellar in 2025, USDY provides an interest-accruing dollar asset (a yield-bearing alternative to fiat stablecoins) for onchain savings, treasury, collateral, and cross-border payment flows. Trades above $1 as yield accrues."
     },
     {
-      "slug": "ping",
-      "shortDescription": "Argentine-founded neo-bank (letsping.com) for Latin American freelancers and contractors, providing US-dollar accounts, crypto accounts and invoicing so users can receive and convert payments in USD or crypto across borders."
+      "slug": "soroswap",
+      "shortDescription": "Soroswap is the first decentralized exchange (DEX) and DEX aggregator on Stellar Soroban, live on mainnet. It is an open-source AMM for swapping tokens and providing liquidity, with an aggregator that routes trades across Soroban AMMs (Soroswap, Phoenix, Aquarius) for best on-chain execution. Its swap Route API returns quotes and optimal routing across Stellar DEXs, including the Stellar classic DEX (SDEX)."
     },
     {
-      "slug": "clickspesa",
-      "shortDescription": "East African Stellar anchor (ClickPesa) based in Tanzania enabling cross-border B2B payments that settle into Tanzanian Shilling (TZS) on local bank and mobile-money rails, connecting senders abroad to recipients in Tanzania."
+      "slug": "aquarius",
+      "shortDescription": "Aquarius (AQUA) is a DeFi liquidity layer and AMM on Stellar/Soroban running stable and volatile AMM liquidity pools with multihop swaps where liquidity providers earn fees plus AQUA reward yield, and incentivizes market-making on the native Stellar DEX. AQUA locks into ICE for on-chain DAO governance votes directing rewards across DEX/AMM markets."
     },
     {
-      "slug": "boss-pay",
-      "shortDescription": "IDT's BOSS Money (formerly Leaf Global Fintech), a Stellar-based remittance and digital-wallet service for migrants and refugees across East and Francophone Africa (Rwanda, Uganda, Kenya, DRC, Senegal, Cameroon, C\u00f4te d'Ivoire), letting users store and send cross-border value."
+      "slug": "phoenix",
+      "shortDescription": "Phoenix DeFi Hub is an SCF-funded AMM-based DEX on Stellar/Soroban (PHO token). It runs constant-product and stableswap liquidity pools where liquidity providers add liquidity to earn fees and staking rewards, with a Factory for creating pools and multi-hop routing for on-chain token swaps. One of the AMM liquidity sources aggregated by Soroswap."
     },
     {
-      "slug": "alfred-pay",
-      "shortDescription": "Latin American anchor-as-a-service (alfredpay.io) providing USDC on/off-ramps on Stellar, with remittance corridors from the US into the Dominican Republic and Haiti and crypto-to-local-fiat payment facilitation for fintechs across LATAM."
+      "slug": "comet",
+      "shortDescription": "Comet is a weighted-pool AMM and DEX primitive on Stellar Soroban (a Balancer-style port). It lets builders create custom-weight, multi-token liquidity pools (e.g. 80/20) where liquidity providers add liquidity to earn swap fees and route token swaps, serving as a configurable liquidity venue and reusable DeFi building block for Soroban."
+    },
+    {
+      "slug": "stellarterm",
+      "shortDescription": "StellarTerm is an open-source, self-custodial web trading client for the native Stellar DEX (SDEX). It offers an order-book trading interface with market data and charts, lets users send, receive, and trade Stellar assets directly on-chain, and supports trustlines, multisignature, and Ledger/Trezor hardware wallets. Built by Ultra Stellar."
+    },
+    {
+      "slug": "stellarbroker",
+      "shortDescription": "StellarBroker is a non-custodial swap router and AMM aggregator on Stellar. It splits trades across Soroban AMM liquidity pools (SoroSwap, Aquarius), Stellar Classic AMMs, and the Stellar DEX orderbook to route swaps at the best price and deepest liquidity. It aggregates existing pools rather than letting users create pools or provide liquidity."
+    },
+    {
+      "slug": "blend",
+      "shortDescription": "Blend is a lending and borrowing protocol (money market) on Stellar Soroban. Anyone can deploy permissionless, isolated lending pools where suppliers earn yield (interest/APY) by depositing assets like USDC, XLM and EURC, and borrowers take over-collateralized loans. It is the base lending and yield primitive other Stellar DeFi apps build on."
+    },
+    {
+      "slug": "slender",
+      "shortDescription": "Slender is a noncustodial lending and borrowing protocol (money market) on Stellar Soroban, built by eq-lab. Users supply crypto assets like XLM and stablecoins to earn passive yield, and borrow against their collateral, with dynamic interest rates set by a smooth hyperbolic utilization curve. It also supports same-block flash loans."
+    },
+    {
+      "slug": "orbitcdp",
+      "shortDescription": "Orbit CDP is a collateralized-debt-position (CDP) lending and borrowing protocol on Stellar Soroban. Users lock collateral (XLM and Etherfuse tokenized bonds like the USTRY US Treasury token and CETES Mexican T-bills) in smart-contract vaults to borrow over-collateralized stablecoins such as oUSD. A money-market primitive for minting stable liquidity against crypto and tokenized RWA collateral."
+    },
+    {
+      "slug": "axelar",
+      "shortDescription": "Axelar is a decentralized interoperability network and cross-chain bridge/message-passing layer connecting Stellar to 70+ chains. Its General Message Passing (GMP) lets Soroban smart contracts send cross-chain messages and transfer assets to Ethereum, Solana, Sui and more; Interchain Token Service moves tokens. Live for Stellar since Feb 16, 2026; underpins Squid Router and bridges XLM in/out of Stellar."
+    },
+    {
+      "slug": "spacewalk",
+      "shortDescription": "Spacewalk is a trust-minimized cross-chain bridge connecting Stellar and Polkadot, built by Pendulum. It bridges XLM and Stellar fiat-backed stablecoins (EURC, AUDD, NGNC, TZS, BRL) into Polkadot/Kusama DeFi and back via a vault/collateral model, giving Stellar assets interoperability with Substrate chains. Live on Pendulum mainnet."
+    },
+    {
+      "slug": "stronghold",
+      "shortDescription": "Stronghold builds virtual payment-network infrastructure for instant settlement and interoperability between legacy and on-chain rails. It operates a cross-chain bridge for its SHx token between Stellar and Ethereum, using Axelar's cross-chain protocol (and Squid Router) to move assets while maintaining a unified 1:1 token supply across both chains."
+    },
+    {
+      "slug": "reflector",
+      "shortDescription": "Reflector is a decentralized price oracle and data-feed network for Stellar and Soroban smart contracts. It delivers on-chain and off-chain asset prices, CEX and DEX exchange rates, FX rates, and subscription-based custom data feeds via a DAO-run node quorum, powering DeFi protocols such as Blend, Laina, and Slender."
+    },
+    {
+      "slug": "redstone-finance",
+      "shortDescription": "Modular price oracle live on Stellar/Soroban mainnet (since March 2026), providing real-time price feeds for DeFi protocols and institutions. Launched with 10 feeds including BTC, ETH, USDC, PYUSD and Franklin Templeton's BENJI; implements the SEP-40 oracle standard. Push-model data-feed delivery (Rust Adapter + Price Feed contracts) for Soroban smart contracts; Blend lending is preparing to integrate."
+    },
+    {
+      "slug": "lightecho",
+      "shortDescription": "Open-source, free price oracle for Stellar Soroban smart contracts, built by BP Ventures. Provides emerging-market FX price feeds (USD, EUR, NGN, KES, INR, ARS, BRL vs XLM) and a 30-day XLM volatility feed, aggregating 50+ CEX, DEX and P2P sources and updating every 10 minutes. Ships a SEP-40 Soroban oracle contract for DeFi integrations."
+    },
+    {
+      "slug": "dia",
+      "shortDescription": "DIA is a cross-chain oracle provider live on Stellar/Soroban, offering customizable price feeds and data feeds for Soroban smart contracts. Builders integrate feeds (e.g. BTC/USD, USDC) sourced across CEX/DEX markets via a simple on-chain read, with custom asset feeds on request. One of three oracle providers in the official Stellar Docs."
+    },
+    {
+      "slug": "band",
+      "shortDescription": "Band Protocol is a cross-chain data oracle live on Stellar/Soroban — one of three oracle providers listed in the official Stellar Docs, with a deployed mainnet contract. It aggregates real-world data and APIs into on-chain price feeds and data feeds that Soroban smart contracts can integrate for DeFi."
+    },
+    {
+      "slug": "defindex",
+      "shortDescription": "DeFindex (by PaltaLabs) is yield infrastructure on Stellar/Soroban. Non-custodial tokenized vaults let wallets, neobanks, and fintechs offer stablecoin savings: diversified yield strategies auto-rebalance USDC/EURC deposits across underlying protocols like Blend, abstracting lending and yield-vault primitives behind a single SDK and API."
+    },
+    {
+      "slug": "benji",
+      "shortDescription": "Benji is Franklin Templeton's tokenized real-world asset (RWA) platform. The Franklin OnChain U.S. Government Money Fund (FOBXX) — a tokenized money market fund backed by U.S. Treasuries — is natively issued on Stellar, the first U.S.-registered mutual fund to record share ownership on a public blockchain. Distributes daily on-chain yield."
+    },
+    {
+      "slug": "wisdomtree",
+      "shortDescription": "WisdomTree Prime is a retail app from asset manager WisdomTree for tokenized real-world assets (RWA) on Stellar: 13 tokenized funds — including a Treasury/government money market fund (WTGXX) — plus a gold token backed 1:1 by physical bullion. Tokenization is enabled via DTCC Digital Assets and Fireblocks."
+    },
+    {
+      "slug": "redswan",
+      "shortDescription": "RedSwan is a FINRA-regulated digital securities marketplace that tokenizes real-world assets (RWAs) on Stellar, focused on commercial real estate. It has issued over $100M of institutional-grade multifamily and hospitality properties, enabling fractional ownership with lower minimums and 24/7 secondary-market liquidity."
+    },
+    {
+      "slug": "etherfuse",
+      "shortDescription": "Etherfuse issues Stablebonds — tokenized real-world assets (RWAs) on Stellar that bring government treasury bonds onchain, including Mexican CETES treasury certificates and US Treasuries. They give users yield-bearing exposure to sovereign debt and underpin Stellar treasury-management apps such as Bando."
+    },
+    {
+      "slug": "spiko",
+      "shortDescription": "Spiko issues tokenized real-world asset (RWA) money market funds on Stellar. Its AMF/ACPR-regulated EUTBL and USTBL funds are backed 100% by EU and US Treasury Bills and let users earn daily yield on cash. A core tokenized-treasuries primitive giving builders onchain short-term sovereign-debt exposure; Stellar is among Spiko's largest deployments."
+    },
+    {
+      "slug": "beans",
+      "shortDescription": "Beans is a non-custodial Stellar wallet and money-transfer app for iOS and Android aimed at non-crypto-native users. It offers QR payments, multi-currency support, free wallet-to-wallet transfers and MoneyGram cash off-ramps across 185+ countries, abstracting blockchain complexity behind a familiar banking experience."
+    },
+    {
+      "slug": "vesseo",
+      "shortDescription": "Vesseo (formerly Vibrant), the consumer USDC wallet from SDF subsidiary Sunship, lets users buy, store, send, receive, and spend digital dollars on Stellar. Widely adopted across high-inflation LatAm markets (~93% Argentina) for cross-border remittances and money transfer, with low-fee instant cash-in/cash-out."
+    },
+    {
+      "slug": "bitso",
+      "shortDescription": "Bitso is a leading Latin American crypto exchange that operates as a Stellar anchor, providing fiat on/off-ramps between USDC and local currency in Mexico and Colombia. Connected to local banking rails, it lets institutions worldwide access USDC-on-Stellar payment corridors into LATAM, powering remittances like US-to-Mexico and B2B cross-border payments."
+    },
+    {
+      "slug": "yellow-card",
+      "shortDescription": "Yellow Card is Africa's largest licensed stablecoin fiat on-ramp and off-ramp, operating across 20 countries. It converts local African currencies to and from USDC on Stellar, serving as an anchor for near-instant, low-cost cross-border payments and remittances for individuals and businesses across the continent."
+    },
+    {
+      "slug": "fonbnk",
+      "shortDescription": "Fonbnk is a fiat on-ramp and off-ramp anchor on Stellar that converts local currency and prepaid mobile airtime into USDC. Built for mobile-first, cash-based markets across Africa and other emerging economies, it uses SEP-24 hosted deposit and withdrawal to give unbanked users low-friction stablecoin on/off-ramp access."
+    },
+    {
+      "slug": "felix-pago",
+      "shortDescription": "Félix Pago is a WhatsApp-based cross-border remittance app for the US to Latin America corridor, letting migrants send money home to Mexico, Guatemala, Honduras and beyond via chat. It routes USDC over the Stellar network and settles to local fiat in seconds (e.g. Mexican pesos via Bitso and SPEI) — a crypto-to-cash money transfer with no crypto knowledge required."
+    },
+    {
+      "slug": "chipper",
+      "shortDescription": "Chipper Cash is a pan-African fintech app for low-cost cross-border payments, virtual cards, and investing. As a Stellar-enabled anchor, it lets users cash in and cash out USDC in real time through MoneyGram's agent network, supporting crypto-to-cash remittance payouts and money transfers across African corridors."
+    },
+    {
+      "slug": "decaf",
+      "shortDescription": "Decaf is a non-custodial wallet on the Solana and Stellar networks for cross-border money movement across nearly 200 countries. Users on/off-ramp between fiat and USDC via MoneyGram and partner ramps, send and receive remittances, and cash out crypto to local fiat without a bank account, with multi-currency support and FX."
+    },
+    {
+      "slug": "dfns",
+      "shortDescription": "Dfns is an MPC wallet-as-a-service and key-management platform with native Stellar and Soroban support. It distributes private key shares across a multi-party computation network so banks, fintechs, and tokenization platforms can create and manage XLM wallets, enforce policy controls, and sign transactions via API for institutional custody."
+    },
+    {
+      "slug": "ultra-stellar",
+      "shortDescription": "Ultra Stellar builds core Stellar products: the LOBSTR wallet, StellarX and StellarTerm trading platforms, and LOBSTR Vault — a multisignature (multisig) self-custody and key-management app for Stellar. Vault generates and stores signer keys locally on-device for M-of-N multisig protection of XLM and Stellar assets."
+    },
+    {
+      "slug": "zenex",
+      "shortDescription": "Zenex (formerly Hermes) is a decentralized perpetual (leveraged) trading exchange on Stellar/Soroban, using a liquidity-pool model with oracle pricing for deep liquidity and low slippage. Currently on testnet, with mainnet pending. Supports passkey login and asset bridging via Rozo, with Circle CCTP support coming soon."
     }
   ],
   "retags": [
     {
-      "slug": "orally",
-      "scfAwarded": true,
-      "scfTotalAwardedUSD": 48000,
+      "slug": "brale",
       "category": "Infrastructure"
     },
     {
-      "slug": "mykobo",
+      "slug": "glo-dollar",
+      "category": "Asset"
+    },
+    {
+      "slug": "ondo",
+      "category": "Asset"
+    },
+    {
+      "slug": "stellarterm",
+      "category": "User-Facing App"
+    },
+    {
+      "slug": "spacewalk",
+      "category": "Infrastructure"
+    },
+    {
+      "slug": "stronghold",
+      "category": "Infrastructure"
+    },
+    {
+      "slug": "benji",
+      "category": "Asset"
+    },
+    {
+      "slug": "wisdomtree",
+      "category": "User-Facing App"
+    },
+    {
+      "slug": "redswan",
+      "category": "Asset"
+    },
+    {
+      "slug": "spiko",
+      "category": "Asset"
+    },
+    {
+      "slug": "bridge",
+      "category": "Infrastructure"
+    },
+    {
+      "slug": "moneygram",
       "category": "Anchor"
     },
     {
-      "slug": "anclap",
+      "slug": "bitso",
+      "category": "Anchor"
+    },
+    {
+      "slug": "yellow-card",
+      "category": "Anchor"
+    },
+    {
+      "slug": "fonbnk",
       "category": "Anchor"
     }
   ],
   "newRecords": [
     {
-      "name": "Rabet",
+      "name": "Solar Wallet",
       "category": "User-Facing App",
-      "website": "https://rabet.io/",
-      "shortDescription": "Open-source non-custodial wallet built natively for the Stellar network, available as a browser extension for Chrome, Firefox, Edge, and Brave. Lets users manage XLM and Stellar assets, transfer and exchange assets, and sign/connect to Stellar dApps (including Soroban apps) by injecting Rabet into the browser without an SDK. Source: rabet.io, github.com/rabetofficial/rabet-extension."
+      "website": "https://solarwallet.io/",
+      "shortDescription": "Solar is a free, open-source (GPL), non-custodial Stellar wallet by SatoshiPay, available as desktop apps for Windows, macOS and Linux and as iOS and Android mobile apps. Users hold, send and receive XLM and Stellar assets, and it offers easy-to-configure built-in multi-signature accounts aimed at business and security-conscious users."
     },
     {
-      "name": "QuickNode",
+      "name": "Circle CCTP (Cross-Chain Transfer Protocol)",
       "category": "Infrastructure",
-      "website": "https://www.quicknode.com/docs/stellar",
-      "shortDescription": "Managed RPC infrastructure provider with official Stellar support. Offers Stellar Mainnet and Testnet endpoints exposing the Horizon REST API for ledger/account/transaction queries plus the Soroban JSON-RPC API for smart-contract deployment and invocation, removing the need to self-host nodes. Source: QuickNode docs and 'QuickNode Announces Support for Stellar and Its Horizon API' blog."
+      "website": "https://www.circle.com/cross-chain-transfer-protocol",
+      "shortDescription": "Circle's Cross-Chain Transfer Protocol (CCTP), live on Stellar since May 2026. Moves native USDC between Stellar and 23+ chains (Ethereum, Solana, Base, Arbitrum, Optimism) via a 1:1 burn-and-mint model rather than wrapped or locked assets, settling in seconds. Builders integrate cross-chain USDC bridging and pass metadata for execution via Hooks."
     },
     {
-      "name": "Validation Cloud",
+      "name": "Stellar Disbursement Platform (SDP)",
       "category": "Infrastructure",
-      "website": "https://www.validationcloud.io/stellar",
-      "shortDescription": "Node infrastructure provider offering high-performance Stellar RPC and Horizon nodes via its Node API. Live on Soroban (Stellar's smart-contract platform) mainnet since March 2024, combining Horizon and Stellar/Soroban RPC in a single endpoint with multi-region, failover, and free-tier access for building and querying Stellar dApps. Sources: validationcloud.io/stellar, blog.validationcloud.io/stellar."
+      "website": "https://stellar.org/products-and-tools/disbursement-platform",
+      "shortDescription": "The Stellar Disbursement Platform (SDP) is the Stellar Development Foundation's open-source, self-hostable platform for making bulk payments to many recipients over the Stellar network. Used for mass payouts, global payroll, vendor and contractor payments, government transfers, remittances, and cash-assistance disbursements; powers Stellar Aid Assist."
     },
     {
-      "name": "Squid Router",
-      "category": "Partner Integration",
-      "website": "https://www.squidrouter.com/",
-      "shortDescription": "Cross-chain swap and bridge aggregator (built on Axelar) that went live for Stellar at the Axelar-Stellar integration launch on Feb 16, 2026. Confirmed live and operational at launch, it routes liquidity and bridges assets such as XLM into/out of Stellar across connected chains. Source: Axelar Network integrates Stellar announcement (Feb 2026)."
+      "name": "BitGo",
+      "category": "Infrastructure",
+      "website": "https://www.bitgo.com",
+      "shortDescription": "BitGo is a regulated qualified custodian and multisignature wallet provider supporting Stellar (XLM). It offers institutional custody and multisig key management for XLM, including self-custody and qualified-custody options, with support for Stellar federation (federated) addresses. BitGo was the first multisig wallet and custody solution to add Stellar."
+    },
+    {
+      "name": "WalletConnect",
+      "category": "Infrastructure",
+      "website": "https://walletconnect.network",
+      "shortDescription": "WalletConnect is the open connection protocol the Stellar Wallets Kit uses to link web dApps to mobile wallets (e.g. LOBSTR) via QR code or deeplink. It is not a wallet itself but a natively supported Stellar Wallets Kit module for bridging mobile Stellar wallets to browser-based applications."
+    },
+    {
+      "name": "Klever",
+      "category": "User-Facing App",
+      "website": "https://klever.io",
+      "shortDescription": "Klever is a non-custodial multichain wallet with Stellar (XLM) support, available as a browser extension, iOS and Android apps and a companion hardware wallet. It lets users buy, swap, send and hold XLM and is natively supported as a module in the Stellar Wallets Kit."
+    },
+    {
+      "name": "Bitget Wallet",
+      "category": "User-Facing App",
+      "website": "https://web3.bitget.com",
+      "shortDescription": "Bitget Wallet is a non-custodial multichain wallet that integrated the Stellar mainnet in 2026 for stablecoin payments, available as iOS and Android apps and a browser extension. It supports holding, swapping and transferring XLM/USDC plus QR pay and on/off ramps, and is a Stellar Wallets Kit module."
+    },
+    {
+      "name": "Fordefi",
+      "category": "Infrastructure",
+      "website": "https://fordefi.com",
+      "shortDescription": "Fordefi is an institutional-grade MPC wallet and Web3 security platform delivered as a multichain browser extension. It is included as a module in the Stellar Wallets Kit so dApps can connect institutional Stellar signers with policy and approval workflows."
+    },
+    {
+      "name": "Cactus Link",
+      "category": "Infrastructure",
+      "website": "https://www.mycactus.com",
+      "shortDescription": "Cactus Link is the institutional browser-extension wallet from Cactus Custody (Matrixport) for connecting custodied accounts to DeFi dApps across ~30 chains. It is included as a module in the Stellar Wallets Kit for institutional Stellar dApp connections."
+    },
+    {
+      "name": "HOT Wallet",
+      "category": "User-Facing App",
+      "website": "https://hot-labs.org",
+      "shortDescription": "HOT Wallet by HOT Labs is a non-custodial multichain wallet (Stellar, TON, NEAR, Solana, EVM and more) delivered as a Telegram mini-app, mobile apps and a browser extension. On Stellar it supports transfers, swaps and gas-free transactions, and is natively supported by the Stellar Wallets Kit."
+    },
+    {
+      "name": "Ledger",
+      "category": "User-Facing App",
+      "website": "https://www.ledger.com",
+      "shortDescription": "Ledger is a hardware wallet (Nano S Plus, Nano X, Stax, Flex) with a native Stellar (XLM) app for cold-storage key management and transaction signing. It is a natively supported hardware module in the Stellar Wallets Kit, usable via USB/WebHID."
+    },
+    {
+      "name": "Trezor",
+      "category": "User-Facing App",
+      "website": "https://trezor.io",
+      "shortDescription": "Trezor is a hardware wallet (Model T, Safe 3, Safe 5) with native Stellar (XLM) support for offline key storage and transaction signing. It is a natively supported hardware module in the Stellar Wallets Kit for cold-storage signing of Stellar transactions."
     }
   ]
 }
