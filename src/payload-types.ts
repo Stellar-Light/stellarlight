@@ -342,6 +342,15 @@ export interface Project {
     awardedRounds?: number[] | null;
   };
   verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
+  embedding?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   provenance: {
     source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
     sourceId?: string | null;
@@ -356,6 +365,10 @@ export interface Project {
    * Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.
    */
   relevanceScore?: number | null;
+  /**
+   * Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed) — this is curated.
+   */
+  prominence?: number | null;
   /**
    * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
    */
@@ -1557,6 +1570,7 @@ export interface ProjectsSelect<T extends boolean = true> {
         awardedRounds?: T;
       };
   verificationLevel?: T;
+  embedding?: T;
   provenance?:
     | T
     | {
@@ -1567,6 +1581,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   lastVerifiedAt?: T;
   featured?: T;
   relevanceScore?: T;
+  prominence?: T;
   communityPick?: T;
   relatedEntities?: T;
   hackathon?: T;

@@ -295,6 +295,16 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			name: "prominence",
+			type: "number",
+			defaultValue: 0,
+			admin: {
+				description:
+					"Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed) — this is curated.",
+				position: "sidebar",
+			},
+		},
+		{
 			name: "communityPick",
 			type: "checkbox",
 			defaultValue: false,

@@ -127,8 +127,70 @@ interface ProjectRow {
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
 	hackathonPrizeTrack: string | null;
+	prominence: number;
+	verificationLevel: string | null;
 	score: number;
 	url: string;
+}
+
+// Synonym + light-stem expansion so natural queries reach records described in
+// adjacent vocabulary the literal `like` would miss: "game" → "gaming"/"GameFi",
+// "dex" → "amm"/"swap", "lending" → "borrow", "oracle" → "price feed". Each query
+// token expands to a term set; a record matches the token if ANY term hits its
+// text. Keeps recall high on single-word category queries without a full vector pass.
+const SYNONYMS: Record<string, string[]> = {
+	wallet: ["wallet", "custody", "signer", "keystore"],
+	dex: ["dex", "amm", "swap", "exchange", "orderbook"],
+	amm: ["amm", "liquidity", "pool", "swap", "dex"],
+	swap: ["swap", "dex", "amm", "exchange"],
+	lending: ["lending", "lend", "borrow", "loan", "money market"],
+	lend: ["lend", "lending", "borrow", "loan"],
+	borrow: ["borrow", "borrowing", "lend", "lending", "loan"],
+	oracle: ["oracle", "price feed", "data feed", "feed"],
+	bridge: ["bridge", "cross-chain", "interoperability", "cctp", "wrapped"],
+	stablecoin: ["stablecoin", "stable", "usdc", "eurc"],
+	staking: ["staking", "stake", "yield", "apy", "earn"],
+	yield: ["yield", "apy", "earn", "staking", "vault"],
+	nft: ["nft", "collectible", "collectibles", "mint"],
+	gaming: ["gaming", "game", "gamefi", "play-to-earn", "play2earn"],
+	game: ["game", "gaming", "gamefi", "play-to-earn"],
+	anchor: ["anchor", "on-ramp", "off-ramp", "sep-24", "sep24", "ramp"],
+	remittance: ["remittance", "cross-border", "money transfer", "send money", "payout"],
+	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
+	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
+	rpc: ["rpc", "node", "endpoint", "horizon"],
+	sdk: ["sdk", "library", "client library", "kit"],
+	explorer: ["explorer", "block explorer"],
+	faucet: ["faucet", "testnet", "friendbot"],
+	identity: ["identity", "kyc", "did", "credential", "compliance"],
+	governance: ["governance", "dao", "voting"],
+	custody: ["custody", "custodial", "mpc", "multisig", "key management"],
+	domains: ["domains", "domain", "name service", "naming"],
+	rwa: ["rwa", "real world asset", "real-world asset", "tokenized", "tokenization"],
+};
+function termsForToken(t: string): string[] {
+	const out = new Set<string>([t]);
+	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1)); // plural
+	if (t.length > 5 && t.endsWith("ing")) out.add(t.slice(0, -3)); // gerund
+	for (const syn of SYNONYMS[t] ?? []) out.add(syn);
+	return [...out];
+}
+
+// Authority boost layered under keyword-match count: a curated `prominence`
+// (0-100, set on canonical/flagship records) dominates, then SDF/community
+// verification, SCF funding, and live status. This is what lifts Freighter /
+// Soroswap / Reflector above tail records that merely contain the query word.
+function rankBoost(p: ProjectRow): number {
+	return (
+		(p.prominence || 0) +
+		(p.verificationLevel === "Verified (SDF)"
+			? 18
+			: p.verificationLevel === "Verified (Community)"
+				? 8
+				: 0) +
+		(p.scfAwarded ? 12 : 0) +
+		(p.status === "Live" ? 4 : 0)
+	);
 }
 
 export async function GET(req: NextRequest) {
@@ -181,11 +243,13 @@ export async function GET(req: NextRequest) {
 			// Soroswap/Aquarius) permanently unsearchable once the directory grew
 			// past 500. The in-memory tiering below still ranks the candidates.
 			if (tokens.length) {
-				where.or = tokens.flatMap((t) => [
-					{ name: { like: t } },
-					{ shortDescription: { like: t } },
-					{ category: { like: t } },
-				]);
+				where.or = tokens.flatMap((t) =>
+					termsForToken(t).flatMap((v) => [
+						{ name: { like: v } },
+						{ shortDescription: { like: v } },
+						{ category: { like: v } },
+					]),
+				);
 			}
 
 			const result = await payload.find({
@@ -212,12 +276,18 @@ export async function GET(req: NextRequest) {
 					hackathonPlacement?: string;
 					hackathonPrize?: number;
 					hackathonPrizeTrack?: string;
+					prominence?: number;
+					verificationLevel?: string;
 				}>
 			).map((p) => {
 				const hay =
 					`${p.name} ${p.shortDescription ?? ""} ${p.category}`.toLowerCase();
 				const score = tokens.length
-					? tokens.reduce((s, t) => s + (hay.includes(t) ? 1 : 0), 0)
+					? tokens.reduce(
+							(s, t) =>
+								s + (termsForToken(t).some((v) => hay.includes(v)) ? 1 : 0),
+							0,
+						)
 					: 1;
 				const hk =
 					p.hackathon && typeof p.hackathon === "object"
@@ -250,6 +320,8 @@ export async function GET(req: NextRequest) {
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
 					hackathonPrizeTrack: p.hackathonPrizeTrack ?? null,
+					prominence: typeof p.prominence === "number" ? p.prominence : 0,
+					verificationLevel: p.verificationLevel ?? null,
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
 				};
@@ -299,12 +371,13 @@ export async function GET(req: NextRequest) {
 				filtered.sort(
 					(a, b) =>
 						b.score - a.score ||
+						rankBoost(b) - rankBoost(a) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
 				projects = filtered;
 			} else {
 				matchMode = "all";
-				projects.sort((a, b) => Number(b.scfAwarded) - Number(a.scfAwarded));
+				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
 			}
 
 			totalMatching = projects.length;
