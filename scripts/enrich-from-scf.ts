@@ -188,14 +188,25 @@ async function main() {
   const unmatched: string[] = [];
 
   for (const scf of scfProjects) {
-    const normTitle = normalize(scf.title);
-    const scfSlug = toSlug(scf.title);
+    // Trim parenthetical/whitespace noise from SCF titles before normalizing
+    // (e.g. "Soroban Optimistic Oracle  (SOO) " → "soroban optimistic oracle").
+    const cleanTitle = scf.title.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+    const normTitle = normalize(cleanTitle);
+    const scfSlug = toSlug(cleanTitle);
+    // SCF slugs carry a trailing hash (e.g. "warp-drive-7tk") — stem it so it
+    // joins our "warp-drive" / "warpdrive" records.
+    const scfSlugStem = String(scf.slug || "").replace(/-[a-z0-9]{2,5}$/i, "");
 
-    let ours = byNormName.get(normTitle) || bySlug.get(scfSlug) || bySlug.get(scf.slug);
+    let ours =
+      byNormName.get(normTitle) ||
+      bySlug.get(scfSlug) ||
+      bySlug.get(scf.slug) ||
+      bySlug.get(scfSlugStem) ||
+      byNormName.get(normalize(scfSlugStem));
 
-    // Try partial matching for common patterns
-    if (!ours) {
-      // Try without common suffixes
+    // Try partial matching for common patterns (last resort; guard tiny stems
+    // to avoid e.g. "velo" swallowing "velocity").
+    if (!ours && normTitle.length >= 4) {
       for (const [key, proj] of byNormName) {
         if (key.includes(normTitle) || normTitle.includes(key)) {
           ours = proj;
@@ -230,11 +241,21 @@ async function main() {
     const updateData: any = {};
 
     // --- SCF round data: always update ---
-    const isAwarded = scf.lastAwardedRound > 0;
     const currentScf = ours.scf || {};
 
     // Scrape detail page early so we can include totalAwarded in SCF data
     const detail = await scrapeDetailPage(scf.slug);
+
+    // The SCF API encodes special award types (Liquidity / Public Goods / RFP)
+    // as NEGATIVE lastAwardedRound codes — those ARE awards. The old
+    // `lastAwardedRound > 0` check silently dropped Blend, Soroswap, Aquarius,
+    // FxDAO, Phoenix, Slender, Scaffold Stellar, SoroPG, the Stellar SDKs, etc.
+    // Treat any non-zero round, or a positive totalAwarded / any awarded rounds,
+    // as funded.
+    const isAwarded =
+      (typeof scf.lastAwardedRound === "number" && scf.lastAwardedRound !== 0) ||
+      (detail?.totalAwarded ?? 0) > 0 ||
+      (detail?.awardedRounds?.length ?? 0) > 0;
 
     const hasNewData =
       currentScf.awarded !== isAwarded ||
