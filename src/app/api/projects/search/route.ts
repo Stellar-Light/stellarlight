@@ -214,16 +214,18 @@ function intentTypesFor(tokens: string[]): Set<string> {
 	return s;
 }
 
-// Authority boost layered under keyword-match count. When the query implies a
-// category (intentTypes), a record whose own `types` match it gets the dominant
-// boost — so the actual wallets/DEXes/lenders lead, not a high-prominence record
-// from another category that merely contains the word. Then curated `prominence`,
-// SDF/community verification, SCF funding, and live status.
-function rankBoost(p: ProjectRow, intentTypes: Set<string>): number {
-	const typeMatch =
-		intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t));
+// Does the record's own `types` match the query's implied category? Used as a
+// PRIMARY sort tier (above prominence) so a true-category record always leads its
+// query, even at prominence 0 — e.g. an obscure NFT project beats a high-prominence
+// lender that merely contains "nft". intentTypes empty (no category query) → false.
+function typeMatch(p: ProjectRow, intentTypes: Set<string>): boolean {
+	return intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t));
+}
+
+// Authority/quality WITHIN a tier: curated prominence, then SDF/community
+// verification, SCF funding, and live status.
+function rankBoost(p: ProjectRow): number {
 	return (
-		(typeMatch ? 60 : 0) +
 		(p.prominence || 0) +
 		(p.verificationLevel === "Verified (SDF)"
 			? 18
@@ -416,15 +418,15 @@ export async function GET(req: NextRequest) {
 				filtered.sort(
 					(a, b) =>
 						b.score - a.score ||
-						rankBoost(b, intentTypes) - rankBoost(a, intentTypes) ||
+						Number(typeMatch(b, intentTypes)) -
+							Number(typeMatch(a, intentTypes)) ||
+						rankBoost(b) - rankBoost(a) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
 				projects = filtered;
 			} else {
 				matchMode = "all";
-				projects.sort(
-					(a, b) => rankBoost(b, intentTypes) - rankBoost(a, intentTypes),
-				);
+				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
 			}
 
 			totalMatching = projects.length;
