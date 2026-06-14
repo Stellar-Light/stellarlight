@@ -38,6 +38,10 @@ const TYPES: Record<string, string[]> = {
 	// payments / remittance
 	"felix-pago": ["Payments"], chipper: ["Payments"], decaf: ["Payments"],
 	"stellar-disbursement-platform-sdp": ["Payments"],
+	// oracles: no "Oracle" type exists, and the lumenloop sync mislabeled these
+	// (DIA=[Bridge,AI], Band=[Bridge], Reflector=[SDK]) — clear the wrong tags so
+	// they stop polluting q=bridge / q=sdk. q=oracle ranks them by prominence.
+	reflector: [], dia: [], band: [], "redstone-finance": [], lightecho: [],
 };
 
 async function main() {
