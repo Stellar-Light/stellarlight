@@ -1,0 +1,27 @@
+name: Enrich SCF data (manual)
+# Re-runs scripts/enrich-from-scf.ts against prod to fix SCF award tagging.
+# Dry-run by default; set execute=true to write. Pulls the live SCF API.
+on:
+  workflow_dispatch:
+    inputs:
+      execute: { description: "Write to DB? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/enrich-from-scf.ts ${{ inputs.execute && '--execute' || '' }}
