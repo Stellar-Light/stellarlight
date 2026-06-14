@@ -2,37 +2,33 @@
   "source": "Electric Capital \u2014 Open Dev Data",
   "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
   "ecosystem": "Stellar",
-  "asOf": "2026-06-04",
-  "refreshedAt": "2026-06-13T08:54:23.839195+00:00",
+  "asOf": "2026-06-05",
+  "refreshedAt": "2026-06-14T09:29:13.185143+00:00",
   "mad": {
-    "total": 1780,
-    "exclusive": 986,
-    "multichain": 794,
-    "thirtyDaysAgo": 1707,
-    "ninetyDaysAgo": 1247,
-    "oneYearAgo": 1029,
+    "total": 1772,
+    "exclusive": 981,
+    "multichain": 791,
+    "thirtyDaysAgo": 1703,
+    "ninetyDaysAgo": 1244,
+    "oneYearAgo": 1033,
     "allTimePeak": 1793,
     "allTimePeakDay": "2026-06-02"
   },
   "commits28d": {
-    "total": 31212,
-    "thirtyDaysAgo": 37990
+    "total": 31411,
+    "thirtyDaysAgo": 37939
   },
   "tenure": {
-    "fullTime": 184,
+    "fullTime": 180,
     "partTime": 1366,
-    "oneTime": 230
+    "oneTime": 226
   },
   "experience": {
-    "lessThan1Year": 1154,
-    "oneToTwoYears": 349,
-    "twoYearsPlus": 277
+    "lessThan1Year": 1149,
+    "oneToTwoYears": 351,
+    "twoYearsPlus": 272
   },
   "series365d": [
-    {
-      "date": "2025-06-04",
-      "mad": 1029
-    },
     {
       "date": "2025-06-05",
       "mad": 1033
@@ -1492,24 +1488,28 @@
     {
       "date": "2026-06-04",
       "mad": 1780
+    },
+    {
+      "date": "2026-06-05",
+      "mad": 1772
     }
   ],
   "geo": {
-    "totalActive28d": 1780,
-    "located": 357,
-    "unknown": 1423,
+    "totalActive28d": 1772,
+    "located": 369,
+    "unknown": 1403,
     "topCountries": [
       {
         "country": "Nigeria",
-        "devs": 175
+        "devs": 182
       },
       {
         "country": "United States",
-        "devs": 45
+        "devs": 46
       },
       {
         "country": "India",
-        "devs": 32
+        "devs": 35
       },
       {
         "country": "Costa Rica",
@@ -1517,7 +1517,7 @@
       },
       {
         "country": "Canada",
-        "devs": 7
+        "devs": 8
       },
       {
         "country": "Argentina",
@@ -1545,12 +1545,8 @@
     {
       "id": 2,
       "name": "Ethereum",
-      "current": 8177,
+      "current": 8140,
       "series": [
-        {
-          "date": "2025-06-04",
-          "mad": 18695
-        },
         {
           "date": "2025-06-05",
           "mad": 18768
@@ -3010,18 +3006,18 @@
         {
           "date": "2026-06-04",
           "mad": 8177
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 8140
         }
       ]
     },
     {
       "id": 391,
       "name": "Solana",
-      "current": 2589,
+      "current": 2572,
       "series": [
-        {
-          "date": "2025-06-04",
-          "mad": 7495
-        },
         {
           "date": "2025-06-05",
           "mad": 7518
@@ -4481,18 +4477,18 @@
         {
           "date": "2026-06-04",
           "mad": 2589
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 2572
         }
       ]
     },
     {
       "id": 1,
       "name": "Bitcoin",
-      "current": 2451,
+      "current": 2437,
       "series": [
-        {
-          "date": "2025-06-04",
-          "mad": 4457
-        },
         {
           "date": "2025-06-05",
           "mad": 4483
@@ -5952,18 +5948,18 @@
         {
           "date": "2026-06-04",
           "mad": 2451
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 2437
         }
       ]
     },
     {
       "id": 2692,
       "name": "Polygon",
-      "current": 1338,
+      "current": 1324,
       "series": [
-        {
-          "date": "2025-06-04",
-          "mad": 2456
-        },
         {
           "date": "2025-06-05",
           "mad": 2466
@@ -7423,81 +7419,81 @@
         {
           "date": "2026-06-04",
           "mad": 1338
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 1324
         }
       ]
     },
     {
       "id": 2817,
       "name": "NEAR",
-      "current": 620,
+      "current": 625,
       "series": [
         {
-          "date": "2025-06-04",
-          "mad": 935
-        },
-        {
           "date": "2025-06-05",
-          "mad": 931
+          "mad": 929
         },
         {
           "date": "2025-06-06",
-          "mad": 932
+          "mad": 930
         },
         {
           "date": "2025-06-07",
-          "mad": 931
+          "mad": 929
         },
         {
           "date": "2025-06-08",
-          "mad": 937
+          "mad": 935
         },
         {
           "date": "2025-06-09",
-          "mad": 942
+          "mad": 940
         },
         {
           "date": "2025-06-10",
-          "mad": 932
+          "mad": 931
         },
         {
           "date": "2025-06-11",
-          "mad": 934
+          "mad": 933
         },
         {
           "date": "2025-06-12",
-          "mad": 924
+          "mad": 923
         },
         {
           "date": "2025-06-13",
-          "mad": 909
+          "mad": 908
         },
         {
           "date": "2025-06-14",
-          "mad": 907
+          "mad": 906
         },
         {
           "date": "2025-06-15",
-          "mad": 916
-        },
-        {
-          "date": "2025-06-16",
           "mad": 915
         },
         {
+          "date": "2025-06-16",
+          "mad": 914
+        },
+        {
           "date": "2025-06-17",
-          "mad": 907
+          "mad": 906
         },
         {
           "date": "2025-06-18",
-          "mad": 886
+          "mad": 885
         },
         {
           "date": "2025-06-19",
-          "mad": 890
+          "mad": 889
         },
         {
           "date": "2025-06-20",
-          "mad": 892
+          "mad": 891
         },
         {
           "date": "2025-06-21",
@@ -8894,18 +8890,18 @@
         {
           "date": "2026-06-04",
           "mad": 620
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 625
         }
       ]
     },
     {
       "id": 8,
       "name": "Cardano",
-      "current": 626,
+      "current": 618,
       "series": [
-        {
-          "date": "2025-06-04",
-          "mad": 858
-        },
         {
           "date": "2025-06-05",
           "mad": 859
@@ -10365,6 +10361,10 @@
         {
           "date": "2026-06-04",
           "mad": 626
+        },
+        {
+          "date": "2026-06-05",
+          "mad": 618
         }
       ]
     }
