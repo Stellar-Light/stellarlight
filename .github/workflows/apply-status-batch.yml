@@ -1,0 +1,17 @@
+name: Apply status batch (manual)
+on: { workflow_dispatch: { inputs: { execute: { description: "write?", type: boolean, default: false } } } }
+permissions: { contents: read }
+jobs:
+  batch:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/apply-status-batch.ts ${{ inputs.execute && '--execute' || '' }}
