@@ -7,15 +7,9 @@ import configPromise from "../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 // [slug, newStatus, reason]
 const OPS: [string, string, string][] = [
-  ["multiclique", "Draft", "defunct — multiclique.org NXDOMAIN"],
-  ["elio-dao", "Draft", "defunct — elio-dao.org NXDOMAIN"],
-  ["blend-capital", "Draft", "dupe of 'blend' (keeper has SCF+logo)"],
-  ["sushi-swap", "Draft", "dupe of 'sushi'"],
-  ["freedom-pay", "Draft", "dupe of 'freedom-pay-wallet' (SCF $150k)"],
-  ["soroban-optimsitic-oracle", "Draft", "typo dupe of 'soroban-optimistic-oracle'"],
-  ["diadata", "Draft", "dupe of 'dia'"],
-  ["raumfi", "Draft", "dupe of 'raum-network'"],
-  ["raum-network", "Development", "lower — testnet-only, never shipped mainnet"],
+  ["zenex", "Pre-Release", "testnet, not mainnet — was overclaiming Live (user-confirmed)"],
+  ["vibrant", "Draft", "rebranded to Vesseo; retire stale-brand record (canonical = vesseo)"],
+  ["yellowcard", "Draft", "duplicate of 'yellow-card' (same company)"],
 ];
 
 async function main() {
