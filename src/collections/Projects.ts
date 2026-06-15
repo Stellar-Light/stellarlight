@@ -95,6 +95,8 @@ export const Projects: CollectionConfig = {
 				"RWA",
 				"Stablecoin",
 				"Social Impact",
+				"RPC",
+				"Faucet",
 			],
 		},
 		{

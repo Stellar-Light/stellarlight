@@ -271,6 +271,8 @@ export interface Project {
         | 'RWA'
         | 'Stablecoin'
         | 'Social Impact'
+        | 'RPC'
+        | 'Faucet'
       )[]
     | null;
   /**
