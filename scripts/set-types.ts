@@ -18,7 +18,7 @@ const TYPES: Record<string, string[]> = {
 	infstones: ["RPC"], ankr: ["RPC"], onfinality: ["RPC"], getblock: ["RPC"],
 	exaion: ["RPC"], "horizon-as-a-service": ["RPC"],
 	obsrvr: ["RPC", "Indexer"], "lightsail-network-quasar": ["RPC", "Indexer"],
-	friendbot: ["Faucet"], "stellar-cli": ["Faucet"], "stellar-quickstart": ["Faucet"],
+	friendbot: ["Faucet"], "stellar-cli": ["Faucet"], "stellar-quickstart": [],
 	"stellar-laboratory": ["SDK", "Explorer", "Faucet"],
 	// --- deferred-categories curation (SDK/RPC/indexer/faucet/identity/gaming) ---
 	"javascript-stellar-sdk": ["SDK"],
