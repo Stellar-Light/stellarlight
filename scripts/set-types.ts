@@ -12,6 +12,14 @@ const EXECUTE = process.argv.includes("--execute");
 // Oracles intentionally left untyped — q=oracle has no intent-type and already ranks
 // right by prominence. Custody/MPC infra → "Security" (NOT Wallet) so it leaves q=wallet.
 const TYPES: Record<string, string[]> = {
+	// --- RPC providers + faucet tools (new RPC / Faucet types — intent-scoped) ---
+	"validation-cloud": ["RPC"], quicknode: ["RPC"], nodies: ["RPC"], nownodes: ["RPC"],
+	alchemy: ["RPC"], blockdaemon: ["RPC"], liquify: ["RPC"], gatewayfm: ["RPC"],
+	infstones: ["RPC"], ankr: ["RPC"], onfinality: ["RPC"], getblock: ["RPC"],
+	exaion: ["RPC"], "horizon-as-a-service": ["RPC"],
+	obsrvr: ["RPC", "Indexer"], "lightsail-network-quasar": ["RPC", "Indexer"],
+	friendbot: ["Faucet"], "stellar-cli": ["Faucet"], "stellar-quickstart": ["Faucet"],
+	"stellar-laboratory": ["SDK", "Explorer", "Faucet"],
 	// --- deferred-categories curation (SDK/RPC/indexer/faucet/identity/gaming) ---
 	"javascript-stellar-sdk": ["SDK"],
 	"soroban-rust-sdk": ["SDK"],
