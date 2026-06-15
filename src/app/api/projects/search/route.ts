@@ -59,6 +59,7 @@ async function semanticProjectRows(
 				status: 1,
 				logo: 1,
 				scf: 1,
+				links: 1,
 				hackathonPlacement: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
@@ -92,6 +93,7 @@ async function semanticProjectRows(
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
+			links: pickLinks(p.links),
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -130,6 +132,7 @@ interface ProjectRow {
 	prominence: number;
 	verificationLevel: string | null;
 	types: string[];
+	links?: Record<string, string>;
 	score: number;
 	url: string;
 }
@@ -240,6 +243,24 @@ function rankBoost(p: ProjectRow): number {
 	);
 }
 
+// Surface the project's OWN canonical homes (website / GitHub / docs / socials)
+// so a consumer can cite the primary source — the project — not us or any
+// directory. These are facts about the project, not anyone's proprietary data;
+// freshness/validity is the Curator link-checker's job, not a sync mirror.
+// Only present, non-empty string fields are included; undefined when none exist.
+function pickLinks(
+	// biome-ignore lint/suspicious/noExplicitAny: payload links group shape
+	links: any,
+): Record<string, string> | undefined {
+	if (!links || typeof links !== "object") return undefined;
+	const out: Record<string, string> = {};
+	for (const k of ["website", "github", "docs", "twitter", "discord"]) {
+		const v = links[k];
+		if (typeof v === "string" && v.length > 0) out[k] = v;
+	}
+	return Object.keys(out).length ? out : undefined;
+}
+
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
 	const q = sp.get("q")?.trim() ?? "";
@@ -327,6 +348,13 @@ export async function GET(req: NextRequest) {
 					prominence?: number;
 					verificationLevel?: string;
 					types?: string[];
+					links?: {
+						website?: string;
+						github?: string;
+						docs?: string;
+						twitter?: string;
+						discord?: string;
+					};
 				}>
 			).map((p) => {
 				const hay =
@@ -372,6 +400,7 @@ export async function GET(req: NextRequest) {
 					prominence: typeof p.prominence === "number" ? p.prominence : 0,
 					verificationLevel: p.verificationLevel ?? null,
 					types: Array.isArray(p.types) ? p.types : [],
+					links: pickLinks(p.links),
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
 				};

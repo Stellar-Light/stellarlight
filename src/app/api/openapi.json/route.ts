@@ -833,7 +833,7 @@ const spec: OpenAPISpec = {
 					shortDescription: { type: "string" },
 					status: {
 						type: "string",
-						enum: ["Live", "Development", "Abandoned"],
+						enum: ["Draft", "Development", "Pre-Release", "Live"],
 					},
 					logoUrl: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
@@ -848,6 +848,30 @@ const spec: OpenAPISpec = {
 							"Relevance score for the current query (higher = better match)",
 					},
 					url: { type: "string", format: "uri" },
+					prominence: {
+						type: "number",
+						description:
+							"Editorial ranking boost (0-100); higher = more canonical for its category.",
+					},
+					verificationLevel: { type: "string", nullable: true },
+					types: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Capability tags (Wallet, DEX, Lending, Oracle, SDK, RPC, Faucet, NFT, RWA, Anchor, Stablecoin, Indexer, Explorer, Security, Gaming).",
+					},
+					links: {
+						type: "object",
+						description:
+							"The project OWN canonical homes - cite these as the primary source, not StellarLight or any directory. Only present, non-empty fields are included.",
+						properties: {
+							website: { type: "string" },
+							github: { type: "string" },
+							docs: { type: "string" },
+							twitter: { type: "string" },
+							discord: { type: "string" },
+						},
+					},
 				},
 			},
 			ProjectSearchResponse: {
