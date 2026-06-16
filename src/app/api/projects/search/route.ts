@@ -17,6 +17,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { searchRepos } from "@/lib/repo-search";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -504,6 +505,15 @@ export async function GET(req: NextRequest) {
 	}
 	const usedSemantic = semanticAdds.length > 0;
 
+	// Code references: top graded repos matching the same query, surfaced INLINE
+	// so a consumer that only calls project search (e.g. an agent with a fixed
+	// tool list) picks them up automatically — no separate repo tool needed.
+	// First page + query only; degrades to [] if the repos index is empty.
+	const codeReferences =
+		q && offset === 0 && payload
+			? (await searchRepos(payload, q, { limit: 5 })).repos
+			: [];
+
 	logApiHit({
 		req,
 		endpoint: "/api/projects/search",
@@ -574,6 +584,10 @@ export async function GET(req: NextRequest) {
 					: {}),
 			},
 			projects: [...scored, ...semanticAdds],
+			// Inline graded code references (GitHub repos) for the same query, so
+			// consumers get existing-repo prior-art without a separate tool call.
+			// Each carries the repo url + homepage to cite. See /api/repos/search.
+			codeReferences,
 		},
 		{
 			headers: {
