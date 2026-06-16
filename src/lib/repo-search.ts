@@ -108,13 +108,40 @@ export async function searchRepos(
 		const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
 		const docs = (res.docs as unknown as RepoDoc[]).map((r) => {
 			const topics = topicList(r.topics);
-			const hay = `${r.fullName} ${r.description ?? ""} ${topics.join(" ")} ${r.primaryLanguage ?? ""} ${r.readmeExcerpt ?? ""}`.toLowerCase();
-			const score = tokens.length
-				? tokens.reduce((s, t) => s + (termsForToken(t).some((v) => hay.includes(v)) ? 1 : 0), 0)
-				: 1;
-			return { r, topics, score };
+			// Field-weighted relevance: WHERE a term hits matters more than that it
+			// hits at all. name/topics (5) > description/language (3) > README-only
+			// (1), so a repo that's actually ABOUT the query outranks one that merely
+			// mentions it once in a README. name and topics share a weight on purpose
+			// — that way an org-name substring ("zk" in "zkbricks") can't beat a real
+			// topic match, and ties fall through to the repoScore quality grade below,
+			// which keeps flagship repos (noir for zk) leading. Multi-term coverage
+			// is rewarded so a repo matching the whole query beats a partial match.
+			const name = r.fullName.toLowerCase();
+			const tops = topics.join(" ").toLowerCase();
+			const desc = `${r.description ?? ""} ${r.primaryLanguage ?? ""}`.toLowerCase();
+			const readme = (r.readmeExcerpt ?? "").toLowerCase();
+			let score = 0;
+			let matched = 0;
+			if (tokens.length) {
+				for (const t of tokens) {
+					const vs = termsForToken(t);
+					const hit = (hay: string) => vs.some((v) => hay.includes(v));
+					let best = 0;
+					if (hit(name) || hit(tops)) best = 5;
+					else if (hit(desc)) best = 3;
+					else if (hit(readme)) best = 1;
+					if (best > 0) {
+						score += best;
+						matched += 1;
+					}
+				}
+				if (matched > 1) score *= 1 + (matched - 1) * 0.3;
+			} else {
+				score = 1;
+			}
+			return { r, topics, score, matched };
 		});
-		let filtered = tokens.length ? docs.filter((d) => d.score >= 1) : docs;
+		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1) : docs;
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		filtered.sort(
 			(a, b) =>
