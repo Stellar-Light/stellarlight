@@ -16,6 +16,10 @@ import {
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	getWinnerLink,
+	LATEST_WINNERS,
+} from "@/data/recent-hackathon-winners";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -23,15 +27,45 @@ export const revalidate = 300;
 interface SubmissionRow {
 	id: string;
 	name: string;
-	slug: string;
-	category: string;
+	// null for curated winners that aren't (yet) Project records in our DB —
+	// they have no internal project page, so the citable link is `url`.
+	slug: string | null;
+	category: string | null;
 	shortDescription: string | null;
 	hackathonStatus: string | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
 	hackathonPrizeTrack: string | null;
 	scfAwarded: boolean;
+	// Set only for curated winners (who built it). Absent for DB submissions.
+	builder?: string | null;
 	url: string;
+}
+
+/**
+ * Curated winner roster for hackathons whose winners aren't Project records in
+ * our DB (e.g. DoraHacks-sourced events). Without this, the detail endpoint
+ * reports `winners: []` for a hackathon that demonstrably had winners — so a
+ * "did an AI-payments project win a prize?" question can't be answered from us.
+ * The roster lives in src/data/recent-hackathon-winners.ts; this surfaces it
+ * through the API in the same shape as DB-derived winners.
+ */
+function staticWinnersForSlug(slug: string): SubmissionRow[] {
+	if (slug !== LATEST_WINNERS.hackathonUname) return [];
+	return LATEST_WINNERS.winners.map((w) => ({
+		id: `winner-${LATEST_WINNERS.hackathonUname}-${w.rank}`,
+		name: w.projectName,
+		slug: null,
+		category: null,
+		shortDescription: w.description,
+		hackathonStatus: null,
+		hackathonPlacement: w.placementLabel,
+		hackathonPrize: w.prizeUsd,
+		hackathonPrizeTrack: null,
+		scfAwarded: false,
+		builder: w.builder,
+		url: getWinnerLink(w),
+	}));
 }
 
 export async function GET(
@@ -90,12 +124,21 @@ export async function GET(
 				endpoint: "/api/hackathons/[slug]",
 				filters: { slug, source: "dorahacks" },
 			});
+			// Curated winner roster (if we have one for this event) — even when the
+			// full submission list isn't in our DB, we can still answer "who won".
+			const curatedWinners = staticWinnersForSlug(slug);
+			const totalPrizeUSD = curatedWinners.reduce(
+				(s, w) => s + (w.hackathonPrize ?? 0),
+				0,
+			);
 			return NextResponse.json(
 				{
 					meta: {
 						source: getHackathonUrl(dora.uname),
 						generatedAt: new Date().toISOString(),
-						note: "DoraHacks-sourced — submissions/winners/tracks not in stellarlight DB; visit externalUrl for full detail",
+						note: curatedWinners.length
+							? "DoraHacks-sourced — full submission list not in stellarlight DB, but the winner roster below is curated; visit externalUrl for all submissions"
+							: "DoraHacks-sourced — submissions/winners/tracks not in stellarlight DB; visit externalUrl for full detail",
 					},
 					hackathon: {
 						id: `dorahacks-${dora.id}`,
@@ -124,13 +167,13 @@ export async function GET(
 						source: "dorahacks",
 						stats: {
 							totalSubmissions: 0,
-							totalPrizeUSD: dora.bonus_price || 0,
-							winners: 0,
+							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
+							winners: curatedWinners.length,
 							outcomes: { built: 0, inProgress: 0, abandoned: 0, unknown: 0 },
 						},
 						tracks: [],
 					},
-					winners: [],
+					winners: curatedWinners,
 					submissions: [],
 				},
 				{
@@ -187,7 +230,13 @@ export async function GET(
 			unknown: submissions.filter((s) => !s.hackathonStatus).length,
 		};
 
-		const winners = submissions.filter((s) => !!s.hackathonPlacement);
+		// Prefer DB-derived winners (submissions with a placement); fall back to
+		// the curated roster if a curated event made it into the DB without
+		// placement-tagged submissions.
+		const dbWinners = submissions.filter((s) => !!s.hackathonPlacement);
+		const winners = dbWinners.length
+			? dbWinners
+			: staticWinnersForSlug(slug);
 
 		const totalPrizeUSD = submissions.reduce(
 			(sum, s) => sum + (s.hackathonPrize ?? 0),
