@@ -4,9 +4,16 @@ const Q_REPO = `
   query RepoInfo($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
       url
+      nameWithOwner
+      description
+      homepageUrl
+      isFork
+      isArchived
       issues(states: OPEN) { totalCount }
       stargazerCount
       pushedAt
+      primaryLanguage { name }
+      repositoryTopics(first: 25) { nodes { topic { name } } }
       defaultBranchRef { target { ... on Commit { committedDate } } }
     }
   }
@@ -150,9 +157,21 @@ export async function fetchRepoInfo(owner: string, name: string) {
 
 	const stargazerCount = typeof r.stargazerCount === 'number' ? r.stargazerCount : (parseInt(String(r.stargazerCount || 0), 10) || 0);
 	const openIssues = typeof r.issues?.totalCount === 'number' ? r.issues.totalCount : (parseInt(String(r.issues?.totalCount || 0), 10) || 0);
+	const topics: string[] = Array.isArray(r.repositoryTopics?.nodes)
+		? r.repositoryTopics.nodes
+				.map((n: any) => n?.topic?.name)
+				.filter((t: any): t is string => typeof t === "string" && t.length > 0)
+		: [];
 
 	return {
 		url: r.url as string,
+		nameWithOwner: (r.nameWithOwner ?? null) as string | null,
+		description: (r.description ?? null) as string | null,
+		homepageUrl: (r.homepageUrl ?? null) as string | null,
+		isFork: !!r.isFork,
+		isArchived: !!r.isArchived,
+		primaryLanguage: (r.primaryLanguage?.name ?? null) as string | null,
+		topics,
 		lastCommitAt:
 			(r.defaultBranchRef?.target?.committedDate ??
 				r.pushedAt) as string,

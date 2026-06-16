@@ -20,6 +20,7 @@ import { Partners } from "./collections/Partners";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Projects } from "./collections/Projects";
+import { Repos } from "./collections/Repos";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { Signals } from "./collections/Signals";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
@@ -54,6 +55,7 @@ export default buildConfig({
 		Users,
 		Media,
 		Projects,
+		Repos,
 		Blog,
 		Builders,
 		RSSFeeds,

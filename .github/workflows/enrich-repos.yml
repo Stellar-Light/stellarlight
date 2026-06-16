@@ -1,0 +1,28 @@
+name: Enrich repos (code-reference index)
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
+permissions: { contents: read }
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Built-in token reads public-repo metadata (topics/stars/lastCommit) fine.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ inputs.execute && '--execute' || '' }}
