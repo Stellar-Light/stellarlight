@@ -506,10 +506,18 @@ export interface Repo {
   homepageUrl?: string | null;
   isFork?: boolean | null;
   isArchived?: boolean | null;
+  /**
+   * First ~4k chars of the README — the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)
+   */
+  readmeExcerpt?: string | null;
   projectSlug?: string | null;
   projectName?: string | null;
   hackathonWinner?: boolean | null;
   scfAwarded?: boolean | null;
+  /**
+   * 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
+   */
+  builderReputation?: number | null;
   /**
    * 0-100 quality grade (freshness + traction + authority)
    */
@@ -1665,10 +1673,12 @@ export interface ReposSelect<T extends boolean = true> {
   homepageUrl?: T;
   isFork?: T;
   isArchived?: T;
+  readmeExcerpt?: T;
   projectSlug?: T;
   projectName?: T;
   hackathonWinner?: T;
   scfAwarded?: T;
+  builderReputation?: T;
   repoScore?: T;
   repoScoreLabel?: T;
   lastEnrichedAt?: T;

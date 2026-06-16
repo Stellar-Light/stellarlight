@@ -26,11 +26,13 @@ export const Repos: CollectionConfig = {
 		{ name: "homepageUrl", type: "text" },
 		{ name: "isFork", type: "checkbox", defaultValue: false },
 		{ name: "isArchived", type: "checkbox", defaultValue: false },
+		{ name: "readmeExcerpt", type: "textarea", admin: { description: "First ~4k chars of the README — the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)" } },
 		// link to the owning project + denormalized grade inputs
 		{ name: "projectSlug", type: "text", index: true },
 		{ name: "projectName", type: "text" },
 		{ name: "hackathonWinner", type: "checkbox", defaultValue: false },
 		{ name: "scfAwarded", type: "checkbox", defaultValue: false },
+		{ name: "builderReputation", type: "number", defaultValue: 0, admin: { description: "0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)" } },
 		// computed grade (scripts/enrich-repos.ts via src/lib/repo-grade.ts)
 		{ name: "repoScore", type: "number", defaultValue: 0, admin: { description: "0-100 quality grade (freshness + traction + authority)", position: "sidebar" } },
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },

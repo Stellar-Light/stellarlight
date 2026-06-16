@@ -18,6 +18,7 @@ export interface RepoGradeInput {
 	hackathonWinner?: boolean; // owning project placed in a hackathon
 	scfAwarded?: boolean; // owning project is SCF-funded
 	projectProminence?: number; // 0-100 curated prominence of the owning project
+	builderReputation?: number; // 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
 }
 
 export interface RepoGrade {
@@ -54,6 +55,7 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	if (input.hackathonWinner) authority += 0.35;
 	if (input.scfAwarded) authority += 0.25;
 	authority += Math.min(0.4, Math.max(0, input.projectProminence ?? 0) / 250); // prominence 100 → +0.4
+	authority += Math.min(0.4, Math.max(0, input.builderReputation ?? 0) * 0.4); // builder rep (Stellar Passport) → up to +0.4
 	authority = Math.min(1, authority);
 
 	let composite = 0.4 * freshness + 0.25 * traction + 0.35 * authority;
