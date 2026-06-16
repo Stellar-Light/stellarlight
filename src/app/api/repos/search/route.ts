@@ -39,10 +39,40 @@ interface RepoDoc {
 	scfAwarded?: boolean;
 	repoScore?: number;
 	repoScoreLabel?: string | null;
+	readmeExcerpt?: string | null;
+	builderReputation?: number;
 }
 
 function topicList(topics: unknown): string[] {
 	return Array.isArray(topics) ? topics.filter((t): t is string => typeof t === "string") : [];
+}
+
+// Synonym expansion so the tech vocabulary an agent uses reaches repos that
+// spell it differently — "zk" must find "zero-knowledge", "amm" find "dex", etc.
+// A query token matches if ANY of its expansions hits the repo's text.
+const SYNONYMS: Record<string, string[]> = {
+	zk: ["zk", "zero-knowledge", "zero knowledge", "zkp", "snark", "stark", "plonk", "groth16", "circuit", "proof"],
+	zkp: ["zkp", "zk", "zero-knowledge", "proof"],
+	oracle: ["oracle", "price feed", "data feed", "datafeed"],
+	amm: ["amm", "dex", "liquidity", "swap"],
+	dex: ["dex", "amm", "swap", "exchange", "orderbook"],
+	wallet: ["wallet", "keypair", "signer", "passkey"],
+	nft: ["nft", "non-fungible", "collectible"],
+	rwa: ["rwa", "real-world asset", "real world asset", "tokenization", "tokenized"],
+	lending: ["lending", "lend", "borrow", "money market"],
+	bridge: ["bridge", "cross-chain", "interoperability", "cctp"],
+	indexer: ["indexer", "indexing", "subgraph", "data pipeline", "etl"],
+	sdk: ["sdk", "library", "client"],
+	soroban: ["soroban", "smart contract", "contract"],
+	contract: ["contract", "soroban", "smart contract"],
+	stablecoin: ["stablecoin", "usdc", "anchor"],
+	defi: ["defi", "decentralized finance", "amm", "lending"],
+};
+function termsForToken(t: string): string[] {
+	const out = new Set<string>([t]);
+	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1));
+	for (const syn of SYNONYMS[t] ?? []) out.add(syn);
+	return [...out];
 }
 
 export async function GET(req: NextRequest) {
@@ -68,9 +98,9 @@ export async function GET(req: NextRequest) {
 			const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
 			const docs = (res.docs as unknown as RepoDoc[]).map((r) => {
 				const topics = topicList(r.topics);
-				const hay = `${r.fullName} ${r.description ?? ""} ${topics.join(" ")} ${r.primaryLanguage ?? ""}`.toLowerCase();
+				const hay = `${r.fullName} ${r.description ?? ""} ${topics.join(" ")} ${r.primaryLanguage ?? ""} ${r.readmeExcerpt ?? ""}`.toLowerCase();
 				const score = tokens.length
-					? tokens.reduce((s, t) => s + (hay.includes(t) ? 1 : 0), 0)
+					? tokens.reduce((s, t) => s + (termsForToken(t).some((v) => hay.includes(v)) ? 1 : 0), 0)
 					: 1;
 				return { ...r, score, _topics: topics };
 			});
@@ -121,6 +151,7 @@ export async function GET(req: NextRequest) {
 				project: r.projectSlug ? { slug: r.projectSlug, name: r.projectName ?? null } : null,
 				hackathonWinner: !!r.hackathonWinner,
 				scfAwarded: !!r.scfAwarded,
+				builderReputation: r.builderReputation ?? 0,
 				repoScore: r.repoScore ?? 0,
 				repoScoreLabel: r.repoScoreLabel ?? null,
 				score: r.score,

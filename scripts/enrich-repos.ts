@@ -51,6 +51,22 @@ function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 	return out;
 }
 
+// 0-1 reputation from a builder's Stellar Passport: SCF tier, featured status,
+// recent commit activity. Conservative + tolerant of unknown tier strings.
+function builderRep(b: Doc): number {
+	let r = 0;
+	const tier = String(b.scf_tier || "").toLowerCase();
+	if (/gold|platinum|tier\s*3|^3$/.test(tier)) r = Math.max(r, 0.9);
+	else if (/silver|tier\s*2|^2$/.test(tier)) r = Math.max(r, 0.7);
+	else if (/bronze|tier\s*1|^1$/.test(tier)) r = Math.max(r, 0.55);
+	else if (tier) r = Math.max(r, 0.45);
+	if (b.is_featured) r = Math.max(r, 0.8);
+	const commits = b.stats?.totalCommits30d ?? 0;
+	if (commits >= 50) r = Math.max(r, 0.7);
+	else if (commits >= 10) r = Math.max(r, 0.55);
+	return Math.min(1, r);
+}
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}`);
@@ -61,6 +77,28 @@ async function main() {
 	const projects = (
 		await payload.find({ collection: "projects", pagination: false, depth: 0 })
 	).docs as Doc[];
+
+	// Builder reputation (Stellar Passport): index by github_username AND by each
+	// builder's listed repo full_names, so a repo by a credentialed/active builder
+	// grades higher — Raph's "tied to builder history/reputation."
+	const builders = (
+		await payload.find({ collection: "builders", pagination: false, depth: 0 })
+	).docs as Doc[];
+	const repByGithub = new Map<string, number>();
+	const repByRepo = new Map<string, number>();
+	for (const b of builders) {
+		const rep = builderRep(b);
+		if (rep <= 0) continue;
+		const gh = String(b.github_username || "").toLowerCase();
+		if (gh) repByGithub.set(gh, Math.max(rep, repByGithub.get(gh) ?? 0));
+		for (const proj of b.projects ?? []) {
+			for (const r of proj?.repos ?? []) {
+				const fn = String(r?.full_name || "").toLowerCase();
+				if (fn) repByRepo.set(fn, Math.max(rep, repByRepo.get(fn) ?? 0));
+			}
+		}
+	}
+	console.log(`Loaded ${builders.length} builders (${repByGithub.size} github + ${repByRepo.size} repo reputation keys).`);
 
 	// Dedupe repos across projects; keep the highest-prominence owning project.
 	const byFull = new Map<string, { owner: string; name: string; full: string; project: Doc }>();
@@ -95,6 +133,10 @@ async function main() {
 			console.log(`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`);
 			continue;
 		}
+		const builderReputation = Math.max(
+			repByGithub.get(owner.toLowerCase()) ?? 0,
+			repByRepo.get(full.toLowerCase()) ?? 0,
+		);
 		const grade = info
 			? repoGrade({
 					lastCommitAt: info.lastCommitAt,
@@ -104,6 +146,7 @@ async function main() {
 					hackathonWinner: !!project.hackathonPlacement,
 					scfAwarded: !!project.scf?.awarded,
 					projectProminence: project.prominence ?? 0,
+					builderReputation,
 				})
 			: { score: 0, label: "low" as const };
 
@@ -123,12 +166,14 @@ async function main() {
 						homepageUrl: info.homepageUrl ?? null,
 						isFork: !!info.isFork,
 						isArchived: !!info.isArchived,
+						readmeExcerpt: info.readme ?? null,
 					}
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
 			hackathonWinner: !!project.hackathonPlacement,
 			scfAwarded: !!project.scf?.awarded,
+			builderReputation,
 			repoScore: grade.score,
 			repoScoreLabel: grade.label,
 			lastEnrichedAt: new Date().toISOString(),

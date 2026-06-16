@@ -14,6 +14,10 @@ const Q_REPO = `
       pushedAt
       primaryLanguage { name }
       repositoryTopics(first: 25) { nodes { topic { name } } }
+      readmeMd: object(expression: "HEAD:README.md") { ... on Blob { text } }
+      readmeLower: object(expression: "HEAD:readme.md") { ... on Blob { text } }
+      readmeRst: object(expression: "HEAD:README.rst") { ... on Blob { text } }
+      readmeTxt: object(expression: "HEAD:README") { ... on Blob { text } }
       defaultBranchRef { target { ... on Commit { committedDate } } }
     }
   }
@@ -162,6 +166,11 @@ export async function fetchRepoInfo(owner: string, name: string) {
 				.map((n: any) => n?.topic?.name)
 				.filter((t: any): t is string => typeof t === "string" && t.length > 0)
 		: [];
+	// First README variant that resolved, capped to keep the index light; this
+	// is the biggest recall lever — topics are sparse, READMEs name the tech.
+	const readmeRaw: string | null =
+		r.readmeMd?.text ?? r.readmeLower?.text ?? r.readmeRst?.text ?? r.readmeTxt?.text ?? null;
+	const readme = typeof readmeRaw === "string" && readmeRaw.length > 0 ? readmeRaw.slice(0, 4000) : null;
 
 	return {
 		url: r.url as string,
@@ -172,6 +181,7 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		isArchived: !!r.isArchived,
 		primaryLanguage: (r.primaryLanguage?.name ?? null) as string | null,
 		topics,
+		readme,
 		lastCommitAt:
 			(r.defaultBranchRef?.target?.committedDate ??
 				r.pushedAt) as string,
