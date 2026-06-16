@@ -172,6 +172,23 @@ const SYNONYMS: Record<string, string[]> = {
 	custody: ["custody", "custodial", "mpc", "multisig", "key management"],
 	domains: ["domains", "domain", "name service", "naming"],
 	rwa: ["rwa", "real world asset", "real-world asset", "tokenized", "tokenization"],
+	// Machine/agent payments (x402). Expand to the phrases real records actually
+	// use — ApiCharge says "pay-per-call"/"API monetization", Benkiko says
+	// "micropayment" — never the literal "x402". Keep to specific phrases, not
+	// bare "api"/"payment", to avoid pulling in generic infra/payments projects.
+	x402: ["x402", "pay-per-call", "pay per call", "api monetization", "micropayment", "metered", "machine payment", "agentic payment", "agent payment"],
+	micropayment: ["micropayment", "micro-payment", "pay-per-call", "x402", "metered"],
+	mpp: ["mpp", "machine payment", "machine-to-machine", "x402", "agentic payment"],
+	agentic: ["agentic", "agent payment", "agentic payment", "x402", "machine payment"],
+	// ROSCA / rotating-savings. Lul's description says "ROSCA", Vaquita is a
+	// rotating-savings product; the regional names (susu/chama/stokvel/…) appear
+	// in queries but not descriptions, so map them onto the terms records use.
+	rosca: ["rosca", "rotating savings", "savings group", "savings circle", "susu", "esusu", "chama", "stokvel", "tanda", "ajo"],
+	chama: ["chama", "rosca", "rotating savings", "savings group"],
+	susu: ["susu", "esusu", "rosca", "rotating savings"],
+	esusu: ["esusu", "susu", "rosca", "rotating savings"],
+	stokvel: ["stokvel", "rosca", "rotating savings", "savings group"],
+	tanda: ["tanda", "rosca", "rotating savings", "savings circle"],
 };
 function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
@@ -199,6 +216,9 @@ const INTENT_TYPE: Record<string, string> = {
 	payments: "Payments",
 	payment: "Payments",
 	remittance: "Payments",
+	x402: "Payments",
+	mpp: "Payments",
+	micropayment: "Payments",
 	anchor: "Anchor",
 	sdk: "SDK",
 	indexer: "Indexer",
