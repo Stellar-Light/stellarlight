@@ -17,7 +17,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { searchRepos } from "@/lib/repo-search";
+import { searchRepos, type RepoResult } from "@/lib/repo-search";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -509,10 +509,26 @@ export async function GET(req: NextRequest) {
 	// so a consumer that only calls project search (e.g. an agent with a fixed
 	// tool list) picks them up automatically — no separate repo tool needed.
 	// First page + query only; degrades to [] if the repos index is empty.
-	const codeReferences =
-		q && offset === 0 && payload
-			? (await searchRepos(payload, q, { limit: 5 })).repos
-			: [];
+	//
+	// Bounded by a timeout: this is best-effort enrichment that rides on an
+	// endpoint agents call on the hot path, so it must never slow the core
+	// project-search response. If the repo lookup doesn't finish in time, we
+	// ship the projects without code references rather than make the caller wait.
+	let codeReferences: RepoResult[] = [];
+	if (q && offset === 0 && payload) {
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const timeout = new Promise<RepoResult[]>((resolve) => {
+			timer = setTimeout(() => resolve([]), 700);
+		});
+		try {
+			codeReferences = await Promise.race([
+				searchRepos(payload, q, { limit: 5 }).then((r) => r.repos),
+				timeout,
+			]);
+		} finally {
+			clearTimeout(timer);
+		}
+	}
 
 	logApiHit({
 		req,
