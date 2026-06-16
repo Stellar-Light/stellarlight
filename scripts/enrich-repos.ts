@@ -21,18 +21,32 @@ const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
 
 type Doc = Record<string, any>;
 
+// owner/name must look like real GitHub idents — kills bad link data like
+// "soo (private repo, can share if needed)" or org/section URLs.
+const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
+const NOT_A_USER = new Set([
+	"orgs", "sponsors", "marketplace", "settings", "topics", "search",
+	"about", "features", "pricing", "apps", "collections",
+]);
 function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 	const out: Array<{ owner: string; name: string }> = [];
+	const add = (rawOwner: string, rawName: string) => {
+		const owner = rawOwner.trim();
+		const name = rawName.replace(/\.git$/, "").trim();
+		if (!VALID_IDENT.test(owner) || !VALID_IDENT.test(name)) return;
+		if (NOT_A_USER.has(owner.toLowerCase())) return;
+		out.push({ owner, name });
+	};
 	for (const r of p.github?.repos ?? []) {
-		if (r?.owner && r?.name) out.push({ owner: String(r.owner), name: String(r.name) });
+		if (r?.owner && r?.name) add(String(r.owner), String(r.name));
 	}
 	const gh = p.links?.github;
 	if (typeof gh === "string" && gh) {
 		const m = gh
 			.replace(/^https?:\/\//, "")
 			.replace(/^www\./, "")
-			.match(/github\.com\/([^/]+)\/([^/?#]+)/i);
-		if (m) out.push({ owner: m[1], name: m[2].replace(/\.git$/, "") });
+			.match(/github\.com\/([^/\s]+)\/([^/?#\s]+)/i);
+		if (m) add(m[1], m[2]);
 	}
 	return out;
 }
@@ -73,6 +87,13 @@ async function main() {
 		} catch (e) {
 			enrichError = e instanceof Error ? e.message : String(e);
 			failed++;
+		}
+		// Don't seed un-fetchable repos (private/gone/garbage) into the public
+		// index — only index references we could actually verify. Re-runs pick
+		// up anything transiently rate-limited.
+		if (!info) {
+			console.log(`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`);
+			continue;
 		}
 		const grade = info
 			? repoGrade({
