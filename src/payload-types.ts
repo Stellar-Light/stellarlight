@@ -71,6 +71,7 @@ export interface Config {
     users: User;
     media: Media;
     projects: Project;
+    repos: Repo;
     blog: Blog;
     builders: Builder;
     'rss-feeds': RssFeed;
@@ -103,6 +104,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    repos: ReposSelect<false> | ReposSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     builders: BuildersSelect<false> | BuildersSelect<true>;
     'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
@@ -468,6 +470,53 @@ export interface Hackathon {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "repos".
+ */
+export interface Repo {
+  id: string;
+  /**
+   * owner/name — natural key
+   */
+  fullName: string;
+  owner?: string | null;
+  name?: string | null;
+  url?: string | null;
+  description?: string | null;
+  /**
+   * GitHub topics (array of strings) — the tech signal for search (zk, soroban, oracle, ...)
+   */
+  topics?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  primaryLanguage?: string | null;
+  stars?: number | null;
+  openIssues?: number | null;
+  lastCommitAt?: string | null;
+  homepageUrl?: string | null;
+  isFork?: boolean | null;
+  isArchived?: boolean | null;
+  projectSlug?: string | null;
+  projectName?: string | null;
+  hackathonWinner?: boolean | null;
+  scfAwarded?: boolean | null;
+  /**
+   * 0-100 quality grade (freshness + traction + authority)
+   */
+  repoScore?: number | null;
+  repoScoreLabel?: string | null;
+  lastEnrichedAt?: string | null;
+  enrichError?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1370,6 +1419,10 @@ export interface PayloadLockedDocument {
         value: string | Project;
       } | null)
     | ({
+        relationTo: 'repos';
+        value: string | Repo;
+      } | null)
+    | ({
         relationTo: 'blog';
         value: string | Blog;
       } | null)
@@ -1591,6 +1644,35 @@ export interface ProjectsSelect<T extends boolean = true> {
   hackathonPlacement?: T;
   hackathonPrize?: T;
   hackathonPrizeTrack?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "repos_select".
+ */
+export interface ReposSelect<T extends boolean = true> {
+  fullName?: T;
+  owner?: T;
+  name?: T;
+  url?: T;
+  description?: T;
+  topics?: T;
+  primaryLanguage?: T;
+  stars?: T;
+  openIssues?: T;
+  lastCommitAt?: T;
+  homepageUrl?: T;
+  isFork?: T;
+  isArchived?: T;
+  projectSlug?: T;
+  projectName?: T;
+  hackathonWinner?: T;
+  scfAwarded?: T;
+  repoScore?: T;
+  repoScoreLabel?: T;
+  lastEnrichedAt?: T;
+  enrichError?: T;
   updatedAt?: T;
   createdAt?: T;
 }
