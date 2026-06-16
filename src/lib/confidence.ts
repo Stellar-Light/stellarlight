@@ -29,6 +29,9 @@ const AUTHORITY: Record<string, number> = {
 	"dev-docs": 0.95,
 	paper: 0.92,
 	audit: 0.9,
+	// A real exploit/incident is the single most safety-relevant signal for a
+	// "is it safe to build on?" question — at least as authoritative as an audit.
+	incident: 0.9,
 	"scf-handbook": 0.85,
 	"ec-developer-report": 0.8,
 	"scf-proposal": 0.72,
@@ -48,6 +51,10 @@ const EVERGREEN = new Set([
 	"dev-docs",
 	"paper",
 	"audit",
+	// A past incident is a durable historical fact — "Blend was hit by an
+	// attempted oracle attack in May 2026" stays true and stays relevant to
+	// safety due-diligence, so it shouldn't decay out of confidence over time.
+	"incident",
 	"scf-handbook",
 ]);
 const FRESHNESS_HALF_LIFE_DAYS = 540; // ~18mo: a 1.5y-old blog post → 0.5

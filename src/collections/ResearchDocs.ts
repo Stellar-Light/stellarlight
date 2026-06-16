@@ -81,6 +81,10 @@ export const ResearchDocs: CollectionConfig = {
 					value: "audit",
 				},
 				{
+					label: "Incident (security exploit / post-mortem)",
+					value: "incident",
+				},
+				{
 					label: "Electric Capital Developer Report",
 					value: "ec-developer-report",
 				},
@@ -99,7 +103,7 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			index: true,
 			admin: {
-				description: "Protocol audited (Blend, Soroswap, …). Only set when source='audit'.",
+				description: "Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.",
 			},
 		},
 		{
@@ -114,7 +118,7 @@ export const ResearchDocs: CollectionConfig = {
 				{ label: "Unknown / Mixed", value: "unknown" },
 			],
 			admin: {
-				description: "Severity bucket inferred from the chunk's section heading. Only set when source='audit'.",
+				description: "Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.",
 			},
 		},
 		{

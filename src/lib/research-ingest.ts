@@ -25,6 +25,7 @@ export type ResearchSource =
 	| "lumenloop"
 	| "lumenloop-research"
 	| "audit"
+	| "incident"
 	| "ec-developer-report";
 
 export type AuditSeverity =

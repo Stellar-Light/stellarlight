@@ -87,6 +87,7 @@ export async function GET(req: NextRequest) {
 		"lumenloop",
 		"lumenloop-research",
 		"audit",
+		"incident",
 		"ec-developer-report",
 	] as const;
 
