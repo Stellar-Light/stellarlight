@@ -33,13 +33,29 @@ const Q_OWNER_REPOS = `
     repositoryOwner(login: $login) {
       repositories(first: 100, isFork: false, privacy: PUBLIC,
                    orderBy: {field: PUSHED_AT, direction: DESC}) {
-        nodes { name isArchived }
+        nodes {
+          name
+          isArchived
+          description
+          primaryLanguage { name }
+          repositoryTopics(first: 12) { nodes { topic { name } } }
+        }
       }
     }
   }
 `;
 
-export async function listOwnerRepos(login: string): Promise<string[]> {
+export interface OwnerRepo {
+	name: string;
+	description: string | null;
+	primaryLanguage: string | null;
+	topics: string[];
+}
+
+// Returns metadata (not just names) so the caller can filter an org's repos to
+// the Stellar-relevant ones — a bare-org link to a multi-chain org (Axelar,
+// Allbridge) otherwise drags in dozens of non-Stellar repos.
+export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 	const token =
 		process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
 	const headers: Record<string, string> = {
@@ -60,7 +76,16 @@ export async function listOwnerRepos(login: string): Promise<string[]> {
 		if (!Array.isArray(nodes)) return [];
 		return nodes
 			.filter((n: any) => n && n.isArchived !== true && typeof n.name === "string")
-			.map((n: any) => n.name as string);
+			.map((n: any) => ({
+				name: n.name as string,
+				description: (n.description ?? null) as string | null,
+				primaryLanguage: (n.primaryLanguage?.name ?? null) as string | null,
+				topics: Array.isArray(n.repositoryTopics?.nodes)
+					? n.repositoryTopics.nodes
+							.map((t: any) => t?.topic?.name)
+							.filter((s: any): s is string => typeof s === "string")
+					: [],
+			}));
 	} catch {
 		return [];
 	}
