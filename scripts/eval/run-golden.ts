@@ -8,14 +8,21 @@
  * Runs each golden question against the live retrieval endpoints and grades
  * RETRIEVAL quality — the thing Tyler asked every data provider to self-check:
  * "storing isn't good enough, you have to store it correctly so queries
- * actually match." For each question we report:
+ * actually match." The question file uses the SAME schema as Tyler/SDF's Raven
+ * golden set + LumenLoop's #8 audit (expect{ liveSource, answerRegex,
+ * forbiddenRegex }), adapted so the regexes match the TOP-K SURFACED CONTENT
+ * (we're the data layer, not the answering agent). For each question we report:
  *
- *   PASS/FAIL  — did every `surface` regex appear somewhere in the top-k?
+ *   PASS/FAIL  — did every `answerRegex` surface AND no `forbiddenRegex` surface?
  *   topScore   — best vector score (research mode)
  *   thin       — the matching chunk is a header/breadcrumb stub (<200 chars
  *                of real content) — surfaced but useless to a synthesizer
  *   junk       — count of nav/date/boilerplate chunks polluting the top-k
  *                (e.g. "58 posts tagged developer", a bare date, "Meeting Notes")
+ *
+ * `forbiddenRegex` is the correctness lever (Raph's #8 "relevance vs
+ * correctness" fix): a wrong/stale fact appearing in the top-k FAILS the case,
+ * even if every answerRegex matched.
  *
  * Default target is production. Each research call costs one Voyage embedding.
  */
@@ -37,10 +44,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 interface Question {
 	id: string;
 	category: string;
-	mode: "research" | "projects" | "live-skip";
+	mode: "research" | "projects";
 	question: string;
 	expect: {
-		surface?: string[];
+		liveSource?: boolean;
+		answerRegex?: string[];
+		forbiddenRegex?: string[];
 		expectUrlIncludes?: string;
 		minTopScore?: number;
 		note?: string;
@@ -84,6 +93,7 @@ interface Graded {
 	status: "PASS" | "FAIL" | "N/A";
 	matched: boolean;
 	missingRegexes: string[];
+	forbiddenHits: string[];
 	topScore: number | null;
 	urlOk: boolean | null;
 	scoreOk: boolean | null;
@@ -102,9 +112,12 @@ async function gradeResearch(q: Question): Promise<Graded> {
 	);
 	const joined = haystacks.join(" \n ");
 
-	const surface = q.expect.surface ?? [];
-	const missing = surface.filter((rx) => !new RegExp(rx, "i").test(joined));
-	const matched = missing.length === 0;
+	const answerRegex = q.expect.answerRegex ?? [];
+	const missing = answerRegex.filter((rx) => !new RegExp(rx, "i").test(joined));
+	const forbiddenHits = (q.expect.forbiddenRegex ?? []).filter((rx) =>
+		new RegExp(rx, "i").test(joined),
+	);
+	const matched = missing.length === 0 && forbiddenHits.length === 0;
 
 	const topScore = results.length
 		? Math.max(...results.map((r) => r.score ?? 0))
@@ -119,11 +132,11 @@ async function gradeResearch(q: Question): Promise<Graded> {
 			? results.some((r) => (r.url ?? "").includes(q.expect.expectUrlIncludes!))
 			: null;
 
-	// Best-matching chunk for the "thin" check: first result that hits surface.
+	// Best-matching chunk for the "thin" check: first result that hits answerRegex.
 	let thin = false;
-	if (matched) {
+	if (missing.length === 0) {
 		const idx = haystacks.findIndex((h) =>
-			surface.every((rx) => new RegExp(rx, "i").test(h)),
+			answerRegex.every((rx) => new RegExp(rx, "i").test(h)),
 		);
 		const best = results[idx >= 0 ? idx : 0];
 		thin = isThin(best?.content ?? "");
@@ -147,6 +160,7 @@ async function gradeResearch(q: Question): Promise<Graded> {
 		status: pass ? "PASS" : "FAIL",
 		matched,
 		missingRegexes: missing,
+		forbiddenHits,
 		topScore,
 		urlOk,
 		scoreOk,
@@ -172,9 +186,12 @@ async function gradeProjects(q: Question): Promise<Graded> {
 			`${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""}`.toLowerCase(),
 		)
 		.join(" \n ");
-	const surface = q.expect.surface ?? [];
-	const missing = surface.filter((rx) => !new RegExp(rx, "i").test(joined));
-	const matched = missing.length === 0;
+	const answerRegex = q.expect.answerRegex ?? [];
+	const missing = answerRegex.filter((rx) => !new RegExp(rx, "i").test(joined));
+	const forbiddenHits = (q.expect.forbiddenRegex ?? []).filter((rx) =>
+		new RegExp(rx, "i").test(joined),
+	);
+	const matched = missing.length === 0 && forbiddenHits.length === 0;
 	return {
 		id: q.id,
 		category: q.category,
@@ -182,6 +199,7 @@ async function gradeProjects(q: Question): Promise<Graded> {
 		status: matched ? "PASS" : "FAIL",
 		matched,
 		missingRegexes: missing,
+		forbiddenHits,
 		topScore: null,
 		urlOk: null,
 		scoreOk: null,
@@ -200,7 +218,9 @@ async function main() {
 
 	const graded: Graded[] = [];
 	for (const q of questions) {
-		if (q.mode === "live-skip") {
+		// liveSource questions need a live network/registry fact the static corpus
+		// is not meant to answer — reported N/A, not a failure (mirrors Raven).
+		if (q.expect.liveSource === true) {
 			graded.push({
 				id: q.id,
 				category: q.category,
@@ -208,6 +228,7 @@ async function main() {
 				status: "N/A",
 				matched: false,
 				missingRegexes: [],
+				forbiddenHits: [],
 				topScore: null,
 				urlOk: null,
 				scoreOk: null,
@@ -229,7 +250,8 @@ async function main() {
 				mode: q.mode,
 				status: "FAIL",
 				matched: false,
-				missingRegexes: q.expect.surface ?? [],
+				missingRegexes: q.expect.answerRegex ?? [],
+				forbiddenHits: [],
 				topScore: null,
 				urlOk: null,
 				scoreOk: null,
@@ -251,11 +273,13 @@ async function main() {
 	const thinCount = scored.filter((g) => g.thin).length;
 	const junkTotal = scored.reduce((s, g) => s + g.junk, 0);
 	const badTitleTotal = scored.reduce((s, g) => s + g.badTitle, 0);
+	const forbiddenTotal = scored.filter((g) => g.forbiddenHits.length).length;
 
 	console.log(`\nGolden retrieval eval — ${BASE_URL}\n${"─".repeat(72)}`);
 	for (const g of graded) {
 		const icon = g.status === "PASS" ? "✓" : g.status === "N/A" ? "·" : "✗";
 		const flags = [
+			g.forbiddenHits.length ? `FORBIDDEN:${g.forbiddenHits.join(",")}` : "",
 			g.thin ? "THIN" : "",
 			g.junk ? `${g.junk} junk` : "",
 			g.badTitle ? `${g.badTitle} bad-title` : "",
@@ -271,10 +295,10 @@ async function main() {
 	}
 	console.log("─".repeat(72));
 	console.log(
-		`PASS ${passed}/${scored.length}   JUNK(content) ${junkTotal}   BAD-TITLE ${badTitleTotal}   THIN ${thinCount}   (live-skipped: ${graded.length - scored.length})`,
+		`PASS ${passed}/${scored.length}   FORBIDDEN-HIT ${forbiddenTotal}   JUNK(content) ${junkTotal}   BAD-TITLE ${badTitleTotal}   THIN ${thinCount}   (live-skipped: ${graded.length - scored.length})`,
 	);
 	console.log(
-		"\nJUNK = result whose CONTENT carries no answer (pruner removes these).\nBAD-TITLE = real content under a nav/date/listing title (ingester mis-title fix).\nTHIN = right page surfaced but chunk is a header stub.\n",
+		"\nFORBIDDEN-HIT = a wrong/stale fact surfaced in the top-k (correctness fail, not relevance).\nJUNK = result whose CONTENT carries no answer (pruner removes these).\nBAD-TITLE = real content under a nav/date/listing title (ingester mis-title fix).\nTHIN = right page surfaced but chunk is a header stub.\n",
 	);
 }
 
