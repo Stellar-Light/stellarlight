@@ -13,7 +13,7 @@
 import "dotenv/config";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
-import { fetchRepoInfo, listOwnerRepos } from "../src/lib/github";
+import { fetchRepoInfo, listOwnerRepos, type OwnerRepo } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -146,25 +146,46 @@ async function main() {
 			orgByLogin.set(key, { login, project: p });
 		}
 	}
+	// Stellar relevance gate: a bare-org link to a multi-chain org (Axelar,
+	// Allbridge, Pendulum) otherwise drags dozens of Cosmos/EVM/unrelated repos
+	// into the code-reference index. A DEDICATED Stellar org (most repos signal)
+	// keeps all its repos; a multi-chain/unrelated org keeps ONLY the repos that
+	// actually mention Stellar/Soroban in name/description/topics.
+	const STELLAR_SIGNAL =
+		/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
+	const isStellarRepo = (r: OwnerRepo) =>
+		STELLAR_SIGNAL.test(`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`);
+
 	let orgRepoCount = 0;
+	let orgReposDropped = 0;
 	for (const { login, project: p } of orgByLogin.values()) {
-		const names = await listOwnerRepos(login);
+		const repos = await listOwnerRepos(login);
+		if (!repos.length) continue;
+		const signal = repos.filter(isStellarRepo);
+		const dedicated = signal.length / repos.length >= 0.5;
+		const keep = (dedicated ? repos : signal).slice(0, ORG_REPO_CAP);
+		orgReposDropped += repos.length - keep.length;
 		let taken = 0;
-		for (const name of names.slice(0, ORG_REPO_CAP)) {
-			if (!VALID_IDENT.test(name)) continue;
-			const full = `${login}/${name}`;
+		for (const r of keep) {
+			if (!VALID_IDENT.test(r.name)) continue;
+			const full = `${login}/${r.name}`;
 			const key = full.toLowerCase();
 			const prev = byFull.get(key);
 			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
-				byFull.set(key, { owner: login, name, full, project: p });
+				byFull.set(key, { owner: login, name: r.name, full, project: p });
 			}
 			taken++;
 		}
 		orgRepoCount += taken;
-		console.log(`  org ${login.padEnd(28)} → ${names.length} repos (${taken} indexed)`);
+		if (taken > 0)
+			console.log(
+				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : ""} → ${taken} indexed`,
+			);
 	}
 	if (orgByLogin.size)
-		console.log(`Expanded ${orgByLogin.size} orgs → ${orgRepoCount} indexed.\n`);
+		console.log(
+			`Expanded ${orgByLogin.size} orgs → ${orgRepoCount} indexed (${orgReposDropped} non-Stellar dropped).\n`,
+		);
 
 	let entries = [...byFull.values()];
 	if (LIMIT > 0) entries = entries.slice(0, LIMIT);
