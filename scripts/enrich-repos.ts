@@ -13,11 +13,14 @@
 import "dotenv/config";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
-import { fetchRepoInfo } from "../src/lib/github";
+import { fetchRepoInfo, listOwnerRepos } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
+// Cap repos pulled per org so a giant or mis-linked org can't flood the index.
+// listOwnerRepos returns most-recently-pushed first, so this keeps the liveliest.
+const ORG_REPO_CAP = Number(process.env.ORG_REPO_CAP || "40") || 40;
 
 type Doc = Record<string, any>;
 
@@ -49,6 +52,23 @@ function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 		if (m) add(m[1], m[2]);
 	}
 	return out;
+}
+
+// A bare-org/user github link (github.com/soroswap) carries no repo path, so
+// reposOf's two-segment regex skips it entirely — that's why flagship orgs
+// contributed ZERO code references. Detect the owner-only case so we can expand
+// it to the owner's repos via listOwnerRepos.
+function orgLoginOf(p: Doc): string | null {
+	const gh = p.links?.github;
+	if (typeof gh !== "string" || !gh) return null;
+	const path = gh.replace(/^https?:\/\//, "").replace(/^www\./, "");
+	// Already a specific owner/name repo → reposOf handled it; not an org link.
+	if (/github\.com\/[^/\s]+\/[^/?#\s]+/i.test(path)) return null;
+	const m = path.match(/github\.com\/([^/?#\s]+)\/?$/i);
+	if (!m) return null;
+	const login = m[1].trim();
+	if (!VALID_IDENT.test(login) || NOT_A_USER.has(login.toLowerCase())) return null;
+	return login;
 }
 
 // 0-1 reputation from a builder's Stellar Passport: SCF tier, featured status,
@@ -112,6 +132,40 @@ async function main() {
 			}
 		}
 	}
+	// Expand bare-org github links (github.com/soroswap → all soroswap/* repos).
+	// Attribute each expanded repo to the linking project so it inherits that
+	// project's hackathon/SCF/prominence/builder grade. Existing explicit repos
+	// keep priority via the prominence guard.
+	const orgByLogin = new Map<string, { login: string; project: Doc }>();
+	for (const p of projects) {
+		const login = orgLoginOf(p);
+		if (!login) continue;
+		const key = login.toLowerCase();
+		const prev = orgByLogin.get(key);
+		if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
+			orgByLogin.set(key, { login, project: p });
+		}
+	}
+	let orgRepoCount = 0;
+	for (const { login, project: p } of orgByLogin.values()) {
+		const names = await listOwnerRepos(login);
+		let taken = 0;
+		for (const name of names.slice(0, ORG_REPO_CAP)) {
+			if (!VALID_IDENT.test(name)) continue;
+			const full = `${login}/${name}`;
+			const key = full.toLowerCase();
+			const prev = byFull.get(key);
+			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
+				byFull.set(key, { owner: login, name, full, project: p });
+			}
+			taken++;
+		}
+		orgRepoCount += taken;
+		console.log(`  org ${login.padEnd(28)} → ${names.length} repos (${taken} indexed)`);
+	}
+	if (orgByLogin.size)
+		console.log(`Expanded ${orgByLogin.size} orgs → ${orgRepoCount} indexed.\n`);
+
 	let entries = [...byFull.values()];
 	if (LIMIT > 0) entries = entries.slice(0, LIMIT);
 	console.log(`${entries.length} unique repos from ${projects.length} projects.\n`);

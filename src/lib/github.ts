@@ -23,6 +23,49 @@ const Q_REPO = `
   }
 `;
 
+// List an owner's (org OR user) public, non-archived repo names, most-recently
+// pushed first. Used to expand a bare-org github link (github.com/soroswap) into
+// its actual repos — without this, a project that links its GitHub *org* instead
+// of a single repo contributes ZERO code references. Best-effort: returns [] on
+// any error (unknown login, rate limit) so enrichment degrades gracefully.
+const Q_OWNER_REPOS = `
+  query OwnerRepos($login: String!) {
+    repositoryOwner(login: $login) {
+      repositories(first: 100, isFork: false, privacy: PUBLIC,
+                   orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes { name isArchived }
+      }
+    }
+  }
+`;
+
+export async function listOwnerRepos(login: string): Promise<string[]> {
+	const token =
+		process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+		"User-Agent": "stellar-ecosystem-directory",
+	};
+	if (token) headers.Authorization = `Bearer ${token}`;
+	try {
+		const res = await fetch(GQL, {
+			method: "POST",
+			headers,
+			body: JSON.stringify({ query: Q_OWNER_REPOS, variables: { login } }),
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: GraphQL response shape
+		const data: any = JSON.parse(await res.text());
+		if (data?.errors) return []; // unknown login / rate-limited → skip gracefully
+		const nodes = data?.data?.repositoryOwner?.repositories?.nodes;
+		if (!Array.isArray(nodes)) return [];
+		return nodes
+			.filter((n: any) => n && n.isArchived !== true && typeof n.name === "string")
+			.map((n: any) => n.name as string);
+	} catch {
+		return [];
+	}
+}
+
 export async function fetchRepoInfo(owner: string, name: string) {
 	const token = process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
 	
