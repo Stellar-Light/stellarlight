@@ -972,17 +972,18 @@ export interface ResearchDoc {
     | 'lumenloop'
     | 'lumenloop-research'
     | 'audit'
+    | 'incident'
     | 'ec-developer-report';
   /**
    * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
    */
   auditor?: string | null;
   /**
-   * Protocol audited (Blend, Soroswap, …). Only set when source='audit'.
+   * Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.
    */
   protocol?: string | null;
   /**
-   * Severity bucket inferred from the chunk's section heading. Only set when source='audit'.
+   * Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.
    */
   severity?: ('critical' | 'high' | 'medium' | 'low' | 'informational' | 'unknown') | null;
   /**

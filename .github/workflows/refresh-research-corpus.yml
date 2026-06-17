@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|ec-developer-report). Leave empty to run all."
+        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|ec-developer-report). Leave empty to run all."
         required: false
         default: ""
 
@@ -103,6 +103,11 @@ jobs:
         if: inputs.source == '' || inputs.source == 'audit'
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-soroban-security.ts --execute
+
+      - name: Ingest curated security incidents (live exploits + post-mortems)
+        if: inputs.source == '' || inputs.source == 'incident'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-incidents.ts --execute
 
       - name: Ingest Electric Capital Developer Reports
         if: inputs.source == '' || inputs.source == 'ec-developer-report'
