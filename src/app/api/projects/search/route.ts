@@ -138,6 +138,18 @@ interface ProjectRow {
 	url: string;
 }
 
+// A project's own indexed code repo (compact form, attached per project row).
+interface ProjectRepoRef {
+	fullName: string;
+	url: string;
+	primaryLanguage: string | null;
+	stars: number;
+	repoScore: number;
+	repoScoreLabel: string | null;
+	judgeScore: number | null;
+	hackathonWinner: boolean;
+}
+
 // Synonym + light-stem expansion so natural queries reach records described in
 // adjacent vocabulary the literal `like` would miss: "game" → "gaming"/"GameFi",
 // "dex" → "amm"/"swap", "lending" → "borrow", "oracle" → "price feed". Each query
@@ -550,6 +562,47 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Per-project repos: attach each surfaced project's OWN indexed code repos
+	// (top-scored), so a consumer can go project → its code directly — not just
+	// the query-scoped codeReferences above. Batched (one query over all returned
+	// slugs) + bounded, best-effort.
+	const baseProjects = [...scored, ...semanticAdds];
+	let projectsOut: Array<(typeof baseProjects)[number] & { repos: ProjectRepoRef[] }> =
+		baseProjects.map((p) => ({ ...p, repos: [] }));
+	if (payload && baseProjects.length) {
+		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
+		try {
+			const repoRes = await payload.find({
+				collection: "repos",
+				where: { projectSlug: { in: slugs } },
+				sort: "-repoScore",
+				limit: Math.min(slugs.length * 8, 500),
+				depth: 0,
+			});
+			const bySlug = new Map<string, ProjectRepoRef[]>();
+			for (const r of repoRes.docs as unknown as Array<Record<string, unknown>>) {
+				const s = r.projectSlug as string | undefined;
+				if (!s) continue;
+				const arr = bySlug.get(s) ?? [];
+				if (arr.length >= 5) continue; // top 5 per project (already score-sorted)
+				arr.push({
+					fullName: String(r.fullName),
+					url: (r.url as string) ?? `https://github.com/${r.fullName}`,
+					primaryLanguage: (r.primaryLanguage as string) ?? null,
+					stars: (r.stars as number) ?? 0,
+					repoScore: (r.repoScore as number) ?? 0,
+					repoScoreLabel: (r.repoScoreLabel as string) ?? null,
+					judgeScore: (r.judgeScore as number) ?? null,
+					hackathonWinner: !!r.hackathonWinner,
+				});
+				bySlug.set(s, arr);
+			}
+			projectsOut = baseProjects.map((p) => ({ ...p, repos: bySlug.get(p.slug) ?? [] }));
+		} catch {
+			// best-effort — ship projects without per-project repos on any error
+		}
+	}
+
 	logApiHit({
 		req,
 		endpoint: "/api/projects/search",
@@ -619,7 +672,7 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 			},
-			projects: [...scored, ...semanticAdds],
+			projects: projectsOut,
 			// Inline graded code references (GitHub repos) for the same query, so
 			// consumers get existing-repo prior-art without a separate tool call.
 			// Each carries the repo url + homepage to cite. See /api/repos/search.
