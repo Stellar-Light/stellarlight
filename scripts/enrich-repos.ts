@@ -21,6 +21,11 @@ const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
 // Cap repos pulled per org so a giant or mis-linked org can't flood the index.
 // listOwnerRepos returns most-recently-pushed first, so this keeps the liveliest.
 const ORG_REPO_CAP = Number(process.env.ORG_REPO_CAP || "40") || 40;
+// Orgs at/below this size reached via a curated project's link are treated as
+// that project's own (dedicated) org — keep all their repos even if the names
+// don't keyword-match "stellar". Only LARGER orgs (Axelar 61, etc.) get the
+// keyword gate, which is where the multi-chain flood risk actually lives.
+const SMALL_ORG_MAX = Number(process.env.SMALL_ORG_MAX || "20") || 20;
 
 type Doc = Record<string, any>;
 
@@ -163,7 +168,12 @@ async function main() {
 		if (!repos.length) continue;
 		const signal = repos.filter(isStellarRepo);
 		const dedicated = signal.length / repos.length >= 0.5;
-		const keep = (dedicated ? repos : signal).slice(0, ORG_REPO_CAP);
+		// Keep all repos when the org is keyword-dedicated OR small. Small orgs are
+		// project-specific (e.g. NoetherDEX's noether/keeperbot/docs are Soroban-
+		// native but don't keyword-match), so the gate would wrongly drop them; it
+		// stays in force only for large multi-chain orgs that would flood the index.
+		const smallOrg = repos.length <= SMALL_ORG_MAX;
+		const keep = (dedicated || smallOrg ? repos : signal).slice(0, ORG_REPO_CAP);
 		orgReposDropped += repos.length - keep.length;
 		let taken = 0;
 		for (const r of keep) {
@@ -179,7 +189,7 @@ async function main() {
 		orgRepoCount += taken;
 		if (taken > 0)
 			console.log(
-				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : ""} → ${taken} indexed`,
+				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : smallOrg ? " (small-org kept)" : ""} → ${taken} indexed`,
 			);
 	}
 	if (orgByLogin.size)
