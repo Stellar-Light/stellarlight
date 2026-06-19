@@ -102,24 +102,34 @@ export async function GET(req: NextRequest) {
 				depth: 0,
 			});
 
-			const projectIds = projectsResult.docs.map((p: { id: string }) =>
-				String(p.id),
+			// Per-project GitHub stats come from the enriched `repos` collection
+			// (keyed by projectSlug, populated by enrich-repos — real stars,
+			// openIssues, lastCommitAt). The legacy `signals` cache this endpoint
+			// used is no longer populated, so every project read back as zeros.
+			const projectSlugs = projectsResult.docs.map(
+				(p: { slug: string }) => p.slug,
 			);
-			const signalsByProjectId = new Map<string, Record<string, unknown>>();
-			if (projectIds.length > 0) {
-				const signalsResult = await payload.find({
-					collection: "signals",
-					where: { project: { in: projectIds } },
-					limit: projectIds.length,
+			const reposByProjectSlug = new Map<
+				string,
+				Array<{ stars?: number; openIssues?: number; lastCommitAt?: string | null }>
+			>();
+			if (projectSlugs.length > 0) {
+				const reposResult = await payload.find({
+					collection: "repos",
+					where: { projectSlug: { in: projectSlugs } },
+					limit: 5000,
 					depth: 0,
 				});
-				for (const s of signalsResult.docs as Array<{
-					project: string | { id: string };
+				for (const r of reposResult.docs as Array<{
+					projectSlug?: string;
+					stars?: number;
+					openIssues?: number;
+					lastCommitAt?: string | null;
 				}>) {
-					const pid =
-						typeof s.project === "string" ? s.project : s.project?.id;
-					if (pid)
-						signalsByProjectId.set(String(pid), s as Record<string, unknown>);
+					if (!r.projectSlug) continue;
+					if (!reposByProjectSlug.has(r.projectSlug))
+						reposByProjectSlug.set(r.projectSlug, []);
+					reposByProjectSlug.get(r.projectSlug)?.push(r);
 				}
 			}
 
@@ -133,15 +143,23 @@ export async function GET(req: NextRequest) {
 					scf?: { awarded?: boolean };
 				}>
 			).map((project) => {
-				const sig = signalsByProjectId.get(String(project.id)) as
-					| { github?: Record<string, unknown> }
-					| undefined;
-				const gh = sig?.github ?? {};
-				const repos = (gh.repos as Array<{ stargazerCount?: number }>) ?? [];
-				const repoStars = repos.reduce(
-					(sum, r) => sum + (r.stargazerCount ?? 0),
+				const repos = reposByProjectSlug.get(project.slug) ?? [];
+				const totalStars = repos.reduce((s, r) => s + (r.stars ?? 0), 0);
+				const openIssuesTotal = repos.reduce(
+					(s, r) => s + (r.openIssues ?? 0),
 					0,
 				);
+				let lastActivityAt: string | null = null;
+				for (const r of repos) {
+					if (
+						r.lastCommitAt &&
+						(!lastActivityAt ||
+							new Date(r.lastCommitAt).getTime() >
+								new Date(lastActivityAt).getTime())
+					) {
+						lastActivityAt = r.lastCommitAt as string;
+					}
+				}
 				return {
 					rank: 0,
 					id: String(project.id),
@@ -151,9 +169,9 @@ export async function GET(req: NextRequest) {
 					shortDescription: project.shortDescription ?? null,
 					scfAwarded: !!project.scf?.awarded,
 					github: {
-						totalStars: (gh.totalStars as number) ?? repoStars,
-						openIssuesTotal: (gh.openIssuesTotal as number) ?? 0,
-						lastActivityAt: (gh.lastActivityAt as string) ?? null,
+						totalStars,
+						openIssuesTotal,
+						lastActivityAt,
 						repoCount: repos.length,
 					},
 				};
