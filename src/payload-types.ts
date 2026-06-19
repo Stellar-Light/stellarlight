@@ -519,6 +519,14 @@ export interface Repo {
    */
   builderReputation?: number | null;
   /**
+   * 0-1 hackathon AI/judge review score
+   */
+  judgeScore?: number | null;
+  /**
+   * hackathon this repo's judge score came from
+   */
+  judgedHackathon?: string | null;
+  /**
    * 0-100 quality grade (freshness + traction + authority)
    */
   repoScore?: number | null;
@@ -1680,6 +1688,8 @@ export interface ReposSelect<T extends boolean = true> {
   hackathonWinner?: T;
   scfAwarded?: T;
   builderReputation?: T;
+  judgeScore?: T;
+  judgedHackathon?: T;
   repoScore?: T;
   repoScoreLabel?: T;
   lastEnrichedAt?: T;

@@ -33,6 +33,11 @@ export const Repos: CollectionConfig = {
 		{ name: "hackathonWinner", type: "checkbox", defaultValue: false },
 		{ name: "scfAwarded", type: "checkbox", defaultValue: false },
 		{ name: "builderReputation", type: "number", defaultValue: 0, admin: { description: "0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)" } },
+		// AI/judge code-review score (0-1) from hackathon evaluations — a far
+		// stronger quality signal than stars (a 5/5-reviewed repo with 0 stars is
+		// still a strong reference). Ingested by scripts/ingest-dora-evals.ts.
+		{ name: "judgeScore", type: "number", admin: { description: "0-1 hackathon AI/judge review score", position: "sidebar" } },
+		{ name: "judgedHackathon", type: "text", admin: { description: "hackathon this repo's judge score came from", position: "sidebar" } },
 		// computed grade (scripts/enrich-repos.ts via src/lib/repo-grade.ts)
 		{ name: "repoScore", type: "number", defaultValue: 0, admin: { description: "0-100 quality grade (freshness + traction + authority)", position: "sidebar" } },
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },
