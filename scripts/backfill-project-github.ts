@@ -36,9 +36,7 @@ const CURATED: Record<string, string> = {
 	"soroban-hub": "https://github.com/Creit-Tech",
 	cypher: "https://github.com/CypherD-IO",
 	blockeden: "https://github.com/blockedenhq",
-	usdx: "https://github.com/FxDAO",
-	eurx: "https://github.com/FxDAO",
-	gbpx: "https://github.com/FxDAO",
+	// usdx/eurx/gbpx (FxDAO stablecoins) removed — FxDAO is no longer active.
 	glousd: "https://github.com/Glo-Foundation",
 	// SDKs / tooling — pinned to the SPECIFIC repo (avoid github.com/stellar flood)
 	"stellar-cli": "https://github.com/stellar/stellar-cli",
