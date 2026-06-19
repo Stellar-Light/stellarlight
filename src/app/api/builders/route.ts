@@ -45,7 +45,12 @@ interface BuilderRow {
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
-	const q = sp.get("q")?.toLowerCase().trim();
+	// `skill`/`tech` alias `q` — the free-text filter below already searches
+	// bio + role + projects, which is exactly "find a builder who's done X".
+	// Agents commonly pass the tech under `skill`; without this it was dropped.
+	const q = (sp.get("q") ?? sp.get("skill") ?? sp.get("tech"))
+		?.toLowerCase()
+		.trim();
 	const location = sp.get("location");
 	const scfTier = sp.get("scfTier");
 	const featured = sp.get("featured") === "1";
