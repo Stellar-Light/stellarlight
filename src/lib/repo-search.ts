@@ -33,6 +33,8 @@ interface RepoDoc {
 	hackathonWinner?: boolean;
 	scfAwarded?: boolean;
 	builderReputation?: number;
+	judgeScore?: number | null;
+	judgedHackathon?: string | null;
 	repoScore?: number;
 	repoScoreLabel?: string | null;
 	readmeExcerpt?: string | null;
@@ -56,6 +58,8 @@ export interface RepoResult {
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
 	builderReputation: number;
+	judgeScore: number | null;
+	judgedHackathon: string | null;
 	repoScore: number;
 	repoScoreLabel: string | null;
 	score: number;
@@ -168,6 +172,8 @@ export async function searchRepos(
 			hackathonWinner: !!r.hackathonWinner,
 			scfAwarded: !!r.scfAwarded,
 			builderReputation: r.builderReputation ?? 0,
+			judgeScore: r.judgeScore ?? null,
+			judgedHackathon: r.judgedHackathon ?? null,
 			repoScore: r.repoScore ?? 0,
 			repoScoreLabel: r.repoScoreLabel ?? null,
 			score,
