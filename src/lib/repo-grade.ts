@@ -1,13 +1,13 @@
 /**
  * Quality grade (0-100) for a code reference — the "grade certain repos as
- * better references" artifact Raph asked for. Fuses three things only
- * StellarLight can combine:
- *   - freshness  (last commit recency)
- *   - traction   (stars, log-scaled)
- *   - authority  (hackathon-winner + SCF-funded + owning-project prominence)
- * Archived/fork repos are down-weighted. Computed at enrich time and stored as
- * `repoScore`; /api/repos/search ranks by it so an agent searching "zk" gets
- * the strongest existing references first, not a flat keyword dump.
+ * better references" artifact. A repo's OWN merit is the base (its stars,
+ * recency, whether it's documented/tagged); inherited project/builder authority
+ * (hackathon-winner + SCF-funded + prominence) is a BOOST *gated by* own merit,
+ * so a flagship org's throwaway sub-repo (0 stars, no description) can't ride
+ * its parent's prominence to a "strong reference" score. Archived/fork repos
+ * are down-weighted. Computed at enrich time and stored as `repoScore`;
+ * /api/repos/search ranks by it so an agent gets the strongest *real* existing
+ * references first, not a flagship org's peripheral plumbing.
  */
 
 export interface RepoGradeInput {
@@ -19,6 +19,11 @@ export interface RepoGradeInput {
 	scfAwarded?: boolean; // owning project is SCF-funded
 	projectProminence?: number; // 0-100 curated prominence of the owning project
 	builderReputation?: number; // 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
+	// Own-merit signals so a flagship org's throwaway sub-repo can't inherit the
+	// parent's full authority (e.g. reflector's 0-star node-orchestrator).
+	hasDescription?: boolean;
+	topicCount?: number;
+	openIssues?: number;
 }
 
 export interface RepoGrade {
@@ -27,6 +32,7 @@ export interface RepoGrade {
 	freshness: number; // 0-1
 	traction: number; // 0-1
 	authority: number; // 0-1
+	ownMerit: number; // 0-1
 }
 
 const DAY_MS = 86_400_000;
@@ -48,20 +54,43 @@ function tractionOf(stars?: number | null): number {
 	return Math.min(1, Math.log10(s + 1) / 3);
 }
 
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
 export function repoGrade(input: RepoGradeInput): RepoGrade {
 	const freshness = freshnessOf(input.lastCommitAt);
 	const traction = tractionOf(input.stargazerCount);
+	const hasDesc = input.hasDescription ? 1 : 0;
+	const hasTopics = (input.topicCount ?? 0) > 0 ? 1 : 0;
+	const engaged = (input.openIssues ?? 0) > 0 ? 1 : 0;
+
+	// Does the repo stand on its OWN as a reference? Stars + recency + whether
+	// it's documented/tagged/has any engagement. This is the base — a 0-star,
+	// undocumented sub-repo scores low here no matter whose org it's under.
+	const ownMerit = clamp01(
+		0.45 * traction +
+			0.25 * freshness +
+			0.18 * hasDesc +
+			0.07 * hasTopics +
+			0.05 * engaged,
+	);
+
+	// Inherited authority from the owning project/builder.
 	let authority = 0;
 	if (input.hackathonWinner) authority += 0.35;
 	if (input.scfAwarded) authority += 0.25;
 	authority += Math.min(0.4, Math.max(0, input.projectProminence ?? 0) / 250); // prominence 100 → +0.4
-	authority += Math.min(0.4, Math.max(0, input.builderReputation ?? 0) * 0.4); // builder rep (Stellar Passport) → up to +0.4
+	authority += Math.min(0.4, Math.max(0, input.builderReputation ?? 0) * 0.4); // builder rep → up to +0.4
 	authority = Math.min(1, authority);
 
-	let composite = 0.4 * freshness + 0.25 * traction + 0.35 * authority;
+	// Authority is a BOOST gated by own merit: a no-merit peripheral repo only
+	// gets ~30% of its parent's authority, so flagship plumbing can't ride the
+	// org's prominence up to "strong reference".
+	const boostedAuthority = authority * (0.3 + 0.7 * ownMerit);
+
+	let composite = 0.6 * ownMerit + 0.4 * boostedAuthority;
 	if (input.isArchived) composite *= 0.5; // archived = weaker reference
 	if (input.isFork) composite *= 0.7; // forks deprioritized
-	composite = Math.max(0, Math.min(1, composite));
+	composite = clamp01(composite);
 
 	const score = Math.round(composite * 100);
 	const label = score >= 70 ? "high" : score >= 40 ? "medium" : "low";
@@ -71,5 +100,6 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		freshness: Math.round(freshness * 100) / 100,
 		traction: Math.round(traction * 100) / 100,
 		authority: Math.round(authority * 100) / 100,
+		ownMerit: Math.round(ownMerit * 100) / 100,
 	};
 }
