@@ -296,12 +296,63 @@ function pickLinks(
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
-	const q = sp.get("q")?.trim() ?? "";
+	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
+	// frequently send the search term under `query` — the field name many other
+	// tools use. An unrecognized param silently drops the term and the endpoint
+	// returns a misleading default list, so honor the common aliases.
+	const q =
+		(
+			sp.get("q") ??
+			sp.get("query") ??
+			sp.get("keyword") ??
+			sp.get("search")
+		)?.trim() ?? "";
 	const category = sp.get("category");
 	const hackathonSlug = sp.get("hackathon");
 	const scfAwardedOnly = sp.get("scfAwarded") === "1";
 	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
+
+	// Guard content-less calls: no query AND no filters. This is almost always a
+	// malformed agent call (the term was sent under a field name we dropped, or
+	// nested wrong). Returning the default project list here is actively harmful —
+	// the caller reports it as the answer ("no escrow/vault projects exist") when
+	// the real projects were never searched. Return an honest empty + how to fix.
+	if (!q && !category && !hackathonSlug && !scfAwardedOnly) {
+		logApiHit({
+			req,
+			endpoint: "/api/projects/search",
+			query: "",
+			filters: { category, hackathon: hackathonSlug, scfAwarded: scfAwardedOnly, limit },
+		});
+		return NextResponse.json(
+			{
+				meta: {
+					source: "https://stellarlight.xyz/directory",
+					generatedAt: new Date().toISOString(),
+					filters: { q: "", category, hackathon: hackathonSlug, scfAwardedOnly, limit, offset },
+					matchMode: "all" as const,
+					matchModeLabel: "no query supplied",
+					counts: { returned: 0, total: 0 },
+					semantic: false,
+					error: "no_query",
+					advisory: {
+						summary:
+							"No search query or filter was supplied, so nothing was searched — this is NOT a signal that the directory lacks matching projects. Re-call with ?q=<terms> (e.g. ?q=escrow+vault). If the term was sent under a different field name, note this endpoint keys off `q` (aliases: query/keyword/search).",
+						suggestions: [
+							{
+								action: "retry-with-q",
+								why: "Re-call with ?q=<your search terms>; results key off the `q` parameter.",
+							},
+						],
+					},
+				},
+				projects: [],
+				codeReferences: [],
+			},
+			{ headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+		);
+	}
 
 	const payload = await getPayloadSafe();
 	let totalMatching = 0;

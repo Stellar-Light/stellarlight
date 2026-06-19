@@ -22,7 +22,10 @@ export const revalidate = 60;
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
-	const q = sp.get("q")?.trim() ?? "";
+	// Accept query/keyword/search as aliases for q — agents often send the term
+	// under `query`, and an unrecognized param silently drops it.
+	const q =
+		(sp.get("q") ?? sp.get("query") ?? sp.get("keyword") ?? sp.get("search"))?.trim() ?? "";
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
 	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
