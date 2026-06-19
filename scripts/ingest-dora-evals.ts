@@ -15,7 +15,8 @@
  */
 import "dotenv/config";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { fetchRepoInfo } from "../src/lib/github";
@@ -47,7 +48,7 @@ async function main() {
 		console.log("⚠ No GITHUB_TOKEN — new-repo GitHub fetches will be rate-limited.");
 	}
 
-	const file = join(__dirname, "data", "dora-evals.json");
+	const file = join(dirname(fileURLToPath(import.meta.url)), "data", "dora-evals.json");
 	let recs = JSON.parse(readFileSync(file, "utf8")) as DoraRec[];
 	if (LIMIT > 0) recs = recs.slice(0, LIMIT);
 	console.log(`${recs.length} judged repos to ingest.\n`);
