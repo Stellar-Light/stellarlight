@@ -222,6 +222,9 @@ async function main() {
 					scfAwarded: !!project.scf?.awarded,
 					projectProminence: project.prominence ?? 0,
 					builderReputation,
+					hasDescription: !!(info.description && info.description.trim()),
+					topicCount: Array.isArray(info.topics) ? info.topics.length : 0,
+					openIssues: info.openIssues ?? 0,
 				})
 			: { score: 0, label: "low" as const };
 
