@@ -5,6 +5,9 @@
  *   GET /api/clusters?dimension=category   (default; coarse 7-cat split)
  *   GET /api/clusters?dimension=types      (finer subtype: Wallet, DEX, Lending, …)
  *   GET /api/clusters?minSize=3            (only clusters with ≥N projects)
+ *   GET /api/clusters?key=RWA             (just one cluster, resolved across BOTH
+ *                                          dimensions — RWA/Wallet are *types*,
+ *                                          Infrastructure is a *category*)
  *
  * Returns a ranked list of project clusters with:
  *   - size: project count in cluster
@@ -60,121 +63,140 @@ interface ProjectDoc {
 	hackathonPrize?: number;
 }
 
+function buildClusters(
+	docs: ProjectDoc[],
+	dimension: Dimension,
+	minSize: number,
+): ClusterRow[] {
+	const buckets = new Map<string, ProjectDoc[]>();
+	for (const p of docs) {
+		const keys: string[] = [];
+		if (dimension === "category" && p.category) {
+			keys.push(p.category);
+		} else if (dimension === "types" && p.types) {
+			if (Array.isArray(p.types)) keys.push(...p.types);
+			else keys.push(p.types);
+		}
+		for (const k of keys) {
+			if (!buckets.has(k)) buckets.set(k, []);
+			buckets.get(k)?.push(p);
+		}
+	}
+
+	const clusters: ClusterRow[] = [];
+	for (const [key, projects] of buckets) {
+		if (projects.length < minSize) continue;
+		const scfFunded = projects.filter((p) => p.scf?.awarded);
+		const scfTotal = scfFunded.reduce((s, p) => s + (p.scf?.totalAwarded ?? 0), 0);
+		const hackathonWinners = projects.filter(
+			(p) =>
+				p.hackathonPlacement === "grand-prize" ||
+				p.hackathonPlacement === "1st" ||
+				p.hackathonPlacement === "2nd" ||
+				p.hackathonPlacement === "3rd" ||
+				p.hackathonPlacement === "track-winner",
+		);
+		// Crowdedness 1–10, log-scaled so the score *differentiates* across cluster
+		// sizes (size 6 → ~3, 30 → ~5, 120 → ~7, 200 → ~8); SCF funding + winners
+		// add a smaller modifier so a well-funded small cluster can outrank a huge
+		// unfunded one.
+		const sizeContribution = Math.log2(projects.length + 1);
+		const scfBonus = Math.log2(scfFunded.length + 1);
+		const winnerBonus = Math.log2(hackathonWinners.length + 1) * 0.5;
+		const crowdedness = Math.max(
+			1,
+			Math.min(10, Math.round(sizeContribution + scfBonus + winnerBonus)),
+		);
+
+		// Sort projects by "interestingness" — SCF-funded first, then prize, then name
+		const ranked = [...projects].sort((a, b) => {
+			const sa = (a.scf?.totalAwarded ?? 0) + (a.hackathonPrize ?? 0);
+			const sb = (b.scf?.totalAwarded ?? 0) + (b.hackathonPrize ?? 0);
+			if (sb !== sa) return sb - sa;
+			return a.name.localeCompare(b.name);
+		});
+
+		clusters.push({
+			key,
+			dimension,
+			size: projects.length,
+			scfFundedCount: scfFunded.length,
+			scfTotalUSD: scfTotal,
+			hackathonWinnerCount: hackathonWinners.length,
+			crowdedness,
+			sampleProjects: ranked.slice(0, 5).map((p) => ({
+				name: p.name,
+				slug: p.slug,
+				shortDescription: p.shortDescription ?? null,
+				scfAwarded: !!p.scf?.awarded,
+				url: `https://stellarlight.xyz/project/${p.slug}`,
+			})),
+		});
+	}
+	return clusters;
+}
+
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
-	const dimensionParam = sp.get("dimension") ?? "category";
+	const rawDimension = sp.get("dimension")?.trim() ?? "";
 	const minSize = Math.max(1, Number(sp.get("minSize") || "1") || 1);
 
-	if (!VALID_DIMENSIONS.includes(dimensionParam as never)) {
-		return NextResponse.json(
-			{
-				error: `unknown dimension: '${dimensionParam}'`,
-				validDimensions: VALID_DIMENSIONS,
-			},
-			{ status: 400 },
-		);
+	// Value filter: "give me THE RWA cluster", not the whole list. Accept
+	// key/category/type/q as aliases. RWA/Wallet/etc. are *types* while
+	// Infrastructure/Tooling are *categories*, so a value is resolved across BOTH
+	// dimensions rather than requiring the caller to know which one it lives in.
+	let valueFilter = (
+		sp.get("key") ??
+		sp.get("category") ??
+		sp.get("type") ??
+		sp.get("q") ??
+		""
+	).trim();
+
+	// Resolve the clustering dimension. An invalid `dimension` (e.g. dimension=RWA,
+	// where the caller conflated the dimension with the value) is treated as a
+	// value filter instead of a 400 — the old behavior silently failed those.
+	let dimension: Dimension = "category";
+	if (rawDimension === "category" || rawDimension === "types") {
+		dimension = rawDimension;
+	} else if (rawDimension && !valueFilter) {
+		valueFilter = rawDimension;
 	}
-	const dimension = dimensionParam as Dimension;
 
 	const payload = await getPayloadSafe();
 	let clusters: ClusterRow[] = [];
+	let availableKeys: string[] = [];
+	let matchedDimension: Dimension | null = null;
 
 	if (payload) {
 		try {
 			const result = await payload.find({
 				collection: "projects",
-				where: {
-					status: { in: ["Development", "Pre-Release", "Live"] },
-				},
+				where: { status: { in: ["Development", "Pre-Release", "Live"] } },
 				limit: 500,
 				depth: 0,
 			});
+			const docs = result.docs as unknown as ProjectDoc[];
 
-			// Build bucket map; one project contributes to N buckets if `types`
-			// is a multi-valued field.
-			const buckets = new Map<string, ProjectDoc[]>();
-			for (const p of result.docs as unknown as ProjectDoc[]) {
-				const keys: string[] = [];
-				if (dimension === "category" && p.category) {
-					keys.push(p.category);
-				} else if (dimension === "types" && p.types) {
-					if (Array.isArray(p.types)) keys.push(...p.types);
-					else keys.push(p.types);
-				}
-				for (const k of keys) {
-					if (!buckets.has(k)) buckets.set(k, []);
-					buckets.get(k)?.push(p);
-				}
+			if (valueFilter) {
+				// Resolve the value across both dimensions, prefer an exact
+				// (case-insensitive) key match, fall back to substring.
+				const all = [
+					...buildClusters(docs, "category", minSize),
+					...buildClusters(docs, "types", minSize),
+				];
+				availableKeys = all.map((c) => c.key);
+				const vf = valueFilter.toLowerCase();
+				let matches = all.filter((c) => c.key.toLowerCase() === vf);
+				if (matches.length === 0)
+					matches = all.filter((c) => c.key.toLowerCase().includes(vf));
+				matches.sort((a, b) => b.crowdedness - a.crowdedness);
+				clusters = matches;
+				matchedDimension = matches[0]?.dimension ?? null;
+			} else {
+				clusters = buildClusters(docs, dimension, minSize);
+				clusters.sort((a, b) => b.crowdedness - a.crowdedness);
 			}
-
-			// Score + sample each bucket
-			for (const [key, projects] of buckets) {
-				if (projects.length < minSize) continue;
-				const scfFunded = projects.filter((p) => p.scf?.awarded);
-				const scfTotal = scfFunded.reduce(
-					(s, p) => s + (p.scf?.totalAwarded ?? 0),
-					0,
-				);
-				const hackathonWinners = projects.filter(
-					(p) =>
-						p.hackathonPlacement === "grand-prize" ||
-						p.hackathonPlacement === "1st" ||
-						p.hackathonPlacement === "2nd" ||
-						p.hackathonPlacement === "3rd" ||
-						p.hackathonPlacement === "track-winner",
-				);
-				// Crowdedness 1–10. The first version used `size + 2×scfFunded
-				// + winners` clipped to 10, which saturated to 10/10 for any
-				// cluster larger than ~10 projects — useless for ranking.
-				//
-				// Log-scaled so the score *differentiates* across cluster
-				// sizes:
-				//   - size 6   → ~3
-				//   - size 30  → ~5
-				//   - size 120 → ~7
-				//   - size 200 → ~8
-				// SCF funding + hackathon-winner adds a smaller modifier on
-				// top, so a well-funded small cluster can still outrank a
-				// huge but unfunded one.
-				const sizeContribution = Math.log2(projects.length + 1);
-				const scfBonus = Math.log2(scfFunded.length + 1);
-				const winnerBonus = Math.log2(hackathonWinners.length + 1) * 0.5;
-				const crowdedness = Math.max(
-					1,
-					Math.min(10, Math.round(sizeContribution + scfBonus + winnerBonus)),
-				);
-				// Raw inputs are already exposed via .size, .scfFundedCount,
-				// .hackathonWinnerCount — agents can recreate the formula.
-
-				// Sort projects by "interestingness" — SCF-funded first, then by
-				// hackathon prize, then alphabetical
-				const ranked = [...projects].sort((a, b) => {
-					const sa = (a.scf?.totalAwarded ?? 0) + (a.hackathonPrize ?? 0);
-					const sb = (b.scf?.totalAwarded ?? 0) + (b.hackathonPrize ?? 0);
-					if (sb !== sa) return sb - sa;
-					return a.name.localeCompare(b.name);
-				});
-
-				clusters.push({
-					key,
-					dimension,
-					size: projects.length,
-					scfFundedCount: scfFunded.length,
-					scfTotalUSD: scfTotal,
-					hackathonWinnerCount: hackathonWinners.length,
-					crowdedness,
-					sampleProjects: ranked.slice(0, 5).map((p) => ({
-						name: p.name,
-						slug: p.slug,
-						shortDescription: p.shortDescription ?? null,
-						scfAwarded: !!p.scf?.awarded,
-						url: `https://stellarlight.xyz/project/${p.slug}`,
-					})),
-				});
-			}
-
-			// Default sort: crowdedness desc (most crowded first)
-			clusters.sort((a, b) => b.crowdedness - a.crowdedness);
 		} catch {
 			// fall through
 		}
@@ -183,7 +205,7 @@ export async function GET(req: NextRequest) {
 	logApiHit({
 		req,
 		endpoint: "/api/clusters",
-		filters: { dimension, minSize },
+		filters: { dimension, minSize, valueFilter: valueFilter || undefined },
 	});
 
 	return NextResponse.json(
@@ -191,13 +213,27 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				filters: { dimension, minSize },
+				filters: {
+					dimension: valueFilter ? matchedDimension : dimension,
+					minSize,
+					...(valueFilter ? { valueFilter, matchedDimension } : {}),
+				},
 				counts: { returned: clusters.length },
 				dimensions: VALID_DIMENSIONS,
 				notes: {
 					crowdedness:
 						"Score 1–10, log-scaled: round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1)), clipped to [1,10]. Log scaling means a cluster of 200 projects ≈ 8/10 vs 6 projects ≈ 3/10 — actually differentiates, unlike a linear formula. Use to identify saturated vs underbuilt lanes; cross-reference .size and .scfFundedCount for the raw numbers.",
 				},
+				// When a value filter matched nothing, tell the caller what IS
+				// available instead of returning a bare empty list.
+				...(valueFilter && clusters.length === 0
+					? {
+							advisory: {
+								summary: `No cluster matches '${valueFilter}'. Pass one of the available keys, or omit the filter to list all clusters for a dimension.`,
+								availableKeys,
+							},
+						}
+					: {}),
 			},
 			clusters,
 		},
