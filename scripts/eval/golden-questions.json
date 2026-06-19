@@ -1,5 +1,5 @@
 {
-	"$comment": "Stellar Light golden-question eval — same shape as Tyler/SDF's Raven golden set and LumenLoop's #8 audit (id / category / question / expect{ liveSource, answerRegex, forbiddenRegex }), adapted for RETRIEVAL grading. Stellar Light is the data/index layer, not the answering agent, so the regexes are matched (case-insensitive) over the TOP-K SURFACED CONTENT (title+content+url), not an agent's answer. Fields: `mode` routes to the endpoint (research|projects). `answerRegex` = patterns that must EACH surface (relevance). `forbiddenRegex` = patterns that must NOT surface — the correctness lever (mirrors Raph's #8 'criteria grade relevance, not correctness' fix): a wrong/stale fact appearing in the top-k FAILS the case. `liveSource: true` marks live-fact questions the static corpus is not meant to answer (reported N/A, not a failure). Retrieval-only knobs: `expectUrlIncludes` (a substring an expected doc URL should contain), `minTopScore` (the best vector score should clear this). Storing isn't enough; the right content has to surface and the wrong content must not.",
+	"$comment": "Stellar Light golden-question retrieval eval. We're the data/index layer, so each question is graded (case-insensitive) over the TOP-K SURFACED CONTENT. `mode` routes to the endpoint: research → /api/research (content), projects → /api/projects/search (projects), repos → /api/repos/search (code references). `answerRegex` = patterns that must EACH surface (the right thing shows up). `forbiddenRegex` = patterns that must NOT surface — the correctness check: a wrong/stale fact in the top-k FAILS the case even when the topic matched. `liveSource: true` marks live-network facts the static corpus isn't meant to answer (reported N/A). `expectUrlIncludes` = a substring an expected doc URL should contain. `minTopScore` = the best result's score must clear it: for research it's the vector cosine; for repos it's the leading repo's repoScore (0-100) — a QUALITY FLOOR so junk can't be the #1 code reference for a tech query. Storing isn't enough; the right content has to surface, the wrong content must not, and the top reference has to be quality.",
 	"questions": [
 		{
 			"id": "agentic-payments-x402",
@@ -206,6 +206,48 @@
 				"liveSource": true,
 				"note": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
 			}
+		},
+		{
+			"id": "repos-zk",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "zk",
+			"expect": { "liveSource": false, "answerRegex": ["noir|kale-sc|attest|private-payment|zk"], "minTopScore": 50 }
+		},
+		{
+			"id": "repos-x402",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "x402",
+			"expect": { "liveSource": false, "answerRegex": ["x402|stellarpay402|agentcard|machine.?payment"], "minTopScore": 60 }
+		},
+		{
+			"id": "repos-oracle",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "oracle price feed",
+			"expect": { "liveSource": false, "answerRegex": ["reflector|oracle|price.?feed"], "minTopScore": 40 }
+		},
+		{
+			"id": "repos-streaming-payments",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "streaming payments",
+			"expect": { "liveSource": false, "answerRegex": ["fluxity|tide|paystreme|stream"], "minTopScore": 25 }
+		},
+		{
+			"id": "repos-escrow",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "escrow vault",
+			"expect": { "liveSource": false, "answerRegex": ["escrow|vault|trustless|microvault"], "minTopScore": 40 }
+		},
+		{
+			"id": "repos-soroswap",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "soroswap",
+			"expect": { "liveSource": false, "answerRegex": ["soroswap/"], "minTopScore": 45 }
 		}
 	]
 }

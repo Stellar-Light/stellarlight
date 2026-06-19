@@ -44,7 +44,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 interface Question {
 	id: string;
 	category: string;
-	mode: "research" | "projects";
+	mode: "research" | "projects" | "repos";
 	question: string;
 	expect: {
 		liveSource?: boolean;
@@ -210,6 +210,55 @@ async function gradeProjects(q: Question): Promise<Graded> {
 	};
 }
 
+async function gradeRepos(q: Question): Promise<Graded> {
+	const url = `${BASE_URL}/api/repos/search?q=${encodeURIComponent(q.question)}&limit=${TOP_K}`;
+	const data = (await fetchJson(url)) as {
+		repos?: Array<{
+			fullName?: string;
+			description?: string;
+			topics?: string[];
+			primaryLanguage?: string;
+			repoScore?: number;
+		}>;
+	};
+	const repos = data.repos ?? [];
+	const joined = repos
+		.map((r) =>
+			`${r.fullName ?? ""} ${r.description ?? ""} ${(r.topics ?? []).join(" ")} ${r.primaryLanguage ?? ""}`.toLowerCase(),
+		)
+		.join(" \n ");
+	const answerRegex = q.expect.answerRegex ?? [];
+	const missing = answerRegex.filter((rx) => !new RegExp(rx, "i").test(joined));
+	const forbiddenHits = (q.expect.forbiddenRegex ?? []).filter((rx) =>
+		new RegExp(rx, "i").test(joined),
+	);
+	// For repos, minTopScore is a QUALITY floor on the LEADING repo's repoScore
+	// (0-100) — so junk can't be the #1 reference for a tech query.
+	const topScore = repos.length
+		? Math.max(...repos.map((r) => r.repoScore ?? 0))
+		: null;
+	const scoreOk =
+		q.expect.minTopScore != null ? (topScore ?? 0) >= q.expect.minTopScore : null;
+	const matched = missing.length === 0 && forbiddenHits.length === 0;
+	const pass = matched && scoreOk !== false;
+	return {
+		id: q.id,
+		category: q.category,
+		mode: q.mode,
+		status: pass ? "PASS" : "FAIL",
+		matched,
+		missingRegexes: missing,
+		forbiddenHits,
+		topScore,
+		urlOk: null,
+		scoreOk,
+		thin: false,
+		junk: 0,
+		badTitle: 0,
+		sample: (repos[0]?.fullName ?? "—").slice(0, 60),
+	};
+}
+
 async function main() {
 	const file = join(__dirname, "golden-questions.json");
 	const { questions } = JSON.parse(readFileSync(file, "utf8")) as {
@@ -241,7 +290,11 @@ async function main() {
 		}
 		try {
 			graded.push(
-				q.mode === "projects" ? await gradeProjects(q) : await gradeResearch(q),
+				q.mode === "repos"
+					? await gradeRepos(q)
+					: q.mode === "projects"
+						? await gradeProjects(q)
+						: await gradeResearch(q),
 			);
 		} catch (e) {
 			graded.push({
