@@ -95,6 +95,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/repos/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search the Stellar GitHub repo / code-reference index
+         * @description Search ~1,900 indexed-and-scored Stellar ecosystem GitHub repos by tech/keyword — the code layer beneath the project directory. Answers *'show me the repos / code for X'* and prior-art **code** lookups that project search can't. Indexes GitHub topics + description + language + README, expands synonyms (zk→zero-knowledge/snark, oracle→price-feed, …), and ranks by `repoScore` (0–100 = freshness + traction + hackathon/SCF/builder authority). Lead with high-score repos as the strongest references and cite each repo's `url` / `homepageUrl`. The same graded repos are injected inline into `/api/projects/search` as `codeReferences`.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Keyword query (free text) */
+                    q?: components["parameters"]["q"];
+                    /** @description Filter by primary language (case-insensitive substring, e.g. 'Rust', 'TypeScript') */
+                    language?: string;
+                    /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
+                    minScore?: number;
+                    /** @description Max results returned (per-page) */
+                    limit?: components["parameters"]["limit"];
+                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                    offset?: components["parameters"]["offset"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Repo search results graded by repoScore */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RepoSearchResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/hackathons": {
         parameters: {
             query?: never;
@@ -286,6 +336,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/partners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List ecosystem partners
+         * @description Published partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter by partner type */
+                    type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+                    /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
+                    sector?: string;
+                    /** @description Filter by region served (global, latam, africa, …) */
+                    region?: string;
+                    /** @description Set to 1 to return only partners currently accepting new clients */
+                    accepting?: "1";
+                    /** @description Keyword query (free text) */
+                    q?: components["parameters"]["q"];
+                    /** @description Max results returned (per-page) */
+                    limit?: components["parameters"]["limit"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Partner directory */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partners/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one partner's full profile
+         * @description Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Partner slug */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Partner profile */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+                /** @description Partner not found or not published */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rfps": {
         parameters: {
             query?: never;
@@ -343,7 +496,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Vector search over a 4,541-chunk corpus of primary Stellar sources: SEPs, SCF Handbook, dev docs, foundational papers (Mazières SCP), lumenloop community playbooks, Soroban audit reports (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, etc.), Electric Capital Developer Reports, SDF blog. Returns top-K chunks with severity metadata for audit chunks. Score field is cosine similarity (0–1, higher = more relevant).
+         * @description Vector search over a 4,541-chunk corpus of primary Stellar sources: SEPs, SCF Handbook, dev docs, foundational papers (Mazières SCP), lumenloop community playbooks, Soroban audit reports (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, etc.), Electric Capital Developer Reports, SDF blog. Returns top-K chunks with severity metadata for audit chunks. Each result carries a `confidence` object — `{ score (0-1), label (high/medium/low), relevance, freshness, authority, ageDays }` — blending match strength, source-aware recency, and source authority so an agent can tell a strong, fresh, canonical hit from a weak or stale one. Sort by `confidence.score` for trust-ranked results; `meta.scoreModel.version` identifies the model. The raw `score` field remains cosine similarity (0–1, higher = more relevant).
          */
         get: {
             parameters: {
@@ -731,7 +884,7 @@ export interface components {
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
             shortDescription?: string;
             /** @enum {string} */
-            status: "Live" | "Development" | "Abandoned";
+            status: "Draft" | "Development" | "Pre-Release" | "Live";
             logoUrl?: string | null;
             scfAwarded?: boolean;
             scfTotalAwardedUSD?: number | null;
@@ -743,6 +896,19 @@ export interface components {
             score?: number;
             /** Format: uri */
             url?: string;
+            /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
+            prominence?: number;
+            verificationLevel?: string | null;
+            /** @description Capability tags (Wallet, DEX, Lending, Oracle, SDK, RPC, Faucet, NFT, RWA, Anchor, Stablecoin, Indexer, Explorer, Security, Gaming). */
+            types?: string[];
+            /** @description The project OWN canonical homes - cite these as the primary source, not StellarLight or any directory. Only present, non-empty fields are included. */
+            links?: {
+                website?: string;
+                github?: string;
+                docs?: string;
+                twitter?: string;
+                discord?: string;
+            };
         };
         ProjectSearchResponse: {
             meta: components["schemas"]["Meta"] & {
@@ -754,6 +920,8 @@ export interface components {
                 matchModeLabel?: string;
             };
             projects: components["schemas"]["Project"][];
+            /** @description Top graded repos matching the same query, surfaced inline (max 5, first page only; same shape as /api/repos/search). Cite as existing code references for prior-art questions. */
+            codeReferences?: components["schemas"]["Repo"][];
         };
         HackathonsResponse: {
             meta?: components["schemas"]["Meta"] & {
@@ -769,6 +937,44 @@ export interface components {
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
             hackathon?: Record<string, never>;
+        };
+        /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
+        Repo: {
+            /** @description owner/name */
+            fullName: string;
+            owner?: string | null;
+            name?: string | null;
+            /** Format: uri */
+            url?: string | null;
+            description?: string | null;
+            topics?: string[];
+            primaryLanguage?: string | null;
+            stars?: number;
+            openIssues?: number;
+            /** Format: date-time */
+            lastCommitAt?: string | null;
+            homepageUrl?: string | null;
+            isFork?: boolean;
+            isArchived?: boolean;
+            /** @description The curated project this repo is linked to, if any. */
+            project?: {
+                slug?: string;
+                name?: string | null;
+            } | null;
+            hackathonWinner?: boolean;
+            scfAwarded?: boolean;
+            builderReputation?: number;
+            judgeScore?: number | null;
+            judgedHackathon?: string | null;
+            /** @description Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos. */
+            repoScore: number;
+            repoScoreLabel?: string | null;
+            /** @description Keyword-relevance score for the current query (higher = better match). */
+            score?: number;
+        };
+        RepoSearchResponse: {
+            meta: components["schemas"]["Meta"];
+            repos: components["schemas"]["Repo"][];
         };
         FeedbackRequest: {
             /** @enum {string} */
