@@ -138,6 +138,15 @@ export async function GET(req: NextRequest) {
 					where: { projectSlug: { in: projectSlugs } },
 					limit: 5000,
 					depth: 0,
+					// Only the stats we aggregate — NOT the README excerpt, which
+					// bloated this fetch enough to time the endpoint out as the repos
+					// collection grew past 2,000 docs.
+					select: {
+						projectSlug: true,
+						stars: true,
+						openIssues: true,
+						lastCommitAt: true,
+					},
 				});
 				for (const r of reposResult.docs as Array<{
 					projectSlug?: string;

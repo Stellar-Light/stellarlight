@@ -191,6 +191,11 @@ export async function searchRepos(
 			limit: tokens.length ? 600 : 200,
 			sort: "-repoScore",
 			depth: 0,
+			// Drop the README excerpt — it's the largest per-doc field and the
+			// candidates here already matched name/description in the DB, so the
+			// (weakest, noisiest) README scoring tier was moot anyway. Big payload
+			// win on the repos collection.
+			select: { readmeExcerpt: false },
 		});
 		const docs = (res.docs as unknown as RepoDoc[]).map((r) => {
 			const topics = topicList(r.topics);

@@ -642,6 +642,19 @@ export async function GET(req: NextRequest) {
 				sort: "-repoScore",
 				limit: Math.min(slugs.length * 8, 500),
 				depth: 0,
+				// Only the fields ProjectRepoRef surfaces — NOT the README excerpt,
+				// which bloated this per-project fetch and timed the endpoint out.
+				select: {
+					fullName: true,
+					url: true,
+					primaryLanguage: true,
+					stars: true,
+					repoScore: true,
+					repoScoreLabel: true,
+					judgeScore: true,
+					hackathonWinner: true,
+					projectSlug: true,
+				},
 			});
 			const bySlug = new Map<string, ProjectRepoRef[]>();
 			for (const r of repoRes.docs as unknown as Array<Record<string, unknown>>) {
