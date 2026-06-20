@@ -46,6 +46,7 @@ Their answer determines which endpoints you lead with — see the user-type rout
 - *"who should audit my contract"* / *"find me an auditor"* / *"which audit firm"* → run the **Find Audit Firm** workflow
 - *"which RFP should I go for"* / *"compare the open RFPs"* / *"rank the RFPs for my team"* → run the **Compare RFPs** workflow
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
+- *"show me the repos / code for X"* / *"what repos exist for X"* / *"prior-art code on Stellar"* → \`/api/projects/search?q={topic}\` returns each project **plus its GitHub repos and a graded \`codeReferences\` list**; or \`/api/repos/search?q={topic}\` to hit the repo index directly (~1,900 Stellar repos, ranked by \`repoScore\`)
 - *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (\`/api/rfps?status=open\`)
 - *"what got funded in SCF round X"* / *"prior SCF projects in {category}"* → SCF history via \`/api/projects/search?scfAwarded=1\`
 - *"how does Stellar compare on dev activity"* → \`/api/leaderboard\` for Stellar ecosystem stats (\`.ecosystem.activeDevs28d\`, \`.ecosystem.commits28d\`, \`.ecosystem.multichainDevs28d\`); for cross-chain peer comparison use \`/api/research?source=ec-developer-report&q=stellar+devs+comparison\`
@@ -215,8 +216,9 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 | \`/api/hackathons/compare\` | GET/POST | Side-by-side comparison of 2-5 hackathons with \`deltas\` |
 | \`/api/analyze\` | GET | Cross-event analytics rollup (hackathons + categories + funding) |
 | \`/api/clusters\` | GET | Topic clusters by category/type with crowdedness score |
-| \`/api/builders\` | GET | Stellar Passport directory (currently empty + \`meta.advisory\`) |
-| \`/api/projects/search\` | GET | Project search with tiered \`matchMode\` fallback |
+| \`/api/builders\` | GET | Builder directory (Stellar Passport) — filter by \`skill=\` (searches bio) or \`location=\` |
+| \`/api/projects/search\` | GET | Project search (tiered \`matchMode\`) — each result includes its GitHub **repos** + a graded **\`codeReferences\`** list |
+| \`/api/repos/search\` | GET | The Stellar repo/code index (~1,900 repos) — ranked by \`repoScore\` (freshness + traction + authority + hackathon-judge override) |
 | \`/api/rfps\` | GET | Open + closed SCF-funded sponsor briefs |
 | \`/api/skills\` | GET | SDF skills catalog (skills.stellar.org) |
 | \`/api/skills/{name}\` | GET | Full content of one SDF skill |
@@ -266,13 +268,13 @@ When in doubt, query \`/api/skills?kind=sdk\` and filter on the user's intent (p
 ## Data freshness
 
 - Hackathons + Projects + Builders metadata: refreshed continuously by curators
-- GitHub activity signals: daily cron job
+- GitHub repo index + activity signals (\`repoScore\`): refreshed by the enrich-repos job
 - Ecosystem dev stats (Electric Capital snapshot): daily at 06:00 UTC
 - SCF awarded data: manually enriched, may lag 1–2 weeks behind live SCF site
 
 ## Limitations
 
-- **Coverage:** only projects curated into the stellarlight directory (~300 Live + Development). Independent GitHub Stellar projects not in our directory won't appear in \`/api/projects/search\`.
+- **Coverage:** ~870 curated projects + ~1,900 indexed-and-scored repos (project repos + hackathon submissions + org expansion). A standalone GitHub repo not tied to a directory project may not be indexed yet — a full independent-repo crawl is the next coverage layer.
 - **Hackathon submissions:** Stellar Hacks events have full coverage. Older / smaller hackathons may be partial.
 - **Builders directory:** only profiles with public Stellar Passport opt-in — does not reflect every Stellar dev.
 - **No live competitor-alert push:** competitor lookups are pull-based (you query, I answer). No automatic "new project added matching your idea" notification yet.
