@@ -137,13 +137,13 @@ async function main() {
 		`  API base: ${process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz"}\n`,
 	);
 
-	// ── Session 1: tools/list returns 14 tools ──────────────────────────────
+	// ── Session 1: tools/list returns 15 tools ──────────────────────────────
 	console.log("◆ Tools registry");
 	try {
 		const resp = await callMcp("tools/list", {});
 		const tools = resp?.result?.tools ?? [];
-		if (tools.length === 14) pass(`tools/list returns 14 tools`);
-		else fail("tools/list returns 14 tools", `got ${tools.length}`);
+		if (tools.length === 15) pass(`tools/list returns 15 tools`);
+		else fail("tools/list returns 15 tools", `got ${tools.length}`);
 
 		const expected = [
 			"search_research",
@@ -152,6 +152,7 @@ async function main() {
 			"compare_hackathons",
 			"get_builders",
 			"search_projects",
+			"search_repos",
 			"get_rfps",
 			"list_skills",
 			"get_skill",

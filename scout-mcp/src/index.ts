@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 14 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's 15 public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -28,8 +28,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
-const USER_AGENT = process.env.SCOUT_USER_AGENT ?? "stellar-scout-mcp/1.0.0";
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
+const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
  * Centralized fetch with error handling. Returns the parsed JSON or a structured
@@ -321,6 +321,61 @@ server.registerTool(
 		const result = await callScout(
 			`/api/projects/search${qs ? `?${qs}` : ""}`,
 		);
+		return asToolResult(result);
+	},
+);
+
+// 6b. search_repos — graded GitHub code-reference index
+server.registerTool(
+	"search_repos",
+	{
+		title: "Search the Stellar GitHub repo / code-reference index",
+		description:
+			"The code layer beneath the project directory — search ~1,900 indexed-and-scored Stellar ecosystem GitHub repos by tech/keyword. Answers 'show me the repos / code for X', 'what repos exist for X', 'is there an open-source implementation of X', and prior-art *code* lookups that project search can't. Indexes GitHub topics + description + language + README, expands synonyms (zk→zero-knowledge/snark, oracle→price-feed, …), and ranks by repoScore (0–100 = freshness + traction + hackathon/SCF/builder authority). Lead with high-score repos as the strongest existing references and cite each repo's url/homepage. The same graded repos are injected inline into search_projects as `codeReferences`, so use this tool when you specifically want repos ranked on their own.",
+		inputSchema: {
+			q: z
+				.string()
+				.optional()
+				.describe(
+					"Tech/keyword query (e.g. 'zk', 'oracle', 'escrow', 'soroban amm').",
+				),
+			language: z
+				.string()
+				.optional()
+				.describe("Filter by primary language (e.g. 'Rust', 'TypeScript')."),
+			minScore: z
+				.number()
+				.int()
+				.min(0)
+				.max(100)
+				.optional()
+				.describe(
+					"Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references.",
+				),
+			limit: z
+				.number()
+				.int()
+				.min(1)
+				.max(100)
+				.optional()
+				.describe("Max results (default 20)."),
+			offset: z
+				.number()
+				.int()
+				.min(0)
+				.optional()
+				.describe("Pagination offset (default 0)."),
+		},
+	},
+	async ({ q, language, minScore, limit, offset }) => {
+		const params = new URLSearchParams();
+		if (q) params.set("q", q);
+		if (language) params.set("language", language);
+		if (minScore !== undefined) params.set("minScore", String(minScore));
+		if (limit !== undefined) params.set("limit", String(limit));
+		if (offset !== undefined) params.set("offset", String(offset));
+		const qs = params.toString();
+		const result = await callScout(`/api/repos/search${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );
