@@ -194,6 +194,34 @@ async function main() {
 		);
 	}
 
+	// ── 9. Every JSON endpoint parses under a STRICT parser ─────────────────
+	// A downstream integrator hit /api/rfps returning a raw control/separator
+	// char (U+2028/U+2029/U+0085 pass through JSON.stringify) that broke jq +
+	// Python json.loads. Assert the raw bytes parse strictly + carry no raw
+	// separators, across the text-heavy endpoints.
+	console.log("◆ Strict JSON parseability");
+	const jsonEndpoints = [
+		"/api/rfps",
+		"/api/research?q=stellar",
+		"/api/projects/search?q=wallet",
+		"/api/clusters",
+		"/api/builders?limit=5",
+		"/api/hackathons",
+		"/api/leaderboard?limit=5",
+	];
+	const SEP = [0x85, 0x2028, 0x2029];
+	for (const ep of jsonEndpoints) {
+		let raw = "";
+		try {
+			raw = await (await fetch(`${BASE}${ep}`)).text();
+			JSON.parse(raw); // throws on any unescaped control char
+			const hasRawSep = [...raw].some((c) => SEP.includes(c.charCodeAt(0)));
+			check(`${ep} is strict-parseable JSON`, !hasRawSep, "contains a raw U+2028/U+2029/U+0085 separator");
+		} catch (e) {
+			bad(`${ep} is strict-parseable JSON`, `JSON.parse failed: ${(e as Error).message.slice(0, 80)}`);
+		}
+	}
+
 	// ── summary ─────────────────────────────────────────────────────────────
 	console.log(`\n${passes} passed · ${failures} failed`);
 	if (failures > 0) process.exit(1);
