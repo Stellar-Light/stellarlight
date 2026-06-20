@@ -52,7 +52,7 @@ export interface paths {
         };
         /**
          * Search Stellar projects (prior art / competitor lookup)
-         * @description Search 741+ curated Stellar projects with tiered match-mode (strict → loose → majority). Tier surfaced as `.meta.matchMode` so agents convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions.
+         * @description Search the curated Stellar project directory (hundreds of projects; live count in /api/status) with tiered match-mode (strict → loose → majority). Tier surfaced as `.meta.matchMode` so agents convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions. A bare call with no q/filter returns `meta.error: no_query` + 0 rows (it does NOT return the full directory).
          */
         get: {
             parameters: {
@@ -65,7 +65,7 @@ export interface paths {
                     hackathon?: string;
                     /** @description Filter to SCF-funded projects only */
                     scfAwarded?: boolean;
-                    /** @description Max results returned (per-page) */
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                     /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                     offset?: components["parameters"]["offset"];
@@ -115,7 +115,7 @@ export interface paths {
                     language?: string;
                     /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
                     minScore?: number;
-                    /** @description Max results returned (per-page) */
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                     /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                     offset?: components["parameters"]["offset"];
@@ -165,7 +165,7 @@ export interface paths {
                     organizer?: string;
                     /** @description Restrict to one feed (curated vs DoraHacks) */
                     source?: "curated" | "dorahacks";
-                    /** @description Max results returned (per-page) */
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                 };
                 header?: never;
@@ -306,7 +306,7 @@ export interface paths {
                     skill?: string;
                     /** @description Filter by SCF tier */
                     scfTier?: string;
-                    /** @description Max results returned (per-page) */
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                     /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                     offset?: components["parameters"]["offset"];
@@ -360,7 +360,7 @@ export interface paths {
                     accepting?: "1";
                     /** @description Keyword query (free text) */
                     q?: components["parameters"]["q"];
-                    /** @description Max results returned (per-page) */
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                 };
                 header?: never;
@@ -457,7 +457,11 @@ export interface paths {
                     status?: "open" | "closed";
                     /** @description Filter by quarter slug (e.g. 'q1-2026') */
                     quarter?: string;
-                    /** @description Max results returned (per-page) */
+                    /** @description Keyword query (free text) */
+                    q?: components["parameters"]["q"];
+                    /** @description Filter by RFP category (e.g. 'defi', 'payments', 'infrastructure'). An unrecognized value returns 400 with the valid category list. */
+                    category?: string;
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                     /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                     offset?: components["parameters"]["offset"];
@@ -504,7 +508,7 @@ export interface paths {
                     /** @description Natural-language search query */
                     q: string;
                     /** @description Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions. */
-                    source?: "sdf-blog" | "scf-handbook" | "sep" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "ec-developer-report";
+                    source?: "sdf-blog" | "scf-handbook" | "sep" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "ec-developer-report";
                     /** @description Max results (default 8, max 25) */
                     limit?: number;
                 };
@@ -728,8 +732,16 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context) */
-                    include?: string;
+                    /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. */
+                    sort?: "activity" | "stars" | "issues";
+                    /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
+                    range?: "7d" | "30d" | "90d" | "1y" | "all";
+                    /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). */
+                    category?: string;
+                    /** @description Response format. */
+                    format?: "json" | "csv";
+                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                    limit?: components["parameters"]["limit"];
                 };
                 header?: never;
                 path?: never;
@@ -763,7 +775,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Get the feedback request schema (discovery)
+         * @description Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Feedback request schema */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+            };
+        };
         put?: never;
         /**
          * Submit feedback on Scout's output
@@ -782,8 +817,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Feedback received */
-                200: {
+                /** @description Feedback received (a curator-queue row was created) */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -916,7 +951,7 @@ export interface components {
                  * @description Tier of match relaxation that produced these results
                  * @enum {string}
                  */
-                matchMode?: "strict" | "loose" | "majority";
+                matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "all";
                 matchModeLabel?: string;
             };
             projects: components["schemas"]["Project"][];
@@ -925,12 +960,16 @@ export interface components {
         };
         HackathonsResponse: {
             meta?: components["schemas"]["Meta"] & {
-                /** @description Live announcement channels when query returns 0 events */
+                /** @description Present when the query returns 0 events — a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
-                    name?: string;
-                    /** Format: uri */
-                    url?: string;
-                }[];
+                    summary?: string;
+                    channels?: {
+                        name?: string;
+                        /** Format: uri */
+                        url?: string;
+                        why?: string;
+                    }[];
+                };
             };
             hackathons?: Record<string, never>[];
         };
@@ -976,20 +1015,25 @@ export interface components {
             meta: components["schemas"]["Meta"];
             repos: components["schemas"]["Repo"][];
         };
+        /** @description Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). */
         FeedbackRequest: {
             /** @enum {string} */
             kind: "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other";
             message: string;
-            query?: string;
-            endpoint?: string;
-            agentName?: string;
+            /** @description Optional context about what triggered the feedback. */
+            context?: {
+                query?: string;
+                endpoint?: string;
+                skillVersion?: string;
+                agentName?: string;
+            };
         };
     };
     responses: never;
     parameters: {
         /** @description Keyword query (free text) */
         q: string;
-        /** @description Max results returned (per-page) */
+        /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
         limit: number;
         /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
         offset: number;
