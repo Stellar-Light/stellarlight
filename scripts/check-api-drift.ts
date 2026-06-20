@@ -241,6 +241,42 @@ async function main() {
 	const mmEnum = spec?.components?.schemas?.ProjectSearchResponse?.properties?.meta?.allOf?.[1]?.properties?.matchMode?.enum || [];
 	check("OpenAPI matchMode enum includes live values (all, loose-1)", mmEnum.includes("all") && mmEnum.includes("loose-1"), `enum=${mmEnum.join(",")}`);
 
+	// ── 11. Responsiveness (catches timeouts/outages, not just wrong data) ──
+	// The guard verified CORRECTNESS but never hit /api/repos/search and had no
+	// latency check — so it missed the day repos/search timed out (it fetched
+	// the whole repo collection per call). Every endpoint must answer 200 within
+	// a budget; repos/search is included explicitly.
+	console.log("◆ Responsiveness (200 within budget)");
+	const BUDGET_MS = 12_000;
+	const timed = async (path: string): Promise<{ code: number; ms: number }> => {
+		const ctrl = new AbortController();
+		const timer = setTimeout(() => ctrl.abort(), BUDGET_MS);
+		const t0 = Date.now();
+		try {
+			const res = await fetch(`${BASE}${path}`, { signal: ctrl.signal });
+			return { code: res.status, ms: Date.now() - t0 };
+		} catch {
+			return { code: 0, ms: Date.now() - t0 };
+		} finally {
+			clearTimeout(timer);
+		}
+	};
+	for (const path of [
+		"/api/status",
+		"/api/projects/search?q=wallet&limit=3",
+		"/api/repos/search?q=oracle&limit=3",
+		"/api/builders?limit=3",
+		"/api/rfps",
+		"/api/research?q=stellar&limit=3",
+		"/api/clusters",
+		"/api/leaderboard?limit=3",
+		"/api/hackathons",
+		"/api/skills",
+	]) {
+		const { code, ms } = await timed(path);
+		check(`${path} → 200 in <${BUDGET_MS / 1000}s`, code === 200, `code=${code} after ${ms}ms`);
+	}
+
 	// ── summary ─────────────────────────────────────────────────────────────
 	console.log(`\n${passes} passed · ${failures} failed`);
 	if (failures > 0) process.exit(1);
