@@ -103,6 +103,7 @@ export const Projects: CollectionConfig = {
 			name: "status",
 			type: "select",
 			required: true,
+			index: true,
 			options: ["Draft", "Development", "Pre-Release", "Live"],
 			defaultValue: "Draft",
 			admin: {

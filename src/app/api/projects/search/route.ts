@@ -422,7 +422,11 @@ export async function GET(req: NextRequest) {
 				collection: "projects",
 				where,
 				limit: 500,
-				depth: 1,
+				// depth:0 — cheap scan. logo/hackathon are populated post-slice for
+				// the returned page only; the depth:1 populate over all ≤500
+				// candidates was the heaviest query on M0 and starved the rest of
+				// the cluster (status/clusters/leaderboard) of connections.
+				depth: 0,
 			});
 
 			projects = (
@@ -560,6 +564,53 @@ export async function GET(req: NextRequest) {
 
 			totalMatching = projects.length;
 			projects = projects.slice(offset, offset + limit);
+
+			// Re-populate logo + hackathon for ONLY the returned page. The
+			// candidate find above runs at depth:0; paying Payload's relation
+			// populate over all ≤500 candidates was the fan-out that made this
+			// the heaviest query on M0. Populate ≤limit docs here instead.
+			if (projects.length) {
+				try {
+					const pageIds = projects.map((p) => p.id);
+					const pop = await payload.find({
+						collection: "projects",
+						where: { id: { in: pageIds } },
+						depth: 1,
+						limit: pageIds.length,
+					});
+					const byId = new Map(
+						(
+							pop.docs as Array<{
+								id: string | number;
+								// biome-ignore lint/suspicious/noExplicitAny: populated relation doc
+								logo?: any;
+								// biome-ignore lint/suspicious/noExplicitAny: populated relation doc
+								hackathon?: any;
+							}>
+						).map((d) => [String(d.id), d]),
+					);
+					for (const p of projects) {
+						const d = byId.get(p.id);
+						if (!d) continue;
+						if (d.logo && typeof d.logo === "object") {
+							p.logoUrl =
+								d.logo.url ??
+								(d.logo.filename
+									? `/api/media/file/${d.logo.filename}`
+									: null);
+						}
+						if (d.hackathon && typeof d.hackathon === "object") {
+							p.hackathon = {
+								id: String(d.hackathon.id),
+								name: d.hackathon.name,
+								slug: d.hackathon.slug,
+							};
+						}
+					}
+				} catch {
+					// best-effort — ship the page without logo/hackathon populate
+				}
+			}
 		} catch {
 			// fall through
 		}
