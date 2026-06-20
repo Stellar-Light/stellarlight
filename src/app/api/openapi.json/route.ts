@@ -179,6 +179,43 @@ const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/repos/search": {
+			get: {
+				tags: ["Repos"],
+				summary: "Search the Stellar GitHub repo / code-reference index",
+				description:
+					"Search ~1,900 indexed-and-scored Stellar ecosystem GitHub repos by tech/keyword — the code layer beneath the project directory. Answers *'show me the repos / code for X'* and prior-art **code** lookups that project search can't. Indexes GitHub topics + description + language + README, expands synonyms (zk→zero-knowledge/snark, oracle→price-feed, …), and ranks by `repoScore` (0–100 = freshness + traction + hackathon/SCF/builder authority). Lead with high-score repos as the strongest references and cite each repo's `url` / `homepageUrl`. The same graded repos are injected inline into `/api/projects/search` as `codeReferences`.",
+				parameters: [
+					{ $ref: "#/components/parameters/q" },
+					{
+						name: "language",
+						in: "query",
+						description:
+							"Filter by primary language (case-insensitive substring, e.g. 'Rust', 'TypeScript')",
+						schema: { type: "string" },
+					},
+					{
+						name: "minScore",
+						in: "query",
+						description:
+							"Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references.",
+						schema: { type: "integer", minimum: 0, maximum: 100, default: 0 },
+					},
+					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/offset" },
+				],
+				responses: {
+					"200": {
+						description: "Repo search results graded by repoScore",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RepoSearchResponse" },
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/hackathons": {
 			get: {
 				tags: ["Hackathons"],
@@ -899,6 +936,12 @@ const spec: OpenAPISpec = {
 						type: "array",
 						items: { $ref: "#/components/schemas/Project" },
 					},
+					codeReferences: {
+						type: "array",
+						description:
+							"Top graded repos matching the same query, surfaced inline (max 5, first page only; same shape as /api/repos/search). Cite as existing code references for prior-art questions.",
+						items: { $ref: "#/components/schemas/Repo" },
+					},
 				},
 			},
 			HackathonsResponse: {
@@ -934,6 +977,65 @@ const spec: OpenAPISpec = {
 				properties: {
 					meta: { $ref: "#/components/schemas/Meta" },
 					hackathon: { type: "object" },
+				},
+			},
+			Repo: {
+				type: "object",
+				description:
+					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
+				required: ["fullName", "repoScore"],
+				properties: {
+					fullName: { type: "string", description: "owner/name" },
+					owner: { type: "string", nullable: true },
+					name: { type: "string", nullable: true },
+					url: { type: "string", format: "uri", nullable: true },
+					description: { type: "string", nullable: true },
+					topics: { type: "array", items: { type: "string" } },
+					primaryLanguage: { type: "string", nullable: true },
+					stars: { type: "integer" },
+					openIssues: { type: "integer" },
+					lastCommitAt: { type: "string", format: "date-time", nullable: true },
+					homepageUrl: { type: "string", nullable: true },
+					isFork: { type: "boolean" },
+					isArchived: { type: "boolean" },
+					project: {
+						type: "object",
+						nullable: true,
+						description: "The curated project this repo is linked to, if any.",
+						properties: {
+							slug: { type: "string" },
+							name: { type: "string", nullable: true },
+						},
+					},
+					hackathonWinner: { type: "boolean" },
+					scfAwarded: { type: "boolean" },
+					builderReputation: { type: "number" },
+					judgeScore: { type: "number", nullable: true },
+					judgedHackathon: { type: "string", nullable: true },
+					repoScore: {
+						type: "number",
+						minimum: 0,
+						maximum: 100,
+						description:
+							"Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
+					},
+					repoScoreLabel: { type: "string", nullable: true },
+					score: {
+						type: "number",
+						description:
+							"Keyword-relevance score for the current query (higher = better match).",
+					},
+				},
+			},
+			RepoSearchResponse: {
+				type: "object",
+				required: ["meta", "repos"],
+				properties: {
+					meta: { $ref: "#/components/schemas/Meta" },
+					repos: {
+						type: "array",
+						items: { $ref: "#/components/schemas/Repo" },
+					},
 				},
 			},
 			FeedbackRequest: {
