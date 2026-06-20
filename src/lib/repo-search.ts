@@ -104,12 +104,16 @@ const SDF_OWNERS = new Set([
 	"stellardevelopmentfoundation",
 ]);
 
-// Stellar-nativeness of a repo (0–3). Used as a tiebreak ABOVE the authority
+// Stellar-nativeness of a repo (0–2). Used as a tiebreak ABOVE the authority
 // grade so a canonical Stellar repo can't be buried by an off-topic but
 // higher-authority (e.g. SCF-funded, multi-chain) repo at the same relevance.
-function stellarSignal(owner: string, hay: string, projectSlug?: string | null): number {
-	if (SDF_OWNERS.has(owner)) return 3;
-	if (projectSlug) return 2; // linked to a curated Stellar project
+// NOTE: deliberately NOT keyed on projectSlug — most off-topic-but-noisy repos
+// (generic SCF-funded multi-chain tools, payment-gateway SDKs) are ALSO linked
+// to a curated project, so a projectSlug boost buried genuinely-strong but
+// unlinked repos (e.g. zk hackathon winners) under mediocre linked ones. SDF
+// org ownership + an explicit stellar/soroban mention are the reliable signals.
+function stellarSignal(owner: string, hay: string): number {
+	if (SDF_OWNERS.has(owner)) return 2;
 	if (/\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay)) return 1;
 	return 0;
 }
@@ -172,7 +176,7 @@ export async function searchRepos(
 				score = 1;
 			}
 			const owner = name.split("/")[0];
-			const stellar = stellarSignal(owner, `${name} ${tops} ${desc}`, r.projectSlug);
+			const stellar = stellarSignal(owner, `${name} ${tops} ${desc}`);
 			const fresh = freshSignal(r.lastCommitAt);
 			return { r, topics, score, matched, stellar, fresh };
 		});
