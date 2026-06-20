@@ -166,13 +166,32 @@ export async function searchRepos(
 	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
 	if (!payload) return { repos: [], total: 0 };
 	try {
+		const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
+		// repos, not the whole collection. It grew past 2,000 docs and pulling
+		// them all (each with a README excerpt) on every call timed the endpoint
+		// out. Coarse substring `like` is the recall net; the field-weighted
+		// boundary scoring below is the precise filter — same design as
+		// /api/projects/search. A no-query browse is capped to the top-scored
+		// page instead of the full collection.
+		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
+		const where: any = {};
+		if (language) where.primaryLanguage = { like: language };
+		if (tokens.length) {
+			where.or = tokens.flatMap((t) =>
+				termsForToken(t).flatMap((v) => [
+					{ fullName: { like: v } },
+					{ description: { like: v } },
+				]),
+			);
+		}
 		const res = await payload.find({
 			collection: "repos",
-			where: language ? { primaryLanguage: { like: language } } : {},
-			limit: 2000,
+			where,
+			limit: tokens.length ? 600 : 200,
+			sort: "-repoScore",
 			depth: 0,
 		});
-		const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
 		const docs = (res.docs as unknown as RepoDoc[]).map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
