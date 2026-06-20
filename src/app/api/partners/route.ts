@@ -16,6 +16,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { boolParam, clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -114,9 +115,9 @@ export async function GET(req: NextRequest) {
 	const type = sp.get("type");
 	const sector = sp.get("sector");
 	const region = sp.get("region");
-	const accepting = sp.get("accepting");
+	const accepting = boolParam(sp.get("accepting"));
 	const q = sp.get("q")?.toLowerCase().trim();
-	const limit = Math.min(Number(sp.get("limit") || "50") || 50, 100);
+	const limit = clampLimit(sp.get("limit"), 50, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	if (type && !PARTNER_TYPES.includes(type)) {
@@ -137,7 +138,7 @@ export async function GET(req: NextRequest) {
 			if (type) where.partnerType = { equals: type };
 			if (sector) where.sectors = { contains: sector };
 			if (region) where.regions = { contains: region };
-			if (accepting === "1") where.acceptingClients = { equals: true };
+			if (accepting) where.acceptingClients = { equals: true };
 
 			const result = await payload.find({
 				collection: "partner-accounts",

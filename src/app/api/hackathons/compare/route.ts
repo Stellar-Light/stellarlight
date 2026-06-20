@@ -227,7 +227,15 @@ async function compare(slugs: string[], req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
-				counts: { requested: slugs.length, returned: snapshots.length },
+				// `returned` counts only hackathons that actually resolved — a
+				// not-found slug yields a placeholder snapshot but must NOT inflate
+				// `returned` (a consumer's returned===requested success check relied
+				// on that). `notFound` surfaces the misses explicitly.
+				counts: {
+					requested: slugs.length,
+					returned: snapshots.filter((s) => s.source !== "not-found").length,
+					notFound: snapshots.filter((s) => s.source === "not-found").length,
+				},
 			},
 			hackathons: snapshots,
 			deltas,

@@ -14,6 +14,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import {
 	ACTIVE_QUARTER,
 	CATEGORIES,
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
 	const categoryFilter = sp.get("category") as Category | null;
 	const quarterFilter = sp.get("quarter") as Quarter | null;
 	const statusFilter = sp.get("status") as RfpStatus | null;
-	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 200);
+	const limit = clampLimit(sp.get("limit"), 100, 200);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	// Reject an unrecognized category instead of silently returning ALL rows
@@ -71,6 +72,18 @@ export async function GET(req: NextRequest) {
 	) {
 		return NextResponse.json(
 			{ error: `Invalid category '${categoryFilter}'.`, validCategories: CATEGORIES },
+			{ status: 400 },
+		);
+	}
+	if (statusFilter && statusFilter !== "open" && statusFilter !== "closed") {
+		return NextResponse.json(
+			{ error: `Invalid status '${statusFilter}'.`, validStatuses: ["open", "closed"] },
+			{ status: 400 },
+		);
+	}
+	if (quarterFilter && !(QUARTERS as readonly string[]).includes(quarterFilter)) {
+		return NextResponse.json(
+			{ error: `Invalid quarter '${quarterFilter}'.`, validQuarters: QUARTERS },
 			{ status: 400 },
 		);
 	}
