@@ -28,6 +28,7 @@ import {
 	rfpStatus,
 } from "@/data/ideas";
 import { logApiHit } from "@/lib/api-usage";
+import { jsonSafe } from "@/lib/json-safe";
 
 // force-dynamic so the query-param filters (q, category, quarter) actually
 // apply — static generation collapses params at build time and would
@@ -122,7 +123,7 @@ export async function GET(req: NextRequest) {
 	});
 
 	return NextResponse.json(
-		{
+		jsonSafe({
 			meta: {
 				source: "https://stellarlight.xyz/ideas",
 				generatedAt: new Date().toISOString(),
@@ -156,7 +157,7 @@ export async function GET(req: NextRequest) {
 			funding:
 				"Stellar Community Fund (SCF) — winners of open RFPs (status: open) are eligible for SCF grant funding in the current round. Closed RFPs are past rounds, surfaced for context but no longer fundable.",
 			rfps,
-		},
+		}),
 		{
 			headers: {
 				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
