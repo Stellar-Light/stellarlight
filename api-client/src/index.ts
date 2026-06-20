@@ -24,6 +24,8 @@ export type { components, paths };
 /** Re-exported component schemas for consumer convenience. */
 export type Project = components["schemas"]["Project"];
 export type ProjectSearchResponse = components["schemas"]["ProjectSearchResponse"];
+export type Repo = components["schemas"]["Repo"];
+export type RepoSearchResponse = components["schemas"]["RepoSearchResponse"];
 export type StatusResponse = components["schemas"]["StatusResponse"];
 export type HackathonsResponse = components["schemas"]["HackathonsResponse"];
 export type HackathonDetailResponse = components["schemas"]["HackathonDetailResponse"];
@@ -32,6 +34,9 @@ export type FeedbackRequest = components["schemas"]["FeedbackRequest"];
 /** Query params, lifted from the generated paths for ergonomic call sites. */
 export type SearchProjectsParams = NonNullable<
 	paths["/api/projects/search"]["get"]["parameters"]["query"]
+>;
+export type SearchReposParams = NonNullable<
+	paths["/api/repos/search"]["get"]["parameters"]["query"]
 >;
 export type GetHackathonsParams = NonNullable<
 	paths["/api/hackathons"]["get"]["parameters"]["query"]
@@ -89,7 +94,7 @@ export class ScoutApiError extends Error {
 }
 
 const DEFAULT_BASE_URL = "https://stellarlight.xyz";
-const CLIENT_VERSION = "1.0.0";
+const CLIENT_VERSION = "1.1.0";
 
 export class ScoutClient {
 	private readonly baseUrl: string;
@@ -115,6 +120,15 @@ export class ScoutClient {
 	/** Search 741+ curated Stellar projects (prior art / competitor lookup). */
 	searchProjects(params: SearchProjectsParams = {}): Promise<ProjectSearchResponse> {
 		return this.get("/api/projects/search", params);
+	}
+
+	/**
+	 * Search ~1,900 indexed-and-scored Stellar GitHub repos by tech/keyword —
+	 * the code layer beneath the project directory. Ranked by repoScore
+	 * (freshness + traction + hackathon/SCF/builder authority).
+	 */
+	searchRepos(params: SearchReposParams = {}): Promise<RepoSearchResponse> {
+		return this.get("/api/repos/search", params);
 	}
 
 	/** List Stellar hackathons (curated + DoraHacks merged feed). */
