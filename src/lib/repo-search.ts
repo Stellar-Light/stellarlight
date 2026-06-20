@@ -154,6 +154,15 @@ function isAlive(lastCommitAt?: string | null): boolean {
 	const days = (Date.now() - Date.parse(lastCommitAt)) / 86_400_000;
 	return Number.isFinite(days) && days <= 365;
 }
+// Hard cutoff: a repo untouched for >2 years is abandoned and has no place in a
+// "live Stellar repo index" — drop it from results entirely rather than let it
+// fill a thin vertical (5yr-dead Moonbeam/Celo/Solana repos were surfacing).
+// Null commit date = unknown, not excluded.
+function isVeryDead(lastCommitAt?: string | null): boolean {
+	if (!lastCommitAt) return false;
+	const days = (Date.now() - Date.parse(lastCommitAt)) / 86_400_000;
+	return Number.isFinite(days) && days > 730;
+}
 function hasStellarMention(hay: string): boolean {
 	return /\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay);
 }
@@ -183,7 +192,11 @@ export async function searchRepos(
 			// topic match, and ties fall through to the repoScore quality grade below,
 			// which keeps flagship repos (noir for zk) leading. Multi-term coverage
 			// is rewarded so a repo matching the whole query beats a partial match.
-			const name = wordy(r.fullName);
+			// Relevance matches the repo NAME (after the owner) — NOT the owner —
+			// so an org named "Blockchain-Oracle" or "hot-dao" doesn't make its
+			// repos rank for "oracle"/"dao". Owner is still used for SDF + mention.
+			const repoPart = r.fullName.split("/").slice(1).join("/") || r.fullName;
+			const name = wordy(repoPart);
 			const tops = wordy(topics.join(" "));
 			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
 			const readme = wordy(r.readmeExcerpt ?? "");
@@ -207,13 +220,18 @@ export async function searchRepos(
 				score = 1;
 			}
 			const owner = r.fullName.split("/")[0].toLowerCase();
-			const hay = `${name} ${tops} ${desc}`;
+			// mention check uses the FULL name (incl. owner) so a stellar/soroban
+			// org still counts, even though owner is excluded from relevance above.
+			const hay = `${wordy(r.fullName)} ${tops} ${desc}`;
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
-			return { r, topics, score, matched, sdf, alive, mention };
+			const dead = isVeryDead(r.lastCommitAt);
+			return { r, topics, score, matched, sdf, alive, mention, dead };
 		});
-		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1) : docs;
+		let filtered = (tokens.length ? docs.filter((d) => d.matched >= 1) : docs).filter(
+			(d) => !d.dead,
+		);
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
