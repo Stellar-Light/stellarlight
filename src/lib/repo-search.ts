@@ -95,6 +95,35 @@ function termsForToken(t: string): string[] {
 	return [...out];
 }
 
+// Match a term at a WORD BOUNDARY (prefix, suffix, or whole word) rather than
+// as a raw infix. "swap" still matches "soro·swap" (suffix) and the topic
+// "dex" still matches, but "dex" no longer matches "in·dex·er" — the substring
+// false positive that ranked a ledger indexer #1 for "amm" and inflated counts.
+// Regexes are cached since the same expansion terms recur for every repo.
+const termRe = new Map<string, RegExp>();
+function boundaryRe(term: string): RegExp {
+	let re = termRe.get(term);
+	if (!re) {
+		const esc = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		re = new RegExp(`(?:\\b${esc}|${esc}\\b)`);
+		termRe.set(term, re);
+	}
+	return re;
+}
+function termHits(terms: string[], hay: string): boolean {
+	return terms.some((v) => boundaryRe(v).test(hay));
+}
+
+// Insert separators at camelCase / letter→digit transitions BEFORE lowercasing,
+// so boundary matching sees words smushed into a name: "StellarPay402" →
+// "stellar pay 402" (so "pay" matches), while "indexer" stays one word.
+function wordy(s: string): string {
+	return s
+		.replace(/([a-z])([A-Z])/g, "$1 $2")
+		.replace(/([A-Za-z])([0-9])/g, "$1 $2")
+		.toLowerCase();
+}
+
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
 const SDF_OWNERS = new Set([
@@ -154,16 +183,16 @@ export async function searchRepos(
 			// topic match, and ties fall through to the repoScore quality grade below,
 			// which keeps flagship repos (noir for zk) leading. Multi-term coverage
 			// is rewarded so a repo matching the whole query beats a partial match.
-			const name = r.fullName.toLowerCase();
-			const tops = topics.join(" ").toLowerCase();
-			const desc = `${r.description ?? ""} ${r.primaryLanguage ?? ""}`.toLowerCase();
-			const readme = (r.readmeExcerpt ?? "").toLowerCase();
+			const name = wordy(r.fullName);
+			const tops = wordy(topics.join(" "));
+			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
+			const readme = wordy(r.readmeExcerpt ?? "");
 			let score = 0;
 			let matched = 0;
 			if (tokens.length) {
 				for (const t of tokens) {
 					const vs = termsForToken(t);
-					const hit = (hay: string) => vs.some((v) => hay.includes(v));
+					const hit = (hay: string) => termHits(vs, hay);
 					let best = 0;
 					if (hit(name) || hit(tops)) best = 5;
 					else if (hit(desc)) best = 3;
@@ -177,7 +206,7 @@ export async function searchRepos(
 			} else {
 				score = 1;
 			}
-			const owner = name.split("/")[0];
+			const owner = r.fullName.split("/")[0].toLowerCase();
 			const hay = `${name} ${tops} ${desc}`;
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
