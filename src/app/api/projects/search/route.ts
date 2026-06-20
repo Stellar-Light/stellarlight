@@ -13,6 +13,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
@@ -317,7 +318,7 @@ export async function GET(req: NextRequest) {
 		.trim();
 	const scfAwardedOnly =
 		scfRaw === "1" || scfRaw === "true" || scfRaw === "yes";
-	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
+	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	// Guard content-less calls: no query AND no filters. This is almost always a

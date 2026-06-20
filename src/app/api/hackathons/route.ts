@@ -20,6 +20,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	type DoraHacksHackathon,
@@ -89,7 +90,7 @@ export async function GET(req: NextRequest) {
 	const statusFilter = sp.get("status");
 	const organizerFilter = sp.get("organizer");
 	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
-	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 300);
+	const limit = clampLimit(sp.get("limit"), 100, 300);
 
 	// Validate enumerated params before doing work — silently returning the
 	// unfiltered feed for `?status=garbage` confuses agents (they think the

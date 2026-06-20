@@ -18,6 +18,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { researchConfidence, SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest) {
 	const q =
 		(sp.get("q") ?? sp.get("query") ?? sp.get("keyword") ?? sp.get("search"))?.trim() ?? "";
 	const sourceFilter = sp.get("source");
-	const limitParam = Math.min(Number(sp.get("limit") || "8") || 8, 25);
+	const limitParam = clampLimit(sp.get("limit"), 8, 25);
 
 	// Single source of truth for valid `source` values. Kept in sync with
 	// the ResearchSource type in src/lib/research-ingest.ts.

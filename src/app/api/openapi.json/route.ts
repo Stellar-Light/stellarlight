@@ -523,6 +523,7 @@ const spec: OpenAPISpec = {
 								"lumenloop",
 								"lumenloop-research",
 								"audit",
+								"incident",
 								"ec-developer-report",
 							],
 						},
@@ -805,8 +806,9 @@ const spec: OpenAPISpec = {
 			limit: {
 				name: "limit",
 				in: "query",
-				description: "Max results returned (per-page)",
-				schema: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+				description:
+					"Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected.",
+				schema: { type: "integer", minimum: 1 },
 			},
 			offset: {
 				name: "offset",
@@ -972,7 +974,14 @@ const spec: OpenAPISpec = {
 								properties: {
 									matchMode: {
 										type: "string",
-										enum: ["strict", "loose", "majority"],
+										enum: [
+										"strict",
+										"loose-1",
+										"loose-2",
+										"loose-3",
+										"majority",
+										"all",
+									],
 										description:
 											"Tier of match relaxation that produced these results",
 									},
@@ -1003,14 +1012,21 @@ const spec: OpenAPISpec = {
 								type: "object",
 								properties: {
 									fallbackChannels: {
-										type: "array",
+										type: "object",
 										description:
-											"Live announcement channels when query returns 0 events",
-										items: {
-											type: "object",
-											properties: {
-												name: { type: "string" },
-												url: { type: "string", format: "uri" },
+											"Present when the query returns 0 events — a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array.",
+										properties: {
+											summary: { type: "string" },
+											channels: {
+												type: "array",
+												items: {
+													type: "object",
+													properties: {
+														name: { type: "string" },
+														url: { type: "string", format: "uri" },
+														why: { type: "string" },
+													},
+												},
 											},
 										},
 									},

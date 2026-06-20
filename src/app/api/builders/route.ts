@@ -14,6 +14,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { boolParam, clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -53,8 +54,8 @@ export async function GET(req: NextRequest) {
 		.trim();
 	const location = sp.get("location");
 	const scfTier = sp.get("scfTier");
-	const featured = sp.get("featured") === "1";
-	const limit = Math.min(Number(sp.get("limit") || "50") || 50, 200);
+	const featured = boolParam(sp.get("featured"));
+	const limit = clampLimit(sp.get("limit"), 50, 200);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();

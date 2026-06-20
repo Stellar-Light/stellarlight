@@ -222,6 +222,25 @@ async function main() {
 		}
 	}
 
+	// ── 10. Cold-input footguns (from the cold-outsider audit) ──────────────
+	console.log("◆ Cold-input footguns");
+	// negative limit must not overrun the page
+	const negLimit = (await getJson("/api/builders?limit=-5")).body?.meta?.counts?.returned;
+	check("builders negative limit is clamped (not an overrun)", typeof negLimit === "number" && negLimit <= 50, `limit=-5 returned ${negLimit}`);
+	const lbNeg = (await getJson("/api/leaderboard?limit=-3")).body?.projects?.length;
+	check("leaderboard negative limit is clamped", typeof lbNeg === "number" && lbNeg <= 50, `limit=-3 returned ${lbNeg}`);
+	// boolean params honor true/yes, not only "1"
+	const feat = (await getJson("/api/builders?featured=true")).body?.meta?.filters?.featured;
+	check("builders featured=true is honored (boolean coercion)", feat === true, `echoed featured=${feat}`);
+	// invalid enum values reject (rfps status/quarter — the silent-returns-all class)
+	check("rfps status=BOGUS → 400", (await statusOf("/api/rfps?status=BOGUS")) === 400);
+	check("rfps quarter=BOGUS → 400", (await statusOf("/api/rfps?quarter=BOGUS")) === 400);
+	// spec ⇄ live shape: fallbackChannels is an object (matches live), matchMode enum covers live values
+	const fbSpec = spec?.components?.schemas?.HackathonsResponse?.properties?.meta?.allOf?.[1]?.properties?.fallbackChannels?.type;
+	check("OpenAPI fallbackChannels typed as object (matches live)", fbSpec === "object", `spec says ${fbSpec}`);
+	const mmEnum = spec?.components?.schemas?.ProjectSearchResponse?.properties?.meta?.allOf?.[1]?.properties?.matchMode?.enum || [];
+	check("OpenAPI matchMode enum includes live values (all, loose-1)", mmEnum.includes("all") && mmEnum.includes("loose-1"), `enum=${mmEnum.join(",")}`);
+
 	// ── summary ─────────────────────────────────────────────────────────────
 	console.log(`\n${passes} passed · ${failures} failed`);
 	if (failures > 0) process.exit(1);

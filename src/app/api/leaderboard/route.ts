@@ -12,6 +12,7 @@
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import { getPayloadSafe } from "@/lib/payload-client";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
 	const range = (sp.get("range") || "all").toLowerCase();
 	const category = sp.get("category");
 	const format = (sp.get("format") || "json").toLowerCase();
-	const limit = Math.min(Number(sp.get("limit") || "50") || 50, 300);
+	const limit = clampLimit(sp.get("limit"), 50, 300);
 
 	// Reject unrecognized sort/range instead of silently falling back to a
 	// surprising order or an empty set. Matches the 400+validX pattern used

@@ -13,6 +13,7 @@
  * Shared implementation in src/lib/repo-search.ts.
  */
 import { type NextRequest, NextResponse } from "next/server";
+import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { searchRepos } from "@/lib/repo-search";
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
 		(sp.get("q") ?? sp.get("query") ?? sp.get("keyword") ?? sp.get("search"))?.trim() ?? "";
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
-	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
+	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
