@@ -1,0 +1,30 @@
+# Drift guard — asserts the live API, the OpenAPI spec, and the skill docs
+# still agree. Created after a downstream consumer (2026-06-20) found the three
+# had silently diverged as endpoints/params were added. Runs daily + on demand.
+name: API drift guard
+
+on:
+  schedule:
+    - cron: "17 13 * * *" # daily ~13:17 UTC
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Base URL to check"
+        required: false
+        default: "https://stellarlight.xyz"
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run API drift guard
+        env:
+          SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
+        run: npx -y tsx scripts/check-api-drift.ts

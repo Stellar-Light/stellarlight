@@ -1,0 +1,205 @@
+/**
+ * API drift guard — asserts the THREE sources of truth agree:
+ *   live API  ⇄  OpenAPI spec (/api/openapi.json)  ⇄  skill docs (/skills/*)
+ *
+ * Built in response to a downstream consumer's discrepancy report (2026-06-20):
+ * the API had drifted from the spec + skill docs as endpoints/params were added.
+ * This catches that class of drift before it ships.
+ *
+ *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-api-drift.ts
+ *
+ * Exits non-zero on any drift. Wired into CI (.github/workflows/api-drift.yml).
+ * No DB / auth needed — everything is fetched from the public live API.
+ */
+
+const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
+
+let failures = 0;
+let passes = 0;
+function ok(name: string) {
+	passes++;
+	console.log(`  ✓ ${name}`);
+}
+function bad(name: string, detail: string) {
+	failures++;
+	console.log(`  ✗ ${name}\n      ${detail}`);
+}
+function check(name: string, cond: boolean, detail = "") {
+	cond ? ok(name) : bad(name, detail);
+}
+
+async function getJson(path: string): Promise<{ status: number; body: any }> {
+	const res = await fetch(`${BASE}${path}`, {
+		headers: { Accept: "application/json" },
+	});
+	let body: any = null;
+	try {
+		body = await res.json();
+	} catch {
+		/* non-JSON */
+	}
+	return { status: res.status, body };
+}
+async function statusOf(path: string): Promise<number> {
+	const res = await fetch(`${BASE}${path}`, { method: "GET" });
+	return res.status;
+}
+
+async function main() {
+	console.log(`API drift guard — ${BASE}\n`);
+
+	const spec = (await getJson("/api/openapi.json")).body;
+	const status = (await getJson("/api/status")).body;
+
+	// ── 1. Spec ⇄ /api/status endpoint registry agree ──────────────────────
+	console.log("◆ Spec ⇄ status endpoint registry");
+	const specPaths = Object.keys(spec?.paths ?? {});
+	const statusEndpoints: string[] = status?.endpoints ?? [];
+	for (const p of specPaths) {
+		check(
+			`status.endpoints lists ${p}`,
+			statusEndpoints.includes(p),
+			`OpenAPI documents ${p} but /api/status.endpoints[] omits it`,
+		);
+	}
+	for (const e of statusEndpoints) {
+		check(
+			`OpenAPI documents ${e}`,
+			specPaths.includes(e),
+			`/api/status advertises ${e} but the OpenAPI spec omits it`,
+		);
+	}
+
+	// ── 2. Populated collections must not read as empty ─────────────────────
+	console.log("◆ Data presence (no false-empty)");
+	const sources: Array<{ name: string; count: number | null }> =
+		status?.sources ?? [];
+	for (const name of ["projects", "builders", "repos"]) {
+		const src = sources.find((s) => s.name === name);
+		check(
+			`status.sources has a populated '${name}'`,
+			!!src && (src.count ?? 0) > 0,
+			`source '${name}' missing or count=${src?.count} (consumers infer the collection is empty)`,
+		);
+	}
+	// builders advisory on a filter miss must NOT claim the directory is empty
+	const builders = (await getJson("/api/builders?skill=__nope__zzz__")).body;
+	const adv: string = builders?.meta?.advisory?.summary ?? "";
+	const buildersCount =
+		sources.find((s) => s.name === "builders")?.count ?? 0;
+	check(
+		"builders filter-miss advisory frames it as a filter miss, not an empty directory",
+		buildersCount === 0 ||
+			/filter miss|matched this query|matched this filter/i.test(adv),
+		`advisory says "${adv.slice(0, 90)}..." while ${buildersCount} builders exist — it must say it's a filter miss, not claim the directory is empty`,
+	);
+
+	// ── 3. Filters actually filter (not silently ignored) ───────────────────
+	console.log("◆ Filters apply (no silent no-op)");
+	const baseTotal = (await getJson("/api/projects/search?q=wallet&limit=1"))
+		.body?.meta?.counts?.total;
+	const scfTrue = (
+		await getJson("/api/projects/search?q=wallet&scfAwarded=true&limit=1")
+	).body?.meta?.counts?.total;
+	check(
+		"projects/search scfAwarded=true filters (boolean form honored)",
+		typeof scfTrue === "number" && scfTrue < baseTotal,
+		`scfAwarded=true total ${scfTrue} == unfiltered ${baseTotal} (filter ignored)`,
+	);
+
+	// ── 4. Invalid filter values reject with 400 + validX ───────────────────
+	console.log("◆ Invalid values rejected (400 + validX)");
+	const invalidCases: Array<[string, string]> = [
+		["/api/hackathons?status=__bad__", "hackathons status"],
+		["/api/research?q=x&source=__bad__", "research source"],
+		["/api/skills?source=__bad__", "skills source"],
+		["/api/rfps?category=__bad__", "rfps category"],
+		["/api/leaderboard?sort=__bad__", "leaderboard sort"],
+		["/api/leaderboard?range=__bad__", "leaderboard range"],
+	];
+	for (const [path, label] of invalidCases) {
+		const code = await statusOf(path);
+		check(`${label} invalid value → 400`, code === 400, `got ${code}`);
+	}
+
+	// ── 5. No-query project search is honest ────────────────────────────────
+	console.log("◆ No-query guard");
+	const bare = (await getJson("/api/projects/search?limit=3")).body;
+	check(
+		"bare projects/search returns no_query (not the full directory)",
+		bare?.meta?.error === "no_query" && (bare?.projects?.length ?? 0) === 0,
+		`error=${bare?.meta?.error} projects=${bare?.projects?.length}`,
+	);
+
+	// ── 6. OpenAPI documents the params the API honors ──────────────────────
+	console.log("◆ OpenAPI param completeness");
+	const rfpsParams = (spec?.paths?.["/api/rfps"]?.get?.parameters ?? []).map(
+		(p: any) => p.name || p.$ref,
+	);
+	check(
+		"OpenAPI rfps documents category",
+		rfpsParams.some((p: string) => p === "category"),
+		`rfps params: ${rfpsParams.join(",")}`,
+	);
+	const lbParams = (
+		spec?.paths?.["/api/leaderboard"]?.get?.parameters ?? []
+	).map((p: any) => p.name || p.$ref);
+	for (const need of ["sort", "range", "category"]) {
+		check(
+			`OpenAPI leaderboard documents ${need}`,
+			lbParams.includes(need),
+			`leaderboard params: ${lbParams.join(",")}`,
+		);
+	}
+	check(
+		"OpenAPI leaderboard dropped the inert 'include'",
+		!lbParams.includes("include"),
+		"include is a documented no-op",
+	);
+
+	// ── 7. Feedback contract: GET + 201 + nested context ────────────────────
+	console.log("◆ Feedback contract");
+	check(
+		"GET /api/feedback documented",
+		!!spec?.paths?.["/api/feedback"]?.get,
+		"GET works live but isn't in the spec",
+	);
+	check(
+		"feedback POST success code is 201",
+		Object.keys(spec?.paths?.["/api/feedback"]?.post?.responses ?? {}).includes(
+			"201",
+		),
+		"spec says 200 but the endpoint returns 201",
+	);
+	check(
+		"FeedbackRequest nests reporting context under 'context'",
+		!!spec?.components?.schemas?.FeedbackRequest?.properties?.context,
+		"spec is flat but the live POST + GET self-schema are nested",
+	);
+
+	// ── 8. Counts are not hardcoded into prose (drift magnets) ──────────────
+	console.log("◆ No hardcoded stale counts");
+	const infoDesc = JSON.stringify(spec?.info ?? {});
+	check(
+		"OpenAPI info does not hardcode a project count",
+		!/\b\d{3,}\+? curated/i.test(infoDesc) && !/~?741/.test(infoDesc),
+		"counts drift — source them from /api/status instead",
+	);
+	const skillDoc = await (await fetch(`${BASE}/skills/stellar-scout.md`)).text();
+	for (const stale of ["currently empty pending", "~1,900", "7 official Stellar Foundation"]) {
+		check(
+			`skill doc free of stale phrase "${stale}"`,
+			!skillDoc.includes(stale),
+			"served skill doc still carries a stale claim",
+		);
+	}
+
+	// ── summary ─────────────────────────────────────────────────────────────
+	console.log(`\n${passes} passed · ${failures} failed`);
+	if (failures > 0) process.exit(1);
+}
+
+main().catch((e) => {
+	console.error("drift check crashed:", e);
+	process.exit(1);
+});
