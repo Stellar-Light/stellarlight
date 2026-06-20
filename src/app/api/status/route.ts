@@ -59,7 +59,7 @@ export async function GET() {
 	const payload = await getPayloadSafe();
 	const generatedAt = new Date().toISOString();
 
-	const [projects, hackathons, builders] = payload
+	const [projects, hackathons, builders, repos] = payload
 		? await Promise.all([
 				collectionStatus(payload, "projects", "projects"),
 				collectionStatus(payload, "hackathons", "hackathons"),
@@ -69,11 +69,18 @@ export async function GET() {
 					"builders",
 					"Synced from Stellar Passport — small and growing dataset",
 				),
+				collectionStatus(
+					payload,
+					"repos",
+					"repos",
+					"Indexed-and-scored Stellar GitHub repos (powers /api/repos/search)",
+				),
 			])
 		: [
 				{ name: "projects", count: null, lastUpdatedAt: null },
 				{ name: "hackathons", count: null, lastUpdatedAt: null },
 				{ name: "builders", count: null, lastUpdatedAt: null },
+				{ name: "repos", count: null, lastUpdatedAt: null },
 			];
 
 	const ecosystemStats: SourceStatus = {
@@ -99,7 +106,14 @@ export async function GET() {
 			service: "Stellar Scout",
 			version: SCOUT_SKILL_VERSION,
 			generatedAt,
-			sources: [projects, hackathons, builders, ecosystemStats, sdfSkills],
+			sources: [
+				projects,
+				hackathons,
+				builders,
+				repos,
+				ecosystemStats,
+				sdfSkills,
+			],
 			usage: usage ?? {
 				total: null,
 				last24h: null,
@@ -117,11 +131,14 @@ export async function GET() {
 				"/api/clusters",
 				"/api/builders",
 				"/api/projects/search",
+				"/api/repos/search",
 				"/api/rfps",
 				"/api/research",
 				"/api/feedback",
 				"/api/skills",
 				"/api/skills/{name}",
+				"/api/partners",
+				"/api/partners/{slug}",
 			],
 			docs: "https://stellarlight.xyz/scout",
 			skill: "https://stellarlight.xyz/skills/stellar-scout.md",

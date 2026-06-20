@@ -309,7 +309,14 @@ export async function GET(req: NextRequest) {
 		)?.trim() ?? "";
 	const category = sp.get("category");
 	const hackathonSlug = sp.get("hackathon");
-	const scfAwardedOnly = sp.get("scfAwarded") === "1";
+	// Accept 1/true/yes (and the `scfAwardedOnly` alias) — agents naturally send
+	// `scfAwarded=true`, which previously fell through to UNFILTERED results
+	// while the caller believed they'd filtered to SCF-funded projects.
+	const scfRaw = (sp.get("scfAwarded") ?? sp.get("scfAwardedOnly"))
+		?.toLowerCase()
+		.trim();
+	const scfAwardedOnly =
+		scfRaw === "1" || scfRaw === "true" || scfRaw === "yes";
 	const limit = Math.min(Number(sp.get("limit") || "20") || 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
@@ -358,6 +365,10 @@ export async function GET(req: NextRequest) {
 	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
 	let matchMode: "strict" | "loose-1" | "majority" | "all" = "all";
+	// Track whether a supplied hackathon slug actually resolved. The hackathons
+	// collection can be empty, in which case the filter would silently no-op —
+	// we surface `unresolvedFilters` so consumers know the filter wasn't applied.
+	let hackathonResolved = true;
 
 	if (payload) {
 		try {
@@ -378,6 +389,7 @@ export async function GET(req: NextRequest) {
 				});
 				const hkId = hk.docs[0]?.id;
 				if (hkId) where.hackathon = { equals: hkId };
+				else hackathonResolved = false;
 			}
 			if (scfAwardedOnly) {
 				where["scf.awarded"] = { equals: true };
@@ -675,10 +687,21 @@ export async function GET(req: NextRequest) {
 					q,
 					category,
 					hackathon: hackathonSlug,
+					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,
 					limit,
 					offset,
 				},
+				// Surface filters that were accepted but could NOT be applied, so a
+				// consumer never silently believes a filter narrowed the results when
+				// it didn't (e.g. a hackathon slug that doesn't resolve because the
+				// hackathons collection is empty).
+				...(hackathonSlug && !hackathonResolved
+					? {
+							unresolvedFilters: ["hackathon"],
+							note: `hackathon='${hackathonSlug}' did not match any known hackathon, so that filter was NOT applied (results are unfiltered by hackathon).`,
+						}
+					: {}),
 				matchMode,
 				// Hint to the caller (agent) so they can frame results honestly:
 				//   strict   → "every keyword matched"
