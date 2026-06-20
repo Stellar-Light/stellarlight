@@ -1,0 +1,24 @@
+name: Mark defunct projects (hide from search)
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+permissions: { contents: read }
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/mark-defunct.ts ${{ inputs.execute && '--execute' || '' }}
