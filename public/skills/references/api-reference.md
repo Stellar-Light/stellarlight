@@ -48,7 +48,7 @@ Single-hackathon detail. **Two response shapes** depending on the data source:
 
 **(b) DoraHacks-only** (slug matches a live DoraHacks event we haven't curated) — metadata + headline numbers only:
 - `.hackathon.source = "dorahacks"`, `.hackathon.prizePoolUSD`, `.hackathon.hackersCount`
-- `.winners`, `.submissions`, `.tracks` all empty; `.meta.note` explains why
+- `.winners` + `.submissions` are empty arrays; the top-level `.tracks` key is **omitted entirely** (not `[]`) for DoraHacks-only detail — guard with `data.tracks?.length`, not `data.tracks.length`. `.meta.note` explains why
 - Tell the user to visit `.hackathon.externalUrl` for the per-submission detail (DoraHacks doesn't expose submissions via API for stellarlight to mirror)
 
 ---
@@ -98,7 +98,7 @@ Use this to answer *"what's the most crowded category on Stellar?"* (lead with t
 ---
 
 ## `GET /api/builders`
-Stellar builder directory (synced from Stellar Passport). **Opt-in only, currently empty pending the next Passport sync — treat as future capability today.** When this endpoint returns 0 results, **do not retry with different queries** — surface the limitation to the user and route them to fallback channels immediately.
+Stellar builder directory (synced from Stellar Passport). **Populated but small and sparse (~110 profiles; some rows are just a GitHub handle + avatar).** A 0-result is a *filter miss*, not an empty directory — `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`scfTier`/`featured`) before routing the user to fallback channels.
 
 **Params:** `q={text}`, `location={city}`, `scfTier={tier}`, `featured=1`.
 
@@ -117,7 +117,7 @@ Search existing Stellar projects (competitor / overlap lookup). The workhorse fo
 - `strict` — every query token matched (highest confidence; lead with "I found N exact matches for {q}")
 - `loose-1` — all but one token matched (treat as adjacent; lead with "I couldn't find an exact match, but these are close — N of M keywords match")
 - `majority` — at least ⌈N/2⌉ tokens matched (broadest interpretation; lead with "broader interpretation of {q} — these projects overlap on the main themes")
-- `all` — no `q` was supplied; results are unfiltered
+- `all` — accompanies results only when a non-`q` filter (`category`/`scfAwarded`) was applied. A bare call with **no `q` AND no filter does NOT return the full directory** — it returns `meta.error: "no_query"` + 0 rows; re-call with `?q=<terms>`.
 
 This fallback chain means **a multi-word natural query like *"real-time price API for Soroban tokens"* will not dead-end at 0** — the endpoint relaxes to looser tiers until it finds something. Honesty matters: tell the user which tier returned the results so they can judge relevance themselves (`.meta.matchModeLabel` gives a pre-formatted human-readable version).
 
@@ -152,7 +152,7 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed proble
 ---
 
 ## `GET /api/skills`
-Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Returned with descriptions + URLs so you can recommend the right one without leaving Scout's surface area. Server-cached for 24h. `.meta.counts.returned` reports total.
+A merged, multi-source AI-skill catalog (~30 entries) — the 7 official SDF skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards) **plus** Stellarlight, lumenloop, and external skills. Filter with `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
 
 ---
 
@@ -178,7 +178,7 @@ Use this when the user asks a **conceptual / thesis / design-tradeoff / security
 
 Always cite the source URL from each returned chunk — that's the whole point. **Audit chunks** carry extra metadata: `.auditor`, `.protocol`, and `.severity` (`critical | high | medium | low | informational | unknown`) — surface these inline ("per a HIGH-severity finding in the Certora audit of Blend Protocol V2…"). **EC Developer Report chunks** are historical (2019–2023 PDFs); for the most recent year cross-reference `developerreport.com/ecosystems/stellar`.
 
-**Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`.
+**Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|incident|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`.
 
 **Returns:** `.results[*]` with `{id, source, title, section, url, content, chunkIndex, score}`. `.meta.mode` indicates `"vector"` (semantic search via Atlas $vectorSearch) or `"keyword"` (fallback when the vector index isn't ready). `.meta.model` reports the embedding model used.
 
