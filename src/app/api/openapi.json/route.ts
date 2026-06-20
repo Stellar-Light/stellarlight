@@ -51,7 +51,7 @@ const spec: OpenAPISpec = {
 			"",
 			"All endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).",
 			"",
-			"Data sources merged behind these endpoints: the Stellarlight directory (~741 curated Stellar projects), Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook).",
+			"Data sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.",
 			"",
 			"## Versioning",
 			"Every response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.",
@@ -132,7 +132,7 @@ const spec: OpenAPISpec = {
 				tags: ["Projects"],
 				summary: "Search Stellar projects (prior art / competitor lookup)",
 				description:
-					"Search 741+ curated Stellar projects with tiered match-mode (strict → loose → majority). Tier surfaced as `.meta.matchMode` so agents convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions.",
+					"Search the curated Stellar project directory (hundreds of projects; live count in /api/status) with tiered match-mode (strict → loose → majority). Tier surfaced as `.meta.matchMode` so agents convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions. A bare call with no q/filter returns `meta.error: no_query` + 0 rows (it does NOT return the full directory).",
 				parameters: [
 					{ $ref: "#/components/parameters/q" },
 					{
@@ -473,6 +473,14 @@ const spec: OpenAPISpec = {
 						description: "Filter by quarter slug (e.g. 'q1-2026')",
 						schema: { type: "string" },
 					},
+					{ $ref: "#/components/parameters/q" },
+					{
+						name: "category",
+						in: "query",
+						description:
+							"Filter by RFP category (e.g. 'defi', 'payments', 'infrastructure'). An unrecognized value returns 400 with the valid category list.",
+						schema: { type: "string" },
+					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 				],
@@ -679,12 +687,41 @@ const spec: OpenAPISpec = {
 					"Returns 28-day active dev counts, commits, full-time vs part-time vs one-time dev splits, geographic distribution. Sourced from Electric Capital. Useful for *'how does Stellar compare on dev activity?'* macro questions.",
 				parameters: [
 					{
-						name: "include",
+						name: "sort",
 						in: "query",
 						description:
-							"Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context)",
+							"Order the project leaderboard. An unrecognized value returns 400 with the valid list.",
+						schema: {
+							type: "string",
+							enum: ["activity", "stars", "issues"],
+							default: "activity",
+						},
+					},
+					{
+						name: "range",
+						in: "query",
+						description:
+							"Activity time-window for the leaderboard. An unrecognized value returns 400.",
+						schema: {
+							type: "string",
+							enum: ["7d", "30d", "90d", "1y", "all"],
+							default: "all",
+						},
+					},
+					{
+						name: "category",
+						in: "query",
+						description:
+							"Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure').",
 						schema: { type: "string" },
 					},
+					{
+						name: "format",
+						in: "query",
+						description: "Response format.",
+						schema: { type: "string", enum: ["json", "csv"], default: "json" },
+					},
+					{ $ref: "#/components/parameters/limit" },
 				],
 				responses: {
 					"200": {
@@ -695,6 +732,18 @@ const spec: OpenAPISpec = {
 			},
 		},
 		"/api/feedback": {
+			get: {
+				tags: ["Feedback"],
+				summary: "Get the feedback request schema (discovery)",
+				description:
+					"Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects.",
+				responses: {
+					"200": {
+						description: "Feedback request schema",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
 			post: {
 				tags: ["Feedback"],
 				summary: "Submit feedback on Scout's output",
@@ -709,8 +758,8 @@ const spec: OpenAPISpec = {
 					},
 				},
 				responses: {
-					"200": {
-						description: "Feedback received",
+					"201": {
+						description: "Feedback received (a curator-queue row was created)",
 						content: {
 							"application/json": {
 								schema: {
@@ -1041,6 +1090,8 @@ const spec: OpenAPISpec = {
 			FeedbackRequest: {
 				type: "object",
 				required: ["kind", "message"],
+				description:
+					"Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema).",
 				properties: {
 					kind: {
 						type: "string",
@@ -1053,9 +1104,16 @@ const spec: OpenAPISpec = {
 						],
 					},
 					message: { type: "string", minLength: 10, maxLength: 4000 },
-					query: { type: "string" },
-					endpoint: { type: "string" },
-					agentName: { type: "string" },
+					context: {
+						type: "object",
+						description: "Optional context about what triggered the feedback.",
+						properties: {
+							query: { type: "string" },
+							endpoint: { type: "string" },
+							skillVersion: { type: "string" },
+							agentName: { type: "string" },
+						},
+					},
 				},
 			},
 		},

@@ -82,6 +82,24 @@ export async function GET(req: NextRequest) {
 	const format = (sp.get("format") || "json").toLowerCase();
 	const limit = Math.min(Number(sp.get("limit") || "50") || 50, 300);
 
+	// Reject unrecognized sort/range instead of silently falling back to a
+	// surprising order or an empty set. Matches the 400+validX pattern used
+	// elsewhere (hackathons/research/skills).
+	const VALID_SORTS = ["activity", "stars", "issues"] as const;
+	const VALID_RANGES = ["7d", "30d", "90d", "1y", "all"] as const;
+	if (!(VALID_SORTS as readonly string[]).includes(sort)) {
+		return NextResponse.json(
+			{ error: `Invalid sort '${sort}'.`, validSorts: VALID_SORTS },
+			{ status: 400 },
+		);
+	}
+	if (!(VALID_RANGES as readonly string[]).includes(range)) {
+		return NextResponse.json(
+			{ error: `Invalid range '${range}'.`, validRanges: VALID_RANGES },
+			{ status: 400 },
+		);
+	}
+
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
 

@@ -61,6 +61,19 @@ export async function GET(req: NextRequest) {
 	const limit = Math.min(Number(sp.get("limit") || "100") || 100, 200);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
+	// Reject an unrecognized category instead of silently returning ALL rows
+	// (a footgun — the caller believes they filtered). Matches the 400+validX
+	// pattern used by /api/hackathons, /api/research, /api/skills.
+	if (
+		categoryFilter &&
+		!(CATEGORIES as readonly string[]).includes(categoryFilter)
+	) {
+		return NextResponse.json(
+			{ error: `Invalid category '${categoryFilter}'.`, validCategories: CATEGORIES },
+			{ status: 400 },
+		);
+	}
+
 	let rfps: RfpRow[] = IDEAS.map(toRow);
 
 	if (

@@ -150,30 +150,50 @@ export async function GET(req: NextRequest) {
 		filters: { location, scfTier, featured, limit },
 	});
 
-	// When the underlying collection is empty (it currently is — pending
-	// Stellar Passport sync), surface an explicit advisory so agents don't
-	// silently report "no Stellar builders found" as if it were a finding
-	// about the ecosystem. Same envelope pattern as /api/hackathons'
-	// fallbackChannels.
+	// Distinguish "collection is empty / unseeded" from "this filter matched
+	// nothing". The advisory must NOT claim the directory is empty when the
+	// collection actually has builders and the query just filtered them all out
+	// — agents relay this copy verbatim, so the wrong branch is a false
+	// statement about the ecosystem. Gate on the real collection size.
+	let collectionTotal = totalMatching;
+	if (payload && totalMatching === 0) {
+		try {
+			const c = await payload.count({
+				collection: "builders",
+				where: { visibility: { not_equals: "hidden" } },
+			});
+			collectionTotal = c.totalDocs;
+		} catch {
+			// keep collectionTotal as-is on a count failure
+		}
+	}
+
+	const builderChannels = [
+		{
+			name: "Stellar Discord — Looking for Collaborators",
+			url: "https://discord.gg/stellardev",
+			why: "The active channel where Stellar devs post 'looking for X' calls",
+		},
+		{
+			name: "GitHub topic:stellar",
+			url: "https://github.com/topics/stellar",
+			why: "Browse repos by Stellar dev contributions",
+		},
+	];
+
 	const builderAdvisory =
-		builders.length === 0
-			? {
-					summary:
-						"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
-					channels: [
-						{
-							name: "Stellar Discord — Looking for Collaborators",
-							url: "https://discord.gg/stellardev",
-							why: "The active channel where Stellar devs post 'looking for X' calls",
-						},
-						{
-							name: "GitHub topic:stellar",
-							url: "https://github.com/topics/stellar",
-							why: "Browse repos by Stellar dev contributions",
-						},
-					],
-				}
-			: undefined;
+		totalMatching > 0
+			? undefined
+			: collectionTotal === 0
+				? {
+						summary:
+							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
+						channels: builderChannels,
+					}
+				: {
+						summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / scfTier / featured). This is a filter miss, not an empty or unseeded directory.`,
+						channels: builderChannels,
+					};
 
 	return NextResponse.json(
 		{
