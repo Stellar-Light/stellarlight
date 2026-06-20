@@ -94,7 +94,7 @@ export class ScoutApiError extends Error {
 }
 
 const DEFAULT_BASE_URL = "https://stellarlight.xyz";
-const CLIENT_VERSION = "1.1.0";
+const CLIENT_VERSION = "1.2.0";
 
 export class ScoutClient {
 	private readonly baseUrl: string;
