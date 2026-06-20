@@ -154,15 +154,6 @@ function isAlive(lastCommitAt?: string | null): boolean {
 	const days = (Date.now() - Date.parse(lastCommitAt)) / 86_400_000;
 	return Number.isFinite(days) && days <= 365;
 }
-// Hard cutoff: a repo untouched for >2 years is abandoned and has no place in a
-// "live Stellar repo index" — drop it from results entirely rather than let it
-// fill a thin vertical (5yr-dead Moonbeam/Celo/Solana repos were surfacing).
-// Null commit date = unknown, not excluded.
-function isVeryDead(lastCommitAt?: string | null): boolean {
-	if (!lastCommitAt) return false;
-	const days = (Date.now() - Date.parse(lastCommitAt)) / 86_400_000;
-	return Number.isFinite(days) && days > 730;
-}
 function hasStellarMention(hay: string): boolean {
 	return /\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay);
 }
@@ -226,12 +217,9 @@ export async function searchRepos(
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
-			const dead = isVeryDead(r.lastCommitAt);
-			return { r, topics, score, matched, sdf, alive, mention, dead };
+			return { r, topics, score, matched, sdf, alive, mention };
 		});
-		let filtered = (tokens.length ? docs.filter((d) => d.matched >= 1) : docs).filter(
-			(d) => !d.dead,
-		);
+		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1) : docs;
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
