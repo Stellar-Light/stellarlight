@@ -121,27 +121,32 @@ export async function getUsageStats(): Promise<{
 			}),
 		]);
 
-		// Per-endpoint counts over the last 7 days, computed DB-side with a
-		// $group aggregation. This previously fetched up to 10,000 raw log rows
-		// and grouped them in memory, which made /api/status take ~13s once the
-		// api-usage log grew large. The aggregation returns one tiny row per
-		// endpoint instead of hauling the raw log off the cluster.
-		let byEndpoint: Array<{ endpoint: string; count: number }> = [];
-		// biome-ignore lint/suspicious/noExplicitAny: raw mongo driver off Payload
-		const db = (payload as any).db?.connection?.db;
-		const coll = db?.collection("api-usage");
-		if (coll) {
-			const grouped = (await coll
-				.aggregate([
-					{ $match: { createdAt: { $gt: new Date(weekAgo) } } },
-					{ $group: { _id: "$endpoint", count: { $sum: 1 } } },
-					{ $sort: { count: -1 } },
-				])
-				.toArray()) as Array<{ _id: string; count: number }>;
-			byEndpoint = grouped
-				.filter((r) => r._id)
-				.map((r) => ({ endpoint: r._id, count: r.count }));
+		// Per-endpoint counts over the last 7 days. Uses Payload's own query —
+		// the path that correctly matches the rows (and handles the collection
+		// name + createdAt type) — but trimmed with select:{endpoint} +
+		// pagination:false so it fetches ONLY the one field it needs and skips
+		// the totalDocs count. Previously this pulled up to 10,000 FULL log rows
+		// and grouped them in memory, which made /api/status take ~13s as the
+		// append-only log grew.
+		const sample = await payload.find({
+			collection: "api-usage",
+			where: { createdAt: { greater_than: weekAgo } },
+			limit: 10_000,
+			depth: 0,
+			pagination: false,
+			select: { endpoint: true },
+		});
+		const byEndpointMap = new Map<string, number>();
+		for (const row of sample.docs as Array<{ endpoint?: string }>) {
+			if (!row.endpoint) continue;
+			byEndpointMap.set(
+				row.endpoint,
+				(byEndpointMap.get(row.endpoint) ?? 0) + 1,
+			);
 		}
+		const byEndpoint = [...byEndpointMap.entries()]
+			.map(([endpoint, count]) => ({ endpoint, count }))
+			.sort((a, b) => b.count - a.count);
 
 		return {
 			total: total.totalDocs,
