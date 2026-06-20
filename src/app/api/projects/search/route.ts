@@ -422,11 +422,17 @@ export async function GET(req: NextRequest) {
 				collection: "projects",
 				where,
 				limit: 500,
-				// depth:0 — cheap scan. logo/hackathon are populated post-slice for
-				// the returned page only; the depth:1 populate over all ≤500
-				// candidates was the heaviest query on M0 and starved the rest of
-				// the cluster (status/clusters/leaderboard) of connections.
 				depth: 0,
+				// THE fix: exclude `embedding` from the candidate fetch. It's a json
+				// voyage-3 vector (~KBs/doc); pulling it for up to 500 matched
+				// projects dragged megabytes out of the M0 free tier on every search
+				// and was the real cause of the 16-20s hangs — the route never reads
+				// it ($vectorSearch uses the index server-side). Same class of bug as
+				// readmeExcerpt in repos/search, same fix. depth:0 keeps the scan
+				// cheap; logo/hackathon are populated post-slice for the page only.
+				select: {
+					embedding: false,
+				},
 			});
 
 			projects = (

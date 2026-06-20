@@ -119,6 +119,11 @@ export async function GET(req: NextRequest) {
 				where: projectWhere,
 				limit: 300,
 				depth: 0,
+				// Exclude the json voyage-3 vector — pulling it for up to 300
+				// projects dragged megabytes off the M0 free tier and timed this
+				// endpoint out (same root cause as projects/search). Only the
+				// scalar stats below are used.
+				select: { embedding: false },
 			});
 
 			// Per-project GitHub stats come from the enriched `repos` collection

@@ -175,6 +175,10 @@ export async function GET(req: NextRequest) {
 				where: { status: { in: ["Development", "Pre-Release", "Live"] } },
 				limit: 500,
 				depth: 0,
+				// Exclude the json voyage-3 vector — fetching it for every project
+				// dragged megabytes off the M0 free tier and timed this endpoint out
+				// (same root cause as projects/search). The cluster math never reads it.
+				select: { embedding: false },
 			});
 			const docs = result.docs as unknown as ProjectDoc[];
 
