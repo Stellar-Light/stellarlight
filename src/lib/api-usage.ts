@@ -121,23 +121,27 @@ export async function getUsageStats(): Promise<{
 			}),
 		]);
 
-		// Per-endpoint counts (over last 7 days, cheaper than all-time)
-		const sample = await payload.find({
-			collection: "api-usage",
-			where: { createdAt: { greater_than: weekAgo } },
-			limit: 10_000,
-			depth: 0,
-		});
-		const byEndpointMap = new Map<string, number>();
-		for (const row of sample.docs as Array<{ endpoint: string }>) {
-			byEndpointMap.set(
-				row.endpoint,
-				(byEndpointMap.get(row.endpoint) ?? 0) + 1,
-			);
+		// Per-endpoint counts over the last 7 days, computed DB-side with a
+		// $group aggregation. This previously fetched up to 10,000 raw log rows
+		// and grouped them in memory, which made /api/status take ~13s once the
+		// api-usage log grew large. The aggregation returns one tiny row per
+		// endpoint instead of hauling the raw log off the cluster.
+		let byEndpoint: Array<{ endpoint: string; count: number }> = [];
+		// biome-ignore lint/suspicious/noExplicitAny: raw mongo driver off Payload
+		const db = (payload as any).db?.connection?.db;
+		const coll = db?.collection("api-usage");
+		if (coll) {
+			const grouped = (await coll
+				.aggregate([
+					{ $match: { createdAt: { $gt: new Date(weekAgo) } } },
+					{ $group: { _id: "$endpoint", count: { $sum: 1 } } },
+					{ $sort: { count: -1 } },
+				])
+				.toArray()) as Array<{ _id: string; count: number }>;
+			byEndpoint = grouped
+				.filter((r) => r._id)
+				.map((r) => ({ endpoint: r._id, count: r.count }));
 		}
-		const byEndpoint = [...byEndpointMap.entries()]
-			.map(([endpoint, count]) => ({ endpoint, count }))
-			.sort((a, b) => b.count - a.count);
 
 		return {
 			total: total.totalDocs,
