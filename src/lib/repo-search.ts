@@ -104,27 +104,29 @@ const SDF_OWNERS = new Set([
 	"stellardevelopmentfoundation",
 ]);
 
-// Stellar-nativeness of a repo (0–2). Used as a tiebreak ABOVE the authority
-// grade so a canonical Stellar repo can't be buried by an off-topic but
-// higher-authority (e.g. SCF-funded, multi-chain) repo at the same relevance.
-// NOTE: deliberately NOT keyed on projectSlug — most off-topic-but-noisy repos
-// (generic SCF-funded multi-chain tools, payment-gateway SDKs) are ALSO linked
-// to a curated project, so a projectSlug boost buried genuinely-strong but
-// unlinked repos (e.g. zk hackathon winners) under mediocre linked ones. SDF
-// org ownership + an explicit stellar/soroban mention are the reliable signals.
-function stellarSignal(owner: string, hay: string): number {
-	if (SDF_OWNERS.has(owner)) return 2;
-	if (/\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay)) return 1;
-	return 0;
+// Tiebreak signals applied ABOVE the authority grade, most → least decisive:
+// SDF-org ownership, then "alive" (committed within a year), then an explicit
+// stellar/soroban mention. Ordering matters and was tuned against live results:
+//   - SDF org first: SDF's own repos are the canonical answer for a Stellar
+//     query (lifts stellar/wallet-backend, stellar/rs-soroban-sdk, anchor-platform).
+//   - alive BEFORE mention: otherwise a long-dead repo with "soroban" in its
+//     name (e.g. orally-network/soroban-oracle, 700d stale) outranks the live
+//     canonical oracle (reflector) that lacks the literal word.
+//   - mention last: among equally-relevant, equally-alive repos it demotes
+//     generic multi-chain repos (rango) below genuinely Stellar-native ones.
+// NOT keyed on projectSlug: most off-topic-noisy repos (generic SCF multi-chain
+// tools, payment-gateway SDKs) are ALSO project-linked, so that boost buried
+// strong unlinked repos (zk hackathon winners) under mediocre linked ones.
+function isSdfOwned(owner: string): boolean {
+	return SDF_OWNERS.has(owner);
 }
-
-// Recency bucket (0–2). Tiebreak ABOVE authority so a long-dead repo can't sit
-// above a freshly-active one of equal relevance + Stellar-nativeness.
-function freshSignal(lastCommitAt?: string | null): number {
-	if (!lastCommitAt) return 0;
+function isAlive(lastCommitAt?: string | null): boolean {
+	if (!lastCommitAt) return false;
 	const days = (Date.now() - Date.parse(lastCommitAt)) / 86_400_000;
-	if (!Number.isFinite(days)) return 0;
-	return days <= 180 ? 2 : days <= 365 ? 1 : 0;
+	return Number.isFinite(days) && days <= 365;
+}
+function hasStellarMention(hay: string): boolean {
+	return /\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay);
 }
 
 export async function searchRepos(
@@ -176,22 +178,26 @@ export async function searchRepos(
 				score = 1;
 			}
 			const owner = name.split("/")[0];
-			const stellar = stellarSignal(owner, `${name} ${tops} ${desc}`);
-			const fresh = freshSignal(r.lastCommitAt);
-			return { r, topics, score, matched, stellar, fresh };
+			const hay = `${name} ${tops} ${desc}`;
+			const sdf = isSdfOwned(owner) ? 1 : 0;
+			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
+			const mention = hasStellarMention(hay) ? 1 : 0;
+			return { r, topics, score, matched, sdf, alive, mention };
 		});
 		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1) : docs;
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
-		// Sort order, most → least decisive: query relevance, then Stellar-
-		// nativeness, then recency, THEN the authority grade. Putting stellar +
-		// freshness ABOVE repoScore stops an off-topic but high-authority repo
-		// (an SCF-funded multi-chain tool, or a long-dead flagship) from
-		// outranking the canonical, live Stellar match at the same relevance.
+		// Sort order, most → least decisive: query relevance, SDF-org ownership,
+		// alive (committed within a year), explicit stellar/soroban mention, THEN
+		// the authority grade and stars. Putting these signals ABOVE repoScore
+		// stops an off-topic but high-authority repo (an SCF-funded multi-chain
+		// tool, or a long-dead flagship) from outranking the canonical, live
+		// Stellar match at the same relevance.
 		filtered.sort(
 			(a, b) =>
 				b.score - a.score ||
-				b.stellar - a.stellar ||
-				b.fresh - a.fresh ||
+				b.sdf - a.sdf ||
+				b.alive - a.alive ||
+				b.mention - a.mention ||
 				(b.r.repoScore ?? 0) - (a.r.repoScore ?? 0) ||
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
 		);
