@@ -2,7 +2,7 @@
 
 > Stellar Scout, as an MCP server. Use it in Claude desktop, Cursor, ChatGPT, Gemini, Cline, Continue, Zed, or any [Model Context Protocol](https://modelcontextprotocol.io) client.
 
-Exposes 14 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs — the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
+Exposes 15 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs — the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
 
 ```
 npx @stellar-light/scout-mcp
@@ -27,6 +27,9 @@ npx @stellar-light/scout-mcp
 
 > *"What's the most crowded category on Stellar right now?"*
 > Calls `get_clusters`. Returns log-scaled crowdedness scores 1–10 across categories.
+
+> *"Show me the Stellar repos / open-source code for zk proofs."*
+> Calls `search_repos`. Returns ~1,900 indexed GitHub repos ranked by repoScore (freshness + traction + hackathon/SCF/builder authority), with synonym expansion and a language filter.
 
 **Hackathons + SCF prep**
 
@@ -65,7 +68,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 }
 ```
 
-Restart Claude Desktop. The 14 Scout tools appear in the slash-menu.
+Restart Claude Desktop. The 15 Scout tools appear in the slash-menu.
 
 ### Cursor
 
@@ -104,7 +107,7 @@ pnpm build
 
 ## Tools
 
-All 14 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
+All 15 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
 
 | Tool | What it does |
 |------|--------------|
@@ -114,6 +117,7 @@ All 14 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `compare_hackathons` | Side-by-side comparison of 2–5 hackathons with delta notes. |
 | `get_builders` | Stellar Passport builder directory. Filter by location, skill, SCF tier. |
 | `search_projects` | Prior-art / competitor lookup across 741+ curated projects. Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. |
+| `search_repos` | Code-reference index: ~1,900 indexed-and-scored Stellar GitHub repos ranked by repoScore. Synonym expansion + `language` / `minScore` filters. The repo layer beneath the project directory. |
 | `get_rfps` | Open + closed Stellar RFPs (SCF-funded sponsor briefs). Quarter-aware. |
 | `list_skills` | Catalog of [skills.stellar.org](https://skills.stellar.org)'s 7 official skills. |
 | `get_skill` | Full content of one SDF skill. |
