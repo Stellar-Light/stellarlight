@@ -5,7 +5,6 @@
  *
  *   GET /api/projects/search?q=stablecoin
  *   GET /api/projects/search?category=Protocol/Contract&scfAwarded=1
- *   GET /api/projects/search?hackathon=stellar-hacks-agents
  *
  * Full-text-ish search across name + short description + category. Not a
  * proper vector search — that's Phase 2. This is keyword overlap, scored
@@ -309,7 +308,6 @@ export async function GET(req: NextRequest) {
 			sp.get("search")
 		)?.trim() ?? "";
 	const category = sp.get("category");
-	const hackathonSlug = sp.get("hackathon");
 	// Accept 1/true/yes (and the `scfAwardedOnly` alias) — agents naturally send
 	// `scfAwarded=true`, which previously fell through to UNFILTERED results
 	// while the caller believed they'd filtered to SCF-funded projects.
@@ -326,19 +324,19 @@ export async function GET(req: NextRequest) {
 	// nested wrong). Returning the default project list here is actively harmful —
 	// the caller reports it as the answer ("no escrow/vault projects exist") when
 	// the real projects were never searched. Return an honest empty + how to fix.
-	if (!q && !category && !hackathonSlug && !scfAwardedOnly) {
+	if (!q && !category && !scfAwardedOnly) {
 		logApiHit({
 			req,
 			endpoint: "/api/projects/search",
 			query: "",
-			filters: { category, hackathon: hackathonSlug, scfAwarded: scfAwardedOnly, limit },
+			filters: { category, scfAwarded: scfAwardedOnly, limit },
 		});
 		return NextResponse.json(
 			{
 				meta: {
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
-					filters: { q: "", category, hackathon: hackathonSlug, scfAwardedOnly, limit, offset },
+					filters: { q: "", category, scfAwardedOnly, limit, offset },
 					matchMode: "all" as const,
 					matchModeLabel: "no query supplied",
 					counts: { returned: 0, total: 0 },
@@ -366,10 +364,6 @@ export async function GET(req: NextRequest) {
 	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
 	let matchMode: "strict" | "loose-1" | "majority" | "all" = "all";
-	// Track whether a supplied hackathon slug actually resolved. The hackathons
-	// collection can be empty, in which case the filter would silently no-op —
-	// we surface `unresolvedFilters` so consumers know the filter wasn't applied.
-	let hackathonResolved = true;
 
 	if (payload) {
 		try {
@@ -379,18 +373,6 @@ export async function GET(req: NextRequest) {
 			};
 			if (category) {
 				where.category = { equals: category };
-			}
-			if (hackathonSlug) {
-				// Resolve hackathon slug → id first
-				const hk = await payload.find({
-					collection: "hackathons",
-					where: { slug: { equals: hackathonSlug } },
-					limit: 1,
-					depth: 0,
-				});
-				const hkId = hk.docs[0]?.id;
-				if (hkId) where.hackathon = { equals: hkId };
-				else hackathonResolved = false;
 			}
 			if (scfAwardedOnly) {
 				where["scf.awarded"] = { equals: true };
@@ -743,7 +725,6 @@ export async function GET(req: NextRequest) {
 		query: q,
 		filters: {
 			category,
-			hackathon: hackathonSlug,
 			scfAwarded: scfAwardedOnly,
 			limit,
 		},
@@ -757,22 +738,11 @@ export async function GET(req: NextRequest) {
 				filters: {
 					q,
 					category,
-					hackathon: hackathonSlug,
 					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,
 					limit,
 					offset,
 				},
-				// Surface filters that were accepted but could NOT be applied, so a
-				// consumer never silently believes a filter narrowed the results when
-				// it didn't (e.g. a hackathon slug that doesn't resolve because the
-				// hackathons collection is empty).
-				...(hackathonSlug && !hackathonResolved
-					? {
-							unresolvedFilters: ["hackathon"],
-							note: `hackathon='${hackathonSlug}' did not match any known hackathon, so that filter was NOT applied (results are unfiltered by hackathon).`,
-						}
-					: {}),
 				matchMode,
 				// Hint to the caller (agent) so they can frame results honestly:
 				//   strict   → "every keyword matched"
