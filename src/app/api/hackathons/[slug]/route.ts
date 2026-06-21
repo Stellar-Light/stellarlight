@@ -13,6 +13,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	fetchAllDoraHacksHackathons,
+	fetchHackathonSubmissions,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -131,14 +132,40 @@ export async function GET(
 				(s, w) => s + (w.hackathonPrize ?? 0),
 				0,
 			);
+			// Pull the live submission roster from DoraHacks (read-through; degrades
+			// to [] if the feed is unavailable). Populates submissions/winners/tracks
+			// for events that aren't curated in our DB.
+			const liveSubmissions = await fetchHackathonSubmissions(dora.uname);
+			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
+			const winners = liveWinners.length ? liveWinners : curatedWinners;
+			const trackMap = new Map<
+				string,
+				{ name: string; submissionCount: number; winnerCount: number }
+			>();
+			for (const sub of liveSubmissions) {
+				if (!sub.track) continue;
+				const e = trackMap.get(sub.track) ?? {
+					name: sub.track,
+					submissionCount: 0,
+					winnerCount: 0,
+				};
+				e.submissionCount += 1;
+				if (sub.isWinner) e.winnerCount += 1;
+				trackMap.set(sub.track, e);
+			}
+			const liveTracks = [...trackMap.values()].sort(
+				(a, b) => b.submissionCount - a.submissionCount,
+			);
 			return NextResponse.json(
 				{
 					meta: {
 						source: getHackathonUrl(dora.uname),
 						generatedAt: new Date().toISOString(),
-						note: curatedWinners.length
-							? "DoraHacks-sourced — full submission list not in stellarlight DB, but the winner roster below is curated; visit externalUrl for all submissions"
-							: "DoraHacks-sourced — submissions/winners/tracks not in stellarlight DB; visit externalUrl for full detail",
+						note: liveSubmissions.length
+							? "DoraHacks-sourced — submissions, winners, and tracks below are pulled live from DoraHacks."
+							: curatedWinners.length
+								? "DoraHacks-sourced — live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
+								: "DoraHacks-sourced — live submission feed unavailable; visit externalUrl for full detail.",
 					},
 					hackathon: {
 						id: `dorahacks-${dora.id}`,
@@ -166,18 +193,18 @@ export async function GET(
 						hackersCount: dora.hackers_count || null,
 						source: "dorahacks",
 						stats: {
-							totalSubmissions: 0,
+							totalSubmissions: liveSubmissions.length,
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
-							winners: curatedWinners.length,
+							winners: winners.length,
 							outcomes: { built: 0, inProgress: 0, abandoned: 0, unknown: 0 },
 						},
-						tracks: [],
+						tracks: liveTracks,
 					},
-					winners: curatedWinners,
-					submissions: [],
+					winners,
+					submissions: liveSubmissions,
 					// Top-level `tracks` (drift report #12) so `data.tracks` isn't
 					// undefined for a consumer (also present under hackathon.tracks).
-					tracks: [],
+					tracks: liveTracks,
 				},
 				{
 					headers: {
