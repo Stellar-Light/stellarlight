@@ -94,6 +94,108 @@ export async function fetchAllDoraHacksHackathons(): Promise<DoraHacksHackathon[
   });
 }
 
+// Browser-like headers — the /hackathon-buidls/ submissions endpoint rejects the
+// short StellarLight UA with 405 (the /hackathon/ list endpoint accepts it).
+const DORA_BROWSER_HEADERS = {
+  Accept: 'application/json',
+  'Accept-Language': 'en-US,en;q=0.9',
+  Referer: 'https://dorahacks.io/',
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+};
+
+export interface DoraHacksSubmission {
+  id: string;
+  name: string;
+  description: string | null;
+  githubUrl: string | null;
+  demoUrl: string | null;
+  videoUrl: string | null;
+  track: string | null;
+  hackathonPlacement: string | null; // e.g. "1st Place" / "Winners" — null if not a winner
+  award: string | null; // e.g. "Blend Composability Award"
+  isWinner: boolean;
+  voteCount: number;
+  url: string;
+  source: 'dorahacks';
+}
+
+// Strip markdown noise (images, links, headings) from a DoraHacks project
+// description and truncate to a usable snippet.
+function cleanDescription(raw: unknown): string | null {
+  if (typeof raw !== 'string' || !raw) return null;
+  const cleaned = raw
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#>*_`~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned ? cleaned.slice(0, 280) : null;
+}
+
+/**
+ * Fetches the live submission ("buidl") roster for one DoraHacks hackathon by
+ * uname. Read-through: returns [] on any error (feed down / WAF / unknown slug)
+ * so callers degrade gracefully. Winners are derived from `winner_prizes`.
+ */
+export async function fetchHackathonSubmissions(
+  uname: string,
+): Promise<DoraHacksSubmission[]> {
+  const out: DoraHacksSubmission[] = [];
+  try {
+    let page = 1;
+    // Hard page cap — DoraHacks events are at most a few hundred submissions.
+    for (let i = 0; i < 6; i++) {
+      const url = `${DORAHACKS_API_BASE}/hackathon-buidls/${encodeURIComponent(
+        uname,
+      )}/?page=${page}&page_size=100`;
+      const res = await fetch(url, {
+        headers: DORA_BROWSER_HEADERS,
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) break;
+      // biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+      const data: any = await res.json();
+      // biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+      const results: any[] = Array.isArray(data?.results) ? data.results : [];
+      for (const s of results) {
+        const prizes = Array.isArray(s?.winner_prizes) ? s.winner_prizes : [];
+        const isWinner = prizes.length > 0;
+        out.push({
+          id: `dorahacks-buidl-${s?.id}`,
+          name: typeof s?.name === 'string' ? s.name : 'Untitled',
+          description: cleanDescription(s?.project_description),
+          githubUrl:
+            typeof s?.github_page === 'string' && s.github_page
+              ? s.github_page
+              : null,
+          demoUrl:
+            typeof s?.demo_link === 'string' && s.demo_link ? s.demo_link : null,
+          videoUrl:
+            typeof s?.demo_video === 'string' && s.demo_video
+              ? s.demo_video
+              : null,
+          track:
+            s?.track_obj?.name ??
+            (typeof s?.track === 'string' ? s.track : null) ??
+            null,
+          hackathonPlacement: isWinner ? (prizes[0]?.name ?? 'Winner') : null,
+          award: isWinner ? (prizes[0]?.award?.title ?? null) : null,
+          isWinner,
+          voteCount: typeof s?.vote_count === 'number' ? s.vote_count : 0,
+          url: `https://dorahacks.io/buidl/${s?.id}`,
+          source: 'dorahacks',
+        });
+      }
+      if (!data?.next) break;
+      page += 1;
+    }
+  } catch (err) {
+    console.error(`Error fetching DoraHacks submissions for ${uname}:`, err);
+  }
+  return out;
+}
+
 /**
  * Formats a Unix timestamp to a human-readable date
  */
