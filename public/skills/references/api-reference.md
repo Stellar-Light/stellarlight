@@ -46,10 +46,12 @@ Single-hackathon detail. **Two response shapes** depending on the data source:
 - `.winners[*]` — projects that placed
 - `.submissions[*]` — every submission with placement, prize, track
 
-**(b) DoraHacks-only** (slug matches a live DoraHacks event we haven't curated) — metadata + headline numbers only:
+**(b) DoraHacks-only** (slug matches a live DoraHacks event we haven't curated in our DB) — now pulls the **live submission roster** from DoraHacks:
 - `.hackathon.source = "dorahacks"`, `.hackathon.prizePoolUSD`, `.hackathon.hackersCount`
-- `.winners` + `.submissions` are empty arrays; the top-level `.tracks` key is **omitted entirely** (not `[]`) for DoraHacks-only detail — guard with `data.tracks?.length`, not `data.tracks.length`. `.meta.note` explains why
-- Tell the user to visit `.hackathon.externalUrl` for the per-submission detail (DoraHacks doesn't expose submissions via API for stellarlight to mirror)
+- `.submissions[*]` — every submission, pulled live: `{name, githubUrl, demoUrl, videoUrl, track, description, hackathonPlacement, award, isWinner, url}`
+- `.winners[*]` — the submissions that placed (derived from `winner_prizes`), each with `hackathonPlacement` (e.g. "1st Place") + `award`
+- `.hackathon.tracks` and the top-level `.tracks` — derived from the roster, each `{name, submissionCount, winnerCount}`. Always present now (`[]` when there are no tracks)
+- Read-through + cached ~1h; if the DoraHacks feed is briefly unavailable these degrade to empty and `.meta.note` says so. `.hackathon.externalUrl` is the canonical event page.
 
 ---
 
@@ -109,7 +111,7 @@ Stellar builder directory (synced from Stellar Passport). **Populated but small 
 ## `GET /api/projects/search`
 Search existing Stellar projects (competitor / overlap lookup). The workhorse for Deep Dive step 2.
 
-**Params:** `q={keywords}`, `category={cat}`, `hackathon={slug}`, `scfAwarded=1`, `limit=N`.
+**Params:** `q={keywords}`, `category={cat}`, `scfAwarded=1`, `limit=N`.
 
 **Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance.
 
