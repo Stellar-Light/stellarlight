@@ -175,6 +175,9 @@ export async function GET(
 					},
 					winners: curatedWinners,
 					submissions: [],
+					// Top-level `tracks` (drift report #12) so `data.tracks` isn't
+					// undefined for a consumer (also present under hackathon.tracks).
+					tracks: [],
 				},
 				{
 					headers: {
@@ -312,6 +315,9 @@ export async function GET(
 				},
 				winners,
 				submissions,
+				// Top-level `tracks` (drift report #12) — same data as hackathon.tracks,
+				// surfaced top-level so `data.tracks` isn't undefined.
+				tracks,
 			},
 			{
 				headers: {

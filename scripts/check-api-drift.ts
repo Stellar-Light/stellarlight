@@ -116,6 +116,7 @@ async function main() {
 		["/api/rfps?category=__bad__", "rfps category"],
 		["/api/leaderboard?sort=__bad__", "leaderboard sort"],
 		["/api/leaderboard?range=__bad__", "leaderboard range"],
+		["/api/leaderboard?category=__bad__", "leaderboard category"],
 	];
 	for (const [path, label] of invalidCases) {
 		const code = await statusOf(path);
