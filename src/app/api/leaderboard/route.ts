@@ -2,7 +2,7 @@
  * Public read-only leaderboard endpoint.
  *
  *   GET /api/leaderboard
- *   GET /api/leaderboard?range=30d&sort=activity&category=DeFi
+ *   GET /api/leaderboard?range=30d&sort=activity&category=Tooling
  *   GET /api/leaderboard?format=csv
  *
  * Returns ranked Stellar ecosystem projects + ecosystem-wide aggregates +
@@ -97,6 +97,30 @@ export async function GET(req: NextRequest) {
 	if (!(VALID_RANGES as readonly string[]).includes(range)) {
 		return NextResponse.json(
 			{ error: `Invalid range '${range}'.`, validRanges: VALID_RANGES },
+			{ status: 400 },
+		);
+	}
+	// Reject an unrecognized category (was 200 with 0 rows — drift report #8).
+	// Mirrors the project `category` select options in src/collections/Projects.ts.
+	const VALID_CATEGORIES = [
+		"Infrastructure",
+		"Tooling",
+		"Partner Integration",
+		"User-Facing App",
+		"Asset",
+		"Protocol/Contract",
+		"Anchor",
+	] as const;
+	if (
+		category &&
+		category !== "all" &&
+		!(VALID_CATEGORIES as readonly string[]).includes(category)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid category '${category}'.`,
+				validCategories: VALID_CATEGORIES,
+			},
 			{ status: 400 },
 		);
 	}

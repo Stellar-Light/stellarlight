@@ -713,7 +713,7 @@ const spec: OpenAPISpec = {
 						name: "category",
 						in: "query",
 						description:
-							"Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure').",
+							"Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list.",
 						schema: { type: "string" },
 					},
 					{
