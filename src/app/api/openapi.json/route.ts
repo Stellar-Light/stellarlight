@@ -153,12 +153,6 @@ const spec: OpenAPISpec = {
 						},
 					},
 					{
-						name: "hackathon",
-						in: "query",
-						description: "Filter by hackathon slug",
-						schema: { type: "string" },
-					},
-					{
 						name: "scfAwarded",
 						in: "query",
 						description: "Filter to SCF-funded projects only",
