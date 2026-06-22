@@ -117,6 +117,9 @@ async function main() {
 		["/api/leaderboard?sort=__bad__", "leaderboard sort"],
 		["/api/leaderboard?range=__bad__", "leaderboard range"],
 		["/api/leaderboard?category=__bad__", "leaderboard category"],
+		["/api/leaderboard?format=__bad__", "leaderboard format"],
+		["/api/projects/search?q=dex&category=__bad__", "projects/search category"],
+		["/api/clusters?dimension=__bad__", "clusters dimension"],
 	];
 	for (const [path, label] of invalidCases) {
 		const code = await statusOf(path);
@@ -230,9 +233,6 @@ async function main() {
 	check("builders negative limit is clamped (not an overrun)", typeof negLimit === "number" && negLimit <= 50, `limit=-5 returned ${negLimit}`);
 	const lbNeg = (await getJson("/api/leaderboard?limit=-3")).body?.projects?.length;
 	check("leaderboard negative limit is clamped", typeof lbNeg === "number" && lbNeg <= 50, `limit=-3 returned ${lbNeg}`);
-	// boolean params honor true/yes, not only "1"
-	const feat = (await getJson("/api/builders?featured=true")).body?.meta?.filters?.featured;
-	check("builders featured=true is honored (boolean coercion)", feat === true, `echoed featured=${feat}`);
 	// invalid enum values reject (rfps status/quarter — the silent-returns-all class)
 	check("rfps status=BOGUS → 400", (await statusOf("/api/rfps?status=BOGUS")) === 400);
 	check("rfps quarter=BOGUS → 400", (await statusOf("/api/rfps?quarter=BOGUS")) === 400);

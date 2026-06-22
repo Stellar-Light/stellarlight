@@ -124,6 +124,13 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	const VALID_FORMATS = ["json", "csv"] as const;
+	if (!(VALID_FORMATS as readonly string[]).includes(format)) {
+		return NextResponse.json(
+			{ error: `Invalid format '${format}'.`, validFormats: VALID_FORMATS },
+			{ status: 400 },
+		);
+	}
 
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
