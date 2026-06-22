@@ -28,7 +28,7 @@ export const dynamic = "force-static";
 export const revalidate = 3600;
 
 const SITE_URL = "https://stellarlight.xyz";
-const VERSION = "1.0.0";
+const VERSION = "1.2.0";
 
 interface OpenAPISpec {
 	openapi: string;
@@ -329,6 +329,13 @@ const spec: OpenAPISpec = {
 					"Returns Stellar builder profiles (sourced from Stellar Passport). Useful for *'find a teammate / collaborator who has shipped in X'* queries. Small + growing dataset — flag gaps honestly.",
 				parameters: [
 					{
+						name: "q",
+						in: "query",
+						description:
+							"Free-text filter over bio / role / projects (accepts `skill`/`tech` as aliases)",
+						schema: { type: "string" },
+					},
+					{
 						name: "location",
 						in: "query",
 						description:
@@ -339,12 +346,6 @@ const spec: OpenAPISpec = {
 						name: "skill",
 						in: "query",
 						description: "Filter by skill/tech mentioned in bio",
-						schema: { type: "string" },
-					},
-					{
-						name: "scfTier",
-						in: "query",
-						description: "Filter by SCF tier",
 						schema: { type: "string" },
 					},
 					{ $ref: "#/components/parameters/limit" },

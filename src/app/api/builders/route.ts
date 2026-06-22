@@ -4,8 +4,6 @@
  *   GET /api/builders
  *   GET /api/builders?q=soroban
  *   GET /api/builders?location=Lagos
- *   GET /api/builders?scfTier=gold
- *   GET /api/builders?featured=1
  *
  * Returns curated Stellar builder profiles (synced from Stellar Passport).
  * Used by the Stellar Scout SKILL.md so AI agents can answer
@@ -14,7 +12,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { boolParam, clampLimit } from "@/lib/http-params";
+import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -53,8 +51,6 @@ export async function GET(req: NextRequest) {
 		?.toLowerCase()
 		.trim();
 	const location = sp.get("location");
-	const scfTier = sp.get("scfTier");
-	const featured = boolParam(sp.get("featured"));
 	const limit = clampLimit(sp.get("limit"), 50, 200);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
@@ -70,12 +66,6 @@ export async function GET(req: NextRequest) {
 			};
 			if (location) {
 				where.location = { like: location };
-			}
-			if (scfTier) {
-				where.scf_tier = { equals: scfTier };
-			}
-			if (featured) {
-				where.is_featured = { equals: true };
 			}
 
 			const result = await payload.find({
@@ -148,7 +138,7 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/builders",
 		query: q,
-		filters: { location, scfTier, featured, limit },
+		filters: { location, limit },
 	});
 
 	// Distinguish "collection is empty / unseeded" from "this filter matched
@@ -192,7 +182,7 @@ export async function GET(req: NextRequest) {
 						channels: builderChannels,
 					}
 				: {
-						summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / scfTier / featured). This is a filter miss, not an empty or unseeded directory.`,
+						summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
 						channels: builderChannels,
 					};
 
@@ -201,7 +191,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
-				filters: { q, location, scfTier, featured, limit, offset },
+				filters: { q, location, limit, offset },
 				counts: { returned: builders.length, total: totalMatching },
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},

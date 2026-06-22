@@ -145,7 +145,7 @@ export async function GET(req: NextRequest) {
 	// key/category/type/q as aliases. RWA/Wallet/etc. are *types* while
 	// Infrastructure/Tooling are *categories*, so a value is resolved across BOTH
 	// dimensions rather than requiring the caller to know which one it lives in.
-	let valueFilter = (
+	const valueFilter = (
 		sp.get("key") ??
 		sp.get("category") ??
 		sp.get("type") ??
@@ -153,14 +153,20 @@ export async function GET(req: NextRequest) {
 		""
 	).trim();
 
-	// Resolve the clustering dimension. An invalid `dimension` (e.g. dimension=RWA,
-	// where the caller conflated the dimension with the value) is treated as a
-	// value filter instead of a 400 — the old behavior silently failed those.
+	// Resolve the clustering dimension. Declared as an enum [category, types] in
+	// the OpenAPI, so an unrecognized value is a 400 (matches the 400+validX pattern
+	// on the other endpoints). To target one cluster, use `key`/`category`/`type`.
 	let dimension: Dimension = "category";
 	if (rawDimension === "category" || rawDimension === "types") {
 		dimension = rawDimension;
-	} else if (rawDimension && !valueFilter) {
-		valueFilter = rawDimension;
+	} else if (rawDimension) {
+		return NextResponse.json(
+			{
+				error: `Invalid dimension '${rawDimension}'.`,
+				validDimensions: VALID_DIMENSIONS,
+			},
+			{ status: 400 },
+		);
 	}
 
 	const payload = await getPayloadSafe();

@@ -52,6 +52,7 @@ Single-hackathon detail. **Two response shapes** depending on the data source:
 - `.winners[*]` — the submissions that placed (derived from `winner_prizes`), each with `hackathonPlacement` (e.g. "1st Place") + `award`
 - `.hackathon.tracks` and the top-level `.tracks` — derived from the roster, each `{name, submissionCount, winnerCount}`. Always present now (`[]` when there are no tracks)
 - Read-through + cached ~1h; if the DoraHacks feed is briefly unavailable these degrade to empty and `.meta.note` says so. `.hackathon.externalUrl` is the canonical event page.
+- **Per-event coverage is uneven** — ideathons / brand-new events may have **no submitted buidls yet**, so `submissions`/`winners`/`tracks` are legitimately empty (not an error); larger build events (e.g. `stellar-hacks-blend`, `stellar-agents-x402-stripe-mpp`) are fully populated.
 
 ---
 
@@ -100,9 +101,9 @@ Use this to answer *"what's the most crowded category on Stellar?"* (lead with t
 ---
 
 ## `GET /api/builders`
-Stellar builder directory (synced from Stellar Passport). **Populated but small and sparse (~110 profiles; some rows are just a GitHub handle + avatar).** A 0-result is a *filter miss*, not an empty directory — `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`scfTier`/`featured`) before routing the user to fallback channels.
+Stellar builder directory (synced from Stellar Passport). **Populated but small and sparse (~110 profiles; some rows are just a GitHub handle + avatar).** A 0-result is a *filter miss*, not an empty directory — `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`skill`) before routing the user to fallback channels.
 
-**Params:** `q={text}`, `location={city}`, `scfTier={tier}`, `featured=1`.
+**Params:** `q={text}`, `location={city}`, `skill={tech}` (alias for `q`).
 
 **Returns:** `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, scfTier, projects[]. When `.meta.counts.returned === 0`, the response also includes `.meta.advisory` with a one-line summary + 2 fallback channels (Stellar Discord + GitHub topic:stellar) — relay these verbatim to the user. The advisory exists specifically so you don't confabulate ecosystem-level claims from an empty directory.
 
@@ -182,7 +183,7 @@ Always cite the source URL from each returned chunk — that's the whole point. 
 
 **Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|incident|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`.
 
-**Returns:** `.results[*]` with `{id, source, title, section, url, content, chunkIndex, score}`. `.meta.mode` indicates `"vector"` (semantic search via Atlas $vectorSearch) or `"keyword"` (fallback when the vector index isn't ready). `.meta.model` reports the embedding model used.
+**Returns:** `.results[*]` with `{id, source, title, section, url, content, chunkIndex, score}`. `.meta.mode` indicates `"vector"` (semantic search via Atlas $vectorSearch) or `"keyword"`. **Mode is chosen per query (dynamic), not per source** — the *same* `source` can return either mode depending on the query string, so don't pin a mode to a source. `.meta.model` reports the embedding model used.
 
 **Read the `score` before citing.** Vector search always returns the top-K nearest chunks even if none are truly relevant. Calibrated from real query patterns:
 - `score ≥ 0.78` → direct hit, cite confidently (e.g. SCP query → Mazières paper)

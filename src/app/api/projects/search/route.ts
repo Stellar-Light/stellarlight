@@ -319,6 +319,27 @@ export async function GET(req: NextRequest) {
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
+	// Reject an unrecognized category (declared as an enum in the OpenAPI; was a
+	// silent 200/0). Matches the project category select options + leaderboard.
+	const VALID_CATEGORIES = [
+		"Infrastructure",
+		"Tooling",
+		"User-Facing App",
+		"Asset",
+		"Protocol/Contract",
+		"Anchor",
+		"Partner Integration",
+	] as const;
+	if (category && !(VALID_CATEGORIES as readonly string[]).includes(category)) {
+		return NextResponse.json(
+			{
+				error: `Invalid category '${category}'.`,
+				validCategories: VALID_CATEGORIES,
+			},
+			{ status: 400 },
+		);
+	}
+
 	// Guard content-less calls: no query AND no filters. This is almost always a
 	// malformed agent call (the term was sent under a field name we dropped, or
 	// nested wrong). Returning the default project list here is actively harmful —
