@@ -28,7 +28,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
-const VERSION = "1.1.0";
+const VERSION = "1.1.2";
 const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
@@ -253,10 +253,6 @@ server.registerTool(
 				.string()
 				.optional()
 				.describe("Filter by skill/tech mentioned in bio."),
-			scfTier: z
-				.string()
-				.optional()
-				.describe("Filter by SCF tier."),
 			limit: z
 				.number()
 				.int()
@@ -266,11 +262,10 @@ server.registerTool(
 				.describe("Max results (default 20)."),
 		},
 	},
-	async ({ location, skill, scfTier, limit }) => {
+	async ({ location, skill, limit }) => {
 		const params = new URLSearchParams();
 		if (location) params.set("location", location);
 		if (skill) params.set("skill", skill);
-		if (scfTier) params.set("scfTier", scfTier);
 		if (limit !== undefined) params.set("limit", String(limit));
 		const qs = params.toString();
 		const result = await callScout(`/api/builders${qs ? `?${qs}` : ""}`);
