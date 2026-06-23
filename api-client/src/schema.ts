@@ -61,8 +61,6 @@ export interface paths {
                     q?: components["parameters"]["q"];
                     /** @description Filter by category */
                     category?: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
-                    /** @description Filter by hackathon slug */
-                    hackathon?: string;
                     /** @description Filter to SCF-funded projects only */
                     scfAwarded?: boolean;
                     /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
@@ -300,12 +298,12 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description Free-text filter over bio / role / projects (accepts `skill`/`tech` as aliases) */
+                    q?: string;
                     /** @description Filter by location substring (e.g. 'Lagos', 'Brazil') */
                     location?: string;
                     /** @description Filter by skill/tech mentioned in bio */
                     skill?: string;
-                    /** @description Filter by SCF tier */
-                    scfTier?: string;
                     /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                     limit?: components["parameters"]["limit"];
                     /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
@@ -736,7 +734,7 @@ export interface paths {
                     sort?: "activity" | "stars" | "issues";
                     /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
                     range?: "7d" | "30d" | "90d" | "1y" | "all";
-                    /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). */
+                    /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */
                     category?: string;
                     /** @description Response format. */
                     format?: "json" | "csv";
