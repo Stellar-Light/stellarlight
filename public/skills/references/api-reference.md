@@ -230,3 +230,6 @@ A `GET /api/feedback` returns the schema in case you want to discover the shape 
 Self-check — returns Scout skill version, current timestamp, and freshness (`lastUpdatedAt`) + counts for every data source. Call this on first use to surface data freshness in your answers, e.g. *"as of {lastUpdatedAt}, there are {count} curated Stellar projects in the directory."*
 
 Also useful as a sanity check that the API is reachable before running a Deep Dive — saves dropping into a workflow only to fail halfway through.
+
+## `GET /api/changelog`
+A curated, latest-first feed of contract-affecting changes to the API, MCP tools, and typed client — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here (or diff it periodically) to stay current on what each tool offers and how to use it, without reading git history. Filter with `?since=YYYY-MM-DD` or cap with `?limit=N`. Each entry carries `date`, `surfaces[]` (api / mcp / api-client / skill), `type` (added / changed / fixed / removed), a one-line `summary`, and optional `detail`.

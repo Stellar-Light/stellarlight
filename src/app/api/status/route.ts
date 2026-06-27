@@ -123,6 +123,7 @@ export async function GET() {
 			},
 			endpoints: [
 				"/api/status",
+				"/api/changelog",
 				"/api/leaderboard",
 				"/api/hackathons",
 				"/api/hackathons/{slug}",
