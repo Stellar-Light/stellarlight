@@ -3,7 +3,7 @@
  *
  *   GET /api/openapi.json
  *
- * Auto-discoverable, machine-readable description of all 14 public
+ * Auto-discoverable, machine-readable description of all public
  * read-only endpoints. Aggregators paste the URL into openapi-typescript /
  * orval / kiota / any codegen and instantly get typed clients in
  * TypeScript, Python, Go, Rust, etc. — no hand-rolled fetch wrappers.

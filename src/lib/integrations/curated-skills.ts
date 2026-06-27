@@ -88,9 +88,9 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "stellar-scout-mcp",
 		name: "Stellar Scout MCP",
 		tagline:
-			"Idea vetting, SCF radar, audit intel, competitor search, builder discovery — as 14 MCP tools for Claude.ai, ChatGPT, Gemini, Cursor.",
+			"Idea vetting, SCF radar, audit intel, competitor & repo search, builder discovery — Scout's full API as native MCP tools for Claude.ai, ChatGPT, Gemini, Cursor.",
 		description:
-			"MCP server wrapping all 14 of Scout's public APIs as native callable tools. Reach the AI clients that don't load SKILL.md (Claude desktop, Cursor MCP mode, ChatGPT custom GPTs, Gemini, Cline, Continue, Zed). Same backend as the SKILL.md version.",
+			"MCP server wrapping Scout's full public API as native callable tools, each with use-case-driven descriptions so agents know when to reach for which. Reach the AI clients that don't load SKILL.md (Claude desktop, Cursor MCP mode, ChatGPT custom GPTs, Gemini, Cline, Continue, Zed). Same backend as the SKILL.md version.",
 		source: "stellarlight",
 		kind: "mcp-server",
 		install: "npx @stellar-light/scout-mcp",
