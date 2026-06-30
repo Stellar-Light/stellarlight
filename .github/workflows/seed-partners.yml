@@ -1,0 +1,32 @@
+name: Seed partner directory
+
+# Populates the partner directory (/api/partners) with curated, factual entries
+# — audit firms + anchors derived live from our project directory. ADDITIVE +
+# IDEMPOTENT (create-only, skips existing slugs); cannot touch other collections.
+# Run dry first (execute=false), inspect the log, then run with execute=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/seed-partners.ts ${{ inputs.execute && '--execute' || '' }}
