@@ -72,7 +72,10 @@ const nextConfig = {
 		const publicApi = [
 			"/api/openapi.json",
 			"/api/status",
+			"/api/changelog",
 			"/api/projects/search",
+			"/api/repos/search",
+			"/api/repos/explain",
 			"/api/hackathons",
 			"/api/hackathons/:slug",
 			"/api/hackathons/compare",

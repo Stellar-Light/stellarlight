@@ -44,6 +44,10 @@ async function statusOf(path: string): Promise<number> {
 	const res = await fetch(`${BASE}${path}`, { method: "GET" });
 	return res.status;
 }
+async function headerOf(path: string, name: string): Promise<string | null> {
+	const res = await fetch(`${BASE}${path}`, { method: "GET" });
+	return res.headers.get(name);
+}
 
 async function main() {
 	console.log(`API drift guard — ${BASE}\n`);
@@ -67,6 +71,28 @@ async function main() {
 			`OpenAPI documents ${e}`,
 			specPaths.includes(e),
 			`/api/status advertises ${e} but the OpenAPI spec omits it`,
+		);
+	}
+
+	// ── 1b. Every public GET endpoint emits X-API-Version + CORS ────────────
+	// next.config.mjs enumerates the public API; an endpoint that ships without
+	// being added there silently loses CORS + the version header (the
+	// repos/search + changelog + explain drift a consumer flagged 2026-06-27).
+	// Headers are path-based, so a bare probe carries them regardless of status.
+	console.log("◆ Public GET endpoints emit X-API-Version + CORS");
+	const getPaths = specPaths.filter((p) => !p.includes("{") && spec.paths[p]?.get);
+	for (const p of getPaths) {
+		const ver = await headerOf(p, "x-api-version");
+		check(
+			`${p} emits X-API-Version`,
+			ver === "1",
+			`got "${ver ?? "none"}" — add "${p}" to next.config.mjs publicApi[]`,
+		);
+		const origin = await headerOf(p, "access-control-allow-origin");
+		check(
+			`${p} emits CORS (Access-Control-Allow-Origin)`,
+			origin === "*",
+			`got "${origin ?? "none"}" — add "${p}" to next.config.mjs publicApi[]`,
 		);
 	}
 
