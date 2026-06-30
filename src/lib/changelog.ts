@@ -32,6 +32,22 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-06-30",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Hackathon detail winners are now sorted by placement and carry a numeric `placementRank` (1 = best), so `winners[0]` is the 1st-place entry. Previously the array was scrambled with only a string label, making winner-order claims ungroundable.",
+		detail:
+			"Applies to both the DoraHacks-feed and curated/DB winner paths. Sort/filter on `placementRank` instead of parsing the `hackathonPlacement` string.",
+	},
+	{
+		date: "2026-06-30",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"`/api/repos/explain` degrades gracefully when DeepWiki hasn't indexed a repo — returns `answered:false` + the routed authoritative repo, instead of surfacing DeepWiki's \"Repository not found\" error as if it were an answer.",
+	},
+	{
+		date: "2026-06-30",
 		surfaces: ["api", "mcp"],
 		version: "scout-mcp@1.1.4",
 		type: "added",
