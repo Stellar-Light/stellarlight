@@ -276,6 +276,41 @@ const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/repos/explain": {
+			get: {
+				tags: ["Repos"],
+				summary: "Deep code answer about a Stellar repo (routing × DeepWiki)",
+				description:
+					"Get a source-grounded ANSWER to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar/stellar-core; Horizon → stellar/go; RPC → stellar/stellar-rpc; SEP reference impls; SDKs), then DeepWiki answers from that repo's internals with source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal. **Not for:** which repos/projects exist → use /api/repos/search or /api/projects/search; ecosystem docs / SEP text / audits → use /api/research. Degrades gracefully: if DeepWiki is unavailable you still get the routed authoritative repo + its deepWikiUrl.",
+				parameters: [
+					{ name: "q", in: "query", required: true, description: "The deep code question (e.g. 'where are transaction result codes defined').", schema: { type: "string" } },
+					{ name: "repo", in: "query", required: false, description: "Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route.", schema: { type: "string" } },
+				],
+				responses: {
+					"200": {
+						description: "Routed repo + DeepWiki-grounded answer",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										ok: { type: "boolean" },
+										q: { type: "string" },
+										repo: { type: "string", nullable: true },
+										routedVia: { type: "string", nullable: true },
+										answer: { type: "string", nullable: true, description: "DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned)." },
+										answered: { type: "boolean" },
+										alternateRepos: { type: "array", items: { type: "string" } },
+										sources: { type: "object", properties: { repoUrl: { type: "string" }, deepWikiUrl: { type: "string" }, deepWikiSearchUrl: { type: "string", nullable: true } } },
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing q" },
+				},
+			},
+		},
 		"/api/hackathons": {
 			get: {
 				tags: ["Hackathons"],
@@ -1151,6 +1186,16 @@ const spec: OpenAPISpec = {
 						description:
 							"Keyword-relevance score for the current query (higher = better match).",
 					},
+						deepWikiUrl: {
+							type: "string",
+							description:
+								"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery.",
+						},
+						canonical: {
+							type: "boolean",
+							description:
+								"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+						},
 				},
 			},
 			RepoSearchResponse: {

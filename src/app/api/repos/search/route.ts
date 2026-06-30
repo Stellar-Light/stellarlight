@@ -33,7 +33,12 @@ export async function GET(req: NextRequest) {
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
-	const { repos, total } = await searchRepos(payload, q, { limit, offset, language, minScore });
+	const { repos, total, canonical } = await searchRepos(payload, q, {
+		limit,
+		offset,
+		language,
+		minScore,
+	});
 
 	logApiHit({ req, endpoint: "/api/repos/search", query: q, filters: { language, minScore, limit } });
 
@@ -43,7 +48,14 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				filters: { q, language: language || null, minScore, limit, offset },
-				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage.",
+				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
+				canonical:
+					canonical.length > 0
+						? {
+								repos: canonical,
+								note: "Curated canonical Stellar repos for this infra/protocol query, floated to the top (e.g. error codes → stellar-core/Horizon/SDKs; Horizon lives in stellar/go). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
+							}
+						: null,
 				counts: { returned: repos.length, total },
 			},
 			repos,

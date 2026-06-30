@@ -31,6 +31,26 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-06-30",
+		surfaces: ["api", "mcp"],
+		version: "scout-mcp@1.1.4",
+		type: "added",
+		summary:
+			"Repo intelligence — deep code answers. Infra/protocol questions now route to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar-core; Horizon → stellar/go; RPC → stellar-rpc) and `explain_repo` / GET /api/repos/explain returns a source-grounded answer pulled from DeepWiki — the actual answer, not just a link.",
+		detail:
+			"search_repos now floats curated canonical SDF repos to the top for infra queries and adds a `deepWikiUrl` to every result. The new `explain_repo` MCP tool + /api/repos/explain endpoint pair our routing with DeepWiki's repo Q&A: our index picks WHICH repo is authoritative, DeepWiki explains WHAT'S INSIDE. 16 MCP tools total.",
+	},
+	{
+		date: "2026-06-27",
+		surfaces: ["api", "mcp", "skill"],
+		version: "scout-mcp@1.1.3",
+		type: "changed",
+		summary:
+			"Every tool/endpoint description rewritten to be use-case-driven — each states when to use it and which sibling tool to use instead — so agents pick the right tool instead of calling all of them. Added GET /api/changelog (this feed).",
+		detail:
+			"Disambiguates the confusable clusters (search_projects vs search_repos vs search_research; the three hackathon tools; clusters vs leaderboard vs analyze). Kept consistent across the MCP, OpenAPI, and skill docs.",
+	},
+	{
 		date: "2026-06-23",
 		surfaces: ["api", "mcp", "api-client"],
 		version: "scout-mcp@1.1.2, api-client@1.2.1",
