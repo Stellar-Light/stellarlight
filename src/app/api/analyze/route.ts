@@ -114,8 +114,19 @@ export async function GET(req: NextRequest) {
 				where: {
 					status: { in: ["Development", "Pre-Release", "Live"] },
 				},
-				limit: 500,
+				// Select only the aggregation fields + raise the cap so the
+				// breakdown covers ALL active projects. Was capped at 500, which
+				// both truncated the distribution and mislabeled totalProjects
+				// (a downstream consumer flagged status=917 vs analyze=500). The
+				// select keeps the larger fetch cheap on the M0 tier.
+				limit: 5000,
 				depth: 0,
+				select: {
+					category: true,
+					scf: true,
+					hackathonPlacement: true,
+					status: true,
+				},
 			});
 			projects = r.docs as unknown as ProjectDoc[];
 		} catch {
@@ -157,6 +168,8 @@ export async function GET(req: NextRequest) {
 		);
 		result.categories = {
 			totalProjects: projects.length,
+			scope:
+				"Active projects only (status Live / Pre-Release / Development). Differs from /api/status.sources.projects, which counts the FULL collection incl. Inactive/other — don't merge the two without labeling the source.",
 			distribution: sorted,
 		};
 	}
