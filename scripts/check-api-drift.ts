@@ -120,6 +120,28 @@ async function main() {
 		`advisory says "${adv.slice(0, 90)}..." while ${buildersCount} builders exist — it must say it's a filter miss, not claim the directory is empty`,
 	);
 
+	// ── 2b. Hackathon winners are placement-sorted with a numeric rank ───────
+	// A consumer (Raven) couldn't ground winner-order claims because the array
+	// was scrambled with only a string label. winners[] must be sorted by
+	// placementRank ascending, and winners[0] must carry a rank.
+	console.log("◆ Hackathon winners placement-sorted");
+	const hk = (await getJson("/api/hackathons/stellar-hacks-kale-reflector")).body;
+	const wns: Array<{ placementRank?: number | null; name?: string }> = hk?.winners ?? [];
+	if (wns.length > 1) {
+		const ranks = wns.map((w) => w.placementRank ?? 9999);
+		const sorted = ranks.every((r, i) => i === 0 || ranks[i - 1] <= r);
+		check(
+			"hackathon winners[] is sorted by placementRank (winners[0] = best)",
+			sorted,
+			`winner ranks out of order: [${ranks.join(", ")}] — rankAndSort regressed`,
+		);
+		check(
+			"hackathon winners carry a numeric placementRank",
+			typeof wns[0].placementRank === "number",
+			`winners[0] (${wns[0]?.name}) has placementRank=${wns[0]?.placementRank} — the field is missing`,
+		);
+	}
+
 	// ── 3. Filters actually filter (not silently ignored) ───────────────────
 	console.log("◆ Filters apply (no silent no-op)");
 	const baseTotal = (await getJson("/api/projects/search?q=wallet&limit=1"))

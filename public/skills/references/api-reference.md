@@ -43,13 +43,13 @@ Single-hackathon detail. **Two response shapes** depending on the data source:
 **(a) Curated** (slug resolves to a Payload Hackathons row) — full detail:
 - `.hackathon.stats` — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown)
 - `.hackathon.tracks[*]` — prize tracks derived from past submissions, each with `{name, winnerCount, submissionCount, totalPrizeUSD}`. Use for "which tracks did this hackathon pay out for?"
-- `.winners[*]` — projects that placed
+- `.winners[*]` — projects that placed, **sorted by placement** (`winners[0]` = 1st), each with a numeric `placementRank` (1 = best) alongside the `hackathonPlacement` label — sort/filter on `placementRank`, don't parse the string
 - `.submissions[*]` — every submission with placement, prize, track
 
 **(b) DoraHacks-only** (slug matches a live DoraHacks event we haven't curated in our DB) — now pulls the **live submission roster** from DoraHacks:
 - `.hackathon.source = "dorahacks"`, `.hackathon.prizePoolUSD`, `.hackathon.hackersCount`
 - `.submissions[*]` — every submission, pulled live: `{name, githubUrl, demoUrl, videoUrl, track, description, hackathonPlacement, award, isWinner, url}`
-- `.winners[*]` — the submissions that placed (derived from `winner_prizes`), each with `hackathonPlacement` (e.g. "1st Place") + `award`
+- `.winners[*]` — the submissions that placed (derived from `winner_prizes`), **sorted by placement** (`winners[0]` = 1st), each with `hackathonPlacement` (e.g. "1st Place"), a numeric `placementRank` (1 = best), + `award`
 - `.hackathon.tracks` and the top-level `.tracks` — derived from the roster, each `{name, submissionCount, winnerCount}`. Always present now (`[]` when there are no tracks)
 - Read-through + cached ~1h; if the DoraHacks feed is briefly unavailable these degrade to empty and `.meta.note` says so. `.hackathon.externalUrl` is the canonical event page.
 - **Per-event coverage is uneven** — ideathons / brand-new events may have **no submitted buidls yet**, so `submissions`/`winners`/`tracks` are legitimately empty (not an error); larger build events (e.g. `stellar-hacks-blend`, `stellar-agents-x402-stripe-mpp`) are fully populated.

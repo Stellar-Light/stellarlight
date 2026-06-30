@@ -1024,6 +1024,12 @@ const spec: OpenAPISpec = {
 					scfTotalAwardedUSD: { type: "number", nullable: true },
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },
+						placementRank: {
+							type: "integer",
+							nullable: true,
+							description:
+								"Numeric rank parsed from hackathonPlacement (1 = best). winners[] is sorted by this, so winners[0] is the 1st-place entry — sort/filter on this instead of parsing the label.",
+						},
 					hackathonPrize: { type: "number", nullable: true },
 					hackathonPrizeTrack: { type: "string", nullable: true },
 					score: {

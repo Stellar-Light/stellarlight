@@ -35,12 +35,48 @@ interface SubmissionRow {
 	shortDescription: string | null;
 	hackathonStatus: string | null;
 	hackathonPlacement: string | null;
+	// Numeric rank parsed from hackathonPlacement (1 = best), set by rankAndSort.
+	// Lets agents sort/find winners numerically instead of string-parsing the
+	// label, and guarantees winners[0] is the 1st-place entry. null = unplaced.
+	placementRank?: number | null;
 	hackathonPrize: number | null;
 	hackathonPrizeTrack: string | null;
 	scfAwarded: boolean;
 	// Set only for curated winners (who built it). Absent for DB submissions.
 	builder?: string | null;
 	url: string;
+}
+
+// Parse a placement label → sortable rank (1 = best). Handles ordinals
+// ("1st Place", "10th Place", "2nd"), grand-prize/overall, runner-up, and
+// track/honorable mentions; anything unrecognized sorts last. A downstream
+// consumer (Raven) rejected our winner data because the array order was
+// scrambled and there was no numeric place field — this fixes both.
+function placementRank(label?: string | null): number {
+	if (!label) return 9999;
+	const s = label.toLowerCase();
+	const ordinal = s.match(/\b(\d+)\s*(?:st|nd|rd|th)\b/);
+	if (ordinal) return Number(ordinal[1]);
+	if (/grand|overall|\bwinner\b/.test(s) && !/runner/.test(s)) return 1;
+	if (/runner.?up/.test(s)) return 2;
+	if (/track.?winner|category winner/.test(s)) return 100;
+	if (/honorable|mention|finalist/.test(s)) return 900;
+	return 9999;
+}
+
+// Annotate each winner with placementRank and sort best-first, so winners[0] is
+// 1st place and agents can rank/filter numerically. Generic so it serves both
+// the DoraHacks-feed shape and the DB/curated SubmissionRow shape (both carry
+// hackathonPlacement). Stable for ties.
+function rankAndSort<T extends { hackathonPlacement?: string | null }>(
+	winners: T[],
+): (T & { placementRank: number | null })[] {
+	return winners
+		.map((w) => ({
+			...w,
+			placementRank: w.hackathonPlacement ? placementRank(w.hackathonPlacement) : null,
+		}))
+		.sort((a, b) => (a.placementRank ?? 9999) - (b.placementRank ?? 9999));
 }
 
 /**
@@ -137,7 +173,9 @@ export async function GET(
 			// for events that aren't curated in our DB.
 			const liveSubmissions = await fetchHackathonSubmissions(dora.uname);
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
-			const winners = liveWinners.length ? liveWinners : curatedWinners;
+			const winners = liveWinners.length
+				? rankAndSort(liveWinners)
+				: rankAndSort(curatedWinners);
 			const trackMap = new Map<
 				string,
 				{ name: string; submissionCount: number; winnerCount: number }
@@ -264,9 +302,9 @@ export async function GET(
 		// the curated roster if a curated event made it into the DB without
 		// placement-tagged submissions.
 		const dbWinners = submissions.filter((s) => !!s.hackathonPlacement);
-		const winners = dbWinners.length
-			? dbWinners
-			: staticWinnersForSlug(slug);
+		const winners = rankAndSort(
+			dbWinners.length ? dbWinners : staticWinnersForSlug(slug),
+		);
 
 		const totalPrizeUSD = submissions.reduce(
 			(sum, s) => sum + (s.hackathonPrize ?? 0),
