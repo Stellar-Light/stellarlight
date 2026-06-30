@@ -200,7 +200,7 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
-function canonicalFor(q: string): string[] {
+export function canonicalFor(q: string): string[] {
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const c of CANONICAL) {

@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 15 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's 16 public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -28,7 +28,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
-const VERSION = "1.1.2";
+const VERSION = "1.1.4";
 const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
@@ -371,6 +371,36 @@ server.registerTool(
 		if (offset !== undefined) params.set("offset", String(offset));
 		const qs = params.toString();
 		const result = await callScout(`/api/repos/search${qs ? `?${qs}` : ""}`);
+		return asToolResult(result);
+	},
+);
+
+// 6c. explain_repo — deep code answer (StellarLight routing × DeepWiki)
+server.registerTool(
+	"explain_repo",
+	{
+		title: "Explain a Stellar repo's internals (deep code answer)",
+		description:
+			"Get a **source-grounded answer** to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error codes / consensus / XDR → `stellar/stellar-core`; Horizon → `stellar/go`; RPC → `stellar/stellar-rpc`; SEP reference impls, SDKs…), then DeepWiki answers from that repo's internals with the source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal — error/result codes, SCP/consensus, ledger, XDR, a SEP's implementation. **Not for:** which repos/projects exist → use search_repos / search_projects; ecosystem docs, SEP text, or audits → use search_research. Returns the routed `repo`, the grounded `answer`, `alternateRepos`, and `sources` (repoUrl + deepWikiUrl). Pass `repo` to pin one, or omit to auto-route.",
+		inputSchema: {
+			q: z
+				.string()
+				.describe(
+					"The deep code question, e.g. 'where are transaction result codes defined' or 'how does SCP reach consensus'.",
+				),
+			repo: z
+				.string()
+				.optional()
+				.describe(
+					"Optional owner/name to pin the repo (e.g. 'stellar/stellar-core'). Omit to auto-route to the authoritative repo.",
+				),
+		},
+	},
+	async ({ q, repo }) => {
+		const params = new URLSearchParams();
+		params.set("q", q);
+		if (repo) params.set("repo", repo);
+		const result = await callScout(`/api/repos/explain?${params.toString()}`);
 		return asToolResult(result);
 	},
 );

@@ -133,6 +133,7 @@ export async function GET() {
 				"/api/builders",
 				"/api/projects/search",
 				"/api/repos/search",
+				"/api/repos/explain",
 				"/api/rfps",
 				"/api/research",
 				"/api/feedback",
