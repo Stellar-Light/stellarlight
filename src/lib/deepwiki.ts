@@ -70,6 +70,17 @@ export async function askDeepWiki(
 		const text: string | null =
 			env.result.structuredContent?.result ?? env.result.content?.[0]?.text ?? null;
 		if (!text || !text.trim()) return null;
+		// DeepWiki signals "repo not indexed" / internal failures as a NORMAL text
+		// answer (not isError), so a naive caller would surface the error string as
+		// if it were a real answer. Detect those and treat them as a miss → the
+		// endpoint then degrades to "here's the authoritative repo + deepWikiUrl".
+		if (
+			/^Error processing question:|Repository not found|to index it\b|No wiki found|not been indexed/i.test(
+				text.trim(),
+			)
+		) {
+			return null;
+		}
 		const m = text.match(/View this search on DeepWiki:\s*(\S+)/);
 		// Strip the trailing "Wiki pages..." + "View this search..." footer from
 		// the answer body; expose the permalink separately as searchUrl.
