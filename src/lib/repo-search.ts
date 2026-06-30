@@ -63,6 +63,10 @@ export interface RepoResult {
 	repoScore: number;
 	repoScoreLabel: string | null;
 	score: number;
+	/** DeepWiki AI-generated wiki of this repo's internals — hand off here for deep "where/how" code questions. */
+	deepWikiUrl: string;
+	/** True when this repo was surfaced as a curated canonical answer for an infra/protocol query. */
+	canonical: boolean;
 }
 
 function topicList(topics: unknown): string[] {
@@ -158,13 +162,60 @@ function hasStellarMention(hay: string): boolean {
 	return /\bstellar\b/.test(hay) || /\bsoroban\b/.test(hay);
 }
 
+// Curated concept → canonical Stellar repos. Plain keyword/topic search can't
+// route a CONCEPT to the authoritative repo when that repo's name/description
+// doesn't contain the words: "error codes" live in the XDR + stellar-core +
+// Horizon + the SDKs (none of which say "error codes"), and Horizon itself is
+// implemented in stellar/go, not a "horizon"-named repo. For these specific
+// infra/protocol questions we inject the canonical SDF repos and float them to
+// the top, in priority order. Repos here that aren't indexed are simply skipped
+// (the DB `in` filter only returns existing ones). Keep entries NARROW — only
+// concepts whose answer is a known core repo, never broad terms like "wallet".
+const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
+	// transaction / operation result & error codes
+	{
+		test: /\b(error|result|status|op(?:eration)?|tx|transaction)\s*codes?\b|\bresult\s*code|\btx\s*result/,
+		repos: ["stellar/stellar-core", "stellar/go", "stellar/js-stellar-sdk", "stellar/rs-soroban-sdk"],
+	},
+	// Horizon (the real implementation lives in stellar/go)
+	{ test: /\bhorizon\b/, repos: ["stellar/go", "stellar/stellar-horizon"] },
+	// RPC
+	{ test: /\b(soroban[\s-]*)?rpc\b/, repos: ["stellar/stellar-rpc", "stellar/soroban-rpc"] },
+	// XDR
+	{ test: /\bxdr\b/, repos: ["stellar/stellar-xdr", "stellar/js-stellar-base", "stellar/rs-stellar-xdr", "stellar/stellar-core"] },
+	// core internals: consensus / ledger / catchup
+	{ test: /\bstellar[\s-]*core\b|\bconsensus\b|\bscp\b|\bvalidator\b|\bledger\s*close|\bcatchup\b|\bquorum\b/, repos: ["stellar/stellar-core"] },
+	// protocol specs: CAPs / SEPs / upgrades
+	{ test: /\bcap[\s-]?\d|\bsep[\s-]?\d|\bprotocol\s*(spec|upgrade|version)|\bcore\s*advancement/, repos: ["stellar/stellar-protocol"] },
+	// anchor / SEP infra
+	{ test: /\banchor\s*platform\b/, repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"] },
+	// quickstart / run a node
+	{ test: /\bquickstart\b|\brun\s*(a\s*)?(node|validator|horizon)\b/, repos: ["stellar/quickstart"] },
+	// SDKs by language
+	{ test: /\b(java\s*script|js|typescript|ts)\s*sdk\b/, repos: ["stellar/js-stellar-sdk"] },
+	{ test: /\b(rust|soroban)\s*sdk\b/, repos: ["stellar/rs-soroban-sdk"] },
+	{ test: /\bpython\s*sdk\b/, repos: ["StellarCN/py-stellar-base"] },
+	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go"] },
+];
+
+// Canonical repos for a query, priority order, deduped. Empty when the query
+// doesn't hit a curated concept (so normal queries behave exactly as before).
+function canonicalFor(q: string): string[] {
+	const hay = wordy(q);
+	const out: string[] = [];
+	for (const c of CANONICAL) {
+		if (c.test.test(hay)) for (const r of c.repos) if (!out.includes(r)) out.push(r);
+	}
+	return out;
+}
+
 export async function searchRepos(
 	payload: PayloadLike | null,
 	q: string,
 	opts: { limit?: number; offset?: number; language?: string; minScore?: number } = {},
-): Promise<{ repos: RepoResult[]; total: number }> {
+): Promise<{ repos: RepoResult[]; total: number; canonical: string[] }> {
 	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
-	if (!payload) return { repos: [], total: 0 };
+	if (!payload) return { repos: [], total: 0, canonical: [] };
 	try {
 		const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
@@ -197,7 +248,27 @@ export async function searchRepos(
 			// win on the repos collection.
 			select: { readmeExcerpt: false },
 		});
-		const docs = (res.docs as unknown as RepoDoc[]).map((r) => {
+		// Curated concept → canonical repo injection. The authoritative SDF repo for
+		// an infra/protocol question often isn't a keyword candidate, so fetch the
+		// curated set and float it to the top in priority order (canonRank).
+		const canonList = canonicalFor(q);
+		const canonRank = new Map(canonList.map((fn, i) => [fn.toLowerCase(), i]));
+		let rawDocs = res.docs as unknown as RepoDoc[];
+		if (canonList.length) {
+			const cres = await payload.find({
+				collection: "repos",
+				where: { fullName: { in: canonList } },
+				limit: canonList.length,
+				depth: 0,
+				select: { readmeExcerpt: false },
+			});
+			const seen = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
+			rawDocs = [
+				...rawDocs,
+				...(cres.docs as unknown as RepoDoc[]).filter((d) => !seen.has(d.fullName.toLowerCase())),
+			];
+		}
+		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
 			// hits at all. name/topics (5) > description/language (3) > README-only
@@ -241,9 +312,11 @@ export async function searchRepos(
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
-			return { r, topics, score, matched, sdf, alive, mention };
+			const crank = canonRank.get(r.fullName.toLowerCase()) ?? 9999;
+			return { r, topics, score, matched, sdf, alive, mention, crank };
 		});
-		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1) : docs;
+		// Keep canonical repos even when they didn't keyword-match (crank < 9999).
+		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1 || d.crank < 9999) : docs;
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
@@ -253,6 +326,7 @@ export async function searchRepos(
 		// Stellar match at the same relevance.
 		filtered.sort(
 			(a, b) =>
+				a.crank - b.crank ||
 				b.score - a.score ||
 				b.sdf - a.sdf ||
 				b.alive - a.alive ||
@@ -261,7 +335,7 @@ export async function searchRepos(
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
 		);
 		const total = filtered.length;
-		const repos = filtered.slice(offset, offset + limit).map(({ r, topics, score }) => ({
+		const repos = filtered.slice(offset, offset + limit).map(({ r, topics, score, crank }) => ({
 			fullName: r.fullName,
 			owner: r.owner ?? null,
 			name: r.name ?? null,
@@ -284,9 +358,11 @@ export async function searchRepos(
 			repoScore: r.repoScore ?? 0,
 			repoScoreLabel: r.repoScoreLabel ?? null,
 			score,
+			deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
+			canonical: crank < 9999,
 		}));
-		return { repos, total };
+		return { repos, total, canonical: repos.filter((r) => r.canonical).map((r) => r.fullName) };
 	} catch {
-		return { repos: [], total: 0 };
+		return { repos: [], total: 0, canonical: [] };
 	}
 }

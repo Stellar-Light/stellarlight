@@ -1151,6 +1151,16 @@ const spec: OpenAPISpec = {
 						description:
 							"Keyword-relevance score for the current query (higher = better match).",
 					},
+						deepWikiUrl: {
+							type: "string",
+							description:
+								"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery.",
+						},
+						canonical: {
+							type: "boolean",
+							description:
+								"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+						},
 				},
 			},
 			RepoSearchResponse: {
