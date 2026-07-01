@@ -19,24 +19,41 @@ export default async function TrendingProjectsSection() {
 	}> = [];
 
 	try {
-		const signalsResult = await payload.find({
-			collection: "signals",
-			sort: "-github.totalStars",
-			limit: 20,
-			depth: 2,
-		});
+		// Star counts come from the enriched `repos` collection (keyed by
+		// projectSlug) — the legacy `signals` cache this used is no longer
+		// populated, so it returned nothing and the whole section vanished.
+		// biome-ignore lint/suspicious/noExplicitAny: Payload Where/doc types are awkward
+		const projectsResult = await payload.find({
+			collection: "projects",
+			where: { status: { in: ["Development", "Pre-Release", "Live"] } },
+			limit: 300,
+			depth: 1,
+			select: { embedding: false },
+		} as any);
 
-		repos = signalsResult.docs
-			.map((signal: any) => {
-				const project = signal.project;
-				if (!project || typeof project === "string") return null;
-				if (!["Development", "Pre-Release", "Live"].includes(project.status))
-					return null;
-				const repoStars = (signal.github?.repos || []).reduce(
-					(sum: number, r: any) => sum + (r.stargazerCount || 0),
-					0,
-				);
-				const totalStars = signal.github?.totalStars || repoStars;
+		const projectSlugs = projectsResult.docs.map((p: any) => p.slug);
+		const starsBySlug = new Map<string, { stars: number; count: number }>();
+		if (projectSlugs.length > 0) {
+			const reposResult = await payload.find({
+				collection: "repos",
+				where: { projectSlug: { in: projectSlugs } },
+				limit: 5000,
+				depth: 0,
+				select: { projectSlug: true, stars: true },
+			});
+			for (const r of reposResult.docs as any[]) {
+				if (!r.projectSlug) continue;
+				const e = starsBySlug.get(r.projectSlug) ?? { stars: 0, count: 0 };
+				e.stars += r.stars ?? 0;
+				e.count += 1;
+				starsBySlug.set(r.projectSlug, e);
+			}
+		}
+
+		repos = projectsResult.docs
+			.map((project: any) => {
+				const agg = starsBySlug.get(project.slug);
+				const totalStars = agg?.stars ?? 0;
 				if (totalStars === 0) return null;
 
 				let logoUrl: string | null = null;
@@ -53,7 +70,7 @@ export default async function TrendingProjectsSection() {
 					name: project.name,
 					slug: project.slug,
 					totalStars,
-					repoCount: signal.github?.repos?.length ?? 0,
+					repoCount: agg?.count ?? 0,
 					category: project.category,
 					logoUrl,
 				};

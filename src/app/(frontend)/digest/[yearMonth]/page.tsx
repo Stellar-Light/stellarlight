@@ -76,7 +76,7 @@ export default async function DigestPage({
 	let totalProjects = 0;
 
 	try {
-		const [projectsResult, signalsResult, blogResult, countResult] =
+		const [projectsResult, activeProjectsResult, blogResult, countResult] =
 			await Promise.all([
 				// New projects added this month
 				payload.find({
@@ -104,15 +104,16 @@ export default async function DigestPage({
 					limit: 20,
 					depth: 1,
 				}),
-				// Top projects by stars
+				// All active projects — joined to repo stars below for the
+				// top-by-stars list (the legacy `signals` source is dead).
 				payload.find({
-					collection: "signals",
+					collection: "projects",
 					where: {
-						"github.totalStars": { greater_than: 0 },
+						status: { in: ["Development", "Pre-Release", "Live"] },
 					},
-					sort: "-github.totalStars",
-					limit: 10,
-					depth: 1,
+					limit: 300,
+					depth: 0,
+					select: { name: true, slug: true },
 				}),
 				// Blog posts published this month
 				payload.find({
@@ -155,27 +156,38 @@ export default async function DigestPage({
 		newProjects = projectsResult.docs;
 		totalProjects = countResult.totalDocs;
 
-		topByStars = signalsResult.docs
-			.map((signal: any) => {
-				const project = signal.project;
-				if (!project || typeof project === "string") return null;
-				if (!["Development", "Pre-Release", "Live"].includes(project.status))
-					return null;
-				const repoStars = (signal.github?.repos || []).reduce(
-					(sum: number, r: any) => sum + (r.stargazerCount || 0),
-					0,
+		// Top projects by stars — summed from the enriched `repos` collection
+		// (the legacy `signals` source is dead).
+		const nameBySlug = new Map<string, string>(
+			(activeProjectsResult.docs as any[]).map((p) => [p.slug, p.name]),
+		);
+		const slugs = (activeProjectsResult.docs as any[]).map((p) => p.slug);
+		const starsBySlug = new Map<string, number>();
+		if (slugs.length > 0) {
+			const reposResult = await payload.find({
+				collection: "repos",
+				where: { projectSlug: { in: slugs } },
+				limit: 5000,
+				depth: 0,
+				select: { projectSlug: true, stars: true },
+			});
+			for (const r of reposResult.docs as any[]) {
+				if (!r.projectSlug) continue;
+				starsBySlug.set(
+					r.projectSlug,
+					(starsBySlug.get(r.projectSlug) ?? 0) + (r.stars ?? 0),
 				);
-				const stars = signal.github?.totalStars || repoStars;
-				if (stars === 0) return null;
-				return {
-					name: project.name,
-					slug: project.slug,
-					totalStars: stars,
-				};
-			})
-			.filter(Boolean) as typeof topByStars;
-
-		topByStars.sort((a, b) => b.totalStars - a.totalStars);
+			}
+		}
+		topByStars = [...starsBySlug.entries()]
+			.filter(([, stars]) => stars > 0)
+			.map(([slug, stars]) => ({
+				name: nameBySlug.get(slug) ?? slug,
+				slug,
+				totalStars: stars,
+			}))
+			.sort((a, b) => b.totalStars - a.totalStars)
+			.slice(0, 10);
 
 		recentBlogPosts = blogResult.docs;
 	} catch {
