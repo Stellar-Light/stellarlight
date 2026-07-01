@@ -23,12 +23,14 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { API_VERSION } from "@/lib/version";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
 const SITE_URL = "https://stellarlight.xyz";
-const VERSION = "1.2.0";
+// Shared with /api/status (`apiVersion`) so the contract version never drifts.
+const VERSION = API_VERSION;
 
 interface OpenAPISpec {
 	openapi: string;
@@ -295,13 +297,16 @@ const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										ok: { type: "boolean" },
+										meta: { type: "object", description: "Provenance: routing/grounding source + generation time.", properties: { source: { type: "string" }, generatedAt: { type: "string", format: "date-time" }, note: { type: "string" } } },
 										q: { type: "string" },
 										repo: { type: "string", nullable: true },
-										routedVia: { type: "string", nullable: true },
+										routedVia: { type: "string", nullable: true, description: "How the repo was chosen: explicit | canonical | search. null when nothing routed." },
 										answer: { type: "string", nullable: true, description: "DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned)." },
-										answered: { type: "boolean" },
-										alternateRepos: { type: "array", items: { type: "string" } },
-										sources: { type: "object", properties: { repoUrl: { type: "string" }, deepWikiUrl: { type: "string" }, deepWikiSearchUrl: { type: "string", nullable: true } } },
+										answered: { type: "boolean", description: "Always present, including when routedVia is null (then false)." },
+										alternateRepos: { type: "array", items: { type: "string" }, description: "Other authoritative repos for this concept. Always present ([] when none)." },
+										sources: { type: "object", description: "Always present; fields are null when nothing was routed.", properties: { repoUrl: { type: "string", nullable: true }, deepWikiUrl: { type: "string", nullable: true }, deepWikiSearchUrl: { type: "string", nullable: true } } },
+										note: { type: "string", nullable: true, description: "Present when routing failed entirely — a hint to use search_repos or pin ?repo=." },
+										note2: { type: "string", nullable: true, description: "Present when a repo routed but DeepWiki had no answer." },
 									},
 								},
 							},
@@ -954,7 +959,8 @@ const spec: OpenAPISpec = {
 				properties: {
 					ok: { type: "boolean" },
 					service: { type: "string", const: "Stellar Scout" },
-					version: { type: "string" },
+					version: { type: "string", description: "Scout skill/service release line." },
+					apiVersion: { type: "string", description: "API contract (OpenAPI) version \u2014 equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version." },
 					generatedAt: { type: "string", format: "date-time" },
 					sources: {
 						type: "array",
@@ -1028,7 +1034,7 @@ const spec: OpenAPISpec = {
 							type: "integer",
 							nullable: true,
 							description:
-								"Numeric rank parsed from hackathonPlacement (1 = best). winners[] is sorted by this, so winners[0] is the 1st-place entry — sort/filter on this instead of parsing the label.",
+								"Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label.",
 						},
 					hackathonPrize: { type: "number", nullable: true },
 					hackathonPrizeTrack: { type: "string", nullable: true },
@@ -1036,6 +1042,31 @@ const spec: OpenAPISpec = {
 						type: "number",
 						description:
 							"Relevance score for the current query (higher = better match)",
+					},
+					confidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Blended confidence for this result: overall score (0-1) + label, decomposed into relevance / freshness / authority sub-signals (each 0-1) and ageDays.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string" },
+							relevance: { type: "number" },
+							freshness: { type: "number" },
+							authority: { type: "number" },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
+					repos: {
+						type: "array",
+						description:
+							"This project\u2019s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project\u2019s code references.",
+						items: { $ref: "#/components/schemas/Repo" },
+					},
+					via: {
+						type: "string",
+						description:
+							"How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback).",
 					},
 					url: { type: "string", format: "uri" },
 					prominence: {
@@ -1208,7 +1239,18 @@ const spec: OpenAPISpec = {
 				type: "object",
 				required: ["meta", "repos"],
 				properties: {
-					meta: { $ref: "#/components/schemas/Meta" },
+					meta: {
+						allOf: [
+							{ $ref: "#/components/schemas/Meta" },
+							{
+								type: "object",
+								properties: {
+									canonical: { type: "string", nullable: true, description: "The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept." },
+									note: { type: "string", description: "How to read the results (e.g. code references graded by repoScore 0-100)." },
+								},
+							},
+						],
+					},
 					repos: {
 						type: "array",
 						items: { $ref: "#/components/schemas/Repo" },

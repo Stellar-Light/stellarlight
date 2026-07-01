@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 16 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's 18 public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -28,7 +28,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
-const VERSION = "1.1.4";
+const VERSION = "1.1.5";
 const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
@@ -623,6 +623,70 @@ server.registerTool(
 	async ({ dimension }) => {
 		const qs = dimension ? `?dimension=${dimension}` : "";
 		const result = await callScout(`/api/analyze${qs}`);
+		return asToolResult(result);
+	},
+);
+
+// 15. get_partners — curated ecosystem partner directory
+server.registerTool(
+	"get_partners",
+	{
+		title: "Search Stellar ecosystem partners (audit firms, anchors, infra)",
+		description:
+			"The curated **ecosystem partner directory** — vetted service providers a builder hires or integrates: audit firms (Veridise, OtterSec, Runtime Verification, Certora, Halborn), anchors & on/off-ramps, infrastructure, tooling, wallets, legal, agencies. Filter by `type` (audit-firm | anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | legal | agency | other), `sector`, `region`, or free-text `q`. **Use when:** 'who can audit my Soroban contract', 'find a Stellar anchor / on-ramp in <region>', 'which infra/tooling/wallet providers exist' — i.e. you want a PROVIDER to hire or integrate. **Not for:** a built product/project or its funding/status → use search_projects; a person/teammate to collaborate with → use get_builders; the GitHub source code → use search_repos.",
+		inputSchema: {
+			type: z
+				.string()
+				.optional()
+				.describe(
+					"Partner type: audit-firm | anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | legal | agency | other.",
+				),
+			sector: z.string().optional().describe("Sector/vertical filter."),
+			region: z.string().optional().describe("Region/country filter."),
+			q: z
+				.string()
+				.optional()
+				.describe("Free-text search across partner name + description."),
+		},
+	},
+	async ({ type, sector, region, q }) => {
+		const params = new URLSearchParams();
+		if (type) params.set("type", type);
+		if (sector) params.set("sector", sector);
+		if (region) params.set("region", region);
+		if (q) params.set("q", q);
+		const qs = params.toString() ? `?${params.toString()}` : "";
+		const result = await callScout(`/api/partners${qs}`);
+		return asToolResult(result);
+	},
+);
+
+// 16. get_changelog — contract-change feed
+server.registerTool(
+	"get_changelog",
+	{
+		title: "Get the Scout API/MCP contract changelog",
+		description:
+			"Latest-first feed of **contract-affecting changes** to the Scout API, MCP tools, and typed client — new/removed endpoints or tools, param/enum changes, response-shape changes, routing/description rewrites. Each entry carries `date`, `surfaces[]`, `type` (added | changed | fixed | removed), a one-line `summary`, and optional `detail`. Filter with `since` (ISO date) / `limit`. **Use when:** you cached Scout's shape earlier and want to know what changed before relying on it, or you're debugging a field/param that moved. **Not for:** the actual ecosystem DATA → use the relevant search tool; current health / data freshness / version → use get_status.",
+		inputSchema: {
+			since: z
+				.string()
+				.optional()
+				.describe("Only entries on/after this ISO date (YYYY-MM-DD)."),
+			limit: z
+				.number()
+				.int()
+				.positive()
+				.optional()
+				.describe("Max entries to return (latest-first)."),
+		},
+	},
+	async ({ since, limit }) => {
+		const params = new URLSearchParams();
+		if (since) params.set("since", since);
+		if (limit) params.set("limit", String(limit));
+		const qs = params.toString() ? `?${params.toString()}` : "";
+		const result = await callScout(`/api/changelog${qs}`);
 		return asToolResult(result);
 	},
 );
