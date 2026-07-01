@@ -1,4 +1,3 @@
-import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,10 @@ import { EcosystemDevStats } from "@/components/ecosystem-dev-stats";
 import { LeaderboardExportButtons } from "@/components/leaderboard-export-buttons";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL =
+	process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+	"https://stellarlight.xyz";
 
 export const metadata: Metadata = {
 	title: "Developer Activity | Stellar Light",
@@ -70,134 +73,59 @@ export default async function LeaderboardPage({
 			? params.category
 			: null;
 
-	const payload = await getPayloadSafe();
+	// Source the ranked rows from /api/leaderboard — the single source of truth
+	// for dev activity. It reads GitHub stats from the enriched `repos`
+	// collection; the legacy `signals` cache this page used to query directly is
+	// no longer populated, so every row read back blank. Consuming the API keeps
+	// the page and endpoint from drifting apart again (sort/range/category all
+	// applied server-side).
 	let leaderboard: LeaderboardEntry[] = [];
-	let ecosystemStats: {
-		totalProjects: number;
-		totalSignals: number;
-		totalStars: number;
-		totalOpenIssues: number;
-		activeInLast30d: number;
-		activeInLast90d: number;
-	} | null = null;
+	try {
+		const qs = new URLSearchParams({ sort: sortBy, range, limit: "50" });
+		if (categoryFilter) qs.set("category", categoryFilter);
 
-	if (payload) {
-		try {
-			// Query Projects first so every active project shows up — even ones
-			// without Signals yet (no GitHub repos curated / cron hasn't run).
-			// Dead projects with stale or no activity will sort to the bottom.
-			const projectWhere: any = {
-				status: { in: ["Development", "Pre-Release", "Live"] },
+		const res = await fetch(`${SITE_URL}/api/leaderboard?${qs.toString()}`, {
+			cache: "no-store",
+		});
+		if (res.ok) {
+			const data = (await res.json()) as {
+				projects?: Array<{
+					id: string;
+					name: string;
+					slug: string;
+					category: string;
+					shortDescription?: string | null;
+					scfAwarded?: boolean;
+					github?: {
+						totalStars?: number;
+						openIssuesTotal?: number;
+						lastActivityAt?: string | null;
+						repoCount?: number;
+					};
+				}>;
 			};
-			if (categoryFilter) projectWhere.category = { equals: categoryFilter };
-
-			const projectsResult = await payload.find({
-				collection: "projects",
-				where: projectWhere,
-				limit: 300,
-				depth: 0,
-			});
-
-			const projectIds = projectsResult.docs.map((p: any) => String(p.id));
-
-			// Batch-fetch all Signals for these projects in one go.
-			let signalsByProjectId = new Map<string, any>();
-			if (projectIds.length > 0) {
-				const signalsResult = await payload.find({
-					collection: "signals",
-					where: { project: { in: projectIds } },
-					limit: projectIds.length,
-					depth: 0,
-				});
-				for (const s of signalsResult.docs as any[]) {
-					const pid =
-						typeof s.project === "string" ? s.project : s.project?.id;
-					if (pid) signalsByProjectId.set(String(pid), s);
-				}
-			}
-
-			// Ecosystem-wide aggregates (computed BEFORE per-row mapping so they
-			// reflect every Live project across the ecosystem, regardless of the
-			// active category/sort/range filters).
-			ecosystemStats = {
-				totalProjects: projectsResult.docs.length,
-				totalSignals: signalsByProjectId.size,
-				totalStars: 0,
-				totalOpenIssues: 0,
-				activeInLast30d: 0,
-				activeInLast90d: 0,
-			};
-			const now = Date.now();
-			const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-			const ninetyDaysAgo = now - 90 * 24 * 60 * 60 * 1000;
-			for (const sig of signalsByProjectId.values()) {
-				ecosystemStats.totalStars += sig?.github?.totalStars ?? 0;
-				ecosystemStats.totalOpenIssues += sig?.github?.openIssuesTotal ?? 0;
-				const last = sig?.github?.lastActivityAt;
-				if (last) {
-					const t = new Date(last).getTime();
-					if (t >= thirtyDaysAgo) ecosystemStats.activeInLast30d++;
-					if (t >= ninetyDaysAgo) ecosystemStats.activeInLast90d++;
-				}
-			}
-
-			leaderboard = projectsResult.docs.map((project: any): LeaderboardEntry => {
-				const signal = signalsByProjectId.get(String(project.id));
-				const repoStars = (signal?.github?.repos || []).reduce(
-					(sum: number, r: any) => sum + (r.stargazerCount || 0),
-					0,
-				);
-				const totalStars = signal?.github?.totalStars ?? repoStars ?? 0;
-
+			leaderboard = (data.projects ?? []).map((p): LeaderboardEntry => {
+				const g = p.github ?? {};
+				const repoCount = g.repoCount ?? 0;
 				return {
-					id: project.id,
-					name: project.name,
-					slug: project.slug,
-					category: project.category,
-					shortDescription: project.shortDescription ?? null,
-					totalStars,
-					openIssuesTotal: signal?.github?.openIssuesTotal ?? 0,
-					lastActivityAt: signal?.github?.lastActivityAt ?? null,
-					repoCount: signal?.github?.repos?.length ?? 0,
-					scfAwarded: !!project.scf?.awarded,
-					hasSignals: !!signal,
+					id: p.id,
+					name: p.name,
+					slug: p.slug,
+					category: p.category,
+					shortDescription: p.shortDescription ?? null,
+					totalStars: g.totalStars ?? 0,
+					openIssuesTotal: g.openIssuesTotal ?? 0,
+					lastActivityAt: g.lastActivityAt ?? null,
+					repoCount,
+					scfAwarded: !!p.scfAwarded,
+					// Show real stats when the project has indexed repos or a
+					// recorded last commit; otherwise the row renders "—".
+					hasSignals: repoCount > 0 || !!g.lastActivityAt,
 				};
 			});
-
-			// Apply time-range filter — projects with NO lastActivityAt are
-			// excluded from any specific range (they only show in "All time").
-			if (range !== "all") {
-				const cutoff = new Date();
-				if (range === "7d") cutoff.setDate(cutoff.getDate() - 7);
-				else if (range === "30d") cutoff.setDate(cutoff.getDate() - 30);
-				else if (range === "90d") cutoff.setDate(cutoff.getDate() - 90);
-				else if (range === "1y") cutoff.setDate(cutoff.getDate() - 365);
-				leaderboard = leaderboard.filter(
-					(e) =>
-						e.lastActivityAt &&
-						new Date(e.lastActivityAt).getTime() >= cutoff.getTime(),
-				);
-			}
-
-			// Sort. Projects with no data on the chosen metric sink to the
-			// bottom — so a "dead" Protocol/Contract project ranks below
-			// projects with more recent activity / more stars.
-			if (sortBy === "activity") {
-				leaderboard.sort((a, b) => {
-					const ad = a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0;
-					const bd = b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0;
-					return bd - ad;
-				});
-			} else if (sortBy === "stars") {
-				leaderboard.sort((a, b) => b.totalStars - a.totalStars);
-			} else if (sortBy === "issues") {
-				leaderboard.sort((a, b) => b.openIssuesTotal - a.openIssuesTotal);
-			}
-
-			leaderboard = leaderboard.slice(0, 50);
-		} catch {
-			// silent
 		}
+	} catch {
+		// silent — the empty-state card renders below
 	}
 
 	const sortOptions = [
