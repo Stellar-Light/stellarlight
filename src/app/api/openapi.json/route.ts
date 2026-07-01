@@ -465,7 +465,7 @@ const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "List ecosystem partners",
 				description:
-					"Published partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first.",
+					"Published ecosystem partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first. Filter by `type` / `sector` / `region` / `accepting` / `q`. **Use when:** 'who should audit my Soroban contract' (`type=audit-firm`), 'find an anchor or on/off-ramp in {region}', or partner discovery for an integration. **Not for:** projects/products that were BUILT → use search_projects; the people who build them → use get_builders; SCF grant briefs → use get_rfps.",
 				parameters: [
 					{
 						name: "type",
