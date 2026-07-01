@@ -1,15 +1,14 @@
 ---
-title: "the stellar hackathon pipeline: cheap top-of-funnel, unmeasured conversion"
+title: "The Stellar Hackathon Pipeline: Cheap Top-of-Funnel, Unmeasured Conversion"
 slug: stellar-hackathon-pipeline
 author: StellarLight
 excerpt: "12 events, 2,717 hackers, $97k in prizes recruit builders cheaply. whether they convert into funded, maintained products is the one number nobody tracks — and it's the honest test of any ecosystem."
 category: ecosystem
 tags: [hackathons, developer-funnel, x402, agentic-payments, scf, ecosystem]
 featured: true
+publishedAt: "2026-05-22T15:00:00.000Z"
 contentType: markdown
 ---
-
-# the stellar hackathon pipeline: cheap top-of-funnel, unmeasured conversion
 
 hackathons are the cheapest recruiting a chain can run. the hard part isn't getting people to show up — it's what happens after. stellar's pipeline is good at the first half and completely blind on the second.
 
@@ -17,7 +16,7 @@ hackathons are the cheapest recruiting a chain can run. the hard part isn't gett
 
 **hackathons are efficient top-of-funnel; conversion is the black box, and the black box is the whole point.** everything below is a version of that sentence with receipts — and an honest admission of the number we can't yet show you.
 
-## 1. the setup: recruiting in a post-airdrop world
+## the setup: recruiting in a post-airdrop world
 
 crypto spent the last cycle buying developers with token incentives. airdrop farming, points programs, mercenary tvl — the whole apparatus was built to rent attention, and it worked exactly as well as renting anything does. the moment the incentive stopped, the builder left.
 
@@ -25,7 +24,7 @@ the market is quietly walking away from that model. as the ecosystem repriced ar
 
 stellar's numbers show a chain leaning into exactly this. it is not trying to out-spend anyone. it is trying to convert intent.
 
-## 2. the proof is in the throughput
+## the proof is in the throughput
 
 if this were vanity activity, the volume wouldn't hold up. it does.
 
@@ -41,7 +40,7 @@ the striking number here is the denominator. **$97k in prizes against 2,717 hack
 
 the frequency is the strategy. twelve events in roughly fifteen months means the top of the funnel is always open. a builder who misses ZK Gaming catches Blend; who misses Blend catches Scaffold Stellar. recruiting stops being a moment and becomes a standing offer.
 
-## 3. the funnel is coherent, not scattered
+## the funnel is coherent, not scattered
 
 who runs these matters as much as how many there are. two organizers account for the entire program, and the split tells you the shape of the strategy.
 
@@ -54,7 +53,7 @@ the SDF events are directed probes — KALE x Reflector, Swaps and Vaults with P
 
 that coherence is a genuine strength and also the honest limit. a directed funnel is a smaller funnel. you won't get the chaotic, thousand-submission memecoin energy of a degen chain out of a program that keeps telling you to go build a price oracle. stellar has traded breadth for aim, and on current evidence that's the right trade — but it is a trade.
 
-## 4. the frontier is showing up in the themes
+## the frontier is showing up in the themes
 
 the most useful thing about a hackathon program is that its topics leak the roadmap. stellar's recent themes are a map of where the chain thinks the next builders come from — and one theme stands out.
 
@@ -64,7 +63,7 @@ the reason this lands on stellar rather than elsewhere is unglamorous and decisi
 
 the active event continues the pattern — Stellar Hacks: Real-World ZK, 534 hackers, pointed squarely at the privacy primitives (BN254, Poseidon) that recent protocol releases shipped. the themes are consistently one step ahead of the average builder, which is what a recruiting funnel is supposed to do.
 
-## 5. where the ground is still moving
+## where the ground is still moving
 
 here is the honest part, and it's the whole reason this report exists.
 

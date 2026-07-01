@@ -1,15 +1,14 @@
 ---
-title: "stablecoins on stellar — the issuer layer"
+title: "Stablecoins on Stellar — The Issuer Layer"
 slug: stablecoins-on-stellar-the-issuer-layer
 author: StellarLight
 excerpt: "~$746m and ~2.7m holders is a fine number. the story is who issues it — circle, paxos, gmo trust, novatti, ondo, brale. in the digital-dollar distribution race, compliance-native rails win institutional issuance, and stellar's issuer roster is the moat."
 category: ecosystem
 tags: [stablecoins, usdc, circle, anchors, rwa, compliance, payments]
 featured: true
+publishedAt: "2026-06-12T15:00:00.000Z"
 contentType: markdown
 ---
-
-# stablecoins on stellar — the issuer layer
 
 most stablecoin coverage counts supply. it looks at a chain, adds up the circulating dollars, ranks it, moves on. by that scoreboard stellar is a mid-table chain — real money, not the most money. that scoreboard misses the actual asset.
 
@@ -17,13 +16,13 @@ most stablecoin coverage counts supply. it looks at a chain, adds up the circula
 
 **the moat isn't the amount of stablecoin on stellar. it's who is allowed to issue it.** ~$746m across 23 stablecoins is fine. the thing worth paying attention to is that ~99.7% of it comes from regulated issuers — circle, paxos, gmo trust, novatti, ondo, brale — not anon mints. in a digital-dollar distribution race that is turning into a compliance race, that roster is the defensible thing. everything below is that sentence with receipts.
 
-## 1. the setup: stablecoins became the product, and issuance became regulated
+## the setup: stablecoins became the product, and issuance became regulated
 
 the broad direction of the last two years is not subtle. stablecoins stopped being crypto plumbing and became the point — the part of this industry with product-market fit, real volume, and, increasingly, real rules. the regulatory turn in the u.s. and europe pushed the question from "can you mint a dollar" to "are you *allowed* to, and who's holding the reserves." that reframes the competition. it's no longer chains fighting over raw throughput or the cheapest fee. it's chains fighting to be the rail a regulated issuer is comfortable putting a licensed dollar on.
 
 this is the fork in the digital-dollar race. one path — the tron path — optimizes for sheer remittance volume and settles enormous flow with a comparatively thin issuer story. another path optimizes for programmability and general-purpose defi. stellar is running a third: be the rail that regulated issuers *choose*, and make compliance a native property instead of a bolt-on. that's a smaller pond today. it's the pond the institutions are wading into.
 
-## 2. the proof is in the roster, not the supply
+## the proof is in the roster, not the supply
 
 here's the live issuer layer.
 
@@ -43,25 +42,25 @@ here's the live issuer layer.
 
 that's the moat restated as data. supply can migrate. an issuer relationship — the legal work, the reserve attestations, the decision by a licensed entity to make *this* chain a home for a licensed asset — does not migrate on a whim. paxos putting PYUSD here, gmo trust bringing its ny-chartered ZUSD and GYEN, novatti issuing a licensed australian dollar — each is a bet that took months of diligence. the roster is sticky in a way a supply number never is.
 
-## 3. why regulated issuers pick a compliance-native rail
+## why regulated issuers pick a compliance-native rail
 
 the reason this roster clusters on stellar and not somewhere else is architectural. stellar shipped compliance primitives as protocol, not product. the ecosystem's own standards — the SEPs — encode it: [SEP-0003](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0003.md) is a compliance protocol; [SEP-0008](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0008.md)-style regulated-asset controls let an issuer gate who can hold and move a token; asset authorization flags are a native ledger feature, not a smart-contract afterthought. an issuer that must know its holders doesn't have to trust a bespoke contract to enforce it. the rail enforces it.
 
 that's the quiet reason a licensed issuer chooses stellar over a general-purpose chain. on a general-purpose chain, compliance is something you build and audit and hope holds. here it's a property of the asset. when you're a regulated entity, "the ledger enforces the rule" is worth more than any throughput number.
 
-## 4. the distribution layer: anchors are the second half of the moat
+## the distribution layer: anchors are the second half of the moat
 
 issuance without distribution is a stranded asset. stellar's answer is the anchor network — its term for the [on/off-ramps that connect the ledger to banks and fintechs](https://developers.stellar.org/docs/build/apps/example-application-tutorial/anchor-integration). our directory lists a deep bench of them: moneygram, bitso, yellow card, fonbnk, anclap, coins.ph, tucambio, cash abroad. these are the last mile — the thing that turns an on-chain dollar into cash in a hand in lagos, buenos aires, or manila.
 
 anchors run on the same standards backbone: [SEP-0024](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md) for hosted deposit/withdrawal, [SEP-0038](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md) for cross-asset quotes, the anchor platform to run it all. so the moat has two walls: regulated issuers minting at the top, a standardized licensed-anchor network distributing at the bottom. moneygram's stellar ramps are the cleanest expression of it — a fifty-year money-transfer network using the chain as settlement, cash-in one country, USDC out another. that's the digital-dollar distribution race made concrete, and stellar is running it through licensed rails at both ends.
 
-## 5. the connectivity turn: USDC stopped being an island
+## the connectivity turn: USDC stopped being an island
 
 for years the knock on stellar-issued USDC was that it was walled — native, but hard to move off. that wall came down. per the ecosystem research corpus, [circle's CCTP went live on stellar](https://lumenloop.com/research/stellar-now-native-gateway-usdc) in may 2026, wiring native USDC into a ~23-chain burn-and-mint corridor with no wrapping and no custodial bridge. exchanges followed the same quarter — kraken and bitso both added stellar USDC rails.
 
 read that against the roster and the strategic picture sharpens. stellar's edge was never being the biggest USDC pool; it was being the *compliant* USDC pool. CCTP removes the one real cost of that position — liquidity isolation — without diluting it. an institution can now issue and settle on a compliance-native rail *and* move value to any major chain on demand. you keep the moat and lose the island. that's the combination the issuer roster was waiting for.
 
-## 6. where the ground is still moving
+## where the ground is still moving
 
 be honest about the gaps.
 

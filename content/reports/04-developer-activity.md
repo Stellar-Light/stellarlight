@@ -1,15 +1,14 @@
 ---
-title: "who is actually building on stellar"
+title: "Who Is Actually Building on Stellar"
 slug: who-is-actually-building-on-stellar-h1-2026
 author: StellarLight
 excerpt: "developers are the leading indicator. a chain with a real full-time core and heavy multichain inflow isn't being visited — it's being staffed. here's what 2,070 devs and 43,207 commits actually say about stellar."
 category: ecosystem
 tags: [developers, soroban, rust, ecosystem, electric-capital, multichain]
 featured: true
+publishedAt: "2026-05-29T15:00:00.000Z"
 contentType: markdown
 ---
-
-# who is actually building on stellar
 
 price tells you what the market feels this quarter. developers tell you what it will be able to do in two years. of every signal a chain emits, the developer base is the slowest to fake and the hardest to buy — you can rent liquidity for a weekend, but you cannot rent 214 people who show up every day to write rust.
 
@@ -17,7 +16,7 @@ price tells you what the market feels this quarter. developers tell you what it 
 
 **a chain's developer base has a signature: the ratio of a full-time core to part-time and multichain inflow tells you whether it's being staffed or just visited. stellar's signature — a small hard core, a large working middle, and heavy multichain crossover — is the profile of a chain that serious builders are migrating into, not touring.** everything below is that sentence with receipts.
 
-## 1. the setup: where developers go when the casino cools
+## the setup: where developers go when the casino cools
 
 the last cycle trained an entire generation of builders on incentives. mercenary tvl, points farms, chains that paid you to deploy. when the market turned — toward stablecoins, tokenized real-world assets, and actual payment volume instead of leverage — a lot of that developer attention had nothing real to attach to and evaporated.
 
@@ -25,7 +24,7 @@ what's left over is more interesting than what left. the direction of travel acr
 
 so the question "who is building on stellar" is really a proxy for a bigger one: as the industry repriced utility over noise, did the people who build the boring, durable things show up here?
 
-## 2. the shape of the base
+## the shape of the base
 
 here is the ecosystem developer snapshot, as of 2026-06-21 (electric capital methodology, surfaced live through our leaderboard):
 
@@ -41,7 +40,7 @@ the headline number — 2,070 — is not the interesting part. the *distribution
 
 that shape matters. a chain that is *only* full-time core is small and closed. a chain that is *mostly* one-time devs is a hype magnet with no retention — a lot of drive-by commits, no one staying. stellar's curve is the healthy middle case: a real core to anchor the standards, a large part-time body doing the actual volume, and a tourist layer small enough (12%) that the base isn't inflated by people who'll never come back. 43,207 commits across 2,070 devs is roughly 21 commits per developer in a month — that's a working population, not a landing page.
 
-## 3. the multichain read is the real tell
+## the multichain read is the real tell
 
 split the same base another way — by whether these developers work only on stellar or also ship on other chains:
 
@@ -54,7 +53,7 @@ split the same base another way — by whether these developers work only on ste
 
 a chain with 0% multichain devs is isolated — its builders only know its own idioms. a chain that is *all* multichain has no committed core. stellar sitting at 58/42 is the migration signature: a majority that has chosen stellar as home, plus a large minority actively importing what works from everywhere else. when the industry's center of gravity shifts toward stablecoins and rwa — things stellar was built for — those are the developers who notice the fit and route work here.
 
-## 4. what they're actually building (curated, native)
+## what they're actually building (curated, native)
 
 aggregate counts can hide a hollow core, so look at *what* the active-by-commits projects actually are. filtered to stellar-native work — dropping star-inflated non-native entries like Keybase (a messaging app with incidental XLM support) and Noir (an Aztec zk-language used *by* soroban devs, not a stellar project) — the top of the activity leaderboard reads like an infrastructure roster:
 
@@ -69,13 +68,13 @@ aggregate counts can hide a hollow core, so look at *what* the active-by-commits
 
 notice what dominates: protocol/contract and tooling and infrastructure. an orderbook. a liquidation keeper network. a trade-finance rail targeting the multi-trillion-dollar financing gap banks abandoned. this is not a memecoin bench. these are the load-bearing pieces you build *before* the flashy apps — the sign of a base staffing a platform, not decorating one. and the sdks tell the same story: the JavaScript, Java, iOS, PHP, KMP, and .NET stellar SDKs all sit high on the activity list, because a language-diverse SDK surface is what you invest in when you expect developers from *other* stacks to arrive.
 
-## 5. why rust and soroban pull this crowd
+## why rust and soroban pull this crowd
 
 the developer profile above isn't an accident of marketing — it's a consequence of the toolchain. the research corpus makes the on-ramp concrete: the canonical [Write, Test, and Deploy a Rust Smart Contract](https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world) guide, the [smart-contracts overview and Rust SDK FAQ](https://developers.stellar.org/docs/build/smart-contracts/overview), and lower-level primitives like [installing Wasm bytecode from within a contract](https://developers.stellar.org/docs/build/guides/transactions/upload-wasm-bytecode) and [deploying a Stellar Asset Contract programmatically](https://developers.stellar.org/docs/build/guides/tokens/deploying-a-sac).
 
 read those together and the audience becomes obvious. this is documentation written for infrastructure engineers — people who deploy contracts *from* contracts, who care about bytecode and wasm and deterministic asset issuance. rust is the language systems programmers already trust; soroban gives them a runtime with real fee metering and a contract model that doesn't fight them. the [frontend guide for stellar dapps](https://developers.stellar.org) in the corpus rounds it out — the same seriousness applied to the app layer. this is the toolchain that converts a curious multichain dev into a committed one: familiar language, mature docs, primitives that assume you know what you're doing.
 
-## 6. where the picture is still incomplete
+## where the picture is still incomplete
 
 honesty about the gaps, because the numbers don't answer everything.
 
