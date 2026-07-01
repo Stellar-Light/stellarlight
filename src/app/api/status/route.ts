@@ -17,11 +17,12 @@ import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
 import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { API_VERSION, SCOUT_SERVICE_VERSION } from "@/lib/version";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-const SCOUT_SKILL_VERSION = "scout-1.0.0";
+const SCOUT_SKILL_VERSION = SCOUT_SERVICE_VERSION;
 
 interface SourceStatus {
 	name: string;
@@ -62,7 +63,12 @@ export async function GET() {
 	const [projects, hackathons, builders, repos] = payload
 		? await Promise.all([
 				collectionStatus(payload, "projects", "projects"),
-				collectionStatus(payload, "hackathons", "hackathons"),
+				collectionStatus(
+					payload,
+					"hackathons",
+					"hackathons",
+					"Curated DB collection only (may be 0). /api/hackathons additionally merges live DoraHacks-sourced events — see its meta.counts for the served total.",
+				),
 				collectionStatus(
 					payload,
 					"builders",
@@ -105,6 +111,9 @@ export async function GET() {
 			ok: true,
 			service: "Stellar Scout",
 			version: SCOUT_SKILL_VERSION,
+			// API contract (OpenAPI) version — tracks /api/openapi.json info.version
+			// from the shared constant so agents can reason about the live contract.
+			apiVersion: API_VERSION,
 			generatedAt,
 			sources: [
 				projects,

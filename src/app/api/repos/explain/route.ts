@@ -60,13 +60,23 @@ export async function GET(req: NextRequest) {
 	logApiHit({ req, endpoint: "/api/repos/explain", query: q, filters: { repo, routedVia } });
 
 	if (!repo) {
+		// Total routing failure. Still emit the full documented shape
+		// (answered/sources/alternateRepos) so agents parsing those keys don't
+		// hit a KeyError on off-topic/unroutable questions.
 		return NextResponse.json({
 			ok: true,
 			meta: { source: "https://stellarlight.xyz/directory", generatedAt: new Date().toISOString() },
 			q,
 			repo: null,
 			routedVia: null,
+			alternateRepos: [],
 			answer: null,
+			answered: false,
+			sources: {
+				repoUrl: null,
+				deepWikiUrl: null,
+				deepWikiSearchUrl: null,
+			},
 			note: "Couldn't route this question to a specific repo. Try search_repos to find candidates, or pin ?repo=owner/name.",
 		});
 	}

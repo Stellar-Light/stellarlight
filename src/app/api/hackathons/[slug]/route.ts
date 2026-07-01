@@ -47,34 +47,58 @@ interface SubmissionRow {
 	url: string;
 }
 
-// Parse a placement label → sortable rank (1 = best). Handles ordinals
-// ("1st Place", "10th Place", "2nd"), grand-prize/overall, runner-up, and
-// track/honorable mentions; anything unrecognized sorts last. A downstream
-// consumer (Raven) rejected our winner data because the array order was
-// scrambled and there was no numeric place field — this fixes both.
-function placementRank(label?: string | null): number {
-	if (!label) return 9999;
+// Word-ordinal placements: "First Place", "Second Place", … Some events
+// (e.g. build-on-stellar) label winners with words, not digits. Without this
+// they all fell through to unranked, scrambling winners[0].
+const WORD_ORDINALS: Record<string, number> = {
+	first: 1,
+	second: 2,
+	third: 3,
+	fourth: 4,
+	fifth: 5,
+	sixth: 6,
+	seventh: 7,
+	eighth: 8,
+	ninth: 9,
+	tenth: 10,
+};
+
+// Parse a placement label → sortable rank (1 = best), or `null` when the label
+// carries no ordinal (a flat "Winners" bucket, as DoraHacks emits for many
+// events). Handles numeric ordinals ("1st Place", "10th"), word ordinals
+// ("First Place"), grand-prize/overall, and runner-up. Returning `null` for
+// unranked — instead of a 9999 sentinel — lets consumers tell "genuinely
+// unranked" from a real rank, and keeps the internal magic number out of the
+// public response. A downstream consumer (Raven) rejected our winner data
+// because the order was scrambled and there was no numeric place field.
+function placementRank(label?: string | null): number | null {
+	if (!label) return null;
 	const s = label.toLowerCase();
 	const ordinal = s.match(/\b(\d+)\s*(?:st|nd|rd|th)\b/);
 	if (ordinal) return Number(ordinal[1]);
-	if (/grand|overall|\bwinner\b/.test(s) && !/runner/.test(s)) return 1;
 	if (/runner.?up/.test(s)) return 2;
+	for (const [word, rank] of Object.entries(WORD_ORDINALS)) {
+		if (new RegExp(`\\b${word}\\b`).test(s)) return rank;
+	}
+	if (/grand|overall/.test(s)) return 1;
 	if (/track.?winner|category winner/.test(s)) return 100;
 	if (/honorable|mention|finalist/.test(s)) return 900;
-	return 9999;
+	// A bare "Winner"/"Winners" bucket has no ordinal → unranked, not rank 1.
+	return null;
 }
 
 // Annotate each winner with placementRank and sort best-first, so winners[0] is
-// 1st place and agents can rank/filter numerically. Generic so it serves both
-// the DoraHacks-feed shape and the DB/curated SubmissionRow shape (both carry
-// hackathonPlacement). Stable for ties.
+// the 1st-place entry *when the event has ranked placements*. Generic so it
+// serves both the DoraHacks-feed shape and the DB/curated SubmissionRow shape
+// (both carry hackathonPlacement). Ranked winners sort ascending; unranked
+// (placementRank === null) sink to the end in stable source order.
 function rankAndSort<T extends { hackathonPlacement?: string | null }>(
 	winners: T[],
 ): (T & { placementRank: number | null })[] {
 	return winners
 		.map((w) => ({
 			...w,
-			placementRank: w.hackathonPlacement ? placementRank(w.hackathonPlacement) : null,
+			placementRank: placementRank(w.hackathonPlacement),
 		}))
 		.sort((a, b) => (a.placementRank ?? 9999) - (b.placementRank ?? 9999));
 }
