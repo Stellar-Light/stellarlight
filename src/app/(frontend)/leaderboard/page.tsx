@@ -1,3 +1,4 @@
+import { getPayloadSafe } from "@/lib/payload-client";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +8,6 @@ import { EcosystemDevStats } from "@/components/ecosystem-dev-stats";
 import { LeaderboardExportButtons } from "@/components/leaderboard-export-buttons";
 
 export const dynamic = "force-dynamic";
-
-const SITE_URL =
-	process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
-	"https://stellarlight.xyz";
 
 export const metadata: Metadata = {
 	title: "Developer Activity | Stellar Light",
@@ -73,59 +70,148 @@ export default async function LeaderboardPage({
 			? params.category
 			: null;
 
-	// Source the ranked rows from /api/leaderboard — the single source of truth
-	// for dev activity. It reads GitHub stats from the enriched `repos`
-	// collection; the legacy `signals` cache this page used to query directly is
-	// no longer populated, so every row read back blank. Consuming the API keeps
-	// the page and endpoint from drifting apart again (sort/range/category all
-	// applied server-side).
+	const payload = await getPayloadSafe();
 	let leaderboard: LeaderboardEntry[] = [];
-	try {
-		const qs = new URLSearchParams({ sort: sortBy, range, limit: "50" });
-		if (categoryFilter) qs.set("category", categoryFilter);
 
-		const res = await fetch(`${SITE_URL}/api/leaderboard?${qs.toString()}`, {
-			cache: "no-store",
-		});
-		if (res.ok) {
-			const data = (await res.json()) as {
-				projects?: Array<{
+	if (payload) {
+		try {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload's Where type is awkward; mirrors /api/leaderboard
+			const projectWhere: any = {
+				status: { in: ["Development", "Pre-Release", "Live"] },
+			};
+			if (categoryFilter) projectWhere.category = { equals: categoryFilter };
+
+			const projectsResult = await payload.find({
+				collection: "projects",
+				where: projectWhere,
+				limit: 300,
+				depth: 0,
+				// Drop the voyage-3 embedding vector — pulling it for up to 300
+				// projects times the query out on the M0 tier.
+				select: { embedding: false },
+			});
+
+			// Per-project GitHub stats come from the enriched `repos` collection
+			// (keyed by projectSlug, populated by enrich-repos). This mirrors
+			// /api/leaderboard — the legacy `signals` cache this page used is no
+			// longer populated, which is why every row read back blank.
+			const projectSlugs = projectsResult.docs.map(
+				(p: { slug: string }) => p.slug,
+			);
+			const reposBySlug = new Map<
+				string,
+				Array<{
+					stars?: number;
+					openIssues?: number;
+					lastCommitAt?: string | null;
+				}>
+			>();
+			if (projectSlugs.length > 0) {
+				const reposResult = await payload.find({
+					collection: "repos",
+					where: { projectSlug: { in: projectSlugs } },
+					limit: 5000,
+					depth: 0,
+					// Only the scalar stats we aggregate — NOT the README excerpt,
+					// which bloats the fetch as the repos collection grows.
+					select: {
+						projectSlug: true,
+						stars: true,
+						openIssues: true,
+						lastCommitAt: true,
+					},
+				});
+				for (const r of reposResult.docs as Array<{
+					projectSlug?: string;
+					stars?: number;
+					openIssues?: number;
+					lastCommitAt?: string | null;
+				}>) {
+					if (!r.projectSlug) continue;
+					if (!reposBySlug.has(r.projectSlug))
+						reposBySlug.set(r.projectSlug, []);
+					reposBySlug.get(r.projectSlug)?.push(r);
+				}
+			}
+
+			leaderboard = (
+				projectsResult.docs as Array<{
 					id: string;
 					name: string;
 					slug: string;
 					category: string;
 					shortDescription?: string | null;
-					scfAwarded?: boolean;
-					github?: {
-						totalStars?: number;
-						openIssuesTotal?: number;
-						lastActivityAt?: string | null;
-						repoCount?: number;
-					};
-				}>;
-			};
-			leaderboard = (data.projects ?? []).map((p): LeaderboardEntry => {
-				const g = p.github ?? {};
-				const repoCount = g.repoCount ?? 0;
+					scf?: { awarded?: boolean };
+				}>
+			).map((project): LeaderboardEntry => {
+				const repos = reposBySlug.get(project.slug) ?? [];
+				const totalStars = repos.reduce((s, r) => s + (r.stars ?? 0), 0);
+				const openIssuesTotal = repos.reduce(
+					(s, r) => s + (r.openIssues ?? 0),
+					0,
+				);
+				let lastActivityAt: string | null = null;
+				for (const r of repos) {
+					if (
+						r.lastCommitAt &&
+						(!lastActivityAt ||
+							new Date(r.lastCommitAt).getTime() >
+								new Date(lastActivityAt).getTime())
+					) {
+						lastActivityAt = r.lastCommitAt;
+					}
+				}
 				return {
-					id: p.id,
-					name: p.name,
-					slug: p.slug,
-					category: p.category,
-					shortDescription: p.shortDescription ?? null,
-					totalStars: g.totalStars ?? 0,
-					openIssuesTotal: g.openIssuesTotal ?? 0,
-					lastActivityAt: g.lastActivityAt ?? null,
-					repoCount,
-					scfAwarded: !!p.scfAwarded,
-					// Show real stats when the project has indexed repos or a
-					// recorded last commit; otherwise the row renders "—".
-					hasSignals: repoCount > 0 || !!g.lastActivityAt,
+					id: String(project.id),
+					name: project.name,
+					slug: project.slug,
+					category: project.category,
+					shortDescription: project.shortDescription ?? null,
+					totalStars,
+					openIssuesTotal,
+					lastActivityAt,
+					repoCount: repos.length,
+					scfAwarded: !!project.scf?.awarded,
+					hasSignals: repos.length > 0 || !!lastActivityAt,
 				};
 			});
+
+			// Time-range filter — projects with no lastActivityAt only show in
+			// "All time".
+			if (range !== "all") {
+				const cutoff = new Date();
+				if (range === "7d") cutoff.setDate(cutoff.getDate() - 7);
+				else if (range === "30d") cutoff.setDate(cutoff.getDate() - 30);
+				else if (range === "90d") cutoff.setDate(cutoff.getDate() - 90);
+				else if (range === "1y") cutoff.setDate(cutoff.getDate() - 365);
+				leaderboard = leaderboard.filter(
+					(e) =>
+						e.lastActivityAt &&
+						new Date(e.lastActivityAt).getTime() >= cutoff.getTime(),
+				);
+			}
+
+			// Sort — projects with no data on the chosen metric sink to the bottom.
+			if (sortBy === "activity") {
+				leaderboard.sort((a, b) => {
+					const ad = a.lastActivityAt
+						? new Date(a.lastActivityAt).getTime()
+						: 0;
+					const bd = b.lastActivityAt
+						? new Date(b.lastActivityAt).getTime()
+						: 0;
+					return bd - ad;
+				});
+			} else if (sortBy === "stars") {
+				leaderboard.sort((a, b) => b.totalStars - a.totalStars);
+			} else if (sortBy === "issues") {
+				leaderboard.sort((a, b) => b.openIssuesTotal - a.openIssuesTotal);
+			}
+
+			leaderboard = leaderboard.slice(0, 50);
+		} catch {
+			// silent — the empty-state card renders below
 		}
-	} catch {
-		// silent — the empty-state card renders below
 	}
 
 	const sortOptions = [
