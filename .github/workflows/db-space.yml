@@ -9,9 +9,13 @@ on:
   workflow_dispatch:
     inputs:
       prune:
-        description: "Prune old api-usage rows? Leave false for a read-only report."
+        description: "Prune old transparency-logs? Leave false for a read-only report."
         type: boolean
         default: false
+      prune_days:
+        description: "Delete transparency-logs older than this many days."
+        type: string
+        default: "30"
 
 permissions: { contents: read }
 
@@ -29,4 +33,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/db-space.ts ${{ inputs.prune && '--prune-usage' || '' }}
+      - run: PRUNE_DAYS=${{ inputs.prune_days }} pnpm exec tsx scripts/db-space.ts ${{ inputs.prune && '--prune-logs' || '' }}
