@@ -1,0 +1,32 @@
+name: DB space (diagnostic + safe usage prune)
+
+# Reports per-collection storage on prod. With prune=true, additionally deletes
+# api-usage telemetry rows older than 14d — the ONLY safe target (no live surface
+# reads it), to free headroom when the M0 512MB cap blocks writes.
+# Run prune=false first to inspect sizes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      prune:
+        description: "Prune old api-usage rows? Leave false for a read-only report."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  space:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/db-space.ts ${{ inputs.prune && '--prune-usage' || '' }}
