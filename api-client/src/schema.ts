@@ -13,7 +13,7 @@ export interface paths {
         };
         /**
          * Service health + endpoint enumeration
-         * @description Returns service health, data-source freshness per collection, and a self-describing enumeration of all 14 endpoints. Useful as a self-discovery call before making other queries.
+         * @description Self-describe / health endpoint for Stellar Scout — returns service ok + version, `generatedAt`, per-source freshness & size (`sources[]`: projects, hackathons, builders, repos, ecosystemStats, sdfSkills, each with count + lastUpdatedAt + notes), recent `usage` stats, and an enumeration of every available `/api/*` endpoint. Cheap (count-only queries, no params). **Use when:** you need to know how fresh/large the data is before answering ('as of when?', 'how many projects are indexed?'), discover what endpoints exist, or sanity-check the API is up. **Not for:** the actual project/repo/research DATA itself → call the matching search tool (search_projects, search_repos, search_research); ecosystem developer-activity macro stats → use get_leaderboard.
          */
         get: {
             parameters: {
@@ -43,6 +43,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/changelog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recent changes to the API, MCP tools, and client
+         * @description A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Only entries on/after this ISO date (YYYY-MM-DD). */
+                    since?: string;
+                    /** @description Max entries to return, latest-first (1–100). */
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Changelog feed (latest-first) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            service?: string;
+                            version?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            meta?: Record<string, never>;
+                            entries?: {
+                                /** Format: date */
+                                date?: string;
+                                surfaces?: ("api" | "mcp" | "api-client" | "skill")[];
+                                version?: string;
+                                /** @enum {string} */
+                                type?: "added" | "changed" | "fixed" | "removed";
+                                summary?: string;
+                                detail?: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/search": {
         parameters: {
             query?: never;
@@ -52,7 +113,7 @@ export interface paths {
         };
         /**
          * Search Stellar projects (prior art / competitor lookup)
-         * @description Search the curated Stellar project directory (hundreds of projects; live count in /api/status) with tiered match-mode (strict → loose → majority). Tier surfaced as `.meta.matchMode` so agents convey relevance honestly. Essential for *'has anyone already built this?'* gap-classification questions. A bare call with no q/filter returns `meta.error: no_query` + 0 rows (it does NOT return the full directory).
+         * @description Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters.
          */
         get: {
             parameters: {
@@ -102,7 +163,7 @@ export interface paths {
         };
         /**
          * Search the Stellar GitHub repo / code-reference index
-         * @description Search ~1,900 indexed-and-scored Stellar ecosystem GitHub repos by tech/keyword — the code layer beneath the project directory. Answers *'show me the repos / code for X'* and prior-art **code** lookups that project search can't. Indexes GitHub topics + description + language + README, expands synonyms (zk→zero-knowledge/snark, oracle→price-feed, …), and ranks by `repoScore` (0–100 = freshness + traction + hackathon/SCF/builder authority). Lead with high-score repos as the strongest references and cite each repo's `url` / `homepageUrl`. The same graded repos are injected inline into `/api/projects/search` as `codeReferences`.
+         * @description Search the indexed Stellar ecosystem **GitHub code repos** — the actual source, graded for quality. Indexes GitHub topics + description + language + README, expands tech synonyms (zk→zero-knowledge/snark, oracle→price-feed), and ranks by **repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority**. Filterable by `language` and `minScore`. **Use when:** 'show me the code / repos for X', 'find a Rust/Soroban implementation of X', 'what GitHub repos exist for X', or you need prior-art source to read, fork, or cite. **Not for:** what products/companies exist or their funding/live status → use search_projects; conceptual docs, SEPs, audits, or how-to/feasibility knowledge → use search_research; a known project's metadata (those repos already ride inline on search_projects results).
          */
         get: {
             parameters: {
@@ -143,6 +204,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/repos/explain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Deep code answer about a Stellar repo (routing × DeepWiki)
+         * @description Get a source-grounded ANSWER to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar/stellar-core; Horizon → stellar/go; RPC → stellar/stellar-rpc; SEP reference impls; SDKs), then DeepWiki answers from that repo's internals with source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal. **Not for:** which repos/projects exist → use /api/repos/search or /api/projects/search; ecosystem docs / SEP text / audits → use /api/research. Degrades gracefully: if DeepWiki is unavailable you still get the routed authoritative repo + its deepWikiUrl.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The deep code question (e.g. 'where are transaction result codes defined'). */
+                    q: string;
+                    /** @description Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route. */
+                    repo?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Routed repo + DeepWiki-grounded answer */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            q?: string;
+                            repo?: string | null;
+                            routedVia?: string | null;
+                            /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
+                            answer?: string | null;
+                            answered?: boolean;
+                            alternateRepos?: string[];
+                            sources?: {
+                                repoUrl?: string;
+                                deepWikiUrl?: string;
+                                deepWikiSearchUrl?: string | null;
+                            };
+                        };
+                    };
+                };
+                /** @description Missing q */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/hackathons": {
         parameters: {
             query?: never;
@@ -152,7 +278,7 @@ export interface paths {
         };
         /**
          * List Stellar hackathons
-         * @description Returns curated Stellar hackathons + live DoraHacks events. Empty status-scoped queries include fallback channels (BuildOnStellar / stellarlight / DoraHacks) so agents can route users to live announcement sources.
+         * @description Browse/LIST Stellar hackathon **events** — a merged, de-duplicated feed of curated Payload events (rich detail, internal pages) + live DoraHacks events (SDF org IDs 3096/3853), sorted upcoming→active→completed then newest-first. Each row carries name, slug, dates, status, organizer, source, and (for DoraHacks) prizePoolUSD + hackersCount. Filter by `status` (upcoming|active|completed), `organizer` slug, or `source` (curated|dorahacks). **Use when:** 'what Stellar hackathons are coming up / running now / recently ended', 'list SDF hackathons', or you need the slug of an event before drilling in. When a forward-looking query (status=upcoming|active) returns zero, it adds `meta.fallbackChannels` (BuildOnStellar, stellarlight.xyz, DoraHacks) — surface those rather than dead-ending. **Not for:** one event's winners/submissions/tracks → use get_hackathon; comparing 2+ named events → use compare_hackathons; ecosystem-wide rollups (total prize pools, category/funding totals across ALL events) → use analyze_ecosystem; RFPs/bounties/grants → use get_rfps.
          */
         get: {
             parameters: {
@@ -200,7 +326,7 @@ export interface paths {
         };
         /**
          * Get one hackathon's full detail
-         * @description Returns submissions, placements, prize tracks, post-hack status funnel, and outcome data for one hackathon by slug. Dual-shape response: curated entries return full detail; DoraHacks-only entries return metadata + prize pool + an explicit `.meta.note`.
+         * @description Full detail for ONE hackathon by slug — its metadata plus every submission with placement, prize amount, prize track, post-hack status (Built/In Progress/Abandoned), and scfAwarded flag; derives `winners`, per-`tracks` aggregates (prize $ + winner/submission counts), and a `stats` outcome funnel. Dual-shape: curated events return full DB detail; DoraHacks-only events read submissions/winners/tracks live from DoraHacks (degrading to a curated winner roster + `meta.note` when the live feed is unavailable). **Use when:** 'who won [event] / its soroban track', 'what projects were submitted to [event]', 'what tracks did [event] have and what did they pay', 'how many [event] submissions are still being built'. Needs an exact slug — get it from get_hackathons first if unknown. **Not for:** listing/browsing many events → use get_hackathons; comparing stats across 2+ events → use compare_hackathons; ecosystem-wide aggregates → use analyze_ecosystem; a winning project's own repo/funding/status outside the hackathon context → use search_projects / search_repos.
          */
         get: {
             parameters: {
@@ -251,7 +377,7 @@ export interface paths {
         };
         /**
          * Compare 2–5 hackathons side-by-side
-         * @description Returns each hackathon's stats + a `.deltas` block highlighting differences agents care about (prize spread, hacker count, prize-per-winner). Useful for *'which Stellar hackathon should I enter?'* type questions.
+         * @description Side-by-side comparison of 2–5 named hackathons (by slug). Returns each event's snapshot (dates, status, source, prizePoolUSD, hackersCount, submissionCount, winnerCount, prizePerWinnerUSD where derivable) plus a `deltas` block flagging the spreads agents care about — prize-pool range, submission-count range, prize-per-winner, registered-hacker counts — with human-readable `notes` like '2× spread'. Unresolved slugs come back as `source:"not-found"` and are listed in deltas.notes without inflating `returned`. **Use when:** 'which Stellar hackathon should I enter', 'how did [event A] compare to [event B] on prizes/turnout', 'was [A] or [B] bigger'. Requires ≥2 known slugs (max 5; iterate beyond that) — resolve them via get_hackathons first. **Not for:** one event's deep detail/winners → use get_hackathon; discovering/listing events → use get_hackathons; ecosystem-wide totals across ALL events → use analyze_ecosystem.
          */
         get: {
             parameters: {
@@ -293,7 +419,7 @@ export interface paths {
         };
         /**
          * Search Stellar builders
-         * @description Returns Stellar builder profiles (sourced from Stellar Passport). Useful for *'find a teammate / collaborator who has shipped in X'* queries. Small + growing dataset — flag gaps honestly.
+         * @description The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, scfTier, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*\/activity stats → use get_leaderboard.
          */
         get: {
             parameters: {
@@ -343,7 +469,7 @@ export interface paths {
         };
         /**
          * List ecosystem partners
-         * @description Published partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first.
+         * @description Published ecosystem partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first. Filter by `type` / `sector` / `region` / `accepting` / `q`. **Use when:** 'who should audit my Soroban contract' (`type=audit-firm`), 'find an anchor or on/off-ramp in {region}', or partner discovery for an integration. **Not for:** projects/products that were BUILT → use search_projects; the people who build them → use get_builders; SCF grant briefs → use get_rfps.
          */
         get: {
             parameters: {
@@ -446,7 +572,7 @@ export interface paths {
         };
         /**
          * List Stellar RFPs (SCF-funded sponsor briefs)
-         * @description Returns open + closed Stellar RFPs (sponsor briefs that get SCF-funded for the winning team). Quarter-aware: response includes `.meta.activeQuarter` so agents know which RFPs are open *now* vs prior rounds.
+         * @description The curated set of Stellar **RFPs / sponsor briefs** (mirrors the /ideas page) — open ones are eligible for **SCF grant funding** when winners are picked; closed ones are past rounds kept for context. Each brief has title, description, technicalRequirements, category, quarter, and a quarter-derived status (open|closed). Filter by `q`, `category`, `quarter`, or `status`; response carries open/closed counts + the activeQuarter. **Use when:** 'what RFPs/bounties match my idea', 'what's the SCF funding asking for this quarter', 'is there a sponsor brief for X I could get funded to build'. **Not for:** projects already BUILT/funded → use search_projects; hackathons + their prizes → use get_hackathons; how-to / SCF Handbook / standards knowledge → use search_research.
          */
         get: {
             parameters: {
@@ -498,7 +624,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Vector search over a 4,541-chunk corpus of primary Stellar sources: SEPs, SCF Handbook, dev docs, foundational papers (Mazières SCP), lumenloop community playbooks, Soroban audit reports (Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, etc.), Electric Capital Developer Reports, SDF blog. Returns top-K chunks with severity metadata for audit chunks. Each result carries a `confidence` object — `{ score (0-1), label (high/medium/low), relevance, freshness, authority, ageDays }` — blending match strength, source-aware recency, and source authority so an agent can tell a strong, fresh, canonical hit from a weak or stale one. Sort by `confidence.score` for trust-ranked results; `meta.scoreModel.version` identifies the model. The raw `score` field remains cosine similarity (0–1, higher = more relevant).
+         * @description Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos.
          */
         get: {
             parameters: {
@@ -544,7 +670,7 @@ export interface paths {
         };
         /**
          * List AI skills for Stellar builders
-         * @description Merged catalog of SDF skills.stellar.org skills + curated Stellar Light entries + approved community submissions. Editorial source priority: Stellarlight → SDF → external ecosystem → competing aggregators → community. Featured skills sort first.
+         * @description Catalog of installable Stellar **AI skills/tools** — a unified, filterable list merging SDF's 7 official skills.stellar.org skills, Stellarlight + lumenloop + trusted third-party curated entries, and approved community submissions. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), `source`, repo/homepage/docs, and `meta.counts.bySource`; filter by `source` or `kind`. **Use when:** 'what Stellar AI skills / MCP servers / SDKs can I install', 'is there a skill for soroban / anchors / payments', or matching a builder's idea to the right installable tool. **Not for:** the full SKILL.md text or install details of ONE named skill → use get_skill; built/funded products in the ecosystem (not installable agent skills) → use search_projects; GitHub source repos → use search_repos; docs/standards/how-to knowledge → use search_research.
          */
         get: {
             parameters: {
@@ -588,7 +714,7 @@ export interface paths {
         };
         /**
          * Get one skill's full content
-         * @description Returns full SKILL.md content for SDF + Stellar Light skills (where applicable) plus metadata for all sources. Use when a user mentions a specific skill by name — cheaper than filtering the full list endpoint.
+         * @description Full detail for ONE skill by slug or display name — returns its metadata plus, for SDF official skills, the complete raw SKILL.md text under `.skill.content` (fetched live from skills.stellar.org); curated/community entries return metadata (and inlined content for Stellarlight's own skills). Accepts either the slug ('agentic-payments') or display name ('Agentic Payments'); 404s with a hint to list /api/skills if unknown. **Use when:** you already know a skill name and need its actual instructions / install command / SKILL.md body to follow or quote. **Not for:** browsing or discovering which skills exist → use list_skills; conceptual docs or standards behind a topic (not a packaged skill) → use search_research.
          */
         get: {
             parameters: {
@@ -639,7 +765,7 @@ export interface paths {
         };
         /**
          * Topic clusters with crowdedness scores
-         * @description Returns clusters of projects by category or types, each with a log-scaled crowdedness score (1–10), SCF-funded count, and sample projects. Useful for *'what's most crowded on Stellar?'* / *'show me underbuilt categories'* queries.
+         * @description Groups the active Stellar **project directory into topic clusters** and scores each on **crowdedness (1–10, log-scaled)** so you can see saturated vs underbuilt lanes — i.e. *where to build*. Each cluster returns `size`, `crowdedness`, `scfFundedCount`, `scfTotalUSD`, `hackathonWinnerCount`, and up to 5 sample projects; cluster by `dimension=category` (coarse 7-cat) or `dimension=types` (finer: Wallet/DEX/Lending/RWA/Oracle…), or pass `key`/`type` to get one cluster. **Use when:** 'what's the most crowded category on Stellar', 'show me an underbuilt/whitespace area', 'how many projects/funded projects are in RWA vs wallets', 'where is the competition thin'. **Not for:** ranking the top projects/repos by stars or activity → use get_leaderboard; ecosystem-wide totals (events + funding + status funnel) → use analyze_ecosystem; finding/looking up an actual named project in a category → use search_projects.
          */
         get: {
             parameters: {
@@ -683,7 +809,7 @@ export interface paths {
         };
         /**
          * Cross-event Stellar ecosystem analytics rollup
-         * @description Aggregate stats across all hackathons + projects + SCF funding. Returns: total events, prize pool totals, top categories by project count + SCF-funded count, distribution of SCF awards, post-hackathon status funnel (Built / In Progress / Abandoned).
+         * @description Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), or `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons.
          */
         get: {
             parameters: {
@@ -725,7 +851,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Returns 28-day active dev counts, commits, full-time vs part-time vs one-time dev splits, geographic distribution. Sourced from Electric Capital. Useful for *'how does Stellar compare on dev activity?'* macro questions.
+         * @description Returns a **ranked list of active Stellar projects** (default top 50, max 300) sortable by `sort=activity|stars|issues` over a `range` (7d/30d/90d/1y/all), with per-project GitHub rollups (`totalStars`, `openIssuesTotal`, `lastActivityAt`, `repoCount`) and `scfAwarded`; optional `category` filter and `format=csv`. Also bundles an **Electric Capital ecosystem dev macro** block (28-day active / Stellar-only / multichain dev counts, commits28d, full-time/part-time/one-time dev splits). **Use when:** 'who/what are the top/most-active Stellar projects', 'most-starred projects', 'which projects shipped recently (last 30d)', 'how many active Stellar devs / how does Stellar's dev activity look', or you need a CSV/Dune-style export of ranked projects. **Not for:** category counts or crowded-vs-underbuilt whitespace → use get_clusters; ecosystem-wide hackathon/funding/status-funnel totals → use analyze_ecosystem; finding a specific project's profile/funding/competitors → use search_projects; ranking individual developers (this ranks PROJECTS, plus an EC macro snapshot — it does not list named devs) → use get_builders.
          */
         get: {
             parameters: {
@@ -923,6 +1049,8 @@ export interface components {
             scfTotalAwardedUSD?: number | null;
             hackathon?: string | null;
             hackathonPlacement?: string | null;
+            /** @description Numeric rank parsed from hackathonPlacement (1 = best). winners[] is sorted by this, so winners[0] is the 1st-place entry — sort/filter on this instead of parsing the label. */
+            placementRank?: number | null;
             hackathonPrize?: number | null;
             hackathonPrizeTrack?: string | null;
             /** @description Relevance score for the current query (higher = better match) */
@@ -1008,6 +1136,10 @@ export interface components {
             repoScoreLabel?: string | null;
             /** @description Keyword-relevance score for the current query (higher = better match). */
             score?: number;
+            /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery. */
+            deepWikiUrl?: string;
+            /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
+            canonical?: boolean;
         };
         RepoSearchResponse: {
             meta: components["schemas"]["Meta"];
