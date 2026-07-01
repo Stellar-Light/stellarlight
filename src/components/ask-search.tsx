@@ -1,0 +1,285 @@
+"use client";
+
+/**
+ * Ask Stellar — a natural-language search over the live StellarLight data layer.
+ *
+ * On submit it queries the same semantic endpoints agents use — /api/research
+ * (vector search over the knowledge corpus: SEPs, dev docs, audits, SDF +
+ * ecosystem writing) and /api/projects/search (the project directory) — and
+ * groups the grounded results. No LLM synthesis yet; every card links to a
+ * primary source so answers are citable, not generated.
+ *
+ * Fetches on explicit submit only (not per-keystroke) — /api/research costs
+ * Voyage credits and is rate-limited.
+ */
+
+import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Search, ArrowUpRight, Loader2, Sparkles } from "lucide-react";
+
+interface ResearchResult {
+	id: string;
+	source: string;
+	title: string;
+	section?: string;
+	url?: string;
+	content?: string;
+	confidence?: { score?: number; label?: string };
+}
+interface ProjectResult {
+	id: string;
+	name: string;
+	slug: string;
+	category?: string;
+	status?: string;
+	shortDescription?: string | null;
+	scfAwarded?: boolean;
+	url?: string;
+	confidence?: { score?: number; label?: string };
+}
+
+const EXAMPLES = [
+	"which lending protocols on soroban are most active?",
+	"who audits soroban smart contracts?",
+	"how do confidential tokens work on stellar?",
+	"what's MPP and how do agents pay with it?",
+	"show me stellar RWA and tokenization projects",
+];
+
+const SOURCE_LABEL: Record<string, string> = {
+	audit: "Audit",
+	sep: "SEP",
+	"dev-docs": "Dev docs",
+	"sdf-blog": "SDF blog",
+	"scf-handbook": "SCF handbook",
+	"lumenloop-research": "Research",
+	lumenloop: "Research",
+	paper: "Paper",
+};
+
+function snippet(text?: string, n = 180): string {
+	if (!text) return "";
+	const clean = text.replace(/[#*`>_]/g, "").replace(/\s+/g, " ").trim();
+	return clean.length > n ? `${clean.slice(0, n)}…` : clean;
+}
+
+export function AskSearch() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const q = searchParams.get("q") || "";
+	const [input, setInput] = useState(q);
+	const [loading, setLoading] = useState(false);
+	const [research, setResearch] = useState<ResearchResult[]>([]);
+	const [projects, setProjects] = useState<ProjectResult[]>([]);
+	const [answered, setAnswered] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const run = useCallback(async (query: string) => {
+		if (!query.trim()) return;
+		setLoading(true);
+		setError(null);
+		try {
+			const [rRes, pRes] = await Promise.all([
+				fetch(`/api/research?q=${encodeURIComponent(query)}&limit=6`).then((r) =>
+					r.ok ? r.json() : { results: [] },
+				),
+				fetch(`/api/projects/search?q=${encodeURIComponent(query)}&limit=6`).then((r) =>
+					r.ok ? r.json() : { projects: [] },
+				),
+			]);
+			setResearch(rRes.results ?? []);
+			setProjects(pRes.projects ?? []);
+			setAnswered(true);
+		} catch {
+			setError("Something went wrong reaching the index. Try again.");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	// Run whenever the URL query changes (shareable + back/forward friendly).
+	useEffect(() => {
+		setInput(q);
+		if (q) run(q);
+		else {
+			setAnswered(false);
+			setResearch([]);
+			setProjects([]);
+		}
+	}, [q, run]);
+
+	const submit = (e?: React.FormEvent) => {
+		e?.preventDefault();
+		const query = input.trim();
+		if (!query) return;
+		router.push(`/ask?q=${encodeURIComponent(query)}`);
+	};
+
+	const ask = (query: string) => {
+		setInput(query);
+		router.push(`/ask?q=${encodeURIComponent(query)}`);
+	};
+
+	const noResults = answered && !loading && research.length === 0 && projects.length === 0;
+
+	return (
+		<div className="w-full">
+			<form onSubmit={submit} className="relative">
+				<Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+				<input
+					type="text"
+					value={input}
+					onChange={(e) => setInput(e.target.value)}
+					placeholder="ask anything about the stellar ecosystem…"
+					className="w-full h-14 pl-14 pr-28 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
+					aria-label="Ask a question about Stellar"
+				/>
+				<button
+					type="submit"
+					disabled={loading || !input.trim()}
+					className="absolute right-2.5 top-1/2 -translate-y-1/2 h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground disabled:opacity-40 transition-colors"
+				>
+					{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+					Ask
+				</button>
+			</form>
+
+			{/* Example prompts */}
+			{!answered && !loading && (
+				<div className="mt-5 flex flex-wrap gap-2">
+					{EXAMPLES.map((ex) => (
+						<button
+							key={ex}
+							onClick={() => ask(ex)}
+							className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+						>
+							{ex}
+						</button>
+					))}
+				</div>
+			)}
+
+			{loading && (
+				<div className="mt-10 flex items-center gap-3 text-muted-foreground text-sm">
+					<Loader2 className="w-4 h-4 animate-spin" />
+					searching the index for “{input}”…
+				</div>
+			)}
+
+			{error && <div className="mt-8 text-sm text-red-400">{error}</div>}
+
+			{noResults && (
+				<div className="mt-10 text-center py-12 border border-border rounded-2xl bg-card">
+					<p className="text-muted-foreground">
+						nothing in the index for “{q}” yet.
+					</p>
+					<p className="text-xs text-muted-foreground/70 mt-2">
+						try a broader phrasing, or{" "}
+						<Link href="/directory" className="underline hover:text-foreground">
+							browse the directory
+						</Link>
+						.
+					</p>
+				</div>
+			)}
+
+			{answered && !loading && (projects.length > 0 || research.length > 0) && (
+				<div className="mt-10 space-y-10">
+					{/* Projects */}
+					{projects.length > 0 && (
+						<section>
+							<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+								Projects ({projects.length})
+							</h2>
+							<div className="grid sm:grid-cols-2 gap-3">
+								{projects.map((p) => (
+									<Link
+										key={p.id}
+										href={`/project/${p.slug}`}
+										className="group block p-4 rounded-xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+									>
+										<div className="flex items-center gap-2 mb-1.5 flex-wrap">
+											<span className="font-medium text-foreground group-hover:text-white transition-colors">
+												{p.name}
+											</span>
+											{p.category && (
+												<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border">
+													{p.category}
+												</span>
+											)}
+											{p.scfAwarded && (
+												<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border">
+													SCF
+												</span>
+											)}
+											{p.status && (
+												<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border">
+													{p.status}
+												</span>
+											)}
+										</div>
+										{p.shortDescription && (
+											<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2">
+												{p.shortDescription}
+											</p>
+										)}
+									</Link>
+								))}
+							</div>
+						</section>
+					)}
+
+					{/* Knowledge base */}
+					{research.length > 0 && (
+						<section>
+							<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+								From the knowledge base ({research.length})
+							</h2>
+							<div className="space-y-3">
+								{research.map((r) => {
+									const Card = r.url ? "a" : "div";
+									return (
+										<Card
+											key={r.id}
+											{...(r.url
+												? { href: r.url, target: "_blank", rel: "noopener noreferrer" }
+												: {})}
+											className="group block p-4 rounded-xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+										>
+											<div className="flex items-start justify-between gap-3">
+												<div className="min-w-0">
+													<div className="flex items-center gap-2 mb-1 flex-wrap">
+														<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border uppercase tracking-wide">
+															{SOURCE_LABEL[r.source] ?? r.source}
+														</span>
+														<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors truncate">
+															{r.title}
+														</span>
+													</div>
+													{r.content && (
+														<p className="text-xs text-muted-foreground/90 leading-relaxed">
+															{snippet(r.content)}
+														</p>
+													)}
+												</div>
+												{r.url && (
+													<ArrowUpRight className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-colors" />
+												)}
+											</div>
+										</Card>
+									);
+								})}
+							</div>
+						</section>
+					)}
+
+					<p className="text-[11px] text-muted-foreground/60 pt-2">
+						grounded results from the live stellarlight index — semantic search over the
+						knowledge corpus + project directory. every card links to a primary source.
+					</p>
+				</div>
+			)}
+		</div>
+	);
+}
