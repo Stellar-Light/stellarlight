@@ -4,9 +4,9 @@ slug: the-stellar-defi-landscape
 author: StellarLight
 excerpt: stellar defi isn't a casino — it's being built as the rails for a $2.33b tokenized-asset base. boring defi is the defi that fits a regulated-value chain, and lending is the funded whitespace under all that collateral.
 category: ecosystem
-tags: [defi, rwa, lending, amm, oracles, soroban, stablecoins]
+tags: defi, rwa, lending, amm, soroban
 featured: true
-publishedAt: "2026-06-19T15:00:00.000Z"
+publishedAt: "2026-06-30T15:00:00.000Z"
 contentType: markdown
 ---
 

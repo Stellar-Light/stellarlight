@@ -4,9 +4,9 @@ slug: stablecoins-on-stellar-the-issuer-layer
 author: StellarLight
 excerpt: "~$746m and ~2.7m holders is a fine number. the story is who issues it — circle, paxos, gmo trust, novatti, ondo, brale. in the digital-dollar distribution race, compliance-native rails win institutional issuance, and stellar's issuer roster is the moat."
 category: ecosystem
-tags: [stablecoins, usdc, circle, anchors, rwa, compliance, payments]
+tags: stablecoins, usdc, circle, rwa, compliance
 featured: true
-publishedAt: "2026-06-12T15:00:00.000Z"
+publishedAt: "2026-06-29T15:00:00.000Z"
 contentType: markdown
 ---
 

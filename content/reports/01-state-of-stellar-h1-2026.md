@@ -4,9 +4,9 @@ slug: state-of-stellar-h1-2026
 author: StellarLight
 excerpt: "for years stellar was the chain nobody talked about — no casino, no memecoins, just payments. then crypto grew up. stablecoins became the killer app, tradfi started tokenizing treasuries, and regulators picked winners. stellar was already built for all of it. here's the state of the ecosystem that turn created."
 category: ecosystem
-tags: ecosystem-map, rwa, stablecoins, soroban, scf, stellar, thesis
+tags: ecosystem, rwa, stablecoins, soroban, scf
 featured: true
-publishedAt: "2026-06-27T15:00:00.000Z"
+publishedAt: "2026-07-01T15:00:00.000Z"
 contentType: markdown
 ---
 
