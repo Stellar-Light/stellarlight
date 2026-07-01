@@ -1,0 +1,35 @@
+name: Publish ecosystem reports
+
+# Publishes the StellarLight ecosystem-report series (content/reports/*.md) to
+# the Blog collection as markdown posts. IDEMPOTENT: creates new slugs, updates
+# existing ones, never deletes. Touches only the `blog` collection.
+# Run dry first (execute=false), inspect the log, then run with execute=true.
+#
+# Prereq: prod Atlas M0 must have write headroom. If it's at the 512MB cap, run
+# the `db-space` Action with prune=true first, then run this.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/seed-blog-posts.ts ${{ inputs.execute && '--execute' || '' }}
