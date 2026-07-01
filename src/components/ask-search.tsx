@@ -38,13 +38,51 @@ interface ProjectResult {
 	url?: string;
 	confidence?: { score?: number; label?: string };
 }
+interface PartnerResult {
+	slug: string;
+	name: string;
+	partnerType?: string;
+	tagline?: string | null;
+	description?: string | null;
+	websiteUrl?: string;
+	acceptingClients?: boolean;
+}
+
+// Map a natural-language question to a partner type so "who can audit my
+// contract" reliably surfaces the audit firms, "find an anchor" the anchors —
+// partner keyword-search alone misses verbose questions.
+const PARTNER_INTENT: { re: RegExp; type: string }[] = [
+	{ re: /audit|security review|secure (my|the)|pen ?test|vulnerab|formal verif/i, type: "audit-firm" },
+	{ re: /\banchor\b|on.?ramp|off.?ramp|fiat|cash.?(in|out)|remittance/i, type: "anchor" },
+	{ re: /\bwallet\b|custody|custodian/i, type: "wallet" },
+	{ re: /infra(structure)?|\brpc\b|\bnode\b|indexer/i, type: "infrastructure" },
+	{ re: /legal|compliance|regulat|licen[sc]/i, type: "legal" },
+	{ re: /market(ing)?|\bagency\b|growth|go.?to.?market/i, type: "agency" },
+	{ re: /tooling|\bsdk\b|dev tool/i, type: "tooling" },
+];
+function partnerQueryFor(q: string): string {
+	const hit = PARTNER_INTENT.find((p) => p.re.test(q));
+	return hit ? `type=${hit.type}` : `q=${encodeURIComponent(q)}`;
+}
+
+const PARTNER_TYPE_LABEL: Record<string, string> = {
+	"audit-firm": "Audit firm",
+	anchor: "Anchor",
+	"on-off-ramp": "On/off-ramp",
+	infrastructure: "Infrastructure",
+	tooling: "Tooling",
+	protocol: "Protocol",
+	wallet: "Wallet",
+	legal: "Legal",
+	agency: "Agency",
+};
 
 const EXAMPLES = [
+	"who can audit my soroban smart contract?",
+	"find me a stellar anchor for on/off-ramp",
 	"which lending protocols on soroban are most active?",
-	"who audits soroban smart contracts?",
 	"how do confidential tokens work on stellar?",
 	"what's MPP and how do agents pay with it?",
-	"show me stellar RWA and tokenization projects",
 ];
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -72,6 +110,7 @@ export function AskSearch() {
 	const [loading, setLoading] = useState(false);
 	const [research, setResearch] = useState<ResearchResult[]>([]);
 	const [projects, setProjects] = useState<ProjectResult[]>([]);
+	const [partners, setPartners] = useState<PartnerResult[]>([]);
 	const [answered, setAnswered] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -80,16 +119,21 @@ export function AskSearch() {
 		setLoading(true);
 		setError(null);
 		try {
-			const [rRes, pRes] = await Promise.all([
+			const [rRes, pRes, partRes] = await Promise.all([
 				fetch(`/api/research?q=${encodeURIComponent(query)}&limit=6`).then((r) =>
 					r.ok ? r.json() : { results: [] },
 				),
 				fetch(`/api/projects/search?q=${encodeURIComponent(query)}&limit=6`).then((r) =>
 					r.ok ? r.json() : { projects: [] },
 				),
+				// Providers/partners — matched by intent (audit → audit firms, etc.).
+				fetch(`/api/partners?${partnerQueryFor(query)}&limit=4`).then((r) =>
+					r.ok ? r.json() : { partners: [] },
+				),
 			]);
 			setResearch(rRes.results ?? []);
 			setProjects(pRes.projects ?? []);
+			setPartners(partRes.partners ?? []);
 			setAnswered(true);
 		} catch {
 			setError("Something went wrong reaching the index. Try again.");
@@ -106,6 +150,7 @@ export function AskSearch() {
 			setAnswered(false);
 			setResearch([]);
 			setProjects([]);
+			setPartners([]);
 		}
 	}, [q, run]);
 
@@ -121,7 +166,8 @@ export function AskSearch() {
 		router.push(`/ask?q=${encodeURIComponent(query)}`);
 	};
 
-	const noResults = answered && !loading && research.length === 0 && projects.length === 0;
+	const noResults =
+		answered && !loading && research.length === 0 && projects.length === 0 && partners.length === 0;
 
 	return (
 		<div className="w-full">
@@ -184,8 +230,52 @@ export function AskSearch() {
 				</div>
 			)}
 
-			{answered && !loading && (projects.length > 0 || research.length > 0) && (
+			{answered && !loading && (partners.length > 0 || projects.length > 0 || research.length > 0) && (
 				<div className="mt-10 space-y-10">
+					{/* Partners / providers — the direct answer to "who can I hire" questions */}
+					{partners.length > 0 && (
+						<section>
+							<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+								Providers ({partners.length})
+							</h2>
+							<div className="grid sm:grid-cols-2 gap-3">
+								{partners.map((p) => {
+									const Card = p.websiteUrl ? "a" : "div";
+									return (
+										<Card
+											key={p.slug}
+											{...(p.websiteUrl
+												? { href: p.websiteUrl, target: "_blank", rel: "noopener noreferrer" }
+												: {})}
+											className="group block p-4 rounded-xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+										>
+											<div className="flex items-center gap-2 mb-1.5 flex-wrap">
+												<span className="font-medium text-foreground group-hover:text-white transition-colors">
+													{p.name}
+												</span>
+												{p.partnerType && (
+													<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border">
+														{PARTNER_TYPE_LABEL[p.partnerType] ?? p.partnerType}
+													</span>
+												)}
+												{p.acceptingClients && (
+													<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
+														accepting
+													</span>
+												)}
+											</div>
+											{(p.tagline || p.description) && (
+												<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2">
+													{p.tagline || p.description}
+												</p>
+											)}
+										</Card>
+									);
+								})}
+							</div>
+						</section>
+					)}
+
 					{/* Projects */}
 					{projects.length > 0 && (
 						<section>

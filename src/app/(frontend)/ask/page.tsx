@@ -23,13 +23,18 @@ export default function AskPage() {
 				</Link>
 
 				<div className="mb-8">
-					<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-						Ask Stellar
-					</h1>
+					<div className="flex items-center gap-3 flex-wrap">
+						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+							Ask Stellar
+						</h1>
+						<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
+							Beta
+						</span>
+					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Natural-language search over the live ecosystem index — projects, protocols,
-						audits, SEPs, and dev docs. The same data layer our agents query, now yours to
-						ask directly.
+						Natural-language search over the live ecosystem index — projects, providers,
+						protocols, audits, SEPs, and dev docs. The same data layer our agents query, now
+						yours to ask directly.
 					</p>
 				</div>
 
