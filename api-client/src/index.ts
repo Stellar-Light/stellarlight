@@ -17,6 +17,7 @@
  * changes.
  */
 
+import { version as PKG_VERSION } from "../package.json";
 import type { components, paths } from "./schema";
 
 export type { components, paths };
@@ -94,7 +95,9 @@ export class ScoutApiError extends Error {
 }
 
 const DEFAULT_BASE_URL = "https://stellarlight.xyz";
-const CLIENT_VERSION = "1.2.0";
+// Derived from package.json so the user-agent version can never drift from the
+// published package version again (it was pinned at a stale "1.2.0").
+const CLIENT_VERSION = PKG_VERSION;
 
 export class ScoutClient {
 	private readonly baseUrl: string;
