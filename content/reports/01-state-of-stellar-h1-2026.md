@@ -1,91 +1,94 @@
 ---
-title: "the state of stellar — h1 2026"
+title: "the state of stellar — h1 2026: the boring chain won"
 slug: state-of-stellar-h1-2026
 author: StellarLight
-excerpt: "889 active projects, $40.7m in scf grants, 2,070 active devs. a data-driven map of what's being built on stellar, who's funding it, and who's shipping — measured live from the stellarlight index, not a slide deck."
+excerpt: "for years stellar was the chain nobody talked about — no casino, no memecoins, just payments. then crypto grew up. stablecoins became the killer app, tradfi started tokenizing treasuries, and regulators picked winners. stellar was already built for all of it. here's the state of the ecosystem that turn created."
 category: ecosystem
-tags: ecosystem-map, data, scf, developers, stellar
+tags: ecosystem-map, rwa, stablecoins, soroban, scf, stellar, thesis
 featured: true
 contentType: markdown
 ---
 
-# the state of stellar — h1 2026
+# the state of stellar — h1 2026: the boring chain won
 
-most people can't tell you how big stellar's builder ecosystem actually is. the numbers exist, they're just scattered across airtable, github, scf rounds, and a dozen dashboards that don't talk to each other. stellarlight pulls them into one index. this is the first read off it.
+for most of the last cycle, stellar was the chain you skipped in the ecosystem tour. no leverage farms, no memecoin factory, no 4-digit apy. it moved dollars across borders and issued assets, and in a market that paid for narrative volatility, "it works and it's cheap" was not a narrative. it was a shrug.
 
-everything below is live. every number is one api call away — no screenshotting a spreadsheet and calling it research. where a figure is a running total or carries a caveat, we say so.
+that market is gone. the thing crypto spent 2024 and 2025 rediscovering — that the durable use cases are stablecoins, payments, and tokenized real-world assets, not the casino — is the exact thing stellar was built for in 2014. the rest of the industry spent a cycle building its way toward stellar's design. this report is a map of the ecosystem that turn produced: what's here, who's funding it, who's shipping, and where the ground is still moving.
 
-## the numbers
+we index the whole builder base — 889 active projects, 2,301 repos, every scf award — so this isn't a vibes post. but it isn't a scoreboard either. the numbers are here to support an argument.
 
-| metric | value |
+## the argument in one line
+
+**stablecoins and rwa are no longer a stellar side-quest; they are the main quest, and soroban arrived just in time to make them programmable.**
+
+everything below is a version of that sentence with receipts.
+
+## 1. the setup: crypto turned toward what stellar already was
+
+three things happened to the market between 2024 and now, and all three point the same direction:
+
+- **stablecoins became the product, not the plumbing.** stablecoin settlement volume overtook the card networks in aggregate terms and regulators stopped treating them as a threat and started writing rules for them. a stablecoin bill in the us and mica in europe did something crypto had never had: they told institutions *which* digital dollars were safe to touch. that turned stablecoins from a crypto-native tool into a tradfi distribution problem — and distribution is stellar's home turf.
+- **rwa stopped being a whitepaper word.** tokenized treasuries went from a pitch deck to billions of dollars of live, yield-bearing, on-chain product issued by names like franklin templeton and ondo. tokenization is the tradfi-meets-crypto bridge, and it runs on the same requirements stellar optimized for a decade ago: cheap issuance, built-in compliance controls, and a network of regulated on/off-ramps.
+- **the casino cooled and utility got repriced.** as the speculative premium bled out of "number go up" chains, the market started paying attention to chains that move real value for real users. stellar's boring became a feature.
+
+stellar didn't pivot into this moment. the moment pivoted into stellar. the interesting question isn't whether the thesis is right — the on-chain data says it is — it's whether the ecosystem is actually *built* to capture it. that's what the rest of this maps.
+
+## 2. the proof is in the issuers
+
+if the thesis were wrong, the money wouldn't be here. it is.
+
+**tokenized real-world assets on stellar: $2.33b, across 86 assets.** that is not defi-native tvl juiced by token incentives — it is treasuries and money-market funds tokenized by institutions:
+
+| issuer | on-chain value |
 |---|---|
-| active projects | **889** |
-| scf-funded projects | **400** |
-| total scf distributed (cumulative) | **$40.7m** |
-| mean scf award | **$101,842** |
-| indexed repos | **2,301** |
-| active devs (28d) | **2,070** |
-| commits (28d) | **43,207** |
-| hackathons tracked | **12** (11 done) |
-| hackathon prize pool | **$97k** |
-| registered hackers | **2,717** |
+| Spiko | $1.08b |
+| Franklin Templeton | $596m |
+| Ondo Finance | $530m |
 
-*source: `/api/analyze`, `/api/status`, electric capital snapshot. queryable at stellarlight.xyz.*
+three names, ~$2.2b of the total, and none of them is a crypto startup chasing a grant. these are regulated asset managers choosing stellar as settlement rails for real financial products. when a franklin templeton money-market fund lives on your chain, you are no longer a "crypto ecosystem" — you are financial infrastructure.
 
-## where the building actually happens
+the stablecoin layer tells the same story from the other side. **23 verified stablecoins, ~$746m circulating, ~2.7m holders** — and again the interesting part isn't the total, it's the roster: circle (usdc/eurc), paxos, gmo trust, novatti, brale. regulated issuers, not anon mints. these are the digital dollars the new rules bless, and they chose to be here.
 
-stellar gets typecast as "payments." the project mix says otherwise. across 889 active projects, apps lead on volume and dollars — but the capital concentrates per-project in protocols and infra.
+and the signal that this is only starting: the ecosystem's own conversation has moved to institutions. the most-cited recent ecosystem discussions in our research corpus aren't about apy — they're about **dtcc, rwas, and compliant privacy**. when the depository trust & clearing corporation — the plumbing under the entire us securities market — shows up in your ecosystem's ama, the addressable market stopped being "crypto users."
 
-| category | projects | scf-funded | scf $ | avg $ / funded |
-|---|---:|---:|---:|---:|
-| user-facing app | 350 | 168 | $16.9m | $100.6k |
-| infrastructure | 195 | 80 | $8.0m | $100.3k |
-| tooling | 161 | 71 | $6.2m | $88.0k |
-| protocol / contract | 130 | 70 | $8.3m | $118.1k |
-| asset | 32 | 5 | $0.22m | $44.2k |
-| anchor | 19 | 5 | $1.07m | $214.4k |
-| partner integration | 2 | 1 | — | — |
+## 3. soroban is what makes it programmable
 
-the read:
+here's the part that would have killed this thesis two years ago: a payments rail that can't run logic can move a tokenized treasury, but it can't build a *market* around it. you need contracts — lending against the collateral, amms to price it, oracles to value it, compliance hooks to gate it.
 
-1. **apps run the ecosystem by count.** 350 projects, 39% of everything active, and the biggest single slice of scf money ($16.9m). this is wallets, payment apps, consumer products — the surface builders and users actually touch.
-2. **protocol work is where the money gets serious.** 130 projects, but the highest average grant of any large category at $118k. shipping soroban logic on-chain costs more and carries more risk than shipping a front end, and the funding reflects it.
-3. **anchors are rare and expensive.** only 19 indexed, but the fattest average award on the board — $214k. moving real money on and off stellar is a regulatory and integration grind, and it prices like one.
+that layer now exists. soroban, stellar's rust-based smart-contract runtime, matured from "testnet curiosity" to an audited, upgraded, production surface — the protocol has shipped upgradeable-contract standards, token-interface extensions, and multiple third-party security audits (veridise and others on soroban core). the index counts **130 protocol/contract projects** carrying **$8.3m** in scf funding — the highest average grant of any large category ($118k), which is what you'd expect when a chain is paying to stand up its programmable layer from scratch.
 
-## scf is the engine, not a subsidy
+and a defi stack is visibly forming on top of it:
 
-the community fund has put out a cumulative **$40.7m across 400 projects**, averaging **$101,842** a grant. that's not spread evenly — apps, protocols, and infra soak up ~82% of every dollar.
+- **lending** is the tell. only 11 projects, but 8 are scf-funded — the highest funded-density of any vertical. blend leads as the reference money-market. a thin, funded lane sitting directly under $2.33b of rwa collateral is not a coincidence; it's the ecosystem building the rails to make that collateral productive.
+- **dex/amm** (soroswap, aquarius, phoenix) and **oracles** (reflector, effectively the default) are already settled — infrastructure lanes with clear incumbents rather than open fields.
 
-here's the part builders should sit with: **~45% of all active indexed projects have taken scf money** at some point (400 of 889). scf isn't a fringe grant program on stellar. it's the dominant capital source for the on-chain builder base. if you're building here, funding is a path, not a lottery ticket.
+the strategic read: stellar is no longer a payments rail *or* a smart-contract chain. it's becoming programmable settlement for regulated value — and that's a category with very few real competitors.
 
-> the $40.7m is a running cumulative total across all historical scf rounds, not a single quarter. per-round breakdowns are getting wired into the index and land in a dedicated scf funding report later in this series.
+## 4. the builder base is coherent, not random
 
-## developers are the leading indicator
+889 active projects. 2,070 developers shipping 43,207 commits in the last 28 days. $40.7m of scf capital across 400 funded projects. those are healthy numbers, but the number that matters is the *shape*: **45% of active projects have taken scf funding.**
 
-grants and project counts tell you what already happened. commits tell you what's happening. latest electric capital snapshot in the index:
+that's unusual, and it's the ecosystem's quiet advantage. most chains grow by throwing open the doors and hoping a casino emerges. stellar grows through a directed capital allocator — the community fund — that steers builders toward the thesis: payments, anchors, rwa infra, tooling. it's why the project mix is coherent (350 apps, 195 infra, 161 tooling, 130 protocol) instead of 800 forks of the same yield farm. the funding isn't just fuel; it's a rudder.
 
-- **2,070 active devs** in the trailing 28 days
-- **1,204 stellar-focused, 866 multichain** — a healthy split, because multichain devs are how new patterns get dragged into the ecosystem
-- **43,207 commits** in the same window
+the flip side, honestly: a directed ecosystem is a smaller ecosystem. stellar isn't going to out-degen solana or out-tvl the ethereum l2s, and it shouldn't try. its bet is that the regulated, real-value slice of crypto is the slice that lasts — and that it owns that slice.
 
-the 2,301 repos stellarlight indexes and scores are a second, independent lens on the same activity — and they power the live [dev-activity leaderboard](https://stellarlight.xyz/leaderboard), which ranks projects by recent commits, stars, and issues.
+## 5. where the ground is still moving
 
-## hackathons are the top of the funnel
+a state-of report that only lists strengths is marketing. here's what's genuinely unresolved, and where 2026 gets decided:
 
-hackathons are where most builders touch stellar first. the index tracks **12 events** (11 done, 1 live), **$97k in prizes**, and **2,717 registered hackers**. winners now carry a numeric placement, so "who won kale x reflector" is a lookup, not a guessing game.
+- **privacy is the next unlock, and it's a compliance story, not a mixer story.** institutions can't settle real assets on a fully transparent ledger — you can't show a competitor your entire book. the ecosystem is actively working confidential-token and compliant-privacy-pool designs (the research corpus has live threads on both). this is the feature that turns "tradfi is experimenting on stellar" into "tradfi settles on stellar." watch it.
+- **native defi tvl is still thin relative to the rwa base.** there's $2.33b of tokenized assets and a comparatively small pool of soroban-native amm/lending liquidity to work it. that gap *is* the opportunity — but until it closes, the "programmable" half of programmable-settlement is more promise than proof.
+- **the agent economy is arriving on payments rails, and stellar is early.** the convergence of ai agents and money — machines that pay each other for services — needs exactly what stellar offers: cheap, fast, final settlement with stable value. the ecosystem's recent hackathons already feature agentic-payment builds (x402-style flows), and it's the frontier most aligned with where both crypto and ai are heading.
+- **the conversion question is still unanswered.** we can see 2,717 hackathon participants enter the funnel; we can't yet see how many become funded, maintained products. wiring that built → shipped → abandoned pipeline is our next data workstream, because "how much of this actually survives" is the honest test of any ecosystem.
 
-the question that actually matters — *how many hackathon projects become funded, maintained products?* — is exactly what a data layer should answer. wiring that built → in-progress → abandoned funnel is in flight, and it anchors a dedicated hackathon-to-product report in this series.
+## the one-paragraph version
+
+stellar spent a decade being early to a thesis the market didn't want yet: that crypto's durable value is moving regulated dollars and real assets, cheaply, with compliance built in. the market finally arrived — $2.33b of tokenized treasuries, regulated stablecoin issuers, and a maturing soroban contract layer are the proof — and the builder base is coherent because scf steers it toward that thesis. the open questions (native liquidity depth, privacy for institutions, agentic payments, real conversion) are exactly the questions of a chain that's winning its category and now has to grow it. boring won. the work now is making boring big.
 
 ## how we counted
 
-no black boxes. all of it is live right now:
-
-- ecosystem rollups → `stellarlight.xyz/api/analyze`
-- source freshness + sizes → `stellarlight.xyz/api/status`
-- the whole machine-readable spec → `stellarlight.xyz/api/openapi.json`
-
-two honest caveats. "active projects" (889) means live / pre-release / development status, and it intentionally differs from the full indexed collection (918), which includes inactive entries — we never merge the two without labeling. and dev counts follow electric capital's method (≥1 commit to a stellar repo in the trailing 28 days), refreshed on a snapshot cadence, not real-time.
+no black boxes. the ecosystem figures are live and queryable: project + funding rollups at `stellarlight.xyz/api/analyze`, source freshness at `/api/status`, rwa tvl at `/api/rwa-tvl`, and the primary-source research corpus (seps, audits, sdf + ecosystem writing) at `/api/research`. two caveats we hold to: "active projects" (889) means live / pre-release / development and differs from the full indexed collection (918); and the $40.7m scf figure is cumulative across all historical rounds, not a single quarter. the macro claims about stablecoin and rwa adoption are the broader market context the on-chain stellar data sits inside — the stellar-specific numbers are all ours, measured live.
 
 ---
 
-*report #1 in the stellarlight ecosystem series. next: the **stellar defi landscape** and a dedicated **scf funding analysis**. all of it comes off the same live index that runs stellarlight.xyz. want the raw data? it's an api call away.*
+*report #1 in the stellarlight ecosystem series. the follow-ups go one level deeper on each layer — the rwa + stablecoin issuer stack, the soroban defi build-out, and where scf capital is actually steering the next wave of builders.*
