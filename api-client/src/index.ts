@@ -131,6 +131,26 @@ export class ScoutClient {
 		return this.get("/api/repos/search", params);
 	}
 
+	/**
+	 * Deep code answer — routes a code question to the authoritative Stellar repo
+	 * (canonical infra routing) and returns a DeepWiki-grounded answer. Omit
+	 * `repo` to auto-route; degrades to `answered:false` + the routed repo if
+	 * DeepWiki hasn't indexed it.
+	 */
+	explainRepo(params: { q: string; repo?: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/repos/explain", params);
+	}
+
+	/** Curated directory of ecosystem partners (audit firms, anchors, on/off-ramps, infra). */
+	getPartners(params: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+		return this.get("/api/partners", params);
+	}
+
+	/** Latest-first feed of contract-affecting API/tool changes (`since` / `limit`). */
+	getChangelog(params: { since?: string; limit?: number } = {}): Promise<Record<string, unknown>> {
+		return this.get("/api/changelog", params);
+	}
+
 	/** List Stellar hackathons (curated + DoraHacks merged feed). */
 	getHackathons(params: GetHackathonsParams = {}): Promise<HackathonsResponse> {
 		return this.get("/api/hackathons", params);
