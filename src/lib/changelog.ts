@@ -33,6 +33,36 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-06-30",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"`GET /api/partners` is now populated — 24 curated ecosystem partners (5 audit firms + 19 anchors), filterable by `?type` / `?sector` / `?region` / `?q`. Was previously empty.",
+		detail:
+			"Curated seed data (`verified:false`); partners can claim + enrich via the portal. Use for 'who should audit my contract' / 'find an anchor' discovery. Audit firms: Veridise, OtterSec, Runtime Verification, Certora, Halborn.",
+	},
+	{
+		date: "2026-06-30",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Every public `/api` endpoint now returns `X-API-Version: 1` and permissive CORS (`Access-Control-Allow-Origin: *`) uniformly — cross-origin/browser agents can call any endpoint and version-pin consistently.",
+	},
+	{
+		date: "2026-06-30",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"`/api/analyze` `categories.totalProjects` reconciled to the active-project count (~888) with an explicit `scope` label — was a stale 500. Intentionally differs from `/api/status`, which counts the full collection.",
+	},
+	{
+		date: "2026-06-27",
+		surfaces: ["api", "skill"],
+		type: "fixed",
+		summary:
+			'`/api/skills` no longer advertises a stale "14 tools" count for Scout MCP — reconciled with the shipped tool set (16 after `explain_repo`).',
+	},
+	{
+		date: "2026-06-30",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"Hackathon detail winners are now sorted by placement and carry a numeric `placementRank` (1 = best), so `winners[0]` is the 1st-place entry. Previously the array was scrambled with only a string label, making winner-order claims ungroundable.",
