@@ -4,9 +4,9 @@ slug: who-is-actually-building-on-stellar-h1-2026
 author: StellarLight
 excerpt: "developers are the leading indicator. a chain with a real full-time core and heavy multichain inflow isn't being visited — it's being staffed. here's what 2,070 devs and 43,207 commits actually say about stellar."
 category: ecosystem
-tags: [developers, soroban, rust, ecosystem, electric-capital, multichain]
+tags: developers, soroban, rust, activity
 featured: true
-publishedAt: "2026-05-29T15:00:00.000Z"
+publishedAt: "2026-06-27T15:00:00.000Z"
 contentType: markdown
 ---
 

@@ -4,9 +4,9 @@ slug: scf-funding-analysis-directed-capital
 author: StellarLight
 excerpt: "$40.7m across 400 projects isn't a grant lottery. it's directed capital allocation — closer to industrial policy than a faucet — and the anchor premium proves the fund is pricing for the hard, regulated work."
 category: ecosystem
-tags: [scf, funding, ecosystem, stellar, grants, anchors, rwa]
+tags: scf, funding, grants, ecosystem
 featured: true
-publishedAt: "2026-06-05T15:00:00.000Z"
+publishedAt: "2026-06-28T15:00:00.000Z"
 contentType: markdown
 ---
 

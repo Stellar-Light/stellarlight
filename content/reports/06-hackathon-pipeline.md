@@ -4,9 +4,9 @@ slug: stellar-hackathon-pipeline
 author: StellarLight
 excerpt: "12 events, 2,717 hackers, $97k in prizes recruit builders cheaply. whether they convert into funded, maintained products is the one number nobody tracks — and it's the honest test of any ecosystem."
 category: ecosystem
-tags: [hackathons, developer-funnel, x402, agentic-payments, scf, ecosystem]
+tags: hackathons, x402, agentic-payments, scf
 featured: true
-publishedAt: "2026-05-22T15:00:00.000Z"
+publishedAt: "2026-06-26T15:00:00.000Z"
 contentType: markdown
 ---
 

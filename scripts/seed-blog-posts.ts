@@ -113,7 +113,16 @@ async function main() {
 	let updated = 0;
 
 	for (const r of reports) {
-		const tags = Array.isArray(r.fm.tags) ? r.fm.tags.join(", ") : (r.fm.tags ?? "");
+		// `tags` is a hasMany text field → an ARRAY of individual tags. Split a
+		// comma string (or pass an array through) so each tag renders as its own
+		// chip instead of one giant comma-blob.
+		const tags = (
+			Array.isArray(r.fm.tags)
+				? r.fm.tags
+				: String(r.fm.tags ?? "").split(",")
+		)
+			.map((t) => t.trim())
+			.filter(Boolean);
 		const data = {
 			title: r.fm.title,
 			slug: r.fm.slug,
