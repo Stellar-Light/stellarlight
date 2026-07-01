@@ -1,15 +1,14 @@
 ---
-title: "the state of stellar — h1 2026: the boring chain won"
+title: "The State of Stellar — H1 2026: The Boring Chain Won"
 slug: state-of-stellar-h1-2026
 author: StellarLight
 excerpt: "for years stellar was the chain nobody talked about — no casino, no memecoins, just payments. then crypto grew up. stablecoins became the killer app, tradfi started tokenizing treasuries, and regulators picked winners. stellar was already built for all of it. here's the state of the ecosystem that turn created."
 category: ecosystem
 tags: ecosystem-map, rwa, stablecoins, soroban, scf, stellar, thesis
 featured: true
+publishedAt: "2026-06-27T15:00:00.000Z"
 contentType: markdown
 ---
-
-# the state of stellar — h1 2026: the boring chain won
 
 for most of the last cycle, stellar was the chain you skipped in the ecosystem tour. no leverage farms, no memecoin factory, no 4-digit apy. it moved dollars across borders and issued assets, and in a market that paid for narrative volatility, "it works and it's cheap" was not a narrative. it was a shrug.
 
@@ -23,7 +22,7 @@ we index the whole builder base — 889 active projects, 2,301 repos, every scf 
 
 everything below is a version of that sentence with receipts.
 
-## 1. the setup: crypto turned toward what stellar already was
+## the setup: crypto turned toward what stellar already was
 
 three things happened to the market between 2024 and now, and all three point the same direction:
 
@@ -33,7 +32,7 @@ three things happened to the market between 2024 and now, and all three point th
 
 stellar didn't pivot into this moment. the moment pivoted into stellar. the interesting question isn't whether the thesis is right — the on-chain data says it is — it's whether the ecosystem is actually *built* to capture it. that's what the rest of this maps.
 
-## 2. the proof is in the issuers
+## the proof is in the issuers
 
 if the thesis were wrong, the money wouldn't be here. it is.
 
@@ -51,7 +50,7 @@ the stablecoin layer tells the same story from the other side. **23 verified sta
 
 and the signal that this is only starting: the ecosystem's own conversation has moved to institutions. the most-cited recent ecosystem discussions in our research corpus aren't about apy — they're about **dtcc, rwas, and compliant privacy**. when the depository trust & clearing corporation — the plumbing under the entire us securities market — shows up in your ecosystem's ama, the addressable market stopped being "crypto users."
 
-## 3. soroban is what makes it programmable
+## soroban is what makes it programmable
 
 here's the part that would have killed this thesis two years ago: a payments rail that can't run logic can move a tokenized treasury, but it can't build a *market* around it. you need contracts — lending against the collateral, amms to price it, oracles to value it, compliance hooks to gate it.
 
@@ -64,7 +63,7 @@ and a defi stack is visibly forming on top of it:
 
 the strategic read: stellar is no longer a payments rail *or* a smart-contract chain. it's becoming programmable settlement for regulated value — and that's a category with very few real competitors.
 
-## 4. the builder base is coherent, not random
+## the builder base is coherent, not random
 
 889 active projects. 2,070 developers shipping 43,207 commits in the last 28 days. $40.7m of scf capital across 400 funded projects. those are healthy numbers, but the number that matters is the *shape*: **45% of active projects have taken scf funding.**
 
@@ -72,7 +71,7 @@ that's unusual, and it's the ecosystem's quiet advantage. most chains grow by th
 
 the flip side, honestly: a directed ecosystem is a smaller ecosystem. stellar isn't going to out-degen solana or out-tvl the ethereum l2s, and it shouldn't try. its bet is that the regulated, real-value slice of crypto is the slice that lasts — and that it owns that slice.
 
-## 5. where the ground is still moving
+## where the ground is still moving
 
 a state-of report that only lists strengths is marketing. here's what's genuinely unresolved, and where 2026 gets decided:
 

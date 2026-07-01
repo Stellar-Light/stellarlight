@@ -1,15 +1,14 @@
 ---
-title: the stellar defi landscape
+title: "The Stellar DeFi Landscape"
 slug: the-stellar-defi-landscape
 author: StellarLight
 excerpt: stellar defi isn't a casino — it's being built as the rails for a $2.33b tokenized-asset base. boring defi is the defi that fits a regulated-value chain, and lending is the funded whitespace under all that collateral.
 category: ecosystem
 tags: [defi, rwa, lending, amm, oracles, soroban, stablecoins]
 featured: true
+publishedAt: "2026-06-19T15:00:00.000Z"
 contentType: markdown
 ---
-
-# the stellar defi landscape
 
 everyone still asks the same question about stellar defi: where's the yield, where's the leverage, where's the farm. wrong question. the interesting thing about the stellar defi stack is what it *isn't* — and what it's quietly being built to sit underneath.
 
@@ -17,7 +16,7 @@ everyone still asks the same question about stellar defi: where's the yield, whe
 
 **stellar defi isn't a casino trying to grow up — it's infrastructure being built as the rails for a $2.33b tokenized-asset base, and lending is the funded whitespace sitting directly under all that collateral.** everything below is that sentence with receipts.
 
-## 1. the macro turned against leverage-defi — and stellar was already on the other side
+## the macro turned against leverage-defi — and stellar was already on the other side
 
 the 2020-21 version of defi was a leverage machine. recursive yield, governance-token emissions, tvl that was mostly the same dollar levered five times. that model got repriced hard. what survived the last two years is the boring half of the stack: stablecoins as the actual product, tokenized treasuries and money-market funds as the actual yield, and real-world assets moving from whitepaper noun to on-chain balance.
 
@@ -25,7 +24,7 @@ that shift matters more for stellar than for almost any other chain, because ste
 
 so "boring defi" on stellar isn't a weakness. money markets, real-yield vaults, and compliance-aware amms are precisely the defi primitives a regulated-value chain needs. the question isn't why stellar defi looks conservative. it's whether the primitives are landing where the value already is.
 
-## 2. the value is already here — $2.33b of it
+## the value is already here — $2.33b of it
 
 if the thesis were wrong, the collateral wouldn't be sitting on the chain. it is.
 
@@ -43,7 +42,7 @@ read the names, not the numbers. spiko tokenizes eu and us treasury money-market
 
 that concentration is the whole point. a chain with $2.33b of tokenized treasuries needs a defi stack that can *do something* with them — lend against them, price them, swap them, wrap them into yield. that's the demand curve stellar defi is building into.
 
-## 3. the map: where the building actually is
+## the map: where the building actually is
 
 the directory's type clusters show where builders and scf dollars have gone. this is the shape of the stack.
 
@@ -66,7 +65,7 @@ three things jump out.
 
 that gap — a lot of tokenized value, very few places to lend it — is the funded whitespace. it's the sentence that explains the whole stack.
 
-## 4. this is not ethereum defi, and that's the design
+## this is not ethereum defi, and that's the design
 
 ethereum defi composed *upward* — primitive on primitive on primitive, until the yield was mostly other people's leverage. stellar's stack is composing *downward*: toward the collateral. the ordering is inverted on purpose.
 
@@ -74,7 +73,7 @@ you can see it in the oracle layer, which is the part of defi nobody notices unt
 
 that's the ethereum contrast in one line: ethereum defi optimized for composability and got fragility; stellar defi is optimizing for the collateral and paying for it in audits and oracle redundancy.
 
-## 5. where the ground is still moving
+## where the ground is still moving
 
 the honest gaps, because the thesis lives or dies on them.
 
