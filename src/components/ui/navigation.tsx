@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles, Terminal } from "lucide-react";
+import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles, Terminal, MessageCircleQuestion } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
@@ -113,6 +113,7 @@ export function Navigation() {
 		{
 			label: "Build & Insights",
 			items: [
+				{ name: "Ask Stellar", href: "/ask", description: "Ask the ecosystem in natural language", icon: MessageCircleQuestion },
 				{ name: "Scout", href: "/scout", description: "AI skill for Stellar ecosystem research", icon: Sparkles },
 				{ name: "Skills", href: "/skills", description: "AI tool marketplace for Stellar builders", icon: Terminal },
 				{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
