@@ -201,6 +201,7 @@ export const Blog: CollectionConfig = {
 				"Community",
 				"Partnership",
 				"Update",
+				"Ecosystem",
 			],
 			admin: {
 				position: "sidebar",
