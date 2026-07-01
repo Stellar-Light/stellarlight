@@ -209,121 +209,51 @@ export default async function ProjectDetailPage({
 
 	if (project.github?.repos && project.github.repos.length > 0) {
 		try {
-			// Import the GitHub fetching logic directly instead of HTTP call
-			const { fetchRepoInfo } = await import("@/lib/github");
-			const projectId = String(project.id);
-			const repos = project.github.repos || [];
-
-			// Check for cached data first
-			const cachedResult = await payload.find({
-				collection: "signals",
-				where: { project: { equals: projectId } },
-				limit: 1,
+			// GitHub stats come from the enriched `repos` collection (keyed by
+			// projectSlug, populated by enrich-repos). The legacy per-project
+			// `signals` cache + live GitHub fetch this used is no longer viable
+			// (signals is not populated and DB writes are blocked), so stars read
+			// back as zero — read the authoritative repo stats directly.
+			const reposResult = await payload.find({
+				collection: "repos",
+				where: { projectSlug: { equals: project.slug } },
+				limit: 100,
+				depth: 0,
+				select: {
+					fullName: true,
+					url: true,
+					stars: true,
+					openIssues: true,
+					lastCommitAt: true,
+				},
 			});
-
-			const cached = cachedResult.docs[0];
-			const reposKey = JSON.stringify(
-				repos.map((r: any) => `${r.owner}/${r.name}`).sort(),
-			);
-			const cachedReposKey = cached?.github?.repos
-				? JSON.stringify(
-						cached.github.repos
-							.map((r: any) => `${r.owner}/${r.name}`)
-							.sort(),
-					)
-				: null;
-
-			const reposChanged = reposKey !== cachedReposKey;
-			// Also invalidate cache if it contains authentication errors (401, etc.)
-			const hasAuthErrors = cached?.github?.repos?.some((r: any) => r.error && (r.error.includes("401") || r.error.includes("Unauthorized")));
-			// Invalidate if totalStars is missing, null, or undefined (indicates incomplete data)
-			const hasInvalidStars = (cached?.github as any)?.totalStars == null; // null or undefined
-			const fresh =
-				cached?.fetchedAt &&
-				Date.now() - new Date(cached.fetchedAt).getTime() <
-					6 * 60 * 60 * 1000 && // 6h
-				!reposChanged && // Also invalidate if repos changed
-				!hasAuthErrors && // Invalidate if cache contains auth errors
-				!hasInvalidStars; // Invalidate if cache has invalid/missing stars data
-
-			if (cached && fresh && cached.github) {
-				const cachedGh = cached.github as any;
-				gh = {
-					lastActivityAt: cachedGh.lastActivityAt ?? null,
-					openIssuesTotal: cachedGh.openIssuesTotal ?? 0,
-					totalStars: cachedGh.totalStars ?? 0,
-					repos: cachedGh.repos ?? [],
-				};
-			} else {
-				// Fetch live data
-				const results = await Promise.allSettled(
-					repos.map((r: any) => fetchRepoInfo(r.owner, r.name)),
-				);
-
-				const enriched = repos.map((r: any, i: number) => {
-					const v = results[i];
-
-					if (v.status === "fulfilled") {
-						return {
-							owner: r.owner,
-							name: r.name,
-							url: v.value.url,
-							lastCommitAt: v.value.lastCommitAt,
-							openIssues: v.value.openIssues,
-							stargazerCount: v.value.stargazerCount ?? 0,
-						};
-					}
-
-					const errorMessage = String((v as PromiseRejectedResult).reason);
-					const isPrivate = errorMessage.includes("Private repository");
+			if (reposResult.docs.length > 0) {
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc type is awkward
+				const enriched = (reposResult.docs as any[]).map((r) => {
+					const [owner, ...rest] = String(r.fullName ?? "").split("/");
 					return {
-						owner: r.owner,
-						name: r.name,
-						url: `https://github.com/${r.owner}/${r.name}`,
-						lastCommitAt: null,
-						openIssues: 0,
-						stargazerCount: 0,
-						error: errorMessage,
-						skipped: isPrivate,
+						owner: owner ?? "",
+						name: rest.join("/") || (r.fullName ?? ""),
+						url:
+							r.url ??
+							(r.fullName ? `https://github.com/${r.fullName}` : ""),
+						lastCommitAt: r.lastCommitAt ?? null,
+						openIssues: r.openIssues ?? 0,
+						stargazerCount: r.stars ?? 0,
 					};
 				});
-
 				const lastTs = Math.max(
+					0,
 					...enriched.map((x) =>
 						x.lastCommitAt ? new Date(x.lastCommitAt).getTime() : 0,
 					),
 				);
-
-				const totalStars = enriched.reduce((s, x) => s + (x.stargazerCount || 0), 0);
-				const openIssuesTotal = enriched.reduce((s, x) => s + (x.openIssues || 0), 0);
-				
 				gh = {
 					lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
-					openIssuesTotal,
-					totalStars,
+					openIssuesTotal: enriched.reduce((sum, x) => sum + (x.openIssues || 0), 0),
+					totalStars: enriched.reduce((sum, x) => sum + (x.stargazerCount || 0), 0),
 					repos: enriched,
 				};
-
-				// Update cache
-				if (cached) {
-					await payload.update({
-						collection: "signals",
-						id: cached.id,
-						data: {
-							fetchedAt: new Date().toISOString(),
-							github: gh,
-						},
-					});
-				} else {
-					await payload.create({
-						collection: "signals",
-						data: {
-							project: projectId,
-							fetchedAt: new Date().toISOString(),
-							github: gh,
-						},
-					});
-				}
 			}
 		} catch (error) {
 			// Silently handle GitHub fetch errors
