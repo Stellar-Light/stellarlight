@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-02",
 		surfaces: ["api"],
+		version: "openapi 1.3.1",
+		type: "added",
+		summary:
+			"`/api/projects/search` results now carry `builtBy` — the organization/entity behind each project ('who built LOBSTR?' → Ultra Stellar; Soroswap → Paltalabs), null when no org is linked. Also: the `status` enum gains 'Inactive' (defunct/archived projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory — e.g. Keybase).",
+		detail:
+			"Attribution is resolved from the curated entities collection (one org per project). Sort/present with builtBy for 'who is behind X' questions instead of guessing from project descriptions.",
+	},
+	{
+		date: "2026-07-02",
+		surfaces: ["api"],
 		version: "openapi 1.3.0",
 		type: "changed",
 		summary:

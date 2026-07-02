@@ -204,7 +204,7 @@ const spec: OpenAPISpec = {
 				tags: ["Projects"],
 				summary: "Search Stellar projects (prior art / competitor lookup)",
 				description:
-					"Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters. Use for 'who has built / is there a / which projects / give me a directory of' questions about Stellar apps, products, protocols, dApps, teams, companies and startups by category — DeFi, lending, credit, yield, AMM, DEX, swap, NFT marketplace, wallets, anchors and on/off-ramps, RWA and real-world-asset tokenization, stablecoins, payments, oracles, identity, gaming, infrastructure, tooling. Also 'is there a mature X I could integrate', 'who is building Y', projects operating as anchors, and named products (Etherfuse Stablebonds, Soroswap).",
+					"Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, `builtBy` (the org/entity behind it — 'who built X'), the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters. Use for 'who has built / is there a / which projects / give me a directory of' questions about Stellar apps, products, protocols, dApps, teams, companies and startups by category — DeFi, lending, credit, yield, AMM, DEX, swap, NFT marketplace, wallets, anchors and on/off-ramps, RWA and real-world-asset tokenization, stablecoins, payments, oracles, identity, gaming, infrastructure, tooling. Also 'is there a mature X I could integrate', 'who is building Y', projects operating as anchors, and named products (Etherfuse Stablebonds, Soroswap).",
 				parameters: [
 					{ $ref: "#/components/parameters/q" },
 					{
@@ -1222,7 +1222,19 @@ const spec: OpenAPISpec = {
 					shortDescription: { type: "string" },
 					status: {
 						type: "string",
-						enum: ["Draft", "Development", "Pre-Release", "Live"],
+						enum: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
+						description:
+							"Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory.",
+					},
+					builtBy: {
+						type: "object",
+						nullable: true,
+						description:
+							"The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}.",
+						properties: {
+							name: { type: "string" },
+							slug: { type: "string" },
+						},
 					},
 					logoUrl: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
