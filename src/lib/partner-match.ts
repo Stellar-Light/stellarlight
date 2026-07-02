@@ -121,10 +121,65 @@ export async function fetchEligiblePartners(
 }
 
 /**
+ * Region/country keywords → our region enum. Lets a plain-language need name a
+ * place ("in Mexico", "for Asia", "Nigeria") and have it resolve to a region so
+ * we can HARD-filter partners that don't cover it — otherwise a LatAm off-ramp
+ * scores on "off-ramp" for an Asia query and surfaces a card that contradicts
+ * "no Asia matches".
+ */
+const REGION_KEYWORDS: Record<string, string[]> = {
+	asia: [
+		"asia", "asian", "philippines", "philippine", "india", "indian",
+		"indonesia", "singapore", "vietnam", "thailand", "japan", "japanese",
+		"china", "chinese", "malaysia", "korea", "hong kong",
+	],
+	latam: [
+		"latam", "latin america", "mexico", "mexican", "brazil", "brazilian",
+		"argentina", "argentine", "chile", "chilean", "peru", "peruvian",
+		"colombia", "colombian", "pesos", "peso", "reais", "real",
+	],
+	africa: [
+		"africa", "african", "nigeria", "nigerian", "kenya", "kenyan",
+		"tanzania", "ghana", "ghanaian", "south africa", "uganda", "rand",
+	],
+	europe: [
+		"europe", "european", "euro", "eur", "eurozone", "germany", "france",
+		"spain", "italy", "portugal", "netherlands", "ukraine", "ukrainian",
+		"united kingdom", "britain", "british", "gbp", "pound",
+	],
+	"north-america": [
+		"usa", "u.s.", "united states", "america", "american", "canada",
+		"canadian", "usd",
+	],
+	mena: ["mena", "middle east", "uae", "dubai", "saudi", "qatar", "emirates"],
+	oceania: [
+		"oceania", "australia", "australian", "aud", "new zealand", "nzd",
+	],
+	global: ["global", "worldwide", "anywhere", "international", "any region"],
+};
+
+/** Which regions a plain-language need is asking for (empty = no preference). */
+function requestedRegions(need: string): Set<string> {
+	const t = ` ${need.toLowerCase()} `;
+	const out = new Set<string>();
+	for (const [region, kws] of Object.entries(REGION_KEYWORDS)) {
+		if (kws.some((k) => t.includes(k))) out.add(region);
+	}
+	// "global" is a wildcard, not a restriction — don't let it filter anything.
+	out.delete("global");
+	return out;
+}
+
+/**
  * Deterministically score partners against a plain-language need. Keyword
  * overlap across services/sectors/regions/type/tagline/description, with a
  * small nudge for accepting-clients + fresh profiles. Returns top `limit`,
  * best first — including the `blob` so the chat model can explain each.
+ *
+ * Region is a HARD filter: if the need names a place, a partner that declares
+ * regions but covers none of the requested ones (and isn't global) is dropped
+ * entirely — so an "Asia" query never surfaces a LatAm-only anchor. Partners
+ * with no region data are kept (unknown coverage isn't a mismatch).
  */
 export function scorePartners(
 	need: string,
@@ -140,7 +195,19 @@ export function scorePartners(
 			.map((p) => ({ score: 0, partner: toPublic(p), blob: partnerBlob(p) }));
 	}
 
-	const scored = docs.map((p) => {
+	// Region gate: drop partners that clearly don't serve the requested place.
+	const wantRegions = requestedRegions(need);
+	const pool =
+		wantRegions.size === 0
+			? docs
+			: docs.filter((p) => {
+					const regions: string[] = p.regions ?? [];
+					if (regions.length === 0) return true; // unknown coverage — keep
+					if (regions.includes("global")) return true;
+					return regions.some((r) => wantRegions.has(r));
+				});
+
+	const scored = pool.map((p) => {
 		const services: string[] = (p.services ?? [])
 			.map((s: { tag: string }) => s.tag)
 			.filter(Boolean);
@@ -186,10 +253,11 @@ export function scorePartners(
 		return { score, partner: toPublic(p), blob: partnerBlob(p) };
 	});
 
+	// Only real hits — no fallback sample. Surfacing zero-relevance partners as
+	// "matches" is what made the cards contradict the reply ("no match" + a card).
+	// Empty → the assistant says there's nothing, with no card.
 	const hits = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
-	// If nothing overlaps, hand back a small sample so the model can still say
-	// "closest I found" rather than nothing.
-	return (hits.length ? hits : scored).slice(0, limit);
+	return hits.slice(0, limit);
 }
 
 /**
