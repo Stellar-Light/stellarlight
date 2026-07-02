@@ -152,7 +152,12 @@ export function renderMarkdownBold(text: string): React.ReactNode[] {
 	);
 }
 
-export function PartnerConciergeChat() {
+export function PartnerConciergeChat({
+	initialQuery,
+}: {
+	/** Question handed off from the directory's Ask box — auto-sent on mount. */
+	initialQuery?: string;
+} = {}) {
 	const [messages, setMessages] = useState<Msg[]>([]);
 	const [input, setInput] = useState("");
 	const [busy, setBusy] = useState(false);
@@ -193,15 +198,31 @@ export function PartnerConciergeChat() {
 		return { reply: d.reply, matches: d.matches, canList: d.canList };
 	}
 
-	// Seed the opening message.
+	// Seed the conversation: a handed-off question (from the directory's Ask
+	// box) is sent immediately as the user's first message — the visitor lands
+	// mid-conversation, already being answered. Otherwise open with a greeting.
 	useEffect(() => {
 		(async () => {
 			setBusy(true);
-			const res = await callAssistant([]);
-			if (res?.reply)
-				setMessages([
-					{ role: "assistant", content: res.reply, matches: res.matches },
-				]);
+			const handoff = initialQuery?.trim();
+			if (handoff) {
+				const first: Msg[] = [{ role: "user", content: handoff }];
+				setMessages(first);
+				const res = await callAssistant(first);
+				if (res?.reply) {
+					setMessages((m) => [
+						...m,
+						{ role: "assistant", content: res.reply, matches: res.matches },
+					]);
+					if (res.canList) setCanList(true);
+				}
+			} else {
+				const res = await callAssistant([]);
+				if (res?.reply)
+					setMessages([
+						{ role: "assistant", content: res.reply, matches: res.matches },
+					]);
+			}
 			setBusy(false);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
