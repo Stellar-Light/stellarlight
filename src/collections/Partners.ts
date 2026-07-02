@@ -98,7 +98,24 @@ export const Partners: CollectionConfig = {
 	// public namespace for agents while auth lives at /api/partner-accounts/*.
 	slug: "partner-accounts",
 	labels: { singular: "Partner", plural: "Partners" },
-	auth: true, // email + password login; admins create accounts for the pilot
+	// Email + password login. Accounts are created by admins (pilot) or as
+	// drafts by the public listing pipeline (/api/partners/submit-listing).
+	// The default forgot-password email links to /admin/reset/:token — a page
+	// partners can't use (they're blocked from the admin panel above), so we
+	// send our own link to the partner-facing reset page instead. The same
+	// reset-token mechanism doubles as the account invite on publish (see
+	// afterChange hook).
+	auth: {
+		forgotPassword: {
+			generateEmailHTML: (args) => {
+				const token = args?.token ?? "";
+				const base = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.xyz";
+				const url = `${base}/partners/reset-password?token=${token}`;
+				return `<p>Reset your Stellar Light partner password:</p><p><a href="${url}">${url}</a></p><p>This link expires soon. If you didn't request this, you can ignore it.</p>`;
+			},
+			generateEmailSubject: () => "Reset your Stellar Light partner password",
+		},
+	},
 	admin: {
 		useAsTitle: "name",
 		defaultColumns: ["name", "partnerType", "status", "freshnessStatus", "lastPartnerUpdateAt"],
@@ -153,6 +170,59 @@ export const Partners: CollectionConfig = {
 					data.freshnessStatus = "fresh";
 				}
 				return data;
+			},
+		],
+		afterChange: [
+			// Publish = invite. When an admin flips a draft to published for a
+			// partner who has never been invited, mint a long-lived password-reset
+			// token and email it as the account invite ("set your password").
+			// Guards: draft→published transition only, once per account
+			// (invitedAt), and a failed email can never block the publish.
+			async ({ doc, previousDoc, operation, req }) => {
+				try {
+					if (operation !== "update") return;
+					if (doc.status !== "published" || previousDoc?.status === "published")
+						return;
+					if (doc.invitedAt || !doc.email) return;
+					const token = await req.payload.forgotPassword({
+						collection: "partner-accounts",
+						data: { email: doc.email },
+						disableEmail: true, // we compose our own invite copy below
+						expiration: 7 * 24 * 60 * 60 * 1000, // 7d — default 1h is too short for an invite
+						req,
+					});
+					const base =
+						process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.xyz";
+					const url = `${base}/partners/reset-password?token=${token}`;
+					await req.payload.sendEmail({
+						to: doc.email,
+						subject: "You're live on Stellar Light — set your password",
+						text: [
+							`${doc.name} is now published in the Stellar Light partner directory.`,
+							"",
+							`Set your password to manage your profile: ${url}`,
+							"",
+							`Your profile: ${base}/partners/${doc.slug}`,
+							`Your dashboard: ${base}/partners/dashboard`,
+							"",
+							"This link expires in 7 days.",
+						].join("\n"),
+					});
+					// Nested update doesn't touch status, so the transition guard
+					// above short-circuits — no recursion.
+					await req.payload.update({
+						collection: "partner-accounts",
+						id: doc.id,
+						data: { invitedAt: new Date().toISOString() },
+						overrideAccess: true,
+						req,
+					});
+				} catch (err) {
+					req.payload.logger.error(
+						{ err, partner: doc?.slug },
+						"partner invite email failed (publish not blocked)",
+					);
+				}
 			},
 		],
 	},
@@ -327,6 +397,25 @@ export const Partners: CollectionConfig = {
 			admin: { description: "Last time the PARTNER touched their profile. Drives the freshness loop." },
 		},
 		autoField({ name: "nextReminderAt", type: "date" }),
+
+		// ── Listing pipeline (system-owned) ────────────────────────────────
+		autoField({
+			name: "invitedAt",
+			type: "date",
+			admin: {
+				description:
+					"Set once the publish-invite email has been sent. Guards re-publish from re-inviting.",
+			},
+		}),
+		autoField({
+			name: "claimRequestedBy",
+			type: "text",
+			admin: {
+				description:
+					"Email of whoever asked to claim this profile via the public listing flow. Verify domain vs website before inviting.",
+			},
+		}),
+		autoField({ name: "claimRequestedAt", type: "date" }),
 
 		// ── Publishing (admin-controlled) ──────────────────────────────────
 		autoField({

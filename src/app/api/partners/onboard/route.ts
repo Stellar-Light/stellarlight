@@ -96,10 +96,34 @@ interface Turn {
  */
 const nullableString = { anyOf: [{ type: "string" }, { type: "null" }] };
 
+const PARTNER_TYPES = [
+	"anchor",
+	"on-off-ramp",
+	"infrastructure",
+	"tooling",
+	"protocol",
+	"wallet",
+	"audit-firm",
+	"legal",
+	"agency",
+	"other",
+];
+
 const EXTRACT_SCHEMA = {
 	type: "object",
 	additionalProperties: false,
 	properties: {
+		partnerType: {
+			anyOf: [
+				{
+					type: "string",
+					enum: [...PARTNER_TYPES],
+					description:
+						"What kind of partner this company is, based on what they described. null if genuinely unclear.",
+				},
+				{ type: "null" },
+			],
+		},
 		tagline: {
 			anyOf: [
 				{

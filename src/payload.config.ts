@@ -1,4 +1,5 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { resendAdapter } from "@payloadcms/email-resend";
 import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
@@ -33,6 +34,23 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+	// Deterministic absolute URLs in system emails (password reset/invite links).
+	// Falls back to the request host when unset (local dev).
+	serverURL: process.env.NEXT_PUBLIC_APP_URL || undefined,
+	// Outbound email (partner digest, quarterly check-ins, invites, password
+	// resets). Resend is REST-based — serverless-safe on Vercel. Without the
+	// key, Payload falls back to its console adapter (dev: emails are logged,
+	// never sent) and every sendEmail call still resolves.
+	...(process.env.RESEND_API_KEY
+		? {
+				email: resendAdapter({
+					apiKey: process.env.RESEND_API_KEY,
+					defaultFromAddress:
+						process.env.EMAIL_FROM_ADDRESS || "hello@stellarlight.xyz",
+					defaultFromName: process.env.EMAIL_FROM_NAME || "Stellar Light",
+				}),
+			}
+		: {}),
 	admin: {
 		user: Users.slug,
 		importMap: {

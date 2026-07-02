@@ -1,5 +1,6 @@
 import { SiGithub, SiX, SiDiscord } from "react-icons/si";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
 	return (
@@ -46,6 +47,22 @@ export default function Footer() {
 								>
 									Documentation
 								</a>
+							</li>
+							<li>
+								<Link
+									href="/partners"
+									className="hover:text-foreground transition-all duration-150"
+								>
+									Partner directory
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/partners/chat"
+									className="hover:text-foreground transition-all duration-150"
+								>
+									Find a partner
+								</Link>
 							</li>
 						</ul>
 					</div>

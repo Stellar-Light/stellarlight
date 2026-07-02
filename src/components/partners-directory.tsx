@@ -112,7 +112,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 					Ecosystem partners you can integrate with — anchors, ramps, infrastructure,
 					tooling, protocols. Every profile is partner-maintained.{" "}
 					<Link
-						href="/partners/join"
+						href="/partners/chat"
 						className="text-foreground underline underline-offset-2 hover:no-underline"
 					>
 						Get listed
@@ -201,7 +201,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 					<p className="text-muted-foreground text-sm">
 						Nothing matches. Try a broader filter or{" "}
 						<Link
-							href="/partners/join"
+							href="/partners/chat"
 							className="text-foreground underline"
 						>
 							get your company listed
@@ -288,7 +288,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 						</p>
 					</div>
 					<Link
-						href="/partners/join"
+						href="/partners/chat"
 						className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
 					>
 						<Sparkles className="w-4 h-4" />

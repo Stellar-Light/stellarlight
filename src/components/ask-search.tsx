@@ -235,9 +235,17 @@ export function AskSearch() {
 					{/* Partners / providers — the direct answer to "who can I hire" questions */}
 					{partners.length > 0 && (
 						<section>
-							<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-								Providers ({partners.length})
-							</h2>
+							<div className="flex items-baseline justify-between gap-3 mb-4 flex-wrap">
+								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+									Providers ({partners.length})
+								</h2>
+								<Link
+									href="/partners/chat"
+									className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+								>
+									chat with the partner concierge →
+								</Link>
+							</div>
 							<div className="grid sm:grid-cols-2 gap-3">
 								{partners.map((p) => {
 									const Card = p.websiteUrl ? "a" : "div";
@@ -260,7 +268,7 @@ export function AskSearch() {
 												)}
 												{p.acceptingClients && (
 													<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
-														accepting
+														Available
 													</span>
 												)}
 											</div>

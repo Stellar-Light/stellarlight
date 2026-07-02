@@ -566,6 +566,181 @@ const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/partners/match": {
+			post: {
+				operationId: "matchPartners",
+				tags: ["Partners"],
+				summary: "AI-rank partners against a plain-language need",
+				description:
+					"Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked — nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["need"],
+								properties: {
+									need: {
+										type: "string",
+										description: "The builder's need, in plain language",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					"200": {
+						description: "Ranked matches with reasons",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"429": { description: "Rate limited" },
+					"503": {
+						description: "AI backend unavailable — fall back to GET /api/partners",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
+		"/api/partners/assistant": {
+			post: {
+				operationId: "partnerAssistant",
+				tags: ["Partners"],
+				summary: "Conversational partner concierge (find OR get listed)",
+				description:
+					"The chat backend for /partners/chat. Send the running message history; the assistant routes intent — a builder describing a need gets real matched partners back in `matches[]` (deterministically searched, never hallucinated; surfaced partners are logged as leads for the weekly partner digest), a company describing itself gets interviewed and `canList:true` signals the client to offer profile extraction. Returns `{reply, matches?, intent, canList}`. 503 `unavailable:true` without AI configured. **Use when:** building a conversational partner-finding UX. **Not for:** one-shot programmatic ranking → POST /api/partners/match; browsing → GET /api/partners.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["messages"],
+								properties: {
+									messages: {
+										type: "array",
+										description: "Chat turns, oldest first",
+										items: {
+											type: "object",
+											required: ["role", "content"],
+											properties: {
+												role: { type: "string", enum: ["user", "assistant"] },
+												content: { type: "string" },
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					"200": {
+						description: "Assistant reply (+ matches when a need was searched)",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"429": { description: "Rate limited" },
+					"503": {
+						description: "AI backend unavailable",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
+		"/api/partners/onboard": {
+			post: {
+				operationId: "partnerOnboard",
+				tags: ["Partners"],
+				summary: "AI onboarding helpers: interview chat + profile extraction",
+				description:
+					"Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated — nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["mode", "messages"],
+								properties: {
+									mode: { type: "string", enum: ["chat", "extract"] },
+									messages: {
+										type: "array",
+										items: {
+											type: "object",
+											required: ["role", "content"],
+											properties: {
+												role: { type: "string", enum: ["user", "assistant"] },
+												content: { type: "string" },
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					"200": {
+						description: "`{reply}` (chat mode) or `{fields}` (extract mode)",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"429": { description: "Rate limited" },
+					"503": {
+						description: "AI backend unavailable",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
+		"/api/partners/submit-listing": {
+			post: {
+				operationId: "submitPartnerListing",
+				tags: ["Partners"],
+				summary: "Submit a new-partner listing (or claim an existing one)",
+				description:
+					"Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead — no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["orgName", "contactEmail"],
+								properties: {
+									orgName: { type: "string", minLength: 2, maxLength: 120 },
+									contactEmail: {
+										type: "string",
+										format: "email",
+										description: "Becomes the partner account login",
+									},
+									fields: {
+										type: "object",
+										description:
+											"Profile fields (typically the /api/partners/onboard extract output)",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					"200": {
+						description: "`{ok:true, mode:'draft'|'claim'}`",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"400": {
+						description: "Missing/invalid orgName or contactEmail",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+					"429": { description: "Rate limited" },
+				},
+			},
+		},
 		"/api/rfps": {
 			get: {
 				operationId: "getRfps",

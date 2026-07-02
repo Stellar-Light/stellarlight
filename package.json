@@ -33,6 +33,7 @@
 		"@next/font": "^14.2.15",
 		"@number-flow/react": "^0.6.0",
 		"@payloadcms/db-mongodb": "3.63.0",
+		"@payloadcms/email-resend": "3.63.0",
 		"@payloadcms/next": "3.63.0",
 		"@payloadcms/payload-cloud": "3.63.0",
 		"@payloadcms/plugin-cloud-storage": "^3.63.0",
