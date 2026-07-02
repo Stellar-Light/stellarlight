@@ -749,6 +749,44 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Org attribution: which entity/organization builds each project — answers
+	// "who built LOBSTR?" (Ultra Stellar) / "who is behind Soroswap?" (Paltalabs)
+	// directly from a search result instead of requiring the entities endpoint.
+	// One cheap query over the small entities collection (depth 0 → projects as
+	// ID arrays), mapped in memory. Best-effort: null when no org is linked.
+	let builtByMap = new Map<string, { name: string; slug: string }>();
+	if (payload && projectsOut.length) {
+		try {
+			const entRes = await payload.find({
+				collection: "entities",
+				limit: 300,
+				depth: 0,
+				select: { name: true, slug: true, projects: true },
+			});
+			const m = new Map<string, { name: string; slug: string }>();
+			for (const e of entRes.docs as unknown as Array<Record<string, unknown>>) {
+				const ids = Array.isArray(e.projects) ? e.projects : [];
+				for (const pid of ids) {
+					const key =
+						typeof pid === "string"
+							? pid
+							: String((pid as { id?: unknown })?.id ?? pid);
+					// First entity wins on the rare multi-org project — entities are
+					// curated one-org-per-project today.
+					if (!m.has(key))
+						m.set(key, { name: String(e.name), slug: String(e.slug) });
+				}
+			}
+			builtByMap = m;
+		} catch {
+			// best-effort — results ship without attribution on any error
+		}
+	}
+	const projectsWithOrg = projectsOut.map((p) => ({
+		...p,
+		builtBy: builtByMap.get(p.id) ?? null,
+	}));
+
 	logApiHit({
 		req,
 		endpoint: "/api/projects/search",
@@ -817,7 +855,7 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 			},
-			projects: projectsOut,
+			projects: projectsWithOrg,
 			// Inline graded code references (GitHub repos) for the same query, so
 			// consumers get existing-repo prior-art without a separate tool call.
 			// Each carries the repo url + homepage to cite. See /api/repos/search.
