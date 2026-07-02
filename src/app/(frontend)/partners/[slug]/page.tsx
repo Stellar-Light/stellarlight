@@ -2,6 +2,7 @@ import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PartnerClaimProfile } from "@/components/partner-claim-profile";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
@@ -123,6 +124,70 @@ export default async function PartnerProfilePage({
 				</Section>
 			)}
 
+			{/* Anchor capabilities — parsed from the partner's stellar.toml (SEP-1),
+			    the same source the official anchors.stellar.org directory uses. */}
+			{(() => {
+				const assets: string[] = (p.assets ?? [])
+					.map((a: { code: string }) => a.code)
+					.filter(Boolean);
+				const seps: string[] = p.seps ?? [];
+				const ramps: string[] = p.rampTypes ?? [];
+				if (!assets.length && !seps.length && !ramps.length && !p.country)
+					return null;
+				const SEP_LABEL: Record<string, string> = {
+					"sep-6": "SEP-6 · programmatic deposit/withdraw",
+					"sep-24": "SEP-24 · interactive deposit/withdraw",
+					"sep-31": "SEP-31 · cross-border payments",
+				};
+				return (
+					<Section title="Capabilities (from stellar.toml)">
+						<div className="space-y-3 max-w-2xl">
+							{ramps.length > 0 && (
+								<div className="flex flex-wrap gap-1.5">
+									{ramps.map((r) => (
+										<span
+											key={r}
+											className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20"
+										>
+											{r === "on-ramp" ? "On-ramp (fiat → Stellar)" : "Off-ramp (Stellar → fiat)"}
+										</span>
+									))}
+									{p.country && (
+										<span className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.03] text-muted-foreground border border-border/50">
+											{p.country}
+										</span>
+									)}
+								</div>
+							)}
+							{assets.length > 0 && (
+								<div className="flex flex-wrap gap-1.5">
+									{assets.map((a) => (
+										<span
+											key={a}
+											className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-foreground border border-border font-medium"
+										>
+											{a}
+										</span>
+									))}
+								</div>
+							)}
+							{seps.length > 0 && (
+								<div className="flex flex-wrap gap-1.5">
+									{seps.map((s) => (
+										<span
+											key={s}
+											className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.03] text-muted-foreground border border-border/50"
+										>
+											{SEP_LABEL[s] ?? s}
+										</span>
+									))}
+								</div>
+							)}
+						</div>
+					</Section>
+				);
+			})()}
+
 			{/* Verified signals — only what actually applies. GitHub activity is
 			    shown only for partners with a public org (open-source tooling/
 			    infra); most anchors, ramps, legal, agencies are closed-source and
@@ -229,6 +294,12 @@ export default async function PartnerProfilePage({
 					)}
 				</div>
 			</Section>
+
+			{/* Claim path — most profiles were seeded curated; the company can
+			    take ownership here (verified before invite). */}
+			<div className="mt-10">
+				<PartnerClaimProfile orgName={p.name} />
+			</div>
 		</main>
 	);
 }

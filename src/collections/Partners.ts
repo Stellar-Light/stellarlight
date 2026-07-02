@@ -282,6 +282,55 @@ export const Partners: CollectionConfig = {
 			options: [...REGIONS],
 		},
 
+		// ── Anchor capabilities (SYSTEM-ENRICHED from stellar.toml, admin-editable) ──
+		// Parsed from each anchor's /.well-known/stellar.toml (SEP-1) — the same
+		// source anchors.stellar.org uses. CURRENCIES → assets; TRANSFER_SERVER →
+		// SEP-6; TRANSFER_SERVER_SEP0024 → SEP-24; DIRECT_PAYMENT_SERVER → SEP-31.
+		// The matcher scores on these ("USDC off-ramp in Mexico" hits asset+country
+		// instead of description luck). autoField: partners don't hand-edit them —
+		// the enrichment run owns them.
+		autoField({
+			name: "assets",
+			type: "array",
+			labels: { singular: "Asset", plural: "Assets" },
+			admin: {
+				description:
+					"Assets this anchor issues/supports, from stellar.toml CURRENCIES (e.g. USDC, EURC, NGNT).",
+			},
+			fields: [{ name: "code", type: "text", required: true }],
+		}),
+		autoField({
+			name: "seps",
+			type: "select",
+			hasMany: true,
+			admin: {
+				description: "SEP standards implemented, from stellar.toml keys.",
+			},
+			options: [
+				{ label: "SEP-6 (programmatic deposit/withdraw)", value: "sep-6" },
+				{ label: "SEP-24 (interactive deposit/withdraw)", value: "sep-24" },
+				{ label: "SEP-31 (cross-border payments)", value: "sep-31" },
+			],
+		}),
+		autoField({
+			name: "rampTypes",
+			type: "select",
+			hasMany: true,
+			admin: { description: "Fiat ramps offered." },
+			options: [
+				{ label: "On-ramp (fiat → Stellar)", value: "on-ramp" },
+				{ label: "Off-ramp (Stellar → fiat)", value: "off-ramp" },
+			],
+		}),
+		autoField({
+			name: "country",
+			type: "text",
+			admin: {
+				description:
+					"Primary jurisdiction/market, from stellar.toml DOCUMENTATION.ORG_* (e.g. 'Mexico', 'Nigeria', 'Global').",
+			},
+		}),
+
 		// ── Capacity & pricing (partner-owned) ────────────────────────────
 		{
 			name: "acceptingClients",

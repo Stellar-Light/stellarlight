@@ -319,7 +319,14 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 
 /* Dashboard ─────────────────────────────────────────────────────────── */
 
-type Tab = "profile" | "chat";
+type Tab = "profile" | "chat" | "leads";
+
+interface Lead {
+	id: string;
+	need: string;
+	source?: string;
+	createdAt?: string;
+}
 
 function Dashboard({
 	partner,
@@ -499,7 +506,12 @@ function Dashboard({
 				</p>
 			</section>
 
-			{/* Tab toggle: overview editor vs AI chat */}
+			{/* Profile strength — the honest v1 of the partner competition: the
+			    same score nudges match ranking, so "add what's missing" is not
+			    just cosmetic. */}
+			<ProfileStrength partner={form} />
+
+			{/* Tab toggle: overview editor vs AI chat vs leads */}
 			<div className="flex items-center gap-2">
 				<TabButton
 					active={tab === "profile"}
@@ -515,9 +527,18 @@ function Dashboard({
 				>
 					Update by chat
 				</TabButton>
+				<TabButton
+					active={tab === "leads"}
+					onClick={() => setTab("leads")}
+					icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+				>
+					Leads
+				</TabButton>
 			</div>
 
-			{tab === "chat" ? (
+			{tab === "leads" ? (
+				<LeadsPanel slug={form.slug} />
+			) : tab === "chat" ? (
 				<MaintenanceChat partner={form} onApply={applyExtracted} />
 			) : (
 				<>
@@ -1178,4 +1199,136 @@ function fmtDate(d?: string | null): string {
 	} catch {
 		return "";
 	}
+}
+
+/* Profile strength ──────────────────────────────────────────────────── */
+
+/** Mirrors profileStrength() in src/lib/partner-match.ts — the matcher gives
+ *  complete profiles a small ranking boost, so this meter is the visible half
+ *  of the same incentive. Keep the checks in sync. */
+function strengthChecks(p: Partner): Array<{ label: string; ok: boolean }> {
+	return [
+		{ label: "Tagline", ok: Boolean(p.tagline) },
+		{ label: "Description", ok: Boolean(p.description) },
+		{ label: "Service tags", ok: (p.services ?? []).length > 0 },
+		{ label: "Sectors", ok: (p.sectors ?? []).length > 0 },
+		{ label: "Regions", ok: (p.regions ?? []).length > 0 },
+		{
+			label: "Contact path",
+			ok: Boolean(p.contactEmail || p.contactChannel),
+		},
+		{ label: "Website", ok: Boolean(p.websiteUrl) },
+		{ label: "Fresh profile", ok: (p.freshnessStatus ?? "fresh") === "fresh" },
+	];
+}
+
+function ProfileStrength({ partner }: { partner: Partner }) {
+	const checks = strengthChecks(partner);
+	const done = checks.filter((c) => c.ok).length;
+	const pct = Math.round((done / checks.length) * 100);
+	const missing = checks.filter((c) => !c.ok).slice(0, 3);
+	return (
+		<section className="rounded-2xl border border-border bg-card p-5">
+			<div className="flex items-center justify-between gap-3 mb-2">
+				<h3 className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+					Profile strength
+				</h3>
+				<span className="text-xs text-foreground font-medium">{pct}%</span>
+			</div>
+			<div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+				<div
+					className={`h-full rounded-full transition-all ${
+						pct >= 80
+							? "bg-emerald-400/80"
+							: pct >= 50
+								? "bg-yellow-400/70"
+								: "bg-orange-400/70"
+					}`}
+					style={{ width: `${pct}%` }}
+				/>
+			</div>
+			<p className="text-xs text-muted-foreground mt-2.5">
+				{missing.length === 0 ? (
+					<>Complete profiles rank higher in concierge matches — yours is all set.</>
+				) : (
+					<>
+						Complete profiles rank higher in concierge matches. Next:{" "}
+						<span className="text-foreground/90">
+							{missing.map((m) => m.label).join(" · ")}
+						</span>
+					</>
+				)}
+			</p>
+		</section>
+	);
+}
+
+/* Leads panel ────────────────────────────────────────────────────────── */
+
+/** Builder searches that surfaced this partner (via the public concierge).
+ *  Reads Payload's auto-mounted /api/partner-leads with cookie auth — the
+ *  collection's read access row-scopes to the partner's own slug. */
+function LeadsPanel({ slug }: { slug?: string }) {
+	const [leads, setLeads] = useState<Lead[] | null>(null);
+
+	useEffect(() => {
+		if (!slug) {
+			setLeads([]);
+			return;
+		}
+		(async () => {
+			try {
+				const r = await fetch(
+					`/api/partner-leads?where[partnerSlug][equals]=${encodeURIComponent(slug)}&sort=-createdAt&limit=25&depth=0`,
+					{ credentials: "include" },
+				);
+				const d = await r.json().catch(() => ({}));
+				setLeads(Array.isArray(d.docs) ? d.docs : []);
+			} catch {
+				setLeads([]);
+			}
+		})();
+	}, [slug]);
+
+	if (leads === null) {
+		return (
+			<div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+				Loading leads…
+			</div>
+		);
+	}
+
+	if (leads.length === 0) {
+		return (
+			<div className="rounded-2xl border border-border bg-card p-8 text-center">
+				<p className="text-sm text-muted-foreground max-w-md mx-auto">
+					No leads yet. When a builder asks the concierge for something you
+					offer, it shows up here (and in your weekly digest). A complete,
+					fresh profile gets matched more.
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="rounded-2xl border border-border bg-card p-5">
+			<h3 className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-4">
+				Builders were looking for this ({leads.length})
+			</h3>
+			<ul className="divide-y divide-border/60">
+				{leads.map((l) => (
+					<li key={l.id} className="py-2.5 flex items-baseline justify-between gap-3">
+						<span className="text-sm text-foreground/90">“{l.need}”</span>
+						<span className="text-[11px] text-muted-foreground whitespace-nowrap">
+							{fmtDate(l.createdAt)}
+						</span>
+					</li>
+				))}
+			</ul>
+			<p className="text-[11px] text-muted-foreground/60 mt-3">
+				Anonymous searches from the partner concierge — shown so you know the
+				demand is real. Keep your services current to catch more of them.
+			</p>
+		</div>
+	);
 }

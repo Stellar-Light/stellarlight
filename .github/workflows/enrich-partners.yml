@@ -1,0 +1,33 @@
+name: Enrich partners from stellar.toml
+
+# Enriches anchor partners from their /.well-known/stellar.toml (assets, SEPs,
+# real on/off-ramp capability from the transfer server /info, contact + logo
+# fill-if-empty) + curated audit-firm backfill. Same source anchors.stellar.org
+# uses. Never deletes; partner-owned fields only filled when empty.
+# Run dry first (execute=false), inspect the per-anchor report, then execute.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/enrich-partners-toml.ts ${{ inputs.execute && '--execute' || '' }}

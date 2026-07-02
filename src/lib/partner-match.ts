@@ -37,6 +37,15 @@ export interface PublicPartner {
 	acceptingClients: boolean | null;
 	sectors: string[];
 	regions: string[];
+	/** Asset codes (USDC, EURC, NGNT…) from stellar.toml CURRENCIES. */
+	assets: string[];
+	/** SEP standards implemented (sep-6, sep-24, sep-31). */
+	seps: string[];
+	/** Real fiat-ramp capability (on-ramp / off-ramp) from the transfer server. */
+	rampTypes: string[];
+	country: string | null;
+	/** True when the partner has a direct contact path (email or channel). */
+	contactable: boolean;
 	freshness: string;
 	url: string;
 }
@@ -59,6 +68,13 @@ function toPublic(p: any): PublicPartner {
 		acceptingClients: p.acceptingClients ?? null,
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
+		assets: (p.assets ?? [])
+			.map((a: { code: string }) => a.code)
+			.filter(Boolean),
+		seps: p.seps ?? [],
+		rampTypes: p.rampTypes ?? [],
+		country: p.country ?? null,
+		contactable: Boolean(p.contactEmail || p.contactChannel),
 		freshness: p.freshnessStatus ?? "fresh",
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};
@@ -125,13 +141,25 @@ export function scorePartners(
 			.filter(Boolean);
 		const sectors: string[] = p.sectors ?? [];
 		const regions: string[] = p.regions ?? [];
+		const assets: string[] = (p.assets ?? [])
+			.map((a: { code: string }) => a.code)
+			.filter(Boolean);
+		const seps: string[] = p.seps ?? [];
+		const rampTypes: string[] = p.rampTypes ?? [];
 
-		// Weighted fields: services + type are the strongest fit signal.
+		// Weighted fields: the stellar.toml-verified capabilities (assets, SEPs,
+		// real ramp direction, country) are the strongest fit signal — "USDC
+		// off-ramp in Mexico" should hit asset+ramp+country, not description
+		// luck. services + type next; free text last.
 		const weighted: Array<[string, number]> = [
-			[services.join(" "), 4],
-			[String(p.partnerType ?? ""), 3],
+			[assets.join(" "), 5],
+			[rampTypes.join(" ").replace(/-/g, " "), 5],
+			[seps.join(" ").replace(/-/g, " "), 4],
+			[String(p.country ?? ""), 4],
+			[services.join(" ").replace(/-/g, " "), 4],
+			[String(p.partnerType ?? "").replace(/-/g, " "), 3],
 			[sectors.join(" "), 3],
-			[regions.join(" "), 2],
+			[regions.join(" ").replace(/-/g, " "), 2],
 			[String(p.tagline ?? ""), 2],
 			[String(p.description ?? ""), 1],
 			[String(p.name ?? ""), 1],
@@ -145,6 +173,10 @@ export function scorePartners(
 		if (score > 0) {
 			if (p.acceptingClients) score += 1;
 			if ((p.freshnessStatus ?? "fresh") === "fresh") score += 1;
+			// Profile-strength nudge: complete profiles rank slightly ahead of
+			// thin ones at equal keyword fit — the "competition" incentive made
+			// mechanical. Capped at +2 so it can't beat real relevance.
+			score += Math.min(2, Math.round(profileStrength(p) * 2));
 		}
 		return { score, partner: toPublic(p), blob: partnerBlob(p) };
 	});
@@ -155,19 +187,49 @@ export function scorePartners(
 	return (hits.length ? hits : scored).slice(0, limit);
 }
 
+/**
+ * Profile completeness, 0..1 — the honest v1 of the partner "competition":
+ * complete profiles get a small matcher boost + a visible meter in the
+ * dashboard telling partners exactly what to add next. One signal, two
+ * surfaces, so the incentive and the ranking can't drift apart.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+export function profileStrength(p: any): number {
+	const checks: boolean[] = [
+		Boolean(p.tagline),
+		Boolean(p.description),
+		(p.services ?? []).length > 0,
+		(p.sectors ?? []).length > 0,
+		(p.regions ?? []).length > 0 || Boolean(p.country),
+		Boolean(p.contactEmail || p.contactChannel),
+		Boolean(p.websiteUrl),
+		Boolean(p.logoUrl),
+		(p.freshnessStatus ?? "fresh") === "fresh",
+	];
+	return checks.filter(Boolean).length / checks.length;
+}
+
 /** Compact one-line description of a partner for the chat model's context. */
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 function partnerBlob(p: any): string {
 	const services: string[] = (p.services ?? [])
 		.map((s: { tag: string }) => s.tag)
 		.filter(Boolean);
+	const assets: string[] = (p.assets ?? [])
+		.map((a: { code: string }) => a.code)
+		.filter(Boolean);
 	const parts = [
 		`${p.name} (${p.partnerType})`,
 		p.tagline,
+		assets.length ? `assets: ${assets.join(", ")}` : "",
+		(p.seps ?? []).length ? `standards: ${(p.seps ?? []).join(", ")}` : "",
+		(p.rampTypes ?? []).length ? `ramps: ${(p.rampTypes ?? []).join(", ")}` : "",
+		p.country ? `country: ${p.country}` : "",
 		services.length ? `services: ${services.join(", ")}` : "",
 		(p.sectors ?? []).length ? `sectors: ${(p.sectors ?? []).join(", ")}` : "",
 		(p.regions ?? []).length ? `regions: ${(p.regions ?? []).join(", ")}` : "",
 		p.acceptingClients ? "accepting clients" : "",
+		p.contactEmail || p.contactChannel ? "contactable" : "no direct contact listed",
 	].filter(Boolean);
 	return parts.join(" · ");
 }

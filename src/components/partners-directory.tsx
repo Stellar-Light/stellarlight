@@ -19,11 +19,26 @@ interface DirectoryPartner {
 	tagline: string | null;
 	sectors: string[];
 	regions: string[];
+	assets: string[];
+	seps: string[];
+	rampTypes: string[];
+	country: string | null;
 	acceptingClients: boolean | null;
+	contactable: boolean;
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
 }
+
+const RAMP_LABELS: Record<string, string> = {
+	"on-ramp": "On-ramp",
+	"off-ramp": "Off-ramp",
+};
+const SEP_LABELS: Record<string, string> = {
+	"sep-6": "SEP-6",
+	"sep-24": "SEP-24",
+	"sep-31": "SEP-31",
+};
 
 const TYPE_LABELS: Record<string, string> = {
 	anchor: "Anchor",
@@ -89,7 +104,8 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 		return initial.filter((p) => {
 			if (typeFilter !== "all" && p.partnerType !== typeFilter) return false;
 			if (q) {
-				const hay = `${p.name} ${p.tagline ?? ""} ${p.sectors.join(" ")} ${p.regions.join(" ")}`.toLowerCase();
+				const hay =
+					`${p.name} ${p.tagline ?? ""} ${p.sectors.join(" ")} ${p.regions.join(" ")} ${p.assets.join(" ")} ${p.seps.join(" ")} ${p.rampTypes.join(" ")} ${p.country ?? ""}`.toLowerCase();
 				if (!hay.includes(q)) return false;
 			}
 			return true;
@@ -228,7 +244,9 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 									<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border whitespace-nowrap">
 										{TYPE_LABELS[p.partnerType] ?? p.partnerType}
 									</span>
-									{p.acceptingClients && (
+									{/* Available only when there's an actual contact path —
+									    an "available" partner you can't reach is a dead end. */}
+									{p.acceptingClients && p.contactable && (
 										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20 whitespace-nowrap">
 											Available
 										</span>
@@ -242,8 +260,50 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 								{p.tagline}
 							</p>
 						)}
-						{(p.sectors.length > 0 || p.regions.length > 0) && (
+						{/* stellar.toml-verified capabilities: assets + SEPs + ramps + country */}
+						{(p.assets.length > 0 ||
+							p.seps.length > 0 ||
+							p.rampTypes.length > 0 ||
+							p.country) && (
 							<div className="mt-3 flex flex-wrap gap-1.5">
+								{p.assets.slice(0, 4).map((a) => (
+									<span
+										key={`a-${a}`}
+										className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.06] text-foreground/90 border border-border font-medium"
+									>
+										{a}
+									</span>
+								))}
+								{p.assets.length > 4 && (
+									<span className="text-[10px] px-1 py-0.5 text-muted-foreground/70">
+										+{p.assets.length - 4}
+									</span>
+								)}
+								{p.rampTypes.map((r) => (
+									<span
+										key={`rt-${r}`}
+										className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/90 border border-border"
+									>
+										{RAMP_LABELS[r] ?? r}
+									</span>
+								))}
+								{p.seps.map((s) => (
+									<span
+										key={`sep-${s}`}
+										className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border"
+									>
+										{SEP_LABELS[s] ?? s}
+									</span>
+								))}
+								{p.country && (
+									<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border">
+										{p.country}
+									</span>
+								)}
+							</div>
+						)}
+						{(p.sectors.length > 0 || p.regions.length > 0) && (
+							<div className="mt-2 flex flex-wrap gap-1.5">
 								{p.sectors.slice(0, 3).map((s) => (
 									<span
 										key={`s-${s}`}
