@@ -170,7 +170,8 @@ export function PartnerConciergeChat({
 	const [canList, setCanList] = useState(false);
 	const [unavailable, setUnavailable] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const endRef = useRef<HTMLDivElement>(null);
+	const chatBoxRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	async function callAssistant(
 		msgs: Msg[],
@@ -229,8 +230,11 @@ export function PartnerConciergeChat({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	// Scroll ONLY the chat box — scrollIntoView scrolls every ancestor, which
+	// yanked the whole PAGE down on each message.
 	useEffect(() => {
-		endRef.current?.scrollIntoView({ behavior: "smooth" });
+		const box = chatBoxRef.current;
+		if (box) box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
 	}, [messages, phase]);
 
 	async function sendText(text: string) {
@@ -248,6 +252,8 @@ export function PartnerConciergeChat({
 			if (res.canList) setCanList(true);
 		}
 		setBusy(false);
+		// Keep the keyboard in the conversation — no click needed between messages.
+		inputRef.current?.focus();
 	}
 
 	async function buildProfile() {
@@ -375,7 +381,7 @@ export function PartnerConciergeChat({
 								value={orgName}
 								onChange={(e) => setOrgName(e.target.value)}
 								placeholder="e.g. Etherfuse"
-								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
+								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border outline-none transition-[border-color] duration-150 focus:border-white/30"
 							/>
 						</div>
 						<div>
@@ -390,7 +396,7 @@ export function PartnerConciergeChat({
 								value={contactEmail}
 								onChange={(e) => setContactEmail(e.target.value)}
 								placeholder="you@company.com"
-								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
+								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border outline-none transition-[border-color] duration-150 focus:border-white/30"
 							/>
 						</div>
 					</div>
@@ -444,7 +450,10 @@ export function PartnerConciergeChat({
 	// chat phase
 	return (
 		<div className="space-y-4">
-			<div className="rounded-2xl border border-border bg-card p-4 min-h-[340px] max-h-[56vh] overflow-y-auto space-y-4">
+			<div
+				ref={chatBoxRef}
+				className="rounded-2xl border border-border bg-card p-4 min-h-[340px] max-h-[60vh] overflow-y-auto space-y-4 scroll-smooth"
+			>
 				{messages.map((m, i) => (
 					<div key={i} className="space-y-3">
 						<div
@@ -480,7 +489,6 @@ export function PartnerConciergeChat({
 						</div>
 					</div>
 				)}
-				<div ref={endRef} />
 			</div>
 
 			{error && <div className="text-xs text-red-400">{error}</div>}
@@ -509,11 +517,12 @@ export function PartnerConciergeChat({
 			>
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
+					ref={inputRef}
+					autoFocus
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 					placeholder="describe what you need, or tell us about your company…"
-					disabled={busy}
-					className="w-full h-12 pl-11 pr-12 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border focus-visible:outline-none focus-visible:border-white/30 disabled:opacity-60"
+					className="w-full h-12 pl-11 pr-12 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border outline-none transition-[border-color] duration-150 focus:border-white/30 disabled:opacity-60"
 				/>
 				<button
 					type="submit"

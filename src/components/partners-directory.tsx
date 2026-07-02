@@ -174,7 +174,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder="search the directory — or ask, and we'll open a chat…"
-					className="w-full h-14 pl-14 pr-24 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
+					className="w-full h-14 pl-14 pr-24 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border outline-none transition-[border-color,box-shadow] duration-150 focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.10)]"
 					aria-label="Search partners, or ask the concierge"
 				/>
 				<button
