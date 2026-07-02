@@ -104,10 +104,11 @@ export const Projects: CollectionConfig = {
 			type: "select",
 			required: true,
 			index: true,
-			options: ["Draft", "Development", "Pre-Release", "Live"],
+			options: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
 			defaultValue: "Draft",
 			admin: {
-				description: "Draft projects require admin approval before appearing on the frontend",
+				description:
+					"Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).",
 			},
 		},
 		{

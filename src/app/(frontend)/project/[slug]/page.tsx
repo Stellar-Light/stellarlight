@@ -401,7 +401,10 @@ export default async function ProjectDetailPage({
 											{project.status === "Development" && (
 												<span className="w-2 h-2 rounded-full bg-yellow-500"></span>
 											)}
-											{project.status}
+											{project.status === "Inactive" && (
+												<span className="w-2 h-2 rounded-full bg-muted-foreground/60"></span>
+											)}
+											{project.status === "Inactive" ? "Inactive / archived" : project.status}
 										</Badge>
 										{project.verificationLevel !== "Unverified" && (
 											<Badge
