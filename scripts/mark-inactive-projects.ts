@@ -23,7 +23,13 @@ import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
-const STALE_MS = 18 * 30 * 24 * 60 * 60 * 1000; // ~18 months
+// --mark-stale (with --execute) also flips the CLEARLY-DEAD set: no repo commit
+// in >=36 months AND never SCF-funded. That combo is unambiguous abandonment —
+// a funded or recently-touched project is never included, so we don't bury
+// stable-but-quiet work. Everything else stays report-only for human review.
+const MARK_STALE = process.argv.includes("--mark-stale");
+const STALE_MS = 18 * 30 * 24 * 60 * 60 * 1000; // ~18 months (report threshold)
+const DEAD_MONTHS = 36; // ~3 years — the auto-mark threshold
 
 // Hand-verified. Extend only after confirming a project is genuinely defunct.
 const CURATED_INACTIVE: string[] = ["keybase"];
@@ -99,7 +105,25 @@ async function main() {
 		console.log(`  ${r.slug.padEnd(26)} ${String(r.stars).padStart(6)}★  last ${r.ageMo == null ? "none" : r.ageMo + "mo"}  ${r.scf ? "SCF" : ""}`);
 	}
 
-	console.log(`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · watchlist: ${WATCHLIST.length} · stale candidates: ${rows.length}`);
+	// CLEARLY DEAD = no commit in >=36mo (a real, dated commit — not "no repo")
+	// AND never SCF-funded. Unambiguous abandonment; safe to auto-mark under
+	// --mark-stale. "No repo at all" is EXCLUDED (could be a legit closed-source
+	// or mis-linked project) — those stay report-only.
+	const dead = rows.filter((r) => r.ageMo != null && r.ageMo >= DEAD_MONTHS && !r.scf);
+	console.log(`\n=== CLEARLY DEAD (>=${DEAD_MONTHS}mo, no SCF) — ${dead.length} projects ${MARK_STALE && EXECUTE ? "→ MARKING Inactive" : "(report only; run --mark-stale --execute to flip)"} ===`);
+	let deadMarked = 0;
+	for (const r of dead) {
+		console.log(`  ${r.slug.padEnd(28)} ${String(r.stars).padStart(6)}★  last ${r.ageMo}mo`);
+		if (MARK_STALE && EXECUTE) {
+			const doc = (await payload.find({ collection: "projects", where: { slug: { equals: r.slug } }, limit: 1, depth: 0 })).docs[0];
+			if (doc && doc.status !== "Inactive") {
+				await payload.update({ collection: "projects", id: doc.id, data: { status: "Inactive" }, overrideAccess: true });
+				deadMarked++;
+			}
+		}
+	}
+
+	console.log(`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length}`);
 	process.exit(0);
 }
 main().catch((e) => { console.error("FAILED:", e?.message ?? e); process.exit(1); });
