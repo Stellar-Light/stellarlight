@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { PartnersDirectory } from "@/components/partners-directory";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -70,5 +72,18 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 
 export default async function PartnersPage() {
 	const partners = await getPartners();
-	return <PartnersDirectory initial={partners} />;
+	return (
+		<div className="min-h-screen relative">
+			<div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28">
+				<Link
+					href="/"
+					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-4 group"
+				>
+					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
+					<span className="text-sm font-medium">Back to Home</span>
+				</Link>
+			</div>
+			<PartnersDirectory initial={partners} />
+		</div>
+	);
 }

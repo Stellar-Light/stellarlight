@@ -2,14 +2,15 @@
 
 /**
  * Public partner directory — browsable grid + filters. Human twin of
- * GET /api/partners. opencode.ai-style: terminal-ish, monochrome,
- * filter chips, every card carries a freshness badge so a builder never
- * reaches out to a dead integration.
+ * GET /api/partners. Visual language matches /ask: narrow focused container,
+ * big rounded search, muted section headers, subtle card hover. Every card
+ * carries a freshness badge so a builder never reaches out to a dead
+ * integration.
  */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, Sparkles, ArrowUpRight } from "lucide-react";
 
 interface DirectoryPartner {
 	slug: string;
@@ -48,11 +49,11 @@ const TYPE_FILTERS = [
 	{ key: "audit-firm", label: "Audit" },
 ];
 
-const FRESH_BADGE: Record<string, { label: string; cls: string }> = {
-	fresh: { label: "Fresh", cls: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-	aging: { label: "Aging", cls: "text-yellow-400 border-yellow-500/30 bg-yellow-500/10" },
-	stale: { label: "Stale", cls: "text-orange-400 border-orange-500/30 bg-orange-500/10" },
-	archived: { label: "Archived", cls: "text-red-400 border-red-500/30 bg-red-500/10" },
+const FRESH_BADGE: Record<string, string> = {
+	fresh: "text-emerald-400/90",
+	aging: "text-yellow-400/90",
+	stale: "text-orange-400/90",
+	archived: "text-red-400/90",
 };
 
 export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) {
@@ -72,162 +73,185 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 	}, [initial, typeFilter, query]);
 
 	return (
-		<main className="max-w-5xl mx-auto px-6 py-12">
-			{/* Header */}
+		<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
+			{/* Hero */}
 			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-foreground tracking-tight">
-					Stellar Partners
-				</h1>
-				<p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-					Ecosystem partners you can integrate with — anchors, ramps,
-					infrastructure, tooling, protocols. Every profile is
-					partner-maintained and freshness-verified, so you never reach out to
-					a dead integration. Are you a partner?{" "}
-					<a
-						href="mailto:hello@stellarlight.xyz?subject=Partner%20listing%20on%20StellarLight"
-						className="text-foreground underline"
+				<div className="flex items-center gap-3 flex-wrap">
+					<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+						Stellar Partners
+					</h1>
+					<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
+						Beta
+					</span>
+				</div>
+				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
+					Ecosystem partners you can integrate with — anchors, ramps, infrastructure,
+					tooling, protocols. Every profile is partner-maintained.{" "}
+					<Link
+						href="/partners/join"
+						className="text-foreground underline underline-offset-2 hover:no-underline"
 					>
 						Get listed
-					</a>
+					</Link>
 					.
 				</p>
 			</div>
 
-			{/* Stats row */}
-			<div className="grid grid-cols-3 gap-3 mb-8">
-				<Stat n={initial.length} label="partners" />
-				<Stat
-					n={initial.filter((p) => p.acceptingClients).length}
-					label="accepting clients"
-				/>
-				<Stat
-					n={initial.filter((p) => p.freshness.status === "fresh").length}
-					label="fresh profiles"
+			{/* Search bar (matches /ask style) */}
+			<div className="relative mb-4">
+				<Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+				<input
+					type="text"
+					value={query}
+					onChange={(e) => setQuery(e.target.value)}
+					placeholder="search partners by name, sector, region…"
+					className="w-full h-14 pl-14 pr-4 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
+					aria-label="Search partners"
 				/>
 			</div>
 
-			{/* Search + filters */}
-			<div className="rounded-xl border border-border/40 bg-card overflow-hidden mb-6">
-				<div className="relative border-b border-border/40">
-					<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 pointer-events-none" />
-					<input
-						type="text"
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						placeholder="Search partners…"
-						className="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-					/>
-				</div>
-				<div className="px-4 py-3 flex flex-wrap gap-1.5">
-					{TYPE_FILTERS.map((f) => {
-						const active = typeFilter === f.key;
-						return (
-							<button
-								type="button"
-								key={f.key}
-								onClick={() => setTypeFilter(f.key)}
-								className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-									active
-										? "bg-foreground text-background border-foreground"
-										: "border-border/50 text-muted-foreground hover:text-foreground"
-								}`}
-							>
-								{f.label}
-							</button>
-						);
-					})}
-				</div>
+			{/* Type filter chips (matches /ask example chips) */}
+			<div className="flex flex-wrap gap-2 mb-8">
+				{TYPE_FILTERS.map((f) => {
+					const active = typeFilter === f.key;
+					return (
+						<button
+							key={f.key}
+							onClick={() => setTypeFilter(f.key)}
+							className={
+								"text-xs px-3 py-1.5 rounded-full transition-colors border " +
+								(active
+									? "bg-white/10 text-foreground border-white/25"
+									: "bg-white/[0.03] text-muted-foreground border-border hover:text-foreground hover:border-white/25")
+							}
+						>
+							{f.label}
+						</button>
+					);
+				})}
 			</div>
 
-			{/* Grid */}
-			{filtered.length === 0 ? (
-				<div className="rounded-xl border border-border/40 bg-card/50 p-12 text-center">
-					<p className="text-sm text-muted-foreground">
-						{initial.length === 0
-							? "The partner directory is launching soon — pilot partners are onboarding now."
-							: "No partners match this filter. Try widening your search."}
+			{/* Results header (muted, ask-style) */}
+			<div className="flex items-center justify-between mb-4">
+				<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+					{filtered.length === 0
+						? "No partners match"
+						: `${filtered.length} partner${filtered.length === 1 ? "" : "s"}`}
+				</h2>
+				{filtered.length === 0 && query && (
+					<button
+						onClick={() => {
+							setQuery("");
+							setTypeFilter("all");
+						}}
+						className="text-xs text-muted-foreground hover:text-foreground underline"
+					>
+						clear filters
+					</button>
+				)}
+			</div>
+
+			{/* Empty state */}
+			{filtered.length === 0 && (
+				<div className="rounded-2xl border border-border bg-card p-10 text-center">
+					<p className="text-muted-foreground text-sm">
+						Nothing matches. Try a broader filter or{" "}
+						<Link
+							href="/partners/join"
+							className="text-foreground underline"
+						>
+							get your company listed
+						</Link>
+						.
 					</p>
 				</div>
-			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{filtered.map((p) => (
-						<PartnerCard key={p.slug} p={p} />
-					))}
+			)}
+
+			{/* Cards */}
+			<div className="grid sm:grid-cols-2 gap-3">
+				{filtered.map((p) => (
+					<Link
+						key={p.slug}
+						href={`/partners/${p.slug}`}
+						className="group block p-4 rounded-xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+					>
+						<div className="flex items-start justify-between gap-3 mb-1.5">
+							<div className="min-w-0">
+								<div className="flex items-center gap-2 mb-1 flex-wrap">
+									<span className="font-medium text-foreground group-hover:text-white transition-colors truncate">
+										{p.name}
+									</span>
+									<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border whitespace-nowrap">
+										{TYPE_LABELS[p.partnerType] ?? p.partnerType}
+									</span>
+									{p.acceptingClients && (
+										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20 whitespace-nowrap">
+											accepting
+										</span>
+									)}
+								</div>
+							</div>
+							<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
+						</div>
+						{p.tagline && (
+							<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2">
+								{p.tagline}
+							</p>
+						)}
+						{(p.sectors.length > 0 || p.regions.length > 0) && (
+							<div className="mt-3 flex flex-wrap gap-1.5">
+								{p.sectors.slice(0, 3).map((s) => (
+									<span
+										key={`s-${s}`}
+										className="text-[10px] text-muted-foreground/80"
+									>
+										#{s}
+									</span>
+								))}
+								{p.regions.slice(0, 2).map((r) => (
+									<span
+										key={`r-${r}`}
+										className="text-[10px] text-muted-foreground/80"
+									>
+										@{r}
+									</span>
+								))}
+							</div>
+						)}
+						{FRESH_BADGE[p.freshness.status] && p.freshness.status !== "fresh" && (
+							<div
+								className={`mt-2 text-[10px] ${FRESH_BADGE[p.freshness.status]}`}
+							>
+								profile is {p.freshness.status}
+							</div>
+						)}
+					</Link>
+				))}
+			</div>
+
+			{/* Get-listed CTA at the bottom (mirrors /ask's Ask box position) */}
+			{filtered.length > 0 && (
+				<div className="mt-10 rounded-2xl border border-border bg-card p-5 flex items-center justify-between gap-4 flex-wrap">
+					<div className="min-w-0">
+						<div className="flex items-center gap-2 mb-1">
+							<Sparkles className="w-4 h-4 text-muted-foreground" />
+							<h3 className="text-sm font-semibold text-foreground">
+								Are you a Stellar partner?
+							</h3>
+						</div>
+						<p className="text-xs text-muted-foreground">
+							Get listed in a short AI-guided chat — no account needed to start.
+						</p>
+					</div>
+					<Link
+						href="/partners/join"
+						className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
+					>
+						<Sparkles className="w-4 h-4" />
+						Get listed
+					</Link>
 				</div>
 			)}
 		</main>
-	);
-}
-
-function Stat({ n, label }: { n: number; label: string }) {
-	return (
-		<div className="rounded-xl border border-border/40 bg-card/40 px-4 py-3">
-			<div className="text-2xl font-bold text-foreground tabular-nums">{n}</div>
-			<div className="text-[11px] uppercase tracking-wide text-muted-foreground/70">
-				{label}
-			</div>
-		</div>
-	);
-}
-
-function PartnerCard({ p }: { p: DirectoryPartner }) {
-	const fresh = FRESH_BADGE[p.freshness.status] ?? FRESH_BADGE.fresh;
-	return (
-		<Link
-			href={`/partners/${p.slug}`}
-			className="group block rounded-xl border border-border/40 bg-card p-5 hover:border-white/20 transition-colors"
-		>
-			<div className="flex items-start justify-between gap-3 mb-2">
-				<div className="min-w-0">
-					<h3 className="text-sm font-semibold text-foreground truncate group-hover:underline">
-						{p.name}
-					</h3>
-					<div className="text-[11px] text-muted-foreground mt-0.5">
-						{TYPE_LABELS[p.partnerType] ?? p.partnerType}
-					</div>
-				</div>
-				<span className={`flex-shrink-0 text-[10px] px-2 py-0.5 rounded-full border ${fresh.cls}`}>
-					{fresh.label}
-				</span>
-			</div>
-			{p.tagline && (
-				<p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-					{p.tagline}
-				</p>
-			)}
-			{/* sectors + regions chips */}
-			{(p.sectors.length > 0 || p.regions.length > 0) && (
-				<div className="flex flex-wrap gap-1 mb-3">
-					{p.sectors.slice(0, 3).map((s) => (
-						<span
-							key={s}
-							className="text-[10px] text-muted-foreground bg-white/[0.03] border border-border/40 rounded px-1.5 py-0.5"
-						>
-							{s}
-						</span>
-					))}
-					{p.regions.slice(0, 2).map((r) => (
-						<span
-							key={r}
-							className="text-[10px] text-muted-foreground/70 bg-white/[0.02] border border-border/30 rounded px-1.5 py-0.5"
-						>
-							{r}
-						</span>
-					))}
-				</div>
-			)}
-			{/* verified signal + accepting badge */}
-			<div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
-				{p.verified.onchainActive && (
-					<span className="text-emerald-400/80">● on-chain active</span>
-				)}
-				{p.verified.scfInvolvement && (
-					<span className="truncate">· {p.verified.scfInvolvement}</span>
-				)}
-				{p.acceptingClients && (
-					<span className="ml-auto text-foreground/80">accepting clients →</span>
-				)}
-			</div>
-		</Link>
 	);
 }

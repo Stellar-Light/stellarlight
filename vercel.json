@@ -15,6 +15,10 @@
 		{
 			"path": "/api/sync/builders",
 			"schedule": "0 6 * * *"
+		},
+		{
+			"path": "/api/cron/partner-freshness",
+			"schedule": "0 8 * * *"
 		}
 	]
 }
