@@ -1292,6 +1292,15 @@ export interface PartnerAccount {
    */
   lastPartnerUpdateAt?: string | null;
   nextReminderAt?: string | null;
+  /**
+   * Set once the publish-invite email has been sent. Guards re-publish from re-inviting.
+   */
+  invitedAt?: string | null;
+  /**
+   * Email of whoever asked to claim this profile via the public listing flow. Verify domain vs website before inviting.
+   */
+  claimRequestedBy?: string | null;
+  claimRequestedAt?: string | null;
   status: 'draft' | 'published' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -2112,6 +2121,9 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
   freshnessStatus?: T;
   lastPartnerUpdateAt?: T;
   nextReminderAt?: T;
+  invitedAt?: T;
+  claimRequestedBy?: T;
+  claimRequestedAt?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

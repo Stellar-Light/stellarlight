@@ -140,6 +140,8 @@ export function PartnerConciergeChat() {
 	const [phase, setPhase] = useState<"chat" | "preview" | "done">("chat");
 	const [fields, setFields] = useState<Fields | null>(null);
 	const [orgName, setOrgName] = useState("");
+	const [contactEmail, setContactEmail] = useState("");
+	const [doneMode, setDoneMode] = useState<"draft" | "claim">("draft");
 	const [canList, setCanList] = useState(false);
 	const [unavailable, setUnavailable] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -227,6 +229,9 @@ export function PartnerConciergeChat() {
 			}
 			if (d.fields) {
 				setFields(d.fields);
+				// Pre-fill the contact email if the AI picked one up in the chat.
+				if (typeof d.fields.contactEmail === "string" && d.fields.contactEmail)
+					setContactEmail(d.fields.contactEmail);
 				setPhase("preview");
 			} else {
 				setError("Couldn't build the profile — add a bit more detail and retry.");
@@ -237,22 +242,27 @@ export function PartnerConciergeChat() {
 	}
 
 	async function submit() {
-		if (busy || !orgName.trim()) return;
+		if (busy || !orgName.trim() || !contactEmail.trim()) return;
 		setBusy(true);
+		setError(null);
 		try {
-			const profile = { orgName: orgName.trim(), ...fields };
-			await fetch("/api/feedback", {
+			// Creates a real draft partner account (or a claim request when the
+			// company is already listed) — reviewed by the team before publish.
+			const r = await fetch("/api/partners/submit-listing", {
 				method: "POST",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify({
-					kind: "other",
-					message: `PARTNER LISTING REQUEST — ${orgName.trim()}\n\n${JSON.stringify(profile, null, 2)}`,
-					context: {
-						endpoint: "/partners/chat",
-						agentName: "partner-concierge-chat",
-					},
+					orgName: orgName.trim(),
+					contactEmail: contactEmail.trim(),
+					fields,
 				}),
 			});
+			const d = await r.json().catch(() => ({}));
+			if (!r.ok) {
+				setError(d.error ?? "Couldn't submit — try again shortly.");
+				return;
+			}
+			setDoneMode(d.mode === "claim" ? "claim" : "draft");
 			setPhase("done");
 		} finally {
 			setBusy(false);
@@ -280,15 +290,28 @@ export function PartnerConciergeChat() {
 			<div className="rounded-2xl border border-border bg-card p-8 text-center">
 				<CheckCircle2 className="w-10 h-10 text-emerald-400/90 mx-auto mb-4" />
 				<h2 className="text-lg font-semibold text-foreground">
-					Submitted for review
+					{doneMode === "claim" ? "Looks like you're already listed" : "Submitted for review"}
 				</h2>
 				<p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-					Thanks — <span className="text-foreground">{orgName}</span> is in the
-					queue. We&apos;ll review the profile and publish it to the{" "}
-					<Link href="/partners" className="underline hover:text-foreground">
-						partner directory
-					</Link>
-					.
+					{doneMode === "claim" ? (
+						<>
+							<span className="text-foreground">{orgName}</span> is already in the{" "}
+							<Link href="/partners" className="underline hover:text-foreground">
+								directory
+							</Link>
+							. We&apos;ve logged your claim — once we verify you&apos;re with the
+							company, we&apos;ll email{" "}
+							<span className="text-foreground">{contactEmail}</span> an invite to
+							manage the profile.
+						</>
+					) : (
+						<>
+							Thanks — <span className="text-foreground">{orgName}</span> is in the
+							queue. Once reviewed and published, we&apos;ll email{" "}
+							<span className="text-foreground">{contactEmail}</span> an invite to
+							set a password and manage the profile.
+						</>
+					)}
 				</p>
 			</div>
 		);
@@ -302,15 +325,34 @@ export function PartnerConciergeChat() {
 					Drafted profile
 				</h2>
 				<div className="rounded-2xl border border-border bg-card p-5">
-					<label className="block text-xs text-muted-foreground mb-1.5">
-						Organization name
-					</label>
-					<input
-						value={orgName}
-						onChange={(e) => setOrgName(e.target.value)}
-						placeholder="e.g. Etherfuse"
-						className="w-full h-10 px-3 mb-5 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
-					/>
+					<div className="grid sm:grid-cols-2 gap-4 mb-5">
+						<div>
+							<label className="block text-xs text-muted-foreground mb-1.5">
+								Organization name
+							</label>
+							<input
+								value={orgName}
+								onChange={(e) => setOrgName(e.target.value)}
+								placeholder="e.g. Etherfuse"
+								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
+							/>
+						</div>
+						<div>
+							<label className="block text-xs text-muted-foreground mb-1.5">
+								Work email{" "}
+								<span className="text-muted-foreground/60">
+									— becomes your account login
+								</span>
+							</label>
+							<input
+								type="email"
+								value={contactEmail}
+								onChange={(e) => setContactEmail(e.target.value)}
+								placeholder="you@company.com"
+								className="w-full h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
+							/>
+						</div>
+					</div>
 					<dl className="divide-y divide-border/60">
 						{FIELD_ORDER.filter((k) => {
 							const v = fields[k];
@@ -332,7 +374,7 @@ export function PartnerConciergeChat() {
 				<div className="flex items-center gap-3">
 					<button
 						onClick={submit}
-						disabled={busy || !orgName.trim()}
+						disabled={busy || !orgName.trim() || !contactEmail.trim()}
 						className="h-10 px-5 inline-flex items-center gap-2 rounded-xl bg-foreground text-background text-sm font-medium disabled:opacity-40 transition-opacity"
 					>
 						{busy ? (
@@ -350,6 +392,7 @@ export function PartnerConciergeChat() {
 						Add more detail
 					</button>
 				</div>
+				{error && <div className="text-xs text-red-400">{error}</div>}
 				<p className="text-[11px] text-muted-foreground/60">
 					Fields the AI couldn&apos;t infer are left blank — nothing is made up.
 				</p>

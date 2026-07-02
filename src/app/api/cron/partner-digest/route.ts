@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPayload } from "payload";
+import { getPayload, type Where } from "payload";
 import configPromise from "@/payload.config";
 
 /**
@@ -34,6 +34,7 @@ export const maxDuration = 60;
 
 const DAY = 24 * 60 * 60 * 1000;
 const CHECKIN_INTERVAL = 90 * DAY; // ~quarterly, per Anke's cadence
+const LEAD_RETENTION_DAYS = 90; // delivered leads older than this are pruned
 const DASHBOARD_URL = "https://stellarlight.xyz/partners/dashboard";
 const MAX_LEADS_SHOWN = 8;
 
@@ -177,6 +178,36 @@ export async function GET(request: Request) {
 			digests.push({ slug, leadCount, checkin: checkinDue });
 		}
 
+		// ── Retention: prune delivered leads past the window ─────────────────
+		// Only ever touches notified:true (a broken digest run can't destroy
+		// undelivered demand signal); 90 days keeps a quarter of history for
+		// admin eyeballing while capping growth on the 512MB M0.
+		const pruneCutoff = new Date(now - LEAD_RETENTION_DAYS * DAY).toISOString();
+		const pruneWhere: Where = {
+			and: [
+				{ notified: { equals: true } },
+				{ createdAt: { less_than: pruneCutoff } },
+			],
+		};
+		let leadsPruned = 0;
+		try {
+			if (dryRun) {
+				leadsPruned = await payload.count({
+					collection: "partner-leads",
+					where: pruneWhere,
+				}).then((r) => r.totalDocs);
+			} else {
+				const pruned = await payload.delete({
+					collection: "partner-leads",
+					where: pruneWhere,
+					depth: 0,
+				});
+				leadsPruned = pruned.docs.length;
+			}
+		} catch {
+			// Best-effort — never fail the digest over retention cleanup.
+		}
+
 		return NextResponse.json({
 			success: true,
 			dryRun,
@@ -184,6 +215,7 @@ export async function GET(request: Request) {
 			emailsSent,
 			checkinsSent,
 			leadsCleared,
+			[dryRun ? "leadsWouldPrune" : "leadsPruned"]: leadsPruned,
 			digests,
 			ranAt: new Date(now).toISOString(),
 		});

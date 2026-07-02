@@ -205,6 +205,7 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
+	const [resetSent, setResetSent] = useState(false);
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
@@ -226,6 +227,26 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 			setError("Something went wrong. Try again.");
 		} finally {
 			setSubmitting(false);
+		}
+	}
+
+	async function forgotPassword() {
+		if (!email) {
+			setError("Enter your email above first, then tap Forgot password.");
+			return;
+		}
+		setError(null);
+		try {
+			// Always responds 200 (no account enumeration); the email links to
+			// /partners/reset-password via the collection's custom template.
+			await fetch("/api/partner-accounts/forgot-password", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email }),
+			});
+			setResetSent(true);
+		} catch {
+			setError("Couldn't send the reset email. Try again.");
 		}
 	}
 
@@ -262,6 +283,11 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 					/>
 				</Field>
 				{error && <div className="text-xs text-red-400">{error}</div>}
+				{resetSent && (
+					<div className="text-xs text-emerald-400">
+						If that email has a partner account, a reset link is on its way.
+					</div>
+				)}
 				<button
 					type="submit"
 					disabled={submitting}
@@ -269,11 +295,18 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 				>
 					{submitting ? "Signing in…" : "Sign in"}
 				</button>
+				<button
+					type="button"
+					onClick={forgotPassword}
+					className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+				>
+					Forgot password?
+				</button>
 			</form>
 			<p className="text-xs text-muted-foreground mt-4">
 				Not a partner yet?{" "}
 				<Link
-					href="/partners/join"
+					href="/partners/chat"
 					className="text-foreground underline underline-offset-2 hover:no-underline"
 				>
 					Get listed
