@@ -83,6 +83,7 @@ const spec: OpenAPISpec = {
 	tags: [
 		{ name: "Discovery", description: "Service health + endpoint enumeration" },
 		{ name: "Projects", description: "Curated Stellar project directory" },
+		{ name: "Repos", description: "Indexed and scored Stellar GitHub repos + code-question answering" },
 		{
 			name: "Hackathons",
 			description: "Stellar Hacks events + DoraHacks feed",
@@ -113,6 +114,7 @@ const spec: OpenAPISpec = {
 	paths: {
 		"/api/status": {
 			get: {
+				operationId: "getStatus",
 				tags: ["Discovery"],
 				summary: "Service health + endpoint enumeration",
 				description:
@@ -131,10 +133,11 @@ const spec: OpenAPISpec = {
 		},
 		"/api/changelog": {
 			get: {
+				operationId: "getChangelog",
 				tags: ["Discovery"],
 				summary: "Recent changes to the API, MCP tools, and client",
 				description:
-					"A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history.",
+					"A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.",
 				parameters: [
 					{
 						name: "since",
@@ -197,6 +200,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/projects/search": {
 			get: {
+				operationId: "searchProjects",
 				tags: ["Projects"],
 				summary: "Search Stellar projects (prior art / competitor lookup)",
 				description:
@@ -243,6 +247,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/repos/search": {
 			get: {
+				operationId: "searchRepos",
 				tags: ["Repos"],
 				summary: "Search the Stellar GitHub repo / code-reference index",
 				description:
@@ -280,6 +285,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/repos/explain": {
 			get: {
+				operationId: "explainRepo",
 				tags: ["Repos"],
 				summary: "Deep code answer about a Stellar repo (routing × DeepWiki)",
 				description:
@@ -318,6 +324,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/hackathons": {
 			get: {
+				operationId: "getHackathons",
 				tags: ["Hackathons"],
 				summary: "List Stellar hackathons",
 				description:
@@ -360,6 +367,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/hackathons/{slug}": {
 			get: {
+				operationId: "getHackathon",
 				tags: ["Hackathons"],
 				summary: "Get one hackathon's full detail",
 				description:
@@ -397,6 +405,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/hackathons/compare": {
 			get: {
+				operationId: "compareHackathons",
 				tags: ["Hackathons"],
 				summary: "Compare 2–5 hackathons side-by-side",
 				description:
@@ -429,6 +438,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/builders": {
 			get: {
+				operationId: "getBuilders",
 				tags: ["Builders"],
 				summary: "Search Stellar builders",
 				description:
@@ -467,6 +477,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/partners": {
 			get: {
+				operationId: "getPartners",
 				tags: ["Partners"],
 				summary: "List ecosystem partners",
 				description:
@@ -525,10 +536,11 @@ const spec: OpenAPISpec = {
 		},
 		"/api/partners/{slug}": {
 			get: {
+				operationId: "getPartner",
 				tags: ["Partners"],
 				summary: "Get one partner's full profile",
 				description:
-					"Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs.",
+					"Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile — services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.",
 				parameters: [
 					{
 						name: "slug",
@@ -556,6 +568,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/rfps": {
 			get: {
+				operationId: "getRfps",
 				tags: ["Funding"],
 				summary: "List Stellar RFPs (SCF-funded sponsor briefs)",
 				description:
@@ -595,6 +608,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/research": {
 			get: {
+				operationId: "searchResearch",
 				tags: ["Research"],
 				summary: "Vector search over the Stellar research corpus",
 				description:
@@ -646,6 +660,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/skills": {
 			get: {
+				operationId: "listSkills",
 				tags: ["Skills"],
 				summary: "List AI skills for Stellar builders",
 				description:
@@ -693,6 +708,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/skills/{name}": {
 			get: {
+				operationId: "getSkill",
 				tags: ["Skills"],
 				summary: "Get one skill's full content",
 				description:
@@ -725,6 +741,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/clusters": {
 			get: {
+				operationId: "getClusters",
 				tags: ["Analytics"],
 				summary: "Topic clusters with crowdedness scores",
 				description:
@@ -757,6 +774,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/analyze": {
 			get: {
+				operationId: "analyzeEcosystem",
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
@@ -783,6 +801,7 @@ const spec: OpenAPISpec = {
 		},
 		"/api/leaderboard": {
 			get: {
+				operationId: "getLeaderboard",
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
@@ -835,10 +854,11 @@ const spec: OpenAPISpec = {
 		},
 		"/api/feedback": {
 			get: {
+				operationId: "getFeedbackSchema",
 				tags: ["Feedback"],
 				summary: "Get the feedback request schema (discovery)",
 				description:
-					"Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects.",
+					"Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first — kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).",
 				responses: {
 					"200": {
 						description: "Feedback request schema",
@@ -847,10 +867,11 @@ const spec: OpenAPISpec = {
 				},
 			},
 			post: {
+				operationId: "submitFeedback",
 				tags: ["Feedback"],
 				summary: "Submit feedback on Scout's output",
 				description:
-					"Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw).",
+					"Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist — file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.",
 				requestBody: {
 					required: true,
 					content: {
