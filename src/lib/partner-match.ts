@@ -33,6 +33,8 @@ export interface PublicPartner {
 	name: string;
 	partnerType: string;
 	tagline: string | null;
+	/** Truncated description — card fallback when tagline is empty. */
+	description: string | null;
 	websiteUrl: string | null;
 	acceptingClients: boolean | null;
 	sectors: string[];
@@ -65,6 +67,7 @@ function toPublic(p: any): PublicPartner {
 		name: p.name,
 		partnerType: p.partnerType,
 		tagline: p.tagline ?? null,
+		description: p.description ? String(p.description).slice(0, 180) : null,
 		websiteUrl: p.websiteUrl ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		sectors: p.sectors ?? [],

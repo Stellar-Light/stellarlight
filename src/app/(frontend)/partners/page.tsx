@@ -24,13 +24,14 @@ export const metadata: Metadata = {
 		"Ecosystem partners builders can integrate with on Stellar — anchors, on/off ramps, infrastructure, tooling, protocols. Each profile is partner-maintained and freshness-verified.",
 };
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 interface DirectoryPartner {
 	slug: string;
 	name: string;
 	partnerType: string;
 	tagline: string | null;
+	description: string | null;
 	sectors: string[];
 	regions: string[];
 	/** stellar.toml-verified anchor capabilities (empty for non-anchors). */
@@ -63,6 +64,7 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 			name: p.name,
 			partnerType: p.partnerType,
 			tagline: p.tagline ?? null,
+			description: p.description ?? null,
 			sectors: p.sectors ?? [],
 			regions: p.regions ?? [],
 			assets: (p.assets ?? [])
