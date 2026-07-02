@@ -34,9 +34,13 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
-	// Deterministic absolute URLs in system emails (password reset/invite links).
-	// Falls back to the request host when unset (local dev).
-	serverURL: process.env.NEXT_PUBLIC_APP_URL || undefined,
+	// NO serverURL on purpose. Setting it makes Payload emit ABSOLUTE URLs on
+	// every media doc (`url: <serverURL>/api/media/file/x`), and the Vercel env
+	// carries a localhost NEXT_PUBLIC_APP_URL — which stamped
+	// http://localhost:3000 on all project images in prod (2026-07-02 incident).
+	// Unset, media URLs stay relative and work on any host. Email links that
+	// need an absolute origin build it themselves via getAppUrl(), which is
+	// Vercel-aware and immune to the localhost env value.
 	// Outbound email (partner digest, quarterly check-ins, invites, password
 	// resets). Resend is REST-based — serverless-safe on Vercel. Without the
 	// key, Payload falls back to its console adapter (dev: emails are logged,
