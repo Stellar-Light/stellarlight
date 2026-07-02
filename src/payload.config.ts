@@ -17,6 +17,7 @@ import { Hackathons } from "./collections/Hackathons";
 import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { Media } from "./collections/Media";
 import { Partners } from "./collections/Partners";
+import { PartnerLeads } from "./collections/PartnerLeads";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Projects } from "./collections/Projects";
@@ -70,6 +71,7 @@ export default buildConfig({
 		ScoutFeedback,
 		CommunitySkills,
 		Partners,
+		PartnerLeads,
 	],
 	globals: [Banner],
 	jobs: {

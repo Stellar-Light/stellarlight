@@ -3,33 +3,30 @@ import { getPayload } from "payload";
 import configPromise from "@/payload.config";
 
 /**
- * Partner freshness cron (Anke's quarterly-update loop).
+ * Partner freshness cron — computes each partner's freshness STATUS only.
  *
  *   GET /api/cron/partner-freshness            (Vercel Cron, Bearer CRON_SECRET)
  *   GET /api/cron/partner-freshness?dryRun=1   (compute, report, write nothing)
  *
- * Walks every partner profile and ages it by how long since the PARTNER last
- * touched it (lastPartnerUpdateAt, falling back to createdAt):
+ * Ages every profile by how long since the PARTNER last touched it
+ * (lastPartnerUpdateAt, falling back to createdAt):
  *
  *     <90d   → fresh
- *     90–180 → aging     (first nudge — "update soon")
+ *     90–180 → aging     ("update soon")
  *     180–365→ stale     (public "please update" badge)
  *     >365d  → archived  (hidden from AI matches; still publicly listed)
  *
- * The incentive: a profile that goes stale is visibly stale next to fresh
- * competitors in the directory, and an archived one drops out of the AI
- * matchmaker entirely (GET /api/partners flags freshness.excludeFromMatching).
- * Keeping it current is the cheapest way to stay discoverable.
+ * The incentive: a stale profile looks stale next to fresh competitors in the
+ * directory, and an archived one drops out of the AI matchmaker entirely.
  *
- * Reminders: on entering aging/stale — and every ~90 days thereafter while
- * still not fresh (driven by nextReminderAt) — we email the partner. Payload
- * has no email adapter wired yet, so sendEmail currently logs to console;
- * this is best-effort and never blocks the freshness update.
+ * Runs daily so the badge is always current. It does NOT email anyone — all
+ * partner email (the quarterly "still active?" check-in AND weekly builder-lead
+ * alerts) is owned by the weekly digest at /api/cron/partner-digest, which
+ * bundles them into one message so partners aren't pinged twice.
  *
- * Writes go through the local API with overrideAccess so the system can set
- * the admin-locked auto fields (freshnessStatus, nextReminderAt). Because the
- * write carries no partner user, the collection's beforeChange hook does NOT
- * treat it as a partner edit — so it never resets the freshness clock.
+ * Writes go through overrideAccess so the system can set the admin-locked
+ * freshnessStatus. Carrying no partner user, the collection's beforeChange hook
+ * does NOT treat it as a partner edit — it never resets the freshness clock.
  */
 
 export const dynamic = "force-dynamic";
@@ -39,7 +36,6 @@ const DAY = 24 * 60 * 60 * 1000;
 const AGING_AFTER = 90 * DAY;
 const STALE_AFTER = 180 * DAY;
 const ARCHIVE_AFTER = 365 * DAY;
-const REMINDER_INTERVAL = 90 * DAY; // quarterly cadence while not fresh
 
 type Freshness = "fresh" | "aging" | "stale" | "archived";
 
@@ -49,25 +45,6 @@ function statusForAge(ageMs: number): Freshness {
 	if (ageMs >= AGING_AFTER) return "aging";
 	return "fresh";
 }
-
-const REMINDER_COPY: Record<
-	Exclude<Freshness, "fresh">,
-	{ subject: string; line: string }
-> = {
-	aging: {
-		subject: "Your Stellar Light partner profile is due for a refresh",
-		line: "It's been about 3 months since you last updated your profile. A quick pass keeps you ranked above stale partners in the directory.",
-	},
-	stale: {
-		subject: "Your Stellar Light partner profile is now showing as stale",
-		line: "Your profile is now flagged 'stale' to builders. Update it to clear the badge and stay front-and-center.",
-	},
-	archived: {
-		subject:
-			"Your Stellar Light partner profile has been archived from AI matches",
-		line: "Your profile hasn't been touched in over a year, so it's now hidden from the AI matchmaker (still publicly listed). Update it to be matchable again.",
-	},
-};
 
 export async function GET(request: Request) {
 	const authHeader = request.headers.get("authorization");
@@ -94,14 +71,8 @@ export async function GET(request: Request) {
 			stale: 0,
 			archived: 0,
 		};
-		let remindersSent = 0;
 		let updated = 0;
-		const changes: Array<{
-			slug: string;
-			from: string;
-			to: Freshness;
-			reminded: boolean;
-		}> = [];
+		const changes: Array<{ slug: string; from: string; to: Freshness }> = [];
 
 		for (const p of result.docs) {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -111,59 +82,21 @@ export async function GET(request: Request) {
 			const current: Freshness = doc.freshnessStatus ?? "fresh";
 			const target = statusForAge(ageMs);
 
-			const statusChanged = target !== current;
-			// A reminder is due if we just crossed into a non-fresh state, or the
-			// partner is still non-fresh and the quarterly timer has elapsed.
-			const reminderDueAt = doc.nextReminderAt
-				? new Date(doc.nextReminderAt).getTime()
-				: 0;
-			const reminderDue =
-				target !== "fresh" &&
-				(statusChanged || !doc.nextReminderAt || reminderDueAt <= now);
+			if (target === current) continue;
+			transitions[target]++;
 
-			if (!statusChanged && !reminderDue) continue;
-
-			// biome-ignore lint/suspicious/noExplicitAny: partial update payload
-			const data: any = {};
-			if (statusChanged) {
-				data.freshnessStatus = target;
-				transitions[target]++;
-			}
-
-			let reminded = false;
-			if (reminderDue) {
-				data.nextReminderAt = new Date(now + REMINDER_INTERVAL).toISOString();
-				if (!dryRun && doc.email) {
-					try {
-						const copy = REMINDER_COPY[target];
-						await payload.sendEmail({
-							to: doc.email,
-							subject: copy.subject,
-							text: `Hi ${doc.name},\n\n${copy.line}\n\nUpdate your profile: https://stellarlight.xyz/partners/dashboard\n\n— Stellar Light`,
-						});
-						reminded = true;
-						remindersSent++;
-					} catch {
-						// Email backend not configured / transient — never block the
-						// freshness write on a failed nudge.
-					}
-				} else if (dryRun) {
-					reminded = true; // would-send
-				}
-			}
-
-			if (!dryRun && Object.keys(data).length > 0) {
+			if (!dryRun) {
 				await payload.update({
 					collection: "partner-accounts",
 					id: doc.id,
-					data,
-					overrideAccess: true, // system write to admin-locked auto fields
+					data: { freshnessStatus: target },
+					overrideAccess: true, // system write to the admin-locked auto field
 					depth: 0,
 				});
 				updated++;
 			}
 
-			changes.push({ slug: doc.slug, from: current, to: target, reminded });
+			changes.push({ slug: doc.slug, from: current, to: target });
 		}
 
 		return NextResponse.json({
@@ -172,7 +105,6 @@ export async function GET(request: Request) {
 			scanned: result.docs.length,
 			updated,
 			transitions,
-			remindersSent,
 			changes,
 			ranAt: new Date(now).toISOString(),
 		});

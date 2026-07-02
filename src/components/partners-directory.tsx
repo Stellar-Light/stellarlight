@@ -97,14 +97,34 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 				</p>
 			</div>
 
-			{/* Search bar (matches /ask style) */}
+			{/* AI concierge CTA — describe a need, get matched (the smart path) */}
+			<Link
+				href="/partners/chat"
+				className="group flex items-center gap-3 mb-3 p-4 rounded-2xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+			>
+				<div className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/[0.06] border border-border flex items-center justify-center">
+					<Sparkles className="w-4 h-4 text-foreground" />
+				</div>
+				<div className="min-w-0 flex-1">
+					<div className="text-sm font-medium text-foreground">
+						Not sure who fits? Ask the concierge
+					</div>
+					<div className="text-xs text-muted-foreground truncate">
+						Describe what you need — &ldquo;a USDC off-ramp in Mexico&rdquo;, &ldquo;a
+						Soroban auditor&rdquo; — and get matched.
+					</div>
+				</div>
+				<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
+			</Link>
+
+			{/* Search bar — keyword browse (matches /ask style) */}
 			<div className="relative mb-4">
 				<Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
 				<input
 					type="text"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					placeholder="search partners by name, sector, region…"
+					placeholder="or browse — search by name, sector, region…"
 					className="w-full h-14 pl-14 pr-4 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
 					aria-label="Search partners"
 				/>
