@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-02",
 		surfaces: ["api"],
+		version: "openapi 1.3.0",
+		type: "changed",
+		summary:
+			"OpenAPI routing overhaul (info.version → 1.3.0): every discovery operation's description now enumerates its answerable topics with real ecosystem vocabulary — searchResearch (compliance/Travel Rule, bug bounties, incidents/post-mortems, SCF governance, SDF, SCP history, ambassador programs), searchProjects (NFT/RWA/lending/wallets/anchors + 'who built X'), searchRepos (OpenZeppelin, SEP-41, fuzz testing), getBuilders (recruit/hire), getRfps/getClusters/analyzeEcosystem. Write ops carry `x-side-effecting: true` so consumers classify them without parsing prose.",
+		detail:
+			"Measured against a lexical spec-routing eval: routing a corpus of real builder questions to the correct operation jumped from 31.6% to 50.5% top-1 and 67.4% to 85.3% top-5. `info.version` is bumped on ANY additive path/description change so drift consumers can diff the version string, not just paths.",
+	},
+	{
+		date: "2026-07-02",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"Partner pipeline is real: new `POST /api/partners/submit-listing` (creates a reviewed draft partner account — or a claim request when the company is already listed), and the previously undocumented `POST /api/partners/match`, `/assistant`, and `/onboard` are now in the OpenAPI spec with operationIds.",
