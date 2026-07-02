@@ -1,0 +1,25 @@
+# Spectral lint of the live OpenAPI spec — runs daily + on PRs so the spec
+# never regresses on its own hygiene rules (operationIds, tag-defined, etc.).
+# Complements scripts/check-api-drift.ts, which asserts live⇄spec agreement.
+name: OpenAPI lint
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "src/app/api/openapi.json/route.ts"
+      - ".spectral.yaml"
+
+jobs:
+  spectral:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm openapi:lint
