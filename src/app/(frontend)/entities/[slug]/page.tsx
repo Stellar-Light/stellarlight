@@ -1,4 +1,5 @@
 import { getPayloadSafe } from "@/lib/payload-client";
+import { aggregateEntity, formatUSD } from "@/lib/entity-stats";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -62,6 +63,7 @@ export default async function EntityDetailPage({
 	}
 
 	const entity = result.docs[0];
+	const stats = aggregateEntity(entity);
 
 	// Get associated projects - filter to only show live/active projects
 	const associatedProjects = (entity.projects || [])
@@ -118,17 +120,42 @@ export default async function EntityDetailPage({
 										{entity.name}
 									</h1>
 
-									{/* Project Count Badge */}
-									<div className="flex flex-wrap items-center gap-3">
-										<Badge
-											variant="secondary"
-											className="text-sm px-4 py-1.5 font-semibold border border-border/50 shadow-sm"
-										>
-											<Code className="w-3.5 h-3.5 mr-1.5" />
-											{associatedProjects.length}{" "}
-											{associatedProjects.length === 1 ? "Project" : "Projects"}
-										</Badge>
+									{/* Aggregated stats — rolled up from this org's projects */}
+									<div className="flex flex-wrap items-center gap-2">
+										{stats.totalScfUSD > 0 && (
+											<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.06] text-foreground border border-border font-semibold">
+												{formatUSD(stats.totalScfUSD)} SCF raised
+											</span>
+										)}
+										<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.03] text-muted-foreground border border-border">
+											{stats.projectCount}{" "}
+											{stats.projectCount === 1 ? "project" : "projects"}
+											{stats.fundedCount > 0 ? ` · ${stats.fundedCount} funded` : ""}
+										</span>
+										{stats.scfRoundCount > 0 && (
+											<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.03] text-muted-foreground border border-border">
+												{stats.scfRoundCount} SCF round
+												{stats.scfRoundCount === 1 ? "" : "s"}
+											</span>
+										)}
+										{stats.repoCount > 0 && (
+											<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.03] text-muted-foreground border border-border">
+												{stats.repoCount} repo{stats.repoCount === 1 ? "" : "s"}
+											</span>
+										)}
 									</div>
+									{stats.categories.length > 0 && (
+										<div className="flex flex-wrap items-center gap-1.5">
+											{stats.categories.slice(0, 5).map((c) => (
+												<span
+													key={c}
+													className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/80 border border-border"
+												>
+													{c}
+												</span>
+											))}
+										</div>
+									)}
 								</div>
 							</div>
 
