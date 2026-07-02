@@ -136,7 +136,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 	}
 
 	return (
-		<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
+		<main className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-16">
 			{/* Hero */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 flex-wrap">
