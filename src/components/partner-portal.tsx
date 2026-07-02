@@ -1259,7 +1259,126 @@ function ProfileStrength({ partner }: { partner: Partner }) {
 					</>
 				)}
 			</p>
+			<CompletenessRank
+				slug={partner.slug}
+				partnerType={partner.partnerType}
+				ownStrength={done / checks.length}
+			/>
 		</section>
+	);
+}
+
+/* Competition rank ───────────────────────────────────────────────────── */
+
+const TYPE_PLURAL: Record<string, string> = {
+	anchor: "anchors",
+	"on-off-ramp": "ramps",
+	infrastructure: "infrastructure providers",
+	tooling: "tooling partners",
+	protocol: "protocols",
+	wallet: "wallets",
+	"audit-firm": "audit firms",
+	legal: "legal partners",
+	agency: "agencies",
+	other: "partners",
+};
+
+/** Completeness score on the PUBLIC partner shape — mirrors strengthChecks()
+ *  / profileStrength() so the rank agrees with the meter and the matcher. */
+// biome-ignore lint/suspicious/noExplicitAny: public API partner shape
+function publicStrength(p: any): number {
+	const checks = [
+		Boolean(p.tagline),
+		Boolean(p.description),
+		(p.services ?? []).length > 0,
+		(p.sectors ?? []).length > 0,
+		(p.regions ?? []).length > 0 || Boolean(p.country),
+		Boolean(p.contactEmail || p.contactChannel),
+		Boolean(p.websiteUrl),
+		Boolean(p.logoUrl),
+		(p.freshness?.status ?? "fresh") === "fresh",
+	];
+	return checks.filter(Boolean).length / checks.length;
+}
+
+/**
+ * "You rank #3 of 29 anchors" — the honest, live competition signal (Anke's
+ * P6). Ranks the partner against published peers of the same type by the same
+ * completeness score the matcher boosts. Draft/unpublished → a publish nudge.
+ */
+function CompletenessRank({
+	slug,
+	partnerType,
+	ownStrength,
+}: {
+	slug?: string;
+	partnerType?: string;
+	ownStrength: number;
+}) {
+	const [state, setState] = useState<
+		{ rank: number; total: number } | "loading" | "unranked" | "error"
+	>("loading");
+
+	useEffect(() => {
+		if (!slug || !partnerType) {
+			setState("unranked");
+			return;
+		}
+		(async () => {
+			try {
+				const r = await fetch(
+					`/api/partners?type=${encodeURIComponent(partnerType)}&limit=200`,
+				);
+				const d = await r.json().catch(() => ({}));
+				// biome-ignore lint/suspicious/noExplicitAny: public API shape
+				const peers: any[] = Array.isArray(d.partners) ? d.partners : [];
+				if (!peers.length) {
+					setState("unranked");
+					return;
+				}
+				// Rank = 1 + peers strictly stronger than me (dense, ties share).
+				const stronger = peers.filter(
+					(p) => p.slug !== slug && publicStrength(p) > ownStrength + 1e-9,
+				).length;
+				const inList = peers.some((p) => p.slug === slug);
+				setState({
+					rank: stronger + 1,
+					total: inList ? peers.length : peers.length + 1,
+				});
+			} catch {
+				setState("error");
+			}
+		})();
+	}, [slug, partnerType, ownStrength]);
+
+	if (state === "loading" || state === "error") return null;
+	const label = TYPE_PLURAL[partnerType ?? "other"] ?? "partners";
+
+	if (state === "unranked") {
+		return (
+			<p className="text-xs text-muted-foreground mt-2">
+				Publish your profile to compete for the top spot among {label}.
+			</p>
+		);
+	}
+
+	const top = state.rank === 1;
+	return (
+		<div className="mt-3 pt-3 border-t border-border/60 flex items-center gap-2 text-xs">
+			<span
+				className={`inline-flex items-center justify-center min-w-[2rem] h-6 px-1.5 rounded-md font-semibold ${
+					top
+						? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+						: "bg-white/[0.06] text-foreground border border-border"
+				}`}
+			>
+				#{state.rank}
+			</span>
+			<span className="text-muted-foreground">
+				of {state.total} {label} by profile completeness
+				{top ? " — you're leading 🎉" : ". Fill the gaps above to climb."}
+			</span>
+		</div>
 	);
 }
 
