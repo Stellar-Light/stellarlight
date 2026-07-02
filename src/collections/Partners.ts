@@ -41,6 +41,15 @@ const isAdmin = (user: { collection?: string } | null | undefined) =>
 	user?.collection === "users";
 
 /**
+ * Seeded/curated partners carry a `curated+<slug>@stellarlight.xyz` placeholder
+ * login (see scripts/enrich-partners-toml.ts). It's not a real inbox, so the
+ * invite hook must never mail it — and swapping it for a real address is how an
+ * admin approves a claim.
+ */
+const isPlaceholderEmail = (email: string | null | undefined): boolean =>
+	!email || (email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
+
+/**
  * Partner-editable field. We mark the system-owned ones explicitly instead
  * (see autoField) so a forgotten access block fails safe: default = editable
  * by the profile owner, which is the common case.
@@ -176,17 +185,40 @@ export const Partners: CollectionConfig = {
 			},
 		],
 		afterChange: [
-			// Publish = invite. When an admin flips a draft to published for a
-			// partner who has never been invited, mint a long-lived password-reset
-			// token and email it as the account invite ("set your password").
-			// Guards: draft→published transition only, once per account
-			// (invitedAt), and a failed email can never block the publish.
+			// Account invite. Two triggers, one action — mint a long-lived
+			// password-reset token and email it as "set your password":
+			//
+			//   1. NEW LISTING: a draft flips to published (submit-listing flow).
+			//      The account email is the company's real submitted address.
+			//   2. CLAIM APPROVAL: an admin verifies a claim on an ALREADY-published
+			//      partner (all 47 seeds are published) and sets the account `email`
+			//      from its `curated+slug@stellarlight.xyz` placeholder to the
+			//      claimer's real address. Without this, the claim button led
+			//      nowhere for every existing partner. Setting a real login email
+			//      IS the approval action.
+			//
+			// A failed email never blocks the save; the nested bookkeeping update
+			// changes neither status nor email, so it can't re-trigger (no recursion).
 			async ({ doc, previousDoc, operation, req }) => {
 				try {
-					if (operation !== "update") return;
-					if (doc.status !== "published" || previousDoc?.status === "published")
+					if (operation !== "update" || !doc.email) return;
+					if (isPlaceholderEmail(doc.email)) return; // never invite the curated+ placeholder
+
+					const justPublished =
+						doc.status === "published" && previousDoc?.status !== "published";
+					// Admin set a real login email on a published partner (claim
+					// approval / reassignment). Firing on any real-email change also
+					// covers a corrected address — the intended recipient still gets it.
+					const emailBecameReal =
+						doc.status === "published" &&
+						doc.email !== previousDoc?.email &&
+						isPlaceholderEmail(previousDoc?.email);
+
+					if (!justPublished && !emailBecameReal) return;
+					// Already invited on this exact email and nothing changed → skip.
+					if (justPublished && doc.invitedAt && doc.email === previousDoc?.email)
 						return;
-					if (doc.invitedAt || !doc.email) return;
+
 					const token = await req.payload.forgotPassword({
 						collection: "partner-accounts",
 						data: { email: doc.email },
@@ -200,9 +232,9 @@ export const Partners: CollectionConfig = {
 						to: doc.email,
 						subject: "You're live on Stellar Light — set your password",
 						text: [
-							`${doc.name} is now published in the Stellar Light partner directory.`,
+							`${doc.name} is now yours to manage in the Stellar Light partner directory.`,
 							"",
-							`Set your password to manage your profile: ${url}`,
+							`Set your password to edit your profile: ${url}`,
 							"",
 							`Your profile: ${base}/partners/${doc.slug}`,
 							`Your dashboard: ${base}/partners/dashboard`,
@@ -210,19 +242,23 @@ export const Partners: CollectionConfig = {
 							"This link expires in 7 days.",
 						].join("\n"),
 					});
-					// Nested update doesn't touch status, so the transition guard
-					// above short-circuits — no recursion.
+					// Stamp invitedAt + clear the (now-actioned) claim request.
 					await req.payload.update({
 						collection: "partner-accounts",
 						id: doc.id,
-						data: { invitedAt: new Date().toISOString() },
+						data: {
+							invitedAt: new Date().toISOString(),
+							...(doc.claimRequestedBy
+								? { claimRequestedBy: null, claimRequestedAt: null }
+								: {}),
+						},
 						overrideAccess: true,
 						req,
 					});
 				} catch (err) {
 					req.payload.logger.error(
 						{ err, partner: doc?.slug },
-						"partner invite email failed (publish not blocked)",
+						"partner invite email failed (save not blocked)",
 					);
 				}
 			},
@@ -463,7 +499,7 @@ export const Partners: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Email of whoever asked to claim this profile via the public listing flow. Verify domain vs website before inviting.",
+					"Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save — that auto-sends them a set-your-password invite and clears this field.",
 			},
 		}),
 		autoField({ name: "claimRequestedAt", type: "date" }),

@@ -139,6 +139,12 @@ export default async function PartnerProfilePage({
 							{p.tagline}
 						</p>
 					)}
+					<a
+						href="#claim"
+						className="inline-block mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+					>
+						Is this your company? Claim it →
+					</a>
 				</div>
 			</div>
 
@@ -327,8 +333,9 @@ export default async function PartnerProfilePage({
 			</Section>
 
 			{/* Claim path — most profiles were seeded curated; the company can
-			    take ownership here (verified before invite). */}
-			<div className="mt-10">
+			    take ownership here (verified before invite). #claim anchors the
+			    header "Claim it →" link. scroll-mt clears the fixed nav. */}
+			<div id="claim" className="mt-10 scroll-mt-28">
 				<PartnerClaimProfile orgName={p.name} />
 			</div>
 		</main>

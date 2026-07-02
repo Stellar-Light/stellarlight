@@ -1318,7 +1318,7 @@ export interface PartnerAccount {
    */
   invitedAt?: string | null;
   /**
-   * Email of whoever asked to claim this profile via the public listing flow. Verify domain vs website before inviting.
+   * Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save — that auto-sends them a set-your-password invite and clears this field.
    */
   claimRequestedBy?: string | null;
   claimRequestedAt?: string | null;
