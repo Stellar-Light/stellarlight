@@ -49,7 +49,10 @@ async function semanticProjectRows(
 				limit: limit * 3,
 			},
 		},
-		{ $match: { status: { $in: ["Development", "Pre-Release", "Live"] } } },
+		// Inactive stays searchable (so a name lookup like "keybase" still finds
+		// it) but is heavily penalized in scoring — it can't ride prominence or
+		// stars to the top of a topic query.
+		{ $match: { status: { $in: ["Development", "Pre-Release", "Live", "Inactive"] } } },
 		{
 			$project: {
 				_id: 1,
@@ -272,7 +275,11 @@ function rankBoost(p: ProjectRow): number {
 				? 8
 				: 0) +
 		(p.scfAwarded ? 12 : 0) +
-		(p.status === "Live" ? 4 : 0)
+		(p.status === "Live" ? 4 : 0) +
+		// Defunct projects sink hard — bigger than any single positive signal, so
+		// they never outrank a live project on a topic query, but a direct name
+		// match (whose text score dwarfs 60) still surfaces them.
+		(p.status === "Inactive" ? -60 : 0)
 	);
 }
 
@@ -390,7 +397,9 @@ export async function GET(req: NextRequest) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 			const where: any = {
-				status: { in: ["Development", "Pre-Release", "Live"] },
+				// Inactive included so a name lookup still finds it; the score()
+				// penalty keeps it out of the way on topic queries.
+				status: { in: ["Development", "Pre-Release", "Live", "Inactive"] },
 			};
 			if (category) {
 				where.category = { equals: category };

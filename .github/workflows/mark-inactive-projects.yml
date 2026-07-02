@@ -1,0 +1,33 @@
+name: Mark inactive (defunct) projects
+
+# Marks hand-verified defunct projects (CURATED_INACTIVE, e.g. Keybase) as
+# status=Inactive so they drop off the leaderboard/directory and sink in search.
+# Also REPORTS staleness + borrowed-clout candidates for human review — those
+# are never auto-marked. Never deletes. Run dry first (execute=false), read the
+# report, then execute.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write the CURATED marks to the DB? Leave false for a dry run + report."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/mark-inactive-projects.ts ${{ inputs.execute && '--execute' || '' }}

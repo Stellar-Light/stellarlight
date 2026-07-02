@@ -280,9 +280,9 @@ export interface Project {
       )[]
     | null;
   /**
-   * Draft projects require admin approval before appearing on the frontend
+   * Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).
    */
-  status: 'Draft' | 'Development' | 'Pre-Release' | 'Live';
+  status: 'Draft' | 'Development' | 'Pre-Release' | 'Live' | 'Inactive';
   links?: {
     website?: string | null;
     github?: string | null;
