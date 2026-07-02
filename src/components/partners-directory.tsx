@@ -1,16 +1,26 @@
 "use client";
 
 /**
- * Public partner directory — browsable grid + filters. Human twin of
- * GET /api/partners. Visual language matches /ask: narrow focused container,
- * big rounded search, muted section headers, subtle card hover. Every card
- * carries a freshness badge so a builder never reaches out to a dead
- * integration.
+ * Public partner directory — the HYBRID front door (like /ask, for partners).
+ *
+ * One big input, two behaviors:
+ *   - typing filters the grid live (name/assets/SEPs/country/sectors);
+ *   - pressing Enter (or an example chip) asks the CONCIERGE — the query goes
+ *     to /api/partners/assistant and the AI's picks render inline above the
+ *     grid as match cards with a one-line why. No separate page needed;
+ *     /partners/chat remains for the full back-and-forth conversation.
+ *
+ * Human twin of GET /api/partners. Visual language matches /ask.
  */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Sparkles, ArrowUpRight } from "lucide-react";
+import { Search, Sparkles, ArrowUpRight, Loader2, X } from "lucide-react";
+import {
+	MatchCard,
+	renderMarkdownBold,
+	type PublicPartner,
+} from "@/components/partner-concierge-chat";
 
 interface DirectoryPartner {
 	slug: string;
@@ -25,10 +35,18 @@ interface DirectoryPartner {
 	country: string | null;
 	acceptingClients: boolean | null;
 	contactable: boolean;
+	logoUrl: string | null;
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
 }
+
+const EXAMPLES = [
+	"I need a USDC off-ramp in Mexico",
+	"Who can audit my Soroban contract?",
+	"EUR on/off ramp with SEP-24",
+	"Tokenized treasury assets",
+];
 
 const RAMP_LABELS: Record<string, string> = {
 	"on-ramp": "On-ramp",
@@ -98,6 +116,12 @@ const regionLabel = (r: string) => REGION_LABELS[r] ?? r;
 export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) {
 	const [typeFilter, setTypeFilter] = useState("all");
 	const [query, setQuery] = useState("");
+	// Concierge (submit-to-ask) state — the /ask-style half of the hybrid.
+	const [askBusy, setAskBusy] = useState(false);
+	const [askQuery, setAskQuery] = useState<string | null>(null);
+	const [askReply, setAskReply] = useState<string | null>(null);
+	const [askMatches, setAskMatches] = useState<PublicPartner[] | null>(null);
+	const [askNote, setAskNote] = useState<string | null>(null);
 
 	const filtered = useMemo(() => {
 		const q = query.trim().toLowerCase();
@@ -112,6 +136,47 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 		});
 	}, [initial, typeFilter, query]);
 
+	async function ask(q: string) {
+		const need = q.trim();
+		if (!need || askBusy) return;
+		setAskBusy(true);
+		setAskNote(null);
+		setAskQuery(need);
+		try {
+			const r = await fetch("/api/partners/assistant", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ messages: [{ role: "user", content: need }] }),
+			});
+			const d = await r.json().catch(() => ({}));
+			if (!r.ok || typeof d.reply !== "string") {
+				setAskReply(null);
+				setAskMatches(null);
+				setAskNote(
+					d.unavailable
+						? "The concierge is offline right now — the keyword filter below still works."
+						: "Couldn't get concierge picks just now — try again in a moment.",
+				);
+				return;
+			}
+			setAskReply(d.reply);
+			setAskMatches(Array.isArray(d.matches) ? d.matches : []);
+		} catch {
+			setAskReply(null);
+			setAskMatches(null);
+			setAskNote("Couldn't get concierge picks just now — try again in a moment.");
+		} finally {
+			setAskBusy(false);
+		}
+	}
+
+	function clearAsk() {
+		setAskQuery(null);
+		setAskReply(null);
+		setAskMatches(null);
+		setAskNote(null);
+	}
+
 	return (
 		<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
 			{/* Hero */}
@@ -125,50 +190,123 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 					</span>
 				</div>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Ecosystem partners you can integrate with — anchors, ramps, infrastructure,
-					tooling, protocols. Every profile is partner-maintained.{" "}
+					Anchors, ramps, auditors, infrastructure — describe what you need and
+					get matched, or browse the directory. Prefer a conversation?{" "}
 					<Link
 						href="/partners/chat"
 						className="text-foreground underline underline-offset-2 hover:no-underline"
 					>
-						Get listed
+						Open the concierge chat
 					</Link>
 					.
 				</p>
 			</div>
 
-			{/* AI concierge CTA — describe a need, get matched (the smart path) */}
-			<Link
-				href="/partners/chat"
-				className="group flex items-center gap-3 mb-3 p-4 rounded-2xl bg-card border border-border hover:border-white/25 hover:bg-white/[0.02] transition-all"
+			{/* Hybrid search — type to filter, Enter to ask the concierge */}
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					ask(query);
+				}}
+				className="relative mb-3"
 			>
-				<div className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/[0.06] border border-border flex items-center justify-center">
-					<Sparkles className="w-4 h-4 text-foreground" />
-				</div>
-				<div className="min-w-0 flex-1">
-					<div className="text-sm font-medium text-foreground">
-						Not sure who fits? Ask the concierge
-					</div>
-					<div className="text-xs text-muted-foreground truncate">
-						Describe what you need — &ldquo;a USDC off-ramp in Mexico&rdquo;, &ldquo;a
-						Soroban auditor&rdquo; — and get matched.
-					</div>
-				</div>
-				<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
-			</Link>
-
-			{/* Search bar — keyword browse (matches /ask style) */}
-			<div className="relative mb-4">
 				<Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
 				<input
 					type="text"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					placeholder="or browse — search by name, sector, region…"
-					className="w-full h-14 pl-14 pr-4 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
-					aria-label="Search partners"
+					placeholder="describe what you need — or search by name, asset, country…"
+					className="w-full h-14 pl-14 pr-24 bg-card text-base text-foreground placeholder-muted-foreground rounded-2xl border border-border transition-all duration-200 focus-visible:outline-none focus-visible:border-white/30 focus-visible:shadow-[0_0_0_3px_rgba(253,218,36,0.12)]"
+					aria-label="Search partners or ask the concierge"
 				/>
-			</div>
+				<button
+					type="submit"
+					disabled={askBusy || !query.trim()}
+					className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 px-3.5 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground disabled:opacity-30 transition-colors"
+				>
+					{askBusy ? (
+						<Loader2 className="w-4 h-4 animate-spin" />
+					) : (
+						<Sparkles className="w-4 h-4" />
+					)}
+					Ask
+				</button>
+			</form>
+
+			{/* Example asks — one tap runs the concierge (like /ask's chips) */}
+			{!askQuery && !askBusy && (
+				<div className="flex flex-wrap gap-2 mb-4">
+					{EXAMPLES.map((ex) => (
+						<button
+							key={ex}
+							type="button"
+							onClick={() => {
+								setQuery(ex);
+								ask(ex);
+							}}
+							className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+						>
+							{ex}
+						</button>
+					))}
+				</div>
+			)}
+
+			{askNote && (
+				<div className="mb-4 text-xs text-muted-foreground">{askNote}</div>
+			)}
+
+			{/* Concierge picks — inline AI matches, /ask-style section */}
+			{(askBusy || askReply) && (
+				<section className="mb-8">
+					<div className="flex items-baseline justify-between gap-3 mb-4">
+						<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
+							<Sparkles className="w-3.5 h-3.5" />
+							Concierge picks{askQuery ? ` — “${askQuery}”` : ""}
+						</h2>
+						{!askBusy && (
+							<button
+								type="button"
+								onClick={clearAsk}
+								className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+							>
+								<X className="w-3 h-3" /> clear
+							</button>
+						)}
+					</div>
+					{askBusy ? (
+						<div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground inline-flex items-center gap-2">
+							<Loader2 className="w-4 h-4 animate-spin" />
+							matching against the directory…
+						</div>
+					) : (
+						<>
+							{askReply && (
+								<p className="text-sm text-foreground/90 leading-relaxed max-w-2xl mb-4 whitespace-pre-wrap">
+									{renderMarkdownBold(askReply)}
+								</p>
+							)}
+							{askMatches && askMatches.length > 0 && (
+								<div className="grid sm:grid-cols-2 gap-2.5">
+									{askMatches.map((m) => (
+										<MatchCard key={m.slug} p={m} />
+									))}
+								</div>
+							)}
+							<p className="text-[11px] text-muted-foreground/60 mt-3">
+								Want to go deeper?{" "}
+								<Link
+									href="/partners/chat"
+									className="underline hover:text-foreground"
+								>
+									continue in the concierge chat
+								</Link>
+								.
+							</p>
+						</>
+					)}
+				</section>
+			)}
 
 			{/* Type filter chips (matches /ask example chips) */}
 			<div className="flex flex-wrap gap-2 mb-8">
@@ -238,6 +376,15 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 						<div className="flex items-start justify-between gap-3 mb-1.5">
 							<div className="min-w-0">
 								<div className="flex items-center gap-2 mb-1 flex-wrap">
+									{p.logoUrl && (
+										// Arbitrary remote domains (stellar.toml ORG_LOGO) — plain img.
+										// eslint-disable-next-line @next/next/no-img-element
+										<img
+											src={p.logoUrl}
+											alt=""
+											className="w-6 h-6 rounded-md border border-border bg-white/[0.03] object-contain flex-shrink-0"
+										/>
+									)}
 									<span className="font-medium text-foreground group-hover:text-white transition-colors truncate">
 										{p.name}
 									</span>
@@ -247,7 +394,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 									{/* Available only when there's an actual contact path —
 									    an "available" partner you can't reach is a dead end. */}
 									{p.acceptingClients && p.contactable && (
-										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20 whitespace-nowrap">
+										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.06] text-foreground/80 border border-border whitespace-nowrap">
 											Available
 										</span>
 									)}
