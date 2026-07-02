@@ -33,7 +33,14 @@ interface DirectoryPartner {
 	tagline: string | null;
 	sectors: string[];
 	regions: string[];
+	/** stellar.toml-verified anchor capabilities (empty for non-anchors). */
+	assets: string[];
+	seps: string[];
+	rampTypes: string[];
+	country: string | null;
 	acceptingClients: boolean | null;
+	/** Has a direct contact path (email/channel) — gates the Available chip. */
+	contactable: boolean;
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
@@ -57,7 +64,14 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 			tagline: p.tagline ?? null,
 			sectors: p.sectors ?? [],
 			regions: p.regions ?? [],
+			assets: (p.assets ?? [])
+				.map((a: { code: string }) => a.code)
+				.filter(Boolean),
+			seps: p.seps ?? [],
+			rampTypes: p.rampTypes ?? [],
+			country: p.country ?? null,
 			acceptingClients: p.acceptingClients ?? null,
+			contactable: Boolean(p.contactEmail || p.contactChannel),
 			freshness: { status: p.freshnessStatus ?? "fresh" },
 			verified: {
 				scfInvolvement: p.verified?.scfInvolvement ?? null,

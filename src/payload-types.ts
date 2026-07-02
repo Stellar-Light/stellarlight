@@ -1229,6 +1229,27 @@ export interface PartnerAccount {
   sectors?: ('defi' | 'payments' | 'rwa' | 'stablecoins' | 'identity' | 'data' | 'ai' | 'gaming' | 'other')[] | null;
   regions?: ('global' | 'north-america' | 'latam' | 'europe' | 'africa' | 'mena' | 'asia' | 'oceania')[] | null;
   /**
+   * Assets this anchor issues/supports, from stellar.toml CURRENCIES (e.g. USDC, EURC, NGNT).
+   */
+  assets?:
+    | {
+        code: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * SEP standards implemented, from stellar.toml keys.
+   */
+  seps?: ('sep-6' | 'sep-24' | 'sep-31')[] | null;
+  /**
+   * Fiat ramps offered.
+   */
+  rampTypes?: ('on-ramp' | 'off-ramp')[] | null;
+  /**
+   * Primary jurisdiction/market, from stellar.toml DOCUMENTATION.ORG_* (e.g. 'Mexico', 'Nigeria', 'Global').
+   */
+  country?: string | null;
+  /**
    * Currently taking new integrations/clients?
    */
   acceptingClients?: boolean | null;
@@ -2090,6 +2111,15 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
       };
   sectors?: T;
   regions?: T;
+  assets?:
+    | T
+    | {
+        code?: T;
+        id?: T;
+      };
+  seps?: T;
+  rampTypes?: T;
+  country?: T;
   acceptingClients?: T;
   typicalEngagement?: T;
   leadTime?: T;

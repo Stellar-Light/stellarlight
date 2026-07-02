@@ -37,6 +37,11 @@ interface PublicPartner {
 	acceptingClients: boolean | null;
 	sectors: string[];
 	regions: string[];
+	assets?: string[];
+	seps?: string[];
+	rampTypes?: string[];
+	country?: string | null;
+	contactable?: boolean;
 	freshness: string;
 	url: string;
 }
@@ -523,9 +528,31 @@ function MatchCard({ p }: { p: PublicPartner }) {
 				</p>
 			)}
 			<div className="flex flex-wrap items-center gap-1.5">
-				{p.acceptingClients && (
+				{/* Available only with a real contact path — no dead-end matches. */}
+				{p.acceptingClients && p.contactable && (
 					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
 						Available
+					</span>
+				)}
+				{(p.assets ?? []).slice(0, 3).map((a) => (
+					<span
+						key={`a-${a}`}
+						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.06] text-foreground/90 border border-border font-medium"
+					>
+						{a}
+					</span>
+				))}
+				{(p.rampTypes ?? []).map((r) => (
+					<span
+						key={`rt-${r}`}
+						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/90 border border-border"
+					>
+						{r === "on-ramp" ? "On-ramp" : r === "off-ramp" ? "Off-ramp" : r}
+					</span>
+				))}
+				{p.country && (
+					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border">
+						{p.country}
 					</span>
 				)}
 				{p.sectors.slice(0, 2).map((s) => (

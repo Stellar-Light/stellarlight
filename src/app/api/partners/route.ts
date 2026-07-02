@@ -60,6 +60,12 @@ function toPublic(p: any) {
 			.filter(Boolean),
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
+		// Anchor capabilities from stellar.toml (SEP-1) — same source as
+		// anchors.stellar.org. Empty for non-anchors.
+		assets: (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean),
+		seps: p.seps ?? [],
+		rampTypes: p.rampTypes ?? [],
+		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		typicalEngagement: p.typicalEngagement ?? null,
 		leadTime: p.leadTime ?? null,

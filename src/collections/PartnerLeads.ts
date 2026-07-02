@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, Where } from "payload";
 
 /**
  * PartnerLeads — demand-side signal for the partner flywheel.
@@ -11,9 +11,15 @@ import type { CollectionConfig } from "payload";
  * profile fresh and stay listed.
  *
  * Written system-side (overrideAccess) from the concierge route; never public
- * to write, admin-only to read. `notified` flips true once a digest includes
- * it, so the next digest doesn't repeat it.
+ * to write. Admins read everything; a logged-in partner reads ONLY their own
+ * slug's leads (Payload auto-mounts /api/partner-leads, and the dashboard's
+ * Leads panel queries it with the partner's cookie — without the row scope
+ * any partner could read every other partner's demand signal). `notified`
+ * flips true once a digest includes it, so the next digest doesn't repeat it.
  */
+const isAdmin = (user: { collection?: string } | null | undefined) =>
+	user?.collection === "users";
+
 export const PartnerLeads: CollectionConfig = {
 	slug: "partner-leads",
 	admin: {
@@ -25,9 +31,19 @@ export const PartnerLeads: CollectionConfig = {
 	},
 	access: {
 		create: () => false, // system-only (overrideAccess from the concierge route)
-		read: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: ({ req }) => {
+			if (isAdmin(req.user)) return true;
+			if (req.user?.collection === "partner-accounts") {
+				// biome-ignore lint/suspicious/noExplicitAny: partner-accounts user doc carries slug
+				const slug = (req.user as any)?.slug;
+				if (!slug) return false;
+				const ownOnly: Where = { partnerSlug: { equals: slug } };
+				return ownOnly;
+			}
+			return false;
+		},
+		update: ({ req }) => isAdmin(req.user),
+		delete: ({ req }) => isAdmin(req.user),
 	},
 	fields: [
 		{
