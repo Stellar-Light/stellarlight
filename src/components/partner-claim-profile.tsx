@@ -77,7 +77,7 @@ export function PartnerClaimProfile({ orgName }: { orgName: string }) {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						placeholder="your work email @company domain"
-						className="flex-1 min-w-[220px] h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border focus-visible:outline-none focus-visible:border-white/30"
+						className="flex-1 min-w-[220px] h-10 px-3 bg-white/[0.02] text-sm text-foreground placeholder-muted-foreground rounded-lg border border-border outline-none transition-[border-color] duration-150 focus:border-white/30"
 					/>
 					<button
 						type="submit"
