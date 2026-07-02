@@ -9,7 +9,14 @@ export const metadata: Metadata = {
 		"Find a Stellar partner by describing what you need — anchors, on/off-ramps, infrastructure, tooling, auditors — or get your own company listed. One AI-guided chat.",
 };
 
-export default function PartnerConciergePage() {
+export default async function PartnerConciergePage({
+	searchParams,
+}: {
+	searchParams: Promise<{ q?: string }>;
+}) {
+	// A ?q= from the directory's Ask box is auto-sent as the first message,
+	// so the handoff lands mid-conversation instead of at a greeting.
+	const { q } = await searchParams;
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-2xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -37,7 +44,7 @@ export default function PartnerConciergePage() {
 					</p>
 				</div>
 
-				<PartnerConciergeChat />
+				<PartnerConciergeChat initialQuery={q} />
 			</main>
 		</div>
 	);

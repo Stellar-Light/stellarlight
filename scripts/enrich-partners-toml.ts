@@ -222,6 +222,144 @@ const OFFICIAL_ANCHOR_SEEDS: Array<{
 	},
 ];
 
+/**
+ * Broader ecosystem partners builders integrate with — fills the categories
+ * the directory launched empty on (wallets, protocols, infrastructure,
+ * tooling) plus the three PILOT companies, which weren't even listed. Same
+ * curated-provenance rules; all are live, Stellar-native services (defunct
+ * projects deliberately excluded). tomlDomain only where a stellar.toml is
+ * known to exist.
+ */
+const ECOSYSTEM_SEEDS: Array<{
+	name: string;
+	partnerType: string;
+	tomlDomain?: string;
+	websiteUrl: string;
+	sectors: string[];
+	description: string;
+}> = [
+	// ── Pilot cohort (Anke's three) ──────────────────────────────────────
+	{
+		name: "DeFindex",
+		partnerType: "infrastructure",
+		websiteUrl: "https://defindex.io",
+		sectors: ["defi"],
+		description:
+			"Automated DeFi yield vaults and strategies on Soroban, built by Palta Labs — plug vaults into any wallet or app.",
+	},
+	{
+		name: "Etherfuse",
+		partnerType: "anchor",
+		tomlDomain: "etherfuse.com",
+		websiteUrl: "https://etherfuse.com",
+		sectors: ["rwa", "stablecoins"],
+		description:
+			"Stablebonds — tokenized government bonds (CETES, USTRY and more) with MXN rails on Stellar.",
+	},
+	{
+		name: "Trustless Work",
+		partnerType: "tooling",
+		websiteUrl: "https://trustlesswork.com",
+		sectors: ["payments", "defi"],
+		description:
+			"Escrow-as-a-service API on Stellar — programmable milestone escrows for marketplaces, agencies and platforms.",
+	},
+	// ── Wallets ──────────────────────────────────────────────────────────
+	{
+		name: "LOBSTR",
+		partnerType: "wallet",
+		tomlDomain: "lobstr.co",
+		websiteUrl: "https://lobstr.co",
+		sectors: ["payments"],
+		description:
+			"Leading consumer Stellar wallet with LOBSTR Vault multisig signing and integrations used across the ecosystem.",
+	},
+	{
+		name: "Freighter",
+		partnerType: "wallet",
+		websiteUrl: "https://freighter.app",
+		sectors: ["defi"],
+		description:
+			"SDF's open-source browser-extension wallet — the default signer for Stellar and Soroban dApps.",
+	},
+	{
+		name: "xBull Wallet",
+		partnerType: "wallet",
+		tomlDomain: "xbull.app",
+		websiteUrl: "https://xbull.app",
+		sectors: ["defi", "payments"],
+		description:
+			"Multi-platform Stellar wallet (web, extension, mobile) with Soroban support and a connect kit for dApps.",
+	},
+	{
+		name: "Albedo",
+		partnerType: "wallet",
+		websiteUrl: "https://albedo.link",
+		sectors: ["identity"],
+		description:
+			"Web-based Stellar signer and single-sign-on — delegated transaction signing for dApps, by the StellarExpert team.",
+	},
+	{
+		name: "Hana Wallet",
+		partnerType: "wallet",
+		websiteUrl: "https://hanawallet.io",
+		sectors: ["payments"],
+		description:
+			"Multi-chain mobile wallet with first-class Stellar and Soroban support.",
+	},
+	// ── Protocols ────────────────────────────────────────────────────────
+	{
+		name: "Blend",
+		partnerType: "protocol",
+		websiteUrl: "https://blend.capital",
+		sectors: ["defi"],
+		description:
+			"Universal lending protocol on Soroban — isolated lending pools with a shared backstop module.",
+	},
+	{
+		name: "Soroswap",
+		partnerType: "protocol",
+		websiteUrl: "https://soroswap.finance",
+		sectors: ["defi"],
+		description:
+			"AMM and DEX aggregator on Soroban — swap routing across Stellar liquidity.",
+	},
+	{
+		name: "Aquarius",
+		partnerType: "protocol",
+		tomlDomain: "aqua.network",
+		websiteUrl: "https://aqua.network",
+		sectors: ["defi"],
+		description:
+			"Liquidity-incentive layer for Stellar — AQUA voting directs rewards to market pairs and AMM pools.",
+	},
+	{
+		name: "Phoenix Protocol",
+		partnerType: "protocol",
+		websiteUrl: "https://phoenix-hub.io",
+		sectors: ["defi"],
+		description: "DeFi hub and AMM suite built natively on Soroban.",
+	},
+	// ── Infrastructure & tooling ─────────────────────────────────────────
+	{
+		name: "Reflector",
+		partnerType: "infrastructure",
+		tomlDomain: "reflector.network",
+		websiteUrl: "https://reflector.network",
+		sectors: ["data", "defi"],
+		description:
+			"Decentralized price-feed oracles for Soroban (SEP-40) — the standard oracle network on Stellar.",
+	},
+	{
+		name: "StellarExpert",
+		partnerType: "tooling",
+		websiteUrl: "https://stellar.expert",
+		sectors: ["data"],
+		description:
+			"The Stellar block explorer and analytics suite — asset directory, ratings, and open APIs builders rely on.",
+	},
+];
+
 /** Real on/off-ramp capability from the transfer server's /info (deposit =
  *  on-ramp, withdraw = off-ramp). SEP-6 and SEP-24 share the /info shape. */
 async function rampsFromInfo(transferServer: string): Promise<string[]> {
@@ -282,17 +420,26 @@ async function main() {
 	);
 	const payload = await getPayload({ config });
 
-	// ── Pass 0: seed official-directory anchors we don't list yet ─────────
-	// Create-only + idempotent (skips existing slugs), same provenance rules
-	// as scripts/seed-partners.ts. Seeded docs are picked up by the enrichment
-	// pass below in the same run. NOTE: created directly as published — the
-	// invite hook only fires on draft→published UPDATES, so seeding never
-	// emails anyone.
+	// ── Pass 0: seed missing partners ──────────────────────────────────────
+	// Official-directory anchors + broader ecosystem (pilots, wallets,
+	// protocols, infra/tooling). Create-only + idempotent (skips existing
+	// slugs), same provenance rules as scripts/seed-partners.ts. Seeded docs
+	// are picked up by the enrichment pass below in the same run. NOTE:
+	// created directly as published — the invite hook only fires on
+	// draft→published UPDATES, so seeding never emails anyone.
+	const ALL_SEEDS = [
+		...OFFICIAL_ANCHOR_SEEDS.map((s) => ({
+			...s,
+			partnerType: "anchor" as string,
+			tomlDomain: s.tomlDomain as string | undefined,
+		})),
+		...ECOSYSTEM_SEEDS,
+	];
 	let seeded = 0;
 	{
 		const { generateSlug } = await import("../src/lib/utils/normalize");
 		const { randomBytes } = await import("node:crypto");
-		for (const seed of OFFICIAL_ANCHOR_SEEDS) {
+		for (const seed of ALL_SEEDS) {
 			const slug = generateSlug(seed.name);
 			const existing = await payload.find({
 				collection: "partner-accounts",
@@ -315,7 +462,8 @@ async function main() {
 							name: seed.name,
 							email: `curated+${slug}@stellarlight.xyz`,
 							password: randomBytes(18).toString("base64url"),
-							partnerType: "anchor",
+							// biome-ignore lint/suspicious/noExplicitAny: enum handled by Payload validation
+							partnerType: seed.partnerType as any,
 							status: "published",
 							// biome-ignore lint/suspicious/noExplicitAny: enum handled by Payload validation
 							sectors: seed.sectors as any,
@@ -326,7 +474,7 @@ async function main() {
 						overrideAccess: true,
 						disableVerificationEmail: true,
 					});
-					console.log(`+ seeded ${slug} (${seed.tomlDomain})`);
+					console.log(`+ seeded ${slug} (${seed.partnerType})`);
 					seeded++;
 				} catch (err) {
 					console.log(
@@ -334,7 +482,7 @@ async function main() {
 					);
 				}
 			} else {
-				console.log(`→ would seed ${slug} (official directory: ${seed.tomlDomain})`);
+				console.log(`→ would seed ${slug} (${seed.partnerType})`);
 				seeded++;
 			}
 		}
@@ -344,8 +492,8 @@ async function main() {
 	const seedOverrides: Record<string, string> = {};
 	{
 		const { generateSlug } = await import("../src/lib/utils/normalize");
-		for (const seed of OFFICIAL_ANCHOR_SEEDS)
-			seedOverrides[generateSlug(seed.name)] = seed.tomlDomain;
+		for (const seed of ALL_SEEDS)
+			if (seed.tomlDomain) seedOverrides[generateSlug(seed.name)] = seed.tomlDomain;
 	}
 
 	const res = await payload.find({
