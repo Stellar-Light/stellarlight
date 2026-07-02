@@ -109,6 +109,119 @@ function domainOf(websiteUrl: string): string | null {
 	}
 }
 
+/**
+ * Anchors whose stellar.toml lives on a different host than their marketing
+ * site. Sourced from the official anchors.stellar.org dataset (its RSC payload
+ * embeds each anchor's real toml URL) — verified live 2026-07-02.
+ */
+const TOML_DOMAIN_OVERRIDES: Record<string, string> = {
+	"anchor-moneygram": "stellar.moneygram.com", // moneygram.com serves a stub toml
+	"anchor-clickspesa": "connect.clickpesa.com",
+};
+
+/** A parse result only counts when it actually carries data — some sites
+ *  return HTML/soft-404s for /.well-known/stellar.toml, which would otherwise
+ *  read as an empty-but-present toml. */
+function hasUsableData(toml: StellarToml): boolean {
+	return (
+		Boolean(
+			toml.topLevel.TRANSFER_SERVER ||
+				toml.topLevel.TRANSFER_SERVER_SEP0024 ||
+				toml.topLevel.DIRECT_PAYMENT_SERVER,
+		) ||
+		toml.currencyCodes.length > 0 ||
+		Object.keys(toml.documentation).length > 0
+	);
+}
+
+/**
+ * Anchors/issuers listed on the OFFICIAL anchors.stellar.org directory that
+ * are missing from ours — seeded create-only (same curated provenance rules
+ * as scripts/seed-partners.ts: published, verified:false, plain facts only,
+ * subjective fields left for the partner to claim + fill). The toml pass
+ * right after seeding fills assets/SEPs/ramps/contact from source.
+ */
+const OFFICIAL_ANCHOR_SEEDS: Array<{
+	name: string;
+	tomlDomain: string;
+	websiteUrl: string;
+	sectors: string[];
+	description: string;
+}> = [
+	{
+		name: "Franklin Templeton",
+		tomlDomain: "franklintempleton.com",
+		websiteUrl: "https://www.franklintempleton.com/",
+		sectors: ["rwa"],
+		description:
+			"Global investment manager issuing the tokenized Franklin OnChain U.S. Government Money Fund (BENJI) on Stellar.",
+	},
+	{
+		name: "AUDD",
+		tomlDomain: "audd.digital",
+		websiteUrl: "https://www.audd.digital",
+		sectors: ["stablecoins", "payments"],
+		description:
+			"Australian-dollar fiat-backed stablecoin (AUDD) issued by AUDC Pty Ltd, with NZDSC for New Zealand.",
+	},
+	{
+		name: "nTokens",
+		tomlDomain: "ntokens.com",
+		websiteUrl: "https://ntokens.com",
+		sectors: ["stablecoins", "payments"],
+		description:
+			"Brazilian Real (BRL) currency anchor — regulated BRL on/off ramp and stablecoin issuer on Stellar.",
+	},
+	{
+		name: "GMO-Z.com Trust",
+		tomlDomain: "stablecoin.z.com",
+		websiteUrl: "https://stablecoin.z.com",
+		sectors: ["stablecoins"],
+		description:
+			"GMO Internet Group's NY-regulated trust company issuing GYEN (JPY) and ZUSD stablecoins on Stellar.",
+	},
+	{
+		name: "Zeam Money",
+		tomlDomain: "mint.zeam.money",
+		websiteUrl: "https://zeam.money",
+		sectors: ["stablecoins", "payments"],
+		description:
+			"Multi-asset issuer (ZARZ, USDZ, XAUZ and more) with SEP-24/31 rails, issued by Zeam Limited (UK).",
+	},
+	{
+		name: "FinClusive",
+		tomlDomain: "finclusive.com",
+		websiteUrl: "https://finclusive.com",
+		sectors: ["payments", "identity"],
+		description:
+			"Compliance-first banking-as-a-service with SEP-6/24/31 rails on Stellar — AML/KYC-gated fiat access.",
+	},
+	{
+		name: "CLPX",
+		tomlDomain: "clpx.finance",
+		websiteUrl: "https://clpx.finance",
+		sectors: ["stablecoins"],
+		description:
+			"Chilean Peso stablecoin (CLPX) with SEP-6/24/31 anchor services.",
+	},
+	{
+		name: "APS Money",
+		tomlDomain: "aps.money",
+		websiteUrl: "https://www.aps.money",
+		sectors: ["stablecoins", "payments"],
+		description:
+			"Advanced Payment Solutions — multi-currency stablecoin issuer (BRL, CLP, EUR, IDR, INR, KZT variants) on Stellar.",
+	},
+	{
+		name: "Transparent Network",
+		tomlDomain: "dcm.systems",
+		websiteUrl: "https://prozora.network",
+		sectors: ["stablecoins", "payments"],
+		description:
+			"Ukrainian Hryvnia (UAH) digital-currency anchor powering instant public-blockchain payments.",
+	},
+];
+
 /** Real on/off-ramp capability from the transfer server's /info (deposit =
  *  on-ramp, withdraw = off-ramp). SEP-6 and SEP-24 share the /info shape. */
 async function rampsFromInfo(transferServer: string): Promise<string[]> {
@@ -169,6 +282,72 @@ async function main() {
 	);
 	const payload = await getPayload({ config });
 
+	// ── Pass 0: seed official-directory anchors we don't list yet ─────────
+	// Create-only + idempotent (skips existing slugs), same provenance rules
+	// as scripts/seed-partners.ts. Seeded docs are picked up by the enrichment
+	// pass below in the same run. NOTE: created directly as published — the
+	// invite hook only fires on draft→published UPDATES, so seeding never
+	// emails anyone.
+	let seeded = 0;
+	{
+		const { generateSlug } = await import("../src/lib/utils/normalize");
+		const { randomBytes } = await import("node:crypto");
+		for (const seed of OFFICIAL_ANCHOR_SEEDS) {
+			const slug = generateSlug(seed.name);
+			const existing = await payload.find({
+				collection: "partner-accounts",
+				where: {
+					or: [{ slug: { equals: slug } }, { name: { equals: seed.name } }],
+				},
+				limit: 1,
+				depth: 0,
+				overrideAccess: true,
+			});
+			if (existing.docs.length > 0) {
+				console.log(`· seed ${slug}: already listed`);
+				continue;
+			}
+			if (EXECUTE) {
+				try {
+					await payload.create({
+						collection: "partner-accounts",
+						data: {
+							name: seed.name,
+							email: `curated+${slug}@stellarlight.xyz`,
+							password: randomBytes(18).toString("base64url"),
+							partnerType: "anchor",
+							status: "published",
+							// biome-ignore lint/suspicious/noExplicitAny: enum handled by Payload validation
+							sectors: seed.sectors as any,
+							description: seed.description,
+							websiteUrl: seed.websiteUrl,
+							lastPartnerUpdateAt: new Date().toISOString(),
+						},
+						overrideAccess: true,
+						disableVerificationEmail: true,
+					});
+					console.log(`+ seeded ${slug} (${seed.tomlDomain})`);
+					seeded++;
+				} catch (err) {
+					console.log(
+						`✗ seed ${slug} failed — ${err instanceof Error ? err.message : err}`,
+					);
+				}
+			} else {
+				console.log(`→ would seed ${slug} (official directory: ${seed.tomlDomain})`);
+				seeded++;
+			}
+		}
+	}
+
+	// Seed toml domains double as overrides for the enrichment pass.
+	const seedOverrides: Record<string, string> = {};
+	{
+		const { generateSlug } = await import("../src/lib/utils/normalize");
+		for (const seed of OFFICIAL_ANCHOR_SEEDS)
+			seedOverrides[generateSlug(seed.name)] = seed.tomlDomain;
+	}
+
 	const res = await payload.find({
 		collection: "partner-accounts",
 		limit: 300,
@@ -193,7 +372,11 @@ async function main() {
 		const report: string[] = [];
 
 		if (isAnchor) {
-			const domain = doc.websiteUrl ? domainOf(doc.websiteUrl) : null;
+			// Overrides (from the official directory) beat the website domain.
+			const domain =
+				TOML_DOMAIN_OVERRIDES[doc.slug] ??
+				seedOverrides[doc.slug] ??
+				(doc.websiteUrl ? domainOf(doc.websiteUrl) : null);
 			if (!domain) {
 				console.log(`✗ ${doc.slug}: no usable websiteUrl — skipped`);
 				skipped++;
@@ -208,6 +391,12 @@ async function main() {
 				continue;
 			}
 			const toml = parseStellarToml(tomlText);
+			if (!hasUsableData(toml)) {
+				// Soft-404 / stub — treat like a missing toml, never as "nothing new".
+				console.log(`✗ ${doc.slug}: stub/HTML at ${domain} — skipped`);
+				skipped++;
+				continue;
+			}
 
 			// SEPs from declared endpoints
 			const seps: string[] = [];
@@ -319,7 +508,7 @@ async function main() {
 	}
 
 	console.log(
-		`\n${EXECUTE ? "enriched" : "would enrich"}: ${enriched} · skipped: ${skipped} · scanned: ${res.docs.length}`,
+		`\n${EXECUTE ? "seeded" : "would seed"}: ${seeded} · ${EXECUTE ? "enriched" : "would enrich"}: ${enriched} · skipped: ${skipped} · scanned: ${res.docs.length}`,
 	);
 	process.exit(0);
 }
