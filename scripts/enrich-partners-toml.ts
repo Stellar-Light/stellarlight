@@ -379,6 +379,62 @@ async function rampsFromInfo(transferServer: string): Promise<string[]> {
 	return ramps;
 }
 
+/* ── curated region/country backfill (public facts only) ────────────────── */
+
+/**
+ * Regions + country per partner, sourced from each partner's OWN description
+ * (already curated facts) plus well-known public HQ facts. Fill-if-empty —
+ * never overwrites partner-claimed data. Slugs with genuinely unverifiable
+ * coverage (blox-global, coca-wallet, elroy-app, ripe-money, wallet-guru,
+ * ping-unknowns…) are deliberately ABSENT: no data beats made-up data, and
+ * completeness sorting sinks them until they claim their profile.
+ */
+const REGION_BACKFILL: Record<
+	string,
+	{ regions: string[]; country?: string }
+> = {
+	// anchors — from their own descriptions
+	"anchor-alfred-pay": { regions: ["latam"] }, // "Latin American anchor-as-a-service"
+	"anchor-anclap": { regions: ["latam"], country: "Argentina" }, // PEN/ARS rails
+	"anchor-bitso": { regions: ["latam"], country: "Mexico" },
+	"anchor-boss-pay": { regions: ["north-america", "africa", "latam"] }, // US-origin remittance corridors
+	"anchor-cash-abroad": { regions: ["latam"], country: "Mexico" },
+	"anchor-clickspesa": { regions: ["africa"], country: "Tanzania" }, // "East African… based in Tanzania"
+	"anchor-coins-ph": { regions: ["asia"], country: "Philippines" }, // "BSP-regulated Philippine"
+	"anchor-fonbnk": { regions: ["africa"] },
+	"anchor-honey-coin": { regions: ["africa"], country: "Kenya" }, // "headquartered in Nairobi"
+	"anchor-moneygram": { regions: ["global"] },
+	"anchor-mykobo": { regions: ["europe"] }, // EUR/EURC rails
+	"anchor-ping": { regions: ["latam"], country: "Argentina" }, // "Argentine-founded neo-bank"
+	"anchor-trace-finance": { regions: ["latam"], country: "Brazil" },
+	"anchor-yellow-card": { regions: ["africa"] }, // "Africa's largest"
+	etherfuse: { regions: ["latam"], country: "Mexico" }, // MXN/CETES rails
+	// official-directory issuers
+	"aps-money": { regions: ["global"] }, // BRL/CLP/EUR/IDR/INR/KZT multi-currency
+	audd: { regions: ["oceania"], country: "Australia" },
+	clpx: { regions: ["latam"], country: "Chile" },
+	finclusive: { regions: ["global"], country: "United States" },
+	"franklin-templeton": { regions: ["global"], country: "United States" },
+	"gmo-zcom-trust": { regions: ["global"], country: "United States" }, // NY-regulated trust
+	ntokens: { regions: ["latam"], country: "Brazil" },
+	"transparent-network": { regions: ["europe"], country: "Ukraine" },
+	"zeam-money": { regions: ["africa", "europe"], country: "United Kingdom" }, // UK issuer, ZAR rails
+	// ecosystem tools/protocols/wallets — global by nature
+	albedo: { regions: ["global"] },
+	aquarius: { regions: ["global"] },
+	blend: { regions: ["global"] },
+	defindex: { regions: ["global", "latam"] }, // Palta Labs (Chile), global product
+	freighter: { regions: ["global"] },
+	"hana-wallet": { regions: ["global"] },
+	lobstr: { regions: ["global"] },
+	"phoenix-protocol": { regions: ["global"] },
+	reflector: { regions: ["global"] },
+	soroswap: { regions: ["global", "latam"] },
+	stellarexpert: { regions: ["global"] },
+	"trustless-work": { regions: ["global", "latam"] },
+	"xbull-wallet": { regions: ["global"] },
+};
+
 /* ── curated audit-firm backfill (public facts only) ────────────────────── */
 
 const AUDIT_BACKFILL: Record<
@@ -512,8 +568,9 @@ async function main() {
 		const isAnchor =
 			doc.partnerType === "anchor" || doc.partnerType === "on-off-ramp";
 		const backfill = AUDIT_BACKFILL[doc.slug];
+		const regionFill = REGION_BACKFILL[doc.slug];
 
-		if (!isAnchor && !backfill) continue;
+		if (!isAnchor && !backfill && !regionFill) continue;
 
 		// biome-ignore lint/suspicious/noExplicitAny: heterogeneous update payload
 		const update: Record<string, any> = {};
@@ -624,6 +681,17 @@ async function main() {
 			if (!doc.tagline && backfill.tagline) {
 				update.tagline = backfill.tagline;
 				report.push("tagline✓");
+			}
+		}
+
+		if (regionFill) {
+			if (!doc.regions?.length) {
+				update.regions = regionFill.regions;
+				report.push(`regions=${regionFill.regions.join(",")}`);
+			}
+			if (!doc.country && regionFill.country) {
+				update.country = regionFill.country;
+				report.push(`country=${regionFill.country}`);
 			}
 		}
 

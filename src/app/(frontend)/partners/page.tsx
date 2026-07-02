@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PartnersDirectory } from "@/components/partners-directory";
+import { profileStrength } from "@/lib/partner-match";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
@@ -58,8 +59,17 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 			limit: 200,
 			depth: 0,
 		});
+		// Completeness-first ordering: rich profiles (tagline, services,
+		// contact, logo, capabilities) lead; thin unclaimed ones sink. Same
+		// profileStrength the matcher boosts — the competition incentive,
+		// visible. Ties break alphabetically for stable ordering.
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		return (result.docs as any[]).map((p) => ({
+		const docs = (result.docs as any[]).sort(
+			(a, b) =>
+				profileStrength(b) - profileStrength(a) ||
+				String(a.name).localeCompare(String(b.name)),
+		);
+		return docs.map((p) => ({
 			slug: p.slug,
 			name: p.name,
 			partnerType: p.partnerType,
