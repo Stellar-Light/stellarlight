@@ -92,7 +92,10 @@ async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
 	try {
 		const res = await fetch(url, {
 			signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-			headers: { "User-Agent": "stellarlight-enrich/1.0", Accept: "application/json" },
+			headers: {
+				"User-Agent": "stellarlight-enrich/1.0",
+				Accept: "application/json",
+			},
 		});
 		if (!res.ok) return null;
 		return (await res.json()) as Record<string, unknown>;
@@ -363,9 +366,7 @@ const ECOSYSTEM_SEEDS: Array<{
 /** Real on/off-ramp capability from the transfer server's /info (deposit =
  *  on-ramp, withdraw = off-ramp). SEP-6 and SEP-24 share the /info shape. */
 async function rampsFromInfo(transferServer: string): Promise<string[]> {
-	const info = await fetchJson(
-		`${transferServer.replace(/\/+$/, "")}/info`,
-	);
+	const info = await fetchJson(`${transferServer.replace(/\/+$/, "")}/info`);
 	if (!info) return [];
 	const anyEnabled = (side: unknown): boolean =>
 		!!side &&
@@ -389,51 +390,49 @@ async function rampsFromInfo(transferServer: string): Promise<string[]> {
  * ping-unknowns…) are deliberately ABSENT: no data beats made-up data, and
  * completeness sorting sinks them until they claim their profile.
  */
-const REGION_BACKFILL: Record<
-	string,
-	{ regions: string[]; country?: string }
-> = {
-	// anchors — from their own descriptions
-	"anchor-alfred-pay": { regions: ["latam"] }, // "Latin American anchor-as-a-service"
-	"anchor-anclap": { regions: ["latam"], country: "Argentina" }, // PEN/ARS rails
-	"anchor-bitso": { regions: ["latam"], country: "Mexico" },
-	"anchor-boss-pay": { regions: ["north-america", "africa", "latam"] }, // US-origin remittance corridors
-	"anchor-cash-abroad": { regions: ["latam"], country: "Mexico" },
-	"anchor-clickspesa": { regions: ["africa"], country: "Tanzania" }, // "East African… based in Tanzania"
-	"anchor-coins-ph": { regions: ["asia"], country: "Philippines" }, // "BSP-regulated Philippine"
-	"anchor-fonbnk": { regions: ["africa"] },
-	"anchor-honey-coin": { regions: ["africa"], country: "Kenya" }, // "headquartered in Nairobi"
-	"anchor-moneygram": { regions: ["global"] },
-	"anchor-mykobo": { regions: ["europe"] }, // EUR/EURC rails
-	"anchor-ping": { regions: ["latam"], country: "Argentina" }, // "Argentine-founded neo-bank"
-	"anchor-trace-finance": { regions: ["latam"], country: "Brazil" },
-	"anchor-yellow-card": { regions: ["africa"] }, // "Africa's largest"
-	etherfuse: { regions: ["latam"], country: "Mexico" }, // MXN/CETES rails
-	// official-directory issuers
-	"aps-money": { regions: ["global"] }, // BRL/CLP/EUR/IDR/INR/KZT multi-currency
-	audd: { regions: ["oceania"], country: "Australia" },
-	clpx: { regions: ["latam"], country: "Chile" },
-	finclusive: { regions: ["global"], country: "United States" },
-	"franklin-templeton": { regions: ["global"], country: "United States" },
-	"gmo-zcom-trust": { regions: ["global"], country: "United States" }, // NY-regulated trust
-	ntokens: { regions: ["latam"], country: "Brazil" },
-	"transparent-network": { regions: ["europe"], country: "Ukraine" },
-	"zeam-money": { regions: ["africa", "europe"], country: "United Kingdom" }, // UK issuer, ZAR rails
-	// ecosystem tools/protocols/wallets — global by nature
-	albedo: { regions: ["global"] },
-	aquarius: { regions: ["global"] },
-	blend: { regions: ["global"] },
-	defindex: { regions: ["global", "latam"] }, // Palta Labs (Chile), global product
-	freighter: { regions: ["global"] },
-	"hana-wallet": { regions: ["global"] },
-	lobstr: { regions: ["global"] },
-	"phoenix-protocol": { regions: ["global"] },
-	reflector: { regions: ["global"] },
-	soroswap: { regions: ["global", "latam"] },
-	stellarexpert: { regions: ["global"] },
-	"trustless-work": { regions: ["global", "latam"] },
-	"xbull-wallet": { regions: ["global"] },
-};
+const REGION_BACKFILL: Record<string, { regions: string[]; country?: string }> =
+	{
+		// anchors — from their own descriptions
+		"anchor-alfred-pay": { regions: ["latam"] }, // "Latin American anchor-as-a-service"
+		"anchor-anclap": { regions: ["latam"], country: "Argentina" }, // PEN/ARS rails
+		"anchor-bitso": { regions: ["latam"], country: "Mexico" },
+		"anchor-boss-pay": { regions: ["north-america", "africa", "latam"] }, // US-origin remittance corridors
+		"anchor-cash-abroad": { regions: ["latam"], country: "Mexico" },
+		"anchor-clickspesa": { regions: ["africa"], country: "Tanzania" }, // "East African… based in Tanzania"
+		"anchor-coins-ph": { regions: ["asia"], country: "Philippines" }, // "BSP-regulated Philippine"
+		"anchor-fonbnk": { regions: ["africa"] },
+		"anchor-honey-coin": { regions: ["africa"], country: "Kenya" }, // "headquartered in Nairobi"
+		"anchor-moneygram": { regions: ["global"] },
+		"anchor-mykobo": { regions: ["europe"] }, // EUR/EURC rails
+		"anchor-ping": { regions: ["latam"], country: "Argentina" }, // "Argentine-founded neo-bank"
+		"anchor-trace-finance": { regions: ["latam"], country: "Brazil" },
+		"anchor-yellow-card": { regions: ["africa"] }, // "Africa's largest"
+		etherfuse: { regions: ["latam"], country: "Mexico" }, // MXN/CETES rails
+		// official-directory issuers
+		"aps-money": { regions: ["global"] }, // BRL/CLP/EUR/IDR/INR/KZT multi-currency
+		audd: { regions: ["oceania"], country: "Australia" },
+		clpx: { regions: ["latam"], country: "Chile" },
+		finclusive: { regions: ["global"], country: "United States" },
+		"franklin-templeton": { regions: ["global"], country: "United States" },
+		"gmo-zcom-trust": { regions: ["global"], country: "United States" }, // NY-regulated trust
+		ntokens: { regions: ["latam"], country: "Brazil" },
+		"transparent-network": { regions: ["europe"], country: "Ukraine" },
+		"zeam-money": { regions: ["africa", "europe"], country: "United Kingdom" }, // UK issuer, ZAR rails
+		// ecosystem tools/protocols/wallets — global by nature
+		albedo: { regions: ["global"] },
+		aquarius: { regions: ["global"] },
+		blend: { regions: ["global"] },
+		defindex: { regions: ["global", "latam"] }, // Palta Labs (Chile), global product
+		freighter: { regions: ["global"] },
+		"hana-wallet": { regions: ["global"] },
+		lobstr: { regions: ["global"] },
+		"phoenix-protocol": { regions: ["global"] },
+		reflector: { regions: ["global"] },
+		soroswap: { regions: ["global", "latam"] },
+		stellarexpert: { regions: ["global"] },
+		"trustless-work": { regions: ["global", "latam"] },
+		"xbull-wallet": { regions: ["global"] },
+	};
 
 /* ── curated audit-firm backfill (public facts only) ────────────────────── */
 
@@ -442,19 +441,27 @@ const AUDIT_BACKFILL: Record<
 	{ services: string[]; regions?: string[]; tagline?: string }
 > = {
 	veridise: {
-		services: ["soroban-audit", "formal-verification", "rust-audit", "zk-audit"],
+		services: [
+			"soroban-audit",
+			"formal-verification",
+			"rust-audit",
+			"zk-audit",
+		],
 		regions: ["global"],
-		tagline: "Formal verification + audits — audited Soroban core (V-SOR reports).",
+		tagline:
+			"Formal verification + audits — audited Soroban core (V-SOR reports).",
 	},
 	ottersec: {
 		services: ["soroban-audit", "rust-audit", "protocol-audit"],
 		regions: ["global"],
-		tagline: "Security audits across Rust chains — deep Soroban/Stellar track record.",
+		tagline:
+			"Security audits across Rust chains — deep Soroban/Stellar track record.",
 	},
 	"runtime-verification": {
 		services: ["formal-verification", "soroban-audit", "protocol-audit"],
 		regions: ["global"],
-		tagline: "Formal methods firm — verification tooling and audits for Soroban.",
+		tagline:
+			"Formal methods firm — verification tooling and audits for Soroban.",
 	},
 	certora: {
 		services: ["formal-verification", "soroban-audit", "prover-tooling"],
@@ -549,7 +556,8 @@ async function main() {
 	{
 		const { generateSlug } = await import("../src/lib/utils/normalize");
 		for (const seed of ALL_SEEDS)
-			if (seed.tomlDomain) seedOverrides[generateSlug(seed.name)] = seed.tomlDomain;
+			if (seed.tomlDomain)
+				seedOverrides[generateSlug(seed.name)] = seed.tomlDomain;
 	}
 
 	const res = await payload.find({
@@ -582,85 +590,90 @@ async function main() {
 				TOML_DOMAIN_OVERRIDES[doc.slug] ??
 				seedOverrides[doc.slug] ??
 				(doc.websiteUrl ? domainOf(doc.websiteUrl) : null);
-			if (!domain) {
-				console.log(`✗ ${doc.slug}: no usable websiteUrl — skipped`);
-				skipped++;
-				continue;
-			}
-			const tomlText = await fetchText(
-				`https://${domain}/.well-known/stellar.toml`,
-			);
-			if (!tomlText) {
-				console.log(`✗ ${doc.slug}: no stellar.toml at ${domain} — skipped`);
-				skipped++;
-				continue;
-			}
-			const toml = parseStellarToml(tomlText);
-			if (!hasUsableData(toml)) {
-				// Soft-404 / stub — treat like a missing toml, never as "nothing new".
-				console.log(`✗ ${doc.slug}: stub/HTML at ${domain} — skipped`);
-				skipped++;
-				continue;
-			}
-
-			// SEPs from declared endpoints
-			const seps: string[] = [];
-			if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
-			if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
-			if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
-			if (seps.length) {
-				update.seps = seps;
-				report.push(`seps=${seps.join(",")}`);
-			}
-
-			// Assets from CURRENCIES
-			if (toml.currencyCodes.length) {
-				update.assets = toml.currencyCodes
-					.slice(0, 25)
-					.map((code) => ({ code }));
-				report.push(`assets=${toml.currencyCodes.slice(0, 8).join(",")}${toml.currencyCodes.length > 8 ? "…" : ""}`);
-			}
-
-			// Real ramp capability from /info (prefer SEP-24 server, else SEP-6)
-			const transferServer =
-				toml.topLevel.TRANSFER_SERVER_SEP0024 || toml.topLevel.TRANSFER_SERVER;
-			if (transferServer) {
-				const ramps = await rampsFromInfo(transferServer);
-				if (ramps.length) {
-					update.rampTypes = ramps;
-					report.push(`ramps=${ramps.join(",")}`);
+			// A missing/unusable toml skips the TOML enrichment only — the
+			// curated region backfill below must still apply (Bitso, Yellow
+			// Card etc. publish no public toml but their regions are known).
+			const tomlText = domain
+				? await fetchText(`https://${domain}/.well-known/stellar.toml`)
+				: null;
+			const toml = tomlText ? parseStellarToml(tomlText) : null;
+			if (!toml || !hasUsableData(toml)) {
+				const why = !domain
+					? "no usable websiteUrl"
+					: !tomlText
+						? `no stellar.toml at ${domain}`
+						: `stub/HTML at ${domain}`;
+				if (!regionFill) {
+					console.log(`✗ ${doc.slug}: ${why} — skipped`);
+					skipped++;
+					continue;
 				}
-			}
+				console.log(`· ${doc.slug}: ${why} — regions backfill only`);
+			} else {
+				// SEPs from declared endpoints
+				const seps: string[] = [];
+				if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
+				if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
+				if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
+				if (seps.length) {
+					update.seps = seps;
+					report.push(`seps=${seps.join(",")}`);
+				}
 
-			// Fill-if-empty partner-owned fields from DOCUMENTATION
-			const d = toml.documentation;
-			if (!doc.logoUrl && d.ORG_LOGO) {
-				update.logoUrl = d.ORG_LOGO;
-				report.push("logo✓");
-			}
-			if (!doc.contactEmail && d.ORG_OFFICIAL_EMAIL) {
-				update.contactEmail = d.ORG_OFFICIAL_EMAIL;
-				report.push(`contact=${d.ORG_OFFICIAL_EMAIL}`);
-			}
-			if (!doc.tagline && d.ORG_DESCRIPTION) {
-				update.tagline = d.ORG_DESCRIPTION.slice(0, 140);
-				report.push("tagline✓");
-			}
+				// Assets from CURRENCIES
+				if (toml.currencyCodes.length) {
+					update.assets = toml.currencyCodes
+						.slice(0, 25)
+						.map((code) => ({ code }));
+					report.push(
+						`assets=${toml.currencyCodes.slice(0, 8).join(",")}${toml.currencyCodes.length > 8 ? "…" : ""}`,
+					);
+				}
 
-			// Derived service tags (merged, deduped, additive)
-			const derivedTags = [
-				...seps,
-				...(update.rampTypes ?? []),
-				...toml.currencyCodes.slice(0, 10).map((c: string) => c.toLowerCase()),
-			];
-			if (derivedTags.length) {
-				const existing: string[] = (doc.services ?? [])
-					.map((s: { tag: string }) => s.tag)
-					.filter(Boolean);
-				const merged = [...new Set([...existing, ...derivedTags])];
-				if (merged.length !== existing.length) {
-					update.services = merged.map((tag) => ({ tag }));
-					report.push(`+${merged.length - existing.length} service tags`);
+				// Real ramp capability from /info (prefer SEP-24 server, else SEP-6)
+				const transferServer =
+					toml.topLevel.TRANSFER_SERVER_SEP0024 ||
+					toml.topLevel.TRANSFER_SERVER;
+				if (transferServer) {
+					const ramps = await rampsFromInfo(transferServer);
+					if (ramps.length) {
+						update.rampTypes = ramps;
+						report.push(`ramps=${ramps.join(",")}`);
+					}
+				}
+
+				// Fill-if-empty partner-owned fields from DOCUMENTATION
+				const d = toml.documentation;
+				if (!doc.logoUrl && d.ORG_LOGO) {
+					update.logoUrl = d.ORG_LOGO;
+					report.push("logo✓");
+				}
+				if (!doc.contactEmail && d.ORG_OFFICIAL_EMAIL) {
+					update.contactEmail = d.ORG_OFFICIAL_EMAIL;
+					report.push(`contact=${d.ORG_OFFICIAL_EMAIL}`);
+				}
+				if (!doc.tagline && d.ORG_DESCRIPTION) {
+					update.tagline = d.ORG_DESCRIPTION.slice(0, 140);
+					report.push("tagline✓");
+				}
+
+				// Derived service tags (merged, deduped, additive)
+				const derivedTags = [
+					...seps,
+					...(update.rampTypes ?? []),
+					...toml.currencyCodes
+						.slice(0, 10)
+						.map((c: string) => c.toLowerCase()),
+				];
+				if (derivedTags.length) {
+					const existing: string[] = (doc.services ?? [])
+						.map((s: { tag: string }) => s.tag)
+						.filter(Boolean);
+					const merged = [...new Set([...existing, ...derivedTags])];
+					if (merged.length !== existing.length) {
+						update.services = merged.map((tag) => ({ tag }));
+						report.push(`+${merged.length - existing.length} service tags`);
+					}
 				}
 			}
 		}
