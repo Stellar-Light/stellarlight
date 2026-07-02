@@ -31,11 +31,24 @@ const TYPE_LABELS: Record<string, string> = {
 	other: "Other",
 };
 
+// Fresh is the normal state — neutral, not a green celebration. Only decay
+// states carry warning colors.
 const FRESH_BADGE: Record<string, { label: string; cls: string }> = {
-	fresh: { label: "Fresh", cls: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
+	fresh: { label: "Fresh", cls: "text-muted-foreground border-border bg-white/[0.03]" },
 	aging: { label: "Aging", cls: "text-yellow-400 border-yellow-500/30 bg-yellow-500/10" },
 	stale: { label: "Stale", cls: "text-orange-400 border-orange-500/30 bg-orange-500/10" },
 	archived: { label: "Archived", cls: "text-red-400 border-red-500/30 bg-red-500/10" },
+};
+
+const PRICING_LABELS: Record<string, string> = {
+	free: "Free",
+	freemium: "Freemium",
+	subscription: "Subscription",
+	"usage-based": "Usage-based",
+	fixed: "Fixed fee",
+	hourly: "Hourly",
+	"rev-share": "Revenue share",
+	custom: "Custom — contact them",
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -97,23 +110,36 @@ export default async function PartnerProfilePage({
 			</Link>
 
 			{/* Header */}
-			<div className="mb-8">
-				<div className="flex items-baseline gap-3 mb-2 flex-wrap">
-					<h1 className="text-3xl font-bold text-foreground tracking-tight">
-						{p.name}
-					</h1>
-					<span className="text-[11px] uppercase tracking-wider text-muted-foreground border border-border/60 rounded px-2 py-0.5">
-						{TYPE_LABELS[p.partnerType] ?? p.partnerType}
-					</span>
-					<span className={`text-[10px] px-2 py-0.5 rounded-full border ${fresh.cls}`}>
-						{fresh.label}
-					</span>
-				</div>
-				{p.tagline && (
-					<p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-						{p.tagline}
-					</p>
+			<div className="mb-8 flex items-start gap-4">
+				{p.logoUrl && (
+					// Remote partner logos come from arbitrary domains (their
+					// stellar.toml ORG_LOGO), so a plain img beats next/image's
+					// domain allowlist here.
+					// eslint-disable-next-line @next/next/no-img-element
+					<img
+						src={p.logoUrl}
+						alt={`${p.name} logo`}
+						className="w-14 h-14 rounded-xl border border-border bg-white/[0.03] object-contain p-1.5 flex-shrink-0"
+					/>
 				)}
+				<div className="min-w-0">
+					<div className="flex items-baseline gap-3 mb-2 flex-wrap">
+						<h1 className="text-3xl font-bold text-foreground tracking-tight">
+							{p.name}
+						</h1>
+						<span className="text-[11px] uppercase tracking-wider text-muted-foreground border border-border/60 rounded px-2 py-0.5">
+							{TYPE_LABELS[p.partnerType] ?? p.partnerType}
+						</span>
+						<span className={`text-[10px] px-2 py-0.5 rounded-full border ${fresh.cls}`}>
+							{fresh.label}
+						</span>
+					</div>
+					{p.tagline && (
+						<p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
+							{p.tagline}
+						</p>
+					)}
+				</div>
 			</div>
 
 			{p.description && (
@@ -147,7 +173,7 @@ export default async function PartnerProfilePage({
 									{ramps.map((r) => (
 										<span
 											key={r}
-											className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20"
+											className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-foreground/90 border border-border font-medium"
 										>
 											{r === "on-ramp" ? "On-ramp (fiat → Stellar)" : "Off-ramp (Stellar → fiat)"}
 										</span>
@@ -258,7 +284,12 @@ export default async function PartnerProfilePage({
 						{p.acceptingClients != null && (
 							<Field label="Accepting clients" value={p.acceptingClients ? "Yes" : "Not right now"} />
 						)}
-						{p.pricingModel && <Field label="Pricing" value={p.pricingModel} />}
+						{p.pricingModel && (
+						<Field
+							label="Pricing"
+							value={PRICING_LABELS[p.pricingModel] ?? p.pricingModel}
+						/>
+					)}
 						{p.leadTime && <Field label="Lead time" value={p.leadTime} />}
 						{p.typicalEngagement && <Field label="Engagement" value={p.typicalEngagement} />}
 						{p.responseSla && <Field label="Response" value={p.responseSla} />}

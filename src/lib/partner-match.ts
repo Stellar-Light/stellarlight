@@ -46,6 +46,7 @@ export interface PublicPartner {
 	country: string | null;
 	/** True when the partner has a direct contact path (email or channel). */
 	contactable: boolean;
+	logoUrl: string | null;
 	freshness: string;
 	url: string;
 }
@@ -75,6 +76,7 @@ function toPublic(p: any): PublicPartner {
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,
 		contactable: Boolean(p.contactEmail || p.contactChannel),
+		logoUrl: p.logoUrl ?? null,
 		freshness: p.freshnessStatus ?? "fresh",
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};

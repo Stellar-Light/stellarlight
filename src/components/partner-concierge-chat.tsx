@@ -28,7 +28,7 @@ import {
 	Search,
 } from "lucide-react";
 
-interface PublicPartner {
+export interface PublicPartner {
 	slug: string;
 	name: string;
 	partnerType: string;
@@ -42,6 +42,7 @@ interface PublicPartner {
 	rampTypes?: string[];
 	country?: string | null;
 	contactable?: boolean;
+	logoUrl?: string | null;
 	freshness: string;
 	url: string;
 }
@@ -118,14 +119,27 @@ const EXAMPLES = [
 const MAILTO =
 	"mailto:hello@stellarlight.xyz?subject=Partner%20listing%20on%20StellarLight";
 
-function renderValue(v: unknown): string {
+const PRICING_LABELS: Record<string, string> = {
+	free: "Free",
+	freemium: "Freemium",
+	subscription: "Subscription",
+	"usage-based": "Usage-based",
+	fixed: "Fixed fee",
+	hourly: "Hourly",
+	"rev-share": "Revenue share",
+	custom: "Custom",
+};
+
+function renderValue(v: unknown, key?: string): string {
 	if (v == null || v === "") return "—";
 	if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
 	if (typeof v === "boolean") return v ? "Yes" : "No";
+	// Enum values are stored lowercase — show the human label, not the raw slug.
+	if (key === "pricingModel") return PRICING_LABELS[String(v)] ?? String(v);
 	return String(v);
 }
 
-function renderMarkdownBold(text: string): React.ReactNode[] {
+export function renderMarkdownBold(text: string): React.ReactNode[] {
 	const parts = text.split(/\*\*(.+?)\*\*/g);
 	return parts.map((chunk, i) =>
 		i % 2 === 1 ? (
@@ -370,7 +384,7 @@ export function PartnerConciergeChat() {
 									{FIELD_LABELS[k]}
 								</dt>
 								<dd className="col-span-2 text-sm text-foreground/90">
-									{renderValue(fields[k])}
+									{renderValue(fields[k], k)}
 								</dd>
 							</div>
 						))}
@@ -508,16 +522,27 @@ export function PartnerConciergeChat() {
 	);
 }
 
-function MatchCard({ p }: { p: PublicPartner }) {
+export function MatchCard({ p }: { p: PublicPartner }) {
 	return (
 		<div className="rounded-xl bg-white/[0.02] border border-border p-3.5 hover:border-white/25 transition-colors">
 			<div className="flex items-start justify-between gap-2 mb-1">
-				<Link
-					href={`/partners/${p.slug}`}
-					className="font-medium text-foreground hover:text-white transition-colors truncate"
-				>
-					{p.name}
-				</Link>
+				<div className="flex items-center gap-2 min-w-0">
+					{p.logoUrl && (
+						// Arbitrary remote domains (stellar.toml ORG_LOGO) — plain img.
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							src={p.logoUrl}
+							alt=""
+							className="w-6 h-6 rounded-md border border-border bg-white/[0.03] object-contain flex-shrink-0"
+						/>
+					)}
+					<Link
+						href={`/partners/${p.slug}`}
+						className="font-medium text-foreground hover:text-white transition-colors truncate"
+					>
+						{p.name}
+					</Link>
+				</div>
 				<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border whitespace-nowrap">
 					{TYPE_LABELS[p.partnerType] ?? p.partnerType}
 				</span>
@@ -530,7 +555,7 @@ function MatchCard({ p }: { p: PublicPartner }) {
 			<div className="flex flex-wrap items-center gap-1.5">
 				{/* Available only with a real contact path — no dead-end matches. */}
 				{p.acceptingClients && p.contactable && (
-					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
+					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.06] text-foreground/80 border border-border">
 						Available
 					</span>
 				)}

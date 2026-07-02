@@ -267,7 +267,7 @@ export function AskSearch() {
 													</span>
 												)}
 												{p.acceptingClients && (
-													<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
+													<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.06] text-foreground/80 border border-border">
 														Available
 													</span>
 												)}

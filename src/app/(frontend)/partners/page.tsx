@@ -41,6 +41,7 @@ interface DirectoryPartner {
 	acceptingClients: boolean | null;
 	/** Has a direct contact path (email/channel) — gates the Available chip. */
 	contactable: boolean;
+	logoUrl: string | null;
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
@@ -72,6 +73,7 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 			country: p.country ?? null,
 			acceptingClients: p.acceptingClients ?? null,
 			contactable: Boolean(p.contactEmail || p.contactChannel),
+			logoUrl: p.logoUrl ?? null,
 			freshness: { status: p.freshnessStatus ?? "fresh" },
 			verified: {
 				scfInvolvement: p.verified?.scfInvolvement ?? null,
