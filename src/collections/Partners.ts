@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field, Where } from "payload";
+import { getAppUrl } from "../lib/utils/app-url";
 import { generateSlug } from "../lib/utils/normalize";
 
 /**
@@ -109,7 +110,9 @@ export const Partners: CollectionConfig = {
 		forgotPassword: {
 			generateEmailHTML: (args) => {
 				const token = args?.token ?? "";
-				const base = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.xyz";
+				// getAppUrl, not NEXT_PUBLIC_APP_URL — the Vercel env carries a
+				// localhost value for that var (2026-07-02 media-URL incident).
+				const base = getAppUrl();
 				const url = `${base}/partners/reset-password?token=${token}`;
 				return `<p>Reset your Stellar Light partner password:</p><p><a href="${url}">${url}</a></p><p>This link expires soon. If you didn't request this, you can ignore it.</p>`;
 			},
@@ -191,8 +194,7 @@ export const Partners: CollectionConfig = {
 						expiration: 7 * 24 * 60 * 60 * 1000, // 7d — default 1h is too short for an invite
 						req,
 					});
-					const base =
-						process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.xyz";
+					const base = getAppUrl();
 					const url = `${base}/partners/reset-password?token=${token}`;
 					await req.payload.sendEmail({
 						to: doc.email,

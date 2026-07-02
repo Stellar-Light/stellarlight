@@ -21,6 +21,7 @@
 
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { getAppUrl } from "@/lib/utils/app-url";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { generateSlug } from "@/lib/utils/normalize";
@@ -158,7 +159,7 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	const base = process.env.NEXT_PUBLIC_APP_URL || "https://stellarlight.xyz";
+	const base = getAppUrl(); // NOT NEXT_PUBLIC_APP_URL — Vercel env carries a localhost value
 	const slug = generateSlug(orgName); // same fn as the collection's slug hook
 
 	try {
