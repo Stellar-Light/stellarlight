@@ -437,8 +437,16 @@ function Dashboard({
 					</span>
 				</SectionTitle>
 				<div className="grid grid-cols-2 gap-2.5 text-sm">
-					<Verified label="Last GitHub commit" value={fmtDate(v.githubLastCommitAt) || "—"} />
-					<Verified label="Commits (90d)" value={v.githubCommits90d ?? "—"} />
+					{/* GitHub activity only applies to open-source partners (tooling,
+					    infra, protocols). Show it only when a GitHub org is set — most
+					    anchors/ramps/legal/agencies are closed-source and shouldn't be
+					    judged on commits they'll never have. */}
+					{form.githubOrg ? (
+						<>
+							<Verified label="Last GitHub commit" value={fmtDate(v.githubLastCommitAt) || "—"} />
+							<Verified label="Commits (90d)" value={v.githubCommits90d ?? "—"} />
+						</>
+					) : null}
 					<Verified
 						label="On-chain activity"
 						value={
@@ -451,12 +459,11 @@ function Dashboard({
 					/>
 					<Verified label="SCF involvement" value={v.scfInvolvement ?? "—"} />
 				</div>
-				{!v.lastAutoVerifyAt && (
-					<p className="text-[11px] text-muted-foreground mt-2.5">
-						No verified signals yet — they populate once our crawler reads your
-						GitHub org and on-chain footprint.
-					</p>
-				)}
+				<p className="text-[11px] text-muted-foreground mt-2.5">
+					{form.githubOrg
+						? "GitHub activity comes from your public org. On-chain and SCF signals populate as we detect them."
+						: "These populate as we detect your on-chain footprint and SCF history. Open-source? Add a GitHub org below to show code activity too — optional, skip it if you're not."}
+				</p>
 			</section>
 
 			{/* Tab toggle: overview editor vs AI chat */}
@@ -777,7 +784,7 @@ function ProfileEditor({
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 				<Input label="Website" value={form.websiteUrl ?? ""} onChange={(x) => set("websiteUrl", x)} changed={changed.has("websiteUrl")} />
 				<Input label="Docs URL" value={form.docsUrl ?? ""} onChange={(x) => set("docsUrl", x)} changed={changed.has("docsUrl")} />
-				<Input label="GitHub org" value={form.githubOrg ?? ""} onChange={(x) => set("githubOrg", x)} hint="drives your verified signals" changed={changed.has("githubOrg")} />
+				<Input label="GitHub org" value={form.githubOrg ?? ""} onChange={(x) => set("githubOrg", x)} hint="optional — open-source only" changed={changed.has("githubOrg")} />
 				<Input label="Contact email" value={form.contactEmail ?? ""} onChange={(x) => set("contactEmail", x)} changed={changed.has("contactEmail")} />
 				<Input label="Contact channel" value={form.contactChannel ?? ""} onChange={(x) => set("contactChannel", x)} hint="Discord / Telegram / lead form" changed={changed.has("contactChannel")} />
 				<Input label="Response SLA" value={form.responseSla ?? ""} onChange={(x) => set("responseSla", x)} hint="e.g. within 24h weekdays" changed={changed.has("responseSla")} />

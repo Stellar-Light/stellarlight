@@ -61,6 +61,28 @@ const TYPE_LABELS: Record<string, string> = {
 	other: "Other",
 };
 
+const SECTOR_LABELS: Record<string, string> = {
+	defi: "DeFi",
+	payments: "Payments",
+	rwa: "RWA",
+	stablecoins: "Stablecoins",
+	identity: "Identity",
+	data: "Data",
+	ai: "AI",
+	gaming: "Gaming",
+	other: "Other",
+};
+const REGION_LABELS: Record<string, string> = {
+	global: "Global",
+	"north-america": "North America",
+	latam: "LatAm",
+	europe: "Europe",
+	africa: "Africa",
+	mena: "MENA",
+	asia: "Asia",
+	oceania: "Oceania",
+};
+
 const FIELD_LABELS: Record<string, string> = {
 	tagline: "Tagline",
 	description: "What you do",
@@ -460,17 +482,23 @@ function MatchCard({ p }: { p: PublicPartner }) {
 			<div className="flex flex-wrap items-center gap-1.5">
 				{p.acceptingClients && (
 					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20">
-						accepting
+						Available
 					</span>
 				)}
 				{p.sectors.slice(0, 2).map((s) => (
-					<span key={s} className="text-[10px] text-muted-foreground/80">
-						#{s}
+					<span
+						key={s}
+						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/90 border border-border"
+					>
+						{SECTOR_LABELS[s] ?? s}
 					</span>
 				))}
 				{p.regions.slice(0, 1).map((r) => (
-					<span key={r} className="text-[10px] text-muted-foreground/80">
-						@{r}
+					<span
+						key={r}
+						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border"
+					>
+						{REGION_LABELS[r] ?? r}
 					</span>
 				))}
 				<Link

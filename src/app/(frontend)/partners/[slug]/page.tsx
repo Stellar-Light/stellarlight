@@ -123,18 +123,36 @@ export default async function PartnerProfilePage({
 				</Section>
 			)}
 
-			{/* Verified signals */}
-			<Section title="Verified by Stellar Light">
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-					<Cell label="Last commit" value={fmtDate(v.githubLastCommitAt)} />
-					<Cell label="Commits (90d)" value={v.githubCommits90d ?? "—"} />
-					<Cell
-						label="On-chain"
-						value={v.onchainActive == null ? "—" : v.onchainActive ? "active" : "none"}
-					/>
-					<Cell label="SCF" value={v.scfInvolvement ?? "—"} />
-				</div>
-			</Section>
+			{/* Verified signals — only what actually applies. GitHub activity is
+			    shown only for partners with a public org (open-source tooling/
+			    infra); most anchors, ramps, legal, agencies are closed-source and
+			    are vouched for by on-chain footprint + SCF history instead. The
+			    section is omitted entirely when we have no signals yet, rather than
+			    showing a wall of dashes. */}
+			{(() => {
+				const cells: Array<{ label: string; value: React.ReactNode }> = [];
+				if (p.githubOrg) {
+					cells.push({ label: "Last commit", value: fmtDate(v.githubLastCommitAt) });
+					cells.push({ label: "Commits (90d)", value: v.githubCommits90d ?? "—" });
+				}
+				if (v.onchainActive != null)
+					cells.push({
+						label: "On-chain",
+						value: v.onchainActive ? "active" : "none",
+					});
+				if (v.scfInvolvement)
+					cells.push({ label: "SCF", value: v.scfInvolvement });
+				if (cells.length === 0) return null;
+				return (
+					<Section title="Verified by Stellar Light">
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+							{cells.map((c) => (
+								<Cell key={c.label} label={c.label} value={c.value} />
+							))}
+						</div>
+					</Section>
+				);
+			})()}
 
 			{services.length > 0 && (
 				<Section title="Services">
