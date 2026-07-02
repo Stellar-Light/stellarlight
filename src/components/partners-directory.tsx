@@ -56,6 +56,30 @@ const FRESH_BADGE: Record<string, string> = {
 	archived: "text-red-400/90",
 };
 
+const SECTOR_LABELS: Record<string, string> = {
+	defi: "DeFi",
+	payments: "Payments",
+	rwa: "RWA",
+	stablecoins: "Stablecoins",
+	identity: "Identity",
+	data: "Data",
+	ai: "AI",
+	gaming: "Gaming",
+	other: "Other",
+};
+const REGION_LABELS: Record<string, string> = {
+	global: "Global",
+	"north-america": "North America",
+	latam: "LatAm",
+	europe: "Europe",
+	africa: "Africa",
+	mena: "MENA",
+	asia: "Asia",
+	oceania: "Oceania",
+};
+const sectorLabel = (s: string) => SECTOR_LABELS[s] ?? s;
+const regionLabel = (r: string) => REGION_LABELS[r] ?? r;
+
 export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) {
 	const [typeFilter, setTypeFilter] = useState("all");
 	const [query, setQuery] = useState("");
@@ -206,7 +230,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 									</span>
 									{p.acceptingClients && (
 										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/20 whitespace-nowrap">
-											accepting
+											Available
 										</span>
 									)}
 								</div>
@@ -223,17 +247,17 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 								{p.sectors.slice(0, 3).map((s) => (
 									<span
 										key={`s-${s}`}
-										className="text-[10px] text-muted-foreground/80"
+										className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/90 border border-border"
 									>
-										#{s}
+										{sectorLabel(s)}
 									</span>
 								))}
 								{p.regions.slice(0, 2).map((r) => (
 									<span
 										key={`r-${r}`}
-										className="text-[10px] text-muted-foreground/80"
+										className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border"
 									>
-										@{r}
+										{regionLabel(r)}
 									</span>
 								))}
 							</div>
