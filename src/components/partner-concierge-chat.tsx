@@ -172,6 +172,10 @@ export function PartnerConciergeChat({
 	const [error, setError] = useState<string | null>(null);
 	const chatBoxRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+	// Guards the mount effect against React's double-invoke (StrictMode /
+	// remount), which otherwise auto-sent the opener twice → two answers to the
+	// first prompt.
+	const initialized = useRef(false);
 
 	async function callAssistant(
 		msgs: Msg[],
@@ -204,6 +208,8 @@ export function PartnerConciergeChat({
 	// box) is sent immediately as the user's first message — the visitor lands
 	// mid-conversation, already being answered. Otherwise open with a greeting.
 	useEffect(() => {
+		if (initialized.current) return; // exactly once, even if the effect re-fires
+		initialized.current = true;
 		(async () => {
 			setBusy(true);
 			const handoff = initialQuery?.trim();
