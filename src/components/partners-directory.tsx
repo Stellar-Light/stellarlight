@@ -23,6 +23,7 @@ interface DirectoryPartner {
 	name: string;
 	partnerType: string;
 	tagline: string | null;
+	description: string | null;
 	sectors: string[];
 	regions: string[];
 	assets: string[];
@@ -120,7 +121,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 			if (typeFilter !== "all" && p.partnerType !== typeFilter) return false;
 			if (q) {
 				const hay =
-					`${p.name} ${p.tagline ?? ""} ${p.sectors.join(" ")} ${p.regions.join(" ")} ${p.assets.join(" ")} ${p.seps.join(" ")} ${p.rampTypes.join(" ")} ${p.country ?? ""}`.toLowerCase();
+					`${p.name} ${p.tagline ?? ""} ${p.description ?? ""} ${p.sectors.join(" ")} ${p.regions.join(" ")} ${p.assets.join(" ")} ${p.seps.join(" ")} ${p.rampTypes.join(" ")} ${p.country ?? ""}`.toLowerCase();
 				if (!hay.includes(q)) return false;
 			}
 			return true;
@@ -295,9 +296,9 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 							</div>
 							<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
 						</div>
-						{p.tagline && (
+						{(p.tagline || p.description) && (
 							<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2">
-								{p.tagline}
+								{p.tagline ?? p.description}
 							</p>
 						)}
 						{/* stellar.toml-verified capabilities: assets + SEPs + ramps + country */}

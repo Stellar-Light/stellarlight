@@ -33,6 +33,7 @@ export interface PublicPartner {
 	name: string;
 	partnerType: string;
 	tagline: string | null;
+	description?: string | null;
 	websiteUrl: string | null;
 	acceptingClients: boolean | null;
 	sectors: string[];
@@ -568,9 +569,9 @@ export function MatchCard({ p }: { p: PublicPartner }) {
 					{TYPE_LABELS[p.partnerType] ?? p.partnerType}
 				</span>
 			</div>
-			{p.tagline && (
+			{(p.tagline || p.description) && (
 				<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2 mb-2">
-					{p.tagline}
+					{p.tagline ?? p.description}
 				</p>
 			)}
 			<div className="flex flex-wrap items-center gap-1.5">
