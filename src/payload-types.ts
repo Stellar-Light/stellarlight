@@ -86,6 +86,7 @@ export interface Config {
     'scout-feedback': ScoutFeedback;
     'community-skills': CommunitySkill;
     'partner-accounts': PartnerAccount;
+    'partner-leads': PartnerLead;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +120,7 @@ export interface Config {
     'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
     'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
+    'partner-leads': PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -616,7 +618,9 @@ export interface Blog {
    * Description from RSS feed (for external posts)
    */
   rssDescription?: string | null;
-  category?: ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update') | null;
+  category?:
+    | ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update' | 'Ecosystem')
+    | null;
   /**
    * Add tags to help categorize this post
    */
@@ -1308,6 +1312,37 @@ export interface PartnerAccount {
   password?: string | null;
 }
 /**
+ * Builder searches that surfaced a partner. Batched into the weekly partner digest.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partner-leads".
+ */
+export interface PartnerLead {
+  id: string;
+  /**
+   * Slug of the partner that was surfaced.
+   */
+  partnerSlug: string;
+  /**
+   * Denormalized name for the digest email.
+   */
+  partnerName?: string | null;
+  /**
+   * The builder's stated need that matched.
+   */
+  need: string;
+  /**
+   * Which surface generated the lead.
+   */
+  source?: ('concierge' | 'match-api') | null;
+  /**
+   * True once a weekly digest has included this lead.
+   */
+  notified?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1494,6 +1529,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'partner-accounts';
         value: string | PartnerAccount;
+      } | null)
+    | ({
+        relationTo: 'partner-leads';
+        value: string | PartnerLead;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2090,6 +2129,19 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partner-leads_select".
+ */
+export interface PartnerLeadsSelect<T extends boolean = true> {
+  partnerSlug?: T;
+  partnerName?: T;
+  need?: T;
+  source?: T;
+  notified?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
