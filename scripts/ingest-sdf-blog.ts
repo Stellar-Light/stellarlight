@@ -19,6 +19,7 @@ import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
+	fetchSitemapUrls,
 	loadExistingChunks,
 	stripHtml,
 	upsertChunks,
@@ -39,21 +40,54 @@ async function fetchHtml(url: string): Promise<string> {
 	return res.text();
 }
 
-/** Find all blog post URLs from the index pages (paginated). */
+/**
+ * Find all blog post URLs from the index pages (paginated).
+ *
+ * sls-006: the old single-segment regex (`/blog/[a-z0-9-]+`) missed every
+ * article nested under a category path (`/blog/developers/q1-2026-…`) — the
+ * flagship quarterly reports were absent from the corpus entirely — while
+ * MATCHING the category listing pages themselves (`/blog/press`), which then
+ * got ingested as "posts" whose bodies are just lists of titles. Nested paths
+ * are now followed; listing pages are excluded here by pattern and again at
+ * fetch time by page classification.
+ */
 async function listBlogPosts(): Promise<string[]> {
+	// Primary discovery: the sitemap. stellar.org/sitemap.xml lists ~555 blog
+	// URLs — ~550 of them nested under category paths the old regex never
+	// matched, i.e. the corpus was missing nearly the ENTIRE blog, not just
+	// the Q1 report sls-006 flagged. Index-page crawling below stays as a
+	// fallback/union for anything the sitemap lags on.
 	const seen = new Set<string>();
+	try {
+		const urls = await fetchSitemapUrls(
+			`${BASE}/sitemap.xml`,
+			`${BASE}/blog/`,
+		);
+		for (const u of urls) {
+			const clean = u.replace(/\/$/, "");
+			if (clean === `${BASE}/blog`) continue;
+			if (clean.match(/\/page\/\d+/) || clean.match(/\/tags?\//)) continue;
+			seen.add(clean);
+		}
+		console.log(`  sitemap: ${seen.size} blog URLs`);
+	} catch {
+		// fall through to index crawl
+	}
 	for (let page = 1; page <= 30; page++) {
 		const url = page === 1 ? `${BASE}/blog` : `${BASE}/blog/page/${page}`;
 		try {
 			const html = await fetchHtml(url);
 			const matches = [
-				...html.matchAll(/href=["'](\/blog\/[a-z0-9][a-z0-9-]+)["']/gi),
+				...html.matchAll(
+					/href=["'](\/blog\/[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*)["']/gi,
+				),
 			];
 			let pageNew = 0;
 			for (const m of matches) {
 				const full = `${BASE}${m[1].replace(/\/$/, "")}`;
 				if (full === `${BASE}/blog`) continue;
 				if (full.match(/\/page\/\d+/)) continue;
+				if (full.match(/\/tags?\//)) continue; // tag/filter listings
 				if (!seen.has(full)) {
 					seen.add(full);
 					pageNew += 1;
@@ -72,6 +106,13 @@ interface Post {
 	title: string;
 	body: string;
 	publishedAt?: string;
+	/**
+	 * sls-006: listing/category/tag pages classify as non-articles — they have
+	 * no article:published_time and no og:type=article, and their "bodies" are
+	 * just lists of other posts' titles. They pollute retrieval (queries for a
+	 * report return the index page that merely NAMES it) and must not chunk.
+	 */
+	isArticle: boolean;
 }
 
 async function fetchPost(url: string): Promise<Post> {
@@ -89,10 +130,15 @@ async function fetchPost(url: string): Promise<Post> {
 		) || html.match(/<time[^>]*datetime=["']([^"']+)["']/i);
 	const publishedAt = dateMatch ? dateMatch[1] : undefined;
 
+	const ogType = html.match(
+		/<meta\s+property=["']og:type["']\s+content=["']([^"']+)["']/i,
+	)?.[1];
+	const isArticle = Boolean(publishedAt) || ogType === "article";
+
 	const main = html.match(/<article[\s\S]*?<\/article>/i)
 		|| html.match(/<main[\s\S]*?<\/main>/i);
 	const body = stripHtml(main ? main[0] : html);
-	return { url, title, body, publishedAt };
+	return { url, title, body, publishedAt, isArticle };
 }
 
 async function run() {
@@ -116,12 +162,31 @@ async function run() {
 
 	const allChunks: ReturnType<typeof chunkMarkdown> = [];
 	let postErrors = 0;
+	// sls-006: pages fetched this run and classified as listings — their
+	// previously-ingested chunks are poison and get pruned in execute mode.
+	const listingDocIds: string[] = [];
+	// Content-hash dedupe across URLs: the same body reachable via several
+	// paths (canonical + category path) must chunk exactly once.
+	const seenBodies = new Set<string>();
+	let skippedListings = 0;
+	let skippedDupes = 0;
 
 	for (const url of urls) {
 		try {
 			const post = await fetchPost(url);
-			if (post.body.length < 200) continue;
 			const slug = url.replace(`${BASE}/blog/`, "").replace(/\/$/, "");
+			if (!post.isArticle) {
+				skippedListings += 1;
+				listingDocIds.push(`blog/${slug}`);
+				continue;
+			}
+			if (post.body.length < 200) continue;
+			const bodyHash = post.body.slice(0, 4000);
+			if (seenBodies.has(bodyHash)) {
+				skippedDupes += 1;
+				continue;
+			}
+			seenBodies.add(bodyHash);
 			const chunks = chunkMarkdown({
 				md: `# ${post.title}\n\n${post.body}`,
 				parentDocId: `blog/${slug}`,
@@ -135,6 +200,16 @@ async function run() {
 			console.error(`  ✗ ${url}: ${(err as Error).message}`);
 			postErrors += 1;
 		}
+	}
+	console.log(
+		`  skipped: ${skippedListings} listing/tag pages, ${skippedDupes} duplicate bodies`,
+	);
+	if (listingDocIds.length) {
+		const poisoned = listingDocIds.filter((id) => existing.has(id));
+		console.log(
+			`  poison chunks to prune (previously-ingested listing pages): ${poisoned.length}` +
+				(poisoned.length ? ` → ${poisoned.slice(0, 8).join(", ")}` : ""),
+		);
 	}
 
 	const stats = { new: 0, updated: 0, unchanged: 0, toEmbed: 0 };
@@ -158,6 +233,23 @@ async function run() {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
+
+	// Prune poison: delete chunks of pages we just re-fetched and classified
+	// as listings (targeted — only pages verified non-article THIS run).
+	let pruned = 0;
+	for (const docId of listingDocIds) {
+		const chunkMap = existing.get(docId);
+		if (!chunkMap) continue;
+		for (const { id } of chunkMap.values()) {
+			try {
+				await payload.delete({ collection: "research-docs", id });
+				pruned += 1;
+			} catch (err) {
+				console.error(`  ✗ prune ${docId}: ${(err as Error).message}`);
+			}
+		}
+	}
+	if (pruned) console.log(`  pruned ${pruned} listing-page chunks`);
 
 	const r = await upsertChunks({
 		payload,
