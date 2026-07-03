@@ -12,7 +12,7 @@ permissions: { contents: read }
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 55
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
@@ -25,4 +25,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ inputs.execute && '--execute' || '' }}
+      # Scheduled runs ALWAYS execute (the whole point of the weekly refresh);
+      # manual dispatch stays dry-run unless the execute box is ticked.
+      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
