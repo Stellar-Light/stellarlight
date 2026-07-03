@@ -8,7 +8,7 @@ import configPromise from "../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 const SLUG = (process.env.SLUG || "").trim();
 const STATUS = (process.env.STATUS || "").trim();
-const VALID = ["Draft", "Development", "Pre-Release", "Live"];
+const VALID = ["Draft", "Development", "Pre-Release", "Live", "Inactive"];
 
 async function main() {
 	if (!SLUG || !VALID.includes(STATUS)) {
