@@ -45,7 +45,7 @@ interface ProjectDoc {
 	hackathonStatus?: string;
 	hackathonPlacement?: string;
 	hackathonPrize?: number;
-	scf?: { awarded?: boolean; totalAwarded?: number; rounds?: string[] };
+	scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
 }
 
 export async function GET(req: NextRequest) {
@@ -126,6 +126,9 @@ export async function GET(req: NextRequest) {
 					category: true,
 					scf: true,
 					hackathonPlacement: true,
+					// sls-013: the funnel read hackathonStatus without selecting it —
+					// every project counted as "Unknown" no matter what the DB held.
+					hackathonStatus: true,
 					status: true,
 				},
 			});
@@ -181,25 +184,39 @@ export async function GET(req: NextRequest) {
 			(s, p) => s + (p.scf?.totalAwarded ?? 0),
 			0,
 		);
-		// Build status funnel (Built / In Progress / Abandoned) for post-hackathon projects
+		// Post-hackathon outcome funnel — scoped to projects that actually came
+		// through a hackathon (sls-013: previously counted EVERY project, so 890
+		// non-hackathon projects landed in "Unknown" and the funnel read as
+		// zeroed placeholders).
 		const funnel: Record<string, number> = {
 			Built: 0,
 			"In Progress": 0,
 			Abandoned: 0,
 			Unknown: 0,
 		};
-		for (const p of projects) {
+		const hackathonProjects = projects.filter(
+			(p) => p.hackathonStatus || p.hackathonPlacement,
+		);
+		for (const p of hackathonProjects) {
 			const k = p.hackathonStatus ?? "Unknown";
 			funnel[k] = (funnel[k] ?? 0) + 1;
 		}
-		// Per-round funding
+		// Per-round funding (sls-013: read the wrong field name — scf.rounds
+		// instead of scf.awardedRounds — so byRound shipped empty forever).
+		// Per-round award amounts are not published by SCF, so a project's
+		// total is apportioned EQUALLY across its awarded rounds rather than
+		// double-counted into each (sls-011: totals are reconstructions).
 		const byRound = new Map<string, { count: number; totalUSD: number }>();
 		for (const p of scfProjects) {
-			for (const r of p.scf?.rounds ?? []) {
-				if (!byRound.has(r)) byRound.set(r, { count: 0, totalUSD: 0 });
-				const stat = byRound.get(r) as { count: number; totalUSD: number };
+			const rounds = p.scf?.awardedRounds ?? [];
+			if (!rounds.length) continue;
+			const share = (p.scf?.totalAwarded ?? 0) / rounds.length;
+			for (const r of rounds) {
+				const key = String(r);
+				if (!byRound.has(key)) byRound.set(key, { count: 0, totalUSD: 0 });
+				const stat = byRound.get(key) as { count: number; totalUSD: number };
 				stat.count += 1;
-				stat.totalUSD += p.scf?.totalAwarded ?? 0;
+				stat.totalUSD += share;
 			}
 		}
 		result.funding = {
@@ -208,9 +225,23 @@ export async function GET(req: NextRequest) {
 			meanAwardUSD: scfProjects.length
 				? Math.round(totalUSD / scfProjects.length)
 				: 0,
-			postHackathonStatusFunnel: funnel,
+			// sls-013: stamp the computation so consumers can tell drift from
+			// re-indexing from methodology change instead of watching the
+			// headline swing unexplained.
+			computedAt: new Date().toISOString(),
+			methodologyVersion: "funding-v2 (2026-07-03)",
+			countBasis:
+				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished.",
+			postHackathonStatusFunnel: {
+				scope: `hackathon-linked projects only (${hackathonProjects.length} of ${projects.length} active)`,
+				...funnel,
+			},
 			byRound: [...byRound.entries()]
-				.map(([round, stat]) => ({ round, ...stat }))
+				.map(([round, stat]) => ({
+					round,
+					count: stat.count,
+					totalUSD: Math.round(stat.totalUSD),
+				}))
 				.sort((a, b) => b.totalUSD - a.totalUSD),
 		};
 	}

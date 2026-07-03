@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
 		surfaces: ["api"],
+		version: "openapi 1.4.2",
+		type: "fixed",
+		summary:
+			"SCF funding data made reconcilable (sls-011/013): `/api/projects/search` rows gain `scfAwardedRounds` (e.g. [2, 17, 22] — rounds are authoritative; dollar totals are in-house reconstructions and can differ between aggregators, reconcile on rounds). `/api/analyze` funding dimension: `byRound` now actually populates (read the wrong field name since launch), amounts apportioned equally across a project's rounds instead of double-counted, `postHackathonStatusFunnel` scoped to hackathon-linked projects (was counting all 890 projects as Unknown via an unselected field), and the block gains `computedAt` + `methodologyVersion` + `countBasis` so metric swings are explainable.",
+		detail:
+			"countBasis states it explicitly: we count distinct PROJECTS (SDF's site counters count SUBMISSIONS — totals differ by design), and SCF doesn't publish per-award amounts for all rounds, so no cumulative dollar figure is official. Present computedAt alongside any quoted total.",
+	},
+	{
+		date: "2026-07-03",
+		surfaces: ["api"],
 		version: "openapi 1.4.1",
 		type: "changed",
 		summary:
