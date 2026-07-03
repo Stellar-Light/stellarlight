@@ -109,7 +109,12 @@ function boundaryRe(term: string): RegExp {
 	let re = termRe.get(term);
 	if (!re) {
 		const esc = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		re = new RegExp(`(?:\\b${esc}|${esc}\\b)`);
+		// Boundary on BOTH sides — a bare `${esc}\b` suffix branch let "dex"
+		// (an amm→dex synonym) match "shiel·dex" and rank a 0-star ZK wallet #1
+		// for "amm". `\bdex\b` still matches "dex" and hyphenated "dex-router"
+		// (hyphen is a boundary) but not a term buried inside a longer word;
+		// wordy() already splits camelCase/letter-digit smush before this runs.
+		re = new RegExp(`\\b${esc}\\b`);
 		termRe.set(term, re);
 	}
 	return re;

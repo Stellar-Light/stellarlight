@@ -283,6 +283,23 @@ function rankBoost(p: ProjectRow): number {
 	);
 }
 
+// Exact/prefix NAME match dominates ranking — searching a project's name should
+// return THAT project, not a higher-prominence project that merely mentions the
+// word (e.g. "blend" was returning Reflector, an oracle Blend uses, because
+// Reflector's prominence beat Blend's on an equal keyword score). 3 = exact,
+// 2 = prefix either way ("sorosw" → Soroswap), 1 = whole-word in the name.
+function nameMatchScore(name: string | undefined, q: string): number {
+	if (!q || !name) return 0;
+	const n = name.toLowerCase().trim();
+	const query = q.toLowerCase().trim();
+	if (!query) return 0;
+	if (n === query) return 3;
+	if (n.startsWith(query) || query.startsWith(n)) return 2;
+	const esc = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	if (new RegExp(`\\b${esc}\\b`).test(n)) return 1;
+	return 0;
+}
+
 // Surface the project's OWN canonical homes (website / GitHub / docs / socials)
 // so a consumer can cite the primary source — the project — not us or any
 // directory. These are facts about the project, not anyone's proprietary data;
@@ -568,6 +585,7 @@ export async function GET(req: NextRequest) {
 				);
 				filtered.sort(
 					(a, b) =>
+						nameMatchScore(b.name, q) - nameMatchScore(a.name, q) ||
 						b.score - a.score ||
 						Number(typeMatch(b, intentTypes)) -
 							Number(typeMatch(a, intentTypes)) ||
