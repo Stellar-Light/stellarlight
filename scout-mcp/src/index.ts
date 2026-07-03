@@ -26,9 +26,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { version as pkgVersion } from "../package.json";
 
 const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
-const VERSION = "1.1.5";
+// Derived from package.json at build time (tsup inlines it) so the
+// self-reported serverInfo.version can never drift from the published version
+// again — 1.1.6 shipped reporting "1.1.5" because this was a hardcoded string.
+// Same fix as api-client's CLIENT_VERSION (#226).
+const VERSION = pkgVersion;
 const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
