@@ -38,7 +38,11 @@ export const ScoutFeedback: CollectionConfig = {
 			"Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.",
 	},
 	access: {
-		create: () => true, // Anyone (any agent) can POST feedback
+		// Direct Payload REST create is DISABLED — the only writer is POST
+		// /api/feedback, which rate-limits + hashes the IP and calls create with
+		// overrideAccess. Leaving this open let anyone POST /api/scout-feedback
+		// straight past the limiter (unbounded on the M0).
+		create: () => false,
 		read: ({ req }) => !!req.user,
 		update: ({ req }) => !!req.user,
 		delete: ({ req }) => !!req.user,

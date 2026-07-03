@@ -139,6 +139,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const doc = await payload.create({
 			collection: "scout-feedback",
+			overrideAccess: true,
 			data: {
 				kind: body.kind as (typeof VALID_KINDS)[number],
 				message: body.message.trim(),

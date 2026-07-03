@@ -9,7 +9,9 @@ export const IdeaSubmissions: CollectionConfig = {
 	},
 	access: {
 		// Anyone can create (public form)
-		create: () => true,
+		// Direct REST create disabled — only POST /api/idea-submissions writes
+		// (rate-limited, overrideAccess). See ScoutFeedback for the same pattern.
+		create: () => false,
 		// Only admins can read/update/delete
 		read: ({ req }) => !!req.user,
 		update: ({ req }) => !!req.user,
