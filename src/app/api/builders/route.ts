@@ -43,6 +43,18 @@ interface BuilderRow {
 	url: string;
 }
 
+// Region umbrella → the free-text country values builder profiles actually
+// carry. Directory coverage note (sls-010): Argentina/Mexico/Peru/Venezuela
+// currently have zero profiles — a Passport-sync gap, not a filter bug —
+// but they stay in the maps so profiles match as soon as they exist.
+const REGION_LOCATIONS: Record<string, string[]> = {
+	latam: ["brazil", "mexico", "argentina", "colombia", "chile", "peru", "costa rica", "venezuela", "ecuador", "uruguay", "bolivia", "guatemala"],
+	"latin america": ["brazil", "mexico", "argentina", "colombia", "chile", "peru", "costa rica", "venezuela", "ecuador", "uruguay", "bolivia", "guatemala"],
+	africa: ["nigeria", "kenya", "ghana", "south africa", "uganda", "tanzania", "egypt", "morocco", "rwanda"],
+	asia: ["india", "philippines", "indonesia", "vietnam", "singapore", "japan", "korea", "thailand", "pakistan", "bangladesh"],
+	europe: ["germany", "france", "spain", "portugal", "italy", "united kingdom", "uk", "netherlands", "poland", "ukraine", "switzerland"],
+};
+
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
 	// `skill`/`tech` alias `q` — the free-text filter below already searches
@@ -66,7 +78,16 @@ export async function GET(req: NextRequest) {
 				visibility: { not_equals: "hidden" },
 			};
 			if (location) {
-				where.location = { like: location };
+				// Region umbrellas → country vocabulary (sls-010): profile locations
+				// are free-text country/city strings, so "Latin America" matched
+				// nothing even with 18 LatAm profiles present. Mirror of the
+				// region synonyms /api/projects/search ships.
+				const regionCountries = REGION_LOCATIONS[location.trim().toLowerCase()];
+				if (regionCountries) {
+					where.or = regionCountries.map((c) => ({ location: { like: c } }));
+				} else {
+					where.location = { like: location };
+				}
 			}
 
 			const result = await payload.find({

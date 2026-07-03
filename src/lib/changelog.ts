@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
 		surfaces: ["api"],
+		version: "openapi 1.4.1",
+		type: "changed",
+		summary:
+			"Four consumer-reported fixes (sls-007/009/010 + repo-search hygiene): `/api/projects/search` now ranks exact/prefix/whole-word NAME matches above all authority signals (q='Blend' returns Blend first, not a higher-authority keyword match); `/api/builders` `location` accepts region umbrellas (Latin America/LatAm, Africa, Asia, Europe → expanded to the country values profiles carry); `/api/rfps` meta gains `scfRound` (currentRound, lastConfirmedRound, submissionWindow, asOf, verifyAt — curated, null when unconfirmed rather than guessed); repo-search term matching moves to two-sided word boundaries (kills mid-word substring noise).",
+		detail:
+			"Name-lookup is the standard directory contract: exact=3/prefix=2/whole-word=1 dominates prominence/SCF authority in the keyword path. scfRound fields are curated because SCF publishes no machine-readable round feed — always present asOf with round answers. All changes additive or ranking-behavior only; no fields removed.",
+	},
+	{
+		date: "2026-07-03",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"`/api/projects/search` region-umbrella synonyms: queries with 'LatAm' now also match records described with country vocabulary (Brazil, Mexico, Argentina, Colombia, Chile, Peru) — likewise 'Africa', 'Asia', 'Europe'. 'LatAm asset issuers' now surfaces PagFinance/CashAbroad-class projects whose records name countries, not regions.",

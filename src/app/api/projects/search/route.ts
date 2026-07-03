@@ -155,6 +155,19 @@ interface ProjectRow {
 	url: string;
 }
 
+// Name-lookup rank (sls-009): the standard directory-search contract — a
+// query that IS a project's name must return that project first, regardless
+// of how much authority (prominence/SCF/stars) other keyword matches carry.
+function nameMatchScore(name: string, slug: string, q: string): number {
+	const qq = q.trim().toLowerCase();
+	if (!qq) return 0;
+	const n = name.trim().toLowerCase();
+	if (n === qq || slug.toLowerCase() === qq) return 3;
+	if (n.startsWith(qq)) return 2;
+	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
+}
+
 // A project's own indexed code repo (compact form, attached per project row).
 interface ProjectRepoRef {
 	fullName: string;
@@ -571,6 +584,13 @@ export async function GET(req: NextRequest) {
 					const need = Math.ceil(tokens.length / 2);
 					filtered = projects.filter((p) => p.score >= need);
 				}
+				// Name-lookup contract (sls-009): an exact/prefix/whole-word name
+				// match must dominate every authority signal — q="Blend" ranked
+				// Reflector (authority-heavy) above the project literally named
+				// Blend. Exact=3, prefix=2, whole-word-in-name=1, else 0.
+				const nameRank = new Map(
+					filtered.map((p) => [p.id, nameMatchScore(p.name, p.slug, q)]),
+				);
 				// Primary rank = keyword-match count. Tiebreak by composite
 				// confidence (status-freshness + SCF/hackathon authority) so on a
 				// broad query like "swap" the flagship audited/funded DEXes lead
@@ -591,6 +611,7 @@ export async function GET(req: NextRequest) {
 				);
 				filtered.sort(
 					(a, b) =>
+						(nameRank.get(b.id) ?? 0) - (nameRank.get(a.id) ?? 0) ||
 						b.score - a.score ||
 						Number(typeMatch(b, intentTypes)) -
 							Number(typeMatch(a, intentTypes)) ||

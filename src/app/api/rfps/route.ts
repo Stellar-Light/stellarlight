@@ -158,6 +158,19 @@ export async function GET(req: NextRequest) {
 				},
 				activeQuarter: ACTIVE_QUARTER,
 				activeQuarterLabel: QUARTER_LABELS[ACTIVE_QUARTER],
+				// SCF round identity + submission window (sls-007). Curated — SCF
+				// publishes no machine-readable round feed, so fields are null when
+				// unconfirmed rather than guessed; `asOf` dates the curation so
+				// consumers can present lag honestly. Updated as rounds are announced.
+				scfRound: {
+					currentRound: null,
+					lastConfirmedRound: 43,
+					lastConfirmedRoundNote:
+						"SCF #43 concluded (recap published 2026-06-02); the next round had not been confirmed open as of asOf.",
+					submissionWindow: { opens: null, closes: null },
+					asOf: "2026-07-03",
+					verifyAt: "https://communityfund.stellar.org",
+				},
 				categories: Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
 					value,
 					label,
