@@ -99,6 +99,7 @@ async function semanticProjectRows(
 			scfAwarded: !!p.scf?.awarded,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
+			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			links: pickLinks(p.links),
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
@@ -143,6 +144,9 @@ interface ProjectRow {
 	scfAwarded: boolean;
 	scfTotalAwardedUSD: number | null;
 	scfAmountStatus: "disclosed" | "undisclosed" | null;
+	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
+	// cross-source totals mechanically instead of guessing at counting bases.
+	scfAwardedRounds: number[];
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
@@ -491,7 +495,7 @@ export async function GET(req: NextRequest) {
 					shortDescription?: string;
 					status: string;
 					logo?: { url?: string; filename?: string } | string | null;
-					scf?: { awarded?: boolean; totalAwarded?: number };
+					scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
 					hackathon?:
 						| { id: string; name: string; slug: string }
 						| string
@@ -548,6 +552,7 @@ export async function GET(req: NextRequest) {
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 					scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
+					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,

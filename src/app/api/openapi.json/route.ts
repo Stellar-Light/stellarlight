@@ -1275,6 +1275,12 @@ const spec: OpenAPISpec = {
 						description:
 							"Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.",
 					},
+					scfAwardedRounds: {
+						type: "array",
+						items: { type: "integer" },
+						description:
+							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
+					},
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },
 						placementRank: {
