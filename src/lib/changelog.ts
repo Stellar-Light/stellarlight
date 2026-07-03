@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
 		surfaces: ["api"],
+		version: "openapi 1.4.0",
+		type: "changed",
+		summary:
+			"Routing-guidance enrichment round 2 (info.version → 1.4.0): seven discovery operations' descriptions gained real-user topic vocabulary — searchResearch (SCF application process/Instawards/review timeline, Soroban security practice: reentrancy/CVEs/DoS classes, ecosystem history: Protocol 20 launch/XLM supply/UNHCR/Enterprise Fund, asset listing, contract verification), searchProjects (wallets/anchors/NFT marketplaces/perps/explorers/market map), searchRepos (streaming payments, ZK verifiers, passkey smart wallets, SDK/CLI versions, OZ RWA), getRfps (current-round + closed-RFP checks), getBuilders (by region/stack), getClusters (market-map/whitespace), analyzeEcosystem (TVL rollups).",
+		detail:
+			"Description text only — no paths, params, or response shapes changed. Measured on the lexical spec-routing eval: scout top-1 53.7%→66.3% (legacy lane) and 72%→84% (real-user lane, top-3 100%), overall +10 cases, zero hard per-case regressions (every strict flip is a case whose accepted-services set already includes scout). Downstream catalogs that gate on routing baselines should re-baseline after ingesting.",
+	},
+	{
+		date: "2026-07-03",
+		surfaces: ["api"],
 		version: "openapi 1.3.3",
 		type: "added",
 		summary:
