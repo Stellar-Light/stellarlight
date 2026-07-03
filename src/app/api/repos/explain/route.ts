@@ -69,6 +69,7 @@ export async function GET(req: NextRequest) {
 			q,
 			repo: null,
 			routedVia: null,
+			repoMeta: null,
 			alternateRepos: [],
 			answer: null,
 			answered: false,
@@ -79,6 +80,39 @@ export async function GET(req: NextRequest) {
 			},
 			note: "Couldn't route this question to a specific repo. Try search_repos to find candidates, or pin ?repo=owner/name.",
 		});
+	}
+
+	// Freshness/status of the routed repo from our index, so the answer can be
+	// framed as-of a date ("grounded in stellar/stellar-core, last commit …")
+	// instead of an undated assertion. Best-effort: null when not indexed.
+	let repoMeta: {
+		lastCommitAt: string | null;
+		stars: number | null;
+		isArchived: boolean;
+		repoScoreLabel: string | null;
+	} | null = null;
+	try {
+		const payload = await getPayloadSafe();
+		if (payload) {
+			const found = await payload.find({
+				collection: "repos",
+				where: { fullName: { equals: repo } },
+				limit: 1,
+				depth: 0,
+				select: { lastCommitAt: true, stars: true, isArchived: true, repoScoreLabel: true },
+			});
+			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
+			if (d) {
+				repoMeta = {
+					lastCommitAt: (d.lastCommitAt as string) ?? null,
+					stars: (d.stars as number) ?? null,
+					isArchived: !!d.isArchived,
+					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
+				};
+			}
+		}
+	} catch {
+		// best-effort — the answer is still valid without index freshness
 	}
 
 	const dw = await askDeepWiki(repo, q);
@@ -94,6 +128,7 @@ export async function GET(req: NextRequest) {
 			q,
 			repo,
 			routedVia,
+			repoMeta,
 			// Other authoritative repos for this concept, so the agent can follow up.
 			alternateRepos: canon.filter((r) => r.toLowerCase() !== repo.toLowerCase()),
 			answer: dw?.answer ?? null,

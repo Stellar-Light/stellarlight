@@ -151,6 +151,7 @@ interface ProjectRepoRef {
 	repoScoreLabel: string | null;
 	judgeScore: number | null;
 	hackathonWinner: boolean;
+	lastCommitAt: string | null;
 }
 
 // Synonym + light-stem expansion so natural queries reach records described in
@@ -700,8 +701,9 @@ export async function GET(req: NextRequest) {
 	// the query-scoped codeReferences above. Batched (one query over all returned
 	// slugs) + bounded, best-effort.
 	const baseProjects = [...scored, ...semanticAdds];
-	let projectsOut: Array<(typeof baseProjects)[number] & { repos: ProjectRepoRef[] }> =
-		baseProjects.map((p) => ({ ...p, repos: [] }));
+	let projectsOut: Array<
+		(typeof baseProjects)[number] & { repos: ProjectRepoRef[]; lastActivityAt: string | null }
+	> = baseProjects.map((p) => ({ ...p, repos: [], lastActivityAt: null }));
 	if (payload && baseProjects.length) {
 		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
 		try {
@@ -723,6 +725,7 @@ export async function GET(req: NextRequest) {
 					judgeScore: true,
 					hackathonWinner: true,
 					projectSlug: true,
+					lastCommitAt: true,
 				},
 			});
 			const bySlug = new Map<string, ProjectRepoRef[]>();
@@ -740,10 +743,21 @@ export async function GET(req: NextRequest) {
 					repoScoreLabel: (r.repoScoreLabel as string) ?? null,
 					judgeScore: (r.judgeScore as number) ?? null,
 					hackathonWinner: !!r.hackathonWinner,
+					lastCommitAt: (r.lastCommitAt as string) ?? null,
 				});
 				bySlug.set(s, arr);
 			}
-			projectsOut = baseProjects.map((p) => ({ ...p, repos: bySlug.get(p.slug) ?? [] }));
+			// Project-level dated signal: most recent commit across the project's
+			// own repos, so "is this project active?" answers carry an as-of date
+			// without a second lookup. Null when no repo has a known commit date.
+			projectsOut = baseProjects.map((p) => {
+				const repos = bySlug.get(p.slug) ?? [];
+				const lastActivityAt = repos.reduce<string | null>(
+					(max, r) => (r.lastCommitAt && (!max || r.lastCommitAt > max) ? r.lastCommitAt : max),
+					null,
+				);
+				return { ...p, repos, lastActivityAt };
+			});
 		} catch {
 			// best-effort — ship projects without per-project repos on any error
 		}

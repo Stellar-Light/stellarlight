@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-03",
+		surfaces: ["api", "mcp"],
+		version: "openapi 1.3.2",
+		type: "added",
+		summary:
+			"Dated freshness on answer surfaces: `/api/repos/explain` now returns `repoMeta` (lastCommitAt, stars, isArchived, repoScoreLabel of the routed repo) so grounded answers carry an as-of date; `/api/projects/search` rows gain `lastActivityAt` (most recent commit across the project's own repos) and each inline repo ref now includes `lastCommitAt`. Also: scout-mcp's search_research `source` enum adds the missing 'incident' value (MCP ⇄ API parity).",
+		detail:
+			"Attach repoMeta.lastCommitAt / lastActivityAt as the as-of date when citing answers instead of asserting undated facts. All changes additive — no field removed or renamed.",
+	},
+	{
 		date: "2026-07-02",
 		surfaces: ["api"],
 		version: "openapi 1.3.1",

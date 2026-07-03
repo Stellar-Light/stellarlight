@@ -117,6 +117,8 @@ server.registerTool(
 				.describe("Natural-language search query."),
 			source: z
 				.enum([
+					// Keep in sync with VALID_SOURCES in src/app/api/research/route.ts
+					// (the live API is the source of truth for this value set).
 					"sdf-blog",
 					"scf-handbook",
 					"sep",
@@ -126,11 +128,12 @@ server.registerTool(
 					"lumenloop",
 					"lumenloop-research",
 					"audit",
+					"incident",
 					"ec-developer-report",
 				])
 				.optional()
 				.describe(
-					"Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
+					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
 				),
 			limit: z
 				.number()

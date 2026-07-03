@@ -307,6 +307,7 @@ const spec: OpenAPISpec = {
 										q: { type: "string" },
 										repo: { type: "string", nullable: true },
 										routedVia: { type: "string", nullable: true, description: "How the repo was chosen: explicit | canonical | search. null when nothing routed." },
+										repoMeta: { type: "object", nullable: true, description: "Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.", properties: { lastCommitAt: { type: "string", format: "date-time", nullable: true }, stars: { type: "integer", nullable: true }, isArchived: { type: "boolean" }, repoScoreLabel: { type: "string", nullable: true } } },
 										answer: { type: "string", nullable: true, description: "DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned)." },
 										answered: { type: "boolean", description: "Always present, including when routedVia is null (then false)." },
 										alternateRepos: { type: "array", items: { type: "string" }, description: "Other authoritative repos for this concept. Always present ([] when none)." },
@@ -1273,6 +1274,13 @@ const spec: OpenAPISpec = {
 						description:
 							"This project\u2019s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project\u2019s code references.",
 						items: { $ref: "#/components/schemas/Repo" },
+					},
+					lastActivityAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"Most recent commit across the project's own indexed repos \u2014 attach as the as-of date for 'is this project active?' answers. Null when no repo has a known commit date.",
 					},
 					via: {
 						type: "string",
