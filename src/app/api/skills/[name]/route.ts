@@ -38,7 +38,6 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { generateSlug } from "@/lib/utils/normalize";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -233,8 +232,10 @@ function humanize(slug: string): string {
 		.join(" ");
 }
 
-// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
-export const POST = methodNotAllowed(["GET"]);
-export const PUT = methodNotAllowed(["GET"]);
-export const DELETE = methodNotAllowed(["GET"]);
-export const PATCH = methodNotAllowed(["GET"]);
+// NOTE (sls-004 regression fix): this route is `dynamic = "force-static"` with a
+// dynamic [name] segment. Next.js cannot reconcile non-GET method handlers with a
+// force-static DYNAMIC route — adding POST/PUT/DELETE/PATCH here made EVERY request
+// (including 404s) render the error boundary → stable HTTP 500. So the JSON-405
+// method-guards (added across the other 22 routes) are intentionally OMITTED here;
+// non-GET falls back to Next's default 405. Do not re-add them without dropping
+// force-static.
