@@ -844,9 +844,81 @@ export async function GET(req: NextRequest) {
 			// best-effort — results ship without attribution on any error
 		}
 	}
+	// Anchor corridor data (sls-012): Anchor-typed project records described
+	// their coverage only in prose ("20 African countries incl. Nigeria") —
+	// unfilterable, undateable. The partner directory already carries the
+	// STRUCTURED fields (stellar.toml-enriched countries/assets/SEPs/ramps),
+	// so join them on by normalized name instead of duplicating the data.
+	// Best-effort, one small query only when the page contains Anchor rows.
+	interface AnchorProfile {
+		slug: string;
+		country: string | null;
+		regions: string[];
+		assets: string[];
+		seps: string[];
+		rampTypes: string[];
+		asOf: string | null;
+		url: string;
+	}
+	let anchorProfiles = new Map<string, AnchorProfile>();
+	const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+	const hasAnchorRows = projectsOut.some((p) =>
+		(p.types ?? []).some((t) => String(t).toLowerCase() === "anchor"),
+	);
+	if (payload && hasAnchorRows) {
+		try {
+			const pRes = await payload.find({
+				collection: "partner-accounts",
+				where: { partnerType: { equals: "anchor" } },
+				limit: 100,
+				depth: 0,
+				select: {
+					name: true,
+					slug: true,
+					country: true,
+					regions: true,
+					assets: true,
+					seps: true,
+					rampTypes: true,
+					lastPartnerUpdateAt: true,
+				},
+			});
+			const m = new Map<string, AnchorProfile>();
+			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>) {
+				const tags = (arr: unknown): string[] =>
+					Array.isArray(arr)
+						? arr
+								.map((x) =>
+									typeof x === "string"
+										? x
+										: String((x as { tag?: unknown; code?: unknown })?.tag ?? (x as { code?: unknown })?.code ?? ""),
+								)
+								.filter(Boolean)
+						: [];
+				m.set(norm(String(d.name)), {
+					slug: String(d.slug),
+					country: (d.country as string) ?? null,
+					regions: tags(d.regions),
+					assets: tags(d.assets),
+					seps: tags(d.seps),
+					rampTypes: tags(d.rampTypes),
+					asOf: (d.lastPartnerUpdateAt as string) ?? null,
+					url: `https://stellarlight.xyz/partners/${d.slug}`,
+				});
+			}
+			anchorProfiles = m;
+		} catch {
+			// best-effort — rows ship without anchorProfile on any error
+		}
+	}
+
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
 		builtBy: builtByMap.get(p.id) ?? null,
+		anchorProfile:
+			(p.types ?? []).some((t) => String(t).toLowerCase() === "anchor")
+				? (anchorProfiles.get(norm(p.name)) ?? null)
+				: null,
 	}));
 
 	logApiHit({

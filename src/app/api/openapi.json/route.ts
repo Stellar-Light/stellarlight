@@ -1281,6 +1281,22 @@ const spec: OpenAPISpec = {
 						description:
 							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
 					},
+					anchorProfile: {
+						type: "object",
+						nullable: true,
+						description:
+							"Structured corridor/coverage data for Anchor-typed projects, joined from the partner directory's stellar.toml enrichment — answers 'which anchors serve corridor X→Y' with filterable, dated fields instead of prose. Null for non-anchor projects or when no partner record matches.",
+						properties: {
+							slug: { type: "string" },
+							country: { type: "string", nullable: true },
+							regions: { type: "array", items: { type: "string" } },
+							assets: { type: "array", items: { type: "string" }, description: "Asset codes the anchor issues/supports (from its stellar.toml CURRENCIES)." },
+							seps: { type: "array", items: { type: "string" }, description: "Supported SEPs (e.g. 6, 24, 31) — the on/off-ramp interop surface." },
+							rampTypes: { type: "array", items: { type: "string" } },
+							asOf: { type: "string", format: "date-time", nullable: true, description: "When the partner record was last updated — cite as the coverage as-of date." },
+							url: { type: "string", format: "uri" },
+						},
+					},
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },
 						placementRank: {
