@@ -15,26 +15,7 @@ export interface paths {
          * Service health + endpoint enumeration
          * @description Self-describe / health endpoint for Stellar Scout — returns service ok + version, `generatedAt`, per-source freshness & size (`sources[]`: projects, hackathons, builders, repos, ecosystemStats, sdfSkills, each with count + lastUpdatedAt + notes), recent `usage` stats, and an enumeration of every available `/api/*` endpoint. Cheap (count-only queries, no params). **Use when:** you need to know how fresh/large the data is before answering ('as of when?', 'how many projects are indexed?'), discover what endpoints exist, or sanity-check the API is up. **Not for:** the actual project/repo/research DATA itself → call the matching search tool (search_projects, search_repos, search_research); ecosystem developer-activity macro stats → use get_leaderboard.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Service status */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["StatusResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -52,50 +33,9 @@ export interface paths {
         };
         /**
          * Recent changes to the API, MCP tools, and client
-         * @description A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history.
+         * @description A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Only entries on/after this ISO date (YYYY-MM-DD). */
-                    since?: string;
-                    /** @description Max entries to return, latest-first (1–100). */
-                    limit?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Changelog feed (latest-first) */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            ok?: boolean;
-                            service?: string;
-                            version?: string;
-                            /** Format: date-time */
-                            generatedAt?: string;
-                            meta?: Record<string, never>;
-                            entries?: {
-                                /** Format: date */
-                                date?: string;
-                                surfaces?: ("api" | "mcp" | "api-client" | "skill")[];
-                                version?: string;
-                                /** @enum {string} */
-                                type?: "added" | "changed" | "fixed" | "removed";
-                                summary?: string;
-                                detail?: string;
-                            }[];
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getChangelog"];
         put?: never;
         post?: never;
         delete?: never;
@@ -113,39 +53,9 @@ export interface paths {
         };
         /**
          * Search Stellar projects (prior art / competitor lookup)
-         * @description Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters.
+         * @description Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, `builtBy` (the org/entity behind it — 'who built X'), the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters. Use for 'who has built / is there a / which projects / give me a directory of' questions about Stellar apps, products, protocols, dApps, teams, companies and startups by category — DeFi, lending, credit, yield, AMM, DEX, swap, NFT marketplace, wallets, anchors and on/off-ramps, RWA and real-world-asset tokenization, stablecoins, payments, oracles, identity, gaming, infrastructure, tooling. Also 'is there a mature X I could integrate', 'who is building Y', projects operating as anchors, and named products (Etherfuse Stablebonds, Soroswap).
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Keyword query (free text) */
-                    q?: components["parameters"]["q"];
-                    /** @description Filter by category */
-                    category?: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
-                    /** @description Filter to SCF-funded projects only */
-                    scfAwarded?: boolean;
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
-                    offset?: components["parameters"]["offset"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Project search results */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProjectSearchResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["searchProjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -163,39 +73,9 @@ export interface paths {
         };
         /**
          * Search the Stellar GitHub repo / code-reference index
-         * @description Search the indexed Stellar ecosystem **GitHub code repos** — the actual source, graded for quality. Indexes GitHub topics + description + language + README, expands tech synonyms (zk→zero-knowledge/snark, oracle→price-feed), and ranks by **repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority**. Filterable by `language` and `minScore`. **Use when:** 'show me the code / repos for X', 'find a Rust/Soroban implementation of X', 'what GitHub repos exist for X', or you need prior-art source to read, fork, or cite. **Not for:** what products/companies exist or their funding/live status → use search_projects; conceptual docs, SEPs, audits, or how-to/feasibility knowledge → use search_research; a known project's metadata (those repos already ride inline on search_projects results).
+         * @description Search the indexed Stellar ecosystem **GitHub code repos** — the actual source, graded for quality. Indexes GitHub topics + description + language + README, expands tech synonyms (zk→zero-knowledge/snark, oracle→price-feed), and ranks by **repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority**. Filterable by `language` and `minScore`. **Use when:** 'show me the code / repos for X', 'find a Rust/Soroban implementation of X', 'what GitHub repos exist for X', or you need prior-art source to read, fork, or cite. **Not for:** what products/companies exist or their funding/live status → use search_projects; conceptual docs, SEPs, audits, or how-to/feasibility knowledge → use search_research; a known project's metadata (those repos already ride inline on search_projects results). Use for finding CODE: libraries, SDKs, boilerplate, templates, starters, example and reference contracts (SEP-41 token, SEP reference impls), OpenZeppelin Soroban contracts, and testing tooling (fuzz, property-based, unit tests) for Soroban, Rust, and Stellar.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Keyword query (free text) */
-                    q?: components["parameters"]["q"];
-                    /** @description Filter by primary language (case-insensitive substring, e.g. 'Rust', 'TypeScript') */
-                    language?: string;
-                    /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
-                    minScore?: number;
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
-                    offset?: components["parameters"]["offset"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Repo search results graded by repoScore */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["RepoSearchResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["searchRepos"];
         put?: never;
         post?: never;
         delete?: never;
@@ -213,54 +93,9 @@ export interface paths {
         };
         /**
          * Deep code answer about a Stellar repo (routing × DeepWiki)
-         * @description Get a source-grounded ANSWER to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar/stellar-core; Horizon → stellar/go; RPC → stellar/stellar-rpc; SEP reference impls; SDKs), then DeepWiki answers from that repo's internals with source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal. **Not for:** which repos/projects exist → use /api/repos/search or /api/projects/search; ecosystem docs / SEP text / audits → use /api/research. Degrades gracefully: if DeepWiki is unavailable you still get the routed authoritative repo + its deepWikiUrl.
+         * @description Get a source-grounded ANSWER to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar/stellar-core; Horizon → stellar/go; RPC → stellar/stellar-rpc; SEP reference impls; SDKs), then DeepWiki answers from that repo's internals with source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal. **Not for:** which repos/projects exist → use /api/repos/search or /api/projects/search; ecosystem docs / SEP text / audits → use /api/research. Degrades gracefully: if DeepWiki is unavailable you still get the routed authoritative repo + its deepWikiUrl. Also for 'how do I / where is / show me the implementation of' deep code questions answered from the authoritative repo's internals.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description The deep code question (e.g. 'where are transaction result codes defined'). */
-                    q: string;
-                    /** @description Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route. */
-                    repo?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Routed repo + DeepWiki-grounded answer */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            ok?: boolean;
-                            q?: string;
-                            repo?: string | null;
-                            routedVia?: string | null;
-                            /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
-                            answer?: string | null;
-                            answered?: boolean;
-                            alternateRepos?: string[];
-                            sources?: {
-                                repoUrl?: string;
-                                deepWikiUrl?: string;
-                                deepWikiSearchUrl?: string | null;
-                            };
-                        };
-                    };
-                };
-                /** @description Missing q */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["explainRepo"];
         put?: never;
         post?: never;
         delete?: never;
@@ -280,35 +115,7 @@ export interface paths {
          * List Stellar hackathons
          * @description Browse/LIST Stellar hackathon **events** — a merged, de-duplicated feed of curated Payload events (rich detail, internal pages) + live DoraHacks events (SDF org IDs 3096/3853), sorted upcoming→active→completed then newest-first. Each row carries name, slug, dates, status, organizer, source, and (for DoraHacks) prizePoolUSD + hackersCount. Filter by `status` (upcoming|active|completed), `organizer` slug, or `source` (curated|dorahacks). **Use when:** 'what Stellar hackathons are coming up / running now / recently ended', 'list SDF hackathons', or you need the slug of an event before drilling in. When a forward-looking query (status=upcoming|active) returns zero, it adds `meta.fallbackChannels` (BuildOnStellar, stellarlight.xyz, DoraHacks) — surface those rather than dead-ending. **Not for:** one event's winners/submissions/tracks → use get_hackathon; comparing 2+ named events → use compare_hackathons; ecosystem-wide rollups (total prize pools, category/funding totals across ALL events) → use analyze_ecosystem; RFPs/bounties/grants → use get_rfps.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter by event status */
-                    status?: "upcoming" | "active" | "completed";
-                    /** @description Filter by organizer slug */
-                    organizer?: string;
-                    /** @description Restrict to one feed (curated vs DoraHacks) */
-                    source?: "curated" | "dorahacks";
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Hackathon list */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["HackathonsResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getHackathons"];
         put?: never;
         post?: never;
         delete?: never;
@@ -328,38 +135,7 @@ export interface paths {
          * Get one hackathon's full detail
          * @description Full detail for ONE hackathon by slug — its metadata plus every submission with placement, prize amount, prize track, post-hack status (Built/In Progress/Abandoned), and scfAwarded flag; derives `winners`, per-`tracks` aggregates (prize $ + winner/submission counts), and a `stats` outcome funnel. Dual-shape: curated events return full DB detail; DoraHacks-only events read submissions/winners/tracks live from DoraHacks (degrading to a curated winner roster + `meta.note` when the live feed is unavailable). **Use when:** 'who won [event] / its soroban track', 'what projects were submitted to [event]', 'what tracks did [event] have and what did they pay', 'how many [event] submissions are still being built'. Needs an exact slug — get it from get_hackathons first if unknown. **Not for:** listing/browsing many events → use get_hackathons; comparing stats across 2+ events → use compare_hackathons; ecosystem-wide aggregates → use analyze_ecosystem; a winning project's own repo/funding/status outside the hackathon context → use search_projects / search_repos.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Hackathon slug */
-                    slug: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Hackathon detail */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["HackathonDetailResponse"];
-                    };
-                };
-                /** @description Hackathon not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getHackathon"];
         put?: never;
         post?: never;
         delete?: never;
@@ -379,29 +155,7 @@ export interface paths {
          * Compare 2–5 hackathons side-by-side
          * @description Side-by-side comparison of 2–5 named hackathons (by slug). Returns each event's snapshot (dates, status, source, prizePoolUSD, hackersCount, submissionCount, winnerCount, prizePerWinnerUSD where derivable) plus a `deltas` block flagging the spreads agents care about — prize-pool range, submission-count range, prize-per-winner, registered-hacker counts — with human-readable `notes` like '2× spread'. Unresolved slugs come back as `source:"not-found"` and are listed in deltas.notes without inflating `returned`. **Use when:** 'which Stellar hackathon should I enter', 'how did [event A] compare to [event B] on prizes/turnout', 'was [A] or [B] bigger'. Requires ≥2 known slugs (max 5; iterate beyond that) — resolve them via get_hackathons first. **Not for:** one event's deep detail/winners → use get_hackathon; discovering/listing events → use get_hackathons; ecosystem-wide totals across ALL events → use analyze_ecosystem.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description 2–5 hackathon slugs, comma-separated (?slugs=a,b) */
-                    slugs: string[];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Comparison rollup */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["compareHackathons"];
         put?: never;
         post?: never;
         delete?: never;
@@ -419,39 +173,9 @@ export interface paths {
         };
         /**
          * Search Stellar builders
-         * @description The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, scfTier, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*\/activity stats → use get_leaderboard.
+         * @description The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, scfTier, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*\/activity stats → use get_leaderboard. Use for recruiting or hiring: find developers, engineers, contributors, or teammates to recruit or hire by skill, SCF tier, or track record of SCF awards.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Free-text filter over bio / role / projects (accepts `skill`/`tech` as aliases) */
-                    q?: string;
-                    /** @description Filter by location substring (e.g. 'Lagos', 'Brazil') */
-                    location?: string;
-                    /** @description Filter by skill/tech mentioned in bio */
-                    skill?: string;
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
-                    offset?: components["parameters"]["offset"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Builder list */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getBuilders"];
         put?: never;
         post?: never;
         delete?: never;
@@ -471,39 +195,7 @@ export interface paths {
          * List ecosystem partners
          * @description Published ecosystem partners (anchors, on/off ramps, infrastructure, tooling, protocols, wallets, audit firms). Each carries partner-claimed facts AND system-verified signals (GitHub activity, on-chain footprint, SCF involvement) plus a `freshness` object — consumers should down-rank or skip partners flagged `freshness.excludeFromMatching`. Fresh partners sort first. Filter by `type` / `sector` / `region` / `accepting` / `q`. **Use when:** 'who should audit my Soroban contract' (`type=audit-firm`), 'find an anchor or on/off-ramp in {region}', or partner discovery for an integration. **Not for:** projects/products that were BUILT → use search_projects; the people who build them → use get_builders; SCF grant briefs → use get_rfps.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter by partner type */
-                    type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
-                    /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
-                    sector?: string;
-                    /** @description Filter by region served (global, latam, africa, …) */
-                    region?: string;
-                    /** @description Set to 1 to return only partners currently accepting new clients */
-                    accepting?: "1";
-                    /** @description Keyword query (free text) */
-                    q?: components["parameters"]["q"];
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Partner directory */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getPartners"];
         put?: never;
         post?: never;
         delete?: never;
@@ -521,42 +213,91 @@ export interface paths {
         };
         /**
          * Get one partner's full profile
-         * @description Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs.
+         * @description Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile — services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Partner slug */
-                    slug: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Partner profile */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-                /** @description Partner not found or not published */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getPartner"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partners/match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI-rank partners against a plain-language need
+         * @description Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked — nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).
+         */
+        post: operations["matchPartners"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partners/assistant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Conversational partner concierge (find OR get listed)
+         * @description The chat backend for /partners/chat. Send the running message history; the assistant routes intent — a builder describing a need gets real matched partners back in `matches[]` (deterministically searched, never hallucinated; surfaced partners are logged as leads for the weekly partner digest), a company describing itself gets interviewed and `canList:true` signals the client to offer profile extraction. Returns `{reply, matches?, intent, canList}`. 503 `unavailable:true` without AI configured. **Use when:** building a conversational partner-finding UX. **Not for:** one-shot programmatic ranking → POST /api/partners/match; browsing → GET /api/partners.
+         */
+        post: operations["partnerAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partners/onboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI onboarding helpers: interview chat + profile extraction
+         * @description Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated — nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.
+         */
+        post: operations["partnerOnboard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partners/submit-listing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a new-partner listing (or claim an existing one)
+         * @description Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead — no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.
+         */
+        post: operations["submitPartnerListing"];
         delete?: never;
         options?: never;
         head?: never;
@@ -572,41 +313,9 @@ export interface paths {
         };
         /**
          * List Stellar RFPs (SCF-funded sponsor briefs)
-         * @description The curated set of Stellar **RFPs / sponsor briefs** (mirrors the /ideas page) — open ones are eligible for **SCF grant funding** when winners are picked; closed ones are past rounds kept for context. Each brief has title, description, technicalRequirements, category, quarter, and a quarter-derived status (open|closed). Filter by `q`, `category`, `quarter`, or `status`; response carries open/closed counts + the activeQuarter. **Use when:** 'what RFPs/bounties match my idea', 'what's the SCF funding asking for this quarter', 'is there a sponsor brief for X I could get funded to build'. **Not for:** projects already BUILT/funded → use search_projects; hackathons + their prizes → use get_hackathons; how-to / SCF Handbook / standards knowledge → use search_research.
+         * @description The curated set of Stellar **RFPs / sponsor briefs** (mirrors the /ideas page) — open ones are eligible for **SCF grant funding** when winners are picked; closed ones are past rounds kept for context. Each brief has title, description, technicalRequirements, category, quarter, and a quarter-derived status (open|closed). Filter by `q`, `category`, `quarter`, or `status`; response carries open/closed counts + the activeQuarter. **Use when:** 'what RFPs/bounties match my idea', 'what's the SCF funding asking for this quarter', 'is there a sponsor brief for X I could get funded to build'. **Not for:** projects already BUILT/funded → use search_projects; hackathons + their prizes → use get_hackathons; how-to / SCF Handbook / standards knowledge → use search_research. Use for 'what grants or sponsor briefs or bounties are open', 'what does the ecosystem want built', 'where can I get an SCF grant' funding-opportunity questions.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Open RFPs are fundable for the current SCF quarter; closed are prior rounds */
-                    status?: "open" | "closed";
-                    /** @description Filter by quarter slug (e.g. 'q1-2026') */
-                    quarter?: string;
-                    /** @description Keyword query (free text) */
-                    q?: components["parameters"]["q"];
-                    /** @description Filter by RFP category (e.g. 'defi', 'payments', 'infrastructure'). An unrecognized value returns 400 with the valid category list. */
-                    category?: string;
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                    /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
-                    offset?: components["parameters"]["offset"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description RFP list */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getRfps"];
         put?: never;
         post?: never;
         delete?: never;
@@ -624,35 +333,9 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos.
+         * @description Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos. Use for ecosystem KNOWLEDGE & explainer questions — 'what is / how does / who / why / is it true that…'. Topics: security & risk (bug bounty, vulnerability disclosure, security audit, exploit, hack, incident, post-mortem, oracle manipulation, YieldBlox, Reflector); compliance & regulation (Travel Rule, FATF, KYC, AML, BSA, sanctions, humanitarian aid); funding & governance (SCF v7.0, award tiers, grant programs, Neural Quorum Governance, community voting, quorum); the Stellar Development Foundation (SDF) — mission, legal structure, org; protocol history (Stellar Consensus Protocol, SCP, whitepaper, authors); ecosystem programs (ambassador program, regional chapters, India, bootcamps); and fact-checking or verifying a claim about Stellar.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Natural-language search query */
-                    q: string;
-                    /** @description Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions. */
-                    source?: "sdf-blog" | "scf-handbook" | "sep" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "ec-developer-report";
-                    /** @description Max results (default 8, max 25) */
-                    limit?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Research results */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["searchResearch"];
         put?: never;
         post?: never;
         delete?: never;
@@ -672,31 +355,7 @@ export interface paths {
          * List AI skills for Stellar builders
          * @description Catalog of installable Stellar **AI skills/tools** — a unified, filterable list merging SDF's 7 official skills.stellar.org skills, Stellarlight + lumenloop + trusted third-party curated entries, and approved community submissions. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), `source`, repo/homepage/docs, and `meta.counts.bySource`; filter by `source` or `kind`. **Use when:** 'what Stellar AI skills / MCP servers / SDKs can I install', 'is there a skill for soroban / anchors / payments', or matching a builder's idea to the right installable tool. **Not for:** the full SKILL.md text or install details of ONE named skill → use get_skill; built/funded products in the ecosystem (not installable agent skills) → use search_projects; GitHub source repos → use search_repos; docs/standards/how-to knowledge → use search_research.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter by source */
-                    source?: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
-                    /** @description Filter by skill kind */
-                    kind?: "skill-md" | "mcp-server" | "sdk" | "cli" | "agent-kit" | "tool";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Skills catalog */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["listSkills"];
         put?: never;
         post?: never;
         delete?: never;
@@ -716,38 +375,7 @@ export interface paths {
          * Get one skill's full content
          * @description Full detail for ONE skill by slug or display name — returns its metadata plus, for SDF official skills, the complete raw SKILL.md text under `.skill.content` (fetched live from skills.stellar.org); curated/community entries return metadata (and inlined content for Stellarlight's own skills). Accepts either the slug ('agentic-payments') or display name ('Agentic Payments'); 404s with a hint to list /api/skills if unknown. **Use when:** you already know a skill name and need its actual instructions / install command / SKILL.md body to follow or quote. **Not for:** browsing or discovering which skills exist → use list_skills; conceptual docs or standards behind a topic (not a packaged skill) → use search_research.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay') */
-                    name: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Skill detail with content */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-                /** @description Skill not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
+        get: operations["getSkill"];
         put?: never;
         post?: never;
         delete?: never;
@@ -765,33 +393,9 @@ export interface paths {
         };
         /**
          * Topic clusters with crowdedness scores
-         * @description Groups the active Stellar **project directory into topic clusters** and scores each on **crowdedness (1–10, log-scaled)** so you can see saturated vs underbuilt lanes — i.e. *where to build*. Each cluster returns `size`, `crowdedness`, `scfFundedCount`, `scfTotalUSD`, `hackathonWinnerCount`, and up to 5 sample projects; cluster by `dimension=category` (coarse 7-cat) or `dimension=types` (finer: Wallet/DEX/Lending/RWA/Oracle…), or pass `key`/`type` to get one cluster. **Use when:** 'what's the most crowded category on Stellar', 'show me an underbuilt/whitespace area', 'how many projects/funded projects are in RWA vs wallets', 'where is the competition thin'. **Not for:** ranking the top projects/repos by stars or activity → use get_leaderboard; ecosystem-wide totals (events + funding + status funnel) → use analyze_ecosystem; finding/looking up an actual named project in a category → use search_projects.
+         * @description Groups the active Stellar **project directory into topic clusters** and scores each on **crowdedness (1–10, log-scaled)** so you can see saturated vs underbuilt lanes — i.e. *where to build*. Each cluster returns `size`, `crowdedness`, `scfFundedCount`, `scfTotalUSD`, `hackathonWinnerCount`, and up to 5 sample projects; cluster by `dimension=category` (coarse 7-cat) or `dimension=types` (finer: Wallet/DEX/Lending/RWA/Oracle…), or pass `key`/`type` to get one cluster. **Use when:** 'what's the most crowded category on Stellar', 'show me an underbuilt/whitespace area', 'how many projects/funded projects are in RWA vs wallets', 'where is the competition thin'. **Not for:** ranking the top projects/repos by stars or activity → use get_leaderboard; ecosystem-wide totals (events + funding + status funnel) → use analyze_ecosystem; finding/looking up an actual named project in a category → use search_projects. Use for 'where should I build', 'what's underbuilt or saturated', 'which categories are crowded' opportunity-gap questions across the project directory.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Cluster by category (coarse 7-cat) or types (finer) */
-                    dimension?: "category" | "types";
-                    /** @description Only include clusters with at least N projects */
-                    minSize?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Cluster list */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getClusters"];
         put?: never;
         post?: never;
         delete?: never;
@@ -809,31 +413,9 @@ export interface paths {
         };
         /**
          * Cross-event Stellar ecosystem analytics rollup
-         * @description Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), or `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons.
+         * @description Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), or `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons. Use for ecosystem-wide totals and macro stats — project counts by category, total SCF funding, hackathon totals, and developer-activity aggregates across the whole ecosystem.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Which slice to return */
-                    dimension?: "all" | "hackathons" | "categories" | "funding";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Analytics rollup */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["analyzeEcosystem"];
         put?: never;
         post?: never;
         delete?: never;
@@ -853,37 +435,7 @@ export interface paths {
          * Stellar ecosystem developer activity
          * @description Returns a **ranked list of active Stellar projects** (default top 50, max 300) sortable by `sort=activity|stars|issues` over a `range` (7d/30d/90d/1y/all), with per-project GitHub rollups (`totalStars`, `openIssuesTotal`, `lastActivityAt`, `repoCount`) and `scfAwarded`; optional `category` filter and `format=csv`. Also bundles an **Electric Capital ecosystem dev macro** block (28-day active / Stellar-only / multichain dev counts, commits28d, full-time/part-time/one-time dev splits). **Use when:** 'who/what are the top/most-active Stellar projects', 'most-starred projects', 'which projects shipped recently (last 30d)', 'how many active Stellar devs / how does Stellar's dev activity look', or you need a CSV/Dune-style export of ranked projects. **Not for:** category counts or crowded-vs-underbuilt whitespace → use get_clusters; ecosystem-wide hackathon/funding/status-funnel totals → use analyze_ecosystem; finding a specific project's profile/funding/competitors → use search_projects; ranking individual developers (this ranks PROJECTS, plus an EC macro snapshot — it does not list named devs) → use get_builders.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. */
-                    sort?: "activity" | "stars" | "issues";
-                    /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
-                    range?: "7d" | "30d" | "90d" | "1y" | "all";
-                    /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */
-                    category?: string;
-                    /** @description Response format. */
-                    format?: "json" | "csv";
-                    /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
-                    limit?: components["parameters"]["limit"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Leaderboard + ecosystem stats */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getLeaderboard"];
         put?: never;
         post?: never;
         delete?: never;
@@ -901,79 +453,15 @@ export interface paths {
         };
         /**
          * Get the feedback request schema (discovery)
-         * @description Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects.
+         * @description Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first — kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Feedback request schema */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>;
-                    };
-                };
-            };
-        };
+        get: operations["getFeedbackSchema"];
         put?: never;
         /**
          * Submit feedback on Scout's output
-         * @description Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw).
+         * @description Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist — file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["FeedbackRequest"];
-                };
-            };
-            responses: {
-                /** @description Feedback received (a curator-queue row was created) */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            ok: boolean;
-                            id: string;
-                            message?: string;
-                        };
-                    };
-                };
-                /** @description Validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Rate limit exceeded */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
+        post: operations["submitFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1010,7 +498,10 @@ export interface components {
             ok: boolean;
             /** @constant */
             service: "Stellar Scout";
+            /** @description Scout skill/service release line. */
             version: string;
+            /** @description API contract (OpenAPI) version — equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version. */
+            apiVersion?: string;
             /** Format: date-time */
             generatedAt: string;
             sources?: {
@@ -1042,19 +533,50 @@ export interface components {
             /** @enum {string} */
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
             shortDescription?: string;
-            /** @enum {string} */
-            status: "Draft" | "Development" | "Pre-Release" | "Live";
+            /**
+             * @description Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory.
+             * @enum {string}
+             */
+            status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
+            /** @description The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}. */
+            builtBy?: {
+                name?: string;
+                slug?: string;
+            } | null;
             logoUrl?: string | null;
             scfAwarded?: boolean;
             scfTotalAwardedUSD?: number | null;
+            /**
+             * @description Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.
+             * @enum {string|null}
+             */
+            scfAmountStatus?: "disclosed" | "undisclosed" | null;
             hackathon?: string | null;
             hackathonPlacement?: string | null;
-            /** @description Numeric rank parsed from hackathonPlacement (1 = best). winners[] is sorted by this, so winners[0] is the 1st-place entry — sort/filter on this instead of parsing the label. */
+            /** @description Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label. */
             placementRank?: number | null;
             hackathonPrize?: number | null;
             hackathonPrizeTrack?: string | null;
             /** @description Relevance score for the current query (higher = better match) */
             score?: number;
+            /** @description Blended confidence for this result: overall score (0-1) + label, decomposed into relevance / freshness / authority sub-signals (each 0-1) and ageDays. */
+            confidence?: {
+                score?: number;
+                label?: string;
+                relevance?: number;
+                freshness?: number;
+                authority?: number;
+                ageDays?: number | null;
+            } | null;
+            /** @description This project’s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project’s code references. */
+            repos?: components["schemas"]["Repo"][];
+            /**
+             * Format: date-time
+             * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null when no repo has a known commit date.
+             */
+            lastActivityAt?: string | null;
+            /** @description How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback). */
+            via?: string;
             /** Format: uri */
             url?: string;
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
@@ -1102,6 +624,17 @@ export interface components {
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
             hackathon?: Record<string, never>;
+            /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
+            winners?: {
+                name?: string;
+                hackathonPlacement?: string | null;
+                placementRank?: number | null;
+                hackathonPrize?: number | null;
+            }[];
+            /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
+            winnersRanked?: boolean | null;
+            submissions?: Record<string, never>[];
+            tracks?: Record<string, never>[];
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
@@ -1142,7 +675,12 @@ export interface components {
             canonical?: boolean;
         };
         RepoSearchResponse: {
-            meta: components["schemas"]["Meta"];
+            meta: components["schemas"]["Meta"] & {
+                /** @description The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes → stellar/stellar-core), or null when the query isn’t a canonical-routed concept. */
+                canonical?: string | null;
+                /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
+                note?: string;
+            };
             repos: components["schemas"]["Repo"][];
         };
         /** @description Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). */
@@ -1173,4 +711,827 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusResponse"];
+                };
+            };
+        };
+    };
+    getChangelog: {
+        parameters: {
+            query?: {
+                /** @description Only entries on/after this ISO date (YYYY-MM-DD). */
+                since?: string;
+                /** @description Max entries to return, latest-first (1–100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Changelog feed (latest-first) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok?: boolean;
+                        service?: string;
+                        version?: string;
+                        /** Format: date-time */
+                        generatedAt?: string;
+                        meta?: Record<string, never>;
+                        entries?: {
+                            /** Format: date */
+                            date?: string;
+                            surfaces?: ("api" | "mcp" | "api-client" | "skill")[];
+                            version?: string;
+                            /** @enum {string} */
+                            type?: "added" | "changed" | "fixed" | "removed";
+                            summary?: string;
+                            detail?: string;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    searchProjects: {
+        parameters: {
+            query?: {
+                /** @description Keyword query (free text) */
+                q?: components["parameters"]["q"];
+                /** @description Filter by category */
+                category?: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
+                /** @description Filter to SCF-funded projects only */
+                scfAwarded?: boolean;
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+                /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                offset?: components["parameters"]["offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project search results */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectSearchResponse"];
+                };
+            };
+        };
+    };
+    searchRepos: {
+        parameters: {
+            query?: {
+                /** @description Keyword query (free text) */
+                q?: components["parameters"]["q"];
+                /** @description Filter by primary language (case-insensitive substring, e.g. 'Rust', 'TypeScript') */
+                language?: string;
+                /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
+                minScore?: number;
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+                /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                offset?: components["parameters"]["offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Repo search results graded by repoScore */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RepoSearchResponse"];
+                };
+            };
+        };
+    };
+    explainRepo: {
+        parameters: {
+            query: {
+                /** @description The deep code question (e.g. 'where are transaction result codes defined'). */
+                q: string;
+                /** @description Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route. */
+                repo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Routed repo + DeepWiki-grounded answer */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok?: boolean;
+                        /** @description Provenance: routing/grounding source + generation time. */
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            note?: string;
+                        };
+                        q?: string;
+                        repo?: string | null;
+                        /** @description How the repo was chosen: explicit | canonical | search. null when nothing routed. */
+                        routedVia?: string | null;
+                        /** @description Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed. */
+                        repoMeta?: {
+                            /** Format: date-time */
+                            lastCommitAt?: string | null;
+                            stars?: number | null;
+                            isArchived?: boolean;
+                            repoScoreLabel?: string | null;
+                        } | null;
+                        /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
+                        answer?: string | null;
+                        /** @description Always present, including when routedVia is null (then false). */
+                        answered?: boolean;
+                        /** @description Other authoritative repos for this concept. Always present ([] when none). */
+                        alternateRepos?: string[];
+                        /** @description Always present; fields are null when nothing was routed. */
+                        sources?: {
+                            repoUrl?: string | null;
+                            deepWikiUrl?: string | null;
+                            deepWikiSearchUrl?: string | null;
+                        };
+                        /** @description Present when routing failed entirely — a hint to use search_repos or pin ?repo=. */
+                        note?: string | null;
+                        /** @description Present when a repo routed but DeepWiki had no answer. */
+                        note2?: string | null;
+                    };
+                };
+            };
+            /** @description Missing q */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getHackathons: {
+        parameters: {
+            query?: {
+                /** @description Filter by event status */
+                status?: "upcoming" | "active" | "completed";
+                /** @description Filter by organizer slug */
+                organizer?: string;
+                /** @description Restrict to one feed (curated vs DoraHacks) */
+                source?: "curated" | "dorahacks";
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hackathon list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HackathonsResponse"];
+                };
+            };
+        };
+    };
+    getHackathon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Hackathon slug */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hackathon detail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HackathonDetailResponse"];
+                };
+            };
+            /** @description Hackathon not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    compareHackathons: {
+        parameters: {
+            query: {
+                /** @description 2–5 hackathon slugs, comma-separated (?slugs=a,b) */
+                slugs: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Comparison rollup */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getBuilders: {
+        parameters: {
+            query?: {
+                /** @description Free-text filter over bio / role / projects (accepts `skill`/`tech` as aliases) */
+                q?: string;
+                /** @description Filter by location substring (e.g. 'Lagos', 'Brazil') */
+                location?: string;
+                /** @description Filter by skill/tech mentioned in bio */
+                skill?: string;
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+                /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                offset?: components["parameters"]["offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Builder list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getPartners: {
+        parameters: {
+            query?: {
+                /** @description Filter by partner type */
+                type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+                /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
+                sector?: string;
+                /** @description Filter by region served (global, latam, africa, …) */
+                region?: string;
+                /** @description Set to 1 to return only partners currently accepting new clients */
+                accepting?: "1";
+                /** @description Keyword query (free text) */
+                q?: components["parameters"]["q"];
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Partner directory */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getPartner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Partner slug */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Partner profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Partner not found or not published */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    matchPartners: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The builder's need, in plain language */
+                    need: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Ranked matches with reasons */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description AI backend unavailable — fall back to GET /api/partners */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    partnerAssistant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Chat turns, oldest first */
+                    messages: {
+                        /** @enum {string} */
+                        role: "user" | "assistant";
+                        content: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Assistant reply (+ matches when a need was searched) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description AI backend unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    partnerOnboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    mode: "chat" | "extract";
+                    messages: {
+                        /** @enum {string} */
+                        role: "user" | "assistant";
+                        content: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description `{reply}` (chat mode) or `{fields}` (extract mode) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description AI backend unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    submitPartnerListing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    orgName: string;
+                    /**
+                     * Format: email
+                     * @description Becomes the partner account login
+                     */
+                    contactEmail: string;
+                    /** @description Profile fields (typically the /api/partners/onboard extract output) */
+                    fields?: Record<string, never>;
+                };
+            };
+        };
+        responses: {
+            /** @description `{ok:true, mode:'draft'|'claim'}` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Missing/invalid orgName or contactEmail */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getRfps: {
+        parameters: {
+            query?: {
+                /** @description Open RFPs are fundable for the current SCF quarter; closed are prior rounds */
+                status?: "open" | "closed";
+                /** @description Filter by quarter slug (e.g. 'q1-2026') */
+                quarter?: string;
+                /** @description Keyword query (free text) */
+                q?: components["parameters"]["q"];
+                /** @description Filter by RFP category (e.g. 'defi', 'payments', 'infrastructure'). An unrecognized value returns 400 with the valid category list. */
+                category?: string;
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+                /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                offset?: components["parameters"]["offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RFP list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    searchResearch: {
+        parameters: {
+            query: {
+                /** @description Natural-language search query */
+                q: string;
+                /** @description Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions. */
+                source?: "sdf-blog" | "scf-handbook" | "sep" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "ec-developer-report";
+                /** @description Max results (default 8, max 25) */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Research results */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    listSkills: {
+        parameters: {
+            query?: {
+                /** @description Filter by source */
+                source?: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
+                /** @description Filter by skill kind */
+                kind?: "skill-md" | "mcp-server" | "sdk" | "cli" | "agent-kit" | "tool";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Skills catalog */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay') */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Skill detail with content */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Skill not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getClusters: {
+        parameters: {
+            query?: {
+                /** @description Cluster by category (coarse 7-cat) or types (finer) */
+                dimension?: "category" | "types";
+                /** @description Only include clusters with at least N projects */
+                minSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cluster list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    analyzeEcosystem: {
+        parameters: {
+            query?: {
+                /** @description Which slice to return */
+                dimension?: "all" | "hackathons" | "categories" | "funding";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Analytics rollup */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getLeaderboard: {
+        parameters: {
+            query?: {
+                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. */
+                sort?: "activity" | "stars" | "issues";
+                /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
+                range?: "7d" | "30d" | "90d" | "1y" | "all";
+                /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */
+                category?: string;
+                /** @description Response format. */
+                format?: "json" | "csv";
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Leaderboard + ecosystem stats */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getFeedbackSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Feedback request schema */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    submitFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Feedback received (a curator-queue row was created) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok: boolean;
+                        id: string;
+                        message?: string;
+                    };
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+}
