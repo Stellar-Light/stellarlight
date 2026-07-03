@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"`/api/projects/search` region-umbrella synonyms: queries with 'LatAm' now also match records described with country vocabulary (Brazil, Mexico, Argentina, Colombia, Chile, Peru) — likewise 'Africa', 'Asia', 'Europe'. 'LatAm asset issuers' now surfaces PagFinance/CashAbroad-class projects whose records name countries, not regions.",
+		detail:
+			"Search behavior only — no paths, params, response shapes, or operation descriptions changed. Prompted by a live agent query that missed country-described projects on a region-worded question.",
+	},
+	{
+		date: "2026-07-03",
+		surfaces: ["api"],
 		version: "openapi 1.4.0",
 		type: "changed",
 		summary:
