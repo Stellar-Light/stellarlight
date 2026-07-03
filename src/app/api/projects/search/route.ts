@@ -862,9 +862,15 @@ export async function GET(req: NextRequest) {
 	}
 	let anchorProfiles = new Map<string, AnchorProfile>();
 	const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-	const hasAnchorRows = projectsOut.some((p) =>
-		(p.types ?? []).some((t) => String(t).toLowerCase() === "anchor"),
-	);
+	// projectsOut is a union of keyword rows (carry `types`) and semantic-search
+	// rows (don't) — read types defensively so the union access typechecks.
+	const typesOf = (p: unknown): string[] => {
+		const t = (p as { types?: unknown }).types;
+		return Array.isArray(t) ? (t as string[]) : [];
+	};
+	const isAnchorRow = (p: unknown) =>
+		typesOf(p).some((t) => t.toLowerCase() === "anchor");
+	const hasAnchorRows = projectsOut.some(isAnchorRow);
 	if (payload && hasAnchorRows) {
 		try {
 			const pRes = await payload.find({
@@ -915,10 +921,9 @@ export async function GET(req: NextRequest) {
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
 		builtBy: builtByMap.get(p.id) ?? null,
-		anchorProfile:
-			(p.types ?? []).some((t) => String(t).toLowerCase() === "anchor")
-				? (anchorProfiles.get(norm(p.name)) ?? null)
-				: null,
+		anchorProfile: isAnchorRow(p)
+			? (anchorProfiles.get(norm(p.name)) ?? null)
+			: null,
 	}));
 
 	logApiHit({
