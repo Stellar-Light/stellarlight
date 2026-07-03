@@ -779,7 +779,35 @@ const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "RFP list",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												activeQuarter: { type: "string" },
+												scfRound: {
+													type: "object",
+													description:
+														"SCF round identity + submission window (curated — SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this.",
+													properties: {
+														currentRound: { type: "integer", nullable: true, description: "Round currently open for submissions; null when no round is confirmed open as of asOf." },
+														lastConfirmedRound: { type: "integer", nullable: true },
+														lastConfirmedRoundNote: { type: "string", nullable: true },
+														submissionWindow: { type: "object", properties: { opens: { type: "string", format: "date", nullable: true }, closes: { type: "string", format: "date", nullable: true } } },
+														asOf: { type: "string", format: "date" },
+														verifyAt: { type: "string", format: "uri" },
+													},
+												},
+											},
+										},
+										rfps: { type: "array", items: { type: "object" } },
+									},
+								},
+							},
+						},
 					},
 				},
 			},

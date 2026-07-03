@@ -109,7 +109,10 @@ function boundaryRe(term: string): RegExp {
 	let re = termRe.get(term);
 	if (!re) {
 		const esc = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		re = new RegExp(`(?:\\b${esc}|${esc}\\b)`);
+		// Two-sided boundary: the previous one-sided form still matched
+		// mid-word suffixes/prefixes ("amm" → "h·amm·er"-class noise) and
+		// polluted narrow vertical queries with off-topic repos.
+		re = new RegExp(`\\b${esc}\\b`);
 		termRe.set(term, re);
 	}
 	return re;
