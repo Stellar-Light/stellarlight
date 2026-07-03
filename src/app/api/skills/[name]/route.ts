@@ -38,6 +38,7 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { generateSlug } from "@/lib/utils/normalize";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -231,3 +232,9 @@ function humanize(slug: string): string {
 		)
 		.join(" ");
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

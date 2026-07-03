@@ -25,6 +25,7 @@ import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -208,3 +209,8 @@ export async function GET() {
 		},
 	});
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const PUT = methodNotAllowed(["GET", "POST"]);
+export const DELETE = methodNotAllowed(["GET", "POST"]);
+export const PATCH = methodNotAllowed(["GET", "POST"]);

@@ -18,6 +18,7 @@ import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { searchRepos, type RepoResult } from "@/lib/repo-search";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -97,6 +98,7 @@ async function semanticProjectRows(
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
+			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			links: pickLinks(p.links),
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
@@ -119,6 +121,17 @@ async function semanticProjectRows(
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
+// sls-002: disambiguate a null award amount. "undisclosed" = the award is
+// confirmed but no amount is published in the source data (not a data gap);
+// "disclosed" = scfTotalAwardedUSD carries the number; null = not awarded.
+function scfAmountStatus(
+	awarded: boolean,
+	totalAwarded: number | null | undefined,
+): "disclosed" | "undisclosed" | null {
+	if (!awarded) return null;
+	return typeof totalAwarded === "number" ? "disclosed" : "undisclosed";
+}
+
 interface ProjectRow {
 	id: string;
 	name: string;
@@ -129,6 +142,7 @@ interface ProjectRow {
 	logoUrl: string | null;
 	scfAwarded: boolean;
 	scfTotalAwardedUSD: number | null;
+	scfAmountStatus: "disclosed" | "undisclosed" | null;
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
@@ -513,6 +527,7 @@ export async function GET(req: NextRequest) {
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
+					scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -882,3 +897,9 @@ export async function GET(req: NextRequest) {
 		},
 	);
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

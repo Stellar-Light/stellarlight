@@ -18,6 +18,7 @@ import { getUsageStats } from "@/lib/api-usage";
 import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { API_VERSION, SCOUT_SERVICE_VERSION } from "@/lib/version";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -165,3 +166,9 @@ export async function GET() {
 		},
 	);
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

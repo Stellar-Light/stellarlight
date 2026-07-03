@@ -30,6 +30,7 @@ import {
 } from "@/data/ideas";
 import { logApiHit } from "@/lib/api-usage";
 import { jsonSafe } from "@/lib/json-safe";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 // force-dynamic so the query-param filters (q, category, quarter) actually
 // apply — static generation collapses params at build time and would
@@ -178,3 +179,9 @@ export async function GET(req: NextRequest) {
 		},
 	);
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);
