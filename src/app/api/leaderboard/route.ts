@@ -16,6 +16,7 @@ import { clampLimit } from "@/lib/http-params";
 import { getPayloadSafe } from "@/lib/payload-client";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -334,3 +335,9 @@ export async function GET(req: NextRequest) {
 		},
 	);
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

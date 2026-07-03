@@ -21,6 +21,7 @@ import {
 	getWinnerLink,
 	LATEST_WINNERS,
 } from "@/data/recent-hackathon-winners";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -263,6 +264,14 @@ export async function GET(
 						tracks: liveTracks,
 					},
 					winners,
+					// sls-005: says whether the winners ARRAY ORDER is a ranking.
+					// true = ordinal placements (sorted by placementRank); false =
+					// tier-labeled winners (all placementRank null, order meaningless);
+					// null = no winners recorded. placementRank is the ONLY per-entry
+					// ordering signal — never infer finishing order from array position.
+					winnersRanked: winners.length
+						? winners.some((w) => w.placementRank !== null)
+						: null,
 					submissions: liveSubmissions,
 					// Top-level `tracks` (drift report #12) so `data.tracks` isn't
 					// undefined for a consumer (also present under hackathon.tracks).
@@ -403,6 +412,11 @@ export async function GET(
 					tracks,
 				},
 				winners,
+				// sls-005: same contract as the DoraHacks branch above — array order
+				// is only a ranking when winnersRanked is true.
+				winnersRanked: winners.length
+					? winners.some((w) => w.placementRank !== null)
+					: null,
 				submissions,
 				// Top-level `tracks` (drift report #12) — same data as hackathon.tracks,
 				// surfaced top-level so `data.tracks` isn't undefined.
@@ -419,3 +433,9 @@ export async function GET(
 		return NextResponse.json({ error: "internal error" }, { status: 500 });
 	}
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

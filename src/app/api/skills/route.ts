@@ -26,6 +26,7 @@ import {
 	type CuratedSkillSource,
 } from "@/lib/integrations/curated-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // 1h on edge
@@ -255,3 +256,9 @@ function shorten(s: string, max: number): string {
 	if (first.length <= max) return first.endsWith(".") ? first : `${first}.`;
 	return `${first.slice(0, max - 1)}…`;
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);

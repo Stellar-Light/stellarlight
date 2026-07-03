@@ -23,6 +23,7 @@ import {
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -270,3 +271,8 @@ export async function POST(req: NextRequest) {
 	const slugs = (body.slugs ?? []).map((s) => String(s).trim()).filter(Boolean);
 	return compare(slugs, req);
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const PUT = methodNotAllowed(["GET", "POST"]);
+export const DELETE = methodNotAllowed(["GET", "POST"]);
+export const PATCH = methodNotAllowed(["GET", "POST"]);

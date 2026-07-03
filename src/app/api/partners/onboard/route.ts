@@ -32,6 +32,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -405,3 +406,9 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
 	}
 }
+
+// sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+export const GET = methodNotAllowed(["POST"]);
+export const PUT = methodNotAllowed(["POST"]);
+export const DELETE = methodNotAllowed(["POST"]);
+export const PATCH = methodNotAllowed(["POST"]);

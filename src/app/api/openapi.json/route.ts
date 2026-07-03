@@ -1240,6 +1240,13 @@ const spec: OpenAPISpec = {
 					logoUrl: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
 					scfTotalAwardedUSD: { type: "number", nullable: true },
+					scfAmountStatus: {
+						type: "string",
+						nullable: true,
+						enum: ["disclosed", "undisclosed", null],
+						description:
+							"Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.",
+					},
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },
 						placementRank: {
@@ -1394,6 +1401,28 @@ const spec: OpenAPISpec = {
 				properties: {
 					meta: { $ref: "#/components/schemas/Meta" },
 					hackathon: { type: "object" },
+					winners: {
+						type: "array",
+						description:
+							"Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first.",
+						items: {
+							type: "object",
+							properties: {
+								name: { type: "string" },
+								hackathonPlacement: { type: "string", nullable: true },
+								placementRank: { type: "integer", nullable: true },
+								hackathonPrize: { type: "number", nullable: true },
+							},
+						},
+					},
+					winnersRanked: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded.",
+					},
+					submissions: { type: "array", items: { type: "object" } },
+					tracks: { type: "array", items: { type: "object" } },
 				},
 			},
 			Repo: {

@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
+		surfaces: ["api"],
+		version: "openapi 1.3.3",
+		type: "added",
+		summary:
+			"Three consumer-reported contract fixes: `/api/hackathons/{slug}` gains `winnersRanked` (true = winners array is placement-sorted; false = tier-labeled winners, array order meaningless — placementRank is the only ordering signal); `/api/projects/search` rows gain `scfAmountStatus` ('undisclosed' = award confirmed but amount unpublished, vs 'disclosed'/null — stop guessing on null amounts); and method misuse on every public endpoint now answers a JSON 405 with an Allow header instead of an empty non-JSON body.",
+		detail:
+			"Addresses downstream integration findings sls-002 (ambiguous null SCF amounts), sls-004 (non-JSON error responses), and sls-005 (tier winner arrays read as rankings). All additive.",
+	},
+	{
+		date: "2026-07-03",
 		surfaces: ["api", "mcp"],
 		version: "openapi 1.3.2",
 		type: "added",
