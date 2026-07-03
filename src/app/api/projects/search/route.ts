@@ -191,6 +191,13 @@ const SYNONYMS: Record<string, string[]> = {
 	game: ["game", "gaming", "gamefi", "play-to-earn"],
 	anchor: ["anchor", "on-ramp", "off-ramp", "sep-24", "sep24", "ramp"],
 	remittance: ["remittance", "cross-border", "money transfer", "send money", "payout"],
+	// Region umbrellas → the country vocabulary records actually use. Raven's
+	// launch demo ("LatAm asset issuers") missed PagFinance/CashAbroad because
+	// their records say "Brazil"/"Mexico", never the umbrella term "LatAm".
+	latam: ["latam", "latin america", "brazil", "brazilian", "mexico", "mexican", "argentina", "colombia", "chile", "peru"],
+	africa: ["africa", "african", "nigeria", "kenya", "ghana", "south africa"],
+	asia: ["asia", "asian", "india", "indian", "philippines", "indonesia", "vietnam", "singapore"],
+	europe: ["europe", "european", "eu"],
 	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
 	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
 	rpc: ["rpc", "node", "endpoint", "horizon"],
