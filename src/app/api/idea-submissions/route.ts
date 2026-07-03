@@ -1,7 +1,20 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+	// Public unauthenticated write — cap it so it can't flood the M0.
+	const limit = rateLimit(request, {
+		endpoint: "/api/idea-submissions",
+		limit: 10,
+		windowMs: 60_000,
+	});
+	if (!limit.allowed) {
+		return NextResponse.json(
+			{ message: "Too many submissions — try again shortly." },
+			{ status: 429, headers: rateLimitHeaders(limit) },
+		);
+	}
 	try {
 		const body = await request.json();
 
@@ -35,6 +48,7 @@ export async function POST(request: Request) {
 
 		await payload.create({
 			collection: "idea-submissions",
+			overrideAccess: true,
 			data: {
 				name,
 				email: email || undefined,
