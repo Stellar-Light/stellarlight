@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-03",
 		surfaces: ["api"],
+		version: "openapi 1.4.3",
+		type: "added",
+		summary:
+			"Anchor corridor data goes structured (sls-012): Anchor-typed rows in `/api/projects/search` now carry `anchorProfile` — country, regions, asset codes, supported SEPs, ramp types, and an asOf date — joined from the partner directory's stellar.toml enrichment. 'Which anchors serve corridor X→Y' becomes filterable, dated evidence instead of prose-mining shortDescriptions.",
+		detail:
+			"Single source of truth: the data lives on partner records (already exposed at /api/partners) and is joined by normalized name at read time — null when no partner record matches. Cite anchorProfile.asOf as the coverage as-of date.",
+	},
+	{
+		date: "2026-07-03",
+		surfaces: ["api"],
 		version: "openapi 1.4.2",
 		type: "fixed",
 		summary:
