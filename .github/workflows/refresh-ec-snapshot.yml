@@ -18,14 +18,20 @@ name: Refresh Electric Capital developer snapshot
 #     a new day (Sundays / holidays sometimes lag). No noise in git log.
 #   - Loop prevention: commits pushed by GITHUB_TOKEN do NOT re-trigger
 #     workflows that watch `push` events, by GitHub's design.
-#   - Vercel still picks up the push via its git webhook → leaderboard
-#     redeploys within a few minutes of a successful refresh.
+#   - Vercel does NOT auto-deploy this commit: it is authored by
+#     stellarlight-bot, and the project's "Git author must have access"
+#     setting blocks bot-authored commits from deploying (the deployment is
+#     created but immediately "blocked"). Without the deploy-hook step below,
+#     the fresh snapshot only reaches production when the next human-authored
+#     PR rebuilds on top of it. The final step fires a Vercel Deploy Hook to
+#     ship it immediately.
 
 on:
   schedule:
-    # 06:00 UTC daily — matches refresh-research-corpus + sits in quiet
-    # hours for US / EU
-    - cron: "0 6 * * *"
+    # EC publishes the Open Dev Data snapshot ~13:00 UTC; run after it.
+    # (06:00 UTC always consumed the *previous* day's export, adding a full
+    # day of lag on top of EC's own ~8-day reporting trail.)
+    - cron: "0 15 * * *"
   workflow_dispatch:
 
 permissions:
@@ -77,3 +83,24 @@ jobs:
           # the block). Workflow run URL lives in the Actions log.
           git commit -m "data: refresh EC snapshot (asOf ${AS_OF_NEW})"
           git push
+          echo "committed=1" >> "$GITHUB_OUTPUT"
+        id: commit
+
+      - name: Trigger Vercel deploy (bot commits don't auto-deploy)
+        # The push above is authored by stellarlight-bot, which Vercel's
+        # "Git author must have access" gate blocks from deploying. Fire a
+        # Deploy Hook so the fresh snapshot ships without waiting for the
+        # next human PR. Guarded: no-op if the secret isn't set yet, and
+        # only when a new day was actually committed.
+        if: steps.commit.outputs.committed == '1'
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_DEPLOY_HOOK_URL:-}" ]; then
+            echo "VERCEL_DEPLOY_HOOK_URL not set — skipping deploy trigger."
+            echo "Snapshot committed but will only go live on the next human-authored build."
+            exit 0
+          fi
+          echo "Firing Vercel Deploy Hook…"
+          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK_URL" -o /dev/null -w "deploy hook HTTP %{http_code}\n"
