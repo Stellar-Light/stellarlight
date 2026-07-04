@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-04",
+		surfaces: ["api"],
+		version: "openapi 1.4.4",
+		type: "changed",
+		summary:
+			"searchResearch description trim (routing hygiene): the 1.4.0 'Soroban security practice' phrasing ('vulnerability classes auditors find', 'audit findings') was lexically strong enough to capture how-to/checklist questions that belong to the ecosystem SKILLS lane in downstream routers. Reworded to 'Soroban security incidents — reentrancy, soroban-sdk advisories/CVEs, denial-of-service' — topical coverage kept, tutorial-shaped phrasing removed.",
+		detail:
+			"Measured on the lexical spec-routing eval before shipping: the stolen skills case routes back to its skill (skills lane restored to its floor) with ZERO scout top-1 losses — all 1.4.0 routing gains hold (legacy 232/338). Downstream catalogs that gate on routing baselines: after ingesting, the only remaining swing vs a 2026-07-03 baseline is the +10 legacy improvement — re-baseline upward.",
+	},
+	{
 		date: "2026-07-03",
 		surfaces: ["api"],
 		version: "openapi 1.4.3",
