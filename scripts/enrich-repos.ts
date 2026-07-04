@@ -99,8 +99,19 @@ async function main() {
 		console.log("⚠ No GITHUB_TOKEN set — GitHub calls will be unauthenticated (rate-limited).");
 	}
 
+	// Provenance gate (farm-exposure audit 2026-07-04): the public /api/intake
+	// creates Draft projects, and the two project-facing surfaces (leaderboard,
+	// projects/search) EXCLUDE Draft — but this enrichment didn't, so a
+	// self-submitted fake project's repos could still enter the repos index and
+	// surface via /api/repos/search + inline codeReferences. Match the surface
+	// filter: Draft projects contribute no repos until promoted.
 	const projects = (
-		await payload.find({ collection: "projects", pagination: false, depth: 0 })
+		await payload.find({
+			collection: "projects",
+			where: { status: { not_equals: "Draft" } },
+			pagination: false,
+			depth: 0,
+		})
 	).docs as Doc[];
 
 	// Builder reputation (Stellar Passport): index by github_username AND by each
@@ -172,7 +183,13 @@ async function main() {
 		// project-specific (e.g. NoetherDEX's noether/keeperbot/docs are Soroban-
 		// native but don't keyword-match), so the gate would wrongly drop them; it
 		// stays in force only for large multi-chain orgs that would flood the index.
-		const smallOrg = repos.length <= SMALL_ORG_MAX;
+		// Farm-exposure audit 2026-07-04: the small-org pass is provenance-gated —
+		// a UserSubmitted project pointing at a fresh ≤20-repo org must still pass
+		// the Stellar-signal keyword gate, so a farmed org can't flood the index
+		// on self-submitted provenance alone. Curated projects keep the bypass
+		// (it's what fixed the Noether no-repos gap).
+		const trustedProvenance = p.provenance?.source !== "UserSubmitted";
+		const smallOrg = repos.length <= SMALL_ORG_MAX && trustedProvenance;
 		const keep = (dedicated || smallOrg ? repos : signal).slice(0, ORG_REPO_CAP);
 		orgReposDropped += repos.length - keep.length;
 		let taken = 0;
