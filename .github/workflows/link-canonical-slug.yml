@@ -1,0 +1,33 @@
+name: Link canonical slug (dedupe)
+
+# Stamps a duplicate/rename project record's `canonicalSlug` so consumers
+# resolve it to the canonical project (sls-008: orbit-finance → orbitcdp).
+# Purely additive — only writes canonicalSlug, never deletes, never edits
+# status, refuses to point at a non-existent canonical slug.
+# Run dry first (execute=false), inspect the per-pair report, then execute.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/link-canonical-slug.ts ${{ inputs.execute && '--execute' || '' }}
