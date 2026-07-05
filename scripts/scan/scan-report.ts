@@ -29,6 +29,11 @@ const API = process.env.SCAN_API_BASE?.trim() || "https://stellarlight.xyz";
 // contracts, non-Rust wallets/frontends, oracles, defunct projects, long tail).
 const SAMPLE_TERMS = ["defi lending", "wallet sdk", "oracle", "nft", "amm dex", "stablecoin", "escrow", "dao governance"];
 
+// Terms that surface the UNPROTECTED long tail (no project link, no SCF):
+// hackathon submissions, tutorials, one-off experiments — the population where
+// the archive path CAN fire and the circuit breakers actually get exercised.
+const UNPROTECTED_TERMS = ["soroban", "hackathon", "stellar sdk", "token contract", "payment", "tutorial", "demo", "smart contract", "defi", "wallet"];
+
 interface SampleRepo {
 	fullName: string;
 	projectSlug: string | null;
@@ -59,6 +64,37 @@ async function assembleSample(): Promise<SampleRepo[]> {
 						repoScoreLabel: r.repoScoreLabel ?? null,
 					});
 				}
+			}
+		} catch (e) {
+			console.error(`  ! sample term "${term}": ${(e as Error).message}`);
+		}
+	}
+	return [...byFull.values()];
+}
+
+// Sample the UNPROTECTED population from the repos index directly: rows with
+// NO project link and NO SCF award — hackathon submissions, tutorials, strays.
+// This is the only population where codeProofTier's archive branch can fire,
+// so it's the one that exercises the two-key rule + breakers before any write.
+async function assembleUnprotectedSample(): Promise<SampleRepo[]> {
+	const byFull = new Map<string, SampleRepo>();
+	for (const term of UNPROTECTED_TERMS) {
+		try {
+			const url = `${API}/api/repos/search?q=${encodeURIComponent(term)}&limit=15`;
+			const d = await (await fetch(url)).json();
+			for (const r of d.repos ?? []) {
+				const full = r.fullName;
+				if (!full || byFull.has(full)) continue;
+				if (r.project || r.scfAwarded) continue; // unprotected only
+				byFull.set(full, {
+					fullName: full,
+					projectSlug: null,
+					scfAwarded: false,
+					prominence: 0,
+					starsIdx: r.stars ?? null,
+					lastCommitIdx: r.lastCommitAt ?? null,
+					repoScoreLabel: r.repoScoreLabel ?? null,
+				});
 			}
 		} catch (e) {
 			console.error(`  ! sample term "${term}": ${(e as Error).message}`);
@@ -130,9 +166,14 @@ async function scoreRepo(s: SampleRepo): Promise<Row | null> {
 
 async function main() {
 	const argv = process.argv.slice(2);
+	const unprotectedMode = argv.includes("--unprotected");
+	const repoArgs = argv.filter((a) => !a.startsWith("--"));
 	let sample: SampleRepo[];
-	if (argv.length) {
-		sample = argv.map((f) => ({ fullName: f, projectSlug: null, scfAwarded: false, prominence: 0, starsIdx: null, lastCommitIdx: null, repoScoreLabel: null }));
+	if (repoArgs.length) {
+		sample = repoArgs.map((f) => ({ fullName: f, projectSlug: null, scfAwarded: false, prominence: 0, starsIdx: null, lastCommitIdx: null, repoScoreLabel: null }));
+	} else if (unprotectedMode) {
+		console.log(`Assembling UNPROTECTED sample (no project link, no SCF) from ${API} …`);
+		sample = await assembleUnprotectedSample();
 	} else {
 		console.log(`Assembling sample from ${API} …`);
 		sample = await assembleSample();
@@ -182,6 +223,18 @@ async function main() {
 		for (const r of protectedDemoted) console.log(`   ${r.full}  tier=${r.tier} unverified=${r.unverified}  (${r.reason})`);
 	} else {
 		console.log("✓ SAFE: 0 protected repos demoted. proof=none stays at community tier (never sunk).");
+	}
+
+	// Every proposed demotion, with its two-key reasons — the review surface for
+	// the archive path. Eyeball each: is it genuinely dead/junk, or a legit repo
+	// the heuristics caught? Any legit repo here = fix the rule before any write.
+	if (archived.length) {
+		console.log(`\nproposed ARCHIVE (${archived.length}) — verify each is genuinely dead/junk:`);
+		for (const r of archived) console.log(`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof} depth=${r.codeDepth.toFixed(2)} farm=${r.farmScore}`);
+	}
+	if (unverified.length) {
+		console.log(`\nproposed unverifiedStellar (${unverified.length}) — soft-excluded from codeReferences/explain, NEVER archived:`);
+		for (const r of unverified) console.log(`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof}`);
 	}
 
 	// Relevance completeness (NOT a demotion): none among PROTECTED = a detection
