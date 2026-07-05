@@ -258,3 +258,79 @@ describe("baseline hard-cap invariant", () => {
 		expect(r.codeDepth).toBeLessThan(0.6);
 	});
 });
+
+// ── Tooling cap: soroban-DEP code without entry macros is not a contract ─────
+
+describe("tooling cap — depends-on-soroban-sdk ≠ IS-a-contract (stellar-cli class)", () => {
+	// CLI/indexer-style application logic: uses contract-adjacent strings
+	// (require_auth in tx-building, storage in ledger tooling) inside a crate
+	// that depends on soroban-sdk — but has ZERO #[contract]/#[contractimpl].
+	const CLI_MAIN = `use soroban_sdk::xdr::{ScVal, Transaction};
+pub fn build_auth_entry(tx: &Transaction) -> ScVal {
+    // tooling code that mentions require_auth in strings and helpers
+    let entry = sign_require_auth(tx);
+    if entry.expired() { panic!("expired"); }
+    entry.to_scval()
+}
+pub fn snapshot_ledger(env_dir: &str) -> u64 {
+    let mut count = 0;
+    for e in read_storage_entries(env_dir) {
+        count += e.size();
+    }
+    count
+}`;
+
+	it("zero entry macros ⇒ capped at 0.35 with reason no-contract-macros", () => {
+		const r = computeCodeDepth(
+			depthInput({
+				blobs: [
+					{ path: "Cargo.toml", text: '[package]\nname = "some-cli"\n[dependencies]\nsoroban-sdk = "22.0.1"\n[lib]\ncrate-type = ["cdylib"]\n' },
+					{ path: "src/main.rs", text: CLI_MAIN },
+					{ path: "src/ledger.rs", text: CLI_MAIN },
+				],
+				contractCrateDirs: ["."],
+				scalars: { tagCount: 50 }, // mature tooling (stellar-cli has many releases)
+			}),
+		);
+		expect(r.codeDepth).toBeLessThanOrEqual(0.35);
+		expect(r.reasons).toContain("no-contract-macros");
+	});
+
+	it("a real contract (entry macros present) is NOT capped by this rule", () => {
+		const r = computeCodeDepth(
+			depthInput({
+				blobs: [
+					{ path: "Cargo.toml", text: '[package]\nname = "token"\n[dependencies]\nsoroban-sdk = "22.0.3"\n[lib]\ncrate-type = ["cdylib"]\n' },
+					{ path: "src/lib.rs", text: TOKEN_LIB_MANIFEST },
+					{ path: "src/actions.rs", text: TOKEN_ACTIONS },
+				],
+				contractCrateDirs: ["."],
+			}),
+		);
+		expect(r.reasons).not.toContain("no-contract-macros");
+	});
+
+	it("module-split rescue: #[contracttype] in big module files (blend class) is NOT capped", () => {
+		// entry #[contract] file fell below the top-N size cut; the analyzed big
+		// module files carry DataKey #[contracttype] enums — contract evidence.
+		const MODULE = `use soroban_sdk::{contracttype, Env, Address};
+#[contracttype]
+pub enum DataKey { Balance(Address), Admin }
+pub fn do_transfer(env: &Env, from: Address, amount: i128) {
+    from.require_auth();
+    let b: i128 = env.storage().persistent().get(&DataKey::Balance(from.clone())).unwrap_or(0);
+    if b < amount { panic!("insufficient"); }
+    env.storage().persistent().set(&DataKey::Balance(from), &(b - amount));
+}`;
+		const r = computeCodeDepth(
+			depthInput({
+				blobs: [
+					{ path: "Cargo.toml", text: '[package]\nname = "pool"\n[dependencies]\nsoroban-sdk = "22.0.3"\n[lib]\ncrate-type = ["cdylib"]\n' },
+					{ path: "src/pool.rs", text: MODULE },
+				],
+				contractCrateDirs: ["."],
+			}),
+		);
+		expect(r.reasons).not.toContain("no-contract-macros");
+	});
+});

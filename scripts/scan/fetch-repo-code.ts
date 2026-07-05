@@ -63,10 +63,22 @@ export function selectDepthPaths(
 	const cargos = tree.filter((e) => e.type === "blob" && e.path.toLowerCase().endsWith("cargo.toml"));
 	const sorobanCrateDirs = cargos.filter((c) => cargoIsSoroban.get(c.path)).map((c) => c.path.replace(/\/?Cargo\.toml$/i, ""));
 	const inSorobanCrate = (p: string) => sorobanCrateDirs.some((d) => (d ? p.startsWith(`${d}/src/`) : p.startsWith("src/")));
-	const isTest = (p: string) => /(^|\/)tests?\//i.test(p) || /_test|test_|\.test\./i.test(p);
+	// Test/fixture exclusion, path-segment precise. The old substring rules
+	// missed test-utils/ and inline src/tests.rs (templar's generated
+	// test-utils/src/pyth_price_id.rs ate a top-18 source slot) while WRONGLY
+	// excluding files like latest_prices.rs (substring "test_").
+	const isTest = (p: string) =>
+		/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(p) || // test-ish dirs
+		/_tests?(\/|\.rs$)/i.test(p) || // integration_test/, foo_test(s).rs
+		/(^|\/)tests?\.rs$/i.test(p) || // inline src/tests.rs
+		/(^|\/)test_[^/]*\.rs$/i.test(p) || // test_foo.rs
+		/\.test\./i.test(p);
+	// Generated/oversize sources waste slots: >400KB blobs fetch as null anyway
+	// (fetchBlob cap) and generated code isn't authored contract logic.
+	const isGenerated = (p: string) => /(generated|codegen|autogen)/i.test(p) || /\.pb\.rs$/i.test(p);
 
 	const sources = rs
-		.filter((e) => inSorobanCrate(e.path) && !isTest(e.path))
+		.filter((e) => inSorobanCrate(e.path) && !isTest(e.path) && !isGenerated(e.path) && (e.size ?? 0) <= 400_000)
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
 		.slice(0, 18)
 		.map((e) => e.path);

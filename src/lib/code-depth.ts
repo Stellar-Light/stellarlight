@@ -444,6 +444,27 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		raw = Math.min(raw, 0.45);
 	}
 
+	// Tooling/SDK-usage cap — a crate can DEPEND on soroban-sdk (CLI, indexer,
+	// client codegen) and even contain contract-adjacent strings (require_auth
+	// in tx-building code, .storage() in ledger tooling) without BEING a
+	// contract; stellar-cli scored 0.50 from its own application logic this
+	// way. The discriminator tooling can't fake is the contract-macro FAMILY:
+	// zero #[contract]/#[contractimpl]/#[contracttype]/#[contracterror] across
+	// every analyzed .rs ⇒ demonstrably no contract code here ⇒ cap at the
+	// shallow-proof level (0.35, ~js-sdk tier). The family (not just entry
+	// macros) is deliberate: in module-split repos the tiny #[contract] entry
+	// file can fall below the top-N size cut while the big module files carry
+	// #[contracttype] DataKeys (blend does exactly this — entry-macros-only
+	// capping wrongly sank it to 0.35 in the calibration re-probe).
+	const contractFamilyMacros = rs.reduce(
+		(n, b) => n + (b.text?.match(/#\[\s*contract(impl|type|error|client)?\s*\]/g)?.length ?? 0),
+		0,
+	);
+	if (contractFamilyMacros === 0) {
+		reasons.push("no-contract-macros");
+		raw = Math.min(raw, 0.35);
+	}
+
 	// (D) CLONE MULTIPLIER — gated on EMPTINESS not similarity (review P8):
 	// a repo full of real non-trivial logic is immune even if it structurally
 	// resembles a template (SEP-41/OZ tokens legitimately share shape).
