@@ -95,6 +95,10 @@ export interface RepoCodeResult {
 	scan: ScanInput; // → detectStellarProof
 	proof: StellarProof;
 	facts: CodeFacts;
+	/** SAFETY-CRITICAL: error/incomplete means "could not conclude" — a proof of
+	 * `none` under a non-ok outcome must never be persisted as a judgment. */
+	outcome: "ok" | "error" | "incomplete";
+	scanNote: string | null;
 	depthInput: DepthInput; // → computeCodeDepth (v2)
 	/** signals for farmScore + tier, sourced from GitHub (not the index). */
 	meta: {
@@ -162,7 +166,7 @@ export async function fetchRepoCode(gh: Gh, full: string): Promise<RepoCodeResul
 		tree: tree.map((e) => ({ path: e.path, type: e.type })),
 		treeComplete,
 	};
-	const { proof, facts } = detectStellarProof(scan);
+	const { proof, facts, outcome, scanNote } = detectStellarProof(scan);
 
 	const depthInput: DepthInput = {
 		fullName: full,
@@ -185,6 +189,8 @@ export async function fetchRepoCode(gh: Gh, full: string): Promise<RepoCodeResul
 		scan,
 		proof,
 		facts,
+		outcome,
+		scanNote: scanNote ?? null,
 		depthInput,
 		meta: {
 			isFork: !!meta.fork,

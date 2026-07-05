@@ -239,6 +239,12 @@ async function main() {
 			repByGithub.get(owner.toLowerCase()) ?? 0,
 			repByRepo.get(full.toLowerCase()) ?? 0,
 		);
+		// Fetch the existing doc BEFORE grading so the persisted Code-Truth
+		// signals (codeDepth, written by scripts/scan/scan-repo-code.ts) feed the
+		// grade — a code-verified deep contract lifts repoScore even at 0 stars.
+		const existing = (
+			await payload.find({ collection: "repos", where: { fullName: { equals: full } }, limit: 1, depth: 0 })
+		).docs[0] as Doc | undefined;
 		const grade = info
 			? repoGrade({
 					lastCommitAt: info.lastCommitAt,
@@ -252,6 +258,7 @@ async function main() {
 					hasDescription: !!(info.description && info.description.trim()),
 					topicCount: Array.isArray(info.topics) ? info.topics.length : 0,
 					openIssues: info.openIssues ?? 0,
+					codeDepth: typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
 				})
 			: { score: 0, label: "low" as const };
 
@@ -285,9 +292,6 @@ async function main() {
 			enrichError,
 		};
 
-		const existing = (
-			await payload.find({ collection: "repos", where: { fullName: { equals: full } }, limit: 1, depth: 0 })
-		).docs[0] as Doc | undefined;
 		const verb = existing ? "update" : "create";
 		console.log(
 			`  ${verb.padEnd(6)} ${full.padEnd(42)} score=${grade.score} ${info?.primaryLanguage ?? "?"} ★${info?.stargazerCount ?? "?"}${enrichError ? `  ⚠ ${enrichError.slice(0, 40)}` : ""}`,

@@ -1,0 +1,43 @@
+name: Scan repo code (signals-only)
+
+# Persists Code-Truth signals (stellarProof, codeDepth, farmScore, scan state)
+# onto existing repo docs. Signals-only v1: NO tier / unverifiedStellar /
+# repoScore writes (zero demotion risk by construction — write-shape.ts).
+# Scores move when enrich-repos next runs. Run dry first, inspect the wave
+# report (incl. predicted score lifts), then execute. Re-run for more waves —
+# scanned repos are skipped, budget guard stops before the token runs dry.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+      limit:
+        description: "Max repos this wave"
+        type: string
+        default: "60"
+      lang:
+        description: "primaryLanguage filter (e.g. Rust) or 'all'"
+        type: string
+        default: "Rust"
+
+permissions: { contents: read }
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }}
