@@ -1,0 +1,32 @@
+name: Backfill project lifecycle (historical archive)
+
+# Writes the lean `lifecycle` group (wasLive + note) onto verified defunct/changed
+# projects so agents can narrate "used to be live" instead of getting silence.
+# Purely additive — only writes lifecycle, never deletes, never changes status.
+# Run dry first (execute=false), inspect the per-project report, then execute.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/backfill-lifecycle.ts ${{ inputs.execute && '--execute' || '' }}

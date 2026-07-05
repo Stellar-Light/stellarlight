@@ -132,6 +132,35 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// Historical archive (lean). Turns a bare `status: Inactive` into
+			// ecosystem memory: a consumer asking "what CDPs are on Stellar?" can be
+			// told "OrbitCDP WAS a live CDP protocol that shut down" instead of
+			// getting silence or a stale "live". Additive — defaults empty; only
+			// meaningful on Inactive records. Can grow later (inactiveSince, reason
+			// enum, successorSlug) without breaking this shape.
+			name: "lifecycle",
+			type: "group",
+			fields: [
+				{
+					name: "wasLive",
+					type: "checkbox",
+					defaultValue: false,
+					admin: {
+						description:
+							"True if this project ever reached Live/production (distinguishes a real product that later died from one abandoned in development). Lets consumers say 'used to be live'.",
+					},
+				},
+				{
+					name: "note",
+					type: "textarea",
+					admin: {
+						description:
+							"Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents — keep it factual and dated.",
+					},
+				},
+			],
+		},
+		{
 			name: "links",
 			type: "group",
 			fields: [
