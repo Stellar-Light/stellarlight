@@ -26,6 +26,10 @@ on:
         description: "Read-back mode: print persisted signals for scanned repos (no GitHub calls, no writes)"
         type: boolean
         default: false
+      extra:
+        description: "Extra flags, e.g. '--rescan --budget 150' (corrective re-scan sized to a partial token window)"
+        type: string
+        default: ""
 
 permissions: { contents: read }
 
@@ -44,4 +48,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }} ${{ inputs.verify && '--verify' || '' }}
+      - run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }} ${{ inputs.verify && '--verify' || '' }} ${{ inputs.extra }}
