@@ -614,13 +614,22 @@ export async function GET(req: NextRequest) {
 						}).score,
 					]),
 				);
+				// Only an EXACT name/slug match (nameRank===3) dominates authority —
+				// that's the sls-009 contract (q="Blend" → the project named Blend).
+				// Prefix(2)/whole-word(1) matches must NOT override prominence, or a
+				// generic query like "swap" ranks a 0-prominence "SwapX" (prefix) above
+				// flagship Soroswap ("swap" isn't a word-boundary in "soroswap" → 0).
+				// So prefix/word name-affinity becomes a LATE tiebreaker, after
+				// relevance + authority, not the primary key (sls-009 recheck regression).
+				const exactName = (id: string) => (nameRank.get(id) === 3 ? 1 : 0);
 				filtered.sort(
 					(a, b) =>
-						(nameRank.get(b.id) ?? 0) - (nameRank.get(a.id) ?? 0) ||
+						exactName(b.id) - exactName(a.id) ||
 						b.score - a.score ||
 						Number(typeMatch(b, intentTypes)) -
 							Number(typeMatch(a, intentTypes)) ||
 						rankBoost(b) - rankBoost(a) ||
+						(nameRank.get(b.id) ?? 0) - (nameRank.get(a.id) ?? 0) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
 				projects = filtered;

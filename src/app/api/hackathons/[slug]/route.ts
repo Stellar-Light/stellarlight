@@ -72,18 +72,38 @@ const WORD_ORDINALS: Record<string, number> = {
 // unranked" from a real rank, and keeps the internal magic number out of the
 // public response. A downstream consumer (Raven) rejected our winner data
 // because the order was scrambled and there was no numeric place field.
+// Medal emoji + Spanish ordinals — many LatAm DoraHacks events label placements
+// as "🥇 1er lugar" / "Primer lugar – Mejor Proyecto", which the English-only
+// parser scored null (sls-005 false negatives: whole ranked events reported
+// winnersRanked=false).
+const MEDALS: Record<string, number> = { "🥇": 1, "🥈": 2, "🥉": 3 };
+const SPANISH_ORDINALS: Record<string, number> = {
+	primer: 1, primero: 1, primera: 1,
+	segundo: 2, segunda: 2,
+	tercer: 3, tercero: 3, tercera: 3,
+	cuarto: 4, cuarta: 4,
+	quinto: 5, quinta: 5,
+	sexto: 6, septimo: 7, octavo: 8, noveno: 9, decimo: 10,
+};
+
 function placementRank(label?: string | null): number | null {
 	if (!label) return null;
-	const s = label.toLowerCase();
-	const ordinal = s.match(/\b(\d+)\s*(?:st|nd|rd|th)\b/);
+	for (const [m, r] of Object.entries(MEDALS)) if (label.includes(m)) return r;
+	// Lowercase + strip accents so "séptimo"/"1º" match.
+	const s = label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+	// English "1st" + Spanish "1er/2do/3ro/4to" + "1º/1°".
+	const ordinal = s.match(/\b(\d+)\s*(?:st|nd|rd|th|er|do|ro|to|mo|vo|no|º|°)\b/);
 	if (ordinal) return Number(ordinal[1]);
-	if (/runner.?up/.test(s)) return 2;
+	if (/runner.?up|subcampe/.test(s)) return 2;
 	for (const [word, rank] of Object.entries(WORD_ORDINALS)) {
 		if (new RegExp(`\\b${word}\\b`).test(s)) return rank;
 	}
-	if (/grand|overall/.test(s)) return 1;
-	if (/track.?winner|category winner/.test(s)) return 100;
-	if (/honorable|mention|finalist/.test(s)) return 900;
+	for (const [word, rank] of Object.entries(SPANISH_ORDINALS)) {
+		if (new RegExp(`\\b${word}\\b`).test(s)) return rank;
+	}
+	if (/grand|overall|gran premio|mejor proyecto/.test(s)) return 1;
+	if (/track.?winner|category winner|ganador de categoria/.test(s)) return 100;
+	if (/honorable|mention|finalist|mencion/.test(s)) return 900;
 	// A bare "Winner"/"Winners" bucket has no ordinal → unranked, not rank 1.
 	return null;
 }
@@ -93,13 +113,15 @@ function placementRank(label?: string | null): number | null {
 // serves both the DoraHacks-feed shape and the DB/curated SubmissionRow shape
 // (both carry hackathonPlacement). Ranked winners sort ascending; unranked
 // (placementRank === null) sink to the end in stable source order.
-function rankAndSort<T extends { hackathonPlacement?: string | null }>(
+function rankAndSort<T extends { hackathonPlacement?: string | null; award?: string | null }>(
 	winners: T[],
 ): (T & { placementRank: number | null })[] {
 	return winners
 		.map((w) => ({
 			...w,
-			placementRank: placementRank(w.hackathonPlacement),
+			// The ordinal can live in either the prize name (hackathonPlacement) or
+			// the award title — try both before declaring a winner unranked.
+			placementRank: placementRank(w.hackathonPlacement) ?? placementRank(w.award),
 		}))
 		.sort((a, b) => (a.placementRank ?? 9999) - (b.placementRank ?? 9999));
 }
