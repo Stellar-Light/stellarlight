@@ -552,7 +552,9 @@ export interface Repo {
   /**
    * Code-verified Stellar relevance (cargo-sdk strongest)
    */
-  stellarProof?: ('cargo-sdk' | 'contract-macros' | 'js-sdk' | 'stellar-toml' | 'weak-mention' | 'none') | null;
+  stellarProof?:
+    | ('cargo-sdk' | 'contract-macros' | 'js-sdk' | 'lang-sdk' | 'stellar-toml' | 'weak-mention' | 'none')
+    | null;
   /**
    * 0-1 Soroban code depth (feeds repoGrade)
    */

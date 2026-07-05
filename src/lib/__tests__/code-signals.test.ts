@@ -116,6 +116,54 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 		expect(r.outcome).toBe("ok");
 	});
 
+	// ── lang-sdk: non-JS/Rust Stellar SDKs (verified against real manifests) ──
+	it("Swift Package.swift w/ stellar-ios-mac-sdk → lang-sdk (KEEP; was wrongly none)", () => {
+		const s = scanOf({
+			"Package.swift": 'dependencies: [\n  .package(url: "https://github.com/Soneso/stellar-ios-mac-sdk", .upToNextMajor(from: "3.6.0")),\n]',
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Swift CocoaPods Podfile w/ pod 'stellar-ios-mac-sdk' → lang-sdk (KEEP; lobstr Vault-iOS class)", () => {
+		const s = scanOf({ Podfile: "# The Soneso stellar SDK for iOS\n  pod 'stellar-ios-mac-sdk', '3.0.3'\n  pod 'lottie-ios'\n" });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Kotlin build.gradle.kts w/ network.lightsail:stellar-sdk → lang-sdk (KEEP)", () => {
+		const s = scanOf({ "build.gradle.kts": 'implementation("network.lightsail:stellar-sdk:3.0.0")' });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Flutter pubspec.yaml w/ stellar_flutter_sdk → lang-sdk (KEEP)", () => {
+		const s = scanOf({ "pubspec.yaml": "dependencies:\n  stellar_flutter_sdk: ^1.8.0\n  flutter:\n" });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Go go.mod requiring github.com/stellar/go → lang-sdk (KEEP)", () => {
+		const s = scanOf({ "go.mod": "module example.com/app\n\nrequire github.com/stellar/go v0.0.0-20240101\n" });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Python requirements.txt w/ stellar-sdk → lang-sdk (KEEP)", () => {
+		const s = scanOf({ "requirements.txt": "requests==2.31.0\nstellar-sdk==8.0.0\n" });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("cargo-sdk still wins over a lang manifest (Rust contract w/ a go.mod tool)", () => {
+		const s = scanOf({ "Cargo.toml": CARGO_SDK, "tools/go.mod": "require github.com/stellar/go v0.0.0" });
+		expect(detectStellarProof(s).proof).toBe("cargo-sdk");
+	});
+
+	it("NEGATIVE: Package.swift with NO stellar dep → none (no over-match)", () => {
+		const s = scanOf({ "Package.swift": 'dependencies: [\n  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),\n]' });
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
+	it("NEGATIVE: build.gradle with an unrelated dep → none", () => {
+		const s = scanOf({ "build.gradle": 'implementation("com.squareup.okhttp3:okhttp:4.12.0")' });
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	// ── The over-filter guards: ambiguity must NEVER produce a confident `none` ──
 
 	it("FIXTURE #10: oversize/binary Cargo.toml (text null) → outcome error, not none-judgment", () => {

@@ -50,6 +50,7 @@ export type StellarProof =
 	| "cargo-sdk"
 	| "contract-macros"
 	| "js-sdk"
+	| "lang-sdk" // non-JS/Rust Stellar SDK dep: Swift/Kotlin/Flutter/Go/Python
 	| "stellar-toml"
 	| "weak-mention"
 	| "none";
@@ -114,6 +115,22 @@ const JS_SDK_DEPS = [
 	"@stellar/typescript-wallet-sdk",
 ];
 
+// Non-JS/Rust Stellar SDKs. A native mobile/backend app that depends on a
+// Stellar SDK (Swift/Kotlin/Flutter/Go/Python) is a genuine Stellar repo — it
+// just carries no Soroban contract, so codeDepth stays shallow but it must NOT
+// read as `none` (e.g. lobstr Vault-Android, soneso stellar-swift-wallet-sdk).
+// Patterns match the DEPENDENCY declaration, not incidental "stellar" mentions.
+// Verified against real manifests before adding (Package.swift → stellar-ios-mac-sdk,
+// build.gradle.kts → network.lightsail:stellar-sdk, go.mod → github.com/stellar/…).
+const LANG_SDK_MARKERS: { lang: string; file: (name: string) => boolean; re: RegExp }[] = [
+	{ lang: "swift", file: (n) => n === "package.swift", re: /stellar[-_]?(ios|mac|wallet|swift|base)[-_]?(sdk|mac)?|stellarsdk|\.package\(\s*url:\s*["'][^"']*\/stellar/i },
+	{ lang: "swift", file: (n) => n === "podfile", re: /pod\s+["'][^"']*stellar|stellar-ios-mac-sdk/i },
+	{ lang: "kotlin", file: (n) => n === "build.gradle" || n === "build.gradle.kts", re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i },
+	{ lang: "dart", file: (n) => n === "pubspec.yaml", re: /stellar_flutter_sdk|stellar_[a-z]+_sdk/i },
+	{ lang: "go", file: (n) => n === "go.mod", re: /github\.com\/stellar\//i },
+	{ lang: "python", file: (n) => n === "requirements.txt" || n === "pyproject.toml" || n === "setup.py" || n === "setup.cfg", re: /\bstellar[-_]sdk\b|py-stellar-base|\bstellar_base\b/i },
+];
+
 // stellar.toml is only a proof if it has real SEP-1 content, not an empty file.
 const RE_STELLAR_TOML = /\bNETWORK_PASSPHRASE\b|\[\[\s*CURRENCIES\s*\]\]|\bSIGNING_KEY\b|\bTRANSFER_SERVER\b|\bWEB_AUTH_ENDPOINT\b/i;
 
@@ -169,7 +186,7 @@ export function detectStellarProof(input: ScanInput): ProofResult {
 	// Guard P1: unreadable proof file ⇒ do not conclude. Retry later.
 	const proofPaths = (p: string) => {
 		const b = basename(p).toLowerCase();
-		return b === "cargo.toml" || b.endsWith(".rs") || b === "package.json" || b === "stellar.toml";
+		return b === "cargo.toml" || b.endsWith(".rs") || b === "package.json" || b === "stellar.toml" || LANG_SDK_MARKERS.some((m) => m.file(b));
 	};
 	const unreadable = input.blobs.find((b) => proofPaths(b.path) && isUnreadable(b));
 	if (unreadable) {
@@ -273,6 +290,21 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 	}
 	facts.stellarJsDep = jsDep;
 
+	// ---- Other-language Stellar SDK (Swift/Kotlin/Flutter/Go/Python) ----
+	let langDep: string | null = null;
+	if (!jsDep) {
+		for (const b of input.blobs) {
+			if (!b.present || b.text == null) continue;
+			const name = basename(b.path).toLowerCase();
+			const hit = LANG_SDK_MARKERS.find((m) => m.file(name) && m.re.test(b.text as string));
+			if (hit) {
+				langDep = `${hit.lang}:${name}`;
+				break;
+			}
+		}
+	}
+	if (langDep && !facts.stellarJsDep) facts.stellarJsDep = langDep;
+
 	// ---- stellar.toml (SEP-1) ----
 	const hasStellarToml = tomlBlobs.some((b) => RE_STELLAR_TOML.test(b.text as string));
 
@@ -280,6 +312,7 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 	if (cargoHasSoroban) return { proof: "cargo-sdk", facts };
 	if (macroCount > 0 || sorobanUse) return { proof: "contract-macros", facts };
 	if (jsDep) return { proof: "js-sdk", facts };
+	if (langDep) return { proof: "lang-sdk", facts };
 	if (hasStellarToml) return { proof: "stellar-toml", facts };
 	if (input.weakMention) return { proof: "weak-mention", facts };
 	return { proof: "none", facts };
@@ -292,7 +325,7 @@ export function computeCodeDepth(proof: StellarProof, facts: CodeFacts): number 
 	const strongRust = proof === "cargo-sdk" || proof === "contract-macros";
 	if (!strongRust) {
 		// js-sdk / stellar-toml proofs are real but shallow → capped at 0.5.
-		if (proof === "js-sdk" || proof === "stellar-toml") return 0.35;
+		if (proof === "js-sdk" || proof === "lang-sdk" || proof === "stellar-toml") return 0.35;
 		return 0; // weak-mention / none
 	}
 	let d = 0.4; // has soroban proof
@@ -327,7 +360,7 @@ export interface FarmInput {
  */
 export function computeFarmScore(input: FarmInput): { score: number; flags: string[] } {
 	// H8/P5: any real proof ⇒ not farm.
-	if (input.proof === "cargo-sdk" || input.proof === "contract-macros" || input.proof === "js-sdk" || input.proof === "stellar-toml") {
+	if (input.proof === "cargo-sdk" || input.proof === "contract-macros" || input.proof === "js-sdk" || input.proof === "lang-sdk" || input.proof === "stellar-toml") {
 		return { score: 0, flags: [] };
 	}
 	const flags: string[] = [];

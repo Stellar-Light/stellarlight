@@ -41,7 +41,7 @@ export interface DepthScalars {
 
 export interface DepthInput {
 	fullName: string;
-	proof: "cargo-sdk" | "contract-macros" | "js-sdk" | "stellar-toml" | "weak-mention" | "none";
+	proof: "cargo-sdk" | "contract-macros" | "js-sdk" | "lang-sdk" | "stellar-toml" | "weak-mention" | "none";
 	versionStatus: "current" | "supported" | "deprecated" | "unknown";
 	isDeployableContract: boolean; // Cargo cdylib
 	/** ALL fetched blobs (root + per-crate Cargo.toml + top src/*.rs by size + tests). */
@@ -345,7 +345,7 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	const reasons: string[] = [];
 
 	// Non-Rust proofs: real but not contract depth.
-	if (input.proof === "js-sdk" || input.proof === "stellar-toml") {
+	if (input.proof === "js-sdk" || input.proof === "lang-sdk" || input.proof === "stellar-toml") {
 		return zero(0.3, "js/toml-proof");
 	}
 	if (input.proof !== "cargo-sdk" && input.proof !== "contract-macros") {

@@ -52,7 +52,7 @@ export const Repos: CollectionConfig = {
 			// Relevance proof from the repo's actual source: strongest → weakest.
 			name: "stellarProof",
 			type: "select",
-			options: ["cargo-sdk", "contract-macros", "js-sdk", "stellar-toml", "weak-mention", "none"],
+			options: ["cargo-sdk", "contract-macros", "js-sdk", "lang-sdk", "stellar-toml", "weak-mention", "none"],
 			index: true,
 			admin: { position: "sidebar", description: "Code-verified Stellar relevance (cargo-sdk strongest)" },
 		},
