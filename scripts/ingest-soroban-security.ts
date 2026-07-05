@@ -1,20 +1,20 @@
 /**
- * Ingest Soroban audit reports from sorobansecurity.com into the
+ * Ingest Soroban audit reports from stellarsecurityportal.com into the
  * ResearchDocs corpus. This is the only Stellar-wide repository of
  * security findings — it aggregates audits from Certora, OtterSec,
  * Halborn, OpenZeppelin, Code4rena, Cantina, Runtime Verification,
  * Veridise, CoinFabrik, Coinspect, Hacken, Quarkslab.
  *
  * API surface (confirmed manually, no docs published):
- *   GET https://sorobansecurity.com/api/v1/reports/        → list
- *   GET https://sorobansecurity.com/api/v1/reports/{id}    → detail
+ *   GET https://stellarsecurityportal.com/api/v1/reports/        → list
+ *   GET https://stellarsecurityportal.com/api/v1/reports/{id}    → detail
  *
  * The `mdFile` body field comes from PDF text extraction and is
  * mangled — letters are spaced apart, headings split letter-by-letter
  * across lines. We run `reassembleSpacedText()` to recover it before
  * chunking.
  *
- * Citations resolve to https://sorobansecurity.com/report/{id}.
+ * Citations resolve to https://stellarsecurityportal.com/report/{id}.
  *
  * Usage:
  *   pnpm exec tsx scripts/ingest-soroban-security.ts             # dry run
@@ -39,8 +39,8 @@ const execute = args.includes("--execute");
 const limitFlag = args.find((a) => a.startsWith("--limit="));
 const LIMIT = limitFlag ? parseInt(limitFlag.split("=")[1], 10) : Infinity;
 
-const API_BASE = "https://sorobansecurity.com/api/v1/reports";
-const REPORT_URL = (id: number) => `https://sorobansecurity.com/report/${id}`;
+const API_BASE = "https://stellarsecurityportal.com/api/v1/reports";
+const REPORT_URL = (id: number) => `https://stellarsecurityportal.com/report/${id}`;
 
 interface ReportListItem {
 	id: number;
@@ -70,7 +70,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 /**
- * The PDF extractor that sorobansecurity.com runs on uploaded reports
+ * The PDF extractor that stellarsecurityportal.com runs on uploaded reports
  * inserts spaces between every glyph and breaks headings into one-letter
  * lines (because the source PDFs use custom letter-spacing). Real word
  * boundaries are double-spaces, intra-word spacing is single. Sample
@@ -280,7 +280,7 @@ function promoteAuditHeadings(md: string): string {
 async function run() {
 	const startedAt = Date.now();
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
-	console.log("source: sorobansecurity.com\n");
+	console.log("source: stellarsecurityportal.com\n");
 
 	console.log("Fetching report list…");
 	const list = await fetchJson<ReportListItem[]>(`${API_BASE}/`);
