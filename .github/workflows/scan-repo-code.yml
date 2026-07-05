@@ -22,6 +22,10 @@ on:
         description: "primaryLanguage filter (e.g. Rust) or 'all'"
         type: string
         default: "Rust"
+      verify:
+        description: "Read-back mode: print persisted signals for scanned repos (no GitHub calls, no writes)"
+        type: boolean
+        default: false
 
 permissions: { contents: read }
 
@@ -40,4 +44,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }} ${{ inputs.verify && '--verify' || '' }}
