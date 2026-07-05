@@ -38,9 +38,15 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { generateSlug } from "@/lib/utils/normalize";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 
-export const dynamic = "force-static";
-export const revalidate = 3600;
+// sls-004: this route is force-DYNAMIC, not force-static. GET stays CDN-cached
+// via the explicit Cache-Control headers on jsonResponse (s-maxage +
+// stale-while-revalidate), so there's no perf cost — but dropping force-static
+// is what lets us attach real JSON-405 method guards below (the force-static +
+// method-handler COMBINATION is what caused the #276/#280 stable-500; the normal
+// dynamic-route + guards pattern used by the other 22 routes is safe).
+export const dynamic = "force-dynamic";
 
 /**
  * Map of slug → inlined SKILL.md text for our own skill files. Lets the
@@ -232,10 +238,11 @@ function humanize(slug: string): string {
 		.join(" ");
 }
 
-// NOTE (sls-004 regression fix): this route is `dynamic = "force-static"` with a
-// dynamic [name] segment. Next.js cannot reconcile non-GET method handlers with a
-// force-static DYNAMIC route — adding POST/PUT/DELETE/PATCH here made EVERY request
-// (including 404s) render the error boundary → stable HTTP 500. So the JSON-405
-// method-guards (added across the other 22 routes) are intentionally OMITTED here;
-// non-GET falls back to Next's default 405. Do not re-add them without dropping
-// force-static.
+// JSON-405 method guards (sls-004): now that the route is force-dynamic (not
+// force-static), the standard guards used by the other routes are safe — a
+// wrong-method request returns machine-parseable JSON, not Vercel's plaintext
+// FUNCTION_INVOCATION_FAILED 405.
+export const POST = methodNotAllowed(["GET"]);
+export const PUT = methodNotAllowed(["GET"]);
+export const DELETE = methodNotAllowed(["GET"]);
+export const PATCH = methodNotAllowed(["GET"]);
