@@ -549,6 +549,88 @@ export interface Repo {
   repoScoreLabel?: string | null;
   lastEnrichedAt?: string | null;
   enrichError?: string | null;
+  /**
+   * Code-verified Stellar relevance (cargo-sdk strongest)
+   */
+  stellarProof?: ('cargo-sdk' | 'contract-macros' | 'js-sdk' | 'stellar-toml' | 'weak-mention' | 'none') | null;
+  /**
+   * 0-1 Soroban code depth (feeds repoGrade)
+   */
+  codeDepth?: number | null;
+  /**
+   * Raw soroban-sdk version requirement (sourced fact)
+   */
+  sorobanSdkVersion?: string | null;
+  /**
+   * soroban-sdk status vs latest protocol (unknown never lowers tier)
+   */
+  versionStatus?: ('current' | 'supported' | 'deprecated' | 'unknown') | null;
+  contractMacroCount?: number | null;
+  /**
+   * Cargo cdylib — real deployable contract
+   */
+  isDeployableContract?: boolean | null;
+  hasAuthPatterns?: boolean | null;
+  hasStoragePatterns?: boolean | null;
+  hasEvents?: boolean | null;
+  usesNoStd?: boolean | null;
+  /**
+   * Matched @stellar/* JS dependency
+   */
+  stellarJsDep?: string | null;
+  /**
+   * Farm signal count (>=2 = archive; real code forces 0)
+   */
+  farmScore?: number | null;
+  /**
+   * Farm reasons — so explain can say WHY it declined
+   */
+  farmFlags?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Alive but no code-proof — soft-excluded, never archived
+   */
+  unverifiedStellar?: boolean | null;
+  /**
+   * CTL scan state — pending/error/incomplete are never demoted
+   */
+  codeScanState?: ('pending' | 'scanned' | 'error' | 'incomplete') | null;
+  codeScanError?: string | null;
+  /**
+   * e.g. submodule-contracts, tree-incomplete, blob-unreadable
+   */
+  codeScanNote?: string | null;
+  codeScannedAt?: string | null;
+  /**
+   * Tier before the last CTL change (for rollback)
+   */
+  priorTier?: string | null;
+  /**
+   * Why the tier changed (enum reasons)
+   */
+  tierReason?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  tierChangedAt?: string | null;
+  /**
+   * Scan run that set the signals — rollback key
+   */
+  tierRunId?: string | null;
+  priorUnverified?: boolean | null;
+  unverifiedRunId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1784,6 +1866,30 @@ export interface ReposSelect<T extends boolean = true> {
   repoScoreLabel?: T;
   lastEnrichedAt?: T;
   enrichError?: T;
+  stellarProof?: T;
+  codeDepth?: T;
+  sorobanSdkVersion?: T;
+  versionStatus?: T;
+  contractMacroCount?: T;
+  isDeployableContract?: T;
+  hasAuthPatterns?: T;
+  hasStoragePatterns?: T;
+  hasEvents?: T;
+  usesNoStd?: T;
+  stellarJsDep?: T;
+  farmScore?: T;
+  farmFlags?: T;
+  unverifiedStellar?: T;
+  codeScanState?: T;
+  codeScanError?: T;
+  codeScanNote?: T;
+  codeScannedAt?: T;
+  priorTier?: T;
+  tierReason?: T;
+  tierChangedAt?: T;
+  tierRunId?: T;
+  priorUnverified?: T;
+  unverifiedRunId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

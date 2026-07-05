@@ -43,5 +43,58 @@ export const Repos: CollectionConfig = {
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },
 		{ name: "lastEnrichedAt", type: "date", admin: { position: "sidebar" } },
 		{ name: "enrichError", type: "text", admin: { position: "sidebar" } },
+
+		// ── Code-Truth Ledger (CTL) — code-signal + audit fields.
+		// DECLARED here so the scanner (scripts/scan/*) can write them and
+		// repoGrade can read codeDepth. All default null/pending; NOTHING writes
+		// these until the guarded scanner ships — additive, ~compact, ~300B/doc.
+		{
+			// Relevance proof from the repo's actual source: strongest → weakest.
+			name: "stellarProof",
+			type: "select",
+			options: ["cargo-sdk", "contract-macros", "js-sdk", "stellar-toml", "weak-mention", "none"],
+			index: true,
+			admin: { position: "sidebar", description: "Code-verified Stellar relevance (cargo-sdk strongest)" },
+		},
+		{ name: "codeDepth", type: "number", admin: { position: "sidebar", description: "0-1 Soroban code depth (feeds repoGrade)" } },
+		{ name: "sorobanSdkVersion", type: "text", admin: { position: "sidebar", description: "Raw soroban-sdk version requirement (sourced fact)" } },
+		{
+			name: "versionStatus",
+			type: "select",
+			options: ["current", "supported", "deprecated", "unknown"],
+			admin: { position: "sidebar", description: "soroban-sdk status vs latest protocol (unknown never lowers tier)" },
+		},
+		{ name: "contractMacroCount", type: "number", admin: { position: "sidebar" } },
+		{ name: "isDeployableContract", type: "checkbox", admin: { position: "sidebar", description: "Cargo cdylib — real deployable contract" } },
+		{ name: "hasAuthPatterns", type: "checkbox", admin: { position: "sidebar" } },
+		{ name: "hasStoragePatterns", type: "checkbox", admin: { position: "sidebar" } },
+		{ name: "hasEvents", type: "checkbox", admin: { position: "sidebar" } },
+		{ name: "usesNoStd", type: "checkbox", admin: { position: "sidebar" } },
+		{ name: "stellarJsDep", type: "text", admin: { position: "sidebar", description: "Matched @stellar/* JS dependency" } },
+		// Anti-farm (additive; real code caps to 0).
+		{ name: "farmScore", type: "number", admin: { position: "sidebar", description: "Farm signal count (>=2 = archive; real code forces 0)" } },
+		{ name: "farmFlags", type: "json", admin: { position: "sidebar", description: "Farm reasons — so explain can say WHY it declined" } },
+		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from
+		// inline codeReferences/explain routing but NEVER archived (reversible).
+		{ name: "unverifiedStellar", type: "checkbox", index: true, admin: { position: "sidebar", description: "Alive but no code-proof — soft-excluded, never archived" } },
+		// Scan lifecycle. pending = never successfully scanned (never demoted).
+		{
+			name: "codeScanState",
+			type: "select",
+			options: ["pending", "scanned", "error", "incomplete"],
+			defaultValue: "pending",
+			index: true,
+			admin: { position: "sidebar", description: "CTL scan state — pending/error/incomplete are never demoted" },
+		},
+		{ name: "codeScanError", type: "text", admin: { position: "sidebar" } },
+		{ name: "codeScanNote", type: "text", admin: { position: "sidebar", description: "e.g. submodule-contracts, tree-incomplete, blob-unreadable" } },
+		{ name: "codeScannedAt", type: "date", admin: { position: "sidebar" } },
+		// ── Audit trail — every code-signal change is explainable + rollbackable.
+		{ name: "priorTier", type: "text", admin: { position: "sidebar", description: "Tier before the last CTL change (for rollback)" } },
+		{ name: "tierReason", type: "json", admin: { position: "sidebar", description: "Why the tier changed (enum reasons)" } },
+		{ name: "tierChangedAt", type: "date", admin: { position: "sidebar" } },
+		{ name: "tierRunId", type: "text", index: true, admin: { position: "sidebar", description: "Scan run that set the signals — rollback key" } },
+		{ name: "priorUnverified", type: "checkbox", admin: { position: "sidebar" } },
+		{ name: "unverifiedRunId", type: "text", admin: { position: "sidebar" } },
 	],
 };
