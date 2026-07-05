@@ -154,6 +154,26 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 		expect(detectStellarProof(s).proof).toBe("cargo-sdk");
 	});
 
+	it("Rust infra: package IS a stellar crate (rs-stellar-xdr) → lang-sdk (was wrongly none)", () => {
+		const s = scanOf({ "Cargo.toml": '[package]\nname = "stellar-xdr"\nversion = "23.0.0"\n' });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Rust infra: dep on stellar-baselib (rs-soroban-client) → lang-sdk", () => {
+		const s = scanOf({ "Cargo.toml": '[package]\nname = "soroban-client"\n[dependencies]\nstellar-baselib = "0.5.8"\n' });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Rust infra: [dependencies.stellar-xdr] table (rs-ingest) → lang-sdk", () => {
+		const s = scanOf({ "Cargo.toml": '[package]\nname = "ingest"\n[dependencies.stellar-xdr]\nversion = "20.0.0"\n' });
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("NEGATIVE: plain Rust crate with no stellar dep → none (noir/calimero class)", () => {
+		const s = scanOf({ "Cargo.toml": '[package]\nname = "noir-compiler"\n[dependencies]\nserde = "1"\ntokio = "1"\n' });
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	it("NEGATIVE: Package.swift with NO stellar dep → none (no over-match)", () => {
 		const s = scanOf({ "Package.swift": 'dependencies: [\n  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),\n]' });
 		expect(detectStellarProof(s).proof).toBe("none");

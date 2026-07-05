@@ -123,6 +123,17 @@ const JS_SDK_DEPS = [
 // Verified against real manifests before adding (Package.swift → stellar-ios-mac-sdk,
 // build.gradle.kts → network.lightsail:stellar-sdk, go.mod → github.com/stellar/…).
 const LANG_SDK_MARKERS: { lang: string; file: (name: string) => boolean; re: RegExp }[] = [
+	// Rust STELLAR INFRA (no soroban-sdk, so it never reaches cargo-sdk): the
+	// XDR/strkey/baselib/env/client crates and packages that ARE those crates
+	// (stellar/rs-stellar-xdr, rs-stellar-archivist, rs-soroban-client,
+	// xycloo/rs-ingest). Without this, canonical stellar-org tooling read as
+	// proof=none — false "confidently not Stellar" on core infrastructure.
+	// Verified against the real Cargo.tomls before adding.
+	{
+		lang: "rust-infra",
+		file: (n) => n === "cargo.toml",
+		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
+	},
 	{ lang: "swift", file: (n) => n === "package.swift", re: /stellar[-_]?(ios|mac|wallet|swift|base)[-_]?(sdk|mac)?|stellarsdk|\.package\(\s*url:\s*["'][^"']*\/stellar/i },
 	{ lang: "swift", file: (n) => n === "podfile", re: /pod\s+["'][^"']*stellar|stellar-ios-mac-sdk/i },
 	{ lang: "kotlin", file: (n) => n === "build.gradle" || n === "build.gradle.kts", re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i },
