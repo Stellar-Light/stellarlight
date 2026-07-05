@@ -50,7 +50,49 @@ if (!GH) {
 }
 const gh = createGh(GH);
 
+// --verify: read-only truth-check surface. Prints the PERSISTED signals for
+// already-scanned repos so they can be diffed against (a) the repos' actual
+// code (fact truth) and (b) a fresh re-compute (determinism). No GitHub calls,
+// no writes.
+async function verifyMain() {
+	const payload = await getPayload({ config: await configPromise });
+	const res = await payload.find({
+		collection: "repos",
+		where: { codeScanState: { equals: "scanned" } },
+		sort: "-codeScannedAt",
+		limit: LIMIT,
+		depth: 0,
+	});
+	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+	const docs = res.docs as any[];
+	console.log(`verify — ${res.totalDocs} scanned docs · showing ${docs.length} (read-only)\n`);
+	for (const d of docs) {
+		console.log(
+			JSON.stringify({
+				fullName: d.fullName,
+				stellarProof: d.stellarProof,
+				codeDepth: d.codeDepth,
+				sorobanSdkVersion: d.sorobanSdkVersion,
+				versionStatus: d.versionStatus,
+				contractMacroCount: d.contractMacroCount,
+				isDeployableContract: d.isDeployableContract,
+				hasAuthPatterns: d.hasAuthPatterns,
+				hasStoragePatterns: d.hasStoragePatterns,
+				hasEvents: d.hasEvents,
+				usesNoStd: d.usesNoStd,
+				stellarJsDep: d.stellarJsDep,
+				farmScore: d.farmScore,
+				codeScannedAt: d.codeScannedAt,
+				repoScore: d.repoScore,
+				repoScoreLabel: d.repoScoreLabel,
+			}),
+		);
+	}
+	process.exit(0);
+}
+
 async function main() {
+	if (process.argv.includes("--verify")) return verifyMain();
 	const payload = await getPayload({ config: await configPromise });
 	console.log(
 		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
