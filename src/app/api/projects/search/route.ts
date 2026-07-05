@@ -328,6 +328,16 @@ function rankBoost(p: ProjectRow): number {
 	);
 }
 
+// Liveness tier. A defunct project must never LEAD a topic/keyword query over a
+// live alternative — someone asking "what CDPs are on Stellar?" wants things to
+// use first, with a shut-down project (e.g. OrbitCDP) available below as history,
+// not at #1. This sorts ABOVE the keyword text score (a strong text match alone
+// can't float a dead project to the top), but BELOW an exact name/slug match, so
+// a direct lookup like q="OrbitCDP" still returns it. Inactive→0, active→1.
+function isActive(p: ProjectRow): number {
+	return p.status === "Inactive" ? 0 : 1;
+}
+
 // Surface the project's OWN canonical homes (website / GitHub / docs / socials)
 // so a consumer can cite the primary source — the project — not us or any
 // directory. These are facts about the project, not anyone's proprietary data;
@@ -650,6 +660,7 @@ export async function GET(req: NextRequest) {
 				filtered.sort(
 					(a, b) =>
 						exactName(b.id) - exactName(a.id) ||
+						isActive(b) - isActive(a) ||
 						b.score - a.score ||
 						Number(typeMatch(b, intentTypes)) -
 							Number(typeMatch(a, intentTypes)) ||
