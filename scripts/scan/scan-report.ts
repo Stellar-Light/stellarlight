@@ -140,7 +140,7 @@ async function scoreRepo(s: SampleRepo): Promise<Row | null> {
 	const isProt = s.scfAwarded || !!s.projectSlug || s.prominence > 0;
 	const tierRes = codeProofTier({
 		proof: r.proof,
-		outcome: r.scan.treeComplete ? "ok" : "incomplete",
+		outcome: r.outcome,
 		farmScore: farm.score,
 		codeDepth,
 		isArchived: r.meta.isArchived,
@@ -152,7 +152,7 @@ async function scoreRepo(s: SampleRepo): Promise<Row | null> {
 	return {
 		full: s.fullName,
 		proof: r.proof,
-		outcome: r.scan.treeComplete ? "ok" : "incomplete",
+		outcome: r.outcome,
 		codeDepth,
 		farmScore: farm.score,
 		tier: tierRes?.tier ?? "—",
