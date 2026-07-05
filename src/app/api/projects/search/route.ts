@@ -794,6 +794,19 @@ export async function GET(req: NextRequest) {
 	// the query-scoped codeReferences above. Batched (one query over all returned
 	// slugs) + bounded, best-effort.
 	const baseProjects = [...scored, ...semanticAdds];
+	// Final liveness float across the FULL assembled list (keyword + semantic
+	// augmentation). A dead project that was the sole strict keyword match must
+	// not sit above the live semantic neighbours appended after it — e.g.
+	// q="cdp stablecoin lending" put defunct OrbitCDP above live lantern/k2-lend.
+	// Stable, so it only lifts active rows above Inactive ones and preserves the
+	// careful within-group order. An EXACT name/slug match still wins first, so
+	// q="OrbitCDP" keeps returning it even though it's Inactive.
+	if (q) {
+		const exact = (p: { name: string; slug: string }) =>
+			nameMatchScore(p.name ?? "", p.slug ?? "", q) === 3 ? 1 : 0;
+		const act = (p: { status: string }) => (p.status === "Inactive" ? 0 : 1);
+		baseProjects.sort((a, b) => exact(b) - exact(a) || act(b) - act(a));
+	}
 	let projectsOut: Array<
 		(typeof baseProjects)[number] & { repos: ProjectRepoRef[]; lastActivityAt: string | null }
 	> = baseProjects.map((p) => ({ ...p, repos: [], lastActivityAt: null }));
