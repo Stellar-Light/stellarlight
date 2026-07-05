@@ -29,6 +29,12 @@ export interface RepoGradeInput {
 	// can lift a 0-star hackathon repo to a strong reference (and sink a weak one
 	// regardless of how fresh/linked it is). Ungated by own-merit on purpose.
 	judgeScore?: number | null;
+	// Code-Truth Ledger depth (0-1) from analyzing the repo's actual Soroban
+	// source (soroban-sdk dep, contract macros, auth/storage, deployable cdylib).
+	// Like judgeScore, it's evidence from the CODE, not heuristics — a
+	// code-verified 0-star contract earns a strong reference on its own merit.
+	// Ungated by own-merit on purpose (the code IS the merit).
+	codeDepth?: number | null;
 }
 
 export interface RepoGrade {
@@ -102,6 +108,17 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		const j = Math.max(0, Math.min(1, input.judgeScore));
 		const judgeDriven = 0.05 + 0.8 * j; // 0 → 0.05, 1 → 0.85
 		composite = Math.max(composite, judgeDriven);
+	}
+
+	// Code depth trumps heuristics too — parallel to judgeScore. A code-verified
+	// deployable contract (codeDepth ~1.0) becomes a strong reference even at 0
+	// stars, fixing star-dominance for the long tail of real-but-unstarred repos.
+	// Take the better of heuristic vs code-driven (a repo that's both deep AND
+	// popular can still climb past code-only).
+	if (typeof input.codeDepth === "number" && Number.isFinite(input.codeDepth)) {
+		const c = Math.max(0, Math.min(1, input.codeDepth));
+		const codeDriven = 0.1 + 0.7 * c; // 0 → 0.1, 1 → 0.8
+		composite = Math.max(composite, codeDriven);
 	}
 
 	if (input.isArchived) composite *= 0.5; // archived = weaker reference
