@@ -981,6 +981,15 @@ export async function GET(req: NextRequest) {
 				// the page with vector-search matches the literal filter missed
 				// (each such row is tagged `via: "semantic"`).
 				semantic: usedSemantic,
+				// sls-011: the SCF fields on rows (scfTotalAwardedUSD, scfAwardedRounds,
+				// scfAmountStatus) carry their counting basis HERE, where the numbers
+				// appear — not only on /api/analyze. Totals are in-house reconstructions
+				// (SCF doesn't publish all per-award amounts; some are XLM/undisclosed —
+				// see scfAmountStatus), so they can legitimately disagree with SDF's own
+				// submission-based counters. scfAwardedRounds lists the rounds a project
+				// won; per-round amounts are unpublished. Full breakdown at /api/analyze?dimension=funding.
+				scfCountBasis:
+					"scfTotalAwardedUSD is an in-house reconstruction (SCF doesn't publish all per-award amounts — some XLM-denominated/undisclosed, see scfAmountStatus); it can legitimately differ from SDF's submission-based counters. scfAwardedRounds = rounds this project won (per-round amounts unpublished). Full per-round breakdown: /api/analyze?dimension=funding.",
 				// When BOTH keyword and semantic came back empty, point the agent
 				// at thesis-level retrieval. Project search can't answer "is x402
 				// possible on Stellar?" — /api/research can.

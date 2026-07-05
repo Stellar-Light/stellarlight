@@ -229,9 +229,9 @@ export async function GET(req: NextRequest) {
 			// re-indexing from methodology change instead of watching the
 			// headline swing unexplained.
 			computedAt: new Date().toISOString(),
-			methodologyVersion: "funding-v2 (2026-07-03)",
+			methodologyVersion: "funding-v2 (2026-07-05)",
 			countBasis:
-				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished.",
+				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects — never add round counts to get a project total.",
 			postHackathonStatusFunnel: {
 				scope: `hackathon-linked projects only (${hackathonProjects.length} of ${projects.length} active)`,
 				...funnel,

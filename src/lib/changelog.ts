@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-05",
+		surfaces: ["api"],
+		version: "openapi 1.4.5",
+		type: "fixed",
+		summary:
+			"Data-quality fixes from an adversarial recheck of the sls-* feedback items: hackathon winner ranking (i18n placement parsing), name-search over-fire, blog chunk hygiene, funding count basis, and JSON errors on the skill-detail route.",
+		detail:
+			"sls-005: placementRank now parses Spanish ordinals + emoji medals and reads the award title, so LatAm/emoji hackathons rank correctly and genuine flat-pool events honestly report winnersRanked=false (was wrong in both directions). sls-009: only an EXACT name/slug match dominates authority now — prefix/whole-word matches drop to a late tiebreaker, so a generic query like 'swap' no longer ranks a 0-prominence 'SwapX' above flagship Soroswap. sls-006: SDF-blog nav/footer boilerplate is stripped at ingest and metadata/related-post stubs are dropped, so retrieval returns article prose not chrome (re-crawl pending). sls-013: countBasis now states byRound[].count is per-round membership (non-additive). sls-011: /api/projects/search meta carries scfCountBasis where the SCF numbers appear. sls-004: /api/skills/{slug} is force-dynamic (GET still CDN-cached via headers) so non-GET returns JSON 405, not a plaintext Vercel error. Schema-only/additive + behavior fixes — no operation-description changes (routing-neutral).",
+	},
+	{
 		date: "2026-07-04",
 		surfaces: ["api"],
 		version: "openapi 1.4.4",

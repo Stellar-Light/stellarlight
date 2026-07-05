@@ -68,12 +68,45 @@ export function sha256(s: string): string {
  * enough sentence text to clear the bar. Used at ingest (addChunk) AND by
  * the prune-low-value-chunks maintenance script, so the rule is one place.
  */
+/**
+ * Strip the SDF site nav/footer boilerplate the HTML scraper appends to chunks
+ * ("…ABOUT US Team Careers … Brand Policy Privacy Policy Terms of Service © 2026
+ * SDF", "Dev Docs Menu", "on this page"). Left in, it (a) dilutes the embedding
+ * of every real chunk and (b) forms footer-only chunks that rank #1 on brand
+ * queries with zero article content (sls-006 recheck). Applied at ingest so
+ * stored chunks are clean, and inside isLowValueChunk so a footer-only chunk
+ * collapses to empty → dropped.
+ */
+export function stripBoilerplate(content: string): string {
+	let s = content;
+	// Footer/nav block: from its start marker through the copyright line.
+	s = s.replace(
+		/\b(?:ABOUT\s*US|Brand\s*Policy|Privacy\s*Policy|Terms\s*of\s*Service)\b[\s\S]*?©\s*\d{4}\s*(?:SDF|Stellar Development Foundation)?\.?/gi,
+		" ",
+	);
+	// Bare trailing copyright not caught above.
+	s = s.replace(/©\s*\d{4}\s*(?:SDF|Stellar Development Foundation)\b[\s\S]*$/gi, " ");
+	s = s.replace(/\bDev Docs Menu\b/gi, " ").replace(/\bon this page\b/gi, " ");
+	return s.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 export function isLowValueChunk(content: string): boolean {
-	const raw = content.trim();
+	// Strip boilerplate FIRST — a footer-only chunk collapses to empty here.
+	const raw = stripBoilerplate(content).trim();
 	if (!raw) return true;
 
 	// Tag-index / archive listing pages — pure navigation, never answerable.
 	if (/\b\d+\s+posts?\s+tagged\b/i.test(raw)) return true;
+	// Related-posts listing block ("More posts…" — a list of OTHER post titles).
+	if (/^more posts\b/i.test(raw)) return true;
+
+	// Per-article metadata/header stub: title + "Author / Publishing date /
+	// Quarterly report / N min read" with NO real prose. Require a genuine
+	// sentence; a bare header carries none. Gated on a metadata marker so real
+	// short sections / code / bullets (which lack period-sentences too) are kept.
+	const sentences = (raw.match(/[^.!?\n]{25,}[.!?]/g) ?? []).length;
+	const metaStub = /\b(publishing date|quarterly report|min read|dev docs menu)\b/i.test(raw);
+	if (metaStub && sentences === 0) return true;
 
 	// Docusaurus auto-generated index "card" link teasers (📄 marker). These
 	// are navigation to a sub-page (which we ingest separately), not content —
@@ -140,9 +173,10 @@ export function chunkMarkdown(opts: {
 	let chunkIndex = 0;
 
 	function addChunk(section: string | null, content: string) {
-		const trimmed = content.trim();
+		// Strip the nav/footer boilerplate so it never dilutes the stored chunk.
+		const trimmed = stripBoilerplate(content).trim();
 		if (!trimmed) return;
-		// Drop nav/breadcrumb/date-only chunks before they ever get embedded.
+		// Drop nav/breadcrumb/date-only/metadata-stub chunks before they embed.
 		if (isLowValueChunk(trimmed)) return;
 		chunks.push({
 			parentDocId,
