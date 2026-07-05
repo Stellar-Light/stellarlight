@@ -287,6 +287,16 @@ export interface Project {
    * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
    */
   canonicalSlug?: string | null;
+  lifecycle?: {
+    /**
+     * True if this project ever reached Live/production (distinguishes a real product that later died from one abandoned in development). Lets consumers say 'used to be live'.
+     */
+    wasLive?: boolean | null;
+    /**
+     * Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents — keep it factual and dated.
+     */
+    note?: string | null;
+  };
   links?: {
     website?: string | null;
     github?: string | null;
@@ -1673,6 +1683,12 @@ export interface ProjectsSelect<T extends boolean = true> {
   types?: T;
   status?: T;
   canonicalSlug?: T;
+  lifecycle?:
+    | T
+    | {
+        wasLive?: T;
+        note?: T;
+      };
   links?:
     | T
     | {

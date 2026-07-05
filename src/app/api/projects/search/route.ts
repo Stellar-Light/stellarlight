@@ -63,6 +63,7 @@ async function semanticProjectRows(
 				shortDescription: 1,
 				status: 1,
 				canonicalSlug: 1,
+				lifecycle: 1,
 				logo: 1,
 				scf: 1,
 				links: 1,
@@ -97,6 +98,7 @@ async function semanticProjectRows(
 			shortDescription: p.shortDescription ?? null,
 			status: p.status,
 			canonicalSlug: p.canonicalSlug ?? null,
+			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
@@ -143,6 +145,7 @@ interface ProjectRow {
 	shortDescription: string | null;
 	status: string;
 	canonicalSlug: string | null;
+	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
 	scfTotalAwardedUSD: number | null;
@@ -343,6 +346,21 @@ function pickLinks(
 	return Object.keys(out).length ? out : undefined;
 }
 
+// Historical-archive block. Only surfaced when it carries real history, so live
+// projects stay clean (null) and a consumer that sees `lifecycle` knows the
+// record is a defunct/changed one worth narrating ("used to be live").
+function pickLifecycle(
+	// biome-ignore lint/suspicious/noExplicitAny: payload lifecycle group shape
+	lc: any,
+): { wasLive: boolean; note: string | null } | null {
+	if (!lc || typeof lc !== "object") return null;
+	const wasLive = lc.wasLive === true;
+	const note =
+		typeof lc.note === "string" && lc.note.trim().length > 0 ? lc.note : null;
+	if (!wasLive && !note) return null;
+	return { wasLive, note };
+}
+
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
 	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
@@ -498,6 +516,7 @@ export async function GET(req: NextRequest) {
 					shortDescription?: string;
 					status: string;
 					canonicalSlug?: string | null;
+					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
 					scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
 					hackathon?:
@@ -553,6 +572,7 @@ export async function GET(req: NextRequest) {
 					shortDescription: p.shortDescription ?? null,
 					status: p.status,
 					canonicalSlug: p.canonicalSlug ?? null,
+					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
