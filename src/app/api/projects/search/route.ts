@@ -62,6 +62,7 @@ async function semanticProjectRows(
 				category: 1,
 				shortDescription: 1,
 				status: 1,
+				canonicalSlug: 1,
 				logo: 1,
 				scf: 1,
 				links: 1,
@@ -95,6 +96,7 @@ async function semanticProjectRows(
 			category: p.category,
 			shortDescription: p.shortDescription ?? null,
 			status: p.status,
+			canonicalSlug: p.canonicalSlug ?? null,
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
@@ -140,6 +142,7 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	canonicalSlug: string | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
 	scfTotalAwardedUSD: number | null;
@@ -494,6 +497,7 @@ export async function GET(req: NextRequest) {
 					category: string;
 					shortDescription?: string;
 					status: string;
+					canonicalSlug?: string | null;
 					logo?: { url?: string; filename?: string } | string | null;
 					scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
 					hackathon?:
@@ -548,6 +552,7 @@ export async function GET(req: NextRequest) {
 					category: p.category,
 					shortDescription: p.shortDescription ?? null,
 					status: p.status,
+					canonicalSlug: p.canonicalSlug ?? null,
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,

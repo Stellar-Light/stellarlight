@@ -283,6 +283,10 @@ export interface Project {
    * Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).
    */
   status: 'Draft' | 'Development' | 'Pre-Release' | 'Live' | 'Inactive';
+  /**
+   * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
+   */
+  canonicalSlug?: string | null;
   links?: {
     website?: string | null;
     github?: string | null;
@@ -1668,6 +1672,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   category?: T;
   types?: T;
   status?: T;
+  canonicalSlug?: T;
   links?:
     | T
     | {

@@ -112,6 +112,26 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// Dedupe / lineage pointer (sls-008). When this record is a duplicate
+			// or former name of another project — same team, same site, split by a
+			// naming artifact (e.g. orbit-finance → orbitcdp, both Zenith Protocols)
+			// — set this to the CANONICAL project's slug. Consumers resolve any
+			// record to its canonical form, so a name lookup that lands on the stale
+			// row can follow the pointer to the funded/active one instead of
+			// returning a contradictory answer. Additive and non-destructive: it
+			// never deletes or hides this record. Pair with status: Inactive to also
+			// suppress the duplicate from active listings. Leave empty for normal
+			// standalone projects.
+			name: "canonicalSlug",
+			type: "text",
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.",
+			},
+		},
+		{
 			name: "links",
 			type: "group",
 			fields: [
