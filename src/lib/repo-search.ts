@@ -236,6 +236,13 @@ export async function searchRepos(
 				termsForToken(t).flatMap((v) => [
 					{ fullName: { like: v } },
 					{ description: { like: v } },
+					// topics too — the in-memory scorer weights a topic hit like a
+					// name hit (5), but a repo whose ONLY match is a topic never
+					// became a candidate (templar-protocol/contracts topic
+					// "defi-lending" was invisible to q="lending"). Mongo regex on an
+					// array field matches per-element; verified against live Payload
+					// REST before adding.
+					{ topics: { like: v } },
 				]),
 			);
 		}
