@@ -25,7 +25,14 @@ const EXECUTE = process.argv.includes("--execute");
 // ── Owner-confirmed lists — edit these, nothing else ─────────────────────────
 // Slugs of partners the OWNER confirmed are dead/defunct (e.g. "ntokens" once
 // confirmed). Empty until the owner signs off on the dry-run output.
-const OWNER_CONFIRMED_DEAD: string[] = [];
+const OWNER_CONFIRMED_DEAD: string[] = [
+	// own site is now a service-retirement notice (accounts closed, users moved
+	// to Boss Money) — the company itself confirms it's dead. Owner-confirmed 2026-07-06.
+	"anchor-elroy-app",
+	// built on Interledger / Open Payments, NOT Stellar — dropped from the
+	// Stellar anchor directory (not dead, just not Stellar). Owner-confirmed 2026-07-06.
+	"anchor-wallet-guru",
+];
 // Slugs of the pilot cohort (the select partners Anke tests with) —
 // owner-confirmed 2026-07-06: the original pilot trio.
 const PILOT_SLUGS: string[] = ["defindex", "etherfuse", "trustless-work"];
