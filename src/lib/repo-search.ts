@@ -232,8 +232,16 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	{ test: /\bxdr\b/, repos: ["stellar/stellar-xdr", "stellar/js-stellar-base", "stellar/rs-stellar-xdr", "stellar/stellar-core"] },
 	// core internals: consensus / ledger / catchup
 	{ test: /\bstellar[\s-]*core\b|\bconsensus\b|\bscp\b|\bvalidator\b|\bledger\s*close|\bcatchup\b|\bquorum\b/, repos: ["stellar/stellar-core"] },
-	// protocol specs: CAPs / SEPs / upgrades
-	{ test: /\bcap[\s-]?\d|\bsep[\s-]?\d|\bprotocol\s*(spec|upgrade|version)|\bcore\s*advancement/, repos: ["stellar/stellar-protocol"] },
+	// protocol specs: CAPs / SEPs / upgrades. Beyond explicit "cap-35" refs, catch
+	// natural spec questions — "which CAP introduced clawback", "which SEP does the
+	// SAC implement", "what CAP added X" — which route to stellar/stellar-protocol
+	// (DeepWiki answers these authoritatively from the CAP/SEP files: verified
+	// CAP-0035 clawback). Collision-safe: \bcaps?\b never matches "capital"/
+	// "capacity" (no word boundary after cap/caps inside those words).
+	{
+		test: /\bcap[\s-]?\d|\bsep[\s-]?\d|\bprotocol\s*(spec|upgrade|version)|\bcore\s*advancement|\b(which|what|when)\s+cap\b|\b(which|what)\s+sep\b|\bcap\s+(introduc|add|implement|defin|enabl|land)|\bsep\s+(introduc|add|implement|defin)/,
+		repos: ["stellar/stellar-protocol"],
+	},
 	// anchor / SEP infra
 	{ test: /\banchor\s*platform\b/, repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"] },
 	// quickstart / run a node
