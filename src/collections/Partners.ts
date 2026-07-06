@@ -1,4 +1,9 @@
 import type { CollectionConfig, Field, Where } from "payload";
+import {
+	isPlaceholderEmail,
+	mintPartnerLoginToken,
+	sendPartnerInviteEmail,
+} from "../lib/partner-invite";
 import { getAppUrl } from "../lib/utils/app-url";
 import { generateSlug } from "../lib/utils/normalize";
 
@@ -40,14 +45,8 @@ import { generateSlug } from "../lib/utils/normalize";
 const isAdmin = (user: { collection?: string } | null | undefined) =>
 	user?.collection === "users";
 
-/**
- * Seeded/curated partners carry a `curated+<slug>@stellarlight.xyz` placeholder
- * login (see scripts/enrich-partners-toml.ts). It's not a real inbox, so the
- * invite hook must never mail it — and swapping it for a real address is how an
- * admin approves a claim.
- */
-const isPlaceholderEmail = (email: string | null | undefined): boolean =>
-	!email || (email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
+// Placeholder-email + token/email plumbing lives in src/lib/partner-invite.ts,
+// shared with the /api/partners/magic-link sign-in route.
 
 /**
  * Partner-editable field. We mark the system-owned ones explicitly instead
@@ -130,7 +129,14 @@ export const Partners: CollectionConfig = {
 	},
 	admin: {
 		useAsTitle: "name",
-		defaultColumns: ["name", "partnerType", "status", "freshnessStatus", "lastPartnerUpdateAt"],
+		defaultColumns: [
+			"name",
+			"partnerType",
+			"status",
+			"pilot",
+			"freshnessStatus",
+			"lastPartnerUpdateAt",
+		],
 		group: "Partner Connector",
 		description:
 			"Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.",
@@ -177,7 +183,10 @@ export const Partners: CollectionConfig = {
 				// stamp it and reset the freshness clock. Admin/cron writes
 				// (signal refreshes, status flips) must NOT reset the clock —
 				// only the partner's own attention counts as freshness.
-				if (operation === "update" && req.user?.collection === "partner-accounts") {
+				if (
+					operation === "update" &&
+					req.user?.collection === "partner-accounts"
+				) {
 					data.lastPartnerUpdateAt = new Date().toISOString();
 					data.freshnessStatus = "fresh";
 				}
@@ -216,32 +225,28 @@ export const Partners: CollectionConfig = {
 
 					if (!justPublished && !emailBecameReal) return;
 					// Already invited on this exact email and nothing changed → skip.
-					if (justPublished && doc.invitedAt && doc.email === previousDoc?.email)
+					if (
+						justPublished &&
+						doc.invitedAt &&
+						doc.email === previousDoc?.email
+					)
 						return;
 
-					const token = await req.payload.forgotPassword({
-						collection: "partner-accounts",
-						data: { email: doc.email },
-						disableEmail: true, // we compose our own invite copy below
-						expiration: 7 * 24 * 60 * 60 * 1000, // 7d — default 1h is too short for an invite
+					const token = await mintPartnerLoginToken(
+						req.payload,
+						doc.email,
 						req,
-					});
-					const base = getAppUrl();
-					const url = `${base}/partners/reset-password?token=${token}`;
-					await req.payload.sendEmail({
-						to: doc.email,
-						subject: "You're live on Stellar Light — set your password",
-						text: [
-							`${doc.name} is now yours to manage in the Stellar Light partner directory.`,
-							"",
-							`Set your password to edit your profile: ${url}`,
-							"",
-							`Your profile: ${base}/partners/${doc.slug}`,
-							`Your dashboard: ${base}/partners/dashboard`,
-							"",
-							"This link expires in 7 days.",
-						].join("\n"),
-					});
+					);
+					if (!token) {
+						// forgotPassword fails silently when no account matches — a
+						// race here would otherwise mail a link with a null token.
+						req.payload.logger.warn(
+							{ partner: doc?.slug },
+							"partner invite: no token minted (account not found?)",
+						);
+						return;
+					}
+					await sendPartnerInviteEmail(req.payload, doc, token);
 					// Stamp invitedAt + clear the (now-actioned) claim request.
 					await req.payload.update({
 						collection: "partner-accounts",
@@ -272,7 +277,10 @@ export const Partners: CollectionConfig = {
 			type: "text",
 			unique: true,
 			index: true,
-			admin: { position: "sidebar", description: "Auto-generated from name if left empty." },
+			admin: {
+				position: "sidebar",
+				description: "Auto-generated from name if left empty.",
+			},
 		},
 		{
 			name: "partnerType",
@@ -291,7 +299,10 @@ export const Partners: CollectionConfig = {
 		{
 			name: "logoUrl",
 			type: "text",
-			admin: { description: "Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)" },
+			admin: {
+				description:
+					"Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)",
+			},
 		},
 		{ name: "websiteUrl", type: "text" },
 		{ name: "foundedYear", type: "number", min: 2000, max: 2100 },
@@ -379,12 +390,18 @@ export const Partners: CollectionConfig = {
 		{
 			name: "typicalEngagement",
 			type: "text",
-			admin: { description: "e.g. '2-6 week integration', 'self-serve API', 'retainer'" },
+			admin: {
+				description:
+					"e.g. '2-6 week integration', 'self-serve API', 'retainer'",
+			},
 		},
 		{
 			name: "leadTime",
 			type: "text",
-			admin: { description: "How fast can a new team start? e.g. 'same week', '2-4 weeks'" },
+			admin: {
+				description:
+					"How fast can a new team start? e.g. 'same week', '2-4 weeks'",
+			},
 		},
 		{
 			name: "pricingModel",
@@ -416,7 +433,10 @@ export const Partners: CollectionConfig = {
 		{
 			name: "contactChannel",
 			type: "text",
-			admin: { description: "Preferred channel — Discord handle, Telegram, lead form URL…" },
+			admin: {
+				description:
+					"Preferred channel — Discord handle, Telegram, lead form URL…",
+			},
 		},
 		{
 			name: "responseSla",
@@ -432,7 +452,10 @@ export const Partners: CollectionConfig = {
 				{
 					name: "projectSlug",
 					type: "text",
-					admin: { description: "Slug in the stellarlight projects directory, if listed." },
+					admin: {
+						description:
+							"Slug in the stellarlight projects directory, if listed.",
+					},
 				},
 			],
 		},
@@ -451,13 +474,19 @@ export const Partners: CollectionConfig = {
 				autoField({
 					name: "onchainActive",
 					type: "checkbox",
-					admin: { description: "Mainnet activity detected for their contracts/accounts." },
+					admin: {
+						description:
+							"Mainnet activity detected for their contracts/accounts.",
+					},
 				}),
 				autoField({ name: "onchainNote", type: "text" }),
 				autoField({
 					name: "scfInvolvement",
 					type: "text",
-					admin: { description: "e.g. 'SCF #38 awardee ($148k)' — read from our SCF data." },
+					admin: {
+						description:
+							"e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.",
+					},
 				}),
 				autoField({ name: "lastAutoVerifyAt", type: "date" }),
 			],
@@ -473,7 +502,10 @@ export const Partners: CollectionConfig = {
 				{ label: "Fresh (updated <90d)", value: "fresh" },
 				{ label: "Aging (90–180d, reminder sent)", value: "aging" },
 				{ label: "Stale (180–365d, public badge)", value: "stale" },
-				{ label: "Archived (>365d, hidden from AI matches)", value: "archived" },
+				{
+					label: "Archived (>365d, hidden from AI matches)",
+					value: "archived",
+				},
 			],
 		}),
 		{
@@ -481,11 +513,25 @@ export const Partners: CollectionConfig = {
 			// correct it manually if needed.
 			name: "lastPartnerUpdateAt",
 			type: "date",
-			admin: { description: "Last time the PARTNER touched their profile. Drives the freshness loop." },
+			admin: {
+				description:
+					"Last time the PARTNER touched their profile. Drives the freshness loop.",
+			},
 		},
 		autoField({ name: "nextReminderAt", type: "date" }),
 
 		// ── Listing pipeline (system-owned) ────────────────────────────────
+		autoField({
+			name: "pilot",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.",
+			},
+		}),
 		autoField({
 			name: "invitedAt",
 			type: "date",

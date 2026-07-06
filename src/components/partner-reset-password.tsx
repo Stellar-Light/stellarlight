@@ -7,17 +7,21 @@
  * route straight to the dashboard.
  */
 
-import { useState } from "react";
+import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const INPUT_CLS =
 	"w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all";
 
 export function PartnerResetPassword() {
 	const router = useRouter();
-	const token = useSearchParams().get("token") ?? "";
+	const params = useSearchParams();
+	const token = params.get("token") ?? "";
+	// mode=signin: the magic-link flow — same mechanics (Payload has no
+	// passwordless login op; setting a password IS the sign-in), softer copy.
+	const signin = params.get("mode") === "signin";
 	const [password, setPassword] = useState("");
 	const [confirm, setConfirm] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -70,10 +74,12 @@ export function PartnerResetPassword() {
 
 			<div className="mb-8">
 				<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-					Set your password
+					{signin ? "Sign in to your dashboard" : "Set your password"}
 				</h1>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Choose a password for your Stellar Light partner account.
+					{signin
+						? "Choose a password to finish signing in — next time you can use either it or an emailed link."
+						: "Choose a password for your Stellar Light partner account."}
 				</p>
 			</div>
 
@@ -94,7 +100,9 @@ export function PartnerResetPassword() {
 					<div className="rounded-2xl border border-border bg-card p-8 text-center">
 						<CheckCircle2 className="w-10 h-10 text-emerald-400/90 mx-auto mb-3" />
 						<p className="text-sm text-foreground">
-							Password set — taking you to your dashboard…
+							{signin
+								? "Signed in — taking you to your dashboard…"
+								: "Password set — taking you to your dashboard…"}
 						</p>
 					</div>
 				) : (
@@ -136,7 +144,7 @@ export function PartnerResetPassword() {
 							className="w-full h-11 rounded-xl bg-foreground text-background font-medium text-sm disabled:opacity-50 transition-opacity inline-flex items-center justify-center gap-2"
 						>
 							{submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-							{submitting ? "Setting…" : "Set password"}
+							{submitting ? "Signing in…" : signin ? "Sign in" : "Set password"}
 						</button>
 					</form>
 				)}

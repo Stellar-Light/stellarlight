@@ -24,9 +24,9 @@
  * cards, muted uppercase section headers, subtle borders.
  */
 
+import { ArrowLeft, CheckCircle2, Pencil, Send, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Sparkles, Send, Pencil, CheckCircle2 } from "lucide-react";
 
 const SECTORS = [
 	"defi",
@@ -178,10 +178,11 @@ export function PartnerPortal() {
 					</span>
 				</div>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Keep your profile current so builders — and their AI agents — find you.
-					Update it by chatting with the assistant, or edit the fields directly.
-					Facts marked <span className="text-foreground font-medium">verified</span>{" "}
-					are measured by Stellar Light and can&apos;t be edited.
+					Keep your profile current so builders — and their AI agents — find
+					you. Update it by chatting with the assistant, or edit the fields
+					directly. Facts marked{" "}
+					<span className="text-foreground font-medium">verified</span> are
+					measured by Stellar Light and can&apos;t be edited.
 				</p>
 			</div>
 
@@ -206,6 +207,40 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [resetSent, setResetSent] = useState(false);
+	// Primary path = emailed sign-in link (nobody was ever handed a password);
+	// the password form is a secondary toggle for partners who set one.
+	const [linkSent, setLinkSent] = useState(false);
+	const [usePassword, setUsePassword] = useState(false);
+
+	const inputCls =
+		"w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all";
+
+	async function sendLink(e: React.FormEvent) {
+		e.preventDefault();
+		setSubmitting(true);
+		setError(null);
+		try {
+			const res = await fetch("/api/partners/magic-link", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email }),
+			});
+			if (res.status === 429) {
+				setError("Too many requests — try again in a few minutes.");
+				return;
+			}
+			if (!res.ok) {
+				setError("Enter a valid email address.");
+				return;
+			}
+			// Constant response server-side — never reveals whether an account exists.
+			setLinkSent(true);
+		} catch {
+			setError("Something went wrong. Try again.");
+		} finally {
+			setSubmitting(false);
+		}
+	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
@@ -253,13 +288,15 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 	return (
 		<div className="max-w-md">
 			<form
-				onSubmit={submit}
+				onSubmit={usePassword ? submit : sendLink}
 				className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-5"
 			>
 				<div>
 					<h2 className="text-lg font-semibold text-foreground">Sign in</h2>
 					<p className="text-sm text-muted-foreground mt-1">
-						Use the credentials Stellar Light shared with you.
+						{usePassword
+							? "Sign in with your email and password."
+							: "Enter your work email — if it matches your company's listing we'll email you a sign-in link. Also how you claim an unclaimed profile."}
 					</p>
 				</div>
 				<Field label="Email">
@@ -268,22 +305,30 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 						value={email}
 						required
 						onChange={(e) => setEmail(e.target.value)}
-						className="w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all"
+						className={inputCls}
 						placeholder="you@company.com"
 					/>
 				</Field>
-				<Field label="Password">
-					<input
-						type="password"
-						value={password}
-						required
-						onChange={(e) => setPassword(e.target.value)}
-						className="w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all"
-						placeholder="••••••••"
-					/>
-				</Field>
+				{usePassword && (
+					<Field label="Password">
+						<input
+							type="password"
+							value={password}
+							required
+							onChange={(e) => setPassword(e.target.value)}
+							className={inputCls}
+							placeholder="••••••••"
+						/>
+					</Field>
+				)}
 				{error && <div className="text-xs text-red-400">{error}</div>}
-				{resetSent && (
+				{linkSent && !usePassword && (
+					<div className="text-xs text-emerald-400">
+						If that email matches a partner account, a sign-in link is on its
+						way — check your inbox (and spam). Links expire in 7 days.
+					</div>
+				)}
+				{resetSent && usePassword && (
 					<div className="text-xs text-emerald-400">
 						If that email has a partner account, a reset link is on its way.
 					</div>
@@ -293,15 +338,35 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 					disabled={submitting}
 					className="w-full h-11 rounded-xl bg-foreground text-background font-medium text-sm disabled:opacity-50 transition-opacity"
 				>
-					{submitting ? "Signing in…" : "Sign in"}
+					{submitting
+						? usePassword
+							? "Signing in…"
+							: "Sending…"
+						: usePassword
+							? "Sign in"
+							: "Email me a sign-in link"}
 				</button>
-				<button
-					type="button"
-					onClick={forgotPassword}
-					className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-				>
-					Forgot password?
-				</button>
+				<div className="flex items-center justify-center gap-4">
+					<button
+						type="button"
+						onClick={() => {
+							setUsePassword((v) => !v);
+							setError(null);
+						}}
+						className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						{usePassword ? "Email me a link instead" : "Have a password?"}
+					</button>
+					{usePassword && (
+						<button
+							type="button"
+							onClick={forgotPassword}
+							className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Forgot password?
+						</button>
+					)}
+				</div>
 			</form>
 			<p className="text-xs text-muted-foreground mt-4">
 				Not a partner yet?{" "}
@@ -483,8 +548,14 @@ function Dashboard({
 					    judged on commits they'll never have. */}
 					{form.githubOrg ? (
 						<>
-							<Verified label="Last GitHub commit" value={fmtDate(v.githubLastCommitAt) || "—"} />
-							<Verified label="Commits (90d)" value={v.githubCommits90d ?? "—"} />
+							<Verified
+								label="Last GitHub commit"
+								value={fmtDate(v.githubLastCommitAt) || "—"}
+							/>
+							<Verified
+								label="Commits (90d)"
+								value={v.githubCommits90d ?? "—"}
+							/>
 						</>
 					) : null}
 					<Verified
@@ -647,7 +718,9 @@ function MaintenanceChat({
 				return null;
 			}
 			if (!res.ok) {
-				setError("The assistant hit a snag — edit your profile directly instead.");
+				setError(
+					"The assistant hit a snag — edit your profile directly instead.",
+				);
 				return null;
 			}
 			const data = await res.json();
@@ -698,10 +771,15 @@ function MaintenanceChat({
 			const res = await fetch("/api/partners/onboard", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ mode: "extract", messages: [seed, ...messages] }),
+				body: JSON.stringify({
+					mode: "extract",
+					messages: [seed, ...messages],
+				}),
 			});
 			if (!res.ok) {
-				setError("Couldn't read the changes from that chat — try editing directly.");
+				setError(
+					"Couldn't read the changes from that chat — try editing directly.",
+				);
 				return;
 			}
 			const data = await res.json();
@@ -717,8 +795,8 @@ function MaintenanceChat({
 		return (
 			<div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
 				The chat assistant isn&apos;t available right now — switch to{" "}
-				<span className="text-foreground font-medium">Your profile</span> and edit
-				the fields directly.
+				<span className="text-foreground font-medium">Your profile</span> and
+				edit the fields directly.
 			</div>
 		);
 	}
@@ -736,7 +814,9 @@ function MaintenanceChat({
 				{display.map((m, i) => (
 					<div
 						key={i}
-						className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
+						className={
+							m.role === "user" ? "flex justify-end" : "flex justify-start"
+						}
 					>
 						<div
 							className={
@@ -745,7 +825,9 @@ function MaintenanceChat({
 									: "max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.03] border border-border px-3.5 py-2 text-sm text-foreground/90 whitespace-pre-wrap"
 							}
 						>
-							{m.role === "assistant" ? renderMarkdownBold(m.content) : m.content}
+							{m.role === "assistant"
+								? renderMarkdownBold(m.content)
+								: m.content}
 						</div>
 					</div>
 				))}
@@ -836,23 +918,73 @@ function ProfileEditor({
 				changed={changed.has("description")}
 			/>
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-				<Input label="Website" value={form.websiteUrl ?? ""} onChange={(x) => set("websiteUrl", x)} changed={changed.has("websiteUrl")} />
-				<Input label="Docs URL" value={form.docsUrl ?? ""} onChange={(x) => set("docsUrl", x)} changed={changed.has("docsUrl")} />
-				<Input label="GitHub org" value={form.githubOrg ?? ""} onChange={(x) => set("githubOrg", x)} hint="optional — open-source only" changed={changed.has("githubOrg")} />
-				<Input label="Contact email" value={form.contactEmail ?? ""} onChange={(x) => set("contactEmail", x)} changed={changed.has("contactEmail")} />
-				<Input label="Contact channel" value={form.contactChannel ?? ""} onChange={(x) => set("contactChannel", x)} hint="Discord / Telegram / lead form" changed={changed.has("contactChannel")} />
-				<Input label="Response SLA" value={form.responseSla ?? ""} onChange={(x) => set("responseSla", x)} hint="e.g. within 24h weekdays" changed={changed.has("responseSla")} />
+				<Input
+					label="Website"
+					value={form.websiteUrl ?? ""}
+					onChange={(x) => set("websiteUrl", x)}
+					changed={changed.has("websiteUrl")}
+				/>
+				<Input
+					label="Docs URL"
+					value={form.docsUrl ?? ""}
+					onChange={(x) => set("docsUrl", x)}
+					changed={changed.has("docsUrl")}
+				/>
+				<Input
+					label="GitHub org"
+					value={form.githubOrg ?? ""}
+					onChange={(x) => set("githubOrg", x)}
+					hint="optional — open-source only"
+					changed={changed.has("githubOrg")}
+				/>
+				<Input
+					label="Contact email"
+					value={form.contactEmail ?? ""}
+					onChange={(x) => set("contactEmail", x)}
+					changed={changed.has("contactEmail")}
+				/>
+				<Input
+					label="Contact channel"
+					value={form.contactChannel ?? ""}
+					onChange={(x) => set("contactChannel", x)}
+					hint="Discord / Telegram / lead form"
+					changed={changed.has("contactChannel")}
+				/>
+				<Input
+					label="Response SLA"
+					value={form.responseSla ?? ""}
+					onChange={(x) => set("responseSla", x)}
+					hint="e.g. within 24h weekdays"
+					changed={changed.has("responseSla")}
+				/>
 			</div>
 
 			<TagEditor
 				label="Services"
 				hint="Granular tags the AI matchmaker matches on — e.g. sep-24-ngn, soroban-audit-rust"
 				tags={(form.services ?? []).map((s) => s.tag)}
-				onChange={(tags) => set("services", tags.map((t) => ({ tag: t })))}
+				onChange={(tags) =>
+					set(
+						"services",
+						tags.map((t) => ({ tag: t })),
+					)
+				}
 				changed={changed.has("services")}
 			/>
-			<MultiSelect label="Sectors" options={SECTORS} value={form.sectors ?? []} onChange={(x) => set("sectors", x)} changed={changed.has("sectors")} />
-			<MultiSelect label="Regions" options={REGIONS} value={form.regions ?? []} onChange={(x) => set("regions", x)} changed={changed.has("regions")} />
+			<MultiSelect
+				label="Sectors"
+				options={SECTORS}
+				value={form.sectors ?? []}
+				onChange={(x) => set("sectors", x)}
+				changed={changed.has("sectors")}
+			/>
+			<MultiSelect
+				label="Regions"
+				options={REGIONS}
+				value={form.regions ?? []}
+				onChange={(x) => set("regions", x)}
+				changed={changed.has("regions")}
+			/>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 				<label className="flex items-center gap-2 text-sm text-foreground">
@@ -863,11 +995,32 @@ function ProfileEditor({
 					/>
 					Currently accepting new clients
 				</label>
-				<Select label="Pricing model" options={PRICING} value={form.pricingModel ?? ""} onChange={(x) => set("pricingModel", x)} changed={changed.has("pricingModel")} />
-				<Input label="Typical engagement" value={form.typicalEngagement ?? ""} onChange={(x) => set("typicalEngagement", x)} changed={changed.has("typicalEngagement")} />
-				<Input label="Lead time" value={form.leadTime ?? ""} onChange={(x) => set("leadTime", x)} changed={changed.has("leadTime")} />
+				<Select
+					label="Pricing model"
+					options={PRICING}
+					value={form.pricingModel ?? ""}
+					onChange={(x) => set("pricingModel", x)}
+					changed={changed.has("pricingModel")}
+				/>
+				<Input
+					label="Typical engagement"
+					value={form.typicalEngagement ?? ""}
+					onChange={(x) => set("typicalEngagement", x)}
+					changed={changed.has("typicalEngagement")}
+				/>
+				<Input
+					label="Lead time"
+					value={form.leadTime ?? ""}
+					onChange={(x) => set("leadTime", x)}
+					changed={changed.has("leadTime")}
+				/>
 			</div>
-			<TextArea label="Pricing notes" value={form.pricingNotes ?? ""} onChange={(x) => set("pricingNotes", x)} changed={changed.has("pricingNotes")} />
+			<TextArea
+				label="Pricing notes"
+				value={form.pricingNotes ?? ""}
+				onChange={(x) => set("pricingNotes", x)}
+				changed={changed.has("pricingNotes")}
+			/>
 		</section>
 	);
 }
@@ -902,10 +1055,18 @@ function TabButton({
 	);
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+	label,
+	children,
+}: {
+	label: string;
+	children: React.ReactNode;
+}) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1.5">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1.5">
+				{label}
+			</span>
 			{children}
 		</label>
 	);
@@ -985,7 +1146,9 @@ function TextArea({
 }) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1">
+				{label}
+			</span>
 			<textarea
 				value={value}
 				rows={3}
@@ -1011,7 +1174,9 @@ function Select({
 }) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1">
+				{label}
+			</span>
 			<select
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -1047,7 +1212,9 @@ function MultiSelect({
 		<div>
 			<span className="block text-xs font-medium text-foreground mb-1.5">
 				{label}
-				{changed && <span className="ml-2 text-[10px] text-emerald-400">updated</span>}
+				{changed && (
+					<span className="ml-2 text-[10px] text-emerald-400">updated</span>
+				)}
 			</span>
 			<div className="flex flex-wrap gap-1.5">
 				{options.map((o) => {
@@ -1100,7 +1267,9 @@ function TagEditor({
 						{hint}
 					</span>
 				)}
-				{changed && <span className="ml-2 text-[10px] text-emerald-400">updated</span>}
+				{changed && (
+					<span className="ml-2 text-[10px] text-emerald-400">updated</span>
+				)}
 			</span>
 			<div className="flex flex-wrap gap-1.5 mb-2">
 				{tags.map((t) => (
@@ -1176,7 +1345,10 @@ function currentProfileSummary(p: Partner): string {
 	};
 	add("tagline", p.tagline);
 	add("description", p.description);
-	add("services", (p.services ?? []).map((s) => s.tag));
+	add(
+		"services",
+		(p.services ?? []).map((s) => s.tag),
+	);
 	add("sectors", p.sectors);
 	add("regions", p.regions);
 	add("accepting clients", p.acceptingClients);
@@ -1249,7 +1421,10 @@ function ProfileStrength({ partner }: { partner: Partner }) {
 			</div>
 			<p className="text-xs text-muted-foreground mt-2.5">
 				{missing.length === 0 ? (
-					<>Complete profiles rank higher in concierge matches — yours is all set.</>
+					<>
+						Complete profiles rank higher in concierge matches — yours is all
+						set.
+					</>
 				) : (
 					<>
 						Complete profiles rank higher in concierge matches. Next:{" "}
@@ -1327,7 +1502,9 @@ function CompletenessRank({
 		(async () => {
 			try {
 				const r = await fetch(
-					`/api/partners?type=${encodeURIComponent(partnerType)}&limit=200`,
+					// all=1: rank against the FULL peer pool — a partner failing the
+					// directory quality bar must still see itself in its own ranking.
+					`/api/partners?type=${encodeURIComponent(partnerType)}&limit=200&all=1`,
 				);
 				const d = await r.json().catch(() => ({}));
 				// biome-ignore lint/suspicious/noExplicitAny: public API shape
@@ -1422,8 +1599,8 @@ function LeadsPanel({ slug }: { slug?: string }) {
 			<div className="rounded-2xl border border-border bg-card p-8 text-center">
 				<p className="text-sm text-muted-foreground max-w-md mx-auto">
 					No leads yet. When a builder asks the concierge for something you
-					offer, it shows up here (and in your weekly digest). A complete,
-					fresh profile gets matched more.
+					offer, it shows up here (and in your weekly digest). A complete, fresh
+					profile gets matched more.
 				</p>
 			</div>
 		);
@@ -1436,7 +1613,10 @@ function LeadsPanel({ slug }: { slug?: string }) {
 			</h3>
 			<ul className="divide-y divide-border/60">
 				{leads.map((l) => (
-					<li key={l.id} className="py-2.5 flex items-baseline justify-between gap-3">
+					<li
+						key={l.id}
+						className="py-2.5 flex items-baseline justify-between gap-3"
+					>
 						<span className="text-sm text-foreground/90">“{l.need}”</span>
 						<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 							{fmtDate(l.createdAt)}

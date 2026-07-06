@@ -16,17 +16,17 @@
  * Degrades gracefully: 503 → point to the directory + mailto.
  */
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import {
+	ArrowUpRight,
+	CheckCircle2,
 	Loader2,
+	Pencil,
+	Search,
 	Send,
 	Sparkles,
-	CheckCircle2,
-	Pencil,
-	ArrowUpRight,
-	Search,
 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 export interface PublicPartner {
 	slug: string;
@@ -52,6 +52,10 @@ interface Msg {
 	role: "user" | "assistant";
 	content: string;
 	matches?: PublicPartner[];
+	/** Set when the assistant classified the turn as a general ecosystem
+	 * question (intent="chat") — renders a "Research question? Ask Stellar →"
+	 * chip carrying the user's question to /ask. */
+	askNudge?: string;
 }
 type Fields = Record<string, unknown>;
 
@@ -177,9 +181,12 @@ export function PartnerConciergeChat({
 	// first prompt.
 	const initialized = useRef(false);
 
-	async function callAssistant(
-		msgs: Msg[],
-	): Promise<{ reply: string; matches?: PublicPartner[]; canList?: boolean } | null> {
+	async function callAssistant(msgs: Msg[]): Promise<{
+		reply: string;
+		matches?: PublicPartner[];
+		canList?: boolean;
+		intent?: string;
+	} | null> {
 		setError(null);
 		const r = await fetch("/api/partners/assistant", {
 			method: "POST",
@@ -198,10 +205,17 @@ export function PartnerConciergeChat({
 			return null;
 		}
 		if (typeof d.reply !== "string") {
-			setError("The assistant hit a snag — browse the directory below instead.");
+			setError(
+				"The assistant hit a snag — browse the directory below instead.",
+			);
 			return null;
 		}
-		return { reply: d.reply, matches: d.matches, canList: d.canList };
+		return {
+			reply: d.reply,
+			matches: d.matches,
+			canList: d.canList,
+			intent: d.intent,
+		};
 	}
 
 	// Seed the conversation: a handed-off question (from the directory's Ask
@@ -220,7 +234,12 @@ export function PartnerConciergeChat({
 				if (res?.reply) {
 					setMessages((m) => [
 						...m,
-						{ role: "assistant", content: res.reply, matches: res.matches },
+						{
+							role: "assistant",
+							content: res.reply,
+							matches: res.matches,
+							askNudge: res.intent === "chat" ? handoff : undefined,
+						},
 					]);
 					if (res.canList) setCanList(true);
 				}
@@ -253,7 +272,12 @@ export function PartnerConciergeChat({
 		if (res?.reply) {
 			setMessages((m) => [
 				...m,
-				{ role: "assistant", content: res.reply, matches: res.matches },
+				{
+					role: "assistant",
+					content: res.reply,
+					matches: res.matches,
+					askNudge: res.intent === "chat" ? text.trim() : undefined,
+				},
 			]);
 			if (res.canList) setCanList(true);
 		}
@@ -287,7 +311,9 @@ export function PartnerConciergeChat({
 					setContactEmail(d.fields.contactEmail);
 				setPhase("preview");
 			} else {
-				setError("Couldn't build the profile — add a bit more detail and retry.");
+				setError(
+					"Couldn't build the profile — add a bit more detail and retry.",
+				);
 			}
 		} finally {
 			setBusy(false);
@@ -343,26 +369,32 @@ export function PartnerConciergeChat({
 			<div className="rounded-2xl border border-border bg-card p-8 text-center">
 				<CheckCircle2 className="w-10 h-10 text-emerald-400/90 mx-auto mb-4" />
 				<h2 className="text-lg font-semibold text-foreground">
-					{doneMode === "claim" ? "Looks like you're already listed" : "Submitted for review"}
+					{doneMode === "claim"
+						? "Looks like you're already listed"
+						: "Submitted for review"}
 				</h2>
 				<p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
 					{doneMode === "claim" ? (
 						<>
-							<span className="text-foreground">{orgName}</span> is already in the{" "}
-							<Link href="/partners" className="underline hover:text-foreground">
+							<span className="text-foreground">{orgName}</span> is already in
+							the{" "}
+							<Link
+								href="/partners"
+								className="underline hover:text-foreground"
+							>
 								directory
 							</Link>
-							. We&apos;ve logged your claim — once we verify you&apos;re with the
-							company, we&apos;ll email{" "}
-							<span className="text-foreground">{contactEmail}</span> an invite to
-							manage the profile.
+							. We&apos;ve logged your claim — once we verify you&apos;re with
+							the company, we&apos;ll email{" "}
+							<span className="text-foreground">{contactEmail}</span> an invite
+							to manage the profile.
 						</>
 					) : (
 						<>
-							Thanks — <span className="text-foreground">{orgName}</span> is in the
-							queue. Once reviewed and published, we&apos;ll email{" "}
-							<span className="text-foreground">{contactEmail}</span> an invite to
-							set a password and manage the profile.
+							Thanks — <span className="text-foreground">{orgName}</span> is in
+							the queue. Once reviewed and published, we&apos;ll email{" "}
+							<span className="text-foreground">{contactEmail}</span> an invite
+							to set a password and manage the profile.
 						</>
 					)}
 				</p>
@@ -484,6 +516,16 @@ export function PartnerConciergeChat({
 								{m.matches.map((p) => (
 									<MatchCard key={p.slug} p={p} />
 								))}
+							</div>
+						)}
+						{m.askNudge && (
+							<div className="flex justify-start">
+								<Link
+									href={`/ask?q=${encodeURIComponent(m.askNudge)}`}
+									className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+								>
+									Research question? Ask Stellar →
+								</Link>
 							</div>
 						)}
 					</div>
