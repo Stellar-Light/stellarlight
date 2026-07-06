@@ -38,6 +38,15 @@ interface RepoDoc {
 	repoScore?: number;
 	repoScoreLabel?: string | null;
 	readmeExcerpt?: string | null;
+	// Code-Truth Ledger signals (scripts/scan/scan-repo-code.ts). Present only
+	// once the repo has been code-scanned; null/absent otherwise.
+	stellarProof?: string | null;
+	codeDepth?: number | null;
+	isDeployableContract?: boolean | null;
+	sorobanSdkVersion?: string | null;
+	versionStatus?: string | null;
+	codeScanState?: string | null;
+	codeScannedAt?: string | null;
 }
 
 export interface RepoResult {
@@ -67,6 +76,41 @@ export interface RepoResult {
 	deepWikiUrl: string;
 	/** True when this repo was surfaced as a curated canonical answer for an infra/protocol query. */
 	canonical: boolean;
+	/**
+	 * Code-verified truth from analyzing the repo's ACTUAL source (not stars or
+	 * topics): how we know it's Stellar (stellarProof), how substantial the
+	 * Soroban code is (codeDepth 0-1), whether it's a deployable contract, and
+	 * its soroban-sdk version vs the current protocol. `null` until code-scanned.
+	 * This is the discriminator between "popular" and "real, current, deep code".
+	 */
+	codeVerified: CodeVerified | null;
+}
+
+export interface CodeVerified {
+	/** Strongest→weakest relevance proof from the code: cargo-sdk | contract-macros | lang-sdk | js-sdk | stellar-toml. */
+	stellarProof: string;
+	/** 0-1 substance of the actual contract code (auth/storage/arith/branch, not presence). Null if non-Rust proof. */
+	codeDepth: number | null;
+	/** Cargo cdylib — a real deployable Soroban contract (vs tooling/SDK/frontend that merely uses Stellar). */
+	isDeployableContract: boolean;
+	/** Raw soroban-sdk version requirement (sourced fact, never a bare protocol int). */
+	sorobanSdkVersion: string | null;
+	/** current | supported | deprecated | unknown — vs the latest protocol at scan time. */
+	versionStatus: string | null;
+	/** When the code was last scanned (ISO). */
+	scannedAt: string | null;
+}
+
+function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
+	if (d.codeScanState !== "scanned" || !d.stellarProof) return null;
+	return {
+		stellarProof: d.stellarProof,
+		codeDepth: typeof d.codeDepth === "number" ? d.codeDepth : null,
+		isDeployableContract: !!d.isDeployableContract,
+		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
+		versionStatus: d.versionStatus ?? null,
+		scannedAt: d.codeScannedAt ?? null,
+	};
 }
 
 function topicList(topics: unknown): string[] {
@@ -370,6 +414,7 @@ export async function searchRepos(
 			score,
 			deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
 			canonical: crank < 9999,
+			codeVerified: codeVerifiedOf(r),
 		}));
 		return { repos, total, canonical: repos.filter((r) => r.canonical).map((r) => r.fullName) };
 	} catch {

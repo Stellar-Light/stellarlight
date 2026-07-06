@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-06",
+		surfaces: ["api"],
+		version: "openapi 1.5.0",
+		type: "added",
+		summary:
+			"codeVerified block on repos — code-truth from analyzing each repo's ACTUAL source (stellarProof, codeDepth, deployable-contract, soroban-sdk version status). The discriminator between a popular repo and real, current, deep Soroban code.",
+		detail:
+			"search_repos results and explain_repo now carry a codeVerified object: stellarProof (how we know it's Stellar — cargo-sdk/contract-macros/lang-sdk/js-sdk/stellar-toml), codeDepth (0-1 substance of the contract logic, not stars), isDeployableContract (Cargo cdylib), sorobanSdkVersion + versionStatus (current/supported/deprecated/unknown vs the latest protocol). Derived by scanning the repo's Cargo.toml + source through a shared, tested pipeline; codeDepth also feeds repoScore so code-verified deep contracts outrank starred-but-shallow ones. null until a repo is code-scanned (honest — we never claim verification we haven't done). ADDITIVE + routing-neutral: new response fields only, no operation added/removed, no operation-description changes.",
+	},
+	{
 		date: "2026-07-05",
 		surfaces: ["api"],
 		version: "openapi 1.4.5",

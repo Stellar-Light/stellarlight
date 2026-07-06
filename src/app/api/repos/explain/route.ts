@@ -92,6 +92,17 @@ export async function GET(req: NextRequest) {
 		isArchived: boolean;
 		repoScoreLabel: string | null;
 	} | null = null;
+	// Code-verified truth from analyzing the routed repo's ACTUAL source — leads
+	// the answer so an agent knows whether it's real, current, deployable Soroban
+	// code before quoting DeepWiki prose. Null until code-scanned.
+	let codeVerified: {
+		stellarProof: string;
+		codeDepth: number | null;
+		isDeployableContract: boolean;
+		sorobanSdkVersion: string | null;
+		versionStatus: string | null;
+		scannedAt: string | null;
+	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
@@ -100,7 +111,19 @@ export async function GET(req: NextRequest) {
 				where: { fullName: { equals: repo } },
 				limit: 1,
 				depth: 0,
-				select: { lastCommitAt: true, stars: true, isArchived: true, repoScoreLabel: true },
+				select: {
+					lastCommitAt: true,
+					stars: true,
+					isArchived: true,
+					repoScoreLabel: true,
+					stellarProof: true,
+					codeDepth: true,
+					isDeployableContract: true,
+					sorobanSdkVersion: true,
+					versionStatus: true,
+					codeScanState: true,
+					codeScannedAt: true,
+				},
 			});
 			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
 			if (d) {
@@ -110,6 +133,16 @@ export async function GET(req: NextRequest) {
 					isArchived: !!d.isArchived,
 					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
 				};
+				if (d.codeScanState === "scanned" && d.stellarProof) {
+					codeVerified = {
+						stellarProof: d.stellarProof as string,
+						codeDepth: typeof d.codeDepth === "number" ? (d.codeDepth as number) : null,
+						isDeployableContract: !!d.isDeployableContract,
+						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
+						versionStatus: (d.versionStatus as string) ?? null,
+						scannedAt: (d.codeScannedAt as string) ?? null,
+					};
+				}
 			}
 		}
 	} catch {
@@ -130,6 +163,10 @@ export async function GET(req: NextRequest) {
 			repo,
 			routedVia,
 			repoMeta,
+			// Code-verified truth (from analyzing the repo's source, not stars):
+			// leads so the agent can qualify the answer — "real deployable contract
+			// on a supported soroban-sdk" vs "tooling that merely uses Stellar".
+			codeVerified,
 			// Other authoritative repos for this concept, so the agent can follow up.
 			alternateRepos: canon.filter((r) => r.toLowerCase() !== repo.toLowerCase()),
 			answer: dw?.answer ?? null,
