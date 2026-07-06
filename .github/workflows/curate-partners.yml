@@ -1,0 +1,23 @@
+name: Curate partners (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Archives ONLY the owner-confirmed dead list + reconciles pilot flags —
+      # both hardcoded in scripts/data/curate-partners.ts. Never auto-detects.
+      - run: pnpm exec tsx scripts/data/curate-partners.ts ${{ inputs.execute && '--execute' || '' }}
