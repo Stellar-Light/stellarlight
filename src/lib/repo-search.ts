@@ -343,6 +343,47 @@ export function canonicalFor(q: string): string[] {
 	return out;
 }
 
+// Curated ecosystem-vertical flagships — DISTINCT from CANONICAL (which is
+// SDF/infra concept→repo AND drives explain routing). This map is SEARCH-ONLY:
+// it floats the real Stellar-native flagships for a vertical to the top when
+// keyword scoring alone can't surface them. The bridge case is the archetype:
+// the actual bridges are too thinly-described to keyword-match — rozo-intents-
+// contracts and crossmesh-ingress-contracts carry NO "bridge"/"cross-chain"
+// token in name/topics/description — while a WALLET (rabet) ranks #1 off a bogus
+// "bridge" topic tag + high authority. The clean `projects` surface knows the
+// real ones; we float the curated repos so an off-type or multichain repo can't
+// bury them. Every fullName is verified in-index before adding (missing ones are
+// silently skipped by the `in` fetch). Add a vertical ONLY when it has this
+// thin-description problem AND a human-verified flagship set — never guess.
+const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
+	// cross-chain bridges. Verified in-index 2026-07-06 (descriptions confirm each
+	// is a real Stellar bridge, not a wallet/aggregator): allbridge (Soroban
+	// contracts + js-sdk), rozo (USDC intents), crossmesh (EVM→Stellar forwarder),
+	// axelar (Cross-chain Gateway for Soroban), spacewalk (Pendulum↔Stellar).
+	{
+		test: /\bbridge\b|\bcross[\s-]?chain\b|\binteroperab/,
+		repos: [
+			"allbridge-io/allbridge-core-soroban-contracts",
+			"rozoai/rozo-intents-contracts",
+			"lightsail-network/crossmesh-ingress-contracts",
+			"axelarnetwork/axelar-amplifier-stellar",
+			"allbridge-io/allbridge-core-js-sdk",
+			"soroswap/spacewalk-implementation",
+		],
+	},
+];
+
+// Curated flagship repos for a query, priority order, deduped. Empty for queries
+// that don't hit a curated vertical (so normal queries are untouched).
+export function flagshipsFor(q: string): string[] {
+	const hay = wordy(q);
+	const out: string[] = [];
+	for (const v of VERTICAL_FLAGSHIPS) {
+		if (v.test.test(hay)) for (const r of v.repos) if (!out.includes(r)) out.push(r);
+	}
+	return out;
+}
+
 export async function searchRepos(
 	payload: PayloadLike | null,
 	q: string,
@@ -394,12 +435,19 @@ export async function searchRepos(
 		// curated set and float it to the top in priority order (canonRank).
 		const canonList = canonicalFor(q);
 		const canonRank = new Map(canonList.map((fn, i) => [fn.toLowerCase(), i]));
+		// Curated vertical flagships (bridge, …) — the same inject-and-float pattern,
+		// but for real ecosystem repos too thinly-described to keyword-match. floatRank
+		// orders them within the vertical; they sort just below canonical, above the
+		// noisy scored list, so a wallet/aggregator can't bury the real flagship.
+		const flagList = flagshipsFor(q);
+		const flagRank = new Map(flagList.map((fn, i) => [fn.toLowerCase(), i]));
+		const injectList = [...new Set([...canonList, ...flagList])];
 		let rawDocs = res.docs as unknown as RepoDoc[];
-		if (canonList.length) {
+		if (injectList.length) {
 			const cres = await payload.find({
 				collection: "repos",
-				where: { fullName: { in: canonList } },
-				limit: canonList.length,
+				where: { fullName: { in: injectList } },
+				limit: injectList.length,
 				depth: 0,
 				select: { readmeExcerpt: false },
 			});
@@ -454,10 +502,13 @@ export async function searchRepos(
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
 			const crank = canonRank.get(r.fullName.toLowerCase()) ?? 9999;
-			return { r, topics, score, matched, sdf, alive, mention, crank };
+			const frank = flagRank.get(r.fullName.toLowerCase()) ?? 9999;
+			return { r, topics, score, matched, sdf, alive, mention, crank, frank };
 		});
-		// Keep canonical repos even when they didn't keyword-match (crank < 9999).
-		let filtered = tokens.length ? docs.filter((d) => d.matched >= 1 || d.crank < 9999) : docs;
+		// Keep canonical + curated-flagship repos even when they didn't keyword-match.
+		let filtered = tokens.length
+			? docs.filter((d) => d.matched >= 1 || d.crank < 9999 || d.frank < 9999)
+			: docs;
 		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
@@ -468,6 +519,7 @@ export async function searchRepos(
 		filtered.sort(
 			(a, b) =>
 				a.crank - b.crank ||
+				a.frank - b.frank ||
 				b.score - a.score ||
 				b.sdf - a.sdf ||
 				b.alive - a.alive ||
