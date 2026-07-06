@@ -130,7 +130,7 @@ export const Partners: CollectionConfig = {
 	},
 	admin: {
 		useAsTitle: "name",
-		defaultColumns: ["name", "partnerType", "status", "freshnessStatus", "lastPartnerUpdateAt"],
+		defaultColumns: ["name", "partnerType", "status", "pilot", "freshnessStatus", "lastPartnerUpdateAt"],
 		group: "Partner Connector",
 		description:
 			"Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.",
@@ -486,6 +486,17 @@ export const Partners: CollectionConfig = {
 		autoField({ name: "nextReminderAt", type: "date" }),
 
 		// ── Listing pipeline (system-owned) ────────────────────────────────
+		autoField({
+			name: "pilot",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.",
+			},
+		}),
 		autoField({
 			name: "invitedAt",
 			type: "date",

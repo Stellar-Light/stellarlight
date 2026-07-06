@@ -525,6 +525,16 @@ const spec: OpenAPISpec = {
 							"Set to 1 to return only partners currently accepting new clients",
 						schema: { type: "string", enum: ["1"] },
 					},
+					{
+						// Param-level doc ONLY — the operation description above is
+						// deliberately untouched (downstream routing catalogs diff
+						// op descriptions; param additions are neutral).
+						name: "all",
+						in: "query",
+						description:
+							"Set to 1 to bypass the directory quality bar. By default results include only complete, non-archived profiles (tagline + a contact path), pilot partners first; all=1 returns every published partner including placeholder-thin profiles.",
+						schema: { type: "string", enum: ["1"] },
+					},
 					{ $ref: "#/components/parameters/q" },
 					{ $ref: "#/components/parameters/limit" },
 				],

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PartnersDirectory } from "@/components/partners-directory";
 import { profileStrength } from "@/lib/partner-match";
+import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
@@ -47,6 +48,10 @@ interface DirectoryPartner {
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
+	/** Pilot cohort — featured first with a badge. */
+	pilot: boolean;
+	/** Passes the directory quality bar (default view shows only these). */
+	quality: boolean;
 }
 
 async function getPartners(): Promise<DirectoryPartner[]> {
@@ -59,13 +64,16 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 			limit: 200,
 			depth: 0,
 		});
-		// Completeness-first ordering: rich profiles (tagline, services,
-		// contact, logo, capabilities) lead; thin unclaimed ones sink. Same
-		// profileStrength the matcher boosts — the competition incentive,
-		// visible. Ties break alphabetically for stable ordering.
+		// Pilot cohort first, then completeness: rich profiles (tagline,
+		// services, contact, logo, capabilities) lead; thin unclaimed ones
+		// sink. Same profileStrength the matcher boosts — the competition
+		// incentive, visible. Ties break alphabetically for stable ordering.
+		// We fetch ALL published (not just quality-bar passers) so the client
+		// "show all" toggle needs no refetch.
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 		const docs = (result.docs as any[]).sort(
 			(a, b) =>
+				Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
 				profileStrength(b) - profileStrength(a) ||
 				String(a.name).localeCompare(String(b.name)),
 		);
@@ -92,6 +100,8 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 				onchainActive: p.verified?.onchainActive ?? null,
 			},
 			websiteUrl: p.websiteUrl ?? null,
+			pilot: Boolean(p.pilot),
+			quality: passesQualityBar(p),
 		}));
 	} catch {
 		return [];

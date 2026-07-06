@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-06",
 		surfaces: ["api"],
+		version: "openapi 1.6.0",
+		type: "changed",
+		summary:
+			"getPartners default results now pass a directory quality bar (tagline + contact path, non-archived) with the pilot cohort sorted first; new all=1 param returns the unfiltered set. New `pilot` boolean on partner entries.",
+		detail:
+			"The partner directory default view now shows only complete, non-archived profiles — most seeded rows were placeholder-thin (no tagline) and read as noise to consumers. Pass all=1 for every published partner (the previous behavior). Sort is pilot-first, then freshness. Additive param + response field; the getPartners operation DESCRIPTION is unchanged (routing-neutral for downstream catalogs — only the default result set is curated, a data-quality improvement). Archived (owner-confirmed dead) partners stay reachable at /api/partners/{slug} with freshness.status=archived.",
+	},
+	{
+		date: "2026-07-06",
+		surfaces: ["api"],
 		version: "openapi 1.5.0",
 		type: "added",
 		summary:

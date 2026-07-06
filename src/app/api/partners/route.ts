@@ -21,6 +21,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { passesQualityBar } from "@/lib/partner-quality";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -51,6 +52,8 @@ function toPublic(p: any) {
 		slug: p.slug,
 		name: p.name,
 		partnerType: p.partnerType,
+		// Pilot cohort — the select partners featured first in the directory.
+		pilot: Boolean(p.pilot),
 		tagline: p.tagline ?? null,
 		description: p.description ?? null,
 		logoUrl: p.logoUrl ?? null,
@@ -123,6 +126,7 @@ export async function GET(req: NextRequest) {
 	const sector = sp.get("sector");
 	const region = sp.get("region");
 	const accepting = boolParam(sp.get("accepting"));
+	const all = boolParam(sp.get("all"));
 	const q = sp.get("q")?.toLowerCase().trim();
 	const limit = clampLimit(sp.get("limit"), 50, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
@@ -154,7 +158,13 @@ export async function GET(req: NextRequest) {
 				depth: 0,
 			});
 
-			let mapped = result.docs.map(toPublic);
+			// Directory quality gate (default ON; ?all=1 bypasses): only complete,
+			// non-archived profiles show by default — 28/47 seeds are placeholder
+			// rows without a tagline. In-memory on ≤200 docs; display-only (the
+			// concierge matcher keeps its own eligibility rule).
+			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
+
+			let mapped = eligible.map(toPublic);
 
 			// Free-text filter across name/tagline/description/services — in
 			// memory, same approach as projects/builders search.
@@ -167,13 +177,15 @@ export async function GET(req: NextRequest) {
 				});
 			}
 
-			// Fresh partners first — never lead a builder toward a stale one.
+			// Pilot cohort first (the select partners), then fresh partners —
+			// never lead a builder toward a stale one.
 			const rank = { fresh: 0, aging: 1, stale: 2, archived: 3 } as Record<
 				string,
 				number
 			>;
 			mapped.sort(
 				(a, b) =>
+					Number(b.pilot) - Number(a.pilot) ||
 					(rank[a.freshness.status] ?? 9) - (rank[b.freshness.status] ?? 9),
 			);
 
@@ -188,7 +200,7 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/partners",
 		query: q,
-		filters: { type, sector, region, accepting, limit, offset },
+		filters: { type, sector, region, accepting, all, limit, offset },
 	});
 
 	return NextResponse.json(
@@ -201,13 +213,14 @@ export async function GET(req: NextRequest) {
 					sector,
 					region,
 					accepting,
+					all,
 					q: q ?? null,
 					limit,
 					offset,
 				},
 				counts: { returned: partners.length, total: totalMatching },
 				validTypes: PARTNER_TYPES,
-				note: "Published partners only. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
+				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived) with pilot partners first; pass all=1 for the unfiltered set. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
 			},
 			partners,
 		},

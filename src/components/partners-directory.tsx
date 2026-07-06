@@ -36,6 +36,10 @@ interface DirectoryPartner {
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
+	/** Pilot cohort — featured first with a badge. */
+	pilot: boolean;
+	/** Passes the directory quality bar (default view shows only these). */
+	quality: boolean;
 }
 
 const EXAMPLES = [
@@ -113,20 +117,48 @@ const regionLabel = (r: string) => REGION_LABELS[r] ?? r;
 export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) {
 	const router = useRouter();
 	const [typeFilter, setTypeFilter] = useState("all");
+	const [regionFilter, setRegionFilter] = useState("all");
+	const [showAll, setShowAll] = useState(false);
 	const [query, setQuery] = useState("");
 
-	const filtered = useMemo(() => {
+	// Type/region/query matcher WITHOUT the quality gate — used by both the
+	// visible list and the hidden-count so "show all (+N)" is accurate for the
+	// current filters.
+	const matchesFilters = useMemo(() => {
 		const q = query.trim().toLowerCase();
-		return initial.filter((p) => {
-			if (typeFilter !== "all" && p.partnerType !== typeFilter) return false;
+		return (p: DirectoryPartner) => {
+			if (typeFilter !== "all") {
+				if (typeFilter === "on-off-ramp") {
+					// Real ramp providers are mostly partnerType=="anchor" with
+					// stellar.toml-verified rampTypes; the chip matches CAPABILITY,
+					// not just the self-declared type (which almost nobody picks).
+					if (p.partnerType !== "on-off-ramp" && p.rampTypes.length === 0)
+						return false;
+				} else if (p.partnerType !== typeFilter) return false;
+			}
+			if (regionFilter !== "all" && !p.regions.includes(regionFilter))
+				return false;
 			if (q) {
 				const hay =
 					`${p.name} ${p.tagline ?? ""} ${p.description ?? ""} ${p.sectors.join(" ")} ${p.regions.join(" ")} ${p.assets.join(" ")} ${p.seps.join(" ")} ${p.rampTypes.join(" ")} ${p.country ?? ""}`.toLowerCase();
 				if (!hay.includes(q)) return false;
 			}
 			return true;
-		});
-	}, [initial, typeFilter, query]);
+		};
+	}, [typeFilter, regionFilter, query]);
+
+	const filtered = useMemo(
+		() => initial.filter((p) => matchesFilters(p) && (showAll || p.quality)),
+		[initial, matchesFilters, showAll],
+	);
+	// How many the quality gate is hiding under the CURRENT filters.
+	const hiddenCount = useMemo(
+		() =>
+			showAll
+				? 0
+				: initial.filter((p) => matchesFilters(p) && !p.quality).length,
+		[initial, matchesFilters, showAll],
+	);
 
 	/** Hand off to the concierge chat with the question pre-sent. */
 	function ask(q: string) {
@@ -203,7 +235,7 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 			</div>
 
 			{/* Type filter chips (matches /ask example chips) */}
-			<div className="flex flex-wrap gap-2 mb-8">
+			<div className="flex flex-wrap gap-2 mb-3">
 				{TYPE_FILTERS.map((f) => {
 					const active = typeFilter === f.key;
 					return (
@@ -223,38 +255,92 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 				})}
 			</div>
 
-			{/* Results header (muted, ask-style) */}
-			<div className="flex items-center justify-between mb-4">
+			{/* Region filter chips */}
+			<div className="flex flex-wrap gap-2 mb-8">
+				{[{ key: "all", label: "All regions" }].concat(
+					Object.entries(REGION_LABELS).map(([key, label]) => ({ key, label })),
+				).map((f) => {
+					const active = regionFilter === f.key;
+					return (
+						<button
+							key={f.key}
+							onClick={() => setRegionFilter(f.key)}
+							className={
+								"text-[11px] px-2.5 py-1 rounded-full transition-colors border " +
+								(active
+									? "bg-white/10 text-foreground border-white/25"
+									: "bg-white/[0.02] text-muted-foreground/80 border-border hover:text-foreground hover:border-white/25")
+							}
+						>
+							{f.label}
+						</button>
+					);
+				})}
+			</div>
+
+			{/* Results header (muted, ask-style) + quality-gate toggle */}
+			<div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
 				<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 					{filtered.length === 0
 						? "No partners match"
 						: `${filtered.length} partner${filtered.length === 1 ? "" : "s"}`}
 				</h2>
-				{filtered.length === 0 && query && (
-					<button
-						onClick={() => {
-							setQuery("");
-							setTypeFilter("all");
-						}}
-						className="text-xs text-muted-foreground hover:text-foreground underline"
-					>
-						clear filters
-					</button>
-				)}
+				<div className="flex items-center gap-3">
+					{(hiddenCount > 0 || showAll) && (
+						<button
+							onClick={() => setShowAll((v) => !v)}
+							className="text-xs text-muted-foreground hover:text-foreground underline"
+						>
+							{showAll
+								? "showing all · show quality only"
+								: `showing quality profiles · show all (+${hiddenCount})`}
+						</button>
+					)}
+					{filtered.length === 0 &&
+						(query || typeFilter !== "all" || regionFilter !== "all") && (
+							<button
+								onClick={() => {
+									setQuery("");
+									setTypeFilter("all");
+									setRegionFilter("all");
+								}}
+								className="text-xs text-muted-foreground hover:text-foreground underline"
+							>
+								clear filters
+							</button>
+						)}
+				</div>
 			</div>
 
 			{/* Empty state */}
 			{filtered.length === 0 && (
 				<div className="rounded-2xl border border-border bg-card p-10 text-center">
 					<p className="text-muted-foreground text-sm">
-						Nothing matches. Try a broader filter or{" "}
-						<Link
-							href="/partners/chat"
-							className="text-foreground underline"
-						>
-							get your company listed
-						</Link>
-						.
+						{hiddenCount > 0 ? (
+							<>
+								No complete profiles match, but {hiddenCount} unclaimed{" "}
+								{hiddenCount === 1 ? "profile does" : "profiles do"}.{" "}
+								<button
+									onClick={() => setShowAll(true)}
+									className="text-foreground underline"
+								>
+									Show all
+								</button>{" "}
+								or{" "}
+								<Link href="/partners/chat" className="text-foreground underline">
+									get your company listed
+								</Link>
+								.
+							</>
+						) : (
+							<>
+								Nothing matches. Try a broader filter or{" "}
+								<Link href="/partners/chat" className="text-foreground underline">
+									get your company listed
+								</Link>
+								.
+							</>
+						)}
 					</p>
 				</div>
 			)}
@@ -285,6 +371,11 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 									<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border whitespace-nowrap">
 										{TYPE_LABELS[p.partnerType] ?? p.partnerType}
 									</span>
+									{p.pilot && (
+										<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.08] text-foreground border border-white/20 whitespace-nowrap">
+											Pilot
+										</span>
+									)}
 									{/* Available only when there's an actual contact path —
 									    an "available" partner you can't reach is a dead end. */}
 									{p.acceptingClients && p.contactable && (

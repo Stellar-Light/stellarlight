@@ -1412,6 +1412,10 @@ export interface PartnerAccount {
   lastPartnerUpdateAt?: string | null;
   nextReminderAt?: string | null;
   /**
+   * Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.
+   */
+  pilot?: boolean | null;
+  /**
    * Set once the publish-invite email has been sent. Guards re-publish from re-inviting.
    */
   invitedAt?: string | null;
@@ -2280,6 +2284,7 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
   freshnessStatus?: T;
   lastPartnerUpdateAt?: T;
   nextReminderAt?: T;
+  pilot?: T;
   invitedAt?: T;
   claimRequestedBy?: T;
   claimRequestedAt?: T;

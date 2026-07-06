@@ -1327,7 +1327,9 @@ function CompletenessRank({
 		(async () => {
 			try {
 				const r = await fetch(
-					`/api/partners?type=${encodeURIComponent(partnerType)}&limit=200`,
+					// all=1: rank against the FULL peer pool — a partner failing the
+					// directory quality bar must still see itself in its own ranking.
+					`/api/partners?type=${encodeURIComponent(partnerType)}&limit=200&all=1`,
 				);
 				const d = await r.json().catch(() => ({}));
 				// biome-ignore lint/suspicious/noExplicitAny: public API shape
