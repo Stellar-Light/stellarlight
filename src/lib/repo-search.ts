@@ -216,6 +216,13 @@ const STOPWORDS = new Set<string>([
 	// ~10/15 verticals in the sweep. Hyphenated names ("stellar-core",
 	// "js-stellar-sdk") are single tokens and are NOT affected — only the bare word.
 	"stellar",
+	// "protocol" — same failure mode as "stellar": a generic token that name-matches
+	// any "*-protocol" repo at weight 5. "swap protocol" surfaced ZKLiquid-protocol
+	// + stellar/stellar-protocol (a governance-discussion repo); "oracle protocol"
+	// surfaced relink's Solidity/EVM contracts (not even Soroban). Verified via live
+	// isolation that "lending protocol" == "lending" (Templar wins either way — the
+	// domain term carries it), so stripping "protocol" only removes the junk.
+	"protocol",
 ]);
 
 // Content tokens for a query: length-filtered, lowercased, stopwords removed.
