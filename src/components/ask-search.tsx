@@ -346,11 +346,13 @@ export function AskSearch() {
 									</h2>
 									<Link
 										href={
-											q ? `/partners?q=${encodeURIComponent(q)}` : "/partners"
+											q
+												? `/partners/chat?q=${encodeURIComponent(q)}`
+												: "/partners"
 										}
 										className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
 									>
-										browse the partner directory →
+										{q ? "ask the partner concierge →" : "browse partners →"}
 									</Link>
 								</div>
 								<div className="grid sm:grid-cols-2 gap-3">
