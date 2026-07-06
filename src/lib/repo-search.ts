@@ -371,6 +371,40 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 			"soroswap/spacewalk-implementation",
 		],
 	},
+	// oracles / price feeds. A 10-vertical curation sweep found a DEMO
+	// (warp-driver/oracle-demo) + a Solana monitoring exporter (blockdaemon/
+	// pyth-exporter) leading while Reflector — THE canonical Stellar oracle — was
+	// absent. All verified in-index, Rust Soroban oracle contracts of curated Live
+	// projects (reflector/lightecho/dia/band).
+	{
+		test: /\boracle\b|\bprice[\s-]?feed\b|\bdata[\s-]?feed\b/,
+		repos: [
+			"reflector-network/reflector-contract",
+			"bp-ventures/lightecho-stellar-oracle",
+			"diadata-org/soroban-oracle-feeders",
+			"bandprotocol/band-std-reference-contracts-soroban",
+		],
+	},
+	// AMM / DEX. soroswap/core (the canonical Soroswap AMM Factory/Router/Pair
+	// contracts) + phoenix-contracts (Phoenix DEX) are buried under frontends on
+	// the bare query because the contract repos don't self-tag "amm". Both
+	// verified in-index (Rust, soroban-sdk). Excludes bare "swap" from the test so
+	// it doesn't collide with the cross-chain-bridge vertical.
+	{
+		test: /\bamm\b|\bdex\b|\bliquidity\s*pool\b/,
+		repos: ["soroswap/core", "phoenix-protocol-group/phoenix-contracts"],
+	},
+	// DAO / governance. A DeFi vault (dogstarapps/arka.fund) + an agent wallet
+	// (OrbitSafe) led on authority over soroban-governor — the canonical Soroban
+	// Governor DAO framework. All verified in-index, real Stellar governance repos.
+	{
+		test: /\bdao\b|\bgovernance\b|\bgovernor\b/,
+		repos: [
+			"script3/soroban-governor",
+			"Consulting-Manao/tansu",
+			"reflector-network/reflector-dao-contract",
+		],
+	},
 ];
 
 // Curated flagship repos for a query, priority order, deduped. Empty for queries
