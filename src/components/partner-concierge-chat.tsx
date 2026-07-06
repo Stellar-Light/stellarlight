@@ -52,6 +52,10 @@ interface Msg {
 	role: "user" | "assistant";
 	content: string;
 	matches?: PublicPartner[];
+	/** Set when the assistant classified the turn as a general ecosystem
+	 * question (intent="chat") — renders a "Research question? Ask Stellar →"
+	 * chip carrying the user's question to /ask. */
+	askNudge?: string;
 }
 type Fields = Record<string, unknown>;
 
@@ -179,7 +183,12 @@ export function PartnerConciergeChat({
 
 	async function callAssistant(
 		msgs: Msg[],
-	): Promise<{ reply: string; matches?: PublicPartner[]; canList?: boolean } | null> {
+	): Promise<{
+		reply: string;
+		matches?: PublicPartner[];
+		canList?: boolean;
+		intent?: string;
+	} | null> {
 		setError(null);
 		const r = await fetch("/api/partners/assistant", {
 			method: "POST",
@@ -201,7 +210,7 @@ export function PartnerConciergeChat({
 			setError("The assistant hit a snag — browse the directory below instead.");
 			return null;
 		}
-		return { reply: d.reply, matches: d.matches, canList: d.canList };
+		return { reply: d.reply, matches: d.matches, canList: d.canList, intent: d.intent };
 	}
 
 	// Seed the conversation: a handed-off question (from the directory's Ask
@@ -220,7 +229,12 @@ export function PartnerConciergeChat({
 				if (res?.reply) {
 					setMessages((m) => [
 						...m,
-						{ role: "assistant", content: res.reply, matches: res.matches },
+						{
+							role: "assistant",
+							content: res.reply,
+							matches: res.matches,
+							askNudge: res.intent === "chat" ? handoff : undefined,
+						},
 					]);
 					if (res.canList) setCanList(true);
 				}
@@ -253,7 +267,12 @@ export function PartnerConciergeChat({
 		if (res?.reply) {
 			setMessages((m) => [
 				...m,
-				{ role: "assistant", content: res.reply, matches: res.matches },
+				{
+					role: "assistant",
+					content: res.reply,
+					matches: res.matches,
+					askNudge: res.intent === "chat" ? text.trim() : undefined,
+				},
 			]);
 			if (res.canList) setCanList(true);
 		}
@@ -484,6 +503,16 @@ export function PartnerConciergeChat({
 								{m.matches.map((p) => (
 									<MatchCard key={p.slug} p={p} />
 								))}
+							</div>
+						)}
+						{m.askNudge && (
+							<div className="flex justify-start">
+								<Link
+									href={`/ask?q=${encodeURIComponent(m.askNudge)}`}
+									className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+								>
+									Research question? Ask Stellar →
+								</Link>
 							</div>
 						)}
 					</div>
