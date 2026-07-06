@@ -201,8 +201,21 @@ const STOPWORDS = new Set<string>([
 	// question words
 	"what", "which", "how", "why", "where", "when", "who", "whose", "whom", "whether",
 	// generic NL-question verbs (no domain words)
-	"work", "works", "working", "use", "uses", "used", "using",
+	"work", "works", "working", "use", "uses", "used", "using", "build",
 	"explain", "describe", "tell", "show", "mean", "means", "need", "want", "know",
+	// superlatives / recommendation filler ("what is the BEST/TOP X"). A 15-vertical
+	// live sweep proved these distort ranking not just as filler but by literal
+	// description match — soroban-governor's desc says "popular Governor DAO" so
+	// "popular" name-matched it into wallet results; hot-dao/public-good-proposals
+	// won "good passkey" via "good".
+	"best", "top", "good", "better", "popular", "recommended", "great", "ideal",
+	// "stellar" — the ecosystem name. Every repo in this index is Stellar, so the
+	// bare token carries ~zero discriminating signal but maximum pollution: it
+	// name-matches high-authority OFF-topic repos (StellarPay402 score 85, an
+	// agent-payment API) and floats them over the real vertical winner across
+	// ~10/15 verticals in the sweep. Hyphenated names ("stellar-core",
+	// "js-stellar-sdk") are single tokens and are NOT affected — only the bare word.
+	"stellar",
 ]);
 
 // Content tokens for a query: length-filtered, lowercased, stopwords removed.
