@@ -206,6 +206,40 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [resetSent, setResetSent] = useState(false);
+	// Primary path = emailed sign-in link (nobody was ever handed a password);
+	// the password form is a secondary toggle for partners who set one.
+	const [linkSent, setLinkSent] = useState(false);
+	const [usePassword, setUsePassword] = useState(false);
+
+	const inputCls =
+		"w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all";
+
+	async function sendLink(e: React.FormEvent) {
+		e.preventDefault();
+		setSubmitting(true);
+		setError(null);
+		try {
+			const res = await fetch("/api/partners/magic-link", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email }),
+			});
+			if (res.status === 429) {
+				setError("Too many requests — try again in a few minutes.");
+				return;
+			}
+			if (!res.ok) {
+				setError("Enter a valid email address.");
+				return;
+			}
+			// Constant response server-side — never reveals whether an account exists.
+			setLinkSent(true);
+		} catch {
+			setError("Something went wrong. Try again.");
+		} finally {
+			setSubmitting(false);
+		}
+	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault();
@@ -253,13 +287,15 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 	return (
 		<div className="max-w-md">
 			<form
-				onSubmit={submit}
+				onSubmit={usePassword ? submit : sendLink}
 				className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-5"
 			>
 				<div>
 					<h2 className="text-lg font-semibold text-foreground">Sign in</h2>
 					<p className="text-sm text-muted-foreground mt-1">
-						Use the credentials Stellar Light shared with you.
+						{usePassword
+							? "Sign in with your email and password."
+							: "Enter your work email — if it matches your company's listing we'll email you a sign-in link. Also how you claim an unclaimed profile."}
 					</p>
 				</div>
 				<Field label="Email">
@@ -268,22 +304,30 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 						value={email}
 						required
 						onChange={(e) => setEmail(e.target.value)}
-						className="w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all"
+						className={inputCls}
 						placeholder="you@company.com"
 					/>
 				</Field>
-				<Field label="Password">
-					<input
-						type="password"
-						value={password}
-						required
-						onChange={(e) => setPassword(e.target.value)}
-						className="w-full h-11 rounded-xl bg-white/[0.02] border border-border px-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.12)] transition-all"
-						placeholder="••••••••"
-					/>
-				</Field>
+				{usePassword && (
+					<Field label="Password">
+						<input
+							type="password"
+							value={password}
+							required
+							onChange={(e) => setPassword(e.target.value)}
+							className={inputCls}
+							placeholder="••••••••"
+						/>
+					</Field>
+				)}
 				{error && <div className="text-xs text-red-400">{error}</div>}
-				{resetSent && (
+				{linkSent && !usePassword && (
+					<div className="text-xs text-emerald-400">
+						If that email matches a partner account, a sign-in link is on its
+						way — check your inbox (and spam). Links expire in 7 days.
+					</div>
+				)}
+				{resetSent && usePassword && (
 					<div className="text-xs text-emerald-400">
 						If that email has a partner account, a reset link is on its way.
 					</div>
@@ -293,15 +337,35 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 					disabled={submitting}
 					className="w-full h-11 rounded-xl bg-foreground text-background font-medium text-sm disabled:opacity-50 transition-opacity"
 				>
-					{submitting ? "Signing in…" : "Sign in"}
+					{submitting
+						? usePassword
+							? "Signing in…"
+							: "Sending…"
+						: usePassword
+							? "Sign in"
+							: "Email me a sign-in link"}
 				</button>
-				<button
-					type="button"
-					onClick={forgotPassword}
-					className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-				>
-					Forgot password?
-				</button>
+				<div className="flex items-center justify-center gap-4">
+					<button
+						type="button"
+						onClick={() => {
+							setUsePassword((v) => !v);
+							setError(null);
+						}}
+						className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						{usePassword ? "Email me a link instead" : "Have a password?"}
+					</button>
+					{usePassword && (
+						<button
+							type="button"
+							onClick={forgotPassword}
+							className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Forgot password?
+						</button>
+					)}
+				</div>
 			</form>
 			<p className="text-xs text-muted-foreground mt-4">
 				Not a partner yet?{" "}

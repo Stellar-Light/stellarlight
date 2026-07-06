@@ -1,4 +1,9 @@
 import type { CollectionConfig, Field, Where } from "payload";
+import {
+	isPlaceholderEmail,
+	mintPartnerLoginToken,
+	sendPartnerInviteEmail,
+} from "../lib/partner-invite";
 import { getAppUrl } from "../lib/utils/app-url";
 import { generateSlug } from "../lib/utils/normalize";
 
@@ -40,14 +45,8 @@ import { generateSlug } from "../lib/utils/normalize";
 const isAdmin = (user: { collection?: string } | null | undefined) =>
 	user?.collection === "users";
 
-/**
- * Seeded/curated partners carry a `curated+<slug>@stellarlight.xyz` placeholder
- * login (see scripts/enrich-partners-toml.ts). It's not a real inbox, so the
- * invite hook must never mail it — and swapping it for a real address is how an
- * admin approves a claim.
- */
-const isPlaceholderEmail = (email: string | null | undefined): boolean =>
-	!email || (email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
+// Placeholder-email + token/email plumbing lives in src/lib/partner-invite.ts,
+// shared with the /api/partners/magic-link sign-in route.
 
 /**
  * Partner-editable field. We mark the system-owned ones explicitly instead
@@ -219,29 +218,17 @@ export const Partners: CollectionConfig = {
 					if (justPublished && doc.invitedAt && doc.email === previousDoc?.email)
 						return;
 
-					const token = await req.payload.forgotPassword({
-						collection: "partner-accounts",
-						data: { email: doc.email },
-						disableEmail: true, // we compose our own invite copy below
-						expiration: 7 * 24 * 60 * 60 * 1000, // 7d — default 1h is too short for an invite
-						req,
-					});
-					const base = getAppUrl();
-					const url = `${base}/partners/reset-password?token=${token}`;
-					await req.payload.sendEmail({
-						to: doc.email,
-						subject: "You're live on Stellar Light — set your password",
-						text: [
-							`${doc.name} is now yours to manage in the Stellar Light partner directory.`,
-							"",
-							`Set your password to edit your profile: ${url}`,
-							"",
-							`Your profile: ${base}/partners/${doc.slug}`,
-							`Your dashboard: ${base}/partners/dashboard`,
-							"",
-							"This link expires in 7 days.",
-						].join("\n"),
-					});
+					const token = await mintPartnerLoginToken(req.payload, doc.email, req);
+					if (!token) {
+						// forgotPassword fails silently when no account matches — a
+						// race here would otherwise mail a link with a null token.
+						req.payload.logger.warn(
+							{ partner: doc?.slug },
+							"partner invite: no token minted (account not found?)",
+						);
+						return;
+					}
+					await sendPartnerInviteEmail(req.payload, doc, token);
 					// Stamp invitedAt + clear the (now-actioned) claim request.
 					await req.payload.update({
 						collection: "partner-accounts",
