@@ -175,6 +175,46 @@ function wordy(s: string): string {
 		.toLowerCase();
 }
 
+// Natural-language filler that must NOT be scored as a query term. A question
+// wrapper ("what does X do", "how does Y work", "explain Z") otherwise lets a
+// repo whose description merely contains "what"/"do"/"work" outrank the real
+// name match — and the multi-term coverage multiplier compounds it, so two
+// filler matches (2×3 ×1.3 = 7.8) beat one weight-5 name hit. Real case: q="what
+// does blend-contracts backstop module do" ranked xycloo/soroban-events-guide
+// (desc: "What are events and how do they work?") above blend-contracts-v2.
+// Closed-class function words + question words + auxiliaries + a short set of
+// generic NL-question verbs. Deliberately NO domain words (contract, module,
+// pool, swap, token…) so vertical queries are untouched.
+const STOPWORDS = new Set<string>([
+	// articles, conjunctions, prepositions
+	"the", "and", "or", "of", "to", "in", "on", "for", "with", "by", "from", "at", "as",
+	"into", "onto", "over", "under", "about", "between", "across", "through", "per", "via", "vs",
+	// pronouns / determiners
+	"it", "its", "this", "that", "these", "those", "they", "them", "their", "there", "here",
+	"you", "we", "my", "your", "our", "his", "her", "me", "us", "an",
+	"any", "some", "all", "each", "both", "no",
+	// to-be / auxiliaries / modals
+	"is", "are", "was", "were", "be", "been", "being", "am",
+	"do", "does", "did", "doing", "done",
+	"has", "have", "had", "having",
+	"can", "could", "should", "would", "will", "shall", "may", "might", "must",
+	// question words
+	"what", "which", "how", "why", "where", "when", "who", "whose", "whom", "whether",
+	// generic NL-question verbs (no domain words)
+	"work", "works", "working", "use", "uses", "used", "using",
+	"explain", "describe", "tell", "show", "mean", "means", "need", "want", "know",
+]);
+
+// Content tokens for a query: length-filtered, lowercased, stopwords removed.
+// Guard: a query that is ALL stopwords ("how does it work") keeps its originals
+// so it still searches (degenerate but non-empty). Exported so /api/projects/
+// search and tests share the exact tokenization.
+export function contentTokens(q: string): string[] {
+	const raw = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+	const content = raw.filter((t) => !STOPWORDS.has(t));
+	return content.length ? content : raw;
+}
+
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
 const SDF_OWNERS = new Set([
@@ -291,7 +331,7 @@ export async function searchRepos(
 	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
 	if (!payload) return { repos: [], total: 0, canonical: [] };
 	try {
-		const tokens = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+		const tokens = contentTokens(q);
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
 		// repos, not the whole collection. It grew past 2,000 docs and pulling
 		// them all (each with a README excerpt) on every call timed the endpoint
