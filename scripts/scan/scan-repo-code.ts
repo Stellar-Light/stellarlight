@@ -30,7 +30,7 @@ import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeFarmScore } from "../../src/lib/code-signals";
-import { createGh, fetchRepoCode } from "./fetch-repo-code";
+import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -41,7 +41,7 @@ const argOf = (name: string, dflt: string) => {
 };
 const LIMIT = Math.max(1, Number(argOf("--limit", "60")) || 60);
 const LANG = argOf("--lang", "Rust");
-const CALL_BUDGET = Math.max(100, Number(argOf("--budget", "800")) || 800);
+const CALL_BUDGET = Math.max(100, Number(argOf("--budget", "650")) || 650);
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
 if (!GH) {
@@ -178,6 +178,14 @@ async function main() {
 				}
 			}
 		} catch (e) {
+			// Hard rate limit → STOP the wave; leave this repo (and the rest)
+			// pending, not error. Prevents burning scan slots on a token-exhaustion
+			// artifact (e.g. stellar/rs-soroban-sdk → blob-unreadable at the tail).
+			if (e instanceof RateLimitError || (e as Error).message?.includes("RATE_LIMIT")) {
+				budgetStopped = true;
+				console.log(`\n⏸ GitHub rate limit hit — stopping wave (repos stay pending, retry next wave).`);
+				break;
+			}
 			callsUsed += 4;
 			data = errorToWrite((e as Error).message, nowIso);
 			errored++;

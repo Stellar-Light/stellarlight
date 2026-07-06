@@ -20,6 +20,16 @@ export interface TreeEntry {
 
 export type Gh = (url: string) => Promise<Response>;
 
+/** Thrown when the GitHub token is hard rate-limited with a far-off reset —
+ * the scanner catches this to STOP the wave cleanly (leaving repos pending)
+ * rather than mark each throttled repo as a scan error. */
+export class RateLimitError extends Error {
+	constructor() {
+		super("RATE_LIMIT_EXHAUSTED");
+		this.name = "RateLimitError";
+	}
+}
+
 /** GitHub REST fetcher with rate-limit backoff. Token from GITHUB_TOKEN/GH_TOKEN. */
 export function createGh(token: string): Gh {
 	return async (url: string) => {
@@ -28,16 +38,29 @@ export function createGh(token: string): Gh {
 				headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "user-agent": "sl-code-scan" },
 			});
 			if (res.status === 403 || res.status === 429) {
+				// Distinguish a HARD rate limit (remaining=0) from a plain
+				// forbidden 403 (private/blocked repo). Only the former should
+				// halt the wave — a forbidden repo is a genuine per-repo error.
+				const remaining = res.headers.get("x-ratelimit-remaining");
 				const reset = Number(res.headers.get("x-ratelimit-reset") ?? 0) * 1000;
 				const wait = Math.max(1000, reset - Date.now());
-				if (wait < 60_000) {
-					await new Promise((r) => setTimeout(r, wait));
-					continue;
+				if (remaining === "0" || res.status === 429) {
+					if (wait < 60_000) {
+						await new Promise((r) => setTimeout(r, wait));
+						continue;
+					}
+					// Reset is far off — don't error out individual repos (which
+					// would burn their scan slot on a rate-limit artifact, e.g.
+					// stellar/rs-soroban-sdk → blob-unreadable). Signal the wave to
+					// stop cleanly; the repos stay pending and retry next wave.
+					throw new RateLimitError();
 				}
+				// Not a rate limit → a real forbidden 403; let the caller treat it
+				// as an unreadable blob (per-repo error, correctly).
 			}
 			return res;
 		}
-		throw new Error(`gh ${url} rate-limited`);
+		throw new RateLimitError();
 	};
 }
 
