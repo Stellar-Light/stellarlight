@@ -4,9 +4,9 @@ import Link from "next/link";
 import { PartnerConciergeChat } from "@/components/partner-concierge-chat";
 
 export const metadata: Metadata = {
-	title: "List your company | Stellar Partners",
+	title: "Partner concierge | Stellar Partners",
 	description:
-		"Get your company listed in the Stellar partner directory — a short AI-guided chat, no account needed. Finding a partner happens right on /partners.",
+		"Describe what you're building and get matched to real Stellar partners — anchors, ramps, auditors, infrastructure. Or list your own company. A short AI-guided chat, no account needed.",
 };
 
 export default async function PartnerConciergePage({
@@ -38,16 +38,17 @@ export default async function PartnerConciergePage({
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Tell me about your company to get listed in the partner directory —
-						a short guided chat, no account needed. Looking for a partner
-						instead? Ask right on the{" "}
+						Describe what you&apos;re building and I&apos;ll match you to real
+						partners — anchors, ramps, auditors, infrastructure. Or tell me
+						about your own company to get listed. No account needed. Prefer to
+						browse?{" "}
 						<Link
 							href="/partners"
 							className="text-foreground underline underline-offset-2 hover:no-underline"
 						>
-							directory page
+							See the full directory
 						</Link>
-						, or continue a follow-up conversation here.
+						.
 					</p>
 				</div>
 

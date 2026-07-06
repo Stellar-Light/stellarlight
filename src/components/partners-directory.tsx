@@ -1,38 +1,31 @@
 "use client";
 
 /**
- * Public partner directory — ONE page, browse-first with an inline ask.
+ * Public partner directory — a clean, browse-first list that matches the
+ * project directory's visual language (idea-card shell, circular logo,
+ * one tag row, "View profile →" footer).
  *
- *   - typing filters the grid live (name/assets/SEPs/country/sectors/regions);
- *   - submitting a real question (Enter / the Ask button / an example chip)
- *     asks the concierge ONCE and renders a "Matched for you" panel inline
- *     above the grid — no navigation, no separate chat page for FIND;
- *   - /partners/chat remains ONLY the "get listed" onboarding surface (plus
- *     the single "ask a follow-up" continuation link from the inline panel).
+ * ONE job: browse + filter. The search box ONLY filters the grid (name,
+ * assets, SEPs, country, sectors, regions) — it never asks anything. Finding
+ * a partner by describing a need lives on its own page, the concierge
+ * (/partners/chat), reached by an obvious button. Listing a company lives on
+ * that same concierge. Managing your profile is "Partner login". Three clearly
+ * separate doors — no more search-vs-ask confusion.
  *
- * Visual language matches the site's directory pages: dropdown filters
- * (Radix DropdownMenu on desktop, Drawer bottom-sheet on mobile — the
- * leaderboard/directory pattern), 3-col card grid, Title-Case tags.
  * Human twin of GET /api/partners.
  */
 
 import {
-	ArrowUpRight,
+	ArrowRight,
 	ChevronDown,
 	Globe,
-	Loader2,
+	LogIn,
 	Search,
 	Sparkles,
 	Tag,
 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-	MatchCard,
-	type PublicPartner,
-	renderMarkdownBold,
-} from "@/components/partner-concierge-chat";
+import { useMemo, useState } from "react";
 import {
 	Drawer,
 	DrawerContent,
@@ -54,7 +47,6 @@ import {
 	rampLabel,
 	regionLabel,
 	sectorLabel,
-	sepLabel,
 	typeLabel,
 } from "@/lib/partner-labels";
 import { cn } from "@/lib/utils";
@@ -77,18 +69,10 @@ interface DirectoryPartner {
 	freshness: { status: string };
 	verified: { scfInvolvement: string | null; onchainActive: boolean | null };
 	websiteUrl: string | null;
-	/** Pilot cohort — featured first with a badge. */
 	pilot: boolean;
 	/** Passes the directory quality bar (default view shows only these). */
 	quality: boolean;
 }
-
-const EXAMPLES = [
-	"I need a USDC off-ramp in Mexico",
-	"Who can audit my Soroban contract?",
-	"EUR on/off ramp with SEP-24",
-	"Tokenized treasury assets",
-];
 
 const TYPE_OPTIONS = [
 	{ value: "all", label: "All types" },
@@ -109,72 +93,17 @@ const REGION_OPTIONS = [{ value: "all", label: "All regions" }].concat(
 const btnBase =
 	"h-11 px-4 inline-flex items-center justify-between gap-2 rounded-xl bg-card border border-border/50 text-foreground hover:bg-white/[0.04] transition-colors";
 
-type AskState =
-	| { kind: "idle" }
-	| { kind: "loading"; need: string }
-	| { kind: "answer"; need: string; reply: string; matches: PublicPartner[] }
-	| { kind: "unavailable"; need: string };
-
 export function PartnersDirectory({
 	initial,
 }: {
 	initial: DirectoryPartner[];
 }) {
-	const searchParams = useSearchParams();
 	const [typeFilter, setTypeFilter] = useState("all");
 	const [regionFilter, setRegionFilter] = useState("all");
 	const [showAll, setShowAll] = useState(false);
 	const [query, setQuery] = useState("");
-	const [askState, setAskState] = useState<AskState>({ kind: "idle" });
 	const [typeDrawerOpen, setTypeDrawerOpen] = useState(false);
 	const [regionDrawerOpen, setRegionDrawerOpen] = useState(false);
-	const askAbort = useRef<AbortController | null>(null);
-	// Handoff (?q= from /ask) runs exactly once.
-	const handedOff = useRef(false);
-
-	/** One-shot concierge FIND — inline, no navigation. */
-	async function runAsk(needRaw: string) {
-		const need = needRaw.trim();
-		if (!need) return;
-		askAbort.current?.abort();
-		const ac = new AbortController();
-		askAbort.current = ac;
-		setAskState({ kind: "loading", need });
-		try {
-			const r = await fetch("/api/partners/assistant", {
-				method: "POST",
-				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ messages: [{ role: "user", content: need }] }),
-				signal: ac.signal,
-			});
-			const d = await r.json().catch(() => ({}));
-			if (ac.signal.aborted) return;
-			if (!r.ok || d.unavailable || typeof d.reply !== "string") {
-				setAskState({ kind: "unavailable", need });
-				return;
-			}
-			setAskState({
-				kind: "answer",
-				need,
-				reply: d.reply,
-				matches: Array.isArray(d.matches) ? d.matches : [],
-			});
-		} catch {
-			if (!ac.signal.aborted) setAskState({ kind: "unavailable", need });
-		}
-	}
-
-	// /ask hands off with ?q= — land mid-answer, client-side (page stays static).
-	useEffect(() => {
-		if (handedOff.current) return;
-		handedOff.current = true;
-		const q = searchParams.get("q")?.trim();
-		if (q) {
-			setQuery(q);
-			runAsk(q);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	// Type/region/query matcher WITHOUT the quality gate — shared by the visible
 	// list and the hidden-count so "view all" stays accurate per-filter.
@@ -201,7 +130,7 @@ export function PartnersDirectory({
 		};
 	}, [typeFilter, regionFilter, query]);
 
-	const filtered = useMemo(
+	const visible = useMemo(
 		() => initial.filter((p) => matchesFilters(p) && (showAll || p.quality)),
 		[initial, matchesFilters, showAll],
 	);
@@ -213,13 +142,8 @@ export function PartnersDirectory({
 		[initial, matchesFilters, showAll],
 	);
 
-	// Featured pilots lead ONLY in the pure browse state; once the user filters
-	// or asks, pilots simply sort first in the normal grid (page.tsx sort).
-	const browsing =
-		typeFilter === "all" && regionFilter === "all" && !query.trim();
-	const featured = browsing ? filtered.filter((p) => p.pilot) : [];
-	const rest = browsing ? filtered.filter((p) => !p.pilot) : filtered;
-
+	const hasFilters =
+		query.trim() !== "" || typeFilter !== "all" || regionFilter !== "all";
 	const typeSelectedLabel =
 		TYPE_OPTIONS.find((o) => o.value === typeFilter)?.label ?? "All types";
 	const regionSelectedLabel =
@@ -227,76 +151,65 @@ export function PartnersDirectory({
 		"All regions";
 
 	return (
-		<main className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16">
-			{/* Hero */}
-			<div className="mb-8">
-				<div className="flex items-center gap-3 flex-wrap">
-					<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-						Stellar Partners
-					</h1>
-					<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
-						Beta
-					</span>
+		<main className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-16">
+			{/* Hero + login */}
+			<div className="mb-6 flex items-start justify-between gap-4">
+				<div className="min-w-0">
+					<div className="flex items-center gap-3 flex-wrap">
+						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+							Stellar Partners
+						</h1>
+						<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
+							Beta
+						</span>
+					</div>
+					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
+						Anchors, ramps, auditors, infrastructure and protocols builders can
+						integrate with — each profile partner-maintained and
+						freshness-checked.
+					</p>
 				</div>
-				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Anchors, ramps, auditors, infrastructure — browse the directory or ask
-					for a match. Are you a partner?{" "}
-					<Link
-						href="/partners/chat"
-						className="text-foreground underline underline-offset-2 hover:no-underline"
-					>
-						List your company →
-					</Link>
-				</p>
+				<Link
+					href="/partners/dashboard"
+					className="hidden sm:inline-flex h-9 px-3.5 items-center gap-1.5 rounded-lg border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors flex-shrink-0"
+				>
+					<LogIn className="w-3.5 h-3.5" />
+					Partner login
+				</Link>
 			</div>
 
-			{/* Search: typing filters live, submitting asks inline */}
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					runAsk(query);
-				}}
-				className="relative mb-3"
+			{/* Concierge CTA — a clearly distinct DOOR, not another search box */}
+			<Link
+				href="/partners/chat"
+				className="group flex items-center gap-3 mb-6 p-4 rounded-xl border border-border bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.03] transition-colors"
 			>
+				<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] flex-shrink-0">
+					<Sparkles className="w-4 h-4 text-foreground" />
+				</span>
+				<span className="min-w-0 flex-1">
+					<span className="block text-sm font-semibold text-foreground">
+						Not sure who you need? Ask the concierge
+					</span>
+					<span className="block text-xs text-muted-foreground">
+						Describe what you&apos;re building and get matched to real partners
+						— or list your own company.
+					</span>
+				</span>
+				<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+			</Link>
+
+			{/* Search — filters the grid live (no ask, no navigation) */}
+			<form onSubmit={(e) => e.preventDefault()} className="relative mb-3">
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					value={query}
-					onChange={(e) => {
-						setQuery(e.target.value);
-						if (askState.kind !== "idle") setAskState({ kind: "idle" });
-					}}
-					placeholder="Search the directory — or describe what you need and press Ask"
-					className="w-full h-11 pl-11 pr-24 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border outline-none transition-[border-color,box-shadow] duration-150 focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.10)]"
-					aria-label="Search partners or describe what you need"
+					onChange={(e) => setQuery(e.target.value)}
+					placeholder="Search partners by name, asset, region…"
+					className="w-full h-11 pl-11 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border outline-none transition-[border-color,box-shadow] duration-150 focus:border-white/30 focus:shadow-[0_0_0_3px_rgba(253,218,36,0.10)]"
+					aria-label="Search partners"
 				/>
-				<button
-					type="submit"
-					disabled={!query.trim() || askState.kind === "loading"}
-					className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground disabled:opacity-30 transition-colors"
-					title="Ask for a match — answered right here"
-				>
-					<Sparkles className="w-3.5 h-3.5" />
-					Ask
-				</button>
 			</form>
-
-			{/* Example asks — answered inline */}
-			<div className="flex flex-wrap gap-2 mb-5">
-				{EXAMPLES.map((ex) => (
-					<button
-						key={ex}
-						type="button"
-						onClick={() => {
-							setQuery(ex);
-							runAsk(ex);
-						}}
-						className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
-					>
-						{ex}
-					</button>
-				))}
-			</div>
 
 			{/* Filters — site-standard dropdowns (desktop) / drawers (mobile) */}
 			<div className="mb-8">
@@ -350,6 +263,20 @@ export function PartnersDirectory({
 							))}
 						</DropdownMenuContent>
 					</DropdownMenu>
+
+					{hasFilters && (
+						<button
+							type="button"
+							onClick={() => {
+								setQuery("");
+								setTypeFilter("all");
+								setRegionFilter("all");
+							}}
+							className="h-11 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Clear
+						</button>
+					)}
 				</div>
 
 				<div className="md:hidden grid grid-cols-2 gap-2">
@@ -433,99 +360,17 @@ export function PartnersDirectory({
 				</div>
 			</div>
 
-			{/* Inline concierge answer */}
-			{askState.kind === "loading" && (
-				<section className="mb-8 rounded-xl border border-border bg-card p-5">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<Loader2 className="w-4 h-4 animate-spin" />
-						Matching “{askState.need}”…
-					</div>
-				</section>
-			)}
-			{askState.kind === "unavailable" && (
-				<section className="mb-8 rounded-xl border border-border bg-card p-4">
-					<p className="text-xs text-muted-foreground">
-						The concierge is busy right now — showing keyword matches below.
-					</p>
-				</section>
-			)}
-			{askState.kind === "answer" && (
-				<section className="mb-8 rounded-xl border border-white/15 bg-white/[0.02] p-5">
-					<div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-						<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-							Matched for you
-						</h2>
-						<div className="flex items-center gap-4">
-							<Link
-								href={`/partners/chat?q=${encodeURIComponent(askState.need)}`}
-								className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-							>
-								Ask a follow-up →
-							</Link>
-							<button
-								type="button"
-								onClick={() => setAskState({ kind: "idle" })}
-								className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-							>
-								Clear
-							</button>
-						</div>
-					</div>
-					<p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap mb-3">
-						{renderMarkdownBold(askState.reply)}
-					</p>
-					{askState.matches.length > 0 && (
-						<div className="grid md:grid-cols-2 gap-2.5">
-							{askState.matches.map((p) => (
-								<MatchCard key={p.slug} p={p} />
-							))}
-						</div>
-					)}
-				</section>
-			)}
-
-			{/* Featured pilots — pure browse state only */}
-			{featured.length > 0 && (
-				<section className="mb-10">
-					<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-						Featured
-					</h2>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{featured.map((p) => (
-							<PartnerCard key={p.slug} p={p} isFeatured />
-						))}
-					</div>
-				</section>
-			)}
-
 			{/* Results header */}
-			<div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+			<div className="flex items-center justify-between gap-3 mb-4">
 				<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-					{rest.length === 0
+					{visible.length === 0
 						? "No partners match"
-						: browsing && featured.length > 0
-							? `All partners (${rest.length})`
-							: `${rest.length} partner${rest.length === 1 ? "" : "s"}`}
+						: `${visible.length} partner${visible.length === 1 ? "" : "s"}`}
 				</h2>
-				{rest.length === 0 &&
-					(query || typeFilter !== "all" || regionFilter !== "all") && (
-						<button
-							type="button"
-							onClick={() => {
-								setQuery("");
-								setTypeFilter("all");
-								setRegionFilter("all");
-								setAskState({ kind: "idle" });
-							}}
-							className="text-xs text-muted-foreground hover:text-foreground underline"
-						>
-							Clear filters
-						</button>
-					)}
 			</div>
 
 			{/* Empty state */}
-			{rest.length === 0 && featured.length === 0 && (
+			{visible.length === 0 && (
 				<div className="rounded-2xl border border-border bg-card p-10 text-center">
 					<p className="text-muted-foreground text-sm">
 						{hiddenCount > 0 ? (
@@ -536,7 +381,7 @@ export function PartnersDirectory({
 									onClick={() => setShowAll(true)}
 									className="text-foreground underline"
 								>
-									View all {hiddenCount} unclaimed{" "}
+									View all {hiddenCount}{" "}
 									{hiddenCount === 1 ? "profile" : "profiles"}
 								</button>{" "}
 								or{" "}
@@ -544,7 +389,7 @@ export function PartnersDirectory({
 									href="/partners/chat"
 									className="text-foreground underline"
 								>
-									get your company listed
+									ask the concierge
 								</Link>
 								.
 							</>
@@ -555,7 +400,7 @@ export function PartnersDirectory({
 									href="/partners/chat"
 									className="text-foreground underline"
 								>
-									get your company listed
+									ask the concierge
 								</Link>
 								.
 							</>
@@ -564,163 +409,147 @@ export function PartnersDirectory({
 				</div>
 			)}
 
-			{/* Cards */}
+			{/* Cards — same grid + shell as the project directory */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-				{rest.map((p) => (
+				{visible.map((p) => (
 					<PartnerCard key={p.slug} p={p} />
 				))}
 			</div>
 
-			{/* Quiet view-all — replaces the old toggle button */}
-			{!showAll && hiddenCount > 0 && rest.length > 0 && (
+			{/* Quiet view-all — surfaces unclaimed/thin profiles on demand */}
+			{!showAll && hiddenCount > 0 && visible.length > 0 && (
 				<div className="mt-8 text-center">
 					<button
 						type="button"
 						onClick={() => setShowAll(true)}
 						className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
 					>
-						view all {filtered.length + hiddenCount} partners →
+						view {hiddenCount} more {hiddenCount === 1 ? "profile" : "profiles"}{" "}
+						→
 					</button>
 				</div>
 			)}
 
 			{/* Get-listed CTA */}
-			{rest.length > 0 && (
-				<div className="mt-12 rounded-2xl border border-border bg-card p-5 flex items-center justify-between gap-4 flex-wrap">
-					<div className="min-w-0">
-						<div className="flex items-center gap-2 mb-1">
-							<Sparkles className="w-4 h-4 text-muted-foreground" />
-							<h3 className="text-sm font-semibold text-foreground">
-								Are you a Stellar partner?
-							</h3>
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Get listed in a short AI-guided chat — no account needed to start.
-						</p>
+			<div className="mt-12 rounded-2xl border border-border bg-card p-5 flex items-center justify-between gap-4 flex-wrap">
+				<div className="min-w-0">
+					<div className="flex items-center gap-2 mb-1">
+						<Sparkles className="w-4 h-4 text-muted-foreground" />
+						<h3 className="text-sm font-semibold text-foreground">
+							Are you a Stellar partner?
+						</h3>
 					</div>
-					<Link
-						href="/partners/chat"
-						className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
-					>
-						<Sparkles className="w-4 h-4" />
-						Get listed
-					</Link>
+					<p className="text-xs text-muted-foreground">
+						Get listed in a short AI-guided chat — no account needed to start.
+					</p>
 				</div>
-			)}
+				<Link
+					href="/partners/chat"
+					className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
+				>
+					<Sparkles className="w-4 h-4" />
+					List your company
+				</Link>
+			</div>
 		</main>
 	);
 }
 
-/** One tidy capability line, Title-Case, capped with an overflow count. */
-function capabilityTags(
-	p: DirectoryPartner,
-): { label: string; strong: boolean }[] {
-	const tags: { label: string; strong: boolean }[] = [];
-	for (const a of p.assets) tags.push({ label: a.toUpperCase(), strong: true });
-	for (const r of p.rampTypes)
-		tags.push({ label: rampLabel(r), strong: false });
-	for (const s of p.seps) tags.push({ label: sepLabel(s), strong: false });
-	if (p.country) tags.push({ label: p.country, strong: false });
-	for (const s of p.sectors)
-		tags.push({ label: sectorLabel(s), strong: false });
-	for (const r of p.regions)
-		tags.push({ label: regionLabel(r), strong: false });
-	return tags;
+/** Up to 4 capability chips, Title-Case — the useful partner facts, compact. */
+function capabilityChips(p: DirectoryPartner): string[] {
+	const chips: string[] = [];
+	for (const a of p.assets) chips.push(a.toUpperCase());
+	for (const r of p.rampTypes) chips.push(rampLabel(r));
+	if (p.country) chips.push(p.country);
+	for (const s of p.sectors) chips.push(sectorLabel(s));
+	for (const r of p.regions) chips.push(regionLabel(r));
+	// De-dupe (country can repeat a region label) and cap.
+	return [...new Set(chips)].slice(0, 4);
 }
 
-function PartnerCard({
-	p,
-	isFeatured = false,
-}: {
-	p: DirectoryPartner;
-	isFeatured?: boolean;
-}) {
-	const tags = capabilityTags(p);
-	const shown = tags.slice(0, 5);
-	const overflow = tags.length - shown.length;
+/**
+ * Partner card — mirrors ProjectCard: idea-card shell, top tag row, circular
+ * logo + name, description, "View profile →" footer. Partner-specific facts
+ * (capabilities, freshness) live in one compact row above the footer.
+ */
+function PartnerCard({ p }: { p: DirectoryPartner }) {
+	const chips = capabilityChips(p);
 	const freshLabel = FRESHNESS_LABELS[p.freshness.status];
+	const available = Boolean(p.acceptingClients && p.contactable);
 
 	return (
-		<Link
-			href={`/partners/${p.slug}`}
-			className={cn(
-				"group flex flex-col p-6 rounded-xl border transition-all hover:-translate-y-px",
-				isFeatured
-					? "bg-white/[0.03] border-white/15 hover:border-white/30"
-					: "bg-card border-border hover:border-white/25 hover:bg-white/[0.02]",
-			)}
-		>
-			<div className="flex items-start justify-between gap-3 mb-2">
-				<div className="min-w-0">
-					<div className="flex items-center gap-2 mb-1.5 flex-wrap">
-						{p.logoUrl && (
-							// Arbitrary remote domains (stellar.toml ORG_LOGO) — plain img.
-							// eslint-disable-next-line @next/next/no-img-element
-							<img
-								src={p.logoUrl}
-								alt=""
-								className="w-6 h-6 rounded-md border border-border bg-white/[0.03] object-contain flex-shrink-0"
-							/>
-						)}
-						<span className="font-semibold text-foreground group-hover:text-white transition-colors truncate">
-							{p.name}
+		<Link href={`/partners/${p.slug}`} className="block h-full group">
+			<div className="idea-card rounded-xl p-6 cursor-pointer flex flex-col h-full min-h-[200px]">
+				{/* Tag row */}
+				<div className="flex justify-between items-center gap-2 mb-4">
+					<span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border backdrop-blur-sm whitespace-nowrap">
+						{typeLabel(p.partnerType)}
+					</span>
+					{available ? (
+						<span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white/[0.06] text-foreground/80 border border-border whitespace-nowrap flex-shrink-0">
+							Available
 						</span>
-					</div>
-					<div className="flex items-center gap-1.5 flex-wrap">
-						<span className="px-2 py-0.5 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border whitespace-nowrap">
-							{typeLabel(p.partnerType)}
-						</span>
-						{p.pilot && (
-							<span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-white text-[#171717] whitespace-nowrap">
-								Pilot
-							</span>
-						)}
-						{p.acceptingClients && p.contactable && (
-							<span className="px-2 py-0.5 text-xs rounded-full bg-white/[0.06] text-foreground/80 border border-border whitespace-nowrap">
-								Available
-							</span>
-						)}
-						{freshLabel && (
+					) : (
+						freshLabel && (
 							<span
 								className={cn(
-									"px-2 py-0.5 text-xs rounded-full bg-white/[0.03] border border-border whitespace-nowrap",
+									"px-2.5 py-1 text-xs rounded-full bg-white/[0.03] border border-border whitespace-nowrap flex-shrink-0",
 									FRESHNESS_COLOR[p.freshness.status],
 								)}
 							>
 								{freshLabel}
 							</span>
-						)}
-					</div>
-				</div>
-				<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
-			</div>
-			{(p.tagline || p.description) && (
-				<p className="text-sm text-muted-foreground leading-snug line-clamp-2 mb-3 flex-1">
-					{p.tagline ?? p.description}
-				</p>
-			)}
-			{shown.length > 0 && (
-				<div className="mt-auto flex flex-wrap gap-1.5">
-					{shown.map((t) => (
-						<span
-							key={t.label}
-							className={cn(
-								"px-2 py-0.5 text-xs rounded-full border whitespace-nowrap",
-								t.strong
-									? "font-medium bg-white/[0.06] text-foreground/90 border-border"
-									: "bg-white/[0.03] text-muted-foreground border-border/50",
-							)}
-						>
-							{t.label}
-						</span>
-					))}
-					{overflow > 0 && (
-						<span className="px-1 py-0.5 text-xs text-muted-foreground/60">
-							+{overflow}
-						</span>
+						)
 					)}
 				</div>
-			)}
+
+				{/* Logo + name */}
+				<div className="flex items-center gap-3 mb-4">
+					{p.logoUrl ? (
+						// Arbitrary remote domains (stellar.toml ORG_LOGO) — plain img.
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							src={p.logoUrl}
+							alt={`${p.name} logo`}
+							className="w-[52px] h-[52px] rounded-full object-cover border border-border/50 bg-white/[0.03] transition-transform duration-150 group-hover:scale-110 group-hover:border-white/30 flex-shrink-0"
+						/>
+					) : (
+						<div className="w-[52px] h-[52px] rounded-full border border-border/50 bg-white/[0.04] flex items-center justify-center text-lg font-semibold text-muted-foreground transition-transform duration-150 group-hover:scale-110 group-hover:border-white/30 flex-shrink-0">
+							{p.name.charAt(0).toUpperCase()}
+						</div>
+					)}
+					<h3 className="text-base md:text-lg font-semibold text-foreground group-hover:text-white transition-all duration-150 leading-tight">
+						{p.name}
+					</h3>
+				</div>
+
+				{/* Description */}
+				<p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 mb-4 group-hover:text-foreground/80 transition-all duration-150">
+					{p.tagline || p.description || "No description available."}
+				</p>
+
+				{/* Capability chips */}
+				{chips.length > 0 && (
+					<div className="flex flex-wrap gap-1.5 mb-4">
+						{chips.map((c) => (
+							<span
+								key={c}
+								className="px-2 py-0.5 text-xs rounded-full bg-white/[0.03] text-muted-foreground border border-border/50 whitespace-nowrap"
+							>
+								{c}
+							</span>
+						))}
+					</div>
+				)}
+
+				{/* Footer */}
+				<div className="flex items-center justify-between pt-4 border-t border-border group-hover:border-white/20 transition-all duration-150">
+					<span className="text-sm font-medium text-foreground group-hover:text-white transition-all duration-150">
+						View profile
+					</span>
+					<ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-150" />
+				</div>
+			</div>
 		</Link>
 	);
 }
