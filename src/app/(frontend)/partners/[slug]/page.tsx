@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PartnerClaimProfile } from "@/components/partner-claim-profile";
+import { regionLabel, sectorLabel } from "@/lib/partner-labels";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
@@ -34,10 +35,22 @@ const TYPE_LABELS: Record<string, string> = {
 // Fresh is the normal state — neutral, not a green celebration. Only decay
 // states carry warning colors.
 const FRESH_BADGE: Record<string, { label: string; cls: string }> = {
-	fresh: { label: "Fresh", cls: "text-muted-foreground border-border bg-white/[0.03]" },
-	aging: { label: "Aging", cls: "text-yellow-400 border-yellow-500/30 bg-yellow-500/10" },
-	stale: { label: "Stale", cls: "text-orange-400 border-orange-500/30 bg-orange-500/10" },
-	archived: { label: "Archived", cls: "text-red-400 border-red-500/30 bg-red-500/10" },
+	fresh: {
+		label: "Fresh",
+		cls: "text-muted-foreground border-border bg-white/[0.03]",
+	},
+	aging: {
+		label: "Aging",
+		cls: "text-yellow-400 border-yellow-500/30 bg-yellow-500/10",
+	},
+	stale: {
+		label: "Stale",
+		cls: "text-orange-400 border-orange-500/30 bg-orange-500/10",
+	},
+	archived: {
+		label: "Archived",
+		cls: "text-red-400 border-red-500/30 bg-red-500/10",
+	},
 };
 
 const PRICING_LABELS: Record<string, string> = {
@@ -130,7 +143,9 @@ export default async function PartnerProfilePage({
 						<span className="text-[11px] uppercase tracking-wider text-muted-foreground border border-border/60 rounded px-2 py-0.5">
 							{TYPE_LABELS[p.partnerType] ?? p.partnerType}
 						</span>
-						<span className={`text-[10px] px-2 py-0.5 rounded-full border ${fresh.cls}`}>
+						<span
+							className={`text-[10px] px-2 py-0.5 rounded-full border ${fresh.cls}`}
+						>
 							{fresh.label}
 						</span>
 					</div>
@@ -181,7 +196,9 @@ export default async function PartnerProfilePage({
 											key={r}
 											className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-foreground/90 border border-border font-medium"
 										>
-											{r === "on-ramp" ? "On-ramp (fiat → Stellar)" : "Off-ramp (Stellar → fiat)"}
+											{r === "on-ramp"
+												? "On-ramp (fiat → Stellar)"
+												: "Off-ramp (Stellar → fiat)"}
 										</span>
 									))}
 									{p.country && (
@@ -229,8 +246,14 @@ export default async function PartnerProfilePage({
 			{(() => {
 				const cells: Array<{ label: string; value: React.ReactNode }> = [];
 				if (p.githubOrg) {
-					cells.push({ label: "Last commit", value: fmtDate(v.githubLastCommitAt) });
-					cells.push({ label: "Commits (90d)", value: v.githubCommits90d ?? "—" });
+					cells.push({
+						label: "Last commit",
+						value: fmtDate(v.githubLastCommitAt),
+					});
+					cells.push({
+						label: "Commits (90d)",
+						value: v.githubCommits90d ?? "—",
+					});
 				}
 				if (v.onchainActive != null)
 					cells.push({
@@ -270,13 +293,19 @@ export default async function PartnerProfilePage({
 				<Section title="Coverage">
 					<div className="flex flex-wrap gap-1.5">
 						{(p.sectors ?? []).map((s: string) => (
-							<span key={s} className="text-[11px] text-muted-foreground bg-white/[0.03] border border-border/40 rounded px-2 py-0.5">
-								{s}
+							<span
+								key={s}
+								className="text-[11px] text-muted-foreground bg-white/[0.03] border border-border/40 rounded px-2 py-0.5"
+							>
+								{sectorLabel(s)}
 							</span>
 						))}
 						{(p.regions ?? []).map((r: string) => (
-							<span key={r} className="text-[11px] text-muted-foreground/70 bg-white/[0.02] border border-border/30 rounded px-2 py-0.5">
-								{r}
+							<span
+								key={r}
+								className="text-[11px] text-muted-foreground/70 bg-white/[0.02] border border-border/30 rounded px-2 py-0.5"
+							>
+								{regionLabel(r)}
 							</span>
 						))}
 					</div>
@@ -288,20 +317,27 @@ export default async function PartnerProfilePage({
 				<Section title="Working together">
 					<dl className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
 						{p.acceptingClients != null && (
-							<Field label="Accepting clients" value={p.acceptingClients ? "Yes" : "Not right now"} />
+							<Field
+								label="Accepting clients"
+								value={p.acceptingClients ? "Yes" : "Not right now"}
+							/>
 						)}
 						{p.pricingModel && (
-						<Field
-							label="Pricing"
-							value={PRICING_LABELS[p.pricingModel] ?? p.pricingModel}
-						/>
-					)}
+							<Field
+								label="Pricing"
+								value={PRICING_LABELS[p.pricingModel] ?? p.pricingModel}
+							/>
+						)}
 						{p.leadTime && <Field label="Lead time" value={p.leadTime} />}
-						{p.typicalEngagement && <Field label="Engagement" value={p.typicalEngagement} />}
+						{p.typicalEngagement && (
+							<Field label="Engagement" value={p.typicalEngagement} />
+						)}
 						{p.responseSla && <Field label="Response" value={p.responseSla} />}
 					</dl>
 					{p.pricingNotes && (
-						<p className="text-xs text-muted-foreground mt-3">{p.pricingNotes}</p>
+						<p className="text-xs text-muted-foreground mt-3">
+							{p.pricingNotes}
+						</p>
 					)}
 				</Section>
 			)}
@@ -310,17 +346,26 @@ export default async function PartnerProfilePage({
 			<Section title="Links">
 				<div className="flex flex-wrap gap-2">
 					{p.websiteUrl && (
-						<LinkBtn href={p.websiteUrl} icon={<ExternalLink className="w-3.5 h-3.5" />}>
+						<LinkBtn
+							href={p.websiteUrl}
+							icon={<ExternalLink className="w-3.5 h-3.5" />}
+						>
 							Website
 						</LinkBtn>
 					)}
 					{p.docsUrl && (
-						<LinkBtn href={p.docsUrl} icon={<ExternalLink className="w-3.5 h-3.5" />}>
+						<LinkBtn
+							href={p.docsUrl}
+							icon={<ExternalLink className="w-3.5 h-3.5" />}
+						>
 							Docs
 						</LinkBtn>
 					)}
 					{p.githubOrg && (
-						<LinkBtn href={`https://github.com/${p.githubOrg}`} icon={<Github className="w-3.5 h-3.5" />}>
+						<LinkBtn
+							href={`https://github.com/${p.githubOrg}`}
+							icon={<Github className="w-3.5 h-3.5" />}
+						>
 							GitHub
 						</LinkBtn>
 					)}
@@ -342,7 +387,13 @@ export default async function PartnerProfilePage({
 	);
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+	title,
+	children,
+}: {
+	title: string;
+	children: React.ReactNode;
+}) {
 	return (
 		<section className="mb-8">
 			<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-3">

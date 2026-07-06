@@ -1,12 +1,12 @@
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { PartnerConciergeChat } from "@/components/partner-concierge-chat";
 
 export const metadata: Metadata = {
-	title: "Partner concierge | Stellar Partners",
+	title: "List your company | Stellar Partners",
 	description:
-		"Find a Stellar partner by describing what you need — anchors, on/off-ramps, infrastructure, tooling, auditors — or get your own company listed. One AI-guided chat.",
+		"Get your company listed in the Stellar partner directory — a short AI-guided chat, no account needed. Finding a partner happens right on /partners.",
 };
 
 export default async function PartnerConciergePage({
@@ -38,9 +38,16 @@ export default async function PartnerConciergePage({
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Describe what you need — a USDC off-ramp, a Soroban auditor, a wallet
-						SDK — and I&apos;ll match you with partners who actually do it. Or tell
-						me about your company to get listed. No account needed.
+						Tell me about your company to get listed in the partner directory —
+						a short guided chat, no account needed. Looking for a partner
+						instead? Ask right on the{" "}
+						<Link
+							href="/partners"
+							className="text-foreground underline underline-offset-2 hover:no-underline"
+						>
+							directory page
+						</Link>
+						, or continue a follow-up conversation here.
 					</p>
 				</div>
 

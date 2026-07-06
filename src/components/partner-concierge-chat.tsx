@@ -27,6 +27,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import {
+	REGION_LABELS,
+	SECTOR_LABELS,
+	PARTNER_TYPE_LABELS as TYPE_LABELS,
+} from "@/lib/partner-labels";
 
 export interface PublicPartner {
 	slug: string;
@@ -59,40 +64,8 @@ interface Msg {
 }
 type Fields = Record<string, unknown>;
 
-const TYPE_LABELS: Record<string, string> = {
-	anchor: "Anchor",
-	"on-off-ramp": "On/Off Ramp",
-	infrastructure: "Infrastructure",
-	tooling: "Tooling",
-	protocol: "Protocol",
-	wallet: "Wallet",
-	"audit-firm": "Audit firm",
-	legal: "Legal",
-	agency: "Agency",
-	other: "Other",
-};
-
-const SECTOR_LABELS: Record<string, string> = {
-	defi: "DeFi",
-	payments: "Payments",
-	rwa: "RWA",
-	stablecoins: "Stablecoins",
-	identity: "Identity",
-	data: "Data",
-	ai: "AI",
-	gaming: "Gaming",
-	other: "Other",
-};
-const REGION_LABELS: Record<string, string> = {
-	global: "Global",
-	"north-america": "North America",
-	latam: "LatAm",
-	europe: "Europe",
-	africa: "Africa",
-	mena: "MENA",
-	asia: "Asia",
-	oceania: "Oceania",
-};
+// Label maps live in src/lib/partner-labels.ts — shared with the directory
+// and the server-rendered profile page (single source of Title-Case truth).
 
 const FIELD_LABELS: Record<string, string> = {
 	tagline: "Tagline",
