@@ -26,8 +26,28 @@ const EXECUTE = process.argv.includes("--execute");
 // Slugs of partners the OWNER confirmed are dead/defunct (e.g. "ntokens" once
 // confirmed). Empty until the owner signs off on the dry-run output.
 const OWNER_CONFIRMED_DEAD: string[] = [];
-// Slugs of the pilot cohort (the select partners Anke tests with).
-const PILOT_SLUGS: string[] = [];
+// Slugs of the pilot cohort (the select partners Anke tests with) —
+// owner-confirmed 2026-07-06: the original pilot trio.
+const PILOT_SLUGS: string[] = ["defindex", "etherfuse", "trustless-work"];
+// Fill-only-if-EMPTY enrichment so the pilots pass the directory quality bar
+// (tagline + a contact path). Facts only: taglines condensed from their own
+// seed descriptions; websites verified live 2026-07-06 (defindex.io 200 "DeFindex:
+// Yield Infrastructure…", etherfuse.com + trustlesswork.com from their GitHub
+// org profiles). NEVER overwrites a partner-entered value.
+const PILOT_ENRICH: Record<string, { tagline: string; websiteUrl: string }> = {
+	defindex: {
+		tagline: "DeFi yield & index infrastructure on Soroban, by Palta Labs",
+		websiteUrl: "https://defindex.io",
+	},
+	etherfuse: {
+		tagline: "Local-currency stablecoins & tokenized-asset infrastructure",
+		websiteUrl: "https://www.etherfuse.com",
+	},
+	"trustless-work": {
+		tagline: "Smart-escrow infrastructure on Stellar — escrow-as-a-service",
+		websiteUrl: "https://www.trustlesswork.com",
+	},
+};
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -50,7 +70,12 @@ async function main() {
 	console.log(`Mode: ${EXECUTE ? "EXECUTE (writes)" : "DRY RUN (read-only)"}`);
 	console.log(`Partners in collection: ${docs.length}\n`);
 
-	const writes: Array<{ id: string; slug: string; data: Record<string, unknown>; note: string }> = [];
+	const writes: Array<{
+		id: string;
+		slug: string;
+		data: Record<string, unknown>;
+		note: string;
+	}> = [];
 
 	console.log("── Archive (owner-confirmed dead) ──");
 	for (const slug of OWNER_CONFIRMED_DEAD) {
@@ -63,7 +88,9 @@ async function main() {
 			console.log(`  ${d.name} (${slug}) — already archived, no-op`);
 			continue;
 		}
-		console.log(`  ${d.name} (${slug}) — freshnessStatus: ${d.freshnessStatus ?? "fresh"} → archived`);
+		console.log(
+			`  ${d.name} (${slug}) — freshnessStatus: ${d.freshnessStatus ?? "fresh"} → archived`,
+		);
 		writes.push({
 			id: d.id,
 			slug,
@@ -81,20 +108,48 @@ async function main() {
 			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
 			continue;
 		}
-		if (d.pilot === true) {
-			console.log(`  ${d.name} (${slug}) — already pilot, no-op`);
+		const data: Record<string, unknown> = {};
+		const notes: string[] = [];
+		if (d.pilot !== true) {
+			data.pilot = true;
+			notes.push("pilot on");
+		}
+		// Quality-bar enrichment — fill ONLY empty fields, never overwrite.
+		const enrich = PILOT_ENRICH[slug];
+		if (enrich) {
+			if (!d.tagline) {
+				data.tagline = enrich.tagline;
+				notes.push(`tagline → "${enrich.tagline}"`);
+			}
+			if (!d.websiteUrl) {
+				data.websiteUrl = enrich.websiteUrl;
+				notes.push(`websiteUrl → ${enrich.websiteUrl}`);
+			}
+		}
+		if (Object.keys(data).length === 0) {
+			console.log(`  ${d.name} (${slug}) — already pilot + complete, no-op`);
 			continue;
 		}
-		console.log(`  ${d.name} (${slug}) — pilot: false → true`);
-		writes.push({ id: d.id, slug, data: { pilot: true }, note: "pilot on" });
+		console.log(`  ${d.name} (${slug}) — ${notes.join(" · ")}`);
+		writes.push({ id: d.id, slug, data, note: notes.join(", ") });
 	}
 	for (const d of docs) {
 		if (d.pilot === true && !pilotSet.has(d.slug)) {
-			console.log(`  ${d.name} (${d.slug}) — pilot: true → false (not in list)`);
-			writes.push({ id: d.id, slug: d.slug, data: { pilot: false }, note: "pilot off" });
+			console.log(
+				`  ${d.name} (${d.slug}) — pilot: true → false (not in list)`,
+			);
+			writes.push({
+				id: d.id,
+				slug: d.slug,
+				data: { pilot: false },
+				note: "pilot off",
+			});
 		}
 	}
-	if (PILOT_SLUGS.length === 0) console.log("  (list empty — existing pilot flags left untouched only if none are set)");
+	if (PILOT_SLUGS.length === 0)
+		console.log(
+			"  (list empty — existing pilot flags left untouched only if none are set)",
+		);
 
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);

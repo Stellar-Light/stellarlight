@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { PartnersDirectory } from "@/components/partners-directory";
 import { profileStrength } from "@/lib/partner-match";
 import { passesQualityBar } from "@/lib/partner-quality";
@@ -121,7 +122,17 @@ export default async function PartnersPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 			</div>
-			<PartnersDirectory initial={partners} />
+			{/* Suspense: PartnersDirectory reads useSearchParams (the ?q= handoff)
+			    — without a boundary that breaks static prerendering of this page. */}
+			<Suspense
+				fallback={
+					<main className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16">
+						<div className="h-11 rounded-xl bg-card border border-border animate-pulse" />
+					</main>
+				}
+			>
+				<PartnersDirectory initial={partners} />
+			</Suspense>
 		</div>
 	);
 }
