@@ -405,6 +405,25 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 			"reflector-network/reflector-dao-contract",
 		],
 	},
+	// RWA / tokenization. An Aztec/Noir security-token repo (taurushq-io/
+	// private-CMTAT-aztec — zero Stellar code, generic "tokenization" topic tag)
+	// ranked #2 over the real Stellar-native tokenization repos. Both seeds
+	// verified in-index: SimplyTokenized (Soroban contracts) + microvault
+	// (SEP-0056 tokenized-vault engine). "tokeniz" prefix covers tokenize/
+	// tokenized/tokenization; bare "token" never matches.
+	{
+		test: /\brwa\b|\breal[\s-]?world[\s-]?asset|\btokeniz/,
+		repos: ["simplytokenized/soroban-smart-contracts", "shamba-records-limited/microvault"],
+	},
+	// lending / money-market. Boxy-ordered (2026-07-06): Blend is THE flagship
+	// Stellar lending protocol and must lead; laina is still testnet-only so it
+	// must NOT rank near the top (unseeded → falls below the float naturally);
+	// slender deliberately NOT seeded (low-value/unmaintained per boxy). templar
+	// (multichain, real soroban crate) stays wherever keyword rank puts it.
+	{
+		test: /\blending\b|\bmoney[\s-]?market\b|\bborrow(?:ing)?\b/,
+		repos: ["blend-capital/blend-contracts-v2", "xycloo/xycloans"],
+	},
 ];
 
 // Curated flagship repos for a query, priority order, deduped. Empty for queries
