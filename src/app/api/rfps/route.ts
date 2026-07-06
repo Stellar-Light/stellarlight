@@ -14,7 +14,6 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { clampLimit } from "@/lib/http-params";
 import {
 	ACTIVE_QUARTER,
 	CATEGORIES,
@@ -29,8 +28,10 @@ import {
 	rfpStatus,
 } from "@/data/ideas";
 import { logApiHit } from "@/lib/api-usage";
+import { clampLimit } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { fetchScfRounds } from "@/lib/scf-rounds";
 
 // force-dynamic so the query-param filters (q, category, quarter) actually
 // apply — static generation collapses params at build time and would
@@ -56,6 +57,9 @@ function toRow(i: Idea): RfpRow {
 }
 
 export async function GET(req: NextRequest) {
+	// Live SCF round state (sls-014) — 6h-revalidated fetch of the awards page.
+	// null on failure so the fallback below can obey the invariant.
+	const scfLive = await fetchScfRounds();
 	const sp = req.nextUrl.searchParams;
 	const q = sp.get("q")?.toLowerCase().trim();
 	const categoryFilter = sp.get("category") as Category | null;
@@ -72,17 +76,26 @@ export async function GET(req: NextRequest) {
 		!(CATEGORIES as readonly string[]).includes(categoryFilter)
 	) {
 		return NextResponse.json(
-			{ error: `Invalid category '${categoryFilter}'.`, validCategories: CATEGORIES },
+			{
+				error: `Invalid category '${categoryFilter}'.`,
+				validCategories: CATEGORIES,
+			},
 			{ status: 400 },
 		);
 	}
 	if (statusFilter && statusFilter !== "open" && statusFilter !== "closed") {
 		return NextResponse.json(
-			{ error: `Invalid status '${statusFilter}'.`, validStatuses: ["open", "closed"] },
+			{
+				error: `Invalid status '${statusFilter}'.`,
+				validStatuses: ["open", "closed"],
+			},
 			{ status: 400 },
 		);
 	}
-	if (quarterFilter && !(QUARTERS as readonly string[]).includes(quarterFilter)) {
+	if (
+		quarterFilter &&
+		!(QUARTERS as readonly string[]).includes(quarterFilter)
+	) {
 		return NextResponse.json(
 			{ error: `Invalid quarter '${quarterFilter}'.`, validQuarters: QUARTERS },
 			{ status: 400 },
@@ -158,19 +171,47 @@ export async function GET(req: NextRequest) {
 				},
 				activeQuarter: ACTIVE_QUARTER,
 				activeQuarterLabel: QUARTER_LABELS[ACTIVE_QUARTER],
-				// SCF round identity + submission window (sls-007). Curated — SCF
-				// publishes no machine-readable round feed, so fields are null when
-				// unconfirmed rather than guessed; `asOf` dates the curation so
-				// consumers can present lag honestly. Updated as rounds are announced.
-				scfRound: {
-					currentRound: null,
-					lastConfirmedRound: 43,
-					lastConfirmedRoundNote:
-						"SCF #43 concluded (recap published 2026-06-02); the next round had not been confirmed open as of asOf.",
-					submissionWindow: { opens: null, closes: null },
-					asOf: "2026-07-03",
-					verifyAt: "https://communityfund.stellar.org",
-				},
+				// SCF round identity + submission window (sls-007, LIVE since sls-014).
+				// Populated from communityfund.stellar.org/awards' embedded
+				// award_rounds payload on a 6h revalidate — the sls-007 "no
+				// machine-readable feed" assumption was wrong, and the hand-curated
+				// constant went stale at birth (asserted "no round open" while the
+				// page showed SCF #45 in Submission). INVARIANT: on fetch failure we
+				// say the live check failed and point at verifyAt — we never assert
+				// a negative the cited source might contradict.
+				scfRound: scfLive
+					? {
+							currentRound: scfLive.currentRound,
+							currentPhase: scfLive.currentPhase,
+							lastConfirmedRound: scfLive.lastConcludedRound,
+							lastConfirmedRoundNote: scfLive.roundsInProgress.length
+								? `In progress: ${scfLive.roundsInProgress
+										.map(
+											(r) =>
+												`SCF #${r.round} (${r.phase}${r.submissionDeadline ? `, submission deadline ${r.submissionDeadline}` : ""})`,
+										)
+										.join(
+											"; ",
+										)}. SCF #${scfLive.lastConcludedRound} is the last concluded round.`
+								: `No round in progress; SCF #${scfLive.lastConcludedRound} is the last concluded round.`,
+							submissionWindow: scfLive.submissionWindow,
+							roundsInProgress: scfLive.roundsInProgress,
+							asOf: scfLive.fetchedAt.slice(0, 10),
+							source: "live",
+							verifyAt: "https://communityfund.stellar.org/awards",
+						}
+					: {
+							currentRound: null,
+							currentPhase: null,
+							lastConfirmedRound: null,
+							lastConfirmedRoundNote:
+								"Live verification against communityfund.stellar.org/awards failed at request time — do NOT read this as 'no round open'; check verifyAt directly.",
+							submissionWindow: { opens: null, closes: null },
+							roundsInProgress: [],
+							asOf: new Date().toISOString().slice(0, 10),
+							source: "unavailable",
+							verifyAt: "https://communityfund.stellar.org/awards",
+						},
 				categories: Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
 					value,
 					label,
