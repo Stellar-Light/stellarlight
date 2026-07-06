@@ -361,7 +361,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// contracts + js-sdk), rozo (USDC intents), crossmesh (EVM→Stellar forwarder),
 	// axelar (Cross-chain Gateway for Soroban), spacewalk (Pendulum↔Stellar).
 	{
-		test: /\bbridge\b|\bcross[\s-]?chain\b|\binteroperab/,
+		test: /\bbridges?\b|\bcross[\s-]?chain\b|\binteroperab/,
 		repos: [
 			"allbridge-io/allbridge-core-soroban-contracts",
 			"rozoai/rozo-intents-contracts",
@@ -377,7 +377,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// absent. All verified in-index, Rust Soroban oracle contracts of curated Live
 	// projects (reflector/lightecho/dia/band).
 	{
-		test: /\boracle\b|\bprice[\s-]?feed\b|\bdata[\s-]?feed\b/,
+		test: /\boracles?\b|\bprice[\s-]?feeds?\b|\bdata[\s-]?feeds?\b/,
 		repos: [
 			"reflector-network/reflector-contract",
 			"bp-ventures/lightecho-stellar-oracle",
@@ -388,17 +388,19 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// AMM / DEX. soroswap/core (the canonical Soroswap AMM Factory/Router/Pair
 	// contracts) + phoenix-contracts (Phoenix DEX) are buried under frontends on
 	// the bare query because the contract repos don't self-tag "amm". Both
-	// verified in-index (Rust, soroban-sdk). Excludes bare "swap" from the test so
-	// it doesn't collide with the cross-chain-bridge vertical.
+	// verified in-index (Rust, soroban-sdk). Includes "swap"/"decentralized
+	// exchange" — the canonical user words for a DEX (a cold audit found q=swap
+	// surfacing multichain rango, not Soroswap). "cross-chain swap" also matches
+	// the bridge vertical, which is fine — both are legitimately relevant.
 	{
-		test: /\bamm\b|\bdex\b|\bliquidity\s*pool\b/,
+		test: /\bamms?\b|\bdex\b|\bdecentralized\s*exchange\b|\bswaps?\b|\bliquidity\s*pools?\b/,
 		repos: ["soroswap/core", "phoenix-protocol-group/phoenix-contracts"],
 	},
 	// DAO / governance. A DeFi vault (dogstarapps/arka.fund) + an agent wallet
 	// (OrbitSafe) led on authority over soroban-governor — the canonical Soroban
 	// Governor DAO framework. All verified in-index, real Stellar governance repos.
 	{
-		test: /\bdao\b|\bgovernance\b|\bgovernor\b/,
+		test: /\bdaos?\b|\bgovernance\b|\bgovernors?\b/,
 		repos: [
 			"script3/soroban-governor",
 			"Consulting-Manao/tansu",
@@ -412,7 +414,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// (SEP-0056 tokenized-vault engine). "tokeniz" prefix covers tokenize/
 	// tokenized/tokenization; bare "token" never matches.
 	{
-		test: /\brwa\b|\breal[\s-]?world[\s-]?asset|\btokeniz/,
+		test: /\brwa\b|\breal[\s-]?world[\s-]?assets?\b|\btokeniz(?:ation|ed)\b/,
 		repos: ["simplytokenized/soroban-smart-contracts", "shamba-records-limited/microvault"],
 	},
 	// lending / money-market. Boxy-ordered (2026-07-06): Blend is THE flagship
@@ -421,7 +423,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// slender deliberately NOT seeded (low-value/unmaintained per boxy). templar
 	// (multichain, real soroban crate) stays wherever keyword rank puts it.
 	{
-		test: /\blending\b|\bmoney[\s-]?market\b|\bborrow(?:ing)?\b/,
+		test: /\blending\b|\bmoney[\s-]?markets?\b/,
 		repos: ["blend-capital/blend-contracts-v2", "xycloo/xycloans"],
 	},
 ];
