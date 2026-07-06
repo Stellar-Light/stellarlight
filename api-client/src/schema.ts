@@ -333,7 +333,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos. Use for ecosystem KNOWLEDGE & explainer questions — 'what is / how does / who / why / is it true that…'. Topics: security & risk (bug bounty, vulnerability disclosure, security audit, exploit, hack, incident, post-mortem, oracle manipulation, YieldBlox, Reflector); compliance & regulation (Travel Rule, FATF, KYC, AML, BSA, sanctions, humanitarian aid); funding & governance (SCF v7.0, award tiers, grant programs, Neural Quorum Governance, community voting, quorum); the Stellar Development Foundation (SDF) — mission, legal structure, org; protocol history (Stellar Consensus Protocol, SCP, whitepaper, authors); ecosystem programs (ambassador program, regional chapters, India, bootcamps); and fact-checking or verifying a claim about Stellar. More topics this corpus answers: SCF program mechanics — how to apply (step-by-step application process), Build Award, Instawards, Liquidity Award (amounts), Public Goods Award, eligibility, review timeline (prescreen, panel review, community vote, KYC), submission deadlines; Soroban security practice — reentrancy, common vulnerability classes auditors find, soroban-sdk security advisories/CVEs, denial-of-service (instance-storage growth, authorization recursion), audit findings and exploitability; ecosystem history — Soroban mainnet launch (Protocol 20), XLM initial supply creation and distribution, humanitarian aid disbursements (UNHCR Ukraine), SDF Enterprise Fund investments, SDF mandate/spending priorities; making an issued asset tradable/visible on exchanges, wallets, explorers, and aggregators; contract source verification (release.yml, Stellar Lab vs stellar.expert).
+         * @description Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos. Use for ecosystem KNOWLEDGE & explainer questions — 'what is / how does / who / why / is it true that…'. Topics: security & risk (bug bounty, vulnerability disclosure, security audit, exploit, hack, incident, post-mortem, oracle manipulation, YieldBlox, Reflector); compliance & regulation (Travel Rule, FATF, KYC, AML, BSA, sanctions, humanitarian aid); funding & governance (SCF v7.0, award tiers, grant programs, Neural Quorum Governance, community voting, quorum); the Stellar Development Foundation (SDF) — mission, legal structure, org; protocol history (Stellar Consensus Protocol, SCP, whitepaper, authors); ecosystem programs (ambassador program, regional chapters, India, bootcamps); and fact-checking or verifying a claim about Stellar. More topics this corpus answers: SCF program mechanics — how to apply (step-by-step application process), Build Award, Instawards, Liquidity Award (amounts), Public Goods Award, eligibility, review timeline (prescreen, panel review, community vote, KYC), submission deadlines; Soroban security incidents — reentrancy, soroban-sdk security advisories/CVEs, denial-of-service (instance-storage growth, authorization recursion); ecosystem history — Soroban mainnet launch (Protocol 20), XLM initial supply creation and distribution, humanitarian aid disbursements (UNHCR Ukraine), SDF Enterprise Fund investments, SDF mandate/spending priorities; making an issued asset tradable/visible on exchanges, wallets, explorers, and aggregators; contract source verification (release.yml, Stellar Lab vs stellar.expert).
          */
         get: operations["searchResearch"];
         put?: never;
@@ -693,6 +693,30 @@ export interface components {
             deepWikiUrl?: string;
             /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
             canonical?: boolean;
+            /** @description Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar. */
+            codeVerified?: {
+                /**
+                 * @description How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml.
+                 * @enum {string}
+                 */
+                stellarProof?: "cargo-sdk" | "contract-macros" | "lang-sdk" | "js-sdk" | "stellar-toml";
+                /** @description 0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs. */
+                codeDepth?: number | null;
+                /** @description Cargo cdylib — a real deployable Soroban contract (vs a CLI/indexer/frontend that only uses Stellar). */
+                isDeployableContract?: boolean;
+                /** @description Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer). */
+                sorobanSdkVersion?: string | null;
+                /**
+                 * @description soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.
+                 * @enum {string|null}
+                 */
+                versionStatus?: "current" | "supported" | "deprecated" | "unknown" | null;
+                /**
+                 * Format: date-time
+                 * @description When the code was last scanned.
+                 */
+                scannedAt?: string | null;
+            } | null;
         };
         RepoSearchResponse: {
             meta: components["schemas"]["Meta"] & {
@@ -896,6 +920,16 @@ export interface operations {
                             stars?: number | null;
                             isArchived?: boolean;
                             repoScoreLabel?: string | null;
+                        } | null;
+                        /** @description Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
+                        codeVerified?: {
+                            stellarProof?: string;
+                            codeDepth?: number | null;
+                            isDeployableContract?: boolean;
+                            sorobanSdkVersion?: string | null;
+                            versionStatus?: string | null;
+                            /** Format: date-time */
+                            scannedAt?: string | null;
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
