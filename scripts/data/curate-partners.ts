@@ -48,12 +48,90 @@ const PILOT_ENRICH: Record<string, { tagline: string; websiteUrl: string }> = {
 		websiteUrl: "https://www.trustlesswork.com",
 	},
 };
+// Fill-only-if-EMPTY metadata enrichment for real payment companies that were
+// seeded thin (name only, no tagline). Thin DB data was NOT deadness — these
+// are real, operating payment/anchor cos. Facts gathered 2026-07-06 from each
+// company's OWN site + Stellar/SDF/SCF sources (cite-or-null; NOTHING invented).
+// None publish a usable stellar.toml at their marketing domain, so structured
+// SEP/asset data stays honestly empty — this fills human-readable metadata only.
+// NEVER overwrites a partner-entered value.
+const PARTNER_ENRICH: Record<
+	string,
+	{ tagline?: string; sectors?: string[]; regions?: string[]; country?: string }
+> = {
+	"anchor-alfred-pay": {
+		tagline:
+			"Stablecoin-to-local-rails cross-border payments across Latin America",
+		sectors: ["payments"],
+		regions: ["latam"],
+	},
+	"anchor-cash-abroad": {
+		tagline:
+			"Instant MXN–USDC conversion and cross-border payments for LatAm businesses",
+		sectors: ["payments"],
+		regions: ["latam"],
+		country: "Mexico",
+	},
+	"anchor-coca-wallet": {
+		tagline:
+			"Non-custodial MPC wallet with a Visa card for crypto and fiat spending",
+		sectors: ["payments"],
+		regions: ["global"],
+		country: "United Arab Emirates",
+	},
+	"anchor-ping": {
+		tagline:
+			"Global dollar and crypto accounts — receive and manage money anywhere",
+		sectors: ["payments"],
+		regions: ["latam"],
+		country: "Argentina",
+	},
+	"anchor-trace-finance": {
+		tagline: "Payments and stablecoin infrastructure for Brazil and LatAm",
+		sectors: ["payments"],
+		regions: ["latam"],
+		country: "Brazil",
+	},
+	"anchor-boss-pay": {
+		tagline:
+			"Stellar-based wallet to store, send and exchange money across Africa",
+		sectors: ["payments"],
+		regions: ["africa"],
+		country: "United States",
+	},
+	"anchor-blox-global": {
+		tagline:
+			"Financial operating system for moving and managing stablecoins globally",
+		sectors: ["payments"],
+		regions: ["global"],
+		country: "United States",
+	},
+	"anchor-ripe-money": {
+		tagline: "Stablecoin off-ramp for Asia — pay and get paid without a bank",
+		sectors: ["payments"],
+		regions: ["asia"],
+		country: "Singapore",
+	},
+};
+
+// Explicit URL CORRECTIONS — OVERWRITE a stored URL that is wrong or unsafe.
+// boss-pay's seeded domain bossmoney.africa was hijacked (2026-07-06: 301s to a
+// Turkish gambling site super-bahis.live); the live product is bossmoney.com.
+// This is the ONLY place a non-empty field is overwritten — and only for safety.
+const URL_CORRECTIONS: Record<string, string> = {
+	"anchor-boss-pay": "https://www.bossmoney.com",
+};
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function main() {
-	if (OWNER_CONFIRMED_DEAD.length === 0 && PILOT_SLUGS.length === 0) {
+	if (
+		OWNER_CONFIRMED_DEAD.length === 0 &&
+		PILOT_SLUGS.length === 0 &&
+		Object.keys(PARTNER_ENRICH).length === 0 &&
+		Object.keys(URL_CORRECTIONS).length === 0
+	) {
 		console.error(
-			"Both lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD and/or PILOT_SLUGS first (owner-confirmed only).",
+			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS first (owner-confirmed only).",
 		);
 		process.exit(1);
 	}
@@ -150,6 +228,61 @@ async function main() {
 		console.log(
 			"  (list empty — existing pilot flags left untouched only if none are set)",
 		);
+
+	console.log("\n── Metadata enrichment (fill-if-empty; real payment cos) ──");
+	for (const [slug, e] of Object.entries(PARTNER_ENRICH)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		const data: Record<string, unknown> = {};
+		const notes: string[] = [];
+		if (e.tagline && !d.tagline) {
+			data.tagline = e.tagline;
+			notes.push(`tagline → "${e.tagline}"`);
+		}
+		if (e.sectors && (!d.sectors || d.sectors.length === 0)) {
+			data.sectors = e.sectors;
+			notes.push(`sectors → ${e.sectors.join("/")}`);
+		}
+		if (e.regions && (!d.regions || d.regions.length === 0)) {
+			data.regions = e.regions;
+			notes.push(`regions → ${e.regions.join("/")}`);
+		}
+		if (e.country && !d.country) {
+			data.country = e.country;
+			notes.push(`country → ${e.country}`);
+		}
+		if (Object.keys(data).length === 0) {
+			console.log(`  ${d.name} (${slug}) — already complete, no-op`);
+			continue;
+		}
+		console.log(`  ${d.name} (${slug}) — ${notes.join(" · ")}`);
+		writes.push({ id: d.id, slug, data, note: notes.join(", ") });
+	}
+
+	console.log("\n── URL corrections (OVERWRITE unsafe/wrong URLs) ──");
+	for (const [slug, url] of Object.entries(URL_CORRECTIONS)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		if (d.websiteUrl === url) {
+			console.log(`  ${d.name} (${slug}) — already ${url}, no-op`);
+			continue;
+		}
+		console.log(
+			`  ${d.name} (${slug}) — websiteUrl: ${d.websiteUrl ?? "(none)"} → ${url}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { websiteUrl: url },
+			note: `url fix → ${url}`,
+		});
+	}
 
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);
