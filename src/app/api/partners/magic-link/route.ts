@@ -24,13 +24,13 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	isPlaceholderEmail,
 	mintPartnerLoginToken,
 	sendPartnerSignInEmail,
 } from "@/lib/partner-invite";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { normalizeUrl } from "@/lib/utils/normalize";
 
@@ -97,7 +97,8 @@ export async function POST(req: NextRequest) {
 	// Everything past this point returns the SAME neutral body.
 	try {
 		const payload = await getPayloadSafe();
-		if (!payload) return NextResponse.json(NEUTRAL, { headers: rateLimitHeaders(limit) });
+		if (!payload)
+			return NextResponse.json(NEUTRAL, { headers: rateLimitHeaders(limit) });
 
 		// 1. Exact account match → sign-in link.
 		const exact = await payload.find({

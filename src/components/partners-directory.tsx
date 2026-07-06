@@ -13,10 +13,10 @@
  * Human twin of GET /api/partners. Visual language matches /ask.
  */
 
-import { useMemo, useState } from "react";
+import { ArrowUpRight, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, ArrowUpRight } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface DirectoryPartner {
 	slug: string;
@@ -114,7 +114,11 @@ const REGION_LABELS: Record<string, string> = {
 const sectorLabel = (s: string) => SECTOR_LABELS[s] ?? s;
 const regionLabel = (r: string) => REGION_LABELS[r] ?? r;
 
-export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) {
+export function PartnersDirectory({
+	initial,
+}: {
+	initial: DirectoryPartner[];
+}) {
 	const router = useRouter();
 	const [typeFilter, setTypeFilter] = useState("all");
 	const [regionFilter, setRegionFilter] = useState("all");
@@ -257,25 +261,30 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 
 			{/* Region filter chips */}
 			<div className="flex flex-wrap gap-2 mb-8">
-				{[{ key: "all", label: "All regions" }].concat(
-					Object.entries(REGION_LABELS).map(([key, label]) => ({ key, label })),
-				).map((f) => {
-					const active = regionFilter === f.key;
-					return (
-						<button
-							key={f.key}
-							onClick={() => setRegionFilter(f.key)}
-							className={
-								"text-[11px] px-2.5 py-1 rounded-full transition-colors border " +
-								(active
-									? "bg-white/10 text-foreground border-white/25"
-									: "bg-white/[0.02] text-muted-foreground/80 border-border hover:text-foreground hover:border-white/25")
-							}
-						>
-							{f.label}
-						</button>
-					);
-				})}
+				{[{ key: "all", label: "All regions" }]
+					.concat(
+						Object.entries(REGION_LABELS).map(([key, label]) => ({
+							key,
+							label,
+						})),
+					)
+					.map((f) => {
+						const active = regionFilter === f.key;
+						return (
+							<button
+								key={f.key}
+								onClick={() => setRegionFilter(f.key)}
+								className={
+									"text-[11px] px-2.5 py-1 rounded-full transition-colors border " +
+									(active
+										? "bg-white/10 text-foreground border-white/25"
+										: "bg-white/[0.02] text-muted-foreground/80 border-border hover:text-foreground hover:border-white/25")
+								}
+							>
+								{f.label}
+							</button>
+						);
+					})}
 			</div>
 
 			{/* Results header (muted, ask-style) + quality-gate toggle */}
@@ -327,7 +336,10 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 									Show all
 								</button>{" "}
 								or{" "}
-								<Link href="/partners/chat" className="text-foreground underline">
+								<Link
+									href="/partners/chat"
+									className="text-foreground underline"
+								>
 									get your company listed
 								</Link>
 								.
@@ -335,7 +347,10 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 						) : (
 							<>
 								Nothing matches. Try a broader filter or{" "}
-								<Link href="/partners/chat" className="text-foreground underline">
+								<Link
+									href="/partners/chat"
+									className="text-foreground underline"
+								>
 									get your company listed
 								</Link>
 								.
@@ -454,13 +469,14 @@ export function PartnersDirectory({ initial }: { initial: DirectoryPartner[] }) 
 								))}
 							</div>
 						)}
-						{FRESH_BADGE[p.freshness.status] && p.freshness.status !== "fresh" && (
-							<div
-								className={`mt-2 text-[10px] ${FRESH_BADGE[p.freshness.status]}`}
-							>
-								profile is {p.freshness.status}
-							</div>
-						)}
+						{FRESH_BADGE[p.freshness.status] &&
+							p.freshness.status !== "fresh" && (
+								<div
+									className={`mt-2 text-[10px] ${FRESH_BADGE[p.freshness.status]}`}
+								>
+									profile is {p.freshness.status}
+								</div>
+							)}
 					</Link>
 				))}
 			</div>

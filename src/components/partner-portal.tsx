@@ -24,9 +24,9 @@
  * cards, muted uppercase section headers, subtle borders.
  */
 
+import { ArrowLeft, CheckCircle2, Pencil, Send, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Sparkles, Send, Pencil, CheckCircle2 } from "lucide-react";
 
 const SECTORS = [
 	"defi",
@@ -178,10 +178,11 @@ export function PartnerPortal() {
 					</span>
 				</div>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Keep your profile current so builders — and their AI agents — find you.
-					Update it by chatting with the assistant, or edit the fields directly.
-					Facts marked <span className="text-foreground font-medium">verified</span>{" "}
-					are measured by Stellar Light and can&apos;t be edited.
+					Keep your profile current so builders — and their AI agents — find
+					you. Update it by chatting with the assistant, or edit the fields
+					directly. Facts marked{" "}
+					<span className="text-foreground font-medium">verified</span> are
+					measured by Stellar Light and can&apos;t be edited.
 				</p>
 			</div>
 
@@ -547,8 +548,14 @@ function Dashboard({
 					    judged on commits they'll never have. */}
 					{form.githubOrg ? (
 						<>
-							<Verified label="Last GitHub commit" value={fmtDate(v.githubLastCommitAt) || "—"} />
-							<Verified label="Commits (90d)" value={v.githubCommits90d ?? "—"} />
+							<Verified
+								label="Last GitHub commit"
+								value={fmtDate(v.githubLastCommitAt) || "—"}
+							/>
+							<Verified
+								label="Commits (90d)"
+								value={v.githubCommits90d ?? "—"}
+							/>
 						</>
 					) : null}
 					<Verified
@@ -711,7 +718,9 @@ function MaintenanceChat({
 				return null;
 			}
 			if (!res.ok) {
-				setError("The assistant hit a snag — edit your profile directly instead.");
+				setError(
+					"The assistant hit a snag — edit your profile directly instead.",
+				);
 				return null;
 			}
 			const data = await res.json();
@@ -762,10 +771,15 @@ function MaintenanceChat({
 			const res = await fetch("/api/partners/onboard", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ mode: "extract", messages: [seed, ...messages] }),
+				body: JSON.stringify({
+					mode: "extract",
+					messages: [seed, ...messages],
+				}),
 			});
 			if (!res.ok) {
-				setError("Couldn't read the changes from that chat — try editing directly.");
+				setError(
+					"Couldn't read the changes from that chat — try editing directly.",
+				);
 				return;
 			}
 			const data = await res.json();
@@ -781,8 +795,8 @@ function MaintenanceChat({
 		return (
 			<div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
 				The chat assistant isn&apos;t available right now — switch to{" "}
-				<span className="text-foreground font-medium">Your profile</span> and edit
-				the fields directly.
+				<span className="text-foreground font-medium">Your profile</span> and
+				edit the fields directly.
 			</div>
 		);
 	}
@@ -800,7 +814,9 @@ function MaintenanceChat({
 				{display.map((m, i) => (
 					<div
 						key={i}
-						className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
+						className={
+							m.role === "user" ? "flex justify-end" : "flex justify-start"
+						}
 					>
 						<div
 							className={
@@ -809,7 +825,9 @@ function MaintenanceChat({
 									: "max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.03] border border-border px-3.5 py-2 text-sm text-foreground/90 whitespace-pre-wrap"
 							}
 						>
-							{m.role === "assistant" ? renderMarkdownBold(m.content) : m.content}
+							{m.role === "assistant"
+								? renderMarkdownBold(m.content)
+								: m.content}
 						</div>
 					</div>
 				))}
@@ -900,23 +918,73 @@ function ProfileEditor({
 				changed={changed.has("description")}
 			/>
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-				<Input label="Website" value={form.websiteUrl ?? ""} onChange={(x) => set("websiteUrl", x)} changed={changed.has("websiteUrl")} />
-				<Input label="Docs URL" value={form.docsUrl ?? ""} onChange={(x) => set("docsUrl", x)} changed={changed.has("docsUrl")} />
-				<Input label="GitHub org" value={form.githubOrg ?? ""} onChange={(x) => set("githubOrg", x)} hint="optional — open-source only" changed={changed.has("githubOrg")} />
-				<Input label="Contact email" value={form.contactEmail ?? ""} onChange={(x) => set("contactEmail", x)} changed={changed.has("contactEmail")} />
-				<Input label="Contact channel" value={form.contactChannel ?? ""} onChange={(x) => set("contactChannel", x)} hint="Discord / Telegram / lead form" changed={changed.has("contactChannel")} />
-				<Input label="Response SLA" value={form.responseSla ?? ""} onChange={(x) => set("responseSla", x)} hint="e.g. within 24h weekdays" changed={changed.has("responseSla")} />
+				<Input
+					label="Website"
+					value={form.websiteUrl ?? ""}
+					onChange={(x) => set("websiteUrl", x)}
+					changed={changed.has("websiteUrl")}
+				/>
+				<Input
+					label="Docs URL"
+					value={form.docsUrl ?? ""}
+					onChange={(x) => set("docsUrl", x)}
+					changed={changed.has("docsUrl")}
+				/>
+				<Input
+					label="GitHub org"
+					value={form.githubOrg ?? ""}
+					onChange={(x) => set("githubOrg", x)}
+					hint="optional — open-source only"
+					changed={changed.has("githubOrg")}
+				/>
+				<Input
+					label="Contact email"
+					value={form.contactEmail ?? ""}
+					onChange={(x) => set("contactEmail", x)}
+					changed={changed.has("contactEmail")}
+				/>
+				<Input
+					label="Contact channel"
+					value={form.contactChannel ?? ""}
+					onChange={(x) => set("contactChannel", x)}
+					hint="Discord / Telegram / lead form"
+					changed={changed.has("contactChannel")}
+				/>
+				<Input
+					label="Response SLA"
+					value={form.responseSla ?? ""}
+					onChange={(x) => set("responseSla", x)}
+					hint="e.g. within 24h weekdays"
+					changed={changed.has("responseSla")}
+				/>
 			</div>
 
 			<TagEditor
 				label="Services"
 				hint="Granular tags the AI matchmaker matches on — e.g. sep-24-ngn, soroban-audit-rust"
 				tags={(form.services ?? []).map((s) => s.tag)}
-				onChange={(tags) => set("services", tags.map((t) => ({ tag: t })))}
+				onChange={(tags) =>
+					set(
+						"services",
+						tags.map((t) => ({ tag: t })),
+					)
+				}
 				changed={changed.has("services")}
 			/>
-			<MultiSelect label="Sectors" options={SECTORS} value={form.sectors ?? []} onChange={(x) => set("sectors", x)} changed={changed.has("sectors")} />
-			<MultiSelect label="Regions" options={REGIONS} value={form.regions ?? []} onChange={(x) => set("regions", x)} changed={changed.has("regions")} />
+			<MultiSelect
+				label="Sectors"
+				options={SECTORS}
+				value={form.sectors ?? []}
+				onChange={(x) => set("sectors", x)}
+				changed={changed.has("sectors")}
+			/>
+			<MultiSelect
+				label="Regions"
+				options={REGIONS}
+				value={form.regions ?? []}
+				onChange={(x) => set("regions", x)}
+				changed={changed.has("regions")}
+			/>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 				<label className="flex items-center gap-2 text-sm text-foreground">
@@ -927,11 +995,32 @@ function ProfileEditor({
 					/>
 					Currently accepting new clients
 				</label>
-				<Select label="Pricing model" options={PRICING} value={form.pricingModel ?? ""} onChange={(x) => set("pricingModel", x)} changed={changed.has("pricingModel")} />
-				<Input label="Typical engagement" value={form.typicalEngagement ?? ""} onChange={(x) => set("typicalEngagement", x)} changed={changed.has("typicalEngagement")} />
-				<Input label="Lead time" value={form.leadTime ?? ""} onChange={(x) => set("leadTime", x)} changed={changed.has("leadTime")} />
+				<Select
+					label="Pricing model"
+					options={PRICING}
+					value={form.pricingModel ?? ""}
+					onChange={(x) => set("pricingModel", x)}
+					changed={changed.has("pricingModel")}
+				/>
+				<Input
+					label="Typical engagement"
+					value={form.typicalEngagement ?? ""}
+					onChange={(x) => set("typicalEngagement", x)}
+					changed={changed.has("typicalEngagement")}
+				/>
+				<Input
+					label="Lead time"
+					value={form.leadTime ?? ""}
+					onChange={(x) => set("leadTime", x)}
+					changed={changed.has("leadTime")}
+				/>
 			</div>
-			<TextArea label="Pricing notes" value={form.pricingNotes ?? ""} onChange={(x) => set("pricingNotes", x)} changed={changed.has("pricingNotes")} />
+			<TextArea
+				label="Pricing notes"
+				value={form.pricingNotes ?? ""}
+				onChange={(x) => set("pricingNotes", x)}
+				changed={changed.has("pricingNotes")}
+			/>
 		</section>
 	);
 }
@@ -966,10 +1055,18 @@ function TabButton({
 	);
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+	label,
+	children,
+}: {
+	label: string;
+	children: React.ReactNode;
+}) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1.5">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1.5">
+				{label}
+			</span>
 			{children}
 		</label>
 	);
@@ -1049,7 +1146,9 @@ function TextArea({
 }) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1">
+				{label}
+			</span>
 			<textarea
 				value={value}
 				rows={3}
@@ -1075,7 +1174,9 @@ function Select({
 }) {
 	return (
 		<label className="block">
-			<span className="block text-xs font-medium text-foreground mb-1">{label}</span>
+			<span className="block text-xs font-medium text-foreground mb-1">
+				{label}
+			</span>
 			<select
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -1111,7 +1212,9 @@ function MultiSelect({
 		<div>
 			<span className="block text-xs font-medium text-foreground mb-1.5">
 				{label}
-				{changed && <span className="ml-2 text-[10px] text-emerald-400">updated</span>}
+				{changed && (
+					<span className="ml-2 text-[10px] text-emerald-400">updated</span>
+				)}
 			</span>
 			<div className="flex flex-wrap gap-1.5">
 				{options.map((o) => {
@@ -1164,7 +1267,9 @@ function TagEditor({
 						{hint}
 					</span>
 				)}
-				{changed && <span className="ml-2 text-[10px] text-emerald-400">updated</span>}
+				{changed && (
+					<span className="ml-2 text-[10px] text-emerald-400">updated</span>
+				)}
 			</span>
 			<div className="flex flex-wrap gap-1.5 mb-2">
 				{tags.map((t) => (
@@ -1240,7 +1345,10 @@ function currentProfileSummary(p: Partner): string {
 	};
 	add("tagline", p.tagline);
 	add("description", p.description);
-	add("services", (p.services ?? []).map((s) => s.tag));
+	add(
+		"services",
+		(p.services ?? []).map((s) => s.tag),
+	);
 	add("sectors", p.sectors);
 	add("regions", p.regions);
 	add("accepting clients", p.acceptingClients);
@@ -1313,7 +1421,10 @@ function ProfileStrength({ partner }: { partner: Partner }) {
 			</div>
 			<p className="text-xs text-muted-foreground mt-2.5">
 				{missing.length === 0 ? (
-					<>Complete profiles rank higher in concierge matches — yours is all set.</>
+					<>
+						Complete profiles rank higher in concierge matches — yours is all
+						set.
+					</>
 				) : (
 					<>
 						Complete profiles rank higher in concierge matches. Next:{" "}
@@ -1488,8 +1599,8 @@ function LeadsPanel({ slug }: { slug?: string }) {
 			<div className="rounded-2xl border border-border bg-card p-8 text-center">
 				<p className="text-sm text-muted-foreground max-w-md mx-auto">
 					No leads yet. When a builder asks the concierge for something you
-					offer, it shows up here (and in your weekly digest). A complete,
-					fresh profile gets matched more.
+					offer, it shows up here (and in your weekly digest). A complete, fresh
+					profile gets matched more.
 				</p>
 			</div>
 		);
@@ -1502,7 +1613,10 @@ function LeadsPanel({ slug }: { slug?: string }) {
 			</h3>
 			<ul className="divide-y divide-border/60">
 				{leads.map((l) => (
-					<li key={l.id} className="py-2.5 flex items-baseline justify-between gap-3">
+					<li
+						key={l.id}
+						className="py-2.5 flex items-baseline justify-between gap-3"
+					>
 						<span className="text-sm text-foreground/90">“{l.need}”</span>
 						<span className="text-[11px] text-muted-foreground whitespace-nowrap">
 							{fmtDate(l.createdAt)}

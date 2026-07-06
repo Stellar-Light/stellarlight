@@ -22,7 +22,8 @@ import { getAppUrl } from "@/lib/utils/app-url";
  * how an admin approves a claim.
  */
 export const isPlaceholderEmail = (email: string | null | undefined): boolean =>
-	!email || (email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
+	!email ||
+	(email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
 
 /**
  * Mint a 7-day password-reset token for a partner account WITHOUT sending

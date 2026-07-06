@@ -8,8 +8,14 @@
 // contract" reliably surfaces the audit firms, "find an anchor" the anchors —
 // partner keyword-search alone misses verbose questions.
 export const PARTNER_INTENT: { re: RegExp; type: string }[] = [
-	{ re: /audit|security review|secure (my|the)|pen ?test|vulnerab|formal verif/i, type: "audit-firm" },
-	{ re: /\banchor\b|on.?ramp|off.?ramp|fiat|cash.?(in|out)|remittance/i, type: "anchor" },
+	{
+		re: /audit|security review|secure (my|the)|pen ?test|vulnerab|formal verif/i,
+		type: "audit-firm",
+	},
+	{
+		re: /\banchor\b|on.?ramp|off.?ramp|fiat|cash.?(in|out)|remittance/i,
+		type: "anchor",
+	},
 	{ re: /\bwallet\b|custody|custodian/i, type: "wallet" },
 	{ re: /infra(structure)?|\brpc\b|\bnode\b|indexer/i, type: "infrastructure" },
 	{ re: /legal|compliance|regulat|licen[sc]/i, type: "legal" },

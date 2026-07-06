@@ -16,12 +16,12 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { boolParam, clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { boolParam, clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { passesQualityBar } from "@/lib/partner-quality";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -66,7 +66,9 @@ function toPublic(p: any) {
 		regions: p.regions ?? [],
 		// Anchor capabilities from stellar.toml (SEP-1) — same source as
 		// anchors.stellar.org. Empty for non-anchors.
-		assets: (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean),
+		assets: (p.assets ?? [])
+			.map((a: { code: string }) => a.code)
+			.filter(Boolean),
 		seps: p.seps ?? [],
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,

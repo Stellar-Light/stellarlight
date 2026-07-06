@@ -129,7 +129,14 @@ export const Partners: CollectionConfig = {
 	},
 	admin: {
 		useAsTitle: "name",
-		defaultColumns: ["name", "partnerType", "status", "pilot", "freshnessStatus", "lastPartnerUpdateAt"],
+		defaultColumns: [
+			"name",
+			"partnerType",
+			"status",
+			"pilot",
+			"freshnessStatus",
+			"lastPartnerUpdateAt",
+		],
 		group: "Partner Connector",
 		description:
 			"Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.",
@@ -176,7 +183,10 @@ export const Partners: CollectionConfig = {
 				// stamp it and reset the freshness clock. Admin/cron writes
 				// (signal refreshes, status flips) must NOT reset the clock —
 				// only the partner's own attention counts as freshness.
-				if (operation === "update" && req.user?.collection === "partner-accounts") {
+				if (
+					operation === "update" &&
+					req.user?.collection === "partner-accounts"
+				) {
 					data.lastPartnerUpdateAt = new Date().toISOString();
 					data.freshnessStatus = "fresh";
 				}
@@ -215,10 +225,18 @@ export const Partners: CollectionConfig = {
 
 					if (!justPublished && !emailBecameReal) return;
 					// Already invited on this exact email and nothing changed → skip.
-					if (justPublished && doc.invitedAt && doc.email === previousDoc?.email)
+					if (
+						justPublished &&
+						doc.invitedAt &&
+						doc.email === previousDoc?.email
+					)
 						return;
 
-					const token = await mintPartnerLoginToken(req.payload, doc.email, req);
+					const token = await mintPartnerLoginToken(
+						req.payload,
+						doc.email,
+						req,
+					);
 					if (!token) {
 						// forgotPassword fails silently when no account matches — a
 						// race here would otherwise mail a link with a null token.
@@ -259,7 +277,10 @@ export const Partners: CollectionConfig = {
 			type: "text",
 			unique: true,
 			index: true,
-			admin: { position: "sidebar", description: "Auto-generated from name if left empty." },
+			admin: {
+				position: "sidebar",
+				description: "Auto-generated from name if left empty.",
+			},
 		},
 		{
 			name: "partnerType",
@@ -278,7 +299,10 @@ export const Partners: CollectionConfig = {
 		{
 			name: "logoUrl",
 			type: "text",
-			admin: { description: "Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)" },
+			admin: {
+				description:
+					"Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)",
+			},
 		},
 		{ name: "websiteUrl", type: "text" },
 		{ name: "foundedYear", type: "number", min: 2000, max: 2100 },
@@ -366,12 +390,18 @@ export const Partners: CollectionConfig = {
 		{
 			name: "typicalEngagement",
 			type: "text",
-			admin: { description: "e.g. '2-6 week integration', 'self-serve API', 'retainer'" },
+			admin: {
+				description:
+					"e.g. '2-6 week integration', 'self-serve API', 'retainer'",
+			},
 		},
 		{
 			name: "leadTime",
 			type: "text",
-			admin: { description: "How fast can a new team start? e.g. 'same week', '2-4 weeks'" },
+			admin: {
+				description:
+					"How fast can a new team start? e.g. 'same week', '2-4 weeks'",
+			},
 		},
 		{
 			name: "pricingModel",
@@ -403,7 +433,10 @@ export const Partners: CollectionConfig = {
 		{
 			name: "contactChannel",
 			type: "text",
-			admin: { description: "Preferred channel — Discord handle, Telegram, lead form URL…" },
+			admin: {
+				description:
+					"Preferred channel — Discord handle, Telegram, lead form URL…",
+			},
 		},
 		{
 			name: "responseSla",
@@ -419,7 +452,10 @@ export const Partners: CollectionConfig = {
 				{
 					name: "projectSlug",
 					type: "text",
-					admin: { description: "Slug in the stellarlight projects directory, if listed." },
+					admin: {
+						description:
+							"Slug in the stellarlight projects directory, if listed.",
+					},
 				},
 			],
 		},
@@ -438,13 +474,19 @@ export const Partners: CollectionConfig = {
 				autoField({
 					name: "onchainActive",
 					type: "checkbox",
-					admin: { description: "Mainnet activity detected for their contracts/accounts." },
+					admin: {
+						description:
+							"Mainnet activity detected for their contracts/accounts.",
+					},
 				}),
 				autoField({ name: "onchainNote", type: "text" }),
 				autoField({
 					name: "scfInvolvement",
 					type: "text",
-					admin: { description: "e.g. 'SCF #38 awardee ($148k)' — read from our SCF data." },
+					admin: {
+						description:
+							"e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.",
+					},
 				}),
 				autoField({ name: "lastAutoVerifyAt", type: "date" }),
 			],
@@ -460,7 +502,10 @@ export const Partners: CollectionConfig = {
 				{ label: "Fresh (updated <90d)", value: "fresh" },
 				{ label: "Aging (90–180d, reminder sent)", value: "aging" },
 				{ label: "Stale (180–365d, public badge)", value: "stale" },
-				{ label: "Archived (>365d, hidden from AI matches)", value: "archived" },
+				{
+					label: "Archived (>365d, hidden from AI matches)",
+					value: "archived",
+				},
 			],
 		}),
 		{
@@ -468,7 +513,10 @@ export const Partners: CollectionConfig = {
 			// correct it manually if needed.
 			name: "lastPartnerUpdateAt",
 			type: "date",
-			admin: { description: "Last time the PARTNER touched their profile. Drives the freshness loop." },
+			admin: {
+				description:
+					"Last time the PARTNER touched their profile. Drives the freshness loop.",
+			},
 		},
 		autoField({ name: "nextReminderAt", type: "date" }),
 

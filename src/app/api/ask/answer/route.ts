@@ -77,12 +77,18 @@ function getAnthropic(): Anthropic | null {
 
 function clean(text: string | null | undefined, n = 500): string {
 	if (!text) return "";
-	const c = text.replace(/[#*`>_]/g, "").replace(/\s+/g, " ").trim();
+	const c = text
+		.replace(/[#*`>_]/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
 	return c.length > n ? `${c.slice(0, n)}…` : c;
 }
 
 /** Fetch a JSON GET, tolerating failure as an empty object. */
-async function getJson(url: string, signal: AbortSignal): Promise<Record<string, unknown>> {
+async function getJson(
+	url: string,
+	signal: AbortSignal,
+): Promise<Record<string, unknown>> {
 	try {
 		const r = await fetch(url, { signal });
 		if (!r.ok) return {};
@@ -121,7 +127,9 @@ export async function POST(req: NextRequest) {
 	let query = "";
 	try {
 		const body = await req.json();
-		query = String(body?.query ?? "").trim().slice(0, 300);
+		query = String(body?.query ?? "")
+			.trim()
+			.slice(0, 300);
 	} catch {
 		// fall through to validation
 	}
@@ -139,9 +147,18 @@ export async function POST(req: NextRequest) {
 		const ac = new AbortController();
 		const timer = setTimeout(() => ac.abort(), 8_000);
 		const [research, projects, partners] = await Promise.all([
-			getJson(`${base}/api/research?q=${encodeURIComponent(query)}&limit=6`, ac.signal),
-			getJson(`${base}/api/projects/search?q=${encodeURIComponent(query)}&limit=6`, ac.signal),
-			getJson(`${base}/api/partners?${partnerQueryFor(query)}&limit=4`, ac.signal),
+			getJson(
+				`${base}/api/research?q=${encodeURIComponent(query)}&limit=6`,
+				ac.signal,
+			),
+			getJson(
+				`${base}/api/projects/search?q=${encodeURIComponent(query)}&limit=6`,
+				ac.signal,
+			),
+			getJson(
+				`${base}/api/partners?${partnerQueryFor(query)}&limit=4`,
+				ac.signal,
+			),
 		]);
 		clearTimeout(timer);
 
@@ -269,7 +286,9 @@ export async function POST(req: NextRequest) {
 		}
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
-				{ error: "The answer engine hit a snag — the cards below still stand." },
+				{
+					error: "The answer engine hit a snag — the cards below still stand.",
+				},
 				{ status: 502, headers: rateLimitHeaders(limit) },
 			);
 		}

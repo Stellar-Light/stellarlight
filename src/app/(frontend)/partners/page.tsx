@@ -1,6 +1,6 @@
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { PartnersDirectory } from "@/components/partners-directory";
 import { profileStrength } from "@/lib/partner-match";
 import { passesQualityBar } from "@/lib/partner-quality";
