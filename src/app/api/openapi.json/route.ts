@@ -308,6 +308,7 @@ const spec: OpenAPISpec = {
 										repo: { type: "string", nullable: true },
 										routedVia: { type: "string", nullable: true, description: "How the repo was chosen: explicit | canonical | search. null when nothing routed." },
 										repoMeta: { type: "object", nullable: true, description: "Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.", properties: { lastCommitAt: { type: "string", format: "date-time", nullable: true }, stars: { type: "integer", nullable: true }, isArchived: { type: "boolean" }, repoScoreLabel: { type: "string", nullable: true } } },
+										codeVerified: { type: "object", nullable: true, description: "Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned.", properties: { stellarProof: { type: "string" }, codeDepth: { type: "number", nullable: true }, isDeployableContract: { type: "boolean" }, sorobanSdkVersion: { type: "string", nullable: true }, versionStatus: { type: "string", nullable: true }, scannedAt: { type: "string", format: "date-time", nullable: true } } },
 										answer: { type: "string", nullable: true, description: "DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned)." },
 										answered: { type: "boolean", description: "Always present, including when routedVia is null (then false)." },
 										alternateRepos: { type: "array", items: { type: "string" }, description: "Other authoritative repos for this concept. Always present ([] when none)." },
@@ -1530,6 +1531,42 @@ const spec: OpenAPISpec = {
 							type: "boolean",
 							description:
 								"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+						},
+						codeVerified: {
+							type: "object",
+							nullable: true,
+							description:
+								"Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar.",
+							properties: {
+								stellarProof: {
+									type: "string",
+									enum: ["cargo-sdk", "contract-macros", "lang-sdk", "js-sdk", "stellar-toml"],
+									description:
+										"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml.",
+								},
+								codeDepth: {
+									type: "number",
+									nullable: true,
+									description:
+										"0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs.",
+								},
+								isDeployableContract: {
+									type: "boolean",
+									description: "Cargo cdylib — a real deployable Soroban contract (vs a CLI/indexer/frontend that only uses Stellar).",
+								},
+								sorobanSdkVersion: {
+									type: "string",
+									nullable: true,
+									description: "Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer).",
+								},
+								versionStatus: {
+									type: "string",
+									enum: ["current", "supported", "deprecated", "unknown"],
+									nullable: true,
+									description: "soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
+								},
+								scannedAt: { type: "string", format: "date-time", nullable: true, description: "When the code was last scanned." },
+							},
 						},
 				},
 			},
