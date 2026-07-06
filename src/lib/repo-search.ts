@@ -242,6 +242,25 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bcap[\s-]?\d|\bsep[\s-]?\d|\bprotocol\s*(spec|upgrade|version)|\bcore\s*advancement|\b(which|what|when)\s+cap\b|\b(which|what)\s+sep\b|\bcap\s+(introduc|add|implement|defin|enabl|land)|\bsep\s+(introduc|add|implement|defin)/,
 		repos: ["stellar/stellar-protocol"],
 	},
+	// classic protocol mechanics: network fees / path payments / claimable
+	// balances. Verified via ?repo= pin that stellar-core's DeepWiki answers all
+	// three authoritatively (fee+surge pricing, PathPaymentStrictSend, claimable-
+	// balance predicates). Fee terms stay bigram-narrow ("transaction fees",
+	// "base fee", "surge pricing") so protocol-level questions route here while
+	// dapp-fee questions ("what fees does soroswap charge") fall through to search.
+	{
+		test: /\b(transaction|network|base|inclusion|resource)\s*fees?\b|\bsurge\s*pricing|\bfee[\s-]?bump|\bpath\s*payment|\bclaimable\s*balance|\bclaim(?:able)?\s*predicates?\b/,
+		repos: ["stellar/stellar-core"],
+	},
+	// Soroban runtime/host internals: the Stellar Asset Contract, storage
+	// TTL/rent/state-archival, the auth framework (require_auth), and host
+	// functions are all implemented in rs-soroban-env — verified via ?repo= pin
+	// that its DeepWiki answers each authoritatively. Terms stay narrow: bare
+	// "authorization"/"storage" never match, only the Soroban-specific phrases.
+	{
+		test: /\bstellar\s*asset\s*contract\b|\bsac\b|\brequire_?\s*auth\b|\bsoroban\s*auth|\bauthorization\s*framework|\bstorage\s*ttl\b|\bttl\b|\bstate\s*archival|\barchived\s*entr|\brent\s*(fee|payment|mechanic|work)|\bhost\s*functions?\b/,
+		repos: ["stellar/rs-soroban-env", "stellar/rs-soroban-sdk"],
+	},
 	// anchor / SEP infra
 	{ test: /\banchor\s*platform\b/, repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"] },
 	// quickstart / run a node
