@@ -1,0 +1,38 @@
+# Content-freshness guard — fails if OUR authored how-to content (skills,
+# references, examples, package READMEs) contains a known-stale Stellar CLI /
+# build command (e.g. wasm32-unknown-unknown, `keys generate --global`). Static
+# repo scan; complements the live-API self-audit + the api-drift guard. Exists
+# because the ecosystem's live pain is agents parroting stale playbooks — we
+# must never be a source of that.
+name: Content freshness guard
+
+on:
+  pull_request:
+    paths:
+      - "public/skills/**"
+      - "references/**"
+      - "src/lib/stellar-scout-skill.ts"
+      - "src/lib/stellar-developer-activity-skill.ts"
+      - "scout-mcp/README.md"
+      - "api-client/README.md"
+      - "README.md"
+      - "scripts/check-content-freshness.ts"
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 13 * * *" # daily ~13:23 UTC (near the api-drift guard)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Scan authored content for stale Stellar CLI commands
+        run: npx -y tsx scripts/check-content-freshness.ts
