@@ -48,6 +48,21 @@ export const EXPERIMENTS: Experiment[] = [
 		envFlag: "EXP_PARTNER_COMPLIANCE_API",
 		since: "2026-07-07",
 	},
+	{
+		id: "partner-onchain-live",
+		title: "Expose on-chain 'live on Stellar' proof to the agent API",
+		hypothesis:
+			"Adding domain-matched on-chain reality (each anchor's OWN issued assets' holders, payment count, stellar.expert rating) to GET /api/partners gives agents the git-free trust signal closed-source anchors otherwise lack — distinguishing a live issuer (Zeam ZARZ ~181k holders, Anclap PEN ~42k) from a barely-used one (AUDD NZDSC 5 holders / 0 payments).",
+		metric:
+			"Ground truth: the variant carries onchain[] for domain-verified issuers (Etherfuse CETES, MYKOBO's OWN EURC not Circle's, Anclap PEN) with holders/payments > 0; baseline carries no onchain field at all. No misattribution (an anchor merely USING USDC has no USDC onchain entry).",
+		status: "running",
+		// NOT exposed to agents/prod yet (boxy: "don't expose it yet"). Test via
+		// ?exp=partner-onchain-live. Graduate by flipping this to true + adding
+		// `onchain` to the OpenAPI spec + republishing the client/MCP surfaces.
+		defaultOn: false,
+		envFlag: "EXP_PARTNER_ONCHAIN_LIVE",
+		since: "2026-07-07",
+	},
 ];
 
 export const experimentById = (id: string): Experiment | undefined =>
