@@ -128,6 +128,121 @@ const PARTNER_ENRICH: Record<
 const URL_CORRECTIONS: Record<string, string> = {
 	"anchor-boss-pay": "https://www.bossmoney.com",
 };
+
+// VERIFIED compliance + corridor facts — the decision-critical signals for a
+// closed-source anchor. Gathered 2026-07-06 from each partner's OWN site /
+// official regulator registries (cite-or-null; NOTHING inferred). A license is
+// listed ONLY where the company states it or a regulator publishes it. Curator-
+// maintained → the whole `compliance` group is overwritten on each run.
+type Compliance = {
+	licenses?: Array<{ authority: string; jurisdiction?: string; type?: string }>;
+	kycRequired?: boolean;
+	travelRule?: boolean;
+	currencies?: string;
+	settlementTime?: string;
+	notableCustomers?: string;
+};
+const COMPLIANCE_ENRICH: Record<string, Compliance> = {
+	"anchor-yellow-card": {
+		licenses: [
+			{
+				authority: "FinCEN",
+				jurisdiction: "United States",
+				type: "MSB registration",
+			},
+			{
+				authority: "KNF",
+				jurisdiction: "Poland (EU)",
+				type: "Virtual currencies register (RDWW-1069)",
+			},
+			{ authority: "NBFIRA", jurisdiction: "Botswana", type: "VASP license" },
+			{
+				authority: "FSCA",
+				jurisdiction: "South Africa",
+				type: "Category I FSP (crypto assets)",
+			},
+		],
+		kycRequired: true,
+		travelRule: true,
+		notableCustomers: "Visa",
+	},
+	"anchor-mykobo": {
+		licenses: [
+			{
+				authority: "GIFI",
+				jurisdiction: "Poland",
+				type: "Registered VASP (RDWW-1590)",
+			},
+		],
+		kycRequired: true,
+		currencies: "EUR",
+		settlementTime: "<1hr",
+		notableCustomers: "LOBSTR, StellarX, Beans, Honeycoin",
+	},
+	"anchor-bitso": {
+		licenses: [
+			{
+				authority: "GFSC",
+				jurisdiction: "Gibraltar",
+				type: "DLT Provider authorization",
+			},
+			{
+				authority: "CNBV",
+				jurisdiction: "Mexico",
+				type: "IFPE (Fintech Law) via Nvio Pagos",
+			},
+		],
+		kycRequired: true,
+		travelRule: true,
+		currencies: "MXN, BRL, ARS, COP, USD",
+	},
+	"anchor-anclap": {
+		licenses: [
+			{
+				authority: "CNV",
+				jurisdiction: "Argentina",
+				type: "Registered PSAV/VASP (N°95)",
+			},
+		],
+		kycRequired: true,
+		settlementTime: "instant",
+	},
+	"anchor-coins-ph": {
+		licenses: [
+			{
+				authority: "Bangko Sentral ng Pilipinas (BSP)",
+				jurisdiction: "Philippines",
+				type: "EMI + EPFS licenses",
+			},
+		],
+		kycRequired: true,
+		currencies: "PHP",
+		settlementTime: "instant",
+	},
+	"anchor-moneygram": {
+		licenses: [
+			{
+				authority: "FinCEN",
+				jurisdiction: "United States",
+				type: "MSB registration",
+			},
+			{
+				authority: "NY DFS",
+				jurisdiction: "United States (New York)",
+				type: "Money Transmitter license",
+			},
+		],
+		kycRequired: true,
+	},
+	etherfuse: {
+		kycRequired: true,
+		currencies: "USD, MXN",
+		settlementTime: "instant",
+		notableCustomers: "Shinhan Securities, BBVA, Felix Pago, Pago46, Brale",
+	},
+	finclusive: { kycRequired: true, currencies: "USD" },
+	clpx: { currencies: "CLP", settlementTime: "<5s" },
+};
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -347,6 +462,34 @@ async function main() {
 	}
 	if (projLogo.size === 0) console.log("  (no matching project logos found)");
 	else console.log(`  (${logoNoop} already correct, no-op)`);
+
+	console.log(
+		"\n── Compliance & corridors (VERIFIED; overwrites the group) ──",
+	);
+	for (const [slug, comp] of Object.entries(COMPLIANCE_ENRICH)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		const summary = [
+			comp.licenses?.length ? `${comp.licenses.length} license(s)` : "",
+			comp.kycRequired ? "KYC" : "",
+			comp.travelRule ? "Travel Rule" : "",
+			comp.currencies ? `ccy:${comp.currencies}` : "",
+			comp.settlementTime ? `settle:${comp.settlementTime}` : "",
+			comp.notableCustomers ? "customers" : "",
+		]
+			.filter(Boolean)
+			.join(" · ");
+		console.log(`  ${d.name} (${slug}) — compliance → ${summary}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { compliance: comp },
+			note: "compliance",
+		});
+	}
 
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);
