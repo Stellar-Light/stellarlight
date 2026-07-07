@@ -53,7 +53,11 @@ async function semanticProjectRows(
 		// Inactive stays searchable (so a name lookup like "keybase" still finds
 		// it) but is heavily penalized in scoring — it can't ride prominence or
 		// stars to the top of a topic query.
-		{ $match: { status: { $in: ["Development", "Pre-Release", "Live", "Inactive"] } } },
+		{
+			$match: {
+				status: { $in: ["Development", "Pre-Release", "Live", "Inactive"] },
+			},
+		},
 		{
 			$project: {
 				_id: 1,
@@ -67,6 +71,8 @@ async function semanticProjectRows(
 				logo: 1,
 				scf: 1,
 				links: 1,
+				coverage: 1,
+				supportedNetworks: 1,
 				hackathonPlacement: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
@@ -105,6 +111,10 @@ async function semanticProjectRows(
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			links: pickLinks(p.links),
+			coverage: pickCoverage(p.coverage),
+			supportedNetworks: Array.isArray(p.supportedNetworks)
+				? p.supportedNetworks
+				: [],
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -160,6 +170,15 @@ interface ProjectRow {
 	prominence: number;
 	verificationLevel: string | null;
 	types: string[];
+	// sls-012: structured anchor corridor coverage (null for non-anchors).
+	coverage: {
+		countries: string[];
+		currencies: string[];
+		seps: string[];
+		asOf: string | null;
+	} | null;
+	// sls-017 (durable): chains this project supports (e.g. ["stellar","xrpl"]).
+	supportedNetworks: string[];
 	links?: Record<string, string>;
 	score: number;
 	url: string;
@@ -213,13 +232,39 @@ const SYNONYMS: Record<string, string[]> = {
 	gaming: ["gaming", "game", "gamefi", "play-to-earn", "play2earn"],
 	game: ["game", "gaming", "gamefi", "play-to-earn"],
 	anchor: ["anchor", "on-ramp", "off-ramp", "sep-24", "sep24", "ramp"],
-	remittance: ["remittance", "cross-border", "money transfer", "send money", "payout"],
+	remittance: [
+		"remittance",
+		"cross-border",
+		"money transfer",
+		"send money",
+		"payout",
+	],
 	// Region umbrellas → the country vocabulary records actually use. Raven's
 	// launch demo ("LatAm asset issuers") missed PagFinance/CashAbroad because
 	// their records say "Brazil"/"Mexico", never the umbrella term "LatAm".
-	latam: ["latam", "latin america", "brazil", "brazilian", "mexico", "mexican", "argentina", "colombia", "chile", "peru"],
+	latam: [
+		"latam",
+		"latin america",
+		"brazil",
+		"brazilian",
+		"mexico",
+		"mexican",
+		"argentina",
+		"colombia",
+		"chile",
+		"peru",
+	],
 	africa: ["africa", "african", "nigeria", "kenya", "ghana", "south africa"],
-	asia: ["asia", "asian", "india", "indian", "philippines", "indonesia", "vietnam", "singapore"],
+	asia: [
+		"asia",
+		"asian",
+		"india",
+		"indian",
+		"philippines",
+		"indonesia",
+		"vietnam",
+		"singapore",
+	],
 	europe: ["europe", "european", "eu"],
 	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
 	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
@@ -231,19 +276,64 @@ const SYNONYMS: Record<string, string[]> = {
 	governance: ["governance", "dao", "voting"],
 	custody: ["custody", "custodial", "mpc", "multisig", "key management"],
 	domains: ["domains", "domain", "name service", "naming"],
-	rwa: ["rwa", "real world asset", "real-world asset", "tokenized", "tokenization"],
+	rwa: [
+		"rwa",
+		"real world asset",
+		"real-world asset",
+		"tokenized",
+		"tokenization",
+	],
 	// Machine/agent payments (x402). Expand to the phrases real records actually
 	// use — ApiCharge says "pay-per-call"/"API monetization", Benkiko says
 	// "micropayment" — never the literal "x402". Keep to specific phrases, not
 	// bare "api"/"payment", to avoid pulling in generic infra/payments projects.
-	x402: ["x402", "pay-per-call", "pay per call", "api monetization", "micropayment", "metered", "machine payment", "agentic payment", "agent payment"],
-	micropayment: ["micropayment", "micro-payment", "pay-per-call", "x402", "metered"],
-	mpp: ["mpp", "machine payment", "machine-to-machine", "x402", "agentic payment"],
-	agentic: ["agentic", "agent payment", "agentic payment", "x402", "machine payment"],
+	x402: [
+		"x402",
+		"pay-per-call",
+		"pay per call",
+		"api monetization",
+		"micropayment",
+		"metered",
+		"machine payment",
+		"agentic payment",
+		"agent payment",
+	],
+	micropayment: [
+		"micropayment",
+		"micro-payment",
+		"pay-per-call",
+		"x402",
+		"metered",
+	],
+	mpp: [
+		"mpp",
+		"machine payment",
+		"machine-to-machine",
+		"x402",
+		"agentic payment",
+	],
+	agentic: [
+		"agentic",
+		"agent payment",
+		"agentic payment",
+		"x402",
+		"machine payment",
+	],
 	// ROSCA / rotating-savings. Lul's description says "ROSCA", Vaquita is a
 	// rotating-savings product; the regional names (susu/chama/stokvel/…) appear
 	// in queries but not descriptions, so map them onto the terms records use.
-	rosca: ["rosca", "rotating savings", "savings group", "savings circle", "susu", "esusu", "chama", "stokvel", "tanda", "ajo"],
+	rosca: [
+		"rosca",
+		"rotating savings",
+		"savings group",
+		"savings circle",
+		"susu",
+		"esusu",
+		"chama",
+		"stokvel",
+		"tanda",
+		"ajo",
+	],
 	chama: ["chama", "rosca", "rotating savings", "savings group"],
 	susu: ["susu", "esusu", "rosca", "rotating savings"],
 	esusu: ["esusu", "susu", "rosca", "rotating savings"],
@@ -296,7 +386,8 @@ function intentTypesFor(tokens: string[]): Set<string> {
 	const s = new Set<string>();
 	for (const t of tokens) {
 		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
-		for (const syn of SYNONYMS[t] ?? []) if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+		for (const syn of SYNONYMS[t] ?? [])
+			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
 	}
 	return s;
 }
@@ -306,7 +397,9 @@ function intentTypesFor(tokens: string[]): Set<string> {
 // query, even at prominence 0 — e.g. an obscure NFT project beats a high-prominence
 // lender that merely contains "nft". intentTypes empty (no category query) → false.
 function typeMatch(p: ProjectRow, intentTypes: Set<string>): boolean {
-	return intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t));
+	return (
+		intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t))
+	);
 }
 
 // Authority/quality WITHIN a tier: curated prominence, then SDF/community
@@ -369,6 +462,29 @@ function pickLifecycle(
 		typeof lc.note === "string" && lc.note.trim().length > 0 ? lc.note : null;
 	if (!wasLive && !note) return null;
 	return { wasLive, note };
+}
+
+// sls-012: structured anchor corridor coverage. Only surfaced when it carries
+// real data, so non-anchors stay clean (null) and a consumer that sees
+// `coverage` can filter/date it instead of prose-mining the description.
+function pickCoverage(
+	// biome-ignore lint/suspicious/noExplicitAny: payload coverage group shape
+	c: any,
+): {
+	countries: string[];
+	currencies: string[];
+	seps: string[];
+	asOf: string | null;
+} | null {
+	if (!c || typeof c !== "object") return null;
+	const arr = (v: unknown): string[] =>
+		Array.isArray(v) ? v.filter((x) => typeof x === "string" && x) : [];
+	const countries = arr(c.countries);
+	const currencies = arr(c.currencies);
+	const seps = arr(c.seps);
+	const asOf = typeof c.asOf === "string" && c.asOf ? c.asOf : null;
+	if (!countries.length && !currencies.length && !seps.length) return null;
+	return { countries, currencies, seps, asOf };
 }
 
 export async function GET(req: NextRequest) {
@@ -454,7 +570,11 @@ export async function GET(req: NextRequest) {
 				projects: [],
 				codeReferences: [],
 			},
-			{ headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+			{
+				headers: {
+					"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				},
+			},
 		);
 	}
 
@@ -528,7 +648,11 @@ export async function GET(req: NextRequest) {
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
-					scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
+					scf?: {
+						awarded?: boolean;
+						totalAwarded?: number;
+						awardedRounds?: number[];
+					};
 					hackathon?:
 						| { id: string; name: string; slug: string }
 						| string
@@ -539,6 +663,13 @@ export async function GET(req: NextRequest) {
 					prominence?: number;
 					verificationLevel?: string;
 					types?: string[];
+					coverage?: {
+						countries?: string[];
+						currencies?: string[];
+						seps?: string[];
+						asOf?: string;
+					} | null;
+					supportedNetworks?: string[];
 					links?: {
 						website?: string;
 						github?: string;
@@ -586,7 +717,10 @@ export async function GET(req: NextRequest) {
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
-					scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
+					scfAmountStatus: scfAmountStatus(
+						!!p.scf?.awarded,
+						p.scf?.totalAwarded,
+					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
@@ -595,6 +729,10 @@ export async function GET(req: NextRequest) {
 					prominence: typeof p.prominence === "number" ? p.prominence : 0,
 					verificationLevel: p.verificationLevel ?? null,
 					types: Array.isArray(p.types) ? p.types : [],
+					coverage: pickCoverage(p.coverage),
+					supportedNetworks: Array.isArray(p.supportedNetworks)
+						? p.supportedNetworks
+						: [],
 					links: pickLinks(p.links),
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
@@ -707,9 +845,7 @@ export async function GET(req: NextRequest) {
 						if (d.logo && typeof d.logo === "object") {
 							p.logoUrl =
 								d.logo.url ??
-								(d.logo.filename
-									? `/api/media/file/${d.logo.filename}`
-									: null);
+								(d.logo.filename ? `/api/media/file/${d.logo.filename}` : null);
 						}
 						if (d.hackathon && typeof d.hackathon === "object") {
 							p.hackathon = {
@@ -808,7 +944,10 @@ export async function GET(req: NextRequest) {
 		baseProjects.sort((a, b) => exact(b) - exact(a) || act(b) - act(a));
 	}
 	let projectsOut: Array<
-		(typeof baseProjects)[number] & { repos: ProjectRepoRef[]; lastActivityAt: string | null }
+		(typeof baseProjects)[number] & {
+			repos: ProjectRepoRef[];
+			lastActivityAt: string | null;
+		}
 	> = baseProjects.map((p) => ({ ...p, repos: [], lastActivityAt: null }));
 	if (payload && baseProjects.length) {
 		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
@@ -835,7 +974,9 @@ export async function GET(req: NextRequest) {
 				},
 			});
 			const bySlug = new Map<string, ProjectRepoRef[]>();
-			for (const r of repoRes.docs as unknown as Array<Record<string, unknown>>) {
+			for (const r of repoRes.docs as unknown as Array<
+				Record<string, unknown>
+			>) {
 				const s = r.projectSlug as string | undefined;
 				if (!s) continue;
 				const arr = bySlug.get(s) ?? [];
@@ -859,7 +1000,10 @@ export async function GET(req: NextRequest) {
 			projectsOut = baseProjects.map((p) => {
 				const repos = bySlug.get(p.slug) ?? [];
 				const lastActivityAt = repos.reduce<string | null>(
-					(max, r) => (r.lastCommitAt && (!max || r.lastCommitAt > max) ? r.lastCommitAt : max),
+					(max, r) =>
+						r.lastCommitAt && (!max || r.lastCommitAt > max)
+							? r.lastCommitAt
+							: max,
 					null,
 				);
 				return { ...p, repos, lastActivityAt };
@@ -884,7 +1028,9 @@ export async function GET(req: NextRequest) {
 				select: { name: true, slug: true, projects: true },
 			});
 			const m = new Map<string, { name: string; slug: string }>();
-			for (const e of entRes.docs as unknown as Array<Record<string, unknown>>) {
+			for (const e of entRes.docs as unknown as Array<
+				Record<string, unknown>
+			>) {
 				const ids = Array.isArray(e.projects) ? e.projects : [];
 				for (const pid of ids) {
 					const key =
@@ -955,7 +1101,11 @@ export async function GET(req: NextRequest) {
 								.map((x) =>
 									typeof x === "string"
 										? x
-										: String((x as { tag?: unknown; code?: unknown })?.tag ?? (x as { code?: unknown })?.code ?? ""),
+										: String(
+												(x as { tag?: unknown; code?: unknown })?.tag ??
+													(x as { code?: unknown })?.code ??
+													"",
+											),
 								)
 								.filter(Boolean)
 						: [];

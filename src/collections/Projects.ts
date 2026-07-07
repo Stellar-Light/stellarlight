@@ -51,7 +51,8 @@ export const Projects: CollectionConfig = {
 			type: "upload",
 			relationTo: "media",
 			admin: {
-				description: "Project logo image. If not provided, a default logo will be used.",
+				description:
+					"Project logo image. If not provided, a default logo will be used.",
 			},
 		},
 		{
@@ -180,7 +181,8 @@ export const Projects: CollectionConfig = {
 					name: "twitter",
 					type: "text",
 					admin: {
-						description: "X (formerly Twitter) profile URL (e.g., https://x.com/username)",
+						description:
+							"X (formerly Twitter) profile URL (e.g., https://x.com/username)",
 					},
 					label: "X (Twitter)",
 				},
@@ -209,8 +211,7 @@ export const Projects: CollectionConfig = {
 					type: "array",
 					labels: { singular: "Repo", plural: "Repos" },
 					admin: {
-						description:
-							"Specific repositories for this project (owner/name)",
+						description: "Specific repositories for this project (owner/name)",
 					},
 					fields: [
 						{ name: "owner", type: "text", required: true },
@@ -244,6 +245,44 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			// sls-012: structured anchor corridor/coverage, so "which anchors serve
+			// corridor X→Y / currency Z?" is filterable + dated, not prose-mined.
+			// Synced from the matching partner record (currencies/SEPs/country) by
+			// scripts/data/curate-projects.ts; `asOf` stamps the sync.
+			name: "coverage",
+			type: "group",
+			admin: {
+				description:
+					"Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.",
+			},
+			fields: [
+				{ name: "countries", type: "text", hasMany: true },
+				{ name: "currencies", type: "text", hasMany: true },
+				{
+					name: "seps",
+					type: "select",
+					hasMany: true,
+					options: [
+						{ label: "SEP-6", value: "sep-6" },
+						{ label: "SEP-24", value: "sep-24" },
+						{ label: "SEP-31", value: "sep-31" },
+					],
+				},
+				{ name: "asOf", type: "text" },
+			],
+		},
+		{
+			// sls-017 (durable half): chain/network support so omission ≠ negation
+			// on wallet/multichain records (e.g. LOBSTR = Stellar + XRPL).
+			name: "supportedNetworks",
+			type: "text",
+			hasMany: true,
+			admin: {
+				description:
+					"Networks this project supports, lowercase (e.g. 'stellar', 'xrpl'). Curator-maintained.",
+			},
+		},
+		{
 			name: "scf",
 			type: "group",
 			admin: {
@@ -269,7 +308,8 @@ export const Projects: CollectionConfig = {
 					name: "slug",
 					type: "text",
 					admin: {
-						description: "SCF project slug (used for linking to communityfund.stellar.org)",
+						description:
+							"SCF project slug (used for linking to communityfund.stellar.org)",
 					},
 				},
 				{
@@ -284,7 +324,8 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					hasMany: true,
 					admin: {
-						description: "Round numbers this project was funded in, e.g. 2, 17, 22",
+						description:
+							"Round numbers this project was funded in, e.g. 2, 17, 22",
 					},
 				},
 			],
@@ -334,7 +375,8 @@ export const Projects: CollectionConfig = {
 			type: "checkbox",
 			defaultValue: false,
 			admin: {
-				description: "Featured projects appear first in the directory when sorted by Featured.",
+				description:
+					"Featured projects appear first in the directory when sorted by Featured.",
 			},
 		},
 		{
@@ -362,7 +404,8 @@ export const Projects: CollectionConfig = {
 			type: "checkbox",
 			defaultValue: false,
 			admin: {
-				description: "Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.",
+				description:
+					"Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.",
 			},
 		},
 		{
@@ -371,7 +414,8 @@ export const Projects: CollectionConfig = {
 			collection: "entities",
 			on: "projects",
 			admin: {
-				description: "Entities/organizations linked to this project. Edit from either side.",
+				description:
+					"Entities/organizations linked to this project. Edit from either side.",
 			},
 		},
 		{
