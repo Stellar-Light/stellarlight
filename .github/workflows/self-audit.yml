@@ -1,0 +1,56 @@
+name: Self-audit (data-quality guard)
+
+# The continuous-improvement Guard: a GROUNDED daily check of the live data
+# behind the Scout contract — liveness, freshness, served-count sanity, and
+# ground-truth spot checks (scripts/self-audit.ts). On a real failure it files
+# an Issue with the reproducible output so the regression is actionable. It
+# never runs adversarial "find the worst" judging (that manufactures problems).
+# Complements api-drift.yml (API ⇄ spec ⇄ docs consistency).
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # daily 13:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Run self-audit
+        id: audit
+        run: |
+          set +e
+          pnpm exec tsx scripts/self-audit.ts | tee audit.log
+          echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        env:
+          SCOUT_BASE: https://stellarlight.xyz
+      - name: File an Issue on a real failure
+        if: steps.audit.outputs.exit != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "The grounded self-audit found a real data-health regression on the live API."
+            echo ""
+            echo '```'
+            cat audit.log
+            echo '```'
+            echo ""
+            echo "Run: $RUN_URL"
+          } > body.md
+          gh issue create --title "Self-audit failure — $(date -u +%Y-%m-%d)" --body-file body.md
+      - name: Fail the job so the regression is visible
+        if: steps.audit.outputs.exit != '0'
+        run: exit 1
