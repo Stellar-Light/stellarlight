@@ -1,16 +1,25 @@
 "use client";
 
 /**
- * Guided matchmaker — the structured, instant counterpart to the free-form
- * concierge chat. Pick a type + region + what you need, get REAL published
- * partners ranked by the shared deterministic scorer, each with the concrete
- * "why this matched" reasons. No LLM, so it's fast. Powered by
- * GET /api/partners/matchmaker.
+ * The primary "find a partner" surface — search-first and instant. Pick a type
+ * + region + what you need, get REAL published partners ranked by the shared
+ * deterministic scorer, each with the concrete "why this matched" reasons. No
+ * LLM, so it's fast. Powered by GET /api/partners/matchmaker.
+ *
+ * The free-form concierge chat is a deliberate ESCALATION from here (via
+ * onAskConcierge), not a co-equal mode — so there's one obvious way to start.
+ * A query handed off from /ask (initialNeed) pre-fills and auto-runs the search.
  */
 
-import { ArrowUpRight, Check, Loader2, Sparkles } from "lucide-react";
+import {
+	ArrowUpRight,
+	Check,
+	Loader2,
+	MessageCircle,
+	Search,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { regionLabel, typeLabel } from "@/lib/partner-labels";
 import { cn } from "@/lib/utils";
 
@@ -53,27 +62,36 @@ const REGIONS = [
 	"global",
 ];
 
+// Goal-shaped starters — a builder recognizes the OUTCOME, not our field names.
 const EXAMPLES = [
-	"USDC off-ramp",
-	"EUR rails",
+	"USDC off-ramp in LatAm",
 	"Rust / Soroban audit",
+	"EUR on-ramp",
 	"tokenized treasuries",
+	"accept crypto payments in Africa",
 ];
 
-export function PartnerMatchmaker() {
+export function PartnerMatchmaker({
+	initialNeed,
+	onAskConcierge,
+}: {
+	initialNeed?: string;
+	onAskConcierge?: (need: string) => void;
+}) {
 	const [type, setType] = useState("");
 	const [region, setRegion] = useState("");
-	const [need, setNeed] = useState("");
+	const [need, setNeed] = useState(initialNeed ?? "");
 	const [state, setState] = useState<State>({ kind: "idle" });
 
 	const empty = !type && !region && !need.trim();
 
-	async function run() {
-		if (empty) return;
+	async function run(override?: { need?: string }) {
+		const n = override?.need ?? need;
+		if (!type && !region && !n.trim()) return;
 		setState({ kind: "loading" });
 		try {
 			const qs = new URLSearchParams();
-			if (need.trim()) qs.set("q", need.trim());
+			if (n.trim()) qs.set("q", n.trim());
 			if (type) qs.set("type", type);
 			if (region) qs.set("region", region);
 			const r = await fetch(`/api/partners/matchmaker?${qs.toString()}`);
@@ -85,12 +103,19 @@ export function PartnerMatchmaker() {
 			setState({
 				kind: "done",
 				matches: Array.isArray(d.matches) ? d.matches : [],
-				need: d.meta?.need ?? "",
+				need: d.meta?.need ?? n,
 			});
 		} catch {
 			setState({ kind: "error" });
 		}
 	}
+
+	// A ?q= handoff from /ask pre-fills and runs the search immediately.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
+	useEffect(() => {
+		if (initialNeed?.trim()) run({ need: initialNeed });
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	function chip(
 		value: string,
@@ -114,6 +139,19 @@ export function PartnerMatchmaker() {
 			</button>
 		);
 	}
+
+	// The one-way escalation to the free-form concierge, seeded with the need.
+	const escalate = onAskConcierge ? (
+		<button
+			type="button"
+			onClick={() => onAskConcierge(need.trim() || "")}
+			className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+		>
+			<MessageCircle className="w-4 h-4" />
+			Prefer to describe it in your own words? Ask the concierge
+			<ArrowUpRight className="w-3.5 h-3.5" />
+		</button>
+	) : null;
 
 	return (
 		<div className="space-y-6">
@@ -171,7 +209,10 @@ export function PartnerMatchmaker() {
 							<button
 								key={ex}
 								type="button"
-								onClick={() => setNeed(ex)}
+								onClick={() => {
+									setNeed(ex);
+									run({ need: ex });
+								}}
 								className="text-xs px-2.5 py-1 rounded-full bg-white/[0.02] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
 							>
 								{ex}
@@ -182,50 +223,61 @@ export function PartnerMatchmaker() {
 
 				<button
 					type="button"
-					onClick={run}
+					onClick={() => run()}
 					disabled={empty || state.kind === "loading"}
 					className="h-10 px-5 inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground disabled:opacity-40 transition-colors"
 				>
 					{state.kind === "loading" ? (
 						<Loader2 className="w-4 h-4 animate-spin" />
 					) : (
-						<Sparkles className="w-4 h-4" />
+						<Search className="w-4 h-4" />
 					)}
 					Find matches
 				</button>
 			</div>
 
 			{state.kind === "error" && (
-				<p className="text-sm text-muted-foreground">
-					The matchmaker is busy right now —{" "}
-					<Link href="/partners" className="text-foreground underline">
-						browse the directory
-					</Link>{" "}
-					instead.
-				</p>
+				<div className="space-y-3">
+					<p className="text-sm text-muted-foreground">
+						The matchmaker is busy right now —{" "}
+						<Link href="/partners" className="text-foreground underline">
+							browse the directory
+						</Link>{" "}
+						instead.
+					</p>
+					{escalate}
+				</div>
 			)}
 
 			{state.kind === "done" && (
-				<div>
-					<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+				<div className="space-y-4">
+					<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						{state.matches.length === 0
 							? "No partners match — try broadening it"
 							: `${state.matches.length} match${state.matches.length === 1 ? "" : "es"}`}
 					</h2>
 					{state.matches.length === 0 ? (
-						<div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-							Nothing fits all of those. Drop a filter, or{" "}
-							<Link href="/partners" className="text-foreground underline">
-								browse everyone
-							</Link>
-							.
+						<div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground space-y-3">
+							<p>
+								Nothing fits all of those. Drop a filter, or{" "}
+								<Link href="/partners" className="text-foreground underline">
+									browse everyone
+								</Link>
+								.
+							</p>
+							{escalate}
 						</div>
 					) : (
-						<div className="grid sm:grid-cols-2 gap-3">
-							{state.matches.map((m) => (
-								<MatchmakerCard key={m.slug} m={m} />
-							))}
-						</div>
+						<>
+							<div className="grid sm:grid-cols-2 gap-3">
+								{state.matches.map((m) => (
+									<MatchmakerCard key={m.slug} m={m} />
+								))}
+							</div>
+							{escalate && (
+								<div className="pt-1 flex justify-center">{escalate}</div>
+							)}
+						</>
 					)}
 				</div>
 			)}

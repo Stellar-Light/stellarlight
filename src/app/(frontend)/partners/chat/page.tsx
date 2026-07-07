@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PartnerFinder } from "@/components/partner-finder";
 
 export const metadata: Metadata = {
-	title: "Partner concierge | Stellar Partners",
+	title: "Find a partner | Stellar Partners",
 	description:
 		"Describe what you're building and get matched to real Stellar partners — anchors, ramps, auditors, infrastructure. Or list your own company. A short AI-guided chat, no account needed.",
 };
@@ -38,11 +38,10 @@ export default async function PartnerConciergePage({
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Use the <span className="text-foreground">guided match</span> to
-						pick what you need and get ranked partners with reasons — or switch
-						to <span className="text-foreground">Ask / list</span> to describe
-						it in your own words, or get your own company listed. No account
-						needed. Prefer to browse?{" "}
+						Tell us what you need — pick a type and region, add what you&apos;re
+						building — and get real partners ranked with the reasons they
+						matched. Not sure how to phrase it? Ask the concierge in your own
+						words. No account needed. Prefer to browse?{" "}
 						<Link
 							href="/partners"
 							className="text-foreground underline underline-offset-2 hover:no-underline"
