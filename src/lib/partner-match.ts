@@ -12,6 +12,13 @@
  */
 
 import type { Payload } from "payload";
+import {
+	rampLabel,
+	regionLabel,
+	sectorLabel,
+	sepLabel,
+	typeLabel,
+} from "./partner-labels";
 
 export const PARTNER_TYPES = [
 	"anchor",
@@ -58,6 +65,8 @@ export interface ScoredPartner {
 	partner: PublicPartner;
 	/** The searchable haystack — handed to the chat model to reason over. */
 	blob: string;
+	/** Human-readable "why this matched" chips (asset/ramp/SEP/country/…). */
+	reasons: string[];
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -87,16 +96,94 @@ function toPublic(p: any): PublicPartner {
 
 /** Words we don't want driving a match (too common to be meaningful). */
 const STOPWORDS = new Set([
-	"a", "an", "the", "and", "or", "for", "to", "of", "in", "on", "with", "we",
-	"i", "need", "looking", "want", "find", "a", "is", "are", "my", "our", "that",
-	"can", "who", "someone", "some", "help", "me", "you", "it", "this", "these",
-	"stellar", "soroban", "partner", "partners", "please", "hi", "hello",
+	"a",
+	"an",
+	"the",
+	"and",
+	"or",
+	"for",
+	"to",
+	"of",
+	"in",
+	"on",
+	"with",
+	"we",
+	"i",
+	"need",
+	"looking",
+	"want",
+	"find",
+	"a",
+	"is",
+	"are",
+	"my",
+	"our",
+	"that",
+	"can",
+	"who",
+	"someone",
+	"some",
+	"help",
+	"me",
+	"you",
+	"it",
+	"this",
+	"these",
+	"stellar",
+	"soroban",
+	"partner",
+	"partners",
+	"please",
+	"hi",
+	"hello",
 ]);
 
 function tokenize(s: string): string[] {
 	return (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
 		(t) => t.length > 1 && !STOPWORDS.has(t),
 	);
+}
+
+/** "soroban-audit" → "Soroban Audit". */
+function prettyTag(s: string): string {
+	return s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * The specific fields that made a partner match a need — rendered as ✓ chips in
+ * the matchmaker so a builder sees WHY, not just a ranked list. Draws only from
+ * the concrete, verifiable fields (assets/ramps/SEPs/country/services/type/
+ * sector/region) — never the vague free-text ones.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+function matchReasons(needTokens: Set<string>, p: any): string[] {
+	const hits = (text: string): boolean => {
+		const toks = new Set(tokenize(text));
+		for (const t of needTokens) if (toks.has(t)) return true;
+		return false;
+	};
+	const out: string[] = [];
+	const assets: string[] = (p.assets ?? [])
+		.map((a: { code: string }) => a.code)
+		.filter(Boolean);
+	for (const a of assets) if (hits(a)) out.push(a.toUpperCase());
+	for (const r of p.rampTypes ?? [])
+		if (hits(r.replace(/-/g, " "))) out.push(rampLabel(r));
+	for (const s of p.seps ?? [])
+		if (hits(s.replace(/-/g, " "))) out.push(sepLabel(s));
+	if (p.country && hits(p.country)) out.push(p.country);
+	const services: string[] = (p.services ?? [])
+		.map((s: { tag: string }) => s.tag)
+		.filter(Boolean);
+	for (const s of services)
+		if (hits(s.replace(/-/g, " "))) out.push(prettyTag(s));
+	if (p.partnerType && hits(String(p.partnerType).replace(/-/g, " ")))
+		out.push(typeLabel(p.partnerType));
+	for (const s of p.sectors ?? []) if (hits(s)) out.push(sectorLabel(s));
+	for (const r of p.regions ?? [])
+		if (hits(r.replace(/-/g, " "))) out.push(regionLabel(r));
+	if (p.acceptingClients) out.push("Accepting clients");
+	return [...new Set(out)].slice(0, 6);
 }
 
 /** Pull the published, non-archived partner set (directory parity). */
@@ -129,32 +216,90 @@ export async function fetchEligiblePartners(
  */
 const REGION_KEYWORDS: Record<string, string[]> = {
 	asia: [
-		"asia", "asian", "philippines", "philippine", "india", "indian",
-		"indonesia", "singapore", "vietnam", "thailand", "japan", "japanese",
-		"china", "chinese", "malaysia", "korea", "hong kong",
+		"asia",
+		"asian",
+		"philippines",
+		"philippine",
+		"india",
+		"indian",
+		"indonesia",
+		"singapore",
+		"vietnam",
+		"thailand",
+		"japan",
+		"japanese",
+		"china",
+		"chinese",
+		"malaysia",
+		"korea",
+		"hong kong",
 	],
 	latam: [
-		"latam", "latin america", "mexico", "mexican", "brazil", "brazilian",
-		"argentina", "argentine", "chile", "chilean", "peru", "peruvian",
-		"colombia", "colombian", "pesos", "peso", "reais", "real",
+		"latam",
+		"latin america",
+		"mexico",
+		"mexican",
+		"brazil",
+		"brazilian",
+		"argentina",
+		"argentine",
+		"chile",
+		"chilean",
+		"peru",
+		"peruvian",
+		"colombia",
+		"colombian",
+		"pesos",
+		"peso",
+		"reais",
+		"real",
 	],
 	africa: [
-		"africa", "african", "nigeria", "nigerian", "kenya", "kenyan",
-		"tanzania", "ghana", "ghanaian", "south africa", "uganda", "rand",
+		"africa",
+		"african",
+		"nigeria",
+		"nigerian",
+		"kenya",
+		"kenyan",
+		"tanzania",
+		"ghana",
+		"ghanaian",
+		"south africa",
+		"uganda",
+		"rand",
 	],
 	europe: [
-		"europe", "european", "euro", "eur", "eurozone", "germany", "france",
-		"spain", "italy", "portugal", "netherlands", "ukraine", "ukrainian",
-		"united kingdom", "britain", "british", "gbp", "pound",
+		"europe",
+		"european",
+		"euro",
+		"eur",
+		"eurozone",
+		"germany",
+		"france",
+		"spain",
+		"italy",
+		"portugal",
+		"netherlands",
+		"ukraine",
+		"ukrainian",
+		"united kingdom",
+		"britain",
+		"british",
+		"gbp",
+		"pound",
 	],
 	"north-america": [
-		"usa", "u.s.", "united states", "america", "american", "canada",
-		"canadian", "usd",
+		"usa",
+		"u.s.",
+		"united states",
+		"america",
+		"american",
+		"canada",
+		"canadian",
+		"usd",
 	],
 	mena: ["mena", "middle east", "uae", "dubai", "saudi", "qatar", "emirates"],
-	oceania: [
-		"oceania", "australia", "australian", "aud", "new zealand", "nzd",
-	],
+	oceania: ["oceania", "australia", "australian", "aud", "new zealand", "nzd"],
 	global: ["global", "worldwide", "anywhere", "international", "any region"],
 };
 
@@ -190,9 +335,12 @@ export function scorePartners(
 	const needTokens = new Set(tokenize(need));
 	if (needTokens.size === 0) {
 		// No usable signal — return a few accepting/fresh partners as a fallback.
-		return docs
-			.slice(0, limit)
-			.map((p) => ({ score: 0, partner: toPublic(p), blob: partnerBlob(p) }));
+		return docs.slice(0, limit).map((p) => ({
+			score: 0,
+			partner: toPublic(p),
+			blob: partnerBlob(p),
+			reasons: [],
+		}));
 	}
 
 	// Region gate: drop partners that clearly don't serve the requested place.
@@ -250,13 +398,20 @@ export function scorePartners(
 			// mechanical. Capped at +2 so it can't beat real relevance.
 			score += Math.min(2, Math.round(profileStrength(p) * 2));
 		}
-		return { score, partner: toPublic(p), blob: partnerBlob(p) };
+		return {
+			score,
+			partner: toPublic(p),
+			blob: partnerBlob(p),
+			reasons: score > 0 ? matchReasons(needTokens, p) : [],
+		};
 	});
 
 	// Only real hits — no fallback sample. Surfacing zero-relevance partners as
 	// "matches" is what made the cards contradict the reply ("no match" + a card).
 	// Empty → the assistant says there's nothing, with no card.
-	const hits = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
+	const hits = scored
+		.filter((s) => s.score > 0)
+		.sort((a, b) => b.score - a.score);
 	return hits.slice(0, limit);
 }
 
@@ -296,13 +451,17 @@ function partnerBlob(p: any): string {
 		p.tagline,
 		assets.length ? `assets: ${assets.join(", ")}` : "",
 		(p.seps ?? []).length ? `standards: ${(p.seps ?? []).join(", ")}` : "",
-		(p.rampTypes ?? []).length ? `ramps: ${(p.rampTypes ?? []).join(", ")}` : "",
+		(p.rampTypes ?? []).length
+			? `ramps: ${(p.rampTypes ?? []).join(", ")}`
+			: "",
 		p.country ? `country: ${p.country}` : "",
 		services.length ? `services: ${services.join(", ")}` : "",
 		(p.sectors ?? []).length ? `sectors: ${(p.sectors ?? []).join(", ")}` : "",
 		(p.regions ?? []).length ? `regions: ${(p.regions ?? []).join(", ")}` : "",
 		p.acceptingClients ? "accepting clients" : "",
-		p.contactEmail || p.contactChannel ? "contactable" : "no direct contact listed",
+		p.contactEmail || p.contactChannel
+			? "contactable"
+			: "no direct contact listed",
 	].filter(Boolean);
 	return parts.join(" · ");
 }

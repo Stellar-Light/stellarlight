@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PartnerConciergeChat } from "@/components/partner-concierge-chat";
+import { PartnerFinder } from "@/components/partner-finder";
 
 export const metadata: Metadata = {
 	title: "Partner concierge | Stellar Partners",
@@ -31,17 +31,18 @@ export default async function PartnerConciergePage({
 				<div className="mb-6">
 					<div className="flex items-center gap-3 flex-wrap">
 						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-							Partner concierge
+							Find a partner
 						</h1>
 						<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
 							Beta
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Describe what you&apos;re building and I&apos;ll match you to real
-						partners — anchors, ramps, auditors, infrastructure. Or tell me
-						about your own company to get listed. No account needed. Prefer to
-						browse?{" "}
+						Use the <span className="text-foreground">guided match</span> to
+						pick what you need and get ranked partners with reasons — or switch
+						to <span className="text-foreground">Ask / list</span> to describe
+						it in your own words, or get your own company listed. No account
+						needed. Prefer to browse?{" "}
 						<Link
 							href="/partners"
 							className="text-foreground underline underline-offset-2 hover:no-underline"
@@ -52,7 +53,7 @@ export default async function PartnerConciergePage({
 					</p>
 				</div>
 
-				<PartnerConciergeChat initialQuery={q} />
+				<PartnerFinder initialQuery={q} />
 			</main>
 		</div>
 	);
