@@ -201,6 +201,29 @@ export default async function PartnerProfilePage({
 		p.typicalEngagement ||
 		p.responseSla;
 
+	const c = p.compliance ?? {};
+	const licenses: Array<{
+		authority?: string;
+		jurisdiction?: string;
+		type?: string;
+	}> = c.licenses ?? [];
+	const csv = (s?: string): string[] =>
+		s
+			? String(s)
+					.split(",")
+					.map((x) => x.trim())
+					.filter(Boolean)
+			: [];
+	const currencies = csv(c.currencies);
+	const customers = csv(c.notableCustomers);
+	const hasCompliance =
+		licenses.length > 0 ||
+		Boolean(c.kycRequired) ||
+		Boolean(c.travelRule) ||
+		currencies.length > 0 ||
+		Boolean(c.settlementTime) ||
+		customers.length > 0;
+
 	const verifiedCells: Array<{ label: string; value: string }> = [];
 	if (p.githubOrg) {
 		verifiedCells.push({
@@ -567,6 +590,92 @@ export default async function PartnerProfilePage({
 											</span>
 										))}
 									</div>
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Compliance & corridors — curator-verified; the decision-critical
+				    facts for a closed-source anchor (regulatory standing + rails). */}
+				{hasCompliance && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold flex items-center gap-2">
+								<ShieldCheck className="w-5 h-5 text-primary" />
+								Compliance &amp; corridors
+							</CardTitle>
+							<CardDescription>
+								Verified from the partner&apos;s own disclosures / regulator
+								registries
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-6">
+							{(c.kycRequired || c.travelRule) && (
+								<div className="flex flex-wrap gap-2">
+									{c.kycRequired && (
+										<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background/50 border border-border/50 text-sm text-foreground/90">
+											<CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+											KYC
+										</span>
+									)}
+									{c.travelRule && (
+										<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background/50 border border-border/50 text-sm text-foreground/90">
+											<CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+											Travel Rule
+										</span>
+									)}
+								</div>
+							)}
+
+							{licenses.length > 0 && (
+								<div>
+									<div className="text-sm font-semibold mb-3 text-muted-foreground">
+										Licenses &amp; registrations
+									</div>
+									<div className="space-y-2">
+										{licenses.map((l, i) => (
+											<div
+												key={`${l.authority}-${i}`}
+												className="flex items-start gap-3 p-3 rounded-xl border border-border/50 bg-background/50"
+											>
+												<ShieldCheck className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+												<div className="min-w-0">
+													<div className="text-sm font-medium text-foreground">
+														{l.authority}
+														{l.jurisdiction ? ` · ${l.jurisdiction}` : ""}
+													</div>
+													{l.type && (
+														<div className="text-xs text-muted-foreground">
+															{l.type}
+														</div>
+													)}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+
+							{(currencies.length > 0 ||
+								c.settlementTime ||
+								customers.length > 0) && (
+								<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+									{currencies.length > 0 && (
+										<StatTile
+											label="Currencies"
+											value={currencies.join(", ")}
+										/>
+									)}
+									{c.settlementTime && (
+										<StatTile label="Settlement" value={c.settlementTime} />
+									)}
+									{customers.length > 0 && (
+										<StatTile
+											label="Notable customers"
+											value={customers.join(", ")}
+										/>
+									)}
 								</div>
 							)}
 						</CardContent>

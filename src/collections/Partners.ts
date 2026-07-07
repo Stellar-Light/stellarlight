@@ -380,6 +380,68 @@ export const Partners: CollectionConfig = {
 			},
 		}),
 
+		// ── Compliance & corridors (curator-maintained; VERIFIED facts only) ──
+		// The decision-critical facts for evaluating an anchor/ramp — regulatory
+		// standing + corridors — for closed-source partners where GitHub says
+		// nothing. NEVER holds a claim that isn't stated on the partner's own site
+		// or an official regulator registry (see scripts/data/curate-partners.ts).
+		{
+			name: "compliance",
+			type: "group",
+			admin: {
+				description:
+					"VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry — never inferred.",
+			},
+			fields: [
+				{
+					name: "licenses",
+					type: "array",
+					labels: { singular: "License", plural: "Licenses" },
+					admin: {
+						description:
+							"Regulatory licenses/registrations — cite the authority + jurisdiction.",
+					},
+					fields: [
+						{ name: "authority", type: "text", required: true },
+						{ name: "jurisdiction", type: "text" },
+						{ name: "type", type: "text" },
+					],
+				},
+				{
+					name: "kycRequired",
+					type: "checkbox",
+					admin: { description: "Performs KYC (stated on their own site)." },
+				},
+				{
+					name: "travelRule",
+					type: "checkbox",
+					admin: {
+						description: "Travel Rule / FATF compliant (explicitly stated).",
+					},
+				},
+				{
+					name: "currencies",
+					type: "text",
+					admin: {
+						description:
+							"Fiat currencies supported, comma-separated (e.g. 'MXN, USD').",
+					},
+				},
+				{
+					name: "settlementTime",
+					type: "text",
+					admin: { description: "e.g. 'instant', '<1hr', 'T+1'." },
+				},
+				{
+					name: "notableCustomers",
+					type: "text",
+					admin: {
+						description: "Publicly-named customers/partners, comma-separated.",
+					},
+				},
+			],
+		},
+
 		// ── Capacity & pricing (partner-owned) ────────────────────────────
 		{
 			name: "acceptingClients",
