@@ -17,10 +17,7 @@ import {
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
-import {
-	getWinnerLink,
-	LATEST_WINNERS,
-} from "@/data/recent-hackathon-winners";
+import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
@@ -78,12 +75,23 @@ const WORD_ORDINALS: Record<string, number> = {
 // winnersRanked=false).
 const MEDALS: Record<string, number> = { "🥇": 1, "🥈": 2, "🥉": 3 };
 const SPANISH_ORDINALS: Record<string, number> = {
-	primer: 1, primero: 1, primera: 1,
-	segundo: 2, segunda: 2,
-	tercer: 3, tercero: 3, tercera: 3,
-	cuarto: 4, cuarta: 4,
-	quinto: 5, quinta: 5,
-	sexto: 6, septimo: 7, octavo: 8, noveno: 9, decimo: 10,
+	primer: 1,
+	primero: 1,
+	primera: 1,
+	segundo: 2,
+	segunda: 2,
+	tercer: 3,
+	tercero: 3,
+	tercera: 3,
+	cuarto: 4,
+	cuarta: 4,
+	quinto: 5,
+	quinta: 5,
+	sexto: 6,
+	septimo: 7,
+	octavo: 8,
+	noveno: 9,
+	decimo: 10,
 };
 
 function placementRank(label?: string | null): number | null {
@@ -92,7 +100,9 @@ function placementRank(label?: string | null): number | null {
 	// Lowercase + strip accents so "séptimo"/"1º" match.
 	const s = label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 	// English "1st" + Spanish "1er/2do/3ro/4to" + "1º/1°".
-	const ordinal = s.match(/\b(\d+)\s*(?:st|nd|rd|th|er|do|ro|to|mo|vo|no|º|°)\b/);
+	const ordinal = s.match(
+		/\b(\d+)\s*(?:st|nd|rd|th|er|do|ro|to|mo|vo|no|º|°)\b/,
+	);
 	if (ordinal) return Number(ordinal[1]);
 	if (/runner.?up|subcampe/.test(s)) return 2;
 	for (const [word, rank] of Object.entries(WORD_ORDINALS)) {
@@ -113,17 +123,55 @@ function placementRank(label?: string | null): number | null {
 // serves both the DoraHacks-feed shape and the DB/curated SubmissionRow shape
 // (both carry hackathonPlacement). Ranked winners sort ascending; unranked
 // (placementRank === null) sink to the end in stable source order.
-function rankAndSort<T extends { hackathonPlacement?: string | null; award?: string | null }>(
-	winners: T[],
-): (T & { placementRank: number | null })[] {
+function rankAndSort<
+	T extends { hackathonPlacement?: string | null; award?: string | null },
+>(winners: T[]): (T & { placementRank: number | null })[] {
 	return winners
 		.map((w) => ({
 			...w,
 			// The ordinal can live in either the prize name (hackathonPlacement) or
 			// the award title — try both before declaring a winner unranked.
-			placementRank: placementRank(w.hackathonPlacement) ?? placementRank(w.award),
+			placementRank:
+				placementRank(w.hackathonPlacement) ?? placementRank(w.award),
 		}))
 		.sort((a, b) => (a.placementRank ?? 9999) - (b.placementRank ?? 9999));
+}
+
+// sls-016: per-place award amounts live only in the description markdown prose
+// ("- **First Place:** $5,000 in XLM"), while the structured `award` field
+// carries the pool label for every winner. Parse the prose into a structured
+// `prizeTiers` array (rank → amount → asset) so consumers filter/join instead
+// of string-mining — join to winners via placementRank. Empty when the
+// description has no itemized split (returns [], never guesses).
+interface PrizeTier {
+	place: string;
+	rank: number | null;
+	amountUSD: number | null;
+	asset: string | null;
+}
+function parsePrizeTiers(description?: string | null): PrizeTier[] {
+	if (!description) return [];
+	// "First Place" | "1st Place" ... then "$5,000" then optional "in XLM".
+	const re =
+		/(?:\*\*)?\s*([A-Za-z]+|\d+(?:st|nd|rd|th))\s+place\s*(?:\*\*)?\s*[:\-–—]?\s*(?:\*\*)?\s*\$\s*([\d,]+(?:\.\d+)?)\s*(?:in\s+([A-Za-z]{2,6}))?/i;
+	const out: PrizeTier[] = [];
+	const seen = new Set<number>();
+	for (const line of description.split(/\r?\n/)) {
+		const m = re.exec(line);
+		if (!m) continue;
+		const rank = placementRank(`${m[1]} Place`);
+		if (rank != null) {
+			if (seen.has(rank)) continue;
+			seen.add(rank);
+		}
+		out.push({
+			place: `${m[1].charAt(0).toUpperCase()}${m[1].slice(1)} Place`,
+			rank,
+			amountUSD: Number(m[2].replace(/,/g, "")) || null,
+			asset: m[3] ? m[3].toUpperCase() : null,
+		});
+	}
+	return out.sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
 }
 
 /**
@@ -260,9 +308,7 @@ export async function GET(
 						startDate: new Date(dora.start_time * 1000)
 							.toISOString()
 							.slice(0, 10),
-						endDate: new Date(dora.end_time * 1000)
-							.toISOString()
-							.slice(0, 10),
+						endDate: new Date(dora.end_time * 1000).toISOString().slice(0, 10),
 						status,
 						externalUrl: getHackathonUrl(dora.uname),
 						organizer: dora.organization
@@ -275,6 +321,9 @@ export async function GET(
 								}
 							: null,
 						prizePoolUSD: dora.bonus_price || null,
+						// sls-016: structured per-place split parsed from the description
+						// prose (rank → amountUSD → asset); [] when not itemized.
+						prizeTiers: parsePrizeTiers(dora.description),
 						hackersCount: dora.hackers_count || null,
 						source: "dorahacks",
 						stats: {
