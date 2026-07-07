@@ -51,6 +51,7 @@ const research = await scout.searchResearch({
 | `getStatus()` | `GET /api/status` |
 | `searchProjects(params)` | `GET /api/projects/search` |
 | `searchRepos(params)` | `GET /api/repos/search` |
+| `getPartners(params)` | `GET /api/partners` |
 | `getHackathons(params)` | `GET /api/hackathons` |
 | `getHackathon(slug)` | `GET /api/hackathons/{slug}` |
 | `compareHackathons(slugs)` | `GET /api/hackathons/compare` |

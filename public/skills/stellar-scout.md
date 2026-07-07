@@ -36,6 +36,7 @@ Their answer determines which endpoints you lead with — see the user-type rout
 - *"vet this idea"* / *"should I build X"* / *"deep dive on Y"* → run **Deep Dive Mode**
 - *"draft my SCF pitch"* / *"help with my SCF application"* / *"how do I pitch this to SCF"* → run the **Draft SCF Pitch** workflow
 - *"who should audit my contract"* / *"find me an auditor"* / *"which audit firm"* → run the **Find Audit Firm** workflow
+- *"find me an anchor / on-ramp / off-ramp in {region}"* / *"who provides {service} on Stellar"* / *"which infra / tooling / wallet provider"* → `/api/partners?type={anchor|on-off-ramp|infrastructure|tooling|wallet}&region={region}&q={need}` — the curated **partner directory** of real, vetted providers to hire or integrate (capabilities from stellar.toml, compliance & corridors, accepting-clients, freshness). Recommend only partners the API returns — never invent one; link each `stellarlight.xyz/partners/{slug}`.
 - *"which RFP should I go for"* / *"compare the open RFPs"* / *"rank the RFPs for my team"* → run the **Compare RFPs** workflow
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
 - *"show me the repos / code for X"* / *"what repos exist for X"* / *"prior-art code on Stellar"* → `/api/projects/search?q={topic}` returns each project **plus its GitHub repos and a graded `codeReferences` list**; or `/api/repos/search?q={topic}` to hit the repo index directly (2,000+ Stellar repos, ranked by `repoScore`)

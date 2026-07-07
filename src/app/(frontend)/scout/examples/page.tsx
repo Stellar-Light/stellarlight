@@ -39,6 +39,11 @@ const SAMPLE_PROMPTS = [
 		prompt:
 			'"I have a soroban DeFi protocol idea. What past Stellar hackathon tracks paid out for similar work?"',
 	},
+	{
+		title: "Find a provider to hire",
+		prompt:
+			'"Who can audit my Soroban contract, and is there a USDC off-ramp anchor in LatAm?"',
+	},
 ];
 
 const SESSIONS = [
@@ -309,6 +314,41 @@ const SESSIONS = [
 			],
 			footer:
 				'Your idea aligns with an existing open RFP — no need to reinvent. The brief is specific (VWAP weighting, SEP-41 support, configurable liquidity thresholds) — read the full RFP before applying. Adjacent RFP that overlaps: "DeFi Positions API" (Q1 2026) — same author, complementary scope.',
+		},
+	},
+	{
+		title: "Find a provider to hire",
+		eyebrow: "Example 7",
+		mode: "conversational" as const,
+		userPrompt:
+			'"Who can audit my Soroban contract, and is there a USDC off-ramp anchor in LatAm?"',
+		steps: [
+			"GET /api/partners?type=audit-firm&q=soroban → vetted audit firms with services + accepting-clients.",
+			"GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp → LatAm anchors with stellar.toml-verified assets/SEPs/ramps.",
+			"Only surface partners the API actually returns — never invent one. Skip archived; note who's accepting clients.",
+			"Link each profile: stellarlight.xyz/partners/{slug} (capabilities, compliance & corridors, contact).",
+		],
+		response: {
+			summary: "Two lists — auditors, then LatAm USDC off-ramp anchors:",
+			rows: [
+				{
+					label: "Veridise / OtterSec / Runtime Verification",
+					value: "Soroban audits",
+					meta: "Accepting clients · stellarlight.xyz/partners/veridise",
+				},
+				{
+					label: "Anclap",
+					value: "ARS/PEN · off-ramp",
+					meta: "Argentina · CNV-registered · stellarlight.xyz/partners/anchor-anclap",
+				},
+				{
+					label: "CLPX",
+					value: "CLP · off-ramp",
+					meta: "Chile · SEP-6/24/31 · stellarlight.xyz/partners/clpx",
+				},
+			],
+			footer:
+				"Every partner shown is a real, published listing with a contact path — freshness-checked, not a scraped guess. Full compliance (licenses, KYC, Travel Rule) lives on each profile.",
 		},
 	},
 ];
