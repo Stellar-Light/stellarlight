@@ -83,7 +83,11 @@ const spec: OpenAPISpec = {
 	tags: [
 		{ name: "Discovery", description: "Service health + endpoint enumeration" },
 		{ name: "Projects", description: "Curated Stellar project directory" },
-		{ name: "Repos", description: "Indexed and scored Stellar GitHub repos + code-question answering" },
+		{
+			name: "Repos",
+			description:
+				"Indexed and scored Stellar GitHub repos + code-question answering",
+		},
 		{
 			name: "Hackathons",
 			description: "Stellar Hacks events + DoraHacks feed",
@@ -291,8 +295,22 @@ const spec: OpenAPISpec = {
 				description:
 					"Get a source-grounded ANSWER to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error/result codes, consensus/SCP, XDR → stellar/stellar-core; Horizon → stellar/go; RPC → stellar/stellar-rpc; SEP reference impls; SDKs), then DeepWiki answers from that repo's internals with source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal. **Not for:** which repos/projects exist → use /api/repos/search or /api/projects/search; ecosystem docs / SEP text / audits → use /api/research. Degrades gracefully: if DeepWiki is unavailable you still get the routed authoritative repo + its deepWikiUrl. Also for 'how do I / where is / show me the implementation of' deep code questions answered from the authoritative repo's internals.",
 				parameters: [
-					{ name: "q", in: "query", required: true, description: "The deep code question (e.g. 'where are transaction result codes defined').", schema: { type: "string" } },
-					{ name: "repo", in: "query", required: false, description: "Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route.", schema: { type: "string" } },
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"The deep code question (e.g. 'where are transaction result codes defined').",
+						schema: { type: "string" },
+					},
+					{
+						name: "repo",
+						in: "query",
+						required: false,
+						description:
+							"Optional owner/name to pin the repo (e.g. stellar/stellar-core). Omit to auto-route.",
+						schema: { type: "string" },
+					},
 				],
 				responses: {
 					"200": {
@@ -303,18 +321,97 @@ const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										ok: { type: "boolean" },
-										meta: { type: "object", description: "Provenance: routing/grounding source + generation time.", properties: { source: { type: "string" }, generatedAt: { type: "string", format: "date-time" }, note: { type: "string" } } },
+										meta: {
+											type: "object",
+											description:
+												"Provenance: routing/grounding source + generation time.",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												note: { type: "string" },
+											},
+										},
 										q: { type: "string" },
 										repo: { type: "string", nullable: true },
-										routedVia: { type: "string", nullable: true, description: "How the repo was chosen: explicit | canonical | search. null when nothing routed." },
-										repoMeta: { type: "object", nullable: true, description: "Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.", properties: { lastCommitAt: { type: "string", format: "date-time", nullable: true }, stars: { type: "integer", nullable: true }, isArchived: { type: "boolean" }, repoScoreLabel: { type: "string", nullable: true } } },
-										codeVerified: { type: "object", nullable: true, description: "Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned.", properties: { stellarProof: { type: "string" }, codeDepth: { type: "number", nullable: true }, isDeployableContract: { type: "boolean" }, sorobanSdkVersion: { type: "string", nullable: true }, versionStatus: { type: "string", nullable: true }, scannedAt: { type: "string", format: "date-time", nullable: true } } },
-										answer: { type: "string", nullable: true, description: "DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned)." },
-										answered: { type: "boolean", description: "Always present, including when routedVia is null (then false)." },
-										alternateRepos: { type: "array", items: { type: "string" }, description: "Other authoritative repos for this concept. Always present ([] when none)." },
-										sources: { type: "object", description: "Always present; fields are null when nothing was routed.", properties: { repoUrl: { type: "string", nullable: true }, deepWikiUrl: { type: "string", nullable: true }, deepWikiSearchUrl: { type: "string", nullable: true } } },
-										note: { type: "string", nullable: true, description: "Present when routing failed entirely — a hint to use search_repos or pin ?repo=." },
-										note2: { type: "string", nullable: true, description: "Present when a repo routed but DeepWiki had no answer." },
+										routedVia: {
+											type: "string",
+											nullable: true,
+											description:
+												"How the repo was chosen: explicit | canonical | search. null when nothing routed.",
+										},
+										repoMeta: {
+											type: "object",
+											nullable: true,
+											description:
+												"Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.",
+											properties: {
+												lastCommitAt: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+												},
+												stars: { type: "integer", nullable: true },
+												isArchived: { type: "boolean" },
+												repoScoreLabel: { type: "string", nullable: true },
+											},
+										},
+										codeVerified: {
+											type: "object",
+											nullable: true,
+											description:
+												"Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned.",
+											properties: {
+												stellarProof: { type: "string" },
+												codeDepth: { type: "number", nullable: true },
+												isDeployableContract: { type: "boolean" },
+												sorobanSdkVersion: { type: "string", nullable: true },
+												versionStatus: { type: "string", nullable: true },
+												scannedAt: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+												},
+											},
+										},
+										answer: {
+											type: "string",
+											nullable: true,
+											description:
+												"DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned).",
+										},
+										answered: {
+											type: "boolean",
+											description:
+												"Always present, including when routedVia is null (then false).",
+										},
+										alternateRepos: {
+											type: "array",
+											items: { type: "string" },
+											description:
+												"Other authoritative repos for this concept. Always present ([] when none).",
+										},
+										sources: {
+											type: "object",
+											description:
+												"Always present; fields are null when nothing was routed.",
+											properties: {
+												repoUrl: { type: "string", nullable: true },
+												deepWikiUrl: { type: "string", nullable: true },
+												deepWikiSearchUrl: { type: "string", nullable: true },
+											},
+										},
+										note: {
+											type: "string",
+											nullable: true,
+											description:
+												"Present when routing failed entirely — a hint to use search_repos or pin ?repo=.",
+										},
+										note2: {
+											type: "string",
+											nullable: true,
+											description:
+												"Present when a repo routed but DeepWiki had no answer.",
+										},
 									},
 								},
 							},
@@ -609,7 +706,8 @@ const spec: OpenAPISpec = {
 					},
 					"429": { description: "Rate limited" },
 					"503": {
-						description: "AI backend unavailable — fall back to GET /api/partners",
+						description:
+							"AI backend unavailable — fall back to GET /api/partners",
 						content: { "application/json": { schema: { type: "object" } } },
 					},
 				},
@@ -804,10 +902,35 @@ const spec: OpenAPISpec = {
 													description:
 														"SCF round identity + submission window (curated — SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this.",
 													properties: {
-														currentRound: { type: "integer", nullable: true, description: "Round currently open for submissions; null when no round is confirmed open as of asOf." },
-														lastConfirmedRound: { type: "integer", nullable: true },
-														lastConfirmedRoundNote: { type: "string", nullable: true },
-														submissionWindow: { type: "object", properties: { opens: { type: "string", format: "date", nullable: true }, closes: { type: "string", format: "date", nullable: true } } },
+														currentRound: {
+															type: "integer",
+															nullable: true,
+															description:
+																"Round currently open for submissions; null when no round is confirmed open as of asOf.",
+														},
+														lastConfirmedRound: {
+															type: "integer",
+															nullable: true,
+														},
+														lastConfirmedRoundNote: {
+															type: "string",
+															nullable: true,
+														},
+														submissionWindow: {
+															type: "object",
+															properties: {
+																opens: {
+																	type: "string",
+																	format: "date",
+																	nullable: true,
+																},
+																closes: {
+																	type: "string",
+																	format: "date",
+																	nullable: true,
+																},
+															},
+														},
 														asOf: { type: "string", format: "date" },
 														verifyAt: { type: "string", format: "uri" },
 													},
@@ -1198,8 +1321,15 @@ const spec: OpenAPISpec = {
 				properties: {
 					ok: { type: "boolean" },
 					service: { type: "string", const: "Stellar Scout" },
-					version: { type: "string", description: "Scout skill/service release line." },
-					apiVersion: { type: "string", description: "API contract (OpenAPI) version \u2014 equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version." },
+					version: {
+						type: "string",
+						description: "Scout skill/service release line.",
+					},
+					apiVersion: {
+						type: "string",
+						description:
+							"API contract (OpenAPI) version \u2014 equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version.",
+					},
 					generatedAt: { type: "string", format: "date-time" },
 					sources: {
 						type: "array",
@@ -1292,30 +1422,50 @@ const spec: OpenAPISpec = {
 						description:
 							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
 					},
-					anchorProfile: {
+					coverage: {
 						type: "object",
 						nullable: true,
 						description:
-							"Structured corridor/coverage data for Anchor-typed projects, joined from the partner directory's stellar.toml enrichment — answers 'which anchors serve corridor X→Y' with filterable, dated fields instead of prose. Null for non-anchor projects or when no partner record matches.",
+							"Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches.",
 						properties: {
-							slug: { type: "string" },
-							country: { type: "string", nullable: true },
-							regions: { type: "array", items: { type: "string" } },
-							assets: { type: "array", items: { type: "string" }, description: "Asset codes the anchor issues/supports (from its stellar.toml CURRENCIES)." },
-							seps: { type: "array", items: { type: "string" }, description: "Supported SEPs (e.g. 6, 24, 31) — the on/off-ramp interop surface." },
-							rampTypes: { type: "array", items: { type: "string" } },
-							asOf: { type: "string", format: "date-time", nullable: true, description: "When the partner record was last updated — cite as the coverage as-of date." },
-							url: { type: "string", format: "uri" },
+							countries: {
+								type: "array",
+								items: { type: "string" },
+								description: "Primary market/jurisdiction country names.",
+							},
+							currencies: {
+								type: "array",
+								items: { type: "string" },
+								description: "Fiat currencies supported (e.g. MXN, EUR, PHP).",
+							},
+							seps: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Supported SEPs (sep-6, sep-24, sep-31) — the on/off-ramp interop surface.",
+							},
+							asOf: {
+								type: "string",
+								nullable: true,
+								description:
+									"Date (YYYY-MM-DD) the coverage was synced from the partner record — cite as the as-of date.",
+							},
 						},
+					},
+					supportedNetworks: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown.",
 					},
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },
-						placementRank: {
-							type: "integer",
-							nullable: true,
-							description:
-								"Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label.",
-						},
+					placementRank: {
+						type: "integer",
+						nullable: true,
+						description:
+							"Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label.",
+					},
 					hackathonPrize: { type: "number", nullable: true },
 					hackathonPrizeTrack: { type: "string", nullable: true },
 					score: {
@@ -1395,13 +1545,13 @@ const spec: OpenAPISpec = {
 									matchMode: {
 										type: "string",
 										enum: [
-										"strict",
-										"loose-1",
-										"loose-2",
-										"loose-3",
-										"majority",
-										"all",
-									],
+											"strict",
+											"loose-1",
+											"loose-2",
+											"loose-3",
+											"majority",
+											"all",
+										],
 										description:
 											"Tier of match relaxation that produced these results",
 									},
@@ -1532,52 +1682,66 @@ const spec: OpenAPISpec = {
 						description:
 							"Keyword-relevance score for the current query (higher = better match).",
 					},
-						deepWikiUrl: {
-							type: "string",
-							description:
-								"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery.",
-						},
-						canonical: {
-							type: "boolean",
-							description:
-								"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
-						},
-						codeVerified: {
-							type: "object",
-							nullable: true,
-							description:
-								"Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar.",
-							properties: {
-								stellarProof: {
-									type: "string",
-									enum: ["cargo-sdk", "contract-macros", "lang-sdk", "js-sdk", "stellar-toml"],
-									description:
-										"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml.",
-								},
-								codeDepth: {
-									type: "number",
-									nullable: true,
-									description:
-										"0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs.",
-								},
-								isDeployableContract: {
-									type: "boolean",
-									description: "Cargo cdylib — a real deployable Soroban contract (vs a CLI/indexer/frontend that only uses Stellar).",
-								},
-								sorobanSdkVersion: {
-									type: "string",
-									nullable: true,
-									description: "Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer).",
-								},
-								versionStatus: {
-									type: "string",
-									enum: ["current", "supported", "deprecated", "unknown"],
-									nullable: true,
-									description: "soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
-								},
-								scannedAt: { type: "string", format: "date-time", nullable: true, description: "When the code was last scanned." },
+					deepWikiUrl: {
+						type: "string",
+						description:
+							"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery.",
+					},
+					canonical: {
+						type: "boolean",
+						description:
+							"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+					},
+					codeVerified: {
+						type: "object",
+						nullable: true,
+						description:
+							"Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar.",
+						properties: {
+							stellarProof: {
+								type: "string",
+								enum: [
+									"cargo-sdk",
+									"contract-macros",
+									"lang-sdk",
+									"js-sdk",
+									"stellar-toml",
+								],
+								description:
+									"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml.",
+							},
+							codeDepth: {
+								type: "number",
+								nullable: true,
+								description:
+									"0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs.",
+							},
+							isDeployableContract: {
+								type: "boolean",
+								description:
+									"Cargo cdylib — a real deployable Soroban contract (vs a CLI/indexer/frontend that only uses Stellar).",
+							},
+							sorobanSdkVersion: {
+								type: "string",
+								nullable: true,
+								description:
+									"Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer).",
+							},
+							versionStatus: {
+								type: "string",
+								enum: ["current", "supported", "deprecated", "unknown"],
+								nullable: true,
+								description:
+									"soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
+							},
+							scannedAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+								description: "When the code was last scanned.",
 							},
 						},
+					},
 				},
 			},
 			RepoSearchResponse: {
@@ -1590,8 +1754,17 @@ const spec: OpenAPISpec = {
 							{
 								type: "object",
 								properties: {
-									canonical: { type: "string", nullable: true, description: "The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept." },
-									note: { type: "string", description: "How to read the results (e.g. code references graded by repoScore 0-100)." },
+									canonical: {
+										type: "string",
+										nullable: true,
+										description:
+											"The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept.",
+									},
+									note: {
+										type: "string",
+										description:
+											"How to read the results (e.g. code references graded by repoScore 0-100).",
+									},
 								},
 							},
 						],
