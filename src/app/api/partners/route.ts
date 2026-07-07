@@ -21,6 +21,7 @@ import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
 import { boolParam, clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { scorePartners } from "@/lib/partner-match";
 import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -216,36 +217,37 @@ export async function GET(req: NextRequest) {
 			// rows without a tagline. In-memory on ≤200 docs; display-only (the
 			// concierge matcher keeps its own eligibility rule).
 			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
+			const bySlug = new Map(eligible.map((d) => [String(d.slug), d]));
+
+			// Ranking:
+			//  - with q: relevance via the SHARED scorer (scorePartners) — the same
+			//    engine the concierge matchmaker uses: partial/OR match weighted by
+			//    the structured capability fields (assets, ramps, SEPs, country…)
+			//    and region-gated. Replaces the old strict all-token-AND text filter
+			//    that returned 1 partner for "USDC off-ramp" when 8 actually fit —
+			//    and perversely returned FEWER results the more keywords you added.
+			//  - without q: pilot cohort first, then freshness.
+			const freshRank = { fresh: 0, aging: 1, stale: 2, archived: 3 } as Record<
+				string,
+				number
+			>;
+			const ordered = q
+				? (scorePartners(q, eligible, eligible.length)
+						.map((s) => bySlug.get(s.partner.slug))
+						.filter(Boolean) as typeof eligible)
+				: [...eligible].sort(
+						(a, b) =>
+							Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
+							(freshRank[String(a.freshnessStatus ?? "fresh")] ?? 9) -
+								(freshRank[String(b.freshnessStatus ?? "fresh")] ?? 9),
+					);
 
 			// EXPERIMENTS (default off): include the gated blocks only when opted
 			// in via ?exp=<id> / X-Experiments header / env canary.
 			const withCompliance = isExperimentOn("partner-compliance-api", req);
 			const withOnchain = isExperimentOn("partner-onchain-live", req);
-			let mapped = eligible.map((p) =>
+			const mapped = ordered.map((p) =>
 				toPublic(p, { compliance: withCompliance, onchain: withOnchain }),
-			);
-
-			// Free-text filter across name/tagline/description/services — in
-			// memory, same approach as projects/builders search.
-			if (q) {
-				const tokens = q.split(/\s+/).filter(Boolean);
-				mapped = mapped.filter((m) => {
-					const hay =
-						`${m.name} ${m.tagline ?? ""} ${m.description ?? ""} ${m.services.join(" ")}`.toLowerCase();
-					return tokens.every((t) => hay.includes(t));
-				});
-			}
-
-			// Pilot cohort first (the select partners), then fresh partners —
-			// never lead a builder toward a stale one.
-			const rank = { fresh: 0, aging: 1, stale: 2, archived: 3 } as Record<
-				string,
-				number
-			>;
-			mapped.sort(
-				(a, b) =>
-					Number(b.pilot) - Number(a.pilot) ||
-					(rank[a.freshness.status] ?? 9) - (rank[b.freshness.status] ?? 9),
 			);
 
 			totalMatching = mapped.length;
@@ -279,7 +281,7 @@ export async function GET(req: NextRequest) {
 				},
 				counts: { returned: partners.length, total: totalMatching },
 				validTypes: PARTNER_TYPES,
-				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived) with pilot partners first; pass all=1 for the unfiltered set. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
+				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
 			},
 			partners,
 		},
