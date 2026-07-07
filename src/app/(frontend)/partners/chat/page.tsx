@@ -38,10 +38,10 @@ export default async function PartnerConciergePage({
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Tell us what you need — pick a type and region, add what you&apos;re
-						building — and get real partners ranked with the reasons they
-						matched. Not sure how to phrase it? Ask the concierge in your own
-						words. No account needed. Prefer to browse?{" "}
+						Describe what you&apos;re building and the concierge will match you
+						to real Stellar partners — anchors, ramps, auditors, infrastructure
+						— or help you get your own company listed. No account needed. Prefer
+						to browse?{" "}
 						<Link
 							href="/partners"
 							className="text-foreground underline underline-offset-2 hover:no-underline"
