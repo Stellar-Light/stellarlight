@@ -1,5 +1,6 @@
 import {
 	ArrowLeft,
+	Boxes,
 	CheckCircle2,
 	ExternalLink,
 	FileText,
@@ -90,6 +91,55 @@ async function getPartner(slug: string): Promise<any | null> {
 	}
 }
 
+// One-line "what they do for you", by type — the git-free equivalent of a
+// GitHub summary for closed-source partners.
+const TYPE_BLURB: Record<string, string> = {
+	anchor: "Fiat ⇄ Stellar on/off-ramp",
+	"on-off-ramp": "Fiat ⇄ Stellar on/off-ramp",
+	infrastructure: "Infrastructure for building on Stellar",
+	tooling: "Developer tooling for Stellar",
+	protocol: "On-chain protocol on Stellar",
+	wallet: "Stellar wallet",
+	"audit-firm": "Smart-contract security audits",
+	legal: "Legal & compliance",
+	agency: "Development agency",
+};
+
+/**
+ * The matching project in our directory (if any). Many partners are also
+ * tracked projects, which carry SCF/GitHub/status data the partner record
+ * lacks — so a closed-source anchor can still show verifiable ecosystem
+ * signals. Join on slug, stripping the "anchor-" prefix.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+async function getMatchingProject(partnerSlug: string): Promise<any | null> {
+	const payload = await getPayloadSafe();
+	if (!payload) return null;
+	try {
+		const res = await payload.find({
+			collection: "projects",
+			where: {
+				and: [
+					{ slug: { equals: partnerSlug.replace(/^anchor-/, "") } },
+					{ status: { in: ["Development", "Pre-Release", "Live"] } },
+				],
+			},
+			limit: 1,
+			depth: 1,
+			select: {
+				slug: true,
+				status: true,
+				verificationLevel: true,
+				scf: true,
+				github: true,
+			},
+		});
+		return res.docs[0] ?? null;
+	} catch {
+		return null;
+	}
+}
+
 export async function generateMetadata({
 	params,
 }: {
@@ -112,6 +162,16 @@ export default async function PartnerProfilePage({
 	const { slug } = await params;
 	const p = await getPartner(slug);
 	if (!p) notFound();
+
+	const proj = await getMatchingProject(slug);
+	const scf = proj?.scf?.awarded ? proj.scf : null;
+	const scfRounds: number[] =
+		scf && Array.isArray(scf.awardedRounds) && scf.awardedRounds.length > 0
+			? (scf.awardedRounds as number[])
+			: scf?.lastAwardedRound > 0
+				? [scf.lastAwardedRound]
+				: [];
+	const repoCount: number = proj?.github?.repos?.length ?? 0;
 
 	const fresh = FRESH[p.freshnessStatus ?? "fresh"] ?? FRESH.fresh;
 	const v = p.verified ?? {};
@@ -238,6 +298,11 @@ export default async function PartnerProfilePage({
 									<h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
 										{p.name}
 									</h1>
+									{TYPE_BLURB[p.partnerType] && (
+										<p className="-mt-1 text-sm text-muted-foreground">
+											{TYPE_BLURB[p.partnerType]}
+										</p>
+									)}
 
 									<div className="flex flex-wrap items-center gap-3">
 										<Badge
@@ -257,6 +322,21 @@ export default async function PartnerProfilePage({
 											<Badge className="bg-gradient-to-r from-green-500/20 to-green-500/10 text-green-400 border-green-500/30 text-sm px-4 py-1.5 font-semibold shadow-sm flex items-center gap-1.5">
 												<CheckCircle2 className="w-3.5 h-3.5" />
 												Available
+											</Badge>
+										)}
+										{scf && (
+											<Badge className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm flex items-center gap-1.5">
+												<CheckCircle2 className="w-3.5 h-3.5" />
+												SCF-funded
+											</Badge>
+										)}
+										{hasCapabilities && (
+											<Badge
+												variant="outline"
+												className="text-sm px-4 py-1.5 font-medium border-border/50 text-muted-foreground flex items-center gap-1.5"
+											>
+												<ShieldCheck className="w-3.5 h-3.5" />
+												stellar.toml verified
 											</Badge>
 										)}
 									</div>
@@ -333,6 +413,98 @@ export default async function PartnerProfilePage({
 						</div>
 					</CardContent>
 				</Card>
+
+				{/* Stellar Community Fund — a real, verifiable ecosystem signal that
+				    works for closed-source partners (from the matching project). */}
+				{scf && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold">
+								Stellar Community Fund
+							</CardTitle>
+							<CardDescription>Awarded funding from the SCF</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								{scfRounds.length > 0 && (
+									<div className="p-4 rounded-xl border border-border/50 bg-background/50">
+										<p className="text-sm font-medium text-muted-foreground mb-2">
+											{scfRounds.length > 1 ? "Funded rounds" : "Funded round"}
+										</p>
+										<div className="flex flex-wrap gap-2">
+											{scfRounds.map((r) => (
+												<span
+													key={r}
+													className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-white/10 text-sm font-bold text-foreground border border-border/50"
+												>
+													{r}
+												</span>
+											))}
+										</div>
+									</div>
+								)}
+								{scf.totalAwarded > 0 && (
+									<div className="p-4 rounded-xl border border-border/50 bg-background/50">
+										<p className="text-sm font-medium text-muted-foreground mb-1">
+											Total funded
+										</p>
+										<p className="text-2xl font-bold text-foreground">
+											${scf.totalAwarded.toLocaleString()}
+										</p>
+									</div>
+								)}
+								{scf.slug && (
+									<a
+										href={`https://communityfund.stellar.org/project/${scf.slug}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-border transition-all duration-150"
+									>
+										<div className="flex-1 min-w-0">
+											<p className="text-sm font-medium text-muted-foreground mb-1">
+												SCF page
+											</p>
+											<p className="text-sm font-semibold text-foreground truncate">
+												View on Community Fund
+											</p>
+										</div>
+										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+									</a>
+								)}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Cross-link to the fuller project record (repos, GitHub activity,
+				    on-chain) — many partners are also tracked projects. */}
+				{proj && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardContent className="p-6">
+							<Link
+								href={`/project/${proj.slug}`}
+								className="group flex items-center gap-4"
+							>
+								<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-all duration-150 flex-shrink-0">
+									<Boxes className="h-6 w-6 text-primary" />
+								</div>
+								<div className="flex-1 min-w-0">
+									<p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+										Also tracked as a project
+									</p>
+									<p className="text-sm text-muted-foreground">
+										See its repos
+										{repoCount > 0
+											? ` (${repoCount} ${repoCount === 1 ? "repo" : "repos"})`
+											: ""}
+										, GitHub activity, and full project record →
+									</p>
+								</div>
+								<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+							</Link>
+						</CardContent>
+					</Card>
+				)}
 
 				{/* Capabilities (anchors — from stellar.toml) */}
 				{hasCapabilities && (
