@@ -150,3 +150,14 @@ Load when the user query matches one of these shapes — the patterns here show 
 4. Surface `.funding.postHackathonStatusFunnel` — how many hackathon projects shipped vs stalled.
 5. Pair with `GET /api/research?source=ec-developer-report&q=stellar+developer+count` for the dev-activity baseline. *"Per Electric Capital, Stellar has had ~2,000 active devs in Dec 2022 (last published full-year), trending with the broader L1 cohort."*
 6. Investor framing close: *"The hard numbers + the corpus citations let your slide deck cite real data, not vibes."*
+
+---
+
+### Example 14 — Find a partner / provider to hire
+**User:** "Who can audit my Soroban contract, and is there a USDC off-ramp anchor in LatAm?"
+**Agent action:**
+1. Audit firms: `GET /api/partners?type=audit-firm&q=soroban` → real, vetted providers (Veridise, OtterSec, Runtime Verification, Certora, Halborn) with services + accepting-clients + contact.
+2. Anchors: `GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp` → LatAm anchors with stellar.toml-verified assets/SEPs/ramps (e.g. Anclap, CLPX); report each partner's asset codes, ramp direction, and country.
+3. Only surface partners actually returned by the API — never invent a provider. Skip archived; note whether each is accepting clients.
+4. Link each profile: `https://stellarlight.xyz/partners/{slug}` (rich profile — capabilities, compliance & corridors, links).
+5. **Not for:** a built product/project → use `search_projects`; a teammate to collaborate with → use `get_builders`.

@@ -1,39 +1,39 @@
 # Stellar Light
 
-A new and comprehensive directory and discovery platform for the Stellar ecosystem. Explore projects, organizations, and resources built on Stellar.
+The data layer for the Stellar ecosystem — a curated, always-fresh index of what's been built and who to work with, exposed to both people (a fast web app) and AI agents (the **Stellar Scout** API, MCP, and skill).
 
 ## Overview
 
-Stellar Light is a modern web application built with Next.js and Payload CMS that serves as a curated directory for the Stellar blockchain ecosystem. It provides a beautiful, searchable interface for discovering projects, organizations (entities), and resources in the Stellar network.
+Stellar Light started as a directory and has grown into the **data layer for the Stellar ecosystem**: a curated, freshness-checked index of the projects, code, research, and service providers on Stellar. It's exposed two ways — a fast human web app, and an agent-facing API + MCP + skill (**Stellar Scout**) that powers assistants like Raven. Built with Next.js 16 and Payload CMS on MongoDB.
 
-## Features
+## What's inside
 
-### 🚀 Core Functionality
+### For people — the web app
 
-- **Project Directory**: Browse and search through Stellar projects with filtering by category, status, and verification level
-- **Entity Management**: Explore organizations and companies building on Stellar, with associated projects
-- **Community Picks**: Featured projects handpicked by the community
-- **Blog Integration**: RSS feed integration for blog posts and highlights
-- **GitHub Integration**: Automatic fetching and caching of GitHub statistics (stars, issues, activity)
-- **Transparency Logs**: Public audit trail of all changes made to the directory
-- **Project Intake**: Public submission form for new projects (requires admin approval)
+- **Project & entity directory** (`/directory`) — browse and search projects and the orgs behind them, with GitHub activity, on-chain data, SCF funding, and live/inactive status.
+- **Ask Stellar** (`/ask`) — natural-language search across the knowledge corpus (SEPs, dev docs, security audits, SDF + ecosystem writing) and the project directory, with a grounded, **cited** answer synthesized only from the results.
+- **Partner Connector** (`/partners`) — a curated directory of vetted providers a builder hires or integrates with (anchors, on/off-ramps, auditors, infrastructure, tooling, wallets). Rich profiles (capabilities, **compliance & corridors**, freshness), a guided **matchmaker** (pick what you need → ranked partners with why-matched reasons), and an AI **concierge** chat. Partners log in and maintain their own profiles.
+- **Skills marketplace** (`/skills`) — installable agent skills for building on Stellar.
+- **Ecosystem reports** (`/blog`) — thesis-driven research on the state of Stellar.
 
-### 🎨 User Experience
+### For agents — Stellar Scout
 
-- **Modern UI**: Built with Tailwind CSS and shadcn/ui components
-- **Responsive Design**: Fully responsive across all device sizes
-- **Fast Navigation**: Optimized routing and data fetching
-- **Search & Filter**: Advanced search and filtering capabilities
-- **Carousel Components**: Interactive carousels for featured content
-- **Load More**: Infinite scroll-style loading for projects
+The same curated data, built to be consumed by AI agents and assistants:
 
-### 🔧 Admin Features
+- **REST API** — projects, repos, research, partners, hackathons, builders, RFPs, leaderboard, clusters, status, and more; documented at [`/api/openapi.json`](https://stellarlight.xyz/api/openapi.json).
+- **MCP server** — [`@stellar-light/scout-mcp`](https://www.npmjs.com/package/@stellar-light/scout-mcp) wraps the API as agent tools.
+- **Agent skill** — the Stellar Scout skill for Claude / Codex / Cursor ([`public/skills/stellar-scout.md`](./public/skills/stellar-scout.md)), mirrored to [`Stellar-Light/stellar-scout`](https://github.com/Stellar-Light/stellar-scout).
+- **Typed client** — [`@stellar-light/api-client`](https://www.npmjs.com/package/@stellar-light/api-client).
 
-- **Payload CMS Admin Panel**: Full-featured content management system
-- **Media Management**: Cloudflare R2 storage integration for media uploads
-- **Data Import**: Airtable and Lumenloop sync capabilities
-- **RSS Management**: Custom RSS feed management interface
-- **Transparency**: Automatic logging of all changes
+### Kept honest
+
+- A **freshness loop** (fresh → aging → stale → archived) so nothing dead surfaces as live.
+- **Verified** system signals shown next to **partner-claimed** facts.
+- Transparency logs, and curator data changes that run **dry-run → review → execute**.
+
+### Admin
+
+- **Payload CMS admin panel** for content management; Cloudflare R2 media storage; Airtable + Lumenloop sync; automatic transparency logging of changes.
 
 ## Tech Stack
 
@@ -116,12 +116,17 @@ stellarlight/
 │   │   │   ├── directory/      # Projects directory
 │   │   │   ├── entities/       # Entities listing & detail
 │   │   │   ├── project/        # Project detail pages
-│   │   │   └── blog/           # Blog pages
+│   │   │   ├── ask/            # Ask Stellar (NL search + grounded answer)
+│   │   │   ├── partners/       # Partner Connector (directory, profiles, concierge)
+│   │   │   ├── scout/          # Stellar Scout (agent data layer) landing
+│   │   │   ├── skills/         # Skills marketplace
+│   │   │   └── blog/           # Blog / ecosystem reports
 │   │   ├── (payload)/          # Payload CMS admin
-│   │   └── api/                # API routes
+│   │   └── api/                # API routes (the Scout REST API)
 │   ├── collections/           # Payload CMS collections
 │   │   ├── Projects.ts         # Projects collection
 │   │   ├── Entities.ts         # Entities collection
+│   │   ├── Partners.ts         # Partner accounts (auth-enabled)
 │   │   ├── Blog.ts             # Blog posts collection
 │   │   └── ...
 │   ├── components/             # React components
@@ -130,9 +135,11 @@ stellarlight/
 │   │   ├── entity-card.tsx     # Entity card component
 │   │   └── ...
 │   └── lib/                    # Utilities and helpers
-├── public/                     # Static assets
-├── scripts/                    # Utility scripts
-└── jobs/                       # Background jobs
+├── public/                     # Static assets (incl. public/skills — Scout skill + references)
+├── scripts/                    # Utility scripts (data curation, cron, enrichment)
+├── jobs/                       # Background jobs
+├── scout-mcp/                  # @stellar-light/scout-mcp — MCP server (npm)
+└── api-client/                 # @stellar-light/api-client — typed API client (npm)
 ```
 
 ## Key Collections
@@ -151,6 +158,13 @@ Organizations, companies, or teams that build multiple projects. Includes:
 - Associated domains
 - Linked projects
 - Logo and description
+
+### Partners
+Vetted ecosystem service providers (anchors, on/off-ramps, auditors, infrastructure, tooling, wallets). An **auth-enabled** collection — partners log in and maintain their own profile. Includes:
+- Capabilities (assets, SEPs, ramps) parsed from stellar.toml
+- Compliance & corridors (licenses, KYC, Travel Rule, currencies) — curator-verified
+- Freshness status + verified-vs-partner-claimed signals
+- Powers the `/partners` directory, matchmaker, and concierge
 
 ### Blog
 Blog posts with RSS feed integration. Supports:
