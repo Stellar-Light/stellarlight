@@ -169,6 +169,9 @@ interface RelatedCard {
 async function getRelatedPartners(current: {
 	slug: string;
 	partnerType: string;
+	regions?: string[];
+	sectors?: string[];
+	country?: string | null;
 }): Promise<{ pairs: RelatedCard[]; peers: RelatedCard[] }> {
 	const payload = await getPayloadSafe();
 	if (!payload) return { pairs: [], peers: [] };
@@ -187,6 +190,8 @@ async function getRelatedPartners(current: {
 				pilot: true,
 				freshnessStatus: true,
 				sectors: true,
+				regions: true,
+				country: true,
 				description: true,
 				services: true,
 				contactEmail: true,
@@ -207,23 +212,51 @@ async function getRelatedPartners(current: {
 				Boolean(p.logoUrl),
 				(p.freshnessStatus ?? "fresh") === "fresh",
 			].filter(Boolean).length;
+		// Overlap with THIS partner — corridor first (country/region), then
+		// sector — so the section is personalized, not identical for every
+		// partner of the same type.
+		const curRegions = new Set((current.regions ?? []).map(String));
+		const curSectors = new Set((current.sectors ?? []).map(String));
+		const curCountry = (current.country ?? "").toLowerCase();
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const overlap = (d: any) => {
+			const r = (d.regions ?? []).filter((x: string) =>
+				curRegions.has(x),
+			).length;
+			const s = (d.sectors ?? []).filter((x: string) =>
+				curSectors.has(x),
+			).length;
+			const c =
+				curCountry && String(d.country ?? "").toLowerCase() === curCountry
+					? 1
+					: 0;
+			return 3 * c + 3 * r + 2 * s;
+		};
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 		const rank = (a: any, b: any) =>
+			overlap(b) - overlap(a) ||
 			Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
 			strength(b) - strength(a);
 
-		const compTypes = COMPLEMENTARY_TYPES[current.partnerType] ?? [];
+		const compTypes = new Set(COMPLEMENTARY_TYPES[current.partnerType] ?? []);
+		// Rank ALL complements together by overlap → take a diverse top 4 (max 2
+		// per role), so the best-fit partners lead regardless of which role.
+		const perType: Record<string, number> = {};
 		const pairs: RelatedCard[] = [];
-		for (const t of compTypes) {
-			const ofType = docs.filter((d) => d.partnerType === t).sort(rank);
-			pairs.push(...ofType.slice(0, 2));
+		for (const d of docs
+			.filter((d) => compTypes.has(d.partnerType))
+			.sort(rank)) {
+			const n = perType[d.partnerType] ?? 0;
+			if (n >= 2) continue;
+			perType[d.partnerType] = n + 1;
+			pairs.push(d);
 			if (pairs.length >= 4) break;
 		}
 		const peers = docs
 			.filter((d) => d.partnerType === current.partnerType)
 			.sort(rank)
 			.slice(0, 3);
-		return { pairs: pairs.slice(0, 4), peers };
+		return { pairs, peers };
 	} catch {
 		return { pairs: [], peers: [] };
 	}
@@ -266,6 +299,9 @@ export default async function PartnerProfilePage({
 	const related = await getRelatedPartners({
 		slug,
 		partnerType: p.partnerType,
+		regions: p.regions ?? [],
+		sectors: p.sectors ?? [],
+		country: p.country ?? null,
 	});
 	const scf = proj?.scf?.awarded ? proj.scf : null;
 	const scfRounds: number[] =
@@ -477,6 +513,15 @@ export default async function PartnerProfilePage({
 											>
 												<ShieldCheck className="w-3.5 h-3.5" />
 												stellar.toml verified
+											</Badge>
+										)}
+										{licenses.length > 0 && (
+											<Badge
+												variant="outline"
+												className="text-sm px-4 py-1.5 font-semibold border-border/50 text-foreground/90 flex items-center gap-1.5"
+											>
+												<ShieldCheck className="w-3.5 h-3.5" />
+												Licensed
 											</Badge>
 										)}
 									</div>
