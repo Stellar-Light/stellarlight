@@ -183,7 +183,19 @@ function matchReasons(needTokens: Set<string>, p: any): string[] {
 	for (const r of p.regions ?? [])
 		if (hits(r.replace(/-/g, " "))) out.push(regionLabel(r));
 	if (p.acceptingClients) out.push("Accepting clients");
-	return [...new Set(out)].slice(0, 6);
+	// Format-insensitive dedupe: services often carry lowercase copies of the
+	// asset/ramp codes ("off-ramp" → "Off Ramp" vs the ramp label "Off-ramp"),
+	// which are the SAME reason. Key on alphanumerics; keep the first (best-
+	// formatted) label, since strong fields are pushed before services.
+	const seen = new Set<string>();
+	const deduped: string[] = [];
+	for (const r of out) {
+		const key = r.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (seen.has(key)) continue;
+		seen.add(key);
+		deduped.push(r);
+	}
+	return deduped.slice(0, 6);
 }
 
 /** Pull the published, non-archived partner set (directory parity). */
