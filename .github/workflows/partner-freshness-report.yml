@@ -1,0 +1,21 @@
+name: Partner freshness report (manual)
+on:
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # READ-ONLY: reports each partner's freshness age + next-nudge countdown
+      # (same logic as the daily partner-freshness cron). Never writes.
+      - run: pnpm exec tsx scripts/data/partner-freshness-report.ts
