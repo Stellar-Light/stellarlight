@@ -553,24 +553,19 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals. */
             scfAwardedRounds?: number[];
-            /** @description Structured corridor/coverage data for Anchor-typed projects, joined from the partner directory's stellar.toml enrichment — answers 'which anchors serve corridor X→Y' with filterable, dated fields instead of prose. Null for non-anchor projects or when no partner record matches. */
-            anchorProfile?: {
-                slug?: string;
-                country?: string | null;
-                regions?: string[];
-                /** @description Asset codes the anchor issues/supports (from its stellar.toml CURRENCIES). */
-                assets?: string[];
-                /** @description Supported SEPs (e.g. 6, 24, 31) — the on/off-ramp interop surface. */
+            /** @description Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
+            coverage?: {
+                /** @description Primary market/jurisdiction country names. */
+                countries?: string[];
+                /** @description Fiat currencies supported (e.g. MXN, EUR, PHP). */
+                currencies?: string[];
+                /** @description Supported SEPs (sep-6, sep-24, sep-31) — the on/off-ramp interop surface. */
                 seps?: string[];
-                rampTypes?: string[];
-                /**
-                 * Format: date-time
-                 * @description When the partner record was last updated — cite as the coverage as-of date.
-                 */
+                /** @description Date (YYYY-MM-DD) the coverage was synced from the partner record — cite as the as-of date. */
                 asOf?: string | null;
-                /** Format: uri */
-                url?: string;
             } | null;
+            /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown. */
+            supportedNetworks?: string[];
             hackathon?: string | null;
             hackathonPlacement?: string | null;
             /** @description Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label. */
