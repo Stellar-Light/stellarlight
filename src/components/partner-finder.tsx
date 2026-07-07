@@ -59,7 +59,13 @@ export function PartnerFinder({ initialQuery }: { initialQuery?: string }) {
 					<span className="text-foreground font-medium">
 						Are you a partner?
 					</span>{" "}
-					Get listed so builders — and their AI agents — find you.
+					Get listed so builders — and their AI agents — find you.{" "}
+					<Link
+						href="/partners/dashboard"
+						className="text-foreground/90 underline underline-offset-2 hover:no-underline"
+					>
+						Already listed? Sign in
+					</Link>
 				</div>
 				<button
 					type="button"

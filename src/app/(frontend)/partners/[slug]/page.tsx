@@ -524,6 +524,14 @@ export default async function PartnerProfilePage({
 												Licensed
 											</Badge>
 										)}
+										{p.foundedYear && (
+											<Badge
+												variant="outline"
+												className="text-sm px-4 py-1.5 font-medium border-border/50 text-muted-foreground"
+											>
+												Since {p.foundedYear}
+											</Badge>
+										)}
 									</div>
 
 									{(sectors.length > 0 || p.country || regions.length > 0) && (
@@ -603,6 +611,15 @@ export default async function PartnerProfilePage({
 				    sees it immediately, not buried under the whole profile. */}
 				<div id="claim" className="mb-8 scroll-mt-28">
 					<PartnerClaimProfile orgName={p.name} />
+					<p className="mt-2 text-xs text-muted-foreground">
+						Already manage {p.name}?{" "}
+						<Link
+							href="/partners/dashboard"
+							className="text-foreground/90 underline underline-offset-2 hover:no-underline"
+						>
+							Sign in
+						</Link>
+					</p>
 				</div>
 
 				{/* Stellar Community Fund — a real, verifiable ecosystem signal that
@@ -693,6 +710,31 @@ export default async function PartnerProfilePage({
 								</div>
 								<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
 							</Link>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Trusted by — publicly-named customers/partners. The social-proof
+				    signal that matters most for closed-source institutions. */}
+				{customers.length > 0 && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold">Trusted by</CardTitle>
+							<CardDescription>
+								Publicly-named customers and partners
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="flex flex-wrap gap-2">
+								{customers.map((name) => (
+									<span
+										key={name}
+										className="px-3.5 py-1.5 rounded-lg bg-background/50 border border-border/50 text-sm font-medium text-foreground/90"
+									>
+										{name}
+									</span>
+								))}
+							</div>
 						</CardContent>
 					</Card>
 				)}
@@ -888,10 +930,9 @@ export default async function PartnerProfilePage({
 								</div>
 							)}
 
-							{(currencies.length > 0 ||
-								c.settlementTime ||
-								customers.length > 0) && (
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							{/* notableCustomers shows in its own "Trusted by" section above. */}
+							{(currencies.length > 0 || c.settlementTime) && (
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									{currencies.length > 0 && (
 										<StatTile
 											label="Currencies"
@@ -900,12 +941,6 @@ export default async function PartnerProfilePage({
 									)}
 									{c.settlementTime && (
 										<StatTile label="Settlement" value={c.settlementTime} />
-									)}
-									{customers.length > 0 && (
-										<StatTile
-											label="Notable customers"
-											value={customers.join(", ")}
-										/>
 									)}
 								</div>
 							)}
