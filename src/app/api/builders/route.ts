@@ -48,12 +48,122 @@ interface BuilderRow {
 // currently have zero profiles — a Passport-sync gap, not a filter bug —
 // but they stay in the maps so profiles match as soon as they exist.
 const REGION_LOCATIONS: Record<string, string[]> = {
-	latam: ["brazil", "mexico", "argentina", "colombia", "chile", "peru", "costa rica", "venezuela", "ecuador", "uruguay", "bolivia", "guatemala"],
-	"latin america": ["brazil", "mexico", "argentina", "colombia", "chile", "peru", "costa rica", "venezuela", "ecuador", "uruguay", "bolivia", "guatemala"],
-	africa: ["nigeria", "kenya", "ghana", "south africa", "uganda", "tanzania", "egypt", "morocco", "rwanda"],
-	asia: ["india", "philippines", "indonesia", "vietnam", "singapore", "japan", "korea", "thailand", "pakistan", "bangladesh"],
-	europe: ["germany", "france", "spain", "portugal", "italy", "united kingdom", "uk", "netherlands", "poland", "ukraine", "switzerland"],
+	latam: [
+		"brazil",
+		"mexico",
+		"argentina",
+		"colombia",
+		"chile",
+		"peru",
+		"costa rica",
+		"venezuela",
+		"ecuador",
+		"uruguay",
+		"bolivia",
+		"guatemala",
+	],
+	"latin america": [
+		"brazil",
+		"mexico",
+		"argentina",
+		"colombia",
+		"chile",
+		"peru",
+		"costa rica",
+		"venezuela",
+		"ecuador",
+		"uruguay",
+		"bolivia",
+		"guatemala",
+	],
+	africa: [
+		"nigeria",
+		"kenya",
+		"ghana",
+		"south africa",
+		"uganda",
+		"tanzania",
+		"egypt",
+		"morocco",
+		"rwanda",
+	],
+	asia: [
+		"india",
+		"philippines",
+		"indonesia",
+		"vietnam",
+		"singapore",
+		"japan",
+		"korea",
+		"thailand",
+		"pakistan",
+		"bangladesh",
+	],
+	europe: [
+		"germany",
+		"france",
+		"spain",
+		"portugal",
+		"italy",
+		"united kingdom",
+		"uk",
+		"netherlands",
+		"poland",
+		"ukraine",
+		"switzerland",
+	],
 };
+
+// sls-010: the `q` filter was strict-literal substring, so a payments-relevant
+// profile ("boleto/PIX infra", "remittances") didn't match q="payments". Expand
+// each query token to a small set of high-precision synonyms + a plural/singular
+// stem, then match if ANY expanded form is present — so concepts match by
+// meaning, not exact spelling. Mirrors the synonym expansion projects-search has.
+const BUILDER_SYNONYMS: Record<string, string[]> = {
+	payments: [
+		"payment",
+		"remittance",
+		"remittances",
+		"boleto",
+		"pix",
+		"pagamento",
+		"checkout",
+		"cross-border",
+	],
+	payment: ["payments", "remittance", "boleto", "pix"],
+	defi: [
+		"decentralized finance",
+		"lending",
+		"amm",
+		"dex",
+		"yield",
+		"liquidity",
+	],
+	wallet: ["wallets", "custody", "custodial", "self-custody"],
+	audit: ["audits", "auditing", "security", "formal verification"],
+	oracle: ["oracles", "price feed", "pricefeed", "price-feed"],
+	rwa: [
+		"real world asset",
+		"real-world asset",
+		"tokenization",
+		"tokenized",
+		"tokenize",
+	],
+	stablecoin: ["stablecoins", "stable coin", "usdc", "eurc"],
+	anchor: ["anchors", "on-ramp", "off-ramp", "on/off-ramp", "sep-24", "sep-6"],
+	nft: ["nfts", "non-fungible"],
+	soroban: ["smart contract", "smart contracts", "rust contract"],
+	ai: ["agent", "agents", "agentic", "llm"],
+	identity: ["kyc", "did", "credential", "verifiable credential"],
+};
+function expandBuilderTerm(t: string): string[] {
+	const out = new Set<string>([t]);
+	// plural/singular stem (payments↔payment, wallets↔wallet)
+	if (t.length > 3 && t.endsWith("s")) out.add(t.slice(0, -1));
+	else if (t.length > 2) out.add(`${t}s`);
+	for (const s of BUILDER_SYNONYMS[t] ?? []) out.add(s);
+	return [...out];
+}
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
@@ -145,7 +255,12 @@ export async function GET(req: NextRequest) {
 					]
 						.join(" ")
 						.toLowerCase();
-					return tokens.every((t) => haystack.includes(t));
+					// Each concept must be present (AND across tokens), but a token
+					// matches via any of its synonyms/stems (sls-010) — so
+					// "payments" also hits a "boleto/PIX/remittance" bio.
+					return tokens.every((t) =>
+						expandBuilderTerm(t).some((v) => haystack.includes(v)),
+					);
 				});
 			}
 
