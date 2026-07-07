@@ -317,10 +317,18 @@ const REGION_KEYWORDS: Record<string, string[]> = {
 
 /** Which regions a plain-language need is asking for (empty = no preference). */
 function requestedRegions(need: string): Set<string> {
-	const t = ` ${need.toLowerCase()} `;
+	const hay = need.toLowerCase();
 	const out = new Set<string>();
+	// WORD-BOUNDARY match, not raw substring: otherwise short currency/region
+	// codes match inside unrelated words — "usd" inside "USDC", "eur" inside
+	// "EURC", "aud" inside "AUDD" — and a stablecoin name silently gates the
+	// query to the wrong region (the bug that made "usdc off-ramp" return 0).
+	const bounded = (k: string): boolean => {
+		const esc = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		return new RegExp(`(^|[^a-z0-9])${esc}([^a-z0-9]|$)`).test(hay);
+	};
 	for (const [region, kws] of Object.entries(REGION_KEYWORDS)) {
-		if (kws.some((k) => t.includes(k))) out.add(region);
+		if (kws.some(bounded)) out.add(region);
 	}
 	// "global" is a wildcard, not a restriction — don't let it filter anything.
 	out.delete("global");
