@@ -442,6 +442,31 @@ export const Partners: CollectionConfig = {
 			],
 		},
 
+		// ── On-chain proof (SYSTEM-OWNED — enrichment run owns it) ─────────
+		// The git-free "live on Stellar" trust signal for closed-source anchors:
+		// their OWN issued assets' live on-chain reality, from stellar.expert.
+		// Attributed ONLY when the asset issuer's `domain` matches the partner's
+		// own domain — so an anchor that merely USES Circle's USDC never inherits
+		// Circle's stats. Populated by scripts/data/enrich-partner-onchain.ts;
+		// nothing fabricated (unmatched assets are simply absent).
+		autoField({
+			name: "onchain",
+			type: "array",
+			labels: { singular: "On-chain asset", plural: "On-chain assets" },
+			admin: {
+				description:
+					"Domain-matched live on-chain assets (holders, payments, rating) from stellar.expert. Enrichment-owned.",
+			},
+			fields: [
+				{ name: "code", type: "text", required: true },
+				{ name: "issuer", type: "text" },
+				{ name: "holders", type: "number" },
+				{ name: "payments", type: "number" },
+				{ name: "rating", type: "number" },
+				{ name: "asOf", type: "text" },
+			],
+		}),
+
 		// ── Capacity & pricing (partner-owned) ────────────────────────────
 		{
 			name: "acceptingClients",

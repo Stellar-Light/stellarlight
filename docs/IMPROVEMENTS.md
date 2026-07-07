@@ -23,7 +23,7 @@ SCOUT_BASE=https://stellarlight.xyz pnpm exec tsx scripts/experiment-eval.ts  # 
 
 ### Partner data (the layer just built out)
 - **Expose compliance to agents** — running now as experiment `partner-compliance-api` (gated **off**). Graduate once the eval wins **and** it's added to the OpenAPI spec.
-- **On-chain "live on Stellar" proof** — resolve each anchor's asset issuers (from stellar.toml CURRENCIES) → Horizon / stellar.expert for live-on-mainnet + supply + holders. The git-free trust signal we deferred (`project.onchain` is empty, so it needs its own ingest).
+- **On-chain "live on Stellar" proof** — running now as experiment `partner-onchain-live` (gated **off**). `scripts/data/enrich-partner-onchain.ts` domain-matches each anchor's OWN issued assets against stellar.expert (holders / payments / rating), attributing an asset ONLY when its issuer `domain` matches the partner's domain — so an anchor merely *using* Circle's USDC never inherits Circle's stats. Writes `partner.onchain`; gated into `/api/partners` via `?exp=partner-onchain-live`; rendered on the profile "Live on Stellar" card. Graduate once the data lands + eval wins + it's in the OpenAPI spec.
 - **Compliance coverage** — extend verified compliance beyond the top ~9 anchors (cite-or-null, same as the first pass).
 
 ### Agent contract

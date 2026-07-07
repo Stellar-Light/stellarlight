@@ -46,18 +46,21 @@ const PARTNER_TYPES = [
  * can act on without knowing our day thresholds.
  */
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies; we read a known subset
-function toPublic(p: any, opts: { compliance?: boolean } = {}) {
+function toPublic(
+	p: any,
+	opts: { compliance?: boolean; onchain?: boolean } = {},
+) {
 	const verified = p.verified ?? {};
 	const freshnessStatus = p.freshnessStatus ?? "fresh";
 	// EXPERIMENT partner-compliance-api (default OFF): expose curator-verified
 	// compliance/corridor facts to agents. Gated so it's not in the stable
 	// contract until it graduates. Only present when the experiment is on AND
 	// the partner actually has compliance data.
-	// biome-ignore lint/suspicious/noExplicitAny: gated experimental field
-	const compliance: any = {};
+	// biome-ignore lint/suspicious/noExplicitAny: gated experimental fields
+	const gated: any = {};
 	if (opts.compliance && p.compliance) {
 		const c = p.compliance;
-		compliance.compliance = {
+		gated.compliance = {
 			licenses: (c.licenses ?? []).map(
 				(l: { authority?: string; jurisdiction?: string; type?: string }) => ({
 					authority: l.authority ?? null,
@@ -72,8 +75,31 @@ function toPublic(p: any, opts: { compliance?: boolean } = {}) {
 			notableCustomers: c.notableCustomers ?? null,
 		};
 	}
+	// EXPERIMENT partner-onchain-live (default OFF): expose the domain-matched
+	// on-chain reality of each anchor's OWN issued assets (git-free trust
+	// signal). Same gating discipline as compliance — not in the stable contract
+	// until it graduates. Only present when opted in AND the partner has data.
+	if (opts.onchain && Array.isArray(p.onchain) && p.onchain.length > 0) {
+		gated.onchain = p.onchain.map(
+			(a: {
+				code?: string;
+				issuer?: string;
+				holders?: number;
+				payments?: number;
+				rating?: number;
+				asOf?: string;
+			}) => ({
+				code: a.code ?? null,
+				issuer: a.issuer ?? null,
+				holders: a.holders ?? null,
+				payments: a.payments ?? null,
+				rating: a.rating ?? null,
+				asOf: a.asOf ?? null,
+			}),
+		);
+	}
 	return {
-		...compliance,
+		...gated,
 		slug: p.slug,
 		name: p.name,
 		partnerType: p.partnerType,
@@ -191,11 +217,12 @@ export async function GET(req: NextRequest) {
 			// concierge matcher keeps its own eligibility rule).
 			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
 
-			// EXPERIMENT (default off): include compliance when opted in via
-			// ?exp=partner-compliance-api / X-Experiments header / env canary.
+			// EXPERIMENTS (default off): include the gated blocks only when opted
+			// in via ?exp=<id> / X-Experiments header / env canary.
 			const withCompliance = isExperimentOn("partner-compliance-api", req);
+			const withOnchain = isExperimentOn("partner-onchain-live", req);
 			let mapped = eligible.map((p) =>
-				toPublic(p, { compliance: withCompliance }),
+				toPublic(p, { compliance: withCompliance, onchain: withOnchain }),
 			);
 
 			// Free-text filter across name/tagline/description/services — in

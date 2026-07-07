@@ -1,0 +1,26 @@
+name: Enrich partner on-chain (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Domain-matched on-chain enrichment: for each published anchor with
+      # its OWN issued assets, look up stellar.expert and attribute an asset
+      # ONLY when the issuer domain matches the partner's domain. Writes
+      # partner.onchain on --execute; read-only otherwise. Never fabricates —
+      # unmatched assets are simply skipped.
+      - run: pnpm exec tsx scripts/data/enrich-partner-onchain.ts ${{ inputs.execute && '--execute' || '' }}

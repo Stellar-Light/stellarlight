@@ -1,4 +1,5 @@
 import {
+	Activity,
 	ArrowLeft,
 	Boxes,
 	CheckCircle2,
@@ -223,6 +224,20 @@ export default async function PartnerProfilePage({
 		currencies.length > 0 ||
 		Boolean(c.settlementTime) ||
 		customers.length > 0;
+
+	// On-chain proof — the anchor's OWN issued assets, live on mainnet
+	// (domain-matched from stellar.expert). The git-free trust signal: real
+	// holders + payment activity distinguish a live issuer from a dormant one.
+	const onchain: Array<{
+		code?: string;
+		issuer?: string;
+		holders?: number;
+		payments?: number;
+		rating?: number;
+		asOf?: string;
+	}> = Array.isArray(p.onchain) ? p.onchain : [];
+	const hasOnchain = onchain.length > 0;
+	const onchainAsOf = onchain.find((o) => o.asOf)?.asOf ?? null;
 
 	const verifiedCells: Array<{ label: string; value: string }> = [];
 	if (p.githubOrg) {
@@ -596,6 +611,69 @@ export default async function PartnerProfilePage({
 					</Card>
 				)}
 
+				{/* Live on Stellar — the anchor's OWN issued assets on mainnet,
+				    domain-matched from stellar.expert. The git-free proof-of-life:
+				    real holders + payment volume, not a self-claim. */}
+				{hasOnchain && (
+					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-xl font-bold flex items-center gap-2">
+								<Activity className="w-5 h-5 text-green-400" />
+								Live on Stellar
+							</CardTitle>
+							<CardDescription>
+								This partner&apos;s own assets on Stellar mainnet — holders and
+								payment activity from stellar.expert
+								{onchainAsOf ? ` (as of ${onchainAsOf})` : ""}
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-3">
+								{onchain.map((o) => {
+									const href = o.issuer
+										? `https://stellar.expert/explorer/public/asset/${o.code}-${o.issuer}`
+										: null;
+									const inner = (
+										<div className="flex flex-wrap items-center gap-x-6 gap-y-3 p-4 rounded-xl border border-border/50 bg-background/50 group-hover:border-green-500/40 transition-colors duration-150">
+											<span className="font-mono text-base font-bold text-foreground min-w-[5rem]">
+												{o.code}
+											</span>
+											<div className="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1">
+												<InlineStat label="Holders" value={fmtNum(o.holders)} />
+												<InlineStat
+													label="Payments"
+													value={fmtNum(o.payments)}
+												/>
+												{o.rating != null && o.rating > 0 && (
+													<InlineStat label="Rating" value={`${o.rating}/10`} />
+												)}
+											</div>
+											{href && (
+												<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-green-400 transition-colors flex-shrink-0" />
+											)}
+										</div>
+									);
+									return href ? (
+										<a
+											key={o.code}
+											href={href}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="group block"
+										>
+											{inner}
+										</a>
+									) : (
+										<div key={o.code} className="group">
+											{inner}
+										</div>
+									);
+								})}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
 				{/* Compliance & corridors — curator-verified; the decision-critical
 				    facts for a closed-source anchor (regulatory standing + rails). */}
 				{hasCompliance && (
@@ -836,8 +914,25 @@ function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
 	);
 }
 
+function InlineStat({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="flex flex-col">
+			<span className="text-xs font-medium text-muted-foreground">{label}</span>
+			<span className="text-base font-bold text-foreground leading-tight">
+				{value}
+			</span>
+		</div>
+	);
+}
+
 function cleanUrl(u: string): string {
 	return u.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+/** 12345 → "12,345"; nullish/negatives → "—". */
+function fmtNum(n?: number | null): string {
+	if (n == null || Number.isNaN(n) || n < 0) return "—";
+	return n.toLocaleString("en-US");
 }
 
 function fmtDate(d?: string | null): string {
