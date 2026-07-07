@@ -291,6 +291,63 @@ async function main() {
 		});
 	}
 
+	// Logo backfill — many partners are ALSO in the projects directory, which
+	// already has the correct curated logo. Their partner logoUrl (from
+	// stellar.toml) is often missing or wrong. Copy the matching project's logo
+	// (join on slug, stripping the "anchor-" prefix) so cards/profiles/concierge
+	// all show the SAME logo as the projects page. OVERWRITES — the project logo
+	// is the source of truth here.
+	console.log("\n── Logo backfill (from matching project logos) ──");
+	const APP = "https://stellarlight.xyz";
+	const wantedProjectSlugs = [
+		...new Set(docs.map((d) => String(d.slug).replace(/^anchor-/, ""))),
+	];
+	const projects = await payload.find({
+		collection: "projects",
+		where: { slug: { in: wantedProjectSlugs } },
+		limit: 500,
+		depth: 1,
+		overrideAccess: true,
+		select: { slug: true, logo: true },
+	});
+	const projLogo = new Map<string, string>();
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	for (const pr of projects.docs as any[]) {
+		const logo = pr.logo;
+		let url = "";
+		if (logo && typeof logo === "object") {
+			if (logo.url) url = String(logo.url);
+			else if (logo.filename) url = `/api/media/file/${logo.filename}`;
+		}
+		if (url) {
+			const abs = url.startsWith("http") ? url : `${APP}${url}`;
+			projLogo.set(String(pr.slug).toLowerCase(), abs);
+		}
+	}
+	let logoNoop = 0;
+	for (const d of docs) {
+		const key = String(d.slug)
+			.replace(/^anchor-/, "")
+			.toLowerCase();
+		const logo = projLogo.get(key);
+		if (!logo) continue;
+		if (d.logoUrl === logo) {
+			logoNoop++;
+			continue;
+		}
+		console.log(
+			`  ${d.name} (${d.slug}) — logoUrl: ${d.logoUrl ?? "(none)"} → ${logo}`,
+		);
+		writes.push({
+			id: d.id,
+			slug: d.slug,
+			data: { logoUrl: logo },
+			note: "logo ← project",
+		});
+	}
+	if (projLogo.size === 0) console.log("  (no matching project logos found)");
+	else console.log(`  (${logoNoop} already correct, no-op)`);
+
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);
 		process.exit(0);
