@@ -18,6 +18,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
+import { isExperimentOn } from "@/lib/experiments";
 import { boolParam, clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { passesQualityBar } from "@/lib/partner-quality";
@@ -45,10 +46,34 @@ const PARTNER_TYPES = [
  * can act on without knowing our day thresholds.
  */
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies; we read a known subset
-function toPublic(p: any) {
+function toPublic(p: any, opts: { compliance?: boolean } = {}) {
 	const verified = p.verified ?? {};
 	const freshnessStatus = p.freshnessStatus ?? "fresh";
+	// EXPERIMENT partner-compliance-api (default OFF): expose curator-verified
+	// compliance/corridor facts to agents. Gated so it's not in the stable
+	// contract until it graduates. Only present when the experiment is on AND
+	// the partner actually has compliance data.
+	// biome-ignore lint/suspicious/noExplicitAny: gated experimental field
+	const compliance: any = {};
+	if (opts.compliance && p.compliance) {
+		const c = p.compliance;
+		compliance.compliance = {
+			licenses: (c.licenses ?? []).map(
+				(l: { authority?: string; jurisdiction?: string; type?: string }) => ({
+					authority: l.authority ?? null,
+					jurisdiction: l.jurisdiction ?? null,
+					type: l.type ?? null,
+				}),
+			),
+			kycRequired: c.kycRequired ?? null,
+			travelRule: c.travelRule ?? null,
+			currencies: c.currencies ?? null,
+			settlementTime: c.settlementTime ?? null,
+			notableCustomers: c.notableCustomers ?? null,
+		};
+	}
 	return {
+		...compliance,
 		slug: p.slug,
 		name: p.name,
 		partnerType: p.partnerType,
@@ -166,7 +191,12 @@ export async function GET(req: NextRequest) {
 			// concierge matcher keeps its own eligibility rule).
 			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
 
-			let mapped = eligible.map(toPublic);
+			// EXPERIMENT (default off): include compliance when opted in via
+			// ?exp=partner-compliance-api / X-Experiments header / env canary.
+			const withCompliance = isExperimentOn("partner-compliance-api", req);
+			let mapped = eligible.map((p) =>
+				toPublic(p, { compliance: withCompliance }),
+			);
 
 			// Free-text filter across name/tagline/description/services — in
 			// memory, same approach as projects/builders search.
