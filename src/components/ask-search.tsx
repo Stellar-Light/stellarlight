@@ -287,8 +287,8 @@ export function AskSearch() {
 									Answer
 								</h2>
 								{answer ? (
-									<div className="rounded-xl bg-card border border-border p-4">
-										<p className="text-sm text-foreground/90 leading-relaxed">
+									<div className="rounded-2xl bg-white/[0.02] border border-white/15 p-5">
+										<p className="text-[15px] text-foreground/90 leading-relaxed">
 											{answer.text.split(/(\[\d+\])/).map((part, i) => {
 												const m = part.match(/^\[(\d+)\]$/);
 												if (!m)
@@ -324,18 +324,27 @@ export function AskSearch() {
 											})}
 										</p>
 										<p className="text-[11px] text-muted-foreground/60 mt-2.5">
-											synthesized only from the results below — every sentence
-											cites a card
+											synthesized only from the sources below — every sentence
+											cites one
 										</p>
 									</div>
 								) : (
-									<div className="rounded-xl bg-card border border-border p-4 animate-pulse">
+									<div className="rounded-2xl bg-white/[0.02] border border-white/15 p-5 animate-pulse">
 										<div className="h-3.5 bg-white/[0.05] rounded w-full mb-2" />
 										<div className="h-3.5 bg-white/[0.05] rounded w-4/5" />
 									</div>
 								)}
 							</section>
 						)}
+
+						{/* Sources — the cards the answer is grounded in (hl.eco/learn:
+						    a synthesized answer over a clean library of primary sources). */}
+						<div className="flex items-center gap-3">
+							<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+								Sources
+							</h2>
+							<div className="flex-1 h-px bg-border" />
+						</div>
 
 						{/* Partners / providers — the direct answer to "who can I hire" questions */}
 						{partners.length > 0 && (
