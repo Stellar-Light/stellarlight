@@ -24,7 +24,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { regionLabel, sectorLabel, typeLabel } from "@/lib/partner-labels";
+import {
+	COMPLEMENTARY_TYPES,
+	regionLabel,
+	sectorLabel,
+	typeLabel,
+	typePlural,
+} from "@/lib/partner-labels";
+import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
@@ -141,6 +148,87 @@ async function getMatchingProject(partnerSlug: string): Promise<any | null> {
 	}
 }
 
+interface RelatedCard {
+	slug: string;
+	name: string;
+	partnerType: string;
+	tagline?: string | null;
+	logoUrl?: string | null;
+	pilot?: boolean;
+	freshnessStatus?: string | null;
+}
+
+/**
+ * Partner-to-partner discovery. From the live published directory, split
+ * candidates into:
+ *   - pairs: COMPLEMENTARY types (an anchor → audit / legal / infra), up to 2
+ *     per type in priority order — the "you'll also need" stack.
+ *   - peers: SAME type — direct alternatives.
+ * Only quality-bar profiles, self excluded, ranked by pilot then completeness.
+ */
+async function getRelatedPartners(current: {
+	slug: string;
+	partnerType: string;
+}): Promise<{ pairs: RelatedCard[]; peers: RelatedCard[] }> {
+	const payload = await getPayloadSafe();
+	if (!payload) return { pairs: [], peers: [] };
+	try {
+		const res = await payload.find({
+			collection: "partner-accounts",
+			where: { status: { equals: "published" } },
+			limit: 200,
+			depth: 0,
+			select: {
+				slug: true,
+				name: true,
+				partnerType: true,
+				tagline: true,
+				logoUrl: true,
+				pilot: true,
+				freshnessStatus: true,
+				sectors: true,
+				description: true,
+				services: true,
+				contactEmail: true,
+				websiteUrl: true,
+			},
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const docs = (res.docs as any[]).filter(
+			(d) => d.slug !== current.slug && passesQualityBar(d),
+		);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const strength = (p: any) =>
+			[
+				p.tagline,
+				p.description,
+				(p.services ?? []).length > 0,
+				(p.sectors ?? []).length > 0,
+				Boolean(p.logoUrl),
+				(p.freshnessStatus ?? "fresh") === "fresh",
+			].filter(Boolean).length;
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const rank = (a: any, b: any) =>
+			Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
+			strength(b) - strength(a);
+
+		const compTypes = COMPLEMENTARY_TYPES[current.partnerType] ?? [];
+		const pairs: RelatedCard[] = [];
+		for (const t of compTypes) {
+			const ofType = docs.filter((d) => d.partnerType === t).sort(rank);
+			pairs.push(...ofType.slice(0, 2));
+			if (pairs.length >= 4) break;
+		}
+		const peers = docs
+			.filter((d) => d.partnerType === current.partnerType)
+			.sort(rank)
+			.slice(0, 3);
+		return { pairs: pairs.slice(0, 4), peers };
+	} catch {
+		return { pairs: [], peers: [] };
+	}
+}
+
 export async function generateMetadata({
 	params,
 }: {
@@ -149,9 +237,19 @@ export async function generateMetadata({
 	const { slug } = await params;
 	const p = await getPartner(slug);
 	if (!p) return { title: "Partner not found | Stellar Light" };
+	const title = `${p.name} | Stellar Partners`;
+	const description = p.tagline ?? `${p.name} — a Stellar ecosystem partner.`;
+	// og:image / twitter:image come from opengraph-image.tsx in this segment.
 	return {
-		title: `${p.name} | Stellar Partners`,
-		description: p.tagline ?? `${p.name} — a Stellar ecosystem partner.`,
+		title,
+		description,
+		openGraph: {
+			title,
+			description,
+			type: "profile",
+			url: `https://stellarlight.xyz/partners/${slug}`,
+		},
+		twitter: { card: "summary_large_image", title, description },
 	};
 }
 
@@ -165,6 +263,10 @@ export default async function PartnerProfilePage({
 	if (!p) notFound();
 
 	const proj = await getMatchingProject(slug);
+	const related = await getRelatedPartners({
+		slug,
+		partnerType: p.partnerType,
+	});
 	const scf = proj?.scf?.awarded ? proj.scf : null;
 	const scfRounds: number[] =
 		scf && Array.isArray(scf.awardedRounds) && scf.awardedRounds.length > 0
@@ -901,8 +1003,82 @@ export default async function PartnerProfilePage({
 						</CardContent>
 					</Card>
 				)}
+
+				{/* Partner-to-partner discovery — the stack you'd pair this partner
+				    with, plus direct peers. Keeps people in the directory + surfaces
+				    the ecosystem, not just one company. */}
+				{(related.pairs.length > 0 || related.peers.length > 0) && (
+					<div className="space-y-8">
+						{related.pairs.length > 0 && (
+							<section>
+								<h2 className="text-xl font-bold text-foreground mb-1">
+									Pairs well with
+								</h2>
+								<p className="text-sm text-muted-foreground mb-5">
+									Partners teams usually bring in alongside{" "}
+									{typeLabel(p.partnerType).toLowerCase()}s like {p.name}.
+								</p>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									{related.pairs.map((r) => (
+										<RelatedPartnerCard key={r.slug} r={r} />
+									))}
+								</div>
+							</section>
+						)}
+						{related.peers.length > 0 && (
+							<section>
+								<h2 className="text-xl font-bold text-foreground mb-5">
+									Other {typePlural(p.partnerType)}
+								</h2>
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+									{related.peers.map((r) => (
+										<RelatedPartnerCard key={r.slug} r={r} />
+									))}
+								</div>
+							</section>
+						)}
+					</div>
+				)}
 			</main>
 		</div>
+	);
+}
+
+function RelatedPartnerCard({ r }: { r: RelatedCard }) {
+	return (
+		<Link
+			href={`/partners/${r.slug}`}
+			className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-card hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5 overflow-hidden"
+		>
+			{r.logoUrl ? (
+				// eslint-disable-next-line @next/next/no-img-element
+				<img
+					src={r.logoUrl}
+					alt=""
+					className="w-11 h-11 rounded-lg border border-border/50 bg-white/[0.03] object-contain p-1 flex-shrink-0"
+				/>
+			) : (
+				<div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-border/50 flex items-center justify-center text-lg font-bold text-foreground/80 flex-shrink-0">
+					{String(r.name).charAt(0).toUpperCase()}
+				</div>
+			)}
+			<div className="flex-1 min-w-0">
+				<div className="flex items-center gap-2">
+					<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+						{r.name}
+					</span>
+					<span className="text-[10px] uppercase tracking-wide text-muted-foreground border border-border/50 rounded px-1.5 py-0.5 flex-shrink-0">
+						{typeLabel(r.partnerType)}
+					</span>
+				</div>
+				{r.tagline && (
+					<p className="text-xs text-muted-foreground truncate mt-0.5">
+						{r.tagline}
+					</p>
+				)}
+			</div>
+			<ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0 rotate-180" />
+		</Link>
 	);
 }
 
