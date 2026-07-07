@@ -452,6 +452,12 @@ export default async function PartnerProfilePage({
 					</CardContent>
 				</Card>
 
+				{/* Is this your company? — claim CTA kept near the top so an owner
+				    sees it immediately, not buried under the whole profile. */}
+				<div id="claim" className="mb-8 scroll-mt-28">
+					<PartnerClaimProfile orgName={p.name} />
+				</div>
+
 				{/* Stellar Community Fund — a real, verifiable ecosystem signal that
 				    works for closed-source partners (from the matching project). */}
 				{scf && (
@@ -895,11 +901,6 @@ export default async function PartnerProfilePage({
 						</CardContent>
 					</Card>
 				)}
-
-				{/* Claim path */}
-				<div id="claim" className="scroll-mt-28">
-					<PartnerClaimProfile orgName={p.name} />
-				</div>
 			</main>
 		</div>
 	);

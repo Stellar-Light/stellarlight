@@ -1,0 +1,28 @@
+name: Seed test partner (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      password:
+        description: "Password for the test account. Leave blank to auto-generate (printed in the log)."
+        type: string
+        required: false
+permissions: { contents: read }
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      TEST_PARTNER_PASSWORD: ${{ inputs.password }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Creates (or resets the password on) a single DRAFT test partner account
+      # so the password login + dashboard can be verified live without Resend.
+      # Draft = invisible in the public directory; owner can still log in.
+      - run: pnpm exec tsx scripts/data/seed-test-partner.ts
