@@ -31,6 +31,25 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-08",
+		surfaces: ["api", "api-client"],
+		version: "@stellar-light/api-client@1.4.0",
+		type: "added",
+		summary:
+			"searchProjects results now carry structured `coverage` {countries, currencies, seps, asOf} for Anchor-typed projects (sls-012) and `supportedNetworks` [] (sls-017) — corridor/chain questions become filterable + dated instead of prose-mined. getHackathon detail adds `prizeTiers` [] {place, rank, amountUSD, asset} parsed from the prize prose (sls-016).",
+		detail:
+			"coverage is synced from the matching partner record (SEPs/currencies/country), null for non-anchors; ~16 anchor projects populated (e.g. bitso → MXN/BRL/ARS/COP/USD, mykobo → SEP-6/24/31·EUR). supportedNetworks distinguishes a multichain wallet's omission from a negative (LOBSTR = [stellar, xrpl]). prizeTiers joins to winners via placementRank (empty when a hackathon has no itemized split). OpenAPI Project schema reconciled: the never-implemented `anchorProfile` field was removed in favor of the real `coverage`/`supportedNetworks`. api-client 1.4.0 regenerated from the live spec.",
+	},
+	{
+		date: "2026-07-08",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getPartners and getBuilders free-text `q` are relevance-matched, not strict all-token substring. getPartners routes `q` through the shared matchmaker scorer (weighted by assets/ramps/SEPs/country/region) — 'USDC off-ramp' in LatAm went 1 → 6 results. getBuilders `q` gains synonym + singular/plural stem expansion (payments ↔ boleto/PIX/remittance) (sls-010).",
+		detail:
+			"Found by dogfooding our own MCP tools with natural questions: the list endpoints used tokens.every(hay.includes) so adding keywords returned FEWER results, and structured capability fields never counted. getPartners now reuses scorePartners (the concierge engine); a latent region bug where 'usd' inside 'USDC' mis-gated queries to North-America was fixed with word-boundary matching (regression-tested). getBuilders q=payments in Brazil went 1 → 2. Ranking-only change; no param/shape changes.",
+	},
+	{
 		date: "2026-07-06",
 		surfaces: ["api"],
 		version: "openapi 1.6.1",
