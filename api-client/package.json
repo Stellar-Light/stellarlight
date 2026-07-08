@@ -1,60 +1,60 @@
 {
-  "name": "@stellar-light/api-client",
-  "version": "1.4.0",
-  "description": "Typed TypeScript client for the Stellar Scout API \u2014 projects, builders, hackathons, SCF, audits, research. Zero dependencies, for autonomous agents and aggregators.",
-  "keywords": [
-    "stellar",
-    "soroban",
-    "api-client",
-    "sdk",
-    "typescript",
-    "agent",
-    "ai",
-    "ecosystem",
-    "scf",
-    "openapi"
-  ],
-  "homepage": "https://stellarlight.xyz/scout",
-  "bugs": {
-    "url": "https://github.com/Stellar-Light/stellarlight/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Stellar-Light/stellarlight.git",
-    "directory": "api-client"
-  },
-  "license": "MIT",
-  "author": "stellarlight.xyz",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --target node20 --clean",
-    "generate": "openapi-typescript https://stellarlight.xyz/api/openapi.json -o src/schema.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "pnpm build && node test/smoke.mjs",
-    "prepublishOnly": "pnpm build"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.5",
-    "openapi-typescript": "^7.13.0",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@stellar-light/api-client",
+	"version": "1.4.1",
+	"description": "Typed TypeScript client for the Stellar Scout API \u2014 projects, builders, hackathons, SCF, audits, research. Zero dependencies, for autonomous agents and aggregators.",
+	"keywords": [
+		"stellar",
+		"soroban",
+		"api-client",
+		"sdk",
+		"typescript",
+		"agent",
+		"ai",
+		"ecosystem",
+		"scf",
+		"openapi"
+	],
+	"homepage": "https://stellarlight.xyz/scout",
+	"bugs": {
+		"url": "https://github.com/Stellar-Light/stellarlight/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Stellar-Light/stellarlight.git",
+		"directory": "api-client"
+	},
+	"license": "MIT",
+	"author": "stellarlight.xyz",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts --target node20 --clean",
+		"generate": "openapi-typescript https://stellarlight.xyz/api/openapi.json -o src/schema.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "pnpm build && node test/smoke.mjs",
+		"prepublishOnly": "pnpm build"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.5",
+		"openapi-typescript": "^7.13.0",
+		"tsup": "^8.3.5",
+		"typescript": "^5.7.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

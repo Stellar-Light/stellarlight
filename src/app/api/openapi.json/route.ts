@@ -638,7 +638,11 @@ const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Partner directory",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/PartnersResponse" },
+							},
+						},
 					},
 				},
 			},
@@ -1315,6 +1319,124 @@ const spec: OpenAPISpec = {
 					details: { type: "object", additionalProperties: true },
 				},
 			},
+			Partner: {
+				type: "object",
+				description:
+					"An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained.",
+				properties: {
+					slug: { type: "string" },
+					name: { type: "string" },
+					partnerType: {
+						type: "string",
+						enum: [
+							"anchor",
+							"on-off-ramp",
+							"infrastructure",
+							"tooling",
+							"protocol",
+							"wallet",
+							"audit-firm",
+							"legal",
+							"agency",
+							"other",
+						],
+					},
+					pilot: {
+						type: "boolean",
+						description:
+							"Founding pilot-cohort partner (sorts first in unqueried lists).",
+					},
+					tagline: { type: "string", nullable: true },
+					description: { type: "string", nullable: true },
+					logoUrl: { type: "string", nullable: true },
+					websiteUrl: { type: "string", nullable: true },
+					foundedYear: { type: "integer", nullable: true },
+					services: { type: "array", items: { type: "string" } },
+					sectors: { type: "array", items: { type: "string" } },
+					regions: { type: "array", items: { type: "string" } },
+					assets: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Asset codes this partner issues/supports (from stellar.toml or curated).",
+					},
+					seps: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based.",
+					},
+					rampTypes: {
+						type: "array",
+						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
+						description: "Fiat ramps offered.",
+					},
+					country: { type: "string", nullable: true },
+					acceptingClients: { type: "boolean" },
+					typicalEngagement: { type: "string", nullable: true },
+					leadTime: { type: "string", nullable: true },
+					pricingModel: { type: "string", nullable: true },
+					pricingNotes: { type: "string", nullable: true },
+					docsUrl: { type: "string", nullable: true },
+					githubOrg: { type: "string", nullable: true },
+					contactEmail: { type: "string", nullable: true },
+					contactChannel: { type: "string", nullable: true },
+					responseSla: { type: "string", nullable: true },
+					caseStudies: { type: "array", items: { type: "object" } },
+					verified: {
+						type: "object",
+						description:
+							"SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal.",
+						properties: {
+							githubLastCommitAt: { type: "string", nullable: true },
+							githubCommits90d: { type: "integer", nullable: true },
+							onchainActive: { type: "boolean", nullable: true },
+							onchainNote: { type: "string", nullable: true },
+							scfInvolvement: { type: "string", nullable: true },
+							lastAutoVerifyAt: { type: "string", nullable: true },
+						},
+					},
+					freshness: {
+						type: "object",
+						description:
+							"Profile freshness state machine (fresh → aging → stale → archived). Consumers should down-rank or skip partners with excludeFromMatching: true.",
+						properties: {
+							status: {
+								type: "string",
+								enum: ["fresh", "aging", "stale", "archived"],
+							},
+							lastPartnerUpdateAt: { type: "string", nullable: true },
+							isCurrent: { type: "boolean" },
+							excludeFromMatching: { type: "boolean" },
+						},
+					},
+					trust: {
+						type: "object",
+						description:
+							"System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string" },
+							freshness: { type: "number" },
+							verification: { type: "number" },
+						},
+					},
+					url: {
+						type: "string",
+						description: "Canonical partner profile page on stellarlight.xyz.",
+					},
+				},
+			},
+			PartnersResponse: {
+				type: "object",
+				properties: {
+					meta: { $ref: "#/components/schemas/Meta" },
+					partners: {
+						type: "array",
+						items: { $ref: "#/components/schemas/Partner" },
+					},
+				},
+			},
 			StatusResponse: {
 				type: "object",
 				required: ["ok", "service", "version", "generatedAt", "endpoints"],
@@ -1457,6 +1579,41 @@ const spec: OpenAPISpec = {
 						items: { type: "string" },
 						description:
 							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown.",
+					},
+					anchorProfile: {
+						type: "object",
+						nullable: true,
+						description:
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. `url` links the full partner profile.",
+						properties: {
+							slug: { type: "string" },
+							country: { type: "string", nullable: true },
+							regions: { type: "array", items: { type: "string" } },
+							assets: { type: "array", items: { type: "string" } },
+							seps: { type: "array", items: { type: "string" } },
+							rampTypes: {
+								type: "array",
+								items: { type: "string", enum: ["on-ramp", "off-ramp"] },
+							},
+							asOf: { type: "string", nullable: true },
+							url: { type: "string" },
+						},
+					},
+					canonicalSlug: {
+						type: "string",
+						nullable: true,
+						description:
+							"When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding.",
+					},
+					lifecycle: {
+						type: "object",
+						nullable: true,
+						description:
+							"Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records.",
+						properties: {
+							wasLive: { type: "boolean" },
+							note: { type: "string", nullable: true },
+						},
 					},
 					hackathon: { type: "string", nullable: true },
 					hackathonPlacement: { type: "string", nullable: true },

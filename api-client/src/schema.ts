@@ -488,6 +488,71 @@ export interface components {
                 total?: number;
             };
         };
+        /** @description An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained. */
+        Partner: {
+            slug?: string;
+            name?: string;
+            /** @enum {string} */
+            partnerType?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+            /** @description Founding pilot-cohort partner (sorts first in unqueried lists). */
+            pilot?: boolean;
+            tagline?: string | null;
+            description?: string | null;
+            logoUrl?: string | null;
+            websiteUrl?: string | null;
+            foundedYear?: number | null;
+            services?: string[];
+            sectors?: string[];
+            regions?: string[];
+            /** @description Asset codes this partner issues/supports (from stellar.toml or curated). */
+            assets?: string[];
+            /** @description SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based. */
+            seps?: string[];
+            /** @description Fiat ramps offered. */
+            rampTypes?: ("on-ramp" | "off-ramp")[];
+            country?: string | null;
+            acceptingClients?: boolean;
+            typicalEngagement?: string | null;
+            leadTime?: string | null;
+            pricingModel?: string | null;
+            pricingNotes?: string | null;
+            docsUrl?: string | null;
+            githubOrg?: string | null;
+            contactEmail?: string | null;
+            contactChannel?: string | null;
+            responseSla?: string | null;
+            caseStudies?: Record<string, unknown>[];
+            /** @description SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal. */
+            verified?: {
+                githubLastCommitAt?: string | null;
+                githubCommits90d?: number | null;
+                onchainActive?: boolean | null;
+                onchainNote?: string | null;
+                scfInvolvement?: string | null;
+                lastAutoVerifyAt?: string | null;
+            };
+            /** @description Profile freshness state machine (fresh → aging → stale → archived). Down-rank or skip partners with excludeFromMatching: true. */
+            freshness?: {
+                /** @enum {string} */
+                status?: "fresh" | "aging" | "stale" | "archived";
+                lastPartnerUpdateAt?: string | null;
+                isCurrent?: boolean;
+                excludeFromMatching?: boolean;
+            };
+            /** @description System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals. */
+            trust?: {
+                score?: number;
+                label?: string;
+                freshness?: number;
+                verification?: number;
+            };
+            /** @description Canonical partner profile page on stellarlight.xyz. */
+            url?: string;
+        };
+        PartnersResponse: {
+            meta?: components["schemas"]["Meta"];
+            partners?: components["schemas"]["Partner"][];
+        };
         ErrorResponse: {
             error: string;
             details?: {
@@ -566,6 +631,24 @@ export interface components {
             } | null;
             /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown. */
             supportedNetworks?: string[];
+            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. `url` links the full partner profile. */
+            anchorProfile?: {
+                slug?: string;
+                country?: string | null;
+                regions?: string[];
+                assets?: string[];
+                seps?: string[];
+                rampTypes?: ("on-ramp" | "off-ramp")[];
+                asOf?: string | null;
+                url?: string;
+            } | null;
+            /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
+            canonicalSlug?: string | null;
+            /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records. */
+            lifecycle?: {
+                wasLive?: boolean;
+                note?: string | null;
+            } | null;
             hackathon?: string | null;
             hackathonPlacement?: string | null;
             /** @description Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label. */
@@ -1099,7 +1182,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PartnersResponse"];
                 };
             };
         };
