@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-08",
+		surfaces: ["mcp"],
+		version: "@stellar-light/scout-mcp@1.1.8",
+		type: "changed",
+		summary:
+			"get_partners `q` param description corrected: q is relevance-ranked by structured capability fit (assets/ramps/SEPs/country/services/region), not a literal name+description keyword search — the old text under-sold capability queries like 'USDC off-ramp Mexico'.",
+	},
+	{
+		date: "2026-07-08",
 		surfaces: ["api", "api-client"],
 		type: "fixed",
 		summary:

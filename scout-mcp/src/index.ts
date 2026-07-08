@@ -654,7 +654,9 @@ server.registerTool(
 			q: z
 				.string()
 				.optional()
-				.describe("Free-text search across partner name + description."),
+				.describe(
+					"Free-text need, relevance-ranked by structured capability fit (assets, ramps, SEPs, country, services, region) — e.g. 'USDC off-ramp Mexico' surfaces anchors by capability, not keyword overlap.",
+				),
 		},
 	},
 	async ({ type, sector, region, q }) => {
