@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api", "api-client"],
 		type: "added",
 		summary:
+			"searchRepos results gain `codeVerified.symbols` — the public code-symbol surface (pub fn/struct/enum/trait names) extracted from each repo's scanned Rust sources. Search also MATCHES on them: 'escrow' now retrieves a repo whose code defines release_escrow/EscrowContract even if its README never says the word (weighted between name/topic and description hits).",
+		detail:
+			"Closes the structure≠semantics gap: the index knew a repo HAS a deployable contract, not WHAT it implements. Symbols are extracted offline from the same fetched sources the codeDepth scan reads (pub items only, plumbing names filtered, capped 60/repo, top 20 exposed), populated by scan waves — repos scanned before 2026-07-08 carry [] until rescanned. Empty symbols on a scanned repo is 'not yet rescanned', NOT 'no public API'.",
+	},
+	{
+		date: "2026-07-08",
+		surfaces: ["api", "api-client"],
+		type: "added",
+		summary:
 			"Contract-as-code guarantee: the OpenAPI spec is now a committed snapshot (specs/openapi.json) and @stellar-light/api-client types are GENERATED from it; CI blocks any contract change that isn't announced in this changelog. Consumers can rely on: every schema/param/op change appears here, same release.",
 	},
 	{

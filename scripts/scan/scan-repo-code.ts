@@ -23,13 +23,15 @@
  *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --budget N (800)
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../../src/payload.config";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeFarmScore } from "../../src/lib/code-signals";
+import { extractCodeSymbols } from "../../src/lib/code-symbols";
+import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
@@ -65,7 +67,9 @@ async function verifyMain() {
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	const docs = res.docs as any[];
-	console.log(`verify — ${res.totalDocs} scanned docs · showing ${docs.length} (read-only)\n`);
+	console.log(
+		`verify — ${res.totalDocs} scanned docs · showing ${docs.length} (read-only)\n`,
+	);
 	for (const d of docs) {
 		console.log(
 			JSON.stringify({
@@ -112,7 +116,13 @@ async function main() {
 		sort: "-lastCommitAt",
 		limit: LIMIT,
 		depth: 0,
-		select: { fullName: true, repoScore: true, isFork: true, isArchived: true, codeScanState: true },
+		select: {
+			fullName: true,
+			repoScore: true,
+			isFork: true,
+			isArchived: true,
+			codeScanState: true,
+		},
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	const docs = res.docs as any[];
@@ -123,12 +133,20 @@ async function main() {
 	let errored = 0;
 	let incomplete = 0;
 	let budgetStopped = false;
-	const lifts: { full: string; proof: string; depth: number; cur: number; predicted: number }[] = [];
+	const lifts: {
+		full: string;
+		proof: string;
+		depth: number;
+		cur: number;
+		predicted: number;
+	}[] = [];
 
 	for (const doc of docs) {
 		if (callsUsed >= CALL_BUDGET) {
 			budgetStopped = true;
-			console.log(`\n⏸ call budget reached (${callsUsed}/${CALL_BUDGET}) — stopping wave; re-run for the next batch.`);
+			console.log(
+				`\n⏸ call budget reached (${callsUsed}/${CALL_BUDGET}) — stopping wave; re-run for the next batch.`,
+			);
 			break;
 		}
 		const full = doc.fullName as string;
@@ -144,7 +162,10 @@ async function main() {
 				errored++;
 				line = `  error  ${full.padEnd(44)} no-tree`;
 			} else {
-				const depth = r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
+				const depth =
+					r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
+				const symbols =
+					r.outcome === "ok" ? extractCodeSymbols(r.depthInput.blobs) : [];
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -158,7 +179,16 @@ async function main() {
 							})
 						: { score: 0, flags: [] };
 				data = signalsToWrite(
-					{ outcome: r.outcome, scanNote: r.scanNote, proof: r.proof, facts: r.facts, codeDepth: depth, farmScore: farm.score, farmFlags: farm.flags },
+					{
+						outcome: r.outcome,
+						scanNote: r.scanNote,
+						proof: r.proof,
+						facts: r.facts,
+						codeDepth: depth,
+						farmScore: farm.score,
+						farmFlags: farm.flags,
+						codeSymbols: symbols,
+					},
 					nowIso,
 				);
 				if (r.outcome === "ok") {
@@ -168,9 +198,12 @@ async function main() {
 					// codeDriven override is max(composite, 0.1+0.7*depth) before the
 					// archived/fork multipliers, so only predict for plain repos.
 					const predicted =
-						!doc.isArchived && !doc.isFork && depth > 0 ? Math.max(cur, Math.round((0.1 + 0.7 * depth) * 100)) : cur;
-					if (predicted > cur) lifts.push({ full, proof: r.proof, depth, cur, predicted });
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score}`;
+						!doc.isArchived && !doc.isFork && depth > 0
+							? Math.max(cur, Math.round((0.1 + 0.7 * depth) * 100))
+							: cur;
+					if (predicted > cur)
+						lifts.push({ full, proof: r.proof, depth, cur, predicted });
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score} syms=${symbols.length}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;
@@ -181,9 +214,14 @@ async function main() {
 			// Hard rate limit → STOP the wave; leave this repo (and the rest)
 			// pending, not error. Prevents burning scan slots on a token-exhaustion
 			// artifact (e.g. stellar/rs-soroban-sdk → blob-unreadable at the tail).
-			if (e instanceof RateLimitError || (e as Error).message?.includes("RATE_LIMIT")) {
+			if (
+				e instanceof RateLimitError ||
+				(e as Error).message?.includes("RATE_LIMIT")
+			) {
 				budgetStopped = true;
-				console.log(`\n⏸ GitHub rate limit hit — stopping wave (repos stay pending, retry next wave).`);
+				console.log(
+					`\n⏸ GitHub rate limit hit — stopping wave (repos stay pending, retry next wave).`,
+				);
 				break;
 			}
 			callsUsed += 4;
@@ -193,7 +231,12 @@ async function main() {
 		}
 		console.log(line);
 		if (EXECUTE) {
-			await payload.update({ collection: "repos", id: doc.id, data, overrideAccess: true });
+			await payload.update({
+				collection: "repos",
+				id: doc.id,
+				data,
+				overrideAccess: true,
+			});
 		}
 	}
 
@@ -202,11 +245,17 @@ async function main() {
 	console.log(
 		`${EXECUTE ? "wrote" : "would write"}: ${scanned + errored + incomplete} docs (scanned=${scanned} error=${errored} incomplete=${incomplete}) · calls≈${callsUsed}${budgetStopped ? " · BUDGET-STOPPED" : ""}`,
 	);
-	console.log("tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)");
+	console.log(
+		"tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)",
+	);
 	if (lifts.length) {
-		console.log(`\npredicted repoScore lifts after next enrich run (top ${Math.min(12, lifts.length)}):`);
+		console.log(
+			`\npredicted repoScore lifts after next enrich run (top ${Math.min(12, lifts.length)}):`,
+		);
 		for (const l of lifts.slice(0, 12))
-			console.log(`   ${l.full.padEnd(44)} ${String(l.cur).padStart(3)} → ~${l.predicted}  (proof=${l.proof} depth=${l.depth.toFixed(2)})`);
+			console.log(
+				`   ${l.full.padEnd(44)} ${String(l.cur).padStart(3)} → ~${l.predicted}  (proof=${l.proof} depth=${l.depth.toFixed(2)})`,
+			);
 	}
 	process.exit(0);
 }
