@@ -5,25 +5,25 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
 import path from "path";
 import { buildConfig } from "payload";
-import { fileURLToPath } from "url";
 import sharp from "sharp";
-
+import { fileURLToPath } from "url";
+import { ApiUsage } from "./collections/ApiUsage";
 import { Blog } from "./collections/Blog";
 import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
 import { CommunitySkills } from "./collections/CommunitySkills";
 import { Entities } from "./collections/Entities";
-import { ApiUsage } from "./collections/ApiUsage";
 import { Hackathons } from "./collections/Hackathons";
 import { IdeaSubmissions } from "./collections/IdeaSubmissions";
+import { LinkChecks } from "./collections/LinkChecks";
 import { Media } from "./collections/Media";
-import { Partners } from "./collections/Partners";
 import { PartnerLeads } from "./collections/PartnerLeads";
-import { ResearchDocs } from "./collections/ResearchDocs";
-import { ScoutFeedback } from "./collections/ScoutFeedback";
+import { Partners } from "./collections/Partners";
 import { Projects } from "./collections/Projects";
 import { Repos } from "./collections/Repos";
+import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
+import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
@@ -69,9 +69,7 @@ export default buildConfig({
 				Logo: "./components/payload/Logo#Logo",
 				Icon: "./components/payload/Icon#Icon",
 			},
-			afterNavLinks: [
-				"./components/payload/AfterNavLinks#AfterNavLinks",
-			],
+			afterNavLinks: ["./components/payload/AfterNavLinks#AfterNavLinks"],
 		},
 	},
 	collections: [
@@ -87,6 +85,7 @@ export default buildConfig({
 		TransparencyLogs,
 		Carousel,
 		Hackathons,
+		LinkChecks,
 		IdeaSubmissions,
 		ApiUsage,
 		ResearchDocs,
@@ -126,7 +125,12 @@ export default buildConfig({
 					hidden: false,
 					group: "System",
 					useAsTitle: "taskSlug",
-					defaultColumns: ["taskSlug", "taskStatus", "createdAt", "completedAt"],
+					defaultColumns: [
+						"taskSlug",
+						"taskStatus",
+						"createdAt",
+						"completedAt",
+					],
 				},
 				labels: {
 					singular: "Sync Job",
@@ -151,7 +155,7 @@ export default buildConfig({
 		connectOptions: {
 			// MongoDB Atlas recommended options
 			retryWrites: true,
-			w: 'majority',
+			w: "majority",
 		},
 		// Disable file storage in MongoDB - files stored on disk in /media directory
 		// On Vercel (read-only filesystem), uploads will fail but admin panel works
