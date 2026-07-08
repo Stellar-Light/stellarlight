@@ -46,3 +46,7 @@ SCOUT_BASE=https://stellarlight.xyz pnpm exec tsx scripts/experiment-eval.ts  # 
 2. Wire the variant behind its flag (`defaultOn: false`) so it's testable via `?exp=<id>` without touching prod.
 3. Run `scripts/experiment-eval.ts` → it must **WIN** vs baseline on a ground-truth metric.
 4. **Graduate:** flip `defaultOn` → add the field/behavior to the OpenAPI contract → PR + merge. Or **kill** it and record why.
+
+## Lessons — the mistake corpus
+
+Every real defect we've shipped, filed by class with the guard that now catches it: [lessons/](./lessons/README.md). Walk the class table before shipping anything new.
