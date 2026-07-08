@@ -22,6 +22,21 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// Stellar); the record previously said "Stellar wallet" only.
 	lobstr:
 		"LOBSTR is a widely used non-custodial wallet for the Stellar and XRP Ledger (XRPL) networks, by Ultra Stellar, on iOS, Android, web and a browser extension. Users hold, send, receive, buy and swap XLM, USDC, XRP and network assets, make peer-to-peer payments, trade on the DEX/SDEX, use fiat on/off-ramps, and claim a federation address (username*lobstr.co). LOBSTR Vault adds multisig.",
+	// raven#8 / sls-018 (data half): the record described only the flagship
+	// Stablebonds product; Etherfuse FX — their Mexico USDC↔MXN on/off-ramp
+	// API (etherfuse/ramp-api-example; wholesale bps-level pricing per their
+	// public docs) — was invisible prose-wise. Multi-product companies get
+	// BOTH products named so neither is hidden behind the dominant one.
+	etherfuse:
+		"Etherfuse is a multi-product company on Stellar: it issues Stablebonds — tokenized government treasury bonds (Mexican CETES, US Treasuries and others) that give yield-bearing onchain exposure to sovereign debt and underpin treasury-management apps such as Bando — and operates Etherfuse FX, a Mexico fiat on/off-ramp API for programmatic USDC↔MXN conversion at wholesale bps-level pricing, built for wallets and apps to integrate.",
+};
+
+// raven#8 / sls-018 (data half): multi-product projects are indexable under
+// EVERY capability they demonstrably have, not a single dominant category.
+// ADDITIVE — merges into `types`, never removes. Grounded in the provider's
+// own products (Etherfuse FX = a live Mexico on/off-ramp API).
+const TYPES_ADD: Record<string, string[]> = {
+	etherfuse: ["Anchor"],
 };
 
 // sls-017 (durable half): chains a project supports, lowercase. Fill-if-empty —
@@ -133,6 +148,80 @@ async function main() {
 			slug: proj.slug,
 			data: { coverage: { countries, currencies, seps, asOf: ASOF } },
 		});
+	}
+
+	// ── raven#8 / sls-018: additive types for multi-product projects ──
+	console.log("\n── Types add (merge, never remove) ──");
+	for (const [slug, addTypes] of Object.entries(TYPES_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const existing: string[] = Array.isArray(d.types) ? d.types : [];
+		const missing = addTypes.filter((t) => !existing.includes(t));
+		if (!missing.length) {
+			console.log(`  ${slug}: types already include ${addTypes.join("/")}, skip`);
+			continue;
+		}
+		const next = [...existing, ...missing];
+		console.log(`  ${slug}: types [${existing.join(", ")}] → [${next.join(", ")}]`);
+		writes.push({ id: d.id, slug, data: { types: next } });
+	}
+
+	// ── raven#8 sweep (REPORT-ONLY): other dual-identity ramp providers ──
+	// Partners with anchor type / ramp capability whose matching PROJECT record
+	// lacks the Anchor type — the same pattern that hid Etherfuse. Prints
+	// candidates for owner review; add confirmed ones to TYPES_ADD. Never writes.
+	console.log("\n── Dual-identity sweep (report-only, no writes) ──");
+	{
+		const anchorsRes = await payload.find({
+			collection: "partner-accounts",
+			where: { status: { equals: "published" } },
+			limit: 300,
+			depth: 0,
+			overrideAccess: true,
+		});
+		let candidates = 0;
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const pt of anchorsRes.docs as any[]) {
+			const isRampCapable =
+				pt.partnerType === "anchor" ||
+				(Array.isArray(pt.rampTypes) && pt.rampTypes.length > 0);
+			if (!isRampCapable) continue;
+			const slugCands = [pt.slug, String(pt.slug).replace(/^anchor-/, "")];
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			let proj: any = null;
+			for (const slug of slugCands) {
+				const r = await payload.find({
+					collection: "projects",
+					where: { slug: { equals: slug } },
+					limit: 1,
+					depth: 0,
+					overrideAccess: true,
+				});
+				if (r.docs[0]) {
+					proj = r.docs[0];
+					break;
+				}
+			}
+			if (!proj) continue;
+			const types: string[] = Array.isArray(proj.types) ? proj.types : [];
+			if (types.includes("Anchor") || proj.category === "Anchor") continue;
+			candidates++;
+			console.log(
+				`  CANDIDATE ${proj.slug}: category=${proj.category} types=[${types.join(", ")}] ← partner ${pt.slug} (type=${pt.partnerType}, ramps=${(pt.rampTypes ?? []).join("/") || "-"})`,
+			);
+		}
+		if (!candidates) console.log("  (none — all ramp-capable partners' projects carry Anchor)");
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──

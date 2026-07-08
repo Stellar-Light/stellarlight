@@ -253,6 +253,20 @@ const COMPLIANCE_ENRICH: Record<string, Compliance> = {
 const FOUNDED_YEARS: Record<string, number> = {
 	// filled from research (cite-or-null)
 };
+
+/** raven#8 / sls-018 (data half): ramp capability for providers whose ramp is a
+ * PROPRIETARY API rather than SEP-6/24 — the stellar.toml enrichment can never
+ * pick those up, so they need a curated, grounded entry. Fill-if-empty on
+ * rampTypes; addAssets appends codes not already present (never removes).
+ * Grounding required per entry (the provider's own docs). */
+const RAMP_ENRICH: Record<
+	string,
+	{ rampTypes: ("on-ramp" | "off-ramp")[]; addAssets?: string[] }
+> = {
+	// Etherfuse FX: Mexico USDC↔MXN on/off-ramp API (etherfuse/ramp-api-example;
+	// their public docs + raven#8: bps-level pricing, both directions).
+	etherfuse: { rampTypes: ["on-ramp", "off-ramp"], addAssets: ["USDC"] },
+};
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -261,7 +275,8 @@ async function main() {
 		PILOT_SLUGS.length === 0 &&
 		Object.keys(PARTNER_ENRICH).length === 0 &&
 		Object.keys(URL_CORRECTIONS).length === 0 &&
-		Object.keys(FOUNDED_YEARS).length === 0
+		Object.keys(FOUNDED_YEARS).length === 0 &&
+		Object.keys(RAMP_ENRICH).length === 0
 	) {
 		console.error(
 			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS / FOUNDED_YEARS first (owner-confirmed only).",
@@ -386,6 +401,41 @@ async function main() {
 		if (e.country && !d.country) {
 			data.country = e.country;
 			notes.push(`country → ${e.country}`);
+		}
+		if (Object.keys(data).length === 0) {
+			console.log(`  ${d.name} (${slug}) — already complete, no-op`);
+			continue;
+		}
+		console.log(`  ${d.name} (${slug}) — ${notes.join(" · ")}`);
+		writes.push({ id: d.id, slug, data, note: notes.join(", ") });
+	}
+
+	// ── raven#8 / sls-018: ramp capability for proprietary-API ramps ──
+	console.log("\n── Ramp enrichment (fill-if-empty rampTypes; append assets) ──");
+	for (const [slug, e] of Object.entries(RAMP_ENRICH)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		const data: Record<string, unknown> = {};
+		const notes: string[] = [];
+		if (!Array.isArray(d.rampTypes) || d.rampTypes.length === 0) {
+			data.rampTypes = e.rampTypes;
+			notes.push(`rampTypes → ${e.rampTypes.join("/")}`);
+		}
+		if (e.addAssets?.length) {
+			// assets is an array of { code } rows; append codes not already present.
+			// biome-ignore lint/suspicious/noExplicitAny: Payload array-field rows
+			const rows: any[] = Array.isArray(d.assets) ? d.assets : [];
+			const have = new Set(
+				rows.map((r) => String(r?.code ?? "").toUpperCase()).filter(Boolean),
+			);
+			const add = e.addAssets.filter((c) => !have.has(c.toUpperCase()));
+			if (add.length) {
+				data.assets = [...rows, ...add.map((code) => ({ code }))];
+				notes.push(`assets += ${add.join("/")}`);
+			}
 		}
 		if (Object.keys(data).length === 0) {
 			console.log(`  ${d.name} (${slug}) — already complete, no-op`);
