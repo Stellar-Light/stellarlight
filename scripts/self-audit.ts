@@ -48,7 +48,11 @@ async function main() {
 	// 1. Liveness + shape — every public endpoint returns and carries data.
 	console.log("── Liveness + shape ──");
 	const endpoints: Array<{ path: string; listKey?: string; min: number }> = [
-		{ path: "/api/projects/search?q=stellar&limit=5", listKey: "projects", min: 1 },
+		{
+			path: "/api/projects/search?q=stellar&limit=5",
+			listKey: "projects",
+			min: 1,
+		},
 		{ path: "/api/repos/search?q=soroban&limit=5", listKey: "repos", min: 1 },
 		{ path: "/api/research?q=soroban&limit=3", listKey: "results", min: 1 },
 		{ path: "/api/partners?all=1&limit=100", listKey: "partners", min: 20 },
@@ -145,7 +149,11 @@ async function main() {
 		const proj = await j("/api/projects/search?q=blend&limit=5");
 		if ((proj.projects ?? []).some((p: { slug: string }) => p.slug === "blend"))
 			ok("projects: 'blend' resolves for q=blend");
-		else bad("projects ground truth", "known project 'blend' not found for q=blend");
+		else
+			bad(
+				"projects ground truth",
+				"known project 'blend' not found for q=blend",
+			);
 	} catch (err) {
 		bad("projects ground truth", `fetch failed: ${String(err)}`);
 	}
@@ -196,8 +204,9 @@ async function main() {
 			const d = await j(
 				`/api/projects/search?q=${encodeURIComponent(r.q)}&limit=${r.topK}`,
 			);
-			const names = (d.projects ?? []).map((p: { name?: string; slug?: string }) =>
-				`${p.name ?? ""} ${p.slug ?? ""}`.toLowerCase(),
+			const names = (d.projects ?? []).map(
+				(p: { name?: string; slug?: string }) =>
+					`${p.name ?? ""} ${p.slug ?? ""}`.toLowerCase(),
 			);
 			if (names.some((n: string) => n.includes(r.match)))
 				ok(`recall: '${r.match}' surfaces for "${r.q}"`);
@@ -209,6 +218,56 @@ async function main() {
 		} catch (err) {
 			bad(`recall: '${r.match}'`, `fetch failed: ${String(err)}`);
 		}
+	}
+
+	// 5. Advertised versions exist — every npm package version the LIVE changelog
+	//    names must actually be installable. Encodes the 2026-07-08 lesson: the
+	//    changelog listed scout-mcp@1.1.8 for ~1h while the publish was blocked on
+	//    an expired token — an agent reading the changelog in that window would
+	//    npm-install a 404. (SHIPPING.md verify-before-advertise, mechanized.)
+	console.log("\n── Advertised versions exist on npm ──");
+	try {
+		const cl = await j("/api/changelog");
+		const entries: Array<{ version?: string }> =
+			cl.changelog ?? cl.entries ?? [];
+		// Short names used by older entries → their scoped npm packages.
+		const SCOPE: Record<string, string> = {
+			"scout-mcp": "@stellar-light/scout-mcp",
+			"api-client": "@stellar-light/api-client",
+		};
+		const wanted = new Map<string, string>(); // "pkg@ver" → pkg,ver checked
+		for (const e of entries) {
+			if (!e.version) continue;
+			for (const tok of e.version.split(",").map((s) => s.trim())) {
+				// "openapi 1.6.1" is the SPEC version, not an npm package — skip.
+				if (!tok || tok.startsWith("openapi ")) continue;
+				const at = tok.lastIndexOf("@");
+				if (at <= 0) continue;
+				const name = SCOPE[tok.slice(0, at)] ?? tok.slice(0, at);
+				const ver = tok.slice(at + 1);
+				if (name.startsWith("@stellar-light/") && ver)
+					wanted.set(`${name}@${ver}`, "");
+			}
+		}
+		if (wanted.size === 0)
+			warn("advertised versions", "no npm versions named in changelog");
+		for (const key of wanted.keys()) {
+			const at = key.lastIndexOf("@");
+			const name = key.slice(0, at);
+			const ver = key.slice(at + 1);
+			const r = await fetch(
+				`https://registry.npmjs.org/${encodeURIComponent(name).replace("%2F", "/")}/${ver}`,
+				{ headers: { "user-agent": "stellarlight-self-audit" } },
+			);
+			if (r.ok) ok(`npm: ${key} installable`);
+			else
+				bad(
+					"advertised version missing",
+					`changelog names ${key} but the npm registry returns ${r.status} — published changelog must never advertise an uninstallable version (verify-before-advertise)`,
+				);
+		}
+	} catch (err) {
+		bad("advertised versions", `check failed: ${String(err)}`);
 	}
 
 	console.log(
