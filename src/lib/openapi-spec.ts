@@ -407,12 +407,6 @@ export const spec: OpenAPISpec = {
 									},
 								},
 							},
-							mainnetContractId: {
-								type: "string",
-								nullable: true,
-								description:
-									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address.",
-							},
 						},
 					},
 					"400": { description: "Missing q" },
@@ -1903,6 +1897,12 @@ export const spec: OpenAPISpec = {
 								items: { type: "string" },
 								description:
 									"Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs.",
+							},
+							mainnetContractId: {
+								type: "string",
+								nullable: true,
+								description:
+									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address.",
 							},
 						},
 					},

@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-09",
+		surfaces: ["api", "api-client"],
+		type: "fixed",
+		summary:
+			"Spec correction: `codeVerified.mainnetContractId` was mis-nested in the explainRepo response (a stray property under `content` instead of inside the schema — caught by spectral) and MISSING from the Repo component entirely. Now correctly placed in both; snapshot + client types regenerated.",
+		detail:
+			"No behavioral change to the live API — the served field was always correct; only the spec's description of it was wrong. Downstream catalogs regenerating from the spec pick up Repo.codeVerified.mainnetContractId as documented.",
+	},
+	{
 		date: "2026-07-08",
 		surfaces: ["api", "api-client"],
 		type: "added",

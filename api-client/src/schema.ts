@@ -802,6 +802,8 @@ export interface components {
                 scannedAt?: string | null;
                 /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
                 symbols?: string[];
+                /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
+                mainnetContractId?: string | null;
             } | null;
         };
         RepoSearchResponse: {
@@ -1036,8 +1038,6 @@ export interface operations {
                         /** @description Present when a repo routed but DeepWiki had no answer. */
                         note2?: string | null;
                     };
-                    /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
-                    mainnetContractId: unknown;
                 };
             };
             /** @description Missing q */

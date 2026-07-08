@@ -122,10 +122,24 @@ async function fetchStatus(url: string, ua?: string): Promise<number> {
  * persistent (bot-walls return both; a real browser usually loads the page).
  * 0/404/410/5xx = blocker.
  */
+// Hosts that bot-wall ALL datacenter traffic with inconsistent statuses
+// (x.com answers 200 to a residential IP and 400 to CI on the same minute) —
+// a CI probe can NEVER verify them, so an unreachable result is a warn, not a
+// blocker. Same conclusion the link-checker's `blocked` status encodes.
+const BOT_WALLED_HOSTS =
+	/^https?:\/\/(x\.com|twitter\.com|(www\.)?linkedin\.com|(www\.)?instagram\.com)\//i;
+
 async function checkUrl(url: string, source: string) {
 	checked++;
 	let status = await fetchStatus(url);
 	if (status >= 200 && status < 400) return;
+	if (BOT_WALLED_HOSTS.test(url)) {
+		warn(
+			url,
+			`HTTP ${status || "network-error"} from CI — bot-walled host, unverifiable from datacenter IPs; verify manually [${source}]`,
+		);
+		return;
+	}
 	if (status === 403 || status === 405 || status === 0) {
 		status = await fetchStatus(url, BROWSER_UA);
 		if (status >= 200 && status < 400) return;
