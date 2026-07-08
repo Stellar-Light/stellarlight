@@ -33,5 +33,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run codeDepth separation gate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The 66-label answer key needs ~1,300 GitHub calls; the built-in Actions
+          # token caps at 1,000/hr, which failed the 2026-07-08 run as INCONCLUSIVE
+          # (coverage gate — correctly: unfetched proves nothing). The PAT carries the
+          # account-wide 5,000/hr limit; read-only public fetches only.
+          GITHUB_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN || secrets.GITHUB_TOKEN }}
         run: pnpm exec tsx scripts/scan/depth-eval.ts
