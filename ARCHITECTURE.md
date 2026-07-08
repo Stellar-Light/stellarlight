@@ -39,7 +39,7 @@ Manual data triggers live in `scripts/` too (e.g. `scripts/refresh-github.ts` �
 
 ## Serving — the contract
 
-- REST under `src/app/api/**`; spec source `src/app/api/openapi.json/route.ts` → live at `/api/openapi.json`. Changelog `src/lib/changelog.ts` → `/api/changelog` (agent-readable; downstream automation ingests it).
+- REST under `src/app/api/**`; spec source `src/lib/openapi-spec.ts` → served at `/api/openapi.json`, snapshotted to `specs/openapi.json` (committed — PR diffs SHOW contract changes) and codegen'd into `api-client/src/schema.ts` via `pnpm contract:write`. Changelog `src/lib/changelog.ts` → `/api/changelog` (agent-readable; downstream automation ingests it).
 - `scout-mcp/` and `api-client/` are thin wrappers over the REST API, published to npm; the agent skill in `public/skills/` mirrors to the public `Stellar-Light/stellar-scout` repo.
 - Contract rules encoded from hard-won findings: structured fields over prose, status enums over ambiguous nulls, self-describing arrays (`placementRank`/`winnersRanked`), `asOf`/`computedAt` stamps, and tool descriptions treated as routing contracts.
 
@@ -50,7 +50,8 @@ Bulk writes only via scripts in `scripts/` (mostly `scripts/data/`) run through 
 ## Kept honest — the guards (`.github/workflows/`)
 
 - `self-audit.yml` — daily grounded checks against the **live** API (liveness, freshness thresholds, served-count sanity, ground-truth spot checks).
-- `api-drift.yml` — live API ⇄ OpenAPI ⇄ docs agreement.
+- `contract-gate.yml` — PR-time contract-as-code: the committed spec snapshot and generated client types must match the route's spec, and a spec change without a changelog entry fails. Silent contract drift is unmergeable.
+- `api-drift.yml` — live API ⇄ OpenAPI ⇄ docs agreement, incl. response FIELD coverage (every field a live row serves must be documented).
 - `depth-eval.yml` — codeDepth separation on the labeled answer key.
 - `content-freshness` + `verify-claims` — no stale CLI commands in authored content; no advertised-but-unshipped claims.
 - Experiments Lab (`src/lib/experiments.ts`, `/experiments`) — variants ship behind per-request flags (default off), graduate only after beating baseline on a ground-truth eval.
