@@ -25,6 +25,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the changelog-coupling step diffs against the PR
+          # base's merge-base, which a shallow clone can't resolve (exit 128).
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
       - uses: actions/setup-node@v4
