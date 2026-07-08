@@ -23,7 +23,9 @@
 		"test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
 		"test:watch": "vitest",
 		"cron:github": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec tsx scripts/refresh-github.ts",
-		"openapi:lint": "spectral lint https://stellarlight.xyz/api/openapi.json --ruleset .spectral.yaml --fail-severity=error"
+		"openapi:lint": "spectral lint https://stellarlight.xyz/api/openapi.json --ruleset .spectral.yaml --fail-severity=error",
+		"contract:write": "tsx scripts/contract/build-contract.ts",
+		"contract:check": "tsx scripts/contract/build-contract.ts --check"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.109.1",
@@ -105,7 +107,8 @@
 		"tsx": "^4.20.6",
 		"typescript": "5.7.3",
 		"vite-tsconfig-paths": "5.1.4",
-		"vitest": "3.2.3"
+		"vitest": "3.2.3",
+		"openapi-typescript": "^7.4.4"
 	},
 	"engines": {
 		"node": "24.12.0",

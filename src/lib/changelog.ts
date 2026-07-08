@@ -32,6 +32,13 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-08",
+		surfaces: ["api", "api-client"],
+		type: "added",
+		summary:
+			"Contract-as-code guarantee: the OpenAPI spec is now a committed snapshot (specs/openapi.json) and @stellar-light/api-client types are GENERATED from it; CI blocks any contract change that isn't announced in this changelog. Consumers can rely on: every schema/param/op change appears here, same release.",
+	},
+	{
+		date: "2026-07-08",
 		surfaces: ["mcp"],
 		version: "@stellar-light/scout-mcp@1.1.8",
 		type: "changed",

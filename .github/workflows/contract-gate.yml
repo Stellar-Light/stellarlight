@@ -1,0 +1,52 @@
+name: Contract gate
+
+# PR-time contract-as-code enforcement (the 2026-07-08 schema-drift lesson):
+#   1. specs/openapi.json (committed snapshot) must match the spec the route
+#      serves — a spec edit without the regenerated snapshot fails.
+#   2. api-client/src/schema.ts is GENERATED from the snapshot — mirror-drift
+#      is impossible; stale types fail.
+#   3. A snapshot change without a changelog entry fails — contract changes
+#      must be announced (downstream drift detectors classify from
+#      /api/changelog).
+# The daily live checks (api-drift.yml field coverage) remain the backstop
+# for data/deploy drift PR-time can't see.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: the changelog-coupling step diffs against the PR
+          # base's merge-base, which a shallow clone can't resolve (exit 128).
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Contract artifacts fresh (snapshot + generated client types)
+        run: pnpm contract:check
+      - name: Spec change requires a changelog entry
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=50
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          if echo "$CHANGED" | grep -qx "specs/openapi.json"; then
+            if ! echo "$CHANGED" | grep -qx "src/lib/changelog.ts"; then
+              echo "::error::specs/openapi.json changed without a changelog entry. Contract changes must be announced — add an entry to src/lib/changelog.ts in this PR."
+              exit 1
+            fi
+            echo "spec changed + changelog updated — OK"
+          else
+            echo "no contract change in this PR"
+          fi
