@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-08",
+		surfaces: ["api", "mcp", "api-client"],
+		type: "fixed",
+		summary:
+			"searchProjects now retrieves on STRUCTURED truth, not just prose. A record's `types` and curated `coverage` (countries/currencies/SEPs) are searchable + drive INCLUSION, so a generic 'Mexico on-ramp MXN' query surfaces Etherfuse (coverage MXN/Mexico; prose about Stablebonds) and 'DEX AMM swap liquidity pool' surfaces Sushi (type=DEX; desc says 'liquidity provision', not 'pool') (sls-018, sls-019).",
+		detail:
+			"Root cause: the candidate query + scoring read only name/description/category, so structured coverage — the exact fields built for corridor queries — was invisible to search, and a strict-AND near-miss dropped a category match for lacking one prose word. Fix (src/lib/project-search-match.ts, unit-tested): coverage values (+ implied anchor/ramp vocabulary for any covered record) and types/supportedNetworks fold into the searchable haystack; a project that IS the queried category or whose coverage serves a queried country/currency is admitted one match-tier looser (structured truth > one extra word); a corridor coverage hit under ramp intent bypasses the tier entirely. Precision-gated: the corridor bypass fires only on ramp/anchor intent + a literal coverage-value match, so topic queries don't over-recall. New known-item recall guard in the daily self-audit (scripts/self-audit.ts) asserts Etherfuse/Sushi/Soroswap stay retrievable — the class, not just the two instances.",
+	},
+	{
+		date: "2026-07-08",
 		surfaces: ["api", "api-client"],
 		version: "@stellar-light/api-client@1.4.0",
 		type: "added",
