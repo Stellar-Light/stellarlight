@@ -53,3 +53,6 @@ node_modules/
 src/app/(payload)/admin/importMap.js
 .claude/
 package-lock.json
+
+# Session scratch / debug output — never commit
+scratchpad/
