@@ -38,4 +38,5 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 1. An incident lands (sls item, tracker issue, demo feedback, our own audit).
 2. Fix it **and** identify the class. New class → new row + guard; existing class → ask why the guard missed it and strengthen it.
 3. Close the incident with reproducible probes; the guard keeps it fixed.
-4. Before shipping anything new, walk the table — the checklist is the "ahead of the curve" part.
+4. **Project the class forward**: ask "which OTHER surfaces have this same shape and haven't broken yet?" — file each projection as an entry in [/ideas/](../../ideas/) tagged `Projects from: class N`. This is the self-improving half of the loop: mistakes generate the improvement backlog before the next incident does.
+5. Before shipping anything new, walk the table — the checklist is the "ahead of the curve" part.
