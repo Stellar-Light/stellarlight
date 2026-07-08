@@ -1,16 +1,17 @@
-# docs/
+# docs/ — operating the app
 
-Deep documentation for Stellar Light. The root [README](../README.md) is the
-overview + "Start here" map; these are the details.
+This folder is for **running and administering the deployment** — nothing else. If you're here to understand or change the code, you want [ARCHITECTURE.md](../ARCHITECTURE.md) (mechanics) and the root [README](../README.md) ("Start here" map) instead.
 
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** — Vercel + MongoDB Atlas + Cloudflare R2 + cron setup, environment variables, and deployment troubleshooting.
-- **[ADMIN.md](./ADMIN.md)** — Payload admin workflows (approving projects, RSS feeds, cron jobs) and the one-off data imports.
-- **[COLLECTIONS.md](./COLLECTIONS.md)** — every Payload collection in detail.
-- **[SHIPPING.md](./SHIPPING.md)** — the ship-gate / claim-verification discipline (why we dry-run → review → execute, and never advertise unverified claims).
+| Doc | Read it when… |
+|---|---|
+| **[DEPLOYMENT.md](./DEPLOYMENT.md)** | you're standing up or debugging the deployment — Vercel, MongoDB Atlas, Cloudflare R2, cron jobs, env vars, and the troubleshooting runbook. |
+| **[ADMIN.md](./ADMIN.md)** | you're working in the Payload admin — approving submitted projects, managing RSS feeds, running the Airtable import, or checking the automated jobs. |
+| **[COLLECTIONS.md](./COLLECTIONS.md)** | you need the field-level detail of a Payload collection. |
 
-Related, elsewhere in the repo:
+Everything else lives where it belongs:
 
-- **[../improvements/](../improvements/)** — the live-services improvement backlog + the self-improvement loop.
-- **[../ideas/](../ideas/)** — proposals not yet committed.
-- **[/api/changelog](https://stellarlight.xyz/api/changelog)** — the live, agent-readable API changelog (source: `src/lib/changelog.ts`).
-- **[/api/openapi.json](https://stellarlight.xyz/api/openapi.json)** — the OpenAPI spec (source: `src/app/api/openapi.json/route.ts`).
+- **[/ARCHITECTURE.md](../ARCHITECTURE.md)** — how the data layer works, code-verified.
+- **[/SHIPPING.md](../SHIPPING.md)** — the ship-gate discipline (verify before advertising, the surface map).
+- **[/improvements/](../improvements/)** — the live-services improvement backlog + self-improvement loop.
+- **[/ideas/](../ideas/)** — proposals not yet committed.
+- **[/api/changelog](https://stellarlight.xyz/api/changelog)** — the live, agent-readable API changelog.

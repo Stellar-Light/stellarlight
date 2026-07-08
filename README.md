@@ -10,6 +10,7 @@ Depending on what you're here for:
 
 | You want… | Go to |
 |---|---|
+| **How it all works** (code-verified mechanics) | [ARCHITECTURE.md](./ARCHITECTURE.md) |
 | **The agent data layer** (endpoints an agent queries) | `src/app/api/**` · spec at [`/api/openapi.json`](https://stellarlight.xyz/api/openapi.json) |
 | **The repo code-truth scoring** (real-contract-vs-scaffold grading) | `src/lib/code-depth.ts`, `code-signals.ts`, `soroban-versions.ts` · scanner + gate in `scripts/scan/` |
 | **The published packages** | `scout-mcp/` (MCP), `api-client/` (typed client) |
@@ -99,7 +100,9 @@ Required env: `DATABASE_URI` (or `MONGODB_URI`), `PAYLOAD_SECRET` (≥32 chars),
 
 ## Documentation
 
-- **[docs/](./docs/)** ([index](./docs/README.md)) — deployment, admin, collections, and the ship-gate discipline.
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — how the data layer works: sources → collections → scoring → serving → guards.
+- **[SHIPPING.md](./SHIPPING.md)** — the ship-gate discipline (verify before advertising; the surface map).
+- **[docs/](./docs/)** ([index](./docs/README.md)) — operating the app: deployment, admin, collections.
 - **[improvements/](./improvements/)** — the live-services improvement backlog + self-improvement loop.
 - **[ideas/](./ideas/)** — proposals not yet committed.
 - **[/api/changelog](https://stellarlight.xyz/api/changelog)** — the live, agent-readable API changelog.
