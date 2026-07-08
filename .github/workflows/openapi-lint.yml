@@ -1,21 +1,34 @@
-# Spectral lint of the live OpenAPI spec — runs daily + on PRs so the spec
-# never regresses on its own hygiene rules (operationIds, tag-defined, etc.).
-# Complements scripts/check-api-drift.ts, which asserts live⇄spec agreement.
+# Spectral lint of the OpenAPI spec.
+#
+# Push/PR runs lint the COMMITTED SNAPSHOT (specs/openapi.json) — deterministic,
+# no race against the Vercel deploy (the old live-URL lint on push graded the
+# pre-deploy spec and false-failed, e.g. the 2026-07-08 19:55 run minutes after
+# the fix merged). The daily scheduled run lints the LIVE URL — that's the
+# serving check (catches a deploy that drifted from the repo).
+# Complements scripts/check-api-drift.ts (live⇄spec agreement) and
+# contract-gate.yml (snapshot freshness).
 name: OpenAPI lint
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 8 * * *"
+  pull_request:
+    paths:
+      - "src/lib/openapi-spec.ts"
+      - "specs/openapi.json"
+      - ".spectral.yaml"
   push:
     branches: [main]
     paths:
-      - "src/app/api/openapi.json/route.ts"
+      - "src/lib/openapi-spec.ts"
+      - "specs/openapi.json"
       - ".spectral.yaml"
 
 jobs:
   spectral:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,4 +36,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm openapi:lint
+      - name: Lint committed snapshot (push/PR) or live URL (schedule/manual)
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            pnpm openapi:lint
+          else
+            pnpm exec spectral lint specs/openapi.json --ruleset .spectral.yaml --fail-severity=error
+          fi
