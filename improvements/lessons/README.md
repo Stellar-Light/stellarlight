@@ -2,7 +2,7 @@
 
 Every real defect we've shipped, filed by **class**, with the mechanized guard that now catches it. The point is not the history — it's that each class is a **design checklist item**: when building any new endpoint, field, or surface, walk this table and ask "does the new thing reintroduce one of these?"
 
-Sources: Tyler's sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 18 items), our tracker issues, cold audits, user demo feedback, and our own gists/postmortems. New incidents get a row here (and a detail file when the story carries design weight) as part of closing them — same loop as filing the verification comment.
+Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 18 items), our tracker issues, cold audits, user demo feedback, and our own gists/postmortems. New incidents get a row here (and a detail file when the story carries design weight) as part of closing them — same loop as filing the verification comment.
 
 ## The classes
 
