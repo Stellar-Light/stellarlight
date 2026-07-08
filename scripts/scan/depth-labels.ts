@@ -23,6 +23,11 @@ export interface LabeledRepo {
 }
 
 export const DEEP: LabeledRepo[] = [
+	// v3 graduate (2026-07-08): breadth-gate sampling fix lifted 0.443 → 0.603.
+	{
+		fullName: "hoops-finance/contracts",
+		why: "Non-fork repo with Hoops' own implemented Soroban router + 4 AMM adapters + smart-account contracts (no stub bodies, per-adapter integration tests); project is SCF r29/30-funded ($150k, SDF-Verified) with a live produ...",
+	},
 	// ── 2026-07-08 label-mining expansion: 111-agent workflow (find → verify →
 	// adversarial refute) over audit corpus + SCF-delivered + template evidence;
 	// every row independently verified against the repo + external sources. ──
@@ -165,6 +170,15 @@ export const DEEP: LabeledRepo[] = [
 ];
 
 export const SHALLOW: LabeledRepo[] = [
+	// v3 graduates (2026-07-08): education/demo name markers now example-cap them.
+	{
+		fullName: "nrxschool/stellar-bootcamp",
+		why: "NearX School bootcamp course materials — Aula 1-5 syllabus with slide JPGs and hello_world/counter/flipper tutorial contracts; scaffold-by-design education repo, not a product.",
+	},
+	{
+		fullName: "warp-driver/oracle-demo",
+		why: 'Official WarpDrive tech-demo by its own README ("This repo is a tech-demo... reads top-to-bottom in one sitting") — testnet-only quickstart oracle example demonstrating the framework\'s cron/event triggers, not the p...',
+	},
 	// ── 2026-07-08 label-mining expansion (same verified batch) ──
 	{
 		fullName: "HatomProtocol/hatom-sc-proxies",
@@ -264,10 +278,6 @@ export const DEEP_FRONTIER: LabeledRepo[] = [
 		why: "Real Soroban router contract sources (Aqua/SoroSwap/Comet/Phoenix adapters + malicious-LP tests), Runtime Verification audit PDF committed in-repo (2025-04-28), SCF r33 $150k with product Live at stellar.broker",
 	},
 	{
-		fullName: "hoops-finance/contracts",
-		why: "Non-fork repo with Hoops' own implemented Soroban router + 4 AMM adapters + smart-account contracts (no stub bodies, per-adapter integration tests); project is SCF r29/30-funded ($150k, SDF-Verified) with a live produ...",
-	},
-	{
 		fullName: "axis-markets/orderbook",
 		why: "Real non-fork Soroban orderbook contract (soroban-sdk 26, substantive matching/settlement logic in src/orderbook.rs+trade.rs, full test suite, v0.4.0, active June 2026) by the StellarExpert team; SCF r40+r42 $136k dis...",
 	},
@@ -293,13 +303,4 @@ export const DEEP_FRONTIER: LabeledRepo[] = [
 	},
 ];
 
-export const SHALLOW_FRONTIER: LabeledRepo[] = [
-	{
-		fullName: "nrxschool/stellar-bootcamp",
-		why: "NearX School bootcamp course materials — Aula 1-5 syllabus with slide JPGs and hello_world/counter/flipper tutorial contracts; scaffold-by-design education repo, not a product.",
-	},
-	{
-		fullName: "warp-driver/oracle-demo",
-		why: 'Official WarpDrive tech-demo by its own README ("This repo is a tech-demo... reads top-to-bottom in one sitting") — testnet-only quickstart oracle example demonstrating the framework\'s cron/event triggers, not the p...',
-	},
-];
+export const SHALLOW_FRONTIER: LabeledRepo[] = [];
