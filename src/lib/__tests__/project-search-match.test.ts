@@ -108,3 +108,35 @@ describe("precision — structured admission does not over-recall", () => {
 		expect(corridorMatch(ETHERFUSE, tokens)).toBe(false);
 	});
 });
+
+describe("Beacon Q3 class — chain vocabulary + filler tokens", () => {
+	it("tokenize drops natural-question filler so it can't score", () => {
+		expect(tokenize("move tokens from Ethereum to Stellar")).toEqual([
+			"move",
+			"tokens",
+			"ethereum",
+		]);
+	});
+
+	it("'ethereum' reaches records that only say 'EVM' (and vice versa)", () => {
+		const bridge = {
+			name: "Allbridge",
+			shortDescription: "Cross-chain bridge between EVM chains and Stellar.",
+			category: "Protocol/Contract",
+			types: ["Bridge"],
+		};
+		const hay = buildHaystack(bridge);
+		expect(scoreTokens(hay, ["ethereum"])).toBe(1);
+		expect(scoreTokens(hay, ["evm"])).toBe(1);
+	});
+
+	it("'cctp' reaches Circle/USDC-vocabulary records", () => {
+		const hay = buildHaystack({
+			name: "Circle CCTP (Cross-Chain Transfer Protocol)",
+			shortDescription: "Native USDC transfers across chains by Circle.",
+			category: "Infrastructure",
+			types: ["Bridge"],
+		});
+		expect(scoreTokens(hay, ["cctp", "usdc"])).toBe(2);
+	});
+});

@@ -44,6 +44,16 @@ const TYPES_ADD: Record<string, string[]> = {
 const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	lobstr: ["stellar", "xrpl"],
 	"ultra-stellar": ["stellar", "xrpl"],
+	// Bridges (Beacon Q3 feedback: "how do I get EVM assets onto Stellar" must
+	// retrieve the actual routes). Grounded in each record's own curated
+	// description; "evm" is the umbrella users' chain-names map onto via the
+	// search synonym layer (ethereum/polygon/arbitrum → evm).
+	allbridge: ["stellar", "evm"],
+	"circle-cctp-cross-chain-transfer-protocol": ["stellar", "evm"],
+	axelar: ["stellar", "evm"],
+	rozo: ["stellar", "evm"],
+	spacewalk: ["stellar", "polkadot"],
+	zkcross: ["stellar", "evm"],
 };
 
 const ASOF = new Date().toISOString().slice(0, 10);
