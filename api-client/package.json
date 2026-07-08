@@ -16,11 +16,11 @@
   ],
   "homepage": "https://stellarlight.xyz/scout",
   "bugs": {
-    "url": "https://github.com/alexanderkoh/stellarlight/issues"
+    "url": "https://github.com/Stellar-Light/stellarlight/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alexanderkoh/stellarlight.git",
+    "url": "git+https://github.com/Stellar-Light/stellarlight.git",
     "directory": "api-client"
   },
   "license": "MIT",
