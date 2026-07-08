@@ -1,12 +1,29 @@
 "use client";
 
+import {
+	Building2,
+	ChevronDown,
+	Code2,
+	DollarSign,
+	Handshake,
+	Home,
+	Layers,
+	Lightbulb,
+	Menu,
+	MessageCircleQuestion,
+	Settings,
+	Sparkles,
+	Terminal,
+	Trophy,
+	Users,
+	X,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { Menu, X, Home, Settings, ChevronDown, Layers, Lightbulb, DollarSign, Building2, Trophy, Code2, Users, Sparkles, Terminal, MessageCircleQuestion, Handshake } from "lucide-react";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
 
 export function Navigation() {
 	const pathname = usePathname();
@@ -55,7 +72,7 @@ export function Navigation() {
 						"Content-Type": "application/json",
 					},
 				});
-				
+
 				// STRICT CHECK: Only set authenticated if:
 				// 1. Response is 200 OK
 				// 2. Response contains user data (could be direct user object or wrapped in 'user' property)
@@ -66,7 +83,7 @@ export function Navigation() {
 						// Payload might return user directly or wrapped in 'user' property
 						const user = data?.user || data;
 						// Check if we have valid user data with an ID
-						const hasValidUser = user && typeof user === 'object' && user.id;
+						const hasValidUser = user && typeof user === "object" && user.id;
 						setIsAuthenticated(hasValidUser);
 					} catch (parseError) {
 						// If we can't parse the response, assume not authenticated
@@ -82,10 +99,10 @@ export function Navigation() {
 				setIsAuthenticated(false);
 			}
 		};
-		
+
 		// Check immediately
 		checkAuth();
-		
+
 		// Re-check auth periodically to handle logout scenarios (every 2 minutes)
 		const interval = setInterval(checkAuth, 120000);
 		return () => clearInterval(interval);
@@ -104,22 +121,77 @@ export function Navigation() {
 		{
 			label: "Directory",
 			items: [
-				{ name: "Projects", href: "/directory", description: "Discover Stellar projects", icon: Layers },
-				{ name: "Partners", href: "/partners", description: "Anchors, ramps, auditors & infra to build with", icon: Handshake },
-				{ name: "Builders", href: "/builders", description: "Meet Stellar developers", icon: Users },
-				{ name: "Entities", href: "/entities", description: "Explore organizations", icon: Building2 },
-				{ name: "Hackathons", href: "/hackathons", description: "Ecosystem hackathon events", icon: Code2 },
+				{
+					name: "Projects",
+					href: "/directory",
+					description: "Discover Stellar projects",
+					icon: Layers,
+				},
+				{
+					name: "Partners",
+					href: "/partners",
+					description: "Anchors, ramps, auditors & infra to build with",
+					icon: Handshake,
+				},
+				{
+					name: "Builders",
+					href: "/builders",
+					description: "Meet Stellar developers",
+					icon: Users,
+				},
+				{
+					name: "Entities",
+					href: "/entities",
+					description: "Explore organizations",
+					icon: Building2,
+				},
+				{
+					name: "Hackathons",
+					href: "/hackathons",
+					description: "Ecosystem hackathon events",
+					icon: Code2,
+				},
 			],
 		},
 		{
 			label: "Build & Insights",
 			items: [
-				{ name: "Ask Stellar", href: "/ask", description: "Ask the ecosystem in natural language", icon: MessageCircleQuestion },
-				{ name: "Scout", href: "/scout", description: "AI skill for Stellar ecosystem research", icon: Sparkles },
-				{ name: "Skills", href: "/skills", description: "AI tool marketplace for Stellar builders", icon: Terminal },
-				{ name: "Ideas", href: "/ideas", description: "Browse RFPs & project ideas", icon: Lightbulb },
-				{ name: "Developer Activity", href: "/leaderboard", description: "Developer and ecosystem metrics", icon: Trophy },
-				{ name: "Stablecoin", href: "https://stablecoin.stellarlight.xyz/", description: "Stellar stablecoin explorer", icon: DollarSign },
+				{
+					name: "Ask Stellar",
+					href: "/ask",
+					description: "Ask the ecosystem in natural language",
+					icon: MessageCircleQuestion,
+				},
+				{
+					name: "Scout",
+					href: "/scout",
+					description: "AI skill for Stellar ecosystem research",
+					icon: Sparkles,
+				},
+				{
+					name: "Skills",
+					href: "/skills",
+					description: "AI tool marketplace for Stellar builders",
+					icon: Terminal,
+				},
+				{
+					name: "Ideas",
+					href: "/ideas",
+					description: "Browse RFPs & project ideas",
+					icon: Lightbulb,
+				},
+				{
+					name: "Developer Activity",
+					href: "/leaderboard",
+					description: "Developer and ecosystem metrics",
+					icon: Trophy,
+				},
+				{
+					name: "Stablecoin",
+					href: "https://stablecoin.stellarlight.xyz/",
+					description: "Stellar stablecoin explorer",
+					icon: DollarSign,
+				},
 			],
 		},
 	];
@@ -129,10 +201,10 @@ export function Navigation() {
 		<nav
 			className={cn(
 				"fixed left-0 w-screen z-50 border-b bg-[#171717] border-[#2F2F2F] transition-all duration-300 ease-in-out overflow-visible",
-				hasScrolled ? 'shadow-[0_1px_3px_rgba(0,0,0,0.3)]' : '',
-				isVisible ? 'translate-y-0' : '-translate-y-full'
+				hasScrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.3)]" : "",
+				isVisible ? "translate-y-0" : "-translate-y-full",
 			)}
-			style={{ top: 'var(--banner-height, 0px)' }}
+			style={{ top: "var(--banner-height, 0px)" }}
 		>
 			<div className="w-full max-w-6xl mx-auto flex h-16 items-center justify-between px-6">
 				<div>
@@ -165,7 +237,12 @@ export function Navigation() {
 							data-testid="nav-explore"
 						>
 							Explore
-							<ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", isExploreOpen && 'rotate-180')} />
+							<ChevronDown
+								className={cn(
+									"w-3.5 h-3.5 transition-transform duration-200",
+									isExploreOpen && "rotate-180",
+								)}
+							/>
 						</button>
 
 						{isExploreOpen && (
@@ -179,7 +256,7 @@ export function Navigation() {
 											<div className="space-y-0.5">
 												{group.items.map((item) => {
 													const Icon = item.icon;
-													const isExternal = item.href.startsWith('http');
+													const isExternal = item.href.startsWith("http");
 
 													const content = (
 														<div className="flex items-start gap-3">
@@ -281,11 +358,7 @@ export function Navigation() {
 				<div className="md:hidden border-t border-[#2F2F2F] animate-in slide-in-from-top duration-200">
 					<div className="px-6 py-3 space-y-1">
 						{exploreGroups.map((group, idx) => (
-							<details
-								key={group.label}
-								open={idx === 0}
-								className="group"
-							>
+							<details key={group.label} open={idx === 0} className="group">
 								<summary className="cursor-pointer list-none flex items-center justify-between px-3 py-2.5 rounded-lg text-xs uppercase tracking-wider text-[#A3A3A3] font-semibold hover:bg-white/5 active:bg-white/10 transition-colors">
 									<span>{group.label}</span>
 									<ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open:rotate-180" />
@@ -293,7 +366,7 @@ export function Navigation() {
 								<div className="space-y-0.5 pb-2">
 									{group.items.map((item) => {
 										const Icon = item.icon;
-										const isExternal = item.href.startsWith('http');
+										const isExternal = item.href.startsWith("http");
 
 										const content = (
 											<div className="flex items-center gap-3">

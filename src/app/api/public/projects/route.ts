@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "Payload not available" },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 
@@ -59,8 +59,7 @@ export async function GET(request: NextRequest) {
 	} catch (error) {
 		return NextResponse.json(
 			{ error: "Failed to fetch projects" },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 }
-

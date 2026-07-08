@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface SiteBannerProps {
 	message: string;
@@ -18,7 +18,11 @@ const colorMap = {
 	gray: "bg-gray-700 text-white",
 };
 
-export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProps) {
+export function SiteBanner({
+	message,
+	linkUrl,
+	backgroundColor,
+}: SiteBannerProps) {
 	const [isVisible, setIsVisible] = useState(true);
 	const [isMounted, setIsMounted] = useState(false);
 	const bannerRef = useRef<HTMLDivElement>(null);
@@ -40,24 +44,27 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 		if (!isMounted) return;
 
 		if (!isVisible) {
-			document.documentElement.style.setProperty('--banner-height', '0px');
+			document.documentElement.style.setProperty("--banner-height", "0px");
 			return;
 		}
 
 		const updateHeight = () => {
 			if (bannerRef.current) {
 				const height = bannerRef.current.offsetHeight;
-				document.documentElement.style.setProperty('--banner-height', `${height}px`);
+				document.documentElement.style.setProperty(
+					"--banner-height",
+					`${height}px`,
+				);
 			}
 		};
 
 		updateHeight();
 
 		// Re-measure on resize (text reflow may change height)
-		window.addEventListener('resize', updateHeight);
+		window.addEventListener("resize", updateHeight);
 		return () => {
-			window.removeEventListener('resize', updateHeight);
-			document.documentElement.style.setProperty('--banner-height', '0px');
+			window.removeEventListener("resize", updateHeight);
+			document.documentElement.style.setProperty("--banner-height", "0px");
 		};
 	}, [isVisible, isMounted]);
 
@@ -80,8 +87,8 @@ export function SiteBanner({ message, linkUrl, backgroundColor }: SiteBannerProp
 			ref={bannerRef}
 			className={`fixed top-0 left-0 right-0 z-[60] w-full ${bgColorClass} px-4 py-2`}
 			style={{
-				transform: 'translateZ(0)',
-				willChange: 'auto',
+				transform: "translateZ(0)",
+				willChange: "auto",
 			}}
 		>
 			<div className="container mx-auto flex items-center justify-between gap-3">

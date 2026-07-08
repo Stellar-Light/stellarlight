@@ -1,7 +1,7 @@
 "use client";
 
-import { useStellarTVL } from "@/hooks/useStellarTVL";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useStellarTVL } from "@/hooks/useStellarTVL";
 
 export default function StellarTVLDisplay() {
 	const { data: tvl, isLoading } = useStellarTVL();
@@ -24,4 +24,3 @@ export default function StellarTVLDisplay() {
 		</div>
 	);
 }
-

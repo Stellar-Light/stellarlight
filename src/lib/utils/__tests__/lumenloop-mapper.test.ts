@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-	mapLumenloopEntry,
 	extractEntryId,
 	type LumenloopEntry,
+	mapLumenloopEntry,
 } from "../lumenloop-mapper";
 
 describe("lumenloop-mapper", () => {
@@ -137,10 +137,7 @@ describe("lumenloop-mapper", () => {
 			const entry: LumenloopEntry = {
 				title: "Multi Repo",
 				links: {
-					github: [
-						"github.com/org/repo1",
-						"github.com/org/repo2",
-					],
+					github: ["github.com/org/repo1", "github.com/org/repo2"],
 				},
 			};
 			const { githubRepos, project } = mapLumenloopEntry(entry, "multi-repo");

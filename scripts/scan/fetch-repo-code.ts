@@ -8,8 +8,15 @@
  * (biggest files hold the real logic; thin mod/manifest lib.rs rank low),
  * Cargo.tomls on a SEPARATE budget so they never starve the source-file budget.
  */
-import { type Blob as SigBlob, type CodeFacts, detectStellarProof, type ScanInput, type StellarProof } from "../../src/lib/code-signals";
-import { type DepthBlob, type DepthInput } from "../../src/lib/code-depth";
+
+import type { DepthBlob, DepthInput } from "../../src/lib/code-depth";
+import {
+	type CodeFacts,
+	detectStellarProof,
+	type ScanInput,
+	type Blob as SigBlob,
+	type StellarProof,
+} from "../../src/lib/code-signals";
 
 export interface TreeEntry {
 	path: string;
@@ -35,7 +42,11 @@ export function createGh(token: string): Gh {
 	return async (url: string) => {
 		for (let attempt = 0; attempt < 4; attempt++) {
 			const res = await fetch(`https://api.github.com${url}`, {
-				headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "user-agent": "sl-code-scan" },
+				headers: {
+					authorization: `Bearer ${token}`,
+					accept: "application/vnd.github+json",
+					"user-agent": "sl-code-scan",
+				},
 			});
 			if (res.status === 403 || res.status === 429) {
 				// Distinguish a HARD rate limit (remaining=0) from a plain
@@ -64,7 +75,12 @@ export function createGh(token: string): Gh {
 	};
 }
 
-async function fetchBlob(gh: Gh, owner: string, name: string, sha: string): Promise<string | null> {
+async function fetchBlob(
+	gh: Gh,
+	owner: string,
+	name: string,
+	sha: string,
+): Promise<string | null> {
 	const res = await gh(`/repos/${owner}/${name}/git/blobs/${sha}`);
 	if (!res.ok) return null;
 	const j = await res.json();
@@ -82,26 +98,44 @@ export function selectDepthPaths(
 	tree: TreeEntry[],
 	cargoIsSoroban: Map<string, boolean>,
 ): { cargos: string[]; sources: string[]; tests: string[] } {
-	const rs = tree.filter((e) => e.type === "blob" && e.path.toLowerCase().endsWith(".rs"));
-	const cargos = tree.filter((e) => e.type === "blob" && e.path.toLowerCase().endsWith("cargo.toml"));
-	const sorobanCrateDirs = cargos.filter((c) => cargoIsSoroban.get(c.path)).map((c) => c.path.replace(/\/?Cargo\.toml$/i, ""));
-	const inSorobanCrate = (p: string) => sorobanCrateDirs.some((d) => (d ? p.startsWith(`${d}/src/`) : p.startsWith("src/")));
+	const rs = tree.filter(
+		(e) => e.type === "blob" && e.path.toLowerCase().endsWith(".rs"),
+	);
+	const cargos = tree.filter(
+		(e) => e.type === "blob" && e.path.toLowerCase().endsWith("cargo.toml"),
+	);
+	const sorobanCrateDirs = cargos
+		.filter((c) => cargoIsSoroban.get(c.path))
+		.map((c) => c.path.replace(/\/?Cargo\.toml$/i, ""));
+	const inSorobanCrate = (p: string) =>
+		sorobanCrateDirs.some((d) =>
+			d ? p.startsWith(`${d}/src/`) : p.startsWith("src/"),
+		);
 	// Test/fixture exclusion, path-segment precise. The old substring rules
 	// missed test-utils/ and inline src/tests.rs (templar's generated
 	// test-utils/src/pyth_price_id.rs ate a top-18 source slot) while WRONGLY
 	// excluding files like latest_prices.rs (substring "test_").
 	const isTest = (p: string) =>
-		/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(p) || // test-ish dirs
+		/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(
+			p,
+		) || // test-ish dirs
 		/_tests?(\/|\.rs$)/i.test(p) || // integration_test/, foo_test(s).rs
 		/(^|\/)tests?\.rs$/i.test(p) || // inline src/tests.rs
 		/(^|\/)test_[^/]*\.rs$/i.test(p) || // test_foo.rs
 		/\.test\./i.test(p);
 	// Generated/oversize sources waste slots: >400KB blobs fetch as null anyway
 	// (fetchBlob cap) and generated code isn't authored contract logic.
-	const isGenerated = (p: string) => /(generated|codegen|autogen)/i.test(p) || /\.pb\.rs$/i.test(p);
+	const isGenerated = (p: string) =>
+		/(generated|codegen|autogen)/i.test(p) || /\.pb\.rs$/i.test(p);
 
 	const sources = rs
-		.filter((e) => inSorobanCrate(e.path) && !isTest(e.path) && !isGenerated(e.path) && (e.size ?? 0) <= 400_000)
+		.filter(
+			(e) =>
+				inSorobanCrate(e.path) &&
+				!isTest(e.path) &&
+				!isGenerated(e.path) &&
+				(e.size ?? 0) <= 400_000,
+		)
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
 		.slice(0, 18)
 		.map((e) => e.path);
@@ -110,7 +144,9 @@ export function selectDepthPaths(
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
 		.slice(0, 3)
 		.map((e) => e.path);
-	const cargoPaths = cargos.filter((c) => cargoIsSoroban.get(c.path) || !c.path.includes("/")).map((c) => c.path);
+	const cargoPaths = cargos
+		.filter((c) => cargoIsSoroban.get(c.path) || !c.path.includes("/"))
+		.map((c) => c.path);
 	// Non-Rust relevance manifests: package.json/stellar.toml (JS/SEP-1) PLUS the
 	// other-language Stellar SDK manifests (Swift/Kotlin/Flutter/Go/Python) so
 	// code-signals can fire the lang-sdk proof instead of wrongly reading a
@@ -150,26 +186,71 @@ export interface RepoCodeResult {
 	contractCrates: number;
 }
 
-const TEMPLATE_NAME = /(hello[-_]?world|template|boilerplate|scaffold|quickstart|starter|example|tutorial)/i;
+/** Verify a README-claimed contract id actually exists on Stellar MAINNET via
+ * stellar.expert. Positive-only + fail-open: any network/API problem returns
+ * null (never penalizes). Guards: only strkey-shaped ids are probed, and the
+ * response must ECHO the requested id — the bare /contract/ endpoint answers
+ * 200 with a LIST, so status alone would false-verify an empty/garbage id. */
+export async function verifyMainnetContract(
+	readmeText: string | null,
+): Promise<string | null> {
+	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].slice(
+		0,
+		3,
+	);
+	for (const id of ids) {
+		try {
+			const ctrl = new AbortController();
+			const t = setTimeout(() => ctrl.abort(), 6000);
+			const res = await fetch(
+				`https://api.stellar.expert/explorer/public/contract/${id}`,
+				{
+					headers: { "user-agent": "sl-code-scan" },
+					signal: ctrl.signal,
+				},
+			);
+			clearTimeout(t);
+			if (!res.ok) continue;
+			const j = (await res.json()) as { contract?: string };
+			if (j?.contract === id) return id;
+		} catch {
+			// fail-open: unverifiable is not unverified-negative
+		}
+	}
+	return null;
+}
+
+const TEMPLATE_NAME =
+	/(hello[-_]?world|template|boilerplate|scaffold|quickstart|starter|example|tutorial)/i;
 
 /** Fetch a repo's code + derive everything the scoring/tiering needs. Read-only. */
-export async function fetchRepoCode(gh: Gh, full: string): Promise<RepoCodeResult | null> {
+export async function fetchRepoCode(
+	gh: Gh,
+	full: string,
+): Promise<RepoCodeResult | null> {
 	const [owner, name] = full.split("/");
 	if (!owner || !name) return null;
 	const meta = await (await gh(`/repos/${owner}/${name}`)).json();
 	if (!meta?.default_branch) return null;
 	const branch = meta.default_branch;
-	const treeRes = await (await gh(`/repos/${owner}/${name}/git/trees/${branch}?recursive=1`)).json();
-	const tree: TreeEntry[] = (treeRes.tree ?? []).map((t: { path: string; type: string; size?: number; sha: string }) => ({
-		path: t.path,
-		type: t.type === "blob" ? "blob" : t.type === "commit" ? "commit" : "tree",
-		size: t.size,
-		sha: t.sha,
-	}));
+	const treeRes = await (
+		await gh(`/repos/${owner}/${name}/git/trees/${branch}?recursive=1`)
+	).json();
+	const tree: TreeEntry[] = (treeRes.tree ?? []).map(
+		(t: { path: string; type: string; size?: number; sha: string }) => ({
+			path: t.path,
+			type:
+				t.type === "blob" ? "blob" : t.type === "commit" ? "commit" : "tree",
+			size: t.size,
+			sha: t.sha,
+		}),
+	);
 	if (!tree.length) return null;
 	const treeComplete = treeRes.truncated !== true; // GitHub caps huge trees → incomplete, never a false "none"
 
-	const cargos = tree.filter((e) => e.type === "blob" && e.path.toLowerCase().endsWith("cargo.toml"));
+	const cargos = tree.filter(
+		(e) => e.type === "blob" && e.path.toLowerCase().endsWith("cargo.toml"),
+	);
 	const cargoText = new Map<string, string>();
 	const cargoIsSoroban = new Map<string, boolean>();
 	for (const c of cargos.slice(0, 40)) {
@@ -181,20 +262,32 @@ export async function fetchRepoCode(gh: Gh, full: string): Promise<RepoCodeResul
 	const sel = selectDepthPaths(tree, cargoIsSoroban);
 	const shaByPath = new Map(tree.map((e) => [e.path, e.sha]));
 	const blobs: DepthBlob[] = [];
-	for (const p of sel.cargos) blobs.push({ path: p, text: cargoText.get(p) ?? null });
+	for (const p of sel.cargos)
+		blobs.push({ path: p, text: cargoText.get(p) ?? null });
 	for (const p of [...sel.sources, ...sel.tests]) {
 		const sha = shaByPath.get(p);
 		const txt = sha ? await fetchBlob(gh, owner, name, sha) : null;
 		blobs.push({ path: p, text: txt });
 	}
-	const contractCrateDirs = cargos.filter((c) => cargoIsSoroban.get(c.path)).map((c) => c.path.replace(/\/?Cargo\.toml$/i, "") || ".");
+	const contractCrateDirs = cargos
+		.filter((c) => cargoIsSoroban.get(c.path))
+		.map((c) => c.path.replace(/\/?Cargo\.toml$/i, "") || ".");
 
 	const readmeEntry = tree.find((e) => /^readme\.md$/i.test(e.path));
-	const readmeText = readmeEntry ? await fetchBlob(gh, owner, name, readmeEntry.sha) : null;
-	const tagsRes = await (await gh(`/repos/${owner}/${name}/tags?per_page=100`)).json();
+	const readmeText = readmeEntry
+		? await fetchBlob(gh, owner, name, readmeEntry.sha)
+		: null;
+	const mainnetContractId = await verifyMainnetContract(readmeText);
+	const tagsRes = await (
+		await gh(`/repos/${owner}/${name}/tags?per_page=100`)
+	).json();
 	const tagCount = Array.isArray(tagsRes) ? tagsRes.length : 0;
 
-	const sigBlobs: SigBlob[] = blobs.map((b) => ({ path: b.path, present: true, text: b.text }));
+	const sigBlobs: SigBlob[] = blobs.map((b) => ({
+		path: b.path,
+		present: true,
+		text: b.text,
+	}));
 	const scan: ScanInput = {
 		fullName: full,
 		blobs: sigBlobs,
@@ -211,6 +304,7 @@ export async function fetchRepoCode(gh: Gh, full: string): Promise<RepoCodeResul
 		blobs,
 		contractCrateDirs: contractCrateDirs.length ? contractCrateDirs : ["."],
 		scalars: {
+			mainnetContractId,
 			isFork: !!meta.fork,
 			parentFullName: meta.parent?.full_name ?? null,
 			releaseCount: 0,

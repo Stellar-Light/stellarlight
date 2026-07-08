@@ -50,7 +50,7 @@ export async function GET() {
 		const html = await response.text();
 
 		const nextDataMatch = html.match(
-			/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/
+			/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/,
 		);
 
 		if (nextDataMatch?.[1]) {
@@ -63,7 +63,7 @@ export async function GET() {
 			let tvl = 0;
 			if (aggregates) {
 				const distributedAsset = Object.values(aggregates).find(
-					(a: any) => a?.label === "Distributed Asset Value"
+					(a: any) => a?.label === "Distributed Asset Value",
 				) as any;
 
 				if (distributedAsset?.value && distributedAsset.value > 0) {
@@ -76,8 +76,10 @@ export async function GET() {
 			const totalAssets = network?.asset_count || 0;
 
 			const sorted = [...issuerStats]
-				.sort((a: any, b: any) =>
-					(b.bridged_token_value_dollar?.val || 0) - (a.bridged_token_value_dollar?.val || 0)
+				.sort(
+					(a: any, b: any) =>
+						(b.bridged_token_value_dollar?.val || 0) -
+						(a.bridged_token_value_dollar?.val || 0),
 				)
 				.slice(0, 5);
 
@@ -91,7 +93,7 @@ export async function GET() {
 			const EXACT_NAME_MAP: Record<string, string> = {
 				"Circle International": "Circle",
 				"Ondo USDY": "Ondo Finance",
-				"Ondo": "Ondo Finance",
+				Ondo: "Ondo Finance",
 				// Issuers that have non-zero bridged value in rwa.xyz's data
 				// but are excluded from their public top-N display. They're
 				// usually fund-level entities (registered but not actively
@@ -145,20 +147,41 @@ export async function GET() {
 
 			if (tvl > 0) {
 				cachedData = { tvl, topIssuers, totalAssets, timestamp: Date.now() };
-				return NextResponse.json({ tvl, topIssuers, totalAssets, cached: false });
+				return NextResponse.json({
+					tvl,
+					topIssuers,
+					totalAssets,
+					cached: false,
+				});
 			}
 		} else {
 			const billionMatch = html.match(/\$(\d+\.?\d*)\s*B/);
 			if (billionMatch?.[1]) {
 				const tvl = parseFloat(billionMatch[1]) * 1_000_000_000;
 				if (tvl > 0) {
-					cachedData = { tvl, topIssuers: [], totalAssets: 0, timestamp: Date.now() };
-					return NextResponse.json({ tvl, topIssuers: [], totalAssets: 0, cached: false });
+					cachedData = {
+						tvl,
+						topIssuers: [],
+						totalAssets: 0,
+						timestamp: Date.now(),
+					};
+					return NextResponse.json({
+						tvl,
+						topIssuers: [],
+						totalAssets: 0,
+						cached: false,
+					});
 				}
 			}
 		}
 
-		return NextResponse.json({ tvl: FALLBACK_TVL, topIssuers: FALLBACK_ISSUERS, totalAssets: 50, cached: false, fallback: true });
+		return NextResponse.json({
+			tvl: FALLBACK_TVL,
+			topIssuers: FALLBACK_ISSUERS,
+			totalAssets: 50,
+			cached: false,
+			fallback: true,
+		});
 	} catch (error) {
 		if (cachedData) {
 			return NextResponse.json({
@@ -169,6 +192,12 @@ export async function GET() {
 				fallback: true,
 			});
 		}
-		return NextResponse.json({ tvl: FALLBACK_TVL, topIssuers: FALLBACK_ISSUERS, totalAssets: 50, cached: true, fallback: true });
+		return NextResponse.json({
+			tvl: FALLBACK_TVL,
+			topIssuers: FALLBACK_ISSUERS,
+			totalAssets: 50,
+			cached: true,
+			fallback: true,
+		});
 	}
 }

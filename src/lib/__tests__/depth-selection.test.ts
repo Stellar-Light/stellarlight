@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { selectDepthPaths, type TreeEntry } from "../../../scripts/scan/fetch-repo-code";
+import {
+	selectDepthPaths,
+	type TreeEntry,
+} from "../../../scripts/scan/fetch-repo-code";
 
 // The SHARED path-selection unit (probe + scanner + eval all go through it).
 // These tests pin the test/fixture/generated/oversize exclusion rules — the
 // templar case (generated test-utils/src/pyth_price_id.rs ate a top-18 source
 // slot) and the OLD false-exclusion (substring "test_" matched latest_prices.rs).
 
-const blob = (path: string, size: number): TreeEntry => ({ path, type: "blob", size, sha: "x" });
+const blob = (path: string, size: number): TreeEntry => ({
+	path,
+	type: "blob",
+	size,
+	sha: "x",
+});
 
 const TREE: TreeEntry[] = [
 	blob("Cargo.toml", 400),

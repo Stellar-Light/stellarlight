@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
 import { useAuth } from "@payloadcms/ui";
+import type React from "react";
+import { useState } from "react";
 
 export const AirtableSyncButton: React.FC = () => {
 	const { user } = useAuth();
@@ -80,7 +81,8 @@ export const AirtableSyncButton: React.FC = () => {
 					fontSize: "14px",
 				}}
 			>
-				Import projects from Airtable. This will fetch all records from the configured Airtable base and create or update projects.
+				Import projects from Airtable. This will fetch all records from the
+				configured Airtable base and create or update projects.
 			</p>
 			<button
 				onClick={handleSync}
@@ -113,7 +115,9 @@ export const AirtableSyncButton: React.FC = () => {
 							? "rgba(16, 185, 129, 0.1)"
 							: "rgba(239, 68, 68, 0.1)",
 						border: `1px solid ${
-							result.success ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"
+							result.success
+								? "rgba(16, 185, 129, 0.3)"
+								: "rgba(239, 68, 68, 0.3)"
 						}`,
 						borderRadius: "4px",
 					}}
@@ -131,7 +135,9 @@ export const AirtableSyncButton: React.FC = () => {
 								✓ Import Completed Successfully
 							</p>
 							{result.stats && (
-								<div style={{ fontSize: "13px", color: "var(--theme-text-muted)" }}>
+								<div
+									style={{ fontSize: "13px", color: "var(--theme-text-muted)" }}
+								>
 									<p style={{ margin: "4px 0" }}>
 										Inserted: <strong>{result.stats.inserted || 0}</strong>
 									</p>
@@ -159,4 +165,3 @@ export const AirtableSyncButton: React.FC = () => {
 		</div>
 	);
 };
-

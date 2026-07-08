@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Trophy, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import {
 	Carousel,
+	type CarouselApi,
 	CarouselContent,
 	CarouselItem,
-	type CarouselApi,
 } from "@/components/ui/carousel";
 import {
-	LATEST_WINNERS,
 	getWinnerLink,
+	LATEST_WINNERS,
 	type RecentWinner,
 } from "@/data/recent-hackathon-winners";
 

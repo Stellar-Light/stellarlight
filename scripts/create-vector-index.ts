@@ -9,6 +9,7 @@
 // installed), AND so it works in both local dev (hoisted pnpm store) and
 // CI (clean checkout where lockfile resolution picks the same version).
 import { createRequire } from "node:module";
+
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
 const { MongoClient } = req("mongodb") as any;
@@ -45,9 +46,13 @@ async function main() {
 		const existing = await coll.listSearchIndexes().toArray();
 		console.log(`  found ${existing.length} search index(es):`);
 		for (const idx of existing) {
-			console.log(`    - ${idx.name} (${idx.type ?? "search"}) — ${idx.status ?? "?"}`);
+			console.log(
+				`    - ${idx.name} (${idx.type ?? "search"}) — ${idx.status ?? "?"}`,
+			);
 		}
-		if (existing.find((i: { name: string }) => i.name === "research_vector_index")) {
+		if (
+			existing.find((i: { name: string }) => i.name === "research_vector_index")
+		) {
 			console.log("\n✅ research_vector_index already exists. Nothing to do.");
 			await client.close();
 			return;

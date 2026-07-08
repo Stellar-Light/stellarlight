@@ -13,9 +13,9 @@
  * touched — those are all read by live surfaces.
  */
 
+import config from "@payload-config";
 import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-import config from "@payload-config";
 
 loadEnv({ path: ".env.local" });
 
@@ -24,7 +24,9 @@ const PRUNE_DAYS = Number(process.env.PRUNE_DAYS ?? "30");
 
 // biome-ignore lint/suspicious/noExplicitAny: reaching the raw mongo handle
 function rawDb(payload: any): any {
-	return payload?.db?.connection?.db ?? payload?.db?.connections?.[0]?.db ?? null;
+	return (
+		payload?.db?.connection?.db ?? payload?.db?.connections?.[0]?.db ?? null
+	);
 }
 
 const DAY = 86_400_000;
@@ -38,9 +40,18 @@ async function main() {
 	}
 
 	const names = [
-		"transparency-logs", "research-docs", "projects", "repos", "signals",
-		"api-usage", "media", "builders", "scout-feedback", "hackathons",
-		"entities", "partner-accounts",
+		"transparency-logs",
+		"research-docs",
+		"projects",
+		"repos",
+		"signals",
+		"api-usage",
+		"media",
+		"builders",
+		"scout-feedback",
+		"hackathons",
+		"entities",
+		"partner-accounts",
 	];
 	console.log("collection            docs        dataMB   storageMB");
 	for (const n of names) {
@@ -63,16 +74,22 @@ async function main() {
 	const total = await logs.countDocuments({});
 	const counts: Record<string, number> = {};
 	for (const d of [7, 30, 90]) {
-		counts[`>${d}d`] = await logs.countDocuments({ timestamp: { $lt: new Date(Date.now() - d * DAY) } });
+		counts[`>${d}d`] = await logs.countDocuments({
+			timestamp: { $lt: new Date(Date.now() - d * DAY) },
+		});
 	}
 	console.log(
 		`\n  transparency-logs: ${total} total · older-than: 7d=${counts[">7d"]}  30d=${counts[">30d"]}  90d=${counts[">90d"]}`,
 	);
-	console.log(`  (a --prune-logs run at PRUNE_DAYS=${PRUNE_DAYS} would delete ${counts[`>${PRUNE_DAYS}d`] ?? "?"} rows)`);
+	console.log(
+		`  (a --prune-logs run at PRUNE_DAYS=${PRUNE_DAYS} would delete ${counts[`>${PRUNE_DAYS}d`] ?? "?"} rows)`,
+	);
 
 	if (PRUNE_LOGS) {
 		const cutoff = new Date(Date.now() - PRUNE_DAYS * DAY);
-		console.log(`\nPruning transparency-logs older than ${PRUNE_DAYS}d (< ${cutoff.toISOString()}) ...`);
+		console.log(
+			`\nPruning transparency-logs older than ${PRUNE_DAYS}d (< ${cutoff.toISOString()}) ...`,
+		);
 		const res = await logs.deleteMany({ timestamp: { $lt: cutoff } });
 		console.log(`  ✓ deleted ${res.deletedCount} transparency-log rows`);
 		const after = await db.stats();

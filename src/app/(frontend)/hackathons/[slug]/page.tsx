@@ -1,19 +1,19 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { getPayloadSafe } from "@/lib/payload-client";
 import {
+	Activity,
 	ArrowLeft,
 	Calendar,
+	CheckCircle2,
+	Clock,
 	ExternalLink,
 	Trophy,
-	Activity,
-	CheckCircle2,
 	XCircle,
-	Clock,
 } from "lucide-react";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 
@@ -228,7 +228,8 @@ function WinnerCard({ p }: { p: any }) {
 			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
 				{p.hackathonPrize ? (
 					<span className="inline-flex items-center gap-1 text-foreground font-semibold">
-						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />${p.hackathonPrize.toLocaleString()}
+						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />$
+						{p.hackathonPrize.toLocaleString()}
 					</span>
 				) : (
 					<span className="text-muted-foreground">Prize awarded</span>

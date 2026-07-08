@@ -59,7 +59,10 @@ export async function askDeepWiki(
 				jsonrpc: "2.0",
 				id: 1,
 				method: "tools/call",
-				params: { name: "ask_question", arguments: { repoName: repo, question } },
+				params: {
+					name: "ask_question",
+					arguments: { repoName: repo, question },
+				},
 			}),
 			signal: ctrl.signal,
 		});
@@ -68,7 +71,9 @@ export async function askDeepWiki(
 		const env = parseSse(await res.text()) as any;
 		if (!env?.result || env.result.isError) return null;
 		const text: string | null =
-			env.result.structuredContent?.result ?? env.result.content?.[0]?.text ?? null;
+			env.result.structuredContent?.result ??
+			env.result.content?.[0]?.text ??
+			null;
 		if (!text || !text.trim()) return null;
 		// DeepWiki signals "repo not indexed" / internal failures as a NORMAL text
 		// answer (not isError), so a naive caller would surface the error string as
@@ -84,7 +89,9 @@ export async function askDeepWiki(
 		const m = text.match(/View this search on DeepWiki:\s*(\S+)/);
 		// Strip the trailing "Wiki pages..." + "View this search..." footer from
 		// the answer body; expose the permalink separately as searchUrl.
-		const answer = text.split(/\n+Wiki pages you might want to explore:/)[0].trim();
+		const answer = text
+			.split(/\n+Wiki pages you might want to explore:/)[0]
+			.trim();
 		return { repo, answer: answer || text.trim(), searchUrl: m ? m[1] : null };
 	} catch {
 		return null;

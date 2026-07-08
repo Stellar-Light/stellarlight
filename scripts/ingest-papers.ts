@@ -11,19 +11,20 @@
  *   npx tsx scripts/ingest-papers.ts --execute   # write to Payload
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
+// pdf-parse 2.x ships a `PDFParse` class via CJS; pull it through createRequire
+import { createRequire } from "node:module";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	loadExistingChunks,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
-// pdf-parse 2.x ships a `PDFParse` class via CJS; pull it through createRequire
-import { createRequire } from "node:module";
 const cjsRequire = createRequire(import.meta.url);
 const { PDFParse } = cjsRequire("pdf-parse") as {
 	PDFParse: new (opts: {
@@ -154,6 +155,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((e) => {
-	console.error("FATAL:", e);
-	process.exit(1);
-});
+		console.error("FATAL:", e);
+		process.exit(1);
+	});

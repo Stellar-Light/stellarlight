@@ -115,9 +115,7 @@ async function loadSkills(): Promise<UnifiedSkill[]> {
 					.map((c) => c.agent)
 					.filter((x): x is string => !!x),
 				targetUser: d.targetUser,
-				tags: (d.tags ?? [])
-					.map((t) => t.tag)
-					.filter((x): x is string => !!x),
+				tags: (d.tags ?? []).map((t) => t.tag).filter((x): x is string => !!x),
 			}));
 		} catch {
 			community = [];

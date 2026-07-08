@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
 
 /**
  * Relevance scoring algorithm for projects.
@@ -55,20 +55,18 @@ function scoreProject(
 		wisdomtree: 20_000_000, // WisdomTree tokenized funds
 	};
 
-	let tvlMatch =
-		MANUAL_TVL[projectNameLower]
-			? { tvl: MANUAL_TVL[projectNameLower], slug: projectNameLower }
-			: ctx.stellarProtocols.get(projectNameLower) ||
-				ctx.stellarProtocols.get(
-					projectNameLower.replace(/\s+/g, "-").toLowerCase(),
-				);
+	let tvlMatch = MANUAL_TVL[projectNameLower]
+		? { tvl: MANUAL_TVL[projectNameLower], slug: projectNameLower }
+		: ctx.stellarProtocols.get(projectNameLower) ||
+			ctx.stellarProtocols.get(
+				projectNameLower.replace(/\s+/g, "-").toLowerCase(),
+			);
 
 	if (!tvlMatch) {
 		let bestTvl = 0;
 		for (const [key, value] of ctx.stellarProtocols.entries()) {
 			if (
-				(key.startsWith(projectNameLower) ||
-					key.includes(projectNameLower)) &&
+				(key.startsWith(projectNameLower) || key.includes(projectNameLower)) &&
 				value.tvl > bestTvl
 			) {
 				tvlMatch = value;
@@ -91,9 +89,7 @@ function scoreProject(
 	// --- GitHub activity (0-25) ---
 	if (signal?.github) {
 		const gh = signal.github;
-		const lastActivity = gh.lastActivityAt
-			? new Date(gh.lastActivityAt)
-			: null;
+		const lastActivity = gh.lastActivityAt ? new Date(gh.lastActivityAt) : null;
 
 		if (lastActivity) {
 			const daysSince =
@@ -150,22 +146,52 @@ function scoreProject(
 	if (project.featured) score += 5;
 
 	// --- Core wallet boost — primary user-facing Stellar wallets ---
-	const TOP_WALLETS = new Set(["freighter", "lobstr", "xbull", "xbull wallet", "albedo"]);
+	const TOP_WALLETS = new Set([
+		"freighter",
+		"lobstr",
+		"xbull",
+		"xbull wallet",
+		"albedo",
+	]);
 	const CORE_WALLETS = new Set([
-		"hana", "hana wallet", "ledger", "trezor", "onekey", "bitget", "klever",
+		"hana",
+		"hana wallet",
+		"ledger",
+		"trezor",
+		"onekey",
+		"bitget",
+		"klever",
 	]);
 	if (TOP_WALLETS.has(projectNameLower)) score += 18;
 	else if (CORE_WALLETS.has(projectNameLower)) score += 15;
 
 	// --- Payments boost — major payment rails on Stellar ---
 	const TOP_PAYMENTS = new Set([
-		"moneygram", "circle", "flutterwave", "yellow card", "wave",
-		"clickpesa", "cowrie", "beans", "vesseo",
+		"moneygram",
+		"circle",
+		"flutterwave",
+		"yellow card",
+		"wave",
+		"clickpesa",
+		"cowrie",
+		"beans",
+		"vesseo",
 	]);
 	const CORE_PAYMENTS = new Set([
-		"fonbnk", "nala", "afriex", "decaf", "chippercash", "ripio",
-		"lemon", "tala", "coins.ph", "boss revolution", "felix pago",
-		"wirex pay", "zebec", "transfermole",
+		"fonbnk",
+		"nala",
+		"afriex",
+		"decaf",
+		"chippercash",
+		"ripio",
+		"lemon",
+		"tala",
+		"coins.ph",
+		"boss revolution",
+		"felix pago",
+		"wirex pay",
+		"zebec",
+		"transfermole",
 	]);
 	const types: string[] = project.types || [];
 	const isPayment = types.includes("Payments");
@@ -225,8 +251,7 @@ export async function GET(request: NextRequest) {
 	// Map signals by project ID
 	const signalsByProject = new Map<string, any>();
 	for (const s of allSignals) {
-		const projectId =
-			typeof s.project === "string" ? s.project : s.project?.id;
+		const projectId = typeof s.project === "string" ? s.project : s.project?.id;
 		if (projectId) signalsByProject.set(projectId, s);
 	}
 

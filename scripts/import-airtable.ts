@@ -1,9 +1,9 @@
 import "dotenv/config";
-import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getPayload } from "payload";
+import configPromise from "../src/payload.config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -143,7 +143,7 @@ function extractImageUrl(logoField: string): string | null {
 
 // Extract filename from logo field
 function extractFilename(logoField: string): string {
-	const match = logoField.match(/^([^\(]+)/);
+	const match = logoField.match(/^([^(]+)/);
 	const filename = match ? match[1].trim() : "logo.png";
 	return filename;
 }
@@ -165,8 +165,7 @@ async function downloadImage(
 			return null;
 		}
 
-		const contentType =
-			response.headers.get("content-type") || "image/png";
+		const contentType = response.headers.get("content-type") || "image/png";
 		const arrayBuffer = await response.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
@@ -245,7 +244,7 @@ async function run() {
 				continue;
 			}
 
-					// Upload logo if available
+			// Upload logo if available
 			let logoId: string | null = null;
 			const logoUrl = extractImageUrl(row.logo);
 
@@ -254,10 +253,7 @@ async function run() {
 				if (imageData) {
 					try {
 						const originalFilename = extractFilename(row.logo);
-						const ext = getExtension(
-							imageData.contentType,
-							originalFilename,
-						);
+						const ext = getExtension(imageData.contentType, originalFilename);
 						const safeFilename = `${row.slug}-logo${ext}`;
 
 						// Create media entry using Payload's upload
@@ -282,15 +278,13 @@ async function run() {
 			}
 
 			// Determine category
-			const category =
-				categoryMapping[row.labelCategory] || "User-Facing App";
+			const category = categoryMapping[row.labelCategory] || "User-Facing App";
 
 			// Determine types
 			const types = typeMapping[row.labelCategory] || ["Other"];
 
 			// Determine status
-			let status: "Draft" | "Development" | "Pre-Release" | "Live" =
-				"Live";
+			let status: "Draft" | "Development" | "Pre-Release" | "Live" = "Live";
 			if (row.comingSoon) {
 				status = "Development";
 			}
@@ -333,7 +327,9 @@ async function run() {
 		}
 	}
 
-	console.log(`Import Summary: ${created} created, ${skipped} skipped, ${errors} errors`);
+	console.log(
+		`Import Summary: ${created} created, ${skipped} skipped, ${errors} errors`,
+	);
 }
 
 run()
@@ -341,7 +337,9 @@ run()
 		process.exit(0);
 	})
 	.catch((err) => {
-		console.error("Import failed:", err instanceof Error ? err.message : String(err));
+		console.error(
+			"Import failed:",
+			err instanceof Error ? err.message : String(err),
+		);
 		process.exit(1);
 	});
-

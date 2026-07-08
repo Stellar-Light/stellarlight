@@ -98,9 +98,9 @@ describe("precision — structured admission does not over-recall", () => {
 		const tokens = tokenize("gaming nft mint");
 		expect(isRampIntent(tokens)).toBe(false);
 		// Etherfuse has coverage but the query has no ramp intent → not a hit.
-		expect(structuredHit(ETHERFUSE, intentTypesFor(tokens), tokens, false)).toBe(
-			false,
-		);
+		expect(
+			structuredHit(ETHERFUSE, intentTypesFor(tokens), tokens, false),
+		).toBe(false);
 	});
 
 	it("a covered anchor still isn't a hit for an unrelated corridor", () => {

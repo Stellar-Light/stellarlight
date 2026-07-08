@@ -22,9 +22,8 @@ interface SearchResult {
 function applyTypeFilter(baseWhere: any, typeFilter?: string) {
 	if (!typeFilter || typeFilter === "all") return;
 
-	const typeValues = typeFilter === "Payments"
-		? ["Payments", "Payment Rail"]
-		: [typeFilter];
+	const typeValues =
+		typeFilter === "Payments" ? ["Payments", "Payment Rail"] : [typeFilter];
 	baseWhere.types = { in: typeValues };
 }
 
@@ -87,12 +86,16 @@ export async function rankedProjectSearch(
 		const aName = a.name?.toLowerCase() || "";
 		const bName = b.name?.toLowerCase() || "";
 
-		const aScore = aName.startsWith(lowerQuery) ? 2
-			: aName.includes(lowerQuery) ? 1
-			: 0;
-		const bScore = bName.startsWith(lowerQuery) ? 2
-			: bName.includes(lowerQuery) ? 1
-			: 0;
+		const aScore = aName.startsWith(lowerQuery)
+			? 2
+			: aName.includes(lowerQuery)
+				? 1
+				: 0;
+		const bScore = bName.startsWith(lowerQuery)
+			? 2
+			: bName.includes(lowerQuery)
+				? 1
+				: 0;
 
 		return bScore - aScore;
 	});

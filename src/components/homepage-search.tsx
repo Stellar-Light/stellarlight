@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import { Select } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Select } from "@/components/ui/select";
 
 const categories = [
 	{ id: "all", label: "All Categories" },
@@ -46,7 +46,10 @@ export function HomepageSearch() {
 	};
 
 	return (
-		<form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+		<form
+			onSubmit={handleSearchSubmit}
+			className="flex flex-col md:flex-row gap-4 items-stretch md:items-center"
+		>
 			<div className="relative w-full md:max-w-[600px]">
 				<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
 				<input
@@ -72,4 +75,3 @@ export function HomepageSearch() {
 		</form>
 	);
 }
-

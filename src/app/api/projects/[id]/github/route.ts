@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import configPromise from "@/payload.config";
 import { getPayload } from "payload";
 import { fetchRepoInfo } from "@/lib/github";
+import configPromise from "@/payload.config";
 
 export async function GET(
 	_: Request,
@@ -45,9 +45,7 @@ export async function GET(
 		);
 		const cachedReposKey = cached?.github?.repos
 			? JSON.stringify(
-					cached.github.repos
-						.map((r: any) => `${r.owner}/${r.name}`)
-						.sort(),
+					cached.github.repos.map((r: any) => `${r.owner}/${r.name}`).sort(),
 				)
 			: null;
 
@@ -55,8 +53,7 @@ export async function GET(
 
 		const fresh =
 			cached?.fetchedAt &&
-			Date.now() - new Date(cached.fetchedAt).getTime() <
-				6 * 60 * 60 * 1000 && // 6h
+			Date.now() - new Date(cached.fetchedAt).getTime() < 6 * 60 * 60 * 1000 && // 6h
 			!reposChanged; // Also invalidate if repos changed
 
 		if (cached && fresh) {
@@ -143,4 +140,3 @@ export async function GET(
 
 	return NextResponse.json(payloadDoc);
 }
-

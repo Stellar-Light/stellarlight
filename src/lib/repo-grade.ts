@@ -104,7 +104,10 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// review: a 5/5 (judge 1.0) becomes a strong reference even at 0 stars; a
 	// 1/5 caps it low. Take the better of heuristic vs judge-driven so a repo
 	// that's BOTH judged-high and has traction can still climb past judged-only.
-	if (typeof input.judgeScore === "number" && Number.isFinite(input.judgeScore)) {
+	if (
+		typeof input.judgeScore === "number" &&
+		Number.isFinite(input.judgeScore)
+	) {
 		const j = Math.max(0, Math.min(1, input.judgeScore));
 		const judgeDriven = 0.05 + 0.8 * j; // 0 → 0.05, 1 → 0.85
 		composite = Math.max(composite, judgeDriven);

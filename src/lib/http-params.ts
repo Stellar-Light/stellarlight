@@ -8,7 +8,11 @@
  * clampLimit: absent / non-numeric / < 1 -> default; otherwise floor + clamp
  * into [1, max]. Deterministic and safe to slice with.
  */
-export function clampLimit(raw: string | null, def: number, max: number): number {
+export function clampLimit(
+	raw: string | null,
+	def: number,
+	max: number,
+): number {
 	const n = Math.floor(Number(raw));
 	if (!Number.isFinite(n) || n < 1) return def;
 	return Math.min(n, max);

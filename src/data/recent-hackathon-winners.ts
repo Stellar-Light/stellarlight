@@ -59,8 +59,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			placementLabel: "3rd Place",
 			projectName: "RenderGate",
 			builder: "tantk",
-			description:
-				"Website rendering for AI agents — pay per render via x402.",
+			description: "Website rendering for AI agents — pay per render via x402.",
 			prizeUsd: 1250,
 		},
 		{

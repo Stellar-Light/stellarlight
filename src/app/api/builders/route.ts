@@ -12,10 +12,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;

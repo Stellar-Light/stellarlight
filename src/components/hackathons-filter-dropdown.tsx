@@ -1,8 +1,8 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
 
 export interface FilterOption {
 	value: string;

@@ -19,13 +19,7 @@ export const CommunitySkills: CollectionConfig = {
 	slug: "community-skills",
 	admin: {
 		useAsTitle: "name",
-		defaultColumns: [
-			"name",
-			"status",
-			"kind",
-			"submittedBy",
-			"submittedAt",
-		],
+		defaultColumns: ["name", "status", "kind", "submittedBy", "submittedAt"],
 		group: "Scout",
 		description:
 			"Community-submitted AI skills for the Stellar marketplace. POST submissions land here as 'pending' — review and approve to publish.",
@@ -56,7 +50,8 @@ export const CommunitySkills: CollectionConfig = {
 			type: "text",
 			required: true,
 			admin: {
-				description: "Display name shown on the skill card (e.g. 'Soroban Audit Helper').",
+				description:
+					"Display name shown on the skill card (e.g. 'Soroban Audit Helper').",
 			},
 		},
 		{
@@ -105,7 +100,8 @@ export const CommunitySkills: CollectionConfig = {
 			type: "text",
 			required: true,
 			admin: {
-				description: 'Install command shown on the card (e.g. "npx skills add user/skill").',
+				description:
+					'Install command shown on the card (e.g. "npx skills add user/skill").',
 			},
 		},
 		{
@@ -164,7 +160,8 @@ export const CommunitySkills: CollectionConfig = {
 				{ name: "githubHandle", type: "text" },
 			],
 			admin: {
-				description: "Submitter contact info (collected on the submission form).",
+				description:
+					"Submitter contact info (collected on the submission form).",
 			},
 		},
 		{

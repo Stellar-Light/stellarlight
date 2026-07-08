@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 import { AskSearch } from "@/components/ask-search";
 
 export const metadata: Metadata = {
@@ -32,13 +32,17 @@ export default function AskPage() {
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Natural-language search over the live ecosystem index — projects, providers,
-						protocols, audits, SEPs, and dev docs. The same data layer our agents query, now
-						yours to ask directly.
+						Natural-language search over the live ecosystem index — projects,
+						providers, protocols, audits, SEPs, and dev docs. The same data
+						layer our agents query, now yours to ask directly.
 					</p>
 				</div>
 
-				<Suspense fallback={<div className="h-14 rounded-2xl bg-card border border-border animate-pulse" />}>
+				<Suspense
+					fallback={
+						<div className="h-14 rounded-2xl bg-card border border-border animate-pulse" />
+					}
+				>
 					<AskSearch />
 				</Suspense>
 			</main>

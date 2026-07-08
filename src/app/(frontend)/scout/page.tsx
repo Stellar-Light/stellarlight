@@ -350,10 +350,10 @@ export default async function ScoutPage() {
 
 					{/* Tight positioning paragraph */}
 					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
-						An AI tool for Stellar builders. Validate ideas, surface prior
-						art, and match open SCF-funded briefs — whether you're entering a
-						hackathon, applying for a grant, or shipping independently. Works
-						as a SKILL.md or an MCP server.
+						An AI tool for Stellar builders. Validate ideas, surface prior art,
+						and match open SCF-funded briefs — whether you're entering a
+						hackathon, applying for a grant, or shipping independently. Works as
+						a SKILL.md or an MCP server.
 					</p>
 
 					{/* Tabbed install picker — the centerpiece */}
@@ -427,7 +427,6 @@ export default async function ScoutPage() {
 						</Link>
 					</div>
 				</div>
-
 
 				{/* What's inside */}
 				<Section title="What's inside">
@@ -816,9 +815,7 @@ export default async function ScoutPage() {
 								<span className="text-emerald-400 w-12 inline-block">
 									{method}
 								</span>
-								<span className="text-foreground w-56 truncate">
-									{path}
-								</span>
+								<span className="text-foreground w-56 truncate">{path}</span>
 								<span className="text-muted-foreground">— {blurb}</span>
 							</div>
 						))}
@@ -866,8 +863,8 @@ export default async function ScoutPage() {
 							Ready to validate your hackathon idea?
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Install Scout, ask{" "}
-							<em>"should I build X on Stellar?"</em> — get evidence.
+							Install Scout, ask <em>"should I build X on Stellar?"</em> — get
+							evidence.
 						</p>
 					</div>
 					<ScoutCopyButton

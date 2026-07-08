@@ -12,6 +12,7 @@
  *   npx tsx scripts/backfill-lifecycle.ts --execute  # write lifecycle
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
@@ -32,7 +33,9 @@ const ENTRIES: Array<{ slug: string; wasLive: boolean; note: string }> = [
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	console.log(`backfill-lifecycle — ${EXECUTE ? "EXECUTE (writing)" : "DRY RUN (no writes)"}`);
+	console.log(
+		`backfill-lifecycle — ${EXECUTE ? "EXECUTE (writing)" : "DRY RUN (no writes)"}`,
+	);
 
 	let wrote = 0;
 	let skipped = 0;
@@ -59,7 +62,9 @@ async function main() {
 			skipped++;
 			continue;
 		}
-		console.log(`→ ${doc.name} (${doc.status}): wasLive=${wasLive} · note="${note.slice(0, 70)}…"`);
+		console.log(
+			`→ ${doc.name} (${doc.status}): wasLive=${wasLive} · note="${note.slice(0, 70)}…"`,
+		);
 		if (EXECUTE) {
 			await payload.update({
 				collection: "projects",

@@ -1,8 +1,8 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import Link from "next/link";
+import { ArrowRight, Star } from "lucide-react";
 import Image from "next/image";
-import { Star, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function TrendingProjectsSection() {
 	const payload = await getPayloadSafe();
@@ -147,8 +147,7 @@ export default async function TrendingProjectsSection() {
 									{repo.totalStars.toLocaleString()}
 								</span>
 								<span>
-									{repo.repoCount}{" "}
-									{repo.repoCount === 1 ? "repo" : "repos"}
+									{repo.repoCount} {repo.repoCount === 1 ? "repo" : "repos"}
 								</span>
 							</div>
 						</div>

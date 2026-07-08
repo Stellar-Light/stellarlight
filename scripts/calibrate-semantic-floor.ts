@@ -4,8 +4,8 @@
  * calibrate-semantic workflow (prod DB + VOYAGE key).
  */
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embed } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 // noise = research/security concepts (NOT projects) → should be cut.
 // match = real needs phrased in non-literal words → should pass.
@@ -27,13 +27,33 @@ async function main() {
 		const qv = await embed(q);
 		const docs = await col
 			.aggregate([
-				{ $vectorSearch: { index: "project_vector_index", path: "embedding", queryVector: qv, numCandidates: 200, limit: 8 } },
-				{ $project: { name: 1, category: 1, score: { $meta: "vectorSearchScore" } } },
+				{
+					$vectorSearch: {
+						index: "project_vector_index",
+						path: "embedding",
+						queryVector: qv,
+						numCandidates: 200,
+						limit: 8,
+					},
+				},
+				{
+					$project: {
+						name: 1,
+						category: 1,
+						score: { $meta: "vectorSearchScore" },
+					},
+				},
 			])
 			.toArray();
 		console.log(`\n[${kind}] "${q}"`);
-		for (const d of docs) console.log(`   ${(d.score ?? 0).toFixed(3)}  ${d.name}  [${d.category}]`);
+		for (const d of docs)
+			console.log(
+				`   ${(d.score ?? 0).toFixed(3)}  ${d.name}  [${d.category}]`,
+			);
 	}
 	process.exit(0);
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+	console.error(e);
+	process.exit(1);
+});

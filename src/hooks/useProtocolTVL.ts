@@ -21,7 +21,7 @@ export function useProtocolTVL(projectName: string | null) {
 		queryFn: async () => {
 			if (!projectName) return null;
 			const res = await fetch(
-				`/api/defillama/protocol/${encodeURIComponent(projectName)}`
+				`/api/defillama/protocol/${encodeURIComponent(projectName)}`,
 			);
 			if (!res.ok) return null;
 			const data = await res.json();

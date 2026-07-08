@@ -19,18 +19,19 @@
  *   pnpm exec tsx scripts/ingest-incidents.ts --execute   # embed + write
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
+	type AuditSeverity,
 	chunkMarkdown,
 	loadExistingChunks,
-	upsertChunks,
-	type AuditSeverity,
 	type ResearchChunk,
+	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");

@@ -18,7 +18,14 @@ export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json();
 
-		const { name, email, ecosystemNeed, needSize, approach, additionalContext } = body;
+		const {
+			name,
+			email,
+			ecosystemNeed,
+			needSize,
+			approach,
+			additionalContext,
+		} = body;
 
 		if (!name || !ecosystemNeed || !needSize || !approach) {
 			return NextResponse.json(
@@ -30,7 +37,10 @@ export async function POST(request: NextRequest) {
 		const validNeedSizes = ["critical", "important", "nice-to-have"];
 		const validApproaches = ["net-new-rfp", "existing-team", "unsure"];
 
-		if (!validNeedSizes.includes(needSize) || !validApproaches.includes(approach)) {
+		if (
+			!validNeedSizes.includes(needSize) ||
+			!validApproaches.includes(approach)
+		) {
 			return NextResponse.json(
 				{ message: "Invalid field values" },
 				{ status: 400 },
@@ -59,12 +69,12 @@ export async function POST(request: NextRequest) {
 			},
 		});
 
-		return NextResponse.json({ message: "Submission received" }, { status: 201 });
+		return NextResponse.json(
+			{ message: "Submission received" },
+			{ status: 201 },
+		);
 	} catch (error) {
 		console.error("Idea submission error:", error);
-		return NextResponse.json(
-			{ message: "Failed to submit" },
-			{ status: 500 },
-		);
+		return NextResponse.json({ message: "Failed to submit" }, { status: 500 });
 	}
 }

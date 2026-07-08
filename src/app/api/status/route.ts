@@ -16,9 +16,9 @@ import { NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
 import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { API_VERSION, SCOUT_SERVICE_VERSION } from "@/lib/version";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;

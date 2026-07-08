@@ -24,15 +24,15 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	fetchEligiblePartners,
-	type PublicPartner,
 	PARTNER_TYPES,
+	type PublicPartner,
 	scorePartners,
 } from "@/lib/partner-match";
+import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -105,7 +105,10 @@ function sanitizeMessages(raw: unknown): Turn[] {
 		if (!m || typeof m !== "object") continue;
 		const role = (m as { role?: unknown }).role;
 		const content = (m as { content?: unknown }).content;
-		if ((role !== "user" && role !== "assistant") || typeof content !== "string")
+		if (
+			(role !== "user" && role !== "assistant") ||
+			typeof content !== "string"
+		)
 			continue;
 		const text = content.trim().slice(0, 4000);
 		if (text) out.push({ role, content: text });
@@ -143,7 +146,10 @@ async function runSearch(
 }
 
 /** Fire-and-forget: record that these partners were surfaced for a need. */
-async function logLeads(need: string, partners: PublicPartner[]): Promise<void> {
+async function logLeads(
+	need: string,
+	partners: PublicPartner[],
+): Promise<void> {
 	const payload = await getPayloadSafe();
 	if (!payload) return;
 	const trimmed = need.trim().slice(0, 400);
@@ -177,7 +183,10 @@ export async function POST(req: NextRequest) {
 	if (!limit.allowed) {
 		const retry = Math.ceil((limit.resetAt - Date.now()) / 1000);
 		return NextResponse.json(
-			{ error: "Too many messages — give it a moment.", retryAfterSeconds: retry },
+			{
+				error: "Too many messages — give it a moment.",
+				retryAfterSeconds: retry,
+			},
 			{
 				status: 429,
 				headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) },

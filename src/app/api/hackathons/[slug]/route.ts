@@ -10,15 +10,15 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
-import { getPayloadSafe } from "@/lib/payload-client";
-import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;

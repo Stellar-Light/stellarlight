@@ -193,6 +193,7 @@ async function main() {
 						farmScore: farm.score,
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
+						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 					},
 					nowIso,
 				);

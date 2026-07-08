@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
 
 const MAX_DESC_LENGTH = 180;
 
@@ -11,7 +11,7 @@ function truncateDescription(desc: string): string {
 	if (!desc || desc.length <= MAX_DESC_LENGTH) return desc;
 
 	// Clean up whitespace, newlines, HTML entities
-	let clean = desc
+	const clean = desc
 		.replace(/\s+/g, " ")
 		.replace(/&amp;/g, "&")
 		.replace(/&nbsp;/g, " ")
@@ -52,7 +52,7 @@ function truncateDescription(desc: string): string {
 const DESCRIPTION_OVERRIDES: Record<string, string> = {
 	"Stellar Light":
 		"A directory and explorer for discovering dApps, tools, and projects across the Stellar ecosystem.",
-	"PayZoll":
+	PayZoll:
 		"Crypto-native payouts infrastructure on Stellar. A modular payments stack unifying crypto and fiat transactions.",
 	ChimpDAO:
 		"A community-driven merch platform combining physical products with blockchain features on Stellar.",
@@ -147,17 +147,17 @@ const REMAINING_TAGS: Record<string, string[]> = {
 	Abroad: ["Payments"],
 	"Cash Abroad": ["Payments"],
 	CashAbroad: ["Payments"],
-	"Wagelink": ["Payments"],
-	"Interlinked": ["Bridge"],
+	Wagelink: ["Payments"],
+	Interlinked: ["Bridge"],
 	Elroy: ["Payments"],
 	Blox: ["Payments", "Anchor"],
 	Sora: ["SDK"],
-	"Mercuryo": ["Payments"],
+	Mercuryo: ["Payments"],
 	NebulaVRF: ["SDK"],
 	Mercury: ["Indexer"],
 	Wave: ["Payments"],
 	Ripe: ["Payments", "Anchor"],
-	"StellarGuard": ["Wallet", "Security"],
+	StellarGuard: ["Wallet", "Security"],
 	"Stellar Router SDK": ["SDK"],
 };
 

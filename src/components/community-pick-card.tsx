@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { X } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 interface CommunityPickCardProps {
@@ -9,7 +9,11 @@ interface CommunityPickCardProps {
 		id: string;
 		name: string;
 		shortDescription?: string | null;
-		logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
+		logo?:
+			| string
+			| { id: string; url?: string | null; filename?: string | null }
+			| null
+			| undefined;
 		links?: {
 			twitter?: string | null;
 		};
@@ -18,7 +22,7 @@ interface CommunityPickCardProps {
 
 export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 	const [logoError, setLogoError] = useState(false);
-	
+
 	// Get logo URL - handle both string ID and populated object
 	let logoUrl = "/logo.png"; // Default fallback
 	if (project.logo && !logoError) {
@@ -42,7 +46,10 @@ export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 			return { handle, url: `https://x.com/${handle}` };
 		}
 		// If it's already just a handle (without URL), extract it
-		const handle = twitterUrl.replace(/^@/, "").replace(/^https?:\/\//, "").split("/")[0];
+		const handle = twitterUrl
+			.replace(/^@/, "")
+			.replace(/^https?:\/\//, "")
+			.split("/")[0];
 		return { handle, url: `https://x.com/${handle}` };
 	};
 
@@ -96,4 +103,3 @@ export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 		</a>
 	);
 }
-

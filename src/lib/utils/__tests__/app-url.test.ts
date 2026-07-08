@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getAppUrl } from "../app-url";
 
 type RelevantEnv = Pick<
@@ -70,9 +70,7 @@ describe("getAppUrl", () => {
 		process.env.VERCEL_ENV = "preview";
 		process.env.VERCEL_URL = "stellarlight-git-feat-xyz.vercel.app";
 		process.env.VERCEL_PROJECT_PRODUCTION_URL = "stellarlight.xyz";
-		expect(getAppUrl()).toBe(
-			"https://stellarlight-git-feat-xyz.vercel.app",
-		);
+		expect(getAppUrl()).toBe("https://stellarlight-git-feat-xyz.vercel.app");
 	});
 
 	it("falls back to VERCEL_PROJECT_PRODUCTION_URL if VERCEL_URL is missing", () => {

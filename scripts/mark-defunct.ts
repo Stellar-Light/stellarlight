@@ -32,7 +32,9 @@ async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}\n`);
 
-	let done = 0, already = 0, missing = 0;
+	let done = 0,
+		already = 0,
+		missing = 0;
 	for (const t of TARGETS) {
 		// biome-ignore lint/suspicious/noExplicitAny: payload doc
 		let p: any = null;
@@ -58,12 +60,16 @@ async function main() {
 			p = byName.docs[0] ?? null;
 		}
 		if (!p) {
-			console.log(`  ? ${t.name.padEnd(12)} — NOT FOUND (slugs tried: ${t.slugs.join(", ")})`);
+			console.log(
+				`  ? ${t.name.padEnd(12)} — NOT FOUND (slugs tried: ${t.slugs.join(", ")})`,
+			);
 			missing++;
 			continue;
 		}
 		if (p.status === "Draft") {
-			console.log(`  = ${t.name.padEnd(12)} "${p.name}" (${p.slug}) already Draft`);
+			console.log(
+				`  = ${t.name.padEnd(12)} "${p.name}" (${p.slug}) already Draft`,
+			);
 			already++;
 			continue;
 		}

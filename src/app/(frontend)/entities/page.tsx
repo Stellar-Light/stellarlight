@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	EntitiesDirectory,
 	type EntityItem,
 } from "@/components/entities-directory";
 import { aggregateEntity } from "@/lib/entity-stats";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 /**
  * Entities & Organizations — the "who builds what" map of the Stellar ecosystem.

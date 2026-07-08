@@ -37,7 +37,8 @@ export const Entities: CollectionConfig = {
 			type: "upload",
 			relationTo: "media",
 			admin: {
-				description: "Entity logo image. If not provided, a default icon will be used.",
+				description:
+					"Entity logo image. If not provided, a default icon will be used.",
 			},
 		},
 		{
@@ -74,7 +75,8 @@ export const Entities: CollectionConfig = {
 					name: "twitter",
 					type: "text",
 					admin: {
-						description: "X (formerly Twitter) profile URL (e.g., https://x.com/username)",
+						description:
+							"X (formerly Twitter) profile URL (e.g., https://x.com/username)",
 					},
 					label: "X (Twitter)",
 				},

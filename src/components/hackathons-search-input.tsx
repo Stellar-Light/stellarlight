@@ -1,8 +1,8 @@
 "use client";
 
+import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
 
 /**
  * Lightweight search input for the hackathons listing. Pushes ?q= into

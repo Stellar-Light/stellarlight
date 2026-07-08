@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Copy, FileJson, ImageDown } from "lucide-react";
+import { useState } from "react";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 
 interface Props {
@@ -46,11 +46,7 @@ function qs(
 	return sp.toString();
 }
 
-export function LeaderboardExportButtons({
-	sort,
-	range,
-	category,
-}: Props) {
+export function LeaderboardExportButtons({ sort, range, category }: Props) {
 	const [skillCopied, setSkillCopied] = useState(false);
 
 	/**

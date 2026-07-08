@@ -18,9 +18,9 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { fetchRepoInfo } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
+import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.INGEST_LIMIT || "0") || 0; // 0 = all
@@ -39,21 +39,34 @@ interface DoraRec {
 const labelOf = (s: number): "high" | "medium" | "low" =>
 	s >= 70 ? "high" : s >= 40 ? "medium" : "low";
 // Same judge-driven curve as repoGrade: 0 → 5, 1 → 85.
-const judgeDrivenScore = (j: number) => Math.round((0.05 + 0.8 * Math.max(0, Math.min(1, j))) * 100);
+const judgeDrivenScore = (j: number) =>
+	Math.round((0.05 + 0.8 * Math.max(0, Math.min(1, j))) * 100);
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}`);
-	if (!process.env.GITHUB_TOKEN?.trim() && !process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim()) {
-		console.log("⚠ No GITHUB_TOKEN — new-repo GitHub fetches will be rate-limited.");
+	if (
+		!process.env.GITHUB_TOKEN?.trim() &&
+		!process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim()
+	) {
+		console.log(
+			"⚠ No GITHUB_TOKEN — new-repo GitHub fetches will be rate-limited.",
+		);
 	}
 
-	const file = join(dirname(fileURLToPath(import.meta.url)), "data", "dora-evals.json");
+	const file = join(
+		dirname(fileURLToPath(import.meta.url)),
+		"data",
+		"dora-evals.json",
+	);
 	let recs = JSON.parse(readFileSync(file, "utf8")) as DoraRec[];
 	if (LIMIT > 0) recs = recs.slice(0, LIMIT);
 	console.log(`${recs.length} judged repos to ingest.\n`);
 
-	let lifted = 0, created = 0, unchanged = 0, failed = 0;
+	let lifted = 0,
+		created = 0,
+		unchanged = 0,
+		failed = 0;
 	for (const rec of recs) {
 		const full = rec.fullName;
 		const [owner, name] = full.split("/");
@@ -61,7 +74,12 @@ async function main() {
 		const jdScore = judgeDrivenScore(rec.judgeScore);
 
 		const existing = (
-			await payload.find({ collection: "repos", where: { fullName: { equals: full } }, limit: 1, depth: 0 })
+			await payload.find({
+				collection: "repos",
+				where: { fullName: { equals: full } },
+				limit: 1,
+				depth: 0,
+			})
 		).docs[0] as Record<string, any> | undefined;
 
 		if (existing) {
@@ -75,7 +93,9 @@ async function main() {
 				unchanged++;
 				continue;
 			}
-			console.log(`  lift   ${full.padEnd(44)} ${existing.repoScore ?? 0}→${newScore}  judge=${rec.judgeScore}`);
+			console.log(
+				`  lift   ${full.padEnd(44)} ${existing.repoScore ?? 0}→${newScore}  judge=${rec.judgeScore}`,
+			);
 			if (EXECUTE) {
 				await payload.update({
 					collection: "repos",
@@ -98,7 +118,9 @@ async function main() {
 		try {
 			info = await fetchRepoInfo(owner, name.replace(/\.git$/, ""));
 		} catch (e) {
-			console.log(`  skip   ${full.padEnd(44)} ⚠ ${(e as Error).message.slice(0, 44)}`);
+			console.log(
+				`  skip   ${full.padEnd(44)} ⚠ ${(e as Error).message.slice(0, 44)}`,
+			);
 			failed++;
 			continue;
 		}
@@ -113,7 +135,9 @@ async function main() {
 			openIssues: info.openIssues ?? 0,
 			judgeScore: rec.judgeScore,
 		});
-		console.log(`  create ${full.padEnd(44)} score=${grade.score}  judge=${rec.judgeScore} ★${info.stargazerCount}`);
+		console.log(
+			`  create ${full.padEnd(44)} score=${grade.score}  judge=${rec.judgeScore} ★${info.stargazerCount}`,
+		);
 		if (EXECUTE) {
 			await payload.create({
 				collection: "repos",

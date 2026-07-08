@@ -55,11 +55,15 @@ async function main() {
 	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}\n`);
 
 	// biome-ignore lint/suspicious/noExplicitAny: payload doc
-	const projects = (await payload.find({ collection: "projects", pagination: false, depth: 0 }))
-		.docs as any[];
+	const projects = (
+		await payload.find({ collection: "projects", pagination: false, depth: 0 })
+	).docs as any[];
 	const bySlug = new Map(projects.map((p) => [p.slug, p]));
 
-	let wrote = 0, already = 0, missing = 0, skipHasGh = 0;
+	let wrote = 0,
+		already = 0,
+		missing = 0,
+		skipHasGh = 0;
 	for (const [slug, gh] of Object.entries(CURATED)) {
 		const p = bySlug.get(slug);
 		if (!p) {
@@ -68,7 +72,9 @@ async function main() {
 			continue;
 		}
 		if (p.links?.github?.trim()) {
-			console.log(`  =  ${slug.padEnd(26)} already has github (${p.links.github}) — skip`);
+			console.log(
+				`  =  ${slug.padEnd(26)} already has github (${p.links.github}) — skip`,
+			);
 			skipHasGh++;
 			continue;
 		}
@@ -94,7 +100,9 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? `DONE: wrote ${wrote}` : `DRY RUN: would write ${already}`}; ${skipHasGh} already had github; ${missing} slugs not found.`,
 	);
-	console.log("→ Re-run the enrich-repos Action next to index the newly-linked repos.");
+	console.log(
+		"→ Re-run the enrich-repos Action next to index the newly-linked repos.",
+	);
 	process.exit(0);
 }
 main().catch((e) => {

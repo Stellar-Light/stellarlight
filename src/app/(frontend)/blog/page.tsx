@@ -1,9 +1,11 @@
-import { Suspense } from "react";
-import { getPayloadSafe } from "@/lib/payload-client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import BlogPostsGrid, { BlogPostsGridSkeleton } from "@/components/blog-posts-grid";
+import Link from "next/link";
+import { Suspense } from "react";
+import BlogPostsGrid, {
+	BlogPostsGridSkeleton,
+} from "@/components/blog-posts-grid";
+import { Button } from "@/components/ui/button";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 type SearchParams = Promise<{
 	page?: string;
@@ -75,8 +77,8 @@ export default async function BlogPage({
 							Blog
 						</h1>
 						<p className="text-lg text-muted-foreground max-w-2xl">
-							Stay updated with the latest news, tutorials, and insights from the
-							Stellar ecosystem.
+							Stay updated with the latest news, tutorials, and insights from
+							the Stellar ecosystem.
 						</p>
 					</div>
 				</div>
@@ -105,7 +107,9 @@ export default async function BlogPage({
 								variant={category === cat ? "default" : "outline"}
 								className="rounded-xl h-8 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm"
 							>
-								<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>{cat}</Link>
+								<Link href={`/blog?category=${cat}${tag ? `&tag=${tag}` : ""}`}>
+									{cat}
+								</Link>
 							</Button>
 						))}
 					</div>
@@ -121,7 +125,9 @@ export default async function BlogPage({
 									variant={tag === t ? "default" : "outline"}
 									className="rounded-xl h-8 px-3 text-xs sm:h-10 sm:px-4 sm:text-sm"
 								>
-									<Link href={`/blog?tag=${encodeURIComponent(t)}${category ? `&category=${category}` : ""}`}>
+									<Link
+										href={`/blog?tag=${encodeURIComponent(t)}${category ? `&category=${category}` : ""}`}
+									>
 										#{t}
 									</Link>
 								</Button>
@@ -138,4 +144,3 @@ export default async function BlogPage({
 		</div>
 	);
 }
-

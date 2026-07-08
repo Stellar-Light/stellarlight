@@ -1017,6 +1017,7 @@ export interface operations {
                             /** Format: date-time */
                             scannedAt?: string | null;
                             symbols?: string[];
+                            mainnetContractId?: string | null;
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
@@ -1035,6 +1036,8 @@ export interface operations {
                         /** @description Present when a repo routed but DeepWiki had no answer. */
                         note2?: string | null;
                     };
+                    /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
+                    mainnetContractId: unknown;
                 };
             };
             /** @description Missing q */

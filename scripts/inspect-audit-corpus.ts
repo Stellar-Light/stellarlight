@@ -7,14 +7,12 @@
  *   - /tmp/audit-suspicious.md   reports with low recovery or weird patterns
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { writeFileSync } from "node:fs";
-import {
-	chunkMarkdown,
-	type AuditSeverity,
-} from "../src/lib/research-ingest";
+import { type AuditSeverity, chunkMarkdown } from "../src/lib/research-ingest";
 import { reassembleSpacedText } from "./ingest-soroban-security";
 
 const API = "https://sorobansecurity.com/api/v1/reports";
@@ -60,19 +58,38 @@ function inferSeverityFromBody(content: string): AuditSeverity {
 			count(/\[L-?\d+\]/g),
 		informational: () =>
 			count(/\bseverity\s*:?\s*info(?:rmative|rmational)?\b/gi) +
-			count(/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi) +
+			count(
+				/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi,
+			) +
 			count(/\bseverity\s+(?:warning|note)\b/gi) +
 			count(/\[I-?\d+\]/g),
 	};
 	const ambient: Record<Sev, () => number> = {
-		critical: () => count(/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi),
-		high: () => count(/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		medium: () => count(/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		low: () => count(/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		informational: () => count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
+		critical: () =>
+			count(
+				/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi,
+			),
+		high: () =>
+			count(
+				/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		medium: () =>
+			count(
+				/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		low: () =>
+			count(
+				/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		informational: () =>
+			count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
 	};
 	const scores: Record<Sev, number> = {
-		critical: 0, high: 0, medium: 0, low: 0, informational: 0,
+		critical: 0,
+		high: 0,
+		medium: 0,
+		low: 0,
+		informational: 0,
 	};
 	for (const sev of Object.keys(explicit) as Sev[]) {
 		const exp = explicit[sev]();
@@ -120,12 +137,21 @@ async function main() {
 		"| ID | Protocol | Auditor | Date | Raw chars | Reassembled | Chunks | Sev: C/H/M/L/I/? | Avg chunk | Max chunk |",
 		"|---|---|---|---|---|---|---|---|---|---|",
 	];
-	const suspicious: string[] = ["# Suspicious reports (flagged for human review)\n"];
+	const suspicious: string[] = [
+		"# Suspicious reports (flagged for human review)\n",
+	];
 
 	const totals = {
 		reports: 0,
 		chunks: 0,
-		severity: { critical: 0, high: 0, medium: 0, low: 0, informational: 0, unknown: 0 } as Record<AuditSeverity, number>,
+		severity: {
+			critical: 0,
+			high: 0,
+			medium: 0,
+			low: 0,
+			informational: 0,
+			unknown: 0,
+		} as Record<AuditSeverity, number>,
 		runtogetherRatioSum: 0,
 		nearLimitChunks: 0,
 	};
@@ -143,7 +169,9 @@ async function main() {
 		}
 		const reassembled = reassembleSpacedText(raw);
 		const chunks = chunkMarkdown({
-			md: promoteAuditHeadings(`# ${meta.protocolName} — ${meta.auditorName}\n\n${reassembled}`),
+			md: promoteAuditHeadings(
+				`# ${meta.protocolName} — ${meta.auditorName}\n\n${reassembled}`,
+			),
 			parentDocId: `audit-${meta.id}`,
 			title: `${meta.protocolName} — ${meta.auditorName}`,
 			url: `https://sorobansecurity.com/report/${meta.id}`,
@@ -153,7 +181,12 @@ async function main() {
 
 		// Severity tally for this report
 		const sev: Record<AuditSeverity, number> = {
-			critical: 0, high: 0, medium: 0, low: 0, informational: 0, unknown: 0,
+			critical: 0,
+			high: 0,
+			medium: 0,
+			low: 0,
+			informational: 0,
+			unknown: 0,
 		};
 		for (const c of chunks) {
 			const s = pickSeverity(c.section, c.content);
@@ -171,9 +204,14 @@ async function main() {
 		totals.runtogetherRatioSum += longWordRatio;
 
 		const avgChunkSize = chunks.length
-			? Math.round(chunks.reduce((s, c) => s + c.content.length, 0) / chunks.length)
+			? Math.round(
+					chunks.reduce((s, c) => s + c.content.length, 0) / chunks.length,
+				)
 			: 0;
-		const maxChunkSize = chunks.reduce((m, c) => Math.max(m, c.content.length), 0);
+		const maxChunkSize = chunks.reduce(
+			(m, c) => Math.max(m, c.content.length),
+			0,
+		);
 
 		totals.reports += 1;
 		totals.chunks += chunks.length;
@@ -199,15 +237,22 @@ async function main() {
 			chunks[Math.floor(chunks.length / 2)],
 			chunks[chunks.length - 1],
 		].filter(Boolean);
-		sampleOut.push(`\n## #${meta.id} ${meta.protocolName} / ${meta.auditorName} (${meta.date.slice(0, 10)})`);
-		sampleOut.push(`Raw: ${raw.length} chars → reassembled: ${reassembled.length} → ${chunks.length} chunks, long-word ratio: ${(longWordRatio * 100).toFixed(1)}%`);
+		sampleOut.push(
+			`\n## #${meta.id} ${meta.protocolName} / ${meta.auditorName} (${meta.date.slice(0, 10)})`,
+		);
+		sampleOut.push(
+			`Raw: ${raw.length} chars → reassembled: ${reassembled.length} → ${chunks.length} chunks, long-word ratio: ${(longWordRatio * 100).toFixed(1)}%`,
+		);
 		for (let i = 0; i < samples.length; i++) {
 			const c = samples[i];
 			const which = ["first", "middle", "last"][i];
-			sampleOut.push(`\n### ${which} chunk (idx=${c.chunkIndex}, section="${c.section ?? ""}", sev=${pickSeverity(c.section, c.content)})`);
+			sampleOut.push(
+				`\n### ${which} chunk (idx=${c.chunkIndex}, section="${c.section ?? ""}", sev=${pickSeverity(c.section, c.content)})`,
+			);
 			sampleOut.push("```");
 			sampleOut.push(c.content.slice(0, 800));
-			if (c.content.length > 800) sampleOut.push(`… (+${c.content.length - 800} more chars)`);
+			if (c.content.length > 800)
+				sampleOut.push(`… (+${c.content.length - 800} more chars)`);
 			sampleOut.push("```");
 		}
 	}
@@ -217,10 +262,18 @@ async function main() {
 	statsOut.push("## Totals");
 	statsOut.push(`- Reports processed: ${totals.reports}`);
 	statsOut.push(`- Chunks total: ${totals.chunks}`);
-	statsOut.push(`- Severity: critical=${totals.severity.critical} high=${totals.severity.high} medium=${totals.severity.medium} low=${totals.severity.low} informational=${totals.severity.informational} unknown=${totals.severity.unknown}`);
-	statsOut.push(`- Avg long-word ratio across reports: ${((totals.runtogetherRatioSum / totals.reports) * 100).toFixed(1)}% (<5% = clean, >15% = degraded)`);
-	statsOut.push(`- Chunks near MAX_CHARS limit (>5500): ${totals.nearLimitChunks} / ${totals.chunks}`);
-	statsOut.push(`- Estimated embed cost: $${((totals.chunks * 250 * 0.06) / 1_000_000).toFixed(4)} (assuming ~250 tokens/chunk)`);
+	statsOut.push(
+		`- Severity: critical=${totals.severity.critical} high=${totals.severity.high} medium=${totals.severity.medium} low=${totals.severity.low} informational=${totals.severity.informational} unknown=${totals.severity.unknown}`,
+	);
+	statsOut.push(
+		`- Avg long-word ratio across reports: ${((totals.runtogetherRatioSum / totals.reports) * 100).toFixed(1)}% (<5% = clean, >15% = degraded)`,
+	);
+	statsOut.push(
+		`- Chunks near MAX_CHARS limit (>5500): ${totals.nearLimitChunks} / ${totals.chunks}`,
+	);
+	statsOut.push(
+		`- Estimated embed cost: $${((totals.chunks * 250 * 0.06) / 1_000_000).toFixed(4)} (assuming ~250 tokens/chunk)`,
+	);
 
 	writeFileSync("/tmp/audit-samples.md", sampleOut.join("\n"));
 	writeFileSync("/tmp/audit-stats.md", statsOut.join("\n"));
@@ -233,8 +286,12 @@ async function main() {
 	console.log("");
 	console.log("Totals:");
 	console.log(`  ${totals.reports} reports, ${totals.chunks} chunks`);
-	console.log(`  severity: C=${totals.severity.critical} H=${totals.severity.high} M=${totals.severity.medium} L=${totals.severity.low} I=${totals.severity.informational} ?=${totals.severity.unknown}`);
-	console.log(`  avg long-word ratio: ${((totals.runtogetherRatioSum / totals.reports) * 100).toFixed(1)}%`);
+	console.log(
+		`  severity: C=${totals.severity.critical} H=${totals.severity.high} M=${totals.severity.medium} L=${totals.severity.low} I=${totals.severity.informational} ?=${totals.severity.unknown}`,
+	);
+	console.log(
+		`  avg long-word ratio: ${((totals.runtogetherRatioSum / totals.reports) * 100).toFixed(1)}%`,
+	);
 }
 
 main()

@@ -15,8 +15,8 @@
  */
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embed, embedBatch } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
@@ -47,8 +47,7 @@ async function main() {
 	console.log(`Loaded ${docs.length} projects (totalDocs=${res.totalDocs}).`);
 
 	const todo = docs.filter(
-		(d) =>
-			FORCE || !Array.isArray(d.embedding) || d.embedding.length !== DIMS,
+		(d) => FORCE || !Array.isArray(d.embedding) || d.embedding.length !== DIMS,
 	);
 	console.log(
 		`${todo.length} need embeddings · ${docs.length - todo.length} already embedded.`,

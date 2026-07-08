@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api", "api-client"],
 		type: "added",
 		summary:
+			"searchRepos codeVerified gains `mainnetContractId` — a README-claimed contract id the scanner VERIFIED to exist on Stellar mainnet (stellar.expert echo-check). Unfakeable deployment evidence: an address string is cheap, a live contract isn't. Verified deployment also weighs ~3x a bare address mention in codeDepth.",
+		detail:
+			"Populated by scan waves (fail-open: network problems never penalize; the response must echo the requested id, so garbage/empty ids can't false-verify). Null = no verified address, NOT 'not deployed'. Also part of scorer v3: sampling-aware breadth gate + education/demo example markers; the ground-truth answer key grew 20 → 66 verified labels (57 gating + 9 frontier) via a 111-agent adversarially-verified label-mining pass.",
+	},
+	{
+		date: "2026-07-08",
+		surfaces: ["api", "api-client"],
+		type: "added",
+		summary:
 			"searchRepos results gain `codeVerified.symbols` — the public code-symbol surface (pub fn/struct/enum/trait names) extracted from each repo's scanned Rust sources. Search also MATCHES on them: 'escrow' now retrieves a repo whose code defines release_escrow/EscrowContract even if its README never says the word (weighted between name/topic and description hits).",
 		detail:
 			"Closes the structure≠semantics gap: the index knew a repo HAS a deployable contract, not WHAT it implements. Symbols are extracted offline from the same fetched sources the codeDepth scan reads (pub items only, plumbing names filtered, capped 60/repo, top 20 exposed), populated by scan waves — repos scanned before 2026-07-08 carry [] until rescanned. Empty symbols on a scanned repo is 'not yet rescanned', NOT 'no public API'.",

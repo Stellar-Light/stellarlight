@@ -107,10 +107,12 @@ export const syncRSSFeedTask: any = async (args: any) => {
 						} else if (rssItem["media:content"]?.url) {
 							featuredImageUrl = rssItem["media:content"].url;
 						}
-						
+
 						// Also try to extract image from content HTML
 						if (!featuredImageUrl && rssItem.content) {
-							const imgMatch = rssItem.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+							const imgMatch = rssItem.content.match(
+								/<img[^>]+src=["']([^"']+)["']/i,
+							);
 							if (imgMatch && imgMatch[1]) {
 								featuredImageUrl = imgMatch[1];
 							}
@@ -132,9 +134,10 @@ export const syncRSSFeedTask: any = async (args: any) => {
 							"";
 
 						// Ensure excerpt is at least 50 chars (required field)
-						const excerpt = description.length > 0
-							? description.substring(0, 300)
-							: (rssItem.title || "RSS Feed Post").substring(0, 300);
+						const excerpt =
+							description.length > 0
+								? description.substring(0, 300)
+								: (rssItem.title || "RSS Feed Post").substring(0, 300);
 
 						// Create external RSS blog post
 						try {
@@ -144,7 +147,11 @@ export const syncRSSFeedTask: any = async (args: any) => {
 									title: rssItem.title || "Untitled",
 									slug,
 									excerpt,
-									author: rssItem.creator || rssItem.author || feed.author || "Unknown",
+									author:
+										rssItem.creator ||
+										rssItem.author ||
+										feed.author ||
+										"Unknown",
 									publishedAt: rssItem.pubDate
 										? new Date(rssItem.pubDate).toISOString()
 										: new Date().toISOString(),
@@ -204,7 +211,9 @@ export const syncRSSFeedTask: any = async (args: any) => {
 						lastSyncedAt: new Date().toISOString(),
 						lastSyncStatus: "Failed",
 						lastSyncError:
-							feedError instanceof Error ? feedError.message : String(feedError),
+							feedError instanceof Error
+								? feedError.message
+								: String(feedError),
 					},
 				});
 			}
@@ -256,8 +265,7 @@ export const syncRSSFeedTask: any = async (args: any) => {
 			log: comprehensiveLog,
 		} as any; // PayloadHandler return type is flexible
 	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
 
 		// Return error output
 		throw new Error(errorMessage);

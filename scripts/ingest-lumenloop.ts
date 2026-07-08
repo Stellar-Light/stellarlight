@@ -22,13 +22,14 @@
  *   npx tsx scripts/ingest-lumenloop.ts --execute   # write to Payload
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embedBatch } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -291,14 +292,16 @@ async function run() {
 		0,
 	);
 	console.log(
-		`  ~${stats.embedTokens} tokens (~$${(stats.embedTokens * 0.06 / 1_000_000).toFixed(4)})`,
+		`  ~${stats.embedTokens} tokens (~$${((stats.embedTokens * 0.06) / 1_000_000).toFixed(4)})`,
 	);
 
 	console.log("\nUpserting to Payload…");
 	for (let i = 0; i < toEmbed.length; i++) {
 		const chunk = toEmbed[i];
 		const embedding = embeddings[i];
-		const existing = existingByDoc.get(chunk.parentDocId)?.get(chunk.chunkIndex);
+		const existing = existingByDoc
+			.get(chunk.parentDocId)
+			?.get(chunk.chunkIndex);
 		const data = {
 			source: "lumenloop" as const,
 			title: chunk.title,
@@ -337,6 +340,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((err) => {
-	console.error("FATAL:", err);
-	process.exit(1);
-});
+		console.error("FATAL:", err);
+		process.exit(1);
+	});

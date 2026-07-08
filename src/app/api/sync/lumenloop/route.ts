@@ -1,21 +1,31 @@
-import { readFile, readdir } from "fs/promises";
 import { existsSync } from "fs";
-import { join } from "path";
-import { simpleGit } from "simple-git";
+import { readdir, readFile } from "fs/promises";
 import yaml from "js-yaml";
-import configPromise from "@/payload.config";
-import { getPayload } from "payload";
 import { headers } from "next/headers";
+import { join } from "path";
+import { getPayload } from "payload";
+import { simpleGit } from "simple-git";
 import {
 	extractEntryId,
-	mapLumenloopEntry,
 	type LumenloopEntry,
+	mapLumenloopEntry,
 } from "@/lib/utils/lumenloop-mapper";
 import { generateSlug } from "@/lib/utils/normalize";
+import configPromise from "@/payload.config";
 
 interface SyncStats {
-	projects: { inserted: number; updated: number; skipped: number; errors: number };
-	entities: { created: number; linked: number; skipped: number; errors: number };
+	projects: {
+		inserted: number;
+		updated: number;
+		skipped: number;
+		errors: number;
+	};
+	entities: {
+		created: number;
+		linked: number;
+		skipped: number;
+		errors: number;
+	};
 	total_files: number;
 }
 
@@ -158,8 +168,10 @@ export async function POST(request: Request) {
 				}
 
 				const entryId = extractEntryId(entry);
-				const { project: mapped, parentEntity } =
-					mapLumenloopEntry(entry, entryId);
+				const { project: mapped, parentEntity } = mapLumenloopEntry(
+					entry,
+					entryId,
+				);
 				const slug = generateSlug(mapped.name!);
 
 				// Check if project exists by slug
@@ -310,7 +322,12 @@ async function linkEntity(
 	stats: SyncStats,
 	errors: string[],
 	dryRun: boolean,
-	dryRunLog: Array<{ action: string; type: string; name: string; details?: string }>,
+	dryRunLog: Array<{
+		action: string;
+		type: string;
+		name: string;
+		details?: string;
+	}>,
 ) {
 	try {
 		const entitySlug = generateSlug(parentName);
@@ -362,8 +379,7 @@ async function findYamlFiles(dir: string): Promise<string[]> {
 	return entries
 		.filter(
 			(e) =>
-				e.isFile() &&
-				(e.name.endsWith(".yaml") || e.name.endsWith(".yml")),
+				e.isFile() && (e.name.endsWith(".yaml") || e.name.endsWith(".yml")),
 		)
 		.map((e) => join(dir, e.name))
 		.sort();

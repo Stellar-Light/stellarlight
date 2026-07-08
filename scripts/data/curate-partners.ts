@@ -411,7 +411,9 @@ async function main() {
 	}
 
 	// ── raven#8 / sls-018: ramp capability for proprietary-API ramps ──
-	console.log("\n── Ramp enrichment (fill-if-empty rampTypes; append assets) ──");
+	console.log(
+		"\n── Ramp enrichment (fill-if-empty rampTypes; append assets) ──",
+	);
 	for (const [slug, e] of Object.entries(RAMP_ENRICH)) {
 		const d = bySlug.get(slug);
 		if (!d) {

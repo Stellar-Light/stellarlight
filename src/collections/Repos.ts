@@ -214,6 +214,15 @@ export const Repos: CollectionConfig = {
 					"Extracted pub fn/type names (array of strings) — code-content search signal",
 			},
 		},
+		{
+			name: "mainnetContractId",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)",
+			},
+		},
 		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from
 		// inline codeReferences/explain routing but NEVER archived (reversible).
 		{

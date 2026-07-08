@@ -22,13 +22,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
-import { getPayloadSafe } from "@/lib/payload-client";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
 
-const VALID_DIMENSIONS = ["all", "hackathons", "categories", "funding"] as const;
+const VALID_DIMENSIONS = [
+	"all",
+	"hackathons",
+	"categories",
+	"funding",
+] as const;
 
 interface CategoryStats {
 	category: string;

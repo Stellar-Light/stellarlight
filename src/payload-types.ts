@@ -624,6 +624,10 @@ export interface Repo {
     | boolean
     | null;
   /**
+   * README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)
+   */
+  mainnetContractId?: string | null;
+  /**
    * Alive but no code-proof — soft-excluded, never archived
    */
   unverifiedStellar?: boolean | null;
@@ -2041,6 +2045,7 @@ export interface ReposSelect<T extends boolean = true> {
   farmScore?: T;
   farmFlags?: T;
   codeSymbols?: T;
+  mainnetContractId?: T;
   unverifiedStellar?: T;
   codeScanState?: T;
   codeScanError?: T;

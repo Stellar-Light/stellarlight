@@ -1,6 +1,6 @@
-import configPromise from "@/payload.config";
-import { getPayload } from "payload";
 import { headers } from "next/headers";
+import { getPayload } from "payload";
+import configPromise from "@/payload.config";
 
 export async function POST(
 	request: Request,
@@ -18,10 +18,13 @@ export async function POST(
 
 	try {
 		if (!resolvedParams.id) {
-			return Response.json({
-				success: false,
-				error: "Feed ID is required",
-			}, { status: 400 });
+			return Response.json(
+				{
+					success: false,
+					error: "Feed ID is required",
+				},
+				{ status: 400 },
+			);
 		}
 
 		// Verify feed exists and is enabled
@@ -31,10 +34,13 @@ export async function POST(
 		});
 
 		if (!feed.enabled) {
-			return Response.json({
-				success: false,
-				error: "Feed is disabled",
-			}, { status: 400 });
+			return Response.json(
+				{
+					success: false,
+					error: "Feed is disabled",
+				},
+				{ status: 400 },
+			);
 		}
 
 		// Queue the RSS sync job for this specific feed
@@ -68,4 +74,3 @@ export async function POST(
 		);
 	}
 }
-

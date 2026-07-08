@@ -57,7 +57,8 @@ export interface OwnerRepo {
 // Allbridge) otherwise drags in dozens of non-Stellar repos.
 export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 	const token =
-		process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+		process.env.GITHUB_TOKEN?.trim() ||
+		process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
 	const headers: Record<string, string> = {
 		"Content-Type": "application/json",
 		"User-Agent": "stellar-ecosystem-directory",
@@ -75,7 +76,9 @@ export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 		const nodes = data?.data?.repositoryOwner?.repositories?.nodes;
 		if (!Array.isArray(nodes)) return [];
 		return nodes
-			.filter((n: any) => n && n.isArchived !== true && typeof n.name === "string")
+			.filter(
+				(n: any) => n && n.isArchived !== true && typeof n.name === "string",
+			)
 			.map((n: any) => ({
 				name: n.name as string,
 				description: (n.description ?? null) as string | null,
@@ -92,19 +95,24 @@ export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 }
 
 export async function fetchRepoInfo(owner: string, name: string) {
-	const token = process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
-	
+	const token =
+		process.env.GITHUB_TOKEN?.trim() ||
+		process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+
 	const headers: Record<string, string> = {
 		"Content-Type": "application/json",
 		"User-Agent": "stellar-ecosystem-directory",
 	};
-	
+
 	if (token) {
 		headers.Authorization = `Bearer ${token.trim()}`;
 	}
-	
-	const requestBody = JSON.stringify({ query: Q_REPO, variables: { owner, name } });
-	
+
+	const requestBody = JSON.stringify({
+		query: Q_REPO,
+		variables: { owner, name },
+	});
+
 	const res = await fetch(GQL, {
 		method: "POST",
 		headers,
@@ -114,7 +122,7 @@ export async function fetchRepoInfo(owner: string, name: string) {
 	// Parse response even if status is not OK to check GraphQL errors
 	let data: any;
 	let responseText: string | null = null;
-	
+
 	try {
 		responseText = await res.text();
 		data = JSON.parse(responseText);
@@ -122,27 +130,28 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		// If we can't parse JSON, it's a real HTTP error
 		if (!res.ok) {
 			const isRateLimit =
-				res.status === 403 &&
-				res.headers.get("x-ratelimit-remaining") === "0";
-			
+				res.status === 403 && res.headers.get("x-ratelimit-remaining") === "0";
+
 			// Handle 401 Unauthorized specifically
 			if (res.status === 401) {
 				const isFineGrained = token?.startsWith("github_pat_");
 				throw new Error(
 					`GitHub API error: 401 Unauthorized - Token authentication failed. ` +
-					(isFineGrained 
-						? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories", 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired.`
-						: `Please verify your GITHUB_TOKEN is valid and has not expired.`)
+						(isFineGrained
+							? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories", 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired.`
+							: `Please verify your GITHUB_TOKEN is valid and has not expired.`),
 				);
 			}
-			
+
 			throw new Error(
 				isRateLimit
 					? "GitHub API rate limit exceeded"
 					: `GitHub API error: ${res.status} - ${responseText || res.statusText}`,
 			);
 		}
-		throw new Error(`Failed to parse GitHub API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+		throw new Error(
+			`Failed to parse GitHub API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+		);
 	}
 
 	// Check for GraphQL errors first (these can occur even with 200 OK)
@@ -159,9 +168,9 @@ export async function fetchRepoInfo(owner: string, name: string) {
 			const isFineGrained = token?.startsWith("github_pat_");
 			throw new Error(
 				`GitHub API error: 401 Unauthorized - ${errorMsg}. ` +
-				(isFineGrained
-					? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories" (not just specific repos), 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired. Repository: ${owner}/${name}`
-					: `Please verify your GITHUB_TOKEN is valid and has not expired.`)
+					(isFineGrained
+						? `For fine-grained tokens (github_pat_), verify: 1) Repository access is set to "All repositories" (not just specific repos), 2) Permissions include Metadata (read), Contents (read), and Issues (read), 3) Token has not expired. Repository: ${owner}/${name}`
+						: `Please verify your GITHUB_TOKEN is valid and has not expired.`),
 			);
 		}
 
@@ -206,10 +215,10 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		// Handle 401 Unauthorized
 		if (res.status === 401) {
 			throw new Error(
-				"GitHub API error: 401 Unauthorized - Invalid or expired token. Please verify your GITHUB_TOKEN environment variable is set correctly and the token is valid."
+				"GitHub API error: 401 Unauthorized - Invalid or expired token. Please verify your GITHUB_TOKEN environment variable is set correctly and the token is valid.",
 			);
 		}
-		
+
 		throw new Error(
 			isRateLimit
 				? "GitHub API rate limit exceeded"
@@ -227,8 +236,14 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		throw new Error("Repository not found");
 	}
 
-	const stargazerCount = typeof r.stargazerCount === 'number' ? r.stargazerCount : (parseInt(String(r.stargazerCount || 0), 10) || 0);
-	const openIssues = typeof r.issues?.totalCount === 'number' ? r.issues.totalCount : (parseInt(String(r.issues?.totalCount || 0), 10) || 0);
+	const stargazerCount =
+		typeof r.stargazerCount === "number"
+			? r.stargazerCount
+			: parseInt(String(r.stargazerCount || 0), 10) || 0;
+	const openIssues =
+		typeof r.issues?.totalCount === "number"
+			? r.issues.totalCount
+			: parseInt(String(r.issues?.totalCount || 0), 10) || 0;
 	const topics: string[] = Array.isArray(r.repositoryTopics?.nodes)
 		? r.repositoryTopics.nodes
 				.map((n: any) => n?.topic?.name)
@@ -237,8 +252,15 @@ export async function fetchRepoInfo(owner: string, name: string) {
 	// First README variant that resolved, capped to keep the index light; this
 	// is the biggest recall lever — topics are sparse, READMEs name the tech.
 	const readmeRaw: string | null =
-		r.readmeMd?.text ?? r.readmeLower?.text ?? r.readmeRst?.text ?? r.readmeTxt?.text ?? null;
-	const readme = typeof readmeRaw === "string" && readmeRaw.length > 0 ? readmeRaw.slice(0, 4000) : null;
+		r.readmeMd?.text ??
+		r.readmeLower?.text ??
+		r.readmeRst?.text ??
+		r.readmeTxt?.text ??
+		null;
+	const readme =
+		typeof readmeRaw === "string" && readmeRaw.length > 0
+			? readmeRaw.slice(0, 4000)
+			: null;
 
 	return {
 		url: r.url as string,
@@ -250,11 +272,9 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		primaryLanguage: (r.primaryLanguage?.name ?? null) as string | null,
 		topics,
 		readme,
-		lastCommitAt:
-			(r.defaultBranchRef?.target?.committedDate ??
-				r.pushedAt) as string,
+		lastCommitAt: (r.defaultBranchRef?.target?.committedDate ??
+			r.pushedAt) as string,
 		openIssues,
 		stargazerCount,
 	};
 }
-

@@ -19,10 +19,10 @@
  * partner's to fill via the portal. We don't put words in their mouth.
  */
 
-import { config as loadEnv } from "dotenv";
 import { randomBytes } from "node:crypto";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { config as loadEnv } from "dotenv";
+import { getPayload } from "payload";
 
 // Local dev reads .env.local; in CI the workflow injects DATABASE_URI via env.
 loadEnv({ path: ".env.local" });
@@ -55,7 +55,8 @@ const AUDIT_FIRMS: SeedPartner[] = [
 		slug: "ottersec",
 		partnerType: "audit-firm",
 		sectors: ["defi"],
-		description: "Security audit firm covering Soroban / Stellar ecosystem smart contracts.",
+		description:
+			"Security audit firm covering Soroban / Stellar ecosystem smart contracts.",
 		websiteUrl: "https://osec.io",
 	},
 	{
@@ -89,7 +90,9 @@ const AUDIT_FIRMS: SeedPartner[] = [
 // the directory rather than a hardcoded copy.
 async function fetchAnchors(): Promise<SeedPartner[]> {
 	try {
-		const res = await fetch(`${SITE}/api/projects/search?category=Anchor&limit=50`);
+		const res = await fetch(
+			`${SITE}/api/projects/search?category=Anchor&limit=50`,
+		);
 		if (!res.ok) return [];
 		const json = (await res.json()) as {
 			projects?: Array<{
@@ -109,7 +112,8 @@ async function fetchAnchors(): Promise<SeedPartner[]> {
 				partnerType: "anchor",
 				sectors: ["payments"],
 				description:
-					p.shortDescription ?? `${p.name} — Stellar anchor (fiat on/off-ramp).`,
+					p.shortDescription ??
+					`${p.name} — Stellar anchor (fiat on/off-ramp).`,
 				websiteUrl: p.links?.website ?? p.url ?? null,
 			}));
 	} catch {
@@ -127,9 +131,13 @@ async function main() {
 	if (!EXECUTE) {
 		console.log("DRY RUN — would create (slug · type · website · name):");
 		for (const p of all) {
-			console.log(`  ${p.slug.padEnd(28)} ${p.partnerType.padEnd(12)} ${p.websiteUrl ?? "—"}  ${p.name}`);
+			console.log(
+				`  ${p.slug.padEnd(28)} ${p.partnerType.padEnd(12)} ${p.websiteUrl ?? "—"}  ${p.name}`,
+			);
 		}
-		console.log("\nRe-run with --execute to write. Idempotent: existing slugs are skipped.");
+		console.log(
+			"\nRe-run with --execute to write. Idempotent: existing slugs are skipped.",
+		);
 		process.exit(0);
 	}
 
@@ -165,7 +173,9 @@ async function main() {
 		created++;
 		console.log(`  ✓ ${p.name} (${p.slug})`);
 	}
-	console.log(`\nDone. created=${created} skipped=${skipped} total=${all.length}`);
+	console.log(
+		`\nDone. created=${created} skipped=${skipped} total=${all.length}`,
+	);
 	process.exit(0);
 }
 

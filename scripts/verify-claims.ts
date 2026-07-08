@@ -130,7 +130,10 @@ async function checkUrl(url: string, source: string) {
 		status = await fetchStatus(url, BROWSER_UA);
 		if (status >= 200 && status < 400) return;
 		if (status === 403 || status === 405) {
-			warn(url, `HTTP ${status} even with browser UA (likely bot-blocking) — verify manually [${source}]`);
+			warn(
+				url,
+				`HTTP ${status} even with browser UA (likely bot-blocking) — verify manually [${source}]`,
+			);
 			return;
 		}
 	}
@@ -171,7 +174,10 @@ async function checkInstallCommand(cmd: string, source: string) {
 			`https://raw.githubusercontent.com/${repo}/main/SKILL.md`,
 		);
 		if (raw !== 200)
-			blocker(cmd, `${repo} exists but has no SKILL.md at root (HTTP ${raw}) [${source}]`);
+			blocker(
+				cmd,
+				`${repo} exists but has no SKILL.md at root (HTTP ${raw}) [${source}]`,
+			);
 		return;
 	}
 	// /plugin marketplace add owner/repo
@@ -183,7 +189,8 @@ async function checkInstallCommand(cmd: string, source: string) {
 	}
 	// npx [-y] @scope/pkg  |  npm install pkg [pkg2...]
 	const pkgs =
-		cmd.match(/(?:npx (?:-y )?|npm install )((?:@?[\w./-]+ ?)+)/)?.[1]
+		cmd
+			.match(/(?:npx (?:-y )?|npm install )((?:@?[\w./-]+ ?)+)/)?.[1]
 			?.split(/\s+/)
 			.filter((p) => p && !p.startsWith("-")) ?? [];
 	for (const pkg of pkgs) {
@@ -195,7 +202,8 @@ async function checkInstallCommand(cmd: string, source: string) {
 	if (mcpUrl) {
 		const status = await fetchStatus(mcpUrl[1]);
 		// Any HTTP response (even 4xx) proves the host is alive; 0 = dead.
-		if (status === 0) blocker(cmd, `MCP host ${mcpUrl[1]} unreachable [${source}]`);
+		if (status === 0)
+			blocker(cmd, `MCP host ${mcpUrl[1]} unreachable [${source}]`);
 	}
 }
 
@@ -212,7 +220,11 @@ function extractUrls(markdown: string): string[] {
 	];
 }
 
-async function runBatch<T>(items: T[], fn: (item: T) => Promise<void>, size = 8) {
+async function runBatch<T>(
+	items: T[],
+	fn: (item: T) => Promise<void>,
+	size = 8,
+) {
 	for (let i = 0; i < items.length; i += size) {
 		await Promise.all(items.slice(i, i + size).map(fn));
 	}
@@ -229,9 +241,15 @@ async function main() {
 		const local = JSON.parse(readFileSync(path.join(ROOT, manifest), "utf8"))
 			.version as string;
 		if (!latest) {
-			blocker(name, `not on the npm registry, but ${manifest} v${local} is advertised`);
+			blocker(
+				name,
+				`not on the npm registry, but ${manifest} v${local} is advertised`,
+			);
 		} else if (latest !== local) {
-			warn(name, `registry has v${latest}, monorepo ${manifest} says v${local} — publish or release-note the drift`);
+			warn(
+				name,
+				`registry has v${latest}, monorepo ${manifest} says v${local} — publish or release-note the drift`,
+			);
 		} else {
 			console.log(`  ok ${name}@${latest}`);
 		}
@@ -275,9 +293,15 @@ async function main() {
 		seenUrl.add(url);
 		return true;
 	});
-	console.log(`  checking ${uniqueUrls.length} unique URLs + ${cmdChecks.length} install commands…`);
+	console.log(
+		`  checking ${uniqueUrls.length} unique URLs + ${cmdChecks.length} install commands…`,
+	);
 	await runBatch(uniqueUrls, ({ url, source }) => checkUrl(url, source));
-	await runBatch(cmdChecks, ({ cmd, source }) => checkInstallCommand(cmd, source), 4);
+	await runBatch(
+		cmdChecks,
+		({ cmd, source }) => checkInstallCommand(cmd, source),
+		4,
+	);
 
 	// 4. Production endpoints
 	console.log("── production endpoints ──");
@@ -287,7 +311,10 @@ async function main() {
 		const expectValidation = probe.includes("__probe__");
 		const ok = expectValidation ? status === 400 : status === 200;
 		if (!ok)
-			blocker(`${PROD}${probe}`, `HTTP ${status || "network-error"} (expected ${expectValidation ? 400 : 200})`);
+			blocker(
+				`${PROD}${probe}`,
+				`HTTP ${status || "network-error"} (expected ${expectValidation ? 400 : 200})`,
+			);
 		else console.log(`  ok ${probe} → ${status}`);
 	}
 
@@ -296,7 +323,9 @@ async function main() {
 	for (const m of MIRRORS) {
 		checked++;
 		try {
-			const res = await fetch(m.remote, { signal: AbortSignal.timeout(15_000) });
+			const res = await fetch(m.remote, {
+				signal: AbortSignal.timeout(15_000),
+			});
 			if (!res.ok) {
 				blocker(m.label, `mirror fetch failed: HTTP ${res.status}`);
 				continue;
@@ -304,7 +333,10 @@ async function main() {
 			const remote = (await res.text()).trim();
 			const local = readFileSync(path.join(ROOT, m.local), "utf8").trim();
 			if (remote !== local)
-				warn(m.label, `drifted from ${m.local} — auto-sync PAT is broken, run the manual sync`);
+				warn(
+					m.label,
+					`drifted from ${m.local} — auto-sync PAT is broken, run the manual sync`,
+				);
 			else console.log(`  ok ${m.label} in sync`);
 		} catch (err) {
 			blocker(m.label, `mirror check error: ${(err as Error).message}`);
@@ -314,9 +346,13 @@ async function main() {
 	// Report
 	const blockers = findings.filter((f) => f.severity === "blocker");
 	const warnings = findings.filter((f) => f.severity === "warn");
-	console.log(`\n${checked} checks · ${blockers.length} blockers · ${warnings.length} warnings\n`);
-	for (const f of blockers) console.log(`  ✗ BLOCKER  ${f.claim}\n             ${f.detail}`);
-	for (const f of warnings) console.log(`  ⚠ warn     ${f.claim}\n             ${f.detail}`);
+	console.log(
+		`\n${checked} checks · ${blockers.length} blockers · ${warnings.length} warnings\n`,
+	);
+	for (const f of blockers)
+		console.log(`  ✗ BLOCKER  ${f.claim}\n             ${f.detail}`);
+	for (const f of warnings)
+		console.log(`  ⚠ warn     ${f.claim}\n             ${f.detail}`);
 
 	if (blockers.length > 0 || (STRICT && warnings.length > 0)) process.exit(1);
 	console.log("all advertised artifacts verified ✓");

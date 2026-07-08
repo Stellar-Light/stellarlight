@@ -17,9 +17,13 @@ async function main() {
 		depth: 0,
 	});
 	const rows = agents.docs as any[];
-	console.log(`AGENT-type calls (agent/claude/codex/cursor) ever: ${agents.totalDocs}\n`);
+	console.log(
+		`AGENT-type calls (agent/claude/codex/cursor) ever: ${agents.totalDocs}\n`,
+	);
 	if (!rows.length) {
-		console.log("==> ZERO agent/bot calls in the entire log. No agent (incl. Pallet) has ever hit the public API.");
+		console.log(
+			"==> ZERO agent/bot calls in the entire log. No agent (incl. Pallet) has ever hit the public API.",
+		);
 		process.exit(0);
 	}
 	// endpoint + bucket breakdown
@@ -33,8 +37,13 @@ async function main() {
 	console.log("by endpoint:", JSON.stringify(byEp));
 	console.log(`\nlatest agent calls (newest first):`);
 	for (const r of rows.slice(0, 40)) {
-		console.log(`  ${String(r.createdAt).slice(0, 19)}  [${r.uaBucket}/${r.country || "?"}]  ${r.endpoint}  q="${r.query || ""}"`);
+		console.log(
+			`  ${String(r.createdAt).slice(0, 19)}  [${r.uaBucket}/${r.country || "?"}]  ${r.endpoint}  q="${r.query || ""}"`,
+		);
 	}
 	process.exit(0);
 }
-main().catch((e) => { console.error("Fatal:", e); process.exit(1); });
+main().catch((e) => {
+	console.error("Fatal:", e);
+	process.exit(1);
+});

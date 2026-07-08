@@ -18,54 +18,54 @@ interface Props {
 const COUNTRY_CODE: Record<string, string> = {
 	"United States": "US",
 	"United Kingdom": "GB",
-	"Nigeria": "NG",
-	"India": "IN",
+	Nigeria: "NG",
+	India: "IN",
 	"Costa Rica": "CR",
-	"Argentina": "AR",
-	"Canada": "CA",
-	"Germany": "DE",
-	"Brazil": "BR",
-	"Türkiye": "TR",
-	"Turkey": "TR",
-	"Spain": "ES",
-	"Kenya": "KE",
-	"Vietnam": "VN",
-	"France": "FR",
-	"China": "CN",
-	"Japan": "JP",
-	"Mexico": "MX",
-	"Colombia": "CO",
-	"Chile": "CL",
-	"Peru": "PE",
-	"Venezuela": "VE",
-	"Australia": "AU",
-	"Netherlands": "NL",
-	"Portugal": "PT",
-	"Italy": "IT",
-	"Poland": "PL",
-	"Ukraine": "UA",
-	"Russia": "RU",
+	Argentina: "AR",
+	Canada: "CA",
+	Germany: "DE",
+	Brazil: "BR",
+	Türkiye: "TR",
+	Turkey: "TR",
+	Spain: "ES",
+	Kenya: "KE",
+	Vietnam: "VN",
+	France: "FR",
+	China: "CN",
+	Japan: "JP",
+	Mexico: "MX",
+	Colombia: "CO",
+	Chile: "CL",
+	Peru: "PE",
+	Venezuela: "VE",
+	Australia: "AU",
+	Netherlands: "NL",
+	Portugal: "PT",
+	Italy: "IT",
+	Poland: "PL",
+	Ukraine: "UA",
+	Russia: "RU",
 	"South Africa": "ZA",
-	"Egypt": "EG",
-	"Pakistan": "PK",
-	"Bangladesh": "BD",
-	"Indonesia": "ID",
-	"Philippines": "PH",
-	"Singapore": "SG",
+	Egypt: "EG",
+	Pakistan: "PK",
+	Bangladesh: "BD",
+	Indonesia: "ID",
+	Philippines: "PH",
+	Singapore: "SG",
 	"South Korea": "KR",
-	"Switzerland": "CH",
-	"Sweden": "SE",
-	"Norway": "NO",
-	"Denmark": "DK",
-	"Finland": "FI",
-	"Ireland": "IE",
-	"Belgium": "BE",
-	"Austria": "AT",
-	"Czechia": "CZ",
-	"Greece": "GR",
-	"Romania": "RO",
-	"Hungary": "HU",
-	"Israel": "IL",
+	Switzerland: "CH",
+	Sweden: "SE",
+	Norway: "NO",
+	Denmark: "DK",
+	Finland: "FI",
+	Ireland: "IE",
+	Belgium: "BE",
+	Austria: "AT",
+	Czechia: "CZ",
+	Greece: "GR",
+	Romania: "RO",
+	Hungary: "HU",
+	Israel: "IL",
 };
 
 function flagEmoji(country: string): string {
@@ -109,7 +109,11 @@ function CountryCard({
 	);
 }
 
-export function EcosystemGeoCards({ topCountries, located, totalActive }: Props) {
+export function EcosystemGeoCards({
+	topCountries,
+	located,
+	totalActive,
+}: Props) {
 	const [open, setOpen] = useState(false);
 	if (!topCountries.length || located === 0) return null;
 
@@ -128,7 +132,8 @@ export function EcosystemGeoCards({ topCountries, located, totalActive }: Props)
 					Where Stellar devs build from
 				</div>
 				<div className="text-[11px] text-muted-foreground/70">
-					{located.toLocaleString()} of {totalActive.toLocaleString()} active devs publish a location · hover for top 10
+					{located.toLocaleString()} of {totalActive.toLocaleString()} active
+					devs publish a location · hover for top 10
 				</div>
 			</div>
 

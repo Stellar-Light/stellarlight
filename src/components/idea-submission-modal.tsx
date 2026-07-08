@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { X } from "lucide-react";
+import { useState } from "react";
 
 interface IdeaSubmissionModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 }
 
-export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProps) {
+export function IdeaSubmissionModal({
+	isOpen,
+	onClose,
+}: IdeaSubmissionModalProps) {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [ecosystemNeed, setEcosystemNeed] = useState("");
@@ -89,7 +92,8 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 							Suggest an Ecosystem Need
 						</h2>
 						<p className="text-sm text-muted-foreground mt-1">
-							Have an idea beyond the listed RFPs? Let reviewers know for the next quarterly cycle.
+							Have an idea beyond the listed RFPs? Let reviewers know for the
+							next quarterly cycle.
 						</p>
 					</div>
 					<button
@@ -104,13 +108,26 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 				{submitted ? (
 					<div className="px-6 py-16 text-center">
 						<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-							<svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+							<svg
+								className="w-8 h-8 text-emerald-400"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M5 13l4 4L19 7"
+								/>
 							</svg>
 						</div>
-						<h3 className="text-lg font-semibold text-foreground mb-2">Submitted!</h3>
+						<h3 className="text-lg font-semibold text-foreground mb-2">
+							Submitted!
+						</h3>
 						<p className="text-sm text-muted-foreground">
-							Thanks for your input. Your suggestion will be reviewed for the next quarterly RFP cycle.
+							Thanks for your input. Your suggestion will be reviewed for the
+							next quarterly RFP cycle.
 						</p>
 					</div>
 				) : (
@@ -122,19 +139,28 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 							</p>
 							<div className="space-y-2 text-sm text-muted-foreground">
 								<p>
-									<span className="text-foreground font-medium">1) How big is the need?</span>{" "}
-									If small and nice-to-have, it may be better suited for bounties or hackathons. If large and critical, it moves to step 2.
+									<span className="text-foreground font-medium">
+										1) How big is the need?
+									</span>{" "}
+									If small and nice-to-have, it may be better suited for
+									bounties or hackathons. If large and critical, it moves to
+									step 2.
 								</p>
 								<p>
-									<span className="text-foreground font-medium">2) How to best fill the gap?</span>{" "}
-									Should an existing team add this feature, or do we need a net-new build via RFP?
+									<span className="text-foreground font-medium">
+										2) How to best fill the gap?
+									</span>{" "}
+									Should an existing team add this feature, or do we need a
+									net-new build via RFP?
 								</p>
 							</div>
 						</div>
 
 						{/* About You */}
 						<div className="space-y-4">
-							<h3 className="text-base font-semibold text-foreground">About You</h3>
+							<h3 className="text-base font-semibold text-foreground">
+								About You
+							</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
 									<label className="block text-sm font-medium text-foreground mb-1.5">
@@ -166,11 +192,14 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 
 						{/* Ecosystem Need */}
 						<div className="space-y-4 pt-4 border-t border-border/50">
-							<h3 className="text-base font-semibold text-foreground">Ecosystem Need</h3>
+							<h3 className="text-base font-semibold text-foreground">
+								Ecosystem Need
+							</h3>
 
 							<div>
 								<label className="block text-sm font-medium text-foreground mb-1.5">
-									What does the ecosystem need? <span className="text-muted-foreground">*</span>
+									What does the ecosystem need?{" "}
+									<span className="text-muted-foreground">*</span>
 								</label>
 								<textarea
 									required
@@ -185,13 +214,26 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 							{/* Need Size */}
 							<div>
 								<label className="block text-sm font-medium text-foreground mb-2">
-									How big is this need? <span className="text-muted-foreground">*</span>
+									How big is this need?{" "}
+									<span className="text-muted-foreground">*</span>
 								</label>
 								<div className="space-y-2">
 									{[
-										{ value: "critical", label: "Critical", desc: "Essential for ecosystem growth and success" },
-										{ value: "important", label: "Important", desc: "Would significantly improve the ecosystem" },
-										{ value: "nice-to-have", label: "Nice to have", desc: "May be better suited for bounties or hackathons" },
+										{
+											value: "critical",
+											label: "Critical",
+											desc: "Essential for ecosystem growth and success",
+										},
+										{
+											value: "important",
+											label: "Important",
+											desc: "Would significantly improve the ecosystem",
+										},
+										{
+											value: "nice-to-have",
+											label: "Nice to have",
+											desc: "May be better suited for bounties or hackathons",
+										},
 									].map((option) => (
 										<label
 											key={option.value}
@@ -211,8 +253,12 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 												required
 											/>
 											<div className="flex-1 min-w-0">
-												<span className="block text-sm font-medium text-foreground leading-tight">{option.label}</span>
-												<p className="text-xs text-muted-foreground mt-1">{option.desc}</p>
+												<span className="block text-sm font-medium text-foreground leading-tight">
+													{option.label}
+												</span>
+												<p className="text-xs text-muted-foreground mt-1">
+													{option.desc}
+												</p>
 											</div>
 										</label>
 									))}
@@ -222,7 +268,8 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 							{/* Approach */}
 							<div>
 								<label className="block text-sm font-medium text-foreground mb-1.5">
-									How should this be addressed? <span className="text-muted-foreground">*</span>
+									How should this be addressed?{" "}
+									<span className="text-muted-foreground">*</span>
 								</label>
 								<select
 									required
@@ -230,10 +277,16 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 									onChange={(e) => setApproach(e.target.value)}
 									className="w-full h-11 px-4 bg-background text-sm text-foreground rounded-xl border border-border/50 focus:outline-none focus:ring-2 focus:ring-ring transition-all appearance-none cursor-pointer"
 								>
-									<option value="" disabled>Select an approach</option>
+									<option value="" disabled>
+										Select an approach
+									</option>
 									<option value="net-new-rfp">Net-new build via RFP</option>
-									<option value="existing-team">Ask an existing team to add the feature</option>
-									<option value="unsure">Not sure — reviewers should decide</option>
+									<option value="existing-team">
+										Ask an existing team to add the feature
+									</option>
+									<option value="unsure">
+										Not sure — reviewers should decide
+									</option>
 								</select>
 							</div>
 
@@ -253,9 +306,7 @@ export function IdeaSubmissionModal({ isOpen, onClose }: IdeaSubmissionModalProp
 						</div>
 
 						{/* Error */}
-						{error && (
-							<p className="text-sm text-red-400">{error}</p>
-						)}
+						{error && <p className="text-sm text-red-400">{error}</p>}
 
 						{/* Actions */}
 						<div className="flex gap-3 pt-2">

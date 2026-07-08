@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import configPromise from "@/payload.config";
 import { getPayload } from "payload";
 import { getAppUrl } from "@/lib/utils/app-url";
+import configPromise from "@/payload.config";
 
 /**
  * Vercel Cron Job: Refresh GitHub statistics for all projects
- * 
+ *
  * Current Schedule: Daily at 2:00 AM UTC (Hobby plan compatible)
  * To run more frequently (e.g., every 6 hours), upgrade to Pro plan and update vercel.json
- * 
+ *
  * Security: Protected by Vercel Cron secret
  */
 export async function GET(request: Request) {
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 	// Vercel automatically adds Authorization header with CRON_SECRET
 	const authHeader = request.headers.get("authorization");
 	const cronSecret = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
-	
+
 	if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
@@ -93,4 +93,3 @@ export async function GET(request: Request) {
 		);
 	}
 }
-

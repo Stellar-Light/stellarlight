@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
 import { useAuth, useConfig } from "@payloadcms/ui";
+import type React from "react";
+import { useState } from "react";
 
 export const RSSSyncButton: React.FC = () => {
 	const { user } = useAuth();
@@ -81,8 +82,8 @@ export const RSSSyncButton: React.FC = () => {
 					fontSize: "14px",
 				}}
 			>
-				Manually trigger RSS feed synchronization. This will fetch all enabled RSS feeds
-				and import new posts.
+				Manually trigger RSS feed synchronization. This will fetch all enabled
+				RSS feeds and import new posts.
 			</p>
 			<button
 				onClick={handleSync}
@@ -115,7 +116,9 @@ export const RSSSyncButton: React.FC = () => {
 							? "rgba(16, 185, 129, 0.1)"
 							: "rgba(239, 68, 68, 0.1)",
 						border: `1px solid ${
-							result.success ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"
+							result.success
+								? "rgba(16, 185, 129, 0.3)"
+								: "rgba(239, 68, 68, 0.3)"
 						}`,
 						borderRadius: "4px",
 					}}
@@ -133,7 +136,9 @@ export const RSSSyncButton: React.FC = () => {
 								✓ Sync Completed Successfully
 							</p>
 							{result.stats && (
-								<div style={{ fontSize: "13px", color: "var(--theme-text-muted)" }}>
+								<div
+									style={{ fontSize: "13px", color: "var(--theme-text-muted)" }}
+								>
 									<p style={{ margin: "4px 0" }}>
 										Inserted: <strong>{result.stats.inserted || 0}</strong>
 									</p>
@@ -161,4 +166,3 @@ export const RSSSyncButton: React.FC = () => {
 		</div>
 	);
 };
-

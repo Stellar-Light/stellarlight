@@ -1,6 +1,6 @@
 "use client";
 
-import { AreaChart, Area } from "@/components/charts/area-chart";
+import { Area, AreaChart } from "@/components/charts/area-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
 
 export interface ChainLine {
@@ -25,11 +25,7 @@ interface Props {
 	animationDuration?: number;
 }
 
-export function EcosystemMadChart({
-	data,
-	chains,
-	animationDuration,
-}: Props) {
+export function EcosystemMadChart({ data, chains, animationDuration }: Props) {
 	return (
 		<AreaChart
 			data={data as unknown as Record<string, unknown>[]}

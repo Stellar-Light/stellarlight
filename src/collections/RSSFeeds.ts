@@ -4,8 +4,15 @@ export const RSSFeeds: CollectionConfig = {
 	slug: "rss-feeds",
 	admin: {
 		useAsTitle: "name",
-		defaultColumns: ["name", "feedUrl", "enabled", "syncFrequency", "lastSyncedAt"],
-		description: "Manage RSS feeds that automatically import blog posts. Visit the RSS Management page to sync feeds.",
+		defaultColumns: [
+			"name",
+			"feedUrl",
+			"enabled",
+			"syncFrequency",
+			"lastSyncedAt",
+		],
+		description:
+			"Manage RSS feeds that automatically import blog posts. Visit the RSS Management page to sync feeds.",
 	},
 	access: {
 		read: ({ req }) => !!req.user,
@@ -77,7 +84,8 @@ export const RSSFeeds: CollectionConfig = {
 			name: "author",
 			type: "text",
 			admin: {
-				description: "Default author name for posts from this feed (if not specified in RSS)",
+				description:
+					"Default author name for posts from this feed (if not specified in RSS)",
 			},
 		},
 		{
@@ -109,7 +117,8 @@ export const RSSFeeds: CollectionConfig = {
 			type: "checkbox",
 			defaultValue: false,
 			admin: {
-				description: "Automatically publish imported posts (otherwise they'll be drafts)",
+				description:
+					"Automatically publish imported posts (otherwise they'll be drafts)",
 			},
 		},
 		{
@@ -164,4 +173,3 @@ export const RSSFeeds: CollectionConfig = {
 		],
 	},
 };
-

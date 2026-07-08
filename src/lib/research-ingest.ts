@@ -85,9 +85,15 @@ export function stripBoilerplate(content: string): string {
 		" ",
 	);
 	// Bare trailing copyright not caught above.
-	s = s.replace(/©\s*\d{4}\s*(?:SDF|Stellar Development Foundation)\b[\s\S]*$/gi, " ");
+	s = s.replace(
+		/©\s*\d{4}\s*(?:SDF|Stellar Development Foundation)\b[\s\S]*$/gi,
+		" ",
+	);
 	s = s.replace(/\bDev Docs Menu\b/gi, " ").replace(/\bon this page\b/gi, " ");
-	return s.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+	return s
+		.replace(/[ \t]{2,}/g, " ")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
 }
 
 export function isLowValueChunk(content: string): boolean {
@@ -105,7 +111,8 @@ export function isLowValueChunk(content: string): boolean {
 	// sentence; a bare header carries none. Gated on a metadata marker so real
 	// short sections / code / bullets (which lack period-sentences too) are kept.
 	const sentences = (raw.match(/[^.!?\n]{25,}[.!?]/g) ?? []).length;
-	const metaStub = /\b(publishing date|quarterly report|min read|dev docs menu)\b/i.test(raw);
+	const metaStub =
+		/\b(publishing date|quarterly report|min read|dev docs menu)\b/i.test(raw);
 	if (metaStub && sentences === 0) return true;
 
 	// Docusaurus auto-generated index "card" link teasers (📄 marker). These

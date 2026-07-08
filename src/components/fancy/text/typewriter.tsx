@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface TypewriterProps {
 	text: string[];
@@ -54,7 +54,15 @@ export default function Typewriter({
 		);
 
 		return () => clearTimeout(timeout);
-	}, [displayedText, isDeleting, currentIndex, text, speed, deleteSpeed, waitTime]);
+	}, [
+		displayedText,
+		isDeleting,
+		currentIndex,
+		text,
+		speed,
+		deleteSpeed,
+		waitTime,
+	]);
 
 	useEffect(() => {
 		const cursorInterval = setInterval(() => {
@@ -70,8 +78,9 @@ export default function Typewriter({
 	return (
 		<span className={isWhiteText ? "text-foreground" : className}>
 			{displayedText}
-			<span className={showCursor ? "opacity-100" : "opacity-0"}>{cursorChar}</span>
+			<span className={showCursor ? "opacity-100" : "opacity-0"}>
+				{cursorChar}
+			</span>
 		</span>
 	);
 }
-

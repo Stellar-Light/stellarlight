@@ -28,6 +28,10 @@ export interface DepthBlob {
 
 /** Repo-level scalars from the GraphQL query (all near-free). */
 export interface DepthScalars {
+	/** Mainnet contract id from the README VERIFIED to exist on-chain via
+	 * stellar.expert (fetch layer; null = none found or unverifiable). Unfakeable
+	 * positive evidence — an address string alone is cheap, a live contract isn't. */
+	mainnetContractId?: string | null;
 	isFork?: boolean;
 	parentFullName?: string | null; // fork parent (owner/name)
 	commitCount?: number | null;
@@ -529,9 +533,15 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		1,
 		Math.max(input.scalars.releaseCount ?? 0, input.scalars.tagCount ?? 0) / 3,
 	);
-	const deployedAddr = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "")
+	// v3: on-chain-VERIFIED deployment (fetch layer checks stellar.expert) is
+	// worth ~3x a bare address mention — the address string is fakeable, the
+	// live mainnet contract is not.
+	const addrMention = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "");
+	const deployedAddr = input.scalars.mainnetContractId
 		? 1
-		: 0;
+		: addrMention
+			? 0.35
+			: 0;
 
 	const substance =
 		0.16 * workspaceBreadth +
@@ -545,7 +555,7 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		0.06 * testScore +
 		0.05 * releaseScore + // release maturity (audit dir path is fakeable → dropped, review P6c)
 		0.04 * Math.min(1, best.financialArith / 3) +
-		0.03 * deployedAddr;
+		0.08 * deployedAddr;
 
 	// (C) penalties.
 	let penalty = 0;

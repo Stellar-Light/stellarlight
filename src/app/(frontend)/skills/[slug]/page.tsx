@@ -34,10 +34,7 @@ import {
 	CURATED_SKILLS,
 	findCuratedSkill,
 } from "@/lib/integrations/curated-skills";
-import {
-	fetchSdfSkill,
-	SDF_SKILL_NAMES,
-} from "@/lib/integrations/sdf-skills";
+import { fetchSdfSkill, SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
@@ -90,8 +87,7 @@ export async function generateMetadata({
 	if (!skill) return { title: "Skill not found | Stellar Light" };
 
 	const title = `${skill.name} | Stellar Light Skills`;
-	const description =
-		skill.tagline ?? truncate(skill.description, 160);
+	const description = skill.tagline ?? truncate(skill.description, 160);
 	const canonical = `${SITE_URL}/skills/${skill.slug}`;
 	const ogUrl = `${SITE_URL}/api/skills/${skill.slug}/og`;
 
@@ -233,22 +229,34 @@ export default async function SkillDetailPage({
 						</div>
 						<div className="flex flex-wrap gap-2">
 							{skill.repository && (
-								<LinkButton href={skill.repository} icon={<Github className="w-3.5 h-3.5" />}>
+								<LinkButton
+									href={skill.repository}
+									icon={<Github className="w-3.5 h-3.5" />}
+								>
 									Repository
 								</LinkButton>
 							)}
 							{skill.homepage && (
-								<LinkButton href={skill.homepage} icon={<ExternalLink className="w-3.5 h-3.5" />}>
+								<LinkButton
+									href={skill.homepage}
+									icon={<ExternalLink className="w-3.5 h-3.5" />}
+								>
 									Homepage
 								</LinkButton>
 							)}
 							{skill.docs && (
-								<LinkButton href={skill.docs} icon={<ExternalLink className="w-3.5 h-3.5" />}>
+								<LinkButton
+									href={skill.docs}
+									icon={<ExternalLink className="w-3.5 h-3.5" />}
+								>
 									Docs
 								</LinkButton>
 							)}
 							{skill.rawUrl && (
-								<LinkButton href={skill.rawUrl} icon={<ExternalLink className="w-3.5 h-3.5" />}>
+								<LinkButton
+									href={skill.rawUrl}
+									icon={<ExternalLink className="w-3.5 h-3.5" />}
+								>
 									Raw SKILL.md
 								</LinkButton>
 							)}
@@ -475,7 +483,11 @@ function humanize(slug: string): string {
 	return slug
 		.split("-")
 		.map((w) =>
-			w === "zk" ? "ZK" : w === "dapp" ? "dApp" : w[0]?.toUpperCase() + w.slice(1),
+			w === "zk"
+				? "ZK"
+				: w === "dapp"
+					? "dApp"
+					: w[0]?.toUpperCase() + w.slice(1),
 		)
 		.join(" ");
 }
@@ -550,10 +562,7 @@ const MARKDOWN_COMPONENTS = {
 	li: (p: React.HTMLAttributes<HTMLLIElement>) => (
 		<li className="leading-relaxed" {...p} />
 	),
-	a: ({
-		href,
-		...rest
-	}: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+	a: ({ href, ...rest }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
 		const isExternal = href?.startsWith("http");
 		return (
 			<a

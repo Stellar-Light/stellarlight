@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
-import configPromise from "@/payload.config";
 import fs from "node:fs";
 import path from "node:path";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
+import configPromise from "@/payload.config";
 
 // Category mapping from Airtable to our schema
 const categoryMapping: Record<string, string> = {
@@ -139,7 +139,7 @@ function extractImageUrl(logoField: string): string | null {
 
 // Extract filename from logo field
 function extractFilename(logoField: string): string {
-	const match = logoField.match(/^([^\(]+)/);
+	const match = logoField.match(/^([^(]+)/);
 	const filename = match ? match[1].trim() : "logo.png";
 	return filename;
 }
@@ -161,8 +161,7 @@ async function downloadImage(
 			return null;
 		}
 
-		const contentType =
-			response.headers.get("content-type") || "image/png";
+		const contentType = response.headers.get("content-type") || "image/png";
 		const arrayBuffer = await response.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
@@ -206,16 +205,16 @@ function normalizeLink(link: string): string {
 
 /**
  * API Route: Import projects from Airtable CSV
- * 
+ *
  * This endpoint imports projects from the CSV file with image uploads.
  * Images are downloaded and uploaded to R2 storage via Payload.
- * 
+ *
  * Security: Protected by CRON_SECRET (same as other cron jobs)
- * 
+ *
  * Usage:
  *   POST /api/import/airtable-csv
  *   Authorization: Bearer <CRON_SECRET>
- * 
+ *
  * Or via curl:
  *   curl -X POST https://yourdomain.com/api/import/airtable-csv \
  *     -H "Authorization: Bearer <CRON_SECRET>"
@@ -233,7 +232,7 @@ export async function POST(request: NextRequest) {
 		// Read CSV file from scripts directory
 		// In production, this file should be in the repository
 		const csvPath = path.join(process.cwd(), "scripts", "airtable_import.csv");
-		
+
 		if (!fs.existsSync(csvPath)) {
 			return NextResponse.json(
 				{ error: `CSV file not found at: ${csvPath}` },
@@ -280,10 +279,7 @@ export async function POST(request: NextRequest) {
 					if (imageData) {
 						try {
 							const originalFilename = extractFilename(row.logo);
-							const ext = getExtension(
-								imageData.contentType,
-								originalFilename,
-							);
+							const ext = getExtension(imageData.contentType, originalFilename);
 							const safeFilename = `${row.slug}-logo${ext}`;
 
 							// Create media entry using Payload's upload
@@ -318,8 +314,7 @@ export async function POST(request: NextRequest) {
 				const types = typeMapping[row.labelCategory] || ["Other"];
 
 				// Determine status
-				let status: "Draft" | "Development" | "Pre-Release" | "Live" =
-					"Live";
+				let status: "Draft" | "Development" | "Pre-Release" | "Live" = "Live";
 				if (row.comingSoon) {
 					status = "Development";
 				}
@@ -391,4 +386,3 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
 	return POST(request);
 }
-

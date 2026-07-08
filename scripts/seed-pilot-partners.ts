@@ -21,10 +21,10 @@
  * first login.
  */
 
-import { config as loadEnv } from "dotenv";
 import { randomBytes } from "node:crypto";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { config as loadEnv } from "dotenv";
+import { getPayload } from "payload";
 
 // Next.js reads .env.local; tsx scripts must load it explicitly.
 loadEnv({ path: ".env.local" });
@@ -66,7 +66,9 @@ const PILOT = [
 
 async function main() {
 	const payload = await getPayload({ config });
-	console.log(`Seeding ${PILOT.length} pilot partners (${PUBLISH ? "published" : "draft"})\n`);
+	console.log(
+		`Seeding ${PILOT.length} pilot partners (${PUBLISH ? "published" : "draft"})\n`,
+	);
 
 	for (const p of PILOT) {
 		const existing = await payload.find({

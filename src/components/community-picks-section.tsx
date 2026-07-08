@@ -1,4 +1,3 @@
-import { getPayloadSafe } from "@/lib/payload-client";
 import CommunityPickCard from "@/components/community-pick-card";
 import CommunityPickCardSkeleton from "@/components/community-pick-card-skeleton";
 import {
@@ -8,6 +7,7 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "@/components/ui/carousel";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function CommunityPicksSection() {
 	const payload = await getPayloadSafe();
@@ -110,4 +110,3 @@ export function CommunityPicksSectionSkeleton() {
 		</section>
 	);
 }
-

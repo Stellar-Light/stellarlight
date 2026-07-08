@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import Airtable from "airtable";
+import { type NextRequest, NextResponse } from "next/server";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 // Airtable configuration - must be set via environment variables
@@ -19,7 +19,10 @@ export async function POST(request: NextRequest) {
 
 		if (!AIRTABLE_BASE_ID || !AIRTABLE_TABLE_ID || !AIRTABLE_VIEW_ID) {
 			return NextResponse.json(
-				{ error: "AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID, and AIRTABLE_VIEW_ID environment variables must be set" },
+				{
+					error:
+						"AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID, and AIRTABLE_VIEW_ID environment variables must be set",
+				},
 				{ status: 500 },
 			);
 		}
@@ -76,18 +79,31 @@ export async function POST(request: NextRequest) {
 				const projectData: any = {
 					name,
 					slug: getSlug(name),
-					shortDescription: (typeof (fields.Description || fields.description || fields.ShortDescription || fields.shortDescription) === "string") 
-						? (fields.Description || fields.description || fields.ShortDescription || fields.shortDescription) 
-						: "",
-					category: (typeof (fields.Category || fields.category) === "string")
-						? (fields.Category || fields.category)
-						: "Infrastructure",
-					status: (typeof (fields.Status || fields.status) === "string")
-						? (fields.Status || fields.status)
-						: "Draft",
-					verificationLevel: (typeof (fields.VerificationLevel || fields.verificationLevel) === "string")
-						? (fields.VerificationLevel || fields.verificationLevel)
-						: "Unverified",
+					shortDescription:
+						typeof (
+							fields.Description ||
+							fields.description ||
+							fields.ShortDescription ||
+							fields.shortDescription
+						) === "string"
+							? fields.Description ||
+								fields.description ||
+								fields.ShortDescription ||
+								fields.shortDescription
+							: "",
+					category:
+						typeof (fields.Category || fields.category) === "string"
+							? fields.Category || fields.category
+							: "Infrastructure",
+					status:
+						typeof (fields.Status || fields.status) === "string"
+							? fields.Status || fields.status
+							: "Draft",
+					verificationLevel:
+						typeof (fields.VerificationLevel || fields.verificationLevel) ===
+						"string"
+							? fields.VerificationLevel || fields.verificationLevel
+							: "Unverified",
 					provenance: {
 						source: "AdminEdit",
 						sourceId: record.id,
@@ -105,11 +121,36 @@ export async function POST(request: NextRequest) {
 					return undefined;
 				};
 
-				const website = getStringField(fields.Website, fields.website, fields.URL, fields.url);
-				const github = getStringField(fields.GitHub, fields.github, fields.GitHubURL, fields.githubUrl);
-				const twitter = getStringField(fields.Twitter, fields.twitter, fields.TwitterURL, fields.twitterUrl);
-				const docs = getStringField(fields.Docs, fields.docs, fields.Documentation, fields.documentation);
-				const orgLogin = getStringField(fields.OrgLogin, fields.orgLogin, fields.GitHubOrg, fields.githubOrg);
+				const website = getStringField(
+					fields.Website,
+					fields.website,
+					fields.URL,
+					fields.url,
+				);
+				const github = getStringField(
+					fields.GitHub,
+					fields.github,
+					fields.GitHubURL,
+					fields.githubUrl,
+				);
+				const twitter = getStringField(
+					fields.Twitter,
+					fields.twitter,
+					fields.TwitterURL,
+					fields.twitterUrl,
+				);
+				const docs = getStringField(
+					fields.Docs,
+					fields.docs,
+					fields.Documentation,
+					fields.documentation,
+				);
+				const orgLogin = getStringField(
+					fields.OrgLogin,
+					fields.orgLogin,
+					fields.GitHubOrg,
+					fields.githubOrg,
+				);
 
 				if (website || github || twitter || docs) {
 					projectData.links = {};
@@ -182,10 +223,12 @@ export async function POST(request: NextRequest) {
 	} catch (error) {
 		return NextResponse.json(
 			{
-				error: error instanceof Error ? error.message : "Unknown error during import",
+				error:
+					error instanceof Error
+						? error.message
+						: "Unknown error during import",
 			},
 			{ status: 500 },
 		);
 	}
 }
-

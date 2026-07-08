@@ -12,8 +12,8 @@
  * text. DRY RUN by default; --execute writes. Run via Action (prod creds + key).
  */
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embed } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const ROZO_ID = "69b035ea2d04b7c0f26dada6";
@@ -24,15 +24,40 @@ const NEW_TAGS = ["Bridge", "Cross-Chain", "CCTP", "USDC"];
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	const doc: any = await payload.findByID({ collection: "projects", id: ROZO_ID, depth: 0 });
+	const doc: any = await payload.findByID({
+		collection: "projects",
+		id: ROZO_ID,
+		depth: 0,
+	});
 
-	console.log(`Mode: ${EXECUTE ? "EXECUTE (writes)" : "DRY RUN (read-only)"}\n`);
+	console.log(
+		`Mode: ${EXECUTE ? "EXECUTE (writes)" : "DRY RUN (read-only)"}\n`,
+	);
 	console.log("CURRENT:");
-	console.log("  name:", doc.name, "| category:", doc.category, "| status:", doc.status);
-	console.log("  provenance.source:", doc.provenance?.source, "| verificationLevel:", doc.verificationLevel);
+	console.log(
+		"  name:",
+		doc.name,
+		"| category:",
+		doc.category,
+		"| status:",
+		doc.status,
+	);
+	console.log(
+		"  provenance.source:",
+		doc.provenance?.source,
+		"| verificationLevel:",
+		doc.verificationLevel,
+	);
 	console.log("  tags:", JSON.stringify(doc.tags));
-	console.log("  shortDescription:", String(doc.shortDescription).slice(0, 90), "…");
-	console.log("  has embedding:", Array.isArray(doc.embedding) ? doc.embedding.length + "-dim" : "no");
+	console.log(
+		"  shortDescription:",
+		String(doc.shortDescription).slice(0, 90),
+		"…",
+	);
+	console.log(
+		"  has embedding:",
+		Array.isArray(doc.embedding) ? doc.embedding.length + "-dim" : "no",
+	);
 
 	// merge tags (handle string[] or object[])
 	let mergedTags = doc.tags;
@@ -40,10 +65,14 @@ async function main() {
 		if (doc.tags.length === 0 || typeof doc.tags[0] === "string") {
 			mergedTags = Array.from(new Set([...(doc.tags || []), ...NEW_TAGS]));
 		} else if (typeof doc.tags[0] === "object" && doc.tags[0]) {
-			const key = "tag" in doc.tags[0] ? "tag" : "name" in doc.tags[0] ? "name" : null;
+			const key =
+				"tag" in doc.tags[0] ? "tag" : "name" in doc.tags[0] ? "name" : null;
 			if (key) {
 				const have = new Set(doc.tags.map((t: any) => t[key]));
-				mergedTags = [...doc.tags, ...NEW_TAGS.filter((t) => !have.has(t)).map((t) => ({ [key]: t }))];
+				mergedTags = [
+					...doc.tags,
+					...NEW_TAGS.filter((t) => !have.has(t)).map((t) => ({ [key]: t })),
+				];
 			}
 		}
 	} else {
@@ -51,16 +80,33 @@ async function main() {
 	}
 
 	// sync-protection: skip-condition is source===LumenloopSeed OR verif===Unverified.
-	const newVerif = doc.verificationLevel === "Unverified" ? "Verified (Community)" : doc.verificationLevel;
+	const newVerif =
+		doc.verificationLevel === "Unverified"
+			? "Verified (Community)"
+			: doc.verificationLevel;
 
-	const tagStr = (mergedTags || []).map((t: any) => (typeof t === "string" ? t : t.tag || t.name || "")).join(" ");
-	const embedText = `${doc.name}. ${NEW_DESCRIPTION}. ${doc.category}. ${tagStr}`.slice(0, 4000);
+	const tagStr = (mergedTags || [])
+		.map((t: any) => (typeof t === "string" ? t : t.tag || t.name || ""))
+		.join(" ");
+	const embedText =
+		`${doc.name}. ${NEW_DESCRIPTION}. ${doc.category}. ${tagStr}`.slice(
+			0,
+			4000,
+		);
 
 	console.log("\nPROPOSED:");
 	console.log("  shortDescription →", NEW_DESCRIPTION.slice(0, 90), "…");
 	console.log("  tags →", JSON.stringify(mergedTags));
-	console.log("  provenance.source → AdminEdit  (was", doc.provenance?.source + ")");
-	console.log("  verificationLevel →", newVerif, "(was", doc.verificationLevel + ")  [protects from sync]");
+	console.log(
+		"  provenance.source → AdminEdit  (was",
+		doc.provenance?.source + ")",
+	);
+	console.log(
+		"  verificationLevel →",
+		newVerif,
+		"(was",
+		doc.verificationLevel + ")  [protects from sync]",
+	);
 	console.log("  re-embed text →", embedText.slice(0, 90), "…");
 
 	if (!EXECUTE) {
@@ -83,4 +129,7 @@ async function main() {
 	console.log("\nDONE: Rozo patched + re-embedded (1024-dim).");
 	process.exit(0);
 }
-main().catch((e) => { console.error("Fatal:", e); process.exit(1); });
+main().catch((e) => {
+	console.error("Fatal:", e);
+	process.exit(1);
+});

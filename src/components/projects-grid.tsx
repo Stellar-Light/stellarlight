@@ -1,6 +1,6 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import ProjectsGridClient from "@/components/projects-grid-client";
 import ProjectCardSkeleton from "@/components/project-card-skeleton";
+import ProjectsGridClient from "@/components/projects-grid-client";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 interface ProjectsGridProps {
 	limit?: number;
@@ -90,4 +90,3 @@ export function ProjectsGridSkeleton() {
 		</div>
 	);
 }
-

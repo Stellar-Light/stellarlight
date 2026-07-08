@@ -4,7 +4,9 @@ interface BlogCardSkeletonProps {
 	isLarge?: boolean;
 }
 
-export default function BlogCardSkeleton({ isLarge = false }: BlogCardSkeletonProps) {
+export default function BlogCardSkeleton({
+	isLarge = false,
+}: BlogCardSkeletonProps) {
 	if (isLarge) {
 		return (
 			<div className="relative overflow-hidden rounded-2xl bg-[#262626] border border-[#2F2F2F] h-full flex flex-col">
@@ -77,4 +79,3 @@ export default function BlogCardSkeleton({ isLarge = false }: BlogCardSkeletonPr
 		</div>
 	);
 }
-

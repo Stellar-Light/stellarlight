@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { ArrowRight, BookOpen, ChevronDown, Plus, Search } from "lucide-react";
 import Link from "next/link";
-import {
-	IDEAS,
-	CATEGORIES,
-	CATEGORY_LABELS,
-	type Quarter,
-} from "@/data/ideas";
-import { Badge } from "@/components/ui/badge";
-import { Search, ChevronDown, Plus, BookOpen, ArrowRight } from "lucide-react";
-import { IdeaSubmissionModal } from "@/components/idea-submission-modal";
+import { useMemo, useState } from "react";
 import { FlickeringGridBg } from "@/components/flickering-grid-bg";
+import { IdeaSubmissionModal } from "@/components/idea-submission-modal";
 import { PointerHighlight } from "@/components/pointer-highlight";
+import { Badge } from "@/components/ui/badge";
+import { CATEGORIES, CATEGORY_LABELS, IDEAS, type Quarter } from "@/data/ideas";
 
 export function IdeasListing() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -26,9 +21,7 @@ export function IdeasListing() {
 		let filtered = IDEAS.filter((idea) => idea.quarter === selectedQuarter);
 
 		if (selectedCategory !== "all") {
-			filtered = filtered.filter(
-				(idea) => idea.category === selectedCategory,
-			);
+			filtered = filtered.filter((idea) => idea.category === selectedCategory);
 		}
 
 		if (searchQuery.trim()) {

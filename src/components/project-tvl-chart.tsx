@@ -1,13 +1,13 @@
 "use client";
 
-import { useProtocolTVL } from "@/hooks/useProtocolTVL";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { AreaChart } from "@/components/charts/area-chart";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Area } from "@/components/charts/area";
+import { AreaChart } from "@/components/charts/area-chart";
 import { Grid } from "@/components/charts/grid";
-import { XAxis } from "@/components/charts/x-axis";
 import { ChartTooltip } from "@/components/charts/tooltip";
+import { XAxis } from "@/components/charts/x-axis";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useProtocolTVL } from "@/hooks/useProtocolTVL";
 
 function formatTVL(value: number): string {
 	if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
@@ -46,15 +46,17 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 	return (
 		<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 			<CardHeader className="pb-4">
-				<CardTitle className="text-xl font-bold">
-					Total Value Locked
-				</CardTitle>
+				<CardTitle className="text-xl font-bold">Total Value Locked</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{/* Stats Row */}
-				<div className={`grid grid-cols-1 ${chartData.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-sm"} gap-4 mb-6`}>
+				<div
+					className={`grid grid-cols-1 ${chartData.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-sm"} gap-4 mb-6`}
+				>
 					<div className="rounded-lg bg-background/50 border border-border/50 p-4">
-						<p className="text-sm text-muted-foreground mb-1">Current TVL on Stellar</p>
+						<p className="text-sm text-muted-foreground mb-1">
+							Current TVL on Stellar
+						</p>
 						<p className="text-2xl font-bold text-foreground">
 							{formatTVL(data.currentTVL)}
 						</p>
@@ -115,8 +117,8 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 								className="underline hover:text-foreground transition-colors"
 							>
 								DeFi Llama
-							</a>
-							{" "}· Stellar chain only
+							</a>{" "}
+							· Stellar chain only
 						</>
 					) : data.sourceUrl ? (
 						<>
@@ -128,8 +130,8 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 								className="underline hover:text-foreground transition-colors"
 							>
 								rwa.xyz
-							</a>
-							{" "}· Stellar chain only
+							</a>{" "}
+							· Stellar chain only
 						</>
 					) : (
 						"TVL based on publicly reported AUM"

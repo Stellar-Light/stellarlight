@@ -31,7 +31,10 @@
 			"category": "protocol",
 			"mode": "research",
 			"question": "What is a trustline on Stellar and why do I need one?",
-			"expect": { "liveSource": false, "answerRegex": ["trustline", "asset|issuer"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["trustline", "asset|issuer"]
+			}
 		},
 		{
 			"id": "soroban-counter",
@@ -45,28 +48,40 @@
 			"category": "dapp-build",
 			"mode": "research",
 			"question": "How do I connect the Freighter wallet in a React app and submit a payment?",
-			"expect": { "liveSource": false, "answerRegex": ["freighter|wallet", "transaction|payment|sign"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["freighter|wallet", "transaction|payment|sign"]
+			}
 		},
 		{
 			"id": "assets-clawback",
 			"category": "assets",
 			"mode": "research",
 			"question": "How do I issue a regulated asset on Stellar with clawback enabled?",
-			"expect": { "liveSource": false, "answerRegex": ["clawback", "asset|flag|auth"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["clawback", "asset|flag|auth"]
+			}
 		},
 		{
 			"id": "data-rpc-vs-horizon",
 			"category": "chain-data",
 			"mode": "research",
 			"question": "Should I use Horizon or Stellar RPC for a new indexer, and how do I stream contract events?",
-			"expect": { "liveSource": false, "answerRegex": ["rpc|horizon", "event|indexer|stream"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["rpc|horizon", "event|indexer|stream"]
+			}
 		},
 		{
 			"id": "orient-remittance",
 			"category": "orient",
 			"mode": "research",
 			"question": "I want to build a USDC remittance app on Stellar for the Philippines corridor. Where do I start?",
-			"expect": { "liveSource": false, "answerRegex": ["anchor|sep-?24|usdc|payment|soroban"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["anchor|sep-?24|usdc|payment|soroban"]
+			}
 		},
 		{
 			"id": "dossier-blend-safety",
@@ -75,7 +90,10 @@
 			"question": "Tell me about the Blend protocol on Stellar — is it safe to build on?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": ["blend", "oracle|incident|exploit|attack|audit|security"],
+				"answerRegex": [
+					"blend",
+					"oracle|incident|exploit|attack|audit|security"
+				],
 				"forbiddenRegex": ["\\bunaudited\\b", "no (public |known )?audits?\\b"]
 			}
 		},
@@ -94,98 +112,146 @@
 			"category": "ecosystem-map",
 			"mode": "projects",
 			"question": "real-world asset RWA tokenization",
-			"expect": { "liveSource": false, "answerRegex": ["rwa|real-world|tokeniz|asset"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["rwa|real-world|tokeniz|asset"]
+			}
 		},
 		{
 			"id": "ecosystem-agent-payments-projects",
 			"category": "ecosystem-map",
 			"mode": "projects",
 			"question": "agent payments x402 API monetization",
-			"expect": { "liveSource": false, "answerRegex": ["agent|payment|x402|api"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["agent|payment|x402|api"]
+			}
 		},
 		{
 			"id": "ecosystem-defi-yield",
 			"category": "ecosystem-map",
 			"mode": "projects",
 			"question": "defi yield aggregator lending",
-			"expect": { "liveSource": false, "answerRegex": ["defi|yield|lend|aggregat"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["defi|yield|lend|aggregat"]
+			}
 		},
 		{
 			"id": "consensus-scp",
 			"category": "protocol",
 			"mode": "research",
 			"question": "How does the Stellar Consensus Protocol reach agreement across nodes?",
-			"expect": { "liveSource": false, "answerRegex": ["scp|consensus", "quorum|federated|node|validator"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["scp|consensus", "quorum|federated|node|validator"]
+			}
 		},
 		{
 			"id": "soroban-auth",
 			"category": "soroban-build",
 			"mode": "research",
 			"question": "How does require_auth and authorization work in a Soroban contract?",
-			"expect": { "liveSource": false, "answerRegex": ["soroban|contract", "auth"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroban|contract", "auth"]
+			}
 		},
 		{
 			"id": "passkeys-smart-wallet",
 			"category": "dapp-build",
 			"mode": "research",
 			"question": "How do passkeys and smart wallets work on Stellar?",
-			"expect": { "liveSource": false, "answerRegex": ["passkey|smart wallet|webauthn|secp256r1|policy signer"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["passkey|smart wallet|webauthn|secp256r1|policy signer"]
+			}
 		},
 		{
 			"id": "fees-inclusion",
 			"category": "protocol",
 			"mode": "research",
 			"question": "How are Stellar transaction fees and the inclusion fee calculated?",
-			"expect": { "liveSource": false, "answerRegex": ["fee", "base fee|inclusion|surge|stroop"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["fee", "base fee|inclusion|surge|stroop"]
+			}
 		},
 		{
 			"id": "path-payments-dex",
 			"category": "protocol",
 			"mode": "research",
 			"question": "How do path payments and the Stellar DEX order book work?",
-			"expect": { "liveSource": false, "answerRegex": ["path payment|dex|order book|offer|liquidity"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["path payment|dex|order book|offer|liquidity"]
+			}
 		},
 		{
 			"id": "soroban-events",
 			"category": "chain-data",
 			"mode": "research",
 			"question": "How do I emit events from a Soroban contract and subscribe to them?",
-			"expect": { "liveSource": false, "answerRegex": ["event", "soroban|contract|topic|publish"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["event", "soroban|contract|topic|publish"]
+			}
 		},
 		{
 			"id": "scf-build-award",
 			"category": "funding",
 			"mode": "research",
 			"question": "How does the Stellar Community Fund Build Award work and what do I submit?",
-			"expect": { "liveSource": false, "answerRegex": ["scf|community fund", "build|award|submission|tranche|milestone"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"scf|community fund",
+					"build|award|submission|tranche|milestone"
+				]
+			}
 		},
 		{
 			"id": "audit-defi-findings",
 			"category": "security",
 			"mode": "research",
 			"question": "What security issues have auditors found in Stellar DeFi or token contracts?",
-			"expect": { "liveSource": false, "answerRegex": ["audit|finding|vulnerab|severity|risk", "soroban|defi|token|contract"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"audit|finding|vulnerab|severity|risk",
+					"soroban|defi|token|contract"
+				]
+			}
 		},
 		{
 			"id": "ec-developer-count",
 			"category": "ecosystem-stats",
 			"mode": "research",
 			"question": "How many active developers does Stellar have according to Electric Capital?",
-			"expect": { "liveSource": false, "answerRegex": ["developer", "stellar|electric capital|monthly|active"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["developer", "stellar|electric capital|monthly|active"]
+			}
 		},
 		{
 			"id": "ecosystem-stablecoin-anchor",
 			"category": "ecosystem-map",
 			"mode": "projects",
 			"question": "stablecoin anchor off-ramp USDC",
-			"expect": { "liveSource": false, "answerRegex": ["stablecoin|anchor|ramp|usdc|payment"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["stablecoin|anchor|ramp|usdc|payment"]
+			}
 		},
 		{
 			"id": "ecosystem-wallet-passkey",
 			"category": "ecosystem-map",
 			"mode": "projects",
 			"question": "wallet passkey smart account",
-			"expect": { "liveSource": false, "answerRegex": ["wallet|passkey|account|smart"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["wallet|passkey|account|smart"]
+			}
 		},
 		{
 			"id": "protocol-current-base-reserve",
@@ -212,42 +278,66 @@
 			"category": "code-references",
 			"mode": "repos",
 			"question": "zk",
-			"expect": { "liveSource": false, "answerRegex": ["noir|kale-sc|attest|private-payment|zk"], "minTopScore": 50 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["noir|kale-sc|attest|private-payment|zk"],
+				"minTopScore": 50
+			}
 		},
 		{
 			"id": "repos-x402",
 			"category": "code-references",
 			"mode": "repos",
 			"question": "x402",
-			"expect": { "liveSource": false, "answerRegex": ["x402|stellarpay402|agentcard|machine.?payment"], "minTopScore": 60 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["x402|stellarpay402|agentcard|machine.?payment"],
+				"minTopScore": 60
+			}
 		},
 		{
 			"id": "repos-oracle",
 			"category": "code-references",
 			"mode": "repos",
 			"question": "oracle price feed",
-			"expect": { "liveSource": false, "answerRegex": ["reflector|oracle|price.?feed"], "minTopScore": 40 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["reflector|oracle|price.?feed"],
+				"minTopScore": 40
+			}
 		},
 		{
 			"id": "repos-streaming-payments",
 			"category": "code-references",
 			"mode": "repos",
 			"question": "streaming payments",
-			"expect": { "liveSource": false, "answerRegex": ["fluxity|tide|paystreme|stream"], "minTopScore": 25 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["fluxity|tide|paystreme|stream"],
+				"minTopScore": 25
+			}
 		},
 		{
 			"id": "repos-escrow",
 			"category": "code-references",
 			"mode": "repos",
 			"question": "escrow vault",
-			"expect": { "liveSource": false, "answerRegex": ["escrow|vault|trustless|microvault"], "minTopScore": 40 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["escrow|vault|trustless|microvault"],
+				"minTopScore": 40
+			}
 		},
 		{
 			"id": "repos-soroswap",
 			"category": "code-references",
 			"mode": "repos",
 			"question": "soroswap",
-			"expect": { "liveSource": false, "answerRegex": ["soroswap/"], "minTopScore": 45 }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroswap/"],
+				"minTopScore": 45
+			}
 		}
 	]
 }

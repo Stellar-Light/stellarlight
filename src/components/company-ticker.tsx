@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 interface CarouselItem {
 	id: string;
 	name: string;
-	image?: string | {
-		id: string;
-		url?: string | null;
-		filename?: string | null;
-	} | null;
+	image?:
+		| string
+		| {
+				id: string;
+				url?: string | null;
+				filename?: string | null;
+		  }
+		| null;
 	url?: string | null;
 }
 
@@ -122,11 +125,7 @@ export default function CompanyTicker({
 								);
 							}
 
-							return (
-								<div key={item.id}>
-									{content}
-								</div>
-							);
+							return <div key={item.id}>{content}</div>;
 						})}
 					</div>
 				</div>
@@ -143,4 +142,3 @@ export default function CompanyTicker({
 		</div>
 	);
 }
-

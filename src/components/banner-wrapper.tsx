@@ -1,6 +1,6 @@
 import { getPayloadSafe } from "@/lib/payload-client";
-import { SiteBanner } from "./site-banner";
 import type { Banner } from "@/payload-types";
+import { SiteBanner } from "./site-banner";
 
 export async function BannerWrapper() {
 	const payload = await getPayloadSafe();
@@ -10,9 +10,9 @@ export async function BannerWrapper() {
 	}
 
 	try {
-		const banner = await payload.findGlobal({
+		const banner = (await payload.findGlobal({
 			slug: "banner",
-		}) as Banner;
+		})) as Banner;
 
 		// Only render if banner is enabled and has a message
 		if (!banner?.enabled || !banner?.message) {

@@ -1,7 +1,10 @@
-import Link from "next/link";
+import { ArrowRight, Code2, GitBranch } from "lucide-react";
 import Image from "next/image";
-import { ArrowRight, GitBranch, Code2 } from "lucide-react";
-import { fetchAllBuilders, type PassportBuilder } from "@/lib/integrations/stellar-passport";
+import Link from "next/link";
+import {
+	fetchAllBuilders,
+	type PassportBuilder,
+} from "@/lib/integrations/stellar-passport";
 
 export default async function TopBuildersSection() {
 	let builders: PassportBuilder[] = [];
@@ -11,8 +14,10 @@ export default async function TopBuildersSection() {
 		builders = all
 			.filter((b) => b.github_username)
 			.sort((a, b) => {
-				const aScore = (a.stats?.totalCommits30d ?? 0) * 2 + (a.projects?.length ?? 0);
-				const bScore = (b.stats?.totalCommits30d ?? 0) * 2 + (b.projects?.length ?? 0);
+				const aScore =
+					(a.stats?.totalCommits30d ?? 0) * 2 + (a.projects?.length ?? 0);
+				const bScore =
+					(b.stats?.totalCommits30d ?? 0) * 2 + (b.projects?.length ?? 0);
 				return bScore - aScore;
 			})
 			.slice(0, 6);
@@ -115,7 +120,10 @@ export function TopBuildersSkeleton() {
 			</div>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={i} className="h-[68px] rounded-xl bg-[#262626] animate-pulse" />
+					<div
+						key={i}
+						className="h-[68px] rounded-xl bg-[#262626] animate-pulse"
+					/>
 				))}
 			</div>
 		</section>

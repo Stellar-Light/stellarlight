@@ -238,7 +238,9 @@ async function gradeRepos(q: Question): Promise<Graded> {
 		? Math.max(...repos.map((r) => r.repoScore ?? 0))
 		: null;
 	const scoreOk =
-		q.expect.minTopScore != null ? (topScore ?? 0) >= q.expect.minTopScore : null;
+		q.expect.minTopScore != null
+			? (topScore ?? 0) >= q.expect.minTopScore
+			: null;
 	const matched = missing.length === 0 && forbiddenHits.length === 0;
 	const pass = matched && scoreOk !== false;
 	return {

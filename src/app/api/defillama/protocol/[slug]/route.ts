@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 type Params = Promise<{ slug: string }>;
 
@@ -39,7 +39,7 @@ const MANUAL_TVL_OVERRIDES: Record<
 };
 
 // Cache for rwa.xyz data (1 hour)
-let rwaCache: Record<string, { data: any; timestamp: number }> = {};
+const rwaCache: Record<string, { data: any; timestamp: number }> = {};
 const RWA_CACHE_TTL = 60 * 60 * 1000;
 
 /**
@@ -120,8 +120,8 @@ async function getStellarProtocols(): Promise<any[]> {
 	if (!res.ok) throw new Error("Failed to fetch protocols");
 	const protocols = await res.json();
 
-	const filtered = protocols.filter(
-		(p: any) => (p.chains || []).includes("Stellar"),
+	const filtered = protocols.filter((p: any) =>
+		(p.chains || []).includes("Stellar"),
 	);
 	cachedProtocols = filtered;
 	cacheTimestamp = now;
@@ -177,8 +177,7 @@ export async function GET(
 		const stellarProtocols = await getStellarProtocols();
 
 		const exactMatch = stellarProtocols.find(
-			(p: any) =>
-				p.name.toLowerCase() === lowerSlug || p.slug === lowerSlug,
+			(p: any) => p.name.toLowerCase() === lowerSlug || p.slug === lowerSlug,
 		);
 		const startsWithMatches = stellarProtocols
 			.filter(

@@ -39,4 +39,3 @@ export function LexicalContent({ content }: LexicalContentProps) {
 		</div>
 	);
 }
-

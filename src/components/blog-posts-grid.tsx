@@ -1,8 +1,8 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import BlogHighlightCard from "@/components/blog-highlight-card";
-import BlogCardSkeleton from "@/components/blog-card-skeleton";
 import Link from "next/link";
+import BlogCardSkeleton from "@/components/blog-card-skeleton";
+import BlogHighlightCard from "@/components/blog-highlight-card";
 import { Button } from "@/components/ui/button";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 interface BlogPostsGridProps {
 	page?: number;
@@ -19,7 +19,14 @@ export default async function BlogPostsGrid({
 	const limit = 12;
 
 	let posts: any[] = [];
-	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
+	let result: any = {
+		docs: [],
+		totalDocs: 0,
+		totalPages: 0,
+		page: 1,
+		hasNextPage: false,
+		hasPrevPage: false,
+	};
 
 	if (payload) {
 		try {
@@ -91,7 +98,9 @@ export default async function BlogPostsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
+							<Link
+								href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}
+							>
 								Previous
 							</Link>
 						</Button>
@@ -117,7 +126,9 @@ export default async function BlogPostsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}>
+							<Link
+								href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}
+							>
 								Next
 							</Link>
 						</Button>
@@ -146,4 +157,3 @@ export function BlogPostsGridSkeleton() {
 		</div>
 	);
 }
-

@@ -1,7 +1,27 @@
-import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	Activity,
+	AlertCircle,
+	ArrowLeft,
+	Calendar,
+	CheckCircle2,
+	Clock,
+	ExternalLink,
+	FileText,
+	Github,
+	Globe,
+	MessageCircle,
+	Star,
+	X,
+} from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import EntityCard from "@/components/entity-card";
+import { ProjectLogo } from "@/components/project-logo";
+import { ProjectTVLChart } from "@/components/project-tvl-chart";
+import ShareButton from "@/components/share-button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,28 +29,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProjectLogo } from "@/components/project-logo";
-import EntityCard from "@/components/entity-card";
-import { ProjectTVLChart } from "@/components/project-tvl-chart";
-import ShareButton from "@/components/share-button";
+import { getPayloadSafe } from "@/lib/payload-client";
 import { getAppUrl } from "@/lib/utils/app-url";
-import {
-	ArrowLeft,
-	ExternalLink,
-	Globe,
-	Github,
-	FileText,
-	X,
-	MessageCircle,
-	Calendar,
-	Activity,
-	AlertCircle,
-	Star,
-	Clock,
-	CheckCircle2,
-} from "lucide-react";
 
 type Params = Promise<{
 	slug: string;
@@ -95,10 +95,7 @@ export async function generateMetadata({
 	if (project.logo) {
 		if (typeof project.logo === "object" && project.logo.url) {
 			imageUrl = project.logo.url;
-		} else if (
-			typeof project.logo === "object" &&
-			project.logo.filename
-		) {
+		} else if (typeof project.logo === "object" && project.logo.filename) {
 			imageUrl = `${appUrl}/media/${project.logo.filename}`;
 		}
 	}
@@ -125,9 +122,7 @@ export async function generateMetadata({
 			type: "website",
 			images: [
 				{
-					url: imageUrl.startsWith("http")
-						? imageUrl
-						: `${appUrl}${imageUrl}`,
+					url: imageUrl.startsWith("http") ? imageUrl : `${appUrl}${imageUrl}`,
 					width: 1200,
 					height: 630,
 					alt: project.name,
@@ -138,11 +133,7 @@ export async function generateMetadata({
 			card: "summary_large_image",
 			title: project.name,
 			description,
-			images: [
-				imageUrl.startsWith("http")
-					? imageUrl
-					: `${appUrl}${imageUrl}`,
-			],
+			images: [imageUrl.startsWith("http") ? imageUrl : `${appUrl}${imageUrl}`],
 		},
 	};
 }
@@ -162,25 +153,25 @@ export default async function ProjectDetailPage({
 	let result;
 	try {
 		result = await payload.find({
-		collection: "projects",
-		where: {
-			and: [
-				{
-					slug: {
-						equals: slug,
+			collection: "projects",
+			where: {
+				and: [
+					{
+						slug: {
+							equals: slug,
+						},
 					},
-				},
-				{
-					status: {
-						in: ["Development", "Pre-Release", "Live"],
+					{
+						status: {
+							in: ["Development", "Pre-Release", "Live"],
+						},
 					},
-				},
-			],
-		},
-		limit: 1,
-		depth: 1,
-	});
-		} catch (error) {
+				],
+			},
+			limit: 1,
+			depth: 1,
+		});
+	} catch (error) {
 		notFound();
 	}
 
@@ -235,8 +226,7 @@ export default async function ProjectDetailPage({
 						owner: owner ?? "",
 						name: rest.join("/") || (r.fullName ?? ""),
 						url:
-							r.url ??
-							(r.fullName ? `https://github.com/${r.fullName}` : ""),
+							r.url ?? (r.fullName ? `https://github.com/${r.fullName}` : ""),
 						lastCommitAt: r.lastCommitAt ?? null,
 						openIssues: r.openIssues ?? 0,
 						stargazerCount: r.stars ?? 0,
@@ -250,8 +240,14 @@ export default async function ProjectDetailPage({
 				);
 				gh = {
 					lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
-					openIssuesTotal: enriched.reduce((sum, x) => sum + (x.openIssues || 0), 0),
-					totalStars: enriched.reduce((sum, x) => sum + (x.stargazerCount || 0), 0),
+					openIssuesTotal: enriched.reduce(
+						(sum, x) => sum + (x.openIssues || 0),
+						0,
+					),
+					totalStars: enriched.reduce(
+						(sum, x) => sum + (x.stargazerCount || 0),
+						0,
+					),
 					repos: enriched,
 				};
 			}
@@ -388,8 +384,8 @@ export default async function ProjectDetailPage({
 
 									{/* Status and Verification Tags */}
 									<div className="flex flex-wrap items-center gap-3">
-										<Badge 
-											variant="outline" 
+										<Badge
+											variant="outline"
 											className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm flex items-center gap-1.5"
 										>
 											{project.status === "Live" && (
@@ -404,68 +400,76 @@ export default async function ProjectDetailPage({
 											{project.status === "Inactive" && (
 												<span className="w-2 h-2 rounded-full bg-muted-foreground/60"></span>
 											)}
-											{project.status === "Inactive" ? "Inactive / archived" : project.status}
+											{project.status === "Inactive"
+												? "Inactive / archived"
+												: project.status}
 										</Badge>
 										{project.verificationLevel !== "Unverified" && (
-											<Badge
-												className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm"
-											>
+											<Badge className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm">
 												<CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
 												{project.verificationLevel}
 											</Badge>
 										)}
-										{(project as any).hackathon && (() => {
-											const h = (project as any).hackathon;
-											const hackathon = typeof h === "object" ? h : null;
-											const status = (project as any).hackathonStatus;
-											const inner = (
-												<>
-													From {hackathon?.name ?? "Hackathon"}
-													{status && (
-														<span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/10 text-purple-300">
-															{status}
-														</span>
-													)}
-												</>
-											);
-											const className =
-												"inline-flex items-center bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border border-purple-500/30 hover:border-purple-500/60 text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors";
-											return hackathon?.slug ? (
-												<Link href={`/hackathons/${hackathon.slug}`} className={className}>
-													{inner}
-												</Link>
-											) : (
-												<span className={className}>{inner}</span>
-											);
-										})()}
+										{(project as any).hackathon &&
+											(() => {
+												const h = (project as any).hackathon;
+												const hackathon = typeof h === "object" ? h : null;
+												const status = (project as any).hackathonStatus;
+												const inner = (
+													<>
+														From {hackathon?.name ?? "Hackathon"}
+														{status && (
+															<span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/10 text-purple-300">
+																{status}
+															</span>
+														)}
+													</>
+												);
+												const className =
+													"inline-flex items-center bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border border-purple-500/30 hover:border-purple-500/60 text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors";
+												return hackathon?.slug ? (
+													<Link
+														href={`/hackathons/${hackathon.slug}`}
+														className={className}
+													>
+														{inner}
+													</Link>
+												) : (
+													<span className={className}>{inner}</span>
+												);
+											})()}
 									</div>
 
 									{/* Category Tags */}
 									<div className="flex flex-wrap items-center gap-3">
-										<Badge 
-											variant="secondary" 
+										<Badge
+											variant="secondary"
 											className="text-sm px-4 py-1.5 font-semibold border border-border/50 shadow-sm"
 										>
 											{project.category}
 										</Badge>
-										{project.types && project.types.length > 0 && (
-											project.types.slice(0, 3).map((type: string, idx: number) => (
-												<Badge
-													key={idx}
-													variant="outline"
-													className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm"
-												>
-													{type}
-												</Badge>
-											))
-										)}
+										{project.types &&
+											project.types.length > 0 &&
+											project.types
+												.slice(0, 3)
+												.map((type: string, idx: number) => (
+													<Badge
+														key={idx}
+														variant="outline"
+														className="text-sm px-4 py-1.5 font-semibold border-border/50 shadow-sm"
+													>
+														{type}
+													</Badge>
+												))}
 									</div>
 								</div>
 							</div>
 
 							{/* Second Row - About the Project Section */}
 							<div className="space-y-4 pt-4 border-t border-border/50">
-								<h2 className="text-xl font-bold text-foreground">About {project.name}</h2>
+								<h2 className="text-xl font-bold text-foreground">
+									About {project.name}
+								</h2>
 								{project.shortDescription ? (
 									<p className="text-base text-muted-foreground leading-relaxed">
 										{project.shortDescription}
@@ -476,10 +480,7 @@ export default async function ProjectDetailPage({
 									</p>
 								)}
 								{project.links?.website && (
-									<Button
-										asChild
-										className="mt-4"
-									>
+									<Button asChild className="mt-4">
 										<a
 											href={project.links.website}
 											target="_blank"
@@ -500,7 +501,9 @@ export default async function ProjectDetailPage({
 				{project.links && Object.values(project.links).some(Boolean) && (
 					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Links & Resources</CardTitle>
+							<CardTitle className="text-xl font-bold">
+								Links & Resources
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -510,7 +513,9 @@ export default async function ProjectDetailPage({
 										linkIcons[key as keyof typeof linkIcons] || ExternalLink;
 									// Extract first valid URL from fields that may contain multiple pasted URLs
 									const decoded = decodeURIComponent(String(url));
-									const urls = decoded.split(/[\s,;|]+/).filter(u => u.startsWith('http'));
+									const urls = decoded
+										.split(/[\s,;|]+/)
+										.filter((u) => u.startsWith("http"));
 									if (urls.length === 0) urls.push(String(url));
 									// Only show the first URL
 									return [urls[0]].map((singleUrl, idx) => (
@@ -529,7 +534,9 @@ export default async function ProjectDetailPage({
 													{key}
 												</span>
 												<span className="block text-xs text-muted-foreground truncate">
-													{singleUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+													{singleUrl
+														.replace(/^https?:\/\//, "")
+														.replace(/\/$/, "")}
 												</span>
 											</div>
 											<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -545,15 +552,22 @@ export default async function ProjectDetailPage({
 				{project.scf?.awarded && (
 					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Stellar Community Fund</CardTitle>
-							<CardDescription>This project received funding from the SCF</CardDescription>
+							<CardTitle className="text-xl font-bold">
+								Stellar Community Fund
+							</CardTitle>
+							<CardDescription>
+								This project received funding from the SCF
+							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								{(() => {
-									const rounds: number[] = Array.isArray(project.scf.awardedRounds)
+									const rounds: number[] = Array.isArray(
+										project.scf.awardedRounds,
+									)
 										? (project.scf.awardedRounds as number[])
-										: project.scf.lastAwardedRound && project.scf.lastAwardedRound > 0
+										: project.scf.lastAwardedRound &&
+												project.scf.lastAwardedRound > 0
 											? [project.scf.lastAwardedRound]
 											: [];
 									return rounds.length > 0 ? (
@@ -576,7 +590,9 @@ export default async function ProjectDetailPage({
 								})()}
 								{project.scf.totalAwarded && project.scf.totalAwarded > 0 && (
 									<div className="p-4 rounded-xl border border-border/50 bg-background/50">
-										<p className="text-sm font-medium text-muted-foreground mb-1">Total Funded</p>
+										<p className="text-sm font-medium text-muted-foreground mb-1">
+											Total Funded
+										</p>
 										<p className="text-2xl font-bold text-foreground">
 											${project.scf.totalAwarded.toLocaleString()}
 										</p>
@@ -590,7 +606,9 @@ export default async function ProjectDetailPage({
 										className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50 hover:bg-background hover:border-border transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
 									>
 										<div className="flex-1 min-w-0">
-											<p className="text-sm font-medium text-muted-foreground mb-1">SCF Page</p>
+											<p className="text-sm font-medium text-muted-foreground mb-1">
+												SCF Page
+											</p>
 											<p className="text-sm font-semibold text-foreground group-hover:text-foreground transition-colors truncate">
 												View on Community Fund
 											</p>
@@ -612,11 +630,14 @@ export default async function ProjectDetailPage({
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Built By</CardTitle>
 							<CardDescription>
-								{linkedEntities.length === 1 ? "Organization" : "Organizations"} behind this project
+								{linkedEntities.length === 1 ? "Organization" : "Organizations"}{" "}
+								behind this project
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className={`grid gap-4 ${linkedEntities.length === 1 ? "grid-cols-1 max-w-sm" : "grid-cols-1 md:grid-cols-2"}`}>
+							<div
+								className={`grid gap-4 ${linkedEntities.length === 1 ? "grid-cols-1 max-w-sm" : "grid-cols-1 md:grid-cols-2"}`}
+							>
 								{linkedEntities.map((entity) => (
 									<EntityCard key={entity.id} entity={entity} />
 								))}
@@ -636,7 +657,9 @@ export default async function ProjectDetailPage({
 											<Activity className="w-5 h-5 text-blue-400" />
 										</div>
 										<div>
-											<p className="text-sm font-medium text-muted-foreground">Last Activity</p>
+											<p className="text-sm font-medium text-muted-foreground">
+												Last Activity
+											</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
 												{gh ? formatDate(gh.lastActivityAt) : "—"}
 											</p>
@@ -659,7 +682,9 @@ export default async function ProjectDetailPage({
 											<AlertCircle className="w-5 h-5 text-orange-400" />
 										</div>
 										<div>
-											<p className="text-sm font-medium text-muted-foreground">Open Issues</p>
+											<p className="text-sm font-medium text-muted-foreground">
+												Open Issues
+											</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
 												{gh?.openIssuesTotal ?? 0}
 											</p>
@@ -667,7 +692,12 @@ export default async function ProjectDetailPage({
 									</div>
 								</div>
 								<p className="text-xs text-muted-foreground">
-									Across {gh?.repos?.length || project.github?.repos?.length || 0} {gh?.repos?.length === 1 || project.github?.repos?.length === 1 ? 'repository' : 'repositories'}
+									Across{" "}
+									{gh?.repos?.length || project.github?.repos?.length || 0}{" "}
+									{gh?.repos?.length === 1 ||
+									project.github?.repos?.length === 1
+										? "repository"
+										: "repositories"}
 								</p>
 							</CardContent>
 						</Card>
@@ -680,9 +710,13 @@ export default async function ProjectDetailPage({
 											<Star className="w-5 h-5 text-[#FDDA24]" />
 										</div>
 										<div>
-											<p className="text-sm font-medium text-muted-foreground">Total Stars</p>
+											<p className="text-sm font-medium text-muted-foreground">
+												Total Stars
+											</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh?.totalStars != null ? gh.totalStars.toLocaleString() : 0}
+												{gh?.totalStars != null
+													? gh.totalStars.toLocaleString()
+													: 0}
 											</p>
 										</div>
 									</div>
@@ -701,67 +735,77 @@ export default async function ProjectDetailPage({
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Repositories</CardTitle>
 							<CardDescription>
-								{project.github.repos.length} {project.github.repos.length === 1 ? 'repository' : 'repositories'} linked to this project
+								{project.github.repos.length}{" "}
+								{project.github.repos.length === 1
+									? "repository"
+									: "repositories"}{" "}
+								linked to this project
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-2">
-								{(gh?.repos || project.github.repos.map((r: any) => ({
-									owner: r.owner,
-									name: r.name,
-									url: `https://github.com/${r.owner}/${r.name}`,
-									lastCommitAt: null,
-									openIssues: 0,
-									stargazerCount: 0,
-									error: undefined,
-									skipped: false,
-								}))).slice(0, 10).map((r: any) => (
-									<a
-										key={`${r.owner}/${r.name}`}
-										href={r.url}
-										target="_blank"
-										rel="noreferrer"
-										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
-									>
-										<div className="flex-1 min-w-0">
-											<div className="flex items-center gap-3 mb-2">
-												<Github className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-												<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-													{r.owner}/{r.name}
-												</span>
-											</div>
-											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
-												{r.error ? (
-													<span className="text-orange-400 font-medium">
-														{r.error}
+								{(
+									gh?.repos ||
+									project.github.repos.map((r: any) => ({
+										owner: r.owner,
+										name: r.name,
+										url: `https://github.com/${r.owner}/${r.name}`,
+										lastCommitAt: null,
+										openIssues: 0,
+										stargazerCount: 0,
+										error: undefined,
+										skipped: false,
+									}))
+								)
+									.slice(0, 10)
+									.map((r: any) => (
+										<a
+											key={`${r.owner}/${r.name}`}
+											href={r.url}
+											target="_blank"
+											rel="noreferrer"
+											className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
+										>
+											<div className="flex-1 min-w-0">
+												<div className="flex items-center gap-3 mb-2">
+													<Github className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+													<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+														{r.owner}/{r.name}
 													</span>
-												) : (
-													<>
-														{r.lastCommitAt && (
-															<span className="flex items-center gap-1.5">
-																<Clock className="w-3.5 h-3.5" />
-																{formatDate(r.lastCommitAt)}
-															</span>
-														)}
-														{r.stargazerCount > 0 && (
-															<span className="flex items-center gap-1.5">
-																<Star className="w-3.5 h-3.5" />
-																{r.stargazerCount.toLocaleString()}
-															</span>
-														)}
-														{r.openIssues > 0 && (
-															<span className="flex items-center gap-1.5">
-																<AlertCircle className="w-3.5 h-3.5" />
-																{r.openIssues} issue{r.openIssues !== 1 ? 's' : ''}
-															</span>
-														)}
-													</>
-												)}
+												</div>
+												<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
+													{r.error ? (
+														<span className="text-orange-400 font-medium">
+															{r.error}
+														</span>
+													) : (
+														<>
+															{r.lastCommitAt && (
+																<span className="flex items-center gap-1.5">
+																	<Clock className="w-3.5 h-3.5" />
+																	{formatDate(r.lastCommitAt)}
+																</span>
+															)}
+															{r.stargazerCount > 0 && (
+																<span className="flex items-center gap-1.5">
+																	<Star className="w-3.5 h-3.5" />
+																	{r.stargazerCount.toLocaleString()}
+																</span>
+															)}
+															{r.openIssues > 0 && (
+																<span className="flex items-center gap-1.5">
+																	<AlertCircle className="w-3.5 h-3.5" />
+																	{r.openIssues} issue
+																	{r.openIssues !== 1 ? "s" : ""}
+																</span>
+															)}
+														</>
+													)}
+												</div>
 											</div>
-										</div>
-										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors ml-4 flex-shrink-0" />
-									</a>
-								))}
+											<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors ml-4 flex-shrink-0" />
+										</a>
+									))}
 							</div>
 						</CardContent>
 					</Card>
@@ -775,14 +819,20 @@ export default async function ProjectDetailPage({
 							project.onchain.contracts.length > 0)) && (
 						<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 							<CardHeader className="pb-4">
-								<CardTitle className="text-xl font-bold">On-Chain Information</CardTitle>
-								<CardDescription>Stellar network data for this project</CardDescription>
+								<CardTitle className="text-xl font-bold">
+									On-Chain Information
+								</CardTitle>
+								<CardDescription>
+									Stellar network data for this project
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-5">
 									{project.onchain.assetCode && (
 										<div>
-											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">Asset Code</div>
+											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+												Asset Code
+											</div>
 											{project.onchain.issuer ? (
 												<a
 													href={`https://stellar.expert/explorer/public/asset/${project.onchain.assetCode}-${project.onchain.issuer}`}
@@ -804,7 +854,9 @@ export default async function ProjectDetailPage({
 									)}
 									{project.onchain.issuer && (
 										<div>
-											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">Issuer</div>
+											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+												Issuer
+											</div>
 											<a
 												href={`https://stellar.expert/explorer/public/account/${project.onchain.issuer}`}
 												target="_blank"
@@ -824,7 +876,10 @@ export default async function ProjectDetailPage({
 											(contract: { address?: string | null }, idx: number) => (
 												<div key={idx}>
 													<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
-														Contract{(project.onchain?.contracts?.length ?? 0) > 1 ? ` ${idx + 1}` : ""}
+														Contract
+														{(project.onchain?.contracts?.length ?? 0) > 1
+															? ` ${idx + 1}`
+															: ""}
 													</div>
 													{contract.address ? (
 														<a
@@ -855,9 +910,12 @@ export default async function ProjectDetailPage({
 				{process.env.NODE_ENV === "development" && (
 					<Card className="border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Transparency Log</CardTitle>
+							<CardTitle className="text-xl font-bold">
+								Transparency Log
+							</CardTitle>
 							<CardDescription>
-								Recent changes to this project entry for accountability and trust
+								Recent changes to this project entry for accountability and
+								trust
 							</CardDescription>
 						</CardHeader>
 						<CardContent>

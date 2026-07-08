@@ -1,6 +1,6 @@
-import configPromise from "@/payload.config";
-import { getPayload } from "payload";
 import { headers } from "next/headers";
+import { getPayload } from "payload";
+import configPromise from "@/payload.config";
 
 export async function POST() {
 	const headersList = await headers();
@@ -31,7 +31,8 @@ export async function POST() {
 		return Response.json({
 			success: true,
 			jobId: job.id,
-			message: "RSS sync job queued and executed successfully. Check the Sync Jobs panel to monitor progress.",
+			message:
+				"RSS sync job queued and executed successfully. Check the Sync Jobs panel to monitor progress.",
 		});
 	} catch (error) {
 		return Response.json(
@@ -43,4 +44,3 @@ export async function POST() {
 		);
 	}
 }
-

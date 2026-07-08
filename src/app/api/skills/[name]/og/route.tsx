@@ -239,7 +239,11 @@ function humanize(slug: string): string {
 	return slug
 		.split("-")
 		.map((w) =>
-			w === "zk" ? "ZK" : w === "dapp" ? "dApp" : w[0]?.toUpperCase() + w.slice(1),
+			w === "zk"
+				? "ZK"
+				: w === "dapp"
+					? "dApp"
+					: w[0]?.toUpperCase() + w.slice(1),
 		)
 		.join(" ");
 }

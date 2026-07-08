@@ -22,8 +22,8 @@ import {
 	fetchAllDoraHacksHackathons,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
-import { getPayloadSafe } from "@/lib/payload-client";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 
@@ -142,9 +142,12 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 	function pickRange<K extends keyof HackathonSnapshot>(
 		key: K,
 		label: string,
-	):
-		| { highest: string; lowest: string; rangeNum: number; values: number[] }
-		| null {
+	): {
+		highest: string;
+		lowest: string;
+		rangeNum: number;
+		values: number[];
+	} | null {
 		const values = real
 			.map((s) => ({ slug: s.slug, v: s[key] as number | undefined }))
 			.filter((x): x is { slug: string; v: number } => typeof x.v === "number");
@@ -168,9 +171,19 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 	}
 
 	const pp = pickRange("prizePoolUSD", "prize pool");
-	if (pp) deltas.prizePoolUSD = { highest: pp.highest, lowest: pp.lowest, rangeUSD: pp.rangeNum };
+	if (pp)
+		deltas.prizePoolUSD = {
+			highest: pp.highest,
+			lowest: pp.lowest,
+			rangeUSD: pp.rangeNum,
+		};
 	const sc = pickRange("submissionCount", "submission count");
-	if (sc) deltas.submissionCount = { highest: sc.highest, lowest: sc.lowest, range: sc.rangeNum };
+	if (sc)
+		deltas.submissionCount = {
+			highest: sc.highest,
+			lowest: sc.lowest,
+			range: sc.rangeNum,
+		};
 	const hc = pickRange("hackersCount", "registered hackers");
 	if (hc) deltas.hackersCount = { highest: hc.highest, lowest: hc.lowest };
 
@@ -181,7 +194,8 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 		}
 	}
 	const ppw = pickRange("prizePerWinnerUSD", "prize per winner");
-	if (ppw) deltas.prizePerWinnerUSD = { highest: ppw.highest, lowest: ppw.lowest };
+	if (ppw)
+		deltas.prizePerWinnerUSD = { highest: ppw.highest, lowest: ppw.lowest };
 
 	const notFound = snaps.filter((s) => s.source === "not-found");
 	if (notFound.length > 0) {

@@ -9,9 +9,9 @@
  * summary strip up top. Visual language matches /partners + /ask.
  */
 
-import { useMemo, useState } from "react";
+import { ArrowUpRight, Search } from "lucide-react";
 import Link from "next/link";
-import { Search, ArrowUpRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import { EntityLogo } from "@/components/entity-logo";
 import { type EntityStats, formatUSD } from "@/lib/entity-stats";
 

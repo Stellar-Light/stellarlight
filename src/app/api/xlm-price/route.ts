@@ -43,7 +43,7 @@ export async function GET() {
 		}
 		return NextResponse.json(
 			{ price: 0, volume24h: 0, marketCap: 0 },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 }

@@ -27,12 +27,32 @@ const API = process.env.SCAN_API_BASE?.trim() || "https://stellarlight.xyz";
 
 // Diverse query terms to assemble a real cross-section of the index (Rust
 // contracts, non-Rust wallets/frontends, oracles, defunct projects, long tail).
-const SAMPLE_TERMS = ["defi lending", "wallet sdk", "oracle", "nft", "amm dex", "stablecoin", "escrow", "dao governance"];
+const SAMPLE_TERMS = [
+	"defi lending",
+	"wallet sdk",
+	"oracle",
+	"nft",
+	"amm dex",
+	"stablecoin",
+	"escrow",
+	"dao governance",
+];
 
 // Terms that surface the UNPROTECTED long tail (no project link, no SCF):
 // hackathon submissions, tutorials, one-off experiments — the population where
 // the archive path CAN fire and the circuit breakers actually get exercised.
-const UNPROTECTED_TERMS = ["soroban", "hackathon", "stellar sdk", "token contract", "payment", "tutorial", "demo", "smart contract", "defi", "wallet"];
+const UNPROTECTED_TERMS = [
+	"soroban",
+	"hackathon",
+	"stellar sdk",
+	"token contract",
+	"payment",
+	"tutorial",
+	"demo",
+	"smart contract",
+	"defi",
+	"wallet",
+];
 
 interface SampleRepo {
 	fullName: string;
@@ -158,7 +178,7 @@ async function scoreRepo(s: SampleRepo): Promise<Row | null> {
 		tier: tierRes?.tier ?? "—",
 		unverified: tierRes?.unverifiedStellar ?? false,
 		protected: isProt,
-		reason: (tierRes?.reason ?? []).join("+") || (farm.flags.join(",") || ""),
+		reason: (tierRes?.reason ?? []).join("+") || farm.flags.join(",") || "",
 		projectSlug: s.projectSlug,
 		scf: s.scfAwarded,
 	};
@@ -170,9 +190,19 @@ async function main() {
 	const repoArgs = argv.filter((a) => !a.startsWith("--"));
 	let sample: SampleRepo[];
 	if (repoArgs.length) {
-		sample = repoArgs.map((f) => ({ fullName: f, projectSlug: null, scfAwarded: false, prominence: 0, starsIdx: null, lastCommitIdx: null, repoScoreLabel: null }));
+		sample = repoArgs.map((f) => ({
+			fullName: f,
+			projectSlug: null,
+			scfAwarded: false,
+			prominence: 0,
+			starsIdx: null,
+			lastCommitIdx: null,
+			repoScoreLabel: null,
+		}));
 	} else if (unprotectedMode) {
-		console.log(`Assembling UNPROTECTED sample (no project link, no SCF) from ${API} …`);
+		console.log(
+			`Assembling UNPROTECTED sample (no project link, no SCF) from ${API} …`,
+		);
 		sample = await assembleUnprotectedSample();
 	} else {
 		console.log(`Assembling sample from ${API} …`);
@@ -192,7 +222,9 @@ async function main() {
 	}
 
 	rows.sort((a, b) => b.codeDepth - a.codeDepth);
-	console.log("proof            depth  farm  tier       prot  reason                  repo");
+	console.log(
+		"proof            depth  farm  tier       prot  reason                  repo",
+	);
 	for (const r of rows) {
 		console.log(
 			`${r.proof.padEnd(15)} ${r.codeDepth.toFixed(2).padStart(5)} ${String(r.farmScore).padStart(4)}  ${r.tier.padEnd(9)} ${(r.protected ? "P" : " ").padStart(3)}  ${(r.reason || "").slice(0, 22).padEnd(22)} ${r.full}`,
@@ -215,26 +247,43 @@ async function main() {
 	const noneUnprotected = noneRepos.filter((r) => !r.protected);
 
 	console.log("\n── safety / drift ──");
-	console.log(`scanned: ${rows.length}  |  archived: ${archived.length}  |  unverified: ${unverified.length}  |  proof=none: ${noneRepos.length} (${pct(noneRepos.length)})`);
+	console.log(
+		`scanned: ${rows.length}  |  archived: ${archived.length}  |  unverified: ${unverified.length}  |  proof=none: ${noneRepos.length} (${pct(noneRepos.length)})`,
+	);
 
 	// THE safety gate: no legit/protected repo may be demoted.
 	if (protectedDemoted.length) {
-		console.log(`\n⛔ OVER-FILTER — ${protectedDemoted.length} PROTECTED repo(s) DEMOTED (this must be 0):`);
-		for (const r of protectedDemoted) console.log(`   ${r.full}  tier=${r.tier} unverified=${r.unverified}  (${r.reason})`);
+		console.log(
+			`\n⛔ OVER-FILTER — ${protectedDemoted.length} PROTECTED repo(s) DEMOTED (this must be 0):`,
+		);
+		for (const r of protectedDemoted)
+			console.log(
+				`   ${r.full}  tier=${r.tier} unverified=${r.unverified}  (${r.reason})`,
+			);
 	} else {
-		console.log("✓ SAFE: 0 protected repos demoted. proof=none stays at community tier (never sunk).");
+		console.log(
+			"✓ SAFE: 0 protected repos demoted. proof=none stays at community tier (never sunk).",
+		);
 	}
 
 	// Every proposed demotion, with its two-key reasons — the review surface for
 	// the archive path. Eyeball each: is it genuinely dead/junk, or a legit repo
 	// the heuristics caught? Any legit repo here = fix the rule before any write.
 	if (archived.length) {
-		console.log(`\nproposed ARCHIVE (${archived.length}) — verify each is genuinely dead/junk:`);
-		for (const r of archived) console.log(`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof} depth=${r.codeDepth.toFixed(2)} farm=${r.farmScore}`);
+		console.log(
+			`\nproposed ARCHIVE (${archived.length}) — verify each is genuinely dead/junk:`,
+		);
+		for (const r of archived)
+			console.log(
+				`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof} depth=${r.codeDepth.toFixed(2)} farm=${r.farmScore}`,
+			);
 	}
 	if (unverified.length) {
-		console.log(`\nproposed unverifiedStellar (${unverified.length}) — soft-excluded from codeReferences/explain, NEVER archived:`);
-		for (const r of unverified) console.log(`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof}`);
+		console.log(
+			`\nproposed unverifiedStellar (${unverified.length}) — soft-excluded from codeReferences/explain, NEVER archived:`,
+		);
+		for (const r of unverified)
+			console.log(`   ${r.full}  reason=${r.reason || "?"}  proof=${r.proof}`);
 	}
 
 	// Relevance completeness (NOT a demotion): none among PROTECTED = a detection
@@ -244,16 +293,26 @@ async function main() {
 		`\nrelevance completeness — proof=none: protected=${noneProtected.length} (kept @ community, detection gap) · unprotected=${noneUnprotected.length} (archive-risk pop.)`,
 	);
 	if (noneProtected.length) {
-		console.log("\nprotected proof=none (detection gaps to review — genuinely off-topic vs parser miss):");
-		for (const r of noneProtected) console.log(`   ${r.full}  (project ${r.projectSlug ?? "—"}, scf=${r.scf})`);
+		console.log(
+			"\nprotected proof=none (detection gaps to review — genuinely off-topic vs parser miss):",
+		);
+		for (const r of noneProtected)
+			console.log(
+				`   ${r.full}  (project ${r.projectSlug ?? "—"}, scf=${r.scf})`,
+			);
 	}
 	if (noneUnprotected.length) {
-		console.log("\nUNPROTECTED proof=none (the population where archive CAN fire):");
-		for (const r of noneUnprotected) console.log(`   ${r.full}  farm=${r.farmScore} tier=${r.tier}`);
+		console.log(
+			"\nUNPROTECTED proof=none (the population where archive CAN fire):",
+		);
+		for (const r of noneUnprotected)
+			console.log(`   ${r.full}  farm=${r.farmScore} tier=${r.tier}`);
 	}
 }
 
-main().then(() => process.exit(0)).catch((e) => {
-	console.error("FATAL", e);
-	process.exit(1);
-});
+main()
+	.then(() => process.exit(0))
+	.catch((e) => {
+		console.error("FATAL", e);
+		process.exit(1);
+	});

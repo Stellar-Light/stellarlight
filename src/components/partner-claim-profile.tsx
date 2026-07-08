@@ -11,8 +11,8 @@
  * invites.
  */
 
-import { useState } from "react";
 import { BadgeCheck, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function PartnerClaimProfile({ orgName }: { orgName: string }) {
 	const [open, setOpen] = useState(false);

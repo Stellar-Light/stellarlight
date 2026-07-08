@@ -1,17 +1,27 @@
 import { Suspense } from "react";
-import { getPayloadSafe } from "@/lib/payload-client";
-import Typewriter from "@/components/fancy/text/typewriter";
-import TVLStats from "@/components/tvl-stats";
-import CarouselSection from "@/components/carousel-section";
 import BaseFeeDisplay from "@/components/base-fee-display";
-import { FlickeringGrid } from "@/components/flickering-grid";
-import BlogHighlights, { BlogHighlightsSkeleton } from "@/components/blog-highlights";
-import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
+import BlogHighlights, {
+	BlogHighlightsSkeleton,
+} from "@/components/blog-highlights";
+import CarouselSection from "@/components/carousel-section";
+import CommunityPicksSection, {
+	CommunityPicksSectionSkeleton,
+} from "@/components/community-picks-section";
 import { DirectoryFilters } from "@/components/directory-filters";
-import CommunityPicksSection, { CommunityPicksSectionSkeleton } from "@/components/community-picks-section";
-import TopBuildersSection, { TopBuildersSkeleton } from "@/components/top-builders-section";
-import TrendingProjectsSection, { TrendingProjectsSkeleton } from "@/components/trending-projects-section";
-import HackathonsSection, { HackathonsSkeleton } from "@/components/hackathons-section";
+import Typewriter from "@/components/fancy/text/typewriter";
+import { FlickeringGrid } from "@/components/flickering-grid";
+import HackathonsSection, {
+	HackathonsSkeleton,
+} from "@/components/hackathons-section";
+import ProjectsGrid, { ProjectsGridSkeleton } from "@/components/projects-grid";
+import TopBuildersSection, {
+	TopBuildersSkeleton,
+} from "@/components/top-builders-section";
+import TrendingProjectsSection, {
+	TrendingProjectsSkeleton,
+} from "@/components/trending-projects-section";
+import TVLStats from "@/components/tvl-stats";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -49,20 +59,26 @@ export default async function HomePage() {
 						<div className="space-y-6">
 							<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
 								<div className="text-foreground mb-2">Explore</div>
-							<Typewriter
-								text={["Stellar", "Stablecoins", "Lending", "AMMs", "Wallets"]}
-								speed={80}
-								className="text-[#FDDA24]"
-								waitTime={1800}
-								deleteSpeed={50}
-								cursorChar="_"
-								whiteTextWords={["Stellar"]}
-							/>
+								<Typewriter
+									text={[
+										"Stellar",
+										"Stablecoins",
+										"Lending",
+										"AMMs",
+										"Wallets",
+									]}
+									speed={80}
+									className="text-[#FDDA24]"
+									waitTime={1800}
+									deleteSpeed={50}
+									cursorChar="_"
+									whiteTextWords={["Stellar"]}
+								/>
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground max-w-[65ch] leading-relaxed">
-								Explore the apps and services built on Stellar. From wallets to DeFi
-								protocols, discover the growing ecosystem powering the future of
-								finance.
+								Explore the apps and services built on Stellar. From wallets to
+								DeFi protocols, discover the growing ecosystem powering the
+								future of finance.
 							</p>
 						</div>
 						<TVLStats />

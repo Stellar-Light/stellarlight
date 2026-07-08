@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 interface PointerHighlightProps {
 	children: ReactNode;
@@ -39,10 +39,7 @@ export function PointerHighlight({
 	}, []);
 
 	return (
-		<span
-			ref={containerRef}
-			className={`relative ${containerClassName}`}
-		>
+		<span ref={containerRef} className={`relative ${containerClassName}`}>
 			{children}
 			{dims && (
 				<motion.div
@@ -81,12 +78,7 @@ export function PointerHighlight({
 					animate={{
 						opacity: [0, 1, 1, 0],
 						top: [0, dims.height - 8, dims.height - 8, dims.height - 8],
-						left: [
-							0,
-							dims.width - 8,
-							dims.width - 8,
-							dims.width - 8,
-						],
+						left: [0, dims.width - 8, dims.width - 8, dims.width - 8],
 					}}
 					transition={{
 						duration: 2,

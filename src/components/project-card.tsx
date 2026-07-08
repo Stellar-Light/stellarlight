@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProjectCardProps {
 	project: {
@@ -16,7 +16,11 @@ interface ProjectCardProps {
 		types?: string[] | null;
 		status: string;
 		verificationLevel?: string;
-		logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
+		logo?:
+			| string
+			| { id: string; url?: string | null; filename?: string | null }
+			| null
+			| undefined;
 	};
 	isFeatured?: boolean;
 }
@@ -26,7 +30,8 @@ export default function ProjectCard({
 	isFeatured = false,
 }: ProjectCardProps) {
 	const [logoError, setLogoError] = useState(false);
-	const types = project.types && project.types.length > 0 ? project.types : null;
+	const types =
+		project.types && project.types.length > 0 ? project.types : null;
 
 	// Get logo URL - handle both string ID and populated object
 	let logoUrl = "/logo.png"; // Default fallback

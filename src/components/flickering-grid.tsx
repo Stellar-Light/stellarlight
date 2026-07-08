@@ -76,7 +76,12 @@ export function FlickeringGrid({
 			ctx.lineTo(x + width - radius, y);
 			ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
 			ctx.lineTo(x + width, y + height - radius);
-			ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+			ctx.quadraticCurveTo(
+				x + width,
+				y + height,
+				x + width - radius,
+				y + height,
+			);
 			ctx.lineTo(x + radius, y + height);
 			ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
 			ctx.lineTo(x, y + radius);
@@ -128,8 +133,16 @@ export function FlickeringGrid({
 						let totalAlpha = 0;
 						let pixelCount = 0;
 
-						for (let by = 0; by < logoBlockHeight && logoY + by < logoImg.naturalHeight; by++) {
-							for (let bx = 0; bx < logoBlockWidth && logoX + bx < logoImg.naturalWidth; bx++) {
+						for (
+							let by = 0;
+							by < logoBlockHeight && logoY + by < logoImg.naturalHeight;
+							by++
+						) {
+							for (
+								let bx = 0;
+								bx < logoBlockWidth && logoX + bx < logoImg.naturalWidth;
+								bx++
+							) {
 								const idx =
 									((logoY + by) * logoImg.naturalWidth + (logoX + bx)) * 4;
 								const alpha = pixels[idx + 3];
@@ -218,7 +231,10 @@ export function FlickeringGrid({
 					const filledSquares = squares.filter(
 						(s) => s.filled > 0 && s.activationOrder >= 0,
 					);
-					const maxOrder = Math.max(...filledSquares.map((s) => s.activationOrder), 0);
+					const maxOrder = Math.max(
+						...filledSquares.map((s) => s.activationOrder),
+						0,
+					);
 					filledSquares.forEach((square) => {
 						square.activationOrder = maxOrder - square.activationOrder;
 					});
@@ -250,7 +266,11 @@ export function FlickeringGrid({
 						);
 						square.lastActivated = currentTime;
 						square.activationOrder = activationCounter++;
-					} else if (!isHovering && square.filled > 0 && retraceStartTime >= 0) {
+					} else if (
+						!isHovering &&
+						square.filled > 0 &&
+						retraceStartTime >= 0
+					) {
 						const retraceTime = currentTime - retraceStartTime;
 						const unfillStart = square.activationOrder * 0.8;
 						if (retraceTime >= unfillStart) {
@@ -267,7 +287,8 @@ export function FlickeringGrid({
 
 					const radius = 2;
 
-					const flicker = Math.sin(square.flickerPhase) * square.flickerIntensity;
+					const flicker =
+						Math.sin(square.flickerPhase) * square.flickerIntensity;
 					const flickerBrightness = Math.max(0, flicker);
 
 					ctx.save();
@@ -396,4 +417,3 @@ export function FlickeringGrid({
 		</div>
 	);
 }
-

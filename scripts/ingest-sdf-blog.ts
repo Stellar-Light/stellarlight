@@ -12,11 +12,11 @@
  *   npx tsx scripts/ingest-sdf-blog.ts --limit=10  # only first 10 posts
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
@@ -24,6 +24,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -59,10 +60,7 @@ async function listBlogPosts(): Promise<string[]> {
 	// fallback/union for anything the sitemap lags on.
 	const seen = new Set<string>();
 	try {
-		const urls = await fetchSitemapUrls(
-			`${BASE}/sitemap.xml`,
-			`${BASE}/blog/`,
-		);
+		const urls = await fetchSitemapUrls(`${BASE}/sitemap.xml`, `${BASE}/blog/`);
 		for (const u of urls) {
 			const clean = u.replace(/\/$/, "");
 			if (clean === `${BASE}/blog`) continue;
@@ -118,8 +116,9 @@ interface Post {
 async function fetchPost(url: string): Promise<Post> {
 	const html = await fetchHtml(url);
 	const titleMatch =
-		html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i) ||
-		html.match(/<title[^>]*>([^<]+)<\/title>/i);
+		html.match(
+			/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
+		) || html.match(/<title[^>]*>([^<]+)<\/title>/i);
 	const title = titleMatch
 		? titleMatch[1].replace(/\s+\|\s+Stellar.*$/i, "").trim()
 		: url;
@@ -135,8 +134,9 @@ async function fetchPost(url: string): Promise<Post> {
 	)?.[1];
 	const isArticle = Boolean(publishedAt) || ogType === "article";
 
-	const main = html.match(/<article[\s\S]*?<\/article>/i)
-		|| html.match(/<main[\s\S]*?<\/main>/i);
+	const main =
+		html.match(/<article[\s\S]*?<\/article>/i) ||
+		html.match(/<main[\s\S]*?<\/main>/i);
 	const body = stripHtml(main ? main[0] : html);
 	return { url, title, body, publishedAt, isArticle };
 }
@@ -226,7 +226,9 @@ async function run() {
 	}
 
 	console.log(`\nChunks: ${allChunks.length} total`);
-	console.log(`  new: ${stats.new} | updated: ${stats.updated} | unchanged: ${stats.unchanged}`);
+	console.log(
+		`  new: ${stats.new} | updated: ${stats.updated} | unchanged: ${stats.unchanged}`,
+	);
 	console.log(`  to embed: ${stats.toEmbed} | post errors: ${postErrors}`);
 
 	if (!execute || !payload) {
@@ -265,6 +267,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((e) => {
-	console.error("FATAL:", e);
-	process.exit(1);
-});
+		console.error("FATAL:", e);
+		process.exit(1);
+	});

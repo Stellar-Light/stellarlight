@@ -10,8 +10,15 @@ export interface DeFiProtocol {
 }
 
 const DEFI_CATEGORIES = [
-	"Dexes", "Dexs", "Lending", "Liquid Staking", "CDP",
-	"Yield", "DEX Aggregator", "Derivatives", "Yield Aggregator",
+	"Dexes",
+	"Dexs",
+	"Lending",
+	"Liquid Staking",
+	"CDP",
+	"Yield",
+	"DEX Aggregator",
+	"Derivatives",
+	"Yield Aggregator",
 	"Liquidity manager",
 ];
 
@@ -23,9 +30,10 @@ export function useDeFiProtocols() {
 			const protocols = await response.json();
 
 			const stellarProtocols = protocols
-				.filter((p: any) =>
-					(p.chains || []).includes("Stellar") &&
-					DEFI_CATEGORIES.includes(p.category)
+				.filter(
+					(p: any) =>
+						(p.chains || []).includes("Stellar") &&
+						DEFI_CATEGORIES.includes(p.category),
 				)
 				.map((p: any) => ({
 					name: p.name,
