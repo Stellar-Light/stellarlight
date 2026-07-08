@@ -1,4 +1,4 @@
-# Stellar Ecosystem Directory - Collections Explanation
+# Collections
 
 This document explains all collections, their purpose, relationships, and how they work together.
 

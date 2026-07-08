@@ -5,7 +5,7 @@ Two incidents created this doc:
 1. **The vapor ship.** We put `npx @stellar-light/scout-mcp` install commands on the site before the npm package — or the npm org — existed. An external partner hit the 404.
 2. **The positioning gap.** A technical partner asked *"what does the MCP win me over the API?"* and we couldn't answer crisply, because the layering logic had never been written down.
 
-This doc prevents both. Read it before shipping any new public surface.
+This doc prevents both. Read it before shipping any new public surface. (How the surfaces work mechanically: [ARCHITECTURE.md](./ARCHITECTURE.md).)
 
 ## The surface map — who consumes what, and why each exists
 

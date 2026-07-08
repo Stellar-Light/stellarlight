@@ -60,3 +60,6 @@ scratchpad/
 # Committed-by-accident dev cruft
 test.env
 *.code-workspace
+
+# Editor config is personal — Biome handles lint/format (biome.json)
+.vscode/

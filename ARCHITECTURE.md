@@ -31,6 +31,8 @@ Code-verified mechanics of the Stellar Light data layer — what feeds it, how r
 - Composite `repoScore` in `src/lib/repo-search.ts` (topic match + freshness + traction + authority; exact-name lookups dominate authority — sls-009).
 - Regression gate: `scripts/scan/depth-eval.ts` over the ground-truth key `depth-labels.ts`, CI-enforced (`.github/workflows/depth-eval.yml`).
 
+Manual data triggers live in `scripts/` too (e.g. `scripts/refresh-github.ts` — the local GitHub-stats refresh behind `pnpm cron:github`).
+
 **Projects:** keyword+synonym search with tiered AND→relaxed matching, semantic (`$vectorSearch`, voyage-3 embeddings) fallback, exact-name boost, Inactive down-rank — `src/app/api/projects/search/route.ts`.
 
 **Partners:** deterministic matcher `src/lib/partner-match.ts` (`scorePartners` — structured-capability weighted, region-gated, word-boundary safe). The list endpoint, matchmaker, and concierge all reuse it — one engine, no drift.
