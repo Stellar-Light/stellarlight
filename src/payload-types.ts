@@ -80,6 +80,7 @@ export interface Config {
     'transparency-logs': TransparencyLog;
     carousel: Carousel;
     hackathons: Hackathon;
+    'link-checks': LinkCheck;
     'idea-submissions': IdeaSubmission;
     'api-usage': ApiUsage;
     'research-docs': ResearchDoc;
@@ -114,6 +115,7 @@ export interface Config {
     'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
     carousel: CarouselSelect<false> | CarouselSelect<true>;
     hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
+    'link-checks': LinkChecksSelect<false> | LinkChecksSelect<true>;
     'idea-submissions': IdeaSubmissionsSelect<false> | IdeaSubmissionsSelect<true>;
     'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
@@ -336,6 +338,19 @@ export interface Project {
         }[]
       | null;
   };
+  /**
+   * Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.
+   */
+  coverage?: {
+    countries?: string[] | null;
+    currencies?: string[] | null;
+    seps?: ('sep-6' | 'sep-24' | 'sep-31')[] | null;
+    asOf?: string | null;
+  };
+  /**
+   * Networks this project supports, lowercase (e.g. 'stellar', 'xrpl'). Curator-maintained.
+   */
+  supportedNetworks?: string[] | null;
   /**
    * Stellar Community Fund data
    */
@@ -588,6 +603,18 @@ export interface Repo {
    * Farm reasons — so explain can say WHY it declined
    */
   farmFlags?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Extracted pub fn/type names (array of strings) — code-content search signal
+   */
+  codeSymbols?:
     | {
         [k: string]: unknown;
       }
@@ -1018,6 +1045,71 @@ export interface Carousel {
   createdAt: string;
 }
 /**
+ * Daily link health checks across Projects, Builders, Entities, Hackathons, and curated skills. Sorted broken-first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "link-checks".
+ */
+export interface LinkCheck {
+  id: string;
+  /**
+   * The URL being health-checked.
+   */
+  url: string;
+  status: 'ok' | 'redirect' | 'blocked' | 'error';
+  /**
+   * HTTP status from the last check, or null on network errors (DNS, timeout, TLS).
+   */
+  statusCode?: number | null;
+  /**
+   * Short reason when status=error and statusCode is null — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert'.
+   */
+  errorReason?: string | null;
+  /**
+   * Final URL after following redirects.
+   */
+  redirectTo?: string | null;
+  /**
+   * How many consecutive check runs this URL has returned error/redirect. 0 = currently healthy.
+   */
+  consecutiveFailures?: number | null;
+  /**
+   * When the URL first started failing. Null = never failed since first observed.
+   */
+  firstFailedAt?: string | null;
+  /**
+   * Last time the URL returned 2xx. Null = never succeeded since first observed.
+   */
+  lastSuccessAt?: string | null;
+  lastChecked: string;
+  /**
+   * Every record in the directory that references this URL. Click through to the source to fix the link or remove the reference.
+   */
+  targets?:
+    | {
+        /**
+         * Source collection slug — projects / builders / entities / hackathons / curated-skills.
+         */
+        collection: string;
+        /**
+         * Slug or identifier within the source collection.
+         */
+        recordSlug: string;
+        /**
+         * Human-readable name (helps in the admin UI).
+         */
+        recordName?: string | null;
+        /**
+         * Field path within the record — e.g. 'links.github', 'website_url', 'docs'.
+         */
+        field: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "idea-submissions".
  */
@@ -1348,6 +1440,56 @@ export interface PartnerAccount {
    */
   country?: string | null;
   /**
+   * VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry — never inferred.
+   */
+  compliance?: {
+    /**
+     * Regulatory licenses/registrations — cite the authority + jurisdiction.
+     */
+    licenses?:
+      | {
+          authority: string;
+          jurisdiction?: string | null;
+          type?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Performs KYC (stated on their own site).
+     */
+    kycRequired?: boolean | null;
+    /**
+     * Travel Rule / FATF compliant (explicitly stated).
+     */
+    travelRule?: boolean | null;
+    /**
+     * Fiat currencies supported, comma-separated (e.g. 'MXN, USD').
+     */
+    currencies?: string | null;
+    /**
+     * e.g. 'instant', '<1hr', 'T+1'.
+     */
+    settlementTime?: string | null;
+    /**
+     * Publicly-named customers/partners, comma-separated.
+     */
+    notableCustomers?: string | null;
+  };
+  /**
+   * Domain-matched live on-chain assets (holders, payments, rating) from stellar.expert. Enrichment-owned.
+   */
+  onchain?:
+    | {
+        code: string;
+        issuer?: string | null;
+        holders?: number | null;
+        payments?: number | null;
+        rating?: number | null;
+        asOf?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Currently taking new integrations/clients?
    */
   acceptingClients?: boolean | null;
@@ -1639,6 +1781,10 @@ export interface PayloadLockedDocument {
         value: string | Hackathon;
       } | null)
     | ({
+        relationTo: 'link-checks';
+        value: string | LinkCheck;
+      } | null)
+    | ({
         relationTo: 'idea-submissions';
         value: string | IdeaSubmission;
       } | null)
@@ -1810,6 +1956,15 @@ export interface ProjectsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  coverage?:
+    | T
+    | {
+        countries?: T;
+        currencies?: T;
+        seps?: T;
+        asOf?: T;
+      };
+  supportedNetworks?: T;
   scf?:
     | T
     | {
@@ -1885,6 +2040,7 @@ export interface ReposSelect<T extends boolean = true> {
   stellarJsDep?: T;
   farmScore?: T;
   farmFlags?: T;
+  codeSymbols?: T;
   unverifiedStellar?: T;
   codeScanState?: T;
   codeScanError?: T;
@@ -2112,6 +2268,32 @@ export interface HackathonsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "link-checks_select".
+ */
+export interface LinkChecksSelect<T extends boolean = true> {
+  url?: T;
+  status?: T;
+  statusCode?: T;
+  errorReason?: T;
+  redirectTo?: T;
+  consecutiveFailures?: T;
+  firstFailedAt?: T;
+  lastSuccessAt?: T;
+  lastChecked?: T;
+  targets?:
+    | T
+    | {
+        collection?: T;
+        recordSlug?: T;
+        recordName?: T;
+        field?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "idea-submissions_select".
  */
 export interface IdeaSubmissionsSelect<T extends boolean = true> {
@@ -2253,6 +2435,34 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
   seps?: T;
   rampTypes?: T;
   country?: T;
+  compliance?:
+    | T
+    | {
+        licenses?:
+          | T
+          | {
+              authority?: T;
+              jurisdiction?: T;
+              type?: T;
+              id?: T;
+            };
+        kycRequired?: T;
+        travelRule?: T;
+        currencies?: T;
+        settlementTime?: T;
+        notableCustomers?: T;
+      };
+  onchain?:
+    | T
+    | {
+        code?: T;
+        issuer?: T;
+        holders?: T;
+        payments?: T;
+        rating?: T;
+        asOf?: T;
+        id?: T;
+      };
   acceptingClients?: T;
   typicalEngagement?: T;
   leadTime?: T;

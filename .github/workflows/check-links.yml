@@ -1,0 +1,64 @@
+name: Curator Agent — Link health check
+
+# Daily cron that HEAD-requests every external URL in the directory and
+# records the result in the LinkChecks Payload collection. Admin dashboard
+# at /admin/collections/link-checks surfaces broken / redirecting URLs.
+#
+# Why daily, not weekly:
+#   - Stellar projects ship + sunset constantly; weekly is too coarse to
+#     keep Scout's citations honest
+#   - HEAD requests are cheap (~1 KB per URL × ~200 URLs = ~200 KB/day,
+#     zero cost)
+#   - The dashboard's "consecutiveFailures" counter is most useful when
+#     it ticks day-by-day so admins can spot a transient blip vs a true
+#     deletion
+#
+# Cadence offset from neighbours:
+#   - 02:00 UTC link health   ← this one
+#   - 06:00 UTC EC snapshot   (refresh-ec-snapshot.yml)
+#   - 06:00 UTC research      (refresh-research-corpus.yml)
+#   So we don't pile three jobs on the runner at the same minute.
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "If true, scan + report but don't write to DB. Default false."
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URI: ${{ secrets.DATABASE_URI }}
+  PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run link health check
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            pnpm exec tsx scripts/check-links.ts
+          else
+            pnpm exec tsx scripts/check-links.ts --execute
+          fi
