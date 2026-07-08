@@ -150,6 +150,61 @@ async function main() {
 		bad("projects ground truth", `fetch failed: ${String(err)}`);
 	}
 
+	// 5. Known-item recall — the answer to "how do we catch important misses?"
+	//    (Tyler, raven#8: Etherfuse, SushiSwap). A prose-only search silently
+	//    DROPS a well-known entity when a category/corridor query is phrased in
+	//    vocabulary its description doesn't literally contain. Precision evals
+	//    can't see a recall hole — you have to assert the KNOWN-GOOD entity is
+	//    present for its natural query. This is a growing answer key: every miss
+	//    Tyler (or our own dogfooding) surfaces becomes a permanent regression
+	//    guard here. `match` is substring on name/slug; `topK` is how deep the
+	//    entity may sit and still count (recall, not #1 ranking).
+	console.log("\n── Known-item recall (category/corridor misses) ──");
+	const RECALL: Array<{
+		q: string;
+		match: string;
+		topK: number;
+		why: string;
+	}> = [
+		{
+			q: "Mexico on-ramp fiat MXN peso deposit anchor",
+			match: "etherfuse",
+			topK: 20,
+			why: "sls-018: coverage serves Mexico/MXN; prose is about Stablebonds",
+		},
+		{
+			q: "DEX AMM swap liquidity pool",
+			match: "sushi",
+			topK: 20,
+			why: "sls-019: type=DEX; desc says 'liquidity provision' not 'pool'",
+		},
+		{
+			q: "AMM decentralized exchange Soroban",
+			match: "soroswap",
+			topK: 20,
+			why: "flagship Soroban AMM — control that must never regress",
+		},
+	];
+	for (const r of RECALL) {
+		try {
+			const d = await j(
+				`/api/projects/search?q=${encodeURIComponent(r.q)}&limit=${r.topK}`,
+			);
+			const names = (d.projects ?? []).map((p: { name?: string; slug?: string }) =>
+				`${p.name ?? ""} ${p.slug ?? ""}`.toLowerCase(),
+			);
+			if (names.some((n: string) => n.includes(r.match)))
+				ok(`recall: '${r.match}' surfaces for "${r.q}"`);
+			else
+				bad(
+					`recall miss: '${r.match}'`,
+					`absent from top-${r.topK} of "${r.q}" (${r.why}). ${(d.projects ?? []).length} returned, matchMode=${d.meta?.matchMode}`,
+				);
+		} catch (err) {
+			bad(`recall: '${r.match}'`, `fetch failed: ${String(err)}`);
+		}
+	}
+
 	console.log(
 		`\n${fails ? "✗ FAIL" : "✓ PASS"} — ${passes} passed, ${warns} warnings, ${fails} failures`,
 	);

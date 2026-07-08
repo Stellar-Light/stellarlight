@@ -19,6 +19,16 @@ import { embed } from "@/lib/embed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { searchRepos, type RepoResult } from "@/lib/repo-search";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import {
+	buildHaystack,
+	corridorMatch,
+	intentTypesFor,
+	isRampIntent,
+	scoreTokens,
+	structuredHit,
+	termsForToken,
+	tokenize,
+} from "@/lib/project-search-match";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -210,197 +220,10 @@ interface ProjectRepoRef {
 	lastCommitAt: string | null;
 }
 
-// Synonym + light-stem expansion so natural queries reach records described in
-// adjacent vocabulary the literal `like` would miss: "game" → "gaming"/"GameFi",
-// "dex" → "amm"/"swap", "lending" → "borrow", "oracle" → "price feed". Each query
-// token expands to a term set; a record matches the token if ANY term hits its
-// text. Keeps recall high on single-word category queries without a full vector pass.
-const SYNONYMS: Record<string, string[]> = {
-	wallet: ["wallet", "custody", "signer", "keystore"],
-	dex: ["dex", "amm", "swap", "exchange", "orderbook"],
-	amm: ["amm", "liquidity", "pool", "swap", "dex"],
-	swap: ["swap", "dex", "amm", "exchange"],
-	lending: ["lending", "lend", "borrow", "loan", "money market"],
-	lend: ["lend", "lending", "borrow", "loan"],
-	borrow: ["borrow", "borrowing", "lend", "lending", "loan"],
-	oracle: ["oracle", "price feed", "data feed", "feed"],
-	bridge: ["bridge", "cross-chain", "interoperability", "cctp", "wrapped"],
-	stablecoin: ["stablecoin", "stable", "usdc", "eurc"],
-	staking: ["staking", "stake", "yield", "apy", "earn"],
-	yield: ["yield", "apy", "earn", "staking", "vault"],
-	nft: ["nft", "collectible", "collectibles", "mint"],
-	gaming: ["gaming", "game", "gamefi", "play-to-earn", "play2earn"],
-	game: ["game", "gaming", "gamefi", "play-to-earn"],
-	anchor: ["anchor", "on-ramp", "off-ramp", "sep-24", "sep24", "ramp"],
-	remittance: [
-		"remittance",
-		"cross-border",
-		"money transfer",
-		"send money",
-		"payout",
-	],
-	// Region umbrellas → the country vocabulary records actually use. Raven's
-	// launch demo ("LatAm asset issuers") missed PagFinance/CashAbroad because
-	// their records say "Brazil"/"Mexico", never the umbrella term "LatAm".
-	latam: [
-		"latam",
-		"latin america",
-		"brazil",
-		"brazilian",
-		"mexico",
-		"mexican",
-		"argentina",
-		"colombia",
-		"chile",
-		"peru",
-	],
-	africa: ["africa", "african", "nigeria", "kenya", "ghana", "south africa"],
-	asia: [
-		"asia",
-		"asian",
-		"india",
-		"indian",
-		"philippines",
-		"indonesia",
-		"vietnam",
-		"singapore",
-	],
-	europe: ["europe", "european", "eu"],
-	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
-	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
-	rpc: ["rpc", "node", "endpoint", "horizon"],
-	sdk: ["sdk", "library", "client library", "kit"],
-	explorer: ["explorer", "block explorer"],
-	faucet: ["faucet", "friendbot"],
-	identity: ["identity", "kyc", "did", "credential", "compliance"],
-	governance: ["governance", "dao", "voting"],
-	custody: ["custody", "custodial", "mpc", "multisig", "key management"],
-	domains: ["domains", "domain", "name service", "naming"],
-	rwa: [
-		"rwa",
-		"real world asset",
-		"real-world asset",
-		"tokenized",
-		"tokenization",
-	],
-	// Machine/agent payments (x402). Expand to the phrases real records actually
-	// use — ApiCharge says "pay-per-call"/"API monetization", Benkiko says
-	// "micropayment" — never the literal "x402". Keep to specific phrases, not
-	// bare "api"/"payment", to avoid pulling in generic infra/payments projects.
-	x402: [
-		"x402",
-		"pay-per-call",
-		"pay per call",
-		"api monetization",
-		"micropayment",
-		"metered",
-		"machine payment",
-		"agentic payment",
-		"agent payment",
-	],
-	micropayment: [
-		"micropayment",
-		"micro-payment",
-		"pay-per-call",
-		"x402",
-		"metered",
-	],
-	mpp: [
-		"mpp",
-		"machine payment",
-		"machine-to-machine",
-		"x402",
-		"agentic payment",
-	],
-	agentic: [
-		"agentic",
-		"agent payment",
-		"agentic payment",
-		"x402",
-		"machine payment",
-	],
-	// ROSCA / rotating-savings. Lul's description says "ROSCA", Vaquita is a
-	// rotating-savings product; the regional names (susu/chama/stokvel/…) appear
-	// in queries but not descriptions, so map them onto the terms records use.
-	rosca: [
-		"rosca",
-		"rotating savings",
-		"savings group",
-		"savings circle",
-		"susu",
-		"esusu",
-		"chama",
-		"stokvel",
-		"tanda",
-		"ajo",
-	],
-	chama: ["chama", "rosca", "rotating savings", "savings group"],
-	susu: ["susu", "esusu", "rosca", "rotating savings"],
-	esusu: ["esusu", "susu", "rosca", "rotating savings"],
-	stokvel: ["stokvel", "rosca", "rotating savings", "savings group"],
-	tanda: ["tanda", "rosca", "rotating savings", "savings circle"],
-};
-function termsForToken(t: string): string[] {
-	const out = new Set<string>([t]);
-	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1)); // plural
-	if (t.length > 5 && t.endsWith("ing")) out.add(t.slice(0, -3)); // gerund
-	for (const syn of SYNONYMS[t] ?? []) out.add(syn);
-	return [...out];
-}
-
-// Map a query token to the `types` value it implies, so ranking can boost
-// records that ARE the queried category over records that merely mention it.
-// Prominence is global; this scopes it to intent — e.g. DFNS is a top *custody*
-// play but shouldn't lead q=wallet, and Soroswap should lead q=dex over a wallet
-// that happens to do swaps. Tokens not mapped here (oracle, custody, yield…)
-// fall back to plain prominence, which already orders them well.
-const INTENT_TYPE: Record<string, string> = {
-	wallet: "Wallet",
-	dex: "DEX",
-	amm: "DEX",
-	swap: "DEX",
-	lending: "Lending",
-	lend: "Lending",
-	borrow: "Lending",
-	bridge: "Bridge",
-	payments: "Payments",
-	payment: "Payments",
-	remittance: "Payments",
-	x402: "Payments",
-	mpp: "Payments",
-	micropayment: "Payments",
-	anchor: "Anchor",
-	sdk: "SDK",
-	indexer: "Indexer",
-	explorer: "Explorer",
-	rpc: "RPC",
-	node: "RPC",
-	faucet: "Faucet",
-	nft: "NFT",
-	rwa: "RWA",
-	gaming: "Gaming",
-	game: "Gaming",
-	stablecoin: "Stablecoin",
-};
-function intentTypesFor(tokens: string[]): Set<string> {
-	const s = new Set<string>();
-	for (const t of tokens) {
-		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
-		for (const syn of SYNONYMS[t] ?? [])
-			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
-	}
-	return s;
-}
-
-// Does the record's own `types` match the query's implied category? Used as a
-// PRIMARY sort tier (above prominence) so a true-category record always leads its
-// query, even at prominence 0 — e.g. an obscure NFT project beats a high-prominence
-// lender that merely contains "nft". intentTypes empty (no category query) → false.
-function typeMatch(p: ProjectRow, intentTypes: Set<string>): boolean {
-	return (
-		intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t))
-	);
-}
+// Synonyms, stemming, intent-type mapping, structured-signal matching, and the
+// searchable haystack all live in project-search-match.ts (imported above) so the
+// admission/scoring rules are unit-tested. The route orchestrates; that module
+// decides what matches.
 
 // Authority/quality WITHIN a tier: curated prominence, then SDF/community
 // verification, SCF funding, and live status.
@@ -598,11 +421,9 @@ export async function GET(req: NextRequest) {
 				where["scf.awarded"] = { equals: true };
 			}
 
-			const tokens = q
-				.toLowerCase()
-				.split(/\s+/)
-				.filter((t) => t.length > 1);
+			const tokens = tokenize(q);
 			const intentTypes = intentTypesFor(tokens);
+			const rampIntent = isRampIntent(tokens);
 
 			// Push the keyword match INTO the DB query (OR over tokens) so EVERY
 			// matching project is a candidate — not just whichever 500 load first
@@ -610,32 +431,63 @@ export async function GET(req: NextRequest) {
 			// scored them in memory, leaving the tail (older seed records like
 			// Soroswap/Aquarius) permanently unsearchable once the directory grew
 			// past 500. The in-memory tiering below still ranks the candidates.
+			//
+			// Structured coverage (text) is matched alongside prose so a record
+			// surfaces on its STRUCTURED truth even when its description never says
+			// the query words — the Etherfuse miss (sls-018): coverage names
+			// Mexico/MXN, prose is about Stablebonds, so a generic Mexico on-ramp
+			// query never fetched it as a candidate. `types`/`coverage.seps` are
+			// `select` fields (not `like`-safe on every Payload version), so they
+			// are NOT in the candidate query — they still contribute to the
+			// in-memory haystack score below, which is what ranks admitted rows.
+			const baseOr = tokens.flatMap((t) =>
+				termsForToken(t).flatMap((v) => [
+					{ name: { like: v } },
+					{ shortDescription: { like: v } },
+					{ category: { like: v } },
+				]),
+			);
+			const structuredOr = tokens.flatMap((t) =>
+				termsForToken(t).flatMap((v) => [
+					{ supportedNetworks: { like: v } },
+					{ "coverage.countries": { like: v } },
+					{ "coverage.currencies": { like: v } },
+				]),
+			);
 			if (tokens.length) {
-				where.or = tokens.flatMap((t) =>
-					termsForToken(t).flatMap((v) => [
-						{ name: { like: v } },
-						{ shortDescription: { like: v } },
-						{ category: { like: v } },
-					]),
-				);
+				where.or = [...baseOr, ...structuredOr];
 			}
 
-			const result = await payload.find({
-				collection: "projects",
-				where,
-				limit: 500,
-				depth: 0,
-				// THE fix: exclude `embedding` from the candidate fetch. It's a json
-				// voyage-3 vector (~KBs/doc); pulling it for up to 500 matched
-				// projects dragged megabytes out of the M0 free tier on every search
-				// and was the real cause of the 16-20s hangs — the route never reads
-				// it ($vectorSearch uses the index server-side). Same class of bug as
-				// readmeExcerpt in repos/search, same fix. depth:0 keeps the scan
-				// cheap; logo/hackathon are populated post-slice for the page only.
-				select: {
-					embedding: false,
-				},
-			});
+			const findCandidates = (
+				// biome-ignore lint/suspicious/noExplicitAny: Payload Where type
+				w: any,
+			) =>
+				payload.find({
+					collection: "projects",
+					where: w,
+					limit: 500,
+					depth: 0,
+					// THE fix: exclude `embedding` from the candidate fetch. It's a json
+					// voyage-3 vector (~KBs/doc); pulling it for up to 500 matched
+					// projects dragged megabytes out of the M0 free tier on every search
+					// and was the real cause of the 16-20s hangs — the route never reads
+					// it ($vectorSearch uses the index server-side). Same class of bug as
+					// readmeExcerpt in repos/search, same fix. depth:0 keeps the scan
+					// cheap; logo/hackathon are populated post-slice for the page only.
+					select: { embedding: false },
+				});
+			// Structured coverage paths are standard Payload operators, but never let
+			// a query-shape surprise silently empty ALL search: on any find error,
+			// retry with the proven name/description/category candidate set. Worst
+			// case the endpoint degrades to its prior behavior, never to nothing.
+			let result: Awaited<ReturnType<typeof findCandidates>>;
+			try {
+				result = await findCandidates(where);
+			} catch {
+				result = await findCandidates(
+					tokens.length ? { ...where, or: baseOr } : where,
+				);
+			}
 
 			projects = (
 				result.docs as Array<{
@@ -679,15 +531,12 @@ export async function GET(req: NextRequest) {
 					};
 				}>
 			).map((p) => {
-				const hay =
-					`${p.name} ${p.shortDescription ?? ""} ${p.category}`.toLowerCase();
-				const score = tokens.length
-					? tokens.reduce(
-							(s, t) =>
-								s + (termsForToken(t).some((v) => hay.includes(v)) ? 1 : 0),
-							0,
-						)
-					: 1;
+				// Haystack folds structured truth (types / supportedNetworks / coverage
+				// values, + injected ramp vocabulary for any covered record) into the
+				// searchable text, so a corridor/category query scores a record on what
+				// it demonstrably IS, not only on how its prose happens to be phrased.
+				const hay = buildHaystack(p);
+				const score = scoreTokens(hay, tokens);
 				const hk =
 					p.hackathon && typeof p.hackathon === "object"
 						? {
@@ -751,16 +600,41 @@ export async function GET(req: NextRequest) {
 			// The .meta.matchMode field tells the caller which tier returned
 			// the results so they can convey relevance honestly to the user.
 			if (tokens.length) {
+				// Structured-signal admission (sls-018/019): a project that IS the
+				// queried category (its `types` match intent) or whose curated
+				// coverage serves a queried corridor is admitted ONE tier looser
+				// than prose token-count alone. Structured truth is stronger
+				// evidence than one extra description word — it is why Sushi (type
+				// DEX; desc says "liquidity provision", query wanted "pool") and
+				// Etherfuse (coverage MXN/Mexico; prose about bonds) were dropped.
+				const admit = (bar: number) => (p: ProjectRow) =>
+					p.score >= bar ||
+					(p.score >= bar - 1 &&
+						structuredHit(p, intentTypes, tokens, rampIntent));
 				matchMode = "strict";
-				let filtered = projects.filter((p) => p.score >= tokens.length);
+				let filtered = projects.filter(admit(tokens.length));
 				if (filtered.length === 0 && tokens.length >= 3) {
 					matchMode = "loose-1";
-					filtered = projects.filter((p) => p.score >= tokens.length - 1);
+					filtered = projects.filter(admit(tokens.length - 1));
 				}
 				if (filtered.length === 0 && tokens.length >= 2) {
 					matchMode = "majority";
-					const need = Math.ceil(tokens.length / 2);
-					filtered = projects.filter((p) => p.score >= need);
+					filtered = projects.filter(admit(Math.ceil(tokens.length / 2)));
+				}
+				// Corridor bypass: a curated coverage match on a queried country/
+				// currency/SEP is unambiguous intent satisfaction — admit it at ANY
+				// tier so a multi-product issuer surfaces for a generic ramp/corridor
+				// query even when its prose (about its primary product) never names
+				// the corridor. Gated on ramp intent + a structured coverage hit, so
+				// it cannot over-recall on ordinary topic queries.
+				if (rampIntent) {
+					const have = new Set(filtered.map((p) => p.id));
+					for (const p of projects) {
+						if (!have.has(p.id) && corridorMatch(p, tokens)) {
+							filtered.push(p);
+							have.add(p.id);
+						}
+					}
 				}
 				// Name-lookup contract (sls-009): an exact/prefix/whole-word name
 				// match must dominate every authority signal — q="Blend" ranked
@@ -800,8 +674,10 @@ export async function GET(req: NextRequest) {
 						exactName(b.id) - exactName(a.id) ||
 						isActive(b) - isActive(a) ||
 						b.score - a.score ||
-						Number(typeMatch(b, intentTypes)) -
-							Number(typeMatch(a, intentTypes)) ||
+						// Structured relevance (type-match OR corridor coverage-match)
+						// leads over pure prose matches at the same keyword score.
+						Number(structuredHit(b, intentTypes, tokens, rampIntent)) -
+							Number(structuredHit(a, intentTypes, tokens, rampIntent)) ||
 						rankBoost(b) - rankBoost(a) ||
 						(nameRank.get(b.id) ?? 0) - (nameRank.get(a.id) ?? 0) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
