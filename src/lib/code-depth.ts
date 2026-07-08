@@ -41,7 +41,14 @@ export interface DepthScalars {
 
 export interface DepthInput {
 	fullName: string;
-	proof: "cargo-sdk" | "contract-macros" | "js-sdk" | "lang-sdk" | "stellar-toml" | "weak-mention" | "none";
+	proof:
+		| "cargo-sdk"
+		| "contract-macros"
+		| "js-sdk"
+		| "lang-sdk"
+		| "stellar-toml"
+		| "weak-mention"
+		| "none";
 	versionStatus: "current" | "supported" | "deprecated" | "unknown";
 	isDeployableContract: boolean; // Cargo cdylib
 	/** ALL fetched blobs (root + per-crate Cargo.toml + top src/*.rs by size + tests). */
@@ -88,16 +95,29 @@ export const KNOWN_EXAMPLE_REPOS: ReadonlySet<string> = new Set(
 );
 
 /** Name/topic markers that flag an example/tutorial/scaffold repo. */
-const EXAMPLE_NAME_MARKER = /\b(examples?|tutorial|quickstart|workshop|cookbook|getting.started|sample|scaffold|boilerplate|starter|challenge|sorobanathon)\b/i;
+// v3 (2026-07-08 frontier calibration): added demo/bootcamp/course/academy/
+// lesson — nrxschool/stellar-bootcamp (tutorial token + course slides) scored
+// 0.616 and warp-driver/oracle-demo 0.569 purely because their marker words
+// were missing. Still immature-gated: a real released project named "*-demo"
+// keeps full score.
+const EXAMPLE_NAME_MARKER =
+	/\b(examples?|tutorial|quickstart|workshop|cookbook|getting.started|sample|scaffold|boilerplate|starter|challenge|sorobanathon|demos?|bootcamp|course|academy|classroom|lessons?)\b/i;
 
 /** Is this repo an example/tutorial by curation or (immaturity-gated) name marker? */
-export function isExampleRepo(fullName: string, topics: string[] | undefined, mature: boolean): boolean {
+export function isExampleRepo(
+	fullName: string,
+	topics: string[] | undefined,
+	mature: boolean,
+): boolean {
 	if (KNOWN_EXAMPLE_REPOS.has(fullName.toLowerCase())) return true;
 	// Name/topic marker only caps an IMMATURE repo — a real, released project that
 	// happens to have "demo"/"sample" in its name keeps full score (no over-filter).
 	if (mature) return false;
 	const name = fullName.slice(fullName.indexOf("/") + 1);
-	return EXAMPLE_NAME_MARKER.test(name) || (topics ?? []).some((t) => EXAMPLE_NAME_MARKER.test(t));
+	return (
+		EXAMPLE_NAME_MARKER.test(name) ||
+		(topics ?? []).some((t) => EXAMPLE_NAME_MARKER.test(t))
+	);
 }
 
 /**
@@ -149,7 +169,7 @@ function stripCommentsAndStrings(src: string): string {
 			continue;
 		}
 		if (c === '"') {
-			out += ' LIT ';
+			out += " LIT ";
 			i++;
 			while (i < n && src[i] !== '"') {
 				if (src[i] === "\\") i++;
@@ -167,11 +187,47 @@ function stripCommentsAndStrings(src: string): string {
 /** Normalize Rust to a token stream: idents→ID, numbers→LIT, strings already LIT. */
 export function normalizeRust(src: string): string[] {
 	const clean = stripCommentsAndStrings(src);
-	const toks = clean.match(/[A-Za-z_][A-Za-z0-9_]*|::|->|=>|\+=|-=|==|!=|<=|>=|&&|\|\||[{}()\[\];,.&|!<>=+\-*/%?:]|LIT/g) ?? [];
+	const toks =
+		clean.match(
+			/[A-Za-z_][A-Za-z0-9_]*|::|->|=>|\+=|-=|==|!=|<=|>=|&&|\|\||[{}()[\];,.&|!<>=+\-*/%?:]|LIT/g,
+		) ?? [];
 	const KEYWORDS = new Set([
-		"fn", "let", "mut", "pub", "impl", "struct", "enum", "match", "if", "else", "for", "while", "loop",
-		"return", "self", "env", "Env", "u32", "u64", "i128", "u128", "bool", "String", "Vec", "Map", "Address",
-		"Symbol", "storage", "instance", "persistent", "temporary", "get", "set", "require_auth", "true", "false",
+		"fn",
+		"let",
+		"mut",
+		"pub",
+		"impl",
+		"struct",
+		"enum",
+		"match",
+		"if",
+		"else",
+		"for",
+		"while",
+		"loop",
+		"return",
+		"self",
+		"env",
+		"Env",
+		"u32",
+		"u64",
+		"i128",
+		"u128",
+		"bool",
+		"String",
+		"Vec",
+		"Map",
+		"Address",
+		"Symbol",
+		"storage",
+		"instance",
+		"persistent",
+		"temporary",
+		"get",
+		"set",
+		"require_auth",
+		"true",
+		"false",
 	]);
 	return toks.map((t) => {
 		if (t === "LIT") return "LIT";
@@ -184,7 +240,8 @@ export function normalizeRust(src: string): string[] {
 /** k=5 token shingles. */
 export function shinglesOf(tokens: string[], k = 5): Set<string> {
 	const s = new Set<string>();
-	for (let i = 0; i + k <= tokens.length; i++) s.add(tokens.slice(i, i + k).join(" "));
+	for (let i = 0; i + k <= tokens.length; i++)
+		s.add(tokens.slice(i, i + k).join(" "));
 	if (tokens.length > 0 && tokens.length < k) s.add(tokens.join(" "));
 	return s;
 }
@@ -212,7 +269,8 @@ interface FnBody {
 function extractContractFns(src: string): FnBody[] {
 	const clean = stripCommentsAndStrings(src);
 	const fns: FnBody[] = [];
-	const reFn = /\bpub\s+fn\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^>]*>)?\s*\([^)]*\)[^;{]*\{/g;
+	const reFn =
+		/\bpub\s+fn\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^>]*>)?\s*\([^)]*\)[^;{]*\{/g;
 	let m: RegExpExecArray | null;
 	while ((m = reFn.exec(clean))) {
 		const name = m[1];
@@ -225,7 +283,9 @@ function extractContractFns(src: string): FnBody[] {
 			i++;
 		}
 		const body = clean.slice(start, i - 1);
-		const statements = body.split(";").filter((s) => s.trim().length > 0).length;
+		const statements = body
+			.split(";")
+			.filter((s) => s.trim().length > 0).length;
 		fns.push({ name, body, statements });
 		reFn.lastIndex = i;
 	}
@@ -242,8 +302,12 @@ function isNonTrivial(fn: FnBody): boolean {
 	if (fn.statements < 3) return false;
 	const b = fn.body;
 	const hasAuth = /\brequire_auth(?:_for_args)?\s*\(/.test(b);
-	const hasCross = /\bClient\s*::\s*new\b|contractclient!|contractimport!/.test(b);
-	const hasArith = /[a-z_0-9)\]]\s*[+\-*/%]\s*[a-z_0-9(]/i.test(b) || /\.(checked_add|checked_sub|checked_mul|checked_div)\b/.test(b);
+	const hasCross = /\bClient\s*::\s*new\b|contractclient!|contractimport!/.test(
+		b,
+	);
+	const hasArith =
+		/[a-z_0-9)\]]\s*[+\-*/%]\s*[a-z_0-9(]/i.test(b) ||
+		/\.(checked_add|checked_sub|checked_mul|checked_div)\b/.test(b);
 	const hasBranch = /\bif\b|\bmatch\b/.test(b);
 	return hasAuth || hasCross || hasArith || hasBranch;
 }
@@ -269,15 +333,28 @@ interface CrateFacts {
 const RE_WRITE = /\.(set|update|extend_ttl|bump|remove)\s*\(/g;
 const RE_AUTH = /\brequire_auth(?:_for_args)?\s*\(/g;
 const RE_CROSS = /([A-Za-z_][A-Za-z0-9_]*Client)\s*::\s*new\s*\(/g;
-const RE_STORAGE_TIER = /\.storage\s*\(\s*\)\s*\.\s*(instance|persistent|temporary)\b/g;
-const RE_CUSTOM_AUTH = /__check_auth|CustomAccountInterface|secp256r1|ed25519|env\s*\.\s*crypto\s*\(/;
-const FIN_TERMS = /\b(interest_rate|interest|liquidat\w*|weighted|invariant|flash.?loan|collateral|accrue|slippage|amount_out|reserve|fee)\b/i;
+const RE_STORAGE_TIER =
+	/\.storage\s*\(\s*\)\s*\.\s*(instance|persistent|temporary)\b/g;
+const RE_CUSTOM_AUTH =
+	/__check_auth|CustomAccountInterface|secp256r1|ed25519|env\s*\.\s*crypto\s*\(/;
+const FIN_TERMS =
+	/\b(interest_rate|interest|liquidat\w*|weighted|invariant|flash.?loan|collateral|accrue|slippage|amount_out|reserve|fee)\b/i;
 
 function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 	const f: CrateFacts = {
-		nonTrivialFns: 0, totalContractFns: 0, rustSloc: 0, writeSites: 0, authGatedWrites: 0,
-		requireAuthCount: 0, crossCalls: 0, dataKeyVariants: 0, storageTiers: 0, errorArms: 0,
-		customAccountAuth: false, financialArith: 0, fnShingles: new Set(),
+		nonTrivialFns: 0,
+		totalContractFns: 0,
+		rustSloc: 0,
+		writeSites: 0,
+		authGatedWrites: 0,
+		requireAuthCount: 0,
+		crossCalls: 0,
+		dataKeyVariants: 0,
+		storageTiers: 0,
+		errorArms: 0,
+		customAccountAuth: false,
+		financialArith: 0,
+		fnShingles: new Set(),
 	};
 	const tiers = new Set<string>();
 	const crossNames = new Set<string>();
@@ -288,7 +365,12 @@ function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 		const noTest = t.replace(/#\[cfg\(test\)\][\s\S]*$/m, "");
 		f.rustSloc += noTest.split("\n").filter((l) => {
 			const s = l.trim();
-			return s.length > 0 && !s.startsWith("//") && !s.startsWith("/*") && !s.startsWith("*");
+			return (
+				s.length > 0 &&
+				!s.startsWith("//") &&
+				!s.startsWith("/*") &&
+				!s.startsWith("*")
+			);
 		}).length;
 
 		const fns = extractContractFns(t);
@@ -302,7 +384,8 @@ function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 			f.writeSites += writes;
 			if (writes > 0 && auths > 0) f.authGatedWrites += writes;
 			// financial arithmetic co-occurrence (review P6d)
-			if (FIN_TERMS.test(fn.body) && /[+\-*/%]|checked_/.test(fn.body)) f.financialArith++;
+			if (FIN_TERMS.test(fn.body) && /[+\-*/%]|checked_/.test(fn.body))
+				f.financialArith++;
 		}
 		f.requireAuthCount += (t.match(RE_AUTH) ?? []).length;
 		// cross-contract calls whose return is used (assigned/let) — de-gamed (P6b)
@@ -312,10 +395,22 @@ function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 		for (const tier of t.match(RE_STORAGE_TIER) ?? []) tiers.add(tier);
 		if (RE_CUSTOM_AUTH.test(t)) f.customAccountAuth = true;
 		// DataKey / contracttype enum variants + contracterror arms
-		const dk = t.match(/#\[contracttype\][\s\S]{0,40}?enum\s+\w+\s*\{([^}]*)\}/);
-		if (dk) f.dataKeyVariants = Math.max(f.dataKeyVariants, dk[1].split(",").filter((s) => s.trim()).length);
-		const ce = t.match(/#\[contracterror\][\s\S]{0,40}?enum\s+\w+\s*\{([^}]*)\}/);
-		if (ce) f.errorArms = Math.max(f.errorArms, ce[1].split(",").filter((s) => s.trim()).length);
+		const dk = t.match(
+			/#\[contracttype\][\s\S]{0,40}?enum\s+\w+\s*\{([^}]*)\}/,
+		);
+		if (dk)
+			f.dataKeyVariants = Math.max(
+				f.dataKeyVariants,
+				dk[1].split(",").filter((s) => s.trim()).length,
+			);
+		const ce = t.match(
+			/#\[contracterror\][\s\S]{0,40}?enum\s+\w+\s*\{([^}]*)\}/,
+		);
+		if (ce)
+			f.errorArms = Math.max(
+				f.errorArms,
+				ce[1].split(",").filter((s) => s.trim()).length,
+			);
 	}
 	f.crossCalls = crossNames.size;
 	f.storageTiers = tiers.size;
@@ -345,7 +440,11 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	const reasons: string[] = [];
 
 	// Non-Rust proofs: real but not contract depth.
-	if (input.proof === "js-sdk" || input.proof === "lang-sdk" || input.proof === "stellar-toml") {
+	if (
+		input.proof === "js-sdk" ||
+		input.proof === "lang-sdk" ||
+		input.proof === "stellar-toml"
+	) {
 		return zero(0.3, "js/toml-proof");
 	}
 	if (input.proof !== "cargo-sdk" && input.proof !== "contract-macros") {
@@ -355,7 +454,9 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	// (A) BASELINE — hard-capped at 0.20 (review invariant).
 	const baseline = Math.min(
 		0.2,
-		0.1 + 0.05 * (input.isDeployableContract ? 1 : 0) + 0.05 * (input.versionStatus === "current" ? 1 : 0),
+		0.1 +
+			0.05 * (input.isDeployableContract ? 1 : 0) +
+			0.05 * (input.versionStatus === "current" ? 1 : 0),
 	);
 
 	// Group .rs blobs by crate dir; score each crate; take MAX for depth terms.
@@ -378,19 +479,36 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 
 	// best single crate by a quick sub-score (nonTrivial density + auth + state)
 	const crateSub = (cf: CrateFacts) =>
-		Math.min(1, cf.nonTrivialFns / 8) * (0.5 + 0.5 * (cf.nonTrivialFns / Math.max(1, cf.totalContractFns))) +
+		Math.min(1, cf.nonTrivialFns / 8) *
+			(0.5 + 0.5 * (cf.nonTrivialFns / Math.max(1, cf.totalContractFns))) +
 		0.3 * authScore(cf) +
 		0.2 * stateComplexity(cf);
-	const best = crateFacts.length ? crateFacts.reduce((a, b) => (crateSub(b) > crateSub(a) ? b : a)) : crateFactsOf([]);
+	const best = crateFacts.length
+		? crateFacts.reduce((a, b) => (crateSub(b) > crateSub(a) ? b : a))
+		: crateFactsOf([]);
 
 	// (B) SUBSTANCE — MAX-crate for depth-driven terms, gated breadth.
-	const fnRatio = best.totalContractFns > 0 ? best.nonTrivialFns / best.totalContractFns : 0;
-	const substantiveFns = Math.min(1, best.nonTrivialFns / 8) * (0.5 + 0.5 * fnRatio);
+	const fnRatio =
+		best.totalContractFns > 0 ? best.nonTrivialFns / best.totalContractFns : 0;
+	const substantiveFns =
+		Math.min(1, best.nonTrivialFns / 8) * (0.5 + 0.5 * fnRatio);
 
-	// breadth gated: only counts if >= ceil(crates/3) crates each clear a bar.
+	// breadth gated: only counts if >= ceil(SAMPLED crates/3) crates each clear
+	// a bar. v3 (2026-07-08): the denominator was TOTAL contractCrates, but the
+	// shared fetch unit caps sources at top-18 — in a 40-crate monorepo (hoops)
+	// most crates have zero fetched files, so the gate demanded deep code in
+	// crates the input never contained and real workspaces could never earn
+	// breadth. Judge the gate on crates we actually sampled; the term magnitude
+	// still uses total crates (real breadth), so a 2-crate repo can't inflate.
 	const deepCrates = crateFacts.filter((cf) => cf.nonTrivialFns >= 3).length;
-	const breadthGate = contractCrates > 1 && deepCrates >= Math.ceil(contractCrates / 3);
-	const workspaceBreadth = breadthGate ? Math.min(1, (contractCrates - 1) / 8) : 0;
+	const sampledCrates = crateFacts.filter((cf) => cf.rustSloc > 0).length;
+	const breadthGate =
+		contractCrates > 1 &&
+		sampledCrates > 1 &&
+		deepCrates >= Math.ceil(Math.min(contractCrates, sampledCrates) / 3);
+	const workspaceBreadth = breadthGate
+		? Math.min(1, (contractCrates - 1) / 8)
+		: 0;
 
 	// single-crate compensation (review P7): a real single contract can't earn
 	// the breadth/cross terms — lift it if it has real logic. Threshold is
@@ -398,15 +516,24 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	// auth-gated writes or real state), but a scaffold (nonTrivialFns 0-1) gets
 	// nothing. Exact lift is calibrated against real repos in P2.
 	const singleCrateComp =
-		contractCrates === 1 && best.nonTrivialFns >= 2 && (authScore(best) > 0.5 || stateComplexity(best) > 0.2) ? 0.12 : 0;
+		contractCrates === 1 &&
+		best.nonTrivialFns >= 2 &&
+		(authScore(best) > 0.5 || stateComplexity(best) > 0.2)
+			? 0.12
+			: 0;
 
 	const slocCurve = Math.min(1, Math.log(1 + repoSloc) / Math.log(801));
 	const crossScore = Math.min(1, best.crossCalls / 2);
 	const testScore = testDepth(input.blobs);
-	const releaseScore = Math.min(1, Math.max(input.scalars.releaseCount ?? 0, input.scalars.tagCount ?? 0) / 3);
-	const deployedAddr = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "") ? 1 : 0;
+	const releaseScore = Math.min(
+		1,
+		Math.max(input.scalars.releaseCount ?? 0, input.scalars.tagCount ?? 0) / 3,
+	);
+	const deployedAddr = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "")
+		? 1
+		: 0;
 
-	let substance =
+	const substance =
 		0.16 * workspaceBreadth +
 		singleCrateComp +
 		0.2 * substantiveFns +
@@ -438,7 +565,8 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	// community-tier (findable) but not surfaced as canonical. Curated set = no
 	// over-filter risk; the name marker only fires on IMMATURE repos so a real
 	// released project named "*-demo" keeps full score.
-	const mature = (input.scalars.releaseCount ?? 0) > 0 || (input.scalars.tagCount ?? 0) > 2;
+	const mature =
+		(input.scalars.releaseCount ?? 0) > 0 || (input.scalars.tagCount ?? 0) > 2;
 	if (isExampleRepo(input.fullName, input.scalars.topics, mature)) {
 		reasons.push("example-repo");
 		raw = Math.min(raw, 0.45);
@@ -457,7 +585,10 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	// #[contracttype] DataKeys (blend does exactly this — entry-macros-only
 	// capping wrongly sank it to 0.35 in the calibration re-probe).
 	const contractFamilyMacros = rs.reduce(
-		(n, b) => n + (b.text?.match(/#\[\s*contract(impl|type|error|client)?\s*\]/g)?.length ?? 0),
+		(n, b) =>
+			n +
+			(b.text?.match(/#\[\s*contract(impl|type|error|client)?\s*\]/g)?.length ??
+				0),
 		0,
 	);
 	if (contractFamilyMacros === 0) {
@@ -476,29 +607,54 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 
 	// (E) fork-of-scaffold hard cap (defense in depth).
 	const parent = (input.scalars.parentFullName ?? "").toLowerCase();
-	if (input.scalars.isFork && KNOWN_SCAFFOLDS.has(parent) && (input.scalars.commitCount ?? 99) < 15 && m > 0.4) {
+	if (
+		input.scalars.isFork &&
+		KNOWN_SCAFFOLDS.has(parent) &&
+		(input.scalars.commitCount ?? 99) < 15 &&
+		m > 0.4
+	) {
 		reasons.push("fork-of-scaffold");
 		return {
 			codeDepth: Math.min(raw * m, 0.4),
-			baseline, substance, cloneMultiplier: m,
-			nonTrivialFns: best.nonTrivialFns, contractCrates, rustSloc: repoSloc, reasons,
+			baseline,
+			substance,
+			cloneMultiplier: m,
+			nonTrivialFns: best.nonTrivialFns,
+			contractCrates,
+			rustSloc: repoSloc,
+			reasons,
 		};
 	}
 
 	return {
 		codeDepth: raw * m,
-		baseline, substance, cloneMultiplier: m,
-		nonTrivialFns: best.nonTrivialFns, contractCrates, rustSloc: repoSloc, reasons,
+		baseline,
+		substance,
+		cloneMultiplier: m,
+		nonTrivialFns: best.nonTrivialFns,
+		contractCrates,
+		rustSloc: repoSloc,
+		reasons,
 	};
 
 	function zero(v: number, why: string): CodeDepthResult {
-		return { codeDepth: v, baseline: v, substance: 0, cloneMultiplier: 1, nonTrivialFns: 0, contractCrates: 0, rustSloc: 0, reasons: [why] };
+		return {
+			codeDepth: v,
+			baseline: v,
+			substance: 0,
+			cloneMultiplier: 1,
+			nonTrivialFns: 0,
+			contractCrates: 0,
+			rustSloc: 0,
+			reasons: [why],
+		};
 	}
 }
 
 // write-gated require_auth density (review P6a).
 function authScore(cf: CrateFacts): number {
-	if (cf.writeSites > 0) return Math.min(1, cf.authGatedWrites / Math.max(1, cf.writeSites * 0.5));
+	if (cf.writeSites > 0)
+		return Math.min(1, cf.authGatedWrites / Math.max(1, cf.writeSites * 0.5));
 	return 0.3 * Math.min(1, cf.requireAuthCount / 3);
 }
 
@@ -517,5 +673,7 @@ function testDepth(blobs: DepthBlob[]): number {
 		asserts += (b.text.match(/\bassert(?:_eq|_ne)?!/g) ?? []).length;
 	}
 	// substance: needs real asserts, not just a #[test] shell (review P5).
-	return clamp01(0.6 * Math.min(1, testFns / 6) + 0.4 * Math.min(1, asserts / 12));
+	return clamp01(
+		0.6 * Math.min(1, testFns / 6) + 0.4 * Math.min(1, asserts / 12),
+	);
 }
