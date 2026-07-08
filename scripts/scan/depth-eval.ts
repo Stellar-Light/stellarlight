@@ -20,7 +20,13 @@
  *   GITHUB_TOKEN=… npx tsx scripts/scan/depth-eval.ts
  */
 import { computeCodeDepth } from "../../src/lib/code-depth";
-import { DEEP, GATE, SHALLOW } from "./depth-labels";
+import {
+	DEEP,
+	DEEP_FRONTIER,
+	GATE,
+	SHALLOW,
+	SHALLOW_FRONTIER,
+} from "./depth-labels";
 import { createGh, fetchRepoCode } from "./fetch-repo-code";
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
@@ -117,6 +123,36 @@ async function main() {
 				`band margin ${margin.toFixed(3)} below required ${GATE.marginMin}`,
 			);
 		}
+	}
+
+	// ── FRONTIER scoreboard (non-gating) ─────────────────────────────────
+	// Externally-TRUE labels the current scorer can't separate yet (see
+	// depth-labels.ts). Printed every run so progress/regression on the
+	// scorer's known blind spots is visible; graduating a row into the gated
+	// bands is scorer-v3 work. Never fails the gate.
+	if (DEEP_FRONTIER.length || SHALLOW_FRONTIER.length) {
+		console.log(
+			`\n── frontier (non-gating): ${DEEP_FRONTIER.length} deep + ${SHALLOW_FRONTIER.length} shallow scorer blind spots ──`,
+		);
+		const fd = await scoreBand("DEEP", DEEP_FRONTIER);
+		const fs = await scoreBand("SHALLOW", SHALLOW_FRONTIER);
+		let separated = 0;
+		for (const r of [...fd.rows, ...fs.rows].sort(
+			(a, b) => b.depth - a.depth,
+		)) {
+			const wouldPass =
+				r.band === "DEEP"
+					? r.depth >= GATE.deepMin
+					: r.depth <= GATE.shallowMax;
+			if (wouldPass) separated++;
+			console.log(
+				`${r.band.padEnd(8)} ${r.depth.toFixed(3)}  ${wouldPass ? "✓ would graduate" : "· blind spot"}  ${r.fullName}`,
+			);
+		}
+		if (separated > 0)
+			console.log(
+				`  → ${separated} frontier repo(s) now separate — graduate them into the gated bands (move rows in depth-labels.ts).`,
+			);
 	}
 
 	if (violations.length) {
