@@ -1534,7 +1534,10 @@ const spec: OpenAPISpec = {
 					scfAmountStatus: {
 						type: "string",
 						nullable: true,
-						enum: ["disclosed", "undisclosed", null],
+						// No null literal in the enum: legal JSON Schema, but it crashes
+						// Spectral's JSONPath engine (nimma) — openapi-lint CI was red for
+						// 3 days on it. `nullable: true` already carries the null case.
+						enum: ["disclosed", "undisclosed"],
 						description:
 							"Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.",
 					},
