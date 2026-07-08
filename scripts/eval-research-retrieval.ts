@@ -8,8 +8,8 @@
  * audit text being unsearchable.
  */
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embed } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 interface Eval {
 	q: string;
@@ -19,22 +19,70 @@ interface Eval {
 
 const EVALS: Eval[] = [
 	// Audit-specific
-	{ q: "what audit findings have been reported for Blend's oracle or price manipulation", expectSources: ["audit"], why: "audit chunks should dominate" },
-	{ q: "self-liquidation vulnerability soroban lending", expectSources: ["audit"], why: "OS-BCL-ADV-00 (Blend OtterSec)" },
-	{ q: "high severity finding in soroswap", expectSources: ["audit"], why: "soroswap audits" },
-	{ q: "OctoLend collateral vault security", expectSources: ["audit"], why: "OctoLend Runtime Verification audit" },
+	{
+		q: "what audit findings have been reported for Blend's oracle or price manipulation",
+		expectSources: ["audit"],
+		why: "audit chunks should dominate",
+	},
+	{
+		q: "self-liquidation vulnerability soroban lending",
+		expectSources: ["audit"],
+		why: "OS-BCL-ADV-00 (Blend OtterSec)",
+	},
+	{
+		q: "high severity finding in soroswap",
+		expectSources: ["audit"],
+		why: "soroswap audits",
+	},
+	{
+		q: "OctoLend collateral vault security",
+		expectSources: ["audit"],
+		why: "OctoLend Runtime Verification audit",
+	},
 	// SCF / grants
-	{ q: "how do I structure a successful SCF submission", expectSources: ["scf-handbook", "lumenloop"], why: "playbook content" },
-	{ q: "what does the SCF awards committee look for", expectSources: ["scf-handbook", "lumenloop"], why: "voter playbook" },
+	{
+		q: "how do I structure a successful SCF submission",
+		expectSources: ["scf-handbook", "lumenloop"],
+		why: "playbook content",
+	},
+	{
+		q: "what does the SCF awards committee look for",
+		expectSources: ["scf-handbook", "lumenloop"],
+		why: "voter playbook",
+	},
 	// Protocol / specs
-	{ q: "what does SEP-24 require for KYC", expectSources: ["sep"], why: "SEP-24 spec" },
-	{ q: "stellar consensus protocol quorum slices", expectSources: ["paper"], why: "Mazieres SCP paper" },
+	{
+		q: "what does SEP-24 require for KYC",
+		expectSources: ["sep"],
+		why: "SEP-24 spec",
+	},
+	{
+		q: "stellar consensus protocol quorum slices",
+		expectSources: ["paper"],
+		why: "Mazieres SCP paper",
+	},
 	// Dev docs
-	{ q: "how to deploy a soroban contract", expectSources: ["dev-docs"], why: "deployment guide" },
-	{ q: "horizon api streaming endpoints", expectSources: ["dev-docs", "sep"], why: "horizon docs" },
+	{
+		q: "how to deploy a soroban contract",
+		expectSources: ["dev-docs"],
+		why: "deployment guide",
+	},
+	{
+		q: "horizon api streaming endpoints",
+		expectSources: ["dev-docs", "sep"],
+		why: "horizon docs",
+	},
 	// Cross-source
-	{ q: "anchors and SEP-31", expectSources: ["sep", "dev-docs"], why: "anchor + SEP-31 spec" },
-	{ q: "stablecoin issuance on stellar", expectSources: ["sdf-blog", "dev-docs", "lumenloop-research"], why: "broad topic" },
+	{
+		q: "anchors and SEP-31",
+		expectSources: ["sep", "dev-docs"],
+		why: "anchor + SEP-31 spec",
+	},
+	{
+		q: "stablecoin issuance on stellar",
+		expectSources: ["sdf-blog", "dev-docs", "lumenloop-research"],
+		why: "broad topic",
+	},
 ];
 
 async function main() {
@@ -55,7 +103,15 @@ async function main() {
 		console.log(`  expect: ${e.expectSources.join(" or ")} (${e.why})`);
 
 		// Try vector search first
-		let docs: Array<{ source: string; title: string; section: string | null; url: string; auditor?: string; protocol?: string; severity?: string }> = [];
+		let docs: Array<{
+			source: string;
+			title: string;
+			section: string | null;
+			url: string;
+			auditor?: string;
+			protocol?: string;
+			severity?: string;
+		}> = [];
 		try {
 			const queryEmbedding = await embed(e.q);
 			const db = payload.db.collections["research-docs"];
@@ -71,8 +127,14 @@ async function main() {
 				},
 				{
 					$project: {
-						source: 1, title: 1, section: 1, url: 1, content: 1,
-						auditor: 1, protocol: 1, severity: 1,
+						source: 1,
+						title: 1,
+						section: 1,
+						url: 1,
+						content: 1,
+						auditor: 1,
+						protocol: 1,
+						severity: 1,
 						_score: { $meta: "vectorSearchScore" },
 					},
 				},

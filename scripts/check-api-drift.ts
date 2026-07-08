@@ -80,7 +80,9 @@ async function main() {
 	// repos/search + changelog + explain drift a consumer flagged 2026-06-27).
 	// Headers are path-based, so a bare probe carries them regardless of status.
 	console.log("◆ Public GET endpoints emit X-API-Version + CORS");
-	const getPaths = specPaths.filter((p) => !p.includes("{") && spec.paths[p]?.get);
+	const getPaths = specPaths.filter(
+		(p) => !p.includes("{") && spec.paths[p]?.get,
+	);
 	for (const p of getPaths) {
 		const ver = await headerOf(p, "x-api-version");
 		check(
@@ -111,8 +113,7 @@ async function main() {
 	// builders advisory on a filter miss must NOT claim the directory is empty
 	const builders = (await getJson("/api/builders?skill=__nope__zzz__")).body;
 	const adv: string = builders?.meta?.advisory?.summary ?? "";
-	const buildersCount =
-		sources.find((s) => s.name === "builders")?.count ?? 0;
+	const buildersCount = sources.find((s) => s.name === "builders")?.count ?? 0;
 	check(
 		"builders filter-miss advisory frames it as a filter miss, not an empty directory",
 		buildersCount === 0 ||
@@ -125,8 +126,10 @@ async function main() {
 	// was scrambled with only a string label. winners[] must be sorted by
 	// placementRank ascending, and winners[0] must carry a rank.
 	console.log("◆ Hackathon winners placement-sorted");
-	const hk = (await getJson("/api/hackathons/stellar-hacks-kale-reflector")).body;
-	const wns: Array<{ placementRank?: number | null; name?: string }> = hk?.winners ?? [];
+	const hk = (await getJson("/api/hackathons/stellar-hacks-kale-reflector"))
+		.body;
+	const wns: Array<{ placementRank?: number | null; name?: string }> =
+		hk?.winners ?? [];
 	if (wns.length > 1) {
 		const ranks = wns.map((w) => w.placementRank ?? 9999);
 		const sorted = ranks.every((r, i) => i === 0 || ranks[i - 1] <= r);
@@ -244,7 +247,9 @@ async function main() {
 			const live = await getJson(fc.path);
 			const rows: any[] = live.body?.[fc.listKey] ?? [];
 			const documented = new Set(
-				Object.keys(spec?.components?.schemas?.[fc.component]?.properties ?? {}),
+				Object.keys(
+					spec?.components?.schemas?.[fc.component]?.properties ?? {},
+				),
 			);
 			if (!rows.length || documented.size === 0) {
 				bad(
@@ -293,8 +298,14 @@ async function main() {
 		!/\b\d{3,}\+? curated/i.test(infoDesc) && !/~?741/.test(infoDesc),
 		"counts drift — source them from /api/status instead",
 	);
-	const skillDoc = await (await fetch(`${BASE}/skills/stellar-scout.md`)).text();
-	for (const stale of ["currently empty pending", "~1,900", "7 official Stellar Foundation"]) {
+	const skillDoc = await (
+		await fetch(`${BASE}/skills/stellar-scout.md`)
+	).text();
+	for (const stale of [
+		"currently empty pending",
+		"~1,900",
+		"7 official Stellar Foundation",
+	]) {
 		check(
 			`skill doc free of stale phrase "${stale}"`,
 			!skillDoc.includes(stale),
@@ -324,27 +335,62 @@ async function main() {
 			raw = await (await fetch(`${BASE}${ep}`)).text();
 			JSON.parse(raw); // throws on any unescaped control char
 			const hasRawSep = [...raw].some((c) => SEP.includes(c.charCodeAt(0)));
-			check(`${ep} is strict-parseable JSON`, !hasRawSep, "contains a raw U+2028/U+2029/U+0085 separator");
+			check(
+				`${ep} is strict-parseable JSON`,
+				!hasRawSep,
+				"contains a raw U+2028/U+2029/U+0085 separator",
+			);
 		} catch (e) {
-			bad(`${ep} is strict-parseable JSON`, `JSON.parse failed: ${(e as Error).message.slice(0, 80)}`);
+			bad(
+				`${ep} is strict-parseable JSON`,
+				`JSON.parse failed: ${(e as Error).message.slice(0, 80)}`,
+			);
 		}
 	}
 
 	// ── 10. Cold-input footguns (from the cold-outsider audit) ──────────────
 	console.log("◆ Cold-input footguns");
 	// negative limit must not overrun the page
-	const negLimit = (await getJson("/api/builders?limit=-5")).body?.meta?.counts?.returned;
-	check("builders negative limit is clamped (not an overrun)", typeof negLimit === "number" && negLimit <= 50, `limit=-5 returned ${negLimit}`);
-	const lbNeg = (await getJson("/api/leaderboard?limit=-3")).body?.projects?.length;
-	check("leaderboard negative limit is clamped", typeof lbNeg === "number" && lbNeg <= 50, `limit=-3 returned ${lbNeg}`);
+	const negLimit = (await getJson("/api/builders?limit=-5")).body?.meta?.counts
+		?.returned;
+	check(
+		"builders negative limit is clamped (not an overrun)",
+		typeof negLimit === "number" && negLimit <= 50,
+		`limit=-5 returned ${negLimit}`,
+	);
+	const lbNeg = (await getJson("/api/leaderboard?limit=-3")).body?.projects
+		?.length;
+	check(
+		"leaderboard negative limit is clamped",
+		typeof lbNeg === "number" && lbNeg <= 50,
+		`limit=-3 returned ${lbNeg}`,
+	);
 	// invalid enum values reject (rfps status/quarter — the silent-returns-all class)
-	check("rfps status=BOGUS → 400", (await statusOf("/api/rfps?status=BOGUS")) === 400);
-	check("rfps quarter=BOGUS → 400", (await statusOf("/api/rfps?quarter=BOGUS")) === 400);
+	check(
+		"rfps status=BOGUS → 400",
+		(await statusOf("/api/rfps?status=BOGUS")) === 400,
+	);
+	check(
+		"rfps quarter=BOGUS → 400",
+		(await statusOf("/api/rfps?quarter=BOGUS")) === 400,
+	);
 	// spec ⇄ live shape: fallbackChannels is an object (matches live), matchMode enum covers live values
-	const fbSpec = spec?.components?.schemas?.HackathonsResponse?.properties?.meta?.allOf?.[1]?.properties?.fallbackChannels?.type;
-	check("OpenAPI fallbackChannels typed as object (matches live)", fbSpec === "object", `spec says ${fbSpec}`);
-	const mmEnum = spec?.components?.schemas?.ProjectSearchResponse?.properties?.meta?.allOf?.[1]?.properties?.matchMode?.enum || [];
-	check("OpenAPI matchMode enum includes live values (all, loose-1)", mmEnum.includes("all") && mmEnum.includes("loose-1"), `enum=${mmEnum.join(",")}`);
+	const fbSpec =
+		spec?.components?.schemas?.HackathonsResponse?.properties?.meta?.allOf?.[1]
+			?.properties?.fallbackChannels?.type;
+	check(
+		"OpenAPI fallbackChannels typed as object (matches live)",
+		fbSpec === "object",
+		`spec says ${fbSpec}`,
+	);
+	const mmEnum =
+		spec?.components?.schemas?.ProjectSearchResponse?.properties?.meta
+			?.allOf?.[1]?.properties?.matchMode?.enum || [];
+	check(
+		"OpenAPI matchMode enum includes live values (all, loose-1)",
+		mmEnum.includes("all") && mmEnum.includes("loose-1"),
+		`enum=${mmEnum.join(",")}`,
+	);
 
 	// ── 11. Responsiveness (catches timeouts/outages, not just wrong data) ──
 	// The guard verified CORRECTNESS but never hit /api/repos/search and had no
@@ -379,7 +425,11 @@ async function main() {
 		"/api/skills",
 	]) {
 		const { code, ms } = await timed(path);
-		check(`${path} → 200 in <${BUDGET_MS / 1000}s`, code === 200, `code=${code} after ${ms}ms`);
+		check(
+			`${path} → 200 in <${BUDGET_MS / 1000}s`,
+			code === 200,
+			`code=${code} after ${ms}ms`,
+		);
 	}
 
 	// ── summary ─────────────────────────────────────────────────────────────

@@ -25,8 +25,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { getPayloadSafe } from "@/lib/payload-client";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -88,7 +88,10 @@ function buildClusters(
 	for (const [key, projects] of buckets) {
 		if (projects.length < minSize) continue;
 		const scfFunded = projects.filter((p) => p.scf?.awarded);
-		const scfTotal = scfFunded.reduce((s, p) => s + (p.scf?.totalAwarded ?? 0), 0);
+		const scfTotal = scfFunded.reduce(
+			(s, p) => s + (p.scf?.totalAwarded ?? 0),
+			0,
+		);
 		const hackathonWinners = projects.filter(
 			(p) =>
 				p.hackathonPlacement === "grand-prize" ||

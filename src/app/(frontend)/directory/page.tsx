@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { DirectoryFilters } from "@/components/directory-filters";
-import DirectoryProjectsGrid, { DirectoryProjectsGridSkeleton } from "@/components/directory-projects-grid";
+import DirectoryProjectsGrid, {
+	DirectoryProjectsGridSkeleton,
+} from "@/components/directory-projects-grid";
 
 type SearchParams = Promise<{
 	q?: string;
@@ -43,7 +45,10 @@ export default async function DirectoryPage({
 				</div>
 
 				{/* Projects Grid — key forces skeleton to show immediately on param change */}
-				<Suspense key={`${searchQuery}-${typeFilter}-${scfFilter}-${sortOption}-${page}`} fallback={<DirectoryProjectsGridSkeleton />}>
+				<Suspense
+					key={`${searchQuery}-${typeFilter}-${scfFilter}-${sortOption}-${page}`}
+					fallback={<DirectoryProjectsGridSkeleton />}
+				>
 					<DirectoryProjectsGrid
 						searchQuery={searchQuery}
 						typeFilter={typeFilter}

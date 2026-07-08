@@ -12,7 +12,7 @@
  */
 
 import { ImageResponse } from "next/og";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { STELLAR_LOGO_DATA_URI } from "@/lib/stellar-logo-data-uri";
 
@@ -62,7 +62,10 @@ function buildChartPaths(
 	});
 
 	const line = points
-		.map((pt, i) => `${i === 0 ? "M" : "L"} ${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`)
+		.map(
+			(pt, i) =>
+				`${i === 0 ? "M" : "L"} ${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`,
+		)
 		.join(" ");
 	const area = `${line} L ${w.toFixed(1)} ${h.toFixed(1)} L 0 ${h.toFixed(1)} Z`;
 	return { line, area, max };
@@ -151,203 +154,195 @@ export async function GET(req: NextRequest) {
 	let img: ImageResponse;
 	try {
 		img = new ImageResponse(
-			(
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					width: 1600,
+					height: 900,
+					background: BG,
+					color: FG,
+					fontFamily: "system-ui, -apple-system, sans-serif",
+					padding: 64,
+					border: `1px solid ${BORDER}`,
+				}}
+			>
+				{/* Header */}
 				<div
 					style={{
 						display: "flex",
-						flexDirection: "column",
-						width: 1600,
-						height: 900,
-						background: BG,
-						color: FG,
-						fontFamily: "system-ui, -apple-system, sans-serif",
-						padding: 64,
-						border: `1px solid ${BORDER}`,
+						justifyContent: "space-between",
+						alignItems: "center",
+						marginBottom: 20,
 					}}
 				>
-					{/* Header */}
 					<div
 						style={{
 							display: "flex",
-							justifyContent: "space-between",
 							alignItems: "center",
-							marginBottom: 20,
+							gap: 12,
 						}}
 					>
+						{STELLAR_LOGO_DATA_URI ? (
+							<img
+								src={STELLAR_LOGO_DATA_URI}
+								width={42}
+								height={42}
+								style={{ filter: "invert(1)" }}
+								alt=""
+							/>
+						) : null}
 						<div
 							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 12,
+								fontSize: 30,
+								fontWeight: 600,
+								color: FG,
+								letterSpacing: "-0.01em",
 							}}
 						>
-							{STELLAR_LOGO_DATA_URI ? (
-								<img
-									src={STELLAR_LOGO_DATA_URI}
-									width={42}
-									height={42}
-									style={{ filter: "invert(1)" }}
-									alt=""
-								/>
-							) : null}
-							<div
-								style={{
-									fontSize: 30,
-									fontWeight: 600,
-									color: FG,
-									letterSpacing: "-0.01em",
-								}}
-							>
-								Stellar Developer Activity
-							</div>
-						</div>
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "flex-end",
-								fontSize: 16,
-								color: "#737373",
-								gap: 6,
-							}}
-						>
-							<span>{dateLabel}</span>
-							<div
-								style={{
-									display: "flex",
-									alignItems: "center",
-									gap: 6,
-								}}
-							>
-								{/* Electric Capital lightning bolt mark */}
-								<svg
-									width="18"
-									height="18"
-									viewBox="0 0 100 100"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<rect width="100" height="100" rx="10" fill="#00BFE9" />
-									<path
-										d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z"
-										fill="#FFFFFF"
-									/>
-								</svg>
-								<span>Source: Electric Capital</span>
-							</div>
+							Stellar Developer Activity
 						</div>
 					</div>
-
-					{/* Stats row */}
-					<div
-						style={{
-							display: "flex",
-							gap: 14,
-							marginBottom: 20,
-						}}
-					>
-						<StatBlock
-							label="Active devs (28d)"
-							value={d.mad.total.toLocaleString()}
-						/>
-						<StatBlock
-							label="Commits (28d)"
-							value={d.commits28d.total.toLocaleString()}
-						/>
-						<StatBlock label="YoY growth" value={yoyStr} />
-						<StatBlock
-							label="Full-time devs"
-							value={d.tenure.fullTime.toLocaleString()}
-						/>
-					</div>
-
-					{/* Chart section */}
 					<div
 						style={{
 							display: "flex",
 							flexDirection: "column",
-							flex: 1,
+							alignItems: "flex-end",
+							fontSize: 16,
+							color: "#737373",
+							gap: 6,
 						}}
 					>
+						<span>{dateLabel}</span>
 						<div
 							style={{
-								fontSize: 14,
-								letterSpacing: "0.06em",
-								textTransform: "uppercase",
-								color: MUTED,
-								marginBottom: 6,
+								display: "flex",
+								alignItems: "center",
+								gap: 6,
 							}}
 						>
-							Monthly active devs over the last year
-						</div>
-						<svg
-							width={chartW}
-							height={chartH}
-							viewBox={`0 0 ${chartW} ${chartH}`}
-							xmlns="http://www.w3.org/2000/svg"
-							style={{ display: "block" }}
-						>
-							<defs>
-								<linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
-									<stop
-										offset="0%"
-										stopColor={STELLAR_GOLD}
-										stopOpacity="0.4"
-									/>
-									<stop
-										offset="100%"
-										stopColor={STELLAR_GOLD}
-										stopOpacity="0.02"
-									/>
-								</linearGradient>
-							</defs>
-							<path d={area} fill="url(#g)" />
-							<path
-								d={line}
-								stroke={STELLAR_GOLD}
-								strokeWidth="2.5"
-								fill="none"
-								strokeLinejoin="round"
-							/>
-						</svg>
-					</div>
-
-					{/* Footer */}
-					<div
-						style={{
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-							marginTop: 20,
-							paddingTop: 20,
-							borderTop: `1px solid ${BORDER}`,
-							fontSize: 17,
-							color: MUTED,
-						}}
-					>
-						<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-							{STELLAR_LOGO_DATA_URI ? (
-								<img
-									src={STELLAR_LOGO_DATA_URI}
-									width={18}
-									height={18}
-									style={{ filter: "invert(1)" }}
-									alt=""
+							{/* Electric Capital lightning bolt mark */}
+							<svg
+								width="18"
+								height="18"
+								viewBox="0 0 100 100"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<rect width="100" height="100" rx="10" fill="#00BFE9" />
+								<path
+									d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z"
+									fill="#FFFFFF"
 								/>
-							) : null}
-							<span>
-								Stellar ranks{" "}
-								<span style={{ color: STELLAR_GOLD, fontWeight: 600 }}>
-									#{stellarRank}
-								</span>{" "}
-								of {ranked.length} tracked L1s by active devs
-							</span>
+							</svg>
+							<span>Source: Electric Capital</span>
 						</div>
-						<span style={{ color: FG, fontWeight: 600 }}>
-							stellarlight.xyz
-						</span>
 					</div>
 				</div>
-			),
+
+				{/* Stats row */}
+				<div
+					style={{
+						display: "flex",
+						gap: 14,
+						marginBottom: 20,
+					}}
+				>
+					<StatBlock
+						label="Active devs (28d)"
+						value={d.mad.total.toLocaleString()}
+					/>
+					<StatBlock
+						label="Commits (28d)"
+						value={d.commits28d.total.toLocaleString()}
+					/>
+					<StatBlock label="YoY growth" value={yoyStr} />
+					<StatBlock
+						label="Full-time devs"
+						value={d.tenure.fullTime.toLocaleString()}
+					/>
+				</div>
+
+				{/* Chart section */}
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						flex: 1,
+					}}
+				>
+					<div
+						style={{
+							fontSize: 14,
+							letterSpacing: "0.06em",
+							textTransform: "uppercase",
+							color: MUTED,
+							marginBottom: 6,
+						}}
+					>
+						Monthly active devs over the last year
+					</div>
+					<svg
+						width={chartW}
+						height={chartH}
+						viewBox={`0 0 ${chartW} ${chartH}`}
+						xmlns="http://www.w3.org/2000/svg"
+						style={{ display: "block" }}
+					>
+						<defs>
+							<linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+								<stop offset="0%" stopColor={STELLAR_GOLD} stopOpacity="0.4" />
+								<stop
+									offset="100%"
+									stopColor={STELLAR_GOLD}
+									stopOpacity="0.02"
+								/>
+							</linearGradient>
+						</defs>
+						<path d={area} fill="url(#g)" />
+						<path
+							d={line}
+							stroke={STELLAR_GOLD}
+							strokeWidth="2.5"
+							fill="none"
+							strokeLinejoin="round"
+						/>
+					</svg>
+				</div>
+
+				{/* Footer */}
+				<div
+					style={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+						marginTop: 20,
+						paddingTop: 20,
+						borderTop: `1px solid ${BORDER}`,
+						fontSize: 17,
+						color: MUTED,
+					}}
+				>
+					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+						{STELLAR_LOGO_DATA_URI ? (
+							<img
+								src={STELLAR_LOGO_DATA_URI}
+								width={18}
+								height={18}
+								style={{ filter: "invert(1)" }}
+								alt=""
+							/>
+						) : null}
+						<span>
+							Stellar ranks{" "}
+							<span style={{ color: STELLAR_GOLD, fontWeight: 600 }}>
+								#{stellarRank}
+							</span>{" "}
+							of {ranked.length} tracked L1s by active devs
+						</span>
+					</div>
+					<span style={{ color: FG, fontWeight: 600 }}>stellarlight.xyz</span>
+				</div>
+			</div>,
 			{
 				width: 1600,
 				height: 900,

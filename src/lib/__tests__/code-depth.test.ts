@@ -426,3 +426,48 @@ describe("v3 frontier calibration (2026-07-08)", () => {
 		).toBe(false);
 	});
 });
+
+describe("v3 verified-mainnet deployment term", () => {
+	const base = (scalars: Partial<DepthInput["scalars"]>): DepthInput => ({
+		fullName: "acme/contracts",
+		proof: "cargo-sdk",
+		versionStatus: "current",
+		isDeployableContract: true,
+		blobs: [
+			{
+				path: "src/lib.rs",
+				text: `#![no_std]\nuse soroban_sdk::{contract, contractimpl, Address, Env};\n#[contract]\npub struct C;\n#[contractimpl]\nimpl C {\n pub fn deposit(env: Env, from: Address, amount: i128) { from.require_auth(); env.storage().persistent().set(&from, &amount); }\n pub fn withdraw(env: Env, to: Address, amount: i128) { to.require_auth(); env.storage().persistent().set(&to, &amount); }\n}`,
+			},
+		],
+		contractCrateDirs: ["."],
+		scalars: {
+			isFork: false,
+			parentFullName: null,
+			releaseCount: 0,
+			tagCount: 0,
+			readmeText: null,
+			topics: [],
+			...scalars,
+		},
+	});
+
+	it("verified mainnet contract scores above bare address mention, which scores above none", () => {
+		const none = computeCodeDepth(base({ readmeText: "just docs" })).codeDepth;
+		const mention = computeCodeDepth(
+			base({
+				readmeText:
+					"Deployed: CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
+			}),
+		).codeDepth;
+		const verified = computeCodeDepth(
+			base({
+				readmeText:
+					"Deployed: CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
+				mainnetContractId:
+					"CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
+			}),
+		).codeDepth;
+		expect(mention).toBeGreaterThan(none);
+		expect(verified).toBeGreaterThan(mention);
+	});
+});

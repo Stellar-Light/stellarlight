@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, memo, useRef, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
+import { memo, useEffect, useRef, useState } from "react";
 import NumberTicker from "@/components/fancy/text/basic-number-ticker";
-import { useStellarTVL } from "@/hooks/useStellarTVL";
 import { useDeFiProtocols } from "@/hooks/useDeFiProtocols";
 import { useRWATVL } from "@/hooks/useRWATVL";
+import { useStellarTVL } from "@/hooks/useStellarTVL";
 
 // Exact-name → local logo path. Names that came back from the rwa.xyz
 // scraper as variants are aliased to the same file.
@@ -14,16 +14,16 @@ const ISSUER_LOGOS: Record<string, string> = {
 	"Franklin Templeton": "/issuers/franklin-templeton.png",
 	"Franklin Templeton Trust": "/issuers/franklin-templeton.png",
 	"Franklin Templeton Benji Investments": "/issuers/franklin-templeton.png",
-	"Spiko": "/issuers/spiko.jpg",
+	Spiko: "/issuers/spiko.jpg",
 	"Ondo Finance": "/issuers/ondo.jpg",
-	"Ondo": "/issuers/ondo.jpg",
+	Ondo: "/issuers/ondo.jpg",
 	"Ondo USDY": "/issuers/ondo.jpg",
-	"Circle": "/issuers/circle.png",
+	Circle: "/issuers/circle.png",
 	"Circle International": "/issuers/circle.png",
-	"WisdomTree": "/issuers/wisdomtree.png",
+	WisdomTree: "/issuers/wisdomtree.png",
 	"RedSwan Digital": "/issuers/redswan.jpg",
-	"RedSwan": "/issuers/redswan.jpg",
-	"Realiz": "/issuers/realiz.png",
+	RedSwan: "/issuers/redswan.jpg",
+	Realiz: "/issuers/realiz.png",
 	"Realiz Digital Assets Fund": "/issuers/realiz.png",
 };
 
@@ -82,7 +82,12 @@ const TVLNumber = memo(function TVLNumber({ value }: { value: number }) {
 	}, [value]);
 
 	if (hasAnimated.current) {
-		return <>${getTVLValue(value).toFixed(2)}{getTVLSuffix(value)}</>;
+		return (
+			<>
+				${getTVLValue(value).toFixed(2)}
+				{getTVLSuffix(value)}
+			</>
+		);
 	}
 
 	return (
@@ -106,11 +111,19 @@ interface TooltipItem {
 	category?: string;
 }
 
-function HoverCard({ items, label, totalCount }: { items: TooltipItem[]; label: string; totalCount: number }) {
+function HoverCard({
+	items,
+	label,
+	totalCount,
+}: {
+	items: TooltipItem[];
+	label: string;
+	totalCount: number;
+}) {
 	return (
 		<div
 			className="absolute left-0 top-full mt-2 w-[280px] sm:w-[300px] rounded-xl border border-[#2F2F2F] shadow-[0_8px_24px_rgba(0,0,0,0.6)] p-4 bg-[#262626] animate-in fade-in slide-in-from-top-1 duration-200"
-			style={{ backgroundColor: '#262626', zIndex: 9999, isolation: 'isolate' }}
+			style={{ backgroundColor: "#262626", zIndex: 9999, isolation: "isolate" }}
 		>
 			<p className="text-xs font-medium text-[#A3A3A3] mb-3">{label}</p>
 			<div className="space-y-3">
@@ -118,9 +131,14 @@ function HoverCard({ items, label, totalCount }: { items: TooltipItem[]; label: 
 					const localLogo = resolveIssuerLogo(item.name);
 					const logoSrc = localLogo || item.logo;
 					return (
-						<div key={item.name} className="flex items-center justify-between gap-3">
+						<div
+							key={item.name}
+							className="flex items-center justify-between gap-3"
+						>
 							<div className="flex items-center gap-2.5 min-w-0">
-								<span className="text-xs text-[#A3A3A3] w-4 flex-shrink-0">{i + 1}</span>
+								<span className="text-xs text-[#A3A3A3] w-4 flex-shrink-0">
+									{i + 1}
+								</span>
 								{logoSrc ? (
 									<img
 										src={logoSrc}
@@ -132,7 +150,9 @@ function HoverCard({ items, label, totalCount }: { items: TooltipItem[]; label: 
 								) : (
 									<div className="w-5 h-5 rounded-full bg-[#404040] flex-shrink-0" />
 								)}
-								<span className="text-sm text-[#E5E5E5] truncate">{item.name}</span>
+								<span className="text-sm text-[#E5E5E5] truncate">
+									{item.name}
+								</span>
 							</div>
 							<span className="text-sm text-[#E5E5E5] font-medium flex-shrink-0">
 								{formatValue(item.value)}
@@ -194,7 +214,10 @@ export default function TVLStats() {
 							<p className="text-sm text-muted-foreground">DeFi TVL</p>
 							<ExternalLink className="w-3 h-3 text-muted-foreground" />
 						</div>
-						<p className="text-2xl font-semibold text-foreground" style={{ minWidth: '140px' }}>
+						<p
+							className="text-2xl font-semibold text-foreground"
+							style={{ minWidth: "140px" }}
+						>
 							{isLoading ? (
 								<span className="text-muted-foreground">Loading...</span>
 							) : (
@@ -205,7 +228,11 @@ export default function TVLStats() {
 				</a>
 
 				{showDefiTooltip && defiItems.length > 0 && (
-					<HoverCard items={defiItems} label="Top Protocols" totalCount={totalProtocols} />
+					<HoverCard
+						items={defiItems}
+						label="Top Protocols"
+						totalCount={totalProtocols}
+					/>
 				)}
 			</div>
 
@@ -225,7 +252,10 @@ export default function TVLStats() {
 							<p className="text-sm text-muted-foreground">RWA TVL</p>
 							<ExternalLink className="w-3 h-3 text-muted-foreground" />
 						</div>
-						<p className="text-2xl font-semibold text-foreground" style={{ minWidth: '140px' }}>
+						<p
+							className="text-2xl font-semibold text-foreground"
+							style={{ minWidth: "140px" }}
+						>
 							{isRWALoading ? (
 								<span className="text-muted-foreground">Loading...</span>
 							) : (
@@ -236,7 +266,11 @@ export default function TVLStats() {
 				</a>
 
 				{showRwaTooltip && rwaItems.length > 0 && (
-					<HoverCard items={rwaItems} label="Top Issuers" totalCount={totalAssets} />
+					<HoverCard
+						items={rwaItems}
+						label="Top Issuers"
+						totalCount={totalAssets}
+					/>
 				)}
 			</div>
 		</div>

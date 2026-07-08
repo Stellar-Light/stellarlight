@@ -10,11 +10,11 @@
  *   npx tsx scripts/ingest-scf-handbook.ts --execute   # write to Payload
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
@@ -22,6 +22,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -78,13 +79,13 @@ async function run() {
 			const page = await fetchPage(url);
 			if (page.body.length < 100) continue; // skip stubs/landing pages
 			// parentDocId = slug derived from URL path
-			const slug = url
-				.replace(BASE, "")
-				.replace(/^\//, "")
-				.replace(/\/$/, "")
-				.replace(/[^a-z0-9-/]/gi, "-")
-				.toLowerCase()
-				|| "index";
+			const slug =
+				url
+					.replace(BASE, "")
+					.replace(/^\//, "")
+					.replace(/\/$/, "")
+					.replace(/[^a-z0-9-/]/gi, "-")
+					.toLowerCase() || "index";
 			const chunks = chunkMarkdown({
 				md: `# ${page.title}\n\n${page.body}`,
 				parentDocId: slug,
@@ -143,6 +144,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((e) => {
-	console.error("FATAL:", e);
-	process.exit(1);
-});
+		console.error("FATAL:", e);
+		process.exit(1);
+	});

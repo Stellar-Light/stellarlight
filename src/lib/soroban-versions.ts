@@ -36,7 +36,10 @@ export const LATEST_PROTOCOL = 26;
  * Ordered oldest→newest. `supportedFloor` = the oldest major still considered
  * "supported" (not yet EOL). Anything below it → `deprecated`.
  */
-export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{ major: number; protocol: number }> = [
+export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{
+	major: number;
+	protocol: number;
+}> = [
 	{ major: 0, protocol: 20 }, // 0.x preview line (pre-1.0), Protocol 20 Soroban launch
 	{ major: 1, protocol: 20 },
 	{ major: 20, protocol: 20 },
@@ -66,7 +69,8 @@ export type VersionStatus = "current" | "supported" | "deprecated" | "unknown";
 export function parseSdkMajor(raw: string | null | undefined): number | null {
 	if (!raw) return null;
 	const s = String(raw).trim().toLowerCase();
-	if (!s || s === "*" || s === "workspace" || s === "git" || s === "path") return null;
+	if (!s || s === "*" || s === "workspace" || s === "git" || s === "path")
+		return null;
 	// Reject obvious non-version markers (a git url, a path).
 	if (s.includes("://") || s.startsWith("/") || s.startsWith(".")) return null;
 	// First run of digits, optionally dotted — the major is the first group.
@@ -77,7 +81,9 @@ export function parseSdkMajor(raw: string | null | undefined): number | null {
 }
 
 /** True when the raw version string denotes a pre-release / rc / git / path dep. */
-export function isPrereleaseOrUnpinned(raw: string | null | undefined): boolean {
+export function isPrereleaseOrUnpinned(
+	raw: string | null | undefined,
+): boolean {
 	if (!raw) return true;
 	const s = String(raw).trim().toLowerCase();
 	if (!s || s === "*" || s === "workspace") return true;
@@ -108,7 +114,8 @@ export function versionStatusOf(
 	// A major we don't have a row for: if it's >= our newest known major, it's
 	// newer-than-table → treat as "current" (a fresh SDK we haven't tabled yet),
 	// never deprecated. If below the supported floor → deprecated. Else supported.
-	const newestKnownMajor = SDK_MAJOR_PROTOCOL[SDK_MAJOR_PROTOCOL.length - 1].major;
+	const newestKnownMajor =
+		SDK_MAJOR_PROTOCOL[SDK_MAJOR_PROTOCOL.length - 1].major;
 	if (!row) {
 		if (major >= newestKnownMajor) return "current";
 		if (major < SUPPORTED_FLOOR_MAJOR) return "deprecated";

@@ -11,12 +11,12 @@
  * data without scraping.
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-import { clampLimit } from "@/lib/http-params";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
+import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -167,7 +167,11 @@ export async function GET(req: NextRequest) {
 			);
 			const reposByProjectSlug = new Map<
 				string,
-				Array<{ stars?: number; openIssues?: number; lastCommitAt?: string | null }>
+				Array<{
+					stars?: number;
+					openIssues?: number;
+					lastCommitAt?: string | null;
+				}>
 			>();
 			if (projectSlugs.length > 0) {
 				const reposResult = await payload.find({

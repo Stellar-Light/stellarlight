@@ -1,12 +1,12 @@
-import React from "react";
-import { Inter, Source_Serif_4, JetBrains_Mono, VT323 } from "next/font/google";
-import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono, Source_Serif_4, VT323 } from "next/font/google";
+import type React from "react";
 import "../globals.css";
-import { Navigation } from "@/components/ui/navigation";
+import { BannerWrapper } from "@/components/banner-wrapper";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
-import { BannerWrapper } from "@/components/banner-wrapper";
+import { Navigation } from "@/components/ui/navigation";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 const inter = Inter({
@@ -118,19 +118,23 @@ export const metadata: Metadata = {
 export default async function RootLayout(props: { children: React.ReactNode }) {
 	const { children } = props;
 
-  return (
-		<html lang="en" suppressHydrationWarning className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} ${vt323.variable}`}>
+	return (
+		<html
+			lang="en"
+			suppressHydrationWarning
+			className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} ${vt323.variable}`}
+		>
 			<body className="min-h-screen font-sans antialiased overflow-x-hidden">
 				<Providers>
 					<BannerWrapper />
 					<Navigation />
 					{/* Spacer for fixed banner and navigation */}
-					<div style={{ height: 'calc(var(--banner-height, 0px) + 4rem)' }} />
+					<div style={{ height: "calc(var(--banner-height, 0px) + 4rem)" }} />
 					<main className="min-h-[calc(100vh-4rem)]">{children}</main>
 					<Footer />
 				</Providers>
 				<Analytics />
-      </body>
-    </html>
+			</body>
+		</html>
 	);
 }

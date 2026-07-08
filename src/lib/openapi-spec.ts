@@ -359,6 +359,10 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 												},
+												mainnetContractId: {
+													type: "string",
+													nullable: true,
+												},
 											},
 										},
 										answer: {
@@ -402,6 +406,12 @@ export const spec: OpenAPISpec = {
 										},
 									},
 								},
+							},
+							mainnetContractId: {
+								type: "string",
+								nullable: true,
+								description:
+									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address.",
 							},
 						},
 					},

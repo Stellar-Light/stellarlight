@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { BuildersSyncButton } from "./BuildersSyncButton";
 
 export const AfterNavLinks: React.FC = () => {
@@ -80,4 +80,3 @@ export const AfterNavLinks: React.FC = () => {
 		</>
 	);
 };
-

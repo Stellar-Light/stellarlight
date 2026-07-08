@@ -14,18 +14,19 @@
  * authoritative repo + its deepWikiUrl so the agent has the right source.
  */
 import { type NextRequest, NextResponse } from "next/server";
-import { askDeepWiki } from "@/lib/deepwiki";
 import { logApiHit } from "@/lib/api-usage";
+import { askDeepWiki } from "@/lib/deepwiki";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { canonicalFor, searchRepos } from "@/lib/repo-search";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
-	const q = (sp.get("q") ?? sp.get("query") ?? sp.get("question"))?.trim() ?? "";
+	const q =
+		(sp.get("q") ?? sp.get("query") ?? sp.get("question"))?.trim() ?? "";
 	let repo = sp.get("repo")?.trim() ?? "";
 
 	if (!q) {
@@ -58,7 +59,12 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
-	logApiHit({ req, endpoint: "/api/repos/explain", query: q, filters: { repo, routedVia } });
+	logApiHit({
+		req,
+		endpoint: "/api/repos/explain",
+		query: q,
+		filters: { repo, routedVia },
+	});
 
 	if (!repo) {
 		// Total routing failure. Still emit the full documented shape
@@ -66,7 +72,10 @@ export async function GET(req: NextRequest) {
 		// hit a KeyError on off-topic/unroutable questions.
 		return NextResponse.json({
 			ok: true,
-			meta: { source: "https://stellarlight.xyz/directory", generatedAt: new Date().toISOString() },
+			meta: {
+				source: "https://stellarlight.xyz/directory",
+				generatedAt: new Date().toISOString(),
+			},
 			q,
 			repo: null,
 			routedVia: null,
@@ -136,7 +145,8 @@ export async function GET(req: NextRequest) {
 				if (d.codeScanState === "scanned" && d.stellarProof) {
 					codeVerified = {
 						stellarProof: d.stellarProof as string,
-						codeDepth: typeof d.codeDepth === "number" ? (d.codeDepth as number) : null,
+						codeDepth:
+							typeof d.codeDepth === "number" ? (d.codeDepth as number) : null,
 						isDeployableContract: !!d.isDeployableContract,
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
 						versionStatus: (d.versionStatus as string) ?? null,
@@ -168,7 +178,9 @@ export async function GET(req: NextRequest) {
 			// on a supported soroban-sdk" vs "tooling that merely uses Stellar".
 			codeVerified,
 			// Other authoritative repos for this concept, so the agent can follow up.
-			alternateRepos: canon.filter((r) => r.toLowerCase() !== repo.toLowerCase()),
+			alternateRepos: canon.filter(
+				(r) => r.toLowerCase() !== repo.toLowerCase(),
+			),
 			answer: dw?.answer ?? null,
 			answered: !!dw,
 			sources: {
@@ -183,7 +195,11 @@ export async function GET(req: NextRequest) {
 							"DeepWiki had no answer (repo not indexed, or the service was briefly unavailable). The routed repo above is still the authoritative source — read it directly or retry.",
 					}),
 		},
-		{ headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900" } },
+		{
+			headers: {
+				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+			},
+		},
 	);
 }
 

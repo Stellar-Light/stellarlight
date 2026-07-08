@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { ArrowUpDown, Calendar, ChevronDown, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ArrowUpDown, Calendar, Tag } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 import {
 	Drawer,
-	DrawerTrigger,
 	DrawerContent,
+	DrawerDescription,
 	DrawerHeader,
 	DrawerTitle,
-	DrawerDescription,
+	DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface Option {
@@ -58,7 +58,11 @@ export function LeaderboardFilters({
 			? (categoryOptions.find((o) => o.value === category) as Option).label
 			: "All categories";
 
-	const navigate = (next: { sort?: string; range?: string; category?: string | null }) => {
+	const navigate = (next: {
+		sort?: string;
+		range?: string;
+		category?: string | null;
+	}) => {
 		const sp = new URLSearchParams();
 		const finalSort = next.sort ?? sort;
 		const finalRange = next.range ?? range;
@@ -66,7 +70,8 @@ export function LeaderboardFilters({
 			next.category === undefined ? category : next.category;
 		if (finalSort !== "activity") sp.set("sort", finalSort);
 		if (finalRange !== "all") sp.set("range", finalRange);
-		if (finalCategory && finalCategory !== "all") sp.set("category", finalCategory);
+		if (finalCategory && finalCategory !== "all")
+			sp.set("category", finalCategory);
 		const qs = sp.toString();
 		router.push(qs ? `/leaderboard?${qs}` : "/leaderboard");
 		router.refresh();
@@ -93,7 +98,9 @@ export function LeaderboardFilters({
 				<DropdownMenu>
 					<DropdownMenuTrigger className={cn(btnBase, "min-w-[170px]")}>
 						<ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-						<span className="flex-1 text-left text-sm truncate">{sortLabel}</span>
+						<span className="flex-1 text-left text-sm truncate">
+							{sortLabel}
+						</span>
 						<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-[180px]">
@@ -117,7 +124,9 @@ export function LeaderboardFilters({
 				<DropdownMenu>
 					<DropdownMenuTrigger className={cn(btnBase, "min-w-[150px]")}>
 						<Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-						<span className="flex-1 text-left text-sm truncate">{rangeLabel}</span>
+						<span className="flex-1 text-left text-sm truncate">
+							{rangeLabel}
+						</span>
 						<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-[160px]">
@@ -141,7 +150,9 @@ export function LeaderboardFilters({
 				<DropdownMenu>
 					<DropdownMenuTrigger className={cn(btnBase, "min-w-[180px]")}>
 						<Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-						<span className="flex-1 text-left text-sm truncate">{categoryLabel}</span>
+						<span className="flex-1 text-left text-sm truncate">
+							{categoryLabel}
+						</span>
 						<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-[200px] max-h-[400px] overflow-y-auto">
@@ -180,7 +191,9 @@ export function LeaderboardFilters({
 					<DrawerTrigger asChild>
 						<button type="button" className={cn(btnBase, "w-full")}>
 							<ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-							<span className="flex-1 text-left text-sm truncate">{sortLabel}</span>
+							<span className="flex-1 text-left text-sm truncate">
+								{sortLabel}
+							</span>
 							<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 						</button>
 					</DrawerTrigger>
@@ -213,14 +226,18 @@ export function LeaderboardFilters({
 					<DrawerTrigger asChild>
 						<button type="button" className={cn(btnBase, "w-full")}>
 							<Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-							<span className="flex-1 text-left text-sm truncate">{rangeLabel}</span>
+							<span className="flex-1 text-left text-sm truncate">
+								{rangeLabel}
+							</span>
 							<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 						</button>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
 							<DrawerTitle>Time range</DrawerTitle>
-							<DrawerDescription>Filter by recent activity window</DrawerDescription>
+							<DrawerDescription>
+								Filter by recent activity window
+							</DrawerDescription>
 						</DrawerHeader>
 						<div className="space-y-1 px-4 pb-6 max-h-[60vh] overflow-y-auto">
 							{rangeOptions.map((o) => (
@@ -244,10 +261,7 @@ export function LeaderboardFilters({
 
 				<Drawer open={categoryDrawerOpen} onOpenChange={setCategoryDrawerOpen}>
 					<DrawerTrigger asChild>
-						<button
-							type="button"
-							className={cn(btnBase, "w-full col-span-2")}
-						>
+						<button type="button" className={cn(btnBase, "w-full col-span-2")}>
 							<Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 							<span className="flex-1 text-left text-sm truncate">
 								{categoryLabel}

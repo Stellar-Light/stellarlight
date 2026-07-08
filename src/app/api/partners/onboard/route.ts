@@ -31,8 +31,8 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 

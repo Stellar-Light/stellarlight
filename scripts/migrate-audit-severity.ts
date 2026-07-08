@@ -15,12 +15,13 @@
  *   pnpm exec tsx scripts/migrate-audit-severity.ts --execute
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import type { AuditSeverity } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const execute = process.argv.includes("--execute");
 
@@ -32,7 +33,11 @@ function inferSeverityFromBody(content: string): AuditSeverity {
 	const c = content;
 	const count = (re: RegExp) => (c.match(re) || []).length;
 	type Sev = Exclude<AuditSeverity, "unknown">;
-	const dbl = (word: string) => word.split("").map((c) => c + c).join("");
+	const dbl = (word: string) =>
+		word
+			.split("")
+			.map((c) => c + c)
+			.join("");
 	const explicit: Record<Sev, () => number> = {
 		critical: () =>
 			count(/\bseverity\s*:?\s*critical\b/gi) +
@@ -64,21 +69,40 @@ function inferSeverityFromBody(content: string): AuditSeverity {
 			count(/\[L-?\d+\]/g),
 		informational: () =>
 			count(/\bseverity\s*:?\s*info(?:rmative|rmational)?\b/gi) +
-			count(/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi) +
+			count(
+				/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi,
+			) +
 			count(/\bseverity\s+(?:warning|note)\b/gi) +
 			count(/\/\/\s*INFO(?:RMATIONAL)?\b/g) +
 			count(new RegExp(`\\b${dbl("info")}`, "gi")) +
 			count(/\[I-?\d+\]/g),
 	};
 	const ambient: Record<Sev, () => number> = {
-		critical: () => count(/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi),
-		high: () => count(/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		medium: () => count(/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		low: () => count(/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		informational: () => count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
+		critical: () =>
+			count(
+				/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi,
+			),
+		high: () =>
+			count(
+				/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		medium: () =>
+			count(
+				/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		low: () =>
+			count(
+				/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		informational: () =>
+			count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
 	};
 	const scores: Record<Sev, number> = {
-		critical: 0, high: 0, medium: 0, low: 0, informational: 0,
+		critical: 0,
+		high: 0,
+		medium: 0,
+		low: 0,
+		informational: 0,
 	};
 	for (const sev of Object.keys(explicit) as Sev[]) {
 		const exp = explicit[sev]();
@@ -106,11 +130,21 @@ async function run() {
 
 	console.log(`\nLoaded ${docs.docs.length} audit chunks`);
 
-	const changes: Array<{ id: string; from: AuditSeverity; to: AuditSeverity }> = [];
+	const changes: Array<{ id: string; from: AuditSeverity; to: AuditSeverity }> =
+		[];
 	const histogram: Record<AuditSeverity, number> = {
-		critical: 0, high: 0, medium: 0, low: 0, informational: 0, unknown: 0,
+		critical: 0,
+		high: 0,
+		medium: 0,
+		low: 0,
+		informational: 0,
+		unknown: 0,
 	};
-	for (const d of docs.docs as Array<{ id: string; content: string; severity?: AuditSeverity }>) {
+	for (const d of docs.docs as Array<{
+		id: string;
+		content: string;
+		severity?: AuditSeverity;
+	}>) {
 		const newSev = inferSeverityFromBody(d.content);
 		const oldSev = d.severity ?? "unknown";
 		histogram[newSev] += 1;

@@ -90,13 +90,18 @@ export function FlickeringGridBg({
 		return () => {
 			cancelAnimationFrame(animationId);
 		};
-	}, [isClient, squareSize, gridGap, color, maxOpacity, flickerChance, width, height]);
+	}, [
+		isClient,
+		squareSize,
+		gridGap,
+		color,
+		maxOpacity,
+		flickerChance,
+		width,
+		height,
+	]);
 
 	return (
-		<canvas
-			ref={canvasRef}
-			className={className}
-			style={{ width, height }}
-		/>
+		<canvas ref={canvasRef} className={className} style={{ width, height }} />
 	);
 }

@@ -1,5 +1,5 @@
-import { getPayloadSafe } from "@/lib/payload-client";
 import CompanyTicker from "@/components/company-ticker";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function CarouselSection() {
 	const payload = await getPayloadSafe();
@@ -26,4 +26,3 @@ export default async function CarouselSection() {
 
 	return <CompanyTicker items={items} className="mb-24" />;
 }
-

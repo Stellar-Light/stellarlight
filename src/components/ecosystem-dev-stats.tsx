@@ -1,7 +1,7 @@
-import { ArrowUpRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import ecData from "@/data/electric-capital-stellar.json";
-import { EcosystemMadChart } from "@/components/ecosystem-mad-chart";
+import { ArrowUpRight, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { EcosystemGeoCards } from "@/components/ecosystem-geo-cards";
+import { EcosystemMadChart } from "@/components/ecosystem-mad-chart";
+import ecData from "@/data/electric-capital-stellar.json";
 
 /** Electric Capital lightning-bolt mark, recreated inline so we don't ship
  *  an external image. The brand color is their cyan. */
@@ -14,10 +14,7 @@ function ElectricCapitalLogo({ className }: { className?: string }) {
 			className={className}
 		>
 			<rect width="100" height="100" rx="10" fill="#00BFE9" />
-			<path
-				d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z"
-				fill="#FFFFFF"
-			/>
+			<path d="M55 12 L24 56 H44 L37 88 L74 40 H52 L62 12 Z" fill="#FFFFFF" />
 		</svg>
 	);
 }
@@ -135,7 +132,10 @@ export function EcosystemDevStats() {
 
 	const madDelta30 = deltaPct(d.mad.total, d.mad.thirtyDaysAgo);
 	const madDelta1y = deltaPct(d.mad.total, d.mad.oneYearAgo);
-	const commitsDelta30 = deltaPct(d.commits28d.total, d.commits28d.thirtyDaysAgo);
+	const commitsDelta30 = deltaPct(
+		d.commits28d.total,
+		d.commits28d.thirtyDaysAgo,
+	);
 
 	const formatDate = (iso: string) => {
 		try {
@@ -261,7 +261,8 @@ export function EcosystemDevStats() {
 					</div>
 					<EcosystemMadChart data={series} chains={chains} />
 					<div className="text-[11px] text-muted-foreground/60 mt-1">
-						“Active dev” = at least one commit to a Stellar ecosystem repo in the trailing 28 days. Hover for daily values.
+						“Active dev” = at least one commit to a Stellar ecosystem repo in
+						the trailing 28 days. Hover for daily values.
 					</div>
 				</div>
 			)}

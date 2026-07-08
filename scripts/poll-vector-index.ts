@@ -3,6 +3,7 @@
  * Exits 0 once queryable, 1 on failure or timeout.
  */
 import { createRequire } from "node:module";
+
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
 const { MongoClient } = req(
@@ -26,7 +27,9 @@ async function main() {
 		if (!idx) {
 			console.log(`[${elapsed}s] index not found yet`);
 		} else {
-			console.log(`[${elapsed}s] status=${idx.status} queryable=${idx.queryable}`);
+			console.log(
+				`[${elapsed}s] status=${idx.status} queryable=${idx.queryable}`,
+			);
 			if (idx.queryable) {
 				console.log(`✅ READY after ${elapsed}s`);
 				await client.close();

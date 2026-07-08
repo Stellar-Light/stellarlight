@@ -184,8 +184,9 @@ export function SkillSubmissionModal({ open, onClose }: Props) {
 					) : (
 						<>
 							<p className="text-xs text-muted-foreground mb-5 leading-relaxed">
-								Your submission lands in our review queue. Approved skills appear in
-								the marketplace within a few days. Required fields are marked.
+								Your submission lands in our review queue. Approved skills
+								appear in the marketplace within a few days. Required fields are
+								marked.
 							</p>
 
 							{error && (
@@ -551,8 +552,8 @@ function SuccessBlock({ onClose }: { onClose: () => void }) {
 			</h3>
 			<p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed mb-6">
 				Stellarlight curators review the queue weekly. Approved skills appear in
-				the marketplace + show up in <code>/api/skills</code> for any AI agent to
-				discover. Thanks for building on Stellar.
+				the marketplace + show up in <code>/api/skills</code> for any AI agent
+				to discover. Thanks for building on Stellar.
 			</p>
 			<button
 				type="button"

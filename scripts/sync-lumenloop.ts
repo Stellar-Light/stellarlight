@@ -7,18 +7,18 @@
  *   npx tsx scripts/sync-lumenloop.ts --execute --skip-entities  # Skip entity creation
  */
 import "dotenv/config";
-import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
-import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { join } from "node:path";
 import { execSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import yaml from "js-yaml";
+import { getPayload } from "payload";
 import {
-	mapLumenloopEntry,
 	extractEntryId,
 	type LumenloopEntry,
+	mapLumenloopEntry,
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
+import configPromise from "../src/payload.config";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -35,7 +35,9 @@ const errors: string[] = [];
 
 async function main() {
 	console.log("=== Lumenloop Ecosystem Sync ===");
-	console.log(`Mode: ${dryRun ? "DRY RUN (no changes)" : "EXECUTE (writing to DB)"}`);
+	console.log(
+		`Mode: ${dryRun ? "DRY RUN (no changes)" : "EXECUTE (writing to DB)"}`,
+	);
 	console.log(`Entities: ${skipEntities ? "SKIPPED" : "ENABLED"}`);
 	console.log("");
 
@@ -72,7 +74,9 @@ async function main() {
 			}
 		} catch (e) {
 			stats.projects.errors++;
-			errors.push(`Parse error ${file}: ${e instanceof Error ? e.message : String(e)}`);
+			errors.push(
+				`Parse error ${file}: ${e instanceof Error ? e.message : String(e)}`,
+			);
 		}
 	}
 	console.log(`Parsed ${entries.length} valid entries\n`);
@@ -120,8 +124,12 @@ async function main() {
 				}
 			} catch (e) {
 				stats.entities.errors++;
-				errors.push(`Entity "${name}": ${e instanceof Error ? e.message : String(e)}`);
-				console.error(`  ENTITY ERROR: ${name}: ${e instanceof Error ? e.message : String(e)}`);
+				errors.push(
+					`Entity "${name}": ${e instanceof Error ? e.message : String(e)}`,
+				);
+				console.error(
+					`  ENTITY ERROR: ${name}: ${e instanceof Error ? e.message : String(e)}`,
+				);
 			}
 		}
 		console.log("");
@@ -133,7 +141,10 @@ async function main() {
 	for (const { file, entry } of entries) {
 		try {
 			const entryId = extractEntryId(entry);
-			const { project: mapped, parentEntity } = mapLumenloopEntry(entry, entryId);
+			const { project: mapped, parentEntity } = mapLumenloopEntry(
+				entry,
+				entryId,
+			);
 			const slug = generateSlug(mapped.name!);
 
 			// Check if project exists
@@ -198,7 +209,13 @@ async function main() {
 
 					// Link entity
 					if (parentEntity && !skipEntities) {
-						await linkEntity(payload, parentEntity, created.id, entityMap, dryRun);
+						await linkEntity(
+							payload,
+							parentEntity,
+							created.id,
+							entityMap,
+							dryRun,
+						);
 					}
 				}
 			}

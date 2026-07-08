@@ -1,10 +1,10 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import ProjectCard from "@/components/project-card";
 import ProjectCardSkeleton from "@/components/project-card-skeleton";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getPayloadSafe } from "@/lib/payload-client";
+import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
 
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
@@ -34,9 +34,8 @@ function getPayloadSort(sortOption: string): string {
 function applyTypeFilter(baseWhere: any, typeFilter?: string) {
 	if (!typeFilter || typeFilter === "all") return;
 
-	const typeValues = typeFilter === "Payments"
-		? ["Payments", "Payment Rail"]
-		: [typeFilter];
+	const typeValues =
+		typeFilter === "Payments" ? ["Payments", "Payment Rail"] : [typeFilter];
 	baseWhere.types = { in: typeValues };
 }
 
@@ -63,9 +62,11 @@ function buildPaginationParams(props: {
 }): string {
 	const params: Record<string, string> = {};
 	if (props.searchQuery) params.q = props.searchQuery;
-	if (props.typeFilter && props.typeFilter !== "all") params.type = props.typeFilter;
+	if (props.typeFilter && props.typeFilter !== "all")
+		params.type = props.typeFilter;
 	if (props.scfFilter) params.scf = props.scfFilter;
-	if (props.sortOption && props.sortOption !== "featured") params.sort = props.sortOption;
+	if (props.sortOption && props.sortOption !== "featured")
+		params.sort = props.sortOption;
 	params.page = String(props.page);
 	return new URLSearchParams(params).toString();
 }
@@ -80,7 +81,14 @@ export default async function DirectoryProjectsGrid({
 }: DirectoryProjectsGridProps) {
 	const payload = await getPayloadSafe();
 
-	let result: any = { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasNextPage: false, hasPrevPage: false };
+	let result: any = {
+		docs: [],
+		totalDocs: 0,
+		totalPages: 0,
+		page: 1,
+		hasNextPage: false,
+		hasPrevPage: false,
+	};
 
 	if (payload) {
 		try {
@@ -121,7 +129,10 @@ export default async function DirectoryProjectsGrid({
 		return (
 			<div className="text-center py-16">
 				<p className="text-lg text-muted-foreground">
-					No projects found. {searchQuery ? "Try adjusting your search terms." : "Projects will appear here once approved."}
+					No projects found.{" "}
+					{searchQuery
+						? "Try adjusting your search terms."
+						: "Projects will appear here once approved."}
 				</p>
 			</div>
 		);
@@ -149,7 +160,9 @@ export default async function DirectoryProjectsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}>
+							<Link
+								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}
+							>
 								<ChevronLeft className="h-3.5 w-3.5" />
 								Previous
 							</Link>
@@ -177,7 +190,9 @@ export default async function DirectoryProjectsGrid({
 							size="default"
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
-							<Link href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}>
+							<Link
+								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}
+							>
 								Next
 								<ChevronRight className="h-3.5 w-3.5" />
 							</Link>

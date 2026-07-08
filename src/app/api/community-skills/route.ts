@@ -28,7 +28,14 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-const VALID_KINDS = ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"] as const;
+const VALID_KINDS = [
+	"skill-md",
+	"mcp-server",
+	"sdk",
+	"cli",
+	"agent-kit",
+	"tool",
+] as const;
 const VALID_TARGET_USERS = ["dev", "founder", "agent"] as const;
 
 interface SubmissionBody {
@@ -57,7 +64,10 @@ function ipHashOf(req: NextRequest): string {
 		req.headers.get("x-real-ip") ||
 		"unknown";
 	const salt = process.env.PAYLOAD_SECRET || "stellar-skills-marketplace-salt";
-	return createHash("sha256").update(`${ip}:${salt}`).digest("hex").slice(0, 16);
+	return createHash("sha256")
+		.update(`${ip}:${salt}`)
+		.digest("hex")
+		.slice(0, 16);
 }
 
 function isKebab(s: string): boolean {
@@ -96,7 +106,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: "invalid JSON body",
-				hint: 'POST application/json with the shape described in GET /api/community-skills',
+				hint: "POST application/json with the shape described in GET /api/community-skills",
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -110,7 +120,11 @@ export async function POST(req: NextRequest) {
 		errs.push("'slug' is required (kebab-case, e.g. 'my-cool-skill')");
 	if (!body.tagline || body.tagline.length < 10 || body.tagline.length > 160)
 		errs.push("'tagline' must be 10–160 chars");
-	if (!body.description || body.description.length < 30 || body.description.length > 2000)
+	if (
+		!body.description ||
+		body.description.length < 30 ||
+		body.description.length > 2000
+	)
 		errs.push("'description' must be 30–2000 chars");
 	if (!body.kind || !VALID_KINDS.includes(body.kind as never))
 		errs.push(`'kind' must be one of: ${VALID_KINDS.join(", ")}`);
@@ -120,8 +134,7 @@ export async function POST(req: NextRequest) {
 		errs.push("'repository' must be a valid URL");
 	if (body.homepage && !isUrl(body.homepage))
 		errs.push("'homepage' must be a valid URL");
-	if (body.docs && !isUrl(body.docs))
-		errs.push("'docs' must be a valid URL");
+	if (body.docs && !isUrl(body.docs)) errs.push("'docs' must be a valid URL");
 	if (body.targetUser) {
 		for (const t of body.targetUser) {
 			if (!VALID_TARGET_USERS.includes(t as never))
@@ -130,7 +143,10 @@ export async function POST(req: NextRequest) {
 	}
 	if (!body.submittedBy?.name || body.submittedBy.name.trim().length < 1)
 		errs.push("'submittedBy.name' is required");
-	if (body.submittedBy?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.submittedBy.email))
+	if (
+		body.submittedBy?.email &&
+		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.submittedBy.email)
+	)
 		errs.push("'submittedBy.email' must be a valid email if provided");
 
 	if (errs.length > 0) {
@@ -185,7 +201,9 @@ export async function POST(req: NextRequest) {
 				homepage: body.homepage,
 				docs: body.docs,
 				compatibility: (body.compatibility ?? []).map((agent) => ({ agent })),
-				targetUser: body.targetUser as (typeof VALID_TARGET_USERS)[number][] | undefined,
+				targetUser: body.targetUser as
+					| (typeof VALID_TARGET_USERS)[number][]
+					| undefined,
 				tags: (body.tags ?? []).map((tag) => ({ tag })),
 				submittedBy: body.submittedBy,
 				submittedAt: new Date().toISOString(),
@@ -242,7 +260,8 @@ export async function GET() {
 			example: {
 				name: "Soroban Audit Helper",
 				slug: "soroban-audit-helper",
-				tagline: "AI skill that audits Soroban contracts against known attack patterns.",
+				tagline:
+					"AI skill that audits Soroban contracts against known attack patterns.",
 				description:
 					"Installable SKILL.md that prompts your agent to run a Soroban contract through a known-pattern check, citing OWASP-style attack vectors and recent Stellar audit findings.",
 				kind: "skill-md",

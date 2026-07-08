@@ -13,11 +13,11 @@
  * Shared implementation in src/lib/repo-search.ts.
  */
 import { type NextRequest, NextResponse } from "next/server";
-import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
+import { clampLimit } from "@/lib/http-params";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { searchRepos } from "@/lib/repo-search";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -27,7 +27,12 @@ export async function GET(req: NextRequest) {
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
-		(sp.get("q") ?? sp.get("query") ?? sp.get("keyword") ?? sp.get("search"))?.trim() ?? "";
+		(
+			sp.get("q") ??
+			sp.get("query") ??
+			sp.get("keyword") ??
+			sp.get("search")
+		)?.trim() ?? "";
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
 	const limit = clampLimit(sp.get("limit"), 20, 100);
@@ -41,7 +46,12 @@ export async function GET(req: NextRequest) {
 		minScore,
 	});
 
-	logApiHit({ req, endpoint: "/api/repos/search", query: q, filters: { language, minScore, limit } });
+	logApiHit({
+		req,
+		endpoint: "/api/repos/search",
+		query: q,
+		filters: { language, minScore, limit },
+	});
 
 	return NextResponse.json(
 		{
@@ -61,7 +71,11 @@ export async function GET(req: NextRequest) {
 			},
 			repos,
 		},
-		{ headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+		{
+			headers: {
+				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+			},
+		},
 	);
 }
 

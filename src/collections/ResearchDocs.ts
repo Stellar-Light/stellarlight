@@ -95,7 +95,8 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			index: true,
 			admin: {
-				description: "Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.",
+				description:
+					"Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.",
 			},
 		},
 		{
@@ -103,7 +104,8 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			index: true,
 			admin: {
-				description: "Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.",
+				description:
+					"Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.",
 			},
 		},
 		{
@@ -118,7 +120,8 @@ export const ResearchDocs: CollectionConfig = {
 				{ label: "Unknown / Mixed", value: "unknown" },
 			],
 			admin: {
-				description: "Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.",
+				description:
+					"Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.",
 			},
 		},
 		{

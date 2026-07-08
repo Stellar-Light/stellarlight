@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
 
 // Explicit name-to-type overrides (audited)
 const EXPLICIT_OVERRIDES: Record<string, string[]> = {
@@ -314,7 +314,7 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	"Encode Club": ["Education"],
 	EduNode: ["Education"],
 	"Dapp World": ["Education"],
-	"Cryptoconexión": ["Education"],
+	Cryptoconexión: ["Education"],
 	BAF: ["Education"],
 	ICanProveIt: ["Education"],
 	"Noticias Trading": ["Education"],
@@ -333,7 +333,7 @@ const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	Halborn: ["Security"],
 	OtterSec: ["Security"],
 	Quarkslab: ["Security"],
-	"Code4rena": ["Security"],
+	Code4rena: ["Security"],
 	Cantina: ["Security"],
 	Certora: ["Security"],
 	"Runtime Verification": ["Security"],
@@ -750,7 +750,17 @@ const TAG_RULES: { type: string; keywords: string[] }[] = [
 			"checkout",
 		],
 	},
-	{ type: "Anchor", keywords: ["stellar anchor", "sep-24", "sep-6", "sep-31", "fiat gateway", "on/off ramp anchor"] },
+	{
+		type: "Anchor",
+		keywords: [
+			"stellar anchor",
+			"sep-24",
+			"sep-6",
+			"sep-31",
+			"fiat gateway",
+			"on/off ramp anchor",
+		],
+	},
 	{
 		type: "SDK",
 		keywords: [
@@ -886,7 +896,9 @@ export async function GET(request: NextRequest) {
 	for (const project of allProjects) {
 		const types: string[] = project.types || [];
 		if (types.includes("Payment Rail")) {
-			const newTypes = types.map((t: string) => t === "Payment Rail" ? "Payments" : t);
+			const newTypes = types.map((t: string) =>
+				t === "Payment Rail" ? "Payments" : t,
+			);
 			if (!dryRun) {
 				await payload.update({
 					collection: "projects",

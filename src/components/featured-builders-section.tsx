@@ -1,8 +1,8 @@
-import { getPayloadSafe } from "@/lib/payload-client";
+import { ArrowRight, Calendar, GitBranch, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import Image from 'next/image';
-import { ArrowRight, Users, GitBranch, Calendar } from "lucide-react";
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from "@/components/ui/card";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function FeaturedBuildersSection() {
 	const payload = await getPayloadSafe();
@@ -16,15 +16,16 @@ export default async function FeaturedBuildersSection() {
 			collection: "builders",
 			where: {
 				visibility: {
-					equals: 'public',
+					equals: "public",
 				},
 			},
-			sort: '-stats.totalCommits30d',
+			sort: "-stats.totalCommits30d",
 			limit: 6,
 		});
 
 		builders = buildersResult.docs.filter(
-			(builder: any) => builder.stats?.totalCommits30d > 0 || builder.is_featured
+			(builder: any) =>
+				builder.stats?.totalCommits30d > 0 || builder.is_featured,
 		);
 
 		// If we don't have enough active builders, get some recent ones
@@ -33,19 +34,19 @@ export default async function FeaturedBuildersSection() {
 				collection: "builders",
 				where: {
 					visibility: {
-						equals: 'public',
+						equals: "public",
 					},
 				},
-				sort: '-createdAt',
+				sort: "-createdAt",
 				limit: 6 - builders.length,
 			});
-			
+
 			builders = [...builders, ...additionalBuilders.docs];
 		}
 
 		builders = builders.slice(0, 6);
 	} catch (error) {
-		console.error('Error fetching builders:', error);
+		console.error("Error fetching builders:", error);
 		return null;
 	}
 
@@ -103,7 +104,7 @@ export default async function FeaturedBuildersSection() {
 										<h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
 											{builder.display_name}
 										</h3>
-										
+
 										{builder.role_title && (
 											<p className="text-sm text-muted-foreground truncate mt-1">
 												{builder.role_title}

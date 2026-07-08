@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
 import config from "@payload-config";
+import { type NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
 
 // IDs to DELETE (duplicates — keep the one with more data, delete the empty one)
 // Also delete test/junk projects
@@ -85,46 +85,46 @@ const TAG_FIXES: Record<string, string[]> = {
 
 	// "Other" tagged projects that need real types
 	Band: ["SDK"], // oracle infra
-	"Alterscope": ["Security"],
-	"Arcturus": ["AI"],
-	"Benji": ["RWA"],
-	"Bigger": ["Education"],
+	Alterscope: ["Security"],
+	Arcturus: ["AI"],
+	Benji: ["RWA"],
+	Bigger: ["Education"],
 	"Block by Block": ["Education"],
-	"Blockdaemon": ["SDK"],
-	"Bondhive": ["Lending"],
-	"Chartui": ["DEX"],
-	"DEXTools": ["Analytics"],
+	Blockdaemon: ["SDK"],
+	Bondhive: ["Lending"],
+	Chartui: ["DEX"],
+	DEXTools: ["Analytics"],
 	"DFS Labs": ["Education"],
-	"Dapplooker": ["Analytics"],
-	"DeRisk": ["Analytics", "Security"],
-	"Diadata": ["SDK"], // oracle
-	"Digicus": ["SDK"],
-	"Dogstar": ["Education", "Gaming"],
-	"EasyA": ["Education"],
-	"Etherfuse": ["RWA"],
-	"Excellar": ["RWA"],
-	"FxDAO": ["Lending"],
+	Dapplooker: ["Analytics"],
+	DeRisk: ["Analytics", "Security"],
+	Diadata: ["SDK"], // oracle
+	Digicus: ["SDK"],
+	Dogstar: ["Education", "Gaming"],
+	EasyA: ["Education"],
+	Etherfuse: ["RWA"],
+	Excellar: ["RWA"],
+	FxDAO: ["Lending"],
 	"Give Credit": ["Lending"],
-	"Giveth": ["Payments"],
+	Giveth: ["Payments"],
 	"Hoops Finance": ["DEX", "Analytics"],
-	"InfStones": ["SDK"],
-	"Kale": ["Gaming"],
-	"Keizai": ["SDK"],
-	"Kwickbit": ["Analytics"],
-	"Lightecho": ["SDK"], // oracle
+	InfStones: ["SDK"],
+	Kale: ["Gaming"],
+	Keizai: ["SDK"],
+	Kwickbit: ["Analytics"],
+	Lightecho: ["SDK"], // oracle
 	"Lumen Loop": ["Explorer"],
 	"Lumos DAO": ["SDK"],
-	"NearX": ["Education"],
-	"Nebula": ["SDK"],
+	NearX: ["Education"],
+	Nebula: ["SDK"],
 	"Nirvana Labs": ["SDK"],
-	"Okashi": ["SDK"],
+	Okashi: ["SDK"],
 	"OnBoarding Club": ["Education"],
 	"Orbit Finance": ["Lending"],
-	"PipeOps": ["SDK"],
+	PipeOps: ["SDK"],
 	"Public Node": ["SDK"],
-	"Reflector": ["SDK"], // oracle
+	Reflector: ["SDK"], // oracle
 	"Rise In": ["Education"],
-	"Slender": ["Lending"],
+	Slender: ["Lending"],
 	"Soroban Academy": ["Education"],
 	"Soroban Domains": ["SDK"],
 	"Soroban Governor": ["SDK"],
@@ -132,21 +132,21 @@ const TAG_FIXES: Record<string, string[]> = {
 	"Stellar Global": ["Education"],
 	"Stellar Laboratory": ["SDK"],
 	"Stellar Quest": ["Education", "Gaming"],
-	"StellarFolio": ["Analytics"],
-	"Stellarbeat": ["Explorer"],
-	"Taurus": ["Wallet", "RWA"],
-	"Tauvlo": ["RWA"],
+	StellarFolio: ["Analytics"],
+	Stellarbeat: ["Explorer"],
+	Taurus: ["Wallet", "RWA"],
+	Tauvlo: ["RWA"],
 	"Token Tails": ["Gaming"],
-	"XycLoans": ["Lending"],
-	"Yieldblox": ["Lending"],
-	"ZettaBlock": ["SDK", "Analytics"],
-	"Ziriz": ["Payments"],
+	XycLoans: ["Lending"],
+	Yieldblox: ["Lending"],
+	ZettaBlock: ["SDK", "Analytics"],
+	Ziriz: ["Payments"],
 	"Soroban Hub": ["SDK"],
 	"Soroban Pulse": ["Analytics"],
-	"SorobanIDE": ["SDK"],
+	SorobanIDE: ["SDK"],
 	"Stellar Dashboard": ["Analytics"],
 	"Stellar Pulse": ["Analytics"],
-	"ChainAtlas": ["Explorer"],
+	ChainAtlas: ["Explorer"],
 	"Stroopy AI": ["AI"],
 	"BAF Network": ["Education"],
 	"Roberto Sanz": ["Education"],
@@ -154,39 +154,39 @@ const TAG_FIXES: Record<string, string[]> = {
 	"Posted App": ["Payments"],
 
 	// Assets tagged "Other" — these are stablecoins/tokens, tag as RWA or Payments
-	"USDC": ["Payments"],
-	"EURC": ["Payments"],
-	"ARST": ["Payments"],
-	"ARS": ["Payments"],
-	"AUDD": ["Payments"],
-	"BRL": ["Payments"],
-	"BRZ": ["Payments"],
-	"GBPx": ["Payments"],
-	"GLOUSD": ["Payments"],
-	"KES": ["Payments"],
-	"MBRL": ["Payments"],
-	"MXNe": ["Payments"],
-	"NGNC": ["Payments"],
-	"PEN": ["Payments"],
-	"QCAD": ["Payments"],
-	"RWF": ["Payments"],
-	"TZS": ["Payments"],
-	"USDx": ["Payments"],
-	"VCHF": ["Payments"],
-	"VEUR": ["Payments"],
-	"gYEN": ["Payments"],
-	"xUSD": ["Payments"],
-	"zUSD": ["Payments"],
+	USDC: ["Payments"],
+	EURC: ["Payments"],
+	ARST: ["Payments"],
+	ARS: ["Payments"],
+	AUDD: ["Payments"],
+	BRL: ["Payments"],
+	BRZ: ["Payments"],
+	GBPx: ["Payments"],
+	GLOUSD: ["Payments"],
+	KES: ["Payments"],
+	MBRL: ["Payments"],
+	MXNe: ["Payments"],
+	NGNC: ["Payments"],
+	PEN: ["Payments"],
+	QCAD: ["Payments"],
+	RWF: ["Payments"],
+	TZS: ["Payments"],
+	USDx: ["Payments"],
+	VCHF: ["Payments"],
+	VEUR: ["Payments"],
+	gYEN: ["Payments"],
+	xUSD: ["Payments"],
+	zUSD: ["Payments"],
 	"5x Crypto": ["Education"],
 
 	// Elroy needs types (was empty)
-	"Elroy": ["Payments"],
+	Elroy: ["Payments"],
 	// Blox needs types
-	"Blox": ["Payments", "Anchor"],
+	Blox: ["Payments", "Anchor"],
 	// Gateway.fm needs types
 	"Gateway.fm": ["SDK"],
 	// Sora
-	"Sora": ["SDK"],
+	Sora: ["SDK"],
 };
 
 export async function GET(request: NextRequest) {
@@ -278,7 +278,10 @@ export async function GET(request: NextRequest) {
 	}
 
 	// 3. Renames
-	const RENAMES: Record<string, { name: string; slug: string; website?: string; twitter?: string }> = {
+	const RENAMES: Record<
+		string,
+		{ name: string; slug: string; website?: string; twitter?: string }
+	> = {
 		Vibrant: {
 			name: "Vesseo",
 			slug: "vesseo",

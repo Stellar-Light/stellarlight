@@ -19,14 +19,14 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import {
 	CURATED_SKILLS,
 	type CuratedSkillKind,
 	type CuratedSkillSource,
 } from "@/lib/integrations/curated-skills";
-import { getPayloadSafe } from "@/lib/payload-client";
+import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // 1h on edge
@@ -34,8 +34,21 @@ export const revalidate = 3600; // 1h on edge
 type Source = "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
 type Kind = CuratedSkillKind;
 
-const VALID_SOURCES: Source[] = ["sdf", "stellarlight", "lumenloop", "external", "community"];
-const VALID_KINDS: Kind[] = ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"];
+const VALID_SOURCES: Source[] = [
+	"sdf",
+	"stellarlight",
+	"lumenloop",
+	"external",
+	"community",
+];
+const VALID_KINDS: Kind[] = [
+	"skill-md",
+	"mcp-server",
+	"sdk",
+	"cli",
+	"agent-kit",
+	"tool",
+];
 
 /**
  * Unified skill shape returned to agents + the frontend. All three sources
@@ -71,7 +84,10 @@ export async function GET(req: NextRequest) {
 
 	if (sourceFilter && !VALID_SOURCES.includes(sourceFilter as Source)) {
 		return NextResponse.json(
-			{ error: `Unknown source '${sourceFilter}'`, validSources: VALID_SOURCES },
+			{
+				error: `Unknown source '${sourceFilter}'`,
+				validSources: VALID_SOURCES,
+			},
 			{ status: 400 },
 		);
 	}
@@ -136,7 +152,8 @@ export async function GET(req: NextRequest) {
 
 	// Apply filters
 	let filtered = all;
-	if (sourceFilter) filtered = filtered.filter((s) => s.source === sourceFilter);
+	if (sourceFilter)
+		filtered = filtered.filter((s) => s.source === sourceFilter);
 	if (kindFilter) filtered = filtered.filter((s) => s.kind === kindFilter);
 
 	// Sort: featured first, then by source priority, then alphabetical.
@@ -247,7 +264,13 @@ async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[]> {
 function humanize(slug: string): string {
 	return slug
 		.split("-")
-		.map((w) => (w === "zk" ? "ZK" : w === "dapp" ? "dApp" : w[0]?.toUpperCase() + w.slice(1)))
+		.map((w) =>
+			w === "zk"
+				? "ZK"
+				: w === "dapp"
+					? "dApp"
+					: w[0]?.toUpperCase() + w.slice(1),
+		)
 		.join(" ");
 }
 

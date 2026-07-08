@@ -64,7 +64,11 @@ async function main() {
 	).docs as any[];
 	console.log(`${builders.length} builders.\n`);
 
-	let enriched = 0, noChange = 0, noUser = 0, skipped = 0, rateHit = 0;
+	let enriched = 0,
+		noChange = 0,
+		noUser = 0,
+		skipped = 0,
+		rateHit = 0;
 	for (const b of builders) {
 		const username = (b.github_username ?? "").trim();
 		if (!username) {
@@ -98,7 +102,9 @@ async function main() {
 			noChange++;
 			continue;
 		}
-		console.log(`  ${username.padEnd(24)} +{ ${Object.keys(patch).join(", ")} }`);
+		console.log(
+			`  ${username.padEnd(24)} +{ ${Object.keys(patch).join(", ")} }`,
+		);
 		if (EXECUTE) {
 			await payload.update({ collection: "builders", id: b.id, data: patch });
 		}

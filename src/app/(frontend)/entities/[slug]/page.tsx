@@ -1,7 +1,18 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import { aggregateEntity, formatUSD } from "@/lib/entity-stats";
+import {
+	ArrowLeft,
+	Building2,
+	Code,
+	ExternalLink,
+	Github,
+	Globe,
+	X,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EntityLogo } from "@/components/entity-logo";
+import ProjectCard from "@/components/project-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,19 +20,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import ProjectCard from "@/components/project-card";
-import { EntityLogo } from "@/components/entity-logo";
-import {
-	ArrowLeft,
-	ExternalLink,
-	Globe,
-	Github,
-	X,
-	Building2,
-	Code,
-} from "lucide-react";
+import { aggregateEntity, formatUSD } from "@/lib/entity-stats";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{
 	slug: string;
@@ -30,11 +30,7 @@ type Params = Promise<{
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
 
-export default async function EntityDetailPage({
-	params,
-}: {
-	params: Params;
-}) {
+export default async function EntityDetailPage({ params }: { params: Params }) {
 	const { slug } = await params;
 	const payload = await getPayloadSafe();
 
@@ -72,10 +68,12 @@ export default async function EntityDetailPage({
 			if (typeof project === "string") {
 				return false; // Skip if not populated
 			}
-			return project.status && ["Development", "Pre-Release", "Live"].includes(project.status);
+			return (
+				project.status &&
+				["Development", "Pre-Release", "Live"].includes(project.status)
+			);
 		})
 		.map((project: any) => project);
-
 
 	return (
 		<div className="min-h-screen relative">
@@ -130,7 +128,9 @@ export default async function EntityDetailPage({
 										<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.03] text-muted-foreground border border-border">
 											{stats.projectCount}{" "}
 											{stats.projectCount === 1 ? "project" : "projects"}
-											{stats.fundedCount > 0 ? ` · ${stats.fundedCount} funded` : ""}
+											{stats.fundedCount > 0
+												? ` · ${stats.fundedCount} funded`
+												: ""}
 										</span>
 										{stats.scfRoundCount > 0 && (
 											<span className="text-sm px-3 py-1.5 rounded-lg bg-white/[0.03] text-muted-foreground border border-border">
@@ -161,7 +161,9 @@ export default async function EntityDetailPage({
 
 							{/* Second Row - About the Entity Section */}
 							<div className="space-y-4 pt-4 border-t border-border/50">
-								<h2 className="text-xl font-bold text-foreground">About {entity.name}</h2>
+								<h2 className="text-xl font-bold text-foreground">
+									About {entity.name}
+								</h2>
 								{entity.description ? (
 									<p className="text-base text-muted-foreground leading-relaxed">
 										{entity.description}
@@ -172,10 +174,7 @@ export default async function EntityDetailPage({
 									</p>
 								)}
 								{entity.links?.website && (
-									<Button
-										asChild
-										className="mt-4"
-									>
+									<Button asChild className="mt-4">
 										<a
 											href={entity.links.website}
 											target="_blank"
@@ -196,7 +195,9 @@ export default async function EntityDetailPage({
 				{entity.links && Object.values(entity.links).some(Boolean) && (
 					<Card className="mb-8 border border-border/50 bg-card shadow-lg">
 						<CardHeader className="pb-4">
-							<CardTitle className="text-xl font-bold">Links & Resources</CardTitle>
+							<CardTitle className="text-xl font-bold">
+								Links & Resources
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -215,7 +216,9 @@ export default async function EntityDetailPage({
 												Website
 											</span>
 											<span className="text-xs text-muted-foreground truncate">
-												{entity.links.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+												{entity.links.website
+													.replace(/^https?:\/\//, "")
+													.replace(/\/$/, "")}
 											</span>
 										</div>
 										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -236,7 +239,9 @@ export default async function EntityDetailPage({
 												GitHub
 											</span>
 											<span className="text-xs text-muted-foreground truncate">
-												{entity.links.github.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+												{entity.links.github
+													.replace(/^https?:\/\//, "")
+													.replace(/\/$/, "")}
 											</span>
 										</div>
 										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -257,7 +262,9 @@ export default async function EntityDetailPage({
 												X (Twitter)
 											</span>
 											<span className="text-xs text-muted-foreground truncate">
-												{entity.links.twitter.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+												{entity.links.twitter
+													.replace(/^https?:\/\//, "")
+													.replace(/\/$/, "")}
 											</span>
 										</div>
 										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -314,7 +321,8 @@ export default async function EntityDetailPage({
 									No projects linked yet
 								</p>
 								<p className="text-sm text-muted-foreground/70">
-									Projects associated with this entity will appear here once they are added.
+									Projects associated with this entity will appear here once
+									they are added.
 								</p>
 							</CardContent>
 						</Card>
@@ -330,4 +338,3 @@ export default async function EntityDetailPage({
 		</div>
 	);
 }
-

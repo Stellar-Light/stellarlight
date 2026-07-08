@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import ProjectCard from "@/components/project-card";
 import ProjectCardSkeleton from "@/components/project-card-skeleton";
+import { Button } from "@/components/ui/button";
 
 interface ProjectsGridClientProps {
 	initialProjects: any[];
@@ -59,7 +59,10 @@ export default function ProjectsGridClient({
 		return (
 			<div className="text-center py-20">
 				<p className="text-lg text-muted-foreground">
-					No projects found. {searchQuery ? "Try adjusting your search terms." : "Projects will appear here once approved."}
+					No projects found.{" "}
+					{searchQuery
+						? "Try adjusting your search terms."
+						: "Projects will appear here once approved."}
 				</p>
 			</div>
 		);
@@ -73,8 +76,7 @@ export default function ProjectsGridClient({
 						key={project.id}
 						project={project}
 						isFeatured={
-							index === 0 &&
-							!project.verificationLevel?.includes("Unverified")
+							index === 0 && !project.verificationLevel?.includes("Unverified")
 						}
 					/>
 				))}
@@ -99,4 +101,3 @@ export default function ProjectsGridClient({
 		</>
 	);
 }
-

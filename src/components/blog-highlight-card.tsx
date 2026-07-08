@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { ExternalLink } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface BlogHighlightCardProps {
 	post: {
@@ -13,7 +13,11 @@ interface BlogHighlightCardProps {
 		author: string;
 		publishedAt?: string | null | undefined;
 		category?: string | null | undefined;
-		featuredImage?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
+		featuredImage?:
+			| string
+			| { id: string; url?: string | null; filename?: string | null }
+			| null
+			| undefined;
 		rssImageUrl?: string | null;
 		featured?: boolean | null | undefined;
 	};
@@ -29,14 +33,16 @@ export default function BlogHighlightCard({
 	// First check for RSS image URL (fastest - direct URL)
 	if (post.rssImageUrl) {
 		imageUrl = post.rssImageUrl;
-		isExternalImage = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
+		isExternalImage =
+			imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 	} else if (post.featuredImage) {
 		// Fall back to uploaded image
 		if (typeof post.featuredImage === "string") {
 			imageUrl = "/logo.png";
 		} else if (post.featuredImage.url) {
 			imageUrl = post.featuredImage.url;
-			isExternalImage = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
+			isExternalImage =
+				imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 		} else if (post.featuredImage.filename) {
 			imageUrl = `/media/${post.featuredImage.filename}`;
 		}
@@ -91,4 +97,3 @@ export default function BlogHighlightCard({
 		</Link>
 	);
 }
-

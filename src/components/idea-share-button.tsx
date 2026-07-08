@@ -1,7 +1,7 @@
 "use client";
 
+import { Check, Link2 } from "lucide-react";
 import { useState } from "react";
-import { Link2, Check } from "lucide-react";
 
 export function IdeaShareButton() {
 	const [copied, setCopied] = useState(false);

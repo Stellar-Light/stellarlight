@@ -30,15 +30,12 @@ import {
 	CURATED_SKILLS,
 	type CuratedSkill,
 } from "@/lib/integrations/curated-skills";
-import {
-	fetchSdfSkill,
-	SDF_SKILL_NAMES,
-} from "@/lib/integrations/sdf-skills";
+import { fetchSdfSkill, SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { generateSlug } from "@/lib/utils/normalize";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { generateSlug } from "@/lib/utils/normalize";
 
 // sls-004: this route is force-DYNAMIC, not force-static. GET stays CDN-cached
 // via the explicit Cache-Control headers on jsonResponse (s-maxage +
@@ -233,7 +230,11 @@ function humanize(slug: string): string {
 	return slug
 		.split("-")
 		.map((w) =>
-			w === "zk" ? "ZK" : w === "dapp" ? "dApp" : w[0]?.toUpperCase() + w.slice(1),
+			w === "zk"
+				? "ZK"
+				: w === "dapp"
+					? "dApp"
+					: w[0]?.toUpperCase() + w.slice(1),
 		)
 		.join(" ");
 }

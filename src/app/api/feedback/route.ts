@@ -23,9 +23,9 @@
 
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,10 @@ function ipHashOf(req: NextRequest): string {
 		req.headers.get("x-real-ip") ||
 		"unknown";
 	const salt = process.env.PAYLOAD_SECRET || "stellar-scout-feedback-salt";
-	return createHash("sha256").update(`${ip}:${salt}`).digest("hex").slice(0, 16);
+	return createHash("sha256")
+		.update(`${ip}:${salt}`)
+		.digest("hex")
+		.slice(0, 16);
 }
 
 export async function POST(req: NextRequest) {
@@ -80,7 +83,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: "invalid JSON body",
-				hint: 'POST with header `Content-Type: application/json` and a body shaped { kind, message, context? }.',
+				hint: "POST with header `Content-Type: application/json` and a body shaped { kind, message, context? }.",
 				example: {
 					kind: "missing-data",
 					message:

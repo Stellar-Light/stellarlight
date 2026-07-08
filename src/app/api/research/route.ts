@@ -18,14 +18,14 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { researchConfidence, SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
+import { clampLimit } from "@/lib/http-params";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { isLowValueChunk } from "@/lib/research-ingest";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -76,7 +76,12 @@ export async function GET(req: NextRequest) {
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
-		(sp.get("q") ?? sp.get("query") ?? sp.get("keyword") ?? sp.get("search"))?.trim() ?? "";
+		(
+			sp.get("q") ??
+			sp.get("query") ??
+			sp.get("keyword") ??
+			sp.get("search")
+		)?.trim() ?? "";
 	const sourceFilter = sp.get("source");
 	const limitParam = clampLimit(sp.get("limit"), 8, 25);
 

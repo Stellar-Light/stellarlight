@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { EntityLogo } from "./entity-logo";
 
 interface EntityCardProps {
@@ -10,13 +10,23 @@ interface EntityCardProps {
 		name: string;
 		slug: string;
 		description?: string | null;
-		logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
+		logo?:
+			| string
+			| { id: string; url?: string | null; filename?: string | null }
+			| null
+			| undefined;
 		domains?: Array<{ domain: string }> | null | undefined;
-		projects?: Array<string | {
-			id: string;
-			name?: string;
-			slug?: string;
-		}> | null | undefined;
+		projects?:
+			| Array<
+					| string
+					| {
+							id: string;
+							name?: string;
+							slug?: string;
+					  }
+			  >
+			| null
+			| undefined;
 	};
 }
 
@@ -81,4 +91,3 @@ export default function EntityCard({ entity }: EntityCardProps) {
 		</Link>
 	);
 }
-

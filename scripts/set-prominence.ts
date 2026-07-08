@@ -21,97 +21,169 @@ const PROM: Record<string, number> = {
 	"java-stellar-sdk": 75,
 	"ios-stellar-sdk": 55,
 	"net-stellar-sdk": 70,
-	"ankr": 55,
-	"onfinality": 62,
-	"getblock": 38,
+	ankr: 55,
+	onfinality: 62,
+	getblock: 38,
 	"lightsail-network-quasar": 70,
-	"exaion": 55,
-	"hubble": 88,
-	"friendbot": 85,
+	exaion: 55,
+	hubble: 88,
+	friendbot: 85,
 	"stellar-cli": 90,
 	"stellar-quickstart": 78,
 	"python-stellar-sdk": 85,
 	"stellar-php-sdk": 80,
 	"kmp-stellar-sdk": 78,
-	"nodies": 82,
-	"alchemy": 80,
-	"blockdaemon": 80,
-	"nownodes": 76,
-	"obsrvr": 80,
-	"quicknode": 84,
+	nodies: 82,
+	alchemy: 80,
+	blockdaemon: 80,
+	nownodes: 76,
+	obsrvr: 80,
+	quicknode: 84,
 	"validation-cloud": 84,
-	"liquify": 72,
-	"gatewayfm": 74,
-	"infstones": 70,
+	liquify: 72,
+	gatewayfm: 74,
+	infstones: 70,
 	"space-and-time": 70,
-	"zettablock": 68,
-	"streamingfast": 72,
-	"flipside": 60,
+	zettablock: 68,
+	streamingfast: 72,
+	flipside: 60,
 	"stellar-laboratory": 80,
-	"idos": 88,
-	"chaincerts": 82,
-	"didstellar": 80,
-	"reclaim": 85,
-	"scorechain": 78,
+	idos: 88,
+	chaincerts: 82,
+	didstellar: 80,
+	reclaim: 85,
+	scorechain: 78,
 	"stellar-passport": 55,
-	"kale": 90,
-	"warmancer": 82,
-	"beamable": 80,
-	"katagames": 68,
+	kale: 90,
+	warmancer: 82,
+	beamable: 80,
+	katagames: 68,
 	"stellar-unity-developer-kit": 66,
-	"nebulavrf": 66,
-	"cyberbrawl": 62,
+	nebulavrf: 66,
+	cyberbrawl: 62,
 	"open-gamefi-sdk": 60,
-	"vaquita": 4,
+	vaquita: 4,
 
 	// wallets
-	freighter: 90, lobstr: 90, xbull: 90,
-	albedo: 80, rabet: 78, hana: 76, vesseo: 78, "solar-wallet": 70,
-	klever: 60, "bitget-wallet": 60, "hot-wallet": 60, ledger: 62, trezor: 62,
-	walletconnect: 58, fordefi: 60, "cactus-link": 55,
+	freighter: 90,
+	lobstr: 90,
+	xbull: 90,
+	albedo: 80,
+	rabet: 78,
+	hana: 76,
+	vesseo: 78,
+	"solar-wallet": 70,
+	klever: 60,
+	"bitget-wallet": 60,
+	"hot-wallet": 60,
+	ledger: 62,
+	trezor: 62,
+	walletconnect: 58,
+	fordefi: 60,
+	"cactus-link": 55,
 	// stablecoins / issuers
-	circle: 90, brale: 72, "glo-dollar": 66,
+	circle: 90,
+	brale: 72,
+	"glo-dollar": 66,
 	// DEX / AMM
-	soroswap: 90, aquarius: 85, phoenix: 80, comet: 70,
-	stellarterm: 72, stellarbroker: 74,
+	soroswap: 90,
+	aquarius: 85,
+	phoenix: 80,
+	comet: 70,
+	stellarterm: 72,
+	stellarbroker: 74,
 	// lending / yield
-	blend: 90, slender: 80, orbitcdp: 70, defindex: 78,
+	blend: 90,
+	slender: 80,
+	orbitcdp: 70,
+	defindex: 78,
 	// oracles
-	reflector: 90, dia: 84, band: 82, "redstone-finance": 80, lightecho: 72,
+	reflector: 90,
+	dia: 84,
+	band: 82,
+	"redstone-finance": 80,
+	lightecho: 72,
 	// bridges / interop
-	allbridge: 88, axelar: 84, spacewalk: 70, stronghold: 64,
+	allbridge: 88,
+	axelar: 84,
+	spacewalk: 70,
+	stronghold: 64,
 	"circle-cctp-cross-chain-transfer-protocol": 66,
 	// RWA
-	benji: 88, ondo: 85, wisdomtree: 80, etherfuse: 78, spiko: 78, redswan: 70,
+	benji: 88,
+	ondo: 85,
+	wisdomtree: 80,
+	etherfuse: 78,
+	spiko: 78,
+	redswan: 70,
 	// anchors / payments / remittance
-	moneygram: 90, bitso: 84, "yellow-card": 80, fonbnk: 76,
-	beans: 70, "felix-pago": 70, chipper: 68, decaf: 66,
+	moneygram: 90,
+	bitso: 84,
+	"yellow-card": 80,
+	fonbnk: 76,
+	beans: 70,
+	"felix-pago": 70,
+	chipper: 68,
+	decaf: 66,
 	"stellar-disbursement-platform-sdp": 72,
 	// custody
-	dfns: 80, "ultra-stellar": 74, bitgo: 72,
+	dfns: 80,
+	"ultra-stellar": 74,
+	bitgo: 72,
 };
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}  (${Object.keys(PROM).length} records)\n`);
-	let done = 0, skipped = 0, missing = 0;
+	console.log(
+		`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}  (${Object.keys(PROM).length} records)\n`,
+	);
+	let done = 0,
+		skipped = 0,
+		missing = 0;
 	for (const [slug, prominence] of Object.entries(PROM)) {
-		const res = await payload.find({ collection: "projects", where: { slug: { equals: slug } }, limit: 1, depth: 0 });
+		const res = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+		});
 		// biome-ignore lint/suspicious/noExplicitAny: doc shape
 		const doc: any = res.docs[0];
-		if (!doc) { console.log(`  ⚠ NOT FOUND: ${slug}`); missing++; continue; }
-		if (doc.prominence === prominence) { console.log(`  • ${doc.name} (${slug}) already ${prominence} — skip`); skipped++; continue; }
-		console.log(`  ${doc.name} (${slug}): prominence ${doc.prominence ?? 0} → ${prominence}`);
+		if (!doc) {
+			console.log(`  ⚠ NOT FOUND: ${slug}`);
+			missing++;
+			continue;
+		}
+		if (doc.prominence === prominence) {
+			console.log(`  • ${doc.name} (${slug}) already ${prominence} — skip`);
+			skipped++;
+			continue;
+		}
+		console.log(
+			`  ${doc.name} (${slug}): prominence ${doc.prominence ?? 0} → ${prominence}`,
+		);
 		if (EXECUTE) {
-			await payload.update({ collection: "projects", id: doc.id, data: {
-				prominence,
-				verificationLevel: doc.verificationLevel === "Unverified" ? "Verified (Community)" : doc.verificationLevel,
-				provenance: { ...(doc.provenance || {}), source: "AdminEdit" },
-			}});
+			await payload.update({
+				collection: "projects",
+				id: doc.id,
+				data: {
+					prominence,
+					verificationLevel:
+						doc.verificationLevel === "Unverified"
+							? "Verified (Community)"
+							: doc.verificationLevel,
+					provenance: { ...(doc.provenance || {}), source: "AdminEdit" },
+				},
+			});
 			done++;
 		}
 	}
-	console.log(`\n${EXECUTE ? `DONE: ${done} updated, ${skipped} already-set, ${missing} not-found.` : `DRY RUN — ${Object.keys(PROM).length - skipped - missing} would change, ${skipped} already-set, ${missing} not-found.`}`);
+	console.log(
+		`\n${EXECUTE ? `DONE: ${done} updated, ${skipped} already-set, ${missing} not-found.` : `DRY RUN — ${Object.keys(PROM).length - skipped - missing} would change, ${skipped} already-set, ${missing} not-found.`}`,
+	);
 	process.exit(0);
 }
-main().catch((e) => { console.error("Fatal:", e); process.exit(1); });
+main().catch((e) => {
+	console.error("Fatal:", e);
+	process.exit(1);
+});

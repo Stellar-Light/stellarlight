@@ -20,10 +20,10 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import config from "@payload-config";
 import { config as loadEnv } from "dotenv";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
-import config from "@payload-config";
 
 // Local dev reads .env.local; CI injects DATABASE_URI + PAYLOAD_SECRET via env.
 loadEnv({ path: ".env.local" });
@@ -92,7 +92,9 @@ async function main() {
 		process.exit(1);
 	}
 
-	const reports = files.map(parseReport).sort((a, b) => a.fm.slug.localeCompare(b.fm.slug));
+	const reports = files
+		.map(parseReport)
+		.sort((a, b) => a.fm.slug.localeCompare(b.fm.slug));
 
 	console.log(
 		`\n${EXECUTE ? "PUBLISHING" : "DRY RUN — would publish"} ${reports.length} ecosystem report(s):\n`,
@@ -104,7 +106,9 @@ async function main() {
 	}
 
 	if (!EXECUTE) {
-		console.log("\nDry run only. Re-run with --execute to write to the Blog collection.\n");
+		console.log(
+			"\nDry run only. Re-run with --execute to write to the Blog collection.\n",
+		);
 		return;
 	}
 
@@ -117,9 +121,7 @@ async function main() {
 		// comma string (or pass an array through) so each tag renders as its own
 		// chip instead of one giant comma-blob.
 		const tags = (
-			Array.isArray(r.fm.tags)
-				? r.fm.tags
-				: String(r.fm.tags ?? "").split(",")
+			Array.isArray(r.fm.tags) ? r.fm.tags : String(r.fm.tags ?? "").split(",")
 		)
 			.map((t) => t.trim())
 			.filter(Boolean);

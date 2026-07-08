@@ -1,7 +1,7 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import ProjectCard from "@/components/project-card";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import ProjectCard from "@/components/project-card";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function EmergingAppsSection() {
 	const payload = await getPayloadSafe();
@@ -80,7 +80,10 @@ export function EmergingAppsSkeleton() {
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={i} className="h-[250px] rounded-xl bg-[#262626] animate-pulse" />
+					<div
+						key={i}
+						className="h-[250px] rounded-xl bg-[#262626] animate-pulse"
+					/>
 				))}
 			</div>
 		</section>

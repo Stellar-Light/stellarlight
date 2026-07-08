@@ -119,8 +119,7 @@ function SkillTab() {
 				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 					-a openclaw
 				</code>
-				. Installs the SKILL.md into your agent's skills directory. Powered
-				by{" "}
+				. Installs the SKILL.md into your agent's skills directory. Powered by{" "}
 				<a
 					href="https://github.com/vercel-labs/skills"
 					target="_blank"
@@ -143,13 +142,13 @@ function McpTab() {
 				className="flex items-center gap-3 rounded-lg bg-black/40 border border-border/30 p-4 font-mono text-sm text-foreground overflow-hidden"
 			/>
 			<p className="text-xs text-muted-foreground mt-3 mb-4 leading-relaxed">
-				Same 14 Scout tools, exposed as a Model Context Protocol server.
-				For clients that don't load{" "}
+				Same 14 Scout tools, exposed as a Model Context Protocol server. For
+				clients that don't load{" "}
 				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 					SKILL.md
 				</code>
-				. Drop the config below into your client's MCP settings — restart →
-				14 tools appear in the slash menu.
+				. Drop the config below into your client's MCP settings — restart → 14
+				tools appear in the slash menu.
 			</p>
 
 			<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
@@ -198,13 +197,13 @@ function ManualTab() {
 						2
 					</span>
 					<div className="leading-relaxed">
-						<strong>Paste it into your AI client.</strong> For Claude Code,
-						save the file to{" "}
+						<strong>Paste it into your AI client.</strong> For Claude Code, save
+						the file to{" "}
 						<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 							.claude/skills/stellar-scout/SKILL.md
 						</code>
-						. For Claude.ai, paste into the conversation. For others, drop
-						into the skills/system-prompt slot.
+						. For Claude.ai, paste into the conversation. For others, drop into
+						the skills/system-prompt slot.
 					</div>
 				</li>
 				<li className="flex gap-3">

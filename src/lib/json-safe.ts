@@ -11,7 +11,10 @@
  * response payload right before NextResponse.json so the endpoint parses
  * cleanly under any consumer. Reported by a downstream integrator on /api/rfps.
  */
-const RAW_UNSAFE = new RegExp(`[${String.fromCharCode(0x85, 0x2028, 0x2029)}]`, "g");
+const RAW_UNSAFE = new RegExp(
+	`[${String.fromCharCode(0x85, 0x2028, 0x2029)}]`,
+	"g",
+);
 
 export function jsonSafe<T>(value: T): T {
 	if (typeof value === "string") {

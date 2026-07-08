@@ -1,14 +1,14 @@
-import Link from "next/link";
+import { ArrowRight, Clock, DollarSign, Users } from "lucide-react";
 import Image from "next/image";
-import { ArrowRight, DollarSign, Users, Clock } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
+	type DoraHacksHackathon,
 	fetchAllDoraHacksHackathons,
 	formatPrize,
+	getDaysRemaining,
 	getHackathonUrl,
 	isHackathonActive,
-	getDaysRemaining,
-	type DoraHacksHackathon,
 } from "@/lib/integrations/dorahacks";
 
 export default async function HackathonsSection() {
@@ -48,9 +48,19 @@ export default async function HackathonsSection() {
 				<HackathonCard h={active[0]} />
 			) : (
 				/* Multiple — horizontal scroll carousel */
-				<div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 -mx-4 px-4 sm:-mx-0 sm:px-0" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+				<div
+					className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 -mx-4 px-4 sm:-mx-0 sm:px-0"
+					style={{
+						scrollbarWidth: "none",
+						msOverflowStyle: "none",
+						WebkitOverflowScrolling: "touch",
+					}}
+				>
 					{active.map((h) => (
-						<div key={h.id} className="snap-start flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-[calc(50%-8px)] lg:w-[calc(50%-8px)]">
+						<div
+							key={h.id}
+							className="snap-start flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-[calc(50%-8px)] lg:w-[calc(50%-8px)]"
+						>
 							<HackathonCard h={h} />
 						</div>
 					))}
@@ -106,7 +116,9 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 				<div className="flex items-center gap-4 text-sm text-muted-foreground whitespace-nowrap flex-shrink-0">
 					<span className="flex items-center gap-1">
 						<DollarSign className="w-3.5 h-3.5 text-[#FDDA24]" />
-						<span className="font-semibold text-foreground">{formatPrize(h.bonus_price)}</span>
+						<span className="font-semibold text-foreground">
+							{formatPrize(h.bonus_price)}
+						</span>
 					</span>
 					<span className="flex items-center gap-1">
 						<Users className="w-3.5 h-3.5" />

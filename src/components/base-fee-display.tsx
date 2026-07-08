@@ -54,7 +54,9 @@ export default function BaseFeeDisplay() {
 		<div className="absolute top-20 right-4 z-40 group">
 			<div className="bg-background/95 backdrop-blur-sm border border-border/60 rounded-full px-3 py-1.5 shadow-sm hover:shadow-md transition-all cursor-default">
 				<div className="flex items-center gap-2">
-					<div className={`w-1.5 h-1.5 rounded-full ${priceData ? "bg-green-500" : "bg-yellow-500 animate-pulse"}`} />
+					<div
+						className={`w-1.5 h-1.5 rounded-full ${priceData ? "bg-green-500" : "bg-yellow-500 animate-pulse"}`}
+					/>
 					<div className="flex items-baseline gap-1.5">
 						<span className="text-xs text-muted-foreground/80">XLM</span>
 						<span className="text-xs font-medium text-foreground">

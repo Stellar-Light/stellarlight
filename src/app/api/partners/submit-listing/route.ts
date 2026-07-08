@@ -21,11 +21,11 @@
 
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
-import { getAppUrl } from "@/lib/utils/app-url";
+import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { getAppUrl } from "@/lib/utils/app-url";
 import { generateSlug } from "@/lib/utils/normalize";
-import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
 
@@ -49,10 +49,25 @@ type PartnerType = (typeof PARTNER_TYPES)[number];
 const isPartnerType = (v: unknown): v is PartnerType =>
 	typeof v === "string" && (PARTNER_TYPES as readonly string[]).includes(v);
 const SECTORS = [
-	"defi", "payments", "rwa", "stablecoins", "identity", "data", "ai", "gaming", "other",
+	"defi",
+	"payments",
+	"rwa",
+	"stablecoins",
+	"identity",
+	"data",
+	"ai",
+	"gaming",
+	"other",
 ] as const;
 const REGIONS = [
-	"global", "north-america", "latam", "europe", "africa", "mena", "asia", "oceania",
+	"global",
+	"north-america",
+	"latam",
+	"europe",
+	"africa",
+	"mena",
+	"asia",
+	"oceania",
 ] as const;
 
 /** Filter unknown input down to members of a const-tuple enum, typed. */
@@ -69,7 +84,14 @@ function enumArray<T extends string>(
 		.slice(0, max);
 }
 const PRICING = [
-	"free", "freemium", "subscription", "usage-based", "fixed", "hourly", "rev-share", "custom",
+	"free",
+	"freemium",
+	"subscription",
+	"usage-based",
+	"fixed",
+	"hourly",
+	"rev-share",
+	"custom",
 ] as const;
 type PricingModel = (typeof PRICING)[number];
 const isPricing = (v: unknown): v is PricingModel =>
@@ -121,8 +143,14 @@ export async function POST(req: NextRequest) {
 	if (!limit.allowed) {
 		const retry = Math.ceil((limit.resetAt - Date.now()) / 1000);
 		return NextResponse.json(
-			{ error: "Too many submissions — give it a moment.", retryAfterSeconds: retry },
-			{ status: 429, headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) } },
+			{
+				error: "Too many submissions — give it a moment.",
+				retryAfterSeconds: retry,
+			},
+			{
+				status: 429,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) },
+			},
 		);
 	}
 
@@ -136,7 +164,11 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	const b = body as { orgName?: unknown; contactEmail?: unknown; fields?: unknown };
+	const b = body as {
+		orgName?: unknown;
+		contactEmail?: unknown;
+		fields?: unknown;
+	};
 	const orgName = str(b.orgName, 120);
 	const contactEmail = str(b.contactEmail, 200)?.toLowerCase();
 	if (!orgName || orgName.length < 2) {
@@ -147,7 +179,10 @@ export async function POST(req: NextRequest) {
 	}
 	if (!contactEmail || !EMAIL_RE.test(contactEmail)) {
 		return NextResponse.json(
-			{ error: "A valid contactEmail is required — it becomes your account login." },
+			{
+				error:
+					"A valid contactEmail is required — it becomes your account login.",
+			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
@@ -227,7 +262,9 @@ export async function POST(req: NextRequest) {
 				sectors: enumArray(f.sectors, SECTORS),
 				regions: enumArray(f.regions, REGIONS),
 				acceptingClients:
-					typeof f.acceptingClients === "boolean" ? f.acceptingClients : undefined,
+					typeof f.acceptingClients === "boolean"
+						? f.acceptingClients
+						: undefined,
 				typicalEngagement: str(f.typicalEngagement, 300),
 				leadTime: str(f.leadTime, 300),
 				pricingModel: isPricing(f.pricingModel) ? f.pricingModel : undefined,

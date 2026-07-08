@@ -1,7 +1,15 @@
-import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	Activity,
+	ArrowLeft,
+	Newspaper,
+	Plus,
+	Star,
+	TrendingUp,
+} from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -9,15 +17,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-	ArrowLeft,
-	Star,
-	Activity,
-	Newspaper,
-	Plus,
-	TrendingUp,
-} from "lucide-react";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +43,7 @@ export async function generateMetadata({
 	};
 }
 
-export default async function DigestPage({
-	params,
-}: {
-	params: Params;
-}) {
+export default async function DigestPage({ params }: { params: Params }) {
 	const { yearMonth } = await params;
 
 	// Validate format: YYYY-MM
@@ -221,7 +217,8 @@ export default async function DigestPage({
 						</h1>
 					</div>
 					<p className="text-muted-foreground">
-						Monthly ecosystem summary — {totalProjects} total projects in the directory
+						Monthly ecosystem summary — {totalProjects} total projects in the
+						directory
 					</p>
 				</div>
 
@@ -231,14 +228,22 @@ export default async function DigestPage({
 						href={`/digest/${prevSlug}`}
 						className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 					>
-						&larr; {prevMonth.toLocaleString("en-US", { month: "long", year: "numeric" })}
+						&larr;{" "}
+						{prevMonth.toLocaleString("en-US", {
+							month: "long",
+							year: "numeric",
+						})}
 					</Link>
 					{hasNextMonth && (
 						<Link
 							href={`/digest/${nextSlug}`}
 							className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 						>
-							{nextMonth.toLocaleString("en-US", { month: "long", year: "numeric" })} &rarr;
+							{nextMonth.toLocaleString("en-US", {
+								month: "long",
+								year: "numeric",
+							})}{" "}
+							&rarr;
 						</Link>
 					)}
 				</div>
@@ -273,11 +278,17 @@ export default async function DigestPage({
 											<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
 												{project.name}
 											</span>
-											<Badge variant="outline" className="text-xs flex-shrink-0">
+											<Badge
+												variant="outline"
+												className="text-xs flex-shrink-0"
+											>
 												{project.status}
 											</Badge>
 										</div>
-										<Badge variant="secondary" className="text-xs flex-shrink-0">
+										<Badge
+											variant="secondary"
+											className="text-xs flex-shrink-0"
+										>
 											{project.category}
 										</Badge>
 									</Link>
@@ -310,7 +321,9 @@ export default async function DigestPage({
 										className="group flex items-center justify-between p-3 rounded-lg hover:bg-white/[0.03] transition-colors"
 									>
 										<div className="flex items-center gap-3">
-											<span className={`text-sm font-bold w-6 text-center ${idx < 3 ? "text-[#FDDA24]" : "text-muted-foreground"}`}>
+											<span
+												className={`text-sm font-bold w-6 text-center ${idx < 3 ? "text-[#FDDA24]" : "text-muted-foreground"}`}
+											>
 												{idx + 1}
 											</span>
 											<span className="font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -338,16 +351,18 @@ export default async function DigestPage({
 									Blog Highlights ({recentBlogPosts.length})
 								</CardTitle>
 							</div>
-							<CardDescription>
-								Posts published in {monthName}
-							</CardDescription>
+							<CardDescription>Posts published in {monthName}</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-2">
 								{recentBlogPosts.map((post: any) => (
 									<Link
 										key={post.id}
-										href={post.isRSSExternal && post.externalUrl ? post.externalUrl : `/blog/${post.slug}`}
+										href={
+											post.isRSSExternal && post.externalUrl
+												? post.externalUrl
+												: `/blog/${post.slug}`
+										}
 										target={post.isRSSExternal ? "_blank" : undefined}
 										rel={post.isRSSExternal ? "noopener noreferrer" : undefined}
 										className="group flex items-center justify-between p-3 rounded-lg hover:bg-white/[0.03] transition-colors"
@@ -357,11 +372,18 @@ export default async function DigestPage({
 												{post.title}
 											</span>
 											<span className="text-xs text-muted-foreground">
-												{post.author} — {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+												{post.author} —{" "}
+												{new Date(post.publishedAt).toLocaleDateString(
+													"en-US",
+													{ month: "short", day: "numeric" },
+												)}
 											</span>
 										</div>
 										{post.category && (
-											<Badge variant="outline" className="text-xs flex-shrink-0 ml-3">
+											<Badge
+												variant="outline"
+												className="text-xs flex-shrink-0 ml-3"
+											>
 												{post.category}
 											</Badge>
 										)}

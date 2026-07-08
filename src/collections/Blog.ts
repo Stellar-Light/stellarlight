@@ -1,7 +1,7 @@
+import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import type { CollectionConfig } from "payload";
-import { lexicalEditor, BlocksFeature } from "@payloadcms/richtext-lexical";
-import { SocialEmbedBlock } from "../blocks/SocialEmbed";
 import { HtmlSnippetBlock } from "../blocks/HtmlSnippet";
+import { SocialEmbedBlock } from "../blocks/SocialEmbed";
 
 export const Blog: CollectionConfig = {
 	slug: "blog",
@@ -124,8 +124,10 @@ export const Blog: CollectionConfig = {
 			name: "content",
 			type: "richText",
 			admin: {
-				description: "Rich text content (used when Content Type is Rich Text Editor)",
-				condition: (data) => data.contentType === "richText" && !data.isRSSExternal,
+				description:
+					"Rich text content (used when Content Type is Rich Text Editor)",
+				condition: (data) =>
+					data.contentType === "richText" && !data.isRSSExternal,
 			},
 			editor: lexicalEditor({
 				features: ({ defaultFeatures }) => [
@@ -140,7 +142,8 @@ export const Blog: CollectionConfig = {
 			admin: {
 				description: "Markdown content (used when Content Type is Markdown)",
 				language: "markdown",
-				condition: (data) => data.contentType === "markdown" && !data.isRSSExternal,
+				condition: (data) =>
+					data.contentType === "markdown" && !data.isRSSExternal,
 			},
 		},
 		{
@@ -148,7 +151,8 @@ export const Blog: CollectionConfig = {
 			type: "relationship",
 			relationTo: "rss-feeds",
 			admin: {
-				description: "If this post was imported from an RSS feed, link to the feed source",
+				description:
+					"If this post was imported from an RSS feed, link to the feed source",
 				position: "sidebar",
 			},
 		},
@@ -156,7 +160,8 @@ export const Blog: CollectionConfig = {
 			name: "rssItemId",
 			type: "text",
 			admin: {
-				description: "Unique identifier from RSS feed item (for duplicate detection)",
+				description:
+					"Unique identifier from RSS feed item (for duplicate detection)",
 				position: "sidebar",
 				readOnly: true,
 			},
@@ -166,7 +171,8 @@ export const Blog: CollectionConfig = {
 			type: "checkbox",
 			defaultValue: false,
 			admin: {
-				description: "If true, this post links to an external RSS article instead of displaying content here",
+				description:
+					"If true, this post links to an external RSS article instead of displaying content here",
 				position: "sidebar",
 				readOnly: true,
 			},
@@ -284,4 +290,3 @@ export const Blog: CollectionConfig = {
 		],
 	},
 };
-

@@ -432,6 +432,10 @@
 													"items": {
 														"type": "string"
 													}
+												},
+												"mainnetContractId": {
+													"type": "string",
+													"nullable": true
 												}
 											}
 										},
@@ -481,6 +485,11 @@
 										}
 									}
 								}
+							},
+							"mainnetContractId": {
+								"type": "string",
+								"nullable": true,
+								"description": "README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address."
 							}
 						}
 					},

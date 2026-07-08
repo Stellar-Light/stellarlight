@@ -21,18 +21,19 @@
  *   pnpm exec tsx scripts/ingest-soroban-security.ts --execute   # write
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
+	type AuditSeverity,
 	chunkMarkdown,
 	loadExistingChunks,
-	upsertChunks,
-	type AuditSeverity,
 	type ResearchChunk,
+	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -40,7 +41,8 @@ const limitFlag = args.find((a) => a.startsWith("--limit="));
 const LIMIT = limitFlag ? parseInt(limitFlag.split("=")[1], 10) : Infinity;
 
 const API_BASE = "https://stellarsecurityportal.com/api/v1/reports";
-const REPORT_URL = (id: number) => `https://stellarsecurityportal.com/report/${id}`;
+const REPORT_URL = (id: number) =>
+	`https://stellarsecurityportal.com/report/${id}`;
 
 interface ReportListItem {
 	id: number;
@@ -119,8 +121,7 @@ export function reassembleSpacedText(raw: string): string {
 				// no terminal punctuation). Otherwise treat as a real heading.
 				const lastFrag = frags[frags.length - 1];
 				const nxtFrag = nxt[2];
-				const looksFragmented =
-					lastFrag.length <= 4 || nxtFrag.length <= 4;
+				const looksFragmented = lastFrag.length <= 4 || nxtFrag.length <= 4;
 				if (!looksFragmented) break;
 				frags.push(nxtFrag);
 				j += 1;
@@ -135,7 +136,10 @@ export function reassembleSpacedText(raw: string): string {
 	}
 
 	// Final pass: collapse 3+ blank lines → 2
-	return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+	return out
+		.join("\n")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
 }
 
 /** Per-line spaced-letter collapse using the 2+ space = real-boundary rule. */
@@ -195,7 +199,11 @@ function inferSeverityFromBody(content: string): AuditSeverity {
 	//   Halborn:      "// HIGH" / "// CRITICAL" tail-of-section markers
 	//   PDF-doubled:  "HHIIGGHH" / "CCRRIITTIICCAALL" letter-doubling
 	//                 from per-glyph PDF extraction with letter-spacing
-	const dbl = (word: string) => word.split("").map((c) => c + c).join("");
+	const dbl = (word: string) =>
+		word
+			.split("")
+			.map((c) => c + c)
+			.join("");
 	const explicit: Record<Sev, () => number> = {
 		critical: () =>
 			count(/\bseverity\s*:?\s*critical\b/gi) +
@@ -227,21 +235,40 @@ function inferSeverityFromBody(content: string): AuditSeverity {
 			count(/\[L-?\d+\]/g),
 		informational: () =>
 			count(/\bseverity\s*:?\s*info(?:rmative|rmational)?\b/gi) +
-			count(/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi) +
+			count(
+				/\binfo(?:rmative|rmational)\s*[-]?\s*(?:severity|finding|issue|note)s?\b/gi,
+			) +
 			count(/\bseverity\s+(?:warning|note)\b/gi) +
 			count(/\/\/\s*INFO(?:RMATIONAL)?\b/g) +
 			count(new RegExp(`\\b${dbl("info")}`, "gi")) +
 			count(/\[I-?\d+\]/g),
 	};
 	const ambient: Record<Sev, () => number> = {
-		critical: () => count(/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi),
-		high: () => count(/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		medium: () => count(/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		low: () => count(/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi),
-		informational: () => count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
+		critical: () =>
+			count(
+				/\bcritical(?:\s|-)+(?:finding|vulnerability|issue|risk|bug)s?\b/gi,
+			),
+		high: () =>
+			count(
+				/\bhigh(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		medium: () =>
+			count(
+				/\bmed(?:ium)?(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		low: () =>
+			count(
+				/\blow(?:\s|-)+(?:risk|impact|priority)\s+(?:finding|vulnerability|issue)?s?\b/gi,
+			),
+		informational: () =>
+			count(/\binformational\s+(?:finding|note|issue|recommendation)s?\b/gi),
 	};
 	const scores: Record<Sev, number> = {
-		critical: 0, high: 0, medium: 0, low: 0, informational: 0,
+		critical: 0,
+		high: 0,
+		medium: 0,
+		low: 0,
+		informational: 0,
 	};
 	for (const sev of Object.keys(explicit) as Sev[]) {
 		const exp = explicit[sev]();
@@ -266,12 +293,12 @@ function inferSeverityFromBody(content: string): AuditSeverity {
  */
 function promoteAuditHeadings(md: string): string {
 	const promoters = [
-		/^# (\d+\s*[—\-.:]\s*)/gm,                                  // "# 02—Scope" / "# 1. Foo"
+		/^# (\d+\s*[—\-.:]\s*)/gm, // "# 02—Scope" / "# 1. Foo"
 		/^# (Findings|Vulnerabilities|Recommendations|Observations|Issues)\b/gim,
 		/^# (Executive\s*Summary|Overview|Scope|Methodology|Disclaimer|Introduction|Appendix|Appendices|Conclusion|Summary\s+of\s+Findings|Detailed\s+Findings)\b/gim,
 		/^# (Critical|High|Medium|Low|Informational|Info|Severity)(\s|$)/gim,
-		/^# (\[[A-Z]?\d+\]\s*)/gm,                                  // "# [A1] Foo"
-		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm,             // "# OS-BCL-ADV-00 Foo"
+		/^# (\[[A-Z]?\d+\]\s*)/gm, // "# [A1] Foo"
+		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo"
 	];
 	for (const re of promoters) md = md.replace(re, "## $1");
 	return md;
@@ -315,9 +342,7 @@ async function run() {
 				continue;
 			}
 			const reassembled = reassembleSpacedText(detail.mdFile);
-			console.log(
-				`${detail.mdFile.length}→${reassembled.length} chars`,
-			);
+			console.log(`${detail.mdFile.length}→${reassembled.length} chars`);
 			if (reassembled.length < 500) {
 				tooShort += 1;
 				continue;
@@ -348,7 +373,10 @@ async function run() {
 				c.auditor = meta.auditorName;
 				c.protocol = meta.protocolName;
 				const fromHeading = inferSeverity(c.section);
-				c.severity = fromHeading !== "unknown" ? fromHeading : inferSeverityFromBody(c.content);
+				c.severity =
+					fromHeading !== "unknown"
+						? fromHeading
+						: inferSeverityFromBody(c.content);
 			}
 			allChunks.push(...chunks);
 		} catch (err) {

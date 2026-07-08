@@ -20,6 +20,7 @@
  *   npx tsx scripts/link-canonical-slug.ts --execute  # write canonicalSlug
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
@@ -38,7 +39,10 @@ const PAIRS: Array<{ duplicate: string; canonical: string; note: string }> = [
 	},
 ];
 
-async function findBySlug(payload: Awaited<ReturnType<typeof getPayload>>, slug: string) {
+async function findBySlug(
+	payload: Awaited<ReturnType<typeof getPayload>>,
+	slug: string,
+) {
 	const res = await payload.find({
 		collection: "projects",
 		where: { slug: { equals: slug } },
@@ -47,13 +51,21 @@ async function findBySlug(payload: Awaited<ReturnType<typeof getPayload>>, slug:
 		select: { slug: true, name: true, status: true, canonicalSlug: true },
 	});
 	return res.docs[0] as
-		| { id: string; slug: string; name: string; status: string; canonicalSlug?: string | null }
+		| {
+				id: string;
+				slug: string;
+				name: string;
+				status: string;
+				canonicalSlug?: string | null;
+		  }
 		| undefined;
 }
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	console.log(`link-canonical-slug — ${EXECUTE ? "EXECUTE (writing)" : "DRY RUN (no writes)"}`);
+	console.log(
+		`link-canonical-slug — ${EXECUTE ? "EXECUTE (writing)" : "DRY RUN (no writes)"}`,
+	);
 
 	let wrote = 0;
 	let skipped = 0;
@@ -73,7 +85,9 @@ async function main() {
 			continue;
 		}
 		if (!can) {
-			console.log(`✗ ${duplicate} → ${canonical}: canonical record NOT found — refusing ghost link`);
+			console.log(
+				`✗ ${duplicate} → ${canonical}: canonical record NOT found — refusing ghost link`,
+			);
 			blocked++;
 			continue;
 		}

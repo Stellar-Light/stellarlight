@@ -73,13 +73,27 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/stellar-scout",
 		installAlt: [
-			{ label: "Codex", command: "npx skills add Stellar-Light/stellar-scout -a codex" },
-			{ label: "OpenClaw", command: "npx skills add Stellar-Light/stellar-scout -a openclaw" },
+			{
+				label: "Codex",
+				command: "npx skills add Stellar-Light/stellar-scout -a codex",
+			},
+			{
+				label: "OpenClaw",
+				command: "npx skills add Stellar-Light/stellar-scout -a openclaw",
+			},
 		],
 		repository: "https://github.com/Stellar-Light/stellar-scout",
 		homepage: "https://stellarlight.xyz/scout",
 		docs: "https://stellarlight.xyz/skills/stellar-scout.md",
-		compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw", "Amp", "Cline", "Antigravity"],
+		compatibility: [
+			"Claude Code",
+			"Codex",
+			"Cursor",
+			"OpenClaw",
+			"Amp",
+			"Cline",
+			"Antigravity",
+		],
 		targetUser: ["dev", "founder", "agent"],
 		tags: ["research", "strategy", "audits", "SCF", "RFPs"],
 		featured: true,
@@ -96,7 +110,15 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		install: "npx @stellar-light/scout-mcp",
 		repository: "https://github.com/Stellar-Light/scout-mcp",
 		homepage: "https://stellarlight.xyz/scout",
-		compatibility: ["Claude Desktop", "Cursor (MCP)", "ChatGPT (custom GPT)", "Gemini", "Cline", "Continue", "Zed"],
+		compatibility: [
+			"Claude Desktop",
+			"Cursor (MCP)",
+			"ChatGPT (custom GPT)",
+			"Gemini",
+			"Cline",
+			"Continue",
+			"Zed",
+		],
 		targetUser: ["dev", "founder", "agent"],
 		tags: ["research", "MCP", "strategy", "audits"],
 		featured: true,
@@ -104,16 +126,25 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "lumenloop-mcp",
 		name: "LumenLoop MCP",
-		tagline: "Read-only Stellar ecosystem MCP — 18 tools over projects, SCF, news, media.",
+		tagline:
+			"Read-only Stellar ecosystem MCP — 18 tools over projects, SCF, news, media.",
 		description:
 			"Free read-only MCP server at https://mcp.lumenloop.com indexing 756+ Stellar projects, 912+ SCF submissions, editorial content, talks, and events. 18 query tools — projects, submissions, articles, media, events. Any MCP-capable client connects (Claude, ChatGPT, Gemini, Cursor). One-time sign-in.",
 		source: "lumenloop",
 		kind: "mcp-server",
-		install: "claude mcp add --transport http lumenloop https://mcp.lumenloop.com",
+		install:
+			"claude mcp add --transport http lumenloop https://mcp.lumenloop.com",
 		repository: "https://github.com/lumenloop/lumenloop-skills",
 		homepage: "https://lumenloop.com/",
 		docs: "https://github.com/lumenloop/lumenloop-skills#connect-the-server",
-		compatibility: ["Claude Desktop", "Claude.ai", "Claude Code", "ChatGPT", "Gemini", "Cursor (MCP)"],
+		compatibility: [
+			"Claude Desktop",
+			"Claude.ai",
+			"Claude Code",
+			"ChatGPT",
+			"Gemini",
+			"Cursor (MCP)",
+		],
 		targetUser: ["dev", "founder", "agent"],
 		tags: ["search", "MCP", "ecosystem", "research"],
 	},
@@ -123,16 +154,21 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "lumenloop-mcp-connect",
 		name: "LumenLoop: MCP Connect",
-		tagline: "Wire the LumenLoop MCP into your agent and learn what each tool does.",
+		tagline:
+			"Wire the LumenLoop MCP into your agent and learn what each tool does.",
 		description:
 			"The starting-point skill from lumenloop-skills. Walks the agent through connecting to LumenLoop's MCP server, explains each of the 18 read-only tools, and tells the agent which downstream LumenLoop skill to invoke for different research questions.",
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/lumenloop-mcp-connect",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/lumenloop-mcp-connect",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "agent"],
@@ -141,16 +177,21 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "lumenloop-ecosystem-scout",
 		name: "LumenLoop: Stellar Ecosystem Scout",
-		tagline: "Map a sector or topic into a landscape of Stellar projects + content.",
+		tagline:
+			"Map a sector or topic into a landscape of Stellar projects + content.",
 		description:
-			"Given a sector (e.g. \"RWA\", \"agentic payments\", \"stablecoin off-ramps\") or topic, this skill orchestrates the LumenLoop MCP tools to produce a landscape map — every relevant project, related SCF submissions, editorial coverage, and media. Useful for ecosystem-wide *\"who's building in X\"* questions.",
+			'Given a sector (e.g. "RWA", "agentic payments", "stablecoin off-ramps") or topic, this skill orchestrates the LumenLoop MCP tools to produce a landscape map — every relevant project, related SCF submissions, editorial coverage, and media. Useful for ecosystem-wide *"who\'s building in X"* questions.',
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-ecosystem-scout",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-ecosystem-scout",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "founder", "agent"],
@@ -166,9 +207,13 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-project-dossier",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-project-dossier",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "founder", "agent"],
@@ -184,9 +229,13 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/scf-submission-radar",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/scf-submission-radar",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["founder", "agent"],
@@ -195,16 +244,21 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "lumenloop-integration-finder",
 		name: "LumenLoop: Integration Finder",
-		tagline: "Find the right wallet / oracle / anchor / RWA / DEX to integrate.",
+		tagline:
+			"Find the right wallet / oracle / anchor / RWA / DEX to integrate.",
 		description:
-			"Given an integration need (e.g. \"oracle for soroban contract\", \"USDC anchor in Brazil\"), the skill walks LumenLoop's project catalog and returns ranked integration candidates with rationale, plus the contact / docs link for each.",
+			'Given an integration need (e.g. "oracle for soroban contract", "USDC anchor in Brazil"), the skill walks LumenLoop\'s project catalog and returns ranked integration candidates with rationale, plus the contact / docs link for each.',
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-integration-finder",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-integration-finder",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "founder", "agent"],
@@ -215,14 +269,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "LumenLoop: Ecosystem Digest",
 		tagline: "Dated digest of recent activity on a theme or entity.",
 		description:
-			"Pulls recent news, SCF round movement, project updates, and media coverage tied to a theme (e.g. \"stablecoins\") or specific entity. Output is a dated digest you can publish, share, or use as briefing prep.",
+			'Pulls recent news, SCF round movement, project updates, and media coverage tied to a theme (e.g. "stablecoins") or specific entity. Output is a dated digest you can publish, share, or use as briefing prep.',
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-ecosystem-digest",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-ecosystem-digest",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "founder", "agent"],
@@ -238,9 +296,13 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-builder-quickstart",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-builder-quickstart",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["dev", "agent"],
@@ -249,16 +311,21 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "lumenloop-content-auditor",
 		name: "LumenLoop: Content Auditor",
-		tagline: "Audit a draft against the ecosystem — fix handles, add citations, flag bad claims.",
+		tagline:
+			"Audit a draft against the ecosystem — fix handles, add citations, flag bad claims.",
 		description:
 			"Given a draft article, blog post, tweet, or pitch, the skill cross-references it against LumenLoop's ecosystem data to fix mis-attributed @handles, add citations to relevant projects, and flag claims that don't hold up against indexed reality.",
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
 		installAlt: [
-			{ label: "Install plugin", command: "/plugin install lumenloop-skills@lumenloop" },
+			{
+				label: "Install plugin",
+				command: "/plugin install lumenloop-skills@lumenloop",
+			},
 		],
-		repository: "https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-content-auditor",
+		repository:
+			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-content-auditor",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
 		compatibility: ["Claude Code"],
 		targetUser: ["founder", "agent"],
@@ -270,7 +337,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "openzeppelin-stellar-contracts",
 		name: "OpenZeppelin Stellar Contracts",
-		tagline: "Audited Soroban contract primitives — tokens, ownership, governance.",
+		tagline:
+			"Audited Soroban contract primitives — tokens, ownership, governance.",
 		description:
 			"OpenZeppelin's official Stellar contracts library for Soroban. Provides audited building blocks: fungible tokens, non-fungible tokens, access control (Ownable, AccessControl), upgradeability, governance, and pausable mechanisms. Reduces audit surface area by using battle-tested primitives instead of writing your own.",
 		source: "external",
@@ -316,7 +384,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "stellar-cli",
 		name: "Stellar CLI",
-		tagline: "Official command-line tool for Stellar + Soroban contract deploy.",
+		tagline:
+			"Official command-line tool for Stellar + Soroban contract deploy.",
 		description:
 			"The official `stellar` CLI — build, deploy, and invoke Soroban contracts; manage accounts; sign and submit transactions; inspect network state. Required for almost every Soroban dev workflow.",
 		source: "external",
@@ -377,7 +446,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "stellar-wallets-kit",
 		name: "Stellar Wallets Kit",
-		tagline: "Multi-wallet connector for Stellar dapps (Freighter, xBull, Albedo, Lobstr, …).",
+		tagline:
+			"Multi-wallet connector for Stellar dapps (Freighter, xBull, Albedo, Lobstr, …).",
 		description:
 			"@creit.tech/stellar-wallets-kit — community-maintained one-shot integration for every major Stellar wallet (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
 		source: "external",
@@ -392,7 +462,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "mercury-indexer",
 		name: "Mercury",
-		tagline: "Real-time Soroban indexer + GraphQL API for contract events and state.",
+		tagline:
+			"Real-time Soroban indexer + GraphQL API for contract events and state.",
 		description:
 			"Mercury (by Xycloo Labs) — production-grade Soroban indexer. Subscribes to mainnet events, indexes contract storage, and exposes structured GraphQL + REST endpoints. Use it when you need a real-time activity feed, contract event stream, or state queries from a JavaScript / TypeScript backend.",
 		source: "external",
@@ -407,7 +478,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "allbridge-sdk",
 		name: "Allbridge SDK",
-		tagline: "Cross-chain bridge SDK — move USDC between Stellar and 14+ chains.",
+		tagline:
+			"Cross-chain bridge SDK — move USDC between Stellar and 14+ chains.",
 		description:
 			"Allbridge Core SDK for bridging USDC and other stablecoins between Stellar and EVM chains (Ethereum, Polygon, BNB, Avalanche, etc.) plus Solana and Tron. Quote, sign, and execute bridge transfers from JavaScript / TypeScript.",
 		source: "external",
@@ -434,12 +506,21 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		docs: "https://docs.rozo.ai/integration/rozointentpay",
 		compatibility: ["React", "Next.js", "wagmi", "viem", "Stellar SEP-24"],
 		targetUser: ["dev", "founder"],
-		tags: ["payments", "checkout", "SEP-24", "anchor", "USDC", "EURC", "cross-chain"],
+		tags: [
+			"payments",
+			"checkout",
+			"SEP-24",
+			"anchor",
+			"USDC",
+			"EURC",
+			"cross-chain",
+		],
 	},
 	{
 		slug: "stellar-typescript-wallet-sdk",
 		name: "Stellar TypeScript Wallet SDK",
-		tagline: "High-level wallet SDK — accounts, SEP-24 deposits, SEP-31 transfers.",
+		tagline:
+			"High-level wallet SDK — accounts, SEP-24 deposits, SEP-31 transfers.",
 		description:
 			"Official @stellar/typescript-wallet-sdk. Higher-level abstraction over Stellar SDK for building wallet apps: create + recover accounts, interact with anchors via SEP-1/6/10/12/24/31 standards, build payments and asset trustlines. The recommended starting point for a Stellar consumer wallet.",
 		source: "external",

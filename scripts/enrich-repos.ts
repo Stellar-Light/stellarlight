@@ -12,9 +12,13 @@
  */
 import "dotenv/config";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
-import { fetchRepoInfo, listOwnerRepos, type OwnerRepo } from "../src/lib/github";
+import {
+	fetchRepoInfo,
+	listOwnerRepos,
+	type OwnerRepo,
+} from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
+import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
@@ -33,8 +37,17 @@ type Doc = Record<string, any>;
 // "soo (private repo, can share if needed)" or org/section URLs.
 const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
 const NOT_A_USER = new Set([
-	"orgs", "sponsors", "marketplace", "settings", "topics", "search",
-	"about", "features", "pricing", "apps", "collections",
+	"orgs",
+	"sponsors",
+	"marketplace",
+	"settings",
+	"topics",
+	"search",
+	"about",
+	"features",
+	"pricing",
+	"apps",
+	"collections",
 ]);
 function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 	const out: Array<{ owner: string; name: string }> = [];
@@ -72,7 +85,8 @@ function orgLoginOf(p: Doc): string | null {
 	const m = path.match(/github\.com\/([^/?#\s]+)\/?$/i);
 	if (!m) return null;
 	const login = m[1].trim();
-	if (!VALID_IDENT.test(login) || NOT_A_USER.has(login.toLowerCase())) return null;
+	if (!VALID_IDENT.test(login) || NOT_A_USER.has(login.toLowerCase()))
+		return null;
 	return login;
 }
 
@@ -95,8 +109,13 @@ function builderRep(b: Doc): number {
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}`);
-	if (!process.env.GITHUB_TOKEN?.trim() && !process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim()) {
-		console.log("⚠ No GITHUB_TOKEN set — GitHub calls will be unauthenticated (rate-limited).");
+	if (
+		!process.env.GITHUB_TOKEN?.trim() &&
+		!process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim()
+	) {
+		console.log(
+			"⚠ No GITHUB_TOKEN set — GitHub calls will be unauthenticated (rate-limited).",
+		);
 	}
 
 	// Provenance gate (farm-exposure audit 2026-07-04): the public /api/intake
@@ -134,10 +153,15 @@ async function main() {
 			}
 		}
 	}
-	console.log(`Loaded ${builders.length} builders (${repByGithub.size} github + ${repByRepo.size} repo reputation keys).`);
+	console.log(
+		`Loaded ${builders.length} builders (${repByGithub.size} github + ${repByRepo.size} repo reputation keys).`,
+	);
 
 	// Dedupe repos across projects; keep the highest-prominence owning project.
-	const byFull = new Map<string, { owner: string; name: string; full: string; project: Doc }>();
+	const byFull = new Map<
+		string,
+		{ owner: string; name: string; full: string; project: Doc }
+	>();
 	for (const p of projects) {
 		for (const { owner, name } of reposOf(p)) {
 			const full = `${owner}/${name}`;
@@ -170,7 +194,9 @@ async function main() {
 	const STELLAR_SIGNAL =
 		/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 	const isStellarRepo = (r: OwnerRepo) =>
-		STELLAR_SIGNAL.test(`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`);
+		STELLAR_SIGNAL.test(
+			`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`,
+		);
 
 	let orgRepoCount = 0;
 	let orgReposDropped = 0;
@@ -190,7 +216,10 @@ async function main() {
 		// (it's what fixed the Noether no-repos gap).
 		const trustedProvenance = p.provenance?.source !== "UserSubmitted";
 		const smallOrg = repos.length <= SMALL_ORG_MAX && trustedProvenance;
-		const keep = (dedicated || smallOrg ? repos : signal).slice(0, ORG_REPO_CAP);
+		const keep = (dedicated || smallOrg ? repos : signal).slice(
+			0,
+			ORG_REPO_CAP,
+		);
 		orgReposDropped += repos.length - keep.length;
 		let taken = 0;
 		for (const r of keep) {
@@ -216,9 +245,13 @@ async function main() {
 
 	let entries = [...byFull.values()];
 	if (LIMIT > 0) entries = entries.slice(0, LIMIT);
-	console.log(`${entries.length} unique repos from ${projects.length} projects.\n`);
+	console.log(
+		`${entries.length} unique repos from ${projects.length} projects.\n`,
+	);
 
-	let created = 0, updated = 0, failed = 0;
+	let created = 0,
+		updated = 0,
+		failed = 0;
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
@@ -232,7 +265,9 @@ async function main() {
 		// index — only index references we could actually verify. Re-runs pick
 		// up anything transiently rate-limited.
 		if (!info) {
-			console.log(`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`);
+			console.log(
+				`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`,
+			);
 			continue;
 		}
 		const builderReputation = Math.max(
@@ -243,7 +278,12 @@ async function main() {
 		// signals (codeDepth, written by scripts/scan/scan-repo-code.ts) feed the
 		// grade — a code-verified deep contract lifts repoScore even at 0 stars.
 		const existing = (
-			await payload.find({ collection: "repos", where: { fullName: { equals: full } }, limit: 1, depth: 0 })
+			await payload.find({
+				collection: "repos",
+				where: { fullName: { equals: full } },
+				limit: 1,
+				depth: 0,
+			})
 		).docs[0] as Doc | undefined;
 		const grade = info
 			? repoGrade({
@@ -258,7 +298,8 @@ async function main() {
 					hasDescription: !!(info.description && info.description.trim()),
 					topicCount: Array.isArray(info.topics) ? info.topics.length : 0,
 					openIssues: info.openIssues ?? 0,
-					codeDepth: typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
+					codeDepth:
+						typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
 				})
 			: { score: 0, label: "low" as const };
 

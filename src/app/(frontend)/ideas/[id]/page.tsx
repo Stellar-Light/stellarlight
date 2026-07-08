@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IDEAS, CATEGORY_LABELS } from "@/data/ideas";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { notFound } from "next/navigation";
 import { IdeaShareButton } from "@/components/idea-share-button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { CATEGORY_LABELS, IDEAS } from "@/data/ideas";
 
 type Params = Promise<{ id: string }>;
 
@@ -31,11 +31,7 @@ export function generateStaticParams() {
 	return IDEAS.map((idea) => ({ id: idea.id }));
 }
 
-export default async function IdeaDetailPage({
-	params,
-}: {
-	params: Params;
-}) {
+export default async function IdeaDetailPage({ params }: { params: Params }) {
 	const { id } = await params;
 	const idea = IDEAS.find((i) => i.id === id);
 
@@ -111,8 +107,8 @@ export default async function IdeaDetailPage({
 										Apply for Funding
 									</h3>
 									<p className="text-sm text-muted-foreground mb-4">
-										Ready to build this? Apply for an SCF grant to
-										fund your project.
+										Ready to build this? Apply for an SCF grant to fund your
+										project.
 									</p>
 									<a
 										href="https://communityfund.stellar.org/"
@@ -132,8 +128,8 @@ export default async function IdeaDetailPage({
 										Join the Discussion
 									</h3>
 									<p className="text-sm text-muted-foreground mb-4">
-										Chat with the community about this RFP in the
-										Stellar dev Discord.
+										Chat with the community about this RFP in the Stellar dev
+										Discord.
 									</p>
 									<a
 										href="https://discord.gg/stellardev"

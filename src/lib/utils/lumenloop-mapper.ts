@@ -201,9 +201,7 @@ function mapCategory(category: string | null | undefined): Project["category"] {
 /**
  * Map Lumenloop tags to our types
  */
-function mapTypes(
-	tags: string[],
-): Project["types"] {
+function mapTypes(tags: string[]): Project["types"] {
 	if (!tags || tags.length === 0) return undefined;
 
 	const typeMap: Record<
@@ -259,13 +257,11 @@ function mapTypes(
 		tokenization: "RWA",
 	};
 
-	type ValidType = typeof typeMap[keyof typeof typeMap];
+	type ValidType = (typeof typeMap)[keyof typeof typeMap];
 
 	const mapped = tags
 		.map((t) => typeMap[t.toLowerCase()])
-		.filter(
-			(t): t is ValidType => t !== undefined,
-		);
+		.filter((t): t is ValidType => t !== undefined);
 
 	// Deduplicate
 	const unique = [...new Set(mapped)];

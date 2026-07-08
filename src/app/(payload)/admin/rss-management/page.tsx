@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { useAuth } from "@payloadcms/ui";
+import React, { useEffect, useState } from "react";
 import "./styles.css";
 
 type RSSFeed = {
@@ -82,10 +82,14 @@ export default function RSSManagementPage() {
 				setJobId(result.jobId);
 				setSyncStatus(`✓ ${result.message || "Job queued successfully!"}`);
 			} else {
-				setSyncStatus(`✗ Failed to queue job: ${result.error || "Unknown error"}`);
+				setSyncStatus(
+					`✗ Failed to queue job: ${result.error || "Unknown error"}`,
+				);
 			}
 		} catch (error) {
-			setSyncStatus(`✗ Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+			setSyncStatus(
+				`✗ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		} finally {
 			setIsSyncing(false);
 		}
@@ -119,7 +123,9 @@ export default function RSSManagementPage() {
 				`✓ Queued ${successful} job(s) successfully! ${failed > 0 ? `${failed} failed.` : "Check the Jobs panel to monitor progress."}`,
 			);
 		} catch (error) {
-			setSyncStatus(`✗ Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+			setSyncStatus(
+				`✗ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		} finally {
 			setIsSyncing(false);
 			setSelectedIds(new Set());
@@ -151,18 +157,34 @@ export default function RSSManagementPage() {
 		<div className="rss-management">
 			<div className="rss-management__header">
 				<div>
-					<div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: "1rem",
+							marginBottom: "0.5rem",
+						}}
+					>
 						<a
 							href="/admin"
 							className="rss-management__back-button"
 							title="Back to Admin Dashboard"
 						>
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+							>
 								<path d="M19 12H5M12 19l-7-7 7-7" />
 							</svg>
 							Back to Admin
 						</a>
-						<h1 className="rss-management__title" style={{ margin: 0 }}>RSS Feed Management</h1>
+						<h1 className="rss-management__title" style={{ margin: 0 }}>
+							RSS Feed Management
+						</h1>
 					</div>
 					<p className="rss-management__description">
 						Manage and sync RSS feeds to import blog posts
@@ -222,7 +244,9 @@ export default function RSSManagementPage() {
 							</a>
 						</div>
 					)}
-					<div style={{ marginTop: "0.75rem", fontSize: "0.875rem", opacity: 0.9 }}>
+					<div
+						style={{ marginTop: "0.75rem", fontSize: "0.875rem", opacity: 0.9 }}
+					>
 						💡 All sync operations now run in the background. Visit{" "}
 						<a
 							href="/admin/collections/payload-jobs"
@@ -245,7 +269,9 @@ export default function RSSManagementPage() {
 							<th className="rss-management__th rss-management__th--checkbox">
 								<input
 									type="checkbox"
-									checked={selectedIds.size === feeds.length && feeds.length > 0}
+									checked={
+										selectedIds.size === feeds.length && feeds.length > 0
+									}
 									onChange={toggleSelectAll}
 									className="rss-management__checkbox"
 								/>
@@ -279,7 +305,9 @@ export default function RSSManagementPage() {
 								<tr
 									key={feed.id}
 									className={`rss-management__row ${
-										selectedIds.has(feed.id) ? "rss-management__row--selected" : ""
+										selectedIds.has(feed.id)
+											? "rss-management__row--selected"
+											: ""
 									}`}
 								>
 									<td className="rss-management__td">
@@ -335,4 +363,3 @@ export default function RSSManagementPage() {
 		</div>
 	);
 }
-

@@ -36,9 +36,10 @@ export default function NumberTicker({
 
 			let current: number;
 			if (transition.ease === "easeInOut") {
-				const easeProgress = progress < 0.5
-					? 2 * progress * progress
-					: 1 - Math.pow(-2 * progress + 2, 2) / 2;
+				const easeProgress =
+					progress < 0.5
+						? 2 * progress * progress
+						: 1 - (-2 * progress + 2) ** 2 / 2;
 				current = from + (target - from) * easeProgress;
 			} else {
 				current = from + (target - from) * progress;
@@ -56,6 +57,9 @@ export default function NumberTicker({
 		requestAnimationFrame(updateValue);
 	}, [from, target, autoStart, transition]);
 
-	return <span ref={nodeRef} className={className}>{from.toFixed(2)}</span>;
+	return (
+		<span ref={nodeRef} className={className}>
+			{from.toFixed(2)}
+		</span>
+	);
 }
-

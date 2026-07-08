@@ -27,6 +27,8 @@ export interface SignalsInput {
 	farmFlags: string[];
 	/** Extracted pub fn/type names (src/lib/code-symbols.ts). */
 	codeSymbols: string[];
+	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
+	mainnetContractId: string | null;
 }
 
 /** Fields the scanner is FORBIDDEN to write — demotion/authority surfaces. */
@@ -71,6 +73,7 @@ export function signalsToWrite(
 		farmScore: s.farmScore,
 		farmFlags: s.farmFlags,
 		codeSymbols: s.codeSymbols,
+		mainnetContractId: s.mainnetContractId,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,
 		codeScannedAt: nowIso,

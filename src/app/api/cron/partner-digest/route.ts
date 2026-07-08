@@ -192,10 +192,12 @@ export async function GET(request: Request) {
 		let leadsPruned = 0;
 		try {
 			if (dryRun) {
-				leadsPruned = await payload.count({
-					collection: "partner-leads",
-					where: pruneWhere,
-				}).then((r) => r.totalDocs);
+				leadsPruned = await payload
+					.count({
+						collection: "partner-leads",
+						where: pruneWhere,
+					})
+					.then((r) => r.totalDocs);
 			} else {
 				const pruned = await payload.delete({
 					collection: "partner-leads",

@@ -14,11 +14,11 @@
  *   npx tsx scripts/ingest-lumenloop-research.ts --execute   # write to Payload
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
@@ -26,6 +26,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -53,8 +54,9 @@ async function fetchArticle(url: string): Promise<Article> {
 	const html = await fetchHtml(url);
 
 	const titleMatch =
-		html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i) ||
-		html.match(/<title[^>]*>([^<]+)<\/title>/i);
+		html.match(
+			/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
+		) || html.match(/<title[^>]*>([^<]+)<\/title>/i);
 	const title = titleMatch
 		? titleMatch[1].replace(/\s+\|\s+Lumen.*$/i, "").trim()
 		: url;
@@ -66,8 +68,9 @@ async function fetchArticle(url: string): Promise<Article> {
 	const publishedAt = dateMatch ? dateMatch[1] : undefined;
 
 	// Prefer <article> for the main content; fall back to <main>
-	const main = html.match(/<article[\s\S]*?<\/article>/i)
-		|| html.match(/<main[\s\S]*?<\/main>/i);
+	const main =
+		html.match(/<article[\s\S]*?<\/article>/i) ||
+		html.match(/<main[\s\S]*?<\/main>/i);
 	const body = stripHtml(main ? main[0] : html);
 	return { url, title, body, publishedAt };
 }

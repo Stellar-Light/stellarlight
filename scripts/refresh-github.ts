@@ -1,6 +1,6 @@
 import "dotenv/config";
-import configPromise from "../src/payload.config";
 import { getPayload } from "payload";
+import configPromise from "../src/payload.config";
 
 async function run() {
 	const payload = await getPayload({
@@ -14,8 +14,7 @@ async function run() {
 
 	for (const p of list.docs) {
 		try {
-			const appUrl =
-				process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+			const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 			await fetch(`${appUrl}/api/projects/${p.id}/github`);
 			await new Promise((r) => setTimeout(r, 250));
 		} catch {
@@ -30,4 +29,3 @@ run()
 		console.error(err);
 		process.exit(1);
 	});
-

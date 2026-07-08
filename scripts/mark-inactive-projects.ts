@@ -37,7 +37,12 @@ const CURATED_INACTIVE: string[] = ["keybase"];
 // Watchlist from prior review (memory) — NOT auto-marked; we print their live
 // state so a human can decide. Some were SCF-funded, so precision matters.
 const WATCHLIST: string[] = [
-	"communidao", "lumosdao", "instantdao", "enerdao", "the-hub", "fxdao",
+	"communidao",
+	"lumosdao",
+	"instantdao",
+	"enerdao",
+	"the-hub",
+	"fxdao",
 ];
 
 async function main() {
@@ -55,11 +60,22 @@ async function main() {
 			depth: 0,
 		});
 		const p = res.docs[0];
-		if (!p) { console.log(`✗ ${slug}: not found`); continue; }
-		if (p.status === "Inactive") { console.log(`· ${slug}: already Inactive`); continue; }
+		if (!p) {
+			console.log(`✗ ${slug}: not found`);
+			continue;
+		}
+		if (p.status === "Inactive") {
+			console.log(`· ${slug}: already Inactive`);
+			continue;
+		}
 		console.log(`→ ${slug}: ${p.status} → Inactive`);
 		if (EXECUTE) {
-			await payload.update({ collection: "projects", id: p.id, data: { status: "Inactive" }, overrideAccess: true });
+			await payload.update({
+				collection: "projects",
+				id: p.id,
+				data: { status: "Inactive" },
+				overrideAccess: true,
+			});
 			marked++;
 		}
 	}
@@ -67,63 +83,144 @@ async function main() {
 	// ---- 2. watchlist live state (report only) ----
 	console.log(`\n=== WATCHLIST — live state (review, not marked) ===`);
 	for (const slug of WATCHLIST) {
-		const res = await payload.find({ collection: "projects", where: { slug: { equals: slug } }, limit: 1, depth: 0 });
+		const res = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+		});
 		const p = res.docs[0];
-		if (!p) { console.log(`  ${slug}: not found`); continue; }
-		const repos = await payload.find({ collection: "repos", where: { projectSlug: { equals: slug } }, limit: 50, depth: 0 });
-		const newest = repos.docs.reduce((mx: number, r: any) => Math.max(mx, r.lastCommitAt ? Date.parse(r.lastCommitAt) : 0), 0);
-		const stars = repos.docs.reduce((s: number, r: any) => s + (r.stars || 0), 0);
-		const ageMo = newest ? Math.round((now - newest) / (30 * 24 * 60 * 60 * 1000)) : null;
+		if (!p) {
+			console.log(`  ${slug}: not found`);
+			continue;
+		}
+		const repos = await payload.find({
+			collection: "repos",
+			where: { projectSlug: { equals: slug } },
+			limit: 50,
+			depth: 0,
+		});
+		const newest = repos.docs.reduce(
+			(mx: number, r: any) =>
+				Math.max(mx, r.lastCommitAt ? Date.parse(r.lastCommitAt) : 0),
+			0,
+		);
+		const stars = repos.docs.reduce(
+			(s: number, r: any) => s + (r.stars || 0),
+			0,
+		);
+		const ageMo = newest
+			? Math.round((now - newest) / (30 * 24 * 60 * 60 * 1000))
+			: null;
 		// biome-ignore lint/suspicious/noExplicitAny: doc shape
-		const scf = (p as any).scf?.awarded ? `SCF $${(p as any).scf.totalAwarded}` : "no SCF";
-		console.log(`  ${slug}: status=${p.status} · ${stars} stars · last commit ${ageMo == null ? "never/no repo" : ageMo + "mo ago"} · ${scf}`);
+		const scf = (p as any).scf?.awarded
+			? `SCF $${(p as any).scf.totalAwarded}`
+			: "no SCF";
+		console.log(
+			`  ${slug}: status=${p.status} · ${stars} stars · last commit ${ageMo == null ? "never/no repo" : ageMo + "mo ago"} · ${scf}`,
+		);
 	}
 
 	// ---- 3. detect stale + high-star-stale candidates (report only) ----
-	console.log(`\n=== DETECTED candidates (report only — confirm before marking) ===`);
+	console.log(
+		`\n=== DETECTED candidates (report only — confirm before marking) ===`,
+	);
 	const active = await payload.find({
 		collection: "projects",
 		where: { status: { in: ["Development", "Pre-Release", "Live"] } },
 		limit: 2000,
 		depth: 0,
 	});
-	const rows: Array<{ slug: string; name: string; stars: number; ageMo: number | null; scf: boolean }> = [];
+	const rows: Array<{
+		slug: string;
+		name: string;
+		stars: number;
+		ageMo: number | null;
+		scf: boolean;
+	}> = [];
 	for (const p of active.docs) {
-		const repos = await payload.find({ collection: "repos", where: { projectSlug: { equals: p.slug } }, limit: 50, depth: 0 });
-		const newest = repos.docs.reduce((mx: number, r: any) => Math.max(mx, r.lastCommitAt ? Date.parse(r.lastCommitAt) : 0), 0);
-		const stars = repos.docs.reduce((s: number, r: any) => s + (r.stars || 0), 0);
+		const repos = await payload.find({
+			collection: "repos",
+			where: { projectSlug: { equals: p.slug } },
+			limit: 50,
+			depth: 0,
+		});
+		const newest = repos.docs.reduce(
+			(mx: number, r: any) =>
+				Math.max(mx, r.lastCommitAt ? Date.parse(r.lastCommitAt) : 0),
+			0,
+		);
+		const stars = repos.docs.reduce(
+			(s: number, r: any) => s + (r.stars || 0),
+			0,
+		);
 		const stale = newest === 0 || now - newest > STALE_MS;
 		if (stale) {
 			// biome-ignore lint/suspicious/noExplicitAny: doc shape
-			rows.push({ slug: p.slug, name: p.name, stars, ageMo: newest ? Math.round((now - newest) / (30 * 24 * 60 * 60 * 1000)) : null, scf: !!(p as any).scf?.awarded });
+			rows.push({
+				slug: p.slug,
+				name: p.name,
+				stars,
+				ageMo: newest
+					? Math.round((now - newest) / (30 * 24 * 60 * 60 * 1000))
+					: null,
+				scf: !!(p as any).scf?.awarded,
+			});
 		}
 	}
 	// The dangerous ones first: lots of stars but stale = borrowed-clout risk.
 	rows.sort((a, b) => b.stars - a.stars);
-	console.log(`stale/no-repo active projects: ${rows.length} (showing top 25 by stars)`);
+	console.log(
+		`stale/no-repo active projects: ${rows.length} (showing top 25 by stars)`,
+	);
 	for (const r of rows.slice(0, 25)) {
-		console.log(`  ${r.slug.padEnd(26)} ${String(r.stars).padStart(6)}★  last ${r.ageMo == null ? "none" : r.ageMo + "mo"}  ${r.scf ? "SCF" : ""}`);
+		console.log(
+			`  ${r.slug.padEnd(26)} ${String(r.stars).padStart(6)}★  last ${r.ageMo == null ? "none" : r.ageMo + "mo"}  ${r.scf ? "SCF" : ""}`,
+		);
 	}
 
 	// CLEARLY DEAD = no commit in >=36mo (a real, dated commit — not "no repo")
 	// AND never SCF-funded. Unambiguous abandonment; safe to auto-mark under
 	// --mark-stale. "No repo at all" is EXCLUDED (could be a legit closed-source
 	// or mis-linked project) — those stay report-only.
-	const dead = rows.filter((r) => r.ageMo != null && r.ageMo >= DEAD_MONTHS && !r.scf);
-	console.log(`\n=== CLEARLY DEAD (>=${DEAD_MONTHS}mo, no SCF) — ${dead.length} projects ${MARK_STALE && EXECUTE ? "→ MARKING Inactive" : "(report only; run --mark-stale --execute to flip)"} ===`);
+	const dead = rows.filter(
+		(r) => r.ageMo != null && r.ageMo >= DEAD_MONTHS && !r.scf,
+	);
+	console.log(
+		`\n=== CLEARLY DEAD (>=${DEAD_MONTHS}mo, no SCF) — ${dead.length} projects ${MARK_STALE && EXECUTE ? "→ MARKING Inactive" : "(report only; run --mark-stale --execute to flip)"} ===`,
+	);
 	let deadMarked = 0;
 	for (const r of dead) {
-		console.log(`  ${r.slug.padEnd(28)} ${String(r.stars).padStart(6)}★  last ${r.ageMo}mo`);
+		console.log(
+			`  ${r.slug.padEnd(28)} ${String(r.stars).padStart(6)}★  last ${r.ageMo}mo`,
+		);
 		if (MARK_STALE && EXECUTE) {
-			const doc = (await payload.find({ collection: "projects", where: { slug: { equals: r.slug } }, limit: 1, depth: 0 })).docs[0];
+			const doc = (
+				await payload.find({
+					collection: "projects",
+					where: { slug: { equals: r.slug } },
+					limit: 1,
+					depth: 0,
+				})
+			).docs[0];
 			if (doc && doc.status !== "Inactive") {
-				await payload.update({ collection: "projects", id: doc.id, data: { status: "Inactive" }, overrideAccess: true });
+				await payload.update({
+					collection: "projects",
+					id: doc.id,
+					data: { status: "Inactive" },
+					overrideAccess: true,
+				});
 				deadMarked++;
 			}
 		}
 	}
 
-	console.log(`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length}`);
+	console.log(
+		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length}`,
+	);
 	process.exit(0);
 }
-main().catch((e) => { console.error("FAILED:", e?.message ?? e); process.exit(1); });
+main().catch((e) => {
+	console.error("FAILED:", e?.message ?? e);
+	process.exit(1);
+});

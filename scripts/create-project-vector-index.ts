@@ -8,6 +8,7 @@
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/create-project-vector-index.ts
  */
 import { createRequire } from "node:module";
+
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
 const { MongoClient } = req("mongodb") as any;
@@ -42,9 +43,13 @@ async function main() {
 	try {
 		const existing = await coll.listSearchIndexes().toArray();
 		for (const idx of existing) {
-			console.log(`  - ${idx.name} (${idx.type ?? "search"}) — ${idx.status ?? "?"}`);
+			console.log(
+				`  - ${idx.name} (${idx.type ?? "search"}) — ${idx.status ?? "?"}`,
+			);
 		}
-		if (existing.find((i: { name: string }) => i.name === "project_vector_index")) {
+		if (
+			existing.find((i: { name: string }) => i.name === "project_vector_index")
+		) {
 			console.log("\n✅ project_vector_index already exists. Nothing to do.");
 			await client.close();
 			return;
@@ -60,7 +65,9 @@ async function main() {
 		console.log("Index builds asynchronously (typical 30s–2min).");
 	} catch (e) {
 		console.error(`✗ createSearchIndex failed: ${(e as Error).message}`);
-		console.error("\nManual fallback — Atlas → Search → Create → Vector Search → JSON:");
+		console.error(
+			"\nManual fallback — Atlas → Search → Create → Vector Search → JSON:",
+		);
 		console.error("  Collection: projects · Index name: project_vector_index");
 		console.error(JSON.stringify(INDEX_DEFINITION.definition, null, 2));
 	}

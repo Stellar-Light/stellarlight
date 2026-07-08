@@ -1,11 +1,11 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import Link from "next/link";
+import { ArrowLeft, ExternalLink, GitFork, Star } from "lucide-react";
 import type { Metadata } from "next";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Star, GitFork, ExternalLink } from "lucide-react";
-import { LeaderboardFilters } from "@/components/leaderboard-filters";
+import Link from "next/link";
 import { EcosystemDevStats } from "@/components/ecosystem-dev-stats";
 import { LeaderboardExportButtons } from "@/components/leaderboard-export-buttons";
+import { LeaderboardFilters } from "@/components/leaderboard-filters";
+import { Card, CardContent } from "@/components/ui/card";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 
@@ -280,125 +280,125 @@ export default async function LeaderboardPage({
 					</Card>
 				) : (
 					<>
-					<div className="text-xs text-muted-foreground mb-3">
-						{leaderboard.length} project{leaderboard.length === 1 ? "" : "s"}
-					</div>
-					<Card className="border border-border/50 bg-card shadow-sm overflow-hidden">
-						<CardContent className="p-0">
-							<div className="overflow-x-auto">
-								<table className="w-full" style={{ tableLayout: "fixed" }}>
-									<colgroup>
-										<col className="w-12 sm:w-14" />
-										<col />
-										<col className="w-20 sm:w-24" />
-										<col className="hidden md:table-column w-20" />
-										<col className="hidden md:table-column w-20" />
-										<col className="hidden sm:table-column w-28" />
-									</colgroup>
-									<thead>
-										<tr className="border-b border-border/50 text-left">
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-												#
-											</th>
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-												Project
-											</th>
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">
-												Stars
-											</th>
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden md:table-cell">
-												Issues
-											</th>
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden md:table-cell">
-												Repos
-											</th>
-											<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden sm:table-cell">
-												Last commit
-											</th>
-										</tr>
-									</thead>
-									<tbody>
-										{leaderboard.map((entry, idx) => {
-											return (
-												<tr
-													key={entry.id}
-													className="border-b border-border/30 last:border-0 hover:bg-white/[0.02] transition-colors"
-												>
-													<td className="px-4 sm:px-6 py-3.5 align-middle">
-														<span className="text-sm tabular-nums text-muted-foreground">
-															{idx + 1}
-														</span>
-													</td>
-													<td className="px-4 sm:px-6 py-3.5">
-														<Link
-															href={`/project/${entry.slug}`}
-															className="group block min-w-0"
-														>
-															<div className="flex items-center gap-2 min-w-0 mb-0.5">
-																<span className="font-medium text-foreground group-hover:text-white transition-colors truncate">
-																	{entry.name}
-																</span>
-																<span className="inline-flex items-center gap-1.5 flex-shrink-0">
-																	<span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50 whitespace-nowrap">
-																		{entry.category}
+						<div className="text-xs text-muted-foreground mb-3">
+							{leaderboard.length} project{leaderboard.length === 1 ? "" : "s"}
+						</div>
+						<Card className="border border-border/50 bg-card shadow-sm overflow-hidden">
+							<CardContent className="p-0">
+								<div className="overflow-x-auto">
+									<table className="w-full" style={{ tableLayout: "fixed" }}>
+										<colgroup>
+											<col className="w-12 sm:w-14" />
+											<col />
+											<col className="w-20 sm:w-24" />
+											<col className="hidden md:table-column w-20" />
+											<col className="hidden md:table-column w-20" />
+											<col className="hidden sm:table-column w-28" />
+										</colgroup>
+										<thead>
+											<tr className="border-b border-border/50 text-left">
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+													#
+												</th>
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+													Project
+												</th>
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">
+													Stars
+												</th>
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden md:table-cell">
+													Issues
+												</th>
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden md:table-cell">
+													Repos
+												</th>
+												<th className="px-4 sm:px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right hidden sm:table-cell">
+													Last commit
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											{leaderboard.map((entry, idx) => {
+												return (
+													<tr
+														key={entry.id}
+														className="border-b border-border/30 last:border-0 hover:bg-white/[0.02] transition-colors"
+													>
+														<td className="px-4 sm:px-6 py-3.5 align-middle">
+															<span className="text-sm tabular-nums text-muted-foreground">
+																{idx + 1}
+															</span>
+														</td>
+														<td className="px-4 sm:px-6 py-3.5">
+															<Link
+																href={`/project/${entry.slug}`}
+																className="group block min-w-0"
+															>
+																<div className="flex items-center gap-2 min-w-0 mb-0.5">
+																	<span className="font-medium text-foreground group-hover:text-white transition-colors truncate">
+																		{entry.name}
 																	</span>
-																	{entry.scfAwarded && (
+																	<span className="inline-flex items-center gap-1.5 flex-shrink-0">
 																		<span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50 whitespace-nowrap">
-																			SCF
+																			{entry.category}
 																		</span>
-																	)}
+																		{entry.scfAwarded && (
+																			<span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50 whitespace-nowrap">
+																				SCF
+																			</span>
+																		)}
+																	</span>
+																</div>
+																{entry.shortDescription && (
+																	<p
+																		className="text-xs text-muted-foreground/80 hidden sm:block"
+																		style={{
+																			display: "-webkit-box",
+																			WebkitLineClamp: 1,
+																			WebkitBoxOrient: "vertical",
+																			overflow: "hidden",
+																		}}
+																	>
+																		{entry.shortDescription}
+																	</p>
+																)}
+															</Link>
+														</td>
+														<td className="px-4 sm:px-6 py-3.5 text-right align-middle">
+															{entry.hasSignals ? (
+																<span className="inline-flex items-center justify-end gap-1 text-sm tabular-nums text-foreground/90">
+																	<Star className="w-3.5 h-3.5 text-muted-foreground" />
+																	{entry.totalStars.toLocaleString()}
 																</span>
-															</div>
-															{entry.shortDescription && (
-																<p
-																	className="text-xs text-muted-foreground/80 hidden sm:block"
-																	style={{
-																		display: "-webkit-box",
-																		WebkitLineClamp: 1,
-																		WebkitBoxOrient: "vertical",
-																		overflow: "hidden",
-																	}}
-																>
-																	{entry.shortDescription}
-																</p>
+															) : (
+																<span className="text-sm tabular-nums text-muted-foreground/50">
+																	—
+																</span>
 															)}
-														</Link>
-													</td>
-													<td className="px-4 sm:px-6 py-3.5 text-right align-middle">
-														{entry.hasSignals ? (
-															<span className="inline-flex items-center justify-end gap-1 text-sm tabular-nums text-foreground/90">
-																<Star className="w-3.5 h-3.5 text-muted-foreground" />
-																{entry.totalStars.toLocaleString()}
+														</td>
+														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
+															<span className="text-sm tabular-nums text-muted-foreground">
+																{entry.hasSignals ? entry.openIssuesTotal : "—"}
 															</span>
-														) : (
-															<span className="text-sm tabular-nums text-muted-foreground/50">
-																—
+														</td>
+														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
+															<span className="text-sm tabular-nums text-muted-foreground">
+																{entry.hasSignals ? entry.repoCount : "—"}
 															</span>
-														)}
-													</td>
-													<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
-														<span className="text-sm tabular-nums text-muted-foreground">
-															{entry.hasSignals ? entry.openIssuesTotal : "—"}
-														</span>
-													</td>
-													<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
-														<span className="text-sm tabular-nums text-muted-foreground">
-															{entry.hasSignals ? entry.repoCount : "—"}
-														</span>
-													</td>
-													<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden sm:table-cell">
-														<span className="text-sm tabular-nums text-muted-foreground">
-															{formatDate(entry.lastActivityAt)}
-														</span>
-													</td>
-												</tr>
-											);
-										})}
-									</tbody>
-								</table>
-							</div>
-						</CardContent>
-					</Card>
+														</td>
+														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden sm:table-cell">
+															<span className="text-sm tabular-nums text-muted-foreground">
+																{formatDate(entry.lastActivityAt)}
+															</span>
+														</td>
+													</tr>
+												);
+											})}
+										</tbody>
+									</table>
+								</div>
+							</CardContent>
+						</Card>
 					</>
 				)}
 			</main>

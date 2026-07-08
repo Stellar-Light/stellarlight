@@ -12,13 +12,12 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { clampLimit } from "@/lib/http-params";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
-import { getPayloadSafe } from "@/lib/payload-client";
-import { searchRepos, type RepoResult } from "@/lib/repo-search";
+import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	buildHaystack,
 	corridorMatch,
@@ -29,6 +28,7 @@ import {
 	termsForToken,
 	tokenize,
 } from "@/lib/project-search-match";
+import { type RepoResult, searchRepos } from "@/lib/repo-search";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings

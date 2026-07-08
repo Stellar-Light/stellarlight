@@ -17,19 +17,20 @@
  *   pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute  # write
  */
 import { config as loadEnv } from "dotenv";
+
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
+import { createRequire } from "node:module";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import {
 	chunkMarkdown,
 	loadExistingChunks,
-	upsertChunks,
 	type ResearchChunk,
+	upsertChunks,
 } from "../src/lib/research-ingest";
+import configPromise from "../src/payload.config";
 
-import { createRequire } from "node:module";
 const cjsRequire = createRequire(import.meta.url);
 const { PDFParse } = cjsRequire("pdf-parse") as {
 	PDFParse: new (opts: {
@@ -84,7 +85,11 @@ async function listReports(): Promise<RepoFile[]> {
  *   dev_report_2022.pdf                          → year=2022, type=annual
  *   Blockchain Developer Geography Analysis 2023.pdf → year=2023, type=geography
  */
-function parseMeta(name: string): { year: number; reportType: string; title: string } {
+function parseMeta(name: string): {
+	year: number;
+	reportType: string;
+	title: string;
+} {
 	const lower = name.toLowerCase();
 	const yearMatch = lower.match(/(20\d{2})/g);
 	// First year in filename = report year. A trailing "updated_2021" is the

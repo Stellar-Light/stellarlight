@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { ExternalLink } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface SocialEmbedProps {
 	url: string;
 }
 
-function detectPlatform(url: string): "twitter" | "instagram" | "youtube" | "unknown" {
+function detectPlatform(
+	url: string,
+): "twitter" | "instagram" | "youtube" | "unknown" {
 	if (/x\.com|twitter\.com/i.test(url)) return "twitter";
 	if (/instagram\.com/i.test(url)) return "instagram";
 	if (/youtube\.com|youtu\.be/i.test(url)) return "youtube";

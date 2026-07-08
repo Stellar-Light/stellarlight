@@ -78,7 +78,11 @@ function kindIcon(kind: string) {
 	}
 }
 
-export function SkillsMarketplace({ initialSkills }: { initialSkills: UnifiedSkill[] }) {
+export function SkillsMarketplace({
+	initialSkills,
+}: {
+	initialSkills: UnifiedSkill[];
+}) {
 	const [sourceFilter, setSourceFilter] = useState<string>("all");
 	const [kindFilter, setKindFilter] = useState<string>("all");
 	const [query, setQuery] = useState("");
@@ -103,7 +107,8 @@ export function SkillsMarketplace({ initialSkills }: { initialSkills: UnifiedSki
 			if (sourceFilter !== "all" && s.source !== sourceFilter) return false;
 			if (kindFilter !== "all" && s.kind !== kindFilter) return false;
 			if (q) {
-				const hay = `${s.name} ${s.tagline ?? ""} ${s.description} ${(s.tags ?? []).join(" ")}`.toLowerCase();
+				const hay =
+					`${s.name} ${s.tagline ?? ""} ${s.description} ${(s.tags ?? []).join(" ")}`.toLowerCase();
 				if (!hay.includes(q)) return false;
 			}
 			return true;
@@ -135,9 +140,9 @@ export function SkillsMarketplace({ initialSkills }: { initialSkills: UnifiedSki
 					</h1>
 					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
 						Install SKILL.md files, MCP servers, and SDKs for Stellar in one
-						command. SDF's official skills, Stellarlight tools, lumenloop's
-						MCP + 8 companion skills, and the broader Stellar ecosystem — all
-						in one marketplace.
+						command. SDF's official skills, Stellarlight tools, lumenloop's MCP
+						+ 8 companion skills, and the broader Stellar ecosystem — all in one
+						marketplace.
 					</p>
 
 					{/* Stats row — opencode-style metrics */}
@@ -183,9 +188,7 @@ export function SkillsMarketplace({ initialSkills }: { initialSkills: UnifiedSki
 
 				{/* "What is a skill?" explainer — tight inline block */}
 				<p className="text-xs text-muted-foreground leading-relaxed mb-12 max-w-3xl">
-					<span className="text-foreground font-medium">
-						New to AI skills?
-					</span>{" "}
+					<span className="text-foreground font-medium">New to AI skills?</span>{" "}
 					A skill is a small file your AI agent loads to gain a specific
 					capability — researching Stellar projects, swapping on Soroswap,
 					writing Soroban contracts. Install with{" "}
@@ -348,7 +351,6 @@ export function SkillsMarketplace({ initialSkills }: { initialSkills: UnifiedSki
 						))}
 					</div>
 				)}
-
 			</main>
 		</div>
 	);

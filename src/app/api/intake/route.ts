@@ -1,7 +1,7 @@
-import { z } from "zod";
-import configPromise from "@/payload.config";
 import { getPayload } from "payload";
-import { normalizeUrl, generateSlug } from "@/lib/utils/normalize";
+import { z } from "zod";
+import { generateSlug, normalizeUrl } from "@/lib/utils/normalize";
+import configPromise from "@/payload.config";
 
 const intakeSchema = z.object({
 	name: z.string().min(1).max(200),
@@ -96,17 +96,18 @@ export async function POST(request: Request) {
 				links: {
 					website: validated.website || undefined,
 				},
-				github: validated.github?.repos && validated.github.repos.length > 0
-					? {
-							orgLogin: validated.github.orgLogin || undefined,
-							repos: validated.github.repos,
-						}
-					: validated.github?.orgLogin
+				github:
+					validated.github?.repos && validated.github.repos.length > 0
 						? {
-								orgLogin: validated.github.orgLogin,
-								repos: [],
+								orgLogin: validated.github.orgLogin || undefined,
+								repos: validated.github.repos,
 							}
-						: undefined,
+						: validated.github?.orgLogin
+							? {
+									orgLogin: validated.github.orgLogin,
+									repos: [],
+								}
+							: undefined,
 				verificationLevel: "Unverified",
 				provenance: {
 					source: "UserSubmitted",

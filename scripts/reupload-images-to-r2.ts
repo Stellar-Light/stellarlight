@@ -1,10 +1,10 @@
 import "dotenv/config";
-import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
+import { getPayload } from "payload";
+import configPromise from "../src/payload.config";
 
 // Explicitly load .env and .env.local (dotenv/config may not load .env.local by default)
 loadEnv({ path: ".env" });
@@ -102,7 +102,7 @@ function extractImageUrl(logoField: string): string | null {
 }
 
 function extractFilename(logoField: string): string {
-	const match = logoField.match(/^([^\(]+)/);
+	const match = logoField.match(/^([^(]+)/);
 	const filename = match ? match[1].trim() : "logo.png";
 	return filename;
 }
@@ -123,8 +123,7 @@ async function downloadImage(
 			return null;
 		}
 
-		const contentType =
-			response.headers.get("content-type") || "image/png";
+		const contentType = response.headers.get("content-type") || "image/png";
 		const arrayBuffer = await response.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
@@ -269,7 +268,9 @@ async function run() {
 		}
 	}
 
-	console.log(`Re-upload Summary: ${updated} updated, ${skipped} skipped, ${errors} errors`);
+	console.log(
+		`Re-upload Summary: ${updated} updated, ${skipped} skipped, ${errors} errors`,
+	);
 }
 
 run()
@@ -277,7 +278,9 @@ run()
 		process.exit(0);
 	})
 	.catch((err) => {
-		console.error("Re-upload failed:", err instanceof Error ? err.message : String(err));
+		console.error(
+			"Re-upload failed:",
+			err instanceof Error ? err.message : String(err),
+		);
 		process.exit(1);
 	});
-

@@ -1,11 +1,15 @@
 "use client";
 
+import { Building2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { Building2 } from "lucide-react";
 
 interface EntityLogoProps {
-	logo?: string | { id: string; url?: string | null; filename?: string | null } | null | undefined;
+	logo?:
+		| string
+		| { id: string; url?: string | null; filename?: string | null }
+		| null
+		| undefined;
 	name: string;
 	size?: number;
 	className?: string;
@@ -38,8 +42,14 @@ export function EntityLogo({
 	// If no logo or error, show fallback icon if requested
 	if ((!logo || logoError) && showFallbackIcon) {
 		return (
-			<div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-border/50 ${className}`} style={{ width: size, height: size }}>
-				<Building2 className="text-primary" style={{ width: size * 0.4, height: size * 0.4 }} />
+			<div
+				className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-border/50 ${className}`}
+				style={{ width: size, height: size }}
+			>
+				<Building2
+					className="text-primary"
+					style={{ width: size * 0.4, height: size * 0.4 }}
+				/>
 			</div>
 		);
 	}
@@ -57,7 +67,3 @@ export function EntityLogo({
 		/>
 	);
 }
-
-
-
-

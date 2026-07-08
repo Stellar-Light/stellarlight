@@ -17,14 +17,15 @@
  * Env required: PAYLOAD_SECRET, MONGODB_URI/DATABASE_URI, VOYAGE_API_KEY.
  */
 import { config as loadEnv } from "dotenv";
+
 // .env.local first (Next.js convention), then .env as fallback
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { embedBatch } from "../src/lib/embed";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -222,10 +223,7 @@ async function run() {
 				.get(d.parentDocId)!
 				.set(d.chunkIndex, { id: d.id, contentHash: d.contentHash });
 		}
-		const total = [...existingBySep.values()].reduce(
-			(s, m) => s + m.size,
-			0,
-		);
+		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing SEP chunks already in collection`);
 	}
 
@@ -284,7 +282,9 @@ async function run() {
 		(s, c) => s + Math.ceil(c.content.length / 4),
 		0,
 	);
-	console.log(`  ~${stats.embedTokens} tokens (~$${(stats.embedTokens * 0.06 / 1_000_000).toFixed(4)})`);
+	console.log(
+		`  ~${stats.embedTokens} tokens (~$${((stats.embedTokens * 0.06) / 1_000_000).toFixed(4)})`,
+	);
 
 	console.log("");
 	console.log("Upserting to Payload…");
@@ -332,6 +332,6 @@ async function run() {
 run()
 	.then(() => process.exit(0))
 	.catch((err) => {
-	console.error("FATAL:", err);
-	process.exit(1);
-});
+		console.error("FATAL:", err);
+		process.exit(1);
+	});

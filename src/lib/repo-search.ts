@@ -50,6 +50,7 @@ interface RepoDoc {
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
 	codeSymbols?: unknown;
+	mainnetContractId?: string | null;
 }
 
 export interface RepoResult {
@@ -105,6 +106,10 @@ export interface CodeVerified {
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
+	/** README contract id VERIFIED to exist on Stellar mainnet (stellar.expert
+	 * echo-check at scan time) — unfakeable deployment evidence; null when no
+	 * verified address. */
+	mainnetContractId: string | null;
 }
 
 function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
@@ -121,6 +126,7 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 					.filter((s): s is string => typeof s === "string")
 					.slice(0, 20)
 			: [],
+		mainnetContractId: d.mainnetContractId ?? null,
 	};
 }
 

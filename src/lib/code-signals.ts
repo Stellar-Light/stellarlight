@@ -15,7 +15,7 @@
  */
 
 import { isProtected, type ProtectionSignals } from "./repo-allowlist";
-import { versionStatusOf, type VersionStatus } from "./soroban-versions";
+import { type VersionStatus, versionStatusOf } from "./soroban-versions";
 
 // ── Inputs ───────────────────────────────────────────────────────────────────
 
@@ -89,16 +89,20 @@ const RE_CARGO_SOROBAN =
 // Extract a version requirement for soroban-sdk (bare or table "version = ").
 const RE_CARGO_SOROBAN_VER =
 	/soroban[-_]sdk\s*=\s*["']([^"']+)["']|soroban[-_]sdk\s*=\s*\{[^}]*\bversion\s*=\s*["']([^"']+)["']/i;
-const RE_CARGO_SOROBAN_WORKSPACE = /soroban[-_]sdk\b[^\n]*\bworkspace\s*=\s*true/i;
+const RE_CARGO_SOROBAN_WORKSPACE =
+	/soroban[-_]sdk\b[^\n]*\bworkspace\s*=\s*true/i;
 // In a workspace root Cargo.toml, the dep lives under [workspace.dependencies].
 const RE_WORKSPACE_DEP_SOROBAN =
 	/\[workspace\.dependencies\][\s\S]*?soroban[-_]sdk\s*=\s*(?:["']([^"']+)["']|\{[^}]*\bversion\s*=\s*["']([^"']+)["'])/i;
 
-const RE_CONTRACT_MACRO = /#\[\s*contract(?:impl|type|client|error|args)?\s*\]/g;
+const RE_CONTRACT_MACRO =
+	/#\[\s*contract(?:impl|type|client|error|args)?\s*\]/g;
 const RE_SOROBAN_USE = /\buse\s+soroban_sdk\b|\bsoroban_sdk\s*::/;
 const RE_AUTH = /\brequire_auth(?:_for_args)?\s*\(/;
-const RE_STORAGE = /\benv\s*\.\s*storage\s*\(\s*\)\s*\.\s*(instance|persistent|temporary)\b|\bstorage\(\)\.(instance|persistent|temporary)\b/;
-const RE_EVENTS = /\benv\s*\.\s*events\s*\(\s*\)\s*\.\s*publish\b|\bevents\(\)\.publish\b/;
+const RE_STORAGE =
+	/\benv\s*\.\s*storage\s*\(\s*\)\s*\.\s*(instance|persistent|temporary)\b|\bstorage\(\)\.(instance|persistent|temporary)\b/;
+const RE_EVENTS =
+	/\benv\s*\.\s*events\s*\(\s*\)\s*\.\s*publish\b|\bevents\(\)\.publish\b/;
 const RE_NOSTD = /#!\s*\[\s*no_std\s*\]/;
 const RE_CDYLIB = /crate[-_]type\s*=\s*\[[^\]]*["']cdylib["']/i;
 
@@ -122,7 +126,11 @@ const JS_SDK_DEPS = [
 // Patterns match the DEPENDENCY declaration, not incidental "stellar" mentions.
 // Verified against real manifests before adding (Package.swift → stellar-ios-mac-sdk,
 // build.gradle.kts → network.lightsail:stellar-sdk, go.mod → github.com/stellar/…).
-const LANG_SDK_MARKERS: { lang: string; file: (name: string) => boolean; re: RegExp }[] = [
+const LANG_SDK_MARKERS: {
+	lang: string;
+	file: (name: string) => boolean;
+	re: RegExp;
+}[] = [
 	// Rust STELLAR INFRA (no soroban-sdk, so it never reaches cargo-sdk): the
 	// XDR/strkey/baselib/env/client crates and packages that ARE those crates
 	// (stellar/rs-stellar-xdr, rs-stellar-archivist, rs-soroban-client,
@@ -134,22 +142,49 @@ const LANG_SDK_MARKERS: { lang: string; file: (name: string) => boolean; re: Reg
 		file: (n) => n === "cargo.toml",
 		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
 	},
-	{ lang: "swift", file: (n) => n === "package.swift", re: /stellar[-_]?(ios|mac|wallet|swift|base)[-_]?(sdk|mac)?|stellarsdk|\.package\(\s*url:\s*["'][^"']*\/stellar/i },
-	{ lang: "swift", file: (n) => n === "podfile", re: /pod\s+["'][^"']*stellar|stellar-ios-mac-sdk/i },
-	{ lang: "kotlin", file: (n) => n === "build.gradle" || n === "build.gradle.kts", re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i },
-	{ lang: "dart", file: (n) => n === "pubspec.yaml", re: /stellar_flutter_sdk|stellar_[a-z]+_sdk/i },
+	{
+		lang: "swift",
+		file: (n) => n === "package.swift",
+		re: /stellar[-_]?(ios|mac|wallet|swift|base)[-_]?(sdk|mac)?|stellarsdk|\.package\(\s*url:\s*["'][^"']*\/stellar/i,
+	},
+	{
+		lang: "swift",
+		file: (n) => n === "podfile",
+		re: /pod\s+["'][^"']*stellar|stellar-ios-mac-sdk/i,
+	},
+	{
+		lang: "kotlin",
+		file: (n) => n === "build.gradle" || n === "build.gradle.kts",
+		re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i,
+	},
+	{
+		lang: "dart",
+		file: (n) => n === "pubspec.yaml",
+		re: /stellar_flutter_sdk|stellar_[a-z]+_sdk/i,
+	},
 	{ lang: "go", file: (n) => n === "go.mod", re: /github\.com\/stellar\//i },
-	{ lang: "python", file: (n) => n === "requirements.txt" || n === "pyproject.toml" || n === "setup.py" || n === "setup.cfg", re: /\bstellar[-_]sdk\b|py-stellar-base|\bstellar_base\b/i },
+	{
+		lang: "python",
+		file: (n) =>
+			n === "requirements.txt" ||
+			n === "pyproject.toml" ||
+			n === "setup.py" ||
+			n === "setup.cfg",
+		re: /\bstellar[-_]sdk\b|py-stellar-base|\bstellar_base\b/i,
+	},
 ];
 
 // stellar.toml is only a proof if it has real SEP-1 content, not an empty file.
-const RE_STELLAR_TOML = /\bNETWORK_PASSPHRASE\b|\[\[\s*CURRENCIES\s*\]\]|\bSIGNING_KEY\b|\bTRANSFER_SERVER\b|\bWEB_AUTH_ENDPOINT\b/i;
+const RE_STELLAR_TOML =
+	/\bNETWORK_PASSPHRASE\b|\[\[\s*CURRENCIES\s*\]\]|\bSIGNING_KEY\b|\bTRANSFER_SERVER\b|\bWEB_AUTH_ENDPOINT\b/i;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** A blob whose path exists but text is null = unreadable (oversize/binary). */
 function isUnreadable(b: Blob): boolean {
-	return b.present && (b.truncated === true || b.binary === true || b.text == null);
+	return (
+		b.present && (b.truncated === true || b.binary === true || b.text == null)
+	);
 }
 
 const basename = (p: string) => p.slice(p.lastIndexOf("/") + 1);
@@ -197,23 +232,43 @@ export function detectStellarProof(input: ScanInput): ProofResult {
 	// Guard P1: unreadable proof file ⇒ do not conclude. Retry later.
 	const proofPaths = (p: string) => {
 		const b = basename(p).toLowerCase();
-		return b === "cargo.toml" || b.endsWith(".rs") || b === "package.json" || b === "stellar.toml" || LANG_SDK_MARKERS.some((m) => m.file(b));
+		return (
+			b === "cargo.toml" ||
+			b.endsWith(".rs") ||
+			b === "package.json" ||
+			b === "stellar.toml" ||
+			LANG_SDK_MARKERS.some((m) => m.file(b))
+		);
 	};
-	const unreadable = input.blobs.find((b) => proofPaths(b.path) && isUnreadable(b));
+	const unreadable = input.blobs.find(
+		(b) => proofPaths(b.path) && isUnreadable(b),
+	);
 	if (unreadable) {
-		return { proof: "none", facts, outcome: "error", scanNote: "blob-unreadable" };
+		return {
+			proof: "none",
+			facts,
+			outcome: "error",
+			scanNote: "blob-unreadable",
+		};
 	}
 
 	// Guard P2: submodule on a contract path ⇒ incomplete (proof may be nested).
 	const submoduleOnContractPath = input.tree.some(
-		(e) => e.type === "commit" && /(^|\/)(contracts?|crates|packages)(\/|$)/i.test(e.path),
+		(e) =>
+			e.type === "commit" &&
+			/(^|\/)(contracts?|crates|packages)(\/|$)/i.test(e.path),
 	);
 	if (submoduleOnContractPath || input.hasGitmodules) {
 		// Still scan what we have; if we find a positive proof, great — otherwise
 		// we must NOT say `none`.
 		const partial = scanFiles(input, facts);
 		if (partial.proof !== "none") return { ...partial, outcome: "ok" };
-		return { proof: "none", facts: partial.facts, outcome: "incomplete", scanNote: "submodule-contracts" };
+		return {
+			proof: "none",
+			facts: partial.facts,
+			outcome: "incomplete",
+			scanNote: "submodule-contracts",
+		};
 	}
 
 	const scanned = scanFiles(input, facts);
@@ -221,17 +276,34 @@ export function detectStellarProof(input: ScanInput): ProofResult {
 	// Guard P3: no positive proof but the tree wasn't fully enumerated ⇒
 	// incomplete (a contract may live deeper than we walked).
 	if (scanned.proof === "none" && !input.treeComplete) {
-		return { proof: "none", facts: scanned.facts, outcome: "incomplete", scanNote: "tree-incomplete" };
+		return {
+			proof: "none",
+			facts: scanned.facts,
+			outcome: "incomplete",
+			scanNote: "tree-incomplete",
+		};
 	}
 	return { ...scanned, outcome: "ok" };
 }
 
 /** The actual signal extraction over readable blobs (no outcome decisions). */
-function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; facts: CodeFacts } {
-	const cargoBlobs = readable(input.blobs, (p) => basename(p).toLowerCase() === "cargo.toml");
+function scanFiles(
+	input: ScanInput,
+	facts: CodeFacts,
+): { proof: StellarProof; facts: CodeFacts } {
+	const cargoBlobs = readable(
+		input.blobs,
+		(p) => basename(p).toLowerCase() === "cargo.toml",
+	);
 	const rsBlobs = readable(input.blobs, (p) => p.toLowerCase().endsWith(".rs"));
-	const pkgBlobs = readable(input.blobs, (p) => basename(p).toLowerCase() === "package.json");
-	const tomlBlobs = readable(input.blobs, (p) => basename(p).toLowerCase() === "stellar.toml");
+	const pkgBlobs = readable(
+		input.blobs,
+		(p) => basename(p).toLowerCase() === "package.json",
+	);
+	const tomlBlobs = readable(
+		input.blobs,
+		(p) => basename(p).toLowerCase() === "stellar.toml",
+	);
 
 	// ---- Rust / Soroban ----
 	let cargoHasSoroban = false;
@@ -252,7 +324,8 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 		const wm = t.match(RE_WORKSPACE_DEP_SOROBAN);
 		if (wm) {
 			cargoHasSoroban = true;
-			if (!facts.sorobanSdkVersion && (wm[1] || wm[2])) facts.sorobanSdkVersion = wm[1] || wm[2];
+			if (!facts.sorobanSdkVersion && (wm[1] || wm[2]))
+				facts.sorobanSdkVersion = wm[1] || wm[2];
 		}
 	}
 	// Whether the version is workspace-inherited or not, if we saw the dep it counts.
@@ -267,12 +340,14 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 		if (matches) macroCount += matches.length;
 		if (RE_SOROBAN_USE.test(t)) sorobanUse = true;
 		if (!facts.hasAuthPatterns && RE_AUTH.test(t)) facts.hasAuthPatterns = true;
-		if (!facts.hasStoragePatterns && RE_STORAGE.test(t)) facts.hasStoragePatterns = true;
+		if (!facts.hasStoragePatterns && RE_STORAGE.test(t))
+			facts.hasStoragePatterns = true;
 		if (!facts.hasEvents && RE_EVENTS.test(t)) facts.hasEvents = true;
 		if (!facts.usesNoStd && RE_NOSTD.test(t)) facts.usesNoStd = true;
 	}
 	facts.contractMacroCount = macroCount;
-	if (cargoBlobs.some((b) => RE_CDYLIB.test(b.text as string))) facts.isDeployableContract = true;
+	if (cargoBlobs.some((b) => RE_CDYLIB.test(b.text as string)))
+		facts.isDeployableContract = true;
 	facts.versionStatus = versionStatusOf(facts.sorobanSdkVersion);
 
 	// ---- JS / TS Stellar SDK ----
@@ -284,7 +359,13 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 		} catch {
 			continue; // malformed package.json — treat as no-signal here, not a hard error
 		}
-		const maps = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies", "resolutions"];
+		const maps = [
+			"dependencies",
+			"devDependencies",
+			"peerDependencies",
+			"optionalDependencies",
+			"resolutions",
+		];
 		const obj = json as Record<string, Record<string, string> | undefined>;
 		for (const map of maps) {
 			const deps = obj[map];
@@ -307,7 +388,9 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 		for (const b of input.blobs) {
 			if (!b.present || b.text == null) continue;
 			const name = basename(b.path).toLowerCase();
-			const hit = LANG_SDK_MARKERS.find((m) => m.file(name) && m.re.test(b.text as string));
+			const hit = LANG_SDK_MARKERS.find(
+				(m) => m.file(name) && m.re.test(b.text as string),
+			);
 			if (hit) {
 				langDep = `${hit.lang}:${name}`;
 				break;
@@ -317,7 +400,9 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 	if (langDep && !facts.stellarJsDep) facts.stellarJsDep = langDep;
 
 	// ---- stellar.toml (SEP-1) ----
-	const hasStellarToml = tomlBlobs.some((b) => RE_STELLAR_TOML.test(b.text as string));
+	const hasStellarToml = tomlBlobs.some((b) =>
+		RE_STELLAR_TOML.test(b.text as string),
+	);
 
 	// ---- Priority ordering (strongest → weakest) ----
 	if (cargoHasSoroban) return { proof: "cargo-sdk", facts };
@@ -332,11 +417,15 @@ function scanFiles(input: ScanInput, facts: CodeFacts): { proof: StellarProof; f
 // ── codeDepth ────────────────────────────────────────────────────────────────
 
 /** 0..1 depth score. A real deployable contract on a current sdk reaches ~1.0 at 0 stars. */
-export function computeCodeDepth(proof: StellarProof, facts: CodeFacts): number {
+export function computeCodeDepth(
+	proof: StellarProof,
+	facts: CodeFacts,
+): number {
 	const strongRust = proof === "cargo-sdk" || proof === "contract-macros";
 	if (!strongRust) {
 		// js-sdk / stellar-toml proofs are real but shallow → capped at 0.5.
-		if (proof === "js-sdk" || proof === "lang-sdk" || proof === "stellar-toml") return 0.35;
+		if (proof === "js-sdk" || proof === "lang-sdk" || proof === "stellar-toml")
+			return 0.35;
 		return 0; // weak-mention / none
 	}
 	let d = 0.4; // has soroban proof
@@ -344,7 +433,8 @@ export function computeCodeDepth(proof: StellarProof, facts: CodeFacts): number 
 	d += 0.2 * Math.min(1, facts.contractMacroCount / 6);
 	if (facts.versionStatus === "current") d += 0.15;
 	// small credit for real contract mechanics
-	if (facts.hasAuthPatterns || facts.hasStoragePatterns || facts.hasEvents) d += 0.05;
+	if (facts.hasAuthPatterns || facts.hasStoragePatterns || facts.hasEvents)
+		d += 0.05;
 	return Math.max(0, Math.min(1, d));
 }
 
@@ -369,13 +459,23 @@ export interface FarmInput {
  * Designed additive so Raph's contributor-graph verdict folds in as one more
  * flag next week.
  */
-export function computeFarmScore(input: FarmInput): { score: number; flags: string[] } {
+export function computeFarmScore(input: FarmInput): {
+	score: number;
+	flags: string[];
+} {
 	// H8/P5: any real proof ⇒ not farm.
-	if (input.proof === "cargo-sdk" || input.proof === "contract-macros" || input.proof === "js-sdk" || input.proof === "lang-sdk" || input.proof === "stellar-toml") {
+	if (
+		input.proof === "cargo-sdk" ||
+		input.proof === "contract-macros" ||
+		input.proof === "js-sdk" ||
+		input.proof === "lang-sdk" ||
+		input.proof === "stellar-toml"
+	) {
 		return { score: 0, flags: [] };
 	}
 	const flags: string[] = [];
-	if (input.forkOfTemplate && (input.commitCount ?? 99) <= 3) flags.push("isTrivialFork");
+	if (input.forkOfTemplate && (input.commitCount ?? 99) <= 3)
+		flags.push("isTrivialFork");
 	if ((input.commitCount ?? 99) <= 2) flags.push("lowCommitCount");
 	// contributorInflation: many REPO authors but tiny code + few commits (the farm fingerprint).
 	if (
@@ -432,35 +532,67 @@ const STALE_MS = 730 * 86_400_000;
  */
 export function codeProofTier(
 	input: TierInput,
-): { tier: "quality" | "community" | "archive"; unverifiedStellar: boolean; reason: string[] } | null {
+): {
+	tier: "quality" | "community" | "archive";
+	unverifiedStellar: boolean;
+	reason: string[];
+} | null {
 	// Doubt ⇒ no change (never demote on error/incomplete scan).
 	if (input.outcome !== "ok") return null;
 
 	// Protected ⇒ never archive/soft-filter; at most promote to quality.
 	if (isProtected(input.protection)) {
 		if (input.proof === "cargo-sdk" || input.proof === "contract-macros") {
-			if (input.codeDepth >= 0.6) return { tier: "quality", unverifiedStellar: false, reason: ["protected", "code-depth"] };
+			if (input.codeDepth >= 0.6)
+				return {
+					tier: "quality",
+					unverifiedStellar: false,
+					reason: ["protected", "code-depth"],
+				};
 		}
-		return { tier: "community", unverifiedStellar: false, reason: ["protected"] };
+		return {
+			tier: "community",
+			unverifiedStellar: false,
+			reason: ["protected"],
+		};
 	}
 
 	const now = input.now ?? Date.now();
-	const stale = !input.lastCommitAt || now - new Date(input.lastCommitAt).getTime() > STALE_MS;
+	const stale =
+		!input.lastCommitAt ||
+		now - new Date(input.lastCommitAt).getTime() > STALE_MS;
 	const lowStar = (input.stars ?? 0) < 3;
 	const reason: string[] = [];
 
 	// ---- archive (two-key) ----
-	if (input.isArchived) return { tier: "archive", unverifiedStellar: false, reason: ["github-archived"] };
-	if (input.farmScore >= 2) return { tier: "archive", unverifiedStellar: false, reason: [`farm:${input.farmScore}`] };
+	if (input.isArchived)
+		return {
+			tier: "archive",
+			unverifiedStellar: false,
+			reason: ["github-archived"],
+		};
+	if (input.farmScore >= 2)
+		return {
+			tier: "archive",
+			unverifiedStellar: false,
+			reason: [`farm:${input.farmScore}`],
+		};
 	if (input.proof === "none" && input.farmScore >= 1) {
-		return { tier: "archive", unverifiedStellar: false, reason: ["none", `farm:${input.farmScore}`] };
+		return {
+			tier: "archive",
+			unverifiedStellar: false,
+			reason: ["none", `farm:${input.farmScore}`],
+		};
 	}
 	// none + stale + low-star with NO farm fingerprint is NOT enough (P4): a
 	// finished/parked but legit contract must not be archived on staleness alone.
 	// (It stays community + unverified, sinks softly, but remains a reference.)
 
 	// ---- quality (code-proven) ----
-	if ((input.proof === "cargo-sdk" || input.proof === "contract-macros") && input.codeDepth >= 0.6) {
+	if (
+		(input.proof === "cargo-sdk" || input.proof === "contract-macros") &&
+		input.codeDepth >= 0.6
+	) {
 		reason.push("code-depth");
 		return { tier: "quality", unverifiedStellar: false, reason };
 	}
@@ -474,9 +606,24 @@ export function codeProofTier(
 }
 
 /** Assemble the full CodeSignals record from a scan input (pure orchestrator). */
-export function computeCodeSignals(input: ScanInput, farm: Omit<FarmInput, "proof" | "facts">): CodeSignals {
+export function computeCodeSignals(
+	input: ScanInput,
+	farm: Omit<FarmInput, "proof" | "facts">,
+): CodeSignals {
 	const { proof, facts, outcome, scanNote } = detectStellarProof(input);
 	const codeDepth = computeCodeDepth(proof, facts);
-	const { score: farmScore, flags: farmFlags } = computeFarmScore({ proof, facts, ...farm });
-	return { stellarProof: proof, outcome, scanNote, facts, codeDepth, farmScore, farmFlags };
+	const { score: farmScore, flags: farmFlags } = computeFarmScore({
+		proof,
+		facts,
+		...farm,
+	});
+	return {
+		stellarProof: proof,
+		outcome,
+		scanNote,
+		facts,
+		codeDepth,
+		farmScore,
+		farmFlags,
+	};
 }

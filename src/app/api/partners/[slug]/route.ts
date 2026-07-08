@@ -11,8 +11,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { getPayloadSafe } from "@/lib/payload-client";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -30,12 +30,16 @@ function toPublic(p: any) {
 		logoUrl: p.logoUrl ?? null,
 		websiteUrl: p.websiteUrl ?? null,
 		foundedYear: p.foundedYear ?? null,
-		services: (p.services ?? []).map((s: { tag: string }) => s.tag).filter(Boolean),
+		services: (p.services ?? [])
+			.map((s: { tag: string }) => s.tag)
+			.filter(Boolean),
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
 		// Anchor capabilities from stellar.toml (SEP-1) — same source as
 		// anchors.stellar.org. Empty for non-anchors.
-		assets: (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean),
+		assets: (p.assets ?? [])
+			.map((a: { code: string }) => a.code)
+			.filter(Boolean),
 		seps: p.seps ?? [],
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,
@@ -101,7 +105,10 @@ export async function GET(
 		const doc = result.docs[0];
 		if (!doc) {
 			return NextResponse.json(
-				{ error: `Partner '${slug}' not found`, hint: "See /api/partners for the published directory." },
+				{
+					error: `Partner '${slug}' not found`,
+					hint: "See /api/partners for the published directory.",
+				},
 				{ status: 404 },
 			);
 		}

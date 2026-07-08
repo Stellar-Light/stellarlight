@@ -28,7 +28,10 @@ function scanOf(
 		text,
 		truncated: text === null ? true : false,
 	}));
-	const tree = Object.keys(files).map((path) => ({ path, type: "blob" as const }));
+	const tree = Object.keys(files).map((path) => ({
+		path,
+		type: "blob" as const,
+	}));
 	return { fullName: "test/repo", blobs, tree, treeComplete: true, ...opts };
 }
 
@@ -51,7 +54,9 @@ describe("versionStatusOf — the constant that must never be wrong", () => {
 	it("returns unknown for git/path/workspace/unpinned deps", () => {
 		expect(versionStatusOf("*")).toBe("unknown");
 		expect(versionStatusOf("workspace")).toBe("unknown");
-		expect(versionStatusOf("git+https://github.com/stellar/rs-soroban-sdk")).toBe("unknown");
+		expect(
+			versionStatusOf("git+https://github.com/stellar/rs-soroban-sdk"),
+		).toBe("unknown");
 		expect(versionStatusOf("../local-sdk")).toBe("unknown");
 		expect(versionStatusOf(null)).toBe("unknown");
 	});
@@ -64,8 +69,10 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 	it("FIXTURE #1: workspace-inherited soroban-sdk → cargo-sdk (KEEP)", () => {
 		// member crate inherits, root declares the real dep under [workspace.dependencies]
 		const s = scanOf({
-			"contracts/token/Cargo.toml": "[dependencies]\nsoroban-sdk.workspace = true\n",
-			"Cargo.toml": '[workspace]\nmembers = ["contracts/*"]\n[workspace.dependencies]\nsoroban-sdk = "22.0.3"\n',
+			"contracts/token/Cargo.toml":
+				"[dependencies]\nsoroban-sdk.workspace = true\n",
+			"Cargo.toml":
+				'[workspace]\nmembers = ["contracts/*"]\n[workspace.dependencies]\nsoroban-sdk = "22.0.3"\n',
 		});
 		const r = detectStellarProof(s);
 		expect(r.proof).toBe("cargo-sdk");
@@ -92,25 +99,37 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 
 	it("FIXTURE #5: js-sdk frontend (no lib.rs) → js-sdk (KEEP)", () => {
 		const s = scanOf({
-			"package.json": JSON.stringify({ dependencies: { "@stellar/stellar-sdk": "^12.0.0", react: "^18" } }),
+			"package.json": JSON.stringify({
+				dependencies: { "@stellar/stellar-sdk": "^12.0.0", react: "^18" },
+			}),
 		});
 		expect(detectStellarProof(s).proof).toBe("js-sdk");
 	});
 
 	it("matches @stellar deps under devDependencies/resolutions too", () => {
-		const s = scanOf({ "package.json": JSON.stringify({ devDependencies: { "js-stellar-sdk": "1.0.0" } }) });
+		const s = scanOf({
+			"package.json": JSON.stringify({
+				devDependencies: { "js-stellar-sdk": "1.0.0" },
+			}),
+		});
 		expect(detectStellarProof(s).proof).toBe("js-sdk");
 	});
 
 	it("FIXTURE #7: rc version → cargo-sdk with versionStatus unknown (no tier drop)", () => {
-		const s = scanOf({ "Cargo.toml": '[dependencies]\nsoroban-sdk = "22.0.0-rc.3"\n' });
+		const s = scanOf({
+			"Cargo.toml": '[dependencies]\nsoroban-sdk = "22.0.0-rc.3"\n',
+		});
 		const r = detectStellarProof(s);
 		expect(r.proof).toBe("cargo-sdk");
 		expect(r.facts.versionStatus).toBe("unknown");
 	});
 
 	it("FIXTURE #8: genuine junk (no Stellar signal, tree complete) → none/ok", () => {
-		const s = scanOf({ "package.json": JSON.stringify({ dependencies: { ethers: "^6", "@solana/web3.js": "^1" } }) });
+		const s = scanOf({
+			"package.json": JSON.stringify({
+				dependencies: { ethers: "^6", "@solana/web3.js": "^1" },
+			}),
+		});
 		const r = detectStellarProof(s);
 		expect(r.proof).toBe("none");
 		expect(r.outcome).toBe("ok");
@@ -119,68 +138,102 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 	// ── lang-sdk: non-JS/Rust Stellar SDKs (verified against real manifests) ──
 	it("Swift Package.swift w/ stellar-ios-mac-sdk → lang-sdk (KEEP; was wrongly none)", () => {
 		const s = scanOf({
-			"Package.swift": 'dependencies: [\n  .package(url: "https://github.com/Soneso/stellar-ios-mac-sdk", .upToNextMajor(from: "3.6.0")),\n]',
+			"Package.swift":
+				'dependencies: [\n  .package(url: "https://github.com/Soneso/stellar-ios-mac-sdk", .upToNextMajor(from: "3.6.0")),\n]',
 		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Swift CocoaPods Podfile w/ pod 'stellar-ios-mac-sdk' → lang-sdk (KEEP; lobstr Vault-iOS class)", () => {
-		const s = scanOf({ Podfile: "# The Soneso stellar SDK for iOS\n  pod 'stellar-ios-mac-sdk', '3.0.3'\n  pod 'lottie-ios'\n" });
+		const s = scanOf({
+			Podfile:
+				"# The Soneso stellar SDK for iOS\n  pod 'stellar-ios-mac-sdk', '3.0.3'\n  pod 'lottie-ios'\n",
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Kotlin build.gradle.kts w/ network.lightsail:stellar-sdk → lang-sdk (KEEP)", () => {
-		const s = scanOf({ "build.gradle.kts": 'implementation("network.lightsail:stellar-sdk:3.0.0")' });
+		const s = scanOf({
+			"build.gradle.kts":
+				'implementation("network.lightsail:stellar-sdk:3.0.0")',
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Flutter pubspec.yaml w/ stellar_flutter_sdk → lang-sdk (KEEP)", () => {
-		const s = scanOf({ "pubspec.yaml": "dependencies:\n  stellar_flutter_sdk: ^1.8.0\n  flutter:\n" });
+		const s = scanOf({
+			"pubspec.yaml":
+				"dependencies:\n  stellar_flutter_sdk: ^1.8.0\n  flutter:\n",
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Go go.mod requiring github.com/stellar/go → lang-sdk (KEEP)", () => {
-		const s = scanOf({ "go.mod": "module example.com/app\n\nrequire github.com/stellar/go v0.0.0-20240101\n" });
+		const s = scanOf({
+			"go.mod":
+				"module example.com/app\n\nrequire github.com/stellar/go v0.0.0-20240101\n",
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Python requirements.txt w/ stellar-sdk → lang-sdk (KEEP)", () => {
-		const s = scanOf({ "requirements.txt": "requests==2.31.0\nstellar-sdk==8.0.0\n" });
+		const s = scanOf({
+			"requirements.txt": "requests==2.31.0\nstellar-sdk==8.0.0\n",
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("cargo-sdk still wins over a lang manifest (Rust contract w/ a go.mod tool)", () => {
-		const s = scanOf({ "Cargo.toml": CARGO_SDK, "tools/go.mod": "require github.com/stellar/go v0.0.0" });
+		const s = scanOf({
+			"Cargo.toml": CARGO_SDK,
+			"tools/go.mod": "require github.com/stellar/go v0.0.0",
+		});
 		expect(detectStellarProof(s).proof).toBe("cargo-sdk");
 	});
 
 	it("Rust infra: package IS a stellar crate (rs-stellar-xdr) → lang-sdk (was wrongly none)", () => {
-		const s = scanOf({ "Cargo.toml": '[package]\nname = "stellar-xdr"\nversion = "23.0.0"\n' });
+		const s = scanOf({
+			"Cargo.toml": '[package]\nname = "stellar-xdr"\nversion = "23.0.0"\n',
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Rust infra: dep on stellar-baselib (rs-soroban-client) → lang-sdk", () => {
-		const s = scanOf({ "Cargo.toml": '[package]\nname = "soroban-client"\n[dependencies]\nstellar-baselib = "0.5.8"\n' });
+		const s = scanOf({
+			"Cargo.toml":
+				'[package]\nname = "soroban-client"\n[dependencies]\nstellar-baselib = "0.5.8"\n',
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("Rust infra: [dependencies.stellar-xdr] table (rs-ingest) → lang-sdk", () => {
-		const s = scanOf({ "Cargo.toml": '[package]\nname = "ingest"\n[dependencies.stellar-xdr]\nversion = "20.0.0"\n' });
+		const s = scanOf({
+			"Cargo.toml":
+				'[package]\nname = "ingest"\n[dependencies.stellar-xdr]\nversion = "20.0.0"\n',
+		});
 		expect(detectStellarProof(s).proof).toBe("lang-sdk");
 	});
 
 	it("NEGATIVE: plain Rust crate with no stellar dep → none (noir/calimero class)", () => {
-		const s = scanOf({ "Cargo.toml": '[package]\nname = "noir-compiler"\n[dependencies]\nserde = "1"\ntokio = "1"\n' });
+		const s = scanOf({
+			"Cargo.toml":
+				'[package]\nname = "noir-compiler"\n[dependencies]\nserde = "1"\ntokio = "1"\n',
+		});
 		expect(detectStellarProof(s).proof).toBe("none");
 	});
 
 	it("NEGATIVE: Package.swift with NO stellar dep → none (no over-match)", () => {
-		const s = scanOf({ "Package.swift": 'dependencies: [\n  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),\n]' });
+		const s = scanOf({
+			"Package.swift":
+				'dependencies: [\n  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),\n]',
+		});
 		expect(detectStellarProof(s).proof).toBe("none");
 	});
 
 	it("NEGATIVE: build.gradle with an unrelated dep → none", () => {
-		const s = scanOf({ "build.gradle": 'implementation("com.squareup.okhttp3:okhttp:4.12.0")' });
+		const s = scanOf({
+			"build.gradle": 'implementation("com.squareup.okhttp3:okhttp:4.12.0")',
+		});
 		expect(detectStellarProof(s).proof).toBe("none");
 	});
 
@@ -211,14 +264,23 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 	});
 
 	it("weak textual mention with no code → weak-mention", () => {
-		const s = scanOf({ "README.md": "we plan to build on Stellar" }, { weakMention: true });
+		const s = scanOf(
+			{ "README.md": "we plan to build on Stellar" },
+			{ weakMention: true },
+		);
 		expect(detectStellarProof(s).proof).toBe("weak-mention");
 	});
 });
 
 describe("farmScore — real code caps to 0 (H8/P5)", () => {
 	it("ANY positive proof forces farmScore 0, even with farm fingerprints", () => {
-		const facts = detectStellarProof(scanOf({ "package.json": JSON.stringify({ dependencies: { "stellar-sdk": "1" } }) })).facts;
+		const facts = detectStellarProof(
+			scanOf({
+				"package.json": JSON.stringify({
+					dependencies: { "stellar-sdk": "1" },
+				}),
+			}),
+		).facts;
 		const r = computeFarmScore({
 			proof: "js-sdk",
 			facts,
@@ -232,8 +294,15 @@ describe("farmScore — real code caps to 0 (H8/P5)", () => {
 	});
 
 	it("FIXTURE #4: squash-merged real contract (5 commits) → farmScore 0", () => {
-		const facts = detectStellarProof(scanOf({ "Cargo.toml": CARGO_SDK, "src/lib.rs": LIB_RS })).facts;
-		const r = computeFarmScore({ proof: "cargo-sdk", facts, commitCount: 5, repoContributorCount: 1 });
+		const facts = detectStellarProof(
+			scanOf({ "Cargo.toml": CARGO_SDK, "src/lib.rs": LIB_RS }),
+		).facts;
+		const r = computeFarmScore({
+			proof: "cargo-sdk",
+			facts,
+			commitCount: 5,
+			repoContributorCount: 1,
+		});
 		expect(r.score).toBe(0);
 	});
 
@@ -256,8 +325,25 @@ describe("codeProofTier — over-filter-safe, two-key, never-demote-on-doubt", (
 	const base = { protection: { fullName: "acme/thing" }, now: NOW };
 
 	it("never demotes on a non-ok scan (error/incomplete → no change)", () => {
-		expect(codeProofTier({ ...base, proof: "none", outcome: "error", farmScore: 5, codeDepth: 0, isArchived: false })).toBeNull();
-		expect(codeProofTier({ ...base, proof: "none", outcome: "incomplete", farmScore: 5, codeDepth: 0 })).toBeNull();
+		expect(
+			codeProofTier({
+				...base,
+				proof: "none",
+				outcome: "error",
+				farmScore: 5,
+				codeDepth: 0,
+				isArchived: false,
+			}),
+		).toBeNull();
+		expect(
+			codeProofTier({
+				...base,
+				proof: "none",
+				outcome: "incomplete",
+				farmScore: 5,
+				codeDepth: 0,
+			}),
+		).toBeNull();
 	});
 
 	it("FIXTURE #6: a protected (canonical) repo is NEVER archived, even with proof none", () => {
@@ -304,12 +390,26 @@ describe("codeProofTier — over-filter-safe, two-key, never-demote-on-doubt", (
 	});
 
 	it("archives genuine junk: none + farm>=1", () => {
-		const r = codeProofTier({ ...base, proof: "none", outcome: "ok", farmScore: 1, codeDepth: 0, isArchived: false });
+		const r = codeProofTier({
+			...base,
+			proof: "none",
+			outcome: "ok",
+			farmScore: 1,
+			codeDepth: 0,
+			isArchived: false,
+		});
 		expect(r?.tier).toBe("archive");
 	});
 
 	it("archives on GitHub ground truth (isArchived)", () => {
-		const r = codeProofTier({ ...base, proof: "cargo-sdk", outcome: "ok", farmScore: 0, codeDepth: 0.9, isArchived: true });
+		const r = codeProofTier({
+			...base,
+			proof: "cargo-sdk",
+			outcome: "ok",
+			farmScore: 0,
+			codeDepth: 0.9,
+			isArchived: true,
+		});
 		expect(r?.tier).toBe("archive");
 	});
 
@@ -330,7 +430,10 @@ describe("codeProofTier — over-filter-safe, two-key, never-demote-on-doubt", (
 
 describe("computeCodeSignals — end-to-end on a real deployable contract", () => {
 	it("a full Soroban token repo scores deep + quality-eligible", () => {
-		const sig = computeCodeSignals(scanOf({ "Cargo.toml": CARGO_SDK, "src/lib.rs": LIB_RS }), { commitCount: 30 });
+		const sig = computeCodeSignals(
+			scanOf({ "Cargo.toml": CARGO_SDK, "src/lib.rs": LIB_RS }),
+			{ commitCount: 30 },
+		);
 		expect(sig.stellarProof).toBe("cargo-sdk");
 		expect(sig.outcome).toBe("ok");
 		expect(sig.codeDepth).toBeGreaterThanOrEqual(0.6);

@@ -20,4 +20,3 @@ export function useStellarTVL() {
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 }
-

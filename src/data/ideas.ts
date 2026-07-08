@@ -184,7 +184,7 @@ export const IDEAS: Idea[] = [
 		id: "account-demolisher",
 		title: "Account Demolisher",
 		description:
-			'Abandoning a Stellar account requires manually removing all trustlines, offers, and data entries before merging the account — a tedious multi-step process with no tooling support. This creates UX debt for end-users and wallet developers alike.',
+			"Abandoning a Stellar account requires manually removing all trustlines, offers, and data entries before merging the account — a tedious multi-step process with no tooling support. This creates UX debt for end-users and wallet developers alike.",
 		technicalRequirements:
 			'Automated Cleanup: Detect and batch-remove all open offers, trustlines, and account data in the minimum number of transactions.\n\nSafe Merge: Final account merge to a user-specified destination address.\n\nWallet SDK: Expose as a callable SDK function so wallets can offer "close account" flows natively.',
 		category: "consumer-dapps",

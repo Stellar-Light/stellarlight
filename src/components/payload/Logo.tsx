@@ -1,19 +1,27 @@
-import React from "react";
+import type React from "react";
 
 export const Logo: React.FC = () => {
 	return (
 		<a
 			href="/"
-			style={{ 
-				display: "flex", 
-				alignItems: "center", 
+			style={{
+				display: "flex",
+				alignItems: "center",
 				gap: "0.5rem",
 				textDecoration: "none",
 				cursor: "pointer",
 			}}
 			title="Go to Home"
 		>
-			<div style={{ height: "32px", width: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+			<div
+				style={{
+					height: "32px",
+					width: "32px",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+			>
 				<img
 					src="/logo.png"
 					alt="Stellar Light Logo"
@@ -33,5 +41,3 @@ export const Logo: React.FC = () => {
 		</a>
 	);
 };
-
-

@@ -22,7 +22,8 @@ import configPromise from "../src/payload.config";
 
 type Doc = Record<string, any>;
 
-const normName = (s: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const normName = (s: string) =>
+	(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
 const githubRepo = (d: Doc): string | null => {
 	const g = d.github || d.links?.github || null;
@@ -72,10 +73,14 @@ async function main() {
 		depth: 0,
 	});
 	const docs = res.docs as Doc[];
-	console.log(`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft)" : "DRY RUN (read-only)"}`);
+	console.log(
+		`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft)" : "DRY RUN (read-only)"}`,
+	);
 	console.log(`Loaded ${docs.length} projects (totalDocs=${res.totalDocs}).\n`);
 	if (docs.length < res.totalDocs) {
-		console.log(`WARNING: only loaded ${docs.length} of ${res.totalDocs} — detection INCOMPLETE.\n`);
+		console.log(
+			`WARNING: only loaded ${docs.length} of ${res.totalDocs} — detection INCOMPLETE.\n`,
+		);
 	}
 
 	const byId = new Map<string, Doc>(docs.map((d) => [String(d.id), d]));
@@ -110,9 +115,13 @@ async function main() {
 	let toHide = 0;
 	console.log(`HIGH-CONFIDENCE duplicate clusters: ${clusters.length}\n`);
 	for (const ids of clusters) {
-		const ranked = ids.map((i) => byId.get(i)!).sort((a, b) => rank(b) - rank(a));
+		const ranked = ids
+			.map((i) => byId.get(i)!)
+			.sort((a, b) => rank(b) - rank(a));
 		const keeper = ranked[0];
-		console.log(`■ keep: ${keeper.name} [${keeper.status}/${keeper.verificationLevel ?? "?"}${keeper.scf?.awarded ? "/SCF" : ""}] (${keeper.slug})`);
+		console.log(
+			`■ keep: ${keeper.name} [${keeper.status}/${keeper.verificationLevel ?? "?"}${keeper.scf?.awarded ? "/SCF" : ""}] (${keeper.slug})`,
+		);
 		for (const d of ranked.slice(1)) {
 			toHide++;
 			if (EXECUTE) {
@@ -123,32 +132,47 @@ async function main() {
 				});
 				console.log(`   HIDDEN→Draft: ${d.name} (${d.slug}) id=${d.id}`);
 			} else {
-				console.log(`   hide: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id}`);
+				console.log(
+					`   hide: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id}`,
+				);
 			}
 		}
 	}
 
 	// Fuzzy — review only, NO action proposed.
-	const names = docs.map((d) => ({ id: String(d.id), name: d.name, nn: normName(d.name) }))
+	const names = docs
+		.map((d) => ({ id: String(d.id), name: d.name, nn: normName(d.name) }))
 		.filter((x) => x.nn.length >= 4)
 		.sort((a, b) => a.nn.localeCompare(b.nn));
 	const fuzzy: string[] = [];
 	for (let i = 0; i < names.length; i++) {
-		for (let j = i + 1; j < names.length && names[j].nn[0] === names[i].nn[0]; j++) {
-			const a = names[i].nn, b = names[j].nn;
+		for (
+			let j = i + 1;
+			j < names.length && names[j].nn[0] === names[i].nn[0];
+			j++
+		) {
+			const a = names[i].nn,
+				b = names[j].nn;
 			if (a === b) continue; // already caught above
 			const prefix = b.startsWith(a) || a.startsWith(b);
-			const oneEdit = Math.abs(a.length - b.length) <= 1 && a.length >= 5 &&
+			const oneEdit =
+				Math.abs(a.length - b.length) <= 1 &&
+				a.length >= 5 &&
 				(a.includes(b.slice(0, -1)) || b.includes(a.slice(0, -1)));
-			if (prefix || oneEdit) fuzzy.push(`   ? ${names[i].name}  ~  ${names[j].name}`);
+			if (prefix || oneEdit)
+				fuzzy.push(`   ? ${names[i].name}  ~  ${names[j].name}`);
 		}
 	}
 
-	console.log(`\nFUZZY (review only, NOT proposed for action): ${fuzzy.length}`);
+	console.log(
+		`\nFUZZY (review only, NOT proposed for action): ${fuzzy.length}`,
+	);
 	for (const f of fuzzy.slice(0, 40)) console.log(f);
 	if (fuzzy.length > 40) console.log(`   …and ${fuzzy.length - 40} more`);
 
-	console.log(`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${docs.length - toHide} kept of ${docs.length}.`);
+	console.log(
+		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${docs.length - toHide} kept of ${docs.length}.`,
+	);
 	console.log("READ-ONLY — nothing was changed.");
 	process.exit(0);
 }

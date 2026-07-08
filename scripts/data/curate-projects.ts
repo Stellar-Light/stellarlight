@@ -179,11 +179,15 @@ async function main() {
 		const existing: string[] = Array.isArray(d.types) ? d.types : [];
 		const missing = addTypes.filter((t) => !existing.includes(t));
 		if (!missing.length) {
-			console.log(`  ${slug}: types already include ${addTypes.join("/")}, skip`);
+			console.log(
+				`  ${slug}: types already include ${addTypes.join("/")}, skip`,
+			);
 			continue;
 		}
 		const next = [...existing, ...missing];
-		console.log(`  ${slug}: types [${existing.join(", ")}] → [${next.join(", ")}]`);
+		console.log(
+			`  ${slug}: types [${existing.join(", ")}] → [${next.join(", ")}]`,
+		);
 		writes.push({ id: d.id, slug, data: { types: next } });
 	}
 
@@ -231,7 +235,10 @@ async function main() {
 				`  CANDIDATE ${proj.slug}: category=${proj.category} types=[${types.join(", ")}] ← partner ${pt.slug} (type=${pt.partnerType}, ramps=${(pt.rampTypes ?? []).join("/") || "-"})`,
 			);
 		}
-		if (!candidates) console.log("  (none — all ramp-capable partners' projects carry Anchor)");
+		if (!candidates)
+			console.log(
+				"  (none — all ramp-capable partners' projects carry Anchor)",
+			);
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──

@@ -1,240 +1,240 @@
 {
-  "descUpdates": [
-    {
-      "slug": "python-stellar-sdk",
-      "shortDescription": "The canonical Python SDK for Stellar (py-stellar-base), listed as a client SDK on developers.stellar.org/docs/tools/sdks. Build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts, with both sync and async support. The go-to Python client library for building on Stellar."
-    },
-    {
-      "slug": "stellar-php-sdk",
-      "shortDescription": "The canonical PHP SDK for Stellar (stellar-php-sdk by Soneso), listed as a client SDK on developers.stellar.org/docs/tools/sdks. The go-to PHP client library to build and sign transactions, query Horizon, implement SEPs, and call the Stellar RPC for Soroban smart contracts."
-    },
-    {
-      "slug": "kmp-stellar-sdk",
-      "shortDescription": "Kotlin Multiplatform SDK for Stellar (kmp-stellar-sdk by Soneso), listed as a client SDK on developers.stellar.org/docs/tools/sdks. Write your Stellar integration once in Kotlin and deploy across JVM (Android, server), iOS, macOS and Web. A client library to build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts."
-    },
-    {
-      "slug": "nodies",
-      "shortDescription": "Nodies is a Web3 infrastructure platform and Stellar RPC node provider offering high-performance RPC and Horizon endpoints on Stellar mainnet and testnet. Lets builders read and submit transactions without self-hosting nodes. SCF-funded and listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "alchemy",
-      "shortDescription": "Alchemy is an enterprise-grade Web3 developer platform and Stellar RPC node provider, offering managed Stellar/Soroban RPC endpoints, Horizon access, enhanced APIs, and dedicated nodes on mainnet and testnet for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "blockdaemon",
-      "shortDescription": "Blockdaemon is an institutional blockchain infrastructure provider and Stellar RPC node provider, offering managed Stellar/Soroban RPC endpoints, Horizon API access, and dedicated nodes on mainnet and testnet for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "nownodes",
-      "shortDescription": "NOWNodes is a node-as-a-service provider offering Stellar RPC node endpoints and Horizon API access across Futurenet, testnet, and mainnet, plus dedicated nodes. Lets builders read and submit Stellar/Soroban transactions without self-hosting. SCF-funded and listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "obsrvr",
-      "shortDescription": "Obsrvr provides production-ready Stellar RPC node infrastructure including Stellar/Soroban RPC endpoints, Horizon API access with RPC archive support, and Flow programmable data pipelines for real-time event streaming and indexing. Lets builders read and submit transactions on mainnet and testnet. SCF-funded and listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "quicknode",
-      "shortDescription": "QuickNode is a managed Stellar RPC node provider with official Stellar support, exposing the Horizon REST API and the Soroban JSON-RPC API on mainnet and testnet plus dedicated nodes. Lets builders read ledger/account/transaction data and submit transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "validation-cloud",
-      "shortDescription": "Validation Cloud is a node infrastructure and Stellar RPC node provider offering high-performance Stellar RPC and Horizon endpoints via its Node API, combining Horizon and Soroban RPC in a single multi-region endpoint with failover and a free tier. Live on Soroban mainnet since March 2024 for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "liquify",
-      "shortDescription": "Liquify is a Stellar RPC node provider supplying long-term public Stellar and Soroban RPC endpoints with archival support across Futurenet, testnet, and mainnet. Lets builders read and submit transactions without self-hosting nodes. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "gatewayfm",
-      "shortDescription": "Gateway.fm is a Stellar RPC node provider offering public and dedicated Stellar/Soroban RPC endpoints with RPC archive support on testnet and mainnet. Lets builders read and submit transactions without self-hosting nodes. SCF-funded and listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "infstones",
-      "shortDescription": "InfStones is a node infrastructure and Stellar RPC node provider offering Horizon and Soroban RPC developer access via an auto-scaling cluster with a freemium tier and dedicated nodes on mainnet. Lets builders read and submit Stellar transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "slug": "space-and-time",
-      "shortDescription": "Space and Time is a verifiable data warehouse and indexer for Stellar/Soroban, integrated with SDF to power data-driven smart contracts. It indexes onchain ledger data, lets developers join it with offchain datasets, and uses Proof of SQL zero-knowledge proofs to verify query results for reserves/NAV proofs, accounting, audits, and compliance."
-    },
-    {
-      "slug": "zettablock",
-      "shortDescription": "ZettaBlock is an institutional-grade Web3 data indexer and analytics platform integrated with Stellar (SDF partner). It indexes Stellar/Soroban on-chain data and auto-generates custom GraphQL and REST APIs from SQL queries, with historical and real-time data plus private off-chain data joins for building data-driven dapps without managing your own indexing infrastructure."
-    },
-    {
-      "slug": "streamingfast",
-      "shortDescription": "StreamingFast brings Firehose and Substreams indexing to Stellar, integrating it into The Graph's decentralized indexing network. Substreams-powered Subgraphs enable high-throughput, parallelized extraction and streaming of Stellar/Soroban ledger and event data as composable data pipelines for subgraph-like access to onchain data."
-    },
-    {
-      "slug": "flipside",
-      "shortDescription": "Flipside provides free analytics dashboards and a SQL data warehouse over indexed Stellar on-chain data, letting analysts and builders query transactions, accounts, and network activity. Part of its blockchain growth and data-science platform, it exposes curated Stellar datasets for ad-hoc analysis and visualization."
-    },
-    {
-      "slug": "stellar-laboratory",
-      "shortDescription": "Stellar Lab (Laboratory, lab.stellar.org) is the SDF's official web-based developer toolkit for the Stellar network. Its Account / Create Account tool funds new testnet (and futurenet) accounts with test XLM directly via the Friendbot faucet, no CLI needed. Also builds, signs, simulates and submits transactions, calls Horizon/RPC endpoints, and decodes XDR. A getting-started-on-testnet staple."
-    },
-    {
-      "slug": "idos",
-      "shortDescription": "idOS is a decentralized identity and data-storage layer providing reusable KYC for Stellar. Users complete KYC/identity verification once, store encrypted credentials self-custodially, and grant apps consent-based access via zero-knowledge proofs — enabling compliant onboarding, verifiable credentials, and portable digital identity across Stellar apps without repeated KYC."
-    },
-    {
-      "slug": "chaincerts",
-      "shortDescription": "Chaincerts issues verifiable credentials and decentralized identity (DID) on Stellar using Soroban smart contracts. It mints non-transferable soulbound credential tokens governed by on-chain issuance/revocation contracts, with encrypted data and self-sovereign identity — a building block for KYC, certifications, and proof-of-credential on Stellar. SCF-funded, by kommitters."
-    },
-    {
-      "slug": "didstellar",
-      "shortDescription": "DID:STELLAR is a W3C-compliant Decentralized Identifier (DID) method for Stellar, letting builders anchor self-sovereign identity and verifiable credentials to Stellar accounts. It provides the DID document registration, resolution, and key-management primitives for decentralized identity, KYC, and proof-of-personhood use cases on Stellar/Soroban. By kommitters."
-    },
-    {
-      "slug": "reclaim",
-      "shortDescription": "Reclaim Protocol brings zkTLS verifiable credentials and proof-of-personhood to Stellar. Its zkFetch SDK generates zero-knowledge proofs of a user's data from any website (HTTPS session keys) and verifies them on-chain via Soroban — enabling DID, reputation, secondary KYC, and verifiable credentials without exposing personal data or relying on APIs. Has an official Stellar/Soroban integration example."
-    },
-    {
-      "slug": "scorechain",
-      "shortDescription": "Scorechain brings enterprise crypto compliance to Stellar: KYT (Know-Your-Transaction), AML, risk scoring, and sanctions screening integrated with the Stellar blockchain. A RegTech platform (FATF/OFAC/EU AMLD-aligned) covering 15+ chains, it gives Stellar anchors and institutions the transaction-monitoring and compliance tooling that complements KYC/identity onboarding. SCF-funded."
-    },
-    {
-      "slug": "stellar-passport",
-      "shortDescription": "Stellar Passport is a passkey-secured identity and participation layer on Stellar. A single QR scan creates a passkey-backed embedded wallet and on-chain identity, then issues verifiable participation stamps/credentials — building a portable reputation and identity record for the Stellar ecosystem. Adjacent to KYC/proof-of-personhood via passkey-based account identity. SCF-funded ($150k)."
-    },
-    {
-      "slug": "kale",
-      "shortDescription": "$KALE is a proof-of-teamwork farming game on Stellar's Soroban smart contracts, created by SDF's Tyler van der Hoeven. The canonical Stellar on-chain game: farmers stake, work and harvest a shared block reward (no winner-takes-all). Open-source miners (web/GPU/mobile) drove massive Soroban activity. Play-to-earn GameFi flagship."
-    },
-    {
-      "slug": "warmancer",
-      "shortDescription": "Warmancer (Black Friday) is a free-to-play on-chain strategy game on Stellar, built by Scrying Stone (ex-SDF founders) with a $136.5K SCF Round 33 award. Uses zero-knowledge proofs on Soroban to hide board positions, plus on-chain items/abilities tied to your wallet. A flagship Stellar GameFi / play-to-earn strategy title."
-    },
-    {
-      "slug": "beamable",
-      "shortDescription": "Beamable is a game server and LiveOps platform integrated with Stellar (SCF #38 $150K Build Award). Its Unity, Unreal and Web SDKs add Stellar wallet login, tokens, NFTs and marketplaces to games, letting studios ship blockchain / GameFi titles on Soroban without deep crypto expertise. Core gaming backend SDK for play-to-earn games on Stellar."
-    },
-    {
-      "slug": "katagames",
-      "shortDescription": "Kata.Games is a Stellar gaming sharing platform empowering indie developers to build, host and share online games using Web3 and Soroban, with a portal system to teleport between creator-authored worlds and NFT-based assets. Backed by the Stellar Community Fund. On-chain game creation and play-to-earn tooling for indie GameFi."
-    },
-    {
-      "slug": "stellar-unity-developer-kit",
-      "shortDescription": "Stellar Unity Developer Kit is a Unity SDK for building blockchain games on Stellar, with wallet management, token interactions and NFT support so game studios can integrate Soroban into video games. SCF-awarded gaming developer tooling for on-chain / GameFi and play-to-earn titles on Stellar."
-    },
-    {
-      "slug": "nebulavrf",
-      "shortDescription": "NebulaVRF is the first fully on-chain Verifiable Random Function for Soroban, providing provably fair randomness for games, lotteries and NFT minting on Stellar. A core GameFi primitive: on-chain games and play-to-earn mechanics use it for tamper-proof loot, matchmaking and draws on Stellar."
-    },
-    {
-      "slug": "cyberbrawl",
-      "shortDescription": "Cyberbrawl is a fast-paced on-chain trading card game (TCG) on Stellar by Litemint. Players battle in real-time duels and tournaments using on-chain heroes, cards and badges, with NFT assets and play-to-earn rewards. A live Stellar GameFi title."
-    },
-    {
-      "slug": "open-gamefi-sdk",
-      "shortDescription": "Open GameFi SDK is an open-source SDK integrating Stellar with the Colyseus.js multiplayer framework, letting developers build and deploy on-chain multiplayer games on Stellar/Soroban. Gaming developer tooling for play-to-earn and GameFi titles."
-    },
-    {
-      "slug": "vaquita",
-      "shortDescription": "Vaquita is a save-to-earn DeFi savings protocol on Stellar/Soroban for LATAM and unbanked users (SCF 'Gamified savings' award). It redistributes yield from early withdrawers to committed savers using game-theory incentives. Note: this is a gamified DeFi savings product, not a game."
-    }
-  ],
-  "retags": [
-    {
-      "slug": "idos",
-      "category": "Infrastructure"
-    }
-  ],
-  "newRecords": [
-    {
-      "name": "JavaScript Stellar SDK",
-      "category": "Tooling",
-      "website": "https://github.com/stellar/js-stellar-sdk",
-      "shortDescription": "The official SDF-maintained JavaScript/TypeScript SDK (@stellar/stellar-sdk, formerly js-stellar-sdk) for building on Stellar. The canonical client library for Node.js and browsers: build, sign and submit transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts. Listed as an official client SDK on developers.stellar.org."
-    },
-    {
-      "name": "Go Stellar SDK",
-      "category": "Tooling",
-      "website": "https://github.com/stellar/go-stellar-sdk",
-      "shortDescription": "The official SDF-maintained Go SDK (go-stellar-sdk) for building on Stellar. The canonical Go client library to build and sign transactions, query Horizon via horizonclient, and interact with the Stellar RPC. In Oct 2025 the stellar/go monorepo was renamed to stellar/go-stellar-sdk; listed as an official client SDK on developers.stellar.org."
-    },
-    {
-      "name": "Soroban Rust SDK",
-      "category": "Tooling",
-      "website": "https://github.com/stellar/rs-soroban-sdk",
-      "shortDescription": "The official SDF-maintained Rust SDK (soroban-sdk) for writing Stellar smart contracts that compile to Wasm and run on the Soroban runtime. The canonical contract SDK: data structures, storage access, crypto, cross-contract calls and a test harness. Published on crates.io as soroban-sdk."
-    },
-    {
-      "name": "TypeScript Wallet SDK",
-      "category": "Tooling",
-      "website": "https://github.com/stellar/typescript-wallet-sdk",
-      "shortDescription": "Official SDF-maintained TypeScript Wallet SDK (@stellar/typescript-wallet-sdk) for building Stellar wallet apps fast. Wraps the JavaScript Stellar SDK to handle accounts, payments, key management, and anchor integration via SEPs (SEP-6, SEP-10, SEP-24, SEP-31). One of the four official Wallet SDK languages on developers.stellar.org."
-    },
-    {
-      "name": "Java Stellar SDK",
-      "category": "Tooling",
-      "website": "https://github.com/lightsail-network/java-stellar-sdk",
-      "shortDescription": "java-stellar-sdk is a community-maintained Java/Android client SDK listed as an official client SDK on developers.stellar.org. Maintained under the Lightsail Network org, it provides APIs to build and sign transactions, query Horizon, and call the Stellar RPC Server to deploy and invoke Soroban smart contracts."
-    },
-    {
-      "name": "iOS Stellar SDK",
-      "category": "Tooling",
-      "website": "https://github.com/Soneso/stellar-ios-mac-sdk",
-      "shortDescription": "Community-maintained iOS and macOS SDK (stellar-ios-mac-sdk by Soneso) for building on Stellar in Swift, listed on developers.stellar.org/docs/tools/sdks as a client SDK. The Swift client library to build and sign transactions, query Horizon, handle SEPs, and call the Stellar RPC for Soroban smart contracts."
-    },
-    {
-      "name": ".NET Stellar SDK",
-      "category": "Tooling",
-      "website": "https://github.com/Beans-BV/dotnet-stellar-sdk",
-      "shortDescription": "Community-maintained C#/.NET SDK (dotnet-stellar-sdk by Beans BV) for building on Stellar, listed as the C# .NET client SDK on developers.stellar.org/docs/tools/sdks. Build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts. Apache-2.0; actively maintained (v15.1.0, June 2026)."
-    },
-    {
-      "name": "Ankr",
-      "category": "Infrastructure",
-      "website": "https://www.ankr.com/rpc/stellar/",
-      "shortDescription": "Ankr is a multi-chain Web3 infrastructure provider offering managed Stellar RPC node endpoints for builders to read and submit transactions. It provides public and premium Soroban JSON-RPC on mainnet and testnet, including full RPC archive access, removing the need to self-host nodes. Officially listed on the developers.stellar.org RPC providers page."
-    },
-    {
-      "name": "OnFinality",
-      "category": "Infrastructure",
-      "website": "https://onfinality.io/en/networks/stellar",
-      "shortDescription": "OnFinality is a blockchain infrastructure platform providing scalable Stellar RPC node endpoints (HTTPS and WebSocket), dedicated node hosting (full, archive, validator), and indexing for builders reading and submitting transactions. Offers Stellar mainnet RPC with request analytics, scalable rate limits and 99.99% uptime. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "name": "GetBlock",
-      "category": "Infrastructure",
-      "website": "https://getblock.io/nodes/xlm/",
-      "shortDescription": "GetBlock is a node-as-a-service provider offering managed Stellar RPC node endpoints, including shared and dedicated nodes with archive support on mainnet. It lets builders launch a production-ready Stellar/Soroban RPC endpoint to read ledger data and submit transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "name": "Lightsail Network (Quasar)",
-      "category": "Infrastructure",
-      "website": "https://quasar.lightsail.network/",
-      "shortDescription": "Quasar by Lightsail Network is a Stellar RPC and data services provider offering a real-time mainnet Stellar RPC node (rpc.lightsail.network), a full archive RPC for historical queries, and a Galexie data lake. Provides mainnet RPC archive access for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page; Lightsail also maintains the Java Stellar SDK."
-    },
-    {
-      "name": "Exaion",
-      "category": "Infrastructure",
-      "website": "https://crypto.exaion.com/products/node",
-      "shortDescription": "Exaion is an institutional blockchain infrastructure provider offering dedicated Stellar RPC and full/archive node hosting on mainnet. It delivers low-latency, enterprise-SLA Stellar RPC node endpoints on bare-metal servers for builders reading and submitting transactions, and is listed on the official developers.stellar.org RPC providers page."
-    },
-    {
-      "name": "Hubble",
-      "category": "Infrastructure",
-      "website": "https://developers.stellar.org/docs/data/analytics/hubble",
-      "shortDescription": "Hubble is SDF's open-source, read-only BigQuery data warehouse providing a complete historical record of the Stellar network for large-scale analytics. Powered by the stellar-etl pipeline, it extracts and transforms ledger, transaction, operation, and event data into BigQuery for SQL querying, aggregation, and network-trend analysis."
-    },
-    {
-      "name": "Friendbot",
-      "category": "Infrastructure",
-      "website": "https://friendbot.stellar.org",
-      "shortDescription": "Friendbot is Stellar's official testnet faucet: an SDF-hosted bot that funds new accounts and Soroban contracts with 10,000 fake test XLM (lumens) so developers can get started. It works via a simple HTTP GET to friendbot.stellar.org on Testnet (friendbot-futurenet.stellar.org on Futurenet) and is the canonical way to fund a testnet account."
-    },
-    {
-      "name": "Stellar CLI",
-      "category": "Tooling",
-      "website": "https://developers.stellar.org/docs/tools/cli/stellar-cli",
-      "shortDescription": "The Stellar CLI is the official command-line tool for Stellar/Soroban developers. `stellar keys generate <name> --fund` generates a keypair and funds it with test XLM via Friendbot (the testnet faucet, ~10,000 XLM) — the fastest way to fund a testnet account. It also deploys and invokes contracts, starts local testnets, and manages keys, accounts, and XDR."
-    },
-    {
-      "name": "Stellar Quickstart",
-      "category": "Tooling",
-      "website": "https://github.com/stellar/quickstart",
-      "shortDescription": "Stellar Quickstart is an official SDF Docker image that runs a complete local Stellar development environment, bundling Stellar Core, Horizon, and RPC in local, testnet, and futurenet modes. It includes a Friendbot faucet at :8000/friendbot to fund new testnet or local accounts with test XLM, letting builders develop against a private network or testnet without external services. It is integrated with the Stellar CLI for starting and stopping containers."
-    }
-  ]
+	"descUpdates": [
+		{
+			"slug": "python-stellar-sdk",
+			"shortDescription": "The canonical Python SDK for Stellar (py-stellar-base), listed as a client SDK on developers.stellar.org/docs/tools/sdks. Build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts, with both sync and async support. The go-to Python client library for building on Stellar."
+		},
+		{
+			"slug": "stellar-php-sdk",
+			"shortDescription": "The canonical PHP SDK for Stellar (stellar-php-sdk by Soneso), listed as a client SDK on developers.stellar.org/docs/tools/sdks. The go-to PHP client library to build and sign transactions, query Horizon, implement SEPs, and call the Stellar RPC for Soroban smart contracts."
+		},
+		{
+			"slug": "kmp-stellar-sdk",
+			"shortDescription": "Kotlin Multiplatform SDK for Stellar (kmp-stellar-sdk by Soneso), listed as a client SDK on developers.stellar.org/docs/tools/sdks. Write your Stellar integration once in Kotlin and deploy across JVM (Android, server), iOS, macOS and Web. A client library to build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts."
+		},
+		{
+			"slug": "nodies",
+			"shortDescription": "Nodies is a Web3 infrastructure platform and Stellar RPC node provider offering high-performance RPC and Horizon endpoints on Stellar mainnet and testnet. Lets builders read and submit transactions without self-hosting nodes. SCF-funded and listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "alchemy",
+			"shortDescription": "Alchemy is an enterprise-grade Web3 developer platform and Stellar RPC node provider, offering managed Stellar/Soroban RPC endpoints, Horizon access, enhanced APIs, and dedicated nodes on mainnet and testnet for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "blockdaemon",
+			"shortDescription": "Blockdaemon is an institutional blockchain infrastructure provider and Stellar RPC node provider, offering managed Stellar/Soroban RPC endpoints, Horizon API access, and dedicated nodes on mainnet and testnet for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "nownodes",
+			"shortDescription": "NOWNodes is a node-as-a-service provider offering Stellar RPC node endpoints and Horizon API access across Futurenet, testnet, and mainnet, plus dedicated nodes. Lets builders read and submit Stellar/Soroban transactions without self-hosting. SCF-funded and listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "obsrvr",
+			"shortDescription": "Obsrvr provides production-ready Stellar RPC node infrastructure including Stellar/Soroban RPC endpoints, Horizon API access with RPC archive support, and Flow programmable data pipelines for real-time event streaming and indexing. Lets builders read and submit transactions on mainnet and testnet. SCF-funded and listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "quicknode",
+			"shortDescription": "QuickNode is a managed Stellar RPC node provider with official Stellar support, exposing the Horizon REST API and the Soroban JSON-RPC API on mainnet and testnet plus dedicated nodes. Lets builders read ledger/account/transaction data and submit transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "validation-cloud",
+			"shortDescription": "Validation Cloud is a node infrastructure and Stellar RPC node provider offering high-performance Stellar RPC and Horizon endpoints via its Node API, combining Horizon and Soroban RPC in a single multi-region endpoint with failover and a free tier. Live on Soroban mainnet since March 2024 for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "liquify",
+			"shortDescription": "Liquify is a Stellar RPC node provider supplying long-term public Stellar and Soroban RPC endpoints with archival support across Futurenet, testnet, and mainnet. Lets builders read and submit transactions without self-hosting nodes. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "gatewayfm",
+			"shortDescription": "Gateway.fm is a Stellar RPC node provider offering public and dedicated Stellar/Soroban RPC endpoints with RPC archive support on testnet and mainnet. Lets builders read and submit transactions without self-hosting nodes. SCF-funded and listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "infstones",
+			"shortDescription": "InfStones is a node infrastructure and Stellar RPC node provider offering Horizon and Soroban RPC developer access via an auto-scaling cluster with a freemium tier and dedicated nodes on mainnet. Lets builders read and submit Stellar transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"slug": "space-and-time",
+			"shortDescription": "Space and Time is a verifiable data warehouse and indexer for Stellar/Soroban, integrated with SDF to power data-driven smart contracts. It indexes onchain ledger data, lets developers join it with offchain datasets, and uses Proof of SQL zero-knowledge proofs to verify query results for reserves/NAV proofs, accounting, audits, and compliance."
+		},
+		{
+			"slug": "zettablock",
+			"shortDescription": "ZettaBlock is an institutional-grade Web3 data indexer and analytics platform integrated with Stellar (SDF partner). It indexes Stellar/Soroban on-chain data and auto-generates custom GraphQL and REST APIs from SQL queries, with historical and real-time data plus private off-chain data joins for building data-driven dapps without managing your own indexing infrastructure."
+		},
+		{
+			"slug": "streamingfast",
+			"shortDescription": "StreamingFast brings Firehose and Substreams indexing to Stellar, integrating it into The Graph's decentralized indexing network. Substreams-powered Subgraphs enable high-throughput, parallelized extraction and streaming of Stellar/Soroban ledger and event data as composable data pipelines for subgraph-like access to onchain data."
+		},
+		{
+			"slug": "flipside",
+			"shortDescription": "Flipside provides free analytics dashboards and a SQL data warehouse over indexed Stellar on-chain data, letting analysts and builders query transactions, accounts, and network activity. Part of its blockchain growth and data-science platform, it exposes curated Stellar datasets for ad-hoc analysis and visualization."
+		},
+		{
+			"slug": "stellar-laboratory",
+			"shortDescription": "Stellar Lab (Laboratory, lab.stellar.org) is the SDF's official web-based developer toolkit for the Stellar network. Its Account / Create Account tool funds new testnet (and futurenet) accounts with test XLM directly via the Friendbot faucet, no CLI needed. Also builds, signs, simulates and submits transactions, calls Horizon/RPC endpoints, and decodes XDR. A getting-started-on-testnet staple."
+		},
+		{
+			"slug": "idos",
+			"shortDescription": "idOS is a decentralized identity and data-storage layer providing reusable KYC for Stellar. Users complete KYC/identity verification once, store encrypted credentials self-custodially, and grant apps consent-based access via zero-knowledge proofs — enabling compliant onboarding, verifiable credentials, and portable digital identity across Stellar apps without repeated KYC."
+		},
+		{
+			"slug": "chaincerts",
+			"shortDescription": "Chaincerts issues verifiable credentials and decentralized identity (DID) on Stellar using Soroban smart contracts. It mints non-transferable soulbound credential tokens governed by on-chain issuance/revocation contracts, with encrypted data and self-sovereign identity — a building block for KYC, certifications, and proof-of-credential on Stellar. SCF-funded, by kommitters."
+		},
+		{
+			"slug": "didstellar",
+			"shortDescription": "DID:STELLAR is a W3C-compliant Decentralized Identifier (DID) method for Stellar, letting builders anchor self-sovereign identity and verifiable credentials to Stellar accounts. It provides the DID document registration, resolution, and key-management primitives for decentralized identity, KYC, and proof-of-personhood use cases on Stellar/Soroban. By kommitters."
+		},
+		{
+			"slug": "reclaim",
+			"shortDescription": "Reclaim Protocol brings zkTLS verifiable credentials and proof-of-personhood to Stellar. Its zkFetch SDK generates zero-knowledge proofs of a user's data from any website (HTTPS session keys) and verifies them on-chain via Soroban — enabling DID, reputation, secondary KYC, and verifiable credentials without exposing personal data or relying on APIs. Has an official Stellar/Soroban integration example."
+		},
+		{
+			"slug": "scorechain",
+			"shortDescription": "Scorechain brings enterprise crypto compliance to Stellar: KYT (Know-Your-Transaction), AML, risk scoring, and sanctions screening integrated with the Stellar blockchain. A RegTech platform (FATF/OFAC/EU AMLD-aligned) covering 15+ chains, it gives Stellar anchors and institutions the transaction-monitoring and compliance tooling that complements KYC/identity onboarding. SCF-funded."
+		},
+		{
+			"slug": "stellar-passport",
+			"shortDescription": "Stellar Passport is a passkey-secured identity and participation layer on Stellar. A single QR scan creates a passkey-backed embedded wallet and on-chain identity, then issues verifiable participation stamps/credentials — building a portable reputation and identity record for the Stellar ecosystem. Adjacent to KYC/proof-of-personhood via passkey-based account identity. SCF-funded ($150k)."
+		},
+		{
+			"slug": "kale",
+			"shortDescription": "$KALE is a proof-of-teamwork farming game on Stellar's Soroban smart contracts, created by SDF's Tyler van der Hoeven. The canonical Stellar on-chain game: farmers stake, work and harvest a shared block reward (no winner-takes-all). Open-source miners (web/GPU/mobile) drove massive Soroban activity. Play-to-earn GameFi flagship."
+		},
+		{
+			"slug": "warmancer",
+			"shortDescription": "Warmancer (Black Friday) is a free-to-play on-chain strategy game on Stellar, built by Scrying Stone (ex-SDF founders) with a $136.5K SCF Round 33 award. Uses zero-knowledge proofs on Soroban to hide board positions, plus on-chain items/abilities tied to your wallet. A flagship Stellar GameFi / play-to-earn strategy title."
+		},
+		{
+			"slug": "beamable",
+			"shortDescription": "Beamable is a game server and LiveOps platform integrated with Stellar (SCF #38 $150K Build Award). Its Unity, Unreal and Web SDKs add Stellar wallet login, tokens, NFTs and marketplaces to games, letting studios ship blockchain / GameFi titles on Soroban without deep crypto expertise. Core gaming backend SDK for play-to-earn games on Stellar."
+		},
+		{
+			"slug": "katagames",
+			"shortDescription": "Kata.Games is a Stellar gaming sharing platform empowering indie developers to build, host and share online games using Web3 and Soroban, with a portal system to teleport between creator-authored worlds and NFT-based assets. Backed by the Stellar Community Fund. On-chain game creation and play-to-earn tooling for indie GameFi."
+		},
+		{
+			"slug": "stellar-unity-developer-kit",
+			"shortDescription": "Stellar Unity Developer Kit is a Unity SDK for building blockchain games on Stellar, with wallet management, token interactions and NFT support so game studios can integrate Soroban into video games. SCF-awarded gaming developer tooling for on-chain / GameFi and play-to-earn titles on Stellar."
+		},
+		{
+			"slug": "nebulavrf",
+			"shortDescription": "NebulaVRF is the first fully on-chain Verifiable Random Function for Soroban, providing provably fair randomness for games, lotteries and NFT minting on Stellar. A core GameFi primitive: on-chain games and play-to-earn mechanics use it for tamper-proof loot, matchmaking and draws on Stellar."
+		},
+		{
+			"slug": "cyberbrawl",
+			"shortDescription": "Cyberbrawl is a fast-paced on-chain trading card game (TCG) on Stellar by Litemint. Players battle in real-time duels and tournaments using on-chain heroes, cards and badges, with NFT assets and play-to-earn rewards. A live Stellar GameFi title."
+		},
+		{
+			"slug": "open-gamefi-sdk",
+			"shortDescription": "Open GameFi SDK is an open-source SDK integrating Stellar with the Colyseus.js multiplayer framework, letting developers build and deploy on-chain multiplayer games on Stellar/Soroban. Gaming developer tooling for play-to-earn and GameFi titles."
+		},
+		{
+			"slug": "vaquita",
+			"shortDescription": "Vaquita is a save-to-earn DeFi savings protocol on Stellar/Soroban for LATAM and unbanked users (SCF 'Gamified savings' award). It redistributes yield from early withdrawers to committed savers using game-theory incentives. Note: this is a gamified DeFi savings product, not a game."
+		}
+	],
+	"retags": [
+		{
+			"slug": "idos",
+			"category": "Infrastructure"
+		}
+	],
+	"newRecords": [
+		{
+			"name": "JavaScript Stellar SDK",
+			"category": "Tooling",
+			"website": "https://github.com/stellar/js-stellar-sdk",
+			"shortDescription": "The official SDF-maintained JavaScript/TypeScript SDK (@stellar/stellar-sdk, formerly js-stellar-sdk) for building on Stellar. The canonical client library for Node.js and browsers: build, sign and submit transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts. Listed as an official client SDK on developers.stellar.org."
+		},
+		{
+			"name": "Go Stellar SDK",
+			"category": "Tooling",
+			"website": "https://github.com/stellar/go-stellar-sdk",
+			"shortDescription": "The official SDF-maintained Go SDK (go-stellar-sdk) for building on Stellar. The canonical Go client library to build and sign transactions, query Horizon via horizonclient, and interact with the Stellar RPC. In Oct 2025 the stellar/go monorepo was renamed to stellar/go-stellar-sdk; listed as an official client SDK on developers.stellar.org."
+		},
+		{
+			"name": "Soroban Rust SDK",
+			"category": "Tooling",
+			"website": "https://github.com/stellar/rs-soroban-sdk",
+			"shortDescription": "The official SDF-maintained Rust SDK (soroban-sdk) for writing Stellar smart contracts that compile to Wasm and run on the Soroban runtime. The canonical contract SDK: data structures, storage access, crypto, cross-contract calls and a test harness. Published on crates.io as soroban-sdk."
+		},
+		{
+			"name": "TypeScript Wallet SDK",
+			"category": "Tooling",
+			"website": "https://github.com/stellar/typescript-wallet-sdk",
+			"shortDescription": "Official SDF-maintained TypeScript Wallet SDK (@stellar/typescript-wallet-sdk) for building Stellar wallet apps fast. Wraps the JavaScript Stellar SDK to handle accounts, payments, key management, and anchor integration via SEPs (SEP-6, SEP-10, SEP-24, SEP-31). One of the four official Wallet SDK languages on developers.stellar.org."
+		},
+		{
+			"name": "Java Stellar SDK",
+			"category": "Tooling",
+			"website": "https://github.com/lightsail-network/java-stellar-sdk",
+			"shortDescription": "java-stellar-sdk is a community-maintained Java/Android client SDK listed as an official client SDK on developers.stellar.org. Maintained under the Lightsail Network org, it provides APIs to build and sign transactions, query Horizon, and call the Stellar RPC Server to deploy and invoke Soroban smart contracts."
+		},
+		{
+			"name": "iOS Stellar SDK",
+			"category": "Tooling",
+			"website": "https://github.com/Soneso/stellar-ios-mac-sdk",
+			"shortDescription": "Community-maintained iOS and macOS SDK (stellar-ios-mac-sdk by Soneso) for building on Stellar in Swift, listed on developers.stellar.org/docs/tools/sdks as a client SDK. The Swift client library to build and sign transactions, query Horizon, handle SEPs, and call the Stellar RPC for Soroban smart contracts."
+		},
+		{
+			"name": ".NET Stellar SDK",
+			"category": "Tooling",
+			"website": "https://github.com/Beans-BV/dotnet-stellar-sdk",
+			"shortDescription": "Community-maintained C#/.NET SDK (dotnet-stellar-sdk by Beans BV) for building on Stellar, listed as the C# .NET client SDK on developers.stellar.org/docs/tools/sdks. Build and sign transactions, query Horizon, and call the Stellar RPC for Soroban smart contracts. Apache-2.0; actively maintained (v15.1.0, June 2026)."
+		},
+		{
+			"name": "Ankr",
+			"category": "Infrastructure",
+			"website": "https://www.ankr.com/rpc/stellar/",
+			"shortDescription": "Ankr is a multi-chain Web3 infrastructure provider offering managed Stellar RPC node endpoints for builders to read and submit transactions. It provides public and premium Soroban JSON-RPC on mainnet and testnet, including full RPC archive access, removing the need to self-host nodes. Officially listed on the developers.stellar.org RPC providers page."
+		},
+		{
+			"name": "OnFinality",
+			"category": "Infrastructure",
+			"website": "https://onfinality.io/en/networks/stellar",
+			"shortDescription": "OnFinality is a blockchain infrastructure platform providing scalable Stellar RPC node endpoints (HTTPS and WebSocket), dedicated node hosting (full, archive, validator), and indexing for builders reading and submitting transactions. Offers Stellar mainnet RPC with request analytics, scalable rate limits and 99.99% uptime. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"name": "GetBlock",
+			"category": "Infrastructure",
+			"website": "https://getblock.io/nodes/xlm/",
+			"shortDescription": "GetBlock is a node-as-a-service provider offering managed Stellar RPC node endpoints, including shared and dedicated nodes with archive support on mainnet. It lets builders launch a production-ready Stellar/Soroban RPC endpoint to read ledger data and submit transactions without self-hosting. Listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"name": "Lightsail Network (Quasar)",
+			"category": "Infrastructure",
+			"website": "https://quasar.lightsail.network/",
+			"shortDescription": "Quasar by Lightsail Network is a Stellar RPC and data services provider offering a real-time mainnet Stellar RPC node (rpc.lightsail.network), a full archive RPC for historical queries, and a Galexie data lake. Provides mainnet RPC archive access for builders reading and submitting transactions. Listed on the official developers.stellar.org RPC providers page; Lightsail also maintains the Java Stellar SDK."
+		},
+		{
+			"name": "Exaion",
+			"category": "Infrastructure",
+			"website": "https://crypto.exaion.com/products/node",
+			"shortDescription": "Exaion is an institutional blockchain infrastructure provider offering dedicated Stellar RPC and full/archive node hosting on mainnet. It delivers low-latency, enterprise-SLA Stellar RPC node endpoints on bare-metal servers for builders reading and submitting transactions, and is listed on the official developers.stellar.org RPC providers page."
+		},
+		{
+			"name": "Hubble",
+			"category": "Infrastructure",
+			"website": "https://developers.stellar.org/docs/data/analytics/hubble",
+			"shortDescription": "Hubble is SDF's open-source, read-only BigQuery data warehouse providing a complete historical record of the Stellar network for large-scale analytics. Powered by the stellar-etl pipeline, it extracts and transforms ledger, transaction, operation, and event data into BigQuery for SQL querying, aggregation, and network-trend analysis."
+		},
+		{
+			"name": "Friendbot",
+			"category": "Infrastructure",
+			"website": "https://friendbot.stellar.org",
+			"shortDescription": "Friendbot is Stellar's official testnet faucet: an SDF-hosted bot that funds new accounts and Soroban contracts with 10,000 fake test XLM (lumens) so developers can get started. It works via a simple HTTP GET to friendbot.stellar.org on Testnet (friendbot-futurenet.stellar.org on Futurenet) and is the canonical way to fund a testnet account."
+		},
+		{
+			"name": "Stellar CLI",
+			"category": "Tooling",
+			"website": "https://developers.stellar.org/docs/tools/cli/stellar-cli",
+			"shortDescription": "The Stellar CLI is the official command-line tool for Stellar/Soroban developers. `stellar keys generate <name> --fund` generates a keypair and funds it with test XLM via Friendbot (the testnet faucet, ~10,000 XLM) — the fastest way to fund a testnet account. It also deploys and invokes contracts, starts local testnets, and manages keys, accounts, and XDR."
+		},
+		{
+			"name": "Stellar Quickstart",
+			"category": "Tooling",
+			"website": "https://github.com/stellar/quickstart",
+			"shortDescription": "Stellar Quickstart is an official SDF Docker image that runs a complete local Stellar development environment, bundling Stellar Core, Horizon, and RPC in local, testnet, and futurenet modes. It includes a Friendbot faucet at :8000/friendbot to fund new testnet or local accounts with test XLM, letting builders develop against a private network or testnet without external services. It is integrated with the Stellar CLI for starting and stopping containers."
+		}
+	]
 }

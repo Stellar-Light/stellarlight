@@ -82,7 +82,9 @@ function main() {
 		});
 	}
 
-	console.log(`Content-freshness guard — scanned ${files.size} authored files.`);
+	console.log(
+		`Content-freshness guard — scanned ${files.size} authored files.`,
+	);
 	if (hits.length === 0) {
 		console.log("✅ No stale Stellar CLI / build commands found.");
 		process.exit(0);

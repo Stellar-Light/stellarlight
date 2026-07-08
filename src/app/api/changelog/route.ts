@@ -29,13 +29,19 @@ export async function GET(req: Request) {
 	const since = searchParams.get("since");
 	if (since && !ISO_DATE.test(since)) {
 		return NextResponse.json(
-			{ ok: false, error: "invalid_since", message: "`since` must be an ISO date (YYYY-MM-DD)." },
+			{
+				ok: false,
+				error: "invalid_since",
+				message: "`since` must be an ISO date (YYYY-MM-DD).",
+			},
 			{ status: 400 },
 		);
 	}
 
 	const limitRaw = searchParams.get("limit");
-	const limit = limitRaw ? Math.max(1, Math.min(100, Number.parseInt(limitRaw, 10) || 0)) : undefined;
+	const limit = limitRaw
+		? Math.max(1, Math.min(100, Number.parseInt(limitRaw, 10) || 0))
+		: undefined;
 
 	// CHANGELOG is authored latest-first; filter then cap.
 	let entries = CHANGELOG;

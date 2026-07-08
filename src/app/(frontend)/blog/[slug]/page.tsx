@@ -1,15 +1,15 @@
-import { getPayloadSafe } from "@/lib/payload-client";
+import { format } from "date-fns";
+import { ArrowLeft, Calendar, Tag, User } from "lucide-react";
+import type { Metadata } from "next";
+import { draftMode } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import Image from "next/image";
-import type { Metadata } from "next";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
-import { format } from "date-fns";
 import { LexicalContent } from "@/components/lexical-content";
 import { MarkdownContent } from "@/components/markdown-content";
-import { draftMode } from "next/headers";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{
 	slug: string;
@@ -122,11 +122,7 @@ export async function generateMetadata({
 	};
 }
 
-export default async function BlogDetailPage({
-	params,
-}: {
-	params: Params;
-}) {
+export default async function BlogDetailPage({ params }: { params: Params }) {
 	const { slug } = await params;
 	const payload = await getPayloadSafe();
 
@@ -140,7 +136,10 @@ export default async function BlogDetailPage({
 	try {
 		const where: any = { slug: { equals: slug } };
 		if (!isDraft) {
-			where.and = [{ slug: { equals: slug } }, { status: { equals: "published" } }];
+			where.and = [
+				{ slug: { equals: slug } },
+				{ status: { equals: "published" } },
+			];
 			delete where.slug;
 		}
 		result = await payload.find({
@@ -170,13 +169,15 @@ export default async function BlogDetailPage({
 	let isExternalImage = false;
 	if (post.rssImageUrl) {
 		imageUrl = post.rssImageUrl;
-		isExternalImage = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
+		isExternalImage =
+			imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 	} else if (post.featuredImage) {
 		if (typeof post.featuredImage === "string") {
 			imageUrl = "/logo.png";
 		} else if (post.featuredImage.url) {
 			imageUrl = post.featuredImage.url;
-			isExternalImage = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
+			isExternalImage =
+				imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 		} else if (post.featuredImage.filename) {
 			imageUrl = `/media/${post.featuredImage.filename}`;
 		}
@@ -248,7 +249,9 @@ export default async function BlogDetailPage({
 					{/* Category Badge */}
 					{post.category && (
 						<div className="mb-6">
-							<Badge className={`${categoryColor} px-3 py-1 text-xs font-semibold border`}>
+							<Badge
+								className={`${categoryColor} px-3 py-1 text-xs font-semibold border`}
+							>
 								{post.category}
 							</Badge>
 						</div>
@@ -350,13 +353,17 @@ export default async function BlogDetailPage({
 								let isRelatedExternal = false;
 								if (relatedPost.rssImageUrl) {
 									relatedImageUrl = relatedPost.rssImageUrl;
-									isRelatedExternal = relatedImageUrl.startsWith("http://") || relatedImageUrl.startsWith("https://");
+									isRelatedExternal =
+										relatedImageUrl.startsWith("http://") ||
+										relatedImageUrl.startsWith("https://");
 								} else if (relatedPost.featuredImage) {
 									if (typeof relatedPost.featuredImage === "string") {
 										relatedImageUrl = "/logo.png";
 									} else if (relatedPost.featuredImage.url) {
 										relatedImageUrl = relatedPost.featuredImage.url;
-										isRelatedExternal = relatedImageUrl.startsWith("http://") || relatedImageUrl.startsWith("https://");
+										isRelatedExternal =
+											relatedImageUrl.startsWith("http://") ||
+											relatedImageUrl.startsWith("https://");
 									} else if (relatedPost.featuredImage.filename) {
 										relatedImageUrl = `/media/${relatedPost.featuredImage.filename}`;
 									}
@@ -416,4 +423,3 @@ export default async function BlogDetailPage({
 		</div>
 	);
 }
-

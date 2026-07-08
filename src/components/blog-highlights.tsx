@@ -1,8 +1,7 @@
-import { getPayloadSafe } from "@/lib/payload-client";
-import BlogHighlightCard from "@/components/blog-highlight-card";
-import BlogCardSkeleton from "@/components/blog-card-skeleton";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import BlogCardSkeleton from "@/components/blog-card-skeleton";
+import BlogHighlightCard from "@/components/blog-highlight-card";
+import { Button } from "@/components/ui/button";
 import {
 	Carousel,
 	CarouselContent,
@@ -10,6 +9,7 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "@/components/ui/carousel";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 export default async function BlogHighlights() {
 	const payload = await getPayloadSafe();
@@ -114,4 +114,3 @@ export function BlogHighlightsSkeleton() {
 		</section>
 	);
 }
-
