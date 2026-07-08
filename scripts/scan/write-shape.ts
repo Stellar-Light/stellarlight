@@ -11,7 +11,11 @@
  * scan-repo-code.ts must build its update payload exclusively through
  * signalsToWrite() (CI-asserted), so the gate cannot be bypassed silently.
  */
-import type { CodeFacts, ScanOutcome, StellarProof } from "../../src/lib/code-signals";
+import type {
+	CodeFacts,
+	ScanOutcome,
+	StellarProof,
+} from "../../src/lib/code-signals";
 
 export interface SignalsInput {
 	outcome: ScanOutcome;
@@ -21,6 +25,8 @@ export interface SignalsInput {
 	codeDepth: number; // computeCodeDepth(...).codeDepth
 	farmScore: number;
 	farmFlags: string[];
+	/** Extracted pub fn/type names (src/lib/code-symbols.ts). */
+	codeSymbols: string[];
 }
 
 /** Fields the scanner is FORBIDDEN to write — demotion/authority surfaces. */
@@ -37,7 +43,10 @@ export const FORBIDDEN_WRITE_KEYS = [
 	"repoScoreLabel",
 ] as const;
 
-export function signalsToWrite(s: SignalsInput, nowIso: string): Record<string, unknown> {
+export function signalsToWrite(
+	s: SignalsInput,
+	nowIso: string,
+): Record<string, unknown> {
 	if (s.outcome !== "ok") {
 		// Could not conclude → record ONLY that we tried and why it failed, so
 		// the repo is retried later and never judged from a broken read.
@@ -61,6 +70,7 @@ export function signalsToWrite(s: SignalsInput, nowIso: string): Record<string, 
 		stellarJsDep: s.facts.stellarJsDep,
 		farmScore: s.farmScore,
 		farmFlags: s.farmFlags,
+		codeSymbols: s.codeSymbols,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,
 		codeScannedAt: nowIso,
@@ -68,7 +78,10 @@ export function signalsToWrite(s: SignalsInput, nowIso: string): Record<string, 
 }
 
 /** Fetch blew up before any scan result existed (network, no tree, throw). */
-export function errorToWrite(message: string, nowIso: string): Record<string, unknown> {
+export function errorToWrite(
+	message: string,
+	nowIso: string,
+): Record<string, unknown> {
 	return {
 		codeScanState: "error",
 		codeScanError: message.slice(0, 200),

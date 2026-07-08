@@ -25,6 +25,7 @@ const okInput: SignalsInput = {
 	codeDepth: 0.78,
 	farmScore: 0,
 	farmFlags: [],
+	codeSymbols: ["initialize_escrow", "EscrowContract"],
 };
 
 describe("write-shape — the signals-only write gate", () => {
@@ -36,6 +37,7 @@ describe("write-shape — the signals-only write gate", () => {
 		expect(w.isDeployableContract).toBe(true);
 		expect(w.codeScanState).toBe("scanned");
 		expect(w.codeScannedAt).toBe("2026-07-05T00:00:00.000Z");
+		expect(w.codeSymbols).toEqual(["initialize_escrow", "EscrowContract"]);
 	});
 
 	it("SAFETY: error outcome persists ONLY scan-state — never a proof/depth judgment", () => {

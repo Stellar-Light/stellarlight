@@ -9,6 +9,8 @@
  * the repoScore quality grade.
  */
 
+import { symbolsHaystack } from "./code-symbols";
+
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
 	find(args: unknown): Promise<{ docs: unknown[] }>;
@@ -47,6 +49,7 @@ interface RepoDoc {
 	versionStatus?: string | null;
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
+	codeSymbols?: unknown;
 }
 
 export interface RepoResult {
@@ -99,6 +102,9 @@ export interface CodeVerified {
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
+	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
+	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
+	symbols: string[];
 }
 
 function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
@@ -110,23 +116,47 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
+		symbols: Array.isArray(d.codeSymbols)
+			? d.codeSymbols
+					.filter((s): s is string => typeof s === "string")
+					.slice(0, 20)
+			: [],
 	};
 }
 
 function topicList(topics: unknown): string[] {
-	return Array.isArray(topics) ? topics.filter((t): t is string => typeof t === "string") : [];
+	return Array.isArray(topics)
+		? topics.filter((t): t is string => typeof t === "string")
+		: [];
 }
 
 // A query token matches if ANY of its expansions hits the repo's text.
 const SYNONYMS: Record<string, string[]> = {
-	zk: ["zk", "zero-knowledge", "zero knowledge", "zkp", "snark", "stark", "plonk", "groth16", "circuit", "proof"],
+	zk: [
+		"zk",
+		"zero-knowledge",
+		"zero knowledge",
+		"zkp",
+		"snark",
+		"stark",
+		"plonk",
+		"groth16",
+		"circuit",
+		"proof",
+	],
 	zkp: ["zkp", "zk", "zero-knowledge", "proof"],
 	oracle: ["oracle", "price feed", "data feed", "datafeed"],
 	amm: ["amm", "dex", "liquidity", "swap"],
 	dex: ["dex", "amm", "swap", "exchange", "orderbook"],
 	wallet: ["wallet", "keypair", "signer", "passkey"],
 	nft: ["nft", "non-fungible", "collectible"],
-	rwa: ["rwa", "real-world asset", "real world asset", "tokenization", "tokenized"],
+	rwa: [
+		"rwa",
+		"real-world asset",
+		"real world asset",
+		"tokenization",
+		"tokenized",
+	],
 	lending: ["lending", "lend", "borrow", "money market"],
 	bridge: ["bridge", "cross-chain", "interoperability", "cctp"],
 	indexer: ["indexer", "indexing", "subgraph", "data pipeline", "etl"],
@@ -187,28 +217,127 @@ function wordy(s: string): string {
 // pool, swap, token…) so vertical queries are untouched.
 const STOPWORDS = new Set<string>([
 	// articles, conjunctions, prepositions
-	"the", "and", "or", "of", "to", "in", "on", "for", "with", "by", "from", "at", "as",
-	"into", "onto", "over", "under", "about", "between", "across", "through", "per", "via", "vs",
+	"the",
+	"and",
+	"or",
+	"of",
+	"to",
+	"in",
+	"on",
+	"for",
+	"with",
+	"by",
+	"from",
+	"at",
+	"as",
+	"into",
+	"onto",
+	"over",
+	"under",
+	"about",
+	"between",
+	"across",
+	"through",
+	"per",
+	"via",
+	"vs",
 	// pronouns / determiners
-	"it", "its", "this", "that", "these", "those", "they", "them", "their", "there", "here",
-	"you", "we", "my", "your", "our", "his", "her", "me", "us", "an",
-	"any", "some", "all", "each", "both", "no",
+	"it",
+	"its",
+	"this",
+	"that",
+	"these",
+	"those",
+	"they",
+	"them",
+	"their",
+	"there",
+	"here",
+	"you",
+	"we",
+	"my",
+	"your",
+	"our",
+	"his",
+	"her",
+	"me",
+	"us",
+	"an",
+	"any",
+	"some",
+	"all",
+	"each",
+	"both",
+	"no",
 	// to-be / auxiliaries / modals
-	"is", "are", "was", "were", "be", "been", "being", "am",
-	"do", "does", "did", "doing", "done",
-	"has", "have", "had", "having",
-	"can", "could", "should", "would", "will", "shall", "may", "might", "must",
+	"is",
+	"are",
+	"was",
+	"were",
+	"be",
+	"been",
+	"being",
+	"am",
+	"do",
+	"does",
+	"did",
+	"doing",
+	"done",
+	"has",
+	"have",
+	"had",
+	"having",
+	"can",
+	"could",
+	"should",
+	"would",
+	"will",
+	"shall",
+	"may",
+	"might",
+	"must",
 	// question words
-	"what", "which", "how", "why", "where", "when", "who", "whose", "whom", "whether",
+	"what",
+	"which",
+	"how",
+	"why",
+	"where",
+	"when",
+	"who",
+	"whose",
+	"whom",
+	"whether",
 	// generic NL-question verbs (no domain words)
-	"work", "works", "working", "use", "uses", "used", "using", "build",
-	"explain", "describe", "tell", "show", "mean", "means", "need", "want", "know",
+	"work",
+	"works",
+	"working",
+	"use",
+	"uses",
+	"used",
+	"using",
+	"build",
+	"explain",
+	"describe",
+	"tell",
+	"show",
+	"mean",
+	"means",
+	"need",
+	"want",
+	"know",
 	// superlatives / recommendation filler ("what is the BEST/TOP X"). A 15-vertical
 	// live sweep proved these distort ranking not just as filler but by literal
 	// description match — soroban-governor's desc says "popular Governor DAO" so
 	// "popular" name-matched it into wallet results; hot-dao/public-good-proposals
 	// won "good passkey" via "good".
-	"best", "top", "good", "better", "popular", "recommended", "great", "ideal",
+	"best",
+	"top",
+	"good",
+	"better",
+	"popular",
+	"recommended",
+	"great",
+	"ideal",
 	// "stellar" — the ecosystem name. Every repo in this index is Stellar, so the
 	// bare token carries ~zero discriminating signal but maximum pollution: it
 	// name-matches high-authority OFF-topic repos (StellarPay402 score 85, an
@@ -230,7 +359,10 @@ const STOPWORDS = new Set<string>([
 // so it still searches (degenerate but non-empty). Exported so /api/projects/
 // search and tests share the exact tokenization.
 export function contentTokens(q: string): string[] {
-	const raw = q.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+	const raw = q
+		.toLowerCase()
+		.split(/\s+/)
+		.filter((t) => t.length > 1);
 	const content = raw.filter((t) => !STOPWORDS.has(t));
 	return content.length ? content : raw;
 }
@@ -282,16 +414,35 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// transaction / operation result & error codes
 	{
 		test: /\b(error|result|status|op(?:eration)?|tx|transaction)\s*codes?\b|\bresult\s*code|\btx\s*result/,
-		repos: ["stellar/stellar-core", "stellar/go", "stellar/js-stellar-sdk", "stellar/rs-soroban-sdk"],
+		repos: [
+			"stellar/stellar-core",
+			"stellar/go",
+			"stellar/js-stellar-sdk",
+			"stellar/rs-soroban-sdk",
+		],
 	},
 	// Horizon (the real implementation lives in stellar/go)
 	{ test: /\bhorizon\b/, repos: ["stellar/go", "stellar/stellar-horizon"] },
 	// RPC
-	{ test: /\b(soroban[\s-]*)?rpc\b/, repos: ["stellar/stellar-rpc", "stellar/soroban-rpc"] },
+	{
+		test: /\b(soroban[\s-]*)?rpc\b/,
+		repos: ["stellar/stellar-rpc", "stellar/soroban-rpc"],
+	},
 	// XDR
-	{ test: /\bxdr\b/, repos: ["stellar/stellar-xdr", "stellar/js-stellar-base", "stellar/rs-stellar-xdr", "stellar/stellar-core"] },
+	{
+		test: /\bxdr\b/,
+		repos: [
+			"stellar/stellar-xdr",
+			"stellar/js-stellar-base",
+			"stellar/rs-stellar-xdr",
+			"stellar/stellar-core",
+		],
+	},
 	// core internals: consensus / ledger / catchup
-	{ test: /\bstellar[\s-]*core\b|\bconsensus\b|\bscp\b|\bvalidator\b|\bledger\s*close|\bcatchup\b|\bquorum\b/, repos: ["stellar/stellar-core"] },
+	{
+		test: /\bstellar[\s-]*core\b|\bconsensus\b|\bscp\b|\bvalidator\b|\bledger\s*close|\bcatchup\b|\bquorum\b/,
+		repos: ["stellar/stellar-core"],
+	},
 	// protocol specs: CAPs / SEPs / upgrades. Beyond explicit "cap-35" refs, catch
 	// natural spec questions — "which CAP introduced clawback", "which SEP does the
 	// SAC implement", "what CAP added X" — which route to stellar/stellar-protocol
@@ -322,11 +473,20 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 		repos: ["stellar/rs-soroban-env", "stellar/rs-soroban-sdk"],
 	},
 	// anchor / SEP infra
-	{ test: /\banchor\s*platform\b/, repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"] },
+	{
+		test: /\banchor\s*platform\b/,
+		repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"],
+	},
 	// quickstart / run a node
-	{ test: /\bquickstart\b|\brun\s*(a\s*)?(node|validator|horizon)\b/, repos: ["stellar/quickstart"] },
+	{
+		test: /\bquickstart\b|\brun\s*(a\s*)?(node|validator|horizon)\b/,
+		repos: ["stellar/quickstart"],
+	},
 	// SDKs by language
-	{ test: /\b(java\s*script|js|typescript|ts)\s*sdk\b/, repos: ["stellar/js-stellar-sdk"] },
+	{
+		test: /\b(java\s*script|js|typescript|ts)\s*sdk\b/,
+		repos: ["stellar/js-stellar-sdk"],
+	},
 	{ test: /\b(rust|soroban)\s*sdk\b/, repos: ["stellar/rs-soroban-sdk"] },
 	{ test: /\bpython\s*sdk\b/, repos: ["StellarCN/py-stellar-base"] },
 	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go"] },
@@ -338,7 +498,8 @@ export function canonicalFor(q: string): string[] {
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const c of CANONICAL) {
-		if (c.test.test(hay)) for (const r of c.repos) if (!out.includes(r)) out.push(r);
+		if (c.test.test(hay))
+			for (const r of c.repos) if (!out.includes(r)) out.push(r);
 	}
 	return out;
 }
@@ -415,7 +576,10 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// tokenized/tokenization; bare "token" never matches.
 	{
 		test: /\brwa\b|\breal[\s-]?world[\s-]?assets?\b|\btokeniz(?:ation|ed)\b/,
-		repos: ["simplytokenized/soroban-smart-contracts", "shamba-records-limited/microvault"],
+		repos: [
+			"simplytokenized/soroban-smart-contracts",
+			"shamba-records-limited/microvault",
+		],
 	},
 	// lending / money-market. Boxy-ordered (2026-07-06): Blend is THE flagship
 	// Stellar lending protocol and must lead; laina is still testnet-only so it
@@ -434,7 +598,8 @@ export function flagshipsFor(q: string): string[] {
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const v of VERTICAL_FLAGSHIPS) {
-		if (v.test.test(hay)) for (const r of v.repos) if (!out.includes(r)) out.push(r);
+		if (v.test.test(hay))
+			for (const r of v.repos) if (!out.includes(r)) out.push(r);
 	}
 	return out;
 }
@@ -442,7 +607,12 @@ export function flagshipsFor(q: string): string[] {
 export async function searchRepos(
 	payload: PayloadLike | null,
 	q: string,
-	opts: { limit?: number; offset?: number; language?: string; minScore?: number } = {},
+	opts: {
+		limit?: number;
+		offset?: number;
+		language?: string;
+		minScore?: number;
+	} = {},
 ): Promise<{ repos: RepoResult[]; total: number; canonical: string[] }> {
 	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
 	if (!payload) return { repos: [], total: 0, canonical: [] };
@@ -470,6 +640,10 @@ export async function searchRepos(
 					// array field matches per-element; verified against live Payload
 					// REST before adding.
 					{ topics: { like: v } },
+					// code-content recall: a repo whose ONLY match is a pub fn/type
+					// name ("escrow" ⇢ release_escrow) must still be a candidate.
+					// codeSymbols is json like topics — same per-element regex match.
+					{ codeSymbols: { like: v } },
 				]),
 			);
 		}
@@ -509,7 +683,9 @@ export async function searchRepos(
 			const seen = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
 			rawDocs = [
 				...rawDocs,
-				...(cres.docs as unknown as RepoDoc[]).filter((d) => !seen.has(d.fullName.toLowerCase())),
+				...(cres.docs as unknown as RepoDoc[]).filter(
+					(d) => !seen.has(d.fullName.toLowerCase()),
+				),
 			];
 		}
 		const docs = rawDocs.map((r) => {
@@ -530,6 +706,9 @@ export async function searchRepos(
 			const tops = wordy(topics.join(" "));
 			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
 			const readme = wordy(r.readmeExcerpt ?? "");
+			// Snake/camel split so \b matching works on symbol names (regex \b
+			// treats _ as a word char — "escrow" never hits "release_escrow" raw).
+			const syms = symbolsHaystack(r.codeSymbols);
 			let score = 0;
 			let matched = 0;
 			if (tokens.length) {
@@ -538,6 +717,10 @@ export async function searchRepos(
 					const hit = (hay: string) => termHits(vs, hay);
 					let best = 0;
 					if (hit(name) || hit(tops)) best = 5;
+					// A pub fn/type named after the query term is stronger evidence the
+					// repo IMPLEMENTS the concept than a description mention — but a
+					// name/topic hit stays highest (it's the repo's own claimed identity).
+					else if (hit(syms)) best = 4;
 					else if (hit(desc)) best = 3;
 					else if (hit(readme)) best = 1;
 					if (best > 0) {
@@ -564,7 +747,8 @@ export async function searchRepos(
 		let filtered = tokens.length
 			? docs.filter((d) => d.matched >= 1 || d.crank < 9999 || d.frank < 9999)
 			: docs;
-		if (minScore > 0) filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
+		if (minScore > 0)
+			filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
 		// the authority grade and stars. Putting these signals ABOVE repoScore
@@ -583,34 +767,42 @@ export async function searchRepos(
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
 		);
 		const total = filtered.length;
-		const repos = filtered.slice(offset, offset + limit).map(({ r, topics, score, crank }) => ({
-			fullName: r.fullName,
-			owner: r.owner ?? null,
-			name: r.name ?? null,
-			url: r.url ?? null,
-			description: r.description ?? null,
-			topics,
-			primaryLanguage: r.primaryLanguage ?? null,
-			stars: r.stars ?? 0,
-			openIssues: r.openIssues ?? 0,
-			lastCommitAt: r.lastCommitAt ?? null,
-			homepageUrl: r.homepageUrl ?? null,
-			isFork: !!r.isFork,
-			isArchived: !!r.isArchived,
-			project: r.projectSlug ? { slug: r.projectSlug, name: r.projectName ?? null } : null,
-			hackathonWinner: !!r.hackathonWinner,
-			scfAwarded: !!r.scfAwarded,
-			builderReputation: r.builderReputation ?? 0,
-			judgeScore: r.judgeScore ?? null,
-			judgedHackathon: r.judgedHackathon ?? null,
-			repoScore: r.repoScore ?? 0,
-			repoScoreLabel: r.repoScoreLabel ?? null,
-			score,
-			deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
-			canonical: crank < 9999,
-			codeVerified: codeVerifiedOf(r),
-		}));
-		return { repos, total, canonical: repos.filter((r) => r.canonical).map((r) => r.fullName) };
+		const repos = filtered
+			.slice(offset, offset + limit)
+			.map(({ r, topics, score, crank }) => ({
+				fullName: r.fullName,
+				owner: r.owner ?? null,
+				name: r.name ?? null,
+				url: r.url ?? null,
+				description: r.description ?? null,
+				topics,
+				primaryLanguage: r.primaryLanguage ?? null,
+				stars: r.stars ?? 0,
+				openIssues: r.openIssues ?? 0,
+				lastCommitAt: r.lastCommitAt ?? null,
+				homepageUrl: r.homepageUrl ?? null,
+				isFork: !!r.isFork,
+				isArchived: !!r.isArchived,
+				project: r.projectSlug
+					? { slug: r.projectSlug, name: r.projectName ?? null }
+					: null,
+				hackathonWinner: !!r.hackathonWinner,
+				scfAwarded: !!r.scfAwarded,
+				builderReputation: r.builderReputation ?? 0,
+				judgeScore: r.judgeScore ?? null,
+				judgedHackathon: r.judgedHackathon ?? null,
+				repoScore: r.repoScore ?? 0,
+				repoScoreLabel: r.repoScoreLabel ?? null,
+				score,
+				deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
+				canonical: crank < 9999,
+				codeVerified: codeVerifiedOf(r),
+			}));
+		return {
+			repos,
+			total,
+			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
+		};
 	} catch {
 		return { repos: [], total: 0, canonical: [] };
 	}

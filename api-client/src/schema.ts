@@ -800,6 +800,8 @@ export interface components {
                  * @description When the code was last scanned.
                  */
                 scannedAt?: string | null;
+                /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
+                symbols?: string[];
             } | null;
         };
         RepoSearchResponse: {
@@ -1014,6 +1016,7 @@ export interface operations {
                             versionStatus?: string | null;
                             /** Format: date-time */
                             scannedAt?: string | null;
+                            symbols?: string[];
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
