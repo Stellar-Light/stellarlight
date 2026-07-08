@@ -359,12 +359,12 @@ export default function ApiReferencePage() {
 					<p className="text-sm text-muted-foreground leading-relaxed">
 						All endpoints live in{" "}
 						<a
-							href="https://github.com/alexanderkoh/stellarlight/tree/dev/src/app/api"
+							href="https://github.com/Stellar-Light/stellarlight/tree/main/src/app/api"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline hover:text-foreground inline-flex items-center gap-1"
 						>
-							alexanderkoh/stellarlight
+							Stellar-Light/stellarlight
 							<ExternalLink className="w-3 h-3" />
 						</a>
 						. The skill manifest that documents them is in{" "}
