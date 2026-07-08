@@ -8,6 +8,12 @@ name: Scan repo code (signals-only)
 # scanned repos are skipped, budget guard stops before the token runs dry.
 
 on:
+  # Weekly stale-first re-scan (gist gap 4): repos pushed since their last scan
+  # get fresh signals (versionStatus, codeDepth, symbols) instead of waiting
+  # for a manual wave. Writes are signals-only (write-shape.ts, zero-demotion
+  # by construction) — the same proven write path manual waves use.
+  schedule:
+    - cron: "0 4 * * 1"
   workflow_dispatch:
     inputs:
       execute:
