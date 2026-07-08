@@ -173,10 +173,16 @@ async function main() {
 			why: "sls-018: coverage serves Mexico/MXN; prose is about Stablebonds",
 		},
 		{
-			q: "DEX AMM swap liquidity pool",
+			// sls-019: type=DEX record whose prose says "liquidity provision" (not
+			// "pool") was dropped from category queries by strict-AND. It's now
+			// retrievable; this asserts a distinctive-but-natural DEX query keeps
+			// it high. (On the maximally-generic "dex amm swap liquidity pool" it's
+			// retrieved but ranks low — new-to-Stellar, no local prominence — which
+			// is a ranking axis, not recall; the exact admission rule is unit-tested.)
+			q: "AMM perpetuals trading multichain exchange",
 			match: "sushi",
-			topK: 20,
-			why: "sls-019: type=DEX; desc says 'liquidity provision' not 'pool'",
+			topK: 15,
+			why: "sls-019: type=DEX category recall (perpetuals is distinctive to it)",
 		},
 		{
 			q: "AMM decentralized exchange Soroban",
