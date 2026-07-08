@@ -18,6 +18,8 @@
 // "dex" → "amm"/"swap", "pool" → "liquidity", "on-ramp" → "anchor". Each query
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
+import { contentTokens } from "./repo-search";
+
 export const SYNONYMS: Record<string, string[]> = {
 	wallet: ["wallet", "custody", "signer", "keystore"],
 	dex: ["dex", "amm", "swap", "exchange", "orderbook", "liquidity"],
@@ -33,6 +35,15 @@ export const SYNONYMS: Record<string, string[]> = {
 	borrow: ["borrow", "borrowing", "lend", "lending", "loan"],
 	oracle: ["oracle", "price feed", "data feed", "feed"],
 	bridge: ["bridge", "cross-chain", "interoperability", "cctp", "wrapped"],
+	// Chain-name vocabulary: bridge/multichain records say "EVM" or "cross-chain";
+	// users name the chain ("Ethereum", "Polygon"). Both directions mapped so
+	// "move tokens from Ethereum to Stellar" reaches Allbridge/CCTP-class records
+	// whose prose never contains the literal chain name (Beacon Q3 feedback).
+	evm: ["evm", "ethereum", "erc-20", "erc20", "cross-chain", "bridge"],
+	ethereum: ["ethereum", "evm", "erc-20", "eth", "cross-chain", "bridge"],
+	polygon: ["polygon", "evm", "cross-chain"],
+	arbitrum: ["arbitrum", "evm", "cross-chain"],
+	cctp: ["cctp", "cross-chain transfer protocol", "circle", "usdc", "bridge"],
 	stablecoin: ["stablecoin", "stable", "usdc", "eurc"],
 	staking: ["staking", "stake", "yield", "apy", "earn"],
 	yield: ["yield", "apy", "earn", "staking", "vault"],
@@ -53,9 +64,25 @@ export const SYNONYMS: Record<string, string[]> = {
 		"sep6",
 		"fiat",
 	],
-	"on-ramp": ["on-ramp", "onramp", "anchor", "ramp", "fiat", "cash-in", "deposit"],
+	"on-ramp": [
+		"on-ramp",
+		"onramp",
+		"anchor",
+		"ramp",
+		"fiat",
+		"cash-in",
+		"deposit",
+	],
 	onramp: ["onramp", "on-ramp", "anchor", "ramp", "fiat", "deposit"],
-	"off-ramp": ["off-ramp", "offramp", "anchor", "ramp", "fiat", "cash-out", "withdraw"],
+	"off-ramp": [
+		"off-ramp",
+		"offramp",
+		"anchor",
+		"ramp",
+		"fiat",
+		"cash-out",
+		"withdraw",
+	],
 	offramp: ["offramp", "off-ramp", "anchor", "ramp", "fiat", "withdraw"],
 	ramp: ["ramp", "on-ramp", "off-ramp", "anchor", "fiat"],
 	fiat: ["fiat", "anchor", "ramp", "on-ramp", "off-ramp"],
@@ -132,7 +159,13 @@ export const SYNONYMS: Record<string, string[]> = {
 		"x402",
 		"metered",
 	],
-	mpp: ["mpp", "machine payment", "machine-to-machine", "x402", "agentic payment"],
+	mpp: [
+		"mpp",
+		"machine payment",
+		"machine-to-machine",
+		"x402",
+		"agentic payment",
+	],
 	agentic: [
 		"agentic",
 		"agent payment",
@@ -170,11 +203,13 @@ export function termsForToken(t: string): string[] {
 	return [...out];
 }
 
+// Stopword-filtered tokenization SHARED with repo search (contentTokens):
+// natural-question filler ("from", "to", "what", "best") must not score as
+// query terms — it let a wallet whose description merely contains "from"
+// outrank the actual bridges on "move tokens from Ethereum to Stellar".
+// contentTokens keeps the raw tokens when a query is ALL stopwords.
 export function tokenize(q: string): string[] {
-	return q
-		.toLowerCase()
-		.split(/\s+/)
-		.filter((t) => t.length > 1);
+	return contentTokens(q);
 }
 
 // Map a query token to the `types` value it implies, so ranking + admission can
@@ -220,7 +255,8 @@ export function intentTypesFor(tokens: string[]): Set<string> {
 	const s = new Set<string>();
 	for (const t of tokens) {
 		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
-		for (const syn of SYNONYMS[t] ?? []) if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+		for (const syn of SYNONYMS[t] ?? [])
+			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
 	}
 	return s;
 }
@@ -279,7 +315,9 @@ function covValues(p: MatchableProject): string[] {
 	const c = p.coverage;
 	if (!c || typeof c !== "object") return [];
 	const arr = (v: unknown): string[] =>
-		Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && !!x) : [];
+		Array.isArray(v)
+			? v.filter((x): x is string => typeof x === "string" && !!x)
+			: [];
 	return [...arr(c.countries), ...arr(c.currencies), ...arr(c.seps)];
 }
 
@@ -320,8 +358,13 @@ export function scoreTokens(hay: string, tokens: string[]): number {
 }
 
 // Does the record's own `types` match the query's implied category?
-export function typeMatch(p: MatchableProject, intentTypes: Set<string>): boolean {
-	return intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t));
+export function typeMatch(
+	p: MatchableProject,
+	intentTypes: Set<string>,
+): boolean {
+	return (
+		intentTypes.size > 0 && (p.types ?? []).some((t) => intentTypes.has(t))
+	);
 }
 
 // Does the project's curated coverage serve a queried country / currency / SEP?
