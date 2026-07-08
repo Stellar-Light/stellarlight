@@ -1,6 +1,6 @@
 # Admin & data operations
 
-The Payload CMS admin panel manages content; this doc covers the admin workflows and the one-off data imports. Collections themselves are documented in [COLLECTIONS_EXPLANATION.md](../COLLECTIONS_EXPLANATION.md).
+The Payload CMS admin panel manages content; this doc covers the admin workflows and the one-off data imports. Collections themselves are documented in [COLLECTIONS.md](./COLLECTIONS.md).
 
 ## Admin panel
 

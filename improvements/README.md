@@ -1,7 +1,9 @@
-# StellarLight — live-services improvement plan
+# improvements/
 
-How we keep improving the live services, continuously — modeled on how Raven
-self-improves. Two engines drive it:
+The live-services improvement backlog — how we keep the data layer improving
+continuously, modeled on how Raven self-improves. This file is the index +
+the loop; add individual tracked items as `improvements/<slug>.md` when a gap
+warrants its own write-up. Two engines drive it:
 
 - **The Guard** — `scripts/self-audit.ts` + `.github/workflows/self-audit.yml` (daily + on-demand). Grounded checks against the live API (liveness, freshness thresholds, served-count sanity, ground-truth spot checks). Finds **real** regressions, files an Issue with a reproducible probe, never manufactures problems. Complements `api-drift.yml` (API ⇄ spec ⇄ docs) + `verify-claims.yml`.
 - **The Experiments Lab** — `src/lib/experiments.ts` + `/experiments` + `scripts/experiment-eval.ts`. Try a variant behind a flag (default off), score it against a ground-truth metric, graduate winners into the contract, kill the rest.
