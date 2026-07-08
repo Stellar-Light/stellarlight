@@ -76,7 +76,7 @@ stellarlight/
 - **Repos** — indexed GitHub repos with the `codeVerified` block (stellarProof, codeDepth, SDK version status).
 - **Blog / RSS** — reports + auto-imported ecosystem writing.
 
-Full detail: [COLLECTIONS_EXPLANATION.md](./COLLECTIONS_EXPLANATION.md).
+Full detail: [docs/COLLECTIONS.md](./docs/COLLECTIONS.md).
 
 ## Tech stack
 
@@ -99,10 +99,10 @@ Required env: `DATABASE_URI` (or `MONGODB_URI`), `PAYLOAD_SECRET` (≥32 chars),
 
 ## Documentation
 
-- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) — Vercel + MongoDB + R2 + cron setup and troubleshooting.
-- [docs/ADMIN.md](./docs/ADMIN.md) — admin workflows + data imports.
-- [COLLECTIONS_EXPLANATION.md](./COLLECTIONS_EXPLANATION.md) — every collection in detail.
-- [docs/SHIPPING.md](./docs/SHIPPING.md) — the ship-gate / claim-verification discipline.
+- **[docs/](./docs/)** ([index](./docs/README.md)) — deployment, admin, collections, and the ship-gate discipline.
+- **[improvements/](./improvements/)** — the live-services improvement backlog + self-improvement loop.
+- **[ideas/](./ideas/)** — proposals not yet committed.
+- **[/api/changelog](https://stellarlight.xyz/api/changelog)** — the live, agent-readable API changelog.
 
 ## Contributing
 
