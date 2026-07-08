@@ -209,6 +209,62 @@ async function main() {
 		"include is a documented no-op",
 	);
 
+	// ── 6b. Response FIELD coverage: live row keys ⊆ documented properties ──
+	// The class behind the 2026-07-08 drift event: #353 removed anchorProfile
+	// from the spec's Project component while the live rows kept carrying it
+	// (plus canonicalSlug/lifecycle, never documented) — downstream catalogs
+	// generated from our spec then under-described reality, and the consumer's
+	// drift detector caught it before we did. Assert every field a live row
+	// actually serves is documented. One direction only: spec props MISSING
+	// from a sampled row are fine (conditional fields like placementRank).
+	console.log("◆ Response field coverage (live ⊆ spec)");
+	const fieldCoverage: Array<{
+		name: string;
+		path: string;
+		listKey: string;
+		component: string;
+	}> = [
+		{
+			name: "searchProjects row",
+			// etherfuse: an Anchor-typed row, so conditional joins (anchorProfile,
+			// coverage) are populated and their absence from the spec is caught.
+			path: "/api/projects/search?q=etherfuse&limit=3",
+			listKey: "projects",
+			component: "Project",
+		},
+		{
+			name: "partners row",
+			path: "/api/partners?all=1&limit=3",
+			listKey: "partners",
+			component: "Partner",
+		},
+	];
+	for (const fc of fieldCoverage) {
+		try {
+			const live = await getJson(fc.path);
+			const rows: any[] = live.body?.[fc.listKey] ?? [];
+			const documented = new Set(
+				Object.keys(spec?.components?.schemas?.[fc.component]?.properties ?? {}),
+			);
+			if (!rows.length || documented.size === 0) {
+				bad(
+					`${fc.name} field coverage`,
+					`no sample rows (${rows.length}) or empty spec component '${fc.component}' (${documented.size} props)`,
+				);
+				continue;
+			}
+			const liveKeys = new Set(rows.flatMap((r) => Object.keys(r ?? {})));
+			const undocumented = [...liveKeys].filter((k) => !documented.has(k));
+			check(
+				`${fc.name}: every live field documented in ${fc.component}`,
+				undocumented.length === 0,
+				`live-but-undocumented: ${undocumented.join(", ")}`,
+			);
+		} catch (err) {
+			bad(`${fc.name} field coverage`, `probe failed: ${String(err)}`);
+		}
+	}
+
 	// ── 7. Feedback contract: GET + 201 + nested context ────────────────────
 	console.log("◆ Feedback contract");
 	check(

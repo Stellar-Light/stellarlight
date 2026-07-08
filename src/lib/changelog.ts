@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-08",
+		surfaces: ["api", "api-client"],
+		type: "fixed",
+		summary:
+			"OpenAPI spec under-documented the live contract — CORRECTION: `Project.anchorProfile` was wrongly removed from the spec as 'never-implemented' (it IS served on Anchor-typed searchProjects rows and is now load-bearing for ramp queries); re-documented, plus `Project.canonicalSlug`, `Project.lifecycle`, and a full `Partner` component for getPartners (previously spec'd as a bare untyped object).",
+		detail:
+			"anchorProfile is the integration-oriented ramp profile joined from the partner directory ({slug,country,regions,assets,seps,rampTypes,asOf,url}; seps [] + non-empty rampTypes = proprietary ramp API rather than SEP-6/24). canonicalSlug = duplicate-lineage pointer; lifecycle = historical-archive context. The new Partner component documents all 31 live row fields incl. the system-computed `verified`/`trust`/`freshness` objects. Downstream catalogs generated from the spec (e.g. schema-drift detectors) should see this as ADDITIVE schema drift only — no ops/params/routing text changed. Prevention: the daily api-drift guard now asserts live-response field coverage (every field a live row serves must be documented in its spec component), so under-documentation is caught by our CI before any consumer's drift detector.",
+	},
+	{
+		date: "2026-07-08",
 		surfaces: ["api", "mcp", "api-client"],
 		type: "fixed",
 		summary:
