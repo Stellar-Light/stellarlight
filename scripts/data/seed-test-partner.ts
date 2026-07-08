@@ -77,6 +77,10 @@ async function main() {
 		console.log(`Created test account (${created.id}).`);
 	}
 
+	// In CI (GitHub Actions) NEVER let the generated password land in the public
+	// run log — a repo collaborator could read it. `::add-mask::` makes the runner
+	// redact it everywhere after. Locally it prints normally so you can grab it.
+	if (process.env.GITHUB_ACTIONS) console.log(`::add-mask::${PASSWORD}`);
 	console.log("\n──────── TEST LOGIN (password path — works today) ────────");
 	console.log(`  URL:      https://stellarlight.xyz/partners/dashboard`);
 	console.log(`  Email:    ${EMAIL}`);
