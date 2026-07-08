@@ -243,6 +243,16 @@ const COMPLIANCE_ENRICH: Record<string, Compliance> = {
 	finclusive: { kycRequired: true, currencies: "USD" },
 	clpx: { currencies: "CLP", settlementTime: "<5s" },
 };
+
+/**
+ * Founding year of the operating entity. VERIFIED, cite-or-null — only where a
+ * reliable source confirms it (company site / Crunchbase / LinkedIn / registry;
+ * NOT a domain-registration guess). Fill-if-empty: never overwrites a year a
+ * partner set themselves. Powers the "Since {year}" trust chip on profiles.
+ */
+const FOUNDED_YEARS: Record<string, number> = {
+	// filled from research (cite-or-null)
+};
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -250,10 +260,11 @@ async function main() {
 		OWNER_CONFIRMED_DEAD.length === 0 &&
 		PILOT_SLUGS.length === 0 &&
 		Object.keys(PARTNER_ENRICH).length === 0 &&
-		Object.keys(URL_CORRECTIONS).length === 0
+		Object.keys(URL_CORRECTIONS).length === 0 &&
+		Object.keys(FOUNDED_YEARS).length === 0
 	) {
 		console.error(
-			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS first (owner-confirmed only).",
+			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS / FOUNDED_YEARS first (owner-confirmed only).",
 		);
 		process.exit(1);
 	}
@@ -488,6 +499,28 @@ async function main() {
 			slug,
 			data: { compliance: comp },
 			note: "compliance",
+		});
+	}
+
+	console.log("\n── Founded year (VERIFIED; fill-if-empty) ──");
+	for (const [slug, year] of Object.entries(FOUNDED_YEARS)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		if (d.foundedYear) {
+			console.log(
+				`  ${d.name} (${slug}) — foundedYear already ${d.foundedYear}, skip`,
+			);
+			continue;
+		}
+		console.log(`  ${d.name} (${slug}) — foundedYear → ${year}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { foundedYear: year },
+			note: `founded ${year}`,
 		});
 	}
 
