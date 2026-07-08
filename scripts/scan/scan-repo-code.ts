@@ -20,7 +20,7 @@
  *   npx tsx scripts/scan/scan-repo-code.ts                       # dry run, 60 Rust repos
  *   npx tsx scripts/scan/scan-repo-code.ts --execute             # write that wave
  *   npx tsx scripts/scan/scan-repo-code.ts --lang all --limit 40 # any language
- *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --budget N (800)
+ *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --stale-first · --budget N (800)
  */
 import { config as loadEnv } from "dotenv";
 
@@ -37,6 +37,11 @@ import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
 const RESCAN = process.argv.includes("--rescan");
+// Stale-first (gist gap 4): re-scan repos whose code CHANGED after their last
+// scan (lastCommitAt > codeScannedAt) — an SDK 0.7→26 upgrade otherwise keeps
+// its stale versionStatus until a wave happens to reach it. Weekly scheduled
+// mode in scan-repo-code.yml.
+const STALE_FIRST = process.argv.includes("--stale-first");
 const argOf = (name: string, dflt: string) => {
 	const i = process.argv.indexOf(name);
 	return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : dflt;
