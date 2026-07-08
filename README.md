@@ -65,7 +65,7 @@ stellarlight/
 ├── public/skills/             # the Stellar Scout agent skill + references
 ├── scout-mcp/                 # @stellar-light/scout-mcp — MCP server (npm)
 ├── api-client/                # @stellar-light/api-client — typed client (npm)
-├── jobs/ · tests/ · docs/     # background jobs · Vitest/Playwright · deep docs
+├── tests/ · docs/             # Vitest/Playwright · operating docs
 └── .github/workflows/         # CI + scheduled data Actions (curation, scans, guards)
 ```
 
