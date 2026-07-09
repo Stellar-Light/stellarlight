@@ -9,6 +9,16 @@ on:
   pull_request:
     paths:
       - "src/lib/code-depth.ts"
+      - "src/lib/js-depth.ts"
+      - "src/lib/code-signals.ts"
+      - "src/lib/soroban-versions.ts"
+      - "src/lib/repo-allowlist.ts"
+      - "scripts/scan/**"
+  push:
+    branches: [main]
+    paths:
+      - "src/lib/code-depth.ts"
+      - "src/lib/js-depth.ts"
       - "src/lib/code-signals.ts"
       - "src/lib/soroban-versions.ts"
       - "src/lib/repo-allowlist.ts"
@@ -33,9 +43,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run codeDepth separation gate
         env:
-          # The 66-label answer key needs ~1,300 GitHub calls; the built-in Actions
-          # token caps at 1,000/hr, which failed the 2026-07-08 run as INCONCLUSIVE
-          # (coverage gate — correctly: unfetched proves nothing). The PAT carries the
-          # account-wide 5,000/hr limit; read-only public fetches only.
+          # Fork PRs can't read the PAT secret, so they fall back to the built-in
+          # token's 1,000/hr limit — which the ~90-repo key blows past (INCONCLUSIVE
+          # red, 2026-07-09). So: PR events run a SAMPLED smoke test (fits the
+          # budget); push-to-main + schedule + dispatch run the FULL gate with the
+          # account-wide PAT (5,000/hr, read-only public fetches).
           GITHUB_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN || secrets.GITHUB_TOKEN }}
+          DEPTH_EVAL_SAMPLE: ${{ github.event_name == 'pull_request' && '6' || '0' }}
         run: pnpm exec tsx scripts/scan/depth-eval.ts

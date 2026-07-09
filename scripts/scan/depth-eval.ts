@@ -41,6 +41,15 @@ if (!GH) {
 }
 const gh = createGh(GH);
 
+// Fork PRs can't read the PAT secret (GitHub withholds secrets from forked
+// pull_request events), so they fall back to the built-in token's 1,000/hr
+// limit — which the ~90-repo key blows past, producing an INCONCLUSIVE red
+// that once tempted a merge-past-red (2026-07-09). PR runs set DEPTH_EVAL_SAMPLE
+// to cap each band to a smoke-test subset that fits the budget; the FULL gate
+// runs on push-to-main + schedule + dispatch (all have the PAT).
+const SAMPLE = Math.max(0, Number(process.env.DEPTH_EVAL_SAMPLE || "0") || 0);
+const cap = <T>(list: T[]): T[] => (SAMPLE > 0 ? list.slice(0, SAMPLE) : list);
+
 interface Row {
 	fullName: string;
 	band: "DEEP" | "SHALLOW";
@@ -76,8 +85,12 @@ async function main() {
 		`depth-eval — gate: DEEP ≥ ${GATE.deepMin} · SHALLOW ≤ ${GATE.shallowMax} · margin ≥ ${GATE.marginMin} · coverage ≥ ${GATE.minCoverage * 100}%\n`,
 	);
 
-	const deep = await scoreBand("DEEP", DEEP);
-	const shallow = await scoreBand("SHALLOW", SHALLOW);
+	if (SAMPLE > 0)
+		console.log(
+			`⚠ SAMPLED smoke test (${SAMPLE}/band) — full gate runs on push-to-main + weekly + dispatch.\n`,
+		);
+	const deep = await scoreBand("DEEP", cap(DEEP));
+	const shallow = await scoreBand("SHALLOW", cap(SHALLOW));
 	const rows = [...deep.rows, ...shallow.rows];
 
 	const violations: string[] = [];
@@ -99,8 +112,8 @@ async function main() {
 
 	// Coverage: an eval that couldn't fetch the key is inconclusive → fail.
 	for (const [band, got, want, misses] of [
-		["DEEP", deep.rows.length, DEEP.length, deep.failed],
-		["SHALLOW", shallow.rows.length, SHALLOW.length, shallow.failed],
+		["DEEP", deep.rows.length, cap(DEEP).length, deep.failed],
+		["SHALLOW", shallow.rows.length, cap(SHALLOW).length, shallow.failed],
 	] as const) {
 		if (got / want < GATE.minCoverage) {
 			violations.push(
@@ -198,8 +211,8 @@ async function main() {
 			}
 			return { rows, failed };
 		};
-		const jd = await scoreJs("DEEP", JS_DEEP);
-		const js = await scoreJs("SHALLOW", JS_SHALLOW);
+		const jd = await scoreJs("DEEP", cap(JS_DEEP));
+		const js = await scoreJs("SHALLOW", cap(JS_SHALLOW));
 		for (const r of [...jd.rows, ...js.rows].sort((a, b) =>
 			a.band === b.band ? b.depth - a.depth : a.band < b.band ? -1 : 1,
 		)) {
@@ -216,8 +229,8 @@ async function main() {
 			);
 		}
 		for (const [band, got, want, misses] of [
-			["JS_DEEP", jd.rows.length, JS_DEEP.length, jd.failed],
-			["JS_SHALLOW", js.rows.length, JS_SHALLOW.length, js.failed],
+			["JS_DEEP", jd.rows.length, cap(JS_DEEP).length, jd.failed],
+			["JS_SHALLOW", js.rows.length, cap(JS_SHALLOW).length, js.failed],
 		] as const) {
 			if (want > 0 && got / want < JS_GATE.minCoverage)
 				violations.push(
