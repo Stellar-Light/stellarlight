@@ -128,14 +128,27 @@ async function main() {
 		console.log(`DRY RUN — ${writes.length} write(s) planned, none applied.`);
 		process.exit(0);
 	}
+	// Per-write isolation (2026-07-09 curate-projects incident: one
+	// ValidationError aborted a 13-write batch). A bad row fails loudly;
+	// the rest still land.
+	let failed = 0;
 	for (const w of writes) {
-		await payload.update({
-			collection: "partner-accounts",
-			id: w.id,
-			data: { onchain: w.onchain },
-			overrideAccess: true,
-		});
-		console.log(`  wrote: ${w.slug} [${w.onchain.length} on-chain assets]`);
+		try {
+			await payload.update({
+				collection: "partner-accounts",
+				id: w.id,
+				data: { onchain: w.onchain },
+				overrideAccess: true,
+			});
+			console.log(`  wrote: ${w.slug} [${w.onchain.length} on-chain assets]`);
+		} catch (err) {
+			failed++;
+			console.error(`  FAILED: ${w.slug} — ${String(err)}`);
+		}
+	}
+	if (failed) {
+		console.error(`\n${failed} write(s) FAILED — fix and re-run.`);
+		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
 	process.exit(0);

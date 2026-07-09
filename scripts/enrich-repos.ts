@@ -252,6 +252,7 @@ async function main() {
 	let created = 0,
 		updated = 0,
 		failed = 0;
+	let writeFailed = 0;
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
@@ -338,18 +339,26 @@ async function main() {
 			`  ${verb.padEnd(6)} ${full.padEnd(42)} score=${grade.score} ${info?.primaryLanguage ?? "?"} ★${info?.stargazerCount ?? "?"}${enrichError ? `  ⚠ ${enrichError.slice(0, 40)}` : ""}`,
 		);
 		if (EXECUTE) {
-			if (existing) {
-				await payload.update({ collection: "repos", id: existing.id, data });
-				updated++;
-			} else {
-				await payload.create({ collection: "repos", data });
-				created++;
+			// Per-write isolation (2026-07-09 curate-projects incident): one bad
+			// doc must not kill the rest of a multi-hundred-repo wave.
+			try {
+				if (existing) {
+					await payload.update({ collection: "repos", id: existing.id, data });
+					updated++;
+				} else {
+					await payload.create({ collection: "repos", data });
+					created++;
+				}
+			} catch (err) {
+				writeFailed++;
+				console.error(`  WRITE FAILED: ${full} — ${String(err)}`);
 			}
 		}
 	}
 	console.log(
-		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
+		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
 	);
+	if (writeFailed) process.exitCode = 1;
 	process.exit(0);
 }
 main().catch((e) => {
