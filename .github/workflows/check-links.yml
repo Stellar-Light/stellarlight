@@ -36,10 +36,20 @@ env:
   DATABASE_URI: ${{ secrets.DATABASE_URI }}
   PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
 
+# Review finding 15: no concurrency group meant a manual dispatch during the
+# (long) scheduled run raced two --execute processes on the unique url index.
+concurrency:
+  group: check-links
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Review finding 8: 15 min was sized for the "~200 URLs" comment above; the
+    # run now checks 2,106 URLs (10s ceiling each, concurrency 5) + ~4,200
+    # sequential DB round-trips AFTER the checks — a kill mid-write corrupts
+    # the freshness counters. Sized for worst case.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 

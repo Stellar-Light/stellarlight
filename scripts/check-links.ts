@@ -69,6 +69,8 @@ interface UrlEntry {
 
 /* ─── URL collection ─────────────────────────────────────────────────── */
 
+let collectorErrors = 0;
+
 async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	const map = new Map<string, Target[]>();
 
@@ -92,7 +94,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	// Projects
 	const projects = await payload.find({
 		collection: "projects",
-		limit: 1000,
+		limit: 2000,
 		depth: 0,
 	});
 	for (const p of projects.docs as Array<{
@@ -119,7 +121,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	// Builders
 	const builders = await payload.find({
 		collection: "builders",
-		limit: 1000,
+		limit: 2000,
 		depth: 0,
 	});
 	for (const b of builders.docs as Array<{
@@ -149,7 +151,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	try {
 		const entities = await payload.find({
 			collection: "entities",
-			limit: 1000,
+			limit: 2000,
 			depth: 0,
 		});
 		for (const e of entities.docs as Array<{
@@ -168,6 +170,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			add(e.links?.twitter, { ...ctx, field: "links.twitter" });
 		}
 	} catch (err) {
+		collectorErrors++;
 		console.warn(`[entities] skipped: ${(err as Error).message}`);
 	}
 
@@ -191,6 +194,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			});
 		}
 	} catch (err) {
+		collectorErrors++;
 		console.warn(`[hackathons] skipped: ${(err as Error).message}`);
 	}
 
@@ -232,6 +236,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			add(s.docs, { ...ctx, field: "docs" });
 		}
 	} catch (err) {
+		collectorErrors++;
 		console.warn(`[community-skills] skipped: ${(err as Error).message}`);
 	}
 
@@ -261,6 +266,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			add(pt.docsUrl, { ...ctx, field: "docsUrl" });
 		}
 	} catch (err) {
+		collectorErrors++;
 		console.warn(`[partner-accounts] skipped: ${(err as Error).message}`);
 	}
 
@@ -296,17 +302,23 @@ async function checkUrl(url: string): Promise<CheckResult> {
 
 		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
 		// Retry with GET if HEAD says it's broken.
-		if (res.status >= 400 && res.status !== 401 && res.status !== 403) {
+		if (
+			res.status >= 400 &&
+			res.status !== 401 &&
+			res.status !== 403 &&
+			res.status !== 429 &&
+			res.status < 500
+		) {
 			const getRes = await fetch(url, {
 				method: "GET",
 				redirect: "manual",
 				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
 				signal: controller.signal,
 			});
-			return summarize(getRes);
+			return summarize(getRes, url);
 		}
 
-		return summarize(res);
+		return summarize(res, url);
 	} catch (err) {
 		const e = err as Error & { code?: string; cause?: unknown };
 		let reason: string;
@@ -331,8 +343,11 @@ async function checkUrl(url: string): Promise<CheckResult> {
 	}
 }
 
-function summarize(res: Response): CheckResult {
-	const url = res.url;
+function summarize(res: Response, requestedUrl: string): CheckResult {
+	// Review finding 22/10: fetch normalizes root domains (example.com →
+	// example.com/), so keying by res.url split every root URL's identity from
+	// its stored record (error path used the cleaned form) — churn + dupes.
+	const url = requestedUrl;
 	if (res.status >= 200 && res.status < 300) {
 		return {
 			url,
@@ -496,11 +511,13 @@ async function main() {
 		const data = {
 			url: r.url,
 			status: r.status,
-			statusCode: r.statusCode ?? undefined,
-			errorReason: r.errorReason ?? undefined,
-			redirectTo: r.redirectTo ?? undefined,
+			// Review finding 11: undefined = "leave unchanged" in Payload updates —
+			// stale errorReason/redirectTo survived a URL recovering. null CLEARS.
+			statusCode: r.statusCode ?? null,
+			errorReason: r.errorReason ?? null,
+			redirectTo: r.redirectTo ?? null,
 			consecutiveFailures,
-			firstFailedAt: firstFailedAt ?? undefined,
+			firstFailedAt: firstFailedAt ?? null,
 			lastSuccessAt: lastSuccessAt ?? undefined,
 			lastChecked: now.toISOString(),
 			targets: r.targets.map((t) => ({
@@ -527,6 +544,19 @@ async function main() {
 			});
 			created++;
 		}
+	}
+
+	// Review finding 9: if ANY collector failed, its URLs are missing from this
+	// run "not because they were removed" — running cleanup would mass-delete
+	// their records. Skip cleanup entirely on a partial collection.
+	if (collectorErrors > 0) {
+		console.warn(
+			`Skipping cleanup: ${collectorErrors} collector(s) failed — a partial URL set must not drive deletions.`,
+		);
+		console.log(
+			`Persisted: ${created} created, ${updated} updated, 0 cleaned up (skipped).`,
+		);
+		process.exit(0);
 	}
 
 	// Cleanup — delete LinkCheck records whose URL no longer appears anywhere

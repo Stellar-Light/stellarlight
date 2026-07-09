@@ -110,7 +110,7 @@ export const LinkChecks: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"How many consecutive check runs this URL has returned error/redirect. 0 = currently healthy.",
+					"How many consecutive check runs this URL has returned ERROR (redirect/blocked reset it — they are reachability, not death). 0 = currently healthy.",
 			},
 		},
 		{
