@@ -213,10 +213,70 @@ export const SYNONYMS: Record<string, string[]> = {
 
 export function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
-	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1)); // plural
-	if (t.length > 5 && t.endsWith("ing")) out.add(t.slice(0, -3)); // gerund
+	// F2 (2026-07-09 audit root #2): light ITERATIVE stemming. Variants are
+	// substring-matched against the haystack, so crude stems are safe —
+	// "sav" matches save/saving/savings; "donat" matches donate/donations.
+	// Each rule also applies to variants produced by earlier rules
+	// (savings → saving → sav).
+	const grow = (v: string) => {
+		if (v.length > 4 && v.endsWith("s")) out.add(v.slice(0, -1)); // plural
+		if (v.length > 5 && v.endsWith("ies")) out.add(`${v.slice(0, -3)}y`); // charities→charity
+		if (v.length > 5 && v.endsWith("ing")) out.add(v.slice(0, -3)); // gerund (saving→sav)
+		if (v.length > 6 && v.endsWith("tion")) out.add(v.slice(0, -3)); // donation→donat
+	};
+	grow(t);
+	for (const v of [...out]) grow(v);
 	for (const syn of SYNONYMS[t] ?? []) out.add(syn);
 	return [...out];
+}
+
+/**
+ * F2: generic query words that must never be the ONLY evidence a relaxed
+ * match tier accepts. On loose-1/majority tiers a record must hit at least
+ * one NON-generic ("anchor") token — the audit showed common verbs dominating
+ * while the intent-bearing rare noun dropped out ("buy gold" matching every
+ * record containing "buy"; "peruvian sol" → 113 rows via "sol"-substring).
+ * STOPWORDS already remove pure filler; this set is the next ring out:
+ * transactional verbs and container nouns that appear in half the corpus.
+ */
+export const GENERIC_QUERY_TOKENS = new Set([
+	"buy",
+	"sell",
+	"get",
+	"send",
+	"receive",
+	"make",
+	"use",
+	"need",
+	"want",
+	"find",
+	"money",
+	"crypto",
+	"token",
+	"tokens",
+	"coin",
+	"coins",
+	"app",
+	"apps",
+	"platform",
+	"service",
+	"services",
+	"tool",
+	"tools",
+	"solution",
+	"project",
+	"projects",
+	"way",
+	"sol", // ambiguous: Solana's ticker vs spanish "sol" — never a lone anchor
+]);
+
+export function anchorTokens(tokens: string[]): string[] {
+	return tokens.filter((t) => !GENERIC_QUERY_TOKENS.has(t) && t.length > 2);
+}
+
+/** Does the record hit ANY of these tokens (via expanded terms)? */
+export function hitsAnyToken(hay: string, tokens: string[]): boolean {
+	return tokens.some((t) => termsForToken(t).some((v) => hay.includes(v)));
 }
 
 // Stopword-filtered tokenization SHARED with repo search (contentTokens):
@@ -225,8 +285,34 @@ export function termsForToken(t: string): string[] {
 // outrank the actual bridges on "move tokens from Ethereum to Stellar".
 // contentTokens keeps the raw tokens when a query is ALL stopwords.
 export function tokenize(q: string): string[] {
-	return contentTokens(q);
+	const tokens = contentTokens(q);
+	// F2: currency NAMES map to the codes coverage.currencies actually stores
+	// (audit: "kenyan shilling" retrieved nothing while q=KES hit #1). Bigram
+	// detection on the raw query; the code joins the token list so both the
+	// candidate query and the haystack score see it.
+	const ql = q.toLowerCase();
+	for (const [phrase, code] of Object.entries(CURRENCY_NAME_TO_CODE)) {
+		if (ql.includes(phrase) && !tokens.includes(code)) tokens.push(code);
+	}
+	return tokens;
 }
+
+// Names people type → the currency codes stored in coverage.currencies.
+export const CURRENCY_NAME_TO_CODE: Record<string, string> = {
+	"kenyan shilling": "kes",
+	"tanzanian shilling": "tzs",
+	"argentine peso": "ars",
+	"argentinian peso": "ars",
+	"mexican peso": "mxn",
+	"colombian peso": "cop",
+	"chilean peso": "clp",
+	"philippine peso": "php",
+	"peruvian sol": "pen",
+	"nigerian naira": "ngn",
+	"brazilian real": "brl",
+	"ghanaian cedi": "ghs",
+	"south african rand": "zar",
+};
 
 // Map a query token to the `types` value it implies, so ranking + admission can
 // treat a record that IS the queried category as more relevant than one that

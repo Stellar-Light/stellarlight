@@ -146,4 +146,16 @@ describe("detectSdkCapabilities", () => {
 			]),
 		).toEqual([]);
 	});
+
+	it("F2: digit-boundary symbols searchable in split AND raw forms", () => {
+		const hay = symbolsHaystack(["Groth16Verifier", "ScVal", "ed25519_sign"]);
+		// digit→Upper split gives standalone groth16
+		expect(hay).toContain("groth16 verifier");
+		// raw concatenated forms survive for one-token identifier queries
+		expect(hay).toContain("scval");
+		expect(hay).toContain("ed25519sign");
+		// and split forms still present
+		expect(hay).toContain("sc val");
+		expect(hay).toContain("ed25519 sign");
+	});
 });

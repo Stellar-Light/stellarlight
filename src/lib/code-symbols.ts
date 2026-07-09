@@ -101,12 +101,19 @@ export function extractCodeSymbols(blobs: SymbolBlob[]): string[] {
  * symbol hit could never fire. */
 export function symbolsHaystack(symbols: unknown): string {
 	if (!Array.isArray(symbols)) return "";
-	return symbols
-		.filter((s): s is string => typeof s === "string")
+	const list = symbols.filter((s): s is string => typeof s === "string");
+	const split = list
 		.join(" ")
 		.replace(/_/g, " ")
-		.replace(/([a-z])([A-Z])/g, "$1 $2")
+		// F2 (audit: groth16/secp256r1/ed25519/scval unfindable): split camelCase
+		// INCLUDING digit→Upper boundaries (Groth16Verifier → groth16 verifier)…
+		.replace(/([a-z0-9])([A-Z])/g, "$1 $2")
 		.toLowerCase();
+	// …and ALSO keep each symbol's raw concatenated lowercase form, so a
+	// one-token query for the whole identifier (scval, ed25519) boundary-matches
+	// even when the split form breaks it apart (ScVal → "sc val" + "scval").
+	const raw = list.map((s) => s.replace(/_/g, "").toLowerCase()).join(" ");
+	return `${split} ${raw}`;
 }
 
 // ── JS/TS (gist gap 1, phase 1: facts, not scores) ─────────────────────────

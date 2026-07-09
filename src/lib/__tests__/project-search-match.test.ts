@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+	anchorTokens,
 	buildHaystack,
 	corridorMatch,
+	hitsAnyToken,
 	intentTypesFor,
 	isRampIntent,
 	scoreTokens,
 	structuredHit,
 	structuredSelectClauses,
+	termsForToken,
 	tokenize,
 	typeMatch,
 } from "../project-search-match";
@@ -223,5 +226,39 @@ describe("review finding 2 — identifier-form queries", () => {
 		expect(structuredSelectClauses(["wallet"])).not.toContainEqual(
 			expect.objectContaining({ "coverage.seps": expect.anything() }),
 		);
+	});
+
+	it("F2: iterative stem variants reach doc forms via substring", () => {
+		// donations → donation → donat (substring-matches "donate")
+		expect(termsForToken("donations")).toContain("donat");
+		// savings → saving → sav (substring-matches "save")
+		expect(termsForToken("savings")).toContain("sav");
+		// charities → charity
+		expect(termsForToken("charities")).toContain("charity");
+	});
+
+	it("F2: currency names map to stored codes at tokenize time", () => {
+		expect(tokenize("kenyan shilling on-ramp")).toContain("kes");
+		expect(tokenize("send argentine peso")).toContain("ars");
+		expect(tokenize("peruvian sol wallet")).toContain("pen");
+		expect(tokenize("random query")).not.toContain("kes");
+	});
+
+	it("F2: anchor tokens exclude generic transactional words", () => {
+		expect(anchorTokens(["buy", "gold"])).toEqual(["gold"]);
+		expect(anchorTokens(["send", "money", "philippines"])).toEqual([
+			"philippines",
+		]);
+		// all-generic queries impose no constraint
+		expect(anchorTokens(["buy", "sell"])).toEqual([]);
+		// 'sol' alone is never an anchor (Solana ticker vs spanish sol)
+		expect(anchorTokens(["peruvian", "sol"])).toEqual(["peruvian"]);
+	});
+
+	it("F2: hitsAnyToken tests expanded terms against a haystack", () => {
+		expect(hitsAnyToken("tokenized gold vaults on stellar", ["gold"])).toBe(
+			true,
+		);
+		expect(hitsAnyToken("a payments wallet", ["gold"])).toBe(false);
 	});
 });
