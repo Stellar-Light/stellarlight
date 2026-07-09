@@ -37,6 +37,12 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 // own products (Etherfuse FX = a live Mexico on/off-ramp API).
 const TYPES_ADD: Record<string, string[]> = {
 	etherfuse: ["Anchor"],
+	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
+	// USDT across Base, Stellar, Solana, Ethereum, BNB" — rozo.ai homepage,
+	// linked not coming-soon; Hacken audit of ROZO Intents in our corpus).
+	// Typed Payments-only, so every bridge/EVM query missed it — the same
+	// multi-product secondary-capability class as etherfuse (sls-018).
+	rozo: ["Bridge"],
 };
 
 /** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
