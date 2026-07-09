@@ -82,6 +82,7 @@ export const Projects: CollectionConfig = {
 				"DEX",
 				"Lending",
 				"Bridge",
+				"Infrastructure",
 				"Payments",
 				"Anchor",
 				"SDK",
