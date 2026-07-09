@@ -521,6 +521,8 @@ export async function GET(req: NextRequest) {
 					category: string;
 					shortDescription?: string;
 					status: string;
+					tvlUSD?: number | null;
+					tvlAsOf?: string | null;
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
@@ -587,6 +589,10 @@ export async function GET(req: NextRequest) {
 					category: p.category,
 					shortDescription: p.shortDescription ?? null,
 					status: p.status,
+					// F8: TVL facts ride the keyword rows too (the semantic mapper
+					// already carries them) — null = not tracked on DefiLlama.
+					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
+					tvlAsOf: p.tvlAsOf ?? null,
 					canonicalSlug: p.canonicalSlug ?? null,
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
