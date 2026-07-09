@@ -13,6 +13,11 @@ on:
   # for a manual wave. Writes are signals-only (write-shape.ts, zero-demotion
   # by construction) — the same proven write path manual waves use.
   schedule:
+    # daily 03:00 UTC — backlog wave: 60 never-scanned repos/day, so the
+    # ~1,700-repo backlog converges in ~a month, then this becomes a no-op
+    # (the wave selector skips scanned repos; signals-only writes).
+    - cron: "0 3 * * *"
+    # weekly Mon 04:00 UTC — stale-first re-scan (pushed since last scan)
     - cron: "0 4 * * 1"
   workflow_dispatch:
     inputs:
@@ -57,8 +62,11 @@ jobs:
       # inputs.* are EMPTY on schedule events (2026-07-08 review, finding 18 —
       # the "weekly stale-first" run was a write-nothing dry run of the wrong
       # wave). Scheduled runs get their own hardcoded step.
+      - name: Daily backlog wave (schedule)
+        if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * *'
+        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --limit 60
       - name: Weekly stale-first re-scan (schedule)
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * 1'
         run: pnpm exec tsx scripts/scan/scan-repo-code.ts --stale-first --execute --limit 60
       - name: Manual wave (dispatch)
         if: github.event_name == 'workflow_dispatch'
