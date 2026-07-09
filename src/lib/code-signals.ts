@@ -530,9 +530,7 @@ const STALE_MS = 730 * 86_400_000;
  *
  * Returns `null` to mean "make NO tier change" (the safe default under doubt).
  */
-export function codeProofTier(
-	input: TierInput,
-): {
+export function codeProofTier(input: TierInput): {
 	tier: "quality" | "community" | "archive";
 	unverifiedStellar: boolean;
 	reason: string[];

@@ -115,23 +115,67 @@ async function main() {
 			...(RESCAN ? [] : [{ codeScanState: { not_equals: "scanned" } }]),
 		],
 	};
-	const res = await payload.find({
-		collection: "repos",
-		where,
-		sort: "-lastCommitAt",
-		limit: LIMIT,
-		depth: 0,
-		select: {
-			fullName: true,
-			repoScore: true,
-			isFork: true,
-			isArchived: true,
-			codeScanState: true,
-		},
-	});
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-	const docs = res.docs as any[];
-	console.log(`eligible: ${res.totalDocs} · this wave: ${docs.length}\n`);
+	let docs: any[];
+	let eligible: number;
+	if (STALE_FIRST) {
+		// Stale = scanned, but pushed since the scan. Payload where can't compare
+		// two fields, so fetch the scanned set (small select) + filter in memory.
+		const scanned = await payload.find({
+			collection: "repos",
+			where: {
+				and: [
+					...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
+					{ codeScanState: { equals: "scanned" } },
+				],
+			},
+			limit: 3000,
+			depth: 0,
+			select: {
+				fullName: true,
+				repoScore: true,
+				isFork: true,
+				isArchived: true,
+				codeScanState: true,
+				lastCommitAt: true,
+				codeScannedAt: true,
+			},
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+		const stale = (scanned.docs as any[]).filter(
+			(d) =>
+				d.lastCommitAt &&
+				d.codeScannedAt &&
+				new Date(d.lastCommitAt).getTime() >
+					new Date(d.codeScannedAt).getTime(),
+		);
+		stale.sort((a, b) =>
+			String(b.lastCommitAt).localeCompare(String(a.lastCommitAt)),
+		);
+		eligible = stale.length;
+		docs = stale.slice(0, LIMIT);
+	} else {
+		const res = await payload.find({
+			collection: "repos",
+			where,
+			sort: "-lastCommitAt",
+			limit: LIMIT,
+			depth: 0,
+			select: {
+				fullName: true,
+				repoScore: true,
+				isFork: true,
+				isArchived: true,
+				codeScanState: true,
+			},
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+		docs = res.docs as any[];
+		eligible = res.totalDocs;
+	}
+	console.log(
+		`eligible: ${eligible} · this wave: ${docs.length}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
+	);
 
 	let callsUsed = 0;
 	let scanned = 0;

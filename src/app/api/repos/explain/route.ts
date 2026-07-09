@@ -111,6 +111,8 @@ export async function GET(req: NextRequest) {
 		sorobanSdkVersion: string | null;
 		versionStatus: string | null;
 		scannedAt: string | null;
+		symbols: string[];
+		mainnetContractId: string | null;
 	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
@@ -132,6 +134,8 @@ export async function GET(req: NextRequest) {
 					versionStatus: true,
 					codeScanState: true,
 					codeScannedAt: true,
+					codeSymbols: true,
+					mainnetContractId: true,
 				},
 			});
 			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
@@ -151,6 +155,12 @@ export async function GET(req: NextRequest) {
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,
+						symbols: Array.isArray(d.codeSymbols)
+							? (d.codeSymbols as unknown[])
+									.filter((s): s is string => typeof s === "string")
+									.slice(0, 20)
+							: [],
+						mainnetContractId: (d.mainnetContractId as string) ?? null,
 					};
 				}
 			}
