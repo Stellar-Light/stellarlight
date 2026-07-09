@@ -41,6 +41,9 @@ const PARTNER_TYPES = [
 	"other",
 ];
 
+// Mirrors Partners.rampTypes select options.
+const RAMP_TYPES = ["on-ramp", "off-ramp"];
+
 /**
  * Map a Payload partner doc → the public shape. Drops auth/internal fields,
  * flattens the verified group, and derives a freshness object consumers
@@ -179,6 +182,7 @@ export async function GET(req: NextRequest) {
 	const type = sp.get("type");
 	const sector = sp.get("sector");
 	const region = sp.get("region");
+	const ramps = sp.get("ramps");
 	const accepting = boolParam(sp.get("accepting"));
 	const all = boolParam(sp.get("all"));
 	const q = sp.get("q")?.toLowerCase().trim();
@@ -188,6 +192,23 @@ export async function GET(req: NextRequest) {
 	if (type && !PARTNER_TYPES.includes(type)) {
 		return NextResponse.json(
 			{ error: `Unknown type '${type}'`, validTypes: PARTNER_TYPES },
+			{ status: 400 },
+		);
+	}
+
+	// Fiat-ramp capability filter (Partners.rampTypes). Comma-separated values
+	// require ALL listed ramps; unknown values 400 rather than the silently-
+	// ignored-param trap this filter was born from (stellar-scout#7).
+	const rampList = ramps
+		? ramps
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean)
+		: [];
+	const badRamp = rampList.find((r) => !RAMP_TYPES.includes(r));
+	if (badRamp) {
+		return NextResponse.json(
+			{ error: `Unknown ramp '${badRamp}'`, validRamps: RAMP_TYPES },
 			{ status: 400 },
 		);
 	}
@@ -203,6 +224,8 @@ export async function GET(req: NextRequest) {
 			if (type) where.partnerType = { equals: type };
 			if (sector) where.sectors = { contains: sector };
 			if (region) where.regions = { contains: region };
+			if (rampList.length)
+				where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
 			if (accepting) where.acceptingClients = { equals: true };
 
 			const result = await payload.find({
@@ -261,7 +284,7 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/partners",
 		query: q,
-		filters: { type, sector, region, accepting, all, limit, offset },
+		filters: { type, sector, region, ramps, accepting, all, limit, offset },
 	});
 
 	return NextResponse.json(
@@ -273,6 +296,7 @@ export async function GET(req: NextRequest) {
 					type,
 					sector,
 					region,
+					ramps: ramps ?? null,
 					accepting,
 					all,
 					q: q ?? null,
@@ -281,6 +305,7 @@ export async function GET(req: NextRequest) {
 				},
 				counts: { returned: partners.length, total: totalMatching },
 				validTypes: PARTNER_TYPES,
+				validRamps: RAMP_TYPES,
 				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
 			},
 			partners,
