@@ -202,6 +202,36 @@ async function main() {
 		bad("bridge corridors", `fetch failed: ${String(err)}`);
 	}
 
+	// Emir's demo class (2026-07-09): if a round is in Submission, /api/rfps
+	// must serve it as a first-class OPEN row — meta-only placement made a
+	// row-reading agent conclude "nothing is open". Guard both directions of
+	// the contract: phase says Submission ⇔ an open scf-round row exists.
+	try {
+		const rf = await j("/api/rfps?status=open");
+		const round = rf.meta?.scfRound;
+		const openRoundRows = (rf.rfps ?? []).filter(
+			(r: { id?: string; status?: string }) =>
+				String(r.id ?? "").startsWith("scf-round-") && r.status === "open",
+		);
+		const inSubmission = /submission/i.test(String(round?.currentPhase ?? ""));
+		if (inSubmission && openRoundRows.length === 0)
+			bad(
+				"rfps open round",
+				`scfRound says '${round.currentPhase}' but no open scf-round row served — the Emir miss regressed`,
+			);
+		else if (!inSubmission && openRoundRows.length > 0)
+			bad(
+				"rfps open round",
+				"open scf-round row served while no round is in Submission — stale open call",
+			);
+		else
+			ok(
+				`rfps open round: phase='${round?.currentPhase ?? "none"}' ⇔ ${openRoundRows.length} open round row(s)`,
+			);
+	} catch (err) {
+		bad("rfps open round", `fetch failed: ${String(err)}`);
+	}
+
 	// 5. Known-item recall — the answer to "how do we catch important misses?"
 	//    (Tyler, raven#8: Etherfuse, SushiSwap). A prose-only search silently
 	//    DROPS a well-known entity when a category/corridor query is phrased in

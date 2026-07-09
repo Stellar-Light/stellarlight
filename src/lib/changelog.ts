@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.5",
+		type: "fixed",
+		summary:
+			"getRfps: an SCF round in Submission phase is now served as a first-class OPEN row (id scf-round-N, category scf, links to the handbook + application page) — previously the live open-round fact existed only in meta.scfRound while every idea row read closed, so row-reading agents concluded no funding was open (observed in a live Raven session, reported by Emir/SDF).",
+		detail:
+			"Additive row, appears under status=open and default listings while a round is accepting submissions; disappears when the window closes. Daily self-audit now asserts the phase⇔row contract in both directions.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.4",
 		type: "fixed",
 		summary:
