@@ -387,6 +387,15 @@ export interface Project {
     | number
     | boolean
     | null;
+  /**
+   * DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.
+   */
+  tvlUSD?: number | null;
+  /**
+   * When tvlUSD was fetched (class 8: dated metrics).
+   */
+  tvlAsOf?: string | null;
+  llamaSlugs?: string[] | null;
   provenance: {
     source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
     sourceId?: string | null;
@@ -1982,6 +1991,9 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   verificationLevel?: T;
   embedding?: T;
+  tvlUSD?: T;
+  tvlAsOf?: T;
+  llamaSlugs?: T;
   provenance?:
     | T
     | {
