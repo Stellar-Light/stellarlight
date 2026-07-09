@@ -67,6 +67,10 @@ const TYPES_ADD: Record<string, string[]> = {
 const STATUS_FIX: Record<string, { from: string; to: string }> = {
 	helix: { from: "Live", to: "Development" },
 	warpdrive: { from: "Live", to: "Development" },
+	// boxy 2026-07-09 (human-confirmed dead) + hard evidence: DefiLlama TVL
+	// $93 (a LENDING protocol), repo eq-lab/slender last push 2025-10-03.
+	// Site still resolves — zombie, not offline; status is the honest signal.
+	slender: { from: "Live", to: "Inactive" },
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
