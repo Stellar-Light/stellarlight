@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.1",
+		type: "changed",
+		summary:
+			"searchResearch results are now trust-ranked and deduplicated: one best chunk per document, ordered by the confidence signal (relevance + freshness + authority) instead of raw retrieval score. Duplicate chunks of a single post no longer crowd the top-K, and semantically-close but stale docs (e.g. a 2022 never-productionized research protocol) no longer outrank current sources on consumer-intent queries.",
+		detail:
+			"Motivating case: 'bridge assets from EVM to Stellar' returned Starbridge (2022) chunks twice while CCTP/Allbridge content sat below the fold; now the top-K carries the Allbridge/Spectra/Tricorn bridge audits + CCTP-bearing integration docs. Response shape unchanged (raw `score` still returned per row); only ordering and per-document dedupe changed. Golden eval: 21/21 pre-existing research questions unchanged, new bridge-evm-to-stellar case added.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.0",
 		type: "changed",
 		summary:
