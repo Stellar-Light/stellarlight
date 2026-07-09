@@ -69,6 +69,42 @@ const STATUS_FIX: Record<string, { from: string; to: string }> = {
 	warpdrive: { from: "Live", to: "Development" },
 };
 
+/** Curated seeds — create-if-missing directory entries with human-verified
+ * provenance. Never updates an existing row (slug match = skip), so a seed
+ * can't clobber later edits. Keep this list SHORT and evidence-quoted. */
+const SEEDS: Array<{
+	slug: string;
+	name: string;
+	category: string;
+	status: string;
+	types: string[];
+	supportedNetworks: string[];
+	shortDescription: string;
+	links: { website?: string; github?: string };
+}> = [
+	// boxy 2026-07-09: the launching-vs-launched contrast needs the launching
+	// side represented. Identity verified via the Certora audit PDF (Certora/
+	// SecurityReports 06_10_2026_Certora_SpectraBridge_AuditReport.pdf), whose
+	// scope links resolve to github.com/perspectivefi/audit-bridge-stellar —
+	// perspectivefi = "Perspective" (perspective.fi), the org behind
+	// spectra.finance. Their own site lists EVM chains only (no Stellar yet)
+	// → Development, not Live.
+	{
+		slug: "spectra-finance",
+		name: "Spectra Finance",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Bridge"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"Spectra (by Perspective, spectra.finance) is an interest-rate derivatives protocol live on EVM chains — fixed-rate yield via Principal/Yield Tokens. Its Spectra Bridge, an EVM⇄Stellar bridge bringing Spectra assets to Soroban, is in development: Certora audited the Stellar bridge contracts in May 2026 (perspectivefi/audit-bridge-stellar). Not yet launched on Stellar.",
+		links: {
+			website: "https://www.spectra.finance",
+			github: "https://github.com/perspectivefi",
+		},
+	},
+];
+
 /** Rebrands — name, website, and description move together so both the old
  * and new brand stay searchable. Equality no-ops keep reruns clean. */
 const REBRANDS: Record<
@@ -358,6 +394,38 @@ async function main() {
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──
+	// ── curated seeds (create-if-missing, never update) ──
+	console.log("\n── Seeds (create-if-missing) ──");
+	for (const seed of SEEDS) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: seed.slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		if (r.docs[0]) {
+			console.log(`  ${seed.slug}: exists, skip`);
+			continue;
+		}
+		console.log(
+			`  ${seed.slug}: CREATE (${seed.status}, ${seed.types.join("/")})`,
+		);
+		if (EXECUTE) {
+			try {
+				await payload.create({
+					collection: "projects",
+					data: seed,
+					overrideAccess: true,
+				});
+				console.log(`  created: ${seed.slug}`);
+			} catch (err) {
+				console.error(`  CREATE FAILED: ${seed.slug} — ${String(err)}`);
+				process.exitCode = 1;
+			}
+		}
+	}
+
 	// ── rebrands (name + website + description together) ──
 	console.log("\n── Rebrands ──");
 	for (const [slug, rb] of Object.entries(REBRANDS)) {
