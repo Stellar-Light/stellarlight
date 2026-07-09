@@ -35,11 +35,20 @@ const bad = (n: string, d: string) => {
 
 // biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
 async function j(path: string): Promise<any> {
-	const r = await fetch(`${BASE}${path}`, {
-		headers: { "user-agent": "stellarlight-self-audit" },
-	});
-	if (!r.ok) throw new Error(`HTTP ${r.status}`);
-	return r.json();
+	// One retry on transient failure (review finding 21: a single network blip
+	// across ~40 sequential fetches filed a spurious daily issue).
+	for (let attempt = 0; ; attempt++) {
+		try {
+			const r = await fetch(`${BASE}${path}`, {
+				headers: { "user-agent": "stellarlight-self-audit" },
+			});
+			if (!r.ok) throw new Error(`HTTP ${r.status}`);
+			return await r.json();
+		} catch (e) {
+			if (attempt >= 1) throw e;
+			await new Promise((res) => setTimeout(res, 3000));
+		}
+	}
 }
 
 async function main() {
@@ -83,7 +92,12 @@ async function main() {
 
 	// 2. Freshness thresholds — a stalled cron shows up as a stale source.
 	console.log("\n── Freshness ──");
-	const status = await j("/api/status");
+	let status: any = {};
+	try {
+		status = await j("/api/status");
+	} catch (e) {
+		bad("/api/status", `fetch failed after retry: ${String(e)}`);
+	}
 	const sources: Array<{ name: string; lastUpdatedAt: string | null }> =
 		status.sources ?? [];
 	const MAX_AGE_DAYS: Record<string, number> = {

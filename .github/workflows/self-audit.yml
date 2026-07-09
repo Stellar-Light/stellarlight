@@ -50,7 +50,13 @@ jobs:
             echo ""
             echo "Run: $RUN_URL"
           } > body.md
-          gh issue create --title "Self-audit failure — $(date -u +%Y-%m-%d)" --body-file body.md
+          # Review finding 21: dedupe — one open audit issue at a time, append context instead of spamming dailies.
+          EXISTING=$(gh issue list --state open --search 'Self-audit failure in:title' --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body-file body.md
+          else
+            gh issue create --title "Self-audit failure — $(date -u +%Y-%m-%d)" --body-file body.md
+          fi
       - name: Fail the job so the regression is visible
         if: steps.audit.outputs.exit != '0'
         run: exit 1
