@@ -1,0 +1,26 @@
+# Engine A — the generated recall matrix (weekly). Derives probes from the
+# live data itself (every record's fields imply its queries) and scores
+# recall per bucket. Report-only: red = a bucket fell below its floor.
+# Engine C will file issues from this; for now the red run IS the signal.
+name: generated-recall
+on:
+  schedule:
+    - cron: "0 7 * * 0"
+  workflow_dispatch: {}
+concurrency:
+  group: generated-recall
+  cancel-in-progress: false
+jobs:
+  recall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run Engine A
+        run: pnpm exec tsx scripts/eval/generated-recall.ts | tee $GITHUB_STEP_SUMMARY
