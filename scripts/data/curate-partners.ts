@@ -127,6 +127,43 @@ const PARTNER_ENRICH: Record<
 // This is the ONLY place a non-empty field is overwritten — and only for safety.
 const URL_CORRECTIONS: Record<string, string> = {
 	"anchor-boss-pay": "https://www.bossmoney.com",
+	// 2026-07-09: hanawallet.io 301s permanently to hana.money (rebrand; live).
+	"hana-wallet": "https://hana.money",
+};
+
+/** F6 part 2 (audit root #6 / lessons class 23): tagline backfill for rows the
+ * default quality bar hid — ALL 5 wallets + ALL 4 protocols returned total:0
+ * ("none exist") on type filters. FILL-IF-EMPTY ONLY: tagline is a
+ * partner-owned manual field; we never overwrite one a partner set. Every
+ * line below is VERBATIM from the partner's own site (hero/meta), fetched +
+ * verified 2026-07-09; xbull-wallet deliberately absent (its site is a v2
+ * coming-soon teaser — stamping that on a live wallet would mislead). */
+const TAGLINE_BACKFILL: Record<string, string> = {
+	freighter:
+		"Browse, connect, and use Stellar apps — all in one place. Non-custodial Stellar wallet for browser and mobile.",
+	lobstr: "Simple & Secure Stellar & XRPL Wallet",
+	albedo:
+		"Albedo provides a safe and reliable way to use Stellar accounts without trusting anyone with your secret key.",
+	"hana-wallet":
+		"Swap, spend, and grow your crypto assets all in one simple app.",
+	blend:
+		"Decentralized lending pools created by users, DAOs, and institutions.",
+	soroswap: "Soroswap is the first DEX aggregator on Stellar.",
+	aquarius:
+		"Aquarius is Stellar's DeFi Hub. Swap instantly, provide liquidity, earn rewards, and take part in governance.",
+	"phoenix-protocol":
+		"Empowered by Soroban's technology, Phoenix is pioneering the ultimate DeFi Hub within Stellar's vibrant ecosystem.",
+	reflector: "Decentralized price oracle for Stellar Network",
+	stellarexpert: "Stellar XLM block explorer and analytics platform",
+	"aps-money": "We handle the payments. You handle the business.",
+	finclusive: "To Be Inclusive, You Must Know Your Customers!",
+	"anchor-clickspesa":
+		"Payments, financial and risk management solutions for businesses in Tanzania",
+	"anchor-coins-ph": "Pay. Send. Trade — The Super App for Filipinos",
+	"anchor-honey-coin": "The future of international finance.",
+	"anchor-fonbnk": "The stablecoin settlement layer for global commerce.",
+	"anchor-yellow-card": "The Infrastructure for Modern Money Movement",
+	"anchor-bitso": "Discover what your money is capable of",
 };
 
 // VERIFIED compliance + corridor facts — the decision-critical signals for a
@@ -448,6 +485,35 @@ async function main() {
 	}
 
 	console.log("\n── URL corrections (OVERWRITE unsafe/wrong URLs) ──");
+	// ── tagline backfill (fill-if-empty; partner-owned field stays sticky) ──
+	console.log("\n── Tagline backfill (fill-if-empty) ──");
+	for (const [slug, tagline] of Object.entries(TAGLINE_BACKFILL)) {
+		const r = await payload.find({
+			collection: "partner-accounts",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no partner "${slug}" — skipped`);
+			continue;
+		}
+		if (d.tagline) {
+			console.log(`  ${slug}: tagline already set, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: tagline ← "${tagline.slice(0, 60)}…"`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { tagline },
+			note: "tagline backfill",
+		});
+	}
+
 	for (const [slug, url] of Object.entries(URL_CORRECTIONS)) {
 		const d = bySlug.get(slug);
 		if (!d) {
