@@ -48,6 +48,11 @@ async function semanticProjectRows(
 	payload: any,
 	q: string,
 	limit: number,
+	// F3: augmentation keeps the calibrated 0.68 floor (no noise on top of
+	// results); RESCUE (keyword total=0 — misspellings, slug forms) lowers it
+	// to 0.6: a below-distribution-but-close match beats an empty page, and
+	// meta.semantic + the label tell the caller how the results were found.
+	floor = 0.68,
 ) {
 	const queryEmbedding = await embed(q);
 	const db = payload.db?.connection?.db;
@@ -86,6 +91,8 @@ async function semanticProjectRows(
 				links: 1,
 				coverage: 1,
 				supportedNetworks: 1,
+				types: 1,
+				prominence: 1,
 				hackathonPlacement: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
@@ -99,8 +106,7 @@ async function semanticProjectRows(
 	// ("send money abroad" → 0.736, "explore soroban contract" → 0.80). 0.68 sits
 	// in that gap: cuts the concept-noise, keeps real matches. Below it we return
 	// [] and defer to the /api/research advisory.
-	const SCORE_FLOOR = 0.68;
-	const docs = raw.filter((p) => (p.score ?? 0) >= SCORE_FLOOR);
+	const docs = raw.filter((p) => (p.score ?? 0) >= floor);
 	if (docs.length === 0) return []; // no genuinely-close match (or index unbuilt)
 	const max = docs.reduce((m, p) => Math.max(m, p.score ?? 0), 0) || 1;
 	return docs.map((p) => {
@@ -128,6 +134,10 @@ async function semanticProjectRows(
 			supportedNetworks: Array.isArray(p.supportedNetworks)
 				? p.supportedNetworks
 				: [],
+			// F3 (audit): semantic rows serialized types=[] / prominence=null for
+			// records that HAVE both — the $project simply omitted the fields.
+			types: Array.isArray(p.types) ? p.types : [],
+			prominence: typeof p.prominence === "number" ? p.prominence : null,
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -768,7 +778,14 @@ export async function GET(req: NextRequest) {
 	// Attach a confidence signal to each result — same trust scale as
 	// /api/research, with project-appropriate signals (keyword relevance,
 	// lifecycle status as freshness, SCF/hackathon vetting as authority).
-	const projMax = projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0);
+	// F3 (audit: keyword confidence uniform 0.97): normalize relevance against
+	// the QUERY size, not just the page max — a row matching 2 of 3 tokens now
+	// reads lower than a full match instead of both saturating at 1.0.
+	const qTokenCount = tokenize(q).length;
+	const projMax = Math.max(
+		projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0),
+		qTokenCount || 1,
+	);
 	const scored = projects.map((p) => ({
 		...p,
 		via: "keyword" as const,
@@ -790,7 +807,14 @@ export async function GET(req: NextRequest) {
 	let semanticAdds: Awaited<ReturnType<typeof semanticProjectRows>> = [];
 	if (q && offset === 0 && scored.length < limit && payload) {
 		try {
-			const sem = await semanticProjectRows(payload, q, limit);
+			// F3: zero keyword hits = rescue mode (lower floor) — the audit's
+			// misspelling/slug-form probes died at total:0 with no fallback.
+			const sem = await semanticProjectRows(
+				payload,
+				q,
+				limit,
+				scored.length === 0 ? 0.6 : 0.68,
+			);
 			const have = new Set(scored.map((r) => r.id));
 			semanticAdds = sem
 				.filter((r) => !have.has(r.id))

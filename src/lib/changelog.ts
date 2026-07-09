@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.4",
+		type: "fixed",
+		summary:
+			"searchProjects semantic lane (F3, audit root #3): semantic-augmented rows now serialize `types` and `prominence` (previously always []/null — a projection bug); zero-keyword-hit queries (misspellings, slug forms) get a semantic RESCUE pass at a lower similarity floor instead of a dead total:0; keyword confidence now discriminates by match completeness (was a uniform ~0.97 across a page).",
+		detail:
+			"Rescue results are flagged by the existing meta.semantic; the calibrated 0.68 floor still guards augmentation on top of keyword results. Confidence values shift for partial matches (2-of-3 tokens now reads lower than a full match) — consumers sorting by confidence get honest ordering.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.3",
 		type: "fixed",
 		summary:
