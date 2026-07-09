@@ -6,6 +6,7 @@ import {
 	isRampIntent,
 	scoreTokens,
 	structuredHit,
+	structuredSelectClauses,
 	tokenize,
 	typeMatch,
 } from "../project-search-match";
@@ -201,5 +202,26 @@ describe("review finding 2 — identifier-form queries", () => {
 	});
 	it("hyphenated vocabulary stays intact", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
+	});
+
+	it("F1: type-browse tokens become types-contains candidate clauses", () => {
+		const cl = structuredSelectClauses(["decentralized", "exchange"]);
+		expect(cl).toContainEqual({ types: { contains: "DEX" } });
+		const edu = structuredSelectClauses(["education", "projects"]);
+		expect(edu).toContainEqual({ types: { contains: "Education" } });
+		const si = structuredSelectClauses(["social", "impact"]);
+		expect(si).toContainEqual({ types: { contains: "Social Impact" } });
+	});
+
+	it("F1: sep tokens become coverage.seps clauses (hyphen-normalized)", () => {
+		expect(structuredSelectClauses(["sep-24", "anchors"])).toContainEqual({
+			"coverage.seps": { contains: "sep-24" },
+		});
+		expect(structuredSelectClauses(["sep24"])).toContainEqual({
+			"coverage.seps": { contains: "sep-24" },
+		});
+		expect(structuredSelectClauses(["wallet"])).not.toContainEqual(
+			expect.objectContaining({ "coverage.seps": expect.anything() }),
+		);
 	});
 });

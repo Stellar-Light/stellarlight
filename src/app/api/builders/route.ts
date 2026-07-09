@@ -192,11 +192,22 @@ export async function GET(req: NextRequest) {
 				// are free-text country/city strings, so "Latin America" matched
 				// nothing even with 18 LatAm profiles present. Mirror of the
 				// region synonyms /api/projects/search ships.
-				const regionCountries = REGION_LOCATIONS[location.trim().toLowerCase()];
+				// F1: common non-English country spellings normalize before matching
+				// (free-text profile locations store the English form).
+				const LOCATION_ALIASES: Record<string, string> = {
+					brasil: "brazil",
+					méxico: "mexico",
+					españa: "spain",
+					deutschland: "germany",
+				};
+				const locNorm =
+					LOCATION_ALIASES[location.trim().toLowerCase()] ??
+					location.trim().toLowerCase();
+				const regionCountries = REGION_LOCATIONS[locNorm];
 				if (regionCountries) {
 					where.or = regionCountries.map((c) => ({ location: { like: c } }));
 				} else {
-					where.location = { like: location };
+					where.location = { like: locNorm };
 				}
 			}
 
@@ -244,6 +255,7 @@ export async function GET(req: NextRequest) {
 				const tokens = q.split(/\s+/).filter(Boolean);
 				builders = builders.filter((b) => {
 					const haystack = [
+						b.githubUsername, // F1: githubUsername is the record's primary key — q must match it
 						b.displayName,
 						b.bio,
 						b.roleTitle,

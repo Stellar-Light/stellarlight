@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
+		surfaces: ["api"],
+		version: "openapi@1.7.2",
+		type: "fixed",
+		summary:
+			"searchProjects recall (F1, full-surface audit root #1): a record's `types` and `coverage.seps` now drive candidate INCLUSION, not just ranking — type-browse queries ('social impact projects', 'education', 'decentralized exchange') and SEP queries ('sep-24 anchors') retrieve records whose prose never says those words. getBuilders: `q` now matches githubUsername, and location accepts common non-English spellings (brasil, méxico).",
+		detail:
+			"The audit measured type-name retrievability at 3/15 (Social Impact) to 63/141 (SDK) because select fields were excluded from the candidate query; they now join via exact-membership clauses driven by the intent-type map (new browse vocabulary: exchange, education, analytics, dashboard, security, impact, ai, infrastructure). Additive recall only — existing results keep their ranking.",
+	},
+	{
+		date: "2026-07-09",
 		surfaces: ["skill"],
 		type: "fixed",
 		summary:
