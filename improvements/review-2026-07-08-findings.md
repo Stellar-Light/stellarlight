@@ -1,239 +1,415 @@
-# 2026-07-08 ship-day adversarial review — confirmed findings
+# Adversarial review of the 2026-07-08 ship-day PRs
 
-**Progress:** batch 1 (#387): findings 1/24/3+18+19/16 FIXED. #386: verify-claims revival + spec nesting. #388: finding 20 (CI tests) FIXED. Corridor fix live-verified (32→20 rows, Etherfuse retained; residual rows = finding 27's coverage-conflation, a DATA fix). Batch 3 (#390 + curate execute, live-verified): findings 25/26/27 FIXED — coverage sync no longer writes HQ-as-corridor, 5 rows corrected on prod ("brazil on-ramp" → 3 strict rows, Bitso #1 via corrected corridor), compliance + logo writes fill-if-empty (dry run proved all seeded groups now skip). Batch 4 (#392): findings 8/9/10/11/12/13/14/15/22 FIXED — link-checker hardened (cleanup vetoed on partial collection, 60-min timeout, URL identity unified, null-clears, no 429/5xx retry-doubling, caps 2000, concurrency group); end-to-end dry run verifying. Batches 5-6 (#394/#395): findings 2/21/4/6/7 FIXED — identifier-form queries tokenize (release_escrow/EscrowContract now matchable, 2 regression tests), self-audit retries+guarded status fetch+issue dedupe, probe timeout covers body read, budget counts cargo blobs, symbol regex bounded (12.5s→0.029s adversarial). Link-checker hardening verified end-to-end (dry run clean over 2,106 URLs within the new timeout). Frontier pass (2026-07-09): finding 5 FIXED — breadth magnitude evidence-scaled (min(contractCrates, deepCrates*3)); same PR ships tiered strong/weak JS file selection which GRADUATED 4 of 7 JS frontier rows (dfns 0.727 / glo-wallet 0.667 / idos 0.570 / reflector-node 0.563 → JS_DEEP now 12 rows; 3 remain with documented causes). REMAINING (deliberately deferred): 17 (api-client regen doc conflict), 23 (builders cap warning), 28/29 (curation join identity + retire-after-applied — lows). 25 of 29 findings closed.
+**Review ran:** 2026-07-08 — 39 agents (6 dimensions → per-finding adversarial refute) over the 31 PRs merged that day. 29 findings confirmed, 4 dismissed.
+**Remediation shipped:** 2026-07-08 → 2026-07-09 UTC across PRs #386–#402 (see batches below).
+**Status: 25 of 29 closed. 4 deferred** (#21, #26, #29, and the overflow-assert residual of #24/#28 — all LOW/MEDIUM, rationale in the Deferred section).
 
-39-agent review (6 dimensions → per-finding adversarial refute) over the 31 PRs merged 2026-07-08. 29 confirmed / 4 dismissed. Fix batch 1 (urgent prod-behavior) shipped same night; the rest is the working queue — strike through as fixed.
+Findings are numbered 1–29 in file order (this replaces the review run's internal IDs, which earlier progress notes referenced but the file never carried).
 
-## [HIGH] src/app/api/projects/search/route.ts (search-correctness)
+## Status board
+
+| #  | Sev  | Area            | Finding (one line)                                                        | Status |
+|----|------|-----------------|---------------------------------------------------------------------------|--------|
+| 1  | HIGH | search          | 2-token corridor queries admit every Anchor as "strict" match             | ✅ #387 — live-verified 32→20 rows |
+| 2  | HIGH | scan pipeline   | `--stale-first` is a dead flag (selection rule never implemented)          | ✅ #387 |
+| 3  | HIGH | link checker    | 15-min job timeout sized for 200 URLs; run now checks 2,106               | ✅ #392 — 60-min timeout |
+| 4  | HIGH | link checker    | One failed source query → cleanup mass-deletes that source's history       | ✅ #392 — cleanup vetoed on partial collection |
+| 5  | HIGH | guards/crons    | Weekly schedule renders no `--execute` → permanent dry run                 | ✅ #387 |
+| 6  | HIGH | guards/crons    | `--stale-first` dead code (same defect as #2, second dimension)            | ✅ #387 |
+| 7  | HIGH | data curation   | Freshness cron un-archives owner-archived partners                         | ✅ #387 — "cron resurrection" fix |
+| 8  | HIGH | data curation   | COMPLIANCE_ENRICH rewrites all 9 partners' compliance on every run         | ✅ #390 — fill-if-empty |
+| 9  | MED  | search          | Symbol queries unmatchable: doc haystack normalized, query tokens not      | ✅ #394 — +2 regression tests |
+| 10 | MED  | scan pipeline   | Call budget misses up to ~40 Cargo.toml blob fetches per repo              | ✅ #395 |
+| 11 | MED  | scan pipeline   | Workspace breadth scales with declared crates (stub-padding inflates)      | ✅ #402 — evidence-scaled |
+| 12 | MED  | scan pipeline   | Mainnet-probe timeout covers headers only, not body read                   | ✅ #395 |
+| 13 | MED  | link checker    | URL keyed differently on network-error vs HTTP paths → history churn      | ✅ #392 — identity unified |
+| 14 | MED  | link checker    | `?? undefined` never clears stale statusCode/errorReason/firstFailedAt     | ✅ #392 — explicit null-clears |
+| 15 | MED  | link checker    | consecutiveFailures description says redirects count; code resets on them  | ✅ #392 |
+| 16 | MED  | contract        | explainRepo response omits documented symbols/mainnetContractId            | ✅ #387 — "explain fields" |
+| 17 | MED  | guards/crons    | "CI-asserted" write-gate test suite runs in no CI workflow                 | ✅ #388 — vitest gates every PR |
+| 18 | MED  | guards/crons    | Self-audit: one transient 5xx files an issue; no retry, no dedupe          | ✅ #394 |
+| 19 | MED  | data curation   | Logo backfill overwrites partner-owned logoUrl on every run                | ✅ #390 — fill-if-empty |
+| 20 | MED  | data curation   | Partner `country` (incorporation) written as corridor coverage             | ✅ #390 + curate execute — 5 prod rows corrected |
+| 21 | MED  | data curation   | Slug-only partner→project join, no entity-identity verification            | ⏸ deferred |
+| 22 | LOW  | scan pipeline   | Quadratic regex backtracking: 12.5 s per crafted 400 KB blob               | ✅ #395 — bounded, 0.029 s |
+| 23 | LOW  | link checker    | HEAD-failure GET retry doubles requests on 429/5xx                         | ✅ #392 |
+| 24 | LOW  | link checker    | `limit: 1000` caps collection; cleanup deletes overflow history            | ✅ #392 — cap 2000 · ⏸ residual: no totalDocs assert |
+| 25 | LOW  | link checker    | No workflow concurrency group → concurrent runs race on unique index      | ✅ #392 |
+| 26 | LOW  | contract        | Two conflicting, both-documented schema.ts regeneration paths              | ⏸ deferred |
+| 27 | LOW  | guards/crons    | URL-form mismatch churns history (same defect as #13, second dimension)    | ✅ #392 |
+| 28 | LOW  | guards/crons    | `limit: 1000` overflow (same defect as #24, second dimension)              | ✅ #392 — same residual as #24 |
+| 29 | LOW  | data curation   | Hardcoded description/URL fixes never retire after applied                 | ⏸ deferred |
+
+## Fix batches (merge times UTC)
+
+- **#386** (2026-07-08 23:45) — un-broke verify-claims CI (duplicate YAML key had killed it for 6 days) + fixed mainnetContractId spec nesting. Adjacent to the review, not one of the 29.
+- **#387** (2026-07-09 00:05) — batch 1, urgent prod behavior: findings **1, 2, 5, 6, 7, 16** (corridor admission, stale-first wired for real incl. the schedule trigger, freshness-cron resurrection guard, explain response fields).
+- **#388** (2026-07-09 00:08) — finding **17**: vitest now gates every PR.
+- **#390** (2026-07-09 00:14) — findings **8, 19, 20**: corridor≠incorporation + fill-if-empty compliance/logo. Curate execute live-verified: 5 prod rows corrected ("brazil on-ramp" → 3 strict rows, Bitso #1 via corrected corridor); dry run proves all seeded groups now skip.
+- **#392** (2026-07-09 00:24) — findings **3, 4, 13, 14, 15, 23, 24, 25, 27, 28**: link-checker hardening (cleanup vetoed on partial collection, 60-min timeout, URL identity unified, null-clears, no 429/5xx retry-doubling, caps 2000, concurrency group). End-to-end dry run verified clean over 2,106 URLs within the new timeout.
+- **#394** (2026-07-09 00:39) — findings **9, 18**: identifier-form queries tokenize (release_escrow/EscrowContract now matchable, 2 regression tests); self-audit retries + guarded status fetch + issue dedupe.
+- **#395** (2026-07-09 00:47) — findings **10, 12, 22**: probe timeout covers body read, budget counts cargo blobs, symbol regex bounded (12.5 s → 0.029 s adversarial).
+- **#402** (2026-07-09 02:42) — finding **11**: workspace breadth evidence-scaled (`min(contractCrates, deepCrates*3)`); hoops re-probed 0.603 unchanged, full depth-eval green. Same PR: tiered JS file selection graduated 4 of 7 JS frontier labels (dfns 0.727 / glo-wallet 0.667 / idos 0.570 / reflector-node 0.563 → JS_DEEP now 12 rows; 3 remain with documented causes).
+
+## Deferred (open queue)
+
+- **#21 — join identity** (MED): slug-only partner→project join drives coverage + logo writes. All 26 current matches human-verified same-entity; the risk is future auto-generated slug collisions. Needs a domain/website cross-check on the join before the next curation wave adds partners.
+- **#24/#28 residual** (LOW): collection caps raised 1000→2000 in #392, but there is still no `totalDocs <= fetched` assert/warning — silent-overflow returns when the directory doubles again.
+- **#26 — api-client regen conflict** (LOW): legacy `pnpm generate` path (live-spec, headerless) contradicts the contract-gate's `contract:write` path. Fails closed (CI rejects the stale output), so it misleads contributors but can't drift; fix is deleting/redirecting the legacy script + README section.
+- **#29 — retire-after-applied** (LOW): DESCRIPTION_FIXES / URL_CORRECTIONS re-assert July-2026 snapshots forever; the equality guard fires exactly when someone later improves the value. Needs an applied/retired marker or from-value guard.
+
+---
+
+# Findings in full
+
+Evidence preserved verbatim from the review run (finding → concrete failure scenario → independent refuter's verdict). Several refuter verdicts were truncated at capture; they end at the last complete sentence, marked *[truncated at capture]*.
+
+## 1 · HIGH · search-correctness — corridor admission degenerates on 2-token queries — ✅ #387
+
+<details><summary>src/app/api/projects/search/route.ts — evidence</summary>
 
 **Finding:** Structured-admission rule degenerates on 2-token corridor queries: for '{country|currency} {ramp-word}' the admit() bar-1 tier (line 610) admits EVERY Anchor-typed project at matchMode 'strict', because COVERAGE_IMPLIES injects ramp vocab into every covered anchor's haystack (guaranteeing score>=1 on the ramp token) and INTENT_TYPE maps the ramp token to type 'Anchor' (guaranteeing typeMatch), making the country/currency token optional.
 
 **Scenario:** Live-confirmed: GET /api/projects/search?q=mexico+on-ramp returns 32 rows with meta.matchMode='strict' / matchModeLabel='all keywords matched'; 28 rows do not serve Mexico, including anchors whose structured coverage names a DIFFERENT country (Coins PH→Philippines, Anclap/Ping→Argentina, Trace Finance→Brazil, Clickspesa→Tanzania, COCA Wallet→UAE). q=nigeria+off-ramp returns 34 rows with ZERO having Nigeria coverage. Pre-#366 strict-AND returned only the true score-2 matches (Bitso/Etherfuse/Cash Abroad). An agent enumerating 'which anchors serve Mexico?' from the rows (or trusting counts.total=32 and the 'all keywords matched' label) confidently reports wrong-country anchors as corridor matches — the exact answer-set Tyler's corridor evals grade. Fix direction: under ramp intent with a corridor token present, require corridorMatch (not bare typeMatch) for the looser-tier admission, or scope bar-1 admission to queries with >=3 tokens.
 
-**Refuter verdict:** Confirmed in code and live. For 2-token '{country} {ramp-word}' queries the strict-tier admit(2) at route.ts:610 degenerates to admit-any-Anchor: INTENT_TYPE maps on-ramp/off-ramp/ramp to type 'Anchor' (typeMatch → structuredHit true, no corridor required), and COVERAGE_IMPLIES plus the 'Anchor' types text guarantee score>=1 on the ramp token, so the country token is optional. Fresh live probes reproduce exactly: q=mexico+on-ramp returns 32 rows at matchMode 'strict' / 'all keywords matched' with 28 rows not serving Mexico, including anchors whose curated coverage names a different country (Co
+**Refuter verdict:** Confirmed in code and live. For 2-token '{country} {ramp-word}' queries the strict-tier admit(2) at route.ts:610 degenerates to admit-any-Anchor: INTENT_TYPE maps on-ramp/off-ramp/ramp to type 'Anchor' (typeMatch → structuredHit true, no corridor required), and COVERAGE_IMPLIES plus the 'Anchor' types text guarantee score>=1 on the ramp token, so the country token is optional. Fresh live probes reproduce exactly: q=mexico+on-ramp returns 32 rows at matchMode 'strict' / 'all keywords matched' with 28 rows not serving Mexico, including anchors whose curated coverage names a different country. *[truncated at capture]*
 
-## [HIGH] scripts/scan/scan-repo-code.ts (scan-pipeline)
+</details>
+
+## 2 · HIGH · scan-pipeline — `--stale-first` is a dead flag — ✅ #387
+
+<details><summary>scripts/scan/scan-repo-code.ts — evidence</summary>
 
 **Finding:** --stale-first is a dead flag: PR #382 (4a8093b) added only the declaration (line 44) and doc line — the in-memory lastCommitAt>codeScannedAt filter its commit message describes was never committed; the flag is referenced nowhere in wave selection. Compounding it, .github/workflows/scan-repo-code.yml's weekly schedule trigger builds its command from inputs.*, which are all empty on schedule events, so the Monday 04:00 run passes neither --stale-first nor --execute (and --limit receives the literal string '--lang' as its value, surviving only via the Number()||60 NaN fallback).
 
 **Scenario:** A repo upgrades soroban-sdk 0.7→26 after its scan. Nothing ever re-selects it: the default where clause is codeScanState != 'scanned', the weekly cron is a write-nothing dry run of that same default wave, and --stale-first '--execute' via manual dispatch extra still selects nothing stale. versionStatus/codeDepth/codeSymbols stay stale indefinitely — exactly the 'gist gap 4' the feature claims to close — while everyone believes the weekly job handles it. The scheduled dry run also burns up to ~650 GitHub calls/week of the shared 1,000/hr Actions token fetching repos it will never write.
 
-**Refuter verdict:** Confirmed on all counts. STALE_FIRST is declared at scripts/scan/scan-repo-code.ts:44 and never read — wave selection (lines 112-117) uses only LANG and RESCAN with codeScanState != 'scanned', so scanned-but-updated repos are never re-selected. Commit 4a8093b's diff is only +7 lines in the script (comment + dead declaration) and +6 in the yml (schedule block), despite its message describing an in-memory lastCommitAt>codeScannedAt filter and a schedule that 'executes stale-first' — the mechanism was never committed. The workflow's run step interpolates inputs.*, which are empty on schedule even
+**Refuter verdict:** Confirmed on all counts. STALE_FIRST is declared at scripts/scan/scan-repo-code.ts:44 and never read — wave selection (lines 112-117) uses only LANG and RESCAN with codeScanState != 'scanned', so scanned-but-updated repos are never re-selected. Commit 4a8093b's diff is only +7 lines in the script (comment + dead declaration) and +6 in the yml (schedule block), despite its message describing an in-memory lastCommitAt>codeScannedAt filter and a schedule that 'executes stale-first' — the mechanism was never committed. *[truncated at capture]*
 
-## [HIGH] .github/workflows/check-links.yml (link-checker-prod)
+</details>
+
+## 3 · HIGH · link-checker — 15-min timeout vs the 2,106-URL run — ✅ #392
+
+<details><summary>.github/workflows/check-links.yml — evidence</summary>
 
 **Finding:** 15-minute job timeout is sized for the '~200 URLs' in the workflow comment, but the run now checks 2,106 URLs with a 10s per-URL timeout and defers ALL 4,200+ sequential DB writes (2,106 find() + 2,106 update/create round-trips to Atlas, then the cleanup scan+deletes) to after every check completes — so on bad-link-heavy days the runner SIGTERMs the process pre-write or mid-write.
 
 **Scenario:** Arithmetic: pnpm install ~1.5 min + Payload init/URL collection ~1 min + checks at concurrency 5 (2,106 URLs; even 5-8% hitting the 10s timeout pushes the check phase to 10-13 min: 150 timeouts × 10s / 5 workers = 5 min alone) + write phase of 2,106 sequential find+write round-trips at 50-150ms each to Atlas from a GitHub runner = 3.5-10 min. Total routinely exceeds timeout-minutes: 15. When the axe falls: (a) killed before the write phase → the entire day's run is silently discarded, consecutiveFailures never ticks (the feature's core value is the day-by-day counter), lastChecked goes stale; (b) killed mid-upsert loop (scripts/check-links.ts:465-530) → partial writes and the cleanup pass at :532 never runs, so removed URLs' records linger and any slash/no-slash duplicate created that run persists until the next complete run. Nothing alerts on the red workflow, so this degrades into 'counter randomly skips days' — exactly the transient-vs-real-failure distinction the dashboard exists to make.
 
-**Refuter verdict:** Confirmed with live run data, though the finder's framing overstates frequency. The actual EXECUTE run (2026-07-08, run 28977466296) took 12m15s of the 15-minute budget: ~40s setup (warm pnpm cache, not 1.5min), 3m43s check phase for 2,106 URLs (only 20 hit the 10s timeout — the finder's '10-13 min check phase' arithmetic is wrong for a normal day), and 7m49s for the 2,106 sequential find+upsert Atlas round-trips (~223ms each, matching the finder's write-phase estimate). So 'routinely exceeds 15 minutes' is falsified — the run succeeded with 2m45s headroom. However, the core mechanism is real:
+**Refuter verdict:** Confirmed with live run data, though the finder's framing overstates frequency. The actual EXECUTE run (2026-07-08, run 28977466296) took 12m15s of the 15-minute budget: ~40s setup (warm pnpm cache, not 1.5min), 3m43s check phase for 2,106 URLs (only 20 hit the 10s timeout — the finder's '10-13 min check phase' arithmetic is wrong for a normal day), and 7m49s for the 2,106 sequential find+upsert Atlas round-trips (~223ms each, matching the finder's write-phase estimate). So 'routinely exceeds 15 minutes' is falsified — the run succeeded with 2m45s headroom. However, the core mechanism is real. *[truncated at capture]*
 
-## [HIGH] scripts/check-links.ts (link-checker-prod)
+</details>
+
+## 4 · HIGH · link-checker — fail-open source query + cleanup mass-delete — ✅ #392
+
+<details><summary>scripts/check-links.ts — evidence</summary>
 
 **Finding:** The per-collection try/catch blocks (entities :149-172, hackathons :175-195, community-skills :211-236, partner-accounts :242-265) swallow find() failures and continue, and the end-of-run cleanup (:532-548) deletes every link-checks doc whose URL wasn't collected this run — so one transient DB error on one source query mass-deletes that collection's entire link-check history.
 
 **Scenario:** At 02:00 the partner-accounts find() throws once (M0 connection blip, throttle, or the cluster-full condition this DB has actually hit) → console.warn, run continues → all partner-only URLs are absent from currentUrls → cleanup deletes every partner link-check record, destroying consecutiveFailures/firstFailedAt/lastSuccessAt history. Next day's run recreates them at zero, so a partner URL genuinely broken for 9 days shows 'consecutiveFailures: 1'. The code comment itself calls partner URLs 'the highest-value links to watch' (the real hijacked-URL incident), yet they're in the fail-open group; only projects and builders finds fail-safe by aborting the run. Fix shape: abort (or skip cleanup) when any source query fails.
 
-**Refuter verdict:** Confirmed end-to-end: entities/hackathons/community-skills/partner-accounts find() calls are fail-open (console.warn + continue, check-links.ts:149-265), while the cleanup at :532-548 unconditionally deletes any link-checks doc whose URL wasn't collected this run, with no skipped-source flag or count guard. The daily 02:00 cron (check-links.yml) runs with --execute by default, so one transient M0 read error on e.g. the partner-accounts query silently deletes all partner-only link-check records; next run recreates them with prev=undefined, resetting consecutiveFailures to 1 and firstFailedAt to
+**Refuter verdict:** Confirmed end-to-end: entities/hackathons/community-skills/partner-accounts find() calls are fail-open (console.warn + continue, check-links.ts:149-265), while the cleanup at :532-548 unconditionally deletes any link-checks doc whose URL wasn't collected this run, with no skipped-source flag or count guard. The daily 02:00 cron (check-links.yml) runs with --execute by default, so one transient M0 read error on e.g. the partner-accounts query silently deletes all partner-only link-check records. *[truncated at capture]*
 
-## [HIGH] /private/tmp/sl-canonical/.github/workflows/scan-repo-code.yml (guards-and-crons)
+</details>
+
+## 5 · HIGH · guards/crons — weekly schedule renders no `--execute` — ✅ #387
+
+<details><summary>.github/workflows/scan-repo-code.yml — evidence</summary>
 
 **Finding:** The weekly scheduled run never writes: the single run step interpolates workflow_dispatch inputs, which are all empty on a schedule event, so no --execute (and no --stale-first/--rescan) is ever passed — the advertised 'weekly stale-first re-scan' is a permanent dry run.
 
 **Scenario:** Every Monday 04:00 UTC the cron fires, the command renders as `scan-repo-code.ts --limit --lang` (argOf survives by accident: Number('--lang')→NaN→60, lang falls back to 'Rust'), EXECUTE=false, so the wave scans up to 60 unscanned Rust repos, prints 'DRY RUN (no writes)', and exits 0 green. No signals (versionStatus, codeDepth, symbols) are ever persisted by the schedule; an SDK 0.7→26 upgrade keeps stale versionStatus forever unless someone manually dispatches with execute=true. Compare enrich-repos.yml line 30, which uses the correct `${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}` pattern. Answer to 'BOTH steps? NEITHER?': there is one step; on schedule it runs in the wrong mode, so effectively neither the write nor the stale-first selection happens.
 
-**Refuter verdict:** Confirmed. On schedule events the `inputs` context is empty (dispatch defaults don't apply), so line 57 renders `scan-repo-code.ts --limit --lang` with no --execute: EXECUTE=false → permanent dry run, and argOf coincidentally survives (Number('--lang')=NaN→limit 60, lang→'Rust' default). --stale-first is never passed anywhere in the workflow (only via the empty `extra` input), and the script has no GITHUB_EVENT_NAME/env fallback, so the advertised weekly stale-first re-scan neither selects stale repos nor writes signals; it exits 0 green each Monday. The correct pattern `(github.event_name == 
+**Refuter verdict:** Confirmed. On schedule events the `inputs` context is empty (dispatch defaults don't apply), so line 57 renders `scan-repo-code.ts --limit --lang` with no --execute: EXECUTE=false → permanent dry run, and argOf coincidentally survives (Number('--lang')=NaN→limit 60, lang→'Rust' default). --stale-first is never passed anywhere in the workflow (only via the empty `extra` input), and the script has no GITHUB_EVENT_NAME/env fallback, so the advertised weekly stale-first re-scan neither selects stale repos nor writes signals; it exits 0 green each Monday. *[truncated at capture]*
 
-## [HIGH] /private/tmp/sl-canonical/scripts/scan/scan-repo-code.ts (guards-and-crons)
+</details>
+
+## 6 · HIGH · guards/crons — `--stale-first` dead code (dup of #2) — ✅ #387
+
+<details><summary>scripts/scan/scan-repo-code.ts — evidence (second dimension)</summary>
 
 **Finding:** The --stale-first flag is dead code: STALE_FIRST is parsed at line 44 but never referenced again — the documented selection rule (lastCommitAt > codeScannedAt) is unimplemented; the where clause only knows LANG and RESCAN.
 
 **Scenario:** An operator dispatches the workflow with extra='--stale-first --execute' expecting changed-since-scan repos to be re-scanned (the workflow header and the script's own lines 40-44 both describe this behavior). The query still filters codeScanState != 'scanned', so already-scanned-but-since-pushed repos are excluded and nothing stale is refreshed; the run reports success. The only way to touch scanned repos is --rescan, which re-scans ALL repos freshest-first (including ones scanned yesterday), burning the 650-call budget on fresh repos before reaching stale ones. Even after fixing the workflow's missing --execute, the weekly stale-first feature cannot work until this flag is wired into the where/sort.
 
-**Refuter verdict:** Verified by direct read and exhaustive grep: STALE_FIRST is declared at scripts/scan/scan-repo-code.ts:44 and never referenced again anywhere in the repo. The where clause (lines 112-117) only filters on primaryLanguage and codeScanState != 'scanned' (dropped by --rescan); there is no lastCommitAt > codeScannedAt condition and sort is hardcoded -lastCommitAt. So '--stale-first --execute' silently excludes already-scanned-but-since-pushed repos and reports success, and the only path to touching scanned repos (--rescan) orders by commit recency, not scan staleness, burning the 650-call budget on
+**Refuter verdict:** Verified by direct read and exhaustive grep: STALE_FIRST is declared at scripts/scan/scan-repo-code.ts:44 and never referenced again anywhere in the repo. The where clause (lines 112-117) only filters on primaryLanguage and codeScanState != 'scanned' (dropped by --rescan); there is no lastCommitAt > codeScannedAt condition and sort is hardcoded -lastCommitAt. So '--stale-first --execute' silently excludes already-scanned-but-since-pushed repos and reports success. *[truncated at capture]*
 
-## [HIGH] src/app/api/cron/partner-freshness/route.ts (data-curation)
+</details>
+
+## 7 · HIGH · data-curation — freshness cron un-archives dead partners — ✅ #387
+
+<details><summary>src/app/api/cron/partner-freshness/route.ts — evidence</summary>
 
 **Finding:** The daily partner-freshness cron recomputes freshnessStatus purely from age and will silently UN-ARCHIVE the owner-confirmed-dead partners that curate-partners.ts archived, resurfacing them in the directory and AI matching.
 
 **Scenario:** curate-partners.ts sets freshnessStatus="archived" for anchor-elroy-app (service retired) and anchor-wallet-guru (not Stellar). Both have lastPartnerUpdateAt=null (verified live), so the cron's anchor falls back to createdAt (seeded mid-2026, far under the 365d ARCHIVE_AFTER). statusForAge() returns "fresh", target !== current, and the cron writes freshnessStatus="fresh" with overrideAccess — flipping excludeFromMatching back to false, so a dead payment provider is again recommended by the AI matchmaker and shown as current. There is no owner-archived flag distinct from age-archived, so re-running the curate script just restarts the same loop. Live evidence: elroy is still "archived" on 2026-07-08 despite the vercel.json 08:00 UTC daily schedule having passed twice since the 07-06 archive — meaning the cron is currently NOT executing in prod (likely CRON_SECRET unset/401), which is the only thing masking this; the first successful cron run reverts both archives.
 
-**Refuter verdict:** Confirmed end-to-end. The cron (route.ts:77-97) recomputes freshnessStatus purely from age (lastPartnerUpdateAt ?? createdAt) over ALL partners with no owner-archived guard, and writes with overrideAccess on any mismatch; curate-partners.ts archives by setting only freshnessStatus="archived" without backdating any date field, so archived elroy/wallet-guru (lastPartnerUpdateAt=null, seed-era createdAt << 365d) get target="fresh" and are un-archived on the first successful cron run, flipping excludeFromMatching back to false. Live probe confirms elroy is freshnessStatus=archived with lastPartner
+**Refuter verdict:** Confirmed end-to-end. The cron (route.ts:77-97) recomputes freshnessStatus purely from age (lastPartnerUpdateAt ?? createdAt) over ALL partners with no owner-archived guard, and writes with overrideAccess on any mismatch; curate-partners.ts archives by setting only freshnessStatus="archived" without backdating any date field, so archived elroy/wallet-guru (lastPartnerUpdateAt=null, seed-era createdAt << 365d) get target="fresh" and are un-archived on the first successful cron run, flipping excludeFromMatching back to false. *[truncated at capture]*
 
-## [HIGH] scripts/data/curate-partners.ts (data-curation)
+</details>
+
+## 8 · HIGH · data-curation — COMPLIANCE_ENRICH clobbers on every run — ✅ #390
+
+<details><summary>scripts/data/curate-partners.ts — evidence</summary>
 
 **Finding:** COMPLIANCE_ENRICH rewrites the entire `compliance` group for all 9 listed partners unconditionally on EVERY --execute run (no diff check, no fill-if-empty), reverting any compliance edit made after the hardcoded 2026-07-06 snapshot.
 
 **Scenario:** Payload's mongodb adapter applies `data: { compliance: comp }` as a mongoose $set that replaces the whole subdocument (verified in node_modules/@payloadcms/db-mongodb/dist/updateOne.js — beforeChange does not merge doc values into omitted keys). `compliance` is NOT an autoField, so it is admin/partner-writable and the collection contract says manual fields are "sticky". Concrete: an admin adds MYKOBO's new GBP corridor or a second license in the admin panel in August; someone later runs `curate-partners.ts --execute` merely to archive a newly-dead partner, and mykobo/anclap/moneygram/etherfuse/clpx/finclusive/yellow-card/bitso/coins-ph all get their compliance silently reset to the July 6 hardcoded facts. Because the write is unconditional (it doesn't even compare), the dry-run prints the same 9 lines every time, training the operator to ignore them.
 
-**Refuter verdict:** Mechanism verified end-to-end. (1) The COMPLIANCE_ENRICH loop (curate-partners.ts:532-555) pushes a write for all 9 slugs with zero comparison to d.compliance — unlike every other section (fill-if-empty or equality no-op), and the dry-run prints only the new-value summary, no old→new diff, so drift is invisible. (2) The clobber is real: payload core's beforeChange (payload/dist/fields/hooks/beforeChange) copies incoming data and never backfills omitted group leaves from the existing doc; @payloadcms/db-mongodb updateOne passes the plain object to mongoose findOneAndUpdate, which casts to top-l
+**Refuter verdict:** Mechanism verified end-to-end. (1) The COMPLIANCE_ENRICH loop (curate-partners.ts:532-555) pushes a write for all 9 slugs with zero comparison to d.compliance — unlike every other section (fill-if-empty or equality no-op), and the dry-run prints only the new-value summary, no old→new diff, so drift is invisible. (2) The clobber is real: payload core's beforeChange copies incoming data and never backfills omitted group leaves from the existing doc. *[truncated at capture]*
 
-## [MEDIUM] src/lib/repo-search.ts (search-correctness)
+</details>
+
+## 9 · MED · search-correctness — symbol queries unmatchable — ✅ #394
+
+<details><summary>src/lib/repo-search.ts — evidence</summary>
 
 **Finding:** One-sided symbol normalization: symbolsHaystack (code-symbols.ts) strips underscores and splits camelCase in the document haystack, but query tokens keep their raw form, so an exact-symbol query builds /\brelease_escrow\b/ which can never match the normalized 'release escrow' — the repo is fetched as a DB candidate via the codeSymbols like clause, then dropped by the in-memory scorer (matched=0, filtered at line 754).
 
 **Scenario:** Reproduced against the real searchRepos with a mock payload doc carrying codeSymbols ['release_escrow','EscrowContract']: q='escrow' correctly returns the repo at symbol-tier score 4, but q='release_escrow', q='EscrowContract', and q='escrowcontract' (the tokenizer lowercases, so any camelCase query becomes one unsplittable token) all return []. Once post-2026-07-08 scans populate codeSymbols (empty live today), an agent asking /api/repos/search?q=claim_milestone — the most literal 'which repo implements X' lookup the feature advertises — gets zero results even though the index stores that exact symbol; only human-spaced forms ('claim milestone') work. Fix direction: normalize query tokens with the same underscore/camelCase split before boundary matching, or add the raw symbol forms to the haystack.
 
-**Refuter verdict:** Confirmed by code read + regex simulation. symbolsHaystack (code-symbols.ts:98) strips underscores and splits camelCase in the doc haystack, but the query pipeline (route trim → contentTokens lowercase/whitespace-split → termsForToken synonyms only) never applies the same normalization, so q='release_escrow' builds /\brelease_escrow\b/ (underscore is a word char) which cannot match 'release escrow', and 'EscrowContract' lowercases to the unsplittable token 'escrowcontract' vs 'escrow contract'. The repo IS fetched as a DB candidate via the codeSymbols like clause (repo-search.ts:652, raw under
+**Refuter verdict:** Confirmed by code read + regex simulation. symbolsHaystack (code-symbols.ts:98) strips underscores and splits camelCase in the doc haystack, but the query pipeline (route trim → contentTokens lowercase/whitespace-split → termsForToken synonyms only) never applies the same normalization, so q='release_escrow' builds /\brelease_escrow\b/ (underscore is a word char) which cannot match 'release escrow', and 'EscrowContract' lowercases to the unsplittable token 'escrowcontract' vs 'escrow contract'. *[truncated at capture]*
 
-## [MEDIUM] scripts/scan/scan-repo-code.ts (scan-pipeline)
+</details>
+
+## 10 · MED · scan-pipeline — call budget misses Cargo.toml blob fetches — ✅ #395
+
+<details><summary>scripts/scan/scan-repo-code.ts — evidence</summary>
 
 **Finding:** Call-budget accounting (line 164: callsUsed += pathsFetched + 5) misses the Cargo.toml blob fetches: fetchRepoCode fetches up to 40 manifest blobs per repo (fetch-repo-code.ts:256, cargos.slice(0,40)) but pathsFetched counts only sel.cargos (soroban + root manifests). Note: excluding the stellar.expert probes from this budget is CORRECT — they are not GitHub API calls and do not consume the GITHUB_TOKEN quota the guard protects.
 
 **Scenario:** A wave containing Rust workspace monorepos (e.g. soroban-examples-style repos with ~40 Cargo.tomls of which 2-3 are soroban) undercounts ~30+ real GitHub calls per repo. At the default --budget 650, a monorepo-heavy 60-repo wave can actually spend 900-1,000+ requests — exhausting the 1,000/hr per-repo Actions GITHUB_TOKEN allowance the budget guard exists to protect, 403ing concurrent scheduled jobs (link-health, enrich, self-audit) for the rest of the hour and/or tripping the scanner's own RateLimitError mid-wave.
 
-**Refuter verdict:** Confirmed in code: fetch-repo-code.ts:256 fetches up to 40 Cargo.toml blobs per repo (one GitHub /git/blobs call each), but pathsFetched (line 334) counts only sel.cargos = soroban + root manifests; scan-repo-code.ts:164's `callsUsed += pathsFetched + 5` has only ~1 call of slack after meta+tree+tags+readme, so non-soroban workspace cargos (up to ~36-39 calls/repo) go uncounted. Qualifying repos exist and rank first in waves (sort -lastCommitAt, lang=Rust): large Rust workspaces like stellar/rs-soroban-env whose crates don't match /soroban[-_]sdk/. No compensating guard: the budget check reads
+**Refuter verdict:** Confirmed in code: fetch-repo-code.ts:256 fetches up to 40 Cargo.toml blobs per repo (one GitHub /git/blobs call each), but pathsFetched (line 334) counts only sel.cargos = soroban + root manifests; scan-repo-code.ts:164's `callsUsed += pathsFetched + 5` has only ~1 call of slack after meta+tree+tags+readme, so non-soroban workspace cargos (up to ~36-39 calls/repo) go uncounted. Qualifying repos exist and rank first in waves. *[truncated at capture]*
 
-## [MEDIUM] src/lib/code-depth.ts (scan-pipeline) — ✅ FIXED (frontier pass 2026-07-09)
+</details>
+
+## 11 · MED · scan-pipeline — workspace breadth scales with declared crates — ✅ #402
 
 **Fix:** workspaceBreadth magnitude now scales with EVIDENCE — `min(contractCrates, deepCrates*3)` (each sampled-deep crate vouches for at most 3, the same ratio the gate uses) — so 39 stub Cargo.tomls no longer buy full breadth off one deep crate. hoops-finance/contracts re-probed at 0.603 (unchanged); full depth-eval green.
+
+<details><summary>src/lib/code-depth.ts — evidence</summary>
 
 **Finding:** v3 breadth gate (lines 507-515, commit 5e16e21) checks depth against min(contractCrates, sampledCrates) but the term magnitude workspaceBreadth still scales with TOTAL contractCrates — so a many-crate workspace where the top-18-by-size source sample lands in 2 crates needs only ONE crate with >=3 nonTrivial fns (ceil(min(40,2)/3)=1) to earn the full 0.16, where v2 required 14 deep crates. The declared-crate count is attacker-controlled (any Cargo.toml mentioning soroban-sdk counts via cargoIsSoroban). The explicitly-asked 2-crate/2-sampled case does NOT inflate: its gate is ceil(2/3)=1 in both v2 and v3 and its magnitude is only 0.02.
 
 **Scenario:** A farm repo (or padded real repo) declares 39 stub crates each with a soroban-sdk Cargo.toml plus one modestly deep crate holding the top-18 largest files: contractCrates=40, sampledCrates=2, deepCrates=1 → gate passes → workspaceBreadth=min(1,39/8)=1 → +0.16 substance that v2 scored 0. That is enough to push a ~0.5 template-grade repo past the 0.6 quality gate and inflate the enrich-time repoScore override (0.1+0.7*depth ≈ +11 points), surfacing it above genuinely deep single-crate contracts.
 
-**Refuter verdict:** Empirically reproduced against the real computeCodeDepth: identical code with contractCrateDirs padded 2→40 (sampled crates unchanged at 2, one deep) moves codeDepth 0.546→0.684, crossing the 0.6 quality gate (codeProofTier promotes to "quality") and lifting the repo-grade codeDriven override ~+10 points. The gate at code-depth.ts:509-512 uses min(contractCrates, sampledCrates) while the magnitude at :513-514 scales with total contractCrates; contractCrateDirs comes from any Cargo.toml matching /soroban[-_]sdk/i (fetch-repo-code.ts:255-273) so stub crates count while the global top-18-by-size 
+**Refuter verdict:** Empirically reproduced against the real computeCodeDepth: identical code with contractCrateDirs padded 2→40 (sampled crates unchanged at 2, one deep) moves codeDepth 0.546→0.684, crossing the 0.6 quality gate (codeProofTier promotes to "quality") and lifting the repo-grade codeDriven override ~+10 points. *[truncated at capture]*
 
-## [MEDIUM] scripts/scan/fetch-repo-code.ts (scan-pipeline)
+</details>
+
+## 12 · MED · scan-pipeline — mainnet-probe timeout covers headers only — ✅ #395
+
+<details><summary>scripts/scan/fetch-repo-code.ts — evidence</summary>
 
 **Finding:** verifyMainnetContract (lines 204-214, commit 9ed4501): clearTimeout(t) fires as soon as fetch resolves (headers received), so the subsequent await res.json() reads the response body with NO abort in effect — the 6s timeout only bounds the header phase. Undici's default bodyTimeout (300s) only fires on an IDLE body, so a slow-drip body (1 byte per ~4 min) is effectively unbounded. Echo-guard itself verified correct against the live API (response field is 'contract').
 
 **Scenario:** A stellar.expert incident where the CDN accepts connections and stalls or dribbles response bodies: each id-bearing repo blocks the single-threaded wave loop for minutes-to-unbounded per id (up to 3 ids), blowing the 30-minute Actions job timeout so the wave tail is killed mid-run every wave for the duration of the incident. For contrast, a full blackhole outage is the BENIGN case the code already bounds: <=6s x <=3 ids = 18s per repo, and only for repos whose README contains C[A-Z2-7]{55} strings — repos without ids make zero probe calls.
 
-**Refuter verdict:** Confirmed in source: verifyMainnetContract calls clearTimeout(t) immediately after fetch resolves (headers), before `await res.json()` (fetch-repo-code.ts:204-214), so the 6s abort only bounds the header phase. No global undici dispatcher config exists in the repo, leaving Node's default idle-based bodyTimeout (300s) as the only body bound — a stalled 200 body costs 300s per probed id (up to 3 per repo = 15 min), and a slow-drip body that sends a byte within each 300s window is effectively unbounded. No caller guard mitigates it: the wave loop (scan-repo-code.ts:163) awaits fetchRepoCode seque
+**Refuter verdict:** Confirmed in source: verifyMainnetContract calls clearTimeout(t) immediately after fetch resolves (headers), before `await res.json()` (fetch-repo-code.ts:204-214), so the 6s abort only bounds the header phase. No global undici dispatcher config exists in the repo, leaving Node's default idle-based bodyTimeout (300s) as the only body bound — a stalled 200 body costs 300s per probed id (up to 3 per repo = 15 min), and a slow-drip body that sends a byte within each 300s window is effectively unbounded. *[truncated at capture]*
 
-## [MEDIUM] scripts/check-links.ts (link-checker-prod)
+</details>
+
+## 13 · MED · link-checker — URL identity split across code paths — ✅ #392
+
+<details><summary>scripts/check-links.ts — evidence</summary>
 
 **Finding:** URL identity split: the error/catch path (:322-328) reports the original cleaned URL (trailing slash stripped by cleanUrl :277), but summarize() (:335) reports fetch-normalized res.url — verified locally: fetch('https://example.com') yields res.url 'https://example.com/' — so every root-domain URL is keyed differently depending on whether it failed at the network level or got an HTTP response.
 
 **Scenario:** A project website healthy for weeks is stored under 'https://example.com/' (slash, from res.url). One day DNS fails → checkUrl's catch returns url 'https://example.com' (no slash) → the upsert find() at :466 misses → a NEW doc is created with consecutiveFailures=1 and lastSuccessAt=null, and cleanup then deletes the old doc with the real history. Every transition between network-error and HTTP-response resets the very counters the dashboard sorts by, and 'last known good' is unrecoverable. Secondary effect: two directory entries that fetch-normalize to the same res.url (case-differing host, fragment) collapse to one result key, and the later upsert overwrites the earlier one's targets array, silently dropping record references. Fix shape: always key results by the input entry URL, never res.url.
 
-**Refuter verdict:** Verified empirically: Node fetch res.url normalizes 'https://example.com' to 'https://example.com/' (slash), while cleanUrl (:277) strips trailing slashes and the catch path (:322-328) returns that slash-less input. summarize (:335) keys all HTTP-response results by res.url, and both the upsert find (:466) and cleanup currentUrls (:533) use r.url with no re-keying by the input entry. So any root-domain URL flips its DB key on every network-error↔HTTP-response transition: the find misses, a fresh doc is created (consecutiveFailures=1, lastSuccessAt=null), and cleanup deletes the doc holding the
+**Refuter verdict:** Verified empirically: Node fetch res.url normalizes 'https://example.com' to 'https://example.com/' (slash), while cleanUrl (:277) strips trailing slashes and the catch path (:322-328) returns that slash-less input. summarize (:335) keys all HTTP-response results by res.url, and both the upsert find (:466) and cleanup currentUrls (:533) use r.url with no re-keying by the input entry. So any root-domain URL flips its DB key on every network-error↔HTTP-response transition. *[truncated at capture]*
 
-## [MEDIUM] scripts/check-links.ts (link-checker-prod)
+</details>
+
+## 14 · MED · link-checker — `?? undefined` never clears stale fields — ✅ #392
+
+<details><summary>scripts/check-links.ts — evidence</summary>
 
 **Finding:** Every nullable field is written as `?? undefined` (:499-504), and Payload's update treats undefined as 'leave unchanged' (null is required to clear) — so errorReason, statusCode, redirectTo, and firstFailedAt are NEVER cleared once set, leaving contradictory stale metadata on records after status transitions.
 
 **Scenario:** URL returns 200 for months (statusCode: 200 stored), then DNS dies: the error path computes statusCode null → sent as undefined → Payload keeps 200 → record reads status='error', statusCode=200, errorReason='ENOTFOUND' — directly contradicting the field's own admin description ('null on network errors'). Conversely a recovered URL keeps its old firstFailedAt (the admin condition Boolean(data.firstFailedAt) displays it), so a healthy link shows 'first failed at <date>' forever; a fixed redirect keeps stale redirectTo. Admins triaging the broken-first dashboard act on last week's failure metadata. Fix shape: pass explicit null instead of undefined for cleared fields.
 
-**Refuter verdict:** Confirmed end-to-end. scripts/check-links.ts:499-504 converts computed nulls (statusCode on network errors, errorReason/redirectTo on recovery, firstFailedAt reset at lines 488-492) to undefined via `?? undefined`. Verified in the installed packages (payload 3.63.0 + @payloadcms/db-mongodb) that update passes data as a $set-style Mongoose updateOne, and Mongoose 6+ unconditionally strips undefined keys — so undefined means 'leave unchanged' and only explicit null clears. LinkChecks has no hooks and no other writer. Therefore ok→DNS-error leaves statusCode=200 alongside status='error'/errorReas
+**Refuter verdict:** Confirmed end-to-end. scripts/check-links.ts:499-504 converts computed nulls (statusCode on network errors, errorReason/redirectTo on recovery, firstFailedAt reset at lines 488-492) to undefined via `?? undefined`. Verified in the installed packages (payload 3.63.0 + @payloadcms/db-mongodb) that update passes data as a $set-style Mongoose updateOne, and Mongoose 6+ unconditionally strips undefined keys — so undefined means 'leave unchanged' and only explicit null clears. LinkChecks has no hooks and no other writer. *[truncated at capture]*
 
-## [MEDIUM] src/collections/LinkChecks.ts (link-checker-prod)
+</details>
+
+## 15 · MED · link-checker — consecutiveFailures description ≠ behavior — ✅ #392
+
+<details><summary>src/collections/LinkChecks.ts — evidence</summary>
 
 **Finding:** consecutiveFailures contract drift: the field description (:112-113) says it counts 'consecutive check runs this URL has returned error/redirect', but the script only ticks on status==='error' (check-links.ts:482-487) — redirect and blocked both RESET the counter to 0, so permanently-redirecting URLs sort as perfectly healthy in the broken-first dashboard.
 
 **Scenario:** Verified in code: isFailingNow = r.status === 'error'; redirect → consecutiveFailures = 0, firstFailedAt = null, every run. A dead project's parked domain 301-ing to a squatter/ad page — or a hijacked partner websiteUrl redirecting somewhere unrelated, the exact signature of the one real hijack incident this checker was justified by — shows consecutiveFailures 0 forever and never surfaces under defaultSort '-consecutiveFailures'. Meanwhile the schema description tells the admin redirects ARE counted, so they'll trust the 0. This is the documented spec-drift bug class (prose contract ≠ code behavior) on a brand-new field. Fix shape: either tick the counter on redirect too or correct the description and add a redirect-focused admin view.
 
-**Refuter verdict:** Mechanism confirmed in code, survives refutation. LinkChecks.ts:112-113 describes consecutiveFailures as counting runs the URL "returned error/redirect", but check-links.ts:482-487 sets isFailingNow = r.status === 'error' only; for status 'redirect' (and 'blocked') consecutiveFailures is unconditionally reset to 0 and firstFailedAt to null on every run. summarize() (check-links.ts:362-371) classifies any 3xx as 'redirect' with redirect:'manual', so a permanently 301-ing URL (parked/hijacked domain) does show consecutiveFailures 0 forever under the defaultSort '-consecutiveFailures' (LinkChecks
+**Refuter verdict:** Mechanism confirmed in code, survives refutation. LinkChecks.ts:112-113 describes consecutiveFailures as counting runs the URL "returned error/redirect", but check-links.ts:482-487 sets isFailingNow = r.status === 'error' only; for status 'redirect' (and 'blocked') consecutiveFailures is unconditionally reset to 0 and firstFailedAt to null on every run. summarize() classifies any 3xx as 'redirect' with redirect:'manual', so a permanently 301-ing URL (parked/hijacked domain) does show consecutiveFailures 0 forever under the defaultSort. *[truncated at capture]*
 
-## [MEDIUM] /private/tmp/sl-canonical/src/app/api/repos/explain/route.ts (contract-as-code)
+</details>
+
+## 16 · MED · contract-as-code — explain response omits documented fields — ✅ #387
+
+<details><summary>src/app/api/repos/explain/route.ts — evidence</summary>
 
 **Finding:** The explainRepo spec block documents `codeVerified.symbols` and `codeVerified.mainnetContractId` in the /api/repos/explain 200 response (openapi-spec.ts lines ~358-365), but the route never returns them: its Payload `select` (route.ts ~lines 122-135) omits codeSymbols and mainnetContractId, and the codeVerified object it builds (lines 107-155) has only 6 fields. This mismatch SURVIVES the in-flight fix/spec-nesting commit 6cb470a, which leaves the explain codeVerified block unchanged (re-verified via git show 6cb470a).
 
 **Scenario:** Probed live: /api/repos/explain?q=where are transaction result codes defined routes to stellar/stellar-core (a scanned repo) and returns codeVerified = {stellarProof, codeDepth, isDeployableContract, sorobanSdkVersion, versionStatus, scannedAt} — no symbols, no mainnetContractId. A consumer generated from the spec that reads codeVerified.symbols to qualify an answer (the spec text even implies presence: "Empty for repos scanned before 2026-07-08") always gets undefined, and any live⇄spec field-coverage comparison flags documented-but-absent fields — the same drift class Tyler's detector reports. Fix direction is a one-of-two choice: project the two fields in the route's select+response (the data already exists on repos docs), or drop them from the explain spec block; today neither is done anywhere.
 
-**Refuter verdict:** Verified in code and live. openapi-spec.ts documents symbols and mainnetContractId inside the /api/repos/explain 200 codeVerified properties (lines 358-365), but route.ts builds codeVerified from a select that omits codeSymbols/mainnetContractId and constructs only 6 fields (lines 123-154). Commit 6cb470a (in history) only fixed the nesting of a stray mainnetContractId and added it to the Repo component — the explain block still documents both fields post-fix. Live probe of stellarlight.xyz/api/repos/explain for a scanned repo (stellar/stellar-core) returns exactly the 6 fields with no symbols
+**Refuter verdict:** Verified in code and live. openapi-spec.ts documents symbols and mainnetContractId inside the /api/repos/explain 200 codeVerified properties (lines 358-365), but route.ts builds codeVerified from a select that omits codeSymbols/mainnetContractId and constructs only 6 fields (lines 123-154). Commit 6cb470a only fixed the nesting of a stray mainnetContractId and added it to the Repo component — the explain block still documents both fields post-fix. Live probe of stellarlight.xyz/api/repos/explain for a scanned repo (stellar/stellar-core) returns exactly the 6 fields. *[truncated at capture]*
 
-## [MEDIUM] /private/tmp/sl-canonical/scripts/scan/write-shape.ts (guards-and-crons)
+</details>
+
+## 17 · MED · guards/crons — "CI-asserted" write-gate suite runs in no CI — ✅ #388
+
+<details><summary>scripts/scan/write-shape.ts — evidence</summary>
 
 **Finding:** The 'CI-asserted' write-gate safety claim is false: no workflow runs the vitest suite. src/lib/__tests__/scan-write-shape.test.ts (FORBIDDEN_WRITE_KEYS assertions + the source-grep discipline checks that scan-repo-code.ts never creates/deletes and only writes gate-built data) executes nowhere — grep across all 44 workflows finds no `vitest`/`pnpm test`, and the Vercel build script is typecheck+next-build only.
 
 **Scenario:** A future edit adds repoScore/tier to signalsToWrite(), or adds an inline `data: {...}` literal or a payload.delete() to scan-repo-code.ts. Nothing in CI fails (contract-gate runs contract:check only; typecheck passes). The next --execute wave against the prod M0 writes demotion/authority fields to ~2,400 repo docs — the exact class the 'zero demotion risk by construction' comments in write-shape.ts line 12 and scan-repo-code.yml lines 4-5 claim is impossible. The FORBIDDEN_WRITE_KEYS list itself is currently correct and the shapes are clean; the defect is that the enforcement it advertises never runs.
 
-**Refuter verdict:** Confirmed. write-shape.ts line 12 claims the signalsToWrite()-only discipline is "CI-asserted", and scan-repo-code.yml advertises "zero demotion risk by construction", but the enforcing suite (src/lib/__tests__/scan-write-shape.test.ts — FORBIDDEN_WRITE_KEYS shape checks plus readFileSync source-greps asserting no payload.delete/create and no inline data literals) runs in no CI: all 44 workflows grep clean for vitest/pnpm test (contract-gate runs only contract:check; self-audit runs the live-API probe script; scan-repo-code.yml runs only the scanner), the Vercel build script is typecheck+next-
+**Refuter verdict:** Confirmed. write-shape.ts line 12 claims the signalsToWrite()-only discipline is "CI-asserted", and scan-repo-code.yml advertises "zero demotion risk by construction", but the enforcing suite runs in no CI: all 44 workflows grep clean for vitest/pnpm test (contract-gate runs only contract:check; self-audit runs the live-API probe script; scan-repo-code.yml runs only the scanner). *[truncated at capture]*
 
-## [MEDIUM] /private/tmp/sl-canonical/.github/workflows/self-audit.yml (guards-and-crons)
+</details>
+
+## 18 · MED · guards/crons — self-audit fragile + no issue dedupe — ✅ #394
+
+<details><summary>.github/workflows/self-audit.yml — evidence</summary>
 
 **Finding:** One transient HTTP failure files a spurious GitHub issue, and there is no dedupe: the audit makes ~40 sequential fetches (Vercel + npm registry) with zero retries, the /api/status fetch in self-audit.ts line 86 is outside any try/catch (one blip aborts the whole run with exit 2), and the issue title embeds the date so a persistent condition files a fresh issue every day.
 
 **Scenario:** A single Vercel cold-start 502 or npm-registry 5xx at 13:00 UTC makes one endpoint check bad() (or crashes main() entirely if it is the /api/status call), exit != 0, and the workflow creates 'Self-audit failure — 2026-07-09' with the log — no re-probe to distinguish a transient from a regression. Conversely a real weekend freshness stall creates three near-identical issues (one per day) because the filing step never searches for an existing open self-audit issue before `gh issue create`.
 
-**Refuter verdict:** All three mechanisms verified in code. (1) scripts/self-audit.ts j() (lines 37-43) is a bare fetch with zero retries; any single !r.ok throws, is converted to bad() at every check site, fails>0 → exit 1, and self-audit.yml files an issue on any nonzero exit — no re-probe distinguishes transient 5xx from regression. (2) The /api/status fetch at line 86 is the only awaited j() call in main() outside a try/catch; a throw there hits main().catch → process.exit(2), which the workflow's `exit != '0'` condition also treats as failure. Exit-code capture via set +e + PIPESTATUS under the default bash s
+**Refuter verdict:** All three mechanisms verified in code. (1) scripts/self-audit.ts j() (lines 37-43) is a bare fetch with zero retries; any single !r.ok throws, is converted to bad() at every check site, fails>0 → exit 1, and self-audit.yml files an issue on any nonzero exit — no re-probe distinguishes transient 5xx from regression. (2) The /api/status fetch at line 86 is the only awaited j() call in main() outside a try/catch; a throw there hits main().catch → process.exit(2), which the workflow's `exit != '0'` condition also treats as failure. *[truncated at capture]*
 
-## [MEDIUM] scripts/data/curate-partners.ts (data-curation)
+</details>
+
+## 19 · MED · data-curation — logo backfill overwrites partner-owned logoUrl — ✅ #390
+
+<details><summary>scripts/data/curate-partners.ts — evidence</summary>
 
 **Finding:** The logo backfill OVERWRITES the partner-owned `logoUrl` field for every partner whose slug matches a project, on every run — reverting any logo a partner sets themselves.
 
 **Scenario:** `logoUrl` is deliberately partner-editable (Partners.ts line 300: "Kept as a URL so partners don't need media-upload permissions" — not an autoField), yet the backfill loops over ALL docs (no status/consent filter) and pushes a write whenever `d.logoUrl !== projectLogo`. Concrete: the DeFindex partner logs into the portal after a rebrand and points logoUrl at their new logo; the next curate-partners --execute run (for any unrelated purpose, e.g. archiving a dead partner) reverts their card/profile/concierge logo to the old project-directory logo — exactly the class of partner-data demotion the manual/auto field split was designed to prevent, and it recurs on every future run.
 
-**Refuter verdict:** Confirmed with one scenario correction. The logo backfill (curate-partners.ts:478-527) loops over ALL partner docs and unconditionally overwrites logoUrl whenever it differs from the matched project's logo — no fill-if-empty guard, no status filter, recurring on every --execute run, and bundled inseparably with unrelated writes (archiving, pilot flags). logoUrl is a manual partner-owned field (Partners.ts:298, not an autoField), and the collection's design contract says manual fields are 'Sticky: nothing overwrites them except the partner (or an admin)' — the backfill breaks that. Scenario cor
+**Refuter verdict:** Confirmed with one scenario correction. The logo backfill (curate-partners.ts:478-527) loops over ALL partner docs and unconditionally overwrites logoUrl whenever it differs from the matched project's logo — no fill-if-empty guard, no status filter, recurring on every --execute run, and bundled inseparably with unrelated writes (archiving, pilot flags). logoUrl is a manual partner-owned field, and the collection's design contract says manual fields are 'Sticky: nothing overwrites them except the partner (or an admin)' — the backfill breaks that. *[truncated at capture]*
 
-## [MEDIUM] scripts/data/curate-projects.ts (data-curation)
+</details>
+
+## 20 · MED · data-curation — incorporation country written as corridor coverage — ✅ #390 + curate execute
+
+<details><summary>scripts/data/curate-projects.ts — evidence</summary>
 
 **Finding:** The coverage sync conflates partner `country` (primary jurisdiction/incorporation) with project `coverage.countries` (fiat corridor coverage) — and today's executed run already wrote incorrect corridor data that fill-if-empty now makes permanent.
 
 **Scenario:** Live-verified wrong data: project boss-pay now has coverage.countries=["United States"] (asOf 2026-07-07) because PARTNER_ENRICH set country="United States" (incorporation) for a product whose own tagline says "send and exchange money across Africa" (partner regions include africa). Project coca-wallet similarly got ["United Arab Emirates"] while regions=global. An agent filtering "anchors with US coverage" retrieves Boss Pay; "Africa corridor anchors" misses it via structured coverage — the omission-equals-negation class. Worse, because the sync is fill-if-empty, the wrong value now blocks the correct corridor list from ever being synced on future runs without a manual DB clear.
 
-**Refuter verdict:** Confirmed end-to-end. curate-projects.ts:128 copies partner `country` (schema-documented as "Primary jurisdiction/market" from stellar.toml ORG_*) into project `coverage.countries` (schema-documented as "fiat/corridor coverage"). Live API shows the executed run's output: boss-pay coverage.countries=["United States"] asOf 2026-07-07 despite partner regions=["africa"]/tagline "across Africa", and coca-wallet=["United Arab Emirates"] despite regions=["global"]. coverage is a first-class inclusion signal in project-search-match.ts, so corridor queries mis-retrieve/miss these anchors (omission-equa
+**Refuter verdict:** Confirmed end-to-end. curate-projects.ts:128 copies partner `country` (schema-documented as "Primary jurisdiction/market" from stellar.toml ORG_*) into project `coverage.countries` (schema-documented as "fiat/corridor coverage"). Live API shows the executed run's output: boss-pay coverage.countries=["United States"] asOf 2026-07-07 despite partner regions=["africa"]/tagline "across Africa", and coca-wallet=["United Arab Emirates"] despite regions=["global"]. coverage is a first-class inclusion signal in project-search-match.ts, so corridor queries mis-retrieve/miss these anchors. *[truncated at capture]*
 
-## [MEDIUM] scripts/data/curate-projects.ts (data-curation)
+</details>
+
+## 21 · MED · data-curation — slug-only join, no entity-identity check — ⏸ DEFERRED
+
+<details><summary>scripts/data/curate-projects.ts — evidence</summary>
 
 **Finding:** The partner→project join (exact slug, or slug minus "anchor-" prefix) has no entity-identity verification, and it drives real writes in two paths (coverage stamp here; logoUrl overwrite in curate-partners.ts), so a future same-slug-different-entity partner silently contaminates an unrelated project.
 
 **Scenario:** I verified all 26 currently-published partners: every current match (ping, boss-pay, moneygram, mykobo, anclap, halborn, certora, ottersec, veridise, audd, etc.) is the same entity — no false positive TODAY. But partner slugs are auto-generated from company names (beforeValidate generateSlug), including accounts created via the public /api/partners/submit-listing pipeline, and the projects collection has ~900 slugs. The moment a partner is published whose name slugifies to an existing unrelated project slug (generic names like "ping" show how plausible this is), the next curate-projects --execute stamps that partner's country/currencies/seps onto the unrelated project as coverage (then fill-if-empty locks it in), and curate-partners' logo backfill gives the partner the unrelated project's logo. The report-only dual-identity sweep shares the same join and would feed the same false positive into TYPES_ADD via owner review.
 
-**Refuter verdict:** Confirmed in code: curate-projects.ts:117-161 bulk-loops ALL published partners (contradicting its own "never bulk-edits" header) and joins to projects by exact slug or slug-minus-"anchor-" with zero entity-identity verification (no domain/website cross-check, no allowlist), writing coverage onto the matched project; curate-partners.ts:478-524 shares the join and overwrites partner logoUrl from the project (and runs with NO published-status filter, so even drafts are hit). Every guard I attacked fails to block the scenario: submit-listing creates drafts but admin publish checks nothing against
+**Refuter verdict:** Confirmed in code: curate-projects.ts:117-161 bulk-loops ALL published partners (contradicting its own "never bulk-edits" header) and joins to projects by exact slug or slug-minus-"anchor-" with zero entity-identity verification (no domain/website cross-check, no allowlist), writing coverage onto the matched project; curate-partners.ts:478-524 shares the join and overwrites partner logoUrl from the project (and runs with NO published-status filter, so even drafts are hit). *[truncated at capture]*
 
-## [LOW] src/lib/code-symbols.ts (scan-pipeline)
+</details>
+
+## 22 · LOW · scan-pipeline — quadratic regex backtracking — ✅ #395
+
+<details><summary>src/lib/code-symbols.ts — evidence</summary>
 
 **Finding:** FN_RE and TYPE_RE (lines 63-65) exhibit quadratic backtracking on unclosed-paren input via the optional pub-visibility group (?:\s*\([^)]*\))?: measured 12.5 SECONDS per regex on a 400KB blob of 'pub (' repeated (which passes the 400_000-byte fetch cap). extractCodeSymbols runs both regexes on every .rs blob, so one crafted repo costs ~25s x 18 source files ≈ 7.5 CPU-minutes in the serial scan loop. Fix is cheap: bound the visibility qualifier ([^)]{0,40} — real qualifiers are 'crate'/'super'/'in path').
 
 **Scenario:** An adversary gets a repo indexed (org-linked enrich path) containing a soroban Cargo.toml and 18 x 400KB src/*.rs files of repeated 'pub (' — non-compiling Rust, but nothing validates that. Each such repo stalls the wave ~7.5 minutes of pure regex CPU; 4 of them in one wave exceed the 30-minute job timeout, killing the remaining wave (similar unclosed-paren patterns also slow code-depth.ts extractContractFns, which is pre-existing v2 code). Requires deliberately adversarial content, hence low likelihood.
 
-**Refuter verdict:** Empirically confirmed: FN_RE/TYPE_RE on a 400KB 'pub (' blob each take ~13.5s (measured; quadratic scaling 204ms→792ms→4.1s→13.5s across 50/100/200/400KB). No guard blocks the scenario: fetchBlob admits files up to exactly 400_000 bytes, selectDepthPaths picks the 18 biggest such .rs files, the Soroban gate is a text-only /soroban[-_]sdk/ match on Cargo.toml (no compilation check), extractCodeSymbols' MAX_SYMBOLS early-break never fires on zero-match input, and the scan loop budgets GitHub API calls but not regex CPU. Workflow timeout is 30 min, so ~8 CPU-min per crafted repo × 4 repos kills t
+**Refuter verdict:** Empirically confirmed: FN_RE/TYPE_RE on a 400KB 'pub (' blob each take ~13.5s (measured; quadratic scaling 204ms→792ms→4.1s→13.5s across 50/100/200/400KB). No guard blocks the scenario: fetchBlob admits files up to exactly 400_000 bytes, selectDepthPaths picks the 18 biggest such .rs files, the Soroban gate is a text-only /soroban[-_]sdk/ match on Cargo.toml (no compilation check), extractCodeSymbols' MAX_SYMBOLS early-break never fires on zero-match input, and the scan loop budgets GitHub API calls but not regex CPU. *[truncated at capture]*
 
-## [LOW] scripts/check-links.ts (link-checker-prod)
+</details>
+
+## 23 · LOW · link-checker — GET retry doubles requests on 429/5xx — ✅ #392
+
+<details><summary>scripts/check-links.ts — evidence</summary>
 
 **Finding:** The HEAD-failure GET retry condition (:299) exempts only 401/403 — a 429 (and any 5xx) triggers an immediate full GET to the same host, doubling requests precisely against servers that are rate-limiting or struggling, with no per-host throttling to space out the ~900+ same-host github.com URLs.
 
 **Scenario:** Dedup is per-URL, not per-host: ~920 projects' links.github + 113 builders' github_username produce roughly a thousand github.com URLs hit back-to-back at concurrency 5. If GitHub (or any host with many directory links) starts returning 429 mid-run, each 429 immediately gets a second GET request — doubling pressure during active throttling and extending the block — after which the remaining URLs on that host all record 'blocked', wiping the day's verification coverage for the directory's single most important host. The retry also GETs on 5xx, poking a struggling small site twice within the same 10s window. Fix shape: add 429 (and arguably 5xx) to the no-retry list; ideally group or jitter by host.
 
-**Refuter verdict:** Confirmed in code: check-links.ts:299 retries with GET whenever HEAD status >=400 except 401/403, so a HEAD 429 (and any 5xx) fires an immediate second full GET to the same URL within the same shared 10s AbortController window. This is pure waste for 429 — summarize() at :348 already classifies 429 as 'blocked' bot-protection, and the retry's stated rationale (GitHub HEAD-404/405-but-GET-200) cannot apply to rate-limit responses, so each 429 predictably yields another 429 while doubling pressure on the throttling host. Dedup in collectAllUrls is per-URL only; runWithConcurrency is a plain 5-wo
+**Refuter verdict:** Confirmed in code: check-links.ts:299 retries with GET whenever HEAD status >=400 except 401/403, so a HEAD 429 (and any 5xx) fires an immediate second full GET to the same URL within the same shared 10s AbortController window. This is pure waste for 429 — summarize() at :348 already classifies 429 as 'blocked' bot-protection, and the retry's stated rationale (GitHub HEAD-404/405-but-GET-200) cannot apply to rate-limit responses. *[truncated at capture]*
 
-## [LOW] scripts/check-links.ts (link-checker-prod)
+</details>
+
+## 24 · LOW · link-checker — `limit: 1000` caps collection — ✅ #392 (cap 2000) · ⏸ residual: no overflow assert
+
+<details><summary>scripts/check-links.ts — evidence</summary>
 
 **Finding:** Hardcoded `limit: 1000` on the projects find (:93-96) with 920 live projects (confirmed via /api/status) — when the collection crosses 1000, the overflow projects' links are silently never checked, and the cleanup pass actively deletes any existing link-check records unique to them.
 
 **Scenario:** Projects grow from 920 → 1005 (it gained docs this week per lastUpdatedAt). The 1001st+ projects (natural order, so effectively arbitrary) are silently dropped from URL collection — no warning, no error. Cleanup then treats their URLs as 'no longer referenced anywhere' and deletes the records, so coverage shrinks invisibly while the dashboard still looks complete. Same pattern on builders/entities (limit 1000; builders at 113 today so more headroom). Fix shape: paginate or use limit: 0, and assert totalDocs <= fetched.
 
-**Refuter verdict:** Verified in code and live: scripts/check-links.ts:93-97 fetches projects with hardcoded limit:1000, no pagination loop and no totalDocs assertion anywhere in the file (same pattern for builders/entities at :120-124/:150-154). Payload silently returns only the first 1000 docs, and the cleanup pass at :532-548 then deletes every link-checks record whose URL wasn't collected this run — so overflow projects' unique URLs are both never checked and have their existing history records deleted, permanently (they are never re-collected while count>1000). The destructive path runs unattended: .github/wo
+**Refuter verdict:** Verified in code and live: scripts/check-links.ts:93-97 fetches projects with hardcoded limit:1000, no pagination loop and no totalDocs assertion anywhere in the file (same pattern for builders/entities at :120-124/:150-154). Payload silently returns only the first 1000 docs, and the cleanup pass at :532-548 then deletes every link-checks record whose URL wasn't collected this run — so overflow projects' unique URLs are both never checked and have their existing history records deleted. *[truncated at capture]*
 
-## [LOW] .github/workflows/check-links.yml (link-checker-prod)
+</details>
+
+## 25 · LOW · link-checker — no workflow concurrency group — ✅ #392
+
+<details><summary>.github/workflows/check-links.yml — evidence</summary>
 
 **Finding:** No `concurrency:` group on the workflow — a workflow_dispatch fired while the (long, ~15-min) scheduled run is mid-flight gives two concurrent --execute processes whose find-then-create upserts race on the unique url index.
 
 **Scenario:** Both runs check a URL not yet in link-checks; both find() (check-links.ts:466) return empty; both call payload.create → the second create hits the unique index on url (LinkChecks.ts:59) with an E11000 duplicate-key error → uncaught → main().catch exits 1 mid-loop, leaving that run's partial writes and skipping its cleanup. The two runs can also interleave delete-vs-update on the same doc. Fix shape: `concurrency: { group: check-links, cancel-in-progress: false }` on the workflow.
 
-**Refuter verdict:** Confirmed: check-links.yml has no concurrency group (none in any workflow), so a workflow_dispatch --execute run can overlap the ~15-min scheduled run. check-links.ts does a non-atomic find-then-create (~line 466) with no try/catch in the write loop; LinkChecks.ts declares url unique:true (real Mongo unique index on this newly created collection), so the second create on a new URL throws E11000 → caught only by main().catch → process.exit(1) mid-loop, abandoning remaining upserts and cleanup. Even absent new URLs, the unguarded cleanup delete loop races identically (second delete of the same s
+**Refuter verdict:** Confirmed: check-links.yml has no concurrency group (none in any workflow), so a workflow_dispatch --execute run can overlap the ~15-min scheduled run. check-links.ts does a non-atomic find-then-create (~line 466) with no try/catch in the write loop; LinkChecks.ts declares url unique:true (real Mongo unique index on this newly created collection), so the second create on a new URL throws E11000 → caught only by main().catch → process.exit(1) mid-loop, abandoning remaining upserts and cleanup. *[truncated at capture]*
 
-## [LOW] /private/tmp/sl-canonical/api-client/package.json (contract-as-code)
+</details>
+
+## 26 · LOW · contract-as-code — two conflicting schema.ts regeneration paths — ⏸ DEFERRED
+
+<details><summary>api-client/package.json — evidence</summary>
 
 **Finding:** Two conflicting, both-documented regeneration paths for api-client/src/schema.ts: the legacy `generate` script (package.json line 43), api-client/README.md lines 103-106, and the src/index.ts header comment all say to regenerate from the LIVE https://stellarlight.xyz/api/openapi.json with plain openapi-typescript (no header), while the contract gate only accepts `pnpm contract:write` output (snapshot-sourced + GENERATED_HEADER prefix, enforced by scripts/contract/build-contract.ts byte-compare).
 
 **Scenario:** A maintainer following the in-repo docs runs `pnpm generate` in api-client — e.g. today, while live still serves the pre-fix spec — and schema.ts loses the GENERATED_HEADER and regenerates the phantom `mainnetContractId: unknown` entry from the lagging live spec. `pnpm contract:check` then fails with "contract artifacts are STALE" on a PR that intended no contract change, and the CI error ("run pnpm contract:write") directly contradicts the README's instruction, sending the contributor in circles. Fails closed (no silent drift), but the stale path should be removed or rewritten to delegate to contract:write.
 
-**Refuter verdict:** Verified in code: api-client/package.json:43 `generate`, README.md "Regenerating types", and src/index.ts:15-16 all document regenerating schema.ts via plain openapi-typescript against the live URL, while scripts/contract/build-contract.ts --check (run on every PR by contract-gate.yml) byte-compares schema.ts against GENERATED_HEADER + openapi-typescript(specs/openapi.json, --export-type=false). Any `pnpm generate` output lacks the header (and the flag), so it unconditionally fails contract:check with an instruction that contradicts the README — independent of live-spec lag. One embellishment 
+**Refuter verdict:** Verified in code: api-client/package.json:43 `generate`, README.md "Regenerating types", and src/index.ts:15-16 all document regenerating schema.ts via plain openapi-typescript against the live URL, while scripts/contract/build-contract.ts --check (run on every PR by contract-gate.yml) byte-compares schema.ts against GENERATED_HEADER + openapi-typescript(specs/openapi.json, --export-type=false). Any `pnpm generate` output lacks the header (and the flag), so it unconditionally fails contract:check with an instruction that contradicts the README — independent of live-spec lag. *[truncated at capture]*
 
-## [LOW] /private/tmp/sl-canonical/scripts/check-links.ts (guards-and-crons)
+</details>
+
+## 27 · LOW · guards/crons — URL-form mismatch churns history (dup of #13) — ✅ #392
+
+<details><summary>scripts/check-links.ts — evidence (second dimension)</summary>
 
 **Finding:** URL-form mismatch between success and error paths churns LinkCheck history: summarize() keys records by fetch-normalized res.url (root domains gain a trailing slash — verified: fetch('https://stellarlight.xyz') → res.url 'https://stellarlight.xyz/'), while the catch path in checkUrl() returns the cleanUrl()-stripped input (no slash), so timeout/DNS/TLS failures upsert under a different key than HTTP results.
 
 **Scenario:** A project website 'https://x.com' checks ok for weeks (doc stored as 'https://x.com/'). The day it times out, the result carries url 'https://x.com': the upsert finds no match and creates a new doc with consecutiveFailures=1 and no lastSuccessAt, and the same run's cleanup pass deletes the old doc ('https://x.com/' is absent from currentUrls) — destroying firstFailedAt/lastSuccessAt continuity. A flapping site create+deletes a doc on every ok↔timeout transition, defeating the dashboard's stated day-by-day blip-vs-dead purpose (the whole reason the cron is daily per check-links.yml's header comment).
 
-**Refuter verdict:** Confirmed by reading the code and live-verifying fetch behavior. cleanUrl() (line 277) strips trailing slashes, so root-domain URLs enter checkUrl() as 'https://x.com'. On the success path, summarize() (line 335) keys the result by res.url, which WHATWG-normalizes root domains to 'https://x.com/' — verified live: fetch('https://stellarlight.xyz', HEAD, redirect:'manual') returns res.url 'https://stellarlight.xyz/'. On the catch path (line 322-323), checkUrl returns the un-normalized input 'https://x.com'. The upsert looks up docs by exact r.url equality (line 468) and the cleanup pass deletes 
+**Refuter verdict:** Confirmed by reading the code and live-verifying fetch behavior. cleanUrl() (line 277) strips trailing slashes, so root-domain URLs enter checkUrl() as 'https://x.com'. On the success path, summarize() (line 335) keys the result by res.url, which WHATWG-normalizes root domains to 'https://x.com/' — verified live. On the catch path (line 322-323), checkUrl returns the un-normalized input 'https://x.com'. *[truncated at capture]*
 
-## [LOW] /private/tmp/sl-canonical/scripts/check-links.ts (guards-and-crons)
+</details>
+
+## 28 · LOW · guards/crons — `limit: 1000` overflow (dup of #24) — ✅ #392 · same residual
+
+<details><summary>scripts/check-links.ts — evidence (second dimension)</summary>
 
 **Finding:** Hard-coded `limit: 1000` on the projects (and builders) find caps URL collection with no overflow warning, and the cleanup pass actively deletes LinkCheck records for anything not collected — projects is at 920 docs live and growing.
 
 **Scenario:** When the projects collection crosses 1,000 docs, every project past the first page silently has its links never checked, the run stays green, and any existing LinkCheck docs whose URLs are unique to those projects are deleted by the 'no longer appears anywhere' cleanup — the checker reads as healthy while coverage silently shrinks.
 
-**Refuter verdict:** Mechanism verified end-to-end. scripts/check-links.ts line 95 caps the projects find at limit:1000 with no pagination loop and no totalDocs/overflow check anywhere in the file; live /api/status shows projects at 920 and growing, so the cap is 92% consumed. The daily cron (.github/workflows/check-links.yml, 02:00 UTC) defaults to --execute, and in that mode the cleanup pass (lines 532-548) hard-deletes every LinkCheck whose URL wasn't collected this run — so once projects crosses 1000, overflow projects' links go unchecked AND their existing LinkCheck history is deleted that same night, while t
+**Refuter verdict:** Mechanism verified end-to-end. scripts/check-links.ts line 95 caps the projects find at limit:1000 with no pagination loop and no totalDocs/overflow check anywhere in the file; live /api/status shows projects at 920 and growing, so the cap is 92% consumed. The daily cron defaults to --execute, and in that mode the cleanup pass (lines 532-548) hard-deletes every LinkCheck whose URL wasn't collected this run. *[truncated at capture]*
 
-## [LOW] scripts/data/curate-projects.ts (data-curation)
+</details>
+
+## 29 · LOW · data-curation — hardcoded fixes never retire after applied — ⏸ DEFERRED
+
+<details><summary>scripts/data/curate-projects.ts — evidence</summary>
 
 **Finding:** DESCRIPTION_FIXES (and its curate-partners.ts analog URL_CORRECTIONS) re-assert hardcoded July-2026 values on every future run with no retire-after-applied mechanism, so they revert any newer admin/partner edit — the equality check guarantees they write precisely when someone has changed the value.
 
 **Scenario:** The lobstr/etherfuse shortDescription snapshots bake in dated product facts. Concrete: in 2027 an admin updates LOBSTR's description for a new supported network, or the claimed boss-pay partner sets their own websiteUrl after another domain change; the next --execute run — triggered to add one new bridge to SUPPORTED_NETWORKS or archive one dead partner — quietly reverts those fields to the stale hardcoded strings (URL_CORRECTIONS reverting a partner-entered websiteUrl is a partner-owned-field demotion). Dry-run does print old→new, but nothing distinguishes "still needs applying" from "reverting somebody's newer fix", and entries are never pruned once applied.
 
-**Refuter verdict:** Mechanism confirmed in code. curate-projects.ts DESCRIPTION_FIXES (lines 88-109) and curate-partners.ts URL_CORRECTIONS (lines 451-469) both guard only on equality with the hardcoded TARGET value — no from-value check, no applied/retired marker, no pruning — so they write exactly when the stored value differs from the July-2026 snapshot, i.e. including when an admin or partner later improved it. Reruns are the designed workflow (manual workflow_dispatch Actions exist for both; file headers say to grow the lists and rerun; SUPPORTED_NETWORKS is documented for future bridge additions), so a futu
+**Refuter verdict:** Mechanism confirmed in code. curate-projects.ts DESCRIPTION_FIXES (lines 88-109) and curate-partners.ts URL_CORRECTIONS (lines 451-469) both guard only on equality with the hardcoded TARGET value — no from-value check, no applied/retired marker, no pruning — so they write exactly when the stored value differs from the July-2026 snapshot, i.e. including when an admin or partner later improved it. Reruns are the designed workflow (manual workflow_dispatch Actions exist for both; file headers say to grow the lists and rerun; SUPPORTED_NETWORKS is documented for future bridge additions). *[truncated at capture]*
+
+</details>
