@@ -1,71 +1,44 @@
-# Full-surface coverage plan — from incident fixes to sweeping engines
+# Full-surface coverage plan — v2, redrafted from the audit
 
-**The problem (boxy, 2026-07-09):** every retrieval/data fix so far was triggered by ONE observed instance — Etherfuse (Mexico ramp recall), Beacon Q3 (EVM bridging), the Solana corridor, Starbridge (stale ranking), the tag-page titles. Each fix was right, but the trigger was a human noticing. The data layer is ~900 projects × dozens of structured fields, ~2,300 repos, a research corpus, 26 partners, hackathons, builders — across four search surfaces. "There could be a million of those issues because the data is so wide." Waiting for demos and cold audits to find them one at a time doesn't scale.
+**v1 of this plan was drafted from the incidents boxy happened to mention (bridges, Etherfuse) — class 22, instance-calibration, committed by the plan itself.** So we ran the audit first: 597 ground-truth-graded probes across 19 lane×intent cells, adversarially verified — see [audit-2026-07-09-full-surface.md](./audit-2026-07-09-full-surface.md) and the 138 reproducible findings in [audit-2026-07-09-findings.json](./audit-2026-07-09-findings.json). This v2 is drafted from what the audit actually found.
 
-**The insight that makes this tractable:** the [lessons corpus](./lessons/README.md) shows the failures are not a million random bugs — they are ~22 recurring **classes**. A class that broke once on one record/query is latent on every sibling record/query. So the systemic solution is not more spot fixes; it's one **sweeping engine per class family** that enumerates ALL instances mechanically, ranks the worst, and feeds the fix queue — before a user or Tyler's eval finds them.
+**The audit's central result:** 138 findings collapse into **8 systemic roots**, and most are fixed by ONE general mechanism each — not per-category patches. The plan is therefore: (Part 1) fix the roots, each with a mechanism that covers its whole surface; (Part 2) stand up the engines that hold the line afterward; (Part 3) the data-truth waves the engines can't do alone.
 
-## What already exists (build on, don't duplicate)
+## Part 1 — the fix program (one mechanism per root)
 
-| Machinery | What it covers today | Its limit |
+| # | Root (audit evidence) | The ONE mechanism | Measure of done |
+|---|---|---|---|
+| F1 | Structured fields don't drive inclusion (types 3/15–63/141 retrievable; seps/currencies/username never) | fold ALL structured fields into the candidate haystack + type-name synonym table; same for builders (username, location umbrellas) | audit probes for type-browse, attributes, builders flip green; recall@10 per type ≥90% |
+| F2 | Lexical gaps: stemming, rare-token weighting, digit-boundary tokens, punctuation forms | shared tokenizer upgrade (light stemmer + IDF-style rare-token weighting + letter/digit boundary splits) in `contentTokens` — one module, all four lanes (the shared-synonym-registry idea, widened) | donate/donations, gaming/game, groth16, secp256r1, D'CENT probes pass; "peruvian sol" inflation gone |
+| F3 | Semantic lane: no zero-hit fallback, inconsistent supplementation, `types=[]/prominence=null` serialization bug, uniform 0.97 confidence | vector fallback when keyword total=0; fix semantic-row serialization; make keyword confidence discriminative | misspelling/slug known-item probes retrieve; semantic rows serve full fields |
+| F4 | Repos ranking: no Stellar-relevance factor (dead other-chain repos beat codeVerified Stellar repos on 7 verticals); owner unsearched; explain token-soup fallback | stellarProof/codeVerified as a ranking factor ahead of raw token count; index owner; explain falls back to canonical-or-honest-miss instead of token-soup top-1 | the 7 vertical probes flip; named-project explain routing (blend/freighter) correct |
+| F5 | Research corpus holes + hygiene: /docs/learn,/tokens,/validators absent; CAPs absent; author-pagination dupes; broken sdf-blog titles; undated docs win news queries | extend dev-docs ingest allowlist; ingest stellar-protocol /core (CAPs — feeds the /api/protocol build); exclude author/pagination URLs; title-extraction fix; date-aware demotion for news-intent | section-coverage list checked in; CAP queries answerable; news cell probes flip |
+| F6 | Partners quality bar hides 19/45 (ALL wallets+protocols) via tagline=null; total=0 reads "none exist" | tagline backfill (19 rows, from each partner's own site) + `meta.counts.filteredOut` honesty field | wallet/protocol partner probes return rows; filteredOut serialized |
+| F7 | Cross-lane signposting absent (8/12 wrong-lane probes) | replicate builders' empty-state advisory + add per-lane "wrong-lane hints" to meta notes (cheap: the in-lane precedents already exist) | wrong-lane probes return a pointer |
+| F8 | Superlatives mislead ("biggest dex" = literal keywords) | honesty note in meta when superlative tokens detected + (later) the tvl/usage data axis | superlative probes carry the disclaimer |
+
+Order: F1+F2+F3 first (same code area, biggest breadth), then F4, F6 (data-only, fast), F5, F7, F8. Every fix wave checks off its findings in the JSON by re-running the probe URLs.
+
+## Part 2 — the engines (hold the line)
+
+- **Engine A — generated recall matrix**: derive the eval from the data itself — every record's structured fields imply the queries that must retrieve it (types, coverage, seps, networks, symbols, usernames). The audit's 19 probe generators are the templates; Engine A mechanizes them into a weekly scored run (recall@K per category bucket, trended). Each Part-1 fix graduates its audit probes into the matrix as permanent regression guards.
+- **Engine B — class-projection sweeps** (report-only, scheduled): prose⇄structure divergence diff, field-population census (now with baselines: descriptions 59 null, builders location 23%, partner taglines 19 null), staleness/liveness exposure, identity/dupes (slug-normalization class: name vs name+suffix), contract shape coverage (live ⊆ spec on all ~10 shapes).
+- **Engine C — the weekly loop** (self-improvement engine #2): run A+B, diff week-over-week, file the worst buckets as tracker issues with reproducible probes; fixes target roots, the next run measures the delta.
+
+## Part 3 — data-truth waves (human-verified, engines can't do these alone)
+
+1. **Liveness wave** (the audit's biggest data number: ~28% of sampled Live rows have dead/parked/squatted sites → est. 150–250 records): link-checker consecutiveFailures + redirect signals generate the candidate list → owner review → status corrections via curated lists (never bulk heuristics — class 18). The squatted-domain sub-class (kunst21) gets link-checker's hijack lane priority.
+2. **Null-description backfill**: 59 records (28/32 Assets — unblocks the entire currency lane after F1 makes fields matchable).
+3. **Dupe collapse**: slug-normalization pairs (detect-duplicate-projects.ts exists — run it, canonicalSlug lineage, merge conflicting scfAwarded truth).
+4. **Category verification waves** (bridge-matrix method, primary sources): wallets → oracles → DEXs → infra, each producing an exact-sync curated matrix.
+
+## Sequencing + measures
+
+| Phase | Work | Measure |
 |---|---|---|
-| Golden eval (34 questions) | hand-picked retrieval cases w/ answer+forbidden regexes | hand-written — coverage grows one incident at a time |
-| Daily self-audit Guard | known-item recall (2 items), bridge networks, changelog-npm claims, freshness | point probes, not surface sweeps |
-| Answer keys (depth labels, recall) | ground-truth discipline for scoring changes | scoped to code-depth + a few recall items |
-| Dual-identity sweep (report-only) | multi-product detection for ramps | one capability, one surface |
-| api-drift / contract gate | live ⊆ spec on 2 row shapes | 2 of ~10 shapes |
-| Lessons class table (22 classes) | the taxonomy + per-class guards | guards check the archetype, not all siblings |
+| 1 | F1–F3 (search core) + F6 (partner taglines) | audit probe flip-rate on those roots; recall@10 per type ≥90% |
+| 2 | F4 (repos relevance) + F5 (corpus holes) + Engine A v1 | 7 vertical probes green; section coverage complete; first weekly matrix baseline |
+| 3 | Engine B+C live; F7/F8 | first engine-filed issues; wrong-lane hints served |
+| 4 (rolling) | Part-3 waves | Live-rows-with-dead-sites → <5%; null descriptions → 0; dupes → 0 |
 
-## The three engines
-
-### Engine A — the generated recall matrix (coverage at data scale)
-
-**Derive the eval from the data itself.** Every record with structured truth implies the natural queries that MUST retrieve it — no hand-writing, no adversarial judging (class 16 discipline: the answer key comes from our own curated fields):
-
-- `coverage.countries=[Mexico]` + `types=[Anchor]` → "mexico on-ramp", "MXN off-ramp" must retrieve Etherfuse
-- `supportedNetworks=[solana]` + `types=[Bridge]` → "solana bridge", "move usdc from solana to stellar" must retrieve it
-- `types=[Oracle]` + status Live → "price oracle on stellar" must include it in top-K
-- partner `rampTypes=[on-ramp]` + `country` → the partners `q` lane, same template
-- repo `codeVerified.symbols` contains `escrow` → "escrow implementation" must retrieve it (repos lane)
-
-Build: `scripts/eval/generated-recall.ts` — walks the directory + partners + repos, instantiates query templates per (type × structured-field) combination, runs them against the live API, and scores **recall@K per category bucket**. Hundreds→thousands of query-record pairs, weekly scheduled + on-demand. Report ranks the worst buckets (e.g. "Oracle × chain queries: 40% recall") — those become the fix wave. Etherfuse, Rozo/Solana, and the corridor gaps would ALL have been caught by this engine before any human noticed.
-
-Guardrails: recall-only (a record failing its own implied queries is unambiguous); tolerance thresholds per bucket so it doesn't demand top-1 for crowded categories; failures file as a REPORT first (precision over recall — some structured data will itself be wrong, and the report catches that too).
-
-### Engine B — class-projection sweeps (the lessons table as a machine)
-
-Each class family gets a sweep that enumerates all instances across all surfaces, scheduled, report-only:
-
-1. **Prose⇄structure divergence** (classes 1/2/6): for every record, extract candidate facts from its own prose (chain names, country names, SEP numbers, fee mentions, product nouns) and diff against the structured fields. Prose says "across Africa" but `coverage`/`regions` empty → row in the report. This generalizes the "chains named in description ⊆ supportedNetworks" guard to every field pair. (The Etherfuse notes boxy has belong here — paste them into this section's spec.)
-2. **Field-population census** (class 2): % populated per structured field per category, trended weekly. A category where `supportedNetworks` is 20% populated is a standing omission=negation hazard.
-3. **Staleness exposure** (classes 8/19): for a sampled query set, the freshness distribution of top-K per lane; flags lanes where >N% of served results are >18mo old with fresher on-topic content below the fold.
-4. **Multi-product/identity** (classes 14/21): the dual-identity sweep generalized beyond ramps to all capability pairs + the slug-join domain cross-check.
-5. **Contract shape coverage** (class 11): field-coverage-all-endpoints — live ⊆ spec on all ~10 row shapes (already in ideas; it's this engine's row).
-
-### Engine C — the weekly loop (Experiments Lab, engine #2 of the self-improvement system)
-
-The piece that makes it self-sustaining instead of another one-off: a weekly scheduled run that executes Engines A+B, diffs against last week, and **files the top-N worst buckets as tracker issues with reproducible probes** (same format as the sls verification issues). Fixes then target the CLASS bucket (like the corridor matrix did), the next run measures the delta, and the issue closes on green. Humans stay in the loop for every data mutation (report → review → curate); the machine does the finding and the measuring.
-
-## Deep-audit waves (the human-verified backbone)
-
-Generated evals find *retrieval* failures; they can't verify the data is TRUE. For that, the bridge-matrix method — parallel agents verifying every record in a category against primary sources, output = a curated exact-sync matrix with evidence quotes — applied category by category:
-
-- ✅ bridges (2026-07-09: chains + launch status, 10 records)
-- ✅ anchors/ramps (2026-07-06/08: stellar.toml + anchors.stellar.org parity + corridors)
-- next, in order of query traffic: **wallets** (networks, custody model, live status), **oracles** (feeds, networks, live), **DEXs/AMMs** (live status, networks), infrastructure/RPC, audit firms (already partner-verified)
-
-One category wave ≈ one session of agent verification + one curated matrix PR + Action apply. Every wave also seeds Engine A with denser truth to generate from — the engines compound.
-
-## Sequencing
-
-| Phase | Deliverable | Measure |
-|---|---|---|
-| 1 (now) | Engine A v1: generated recall matrix over projects+partners, report-only, manual dispatch | first full-surface recall baseline per category |
-| 2 | Engine B sweeps 1+2 (prose⇄structure diff, field census) + field-coverage-all-endpoints | divergence report; % population trended |
-| 3 | Engine C: weekly schedule + auto-filed issues w/ probes; golden eval absorbs generated cases that prove stable | incidents found by engine vs by humans (target: engine-first) |
-| 4 (rolling) | category deep-audit waves (wallets → oracles → DEXs → infra) | verified-matrix coverage % of directory |
-
-## Success criteria
-
-- Recall@K per category bucket ≥ threshold, trended weekly — regressions caught by the engine, not by demos
-- Every new lessons class gets a projection sweep within a week of filing (loop step 4 is mechanized, not aspirational)
-- The next Etherfuse-shaped miss is found by Engine A before anyone asks Raven the question
+**North-star measure:** the audit re-run (same 19 cells, fresh sampling) — target ok-rate from today's **59% → ≥85%** after Phases 1–2, and every future incident answerable with "which root/engine missed it, and why."
