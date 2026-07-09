@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.7",
+		type: "changed",
+		summary:
+			"searchRepos ranking: Stellar evidence now ranks ABOVE raw keyword score (3-tier: code-verified/SDF/canonical > stellar-mentioned incl. README > no evidence) — org-swept other-chain repos no longer beat code-verified Stellar repos on niche verticals. Repo owner is now searchable (q=allbridge reaches allbridge-io/*). explainRepo gains an honesty guard: an unmapped question whose best search hit shares no query token returns the no-route response with nearest candidates as alternateRepos, instead of confidently explaining a lexical-noise repo.",
+		detail:
+			"Ranking-order change only — response shapes unchanged; no operation description text changed. Values re-rank immediately; 3 unit tests pin the policy.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.6",
 		type: "added",
 		summary:

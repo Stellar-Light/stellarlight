@@ -732,6 +732,11 @@ export async function searchRepos(
 			// Snake/camel split so \b matching works on symbol names (regex \b
 			// treats _ as a word char — "escrow" never hits "release_escrow" raw).
 			const syms = symbolsHaystack(r.codeSymbols);
+			// F4 (audit root #4): owner is searchable — q=allbridge must reach
+			// allbridge-io/* even when the repo name doesn't repeat the org.
+			// Same stopword-filtered tokens as everything else, so generic words
+			// can't pollute via owner.
+			const ownerHay = wordy(r.fullName.split("/")[0]);
 			let score = 0;
 			let matched = 0;
 			if (tokens.length) {
@@ -744,7 +749,7 @@ export async function searchRepos(
 					// repo IMPLEMENTS the concept than a description mention — but a
 					// name/topic hit stays highest (it's the repo's own claimed identity).
 					else if (hit(syms)) best = 4;
-					else if (hit(desc)) best = 3;
+					else if (hit(desc) || hit(ownerHay)) best = 3;
 					else if (hit(readme)) best = 1;
 					if (best > 0) {
 						score += best;
@@ -756,15 +761,40 @@ export async function searchRepos(
 				score = 1;
 			}
 			const owner = r.fullName.split("/")[0].toLowerCase();
-			// mention check uses the FULL name (incl. owner) so a stellar/soroban
-			// org still counts, even though owner is excluded from relevance above.
-			const hay = `${wordy(r.fullName)} ${tops} ${desc}`;
+			// mention check spans name/topics/desc AND readme (F4: a repo whose
+			// only Stellar evidence is its README is still Stellar-evidenced).
+			const hay = `${wordy(r.fullName)} ${tops} ${desc} ${readme}`;
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
 			const crank = canonRank.get(r.fullName.toLowerCase()) ?? 9999;
 			const frank = flagRank.get(r.fullName.toLowerCase()) ?? 9999;
-			return { r, topics, score, matched, sdf, alive, mention, crank, frank };
+			// F4 (audit root #4): STELLARNESS ranks above raw keyword score.
+			// 2 = proven (code-scanned with stellarProof, SDF org, or curated
+			//     canonical/flagship), 1 = evidenced (stellar/soroban appears in
+			//     its own name/topics/desc/readme), 0 = no Stellar evidence at
+			//     all (org-swept other-chain repos). The audit showed tier-0
+			//     repos beating code-verified Stellar repos on 7 verticals
+			//     purely on name-token hits — for a Stellar data layer a tier-0
+			//     repo is never the right answer over a tier-1/2 one.
+			const stellarness =
+				codeVerifiedOf(r) !== null || sdf === 1 || crank < 9999 || frank < 9999
+					? 2
+					: mention === 1
+						? 1
+						: 0;
+			return {
+				r,
+				topics,
+				score,
+				matched,
+				sdf,
+				alive,
+				mention,
+				stellarness,
+				crank,
+				frank,
+			};
 		});
 		// Keep canonical + curated-flagship repos even when they didn't keyword-match.
 		let filtered = tokens.length
@@ -782,6 +812,9 @@ export async function searchRepos(
 			(a, b) =>
 				a.crank - b.crank ||
 				a.frank - b.frank ||
+				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
+				// relevance still dominates within a tier.
+				b.stellarness - a.stellarness ||
 				b.score - a.score ||
 				b.sdf - a.sdf ||
 				b.alive - a.alive ||

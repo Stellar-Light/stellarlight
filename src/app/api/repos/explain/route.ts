@@ -18,7 +18,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { askDeepWiki } from "@/lib/deepwiki";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { canonicalFor, searchRepos } from "@/lib/repo-search";
+import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
 	// Route to the authoritative repo: curated canonical map first (concept →
 	// SDF repo), then the graded index as a fallback for non-canonical topics.
 	let routedVia: "explicit" | "canonical" | "search" = "explicit";
+	let nearMisses: string[] = [];
 	const canon = canonicalFor(q);
 	if (!repo) {
 		if (canon.length) {
@@ -52,7 +53,19 @@ export async function GET(req: NextRequest) {
 		} else {
 			const payload = await getPayloadSafe();
 			const { repos } = await searchRepos(payload, q, { limit: 1 });
-			if (repos[0]) {
+			// F4 honesty guard (audit: token-soup fallback): adopting the search
+			// top-1 is only justified when it shares a real query token in its
+			// own identity (name/topics/description). Otherwise an unmapped NL
+			// question got a lexical-noise winner — say so instead of confidently
+			// explaining the wrong repo.
+			const qTokens = contentTokens(q);
+			const identityHit = (rr: (typeof repos)[number]) => {
+				const hay =
+					`${rr.fullName} ${(rr.topics ?? []).join(" ")} ${rr.description ?? ""}`.toLowerCase();
+				return qTokens.some((t) => hay.includes(t));
+			};
+			nearMisses = repos.slice(0, 3).map((rr) => rr.fullName);
+			if (repos[0] && (qTokens.length === 0 || identityHit(repos[0]))) {
 				repo = repos[0].fullName;
 				routedVia = "search";
 			}
@@ -80,7 +93,9 @@ export async function GET(req: NextRequest) {
 			repo: null,
 			routedVia: null,
 			repoMeta: null,
-			alternateRepos: [],
+			// Near-miss candidates from search — surfaced so an agent can pick
+			// one and pin ?repo= instead of dead-ending (F4 honesty guard).
+			alternateRepos: nearMisses,
 			answer: null,
 			answered: false,
 			sources: {
