@@ -1,5 +1,7 @@
 # 2026-07-08 ship-day adversarial review — confirmed findings
 
+**Progress:** batch 1 (#387): findings 1/24/3+18+19/16 FIXED. #386: verify-claims revival + spec nesting. #388: finding 20 (CI tests) FIXED. Corridor fix live-verified (32→20 rows, Etherfuse retained; residual rows = finding 27's coverage-conflation, a DATA fix). Next queue: 27 (coverage data — incorporation≠corridor), 25/26 (curation overwrite semantics), 8/9/11/12 (link-checker hardening), 2 (symbol query normalization), 21 (self-audit retries/dedupe), remaining mediums/lows.
+
 39-agent review (6 dimensions → per-finding adversarial refute) over the 31 PRs merged 2026-07-08. 29 confirmed / 4 dismissed. Fix batch 1 (urgent prod-behavior) shipped same night; the rest is the working queue — strike through as fixed.
 
 ## [HIGH] src/app/api/projects/search/route.ts (search-correctness)
