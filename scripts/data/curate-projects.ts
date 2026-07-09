@@ -18,6 +18,11 @@ import configPromise from "../../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 
 const DESCRIPTION_FIXES: Record<string, string> = {
+	// boxy 2026-07-09: CCTP entry read like a bridge product; it's the RAIL.
+	// An agent answering "how do I bridge USDC to Stellar" should name CCTP
+	// as the mechanism and a bridge built on it as the actionable route.
+	"circle-cctp-cross-chain-transfer-protocol":
+		"Circle's Cross-Chain Transfer Protocol (CCTP), live on Stellar since May 2026. Moves native USDC between Stellar and 23+ chains (Ethereum, Solana, Base, Arbitrum, Optimism) via a 1:1 burn-and-mint model rather than wrapped or locked assets, settling in seconds. CCTP is bridging INFRASTRUCTURE, not a user-facing bridge: there is no Circle-hosted bridge app — builders integrate it (and pass execution metadata via Hooks), and end-users move USDC through bridges built on it, e.g. Rozo's Intent Bridge on Stellar.",
 	// sls-017: lobstr.co self-describes as a "Stellar & XRPL Wallet" (by Ultra
 	// Stellar); the record previously said "Stellar wallet" only.
 	lobstr:
@@ -43,6 +48,10 @@ const TYPES_ADD: Record<string, string[]> = {
 	// Typed Payments-only, so every bridge/EVM query missed it — the same
 	// multi-product secondary-capability class as etherfuse (sls-018).
 	rozo: ["Bridge"],
+	// boxy 2026-07-09: CCTP is bridging INFRA (burn-and-mint rail bridge
+	// builders integrate), not a user-facing bridge app. Keep Bridge so
+	// corridor queries still learn it exists; add the taxonomy truth.
+	"circle-cctp-cross-chain-transfer-protocol": ["Infrastructure"],
 };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
