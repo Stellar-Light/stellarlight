@@ -50,3 +50,5 @@ SCOUT_BASE=https://stellarlight.xyz pnpm exec tsx scripts/experiment-eval.ts  # 
 ## Lessons — the mistake corpus
 
 Every real defect we've shipped, filed by class with the guard that now catches it: [lessons/](./lessons/README.md). Walk the class table before shipping anything new.
+
+- **[Full-surface coverage plan](./full-surface-coverage-plan.md)** — from incident-driven fixes to sweeping engines: generated recall matrix (Engine A), class-projection sweeps (Engine B), weekly lab loop (Engine C), category deep-audit waves. The umbrella for the Etherfuse/bridging/staleness class of work.
