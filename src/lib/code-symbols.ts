@@ -60,9 +60,13 @@ const NOISE = new Set([
 const MAX_SYMBOLS = 60;
 
 // pub fn / pub(crate) fn / pub async fn NAME(  — and pub struct/enum/trait NAME
-const FN_RE = /\bpub(?:\s*\([^)]*\))?\s+(?:async\s+)?fn\s+([a-z_][a-z0-9_]*)/g;
+// finding 7: the visibility group is bounded + newline-free — the unbounded
+// [^)]* backtracked quadratically on adversarial 'pub (' floods (12.5s per
+// regex on a 400KB blob). pub(crate)/pub(super)/pub(in path) all fit in 64.
+const FN_RE =
+	/\bpub(?:\s*\([^)\n]{0,64}\))?\s+(?:async\s+)?fn\s+([a-z_][a-z0-9_]*)/g;
 const TYPE_RE =
-	/\bpub(?:\s*\([^)]*\))?\s+(?:struct|enum|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
+	/\bpub(?:\s*\([^)\n]{0,64}\))?\s+(?:struct|enum|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
 
 const isTestPath = (p: string) =>
 	/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(

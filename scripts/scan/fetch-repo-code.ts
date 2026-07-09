@@ -209,9 +209,11 @@ export async function verifyMainnetContract(
 					signal: ctrl.signal,
 				},
 			);
-			clearTimeout(t);
 			if (!res.ok) continue;
+			// finding 6: clearing on header-arrival left the BODY read unbounded
+			// (undici default 300s) — a stalling stellar.expert could hang a wave.
 			const j = (await res.json()) as { contract?: string };
+			clearTimeout(t);
 			if (j?.contract === id) return id;
 		} catch {
 			// fail-open: unverifiable is not unverified-negative
@@ -331,7 +333,11 @@ export async function fetchRepoCode(
 			tagCount,
 			nameLooksTemplate: TEMPLATE_NAME.test(name),
 		},
-		pathsFetched: sel.cargos.length + sel.sources.length + sel.tests.length,
+		// finding 4: the cargo-relevance scan fetches up to 40 manifest blobs
+		// BEFORE selection — count what was actually fetched, or the call-budget
+		// guard under-counts and a wave can blow the token allowance.
+		pathsFetched:
+			Math.min(cargos.length, 40) + sel.sources.length + sel.tests.length,
 		contractCrates: contractCrateDirs.length,
 	};
 }
