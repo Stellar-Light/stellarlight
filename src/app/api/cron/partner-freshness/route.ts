@@ -82,6 +82,18 @@ export async function GET(request: Request) {
 			const current: Freshness = doc.freshnessStatus ?? "fresh";
 			const target = statusForAge(ageMs);
 
+			// ARCHIVED IS TERMINAL for this cron. "archived" is set two ways: by age
+			// (which this cron may lawfully reverse when a partner updates) — and by
+			// the OWNER confirming a partner is dead (curate-partners.ts). The cron
+			// can't tell them apart, and un-archiving an owner-confirmed-dead
+			// partner resurrects it in the directory + AI matching daily (found by
+			// the 2026-07-08 review: elroy/wallet-guru resurrection loop). Only a
+			// PARTNER-driven update (their save re-stamps lastPartnerUpdateAt via
+			// the collection hook, making age small) should revive — and that same
+			// small age makes target "fresh" AFTER an admin manually un-archives.
+			// So: never auto-transition OUT of archived here.
+			if (current === "archived") continue;
+
 			if (target === current) continue;
 			transitions[target]++;
 

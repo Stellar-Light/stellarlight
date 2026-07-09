@@ -140,3 +140,42 @@ describe("Beacon Q3 class — chain vocabulary + filler tokens", () => {
 		expect(scoreTokens(hay, ["cctp", "usdc"])).toBe(2);
 	});
 });
+
+describe("review finding 1 — corridor-discriminating admission", () => {
+	const mexTokens = tokenize("mexico on-ramp");
+	const intent = intentTypesFor(mexTokens);
+
+	it("wrong-country anchor is NOT structurally admitted for 'mexico on-ramp'", () => {
+		const coinsPh = {
+			name: "Coins PH",
+			shortDescription: "Philippines crypto wallet and fiat ramp.",
+			category: "Anchor",
+			types: ["Anchor"],
+			coverage: { countries: ["Philippines"], currencies: ["PHP"], seps: ["sep-24"] },
+		};
+		expect(structuredHit(coinsPh, intent, mexTokens, true)).toBe(false);
+	});
+
+	it("right-corridor anchor IS admitted (Etherfuse recall preserved)", () => {
+		const etherfuse = {
+			name: "Etherfuse",
+			shortDescription: "Stablebonds — tokenized government bonds.",
+			category: "Protocol/Contract",
+			types: ["RWA", "Anchor"],
+			coverage: { countries: ["Mexico"], currencies: ["USD", "MXN"], seps: [] },
+		};
+		expect(structuredHit(etherfuse, intent, mexTokens, true)).toBe(true);
+	});
+
+	it("pure ramp query (no discriminator) still admits by Anchor type", () => {
+		const t = tokenize("on-ramp anchors");
+		const anyAnchor = { name: "X", shortDescription: "", category: "Anchor", types: ["Anchor"] };
+		expect(structuredHit(anyAnchor, intentTypesFor(t), t, true)).toBe(true);
+	});
+
+	it("non-ramp category query keeps type admission (Sushi class)", () => {
+		const t = tokenize("DEX AMM swap liquidity pool");
+		const sushi = { name: "Sushi", shortDescription: "AMM swaps and liquidity provision.", category: "Protocol/Contract", types: ["DEX"] };
+		expect(structuredHit(sushi, intentTypesFor(t), t, false)).toBe(true);
+	});
+});

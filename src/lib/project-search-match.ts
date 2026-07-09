@@ -387,7 +387,21 @@ export function structuredHit(
 	tokens: string[],
 	rampIntent: boolean,
 ): boolean {
-	if (typeMatch(p, intentTypes)) return true;
-	if (rampIntent && corridorMatch(p, tokens)) return true;
-	return false;
+	if (rampIntent) {
+		// Corridor-DISCRIMINATING query (carries a non-ramp token — a country/
+		// currency/etc.): bare Anchor-type is NOT enough for looser-tier
+		// admission. Every covered anchor scores on the ramp token (its haystack
+		// carries the implied ramp vocabulary), so type-only admission made the
+		// discriminator optional — "mexico on-ramp" admitted 28 wrong-country
+		// anchors at matchMode "strict" (2026-07-08 review, finding 1). The
+		// looser tier must prove the CORRIDOR, not the category.
+		const hasNonRampToken = tokens.some(
+			(t) =>
+				!RAMP_VOCAB.has(t) && !termsForToken(t).some((v) => RAMP_VOCAB.has(v)),
+		);
+		if (hasNonRampToken) return corridorMatch(p, tokens);
+		// Pure ramp query ("on-ramp anchors") — listing the category IS the intent.
+		return typeMatch(p, intentTypes) || corridorMatch(p, tokens);
+	}
+	return typeMatch(p, intentTypes);
 }
