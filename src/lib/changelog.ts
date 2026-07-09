@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.3",
+		type: "fixed",
+		summary:
+			"Search lexical core (F2, audit root #2): iterative stemming (donations/donate, savings/save, charities/charity now co-retrieve), currency NAMES map to stored codes ('kenyan shilling' → KES rows), relaxed match tiers must keep the intent-bearing rare token (generic verbs like buy/get/send can no longer be the only match — 'peruvian sol' no longer floods on 'sol'), repo symbol search handles digit-boundary identifiers (groth16, secp256r1, ed25519, ScVal). Builders: 'south america'/'central america' location umbrellas.",
+		detail:
+			"Values/recall only, no shape changes. matchMode semantics unchanged except loose-1/majority additionally require an anchor-token hit; all-generic queries behave as before.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.2",
 		type: "fixed",
 		summary:

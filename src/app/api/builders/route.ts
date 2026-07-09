@@ -195,6 +195,8 @@ export async function GET(req: NextRequest) {
 				// F1: common non-English country spellings normalize before matching
 				// (free-text profile locations store the English form).
 				const LOCATION_ALIASES: Record<string, string> = {
+					"south america": "latam", // F2: umbrella alias (audit: honest-0 miss)
+					"central america": "latam",
 					brasil: "brazil",
 					méxico: "mexico",
 					españa: "spain",

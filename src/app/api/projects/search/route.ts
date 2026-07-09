@@ -19,8 +19,10 @@ import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
+	anchorTokens,
 	buildHaystack,
 	corridorMatch,
+	hitsAnyToken,
 	intentTypesFor,
 	isRampIntent,
 	scoreTokens,
@@ -159,6 +161,8 @@ function scfAmountStatus(
 }
 
 interface ProjectRow {
+	/** Searchable haystack (F2: relaxed-tier anchor guard re-tests it). Semantic rows may omit it. */
+	hay?: string;
 	id: string;
 	name: string;
 	slug: string;
@@ -561,6 +565,8 @@ export async function GET(req: NextRequest) {
 						logoUrl = `/api/media/file/${p.logo.filename}`;
 				}
 				return {
+					hay, // F2: relaxed-tier anchor guard re-tests tokens on the row
+
 					id: String(p.id),
 					name: p.name,
 					slug: p.slug,
@@ -619,13 +625,26 @@ export async function GET(req: NextRequest) {
 						structuredHit(p, intentTypes, tokens, rampIntent));
 				matchMode = "strict";
 				let filtered = projects.filter(admit(tokens.length));
+				// F2 (audit root #2): relaxed tiers must keep the intent-bearing
+				// rare token. Without this, dropping a token drops the NOUN and
+				// keeps the verb — "buy gold" matched everything containing
+				// "buy". A record admitted at loose-1/majority must hit at least
+				// one anchor (non-generic) token; queries that are ALL generic
+				// keep today's behavior.
+				const anchors = anchorTokens(tokens);
+				const keepsAnchor = (p: ProjectRow) =>
+					anchors.length === 0 || !p.hay || hitsAnyToken(p.hay, anchors);
 				if (filtered.length === 0 && tokens.length >= 3) {
 					matchMode = "loose-1";
-					filtered = projects.filter(admit(tokens.length - 1));
+					filtered = projects
+						.filter(admit(tokens.length - 1))
+						.filter(keepsAnchor);
 				}
 				if (filtered.length === 0 && tokens.length >= 2) {
 					matchMode = "majority";
-					filtered = projects.filter(admit(Math.ceil(tokens.length / 2)));
+					filtered = projects
+						.filter(admit(Math.ceil(tokens.length / 2)))
+						.filter(keepsAnchor);
 				}
 				// Corridor bypass: a curated coverage match on a queried country/
 				// currency/SEP is unambiguous intent satisfaction — admit it at ANY
@@ -811,7 +830,12 @@ export async function GET(req: NextRequest) {
 	// (top-scored), so a consumer can go project → its code directly — not just
 	// the query-scoped codeReferences above. Batched (one query over all returned
 	// slugs) + bounded, best-effort.
-	const baseProjects = [...scored, ...semanticAdds];
+	// F2: `hay` is internal scoring state — strip it here so it can never
+	// serialize into the API response (rows past this point feed projectsOut).
+	const baseProjects = [...scored, ...semanticAdds].map((p) => {
+		const { hay: _hay, ...rest } = p as typeof p & { hay?: string };
+		return rest;
+	});
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
 	// not sit above the live semantic neighbours appended after it — e.g.
