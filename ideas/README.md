@@ -9,13 +9,15 @@ Two provenance streams feed this folder:
 ## Open ideas
 
 ### Code-truth / repo indexing
-- **[JS/TS symbol extraction + dapp depth](./js-symbol-extraction.md)** — the non-Rust half of code truth (~1,900 repos). *(Rust symbol extraction shipped 2026-07-08.)*
-- **[Re-scan on push](./rescan-on-push.md)** — stale `versionStatus` until the next wave is self-inflicted stale advice.
+- ~~JS/TS symbol extraction + dapp depth~~ — **shipped 2026-07-09** (#397–#402: sdkCapabilities + calibrated jsDepth + 29-label answer key + gate; 3 JS frontier blind spots remain).
+- ~~Re-scan on push~~ — **shipped 2026-07-09**: weekly stale-first re-scan (real this time, #387) + daily backlog wave (#401) + PR sample gate + post-merge full gate.
 - ~~Bigger code-truth label set~~ — **in flight 2026-07-08**: label-mining workflow over audit corpus + SCF-delivered + template evidence, adversarially verified.
 - ~~Semantic / code-content indexing~~ — **shipped 2026-07-08** as `codeVerified.symbols` (search matches pub fn/type names).
 
 ### Retrieval quality
 - **[Shared synonym registry](./shared-synonym-registry.md)** — one vocabulary module across all four search surfaces (class 5).
+- **Hybrid lexical+vector research retrieval** — "fastest cheapest way to move assets from Ethereum to Stellar" retrieves payments dev-docs, not bridge routes: the answer exists but embeddings never fetch it (class 19 residual). Union lexical matches into the vector pool before ranking. Aligns with raven#12's atlas+lexical+semantic direction — coordinate, don't pre-build. *(Projects from: class 19)*
+- **Research ingest title/dedupe hygiene** — meeting-notes chunks surface under nav/date titles ("11 posts tagged with …", "2024-08-23") and the same content appears under multiple URLs (tag page + canonical page), which per-URL dedupe can't collapse. Fix at ingest: title from page h1, skip tag-aggregation URLs, content-hash dedupe. Golden eval counts BAD-TITLE 11 today. *(Projects from: classes 10/19)*
 - **[Capability-mismatch sweep](./capability-mismatch-sweep.md)** — generalize the dual-identity sweep beyond ramps (class 14; `audd` is the open candidate).
 - **Fee-transparency axis** — structured `feeBps` + `asOf` on ramp corridors so "ranked by fee" is answerable (raven#8 / Raph; class 1). Needs grounded doc-crawling per provider.
 
@@ -24,6 +26,7 @@ Two provenance streams feed this folder:
 - **[Research-doc freshness + SDK-version tagging](./research-doc-freshness.md)** — per-doc `lastVerifiedAt` + version-status on tutorials/setup guides (classes 8/18, Beacon Q2).
 - **[Field coverage on every endpoint](./field-coverage-all-endpoints.md)** — extend the live-⊆-spec check from 2 row shapes to all ~10 (class 11).
 - **[Skill-mirror freshness guard](./skill-mirror-freshness-guard.md)** — advertised skill ⊆ reality (class 12).
+- **Slug-join identity cross-check** — partner→project joins match by slug with no entity verification (review 2026-07-08 #21); the Spectra near-miss proved the class live (class 21). Add a domain/website cross-check to the join before the next curation wave adds partners.
 
 ### Agent contract
 - **Field selection** (`?fields=`) and **webhooks** (`POST /api/subscribe`) — let agents ask for only what they need / get pushed changes instead of polling.
