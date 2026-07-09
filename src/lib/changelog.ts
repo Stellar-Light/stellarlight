@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
+		surfaces: ["api", "api-client"],
+		type: "fixed",
+		summary:
+			"getPartners gains a real `ramps` filter (`on-ramp` / `off-ramp`, comma-separated to require both; unknown values 400 with `validRamps`). CORRECTION: a fix-verification note on the public tracker cited `?ramps=on-ramp` as a probe before this param existed — the endpoint silently ignored it and returned the unfiltered set. The advertised contract is now the implemented contract.",
+		detail:
+			"Filters on the structured Partners.rampTypes capability field (the same data the `q` relevance scorer already weighted). meta.filters echoes `ramps`; meta.validRamps lists accepted values. Corridor lookups compose: ramps=on-ramp&q=mexico.",
+	},
+	{
+		date: "2026-07-09",
 		surfaces: ["api-client"],
 		version: "@stellar-light/api-client@1.5.0",
 		type: "added",

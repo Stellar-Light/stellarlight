@@ -612,6 +612,15 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
+						// Param-level doc ONLY — op description deliberately untouched
+						// (downstream routing catalogs diff op descriptions).
+						name: "ramps",
+						in: "query",
+						description:
+							"Filter by fiat-ramp capability: `on-ramp` (fiat → Stellar), `off-ramp` (Stellar → fiat), or `on-ramp,off-ramp` to require both. Unknown values return 400 with `validRamps`. Combine with `region`/`q` for corridor lookups (e.g. ramps=on-ramp&q=mexico).",
+						schema: { type: "string", example: "on-ramp" },
+					},
+					{
 						name: "accepting",
 						in: "query",
 						description:
