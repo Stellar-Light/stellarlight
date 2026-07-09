@@ -19,13 +19,13 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { researchConfidence, SCORE_MODEL_VERSION } from "@/lib/confidence";
+import { SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { isLowValueChunk } from "@/lib/research-ingest";
+import { rankResearchChunks } from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -346,32 +346,12 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
-	// Drop low-value chunks (Docusaurus nav cards, breadcrumb/date stubs) that
-	// either path may surface on a stray token match — the SAME rule the
-	// ingester uses. Applied at read time so chunks embedded before the filter
-	// existed never reach a caller, WITHOUT a destructive corpus delete: the
-	// rows stay in Atlas, fully reversible. Both paths over-fetch above, so we
-	// still return up to `limitParam` real results after trimming.
-	chunks = chunks
-		.filter((c) => !isLowValueChunk(c.content))
-		.slice(0, limitParam);
-
-	// Attach a confidence signal to every result so a consuming agent can tell
-	// a strong, fresh, authoritative hit from a weak/stale one — not just read
-	// the raw cosine. Keyword mode needs the set max to normalize relevance.
-	const now = Date.now();
-	const maxScore = chunks.reduce((m, c) => Math.max(m, c.score ?? 0), 0);
-	const results = chunks.map((c) => ({
-		...c,
-		confidence: researchConfidence({
-			score: c.score,
-			source: c.source,
-			mode,
-			maxScore,
-			publishedAt: c.publishedAt,
-			now,
-		}),
-	}));
+	// Shared ranking stage (src/lib/research-rank.ts): drop low-value chunks,
+	// collapse to the best chunk per document, and order by the attached
+	// confidence signal (relevance + freshness + authority) with raw-score
+	// tie-breaks — so a current doc outranks a semantically-close but stale
+	// one, and duplicate chunks of one post can't crowd the top-K.
+	const results = rankResearchChunks(chunks, { limit: limitParam, mode });
 
 	logApiHit({
 		req,
@@ -396,7 +376,7 @@ export async function GET(req: NextRequest) {
 				scoreModel: {
 					version: SCORE_MODEL_VERSION,
 					fields: ["relevance", "freshness", "authority"],
-					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Sort by it for trust-ranked results.",
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document.",
 				},
 			},
 			results,

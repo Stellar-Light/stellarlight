@@ -41,7 +41,10 @@
 			"category": "soroban-build",
 			"mode": "research",
 			"question": "Write a minimal Soroban contract that stores a counter and increments it.",
-			"expect": { "liveSource": false, "answerRegex": ["soroban", "contract"] }
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroban", "contract"]
+			}
 		},
 		{
 			"id": "dapp-freighter",
@@ -337,6 +340,17 @@
 				"liveSource": false,
 				"answerRegex": ["soroswap/"],
 				"minTopScore": 45
+			}
+		},
+		{
+			"id": "bridge-evm-to-stellar",
+			"category": "consumer-onboarding",
+			"mode": "research",
+			"question": "bridge assets from EVM to Stellar",
+			"expect": {
+				"answerRegex": ["allbridge", "cctp|circle"],
+				"forbiddenRegex": ["starbridge"],
+				"note": "The 2026-07-09 demo miss: Starbridge (2022 research protocol, never productionized) chunks filled the top-K twice over while current routes (CCTP/USDC, Allbridge) sat at ranks 11-20. Guards the research-rank stage: per-doc dedupe + confidence (freshness/authority) ordering. Starbridge surfacing for consumer bridge intent = stale-advice failure, same class as recommending wasm32-unknown-unknown."
 			}
 		}
 	]
