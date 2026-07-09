@@ -1,0 +1,26 @@
+# Engine B — data-consistency sweeps (weekly, report-only). Prose⇄structure
+# divergence, field-population census, dupe detection, staleness exposure.
+# The report feeds the Part-3 human-verified waves; Engine C files issues.
+name: engine-b-sweeps
+on:
+  schedule:
+    - cron: "0 8 * * 0"
+  workflow_dispatch: {}
+concurrency:
+  group: engine-b-sweeps
+  cancel-in-progress: false
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run Engine B
+        run: pnpm exec tsx scripts/eval/engine-b-sweeps.ts | tee $GITHUB_STEP_SUMMARY
