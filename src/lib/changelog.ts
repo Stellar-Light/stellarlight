@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
+		surfaces: ["api"],
+		version: "openapi@1.7.0",
+		type: "changed",
+		summary:
+			"Spec info.version bumped 1.6.1 → 1.7.0, covering the 2026-07-08/09 contract additions that shipped under an unchanged version: codeVerified.symbols/sdkCapabilities/mainnetContractId, Project.canonicalSlug/lifecycle/anchorProfile, typed Partner/PartnersResponse, and the getPartners `ramps` filter.",
+		detail:
+			"Going forward info.version bumps with every observable contract change (including description-only changes), so downstream catalogs can use it as a staleness signal instead of diffing the whole document.",
+	},
+	{
+		date: "2026-07-09",
 		surfaces: ["api", "api-client"],
 		type: "fixed",
 		summary:
