@@ -113,6 +113,7 @@ export async function GET(req: NextRequest) {
 		scannedAt: string | null;
 		symbols: string[];
 		mainnetContractId: string | null;
+		sdkCapabilities: string[];
 	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
@@ -136,6 +137,7 @@ export async function GET(req: NextRequest) {
 					codeScannedAt: true,
 					codeSymbols: true,
 					mainnetContractId: true,
+					sdkCapabilities: true,
 				},
 			});
 			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
@@ -161,6 +163,11 @@ export async function GET(req: NextRequest) {
 									.slice(0, 20)
 							: [],
 						mainnetContractId: (d.mainnetContractId as string) ?? null,
+						sdkCapabilities: Array.isArray(d.sdkCapabilities)
+							? (d.sdkCapabilities as unknown[]).filter(
+									(s): s is string => typeof s === "string",
+								)
+							: [],
 					};
 				}
 			}

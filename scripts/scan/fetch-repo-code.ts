@@ -97,7 +97,12 @@ async function fetchBlob(
 export function selectDepthPaths(
 	tree: TreeEntry[],
 	cargoIsSoroban: Map<string, boolean>,
-): { cargos: string[]; sources: string[]; tests: string[] } {
+): {
+	cargos: string[];
+	sources: string[];
+	tests: string[];
+	jsSources: string[];
+} {
 	const rs = tree.filter(
 		(e) => e.type === "blob" && e.path.toLowerCase().endsWith(".rs"),
 	);
@@ -147,6 +152,25 @@ export function selectDepthPaths(
 	const cargoPaths = cargos
 		.filter((c) => cargoIsSoroban.get(c.path) || !c.path.includes("/"))
 		.map((c) => c.path);
+	// JS/TS sources (gist gap 1 phase 1): the dapp-side symbol + SDK-capability
+	// facts need actual sources — previously NOTHING non-Rust was fetched. Top-8
+	// by size, junk-dir/test/minified/declaration excluded, budget +8 blobs.
+	const isJsJunk = (p: string) =>
+		/(^|\/)(node_modules|dist|build|out|\.next|coverage|vendor|generated)\//i.test(
+			p,
+		) ||
+		/\.(min|bundle)\.js$/i.test(p) ||
+		/\.d\.ts$/i.test(p);
+	const jsSources = tree
+		.filter(
+			(e) => e.type === "blob" && /\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(e.path),
+		)
+		.filter(
+			(e) => !isJsJunk(e.path) && !isTest(e.path) && (e.size ?? 0) <= 400_000,
+		)
+		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
+		.slice(0, 8)
+		.map((e) => e.path);
 	// Non-Rust relevance manifests: package.json/stellar.toml (JS/SEP-1) PLUS the
 	// other-language Stellar SDK manifests (Swift/Kotlin/Flutter/Go/Python) so
 	// code-signals can fire the lang-sdk proof instead of wrongly reading a
@@ -159,7 +183,12 @@ export function selectDepthPaths(
 		.sort((a, b) => a.path.split("/").length - b.path.split("/").length) // prefer root manifests
 		.slice(0, 8)
 		.map((e) => e.path);
-	return { cargos: cargoPaths, sources, tests: [...tests, ...others] };
+	return {
+		cargos: cargoPaths,
+		sources,
+		tests: [...tests, ...others],
+		jsSources,
+	};
 }
 
 export interface RepoCodeResult {
@@ -266,7 +295,7 @@ export async function fetchRepoCode(
 	const blobs: DepthBlob[] = [];
 	for (const p of sel.cargos)
 		blobs.push({ path: p, text: cargoText.get(p) ?? null });
-	for (const p of [...sel.sources, ...sel.tests]) {
+	for (const p of [...sel.sources, ...sel.tests, ...sel.jsSources]) {
 		const sha = shaByPath.get(p);
 		const txt = sha ? await fetchBlob(gh, owner, name, sha) : null;
 		blobs.push({ path: p, text: txt });
@@ -337,7 +366,10 @@ export async function fetchRepoCode(
 		// BEFORE selection — count what was actually fetched, or the call-budget
 		// guard under-counts and a wave can blow the token allowance.
 		pathsFetched:
-			Math.min(cargos.length, 40) + sel.sources.length + sel.tests.length,
+			Math.min(cargos.length, 40) +
+			sel.sources.length +
+			sel.tests.length +
+			sel.jsSources.length,
 		contractCrates: contractCrateDirs.length,
 	};
 }

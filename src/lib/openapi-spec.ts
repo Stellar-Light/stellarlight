@@ -363,6 +363,10 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 												},
+												sdkCapabilities: {
+													type: "array",
+													items: { type: "string" },
+												},
 											},
 										},
 										answer: {
@@ -1903,6 +1907,12 @@ export const spec: OpenAPISpec = {
 								nullable: true,
 								description:
 									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address.",
+							},
+							sdkCapabilities: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
 							},
 						},
 					},

@@ -30,7 +30,11 @@ loadEnv({ path: ".env" });
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeFarmScore } from "../../src/lib/code-signals";
-import { extractCodeSymbols } from "../../src/lib/code-symbols";
+import {
+	detectSdkCapabilities,
+	extractCodeSymbols,
+	extractJsSymbols,
+} from "../../src/lib/code-symbols";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
@@ -213,8 +217,16 @@ async function main() {
 			} else {
 				const depth =
 					r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
-				const symbols =
+				// Rust pub-surface first; JS/TS exported surface when there is none
+				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
+				const rustSymbols =
 					r.outcome === "ok" ? extractCodeSymbols(r.depthInput.blobs) : [];
+				const symbols =
+					rustSymbols.length > 0 || r.outcome !== "ok"
+						? rustSymbols
+						: extractJsSymbols(r.depthInput.blobs);
+				const sdkCapabilities =
+					r.outcome === "ok" ? detectSdkCapabilities(r.depthInput.blobs) : [];
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -237,6 +249,7 @@ async function main() {
 						farmScore: farm.score,
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
+						sdkCapabilities,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 					},
 					nowIso,
