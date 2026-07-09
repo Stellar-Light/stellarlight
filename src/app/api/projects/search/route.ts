@@ -25,6 +25,7 @@ import {
 	isRampIntent,
 	scoreTokens,
 	structuredHit,
+	structuredSelectClauses,
 	termsForToken,
 	tokenize,
 } from "@/lib/project-search-match";
@@ -437,9 +438,10 @@ export async function GET(req: NextRequest) {
 			// the query words — the Etherfuse miss (sls-018): coverage names
 			// Mexico/MXN, prose is about Stablebonds, so a generic Mexico on-ramp
 			// query never fetched it as a candidate. `types`/`coverage.seps` are
-			// `select` fields (not `like`-safe on every Payload version), so they
-			// are NOT in the candidate query — they still contribute to the
-			// in-memory haystack score below, which is what ranks admitted rows.
+			// select fields (`like`-unsafe) so they join via `contains` clauses
+			// built from the INTENT_TYPE map instead (F1, 2026-07-09 audit:
+			// type-only records — Social Impact 3/15 retrievable — never became
+			// candidates even though the haystack scores types).
 			const baseOr = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
 					{ name: { like: v } },
@@ -455,7 +457,11 @@ export async function GET(req: NextRequest) {
 				]),
 			);
 			if (tokens.length) {
-				where.or = [...baseOr, ...structuredOr];
+				where.or = [
+					...baseOr,
+					...structuredOr,
+					...structuredSelectClauses(tokens),
+				];
 			}
 
 			const findCandidates = (

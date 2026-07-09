@@ -265,6 +265,18 @@ export const INTENT_TYPE: Record<string, string> = {
 	gaming: "Gaming",
 	game: "Gaming",
 	stablecoin: "Stablecoin",
+	// F1 (2026-07-09 full-surface audit): type-browse queries missed records
+	// whose ONLY evidence is types[] — these tokens map browse vocabulary onto
+	// the exact select values so candidates + ranking both see them.
+	exchange: "DEX",
+	education: "Education",
+	bootcamp: "Education",
+	analytics: "Analytics",
+	dashboard: "Analytics",
+	security: "Security",
+	impact: "Social Impact",
+	ai: "AI",
+	infrastructure: "Infrastructure",
 };
 
 export function intentTypesFor(tokens: string[]): Set<string> {
@@ -275,6 +287,29 @@ export function intentTypesFor(tokens: string[]): Set<string> {
 			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
 	}
 	return s;
+}
+
+/**
+ * Candidate-inclusion clauses for STRUCTURED select fields (F1, 2026-07-09
+ * audit root #1). `types` and `coverage.seps` are select fields — `like` is
+ * not safe on them across Payload versions, but `contains` (exact array
+ * membership) is, and the INTENT_TYPE map gives us the exact select values a
+ * query token implies. Without these clauses a record whose ONLY match is its
+ * type (Social Impact: 3/15 retrievable) or its SEP list never becomes a
+ * candidate, no matter what the in-memory haystack would score — the sls-018
+ * class at the type/sep level.
+ */
+export function structuredSelectClauses(
+	tokens: string[],
+): Array<Record<string, { contains: string }>> {
+	const out: Array<Record<string, { contains: string }>> = [];
+	for (const tv of intentTypesFor(tokens))
+		out.push({ types: { contains: tv } });
+	for (const t of tokens) {
+		const m = t.match(/^sep-?(\d{1,3})$/);
+		if (m) out.push({ "coverage.seps": { contains: `sep-${m[1]}` } });
+	}
+	return out;
 }
 
 // Ramp/anchor/corridor intent vocabulary. A query carrying any of these (direct
