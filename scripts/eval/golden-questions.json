@@ -8,9 +8,7 @@
 			"question": "How do I charge AI agents per API call on Stellar?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"x402|machine payment|agentic payment"
-				],
+				"answerRegex": ["x402|machine payment|agentic payment"],
 				"expectUrlIncludes": "agentic-payments",
 				"minTopScore": 0.7
 			}
@@ -35,10 +33,7 @@
 			"question": "What is a trustline on Stellar and why do I need one?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"trustline",
-					"asset|issuer"
-				]
+				"answerRegex": ["trustline", "asset|issuer"]
 			}
 		},
 		{
@@ -48,10 +43,7 @@
 			"question": "Write a minimal Soroban contract that stores a counter and increments it.",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"soroban",
-					"contract"
-				]
+				"answerRegex": ["soroban", "contract"]
 			}
 		},
 		{
@@ -61,10 +53,7 @@
 			"question": "How do I connect the Freighter wallet in a React app and submit a payment?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"freighter|wallet",
-					"transaction|payment|sign"
-				]
+				"answerRegex": ["freighter|wallet", "transaction|payment|sign"]
 			}
 		},
 		{
@@ -74,10 +63,7 @@
 			"question": "How do I issue a regulated asset on Stellar with clawback enabled?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"clawback",
-					"asset|flag|auth"
-				]
+				"answerRegex": ["clawback", "asset|flag|auth"]
 			}
 		},
 		{
@@ -87,10 +73,7 @@
 			"question": "Should I use Horizon or Stellar RPC for a new indexer, and how do I stream contract events?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"rpc|horizon",
-					"event|indexer|stream"
-				]
+				"answerRegex": ["rpc|horizon", "event|indexer|stream"]
 			}
 		},
 		{
@@ -100,9 +83,7 @@
 			"question": "I want to build a USDC remittance app on Stellar for the Philippines corridor. Where do I start?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"anchor|sep-?24|usdc|payment|soroban"
-				]
+				"answerRegex": ["anchor|sep-?24|usdc|payment|soroban"]
 			}
 		},
 		{
@@ -116,10 +97,7 @@
 					"blend",
 					"oracle|incident|exploit|attack|audit|security"
 				],
-				"forbiddenRegex": [
-					"\\bunaudited\\b",
-					"no (public |known )?audits?\\b"
-				]
+				"forbiddenRegex": ["\\bunaudited\\b", "no (public |known )?audits?\\b"]
 			}
 		},
 		{
@@ -129,10 +107,7 @@
 			"question": "What reentrancy or auth bugs have auditors found in Soroban contracts?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"audit|finding|vulnerab",
-					"soroban|contract|auth"
-				]
+				"answerRegex": ["audit|finding|vulnerab", "soroban|contract|auth"]
 			}
 		},
 		{
@@ -142,9 +117,7 @@
 			"question": "real-world asset RWA tokenization",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"rwa|real-world|tokeniz|asset"
-				]
+				"answerRegex": ["rwa|real-world|tokeniz|asset"]
 			}
 		},
 		{
@@ -154,9 +127,7 @@
 			"question": "agent payments x402 API monetization",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"agent|payment|x402|api"
-				]
+				"answerRegex": ["agent|payment|x402|api"]
 			}
 		},
 		{
@@ -166,9 +137,7 @@
 			"question": "defi yield aggregator lending",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"defi|yield|lend|aggregat"
-				]
+				"answerRegex": ["defi|yield|lend|aggregat"]
 			}
 		},
 		{
@@ -178,10 +147,7 @@
 			"question": "How does the Stellar Consensus Protocol reach agreement across nodes?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"scp|consensus",
-					"quorum|federated|node|validator"
-				]
+				"answerRegex": ["scp|consensus", "quorum|federated|node|validator"]
 			}
 		},
 		{
@@ -191,10 +157,7 @@
 			"question": "How does require_auth and authorization work in a Soroban contract?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"soroban|contract",
-					"auth"
-				]
+				"answerRegex": ["soroban|contract", "auth"]
 			}
 		},
 		{
@@ -204,9 +167,7 @@
 			"question": "How do passkeys and smart wallets work on Stellar?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"passkey|smart wallet|webauthn|secp256r1|policy signer"
-				]
+				"answerRegex": ["passkey|smart wallet|webauthn|secp256r1|policy signer"]
 			}
 		},
 		{
@@ -216,10 +177,7 @@
 			"question": "How are Stellar transaction fees and the inclusion fee calculated?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"fee",
-					"base fee|inclusion|surge|stroop"
-				]
+				"answerRegex": ["fee", "base fee|inclusion|surge|stroop"]
 			}
 		},
 		{
@@ -229,9 +187,7 @@
 			"question": "How do path payments and the Stellar DEX order book work?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"path payment|dex|order book|offer|liquidity"
-				]
+				"answerRegex": ["path payment|dex|order book|offer|liquidity"]
 			}
 		},
 		{
@@ -241,10 +197,7 @@
 			"question": "How do I emit events from a Soroban contract and subscribe to them?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"event",
-					"soroban|contract|topic|publish"
-				]
+				"answerRegex": ["event", "soroban|contract|topic|publish"]
 			}
 		},
 		{
@@ -280,10 +233,7 @@
 			"question": "How many active developers does Stellar have according to Electric Capital?",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"developer",
-					"stellar|electric capital|monthly|active"
-				]
+				"answerRegex": ["developer", "stellar|electric capital|monthly|active"]
 			}
 		},
 		{
@@ -293,9 +243,7 @@
 			"question": "stablecoin anchor off-ramp USDC",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"stablecoin|anchor|ramp|usdc|payment"
-				]
+				"answerRegex": ["stablecoin|anchor|ramp|usdc|payment"]
 			}
 		},
 		{
@@ -305,9 +253,7 @@
 			"question": "wallet passkey smart account",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"wallet|passkey|account|smart"
-				]
+				"answerRegex": ["wallet|passkey|account|smart"]
 			}
 		},
 		{
@@ -337,9 +283,7 @@
 			"question": "zk",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"noir|kale-sc|attest|private-payment|zk"
-				],
+				"answerRegex": ["noir|kale-sc|attest|private-payment|zk"],
 				"minTopScore": 50
 			}
 		},
@@ -350,9 +294,7 @@
 			"question": "x402",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"x402|stellarpay402|agentcard|machine.?payment"
-				],
+				"answerRegex": ["x402|stellarpay402|agentcard|machine.?payment"],
 				"minTopScore": 60
 			}
 		},
@@ -363,9 +305,7 @@
 			"question": "oracle price feed",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"reflector|oracle|price.?feed"
-				],
+				"answerRegex": ["reflector|oracle|price.?feed"],
 				"minTopScore": 40
 			}
 		},
@@ -376,9 +316,7 @@
 			"question": "streaming payments",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"fluxity|tide|paystreme|stream"
-				],
+				"answerRegex": ["fluxity|tide|paystreme|stream"],
 				"minTopScore": 25
 			}
 		},
@@ -389,9 +327,7 @@
 			"question": "escrow vault",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"escrow|vault|trustless|microvault"
-				],
+				"answerRegex": ["escrow|vault|trustless|microvault"],
 				"minTopScore": 40
 			}
 		},
@@ -402,9 +338,7 @@
 			"question": "soroswap",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": [
-					"soroswap/"
-				],
+				"answerRegex": ["soroswap/"],
 				"minTopScore": 45
 			}
 		},
@@ -414,13 +348,8 @@
 			"mode": "research",
 			"question": "bridge assets from EVM to Stellar",
 			"expect": {
-				"answerRegex": [
-					"allbridge",
-					"cctp|circle"
-				],
-				"forbiddenRegex": [
-					"starbridge"
-				],
+				"answerRegex": ["allbridge", "cctp|circle"],
+				"forbiddenRegex": ["starbridge"],
 				"note": "The 2026-07-09 demo miss: Starbridge (2022 research protocol, never productionized) chunks filled the top-K twice over while current routes (CCTP/USDC, Allbridge) sat at ranks 11-20. Guards the research-rank stage: per-doc dedupe + confidence (freshness/authority) ordering. Starbridge surfacing for consumer bridge intent = stale-advice failure, same class as recommending wasm32-unknown-unknown."
 			}
 		},
@@ -430,11 +359,21 @@
 			"mode": "projects",
 			"question": "solana to stellar bridge",
 			"expect": {
-				"answerRegex": [
-					"allbridge",
-					"rozo|cctp|circle"
-				],
+				"answerRegex": ["allbridge", "rozo|cctp|circle"],
 				"note": "Corridor-matrix guard (2026-07-09): Solana corridors were invisible because supportedNetworks was seeded [stellar, evm] only. Allbridge (docs: Solana live) and Rozo/CCTP (Solana live) must surface for the Solana corridor. Generalizes the bridge-evm-to-stellar research guard to the projects lane + a second chain."
+			}
+		},
+		{
+			"id": "scf-handbook-link",
+			"category": "known-item-source",
+			"mode": "research",
+			"question": "SCF handbook link",
+			"expect": {
+				"answerRegex": [
+					"stellar\\\\.gitbook\\\\.io/scf-handbook",
+					"Welcome to the SCF Handbook"
+				],
+				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it."
 			}
 		}
 	]

@@ -104,6 +104,28 @@ export async function GET(req: NextRequest) {
 
 	let rfps: RfpRow[] = IDEAS.map(toRow);
 
+	// Emir's demo miss (2026-07-09): the live open round existed ONLY in
+	// meta.scfRound while every idea row read status=closed — a row-reading
+	// agent concluded "nothing is open" and missed the single most important
+	// funding fact. An open SCF round IS the top funding opportunity: serve
+	// Submission-phase rounds as first-class OPEN rows, not just metadata.
+	const roundRows: RfpRow[] = (scfLive?.roundsInProgress ?? [])
+		.filter((r) => /submission/i.test(r.phase ?? ""))
+		.map((r) => ({
+			id: `scf-round-${r.round}`,
+			title: `SCF Round #${r.round} — submissions OPEN${r.submissionDeadline ? ` until ${r.submissionDeadline}` : ""}`,
+			description: `Stellar Community Fund round #${r.round} is currently accepting submissions${r.submissionDeadline ? ` (deadline ${r.submissionDeadline})` : ""}. The Build Award funds Stellar/Soroban projects — eligibility, rules and the application flow are in the SCF Handbook (https://stellar.gitbook.io/scf-handbook). Apply via https://communityfund.stellar.org.`,
+			technicalRequirements: null,
+			category: "scf",
+			authorName: "Stellar Community Fund",
+			quarter: ACTIVE_QUARTER,
+			categoryLabel: CATEGORY_LABELS.scf,
+			quarterLabel: "Live round",
+			status: "open",
+			url: "https://communityfund.stellar.org/awards",
+		}));
+	rfps = [...roundRows, ...rfps];
+
 	if (
 		categoryFilter &&
 		(CATEGORIES as readonly string[]).includes(categoryFilter)
