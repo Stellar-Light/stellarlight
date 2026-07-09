@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
+		surfaces: ["skill"],
+		type: "fixed",
+		summary:
+			"Scout skill api-reference caught up to the OpenAPI 1.7.x surface (stellar-scout#8): getPartners now documents the `ramps` filter and the typed Partner row (rampTypes/seps/assets/freshness/trust/verified); explainRepo and searchRepos document the full codeVerified block (symbols, sdkCapabilities, mainnetContractId) and the code-depth term in repoScore.",
+		detail:
+			"Skill prose is bundled by downstream agents as runtime guidance, so it lagging the spec meant agents missed callable capabilities. Synced to the Stellar-Light/stellar-scout mirror in the same change.",
+	},
+	{
+		date: "2026-07-09",
 		surfaces: ["api"],
 		version: "openapi@1.7.1",
 		type: "changed",
