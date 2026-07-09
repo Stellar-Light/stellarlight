@@ -215,6 +215,7 @@ export async function GET(req: NextRequest) {
 
 	let partners: ReturnType<typeof toPublic>[] = [];
 	let totalMatching = 0;
+	let filteredOutCount = 0;
 
 	const payload = await getPayloadSafe();
 	if (payload) {
@@ -240,6 +241,10 @@ export async function GET(req: NextRequest) {
 			// rows without a tagline. In-memory on ≤200 docs; display-only (the
 			// concierge matcher keeps its own eligibility rule).
 			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
+			// Emir-class fix (lessons class 23, 2026-07-09): rows hidden by the
+			// quality bar must be DISCLOSED — counts.total=0 with no filteredOut
+			// read as "no wallet partners exist" while 5 sat behind null taglines.
+			filteredOutCount = result.docs.length - eligible.length;
 			const bySlug = new Map(eligible.map((d) => [String(d.slug), d]));
 
 			// Ranking:
@@ -303,7 +308,14 @@ export async function GET(req: NextRequest) {
 					limit,
 					offset,
 				},
-				counts: { returned: partners.length, total: totalMatching },
+				counts: {
+					returned: partners.length,
+					total: totalMatching,
+					// Rows hidden by the default directory quality bar (pass all=1
+					// to include them). >0 with total=0 means "exists but thin
+					// profile", NOT "none exist".
+					filteredOut: filteredOutCount,
+				},
 				validTypes: PARTNER_TYPES,
 				validRamps: RAMP_TYPES,
 				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
