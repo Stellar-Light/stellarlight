@@ -344,6 +344,25 @@ export const JS_DEEP: LabeledRepo[] = [
 		fullName: "Nectar-Network/nectar",
 		why: "frontend/lib/stellar.ts has genuine SDK integration (Stellar Wallets Kit multi-wallet connect/sign, Horizon balances, TransactionBuilder + Soroban rpc.Server/Contract/assembleTransaction contract i...",
 	},
+	// ── graduated from JS_DEEP_FRONTIER (frontier pass 2026-07-09) ──
+	// Tiered strong/weak JS file selection ended their monorepo dilution: the
+	// Stellar integration files now win sample slots (0.563-0.727, all ≥ 0.5).
+	{
+		fullName: "dfns/dfns-sdk-ts",
+		why: "packages/lib-stellar/index.ts (published @dfns/lib-stellar 0.8.24) implements real signing: imports @stellar/stellar-sdk Transaction/FeeBumpTransaction/Networks, serializes tx envelope to XDR and a...",
+	},
+	{
+		fullName: "glo-foundation/glo-wallet",
+		why: "Live Glo Dollar wallet with real SDK use in own source: lib/balance.ts parses Horizon txs via StellarSdk.TransactionBuilder.fromXDR, UserAuthModal.tsx does Freighter wallet connection via stellar-w...",
+	},
+	{
+		fullName: "idos-network/idos-sdk-js",
+		why: "Core package packages/kwil-infra has genuine @stellar/stellar-sdk integration — Stellar Keypair signing flow in create-kwil-signer.ts and Keypair.verify signature verification in signature-verifica...",
+	},
+	{
+		fullName: "reflector-network/reflector-node",
+		why: "src/utils/rpc-helper.js does genuine @stellar/stellar-sdk@16 Soroban work — rpc.Server requests, Transaction/DecoratedSignature handling, submitTransaction with XDR result parsing — plus oracle/DAO...",
+	},
 ];
 
 export const JS_SHALLOW: LabeledRepo[] = [
@@ -407,30 +426,22 @@ export const JS_SHALLOW: LabeledRepo[] = [
 
 /**
  * JS_DEEP_FRONTIER — TRUE labels (verified live products/SDKs) the current
- * scorer under-scores (2026-07-09 calibration run 2: 0.30-0.48). Dominant
- * cause: monorepo selection dilution — the top-8 JS file sample misses the
- * Stellar integration files (allbridge SDK: 19k SLOC sampled, zero
- * capability hits; its srb/ integration sits below the cut). Non-gating;
- * graduating rows = jsDepth v2 work. Never delete a true label the scorer
- * fails — that would make the key circular.
+ * scorer under-scores. Non-gating; graduating rows = jsDepth v2 work. Never
+ * delete a true label the scorer fails — that would make the key circular.
+ *
+ * Frontier pass 2026-07-09: tiered strong/weak selection graduated 4 of 7
+ * (dfns/glo/idos/reflector — monorepo dilution solved). The 3 that remain:
+ *  - stellarexplorer (0.418): read-only explorer — its real SDK work is
+ *    Horizon QUERY builders, which the capability weights under-credit
+ *    relative to tx-building/signing flows.
+ *  - lobstr-browser-extension (0.369): signing happens via the proprietary
+ *    @lobstrco/signer-extension-api, not raw stellar-sdk calls — capability
+ *    patterns see only horizon.
+ *  - allbridge-core-js-sdk (0.300): dilution survives even tiers — every
+ *    path matches the weak "bridge" term so EVM/Tron files still displace
+ *    src/services/bridge/srb; needs dir-aware selection (jsDepth v2).
  */
 export const JS_DEEP_FRONTIER: LabeledRepo[] = [
-	{
-		fullName: "reflector-network/reflector-node",
-		why: "src/utils/rpc-helper.js does genuine @stellar/stellar-sdk@16 Soroban work — rpc.Server requests, Transaction/DecoratedSignature handling, submitTransaction with XDR result parsing — plus oracle/DAO...",
-	},
-	{
-		fullName: "glo-foundation/glo-wallet",
-		why: "Live Glo Dollar wallet with real SDK use in own source: lib/balance.ts parses Horizon txs via StellarSdk.TransactionBuilder.fromXDR, UserAuthModal.tsx does Freighter wallet connection via stellar-w...",
-	},
-	{
-		fullName: "idos-network/idos-sdk-js",
-		why: "Core package packages/kwil-infra has genuine @stellar/stellar-sdk integration — Stellar Keypair signing flow in create-kwil-signer.ts and Keypair.verify signature verification in signature-verifica...",
-	},
-	{
-		fullName: "dfns/dfns-sdk-ts",
-		why: "packages/lib-stellar/index.ts (published @dfns/lib-stellar 0.8.24) implements real signing: imports @stellar/stellar-sdk Transaction/FeeBumpTransaction/Networks, serializes tx envelope to XDR and a...",
-	},
 	{
 		fullName: "chatch/stellarexplorer",
 		why: "Live steexp.com explorer (2017-2026, 507 stars) with real @stellar/stellar-sdk@16 integration in its own app/lib/stellar/ — Soroban rpc.Server subclass, Horizon query builders, Federation/MuxedAcco...",

@@ -166,8 +166,15 @@ export function selectDepthPaths(
 	// big monorepos (allbridge SDK scored zero capabilities from 20k SLOC of
 	// non-Stellar files). Files whose PATH signals Stellar work rank first,
 	// then size fills the rest.
-	const JS_RELEVANT =
-		/(stellar|soroban|wallet|sign|horizon|payment|sep[-_]?\d|anchor|freighter|passkey|contract|bridge|srb|tx|transaction)/i;
+	// Tiered relevance (frontier pass 2026-07-09): in a repo like
+	// allbridge-core-js-sdk EVERY path contains "bridge", so a flat relevance
+	// regex stops discriminating and the biggest (EVM/Tron) files displace the
+	// smaller Stellar ones — 19k SLOC sampled, zero capability hits. STRONG
+	// markers are unambiguous Stellar paths; WEAK are generic fintech words.
+	const JS_STRONG =
+		/(stellar|soroban|srb|freighter|passkey|lobstr|albedo|xbull|sep[-_]?\d|horizon)/i;
+	const JS_WEAK =
+		/(wallet|sign|payment|anchor|contract|bridge|tx|transaction|rpc)/i;
 	const jsCandidates = tree
 		.filter(
 			(e) => e.type === "blob" && /\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(e.path),
@@ -175,16 +182,30 @@ export function selectDepthPaths(
 		.filter(
 			(e) => !isJsJunk(e.path) && !isTest(e.path) && (e.size ?? 0) <= 400_000,
 		);
-	const jsRelevant = jsCandidates
-		.filter((e) => JS_RELEVANT.test(e.path))
-		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
-		.slice(0, 6);
-	const relevantSet = new Set(jsRelevant.map((e) => e.path));
-	const jsBySize = jsCandidates
-		.filter((e) => !relevantSet.has(e.path))
-		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
-		.slice(0, Math.max(2, 8 - jsRelevant.length));
-	const jsSources = [...jsRelevant, ...jsBySize].map((e) => e.path);
+	const bySize = (a: TreeEntry, b: TreeEntry) => (b.size ?? 0) - (a.size ?? 0);
+	const picked = new Set<string>();
+	const take = (list: TreeEntry[], n: number) =>
+		list
+			.filter((e) => !picked.has(e.path))
+			.sort(bySize)
+			.slice(0, n)
+			.map((e) => (picked.add(e.path), e.path));
+	// Unused tier budget rolls forward: a repo with no strong-tier paths
+	// (blend-sdk-js — no "stellar" in any filename) must still sample its
+	// full 10 files, not shrink to 5.
+	const strongPick = take(
+		jsCandidates.filter((e) => JS_STRONG.test(e.path)),
+		5,
+	);
+	const weakPick = take(
+		jsCandidates.filter((e) => JS_WEAK.test(e.path)),
+		8 - strongPick.length,
+	);
+	const jsSources = [
+		...strongPick,
+		...weakPick,
+		...take(jsCandidates, 10 - strongPick.length - weakPick.length),
+	];
 	// Non-Rust relevance manifests: package.json/stellar.toml (JS/SEP-1) PLUS the
 	// other-language Stellar SDK manifests (Swift/Kotlin/Flutter/Go/Python) so
 	// code-signals can fire the lang-sdk proof instead of wrongly reading a

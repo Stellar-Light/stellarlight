@@ -55,3 +55,29 @@ describe("selectDepthPaths — source-slot hygiene", () => {
 		expect(sel.tests).toContain("contracts/src/tests.rs");
 	});
 });
+
+describe("selectDepthPaths — tiered JS selection budget rollover", () => {
+	const js = (name: string, size: number) => blob(name, size);
+
+	it("strong-tier Stellar paths win slots over bigger generic files", () => {
+		const tree = [
+			js("src/stellar/swap.ts", 1_000),
+			js("src/soroban/invoke.ts", 1_000),
+			js("src/evm/bridge_core.ts", 90_000),
+			js("src/tron/bridge_core.ts", 90_000),
+		];
+		const sel = selectDepthPaths(tree, new Map());
+		expect(sel.jsSources.slice(0, 2)).toEqual([
+			"src/stellar/swap.ts",
+			"src/soroban/invoke.ts",
+		]);
+	});
+
+	it("a repo with NO strong-tier paths still fills its full 10-file budget (blend-sdk case)", () => {
+		const tree = Array.from({ length: 12 }, (_, i) =>
+			js(`src/pool/pool_contract_${i}.ts`, 2_000 + i),
+		);
+		const sel = selectDepthPaths(tree, new Map());
+		expect(sel.jsSources).toHaveLength(10);
+	});
+});
