@@ -348,6 +348,30 @@ export const Projects: CollectionConfig = {
 			admin: { hidden: true },
 		},
 		{
+			// DefiLlama-verified TVL (system-written by scripts/enrich-tvl.ts).
+			// null = NOT TRACKED on DefiLlama — never "zero TVL" (class 3);
+			// llama-listed protocols with ~$0 feed the liveness report instead.
+			name: "tvlUSD",
+			type: "number",
+			admin: {
+				description:
+					"DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.",
+			},
+		},
+		{
+			name: "tvlAsOf",
+			type: "date",
+			admin: { description: "When tvlUSD was fetched (class 8: dated metrics)." },
+		},
+		{
+			// Curated mapping to DefiLlama protocol slugs (several per project —
+			// e.g. blend = pools + pools-v2 + backstops). Maintained in
+			// scripts/enrich-tvl.ts LLAMA_MAP; stored for provenance.
+			name: "llamaSlugs",
+			type: "text",
+			hasMany: true,
+		},
+		{
 			name: "provenance",
 			type: "group",
 			fields: [
