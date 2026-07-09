@@ -172,6 +172,36 @@ async function main() {
 		bad("projects ground truth", `fetch failed: ${String(err)}`);
 	}
 
+	// Bridge corridor guard (2026-07-09): every Bridge-typed project must
+	// carry a non-empty supportedNetworks — an empty list is the
+	// omission-equals-negation trap that made Solana/EVM corridor queries
+	// miss real launched bridges (Rozo/Helix class). Chain lists themselves
+	// are curated in scripts/data/curate-projects.ts SUPPORTED_NETWORKS.
+	try {
+		const br = await j("/api/projects/search?q=bridge&limit=20");
+		const bridges = (br.projects ?? []).filter(
+			(p: { types?: string[] }) =>
+				Array.isArray(p.types) && p.types.includes("Bridge"),
+		);
+		const empty = bridges.filter(
+			(p: { supportedNetworks?: string[] }) =>
+				!Array.isArray(p.supportedNetworks) || !p.supportedNetworks.length,
+		);
+		if (!bridges.length)
+			bad("bridge corridors", "no Bridge-typed rows for q=bridge");
+		else if (empty.length)
+			bad(
+				"bridge corridors",
+				`${empty.length} Bridge-typed project(s) with EMPTY supportedNetworks: ${empty.map((p: { slug: string }) => p.slug).join(", ")} — add verified chains to SUPPORTED_NETWORKS`,
+			);
+		else
+			ok(
+				`bridge corridors: ${bridges.length} Bridge-typed rows all carry supportedNetworks`,
+			);
+	} catch (err) {
+		bad("bridge corridors", `fetch failed: ${String(err)}`);
+	}
+
 	// 5. Known-item recall — the answer to "how do we catch important misses?"
 	//    (Tyler, raven#8: Etherfuse, SushiSwap). A prose-only search silently
 	//    DROPS a well-known entity when a category/corridor query is phrased in

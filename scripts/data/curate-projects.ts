@@ -45,6 +45,21 @@ const TYPES_ADD: Record<string, string[]> = {
 	rozo: ["Bridge"],
 };
 
+/** Launch-status corrections (boxy 2026-07-09: "some are in process of
+ * launching while allbridge has launched"). Each row is grounded in the
+ * project's OWN current materials — never a staleness heuristic:
+ *  - helix: helixlabs.org homepage — "Helix is not live on any chain other
+ *    than Canton"; Stellar listed under "Next rails — roadmap targets, not
+ *    live" (docs plan Soroban TESTNET in phase 1).
+ *  - warpdrive: warp-drive.xyz has no app/mainnet claim; GitHub milestone
+ *    language ("Preparation for bringing WarpDrive to Stellar — Milestone 1").
+ * Writes only when the stored status matches the WRONG value, so a later
+ * manual correction is never clobbered; rows retire once applied. */
+const STATUS_FIX: Record<string, { from: string; to: string }> = {
+	helix: { from: "Live", to: "Development" },
+	warpdrive: { from: "Live", to: "Development" },
+};
+
 /** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
  * rows the 2026-07-07 sync mis-wrote with the partner's incorporation country.
  * Grounding per row: [] = the corridor is regional/global (the partner record's
@@ -64,15 +79,31 @@ const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	lobstr: ["stellar", "xrpl"],
 	"ultra-stellar": ["stellar", "xrpl"],
-	// Bridges (Beacon Q3 feedback: "how do I get EVM assets onto Stellar" must
-	// retrieve the actual routes). Grounded in each record's own curated
-	// description; "evm" is the umbrella users' chain-names map onto via the
-	// search synonym layer (ethereum/polygon/arbitrum → evm).
-	allbridge: ["stellar", "evm"],
-	"circle-cctp-cross-chain-transfer-protocol": ["stellar", "evm"],
-	axelar: ["stellar", "evm"],
-	rozo: ["stellar", "evm"],
-	spacewalk: ["stellar", "polkadot"],
+	// Bridge corridor matrix (boxy 2026-07-09: "same issue for Solana?" — yes).
+	// Every row below verified from PRIMARY sources on 2026-07-09 (vendor
+	// docs/APIs, quotes in the PR): the original Beacon-Q3 seeds were
+	// [stellar, evm] only, hiding real Solana/Tron/XRPL/... corridors.
+	// "evm" is the umbrella users' chain-names map onto via the search
+	// synonym layer (ethereum/polygon/base/bnb/arbitrum → evm).
+	// This list is EXACT-SYNC for its slugs (see apply loop): the canonical
+	// place to update a listed project's networks is HERE, not the admin.
+	allbridge: ["stellar", "evm", "solana", "tron", "sui"], // docs-core.allbridge.io + live SRB USDC pool on core API
+	"circle-cctp-cross-chain-transfer-protocol": [
+		"stellar", // CCTP V2 domain 27 (standard transfer)
+		"evm",
+		"solana",
+		"sui",
+		"aptos",
+		"noble",
+		"starknet",
+	], // developers.circle.com/cctp/concepts/supported-chains-and-domains
+	axelar: ["stellar", "evm", "solana", "sui", "xrpl"], // axelar-chains-config mainnet.json: stellar mainnet contracts deployed
+	rozo: ["stellar", "evm", "solana"], // rozo.ai/llms.txt: pay-in/out Ethereum/Arbitrum/Base/BSC/Polygon/Solana/Stellar; "Stellar CCTP V2 is live on ROZO"
+	spacewalk: ["stellar", "polkadot", "kusama"], // pendulumchain.org: Pendulum (Polkadot) + Amplitude (Kusama), launched
+	stronghold: ["stellar", "evm", "xrpl"], // gateway.stronghold.co/bridge (SHx-only: Stellar⇄Ethereum + XRPL leg live)
+	"templar-protocol": ["stellar", "bitcoin", "evm", "near"], // templarfi.org/blog/stellar launch post; bridgeless (NEAR chain sigs)
+	warpdrive: ["stellar", "evm"], // warp-drive.xyz targets Base/Ethereum/Optimism/BNB — NOT yet launched (see STATUS_FIX)
+	helix: ["canton"], // helixlabs.org: "not live on any chain other than Canton"; Stellar = roadmap (see STATUS_FIX)
 	zkcross: ["stellar", "evm"],
 };
 
@@ -300,6 +331,32 @@ async function main() {
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──
+	// ── launch-status corrections (from-guarded, retire once applied) ──
+	console.log("\n── Status fixes (from-guarded) ──");
+	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.status !== fix.from) {
+			console.log(
+				`  ${slug}: status '${d.status}' ≠ '${fix.from}', skip (retired or manually set)`,
+			);
+			continue;
+		}
+		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
+		writes.push({ id: d.id, slug, data: { status: fix.to } });
+	}
+
 	console.log("\n── Supported networks (fill-if-empty) ──");
 	for (const [slug, nets] of Object.entries(SUPPORTED_NETWORKS)) {
 		const r = await payload.find({
@@ -315,11 +372,16 @@ async function main() {
 			console.log(`  WARN: no project "${slug}" — skipped`);
 			continue;
 		}
-		if (Array.isArray(d.supportedNetworks) && d.supportedNetworks.length) {
-			console.log(`  ${slug}: already set, skip`);
+		const cur: string[] = Array.isArray(d.supportedNetworks)
+			? d.supportedNetworks
+			: [];
+		// EXACT-SYNC for curated slugs: the matrix above is the source of
+		// truth (primary-source-verified). Equality no-ops keep reruns clean.
+		if (cur.join(",") === nets.join(",")) {
+			console.log(`  ${slug}: already in sync, skip`);
 			continue;
 		}
-		console.log(`  ${slug} → ${nets.join(", ")}`);
+		console.log(`  ${slug}: [${cur.join(", ")}] → [${nets.join(", ")}]`);
 		writes.push({ id: d.id, slug, data: { supportedNetworks: nets } });
 	}
 
