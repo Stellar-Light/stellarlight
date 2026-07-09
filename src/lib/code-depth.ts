@@ -510,8 +510,12 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		contractCrates > 1 &&
 		sampledCrates > 1 &&
 		deepCrates >= Math.ceil(Math.min(contractCrates, sampledCrates) / 3);
+	// finding 5 (review): magnitude used TOTAL crates even when the sample only
+	// evidenced a few deep ones — a 40-crate workspace with ONE sampled-deep
+	// crate earned full breadth. Scale by evidence: each verified-deep crate
+	// vouches for at most 3 (the sampling ratio the gate itself uses).
 	const workspaceBreadth = breadthGate
-		? Math.min(1, (contractCrates - 1) / 8)
+		? Math.min(1, (Math.min(contractCrates, deepCrates * 3) - 1) / 8)
 		: 0;
 
 	// single-crate compensation (review P7): a real single contract can't earn

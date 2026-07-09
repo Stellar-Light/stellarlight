@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api", "api-client"],
+		type: "fixed",
+		summary:
+			"codeDepth accuracy: tiered Stellar-path file selection fixes monorepo dilution for JS/TS repos (multi-chain SDKs/wallets whose Stellar integration files were displaced by bigger non-Stellar files now score on their actual Stellar code), and Rust workspace breadth now scales with evidenced-deep crates instead of raw declared-crate count (stub Cargo.toml padding no longer inflates depth).",
+		detail:
+			"Affected JS repos re-score on their next scan wave (multi-chain SDK/wallet monorepos — previously under-scored). No shape changes; values only. Answer-key gate now 12 JS deep + 14 shallow labels, margin 0.110.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api", "api-client"],
 		type: "changed",
 		summary:
 			"codeDepth for JS/TS dapps is now the calibrated jsDepth, not a flat 0.3. A repo's `codeVerified.codeDepth` now separates real Stellar integration (wallets, dapps, SDKs — 0.5-1.0) from boilerplate/templates (≤0.3) for js-sdk repos, using the same 0-1 scale as Rust contracts. Grounded in a 29-label adversarially-verified answer key + CI gate.",

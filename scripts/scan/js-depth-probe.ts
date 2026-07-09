@@ -1,12 +1,13 @@
 /** One-off calibration probe: score the JS answer key with the real fetch path. */
 import { computeJsDepth } from "../../src/lib/js-depth";
-import { JS_DEEP, JS_SHALLOW } from "./depth-labels";
+import { JS_DEEP, JS_DEEP_FRONTIER, JS_SHALLOW } from "./depth-labels";
 import { createGh, fetchRepoCode } from "./fetch-repo-code";
 
 const gh = createGh(process.env.GITHUB_TOKEN?.trim() ?? "");
 async function main() {
 	for (const [band, list] of [
 		["DEEP", JS_DEEP],
+		["FRONTIER", JS_DEEP_FRONTIER],
 		["SHALLOW", JS_SHALLOW],
 	] as const) {
 		for (const { fullName } of list) {
