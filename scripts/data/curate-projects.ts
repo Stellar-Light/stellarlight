@@ -39,6 +39,20 @@ const TYPES_ADD: Record<string, string[]> = {
 	etherfuse: ["Anchor"],
 };
 
+/** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
+ * rows the 2026-07-07 sync mis-wrote with the partner's incorporation country.
+ * Grounding per row: [] = the corridor is regional/global (the partner record's
+ * `regions` carries it; a wrong single country is worse than honest absence).
+ * bitso's corridors are proven by its own CNBV/GFSC compliance currencies
+ * (MXN/BRL/ARS/COP). Rows retire (no-op) once applied — equality-checked. */
+const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
+	"boss-pay": [], // HQ=US; corridors = Africa/LatAm remittance (regions field)
+	"ripe-money": [], // HQ=Singapore; "off-ramp for Asia"
+	"coca-wallet": [], // HQ=UAE; global wallet
+	"blox-global": [], // HQ=US; "stablecoins globally"
+	bitso: ["Mexico", "Brazil", "Argentina", "Colombia"],
+};
+
 // sls-017 (durable half): chains a project supports, lowercase. Fill-if-empty —
 // so omission ≠ negation on wallet/multichain records.
 const SUPPORTED_NETWORKS: Record<string, string[]> = {
@@ -125,7 +139,14 @@ async function main() {
 	for (const pt of partnersRes.docs as any[]) {
 		const seps: string[] = pt.seps ?? [];
 		const currencies = csv(pt.compliance?.currencies);
-		const countries = pt.country ? [String(pt.country)] : [];
+		// Review 2026-07-08 finding 27: pt.country is the partner's primary
+		// JURISDICTION (incorporation/HQ), NOT its fiat corridor — copying it
+		// wrote "United States" as boss-pay's corridor (its corridors are
+		// Africa/LatAm) and "Singapore" for ripe-money (Asia off-ramp). Corridor
+		// countries now come ONLY from the explicit grounded map below; the sync
+		// carries currencies (compliance-grounded) + SEPs (toml-grounded), which
+		// ARE corridor facts.
+		const countries: string[] = [];
 		if (!seps.length && !currencies.length && !countries.length) continue;
 		// Partner slug is often `anchor-<name>`; the project slug is `<name>`.
 		const candidates = [pt.slug, String(pt.slug).replace(/^anchor-/, "")];
@@ -239,6 +260,37 @@ async function main() {
 			console.log(
 				"  (none — all ramp-capable partners' projects carry Anchor)",
 			);
+	}
+
+	// ── finding 27: corridor-country corrections (OVERWRITE, equality-guarded) ──
+	console.log("\n── Coverage country corrections (finding 27) ──");
+	for (const [slug, fix] of Object.entries(COVERAGE_COUNTRY_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const cur: string[] = d.coverage?.countries ?? [];
+		if (JSON.stringify(cur) === JSON.stringify(fix)) {
+			console.log(`  ${slug}: already corrected, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: countries [${cur.join(", ")}] → [${fix.join(", ")}]`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { coverage: { ...(d.coverage ?? {}), countries: fix, asOf: ASOF } },
+		});
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──

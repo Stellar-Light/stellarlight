@@ -475,7 +475,9 @@ async function main() {
 	// (join on slug, stripping the "anchor-" prefix) so cards/profiles/concierge
 	// all show the SAME logo as the projects page. OVERWRITES — the project logo
 	// is the source of truth here.
-	console.log("\n── Logo backfill (from matching project logos) ──");
+	console.log(
+		"\n── Logo backfill (fill-if-empty from matching project logos) ──",
+	);
 	const APP = "https://stellarlight.xyz";
 	const wantedProjectSlugs = [
 		...new Set(docs.map((d) => String(d.slug).replace(/^anchor-/, ""))),
@@ -513,6 +515,13 @@ async function main() {
 			logoNoop++;
 			continue;
 		}
+		// Review 2026-07-08 finding 26: this OVERWROTE partner-set logos on every
+		// run. Fill-if-empty now — the project logo seeds a missing partner logo,
+		// but a logo the partner chose is theirs.
+		if (d.logoUrl) {
+			logoNoop++;
+			continue;
+		}
 		console.log(
 			`  ${d.name} (${d.slug}) — logoUrl: ${d.logoUrl ?? "(none)"} → ${logo}`,
 		);
@@ -526,9 +535,7 @@ async function main() {
 	if (projLogo.size === 0) console.log("  (no matching project logos found)");
 	else console.log(`  (${logoNoop} already correct, no-op)`);
 
-	console.log(
-		"\n── Compliance & corridors (VERIFIED; overwrites the group) ──",
-	);
+	console.log("\n── Compliance & corridors (VERIFIED; fill-if-empty) ──");
 	for (const [slug, comp] of Object.entries(COMPLIANCE_ENRICH)) {
 		const d = bySlug.get(slug);
 		if (!d) {
@@ -545,6 +552,19 @@ async function main() {
 		]
 			.filter(Boolean)
 			.join(" · ");
+		// Review 2026-07-08 finding 25: this used to OVERWRITE the whole group on
+		// every run, reverting any compliance edit made after the hardcoded
+		// snapshot date. Fill-if-empty now: seed once, then the record (admin or
+		// partner edits) is the source of truth. Re-asserting updated facts =
+		// update the map AND clear the group in admin (deliberate two-step).
+		const hasCompliance =
+			(d.compliance?.licenses?.length ?? 0) > 0 ||
+			d.compliance?.kycRequired != null ||
+			!!d.compliance?.currencies;
+		if (hasCompliance) {
+			console.log(`  ${d.name} (${slug}) — compliance already set, skip`);
+			continue;
+		}
 		console.log(`  ${d.name} (${slug}) — compliance → ${summary}`);
 		writes.push({
 			id: d.id,
