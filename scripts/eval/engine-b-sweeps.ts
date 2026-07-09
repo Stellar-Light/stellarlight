@@ -98,7 +98,7 @@ function norm(s: string): string {
 }
 
 async function main() {
-	console.log(`Engine B — data-consistency sweeps → ${BASE}\n`);
+	console.error(`Engine B — data-consistency sweeps → ${BASE}`);
 	const report: Record<string, unknown> = {};
 
 	// frame: full project corpus by category (empty q returns nothing)
@@ -127,7 +127,7 @@ async function main() {
 				"projects",
 			)),
 		);
-	console.log(`frame: ${projects.length} projects\n`);
+	console.error(`frame: ${projects.length} projects`);
 
 	// ── S1 PROSE⇄STRUCTURE divergence ──
 	const s1: Array<{
