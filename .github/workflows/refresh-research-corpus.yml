@@ -68,6 +68,13 @@ jobs:
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-seps.ts --execute
 
+      - name: Ingest CAPs (core protocol proposals)
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+        run: pnpm exec tsx scripts/ingest-caps.ts --execute
+
       - name: Ingest lumenloop (awesome-stellar-community-fund)
         if: inputs.source == '' || inputs.source == 'lumenloop'
         continue-on-error: true

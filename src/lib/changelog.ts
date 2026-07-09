@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.6",
+		type: "added",
+		summary:
+			"searchResearch gains the `cap` source — Core Advancement Proposals (stellar-protocol/core) join the corpus at SEP-tier authority, closing the audit's biggest protocol-lane gap (CAP-number queries previously fell through to meeting-notes junk). Dev-docs ingestion also extended: the page cap no longer truncates ~400 reference pages (tokens/asset-issuance, validators, learn), and author/pagination junk URLs are excluded at the source.",
+		detail:
+			"New corpus content lands with the next scheduled refresh-research-corpus run. cap chunks are evergreen (no freshness decay), authority 1.0, filterable via ?source=cap.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.5",
 		type: "fixed",
 		summary:

@@ -1484,7 +1484,7 @@ export interface operations {
                 /** @description Natural-language search query */
                 q: string;
                 /** @description Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions. */
-                source?: "sdf-blog" | "scf-handbook" | "sep" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "ec-developer-report";
+                source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "ec-developer-report";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;
             };

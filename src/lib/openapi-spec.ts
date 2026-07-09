@@ -981,6 +981,7 @@ export const spec: OpenAPISpec = {
 								"sdf-blog",
 								"scf-handbook",
 								"sep",
+								"cap",
 								"dev-docs",
 								"paper",
 								"scf-proposal",
