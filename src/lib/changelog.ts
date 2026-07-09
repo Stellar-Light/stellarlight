@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
+		surfaces: ["api-client"],
+		version: "@stellar-light/api-client@1.5.0",
+		type: "added",
+		summary:
+			"api-client 1.5.0 published: regenerated types for spec 1.6.1 — codeVerified gains `symbols`, `sdkCapabilities`, `mainnetContractId`; Project gains `canonicalSlug`, `lifecycle`, restored `anchorProfile`; partners responses are now fully typed (Partner/PartnersResponse schemas).",
+		detail:
+			"Registry-verified: the published d.ts carries the new codeVerified fields. Consumers on 1.4.x see the new response fields as untyped extras; upgrade for autocomplete/type-safety on code-facts data.",
+	},
+	{
+		date: "2026-07-09",
 		surfaces: ["api", "api-client"],
 		type: "fixed",
 		summary:
