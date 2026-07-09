@@ -399,14 +399,27 @@ async function main() {
 		console.log("DRY RUN — none applied.");
 		process.exit(0);
 	}
+	// Per-write isolation (2026-07-09 incident: one ValidationError — an
+	// enum value missing from the Types options — aborted the whole batch,
+	// losing 12 valid writes). A bad row fails loudly; the rest still land.
+	let failed = 0;
 	for (const w of writes) {
-		await payload.update({
-			collection: "projects",
-			id: w.id,
-			data: w.data,
-			overrideAccess: true,
-		});
-		console.log(`  wrote: ${w.slug}`);
+		try {
+			await payload.update({
+				collection: "projects",
+				id: w.id,
+				data: w.data,
+				overrideAccess: true,
+			});
+			console.log(`  wrote: ${w.slug}`);
+		} catch (err) {
+			failed++;
+			console.error(`  FAILED: ${w.slug} — ${String(err)}`);
+		}
+	}
+	if (failed) {
+		console.error(`\n${failed} write(s) FAILED — fix and re-run.`);
+		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
 	process.exit(0);
