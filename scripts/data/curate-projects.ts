@@ -69,6 +69,23 @@ const STATUS_FIX: Record<string, { from: string; to: string }> = {
 	warpdrive: { from: "Live", to: "Development" },
 };
 
+/** Rebrands — name, website, and description move together so both the old
+ * and new brand stay searchable. Equality no-ops keep reruns clean. */
+const REBRANDS: Record<
+	string,
+	{ name: string; website: string; description: string }
+> = {
+	// boxy 2026-07-09: "tricorn is live (as) utexo" — human-confirmed live.
+	// tricorn.network 301s → bridge.utexo.com → mint.utexo.com. Coinspect
+	// audited the Stellar/Soroban integration (stellarsecurityportal.com/report/31).
+	tricorn: {
+		name: "Utexo",
+		website: "https://mint.utexo.com",
+		description:
+			"Utexo (formerly Tricorn) is a live cross-chain bridge supporting EVM and non-EVM chains, moving assets to and from Stellar. Its Stellar/Soroban bridge integration was audited by Coinspect. Rebranded from tricorn.network to utexo.com.",
+	},
+};
+
 /** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
  * rows the 2026-07-07 sync mis-wrote with the partner's incorporation country.
  * Grounding per row: [] = the corridor is regional/global (the partner record's
@@ -112,6 +129,7 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	stronghold: ["stellar", "evm", "xrpl"], // gateway.stronghold.co/bridge (SHx-only: Stellar⇄Ethereum + XRPL leg live)
 	"templar-protocol": ["stellar", "bitcoin", "evm", "near"], // templarfi.org/blog/stellar launch post; bridgeless (NEAR chain sigs)
 	warpdrive: ["stellar", "evm"], // warp-drive.xyz targets Base/Ethereum/Optimism/BNB — NOT yet launched (see STATUS_FIX)
+	tricorn: ["stellar", "evm"], // Coinspect-audited Stellar⇄EVM bridge; live as Utexo (boxy-confirmed 2026-07-09)
 	helix: ["canton"], // helixlabs.org: "not live on any chain other than Canton"; Stellar = roadmap (see STATUS_FIX)
 	zkcross: ["stellar", "evm"],
 };
@@ -340,6 +358,39 @@ async function main() {
 	}
 
 	// ── sls-017 (durable): supportedNetworks (fill-if-empty) ──
+	// ── rebrands (name + website + description together) ──
+	console.log("\n── Rebrands ──");
+	for (const [slug, rb] of Object.entries(REBRANDS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
+		const data: any = {};
+		if (d.name !== rb.name) data.name = rb.name;
+		if (d.shortDescription !== rb.description)
+			data.shortDescription = rb.description;
+		if ((d.links?.website ?? "") !== rb.website)
+			data.links = { ...(d.links ?? {}), website: rb.website };
+		if (!Object.keys(data).length) {
+			console.log(`  ${slug}: already rebranded, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: ${d.name} → ${rb.name} (${Object.keys(data).join(", ")})`,
+		);
+		writes.push({ id: d.id, slug, data });
+	}
+
 	// ── launch-status corrections (from-guarded, retire once applied) ──
 	console.log("\n── Status fixes (from-guarded) ──");
 	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
