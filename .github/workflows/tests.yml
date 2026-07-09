@@ -1,0 +1,26 @@
+# Unit tests in CI — review 2026-07-08 finding 20: the vitest suite (incl. the
+# write-shape FORBIDDEN_WRITE_KEYS safety assertions the scanner's zero-demotion
+# claim depends on) ran in NO workflow; "CI-asserted" was aspirational. Now it
+# gates every PR. The DB-integration file needs a live DB and is excluded here
+# (it runs locally via test:int).
+name: Unit tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: { contents: read }
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run src/lib/__tests__/
