@@ -232,6 +232,29 @@ async function main() {
 		bad("rfps open round", `fetch failed: ${String(err)}`);
 	}
 
+	// F6 guard (lessons class 23): wallet/protocol partners must be VISIBLE
+	// under the default quality bar — type=wallet returning 0 read as "none
+	// exist" while 5 sat behind null taglines. filteredOut discloses hidden
+	// rows; this asserts the marquee types actually surface.
+	try {
+		for (const [ptype, min] of [
+			["wallet", 3],
+			["protocol", 3],
+		] as const) {
+			const pr = await j(`/api/partners?type=${ptype}`);
+			const n = pr.meta?.counts?.returned ?? 0;
+			const hidden = pr.meta?.counts?.filteredOut ?? 0;
+			if (n < min)
+				bad(
+					`partners ${ptype} visibility`,
+					`type=${ptype} returned ${n} (< ${min}) with ${hidden} filtered out — quality bar re-hiding marquee partners`,
+				);
+			else ok(`partners ${ptype} visibility: ${n} visible, ${hidden} filtered`);
+		}
+	} catch (err) {
+		bad("partners visibility", `fetch failed: ${String(err)}`);
+	}
+
 	// 5. Known-item recall — the answer to "how do we catch important misses?"
 	//    (Tyler, raven#8: Etherfuse, SushiSwap). A prose-only search silently
 	//    DROPS a well-known entity when a category/corridor query is phrased in
