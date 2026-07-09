@@ -81,6 +81,7 @@ const SEEDS: Array<{
 	supportedNetworks: string[];
 	shortDescription: string;
 	links: { website?: string; github?: string };
+	provenance: { source: "LumenloopSeed" | "UserSubmitted" | "AdminEdit" };
 }> = [
 	// boxy 2026-07-09: the launching-vs-launched contrast needs the launching
 	// side represented. Identity verified via the Certora audit PDF (Certora/
@@ -102,6 +103,8 @@ const SEEDS: Array<{
 			website: "https://www.spectra.finance",
 			github: "https://github.com/perspectivefi",
 		},
+		// provenance.source is required; AdminEdit = curated by us.
+		provenance: { source: "AdminEdit" },
 	},
 ];
 
@@ -516,7 +519,9 @@ async function main() {
 	console.log(`\n${writes.length} write(s) planned.`);
 	if (!EXECUTE) {
 		console.log("DRY RUN — none applied.");
-		process.exit(0);
+		// honor exitCode set by failed writes/creates (a bare exit(0) was
+		// stomping it — the 2026-07-09 seed failure ran green).
+		process.exit(process.exitCode ?? 0);
 	}
 	// Per-write isolation (2026-07-09 incident: one ValidationError — an
 	// enum value missing from the Types options — aborted the whole batch,
