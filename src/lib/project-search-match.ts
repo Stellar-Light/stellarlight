@@ -303,7 +303,16 @@ export function tokenize(q: string): string[] {
 	const rawWord = q.trim();
 	if (!/\s/.test(rawWord) && tokens.length > 1) {
 		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
-		if (joined.length > 2 && !tokens.includes(joined)) tokens.push(joined);
+		if (joined.length > 2 && !tokens.includes(joined)) {
+			// Drop sub-3-char fragments once the joined form exists: 'DeRisk' →
+			// [risk, derisk], 'DeFi' → [defi]. Two-char fragments ('de', 'fi')
+			// substring-match half the directory and flood the DB candidate
+			// window, so the actual named record never loads (the live DeRisk
+			// miss) — and they add no discrimination the joined form lacks.
+			const kept = tokens.filter((t) => t.length >= 3);
+			tokens.length = 0;
+			tokens.push(...kept, joined);
+		}
 	}
 	return tokens;
 }

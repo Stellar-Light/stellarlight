@@ -209,7 +209,11 @@ describe("review finding 2 — identifier-form queries", () => {
 			"escrow",
 			"releaseescrow",
 		]);
-		expect(tokenize("DeRisk")).toEqual(["de", "risk", "derisk"]);
+		// Sub-3-char fragments drop once the joined form exists — they flood
+		// the DB candidate window (the live DeRisk miss) without adding any
+		// discrimination the joined form lacks.
+		expect(tokenize("DeRisk")).toEqual(["risk", "derisk"]);
+		expect(tokenize("DeFi")).toEqual(["defi"]);
 		// Multi-word queries are untouched — no joined form appended.
 		expect(tokenize("release escrow")).toEqual(["release", "escrow"]);
 	});
