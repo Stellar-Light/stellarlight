@@ -477,6 +477,7 @@ async function main() {
 	const now = new Date();
 	let created = 0;
 	let updated = 0;
+	let writeFailed = 0;
 	for (const r of results) {
 		const existing = await payload.find({
 			collection: "link-checks" as any,
@@ -528,21 +529,28 @@ async function main() {
 			})),
 		};
 
-		if (prev) {
-			await payload.update({
-				collection: "link-checks" as any,
-				id: prev.id,
-				data,
-				depth: 0,
-			});
-			updated++;
-		} else {
-			await payload.create({
-				collection: "link-checks" as any,
-				data,
-				depth: 0,
-			});
-			created++;
+		// Per-write isolation (2026-07-09): a duplicate-key race or validation
+		// error on one URL must not abandon the remaining upserts + cleanup.
+		try {
+			if (prev) {
+				await payload.update({
+					collection: "link-checks" as any,
+					id: prev.id,
+					data,
+					depth: 0,
+				});
+				updated++;
+			} else {
+				await payload.create({
+					collection: "link-checks" as any,
+					data,
+					depth: 0,
+				});
+				created++;
+			}
+		} catch (err) {
+			writeFailed++;
+			console.error(`  WRITE FAILED: ${r.url} — ${String(err)}`);
 		}
 	}
 
@@ -554,7 +562,7 @@ async function main() {
 			`Skipping cleanup: ${collectorErrors} collector(s) failed — a partial URL set must not drive deletions.`,
 		);
 		console.log(
-			`Persisted: ${created} created, ${updated} updated, 0 cleaned up (skipped).`,
+			`Persisted: ${created} created, ${updated} updated, ${writeFailed} write-failed, 0 cleaned up (skipped).`,
 		);
 		process.exit(0);
 	}
@@ -578,9 +586,9 @@ async function main() {
 	}
 
 	console.log(
-		`Persisted: ${created} created, ${updated} updated, ${deleted} cleaned up.`,
+		`Persisted: ${created} created, ${updated} updated, ${writeFailed} write-failed, ${deleted} cleaned up.`,
 	);
-	process.exit(0);
+	process.exit(writeFailed ? 1 : 0);
 }
 
 main().catch((err) => {
