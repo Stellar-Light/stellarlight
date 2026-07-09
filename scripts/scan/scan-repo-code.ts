@@ -35,6 +35,7 @@ import {
 	extractCodeSymbols,
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
+import { computeJsDepth } from "../../src/lib/js-depth";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
@@ -215,8 +216,27 @@ async function main() {
 				errored++;
 				line = `  error  ${full.padEnd(44)} no-tree`;
 			} else {
-				const depth =
+				let depth =
 					r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
+				// gist gap 1 phase 2: for JS/TS dapps, computeCodeDepth returns a
+				// FLAT 0.3 (it only scores Rust contracts). Replace it with the
+				// calibrated jsDepth when this is a JS repo with actual JS sources —
+				// real dapps rise above 0.3, boilerplate stays at/below it.
+				if (r.outcome === "ok" && r.proof === "js-sdk") {
+					const jd = computeJsDepth({
+						fullName: full,
+						blobs: r.depthInput.blobs,
+						stellarJsDep: r.facts.stellarJsDep,
+						scalars: {
+							isFork: r.meta.isFork,
+							tagCount: r.meta.tagCount,
+							readmeText: r.depthInput.scalars.readmeText,
+							topics: r.depthInput.scalars.topics ?? [],
+							nameLooksTemplate: r.meta.nameLooksTemplate,
+						},
+					});
+					if (!jd.reasons.includes("no-js-sources")) depth = jd.jsDepth;
+				}
 				// Rust pub-surface first; JS/TS exported surface when there is none
 				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
 				const rustSymbols =

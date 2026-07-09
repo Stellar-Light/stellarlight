@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api", "api-client"],
+		type: "changed",
+		summary:
+			"codeDepth for JS/TS dapps is now the calibrated jsDepth, not a flat 0.3. A repo's `codeVerified.codeDepth` now separates real Stellar integration (wallets, dapps, SDKs — 0.5-1.0) from boilerplate/templates (≤0.3) for js-sdk repos, using the same 0-1 scale as Rust contracts. Grounded in a 29-label adversarially-verified answer key + CI gate.",
+		detail:
+			"Only js-sdk-proof repos with actual JS sources are re-scored; Rust contracts, other-language SDKs, and non-code repos are unchanged. sdkCapabilities carries the underlying evidence. Populated as scan waves reach non-Rust repos (was uniformly 0.3 before).",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api", "api-client"],
 		type: "added",
 		summary:
 			"JS/TS code facts (gist gap 1, phase 1): searchRepos + explainRepo codeVerified gains `sdkCapabilities` — Stellar SDK capability tags detected in a repo's actual JS/TS sources (tx-building, signing, soroban-rpc, sep10-auth, sep24-ramp, wallet-kit, passkey, …), and `symbols` now covers JS/TS exported surfaces when a repo has no Rust.",
