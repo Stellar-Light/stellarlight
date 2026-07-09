@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.8",
+		type: "added",
+		summary:
+			"F7+F8 (audit root #8): cross-lane hints — empty or weak-match responses on searchProjects/searchRepos/searchResearch/getPartners now carry meta.hints pointing at the lane that answers ('code → /api/repos/search', 'providers → /api/partners'…); superlative queries ('biggest dex') get meta.superlativeNote stating result order is NOT a size/usage ranking; Project rows gain tvlUSD/tvlAsOf (DefiLlama, weekly refresh; null = not tracked, never zero).",
+		detail:
+			"Also: single-word camelCase known-item queries fixed (q=DeRisk missed the record named DeRisk — the raw joined form now participates alongside the split tokens; Engine A run-1 catch). Hints appear ONLY on empty/relaxed-tier responses — healthy strict results are unchanged.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.7",
 		type: "changed",
 		summary:

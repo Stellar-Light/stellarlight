@@ -294,6 +294,17 @@ export function tokenize(q: string): string[] {
 	for (const [phrase, code] of Object.entries(CURRENCY_NAME_TO_CODE)) {
 		if (ql.includes(phrase) && !tokens.includes(code)) tokens.push(code);
 	}
+	// Engine A run-1 catch (DeRisk): a single-word camelCase/punctuated query
+	// splits into tokens and the RAW form never participates — q=DeRisk missed
+	// the record named DeRisk while q=derisk hit top-1. Re-append the joined
+	// raw form: the named record (whose haystack carries the joined name)
+	// passes strict; token-soup matches that only hit the fragments drop a
+	// tier. Space-containing queries are untouched.
+	const rawWord = q.trim();
+	if (!/\s/.test(rawWord) && tokens.length > 1) {
+		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (joined.length > 2 && !tokens.includes(joined)) tokens.push(joined);
+	}
 	return tokens;
 }
 

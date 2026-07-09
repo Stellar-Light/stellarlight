@@ -454,7 +454,8 @@ async function main() {
 		if (d.name !== rb.name) data.name = rb.name;
 		if (d.shortDescription !== rb.description)
 			data.shortDescription = rb.description;
-		if ((d.links?.website ?? "") !== rb.website)
+		const normUrl = (u: string) => u.replace(/\/+$/, "");
+		if (normUrl(d.links?.website ?? "") !== normUrl(rb.website))
 			data.links = { ...(d.links ?? {}), website: rb.website };
 		if (!Object.keys(data).length) {
 			console.log(`  ${slug}: already rebranded, skip`);

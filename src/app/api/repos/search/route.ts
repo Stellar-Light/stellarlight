@@ -15,6 +15,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
+import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { searchRepos } from "@/lib/repo-search";
@@ -56,6 +57,9 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...(laneHints("repos", { empty: repos.length === 0 })
+					? { hints: laneHints("repos", { empty: repos.length === 0 }) }
+					: {}),
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				filters: { q, language: language || null, minScore, limit, offset },

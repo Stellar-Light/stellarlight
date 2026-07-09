@@ -648,6 +648,10 @@ export interface components {
                 asOf?: string | null;
                 url?: string;
             } | null;
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf. */
+            tvlUSD?: number | null;
+            /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
+            tvlAsOf?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
             canonicalSlug?: string | null;
             /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records. */

@@ -199,9 +199,19 @@ describe("review finding 1 — corridor-discriminating admission", () => {
 });
 
 describe("review finding 2 — identifier-form queries", () => {
-	it("snake_case and camelCase queries split into word tokens", () => {
-		expect(tokenize("release_escrow")).toEqual(["release", "escrow"]);
-		expect(tokenize("EscrowContract")).toEqual(["escrow", "contract"]);
+	it("snake_case and camelCase queries split into word tokens AND keep the raw joined form (DeRisk fix)", () => {
+		// Engine A run-1 catch: q=DeRisk missed the record named DeRisk because
+		// only the split fragments participated. The joined raw form now rides
+		// along — the named record passes strict, fragment-only matches drop a
+		// tier.
+		expect(tokenize("release_escrow")).toEqual([
+			"release",
+			"escrow",
+			"releaseescrow",
+		]);
+		expect(tokenize("DeRisk")).toEqual(["de", "risk", "derisk"]);
+		// Multi-word queries are untouched — no joined form appended.
+		expect(tokenize("release escrow")).toEqual(["release", "escrow"]);
 	});
 	it("hyphenated vocabulary stays intact", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");

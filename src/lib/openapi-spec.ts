@@ -1608,6 +1608,17 @@ export const spec: OpenAPISpec = {
 							url: { type: "string" },
 						},
 					},
+					tvlUSD: {
+						type: "number",
+						nullable: true,
+						description:
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf.",
+					},
+					tvlAsOf: {
+						type: "string",
+						nullable: true,
+						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+					},
 					canonicalSlug: {
 						type: "string",
 						nullable: true,
