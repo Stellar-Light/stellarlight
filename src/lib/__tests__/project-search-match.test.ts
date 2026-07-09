@@ -151,7 +151,11 @@ describe("review finding 1 — corridor-discriminating admission", () => {
 			shortDescription: "Philippines crypto wallet and fiat ramp.",
 			category: "Anchor",
 			types: ["Anchor"],
-			coverage: { countries: ["Philippines"], currencies: ["PHP"], seps: ["sep-24"] },
+			coverage: {
+				countries: ["Philippines"],
+				currencies: ["PHP"],
+				seps: ["sep-24"],
+			},
 		};
 		expect(structuredHit(coinsPh, intent, mexTokens, true)).toBe(false);
 	});
@@ -169,13 +173,33 @@ describe("review finding 1 — corridor-discriminating admission", () => {
 
 	it("pure ramp query (no discriminator) still admits by Anchor type", () => {
 		const t = tokenize("on-ramp anchors");
-		const anyAnchor = { name: "X", shortDescription: "", category: "Anchor", types: ["Anchor"] };
+		const anyAnchor = {
+			name: "X",
+			shortDescription: "",
+			category: "Anchor",
+			types: ["Anchor"],
+		};
 		expect(structuredHit(anyAnchor, intentTypesFor(t), t, true)).toBe(true);
 	});
 
 	it("non-ramp category query keeps type admission (Sushi class)", () => {
 		const t = tokenize("DEX AMM swap liquidity pool");
-		const sushi = { name: "Sushi", shortDescription: "AMM swaps and liquidity provision.", category: "Protocol/Contract", types: ["DEX"] };
+		const sushi = {
+			name: "Sushi",
+			shortDescription: "AMM swaps and liquidity provision.",
+			category: "Protocol/Contract",
+			types: ["DEX"],
+		};
 		expect(structuredHit(sushi, intentTypesFor(t), t, false)).toBe(true);
+	});
+});
+
+describe("review finding 2 — identifier-form queries", () => {
+	it("snake_case and camelCase queries split into word tokens", () => {
+		expect(tokenize("release_escrow")).toEqual(["release", "escrow"]);
+		expect(tokenize("EscrowContract")).toEqual(["escrow", "contract"]);
+	});
+	it("hyphenated vocabulary stays intact", () => {
+		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
 	});
 });

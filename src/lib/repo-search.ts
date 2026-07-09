@@ -365,7 +365,16 @@ const STOPWORDS = new Set<string>([
 // so it still searches (degenerate but non-empty). Exported so /api/projects/
 // search and tests share the exact tokenization.
 export function contentTokens(q: string): string[] {
+	// Identifier-form queries split into word tokens BEFORE lowercasing —
+	// review 2026-07-08 finding 2: symbolsHaystack normalizes docs
+	// (release_escrow → "release escrow") but a query token kept its raw form,
+	// so the most literal lookup the symbols feature advertises
+	// (q=release_escrow, q=EscrowContract) could never match. snake_case and
+	// camelCase become separate tokens ("release_escrow" → [release, escrow]);
+	// hyphenated terms ("on-ramp") are untouched.
 	const raw = q
+		.replace(/_/g, " ")
+		.replace(/([a-z])([A-Z])/g, "$1 $2")
 		.toLowerCase()
 		.split(/\s+/)
 		.filter((t) => t.length > 1);
