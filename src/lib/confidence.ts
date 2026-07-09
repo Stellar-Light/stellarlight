@@ -26,6 +26,8 @@ export const SCORE_MODEL_VERSION = "research-confidence-1";
 /** Per-source trust weight (0–1). Canonical specs/docs rank highest. */
 const AUTHORITY: Record<string, number> = {
 	sep: 1.0,
+	// Core protocol proposals — same canonical-spec tier as SEPs.
+	cap: 1.0,
 	"dev-docs": 0.95,
 	paper: 0.92,
 	audit: 0.9,
@@ -48,6 +50,7 @@ const DEFAULT_AUTHORITY = 0.6;
  */
 const EVERGREEN = new Set([
 	"sep",
+	"cap",
 	"dev-docs",
 	"paper",
 	"audit",

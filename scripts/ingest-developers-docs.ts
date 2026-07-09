@@ -26,7 +26,7 @@ import configPromise from "../src/payload.config";
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
 const limitArg = args.find((a) => a.startsWith("--limit="));
-const limit = limitArg ? Number(limitArg.split("=")[1]) : 500;
+const limit = limitArg ? Number(limitArg.split("=")[1]) : 1200;
 
 const BASE = "https://developers.stellar.org";
 const SITEMAP = `${BASE}/sitemap.xml`;
@@ -108,8 +108,20 @@ async function run() {
 
 	console.log("Listing sitemap…");
 	const allUrls = await fetchSitemapUrls(SITEMAP, BASE);
-	const urls = allUrls.slice(0, limit);
-	console.log(`  ${urls.length} pages (cap ${limit})`);
+	// F5a (audit root #5): junk URLs (author archives, pagination, tag indexes)
+	// were burning the page cap AND ingesting as dupe/nav chunks; and the blind
+	// slice cut ~400 real /docs pages (tokens, validators, learn) — vector
+	// search then papered over the holes at "high" confidence. Exclude junk,
+	// then order docs-first so a cap always keeps reference content.
+	const JUNK_URL =
+		/\/(authors|tags)\/|\/page\/\d+|\/meetings\/?$|\/search(\?|$)/i;
+	const kept = allUrls.filter((u) => !JUNK_URL.test(u));
+	const prio = (u: string) => (u.includes("/docs/") ? 0 : 1);
+	kept.sort((a, b) => prio(a) - prio(b) || a.localeCompare(b));
+	const urls = kept.slice(0, limit);
+	console.log(
+		`  ${urls.length} pages (cap ${limit}; ${allUrls.length - kept.length} junk excluded, ${allUrls.length} total)`,
+	);
 
 	const allChunks: ReturnType<typeof chunkMarkdown> = [];
 	let pageErrors = 0;

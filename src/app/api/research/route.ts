@@ -91,6 +91,7 @@ export async function GET(req: NextRequest) {
 		"sdf-blog",
 		"scf-handbook",
 		"sep",
+		"cap",
 		"dev-docs",
 		"paper",
 		"scf-proposal",
