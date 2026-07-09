@@ -20,6 +20,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
 import { boolParam, clampLimit } from "@/lib/http-params";
+import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
 import { passesQualityBar } from "@/lib/partner-quality";
@@ -308,6 +309,9 @@ export async function GET(req: NextRequest) {
 					limit,
 					offset,
 				},
+				...(laneHints("partners", { empty: partners.length === 0 })
+					? { hints: laneHints("partners", { empty: partners.length === 0 }) }
+					: {}),
 				counts: {
 					returned: partners.length,
 					total: totalMatching,

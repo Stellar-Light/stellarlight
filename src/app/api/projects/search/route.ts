@@ -16,6 +16,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { clampLimit } from "@/lib/http-params";
+import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
@@ -138,6 +139,9 @@ async function semanticProjectRows(
 			// records that HAVE both — the $project simply omitted the fields.
 			types: Array.isArray(p.types) ? p.types : [],
 			prominence: typeof p.prominence === "number" ? p.prominence : null,
+			// F8: TVL facts (DefiLlama; null = not tracked there, never zero)
+			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
+			tvlAsOf: p.tvlAsOf ?? null,
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -1089,6 +1093,18 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				matchMode,
+				...(superlativeNote(q) ? { superlativeNote: superlativeNote(q) } : {}),
+				...(laneHints("projects", {
+					empty: projects.length === 0,
+					weakMatch: matchMode === "majority" || matchMode === "loose-1",
+				})
+					? {
+							hints: laneHints("projects", {
+								empty: projects.length === 0,
+								weakMatch: matchMode === "majority" || matchMode === "loose-1",
+							}),
+						}
+					: {}),
 				// Hint to the caller (agent) so they can frame results honestly:
 				//   strict   → "every keyword matched"
 				//   loose-1  → "all but one keyword matched"

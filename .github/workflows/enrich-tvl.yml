@@ -1,0 +1,29 @@
+# Weekly DefiLlama TVL refresh (F8 serving depends on fresh tvlAsOf — class 8).
+# Report sections (liveness/discovery candidates) land in the job log for the
+# Part-3 liveness wave; writes are mapped-protocols-only (see enrich-tvl.ts).
+name: enrich-tvl
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch: {}
+concurrency:
+  group: enrich-tvl
+  cancel-in-progress: false
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Refresh TVL (execute)
+        run: pnpm exec tsx scripts/enrich-tvl.ts --execute | tee $GITHUB_STEP_SUMMARY

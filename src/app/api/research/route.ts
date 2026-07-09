@@ -22,6 +22,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
 import { clampLimit } from "@/lib/http-params";
+import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -364,6 +365,9 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...(laneHints("research", { empty: results.length === 0 })
+					? { hints: laneHints("research", { empty: results.length === 0 }) }
+					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
 				query: q,
