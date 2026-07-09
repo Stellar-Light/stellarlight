@@ -163,15 +163,15 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	],
 	[
 		"soroban-rpc",
-		/\bSorobanRpc\b|\brpc\.Server\b|\bsimulateTransaction\b|\bgetTransaction\b.*\brpc\b|soroban-rpc/,
+		/\bSorobanRpc\b|\brpc\.Server\b|\bsimulateTransaction\b|\bprepareTransaction\b|\bsendTransaction\b|soroban-rpc|\bSorobanDataBuilder\b/,
 	],
 	[
 		"contract-invoke",
-		/\bContract\(|\bcontract\.call\(|\binvokeHostFunction\b|\bassembleTransaction\b/,
+		/\bnew Contract\(|\bContract\(|[Cc]ontract\.call\(|\binvokeHostFunction\b|\bassembleTransaction\b|\bfuncArgsToScVals\b|\bnativeToScVal\b|\bscValToNative\b/,
 	],
 	[
 		"horizon",
-		/\bHorizon\.Server\b|horizon\.stellar\.org|\bserver\.loadAccount\b|\bserver\.submitTransaction\b/,
+		/\bHorizon\.Server\b|horizon\.stellar\.org|\bserver\.loadAccount\b|\bserver\.submitTransaction\b|\bTransactionBuilder\.fromXDR\b|\bStrKey\./,
 	],
 	["sep10-auth", /\bWebAuth\b|sep-?10|\bchallenge\s*transaction/i],
 	["sep24-ramp", /sep-?24|\binteractive\s*deposit|\bTransferServerService\b/i],

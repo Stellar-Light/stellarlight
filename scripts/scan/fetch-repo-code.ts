@@ -161,16 +161,30 @@ export function selectDepthPaths(
 		) ||
 		/\.(min|bundle)\.js$/i.test(p) ||
 		/\.d\.ts$/i.test(p);
-	const jsSources = tree
+	// Relevance-first selection (JS calibration lesson, same class as the Rust
+	// hoops case): pure top-8-by-size missed the Stellar integration files in
+	// big monorepos (allbridge SDK scored zero capabilities from 20k SLOC of
+	// non-Stellar files). Files whose PATH signals Stellar work rank first,
+	// then size fills the rest.
+	const JS_RELEVANT =
+		/(stellar|soroban|wallet|sign|horizon|payment|sep[-_]?\d|anchor|freighter|passkey|contract|bridge|srb|tx|transaction)/i;
+	const jsCandidates = tree
 		.filter(
 			(e) => e.type === "blob" && /\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(e.path),
 		)
 		.filter(
 			(e) => !isJsJunk(e.path) && !isTest(e.path) && (e.size ?? 0) <= 400_000,
-		)
+		);
+	const jsRelevant = jsCandidates
+		.filter((e) => JS_RELEVANT.test(e.path))
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
-		.slice(0, 8)
-		.map((e) => e.path);
+		.slice(0, 6);
+	const relevantSet = new Set(jsRelevant.map((e) => e.path));
+	const jsBySize = jsCandidates
+		.filter((e) => !relevantSet.has(e.path))
+		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
+		.slice(0, Math.max(2, 8 - jsRelevant.length));
+	const jsSources = [...jsRelevant, ...jsBySize].map((e) => e.path);
 	// Non-Rust relevance manifests: package.json/stellar.toml (JS/SEP-1) PLUS the
 	// other-language Stellar SDK manifests (Swift/Kotlin/Flutter/Go/Python) so
 	// code-signals can fire the lang-sdk proof instead of wrongly reading a
