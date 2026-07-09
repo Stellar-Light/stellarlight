@@ -304,3 +304,153 @@ export const DEEP_FRONTIER: LabeledRepo[] = [
 ];
 
 export const SHALLOW_FRONTIER: LabeledRepo[] = [];
+
+/**
+ * JS/TS dapp-depth answer key (gist gap 1, phase 2) — same discipline as the
+ * Rust bands: externally-grounded (live products/official SDKs vs official
+ * templates/tutorials), adversarially verified, never scorer-derived.
+ * Consumed by the depth-eval JS section; computeJsDepth calibrates here.
+ */
+export const JS_DEEP: LabeledRepo[] = [
+	{
+		fullName: "creit-tech/xbull-wallet",
+		why: "Real xBull wallet source: signing.service.ts signs Transaction/FeeBumpTransaction/Soroban auth via @stellar/stellar-sdk Keypair, plus SEP-7/10/24 services and a full stellar-sdk gateway; active pro...",
+	},
+	{
+		fullName: "stellarterm/stellarterm",
+		why: "Session.js builds/signs real transactions via @stellar/stellar-sdk (TransactionBuilder + Ledger/Trezor/Freighter/WalletConnect signing) plus first-party orderbook/multisig/SEP-24 modules; long-live...",
+	},
+	{
+		fullName: "blend-capital/blend-sdk-js",
+		why: "src/pool/pool_contract.ts builds real Soroban contract ops via @stellar/stellar-sdk (Contract.call + spec.funcArgsToScVals → XDR) across pool/backstop/emitter/pool_factory modules; official publish...",
+	},
+	{
+		fullName: "stellar-broker/ui",
+		why: "src/widget/wallet-kit.js has real wallet-connect + signing (StellarWalletsKit modal, signTx via TransactionBuilder.fromXDR on PUBLIC) and withdraw-form uses StrKey validation; it is the live stella...",
+	},
+	{
+		fullName: "RozoAI/rozo-rewards-miniapp",
+		why: "src/hooks/useRozoWallet.ts builds a real Soroban contract-invoke tx (@stellar/stellar-sdk TransactionBuilder + Contract.call pay, simulateTransaction, auth-entry XDR, signAuthEntry signing flow) pl...",
+	},
+	{
+		fullName: "diadata-org/soroban-oracle-feeders",
+		why: "TS-dominant repo; own source (apps/oracle/src/oracles/soroban.ts + packages/common/src/soroban.ts) does real @stellar/stellar-sdk work — TransactionBuilder, contract.call('set_multiple_values'), pr...",
+	},
+	{
+		fullName: "NoetherDEX/noether",
+		why: "web/lib/stellar/market.ts builds/signs/submits Soroban contract txs with @stellar/stellar-sdk (toScVal args, signTransaction flow, rpc/xdr/Horizon imports) plus wallet-kit connection and tx-builder...",
+	},
+	{
+		fullName: "Nectar-Network/nectar",
+		why: "frontend/lib/stellar.ts has genuine SDK integration (Stellar Wallets Kit multi-wallet connect/sign, Horizon balances, TransactionBuilder + Soroban rpc.Server/Contract/assembleTransaction contract i...",
+	},
+];
+
+export const JS_SHALLOW: LabeledRepo[] = [
+	{
+		fullName: "allbridge-io/allbridge-example-react",
+		why: 'README self-describes as "a simple example of how to integrate the Allbridge Core SDK" that "intentionally omits validation/error handling"; Stellar.ts is a ~30-line Freighter connect/sign wrap...',
+	},
+	{
+		fullName: "paltalabs/defindex-integration-tutorial",
+		why: 'README explicitly frames the repo as a video-tutorial production kit ("Tutorial completo... material necesario para producir un video tutorial") with demo-only code (src/demo/ CLI/backend/fronten...',
+	},
+	{
+		fullName: "soroswap/stellar-workshop",
+		why: 'README self-describes as an "educational workshop... for Rio University students"; repo is two tutorial scripts (workshop-rio.ts/soroswap.ts) doing testnet-only, console-narrated SDK walkthroughs...',
+	},
+	{
+		fullName: "etherfuse/ramp-api-example",
+		why: 'Self-described official API example ("Example of how to use the etherfuse Ramp API"; package.json "Simple example for how to use ramp API") whose only code is plain fetch() calls to api.etherfu...',
+	},
+	{
+		fullName: "ripe-money/tutorial-wallet-standard",
+		why: 'Repo self-describes as "Tutorial / exploratory app to understand Wallet Standard"; README calls it a "barebone" explore app, tree is a tiny create-next-app scaffold, and the SDK used is @solana...',
+	},
+	{
+		fullName: "reclaimprotocol/zkfetch-stellar-example",
+		why: 'Repo is named "-example" and its README self-describes as "a comprehensive demonstration"/"showcases how to" — official demo scaffold (0 stars, ~10 files); real but tutorial-purpose stellar-s...',
+	},
+	{
+		fullName: "sorobanhooks/sorobanhooks-integration-example",
+		why: 'Self-titled "Integration Example" — create-next-app boilerplate whose only source (BalanceStream.js) uses socket.io-client to hit sorobanhooks API; no Stellar SDK anywhere, 0 stars, 2-day commit ...',
+	},
+	{
+		fullName: "mowblox/upgrade-contracts-example",
+		why: 'Stock "Sample Hardhat Project" README, 12-file EVM boilerplate (Vending.sol + default Lock.ts test), single-day 2023 push, 0 stars, no Stellar SDK usage at all — scaffold-by-design.',
+	},
+	{
+		fullName: "mystic-finance/example-otc-project",
+		why: 'README states "This project simulates the codebase of a protocol integrating with Mysticswap" and package.json is named example-otc-protocol; NestJS/Mongo demo with no Stellar SDK deps at all (EV...',
+	},
+	{
+		fullName: "rangesecurity/oracle-example",
+		why: 'README opens with "This repository demonstrates how to fetch off-chain data... Example" (explicit example-by-design framing), and its TS client (anchor/client/sdk.ts, package.json) uses only @sol...',
+	},
+	{
+		fullName: "bluxcc/next-ts-blux-template",
+		why: 'Official Blux starter template ("A minimal Next starter with Blux already integrated"): 4-file app whose only Stellar-adjacent code is a BluxProvider wrapper (providers.tsx) and a trivial login/l...',
+	},
+	{
+		fullName: "boostylabs/react-webpack-template",
+		why: 'Self-described "template repository for react app": package.json has no Stellar deps at all, App.tsx is the stock Learn-React placeholder, whole tree is webpack/eslint scaffold config — generic b...',
+	},
+	{
+		fullName: "adamikhq/adamik-tutorial",
+		why: 'Tutorial/demo by design (repo name + README "Sodot Multichain Demo ... demonstrates how to interact"); zero Stellar SDK deps in package.json — tx encode/sign/broadcast go through Adamik\'s chain-a...',
+	},
+	{
+		fullName: "mowblox/blockexplorer-starter",
+		why: "Alchemy University Ethereum bootcamp starter — README is lesson/clone-the-starter framing, src/App.js is trivial alchemy-sdk getBlockNumber boilerplate on ETH_MAINNET with zero Stellar SDK code; te...",
+	},
+];
+
+/**
+ * JS_DEEP_FRONTIER — TRUE labels (verified live products/SDKs) the current
+ * scorer under-scores (2026-07-09 calibration run 2: 0.30-0.48). Dominant
+ * cause: monorepo selection dilution — the top-8 JS file sample misses the
+ * Stellar integration files (allbridge SDK: 19k SLOC sampled, zero
+ * capability hits; its srb/ integration sits below the cut). Non-gating;
+ * graduating rows = jsDepth v2 work. Never delete a true label the scorer
+ * fails — that would make the key circular.
+ */
+export const JS_DEEP_FRONTIER: LabeledRepo[] = [
+	{
+		fullName: "reflector-network/reflector-node",
+		why: "src/utils/rpc-helper.js does genuine @stellar/stellar-sdk@16 Soroban work — rpc.Server requests, Transaction/DecoratedSignature handling, submitTransaction with XDR result parsing — plus oracle/DAO...",
+	},
+	{
+		fullName: "glo-foundation/glo-wallet",
+		why: "Live Glo Dollar wallet with real SDK use in own source: lib/balance.ts parses Horizon txs via StellarSdk.TransactionBuilder.fromXDR, UserAuthModal.tsx does Freighter wallet connection via stellar-w...",
+	},
+	{
+		fullName: "idos-network/idos-sdk-js",
+		why: "Core package packages/kwil-infra has genuine @stellar/stellar-sdk integration — Stellar Keypair signing flow in create-kwil-signer.ts and Keypair.verify signature verification in signature-verifica...",
+	},
+	{
+		fullName: "dfns/dfns-sdk-ts",
+		why: "packages/lib-stellar/index.ts (published @dfns/lib-stellar 0.8.24) implements real signing: imports @stellar/stellar-sdk Transaction/FeeBumpTransaction/Networks, serializes tx envelope to XDR and a...",
+	},
+	{
+		fullName: "chatch/stellarexplorer",
+		why: "Live steexp.com explorer (2017-2026, 507 stars) with real @stellar/stellar-sdk@16 integration in its own app/lib/stellar/ — Soroban rpc.Server subclass, Horizon query builders, Federation/MuxedAcco...",
+	},
+	{
+		fullName: "lobstrco/lobstr-browser-extension",
+		why: "Official LOBSTR wallet extension (active, pushed 2026-07): Home.tsx uses @stellar/stellar-sdk Horizon.Server for live balance handling and background/messageListener/external/sign.ts + @lobstrco/si...",
+	},
+	{
+		fullName: "allbridge-io/allbridge-core-js-sdk",
+		why: "src/services/bridge/srb and src/utils/srb use @stellar/stellar-sdk for real Soroban contract tx building (swap_and_bridge), Horizon/SorobanRpc submission, trustlines and simulate/restore — first-pa...",
+	},
+];
+
+/** Gate for the JS bands — thresholds set from the first empirical run. */
+// Calibration run 2 (2026-07-09): gating min(DEEP)=0.510 (blend-sdk-js),
+// max(SHALLOW)=0.400 (the example-cap ceiling) → margin 0.110.
+export const JS_GATE = {
+	deepMin: 0.5,
+	shallowMax: 0.4,
+	marginMin: 0.05,
+	minCoverage: 0.75,
+};
