@@ -51,6 +51,7 @@ interface RepoDoc {
 	codeScannedAt?: string | null;
 	codeSymbols?: unknown;
 	mainnetContractId?: string | null;
+	sdkCapabilities?: unknown;
 }
 
 export interface RepoResult {
@@ -110,6 +111,10 @@ export interface CodeVerified {
 	 * echo-check at scan time) — unfakeable deployment evidence; null when no
 	 * verified address. */
 	mainnetContractId: string | null;
+	/** Stellar SDK capability tags from the repo's JS/TS sources (tx-building,
+	 * signing, soroban-rpc, sep10-auth, wallet-kit, …) — what a dapp actually
+	 * DOES with the SDK; [] until scanned post-2026-07-09 or no JS sources. */
+	sdkCapabilities: string[];
 }
 
 function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
@@ -127,6 +132,9 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 					.slice(0, 20)
 			: [],
 		mainnetContractId: d.mainnetContractId ?? null,
+		sdkCapabilities: Array.isArray(d.sdkCapabilities)
+			? d.sdkCapabilities.filter((s): s is string => typeof s === "string")
+			: [],
 	};
 }
 

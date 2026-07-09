@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { extractCodeSymbols, symbolsHaystack } from "../code-symbols";
+import {
+	detectSdkCapabilities,
+	extractCodeSymbols,
+	extractJsSymbols,
+	symbolsHaystack,
+} from "../code-symbols";
 
 const ESCROW_RS = `
 #![no_std]
@@ -82,5 +87,63 @@ describe("symbolsHaystack", () => {
 		expect(symbolsHaystack([1, "swap_exact_tokens", null])).toContain(
 			"swap exact tokens",
 		);
+	});
+});
+
+const WALLET_TS = `
+import { TransactionBuilder, Operation, Keypair } from "@stellar/stellar-sdk";
+import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
+
+export async function buildPaymentTx(dest: string, amount: string) {
+	const tx = new TransactionBuilder(account, { fee }).addOperation(
+		Operation.payment({ destination: dest, amount, asset }),
+	).build();
+	return tx;
+}
+export const signWithWallet = async (tx) => kit.signTransaction(tx.toXDR());
+export class EscrowClient {}
+module.exports.legacyHelper = () => {};
+function internalOnly() {}
+`;
+
+describe("extractJsSymbols (gap 1 phase 1)", () => {
+	it("extracts exported fns/consts/classes and CJS exports", () => {
+		const syms = extractJsSymbols([{ path: "src/wallet.ts", text: WALLET_TS }]);
+		expect(syms).toContain("buildPaymentTx");
+		expect(syms).toContain("signWithWallet");
+		expect(syms).toContain("EscrowClient");
+		expect(syms).toContain("legacyHelper");
+		expect(syms).not.toContain("internalOnly");
+	});
+	it("skips tests, non-JS files, and null blobs", () => {
+		expect(
+			extractJsSymbols([
+				{ path: "tests/wallet.test.ts", text: "export function fakeApi(){}" },
+				{ path: "src/lib.rs", text: "export function notJs(){}" },
+				{ path: "src/x.ts", text: null },
+			]),
+		).toEqual([]);
+	});
+});
+
+describe("detectSdkCapabilities", () => {
+	it("tags real wallet-integration capabilities from call patterns", () => {
+		const tags = detectSdkCapabilities([
+			{ path: "src/wallet.ts", text: WALLET_TS },
+		]);
+		expect(tags).toContain("tx-building");
+		expect(tags).toContain("signing");
+		expect(tags).toContain("wallet-kit");
+		expect(tags).not.toContain("sep24-ramp");
+	});
+	it("boilerplate with no SDK calls gets no tags", () => {
+		expect(
+			detectSdkCapabilities([
+				{
+					path: "src/app.tsx",
+					text: "export const App = () => <div>hello</div>;",
+				},
+			]),
+		).toEqual([]);
 	});
 });

@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api", "api-client"],
+		type: "added",
+		summary:
+			"JS/TS code facts (gist gap 1, phase 1): searchRepos + explainRepo codeVerified gains `sdkCapabilities` — Stellar SDK capability tags detected in a repo's actual JS/TS sources (tx-building, signing, soroban-rpc, sep10-auth, sep24-ramp, wallet-kit, passkey, …), and `symbols` now covers JS/TS exported surfaces when a repo has no Rust.",
+		detail:
+			"The dapp-depth fact set: 'real wallet integration vs boilerplate' is legible from which SDK calls appear. Closed tag enum; [] = not yet scanned post-2026-07-09 or no JS sources (scan-dated, not a negative). Scoring for non-Rust repos deliberately stays flat until a JS answer key is mined — these are facts, not judgments. Populated by scan waves.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api", "api-client"],
 		type: "fixed",
 		summary:
 			"Spec correction: `codeVerified.mainnetContractId` was mis-nested in the explainRepo response (a stray property under `content` instead of inside the schema — caught by spectral) and MISSING from the Repo component entirely. Now correctly placed in both; snapshot + client types regenerated.",

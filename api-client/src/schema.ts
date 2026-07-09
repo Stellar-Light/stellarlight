@@ -804,6 +804,8 @@ export interface components {
                 symbols?: string[];
                 /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
+                /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
+                sdkCapabilities?: string[];
             } | null;
         };
         RepoSearchResponse: {
@@ -1020,6 +1022,7 @@ export interface operations {
                             scannedAt?: string | null;
                             symbols?: string[];
                             mainnetContractId?: string | null;
+                            sdkCapabilities?: string[];
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;

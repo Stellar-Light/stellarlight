@@ -108,3 +108,89 @@ export function symbolsHaystack(symbols: unknown): string {
 		.replace(/([a-z])([A-Z])/g, "$1 $2")
 		.toLowerCase();
 }
+
+// ── JS/TS (gist gap 1, phase 1: facts, not scores) ─────────────────────────
+// The ~1,900 non-Rust repos carry no code-content signal at all. Phase 1
+// extracts (a) the exported symbol surface and (b) WHICH Stellar SDK
+// capabilities the code actually invokes — "real wallet integration vs
+// boilerplate" is legible from whether tx-building/signing/SEP flows appear.
+// Scoring stays flat (0.3) until a JS answer key is mined; these are facts.
+// All regexes bounded + newline-free in variable parts (finding-7 lesson).
+
+const JS_EXPORT_RES = [
+	// export function foo / export async function foo / export class Foo
+	/\bexport\s+(?:default\s+)?(?:async\s+)?(?:function|class)\s+([A-Za-z_$][A-Za-z0-9_$]{2,60})/g,
+	// export const foo = / export let foo =
+	/\bexport\s+(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]{2,60})\s*=/g,
+	// module.exports.foo = / exports.foo =
+	/\b(?:module\.)?exports\.([A-Za-z_$][A-Za-z0-9_$]{2,60})\s*=/g,
+];
+
+const JS_EXT = /\.(ts|tsx|js|jsx|mjs|cjs)$/i;
+
+/** Exported-symbol surface for JS/TS sources — same contract as the Rust
+ * extractor: pub(lic) API only, noise filtered, deduped, capped. */
+export function extractJsSymbols(blobs: SymbolBlob[]): string[] {
+	const out: string[] = [];
+	const seen = new Set<string>();
+	const add = (name: string) => {
+		const key = name.toLowerCase();
+		if (name.length < 4 || NOISE.has(key) || seen.has(key)) return;
+		seen.add(key);
+		if (out.length < MAX_SYMBOLS) out.push(name);
+	};
+	for (const b of blobs) {
+		if (out.length >= MAX_SYMBOLS) break;
+		if (!b.text || !JS_EXT.test(b.path) || isTestPath(b.path)) continue;
+		for (const re of JS_EXPORT_RES) {
+			for (const m of b.text.matchAll(re)) add(m[1]);
+		}
+	}
+	return out;
+}
+
+/** Stellar SDK capability tags — WHAT the dapp actually does with the SDK.
+ * Each tag fires on concrete call/import patterns, not vibes; the tag set is
+ * closed (documented enum) so consumers can filter on it. */
+const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	[
+		"tx-building",
+		/\bTransactionBuilder\b|\.addOperation\(|\bOperation\.(payment|invokeHostFunction|createAccount|changeTrust)\b/,
+	],
+	[
+		"signing",
+		/\bsignTransaction\b|\.sign\(\s*[A-Za-z_$]|\bKeypair\.fromSecret\b/,
+	],
+	[
+		"soroban-rpc",
+		/\bSorobanRpc\b|\brpc\.Server\b|\bsimulateTransaction\b|\bgetTransaction\b.*\brpc\b|soroban-rpc/,
+	],
+	[
+		"contract-invoke",
+		/\bContract\(|\bcontract\.call\(|\binvokeHostFunction\b|\bassembleTransaction\b/,
+	],
+	[
+		"horizon",
+		/\bHorizon\.Server\b|horizon\.stellar\.org|\bserver\.loadAccount\b|\bserver\.submitTransaction\b/,
+	],
+	["sep10-auth", /\bWebAuth\b|sep-?10|\bchallenge\s*transaction/i],
+	["sep24-ramp", /sep-?24|\binteractive\s*deposit|\bTransferServerService\b/i],
+	[
+		"wallet-kit",
+		/stellar-wallets-kit|@stellar\/wallet-sdk|\bfreighter(-api)?\b|albedo/i,
+	],
+	["passkey", /passkey-kit|\bPasskeyKit\b|webauthn/i],
+	["fee-bump", /\bfeeBump\b|\bTransactionBuilder\.buildFeeBumpTransaction\b/i],
+];
+
+export function detectSdkCapabilities(blobs: SymbolBlob[]): string[] {
+	const tags = new Set<string>();
+	for (const b of blobs) {
+		if (!b.text || !JS_EXT.test(b.path)) continue;
+		for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
+			if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+		}
+		if (tags.size === SDK_CAPABILITY_PATTERNS.length) break;
+	}
+	return [...tags].sort();
+}
