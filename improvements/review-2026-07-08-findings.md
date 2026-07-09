@@ -1,6 +1,6 @@
 # 2026-07-08 ship-day adversarial review — confirmed findings
 
-**Progress:** batch 1 (#387): findings 1/24/3+18+19/16 FIXED. #386: verify-claims revival + spec nesting. #388: finding 20 (CI tests) FIXED. Corridor fix live-verified (32→20 rows, Etherfuse retained; residual rows = finding 27's coverage-conflation, a DATA fix). Next queue: 27 (coverage data — incorporation≠corridor), 25/26 (curation overwrite semantics), 8/9/11/12 (link-checker hardening), 2 (symbol query normalization), 21 (self-audit retries/dedupe), remaining mediums/lows.
+**Progress:** batch 1 (#387): findings 1/24/3+18+19/16 FIXED. #386: verify-claims revival + spec nesting. #388: finding 20 (CI tests) FIXED. Corridor fix live-verified (32→20 rows, Etherfuse retained; residual rows = finding 27's coverage-conflation, a DATA fix). Batch 3 (#390 + curate execute, live-verified): findings 25/26/27 FIXED — coverage sync no longer writes HQ-as-corridor, 5 rows corrected on prod ("brazil on-ramp" → 3 strict rows, Bitso #1 via corrected corridor), compliance + logo writes fill-if-empty (dry run proved all seeded groups now skip). Next queue: 8/9/11/12 (link-checker hardening), 2 (symbol query normalization), 21 (self-audit retries/dedupe), 5 (breadth magnitude), 6 (probe body timeout), 7 (regex backtracking), 4 (budget accounting), remaining lows.
 
 39-agent review (6 dimensions → per-finding adversarial refute) over the 31 PRs merged 2026-07-08. 29 confirmed / 4 dismissed. Fix batch 1 (urgent prod-behavior) shipped same night; the rest is the working queue — strike through as fixed.
 
