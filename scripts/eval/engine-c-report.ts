@@ -15,10 +15,17 @@
  */
 import { readFileSync } from "node:fs";
 
-const [, , aPath, bPath, dPath, corpusPath] = process.argv;
+const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const [aPath, bPath, dPath, corpusPath] = positional;
+// --prev=<dir>: last successful run's evidence artifact (a.json/b.json/
+// d.json/corpus.json) — enables week-over-week deltas. Absent on the first
+// run or when the artifact expired; the report degrades to absolute values.
+const prevDir = process.argv
+	.find((a) => a.startsWith("--prev="))
+	?.slice("--prev=".length);
 if (!aPath || !bPath) {
 	console.error(
-		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json]",
+		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json] [--prev=dir]",
 	);
 	process.exit(2);
 }
@@ -33,6 +40,17 @@ function readJson(p: string): any {
 
 const a = readJson(aPath);
 const b = readJson(bPath);
+const prev = {
+	a: prevDir ? readJson(`${prevDir}/a.json`) : null,
+	b: prevDir ? readJson(`${prevDir}/b.json`) : null,
+	d: prevDir ? readJson(`${prevDir}/d.json`) : null,
+};
+const delta = (now?: number | null, before?: number | null): string => {
+	if (typeof now !== "number" || typeof before !== "number") return "";
+	const d = Math.round((now - before) * 10) / 10;
+	if (d === 0) return " (=)";
+	return d > 0 ? ` (▲${d})` : ` (▼${Math.abs(d)})`;
+};
 const lines: string[] = [];
 let red = false;
 
@@ -46,12 +64,20 @@ lines.push("");
 // ── Engine A: recall scoreboard ──
 lines.push("### Engine A — generated recall (per-bucket)");
 if (Array.isArray(a.board)) {
-	lines.push("| bucket | recall | floor | status |");
-	lines.push("|---|---|---|---|");
+	const prevRates = new Map<string, number>(
+		Array.isArray(prev.a?.board)
+			? prev.a.board.map((r: { bucket: string; rate: number }) => [
+					r.bucket,
+					r.rate,
+				])
+			: [],
+	);
+	lines.push("| bucket | recall | Δ wk | floor | status |");
+	lines.push("|---|---|---|---|---|");
 	for (const row of a.board) {
 		if (row.status === "RED") red = true;
 		lines.push(
-			`| ${row.bucket} | ${row.rate}% | ${row.floor}% | ${row.status === "RED" ? "🔴 BELOW FLOOR" : "🟢"} |`,
+			`| ${row.bucket} | ${row.rate}% | ${delta(row.rate, prevRates.get(row.bucket)) || "—"} | ${row.floor}% | ${row.status === "RED" ? "🔴 BELOW FLOOR" : "🟢"} |`,
 		);
 	}
 	const fails = (a.failures ?? []).length;
@@ -130,8 +156,22 @@ if (dPath) {
 	lines.push("");
 	lines.push("### Engine D — demand-side misses (real queries, replayed)");
 	if (d && !d._error && d.frame) {
+		const missKey = (m: { endpoint: string; query: string }) =>
+			`${m.endpoint} ${m.query}`;
+		const prevMisses = new Set(
+			(
+				(prev.d?.misses ?? []) as Array<{ endpoint: string; query: string }>
+			).map(missKey),
+		);
+		const nowMisses = new Set(
+			((d.misses ?? []) as Array<{ endpoint: string; query: string }>).map(
+				missKey,
+			),
+		);
+		const newMisses = [...nowMisses].filter((k) => !prevMisses.has(k)).length;
+		const resolved = [...prevMisses].filter((k) => !nowMisses.has(k)).length;
 		lines.push(
-			`Window ${d.windowDays}d: ${d.frame.realHits} real-consumer hits, ${d.frame.distinctQueries} distinct queries, top ${d.frame.replayed} replayed. **OK rate on real demand: ${d.okRate}%.**`,
+			`Window ${d.windowDays}d: ${d.frame.realHits} real-consumer hits, ${d.frame.distinctQueries} distinct queries, top ${d.frame.replayed} replayed. **OK rate on real demand: ${d.okRate}%${delta(d.okRate, prev.d?.okRate)}.**${prev.d?.misses ? ` Misses: +${newMisses} new / −${resolved} resolved vs last run.` : ""}`,
 		);
 		const misses = (d.misses ?? []) as Array<{
 			class: string;
