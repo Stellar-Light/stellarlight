@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-10",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Duplicate project records merged (12 pairs, e.g. stellar-expert/stellarexpert, soroban-pulse/sorobanpulse, coins-ph/coinsph): each pair was ONE project split across an SCF-funded record and a lumenloop-enriched record, splitting funding/description/repos between rows. The canonical record now carries the complete facts; the duplicate stays name-searchable as a lineage shadow (canonicalSlug → canonical, status Inactive, lifecycle.note explains). No records deleted; no shape change.",
+		detail:
+			"Consumers resolving a shadow should follow its canonicalSlug pointer for funding/status/repos. Aggregates (analyze funding, clusters, leaderboard) already exclude Inactive rows, so per-project stats stop double/under-counting. Repo enrichment now links repos only to canonical records.",
+	},
+	{
+		date: "2026-07-10",
+		surfaces: ["api"],
 		version: "openapi@1.7.11",
 		type: "changed",
 		summary:

@@ -124,6 +124,10 @@ async function main() {
 	// self-submitted fake project's repos could still enter the repos index and
 	// surface via /api/repos/search + inline codeReferences. Match the surface
 	// filter: Draft projects contribute no repos until promoted.
+	// Lineage shadows (canonicalSlug set = duplicate record of another project)
+	// are also skipped: both records of a dupe pair used to claim the same
+	// repos, leaving repos.projectSlug pointing at whichever record enriched
+	// last — the class-10 split-stats churn. Only the canonical links repos.
 	const projects = (
 		await payload.find({
 			collection: "projects",
@@ -131,7 +135,9 @@ async function main() {
 			pagination: false,
 			depth: 0,
 		})
-	).docs as Doc[];
+	).docs.filter(
+		(p) => !(p as Doc & { canonicalSlug?: string }).canonicalSlug,
+	) as Doc[];
 
 	// Builder reputation (Stellar Passport): index by github_username AND by each
 	// builder's listed repo full_names, so a repo by a credentialed/active builder
