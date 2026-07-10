@@ -83,6 +83,9 @@ jobs:
       - name: Ingest lumenloop (awesome-stellar-community-fund)
         if: inputs.source == '' || inputs.source == 'lumenloop'
         continue-on-error: true
+        env:
+          # per-file last-commit lookups (publishedAt) need the API rate lift
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-lumenloop.ts --execute
 
       - name: Ingest lumenloop research (ecosystem analyses)
