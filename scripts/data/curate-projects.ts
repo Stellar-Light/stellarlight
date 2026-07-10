@@ -92,13 +92,245 @@ const TYPES_ADD: Record<string, string[]> = {
  *    language ("Preparation for bringing WarpDrive to Stellar — Milestone 1").
  * Writes only when the stored status matches the WRONG value, so a later
  * manual correction is never clobbered; rows retire once applied. */
-const STATUS_FIX: Record<string, { from: string; to: string }> = {
-	helix: { from: "Live", to: "Development" },
-	warpdrive: { from: "Live", to: "Development" },
-	// boxy 2026-07-09 (human-confirmed dead) + hard evidence: DefiLlama TVL
-	// $93 (a LENDING protocol), repo eq-lab/slender last push 2025-10-03.
-	// Site still resolves — zombie, not offline; status is the honest signal.
-	slender: { from: "Live", to: "Inactive" },
+const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
+	{
+		helix: { from: "Live", to: "Development" },
+		warpdrive: { from: "Live", to: "Development" },
+		// boxy 2026-07-09 (human-confirmed dead) + hard evidence: DefiLlama TVL
+		// $93 (a LENDING protocol), repo eq-lab/slender last push 2025-10-03.
+		// Site still resolves — zombie, not offline; status is the honest signal.
+		slender: { from: "Live", to: "Inactive" },
+		// ── Liveness wave (boxy-approved 2026-07-10, improvements/liveness-
+		// triage-2026-07-10.md): 38 confirmed-dead flips. Each verdict required
+		// POSITIVE evidence (shutdown notice, parked/unregistered domain, or a
+		// fully abandoned footprint) from the per-project research pass; the
+		// per-row note becomes lifecycle.note so the record is ecosystem memory
+		// ("X WAS a live Y that shut down"), not silence. From-guarded: a later
+		// manual correction is never clobbered; rows retire once applied. ──
+		aerochain: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Parent company site wingleet.com is live (\u00a9 2026) but pivoted to aircraft redelivery/compliance intelligence with zero mention of Aerochain, blockchain, or Stellar; aerochain.wingleet.com no longer\u2026",
+		},
+		arcturus: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): The GPT backend domain arcturus-gpt.com is unresolvable and github.com/Soneso/Arcturus was last pushed 2024-03; the ChatGPT plugin platform it targeted was discontinued and Soneso's otherwise-activ\u2026",
+		},
+		b4b: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Primary brand domain parked for sale ('b4b.world for sale | Spaceship.com'), b4b.app serves invalid TLS only, newest footprint is 2022-23 hackathon submissions.",
+		},
+		benkiko: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): benkiko.xyz has no DNS record, GitHub org benkikodao has zero public repos, newest footprint is 2021 press + passive SCF/LinkedIn listings.",
+		},
+		blip: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Owner deliberately archived all four repos in the blipmonitor GitHub org (last push 2024-12, all archived=true) and blip.watch is unregistered; no relaunch found.",
+		},
+		borderdollar: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): borderdollar.co 404, borderdollar.com parked lander, founder's GitHub pushes only unrelated personal repos, Tracxn profile reports the company no longer active.",
+		},
+		brl: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): nTokens' own live site announces the BRL-on-Stellar anchor service was discontinued during 2024 ('Servi\u00e7o de Real Virtual \u2026 ser\u00e1 descontinuado ao longo de 2024') with fiat withdrawals not guarantee\u2026",
+		},
+		canfy: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): canfy.net NXDOMAIN with no Wayback snapshot, no GitHub org, zero product mentions via search \u2014 entire footprint gone.",
+		},
+		chaincred: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded landing page prince29chouhan.github.io/chaincred_landing 404s, author has no chaincred repo left, and search found no footprint at all \u2014 hackathon-grade project.",
+		},
+		cosmiclink: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): cosmic.link is NXDOMAIN, sibling cosmic.plus redirects to an expired-domain sale listing, and the cosmic-plus GitHub org's last real push was 2023-09.",
+		},
+		cosmicvote: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): cosmic.vote NXDOMAIN (last Wayback Nov 2023), parent cosmic.plus expired \u2192 domain-sale redirect, GitHub untouched since 2023-09 \u2014 footprint abandoned ~3 years.",
+		},
+		cryptocannoneer: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): blockshangerous.com unregistered (last indexed blog post 2021-04), GitHub org last push 2022-11; no newer footprint found.",
+		},
+		"ea-kazi": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): biotlabs.africa NXDOMAIN (last archived 2024-08), org stale since 2023-03, eakazi.com broken TLS, .io/.org NXDOMAIN; last sign of life is a ~2023/24 pivot post to ICP with no working product since.",
+		},
+		equilibre: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): equilibre.io unresolvable, cosmic-plus GitHub org idle since 2023-09, parent domain cosmic.plus now serves a domain-sales/parking page \u2014 entire footprint abandoned.",
+		},
+		forge: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): forgerpc.com is unresolvable, no GitHub org, and no footprint found via searches for 'Forge forgerpc Stellar Horizon Soroban RPC node deployment' \u2014 no mention of the product or a relaunch anywhere.",
+		},
+		"gecko-fuzz": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded website github.com/jjjutla/geckofuzz returns 404 \u2014 repo deleted (absent from the author's repo list) \u2014 and searches for 'geckofuzz' find no relaunch or other footprint.",
+		},
+		lumenaut: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): The pool's sole function was eliminated when Stellar removed protocol inflation (Protocol 12, Oct 2019 \u2014 coinmetrics: 'the end of inflation also means the end of the Lumenaut inflation pool'); lume\u2026",
+		},
+		"lumens-for-charity": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): lumensforcharity.tech unregistered; only footprint is SCF Round 3 material from January 2020 (galactictalk.org); no activity since.",
+		},
+		mimoto: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Only recorded footprint github.com/nkoorty/mimoto returns 404 and is absent from the owner's repo list; search found no footprint anywhere else.",
+		},
+		mxlet: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): xlet.io no longer resolves and the wallet repo github.com/MattPearce/xlet last pushed 2020-06; the author's 2026 GitHub activity is entirely unrelated projects.",
+		},
+		opensolar: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): openx.solar NXDOMAIN, YaleOpenLab repos untouched since Jan 2023, Yale OpenLab's own page frames the effort as concluded/absorbed into Open Earth Foundation \u2014 the Stellar crowdfunding platform no l\u2026",
+		},
+		pactta: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): pactta.com fully unregistered (no NS/A records) and searches found no footprint newer than the 2023 Techstars class announcement.",
+		},
+		"paygo-crypto": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): paygocrypto.io unregistered (no NS/A records); no current footprint found via searches \u2014 only unrelated or archival results.",
+		},
+		quidroo: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): quidroo.com unresolvable; only stale directory entries (communityfund.stellar.org/projects/quidroo, F6S, Crunchbase); no product activity since ~2021 DFS Lab/Stellar cohort coverage.",
+		},
+		rigel: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): rigel.link has no DNS record; only footprint is the ~2019 SCF #5 listing/forum thread; recent 'Rigel' hits are an unrelated affiliate tool.",
+		},
+		"scam-flagging-system": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded website (a Google Sheet) returns 404 and searches for 'Stellar Scam Flagging System' surface nothing beyond the SCF listing at https://communityfund.stellar.org/projects/scam-flagging-syst\u2026",
+		},
+		skeeper: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): skeeper.xyz has no DNS records; only footprint is the SCF-23 recap and a stale search-index entry \u2014 no GitHub org or newer activity anywhere.",
+		},
+		snnac: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): snnac.me unregistered, BlockShangerous GitHub org last push 2022-11, only 2022-era SCF#11 material found; no relaunch.",
+		},
+		"soroban-assistant": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Heroku app gone (404), no GitHub org, no footprint via search \u2014 hackathon-grade project with zero remaining presence.",
+		},
+		sorobanide: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): sorobanide.com unresolvable and the only traced repo (omeganetwork-tech/sorobanide) also deleted (GitHub API 404); no other footprint via search.",
+		},
+		sorobuilder: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): sorobuilder.com returns 404, no footprint via search, author's related repo github.com/luisao8/Soroban-code-AIssistant untouched since 2024-06 (his 2026 pushes are unrelated AI projects).",
+		},
+		sorosorcerer: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): sorosorcerer.com NXDOMAIN, org has no sorosorcerer repo (recent pushes unrelated), only dated footprint is a 2023 SDF community-tooling blog mention; no relaunch.",
+		},
+		sorscan: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): sorscan.org/.com/.io all unresolvable, no GitHub presence, nothing newer than the SCF #20 (2023) listing at communityfund.stellar.org/project/sorscan-svd.",
+		},
+		"stellar-update": {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): Domain taken over by an unrelated party \u2014 stellarupdate.com now serves a Chinese admin system ('\u667a\u7acb\u65b9\u7ba1\u7406\u7cfb\u7edf', verified via curl) \u2014 and no trace of the Stellar blog operating elsewhere.",
+		},
+		stellarstrides: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): stellarstrides.xyz has no DNS record; only footprint is the SCF #22 recap on medium.com/stellar-community \u2014 no site, socials, or repos anywhere newer.",
+		},
+		typiqo: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): typiqo.it has no DNS record, typiqo.com redirects to a domain-for-sale listing (brandbucket), newest footprint is 2021 press.",
+		},
+		vitreous: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (no NS/A records); only footprint is a years-old SCF profile piece on stellar.org/blog with nothing newer anywhere.",
+		},
+		whalestack: {
+			from: "Live",
+			to: "Inactive",
+			note: "Confirmed defunct 2026-07-10 (liveness triage): whalestack.com has 303-redirected to btcpayserver.org since at least 2025-09 (Wayback CDX), site now refuses connections, coinqvest.com broken TLS, the WordPress coinqvest plugin delisted, GitHub s\u2026",
+		},
+	};
+
+/** Website corrections (liveness triage 2026-07-10, boxy-approved): the
+ * PRODUCT is verifiably alive but the recorded URL is dead (lapsed apex,
+ * rebrand, or move). Overwrites links.website; equality no-ops keep reruns
+ * clean. Status stays Live — these were false positives on the death list. */
+const WEBSITE_FIXES: Record<string, string> = {
+	// Afriex operates today at afriex.com (200; afriexapp.com www even redirects there) with active App Store/Google Play listings; only the recorded afriexapp.com…
+	afriex: "https://www.afriex.com/",
+	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
+	arst: "https://www.arst.finance/en",
+	// Product site live at https://www.bravepay.net/ (wallet/POS/payments content), help.bravepay.net 200; only the recorded apex bravepay.net DNS record is broken.
+	bravepay: "https://www.bravepay.net/",
+	// BRZ stablecoin actively offered by issuer Transfero, live at transfero.com featuring BRZ; recorded brztoken.io returns 404.
+	brz: "https://www.transfero.com/",
+	// Old domain depayapp.com serves the rebranded live site depay.us (200, 'infraestructura de pagos cross-border', same org per hreflang); old domain's TLS cert …
+	depay: "https://depay.us/",
+	// Rebranded to Choppaddi and live at choppaddi.com (200, food-delivery content still referencing FastBuka), while fastbuka.com returns 503.
+	fastbuka: "https://choppaddi.com/",
+	// Recorded 'website' was a now-broken Google Slides link; freshly awarded SCF #37 build ($135k, Build phase) per communityfund.stellar.org, named among active …
+	lumenshade:
+		"https://communityfund.stellar.org/project/lumenshade-privacy-pools-hnp",
+	// Meria operates today: live staking platform at meria.com/en/staking + stake.meria.com, Feb 2026 Taurus partnership announcement; recorded defi.meria.com subd…
+	"meria-defi": "https://www.meria.com/",
+	// Securrency was acquired by DTCC (closed Dec 2023) and rebranded DTCC Digital Assets, active with 2026 announcements (dtcc.com/news/2026/may/04 tokenization s…
+	securrency: "https://www.dtcc.com/digital-assets",
+	// Live: sfxchange.co 302s to www.sfxchange.co returning 200 titled 'SFx Money App'; only the recorded /en deep link 404s.
+	sfx: "https://www.sfxchange.co/",
+	// The Stellar MetaMask snap is listed and installable on the official Snaps directory (snaps.metamask.io/snap/npm/stellar-snap; bogus-slug control 404s), npm s…
+	"stellar-metamask": "https://snaps.metamask.io/snap/npm/stellar-snap/",
+	// Continues as OBSRVR Radar: radar.withobsrvr.com live ('Stellar Network Explorer | OBSRVR Radar'), github.com/withObsrvr/stellarbeat pushed 2026-07-09; stella…
+	stellarbeat: "https://radar.withobsrvr.com/",
+	// xycLoans WebApp live at https://main.xycloans.app/ with docs.xycloans.app live and the xycloo GitHub org pushing as recently as 2026-07; only the recorded ap…
+	xycloans: "https://main.xycloans.app/",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
@@ -267,6 +499,10 @@ const DUPE_MERGES: Array<{
 	{ dupe: "coinsph", canonical: "coins-ph" },
 	{ dupe: "cashabroad", canonical: "cash-abroad" },
 	{ dupe: "arka-fund", canonical: "arkafund" },
+	// Liveness triage 2026-07-10: 13th pair — same project, different
+	// spellings ("ChainsAtlas"/"ChainAtlas"), missed by the S3 name
+	// normalization. Canonical = chainsatlas (SCF-funded, gh org).
+	{ dupe: "chainatlas", canonical: "chainsatlas" },
 	{
 		dupe: "balanced",
 		canonical: "balanced-network",
@@ -591,7 +827,43 @@ async function main() {
 			continue;
 		}
 		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
-		writes.push({ id: d.id, slug, data: { status: fix.to } });
+		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
+		const data: any = { status: fix.to };
+		// Inactive flips carry their evidence as ecosystem memory (fill-if-
+		// empty): "X WAS a live Y that shut down" beats silence for consumers.
+		if (fix.note && !d.lifecycle?.note)
+			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
+		writes.push({ id: d.id, slug, data });
+	}
+
+	console.log("\n── Website fixes (dead recorded URL → verified live URL) ──");
+	for (const [slug, website] of Object.entries(WEBSITE_FIXES)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const norm = (u: string) => (u ?? "").replace(/\/+$/, "");
+		if (norm(d.links?.website) === norm(website)) {
+			console.log(`  ${slug}: website already current, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: website ${d.links?.website ?? "(none)"} → ${website}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), website } },
+		});
 	}
 
 	console.log("\n── Supported networks (fill-if-empty) ──");
