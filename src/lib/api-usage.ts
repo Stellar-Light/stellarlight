@@ -46,10 +46,24 @@ interface LogArgs {
 	query?: string | null;
 	/** Optional compact filters object — serialized to JSON, truncated to 200 chars. */
 	filters?: Record<string, unknown>;
+	/**
+	 * Rows returned on this response. Lets Engine D trend zero/thin-result
+	 * rates on REAL demand straight from the log, without replaying.
+	 */
+	resultCount?: number;
+	/** Match tier served (projects/search) or retrieval mode (research). */
+	matchMode?: string;
 }
 
 /** Log a hit. Always returns immediately — DB write is fire-and-forget. */
-export function logApiHit({ req, endpoint, query, filters }: LogArgs): void {
+export function logApiHit({
+	req,
+	endpoint,
+	query,
+	filters,
+	resultCount,
+	matchMode,
+}: LogArgs): void {
 	const ua = req.headers.get("user-agent");
 	const scoutVersion = req.headers.get("x-scout-version") || undefined;
 	const country =
@@ -81,6 +95,8 @@ export function logApiHit({ req, endpoint, query, filters }: LogArgs): void {
 					scoutVersion,
 					country,
 					filtersJson,
+					...(typeof resultCount === "number" ? { resultCount } : {}),
+					...(matchMode ? { matchMode } : {}),
 				},
 			});
 		} catch {

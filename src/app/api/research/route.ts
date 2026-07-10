@@ -367,6 +367,8 @@ export async function GET(req: NextRequest) {
 		endpoint: "/api/research",
 		query: q,
 		filters: { source: sourceFilter, limit: limitParam, mode },
+		resultCount: results.length,
+		matchMode: mode,
 	});
 
 	return NextResponse.json(
