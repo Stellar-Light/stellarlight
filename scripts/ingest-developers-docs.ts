@@ -21,6 +21,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import { JUNK_URL_RE } from "../src/lib/research-rank";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
@@ -113,9 +114,12 @@ async function run() {
 	// slice cut ~400 real /docs pages (tokens, validators, learn) — vector
 	// search then papered over the holes at "high" confidence. Exclude junk,
 	// then order docs-first so a cap always keeps reference content.
-	const JUNK_URL =
-		/\/(authors|tags)\/|\/page\/\d+|\/meetings\/?$|\/search(\?|$)/i;
-	const kept = allUrls.filter((u) => !JUNK_URL.test(u));
+	// ONE pattern with the ranker/prune (JUNK_URL_RE): this file's private
+	// copy lacked /meetings/archive, so the crawl re-added a row the prune
+	// had deleted (corpus sweep S5 caught it). Search pages aren't in the
+	// shared pattern (never crawled elsewhere) — kept as a local extra.
+	const JUNK_URL = /\/search(\?|$)/i;
+	const kept = allUrls.filter((u) => !JUNK_URL.test(u) && !JUNK_URL_RE.test(u));
 	const prio = (u: string) => (u.includes("/docs/") ? 0 : 1);
 	kept.sort((a, b) => prio(a) - prio(b) || a.localeCompare(b));
 	const urls = kept.slice(0, limit);
