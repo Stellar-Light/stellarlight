@@ -40,6 +40,12 @@ const AUTHORITY: Record<string, number> = {
 	"sdf-blog": 0.7,
 	"lumenloop-research": 0.62,
 	lumenloop: 0.6,
+	// Dated protocol/dev meeting recaps (developers.stellar.org/meetings/…).
+	// Legit primary sources, but a one-paragraph recap must not outrank the
+	// canonical doc/CAP it mentions — audit R2: meeting notes rode dev-docs'
+	// 0.95 authority + evergreen freshness to the top of concept queries.
+	// They're also time-sensitive (freshness decays), unlike reference docs.
+	"meeting-notes": 0.5,
 };
 const DEFAULT_AUTHORITY = 0.6;
 
@@ -118,6 +124,15 @@ export interface ConfidenceInput {
 	/** Max raw score in the result set — used to normalize keyword mode. */
 	maxScore: number;
 	publishedAt?: string | null;
+	/**
+	 * 0–1 fraction of query tokens found in the doc's title (+ named-protocol
+	 * field where present). A title that IS the question is direct relevance
+	 * evidence the retrieval score under-weights — audit R2: the doc titled
+	 * 'Install the CLI' ranked 16 for q="install stellar cli" while meeting
+	 * recaps filled the top. Folded into relevance (not a separate axis) so
+	 * the composite stays explainable as relevance+freshness+authority.
+	 */
+	titleMatch?: number;
 	/** Injectable clock so callers/tests are deterministic. Defaults to now. */
 	now?: number;
 }
@@ -153,7 +168,10 @@ export function composeConfidence(
 
 export function researchConfidence(input: ConfidenceInput): Confidence {
 	const now = input.now ?? Date.now();
-	const relevance = relevanceFrom(input.score ?? 0, input.mode, input.maxScore);
+	const relevance = clamp01(
+		relevanceFrom(input.score ?? 0, input.mode, input.maxScore) +
+			0.15 * clamp01(input.titleMatch ?? 0),
+	);
 	const authority = AUTHORITY[input.source] ?? DEFAULT_AUTHORITY;
 	const { freshness, ageDays } = freshnessFrom(
 		input.source,

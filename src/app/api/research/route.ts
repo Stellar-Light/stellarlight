@@ -161,7 +161,10 @@ export async function GET(req: NextRequest) {
 		// are filtered out of the results below, so we need headroom to still
 		// return `limitParam` real chunks. The early $limit is dropped for the
 		// same reason — trimming happens after the low-value filter.
-		const overfetch = Math.max(limitParam * 4, 24);
+		// 8× (was 4×): per-doc collapse needs DISTINCT documents — audit R2
+		// found pages of 10 with only 6 docs because the 40-chunk pool was
+		// dominated by multi-chunk hits on the same few documents.
+		const overfetch = Math.max(limitParam * 8, 48);
 		const pipeline: Record<string, unknown>[] = [
 			{
 				$vectorSearch: {
@@ -342,7 +345,7 @@ export async function GET(req: NextRequest) {
 				}))
 				.filter((d) => (d.score ?? 0) > 0)
 				.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-				.slice(0, Math.max(limitParam * 4, 24));
+				.slice(0, Math.max(limitParam * 8, 48));
 		} catch {
 			chunks = [];
 		}
@@ -353,7 +356,11 @@ export async function GET(req: NextRequest) {
 	// confidence signal (relevance + freshness + authority) with raw-score
 	// tie-breaks — so a current doc outranks a semantically-close but stale
 	// one, and duplicate chunks of one post can't crowd the top-K.
-	const results = rankResearchChunks(chunks, { limit: limitParam, mode });
+	const results = rankResearchChunks(chunks, {
+		limit: limitParam,
+		mode,
+		query: q,
+	});
 
 	logApiHit({
 		req,
