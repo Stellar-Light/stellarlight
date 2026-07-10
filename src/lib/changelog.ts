@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-10",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Liveness wave: 38 provably-defunct projects flipped Live → Inactive (each individually researched with positive evidence — shutdown notices, parked/unregistered domains, abandoned footprints — recorded on the row as lifecycle.note, e.g. Whalestack wound down to a BTCPay redirect; nTokens discontinued the BRL anchor; Lumenaut's inflation pool ended with Protocol 12). 13 records whose PRODUCT is alive got their dead recorded URL repointed (stellarbeat → OBSRVR Radar, fastbuka → Choppaddi rebrand, afriex, xycloans, arst…). chainatlas merged into chainsatlas (duplicate).",
+		detail:
+			"Directory truth change only — no shape change. Live count 871 → 832. Inactive records stay name-searchable (heavily down-ranked) and now explain themselves via lifecycle.note; they drop out of active listings, leaderboard, clusters and funding aggregates. Methodology + full evidence table: the liveness triage in our changelog-linked improvements notes.",
+	},
+	{
+		date: "2026-07-10",
 		surfaces: ["api-client"],
 		version: "api-client@1.5.1",
 		type: "fixed",
