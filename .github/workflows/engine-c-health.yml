@@ -42,10 +42,16 @@ jobs:
         # --out (not a stdout pipe): Payload's logger writes startup lines to
         # stdout, which corrupted the piped JSON on the first run.
         run: pnpm exec tsx scripts/eval/engine-d-demand.ts --out=/tmp/d.json 2> /tmp/d.log
+      - name: Corpus sweeps (research-docs S5-S8)
+        continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: pnpm exec tsx scripts/eval/engine-b-corpus.ts --out=/tmp/corpus.json 2> /tmp/corpus.log
       - name: Engine C report
         id: report
         run: |
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |

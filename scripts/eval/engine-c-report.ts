@@ -15,10 +15,10 @@
  */
 import { readFileSync } from "node:fs";
 
-const [, , aPath, bPath, dPath] = process.argv;
+const [, , aPath, bPath, dPath, corpusPath] = process.argv;
 if (!aPath || !bPath) {
 	console.error(
-		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json]",
+		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json]",
 	);
 	process.exit(2);
 }
@@ -90,6 +90,17 @@ if (b && !b._error) {
 		lines.push(
 			`- **Duplicate slug pairs:** ${s3.count} (canonicalSlug unset → split funding/stats)`,
 		);
+	const s3b = b.s3b_domain_duplicates;
+	if (s3b?.count)
+		lines.push(
+			`- **Domain-keyed duplicates (NEW, names differ):** ${s3b.count} — ${s3b.groups
+				.slice(0, 3)
+				.map(
+					(g: { apex: string; records: Array<{ slug: string }> }) =>
+						`${g.apex} (${g.records.map((r) => r.slug).join("/")})`,
+				)
+				.join("; ")}`,
+		);
 	if (s4)
 		lines.push(
 			`- **Staleness:** ${s4.liveNoDatedSignal} Live with NO dated signal, ${s4.liveStale365} Live stale >365d (liveness-wave pool)`,
@@ -147,6 +158,37 @@ if (dPath) {
 	} else {
 		lines.push(
 			`⚠ Engine D output unreadable: ${d?._error ?? "empty"} (DB secrets missing on the step?)`,
+		);
+	}
+}
+
+// ── Corpus sweeps: research-docs consistency (R2 classes as guards) ──
+if (corpusPath) {
+	const c = readJson(corpusPath);
+	lines.push("");
+	lines.push("### Corpus sweeps — research-docs (S5–S8)");
+	if (c && !c._error && c.frame) {
+		lines.push(`Frame: ${c.frame.chunks} chunks / ${c.frame.docs} docs.`);
+		lines.push(
+			`- **S5 junk URLs (must be 0):** ${c.s5_junk_urls?.count ?? "?"}${c.s5_junk_urls?.count ? " 🔴 crawl regression" : " 🟢"}`,
+		);
+		lines.push(
+			`- **S6 bad titles:** ${c.s6_bad_titles?.count ?? "?"} docs (${Object.entries(
+				c.s6_bad_titles?.byIssue ?? {},
+			)
+				.map(([k, v]) => `${k}: ${v}`)
+				.join(", ")})`,
+		);
+		const stalled = c.s7_stalled ?? [];
+		lines.push(
+			`- **S7 ingest freshness:** ${stalled.length ? `⚠ STALLED: ${stalled.join(", ")}` : "all time-sensitive sources advancing 🟢"}`,
+		);
+		lines.push(
+			`- **S8 mirrored chunks (same content, >1 URL):** ${c.s8_mirrors?.count ?? "?"}`,
+		);
+	} else {
+		lines.push(
+			`⚠ Corpus sweep output unreadable: ${c?._error ?? "empty"} (DB secrets missing on the step?)`,
 		);
 	}
 }
