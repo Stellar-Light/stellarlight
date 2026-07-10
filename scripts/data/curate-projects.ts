@@ -503,6 +503,52 @@ const DUPE_MERGES: Array<{
 	// spellings ("ChainsAtlas"/"ChainAtlas"), missed by the S3 name
 	// normalization. Canonical = chainsatlas (SCF-funded, gh org).
 	{ dupe: "chainatlas", canonical: "chainsatlas" },
+	// ── S3b domain-keyed dupes wave (boxy "run it" 2026-07-10): 26 pairs
+	// found by the new same-website-apex sweep, identity verified per pair
+	// (shared apex = shared entity; canonical = SCF-funded record, else the
+	// richer one; org product-families went to the sweep ALLOWLIST instead,
+	// never merged). Decision matrix in scratchpad s3b-triage.json. ──
+	{ dupe: "band-protocol", canonical: "band" }, // both SCF ($100k/$60k) — shadow keeps its own award facts, lineage note explains the split
+	{ dupe: "gateway", canonical: "gatewayfm" },
+	{ dupe: "reclaim-protocol", canonical: "reclaim" },
+	{ dupe: "volta", canonical: "volta-circuit" },
+	{ dupe: "diameter", canonical: "diameter-pay" },
+	{ dupe: "baf-nework", canonical: "baf" }, // typo'd slug ("nework")
+	{ dupe: "blockeden", canonical: "blockedenxyz" },
+	{ dupe: "ortege-ai", canonical: "ortege" },
+	{ dupe: "aha-labs", canonical: "the-aha-company" }, // same org, two namings; canonical = the richer record (5 repos)
+	// The sorobansecurity.com → stellarsecurityportal.com rebrand (sls-003
+	// URL migration): current brand = canonical, absorbs the SCF award —
+	// the ultra-swap→usdc-swap pattern.
+	{
+		dupe: "soroban-security-portal",
+		canonical: "stellar-security-portal",
+		copyScf: true,
+	},
+	{
+		dupe: "expand",
+		canonical: "expand-network",
+		fill: {
+			shortDescription:
+				"Expand.network offers a unified API that connects developers to over 100 decentralized finance (DeFi) endpoints across more than 40 blockchains and protocols, including both EVM and non-EVM platforms.",
+			github: "https://github.com/expand-network",
+		},
+	},
+	{ dupe: "digibank-sdp", canonical: "digibank" }, // the SDP row is a submission-title variant of the same company (award amount None — no numeric loss)
+	{ dupe: "trace-finance", canonical: "trace" },
+	{ dupe: "ripe-money", canonical: "ripe" },
+	{ dupe: "pakana", canonical: "pakananet" }, // pakananet carries the $45.2k SCF award
+	{ dupe: "meria", canonical: "meria-defi" },
+	{ dupe: "coca-wallet", canonical: "coca" },
+	{ dupe: "alfred-pay", canonical: "alfred" },
+	{ dupe: "blue-marble", canonical: "the-blue-marble" },
+	{ dupe: "mica-rent", canonical: "mica" },
+	{ dupe: "elroy-app", canonical: "elroy" },
+	{ dupe: "blox-global", canonical: "blox" },
+	{ dupe: "huma-finance", canonical: "huma" },
+	{ dupe: "bim", canonical: "bim-exchange" },
+	{ dupe: "normal-finance", canonical: "normal" }, // shadow has 5 linked repos vs canonical's 1 — repos.projectSlug repoint is a known follow-up
+	{ dupe: "liqvid", canonical: "liqvidxyz" },
 	{
 		dupe: "balanced",
 		canonical: "balanced-network",
