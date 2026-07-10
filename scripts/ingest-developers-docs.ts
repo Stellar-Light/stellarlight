@@ -137,12 +137,23 @@ async function run() {
 					.replace(/\/$/, "")
 					.replace(/[^a-z0-9-/]/gi, "-")
 					.toLowerCase() || "index";
+			// Audit R2 (DATA-WRONG): publishedAt was null on every dev-docs row
+			// even though the pages carry an explicit 'Last updated on <date>'
+			// footer — derive it so served rows tell the truth about their age.
+			// (dev-docs remain evergreen for freshness; this is data honesty.)
+			const updated = page.body.match(
+				/Last updated on\s+([A-Z][a-z]{2,8} \d{1,2}, \d{4})/,
+			);
+			const updatedTs = updated ? Date.parse(`${updated[1]} UTC`) : Number.NaN;
 			const chunks = chunkMarkdown({
 				md: `# ${page.title}\n\n${page.body}`,
 				parentDocId: slug,
 				title: page.title,
 				url,
 				tags: ["dev-docs", "stellar-docs"],
+				...(Number.isFinite(updatedTs)
+					? { publishedAt: new Date(updatedTs).toISOString().slice(0, 10) }
+					: {}),
 			});
 			allChunks.push(...chunks);
 		} catch (err) {

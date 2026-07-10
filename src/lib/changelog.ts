@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-10",
+		surfaces: ["api"],
+		version: "openapi@1.7.10",
+		type: "changed",
+		summary:
+			"searchResearch ranking overhaul (audit R2, worst cell at 12%): dated meeting recaps (developers.stellar.org/meetings/YYYY/MM/DD) no longer ride dev-docs' canonical authority + evergreen freshness — they now score as meeting-notes (authority 0.5) with their URL date as freshness, so a one-line recap can't outrank the CAP/doc it mentions. Crawl-artifact rows (author archives, pagination mirrors) are dropped at serve time and pruned from the corpus. Exact-duplicate content mirrored across URLs collapses to one row. A title-match signal now feeds relevance ('Install the CLI' ranks top for q=install stellar cli; named-protocol audit lookups match the protocol field). Deeper candidate pool (8×) so 'best chunk per document' actually yields distinct documents.",
+		detail:
+			"Also ingest-side (lands with the next corpus refresh): CAP/SEP titles read the preamble Title: field first (cap-0066/sep-0020 carried mid-document body fragments as titles); dev-docs rows get publishedAt from the pages' own 'Last updated on' footer (was null on 100% of rows). Ranking-order change only — response shape unchanged; meeting rows now serialize their URL-derived publishedAt instead of null.",
+	},
+	{
 		date: "2026-07-09",
 		surfaces: ["api"],
 		version: "openapi@1.7.9",

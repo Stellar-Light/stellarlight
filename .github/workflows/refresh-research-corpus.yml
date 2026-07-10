@@ -95,6 +95,14 @@ jobs:
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-sdf-blog.ts --execute
 
+      - name: Prune crawl-artifact rows (author archives, pagination mirrors)
+        # Audit R2: pre-F5a ingests left junk URLs in the corpus (upsert-only
+        # ingest never removes them). Deletes ONLY rows matching the same
+        # JUNK_URL_RE the ingester excludes and the ranker drops.
+        if: inputs.source == '' || inputs.source == 'dev-docs'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/prune-research-junk.ts --execute
+
       - name: Ingest developers.stellar.org
         if: inputs.source == '' || inputs.source == 'dev-docs'
         continue-on-error: true

@@ -80,12 +80,17 @@ async function fetchSepMarkdown(path: string): Promise<string> {
 	return res.text();
 }
 
-/** Extract the title from an SEP — first H1 or frontmatter `Title:` field. */
+/**
+ * Extract the title from an SEP — preamble `Title:` field first, H1 fallback.
+ * Preamble-first because the H1 regex matches ANY `# ` line in the body:
+ * audit R2 caught sep-0020/cap-0066 titled with a mid-document body fragment
+ * (the doc's first `# ` heading) while the canonical Title: sat unread.
+ */
 function extractTitle(md: string, fallbackId: string): string {
-	const h1 = md.match(/^#\s+(.+?)$/m);
-	if (h1) return h1[1].trim();
 	const fm = md.match(/^Title:\s*(.+?)$/m);
 	if (fm) return fm[1].trim();
+	const h1 = md.match(/^#\s+(.+?)$/m);
+	if (h1) return h1[1].trim();
 	return fallbackId;
 }
 
