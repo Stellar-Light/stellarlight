@@ -177,6 +177,79 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	zkcross: ["stellar", "evm"],
 };
 
+/** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
+ * identity-verified 2026-07-10 — every pair shares the same website, so these
+ * are the same entity twice, not name collisions (class 21 check done).
+ * Recurring shape: an SCF-derived record (funding, empty desc) + a
+ * lumenloop-enriched record (desc/GitHub, no funding) split one project's
+ * facts across two rows.
+ *
+ * Per merge: the CANONICAL record absorbs the dupe's complementary facts
+ * (fill-if-empty only — desc/github verbatim from the dupe's own record);
+ * the DUPE gets canonicalSlug → canonical + status Inactive (the documented
+ * suppress-from-active-listings mechanism) + a lifecycle note. Nothing is
+ * deleted. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
+ * the award sits on the stale-named record: awarded/rounds copy to the
+ * canonical only when the canonical carries no award of its own. */
+const DUPE_MERGES: Array<{
+	dupe: string;
+	canonical: string;
+	fill?: { shortDescription?: string; github?: string };
+	copyScf?: boolean;
+}> = [
+	{ dupe: "stellarexpert", canonical: "stellar-expert" },
+	{
+		dupe: "sorobanpulse",
+		canonical: "soroban-pulse",
+		fill: {
+			shortDescription:
+				"SorobanPulse showcases Soroban's true potential through data and metrics from real world problem-solving dApps.",
+			github: "https://github.com/crosschainlabs-stellar/sorobanpulse-webapp",
+		},
+	},
+	{
+		dupe: "sorobanhub",
+		canonical: "soroban-hub",
+		fill: {
+			shortDescription:
+				"Manage, monitor and interact with your deployed contracts from a single and free to use desktop app.",
+		},
+	},
+	{ dupe: "passport", canonical: "stellar-passport" },
+	{
+		dupe: "givecredit",
+		canonical: "give-credit",
+		fill: {
+			shortDescription:
+				"Offset carbon emissions with tax-deductible XLM donations - automated by Soroban.",
+			github: "https://github.com/collaborativeeconomics/give-credit",
+		},
+	},
+	{
+		dupe: "stellarcarbon",
+		canonical: "stellar-carbon",
+		fill: {
+			shortDescription:
+				"Stellarcarbon offers transparent, nature-based carbon offsetting by registering offsets on both the Stellar blockchain and the Verra Registry, enabling users to voluntarily offset their carbon footprint through on-chain and off-chain records.",
+			github: "https://github.com/stellarcarbon",
+		},
+	},
+	{ dupe: "ultra-swap", canonical: "usdc-swap", copyScf: true },
+	{ dupe: "honeycoin", canonical: "honey-coin" },
+	{ dupe: "coinsph", canonical: "coins-ph" },
+	{ dupe: "cashabroad", canonical: "cash-abroad" },
+	{ dupe: "arka-fund", canonical: "arkafund" },
+	{
+		dupe: "balanced",
+		canonical: "balanced-network",
+		fill: {
+			shortDescription:
+				"Balanced is a cross-chain DEX and stablecoin that enables native cross-chain DeFi primitives for any ecosystem.",
+			github: "https://github.com/balancednetwork",
+		},
+	},
+];
+
 const ASOF = new Date().toISOString().slice(0, 10);
 const csv = (s?: string | null): string[] =>
 	s
@@ -519,6 +592,82 @@ async function main() {
 		}
 		console.log(`  ${slug}: [${cur.join(", ")}] → [${nets.join(", ")}]`);
 		writes.push({ id: d.id, slug, data: { supportedNetworks: nets } });
+	}
+
+	console.log("\n── Duplicate merges (canonicalSlug lineage, class 10) ──");
+	for (const m of DUPE_MERGES) {
+		const [rc, rd] = await Promise.all(
+			[m.canonical, m.dupe].map((slug) =>
+				payload.find({
+					collection: "projects",
+					where: { slug: { equals: slug } },
+					limit: 1,
+					depth: 0,
+					overrideAccess: true,
+				}),
+			),
+		);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const canon = rc.docs[0] as any;
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const dupe = rd.docs[0] as any;
+		if (!canon || !dupe) {
+			console.log(`  WARN: ${m.canonical}/${m.dupe} — record missing, skipped`);
+			continue;
+		}
+		if (canon.canonicalSlug) {
+			console.log(
+				`  WARN: canonical ${m.canonical} itself points at '${canon.canonicalSlug}' — review, skipped`,
+			);
+			continue;
+		}
+
+		// canonical absorbs complementary facts (fill-if-empty only)
+		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
+		const cData: any = {};
+		if (m.fill?.shortDescription && !canon.shortDescription?.trim())
+			cData.shortDescription = m.fill.shortDescription;
+		if (m.fill?.github && !canon.links?.github)
+			cData.links = { ...(canon.links ?? {}), github: m.fill.github };
+		if (m.copyScf && !canon.scf?.awarded && dupe.scf?.awarded) {
+			cData.scf = {
+				...(canon.scf ?? {}),
+				awarded: true,
+				totalAwarded: dupe.scf.totalAwarded ?? null,
+				awardedRounds: dupe.scf.awardedRounds ?? [],
+			};
+		}
+		if (Object.keys(cData).length) {
+			console.log(
+				`  ${m.canonical}: absorb from ${m.dupe} (${Object.keys(cData).join(", ")})`,
+			);
+			writes.push({ id: canon.id, slug: m.canonical, data: cData });
+		}
+
+		// dupe becomes a lineage shadow (guarded; never deleted)
+		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
+		const dData: any = {};
+		if (!dupe.canonicalSlug) dData.canonicalSlug = m.canonical;
+		else if (dupe.canonicalSlug !== m.canonical) {
+			console.log(
+				`  WARN: ${m.dupe} already points at '${dupe.canonicalSlug}' ≠ '${m.canonical}' — review, skipped`,
+			);
+			continue;
+		}
+		if (dupe.status !== "Inactive") dData.status = "Inactive";
+		if (!dupe.lifecycle?.note)
+			dData.lifecycle = {
+				...(dupe.lifecycle ?? {}),
+				note: `Duplicate record of '${m.canonical}' (same project, split entry) — funding, status and repos live on the canonical record. Merged ${ASOF}.`,
+			};
+		if (Object.keys(dData).length) {
+			console.log(
+				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status was '${dupe.status}')`,
+			);
+			writes.push({ id: dupe.id, slug: m.dupe, data: dData });
+		} else {
+			console.log(`  ${m.dupe}: already linked + Inactive, skip`);
+		}
 	}
 
 	console.log(`\n${writes.length} write(s) planned.`);

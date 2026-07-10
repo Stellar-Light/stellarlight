@@ -226,7 +226,7 @@ async function main() {
 		const k = canon(p.name);
 		(byCanon.get(k) ?? byCanon.set(k, []).get(k))!.push(p);
 	}
-	const dupes = [...byCanon.values()]
+	const allGroups = [...byCanon.values()]
 		.filter((g) => g.length > 1 && new Set(g.map((p) => p.slug)).size > 1)
 		.map((g) =>
 			g.map((p) => ({
@@ -236,7 +236,22 @@ async function main() {
 				scfAwarded: p.scfAwarded,
 			})),
 		);
-	report.s3_duplicates = { count: dupes.length, groups: dupes };
+	// A group is RESOLVED once its lineage is recorded: every member but one
+	// points canonicalSlug at a slug inside the group. Only unresolved groups
+	// count toward the fix queue (else the tracker stays red on merged dupes).
+	const isResolved = (g: (typeof allGroups)[number]) => {
+		const slugs = new Set(g.map((p) => p.slug));
+		const shadows = g.filter(
+			(p) => p.canonicalSlug && slugs.has(p.canonicalSlug),
+		);
+		return shadows.length === g.length - 1;
+	};
+	const dupes = allGroups.filter((g) => !isResolved(g));
+	report.s3_duplicates = {
+		count: dupes.length,
+		resolved: allGroups.length - dupes.length,
+		groups: dupes,
+	};
 
 	// ── S4 STALENESS exposure ──
 	const now = Date.now();
