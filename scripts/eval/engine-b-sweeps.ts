@@ -253,6 +253,61 @@ async function main() {
 		groups: dupes,
 	};
 
+	// ── S3b DOMAIN-KEYED duplicates ──
+	// Name normalization missed chainsatlas/chainatlas (different spellings).
+	// The stronger identity key is the one every liveness verification used:
+	// two records sharing a website apex ARE the same entity (class 21 in
+	// reverse — the site is the identity). Shared-hosting apexes are skipped
+	// (github.com etc. would group unrelated records).
+	const SHARED_APEX = new Set([
+		"github.com",
+		"docs.google.com",
+		"google.com",
+		"twitter.com",
+		"x.com",
+		"medium.com",
+		"notion.site",
+		"notion.so",
+		"vercel.app",
+		"netlify.app",
+		"communityfund.stellar.org",
+		"stellar.org",
+		"linktr.ee",
+	]);
+	const apexOf = (u: string | null | undefined): string | null => {
+		if (!u) return null;
+		try {
+			const host = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+			const parts = host.split(".");
+			return parts.length > 2 ? parts.slice(-2).join(".") : host;
+		} catch {
+			return null;
+		}
+	};
+	const byApex = new Map<string, any[]>();
+	for (const p of projects) {
+		if (p.canonicalSlug) continue; // lineage shadows already resolved
+		const apex = apexOf(p.links?.website);
+		if (!apex || SHARED_APEX.has(apex)) continue;
+		(byApex.get(apex) ?? byApex.set(apex, []).get(apex))!.push(p);
+	}
+	const domainDupes = [...byApex.entries()]
+		.filter(([, g]) => g.length > 1 && new Set(g.map((p) => p.slug)).size > 1)
+		// only NEW findings: same-canon-name groups are S3's territory already
+		.filter(([, g]) => new Set(g.map((p) => canon(p.name))).size > 1)
+		.map(([apex, g]) => ({
+			apex,
+			records: g.map((p) => ({
+				slug: p.slug,
+				name: p.name,
+				scfAwarded: p.scfAwarded,
+			})),
+		}));
+	report.s3b_domain_duplicates = {
+		count: domainDupes.length,
+		groups: domainDupes.slice(0, 20),
+	};
+
 	// ── S4 STALENESS exposure ──
 	const now = Date.now();
 	const STALE_DAYS = 365;
