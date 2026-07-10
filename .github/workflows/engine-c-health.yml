@@ -48,6 +48,11 @@ jobs:
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
         run: pnpm exec tsx scripts/eval/engine-b-corpus.ts --out=/tmp/corpus.json 2> /tmp/corpus.log
+      - name: SCF status cross-check (scfAwarded vs communityfund)
+        # Public-API + SCF-site scrape only, no secrets. Verifies our
+        # scfAwarded booleans against the authoritative source.
+        continue-on-error: true
+        run: pnpm exec tsx scripts/eval/scf-crosscheck.ts --out=/tmp/scf.json 2> /tmp/scf.log
       - name: Fetch previous run's evidence (week-over-week deltas)
         # Downloads the LAST successful run's engine-evidence artifact so the
         # report can render Δs. First run / expired artifact → step no-ops
@@ -65,7 +70,7 @@ jobs:
         run: |
           PREV_FLAG=""
           [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json /tmp/scf.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |

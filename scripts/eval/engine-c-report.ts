@@ -16,7 +16,7 @@
 import { readFileSync } from "node:fs";
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-const [aPath, bPath, dPath, corpusPath] = positional;
+const [aPath, bPath, dPath, corpusPath, scfPath] = positional;
 // --prev=<dir>: last successful run's evidence artifact (a.json/b.json/
 // d.json/corpus.json) — enables week-over-week deltas. Absent on the first
 // run or when the artifact expired; the report degrades to absolute values.
@@ -235,6 +235,31 @@ if (corpusPath) {
 		lines.push(
 			`⚠ Corpus sweep output unreadable: ${c?._error ?? "empty"} (DB secrets missing on the step?)`,
 		);
+	}
+}
+
+// ── SCF status cross-check: our scfAwarded vs communityfund ground truth ──
+if (scfPath) {
+	const s = readJson(scfPath);
+	lines.push("");
+	lines.push("### SCF status cross-check (scfAwarded vs communityfund)");
+	if (s && !s._error && s.frame) {
+		const over = (s.overstated ?? []).length;
+		const under = (s.understated ?? []).length;
+		if (over > 0 || under > 0) red = true;
+		lines.push(
+			`${s.frame.matched} high-precision matches. **Overstated (we claim, source denies): ${over}${over ? " 🔴" : " 🟢"} · Understated (source confirms, we deny): ${under}${under ? " 🔴" : " 🟢"}.**`,
+		);
+		for (const o of (s.overstated ?? []).slice(0, 8))
+			lines.push(`- OVERSTATED \`${o.slug}\` — ${o.url}`);
+		for (const u of (s.understated ?? []).slice(0, 8))
+			lines.push(
+				`- UNDERSTATED \`${u.slug}\` — SCF ${(u.scfRounds ?? []).map((r: string) => `#${r}`).join(" ")} — ${u.url}`,
+			);
+		if (over === 0 && under === 0)
+			lines.push("Our SCF-awarded data agrees with the source. ✅");
+	} else {
+		lines.push(`⚠ SCF cross-check output unreadable: ${s?._error ?? "empty"}`);
 	}
 }
 
