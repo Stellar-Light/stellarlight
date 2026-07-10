@@ -34,6 +34,14 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// BOTH products named so neither is hidden behind the dominant one.
 	etherfuse:
 		"Etherfuse is a multi-product company on Stellar: it issues Stablebonds — tokenized government treasury bonds (Mexican CETES, US Treasuries and others) that give yield-bearing onchain exposure to sovereign debt and underpin treasury-management apps such as Bando — and operates Etherfuse FX, a Mexico fiat on/off-ramp API for programmatic USDC↔MXN conversion at wholesale bps-level pricing, built for wallets and apps to integrate.",
+	// raven#18 (mmazco, 2026-07-09): Alchemy's Stellar Data API is now LIVE
+	// but the record predated it (RPC-only prose). Grounded in Alchemy's own
+	// docs (alchemy.com/docs/reference/stellar-api-quickstart + stellar-data-
+	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
+	// Their claimed validator role is NOT stated on their pages — omitted
+	// until primary-source verifiable (class 18: no fabrication).
+	alchemy:
+		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar with two products: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
@@ -52,6 +60,10 @@ const TYPES_ADD: Record<string, string[]> = {
 	// builders integrate), not a user-facing bridge app. Keep Bridge so
 	// corridor queries still learn it exists; add the taxonomy truth.
 	"circle-cctp-cross-chain-transfer-protocol": ["Infrastructure"],
+	// raven#18: the Stellar Data API is a portfolio/indexer product (SDF's own
+	// indexers page classifies it there) — RPC-only typing hid it from every
+	// indexer/portfolio-API query. Same multi-product class as etherfuse.
+	alchemy: ["Indexer"],
 };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
