@@ -1,0 +1,53 @@
+# Engine C — the weekly self-improvement loop. Runs Engine A (recall matrix)
+# + Engine B (data sweeps), builds one rolling "Retrieval health" tracker
+# issue (edited each week = week-over-week state), red on any A floor breach.
+name: engine-c-health
+on:
+  schedule:
+    - cron: "0 9 * * 0"
+  workflow_dispatch: {}
+concurrency:
+  group: engine-c-health
+  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Engine A
+        run: pnpm exec tsx scripts/eval/generated-recall.ts --json > /tmp/a.json 2> /tmp/a.log || echo "A_RED=1" >> $GITHUB_ENV
+      - name: Engine B
+        run: pnpm exec tsx scripts/eval/engine-b-sweeps.ts --json > /tmp/b.json 2> /tmp/b.log
+      - name: Engine C report
+        id: report
+        run: |
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
+      - name: Upsert rolling health issue
+        run: |
+          TITLE="Retrieval health — weekly tracker"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          BODY_FILE=/tmp/health.md
+          if [ -n "$EXISTING" ]; then
+            gh issue edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file "$BODY_FILE"
+            echo "updated issue #$EXISTING"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file "$BODY_FILE"
+            echo "created tracker issue"
+          fi
+      - name: Fail run on floor breach
+        if: env.A_RED == '1' || env.C_RED == '1'
+        run: echo "::error::Engine A recall below floor — see the health tracker issue" && exit 1

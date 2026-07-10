@@ -92,7 +92,7 @@ async function pageAll(
 }
 
 async function main() {
-	console.log(`Engine A — generated recall matrix → ${BASE}\n`);
+	console.error(`Engine A — generated recall matrix → ${BASE}`);
 
 	// ── frame: pull the corpus once (empty q returns nothing — page by
 	// category, enumerated from the API's own honest 400 valid-list) ──
@@ -123,7 +123,7 @@ async function main() {
 				"projects",
 			)),
 		);
-	console.log(
+	console.error(
 		`frame: ${projects.length} projects across ${cats.length} categories`,
 	);
 
