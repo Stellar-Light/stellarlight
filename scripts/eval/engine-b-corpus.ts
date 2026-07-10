@@ -62,8 +62,13 @@ function titleIssue(title: string, url: string): string | null {
 	if (!t) return "empty";
 	if (BARE_DATE_RE.test(t) && !/\/meetings\//.test(url)) return "bare-date";
 	if (t.length > 110) return "overlong (sentence, not a title)";
-	if (/[.!?]$/.test(t) || t.split(/\s+/).length > 9)
-		return "sentence-like (body fragment?)";
+	// Run-3 evidence: word-count flagged 296 legit SEO-style docs titles
+	// ('Issue an Asset on Stellar: Set Trustlines…'). A body fragment ENDS
+	// like a sentence; length alone doesn't make one.
+	if (/[.!?]$/.test(t)) return "sentence-like (body fragment?)";
+	// Run-3 samples surfaced this class: '&amp;' served raw in titles —
+	// the ingester never decodes entities from <title>.
+	if (/&(amp|lt|gt|quot|#\d+|#x[0-9a-f]+);/i.test(t)) return "html-entities";
 	return null;
 }
 
