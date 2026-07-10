@@ -317,6 +317,56 @@ async function main() {
 		}
 	}
 
+	// 4b. Semantic-fallback honesty (audit R1, openapi@1.7.9) — a response
+	//     built entirely from the vector fallback must SAY so: matchMode
+	//     "semantic" (never "strict"/"majority" over pure guesses) and no
+	//     via:"semantic" row scoring above the 0.7 cap / "high" label. Guards
+	//     the confident-wrong-answer class for agent consumers.
+	console.log("\n── Semantic-fallback honesty ──");
+	// Queries with no keyword hit in the directory — they exercise the
+	// zero-keyword rescue rung. If a probe starts keyword-matching (record
+	// added, retrieval improves), it passes vacuously; two probes of different
+	// shapes keep the guard non-vacuous in practice.
+	const SEMANTIC_PROBES = [
+		"fonbank", // audit R1 original: not in directory; fallback served veur/boss-pay as "strict" 0.9+
+		"charge autonomous AI agents per api call", // conceptual phrasing, x402-class
+	];
+	for (const probe of SEMANTIC_PROBES) {
+		try {
+			const d = await j(
+				`/api/projects/search?q=${encodeURIComponent(probe)}&limit=10`,
+			);
+			const rows: Array<{
+				via?: string;
+				confidence?: { score?: number; label?: string };
+			}> = d.projects ?? [];
+			const semRows = rows.filter((p) => p.via === "semantic");
+			const allSemantic = semRows.length > 0 && semRows.length === rows.length;
+			if (allSemantic && d.meta?.matchMode !== "semantic")
+				bad(
+					`semantic honesty: matchMode ("${probe}")`,
+					`all ${rows.length} rows are via:semantic but matchMode=${d.meta?.matchMode} (must be "semantic")`,
+				);
+			else
+				ok(
+					`semantic matchMode honest for "${probe}" (${semRows.length}/${rows.length} semantic, matchMode=${d.meta?.matchMode})`,
+				);
+			const overconfident = semRows.filter(
+				(p) =>
+					(p.confidence?.score ?? 0) > 0.7 || p.confidence?.label === "high",
+			);
+			if (overconfident.length)
+				bad(
+					`semantic honesty: confidence cap ("${probe}")`,
+					`${overconfident.length} via:semantic row(s) above 0.7/"high" — the cap regressed`,
+				);
+			else if (semRows.length)
+				ok(`semantic confidence capped ≤0.7 (${semRows.length} rows)`);
+		} catch (err) {
+			bad(`semantic honesty ("${probe}")`, `fetch failed: ${String(err)}`);
+		}
+	}
+
 	// 5. Advertised versions exist — every npm package version the LIVE changelog
 	//    names must actually be installable. Encodes the 2026-07-08 lesson: the
 	//    changelog listed scout-mcp@1.1.8 for ~1h while the publish was blocked on
