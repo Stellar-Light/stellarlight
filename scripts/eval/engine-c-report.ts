@@ -180,8 +180,13 @@ if (corpusPath) {
 				.join(", ")})`,
 		);
 		const stalled = c.s7_stalled ?? [];
+		const undated = Object.entries(
+			(c.s7_coverage ?? {}) as Record<string, { undated?: boolean }>,
+		)
+			.filter(([, v]) => v.undated)
+			.map(([s]) => s);
 		lines.push(
-			`- **S7 ingest freshness:** ${stalled.length ? `⚠ STALLED: ${stalled.join(", ")}` : "all time-sensitive sources advancing 🟢"}`,
+			`- **S7 ingest freshness:** ${stalled.length ? `⚠ STALLED: ${stalled.join(", ")}` : "all time-sensitive sources advancing 🟢"}${undated.length ? ` · undated sources (publishedAt never extracted — unmeasurable): ${undated.join(", ")}` : ""}`,
 		);
 		lines.push(
 			`- **S8 mirrored chunks (same content, >1 URL):** ${c.s8_mirrors?.count ?? "?"}`,

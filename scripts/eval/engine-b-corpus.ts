@@ -39,25 +39,31 @@ const OUT_FILE = process.argv
 
 /**
  * Sources whose content is time-sensitive — a stalled ingest is a defect.
- * Calibrated against real cadence (first run mis-flagged two healthy
- * sources): lumenloop's repo pushes ~monthly with dated-content lag, EC
- * publishes ~annually.
+ * Calibrated against real cadence. ec-developer-report is NOT here: its
+ * GitHub source is an archival repo (newest PDF = the 2023 geography
+ * analysis); EC moved publication to developerreport.com — tracked as a
+ * new-source work item, not a stall.
  */
 const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 	"sdf-blog": 30,
 	"lumenloop-research": 30,
-	lumenloop: 75,
-	"ec-developer-report": 400,
 };
 
 const BARE_DATE_RE = /^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\w+ \d{1,2}, \d{4})$/;
 
-function titleIssue(title: string): string | null {
+/**
+ * Evidence-calibrated (first live run): 'starts-lowercase' false-positived
+ * on CLI/RPC reference pages whose titles ARE lowercase identifiers
+ * ('tx sign and tx send', 'request_trust'); meeting recaps are inherently
+ * date-titled. A real body-fragment title reads like a SENTENCE.
+ */
+function titleIssue(title: string, url: string): string | null {
 	const t = (title ?? "").trim();
 	if (!t) return "empty";
-	if (BARE_DATE_RE.test(t)) return "bare-date";
-	if (/^[a-z]/.test(t)) return "starts-lowercase (body fragment?)";
+	if (BARE_DATE_RE.test(t) && !/\/meetings\//.test(url)) return "bare-date";
 	if (t.length > 110) return "overlong (sentence, not a title)";
+	if (/[.!?]$/.test(t) || t.split(/\s+/).length > 9)
+		return "sentence-like (body fragment?)";
 	return null;
 }
 
@@ -109,7 +115,7 @@ async function main() {
 		issue: string;
 	}> = [];
 	for (const d of byDoc.values()) {
-		const issue = titleIssue(d.title ?? "");
+		const issue = titleIssue(d.title ?? "", d.url);
 		if (issue)
 			badTitles.push({
 				url: d.url,
@@ -134,6 +140,7 @@ async function main() {
 			datedPct: number;
 			newestAgeDays: number | null;
 			stalled: boolean;
+			undated: boolean;
 		}
 	> = {};
 	for (const [source, list] of bySource) {
@@ -146,13 +153,20 @@ async function main() {
 			? Math.round((now - newest) / 86_400_000)
 			: null;
 		const expect = FRESHNESS_EXPECTATIONS_DAYS[source];
+		// undated ≠ stalled: lumenloop's chunks carry NO publishedAt at all
+		// (an extraction gap of the R2 class) — freshness is UNMEASURABLE
+		// there, which is its own finding, not a stall verdict.
+		const undated = dated.length === 0;
 		coverage[source] = {
 			chunks: list.length,
 			datedPct: Math.round((dated.length / list.length) * 100),
 			newestAgeDays,
+			undated,
 			stalled:
 				expect !== undefined &&
-				(newestAgeDays === null || newestAgeDays > expect),
+				!undated &&
+				newestAgeDays !== null &&
+				newestAgeDays > expect,
 		};
 	}
 
