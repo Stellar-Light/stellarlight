@@ -1154,7 +1154,7 @@ export interface ApiUsage {
    * Query keywords (truncated to 100 chars, lowercased)
    */
   query?: string | null;
-  uaBucket?: ('claude' | 'codex' | 'cursor' | 'agent' | 'curl' | 'browser' | 'bot' | 'other') | null;
+  uaBucket?: ('claude' | 'codex' | 'cursor' | 'agent' | 'curl' | 'browser' | 'bot' | 'probe' | 'other') | null;
   /**
    * Value of the X-Scout-Version header, if sent
    */

@@ -67,6 +67,7 @@ export const ApiUsage: CollectionConfig = {
 				{ label: "curl / scripted", value: "curl" },
 				{ label: "Browser", value: "browser" },
 				{ label: "Bot / crawler", value: "bot" },
+				{ label: "Stellarlight probe / engine", value: "probe" },
 				{ label: "Other", value: "other" },
 			],
 		},
