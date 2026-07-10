@@ -194,6 +194,19 @@ async function main() {
 				expected: `≥${floor} of top-10 carry types=${type} (${n} exist)`,
 				observed: `${carrying} carry it`,
 			});
+			// P-ORDER — inclusion isn't enough: audit round-2's biggest cluster
+			// was WRONG THING ON TOP (28 findings). For a type-browse query the
+			// #1 result must itself carry the type (graded only where ≥3 records
+			// of the type exist, so a thin type can't fail on scarcity).
+			if (n >= 3 && rows.length > 0) {
+				const top = rows[0];
+				tally("P-ORDER", ((top.types ?? []) as string[]).includes(type), {
+					area: type,
+					probe: `${BASE}/api/projects/search?q=${q}&limit=10`,
+					expected: `#1 result carries types=${type}`,
+					observed: `#1 = ${top.slug} [${(top.types ?? []).join(",")}]`,
+				});
+			}
 		} catch (e) {
 			tally("P-TYPE", false, {
 				area: type,
@@ -203,6 +216,75 @@ async function main() {
 			});
 		}
 	}
+
+	// P-ORDER (attribute-carrier variants) — the 'bitcoin bridge' residual:
+	// a query naming attribute+type must put an actual carrier of the TYPE
+	// on top, not a record that merely mentions the attribute word.
+	const ORDER_PHRASES: Array<{ type: string; phrase: string }> = [
+		{ type: "Bridge", phrase: "bitcoin bridge" },
+		{ type: "Stablecoin", phrase: "usd stablecoin" },
+		{ type: "Wallet", phrase: "mobile wallet" },
+		{ type: "Anchor", phrase: "off-ramp anchor" },
+	];
+	for (const { type, phrase } of ORDER_PHRASES) {
+		if ((typeCounts.get(type) ?? 0) < 3) continue;
+		const q = encodeURIComponent(phrase);
+		try {
+			const d = await j(`/api/projects/search?q=${q}&limit=5`);
+			const rows = d.projects ?? [];
+			const top = rows[0];
+			tally("P-ORDER", !!top && (top.types ?? []).includes(type), {
+				area: type,
+				probe: `${BASE}/api/projects/search?q=${q}&limit=5`,
+				expected: `#1 result carries types=${type}`,
+				observed: top
+					? `#1 = ${top.slug} [${(top.types ?? []).join(",")}]`
+					: "empty",
+			});
+		} catch (e) {
+			tally("P-ORDER", false, {
+				area: type,
+				probe: phrase,
+				expected: "response",
+				observed: String(e),
+			});
+		}
+	}
+
+	// P-PHRASE — real users wrap names in words (audit round-2 R3: template
+	// probes all phrase alike, natural phrasing dead-ended on strict-AND).
+	// One deterministic template per record (slug-hashed, so runs are stable
+	// and the probe count stays = record count).
+	const TEMPLATES = [
+		(n: string) => `what is ${n}`,
+		(n: string) => `tell me about ${n}`,
+		(n: string) => `${n} on stellar`,
+		(n: string) => `is ${n} live`,
+	];
+	const hashIdx = (s: string) =>
+		[...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % TEMPLATES.length, 0);
+	await pool(cap(projects), 4, async (p) => {
+		const phrase = TEMPLATES[hashIdx(p.slug)](p.name);
+		const q = encodeURIComponent(phrase);
+		try {
+			const d = await j(`/api/projects/search?q=${q}&limit=3`);
+			const ok = (d.projects ?? []).some((r: any) => r.slug === p.slug);
+			tally("P-PHRASE", ok, {
+				area: p.category ?? "?",
+				probe: `${BASE}/api/projects/search?q=${q}&limit=3`,
+				expected: `${p.slug} in top-3 for '${phrase}'`,
+				observed:
+					(d.projects ?? []).map((r: any) => r.slug).join(", ") || "empty",
+			});
+		} catch (e) {
+			tally("P-PHRASE", false, {
+				area: p.category ?? "?",
+				probe: phrase,
+				expected: "response",
+				observed: String(e),
+			});
+		}
+	});
 
 	// P-ATTR — records with structured attributes imply attribute queries.
 	const attrProbes: Array<{ p: any; q: string; area: string }> = [];
@@ -360,6 +442,11 @@ async function main() {
 		"PA-CAP": 0.9,
 		"B-USER": 0.85,
 		"R-SYM": 0.75,
+		// New 2026-07-10 (roadmap: order floors + paraphrase probes). Set
+		// conservatively for the first reading — a RED should mean regression,
+		// not baseline discovery. Tighten after the first full weekly run.
+		"P-ORDER": 0.7,
+		"P-PHRASE": 0.6,
 	};
 	let red = false;
 	const board = [...buckets.entries()].map(([k, v]) => {
