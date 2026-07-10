@@ -28,9 +28,13 @@ function check(name: string, cond: boolean, detail = "") {
 	cond ? ok(name) : bad(name, detail);
 }
 
+// stellarlight-* UA → uaBucket "probe": keeps this daily guard out of
+// Engine D's demand mining (the residual `other` bucket ≈ Raven traffic).
+const UA = { "User-Agent": "stellarlight-drift-guard" };
+
 async function getJson(path: string): Promise<{ status: number; body: any }> {
 	const res = await fetch(`${BASE}${path}`, {
-		headers: { Accept: "application/json" },
+		headers: { Accept: "application/json", ...UA },
 	});
 	let body: any = null;
 	try {
@@ -41,11 +45,11 @@ async function getJson(path: string): Promise<{ status: number; body: any }> {
 	return { status: res.status, body };
 }
 async function statusOf(path: string): Promise<number> {
-	const res = await fetch(`${BASE}${path}`, { method: "GET" });
+	const res = await fetch(`${BASE}${path}`, { method: "GET", headers: UA });
 	return res.status;
 }
 async function headerOf(path: string, name: string): Promise<string | null> {
-	const res = await fetch(`${BASE}${path}`, { method: "GET" });
+	const res = await fetch(`${BASE}${path}`, { method: "GET", headers: UA });
 	return res.headers.get(name);
 }
 

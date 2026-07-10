@@ -21,12 +21,20 @@ type UaBucket =
 	| "curl"
 	| "browser"
 	| "bot"
+	| "probe"
 	| "other";
 
 /** Coarse-bucket a User-Agent string. Order matters — more-specific first. */
 export function bucketUserAgent(ua: string | null): UaBucket {
 	if (!ua) return "other";
 	const s = ua.toLowerCase();
+	// Our OWN engines/audits/evals — every recurring script sends a
+	// stellarlight-* UA. Labeling self-traffic explicitly is what makes the
+	// residual `other` bucket meaningful demand: Raven's adapter sends NO
+	// User-Agent (verified: kalepail/stellar-raven src/adapters/scout.ts sets
+	// only Content-Type), so its hits land in `other` — Engine D admits
+	// `other` as real demand and must not find our probes there.
+	if (/stellarlight-|golden-eval/.test(s)) return "probe";
 	if (/claude(-code|\.ai)?|anthropic/.test(s)) return "claude";
 	if (/codex|openai/.test(s)) return "codex";
 	if (/cursor/.test(s)) return "cursor";
