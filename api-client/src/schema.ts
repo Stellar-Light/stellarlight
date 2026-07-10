@@ -492,6 +492,8 @@ export interface components {
                 returned?: number;
                 /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. */
                 total?: number;
+                /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses. */
+                semantic?: number;
             };
         };
         ErrorResponse: {
@@ -704,10 +706,10 @@ export interface components {
         ProjectSearchResponse: {
             meta: components["schemas"]["Meta"] & {
                 /**
-                 * @description Tier of match relaxation that produced these results
+                 * @description Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.
                  * @enum {string}
                  */
-                matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "all";
+                matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "semantic" | "all";
                 matchModeLabel?: string;
             };
             projects: components["schemas"]["Project"][];

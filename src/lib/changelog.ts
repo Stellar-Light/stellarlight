@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-09",
 		surfaces: ["api"],
+		version: "openapi@1.7.9",
+		type: "changed",
+		summary:
+			'Semantic-fallback honesty on searchProjects (audit R1): when NO keyword tier matches and results come from the vector fallback, meta.matchMode now says `semantic` (new enum value) with an honest matchModeLabel — previously it claimed `strict`/`majority` ("all keywords matched") over pure similarity guesses. Semantic rows\' confidence is now computed from the ABSOLUTE cosine band and hard-capped below `high` (max 0.7 / medium) — the top fallback guess no longer reads 0.9+ "high". meta.counts gains `semantic` (rows on this page served by the fallback).',
+		detail:
+			"Why: an agent consuming a confident wrong answer is worse off than with an empty set. Keyword-matched rows are unchanged. Additive/labeling change — no rows removed, ranking order unchanged (semantic adds still append below keyword hits). Consumers pinning matchMode enums should add `semantic`.",
+	},
+	{
+		date: "2026-07-09",
+		surfaces: ["api"],
 		version: "openapi@1.7.8",
 		type: "added",
 		summary:
