@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-10",
+		surfaces: ["api-client"],
+		version: "api-client@1.5.1",
+		type: "fixed",
+		summary:
+			"Types catch up to openapi 1.7.9-1.7.11: matchMode union gains 'semantic', meta.counts gains optional `semantic`. Consumers on 1.5.0 narrowing matchMode exhaustively hit an unknown value at runtime when the API serves a semantic-fallback page — update to 1.5.1.",
+		detail:
+			"Generated-types-only release; no runtime behavior change in the client.",
+	},
+	{
+		date: "2026-07-10",
 		surfaces: ["api"],
 		type: "changed",
 		summary:
