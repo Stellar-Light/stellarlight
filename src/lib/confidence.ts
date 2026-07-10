@@ -199,6 +199,45 @@ export function projectConfidence(input: {
 }
 
 /**
+ * Confidence for a SEMANTIC (vector-fallback) project row. Two honesty rules
+ * separate it from keyword `projectConfidence`:
+ *
+ *   1. Relevance comes from the ABSOLUTE cosine band (same 0.55–0.85 → 0–1
+ *      rescale as research vector mode), not normalization against the
+ *      semantic set's own max — set-max made the top guess read
+ *      relevance≈1.0 no matter how weak the whole set was.
+ *   2. The composite is capped below the "high" threshold. A vector guess
+ *      served because keywords found nothing (or too little) must never
+ *      claim the same trust as a literal match — the audit's R1 root:
+ *      off-topic fallback rows at 0.9+ "high" become confident wrong
+ *      answers for agent consumers.
+ */
+const SEMANTIC_CONFIDENCE_CAP = 0.7; // just under the 0.75 "high" threshold
+
+export function semanticProjectConfidence(input: {
+	/** Raw Atlas vectorSearchScore (cosine), NOT set-normalized. */
+	score: number;
+	status?: string | null;
+	scfAwarded?: boolean;
+	hackathonPlacement?: string | null;
+}): Confidence {
+	const relevance = relevanceFrom(input.score ?? 0, "vector", 1);
+	const freshness = PROJECT_STATUS_FRESHNESS[input.status ?? ""] ?? 0.5;
+	let authority = 0.6;
+	if (input.scfAwarded) authority += 0.25;
+	if (input.hackathonPlacement) authority += 0.1;
+	const c = composeConfidence(
+		relevance,
+		clamp01(freshness),
+		clamp01(authority),
+		null,
+	);
+	if (c.score > SEMANTIC_CONFIDENCE_CAP)
+		return { ...c, score: SEMANTIC_CONFIDENCE_CAP, label: "medium" };
+	return c;
+}
+
+/**
  * Trust score for a PARTNER profile. Unlike search results there's no query
  * relevance — a directory entry's trustworthiness is about how current the
  * profile is (freshness loop) and how much of it is system-verified (on-chain

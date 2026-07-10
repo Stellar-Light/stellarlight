@@ -49,7 +49,7 @@ export const spec: OpenAPISpec = {
 			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.",
 			"",
 			"## Ordering & relevance",
-			"`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority`) so you know how much the query was relaxed. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
+			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.',
 		].join("\n"),
 		contact: {
 			name: "Stellar Light",
@@ -1313,6 +1313,12 @@ export const spec: OpenAPISpec = {
 								description:
 									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total.",
 							},
+							semantic: {
+								type: "integer",
+								minimum: 0,
+								description:
+									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses.',
+							},
 						},
 					},
 				},
@@ -1727,10 +1733,11 @@ export const spec: OpenAPISpec = {
 											"loose-2",
 											"loose-3",
 											"majority",
+											"semantic",
 											"all",
 										],
 										description:
-											"Tier of match relaxation that produced these results",
+											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.',
 									},
 									matchModeLabel: { type: "string" },
 								},

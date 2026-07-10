@@ -3,6 +3,7 @@ import {
 	partnerTrust,
 	projectConfidence,
 	researchConfidence,
+	semanticProjectConfidence,
 } from "../confidence";
 
 // Fixed clock so freshness math is deterministic.
@@ -133,6 +134,38 @@ describe("projectConfidence", () => {
 			scfAwarded: true,
 		});
 		expect(weak.score).toBeLessThan(strong.score);
+	});
+});
+
+describe("semanticProjectConfidence", () => {
+	it("can never read 'high' — even a perfect cosine on a vetted Live project", () => {
+		const c = semanticProjectConfidence({
+			score: 0.9, // above the whole calibrated band
+			status: "Live",
+			scfAwarded: true,
+			hackathonPlacement: "1st",
+		});
+		expect(c.score).toBeLessThanOrEqual(0.7);
+		expect(c.label).toBe("medium");
+	});
+
+	it("uses the absolute cosine band, not set-max normalization", () => {
+		// A rescue-floor hit (0.62) must read weaker than a genuinely close
+		// match (0.80) — under the old set-max scheme a lone 0.62 top hit
+		// normalized to relevance 1.0.
+		const weak = semanticProjectConfidence({ score: 0.62, status: "Live" });
+		const strong = semanticProjectConfidence({ score: 0.8, status: "Live" });
+		expect(weak.relevance).toBeLessThan(0.35);
+		expect(strong.relevance).toBeGreaterThan(0.7);
+		expect(weak.score).toBeLessThan(strong.score);
+	});
+
+	it("a barely-above-floor guess reads low, not trustworthy", () => {
+		const c = semanticProjectConfidence({
+			score: 0.61,
+			status: "Development",
+		});
+		expect(c.label).toBe("low");
 	});
 });
 

@@ -13,7 +13,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { projectConfidence } from "@/lib/confidence";
+import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { clampLimit } from "@/lib/http-params";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
@@ -109,7 +109,6 @@ async function semanticProjectRows(
 	// [] and defer to the /api/research advisory.
 	const docs = raw.filter((p) => (p.score ?? 0) >= floor);
 	if (docs.length === 0) return []; // no genuinely-close match (or index unbuilt)
-	const max = docs.reduce((m, p) => Math.max(m, p.score ?? 0), 0) || 1;
 	return docs.map((p) => {
 		let logoUrl: string | null = null;
 		if (p.logo && typeof p.logo === "object") {
@@ -149,9 +148,10 @@ async function semanticProjectRows(
 			score: p.score ?? 0,
 			via: "semantic" as const,
 			url: `https://stellarlight.xyz/project/${p.slug}`,
-			confidence: projectConfidence({
+			// Semantic honesty (audit R1): absolute-cosine relevance + a hard cap
+			// below "high" — a fallback guess can't outrank literal-match trust.
+			confidence: semanticProjectConfidence({
 				score: p.score ?? 0,
-				maxScore: max,
 				status: p.status,
 				scfAwarded: !!p.scf?.awarded,
 				hackathonPlacement: p.hackathonPlacement,
@@ -423,7 +423,7 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
-	let matchMode: "strict" | "loose-1" | "majority" | "all" = "all";
+	let matchMode: "strict" | "loose-1" | "majority" | "semantic" | "all" = "all";
 
 	if (payload) {
 		try {
@@ -834,6 +834,11 @@ export async function GET(req: NextRequest) {
 		}
 	}
 	const usedSemantic = semanticAdds.length > 0;
+	// Semantic honesty (audit R1): when EVERY row on the page came from the
+	// vector fallback, the ladder's residual matchMode ("strict"/"majority")
+	// is a lie — no keyword tier matched anything. Say so, so an agent frames
+	// these as similarity guesses, not keyword-confirmed answers.
+	if (usedSemantic && scored.length === 0) matchMode = "semantic";
 
 	// Code references: top graded repos matching the same query, surfaced INLINE
 	// so a consumer that only calls project search (e.g. an agent with a fixed
@@ -1102,12 +1107,18 @@ export async function GET(req: NextRequest) {
 				...(superlativeNote(q) ? { superlativeNote: superlativeNote(q) } : {}),
 				...(laneHints("projects", {
 					empty: projects.length === 0,
-					weakMatch: matchMode === "majority" || matchMode === "loose-1",
+					weakMatch:
+						matchMode === "majority" ||
+						matchMode === "loose-1" ||
+						matchMode === "semantic",
 				})
 					? {
 							hints: laneHints("projects", {
 								empty: projects.length === 0,
-								weakMatch: matchMode === "majority" || matchMode === "loose-1",
+								weakMatch:
+									matchMode === "majority" ||
+									matchMode === "loose-1" ||
+									matchMode === "semantic",
 							}),
 						}
 					: {}),
@@ -1115,18 +1126,25 @@ export async function GET(req: NextRequest) {
 				//   strict   → "every keyword matched"
 				//   loose-1  → "all but one keyword matched"
 				//   majority → "most of your keywords matched — broader interpretation"
+				//   semantic → NO keyword matched; vector-similarity guesses only
 				//   all      → no keyword query was supplied
 				matchModeLabel: {
 					strict: "all keywords matched",
 					"loose-1": "all but one keyword matched",
 					majority: "majority of keywords matched (broader scope)",
+					semantic:
+						"no keyword match — semantically similar results (verify relevance before relying on them)",
 					all: "no keyword filter",
 				}[matchMode],
 				// total = matches before offset/limit slicing — lets paging
-				// consumers know when they've seen everything.
+				// consumers know when they've seen everything. `semantic` counts
+				// the rows on THIS page served by the vector fallback (also part
+				// of `total`) so a consumer can separate keyword truth from
+				// similarity guesses.
 				counts: {
 					returned: projects.length + semanticAdds.length,
 					total: totalMatching + semanticAdds.length,
+					semantic: semanticAdds.length,
 				},
 				// `semantic: true` means the keyword pass was thin and we filled
 				// the page with vector-search matches the literal filter missed
