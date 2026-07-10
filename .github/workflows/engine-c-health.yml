@@ -48,10 +48,24 @@ jobs:
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
         run: pnpm exec tsx scripts/eval/engine-b-corpus.ts --out=/tmp/corpus.json 2> /tmp/corpus.log
+      - name: Fetch previous run's evidence (week-over-week deltas)
+        # Downloads the LAST successful run's engine-evidence artifact so the
+        # report can render Δs. First run / expired artifact → step no-ops
+        # and the report degrades to absolute values.
+        continue-on-error: true
+        run: |
+          PREV=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=engine-c-health.yml --status=success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$PREV" ]; then
+            gh run download "$PREV" --repo "$GITHUB_REPOSITORY" -n engine-evidence -D /tmp/prev && echo "prev run: $PREV" || true
+          else
+            echo "no previous successful run"
+          fi
       - name: Engine C report
         id: report
         run: |
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          PREV_FLAG=""
+          [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |
