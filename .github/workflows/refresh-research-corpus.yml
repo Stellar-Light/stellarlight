@@ -27,6 +27,11 @@ on:
         description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|ec-developer-report). Leave empty to run all."
         required: false
         default: ""
+      prune_execute:
+        description: "Actually DELETE junk crawl-artifact rows (prune-research-junk). Default dry-run: the step logs what it would delete."
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -99,9 +104,11 @@ jobs:
         # Audit R2: pre-F5a ingests left junk URLs in the corpus (upsert-only
         # ingest never removes them). Deletes ONLY rows matching the same
         # JUNK_URL_RE the ingester excludes and the ranker drops.
+        # Dry-run unless dispatched with prune_execute=true — inspect the
+        # dry-run log (it lists every URL) before flipping the switch.
         if: inputs.source == '' || inputs.source == 'dev-docs'
         continue-on-error: true
-        run: pnpm exec tsx scripts/prune-research-junk.ts --execute
+        run: pnpm exec tsx scripts/prune-research-junk.ts ${{ inputs.prune_execute == true && '--execute' || '' }}
 
       - name: Ingest developers.stellar.org
         if: inputs.source == '' || inputs.source == 'dev-docs'
