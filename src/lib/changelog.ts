@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-10",
 		surfaces: ["api"],
+		version: "openapi@1.7.11",
+		type: "changed",
+		summary:
+			"searchResearch title-match refinement: a query naming a record's protocol field exactly (q='hiyield audit') now counts as a FULL title match — previously the generic token 'audit' gave the named record and an off-protocol audit the same boost, and the wrong record kept #1 on a 0.01 cosine edge (1.7.10 live-verify residual).",
+		detail:
+			"Ranking-order change only; no shape change. Unit test pins the real-world case (both titles contain 'Audit Report', only the protocol field discriminates).",
+	},
+	{
+		date: "2026-07-10",
+		surfaces: ["api"],
 		version: "openapi@1.7.10",
 		type: "changed",
 		summary:

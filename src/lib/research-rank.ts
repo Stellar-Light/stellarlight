@@ -72,6 +72,19 @@ function meetingReclass(c: RankableChunk): {
 
 /** Fraction of query tokens present in title (+ named-protocol field). */
 function titleMatchFraction(c: RankableChunk, query: string): number {
+	// A named-protocol hit is a full match: the user asked about THIS record
+	// by name. Without it, "hiyield audit" scored HiYield (protocol match)
+	// and xycloans (the generic word 'audit' in its title) the same 0.5 —
+	// the off-protocol audit kept the top on a 0.01 cosine edge.
+	const proto = (c.protocol ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+	if (
+		proto.length >= 4 &&
+		query
+			.toLowerCase()
+			.replace(/[^a-z0-9]/g, "")
+			.includes(proto)
+	)
+		return 1;
 	const tokens = [
 		...new Set(
 			query
