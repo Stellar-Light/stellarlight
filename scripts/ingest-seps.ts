@@ -203,10 +203,10 @@ async function run() {
 
 	const payload = execute ? await getPayload({ config: configPromise }) : null;
 
-	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash}>
+	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
 	const existingBySep = new Map<
 		string,
-		Map<number, { id: string; contentHash: string }>
+		Map<number, { id: string; contentHash: string; title: string | null }>
 	>();
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
@@ -221,12 +221,15 @@ async function run() {
 			parentDocId: string;
 			chunkIndex: number;
 			contentHash: string;
+			title?: string | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
-			existingBySep
-				.get(d.parentDocId)!
-				.set(d.chunkIndex, { id: d.id, contentHash: d.contentHash });
+			existingBySep.get(d.parentDocId)!.set(d.chunkIndex, {
+				id: d.id,
+				contentHash: d.contentHash,
+				title: d.title ?? null,
+			});
 		}
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing SEP chunks already in collection`);
@@ -247,7 +250,31 @@ async function run() {
 			for (const chunk of chunks) {
 				const prev = existing?.get(chunk.chunkIndex);
 				if (prev && prev.contentHash === chunk.contentHash) {
-					stats.chunksUnchanged++;
+					// Lesson class 25: the title lives OUTSIDE the content hash, so
+					// extraction fixes (preamble-Title-first) never reach existing
+					// rows through the embed path. Content-identical + drifted
+					// title → update in place, no re-embed. (This script has its
+					// own upsert loop — the shared upsertChunks fix doesn't apply.)
+					if (payload && (prev.title ?? "") !== chunk.title) {
+						stats.chunksUpdated++;
+						try {
+							await payload.update({
+								collection: "research-docs",
+								id: prev.id,
+								data: { title: chunk.title },
+							});
+							console.log(
+								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
+							);
+						} catch (err) {
+							console.error(
+								`  ✗ title ${chunk.parentDocId}#${chunk.chunkIndex}: ${(err as Error).message}`,
+							);
+							stats.errors++;
+						}
+					} else {
+						stats.chunksUnchanged++;
+					}
 					continue;
 				}
 				toEmbed.push(chunk);
