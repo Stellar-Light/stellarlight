@@ -50,6 +50,7 @@ interface Chunk {
 	content: string;
 	contentHash: string;
 	tags: string[];
+	publishedAt?: string;
 }
 
 function sha256(s: string): string {
@@ -83,6 +84,34 @@ async function fetchMarkdown(path: string): Promise<string> {
 	const res = await fetch(url, { headers: { "User-Agent": "stellarlight" } });
 	if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
 	return res.text();
+}
+
+/**
+ * Corpus sweep S7 found this source 100% UNDATED — freshness unmeasurable.
+ * A file's last commit date IS its publication date for a docs repo. One
+ * request per file; GITHUB_TOKEN (present in Actions) lifts the anon rate
+ * limit. Failure degrades to undated, never blocks the ingest.
+ */
+async function lastCommitDate(path: string): Promise<string | undefined> {
+	try {
+		const headers: Record<string, string> = {
+			"User-Agent": "stellarlight-scout-ingest",
+		};
+		if (process.env.GITHUB_TOKEN)
+			headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+		const res = await fetch(
+			`${GITHUB_API}/commits?path=${encodeURIComponent(path)}&per_page=1`,
+			{ headers },
+		);
+		if (!res.ok) return undefined;
+		const commits = (await res.json()) as Array<{
+			commit?: { committer?: { date?: string } };
+		}>;
+		const d = commits[0]?.commit?.committer?.date;
+		return d ? d.slice(0, 10) : undefined;
+	} catch {
+		return undefined;
+	}
 }
 
 function extractTitle(md: string, fallback: string): string {
@@ -199,7 +228,10 @@ async function run() {
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash}>
 	const existingByDoc = new Map<
 		string,
-		Map<number, { id: string; contentHash: string }>
+		Map<
+			number,
+			{ id: string; contentHash: string; publishedAt?: string | null }
+		>
 	>();
 	if (payload) {
 		console.log("Loading existing lumenloop chunks for dedup…");
@@ -214,12 +246,15 @@ async function run() {
 			parentDocId: string;
 			chunkIndex: number;
 			contentHash: string;
+			publishedAt?: string | null;
 		}>) {
 			if (!existingByDoc.has(d.parentDocId))
 				existingByDoc.set(d.parentDocId, new Map());
-			existingByDoc
-				.get(d.parentDocId)!
-				.set(d.chunkIndex, { id: d.id, contentHash: d.contentHash });
+			existingByDoc.get(d.parentDocId)!.set(d.chunkIndex, {
+				id: d.id,
+				contentHash: d.contentHash,
+				publishedAt: d.publishedAt ?? null,
+			});
 		}
 		const total = [...existingByDoc.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing chunks already in collection`);
@@ -246,13 +281,31 @@ async function run() {
 			try {
 				const md = await fetchMarkdown(file.path);
 				const title = extractTitle(md, file.name);
+				const publishedAt = await lastCommitDate(file.path);
 				const chunks = chunkMarkdown(md, id, title, url, subdir);
+				for (const c of chunks) c.publishedAt = publishedAt;
 				stats.chunksTotal += chunks.length;
 
 				const existing = existingByDoc.get(id);
 				for (const chunk of chunks) {
 					const prev = existing?.get(chunk.chunkIndex);
 					if (prev && prev.contentHash === chunk.contentHash) {
+						// Metadata-only drift (#440 pattern): backfill publishedAt on
+						// content-identical rows without re-embedding — otherwise the
+						// 246 existing undated chunks stay undated forever.
+						const prevDay = (prev.publishedAt ?? "").slice(0, 10);
+						if (execute && payload && publishedAt && prevDay !== publishedAt) {
+							try {
+								await payload.update({
+									collection: "research-docs",
+									id: prev.id,
+									data: { publishedAt },
+								});
+								stats.chunksUpdated++;
+							} catch {
+								stats.errors++;
+							}
+						}
 						stats.chunksUnchanged++;
 						continue;
 					}
@@ -312,6 +365,7 @@ async function run() {
 			content: chunk.content,
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
+			publishedAt: chunk.publishedAt,
 			embedding,
 		};
 		try {
