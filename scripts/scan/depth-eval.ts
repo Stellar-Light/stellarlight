@@ -32,7 +32,7 @@ import {
 	SHALLOW,
 	SHALLOW_FRONTIER,
 } from "./depth-labels";
-import { createGh, fetchRepoCode } from "./fetch-repo-code";
+import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
 if (!GH) {
@@ -40,6 +40,51 @@ if (!GH) {
 	process.exit(1);
 }
 const gh = createGh(GH);
+
+// A NEUTRAL exit for budget exhaustion. The gate fetches ~90 repos live
+// (~900 API calls); the account is SHARED with local dev, so a burst of local
+// runs can drain the 5,000/hr budget out from under a CI run — which then fails
+// COVERAGE and shows a misleading red that once tempted a merge-past-red
+// (2026-07-10). Budget exhaustion is not a scoring regression: it self-heals in
+// ≤1h and push-to-main + weekly + dispatch all re-run. So we exit 0 with a LOUD
+// "SKIPPED — not verified" banner (distinct from the "separation holds" pass),
+// never a red. The gate is advisory, not a required merge check, so a skip
+// can't wave a real regression through a protected branch.
+function skipForBudget(where: string): never {
+	console.error(
+		`\n⏭  SKIPPED — GitHub API budget exhausted while ${where}.\n` +
+			"   This is NOT a scoring regression. The depth-eval account is shared\n" +
+			"   with local dev; a burst of runs drains the 5,000/hr pool. It resets\n" +
+			"   within the hour, and push-to-main + weekly + dispatch all re-run the\n" +
+			"   full gate. Re-dispatch once budget returns to VERIFY separation.",
+	);
+	process.exit(0);
+}
+
+// Pre-flight: don't start a run we can't finish. If the visible budget is below
+// what the key needs (~10 calls/repo), skip up front rather than fetch a
+// partial set and fail coverage.
+async function preflightBudget(repoCount: number): Promise<void> {
+	try {
+		// gh() returns the raw Response; callers read the body themselves.
+		const res = await gh("/rate_limit");
+		if (!res.ok) return;
+		const rl = (await res.json()) as {
+			resources?: { core?: { remaining?: number } };
+		};
+		const remaining = rl?.resources?.core?.remaining;
+		const need = repoCount * 10;
+		if (typeof remaining === "number" && remaining < need) {
+			console.error(
+				`  pre-flight: core budget ${remaining} < ~${need} needed for ${repoCount} repos.`,
+			);
+			skipForBudget("pre-flight budget check");
+		}
+	} catch {
+		// rate_limit endpoint itself is free and rarely fails; if it does, fall
+		// through and let the run surface a real RateLimitError if budget is gone.
+	}
+}
 
 // Fork PRs can't read the PAT secret (GitHub withholds secrets from forked
 // pull_request events), so they fall back to the built-in token's 1,000/hr
@@ -73,6 +118,7 @@ async function scoreBand(
 			const d = computeCodeDepth(r.depthInput);
 			rows.push({ fullName, band, depth: d.codeDepth, why });
 		} catch (e) {
+			if (e instanceof RateLimitError) throw e; // budget → skip, not a miss
 			console.error(`  ! ${fullName}: ${(e as Error).message}`);
 			failed.push(fullName);
 		}
@@ -89,6 +135,18 @@ async function main() {
 		console.log(
 			`⚠ SAMPLED smoke test (${SAMPLE}/band) — full gate runs on push-to-main + weekly + dispatch.\n`,
 		);
+
+	// Rough repo count across every band we'll fetch, for the pre-flight check.
+	const plannedRepos =
+		cap(DEEP).length +
+		cap(SHALLOW).length +
+		DEEP_FRONTIER.length +
+		SHALLOW_FRONTIER.length +
+		cap(JS_DEEP).length +
+		cap(JS_SHALLOW).length +
+		JS_DEEP_FRONTIER.length;
+	await preflightBudget(plannedRepos);
+
 	const deep = await scoreBand("DEEP", cap(DEEP));
 	const shallow = await scoreBand("SHALLOW", cap(SHALLOW));
 	const rows = [...deep.rows, ...shallow.rows];
@@ -205,6 +263,7 @@ async function main() {
 					});
 					rows.push({ fullName, band, depth: d.jsDepth, why });
 				} catch (e) {
+					if (e instanceof RateLimitError) throw e; // budget → skip
 					console.error(`  ! ${fullName}: ${(e as Error).message}`);
 					failed.push(fullName);
 				}
@@ -273,6 +332,7 @@ async function main() {
 }
 
 main().catch((e) => {
+	if (e instanceof RateLimitError) skipForBudget("scoring the answer key");
 	console.error("FATAL", e);
 	process.exit(1);
 });
