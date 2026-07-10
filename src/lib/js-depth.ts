@@ -49,6 +49,7 @@ const CAP_WEIGHTS: Record<string, number> = {
 	"sep10-auth": 0.08,
 	"sep24-ramp": 0.08,
 	"wallet-kit": 0.06,
+	"wallet-provider": 0.06,
 	passkey: 0.06,
 	horizon: 0.05,
 	"fee-bump": 0.04,
@@ -57,6 +58,13 @@ const CAP_WEIGHTS: Record<string, number> = {
 const JS_EXT = /\.(ts|tsx|js|jsx|mjs|cjs)$/i;
 const EXAMPLE_NAME =
 	/\b(examples?|tutorial|template|boilerplate|starter|scaffold|workshop|bootcamp|demos?|playground|hello)\b/i;
+
+// Horizon read-endpoint call builders. Read-heavy products (explorers,
+// dashboards, wallets) hit MANY distinct endpoints; templates hit one or two
+// (loadAccount + submitTransaction). Breadth of reads is substance the single
+// "horizon" capability tag can't express.
+const HORIZON_READ_RE =
+	/\bserver\s*\.\s*(payments|operations|effects|trades|offers|orderbook|ledgers|transactions|accounts|assets|claimableBalances|liquidityPools|tradeAggregation|strictReceivePaths|strictSendPaths)\s*\(/g;
 
 export function computeJsDepth(input: JsDepthInput): JsDepthResult {
 	const reasons: string[] = [];
@@ -100,10 +108,31 @@ export function computeJsDepth(input: JsDepthInput): JsDepthResult {
 	)
 		? 0.05
 		: 0;
+	// read breadth: ≥4 DISTINCT Horizon read endpoints = a read-heavy product
+	// (explorer/dashboard/wallet). Templates call one or two. Blind-spot fix
+	// (2026-07-10): stellarexplorer's substance is breadth of reads, which no
+	// capability tag captured.
+	const readEndpoints = new Set<string>();
+	for (const b of jsBlobs)
+		for (const m of (b.text ?? "").matchAll(HORIZON_READ_RE))
+			readEndpoints.add(m[1]);
+	const readBreadth = readEndpoints.size >= 4 ? 0.06 : 0;
+	if (readBreadth) reasons.push(`read-breadth-${readEndpoints.size}`);
+	// released maturity: ≥10 version tags = a maintained, shipped product.
+	// Scaffolds and tutorials don't cut ten releases. Small on purpose —
+	// maturity supports substance, it must never substitute for it.
+	const maturityScore = (input.scalars.tagCount ?? 0) >= 10 ? 0.05 : 0;
 
 	let raw = Math.min(
 		1,
-		baseline + capScore + realFlow + slocCurve + symbolCurve + testScore,
+		baseline +
+			capScore +
+			realFlow +
+			slocCurve +
+			symbolCurve +
+			testScore +
+			readBreadth +
+			maturityScore,
 	);
 
 	// (C) scaffold caps — mirrors the Rust example cap (immaturity-gated).
