@@ -70,10 +70,27 @@ function firstHeading(body: string): string | null {
 	return m[1].trim().replace(/​/g, "").trim() || null;
 }
 
+/** Decode the entities that actually occur in <title> text. Corpus sweep S6
+ * found '&amp;' served raw in ~dozens of dev-docs titles — the metadata-drift
+ * upsert path propagates the decoded titles without re-embedding. */
+function decodeEntities(s: string): string {
+	return s
+		.replace(/&amp;/gi, "&")
+		.replace(/&lt;/gi, "<")
+		.replace(/&gt;/gi, ">")
+		.replace(/&quot;/gi, '"')
+		.replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+		.replace(/&#x([0-9a-f]+);/gi, (_, h) =>
+			String.fromCodePoint(Number.parseInt(h, 16)),
+		)
+		.replace(/&apos;/gi, "'")
+		.replace(/&nbsp;/gi, " ");
+}
+
 async function fetchPage(url: string): Promise<PageData> {
 	const html = await fetchHtml(url);
 	const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-	const rawTitle = titleMatch ? titleMatch[1].trim() : url;
+	const rawTitle = titleMatch ? decodeEntities(titleMatch[1]).trim() : url;
 	let title = rawTitle
 		.split(/\s+[|\-—]\s+/)[0]
 		.replace(/\s+\|.*$/, "")
