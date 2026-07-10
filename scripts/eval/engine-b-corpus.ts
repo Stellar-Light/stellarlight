@@ -37,12 +37,17 @@ const OUT_FILE = process.argv
 	.find((x) => x.startsWith("--out="))
 	?.slice("--out=".length);
 
-/** Sources whose content is time-sensitive — a stalled ingest is a defect. */
+/**
+ * Sources whose content is time-sensitive — a stalled ingest is a defect.
+ * Calibrated against real cadence (first run mis-flagged two healthy
+ * sources): lumenloop's repo pushes ~monthly with dated-content lag, EC
+ * publishes ~annually.
+ */
 const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 	"sdf-blog": 30,
-	"lumenloop-research": 21,
-	lumenloop: 45,
-	"ec-developer-report": 120,
+	"lumenloop-research": 30,
+	lumenloop: 75,
+	"ec-developer-report": 400,
 };
 
 const BARE_DATE_RE = /^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\w+ \d{1,2}, \d{4})$/;

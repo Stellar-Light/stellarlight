@@ -65,6 +65,19 @@ jobs:
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file "$BODY_FILE"
             echo "created tracker issue"
           fi
+      - name: Upload evidence JSONs
+        # The report headlines counts; the full sample lists (S6 titles, S8
+        # mirror URLs, S3b groups, Engine D miss rows) live in these files.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-evidence
+          path: |
+            /tmp/a.json
+            /tmp/b.json
+            /tmp/d.json
+            /tmp/corpus.json
+          retention-days: 30
       - name: Fail run on floor breach
         if: env.A_RED == '1' || env.C_RED == '1'
         run: echo "::error::Engine A recall below floor — see the health tracker issue" && exit 1

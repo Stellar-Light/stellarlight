@@ -291,10 +291,34 @@ async function main() {
 		if (!apex || SHARED_APEX.has(apex)) continue;
 		(byApex.get(apex) ?? byApex.set(apex, []).get(apex))!.push(p);
 	}
+	// First live run over-flagged org-with-multiple-products (circle.com →
+	// circle/cctp/usdc; withobsrvr.com → obsrvr/stellarbeat): distinct records
+	// legitimately share an org domain. A DUPE additionally shares name
+	// vocabulary (band/band-protocol; chainsatlas/chainatlas via prefix).
+	const nameTokens = (name: string) =>
+		new Set(
+			norm(name)
+				.split(/[^a-z0-9]+/)
+				.filter((t) => t.length >= 3),
+		);
+	const namesRelated = (a: string, b: string) => {
+		const ta = nameTokens(a);
+		const tb = nameTokens(b);
+		for (const t of ta) if (tb.has(t)) return true;
+		const ca = canon(a);
+		const cb = canon(b);
+		return (
+			ca.length >= 4 && cb.length >= 4 && (ca.includes(cb) || cb.includes(ca))
+		);
+	};
 	const domainDupes = [...byApex.entries()]
 		.filter(([, g]) => g.length > 1 && new Set(g.map((p) => p.slug)).size > 1)
 		// only NEW findings: same-canon-name groups are S3's territory already
 		.filter(([, g]) => new Set(g.map((p) => canon(p.name))).size > 1)
+		// dupes share name vocabulary; org product-families don't
+		.filter(([, g]) =>
+			g.some((p, i) => g.some((q, j) => j > i && namesRelated(p.name, q.name))),
+		)
 		.map(([apex, g]) => ({
 			apex,
 			records: g.map((p) => ({
