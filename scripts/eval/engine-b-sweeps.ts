@@ -274,6 +274,20 @@ async function main() {
 		"stellar.org",
 		"linktr.ee",
 	]);
+	// Human-reviewed org product-FAMILIES (2026-07-10 triage): distinct
+	// records that legitimately share an org domain — NOT duplicates. Kept
+	// out of the sweep so its count converges to real findings. Re-review a
+	// domain if a NEW record appears on it (the allowlist is per-apex, so a
+	// genuinely new dupe on these domains would be missed — acceptable while
+	// the list stays this short).
+	const FAMILY_APEXES = new Set([
+		"circle.com", // Circle org + CCTP rail + USDC asset
+		"57blocks.io", // dev shop with three separately-SCF-funded tools
+		"hot-labs.org", // HOT Wallet + HOT Protocol — two products
+		"dune.com", // Dune the platform + our funded dashboards artifact
+		"lightsail.network", // Lightsail Network + its Quasar product
+		"posted.app", // soracle/sora/posted-app trio — one team's product line, owner judgment pending
+	]);
 	const apexOf = (u: string | null | undefined): string | null => {
 		if (!u) return null;
 		try {
@@ -288,7 +302,7 @@ async function main() {
 	for (const p of projects) {
 		if (p.canonicalSlug) continue; // lineage shadows already resolved
 		const apex = apexOf(p.links?.website);
-		if (!apex || SHARED_APEX.has(apex)) continue;
+		if (!apex || SHARED_APEX.has(apex) || FAMILY_APEXES.has(apex)) continue;
 		(byApex.get(apex) ?? byApex.set(apex, []).get(apex))!.push(p);
 	}
 	// First live run over-flagged org-with-multiple-products (circle.com →
@@ -329,7 +343,9 @@ async function main() {
 		}));
 	report.s3b_domain_duplicates = {
 		count: domainDupes.length,
-		groups: domainDupes.slice(0, 20),
+		// 40 (was 20): the first sweep found 32 groups and the report's slice
+		// silently hid 12 — a no-silent-caps violation caught during triage.
+		groups: domainDupes.slice(0, 40),
 	};
 
 	// ── S4 STALENESS exposure ──
