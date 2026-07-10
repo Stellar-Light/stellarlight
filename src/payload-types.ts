@@ -1167,6 +1167,14 @@ export interface ApiUsage {
    * Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}
    */
   filtersJson?: string | null;
+  /**
+   * Rows returned on this response (0 = miss)
+   */
+  resultCount?: number | null;
+  /**
+   * Match tier / retrieval mode served
+   */
+  matchMode?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2336,6 +2344,8 @@ export interface ApiUsageSelect<T extends boolean = true> {
   scoutVersion?: T;
   country?: T;
   filtersJson?: T;
+  resultCount?: T;
+  matchMode?: T;
   updatedAt?: T;
   createdAt?: T;
 }

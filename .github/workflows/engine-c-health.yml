@@ -31,10 +31,19 @@ jobs:
         run: pnpm exec tsx scripts/eval/generated-recall.ts --json > /tmp/a.json 2> /tmp/a.log || echo "A_RED=1" >> $GITHUB_ENV
       - name: Engine B
         run: pnpm exec tsx scripts/eval/engine-b-sweeps.ts --json > /tmp/b.json 2> /tmp/b.log
+      - name: Engine D (demand-side mining)
+        # Mines the api-usage log for real consumer queries and replays them
+        # against live — needs read access to the prod DB (no writes). If the
+        # secrets are absent the step degrades and the report says so.
+        continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: pnpm exec tsx scripts/eval/engine-d-demand.ts --json > /tmp/d.json 2> /tmp/d.log
       - name: Engine C report
         id: report
         run: |
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |

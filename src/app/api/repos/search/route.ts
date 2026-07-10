@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
 		endpoint: "/api/repos/search",
 		query: q,
 		filters: { language, minScore, limit },
+		resultCount: repos.length,
 	});
 
 	return NextResponse.json(

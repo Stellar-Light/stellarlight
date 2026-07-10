@@ -1088,6 +1088,8 @@ export async function GET(req: NextRequest) {
 			scfAwarded: scfAwardedOnly,
 			limit,
 		},
+		resultCount: projects.length + semanticAdds.length,
+		matchMode,
 	});
 
 	return NextResponse.json(

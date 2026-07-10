@@ -291,6 +291,7 @@ export async function GET(req: NextRequest) {
 		endpoint: "/api/partners",
 		query: q,
 		filters: { type, sector, region, ramps, accepting, all, limit, offset },
+		resultCount: partners.length,
 	});
 
 	return NextResponse.json(

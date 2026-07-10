@@ -94,6 +94,25 @@ export const ApiUsage: CollectionConfig = {
 					"Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}",
 			},
 		},
+		{
+			// Engine D (demand-side mining): rows returned on this response.
+			// 0 = a real consumer asked and got nothing — the highest-signal
+			// miss class there is, trendable straight from the log.
+			name: "resultCount",
+			type: "number",
+			admin: {
+				description: "Rows returned on this response (0 = miss)",
+			},
+		},
+		{
+			// Match tier served (projects: strict/loose-1/majority/semantic/all;
+			// research: vector/keyword). `semantic` on projects = pure fallback.
+			name: "matchMode",
+			type: "text",
+			admin: {
+				description: "Match tier / retrieval mode served",
+			},
+		},
 	],
 	timestamps: true,
 };

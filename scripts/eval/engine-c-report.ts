@@ -15,9 +15,11 @@
  */
 import { readFileSync } from "node:fs";
 
-const [, , aPath, bPath] = process.argv;
+const [, , aPath, bPath, dPath] = process.argv;
 if (!aPath || !bPath) {
-	console.error("usage: engine-c-report.ts <engine-a.json> <engine-b.json>");
+	console.error(
+		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json]",
+	);
 	process.exit(2);
 }
 
@@ -109,6 +111,44 @@ if (b && !b._error) {
 	}
 } else {
 	lines.push(`⚠ Engine B output unreadable: ${b?._error ?? "empty"}`);
+}
+
+// ── Engine D: demand-side misses (real consumer queries, replayed) ──
+if (dPath) {
+	const d = readJson(dPath);
+	lines.push("");
+	lines.push("### Engine D — demand-side misses (real queries, replayed)");
+	if (d && !d._error && d.frame) {
+		lines.push(
+			`Window ${d.windowDays}d: ${d.frame.realHits} real-consumer hits, ${d.frame.distinctQueries} distinct queries, top ${d.frame.replayed} replayed. **OK rate on real demand: ${d.okRate}%.**`,
+		);
+		const misses = (d.misses ?? []) as Array<{
+			class: string;
+			endpoint: string;
+			query: string;
+			hits: number;
+			evidence: string;
+		}>;
+		if (misses.length) {
+			lines.push("");
+			lines.push(
+				"Worst misses by demand (these ARE the fix queue — a real consumer asked and we failed):",
+			);
+			for (const m of misses.slice(0, 12))
+				lines.push(
+					`- **${m.class}** \`${m.query}\` on ${m.endpoint} (${m.hits} hit${m.hits > 1 ? "s" : ""}) — ${m.evidence}`,
+				);
+			if (misses.length > 12)
+				lines.push(`- …and ${misses.length - 12} more (see run artifact)`);
+		} else {
+			lines.push("");
+			lines.push("No misses on replayed real demand this week. 🟢");
+		}
+	} else {
+		lines.push(
+			`⚠ Engine D output unreadable: ${d?._error ?? "empty"} (DB secrets missing on the step?)`,
+		);
+	}
 }
 
 lines.push("");
