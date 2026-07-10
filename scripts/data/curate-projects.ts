@@ -40,11 +40,24 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
 	// Tier-1 validator: boxy-confirmed 2026-07-10 + Alchemy's own blog
 	// ("Alchemy expands support on Stellar with Data APIs and Tier-1
-	// validation … Alchemy is now a tier-1 validator on Stellar"). Note the
-	// official tier-1-orgs docs page does NOT list them yet — the exact
-	// docs-lag raven#18 describes.
+	// validation … Alchemy is now a tier-1 validator on Stellar", announced
+	// x.com/Alchemy/status/2074907730129883195, 2026-07-08) + listed on the
+	// official tier-1-orgs docs page and the node explorer (boxy-verified —
+	// an earlier note here claimed the docs page lacked them; that was a
+	// false negative from a text-strip curl of a data-rendered page).
 	alchemy:
 		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
+};
+
+// Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
+// "should the data layer ingest partner docs?": NO — provider reference
+// docs are agent-readable at SOURCE (Alchemy ships llms.txt) and a corpus
+// copy would go stale (the class-19 hazard) while duplicating what the
+// provider already serves agents. Our differentiated role is the STRUCTURED
+// record (who provides what, freshness, confidence) + a first-class pointer
+// so consumers hop straight to the living source.
+const DOCS_LINKS: Record<string, string> = {
+	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
@@ -683,6 +696,33 @@ async function main() {
 		} else {
 			console.log(`  ${m.dupe}: already linked + Inactive, skip`);
 		}
+	}
+
+	console.log("\n── Docs links (fill-if-empty) ──");
+	for (const [slug, docsUrl] of Object.entries(DOCS_LINKS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.links?.docs) {
+			console.log(`  ${slug}: links.docs already set, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: links.docs → ${docsUrl}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), docs: docsUrl } },
+		});
 	}
 
 	console.log(`\n${writes.length} write(s) planned.`);
