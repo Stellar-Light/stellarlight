@@ -270,18 +270,23 @@ describe("rankResearchChunks", () => {
 		);
 	});
 
-	it("named-protocol audit rows match the title haystack via protocol field", () => {
+	it("named-protocol match beats a generic title-word hit on the wrong record", () => {
+		// Real-world shape (live probe 2026-07-10): BOTH titles contain
+		// 'Audit Report', so the generic token 'audit' gave both rows the
+		// same 0.5 boost and xycloans kept the top on a 0.01 cosine edge.
+		// The protocol field naming the queried record must count as a FULL
+		// match — the user asked about THIS record by name.
 		const pool = [
 			{
 				...chunk({ url: "https://audits.dev/xycloans", score: 0.66 }),
 				source: "audit",
-				title: "OtterSec Audit Report",
-				protocol: "xycLoans",
+				title: "xycLoans — OtterSec Audit Report",
+				protocol: "xycloans",
 			},
 			{
 				...chunk({ url: "https://audits.dev/hiyield", score: 0.65 }),
 				source: "audit",
-				title: "Veridise Audit Report",
+				title: "HiYield — Veridise Audit Report",
 				protocol: "HiYield",
 			},
 		];
@@ -292,5 +297,8 @@ describe("rankResearchChunks", () => {
 			now: NOW,
 		});
 		expect(out[0].url).toContain("hiyield");
+		expect(out[0].confidence.relevance).toBeGreaterThan(
+			out[1].confidence.relevance,
+		);
 	});
 });

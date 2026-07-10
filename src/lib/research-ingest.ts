@@ -230,30 +230,33 @@ export function chunkMarkdown(opts: {
  * Load existing chunks for `source`, indexed by (parentDocId, chunkIndex).
  * Used by ingest scripts to dedup and skip re-embedding unchanged chunks.
  */
+export interface ExistingChunkRef {
+	id: string;
+	contentHash: string;
+	title?: string | null;
+	publishedAt?: string | null;
+}
+
 export async function loadExistingChunks(
 	payload: Payload,
 	source: ResearchSource,
-): Promise<Map<string, Map<number, { id: string; contentHash: string }>>> {
-	const map = new Map<
-		string,
-		Map<number, { id: string; contentHash: string }>
-	>();
+): Promise<Map<string, Map<number, ExistingChunkRef>>> {
+	const map = new Map<string, Map<number, ExistingChunkRef>>();
 	const existing = await payload.find({
 		collection: "research-docs",
 		where: { source: { equals: source } },
 		limit: 10_000,
 		depth: 0,
 	});
-	for (const d of existing.docs as unknown as Array<{
-		id: string;
-		parentDocId: string;
-		chunkIndex: number;
-		contentHash: string;
-	}>) {
+	for (const d of existing.docs as unknown as Array<
+		ExistingChunkRef & { parentDocId: string; chunkIndex: number }
+	>) {
 		if (!map.has(d.parentDocId)) map.set(d.parentDocId, new Map());
 		map.get(d.parentDocId)?.set(d.chunkIndex, {
 			id: d.id,
 			contentHash: d.contentHash,
+			title: d.title ?? null,
+			publishedAt: d.publishedAt ?? null,
 		});
 	}
 	return map;
@@ -268,14 +271,30 @@ export interface UpsertStats {
 }
 
 /**
+ * Compare dates by calendar day: Payload stores full ISO datetimes while
+ * ingesters emit YYYY-MM-DD — raw string comparison would read every row as
+ * drifted and churn the whole corpus on each daily refresh.
+ */
+function normalizeDate(d: string | null | undefined): string | null {
+	if (!d) return null;
+	const ts = Date.parse(d);
+	return Number.isFinite(ts) ? new Date(ts).toISOString().slice(0, 10) : null;
+}
+
+/**
  * Embed and upsert a batch of chunks against the existing collection.
- * Skips chunks whose content hash hasn't changed.
+ * Skips chunks whose content hash hasn't changed — EXCEPT when metadata
+ * (title, publishedAt) drifted while the content stayed identical: those
+ * update in place without re-embedding (embeddings hash the content only).
+ * Without this path, extraction fixes never reach existing rows — audit R2:
+ * cap-0066's garbage title survived every daily refresh because its body
+ * hash was unchanged.
  */
 export async function upsertChunks(opts: {
 	payload: Payload;
 	source: ResearchSource;
 	chunks: ResearchChunk[];
-	existing: Map<string, Map<number, { id: string; contentHash: string }>>;
+	existing: Map<string, Map<number, ExistingChunkRef>>;
 }): Promise<UpsertStats> {
 	const { payload, source, chunks, existing } = opts;
 	const stats: UpsertStats = {
@@ -287,15 +306,48 @@ export async function upsertChunks(opts: {
 	};
 
 	const toEmbed: ResearchChunk[] = [];
+	const metaOnly: ResearchChunk[] = [];
 	for (const chunk of chunks) {
 		const prev = existing.get(chunk.parentDocId)?.get(chunk.chunkIndex);
 		if (prev && prev.contentHash === chunk.contentHash) {
-			stats.unchanged += 1;
+			const titleDrift =
+				prev.title !== undefined && (prev.title ?? "") !== chunk.title;
+			const dateDrift =
+				chunk.publishedAt !== undefined &&
+				normalizeDate(prev.publishedAt) !== normalizeDate(chunk.publishedAt);
+			if (titleDrift || dateDrift) {
+				metaOnly.push(chunk);
+				stats.updated += 1;
+			} else {
+				stats.unchanged += 1;
+			}
 			continue;
 		}
 		toEmbed.push(chunk);
 		if (prev) stats.updated += 1;
 		else stats.new += 1;
+	}
+
+	if (metaOnly.length) {
+		console.log(
+			`  Metadata-only update (no re-embed) for ${metaOnly.length} chunk(s)…`,
+		);
+		for (const chunk of metaOnly) {
+			const prev = existing.get(chunk.parentDocId)?.get(chunk.chunkIndex);
+			if (!prev) continue;
+			try {
+				await payload.update({
+					collection: "research-docs",
+					id: prev.id,
+					data: { title: chunk.title, publishedAt: chunk.publishedAt },
+				});
+			} catch (err) {
+				console.error(
+					`    ✗ ${chunk.parentDocId}#${chunk.chunkIndex}: ${(err as Error).message}`,
+				);
+				stats.errors += 1;
+			}
+		}
 	}
 
 	if (toEmbed.length === 0) return stats;
