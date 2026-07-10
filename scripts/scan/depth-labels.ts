@@ -363,6 +363,20 @@ export const JS_DEEP: LabeledRepo[] = [
 		fullName: "reflector-network/reflector-node",
 		why: "src/utils/rpc-helper.js does genuine @stellar/stellar-sdk@16 Soroban work — rpc.Server requests, Transaction/DecoratedSignature handling, submitTransaction with XDR result parsing — plus oracle/DAO...",
 	},
+	// ── graduated from JS_DEEP_FRONTIER (blind-spot fixes 2026-07-10:
+	// binding/signer patterns + wallet-provider + read-breadth + maturity) ──
+	{
+		fullName: "chatch/stellarexplorer",
+		why: "Live steexp.com explorer (2017-2026, 507 stars) with real @stellar/stellar-sdk@16 integration in its own app/lib/stellar/ — Soroban rpc.Server subclass, Horizon query builders, Federation/MuxedAcco...",
+	},
+	{
+		fullName: "lobstrco/lobstr-browser-extension",
+		why: "Official LOBSTR wallet extension (active, pushed 2026-07): Home.tsx uses @stellar/stellar-sdk Horizon.Server for live balance handling and background/messageListener/external/sign.ts + @lobstrco/si...",
+	},
+	{
+		fullName: "allbridge-io/allbridge-core-js-sdk",
+		why: "src/services/bridge/srb and src/utils/srb use @stellar/stellar-sdk for real Soroban contract tx building (swap_and_bridge), Horizon/SorobanRpc submission, trustlines and simulate/restore — first-pa...",
+	},
 ];
 
 export const JS_SHALLOW: LabeledRepo[] = [
@@ -442,18 +456,9 @@ export const JS_SHALLOW: LabeledRepo[] = [
  *    src/services/bridge/srb; needs dir-aware selection (jsDepth v2).
  */
 export const JS_DEEP_FRONTIER: LabeledRepo[] = [
-	{
-		fullName: "chatch/stellarexplorer",
-		why: "Live steexp.com explorer (2017-2026, 507 stars) with real @stellar/stellar-sdk@16 integration in its own app/lib/stellar/ — Soroban rpc.Server subclass, Horizon query builders, Federation/MuxedAcco...",
-	},
-	{
-		fullName: "lobstrco/lobstr-browser-extension",
-		why: "Official LOBSTR wallet extension (active, pushed 2026-07): Home.tsx uses @stellar/stellar-sdk Horizon.Server for live balance handling and background/messageListener/external/sign.ts + @lobstrco/si...",
-	},
-	{
-		fullName: "allbridge-io/allbridge-core-js-sdk",
-		why: "src/services/bridge/srb and src/utils/srb use @stellar/stellar-sdk for real Soroban contract tx building (swap_and_bridge), Horizon/SorobanRpc submission, trustlines and simulate/restore — first-pa...",
-	},
+	// (emptied 2026-07-10 — all three graduated to JS_DEEP after the blind-spot
+	// fixes: generated-binding + wallet-signer patterns, wallet-provider tag,
+	// horizon read-breadth, released-maturity. See that pass in js-depth.ts.)
 ];
 
 /** Gate for the JS bands — thresholds set from the first empirical run. */

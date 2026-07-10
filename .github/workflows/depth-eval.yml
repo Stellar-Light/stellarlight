@@ -10,6 +10,8 @@ on:
     paths:
       - "src/lib/code-depth.ts"
       - "src/lib/js-depth.ts"
+      - "src/lib/code-symbols.ts"
+      - "scripts/scan/depth-labels.ts"
       - "src/lib/code-signals.ts"
       - "src/lib/soroban-versions.ts"
       - "src/lib/repo-allowlist.ts"

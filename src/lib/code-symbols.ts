@@ -166,7 +166,7 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	],
 	[
 		"signing",
-		/\bsignTransaction\b|\.sign\(\s*[A-Za-z_$]|\bKeypair\.fromSecret\b/,
+		/\bsignTransaction\b|\.sign\(\s*[A-Za-z_$]|\bKeypair\.fromSecret\b|\bsignAndSend\b|\bsignMessage\b|\bsignAuthEntry\b/,
 	],
 	[
 		"soroban-rpc",
@@ -174,7 +174,7 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	],
 	[
 		"contract-invoke",
-		/\bnew Contract\(|\bContract\(|[Cc]ontract\.call\(|\binvokeHostFunction\b|\bassembleTransaction\b|\bfuncArgsToScVals\b|\bnativeToScVal\b|\bscValToNative\b/,
+		/\bnew Contract\(|\bContract\(|[Cc]ontract\.call\(|\binvokeHostFunction\b|\bassembleTransaction\b|\bfuncArgsToScVals\b|\bnativeToScVal\b|\bscValToNative\b|\bAssembledTransaction\b|\bContractClient\b|\bContractSpec\b/,
 	],
 	[
 		"horizon",
@@ -185,6 +185,13 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	[
 		"wallet-kit",
 		/stellar-wallets-kit|@stellar\/wallet-sdk|\bfreighter(-api)?\b|albedo/i,
+	],
+	// EXPORTS the standard wallet-API surface (freighter-api/xbull/rabet shape).
+	// Templates CONSUME these functions (import them); only an actual wallet
+	// provides them. Blind-spot fix (2026-07-10, lobstr-browser-extension).
+	[
+		"wallet-provider",
+		/\bexport\s+(?:const|async\s+function|function)\s+(?:getPublicKey|signTransaction|signMessage|signAuthEntry|requestAccess)\b/,
 	],
 	["passkey", /passkey-kit|\bPasskeyKit\b|webauthn/i],
 	["fee-bump", /\bfeeBump\b|\bTransactionBuilder\.buildFeeBumpTransaction\b/i],
