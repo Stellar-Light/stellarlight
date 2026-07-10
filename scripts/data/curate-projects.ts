@@ -370,6 +370,419 @@ const SEEDS: Array<{
 		// provenance.source is required; AdminEdit = curated by us.
 		provenance: { source: "AdminEdit" },
 	},
+	// ── SCF-awardee seed wave (boxy 2026-07-10 "lets do that"): projects
+	// found on communityfund.stellar.org with an award badge but NO directory
+	// record (scf-absence-diff.ts). Each was researched (6-agent fan-out) for a
+	// LIVE footprint and deduped against the directory (19 of 50 candidates
+	// already existed under different slugs → dropped). These 31 have a verified
+	// site/repo; went-nowhere submissions were SKIPped. AdminEdit provenance;
+	// create-if-missing so a slug collision safely no-ops. Evidence + skip list:
+	// improvements/scf-seed-wave-2026-07-10.md.
+	{
+		slug: "forestio",
+		name: "Forestio",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Social Impact"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Forestio uses satellite imagery and machine learning to verify tree planting and estimate carbon footprints, with plans to tokenize verified forestry data on-chain.",
+		links: {
+			website: "https://forestio.ai/",
+			github: "https://github.com/forest-io/ForestConsumerWeb",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "nemorixpay",
+		name: "NemorixPay",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Wallet", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"NemorixPay is an in-development Flutter mobile wallet for cross-border remittances between the U.S. and Latin America using Stellar stablecoins (USDC/XLM).",
+		links: {
+			website: "https://nemorixpay.com/",
+			github: "https://github.com/nemorixpay",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "trustline",
+		name: "Trustline",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Security", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Trustline provides a security SDK and smart-contract insurance for institutional on-chain finance, offering a free sandbox tier and TVL-based pricing.",
+		links: { website: "https://www.trustline.id" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "troqpay",
+		name: "TroqPay",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"TroqPay lets Brazilian merchants accept Pix via checkout, links, or API and settle in BRL or stablecoins, using Stellar as a digital-dollar settlement layer.",
+		links: { website: "https://troqpay.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "bluechip",
+		name: "Bluechip",
+		category: "Tooling",
+		status: "Live",
+		types: ["Analytics", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bluechip is an independent stablecoin rating agency publishing letter-grade economic-safety ratings for 15+ stablecoins using its SMIDGE framework.",
+		links: { website: "https://bluechip.org/en" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "tokenpad",
+		name: "Tokenpad",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Analytics"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"Cross-chain crypto and DeFi portfolio-tracker mobile app (iOS/Android, 100k+ downloads) by 57blocks, funded via SCF to add Stellar support.",
+		links: { website: "https://tokenpad.io" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "fuul",
+		name: "Fuul",
+		category: "Tooling",
+		status: "Live",
+		types: ["Analytics", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Fuul is an incentives, affiliate and referral engine for crypto apps (clients include Coinbase, dYdX), funded by SCF to deploy natively on Stellar via Soroban.",
+		links: { website: "https://www.fuul.xyz" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "prism",
+		name: "Prism",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["DEX", "Payments"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"Prism is a multi-chain crypto financial hub (DEX liquidity pools, trading, payments, yield) funded by SCF #44 to expand onto Stellar.",
+		links: { website: "https://prismfi.cc" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "escala",
+		name: "Escala",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments", "RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Escala is a B2B embedded-finance platform (LatAm) building collective-investment products on Soroban with USDC escrows and milestone-based fund releases.",
+		links: { website: "https://escalahq.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "safu-protocol",
+		name: "SAFU Protocol",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Security", "Infrastructure"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"SAFU is an audited stake-backed wallet-drain insurance protocol (deposit to earn yield plus automated payout coverage) on Ethereum, funded by SCF #44 to launch community pools on Stellar.",
+		links: { website: "https://safustaking.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "the-strategists",
+		name: "The Strategists",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Lending", "SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"PaltaLabs' The Strategists builds reusable Soroban smart-contract modules for DeFi yield optimization (tied to their DeFindex product), funded by SCF #42.",
+		links: {
+			website: "https://paltalabs.io",
+			github: "https://github.com/paltalabs",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "gameduk",
+		name: "Gameduk",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Education", "Gaming"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Gamified learning platform where users complete educational challenges to earn XP, badges and certificates; its SCF-funded MVP rewarded learners with Stellar XLM.",
+		links: { website: "https://www.gameduk.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "tokeshare",
+		name: "Tokeshare",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["RWA", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Tokenized real-world-asset investment platform (real estate, commodities, index funds) with a Stellar proof-of-concept for tokenized real estate and USDC rent distribution.",
+		links: { website: "https://tokeshare.co" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "scopuly",
+		name: "Scopuly",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Wallet", "DEX"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Non-custodial Stellar wallet and SDEX across iOS, Android, macOS, Telegram and web supporting payments, multisig, asset issuance, swaps and DEX trading.",
+		links: { website: "https://scopuly.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "elementpay",
+		name: "ElementPay",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments", "Stablecoin", "Anchor"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Cross-border USDC stablecoin payment infrastructure for Africa connecting mobile money and USSD to stablecoin rails for invoicing, collections and payouts.",
+		links: { website: "https://www.elementpay.net" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "hermes",
+		name: "Hermes",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["DEX"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Decentralized perpetual (leveraged) exchange on Stellar/Soroban using liquidity pools and oracles, built by the Zenith Protocols team.",
+		links: {
+			website: "https://github.com/zenith-protocols/hermes",
+			github: "https://github.com/zenith-protocols/hermes",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "feeprime",
+		name: "FeePrime",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"FeePrime is a business-management platform for African SMEs (POS, invoicing, CRM, accounting, payroll); its SCF pitch was a Stellar-USDC invoicing and payroll tool for freelancers.",
+		links: { website: "https://feeprime.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "openxswitch",
+		name: "OpenXSwitch",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Wallet", "Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"OpenXSwitch is a Lagos financial-infrastructure-as-a-service platform offering wallet-as-a-service, a trading/swap API, and stablecoin/smart-account infra for African fintechs; its SCF pitch added Stellar interchain and gasless APIs.",
+		links: { website: "https://openxswitch.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "verso",
+		name: "VERSO",
+		category: "Anchor",
+		status: "Live",
+		types: ["Anchor", "Payments", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"VERSO/Versotek is an SBS-regulated Peruvian stablecoin exchange building Peru's first compliant Stellar anchor for PEN/USD/USDC on- and off-ramps via the SDF Anchor Platform.",
+		links: { website: "https://www.versotek.io" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "mydatacoin",
+		name: "MyDataCoin",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Security", "Lending"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MyDataCoin builds privacy-preserving DeFi lending and KYC compliance on Stellar using zero-knowledge proofs and self-sovereign identity, with an 'Atria' dashboard suite.",
+		links: {
+			website: "https://mydatacoin.io",
+			github: "https://github.com/MyDataCoin",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "neftwerk",
+		name: "Neftwerk",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["NFT", "RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Blockchain platform for contemporary-art transactions and real-world-asset tokenization of artworks, including the MyPocket Gallery tool and the Neftwerk Protocol.",
+		links: {
+			website: "https://www.neftwerk.com",
+			github: "https://github.com/Neftwerk/Neftwerk",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "stellar-command-insights",
+		name: "Stellar Command Insights",
+		category: "Tooling",
+		status: "Development",
+		types: ["Analytics", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Real-time monitoring and visualization tool for Soroban CLI commands and on-chain events, built on the ELK stack with Kibana dashboards and Telegram/Slack alerts.",
+		links: {
+			website: "https://github.com/bytemaster333/Soroban-ELK",
+			github: "https://github.com/bytemaster333/Soroban-ELK",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "lucent",
+		name: "Lucent",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Stablecoin", "Lending"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Stellar-native Liquity-v2-style CDP protocol where users deposit XLM collateral to mint the overcollateralized stablecoin starUSD and earn yield.",
+		links: { website: "https://starusd.xyz/" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "zilt",
+		name: "Zilt",
+		category: "Anchor",
+		status: "Live",
+		types: ["Anchor", "Payments", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Mobile-money on-ramp converting M-Pesa and other mobile-money balances into USDC on Stellar to onboard unbanked users in the global south.",
+		links: {
+			website: "https://zilt.vercel.app/",
+			github: "https://github.com/tomrowbo/zilt",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "d-fct",
+		name: "d-FCT",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Social Impact"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"A decentralized fact-checking toolkit for transparent content verification, provenance, governance, and reward-driven community contributions.",
+		links: { website: "https://dfc.to", github: "https://github.com/mobr-ai" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "soroban-decompiler",
+		name: "Soroban Decompiler",
+		category: "Tooling",
+		status: "Development",
+		types: ["Security"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"An open-source tool that reverse-engineers Soroban (WASM) smart contracts into human-readable form for auditing and debugging.",
+		links: {
+			website: "https://github.com/salaheldinsoliman/soroban-decompiler",
+			github: "https://github.com/salaheldinsoliman/soroban-decompiler",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "lumagg",
+		name: "LumAgg",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["DEX"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"A liquidity aggregator for Stellar Soroban DEXes (Soroswap, Aquarius, Phoenix, Comet, Classic) finding optimal swap routes and splitting orders across venues in one transaction.",
+		links: { website: "https://www.lumagg.xyz" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "soroban-payout-token-suite",
+		name: "Soroban Payout & Token Suite",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["RWA", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"A Soroban-based Asset Manager for issuing, selling, and redeeming tokens with investor onboarding, KYC, and automated payout distribution.",
+		links: { website: "https://floris3.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "octarine",
+		name: "Octarine",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["RWA", "DEX"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"An RFQ-based liquidity protocol for tokenized real-world assets on Stellar where liquidity providers compete to offer executable prices for instant onchain settlement.",
+		links: { website: "https://octarine.finance" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "lusty-finance",
+		name: "Lusty Finance",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["DEX"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"A DeFi options-yield venue on Stellar where users sell covered calls and cash-secured puts on XLM to earn premium upfront, with Black-Scholes pricing and automated settlement.",
+		links: {
+			website: "https://lusty.finance",
+			github: "https://github.com/utkurock/Lusty",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "sunereum-labs",
+		name: "Sunereum Labs",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["RWA", "Analytics"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Combines IoT-driven data collection with Soroban smart contracts for renewable-energy asset monitoring, parametric insurance, and stablecoin-based energy transactions.",
+		links: {
+			website: "https://sunereum.com",
+			github: "https://github.com/Sunereum-Labs",
+		},
+		provenance: { source: "AdminEdit" },
+	},
 ];
 
 /** Rebrands — name, website, and description move together so both the old
