@@ -38,10 +38,13 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// but the record predated it (RPC-only prose). Grounded in Alchemy's own
 	// docs (alchemy.com/docs/reference/stellar-api-quickstart + stellar-data-
 	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
-	// Their claimed validator role is NOT stated on their pages — omitted
-	// until primary-source verifiable (class 18: no fabrication).
+	// Tier-1 validator: boxy-confirmed 2026-07-10 + Alchemy's own blog
+	// ("Alchemy expands support on Stellar with Data APIs and Tier-1
+	// validation … Alchemy is now a tier-1 validator on Stellar"). Note the
+	// official tier-1-orgs docs page does NOT list them yet — the exact
+	// docs-lag raven#18 describes.
 	alchemy:
-		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar with two products: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
+		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
