@@ -897,7 +897,11 @@ async function main() {
 			console.log(`  WARN: no project "${slug}" — skipped`);
 			continue;
 		}
-		const norm = (u: string) => (u ?? "").replace(/\/+$/, "");
+		// Payload normalizes stored URLs (strips www.) — compare both sides
+		// normalized or these rows re-plan forever (caught on the S3b dry-run:
+		// 7 already-applied website fixes re-planned as writes).
+		const norm = (u: string) =>
+			(u ?? "").replace(/^(https?:\/\/)www\./, "$1").replace(/\/+$/, "");
 		if (norm(d.links?.website) === norm(website)) {
 			console.log(`  ${slug}: website already current, skip`);
 			continue;
