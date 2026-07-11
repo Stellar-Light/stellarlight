@@ -305,7 +305,7 @@ if (goldenPath) {
 lines.push("");
 lines.push("### The loop");
 lines.push(
-	"Fix targets the worst bucket → next week's run measures the delta here. Data sweeps feed the human-verified Part-3 waves (report → owner review → curated fix, never bulk). See `improvements/full-surface-coverage-plan.md`.",
+	"Fix targets the worst bucket → next week's run measures the delta here. Data sweeps feed the human-verified Part-3 waves (report → owner review → curated fix, never bulk). See `improvements/engine/full-surface-coverage-plan.md`.",
 );
 
 console.log(lines.join("\n"));

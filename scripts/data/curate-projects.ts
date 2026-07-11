@@ -415,7 +415,7 @@ const SEEDS: Array<{
 	// already existed under different slugs → dropped). These 31 have a verified
 	// site/repo; went-nowhere submissions were SKIPped. AdminEdit provenance;
 	// create-if-missing so a slug collision safely no-ops. Evidence + skip list:
-	// improvements/scf-seed-wave-2026-07-10.md.
+	// improvements/waves/scf-seed-wave-2026-07-10.md.
 	{
 		slug: "forestio",
 		name: "Forestio",
