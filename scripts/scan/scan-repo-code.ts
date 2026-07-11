@@ -168,8 +168,11 @@ async function main() {
 			// target) sit behind hundreds of recently-pushed small repos — real
 			// symbol queries failed while R-SYM read 100% on the 5 repos that
 			// happened to be scanned. Canonical/high-score repos are what
-			// consumers actually look up; scan them first.
-			sort: ["-repoScore", "-lastCommitAt"],
+			// consumers actually look up; scan them first. (Comma-separated STRING —
+			// the array form is silently ignored by the Payload find; verified live
+			// 2026-07-11 when a rescan wave picked hackathon repos over score-74
+			// js-stellar-sdk.)
+			sort: "-repoScore,-lastCommitAt",
 			limit: LIMIT,
 			depth: 0,
 			select: {
