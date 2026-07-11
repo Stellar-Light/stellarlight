@@ -183,6 +183,8 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	tvlUSD?: number | null;
+	tvlAsOf?: string | null;
 	canonicalSlug: string | null;
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
@@ -353,6 +355,54 @@ export async function GET(req: NextRequest) {
 		scfRaw === "1" || scfRaw === "true" || scfRaw === "yes";
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
+	// status filter (2026-07-11 audit): 81 Inactive projects were UNREACHABLE —
+	// nothing filtered on status, and unknown params were silently ignored, so
+	// ?status=Inactive returned all-Live results "as if filtered".
+	const statusParam = sp.get("status")?.trim() || null;
+	const VALID_STATUSES = [
+		"Live",
+		"Inactive",
+		"Development",
+		"Pre-Release",
+		"Pre-Development",
+	] as const;
+	if (
+		statusParam &&
+		!(VALID_STATUSES as readonly string[]).includes(statusParam)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid status '${statusParam}'.`,
+				validStatuses: VALID_STATUSES,
+			},
+			{ status: 400 },
+		);
+	}
+	// Honest contract (2026-07-11 audit, EMPTY-DISHONEST med): an unknown param
+	// (?country=NG, ?sep=24) was silently dropped — the caller got unfiltered
+	// results while believing they'd filtered. We can't 400 (additive-only
+	// contract), but we can SAY it: responses carry meta.warnings.
+	const KNOWN_PARAMS = new Set([
+		"q",
+		"query",
+		"keyword",
+		"search",
+		"category",
+		"scfAwarded",
+		"scfAwardedOnly",
+		"status",
+		"limit",
+		"offset",
+		"exp",
+	]);
+	const unknownParams = [...new Set([...sp.keys()])].filter(
+		(k) => !KNOWN_PARAMS.has(k),
+	);
+	const warnings = unknownParams.length
+		? [
+				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
+			]
+		: [];
 
 	// Reject an unrecognized category (declared as an enum in the OpenAPI; was a
 	// silent 200/0). Matches the project category select options + leaderboard.
@@ -380,7 +430,7 @@ export async function GET(req: NextRequest) {
 	// nested wrong). Returning the default project list here is actively harmful —
 	// the caller reports it as the answer ("no escrow/vault projects exist") when
 	// the real projects were never searched. Return an honest empty + how to fix.
-	if (!q && !category && !scfAwardedOnly) {
+	if (!q && !category && !scfAwardedOnly && !statusParam) {
 		logApiHit({
 			req,
 			endpoint: "/api/projects/search",
@@ -392,6 +442,7 @@ export async function GET(req: NextRequest) {
 				meta: {
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
+					...(warnings.length ? { warnings } : {}),
 					filters: { q: "", category, scfAwardedOnly, limit, offset },
 					matchMode: "all" as const,
 					matchModeLabel: "no query supplied",
@@ -439,10 +490,22 @@ export async function GET(req: NextRequest) {
 			if (scfAwardedOnly) {
 				where["scf.awarded"] = { equals: true };
 			}
+			if (statusParam) {
+				// Explicit filter overrides the default status pool — this is what
+				// makes the Inactive corpus reachable (?status=Inactive).
+				where.status = { equals: statusParam };
+			}
 
 			const tokens = tokenize(q);
 			const intentTypes = intentTypesFor(tokens);
 			const rampIntent = isRampIntent(tokens);
+			// TVL-superlative intent (2026-07-11 audit, F1 class): "highest tvl"
+			// returned five tvl=null records while Blend ($139M) sat unfetched —
+			// the structured field the query literally asks about played no part.
+			const tvlIntent = /\btvl\b|total value locked/i.test(q);
+			// "X vs Y" comparison (audit: blend vs yieldblox dropped Blend): both
+			// SUBJECTS must be present — tiered token matching can drop one.
+			const vsMatch = q.match(/^(.+?)\s+(?:vs\.?|versus)\s+(.+)$/i);
 
 			// Push the keyword match INTO the DB query (OR over tokens) so EVERY
 			// matching project is a candidate — not just whichever 500 load first
@@ -479,6 +542,10 @@ export async function GET(req: NextRequest) {
 					...baseOr,
 					...structuredOr,
 					...structuredSelectClauses(tokens),
+					// TVL intent: every TVL-tracked record joins the candidate pool —
+					// "highest tvl" must consider the actual TVL leaders, whose prose
+					// never contains the word "tvl".
+					...(tvlIntent ? [{ tvlUSD: { greater_than: 0 } }] : []),
 				];
 			}
 
@@ -681,6 +748,39 @@ export async function GET(req: NextRequest) {
 						}
 					}
 				}
+				// TVL bypass (mirrors the corridor bypass): under TVL intent, every
+				// TVL-tracked candidate is admitted regardless of prose token count —
+				// Blend's description doesn't say "tvl", its tvlUSD field does.
+				if (tvlIntent) {
+					const have = new Set(filtered.map((p) => p.id));
+					for (const p of projects) {
+						if (!have.has(p.id) && p.tvlUSD != null) {
+							filtered.push(p);
+							have.add(p.id);
+						}
+					}
+				}
+				// "X vs Y": guarantee BOTH named subjects are present — pick each
+				// subject's best name-match from the full candidate pool (exact or
+				// prefix, ≥2) and admit it if the tiers dropped it.
+				if (vsMatch) {
+					const have = new Set(filtered.map((p) => p.id));
+					for (const subject of [vsMatch[1].trim(), vsMatch[2].trim()]) {
+						let best: (typeof projects)[number] | null = null;
+						let bestRank = 1; // require ≥2 (prefix or exact)
+						for (const p of projects) {
+							const r = nameMatchScore(p.name, p.slug, subject);
+							if (r > bestRank) {
+								bestRank = r;
+								best = p;
+							}
+						}
+						if (best && !have.has(best.id)) {
+							filtered.unshift(best);
+							have.add(best.id);
+						}
+					}
+				}
 				// Name-lookup contract (sls-009): an exact/prefix/whole-word name
 				// match must dominate every authority signal — q="Blend" ranked
 				// Reflector (authority-heavy) above the project literally named
@@ -728,6 +828,16 @@ export async function GET(req: NextRequest) {
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
 				projects = filtered;
+				// TVL-superlative float: rows that HAVE the asked-about number rank
+				// above rows that don't, ordered by it. Stable, so within each group
+				// the careful sort above is preserved.
+				if (tvlIntent) {
+					projects.sort(
+						(a, b) =>
+							(b.tvlUSD != null ? 1 : 0) - (a.tvlUSD != null ? 1 : 0) ||
+							(b.tvlUSD ?? 0) - (a.tvlUSD ?? 0),
+					);
+				}
 			} else {
 				matchMode = "all";
 				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
@@ -875,6 +985,11 @@ export async function GET(req: NextRequest) {
 		const { hay: _hay, ...rest } = p as typeof p & { hay?: string };
 		return rest;
 	});
+	// An explicit ?status= filter is a hard contract on EVERY path — semantic
+	// augmentation must not smuggle other-status rows past it.
+	if (statusParam) {
+		baseProjects = baseProjects.filter((p) => p.status === statusParam);
+	}
 	// Shadow-fold (2026-07-11 audit, WRONG-RESULT high): a merged duplicate
 	// ("lineage shadow": canonicalSlug → another record, status Inactive) must
 	// never be SERVED — q=stellarexpert ranked the Inactive tombstone #1 while
@@ -1187,9 +1302,11 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
+				...(warnings.length ? { warnings } : {}),
 				filters: {
 					q,
 					category,
+					status: statusParam,
 					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,
 					limit,

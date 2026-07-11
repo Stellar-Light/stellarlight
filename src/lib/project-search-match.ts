@@ -504,12 +504,35 @@ export function buildHaystack(p: MatchableProject): string {
 	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText}`.toLowerCase();
 }
 
+// Negation guard (2026-07-11 audit): substring matching means "custodial"
+// hits inside "NON-custodial" — the OPPOSITE meaning — so "custody with
+// staking" surfaced three non-custodial products as custody matches. A
+// variant occurrence preceded by "non-"/"non " does not count as a hit…
+function hasPositiveHit(hay: string, v: string): boolean {
+	let i = hay.indexOf(v);
+	while (i !== -1) {
+		const before = hay.slice(Math.max(0, i - 4), i);
+		if (!/non[-\s]?$/.test(before)) return true;
+		i = hay.indexOf(v, i + 1);
+	}
+	return false;
+}
+
 // Prose+structured keyword score: how many query tokens hit the haystack (each
 // token counts once, via any of its expanded terms).
 export function scoreTokens(hay: string, tokens: string[]): number {
 	if (!tokens.length) return 1;
+	// …unless the QUERY is itself negation-seeking ("non custodial wallet") —
+	// then negated prose is exactly what it's asking for.
+	const negSeeking = tokens.some((t) => t.startsWith("non"));
 	return tokens.reduce(
-		(s, t) => s + (termsForToken(t).some((v) => hay.includes(v)) ? 1 : 0),
+		(s, t) =>
+			s +
+			(termsForToken(t).some((v) =>
+				negSeeking ? hay.includes(v) : hasPositiveHit(hay, v),
+			)
+				? 1
+				: 0),
 		0,
 	);
 }
