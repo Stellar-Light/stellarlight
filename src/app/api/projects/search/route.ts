@@ -495,6 +495,15 @@ export async function GET(req: NextRequest) {
 				// makes the Inactive corpus reachable (?status=Inactive).
 				where.status = { equals: statusParam };
 			}
+			if (!q) {
+				// Browse mode (no query): lineage shadows are merged-away dupes, not
+				// real records — exclude them in the DB so counts.total and page
+				// sizes are exact (re-measure 2026-07-11: ?status=Inactive said
+				// total=82 but only 42 real rows survived the fold). Query mode
+				// keeps shadows as candidates: their NAMES must stay searchable so
+				// the fold can serve the canonical for alias lookups.
+				where.canonicalSlug = { equals: null };
+			}
 
 			const tokens = tokenize(q);
 			const intentTypes = intentTypesFor(tokens);
@@ -776,7 +785,7 @@ export async function GET(req: NextRequest) {
 							}
 						}
 						if (best && !have.has(best.id)) {
-							filtered.unshift(best);
+							filtered.push(best);
 							have.add(best.id);
 						}
 					}
@@ -827,6 +836,30 @@ export async function GET(req: NextRequest) {
 						(nameRank.get(b.id) ?? 0) - (nameRank.get(a.id) ?? 0) ||
 						(confByName.get(b.id) ?? 0) - (confByName.get(a.id) ?? 0),
 				);
+				// "X vs Y" re-pin AFTER the sort (re-measure 2026-07-11: subjects
+				// admitted pre-sort got re-buried — aquarius at #7, outside the
+				// default window). Both named subjects move to the front, best
+				// name-match order preserved between them.
+				if (vsMatch) {
+					const subjectIds: string[] = [];
+					for (const subject of [vsMatch[1].trim(), vsMatch[2].trim()]) {
+						let best: (typeof filtered)[number] | null = null;
+						let bestRank = 1;
+						for (const p of filtered) {
+							const r = nameMatchScore(p.name, p.slug, subject);
+							if (r > bestRank) {
+								bestRank = r;
+								best = p;
+							}
+						}
+						if (best) subjectIds.push(best.id);
+					}
+					if (subjectIds.length) {
+						const front = filtered.filter((p) => subjectIds.includes(p.id));
+						const rest = filtered.filter((p) => !subjectIds.includes(p.id));
+						filtered = [...front, ...rest];
+					}
+				}
 				projects = filtered;
 				// TVL-superlative float: rows that HAVE the asked-about number rank
 				// above rows that don't, ordered by it. Stable, so within each group
@@ -938,6 +971,11 @@ export async function GET(req: NextRequest) {
 			const have = new Set(scored.map((r) => r.id));
 			semanticAdds = sem
 				.filter((r) => !have.has(r.id))
+				// ?status= is a hard contract — the vector index has no status
+				// filter, so enforce it here AT THE SOURCE. Filtering later (post
+				// count/slice) produced phantom counts and under-filled pages
+				// (re-measure 2026-07-11: total=1 with projects=[]).
+				.filter((r) => !statusParam || r.status === statusParam)
 				.slice(0, limit - scored.length);
 		} catch {
 			// index not ready / no embedding key — degrade to keyword-only
@@ -1065,7 +1103,17 @@ export async function GET(req: NextRequest) {
 						: null;
 				const c = target ? canBySlug.get(target) : null;
 				// dangling pointer → keep the shadow rather than lose the hit
-				const effective = target && c ? swapped(row, c) : row;
+				let effective = target && c ? swapped(row, c) : row;
+				// ?status= is a hard contract: if the swap would smuggle in a
+				// canonical of a DIFFERENT status (Inactive shadow → Live
+				// canonical under ?status=Inactive), drop the row entirely — a
+				// merged-away shadow is not a real record for a status browse.
+				// Dropping here (not post-count) keeps counts and page size
+				// honest (re-measure 2026-07-11: returned=5 with 4 rows).
+				if (statusParam && effective.status !== statusParam) {
+					if (effective !== row) continue; // swapped to other status → drop
+					effective = row; // shadow itself off-status can't happen (DB-filtered)
+				}
 				if (seen.has(effective.slug)) continue;
 				seen.add(effective.slug);
 				folded.push(effective);
@@ -1075,10 +1123,11 @@ export async function GET(req: NextRequest) {
 			// fold is best-effort — serving the shadow beats erroring the search
 		}
 	}
-	// An explicit ?status= filter is a hard contract on EVERY path — applied
-	// AFTER the shadow-fold (live-verify 2026-07-11 caught the leak: a folded
-	// shadow re-introduced its Live canonical into ?status=Inactive results)
-	// and after semantic augmentation, so nothing smuggles other-status rows.
+	// Belt-and-suspenders on the ?status= contract: keyword candidates are
+	// DB-filtered and semanticAdds are filtered at source, so this should be a
+	// no-op — but any row that still slips through must not be served. (Counts
+	// are recomputed from the final rows at serialization, so this can no
+	// longer produce phantom totals.)
 	if (statusParam) {
 		baseProjects = baseProjects.filter((p) => p.status === statusParam);
 	}
