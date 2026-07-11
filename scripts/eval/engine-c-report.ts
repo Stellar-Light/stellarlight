@@ -16,7 +16,7 @@
 import { readFileSync } from "node:fs";
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-const [aPath, bPath, dPath, corpusPath, scfPath] = positional;
+const [aPath, bPath, dPath, corpusPath, scfPath, goldenPath] = positional;
 // --prev=<dir>: last successful run's evidence artifact (a.json/b.json/
 // d.json/corpus.json) — enables week-over-week deltas. Absent on the first
 // run or when the artifact expired; the report degrades to absolute values.
@@ -260,6 +260,45 @@ if (scfPath) {
 			lines.push("Our SCF-awarded data agrees with the source. ✅");
 	} else {
 		lines.push(`⚠ SCF cross-check output unreadable: ${s?._error ?? "empty"}`);
+	}
+}
+
+// ── Golden retrieval eval: correctness classes on the curated question set ──
+if (goldenPath) {
+	const g = readJson(goldenPath);
+	lines.push("");
+	lines.push("### Golden retrieval eval (correctness classes)");
+	if (g && !g._error && Array.isArray(g.graded)) {
+		const scored = g.graded.filter(
+			(r: { status: string }) => r.status !== "N/A",
+		);
+		const passed = scored.filter(
+			(r: { status: string }) => r.status === "PASS",
+		).length;
+		const forbidden = scored.filter(
+			(r: { forbiddenHits?: string[] }) => r.forbiddenHits?.length,
+		).length;
+		const junk = scored.reduce(
+			(s: number, r: { junk?: number }) => s + (r.junk ?? 0),
+			0,
+		);
+		const badTitle = scored.reduce(
+			(s: number, r: { badTitle?: number }) => s + (r.badTitle ?? 0),
+			0,
+		);
+		// Forbidden hits are CORRECTNESS failures (a wrong/stale fact served) —
+		// they red the run. Recall-grade misses are the fix queue, not a red.
+		if (forbidden > 0) red = true;
+		lines.push(
+			`**${passed}/${scored.length} pass · forbidden-hits ${forbidden}${forbidden ? " 🔴" : " 🟢"} · junk ${junk} · bad-titles ${badTitle}.**`,
+		);
+		const misses = g.graded.filter(
+			(r: { status: string }) => r.status === "FAIL",
+		);
+		for (const m of misses.slice(0, 6))
+			lines.push(`- MISS \`${m.id ?? m.question ?? "?"}\``);
+	} else {
+		lines.push(`⚠ Golden output unreadable: ${g?._error ?? "empty"}`);
 	}
 }
 
