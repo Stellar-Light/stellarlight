@@ -16,7 +16,8 @@
 import { readFileSync } from "node:fs";
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-const [aPath, bPath, dPath, corpusPath, scfPath, goldenPath] = positional;
+const [aPath, bPath, dPath, corpusPath, scfPath, goldenPath, ePath] =
+	positional;
 // --prev=<dir>: last successful run's evidence artifact (a.json/b.json/
 // d.json/corpus.json) — enables week-over-week deltas. Absent on the first
 // run or when the artifact expired; the report degrades to absolute values.
@@ -25,7 +26,7 @@ const prevDir = process.argv
 	?.slice("--prev=".length);
 if (!aPath || !bPath) {
 	console.error(
-		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json] [--prev=dir]",
+		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json] [scf.json] [golden.json] [engine-e.json] [--prev=dir]",
 	);
 	process.exit(2);
 }
@@ -258,8 +259,49 @@ if (scfPath) {
 			);
 		if (over === 0 && under === 0)
 			lines.push("Our SCF-awarded data agrees with the source. ✅");
+		// Round MEMBERSHIP (the phoenix class): totals right, round set wrong.
+		// A round the source affirmatively marks "Not Awarded" reds the run
+		// exactly like an overstated boolean — we're claiming an award the
+		// source denies, just at round granularity.
+		if (Array.isArray(s.roundsOverstated)) {
+			const rOver = s.roundsOverstated.length;
+			const rUnv = (s.roundsUnverifiable ?? []).length;
+			if (rOver > 0) red = true;
+			lines.push(
+				`Round membership (${s.frame.roundsChecked ?? "?"} awarded records checked): **rounds-overstated ${rOver}${rOver ? " 🔴" : " 🟢"}** · unverifiable ${rUnv} (review by hand, never accused).`,
+			);
+			for (const r of s.roundsOverstated.slice(0, 8))
+				lines.push(
+					`- ROUNDS-OVERSTATED \`${r.slug}\` ours [${(r.ourRounds ?? []).map((x: string) => `#${x}`).join(" ")}] vs official awarded [${(r.officialAwardedRounds ?? []).map((x: string) => `#${x}`).join(" ")}] — ${r.url}`,
+				);
+		}
 	} else {
 		lines.push(`⚠ SCF cross-check output unreadable: ${s?._error ?? "empty"}`);
+	}
+}
+
+// ── Engine E: contract honesty (spec ⇄ live params + fields) ──
+if (ePath) {
+	const e = readJson(ePath);
+	lines.push("");
+	lines.push("### Engine E — contract honesty (spec ⇄ live)");
+	if (e && !e._error && e.frame) {
+		const silent = (e.silentParams ?? []).length;
+		const invalid = (e.invalidAccepted ?? []).length;
+		const missing = (e.missingFields ?? []).length;
+		const undoc = (e.undocumentedFields ?? []).length;
+		// A silently-ignored documented param is a correctness lie to every
+		// consumer that sets it (the sls-033/040 class) — red, like overstated.
+		if (silent > 0) red = true;
+		lines.push(
+			`Frame: ${e.frame.ops} ops · ${e.frame.paramsProbed} params probed · ${e.frame.fieldsChecked} fields checked. **Silent params: ${silent}${silent ? " 🔴" : " 🟢"} · invalid-accepted: ${invalid} · doc-but-absent fields: ${missing} · live-but-undocumented fields: ${undoc}.**`,
+		);
+		for (const f of (e.silentParams ?? []).slice(0, 6))
+			lines.push(`- SILENT \`${f.op}\` param \`${f.param}\` — ${f.evidence}`);
+		for (const f of (e.invalidAccepted ?? []).slice(0, 6))
+			lines.push(`- INVALID-ACCEPTED \`${f.op}\` \`${f.param}\``);
+	} else {
+		lines.push(`⚠ Engine E output unreadable: ${e?._error ?? "empty"}`);
 	}
 }
 

@@ -58,6 +58,13 @@ jobs:
         # live API — was manual-only until 2026-07-11; now standing weekly.
         continue-on-error: true
         run: pnpm exec tsx scripts/eval/run-golden.ts --json > /tmp/golden.json 2> /tmp/golden.log
+      - name: Engine E (contract honesty)
+        # Spec-derived param-effect + field-coverage probes against live —
+        # the silent-param / advertised-but-absent guard. Public API only,
+        # no secrets. Exit 1 on silentParams>0 is absorbed here (the report
+        # step reds the run via the Engine E section instead).
+        continue-on-error: true
+        run: pnpm exec tsx scripts/eval/engine-e-contract.ts --out=/tmp/e.json 2> /tmp/e.log
       - name: Fetch previous run's evidence (week-over-week deltas)
         # Downloads the LAST successful run's engine-evidence artifact so the
         # report can render Δs. First run / expired artifact → step no-ops
@@ -75,7 +82,7 @@ jobs:
         run: |
           PREV_FLAG=""
           [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json /tmp/scf.json /tmp/golden.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json /tmp/scf.json /tmp/golden.json /tmp/e.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |
@@ -101,6 +108,9 @@ jobs:
             /tmp/b.json
             /tmp/d.json
             /tmp/corpus.json
+            /tmp/scf.json
+            /tmp/golden.json
+            /tmp/e.json
           retention-days: 30
       - name: Fail run on floor breach
         if: env.A_RED == '1' || env.C_RED == '1'

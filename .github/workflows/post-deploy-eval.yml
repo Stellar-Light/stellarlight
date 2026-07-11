@@ -1,0 +1,150 @@
+# Post-deploy eval — the per-SHIP counterpart of the weekly engine-c-health.
+# Tyler re-evals on every absorb; until 2026-07-11 we only evaled weekly, so a
+# ship could regress retrieval/contract quality and sit broken for days. This
+# runs the fast suites (golden, sampled recall, Engine E contract honesty)
+# right after any push that touches the API surface or ranking code, waits for
+# the Vercel deploy to become visible, and posts one summary comment to the
+# rolling health tracker issue (#436).
+#
+# Gate (exit nonzero) ONLY on: golden REGRESSION vs the pinned baseline, or
+# Engine E silentParams>0. Sampled recall is informational (small samples make
+# floor breaches noisy — the full weekly run owns those floors).
+name: post-deploy-eval
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/lib/openapi-spec.ts
+      - src/app/api/**
+      - src/lib/*search*
+      - src/lib/search/**
+      - src/lib/research-rank.ts
+      - src/lib/confidence.ts
+      - scripts/eval/golden-questions.json
+  workflow_dispatch: {}
+concurrency:
+  group: post-deploy-eval
+  cancel-in-progress: true
+permissions:
+  issues: write
+  contents: read
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TRACKER_ISSUE: "436"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Wait for deploy (apiVersion gate)
+        id: gate
+        # The eval is only meaningful against the JUST-shipped code. Wait 5
+        # minutes for Vercel, then require live /api/status.apiVersion to
+        # equal src/lib/version.ts from THIS checkout (retry up to 10 more
+        # minutes). Never-visible → skip-with-notice, exit 0: deploy
+        # monitoring is not this workflow's job (bot-authored commits are
+        # known not to deploy — see project_bot_commits_dont_deploy).
+        run: |
+          WANT=$(grep -oE 'API_VERSION = "[^"]+"' src/lib/version.ts | cut -d'"' -f2)
+          echo "expected apiVersion: $WANT"
+          sleep 300
+          for i in $(seq 1 20); do
+            LIVE=$(curl -sf --max-time 15 https://stellarlight.xyz/api/status | jq -r '.apiVersion // empty' || true)
+            if [ "$LIVE" = "$WANT" ]; then
+              echo "live apiVersion=$LIVE matches — deploy visible"
+              echo "deployed=1" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "live=$LIVE want=$WANT — retry $i/20"
+            sleep 30
+          done
+          echo "deployed=0" >> "$GITHUB_OUTPUT"
+          echo "live=${LIVE:-unreachable}" >> "$GITHUB_OUTPUT"
+          echo "want=$WANT" >> "$GITHUB_OUTPUT"
+      - name: Skip notice (deploy never became visible)
+        if: steps.gate.outputs.deployed == '0'
+        run: |
+          gh issue comment "$TRACKER_ISSUE" --repo "$GITHUB_REPOSITORY" --body "**post-deploy-eval SKIPPED** for \`${GITHUB_SHA::7}\` — live apiVersion stayed \`${{ steps.gate.outputs.live }}\` (wanted \`${{ steps.gate.outputs.want }}\`) after 15 min. Deploy not visible (bot-authored push, deploy failure, or no-op) — eval not run. [run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+      - name: Golden retrieval eval
+        if: steps.gate.outputs.deployed == '1'
+        # Regression gate pinned at the 2026-07-11 baseline: 32/37 pass,
+        # 1 standing forbidden-hit (blend-incident-facts — tracked weekly).
+        # Red = pass drops >1 below baseline OR a NEW forbidden fact appears.
+        # Re-pin when golden-questions.json changes materially; ratchet
+        # FORBIDDEN_BASELINE to 0 once the standing item is fixed.
+        env:
+          PASS_FLOOR: "31"
+          FORBIDDEN_BASELINE: "1"
+        run: |
+          pnpm exec tsx scripts/eval/run-golden.ts --json > /tmp/golden.json 2> /tmp/golden.log || echo "GOLDEN_ERR=1" >> "$GITHUB_ENV"
+          PASS=$(jq '[.graded[] | select(.status=="PASS")] | length' /tmp/golden.json 2>/dev/null || echo 0)
+          SCORED=$(jq '[.graded[] | select(.status!="N/A")] | length' /tmp/golden.json 2>/dev/null || echo 0)
+          FORBIDDEN=$(jq '[.graded[] | select((.forbiddenHits|length)>0)] | length' /tmp/golden.json 2>/dev/null || echo 0)
+          echo "GOLDEN_PASS=$PASS" >> "$GITHUB_ENV"
+          echo "GOLDEN_SCORED=$SCORED" >> "$GITHUB_ENV"
+          echo "GOLDEN_FORBIDDEN=$FORBIDDEN" >> "$GITHUB_ENV"
+          if [ "$PASS" -lt "$PASS_FLOOR" ] || [ "$FORBIDDEN" -gt "$FORBIDDEN_BASELINE" ]; then
+            echo "GOLDEN_RED=1" >> "$GITHUB_ENV"
+          fi
+          echo "golden: $PASS/$SCORED pass, $FORBIDDEN forbidden (floor $PASS_FLOOR, forbidden baseline $FORBIDDEN_BASELINE)"
+      - name: Generated recall (sampled)
+        if: steps.gate.outputs.deployed == '1'
+        # RECALL_SAMPLE caps probes per bucket — sampled for per-ship speed.
+        # 25 keeps bucket rates meaningful; still informational-only here
+        # (the full weekly engine-c run owns the floors).
+        env:
+          RECALL_SAMPLE: "25"
+        run: pnpm exec tsx scripts/eval/generated-recall.ts --json > /tmp/recall.json 2> /tmp/recall.log || echo "RECALL_RED=1" >> "$GITHUB_ENV"
+      - name: Engine E (contract honesty)
+        if: steps.gate.outputs.deployed == '1'
+        # Exits 1 iff silentParams>0 — a documented param the live API
+        # provably ignores. That's a per-ship gate: a ship must not ship a
+        # lying contract.
+        run: pnpm exec tsx scripts/eval/engine-e-contract.ts --out=/tmp/e.json 2> /tmp/e.log || echo "E_RED=1" >> "$GITHUB_ENV"
+      - name: Comment summary on tracker issue
+        if: always() && steps.gate.outputs.deployed == '1'
+        run: |
+          {
+            echo "**post-deploy-eval** for \`${GITHUB_SHA::7}\` (${{ github.event_name }}) — [run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo ""
+            if [ "${GOLDEN_RED:-0}" = "1" ]; then G="🔴 RED"; else G="🟢 pass"; fi
+            echo "- **Golden**: $G — ${GOLDEN_PASS:-?}/${GOLDEN_SCORED:-?} pass, forbidden-hits ${GOLDEN_FORBIDDEN:-?} (gate: pass≥31, forbidden≤1)"
+            jq -r '[.graded[] | select(.status=="FAIL")] | .[:6][] | "  - MISS `\(.id)`\(if (.forbiddenHits|length)>0 then " FORBIDDEN:\(.forbiddenHits|join(","))" else "" end)"' /tmp/golden.json 2>/dev/null || true
+            if [ "${RECALL_RED:-0}" = "1" ]; then R="⚠ below-floor (informational — sampled)"; else R="🟢 all floors held (sampled)"; fi
+            echo "- **Recall (RECALL_SAMPLE=25)**: $R"
+            jq -r '.board[] | "  - \(.bucket) \(.ok)/\(.total) = \(.rate)% (floor \(.floor)%)\(if .status=="RED" then " 🔴" else "" end)"' /tmp/recall.json 2>/dev/null || echo "  - recall output unreadable"
+            if [ "${E_RED:-0}" = "1" ]; then E="🔴 RED — silent params"; else E="🟢 no silent params"; fi
+            echo "- **Engine E (contract)**: $E"
+            jq -r '.silentParams[:6][] | "  - SILENT `\(.op)` param `\(.param)`"' /tmp/e.json 2>/dev/null || true
+            jq -r '"  - invalid-accepted \(.invalidAccepted|length) · doc-but-absent \(.missingFields|length) · undocumented \(.undocumentedFields|length)"' /tmp/e.json 2>/dev/null || echo "  - engine-e output unreadable"
+            echo ""
+            if [ "${GOLDEN_RED:-0}" = "1" ] || [ "${E_RED:-0}" = "1" ]; then
+              echo "**Verdict: 🔴 gate failed — this ship regressed golden or ships a lying contract param.**"
+            else
+              echo "**Verdict: 🟢 gates passed.**"
+            fi
+          } > /tmp/comment.md
+          gh issue comment "$TRACKER_ISSUE" --repo "$GITHUB_REPOSITORY" --body-file /tmp/comment.md
+      - name: Upload eval evidence
+        if: always() && steps.gate.outputs.deployed == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-deploy-eval-evidence
+          path: |
+            /tmp/golden.json
+            /tmp/recall.json
+            /tmp/e.json
+          retention-days: 14
+      - name: Gate
+        if: steps.gate.outputs.deployed == '1' && (env.GOLDEN_RED == '1' || env.E_RED == '1')
+        run: |
+          echo "::error::post-deploy-eval gate failed — golden regression (GOLDEN_RED=${GOLDEN_RED:-0}) or silent contract params (E_RED=${E_RED:-0}). See the tracker comment on issue #436."
+          exit 1
