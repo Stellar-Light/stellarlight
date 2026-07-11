@@ -218,6 +218,22 @@ export const spec: OpenAPISpec = {
 						description: "Filter to SCF-funded projects only",
 						schema: { type: "boolean" },
 					},
+					{
+						name: "status",
+						in: "query",
+						description:
+							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Unknown values return 400 with validStatuses.",
+						schema: {
+							type: "string",
+							enum: [
+								"Live",
+								"Inactive",
+								"Development",
+								"Pre-Release",
+								"Pre-Development",
+							],
+						},
+					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 				],
