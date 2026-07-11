@@ -80,8 +80,6 @@ const ENDPOINTS: Endpoint[] = [
 				type: "string",
 				description: "Substring match against location field",
 			},
-			{ name: "scfTier", type: "string", description: "Filter by SCF tier" },
-			{ name: "featured", type: "1", description: "Featured profiles only" },
 			{
 				name: "limit",
 				type: "number",
@@ -89,7 +87,7 @@ const ENDPOINTS: Endpoint[] = [
 			},
 		],
 		returns: [
-			".builders[*] — githubUsername, displayName, bio, roleTitle, location, scfTier, projects[], url",
+			".builders[*] — githubUsername, displayName, bio, roleTitle, location, projects[], url (a scfTier field exists on rows but is unpopulated — empty for every profile; SCF award history lives on PROJECTS via /api/projects/search)",
 		],
 		notes:
 			"When fewer than 3 builders match, the SKILL.md instructs the agent to surface that explicitly and recommend Stellar Discord #builders + the Stellar GitHub org as fallback channels.",

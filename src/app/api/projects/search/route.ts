@@ -403,6 +403,45 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// type filter (sls-033): ?type=Wallet was silently ignored — q=wallet&type=Wallet
+	// returned rows identical to q=wallet, so a caller believed they had an exact
+	// Wallet-typed enumeration while getting keyword soup. Validate against the
+	// `types` select options (src/collections/Projects.ts) and filter server-side,
+	// mirroring statusParam: DB where clause + semantic-source filter + post-fold
+	// enforcement + echo in meta.filters.
+	const typeParam = sp.get("type")?.trim() || null;
+	const VALID_TYPES = [
+		"Wallet",
+		"DEX",
+		"Lending",
+		"Bridge",
+		"Infrastructure",
+		"Payments",
+		"Anchor",
+		"SDK",
+		"Indexer",
+		"Explorer",
+		"Analytics",
+		"AI",
+		"Gaming",
+		"Education",
+		"Security",
+		"NFT",
+		"RWA",
+		"Stablecoin",
+		"Social Impact",
+		"RPC",
+		"Faucet",
+	] as const;
+	if (typeParam && !(VALID_TYPES as readonly string[]).includes(typeParam)) {
+		return NextResponse.json(
+			{
+				error: `Invalid type '${typeParam}'.`,
+				validTypes: VALID_TYPES,
+			},
+			{ status: 400 },
+		);
+	}
 	// Honest contract (2026-07-11 audit, EMPTY-DISHONEST med): an unknown param
 	// (?country=NG, ?sep=24) was silently dropped — the caller got unfiltered
 	// results while believing they'd filtered. We can't 400 (additive-only
@@ -413,6 +452,7 @@ export async function GET(req: NextRequest) {
 		"keyword",
 		"search",
 		"category",
+		"type",
 		"scfAwarded",
 		"scfAwardedOnly",
 		"status",
@@ -425,7 +465,7 @@ export async function GET(req: NextRequest) {
 	);
 	const warnings = unknownParams.length
 		? [
-				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
+				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
 			]
 		: [];
 
@@ -455,7 +495,7 @@ export async function GET(req: NextRequest) {
 	// nested wrong). Returning the default project list here is actively harmful —
 	// the caller reports it as the answer ("no escrow/vault projects exist") when
 	// the real projects were never searched. Return an honest empty + how to fix.
-	if (!q && !category && !scfAwardedOnly && !statusParam) {
+	if (!q && !category && !scfAwardedOnly && !statusParam && !typeParam) {
 		logApiHit({
 			req,
 			endpoint: "/api/projects/search",
@@ -519,6 +559,11 @@ export async function GET(req: NextRequest) {
 				// Explicit filter overrides the default status pool — this is what
 				// makes the Inactive corpus reachable (?status=Inactive).
 				where.status = { equals: statusParam };
+			}
+			if (typeParam) {
+				// sls-033: `types` is a hasMany select — `contains` is exact array
+				// membership, so ?type=Wallet enumerates only Wallet-typed records.
+				where.types = { contains: typeParam };
 			}
 			if (!q) {
 				// Browse mode (no query): lineage shadows are merged-away dupes, not
@@ -1013,6 +1058,13 @@ export async function GET(req: NextRequest) {
 				// count/slice) produced phantom counts and under-filled pages
 				// (re-measure 2026-07-11: total=1 with projects=[]).
 				.filter((r) => !statusParam || r.status === statusParam)
+				// ?type= is the same hard contract (sls-033): semantic rows carry
+				// types[], so enforce exact membership at the source too.
+				.filter(
+					(r) =>
+						!typeParam ||
+						(Array.isArray(r.types) && r.types.includes(typeParam)),
+				)
 				.slice(0, limit - scored.length);
 		} catch {
 			// index not ready / no embedding key — degrade to keyword-only
@@ -1151,6 +1203,12 @@ export async function GET(req: NextRequest) {
 					if (effective !== row) continue; // swapped to other status → drop
 					effective = row; // shadow itself off-status can't happen (DB-filtered)
 				}
+				// ?type= mirrors the status contract (sls-033): a swap must not
+				// smuggle in a canonical that lacks the filtered type.
+				if (typeParam && effective !== row) {
+					const tps = Array.isArray(effective.types) ? effective.types : [];
+					if (!tps.includes(typeParam)) continue;
+				}
 				if (seen.has(effective.slug)) continue;
 				seen.add(effective.slug);
 				folded.push(effective);
@@ -1167,6 +1225,14 @@ export async function GET(req: NextRequest) {
 	// longer produce phantom totals.)
 	if (statusParam) {
 		baseProjects = baseProjects.filter((p) => p.status === statusParam);
+	}
+	// Same belt-and-suspenders for ?type= (sls-033): keyword candidates are
+	// DB-filtered and semanticAdds are filtered at source, so this should be a
+	// no-op — but a row without the filtered type must never be served.
+	if (typeParam) {
+		baseProjects = baseProjects.filter(
+			(p) => Array.isArray(p.types) && p.types.includes(typeParam),
+		);
 	}
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
@@ -1394,6 +1460,7 @@ export async function GET(req: NextRequest) {
 				filters: {
 					q,
 					category,
+					type: typeParam,
 					status: statusParam,
 					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,

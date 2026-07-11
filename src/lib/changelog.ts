@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-11",
 		surfaces: ["api"],
+		version: "openapi@1.7.13",
+		type: "added",
+		summary:
+			"Contract-honesty batch (sls-025/033/036/038/040): searchProjects gains a real `type` filter (?type=Wallet now filters server-side on types[] membership — it was silently ignored; unknown values 400 with validTypes; echoed in meta.filters.type). analyzeEcosystem gains `dimension=tvl` and serves the TVL rollup the description promised (totalTvlUSD + top10 by tvlUSD, DefiLlama-sourced, asOf-dated; also in dimension=all). getLeaderboard responses carry meta.metricDefinitions defining every served metric (issues = OPEN-issue backlog rollup, issue-only excluding PRs — a backlog snapshot, not activity; activity/lastActivityAt = latest default-branch commit across indexed repos; repoCount = indexed-repo coverage). searchRepos recall: owner-segment and separator-insensitive alias matching (q=progax01, q=stellar8004, q=subquery/stellar-subql-starter now resolve; erc/eip/src-NNNN standards tokens expand to their number), and zero-result pages carry meta.searched (tokens + expansions + fields searched) stating an empty page is NOT evidence of nonexistence. getBuilders descriptions no longer advertise SCF-tier/award-track recruiting (every live scfTier value is empty; the response field remains, explicitly labeled unpopulated).",
+		detail:
+			"All additive; nothing removed or renamed. New optional response members: searchProjects meta.filters.type; analyze `tvl` block (+ 'tvl' in meta.validDimensions); leaderboard meta.metricDefinitions; searchRepos meta.searched (zero-result responses only). searchRepos ranking: an exact owner/name/path alias match now outranks keyword/semantic neighbors (below curated canonical/flagship floats); other queries rank as before. Consumers that treated q=wallet keyword results as a Wallet-type roster should switch to ?type=Wallet.",
+	},
+	{
+		date: "2026-07-11",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"Provenance fields on searchProjects rows (sls-023/024/029/031, additive): `statusAsOf` (when the lifecycle label was last asserted, ISO 8601), `statusSourceUrl` (primary evidence URL), `statusBasis` (what KIND of evidence: operator-announcement | site-liveness | onchain-activity | human-verified | source-inherited), `tvlSource` (which source produced tvlUSD, e.g. 'defillama'), `tvlMethod` (how it was computed — inclusion scope for reconciling cross-source differences). Data: DTCC corrected Live → Development (its own announcement says DTC tokenization on Stellar is expected H1 2027 — an entity being live is not a live Stellar deployment); Band + Lightecho oracles gain supportedNetworks from primary evidence (Stellar-docs-listed mainnet contract + Band's own Soroban repo; Lightecho's README mainnet contract).",

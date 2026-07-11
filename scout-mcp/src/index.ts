@@ -253,7 +253,7 @@ server.registerTool(
 	{
 		title: "Search Stellar builders",
 		description:
-			"The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, scfTier, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*/activity stats → use get_leaderboard.",
+			"The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, and the projects[] each has shipped. (No populated SCF-tier/award data on profiles — the response's `scfTier` field is empty on every profile today; a project's SCF award history comes from search_projects.) Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*/activity stats → use get_leaderboard.",
 		inputSchema: {
 			location: z
 				.string()
