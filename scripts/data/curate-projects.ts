@@ -120,6 +120,13 @@ const SCF_FIX: Record<
 	// $100K, #25 $94.5K + Q1-2024 Liquidity $50K); #18/#24 explicitly NOT
 	// awarded. Total was right, membership wasn't.
 	phoenix: { awarded: true, totalAwarded: 394500, awardedRounds: [16, 20, 25] },
+	// sls-026: live said $391K + rounds [17,23,27,30]; official = $291K PAID,
+	// round 30 marked Ineligible. Paid awards only.
+	aquarius: {
+		awarded: true,
+		totalAwarded: 291000,
+		awardedRounds: [17, 23, 27],
+	},
 	// sls-030: official pages show $150K (r13) + $141K (r18); record said false.
 	comet: { awarded: true, totalAwarded: 291000, awardedRounds: [13, 18] },
 };
