@@ -902,53 +902,65 @@ export async function GET(req: NextRequest) {
 				// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
 				(canRes.docs as any[]).map((d) => [d.slug, d]),
 			);
-			const present = new Set(baseProjects.map((p) => p.slug));
-			baseProjects = baseProjects.flatMap((row) => {
-				const target = row.canonicalSlug;
-				if (!target || target === row.slug) return [row];
-				if (present.has(target)) return []; // canonical already serves this hit
-				const c = canBySlug.get(target);
-				if (!c) return [row]; // dangling pointer — the shadow beats nothing
-				present.add(target);
+			// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+			const swapped = (row: (typeof baseProjects)[number], c: any) => {
 				let logoUrl: string | null = null;
 				if (c.logo && typeof c.logo === "object") {
 					if (c.logo.url) logoUrl = c.logo.url;
 					else if (c.logo.filename)
 						logoUrl = `/api/media/file/${c.logo.filename}`;
 				}
-				return [
-					{
-						...row,
-						id: String(c.id),
-						name: c.name,
-						slug: c.slug,
-						category: c.category,
-						shortDescription: c.shortDescription ?? null,
-						status: c.status,
-						tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
-						tvlAsOf: c.tvlAsOf ?? null,
-						canonicalSlug: null,
-						lifecycle: pickLifecycle(c.lifecycle),
-						logoUrl,
-						scfAwarded: !!c.scf?.awarded,
-						scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
-						scfAmountStatus: scfAmountStatus(
-							!!c.scf?.awarded,
-							c.scf?.totalAwarded,
-						),
-						scfAwardedRounds: c.scf?.awardedRounds ?? [],
-						prominence: typeof c.prominence === "number" ? c.prominence : 0,
-						verificationLevel: c.verificationLevel ?? null,
-						types: Array.isArray(c.types) ? c.types : [],
-						coverage: pickCoverage(c.coverage),
-						supportedNetworks: Array.isArray(c.supportedNetworks)
-							? c.supportedNetworks
-							: [],
-						links: pickLinks(c.links),
-						url: `https://stellarlight.xyz/project/${c.slug}`,
-					},
-				];
-			});
+				return {
+					...row,
+					id: String(c.id),
+					name: c.name,
+					slug: c.slug,
+					category: c.category,
+					shortDescription: c.shortDescription ?? null,
+					status: c.status,
+					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
+					tvlAsOf: c.tvlAsOf ?? null,
+					canonicalSlug: null,
+					lifecycle: pickLifecycle(c.lifecycle),
+					logoUrl,
+					scfAwarded: !!c.scf?.awarded,
+					scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
+					scfAmountStatus: scfAmountStatus(
+						!!c.scf?.awarded,
+						c.scf?.totalAwarded,
+					),
+					scfAwardedRounds: c.scf?.awardedRounds ?? [],
+					prominence: typeof c.prominence === "number" ? c.prominence : 0,
+					verificationLevel: c.verificationLevel ?? null,
+					types: Array.isArray(c.types) ? c.types : [],
+					coverage: pickCoverage(c.coverage),
+					supportedNetworks: Array.isArray(c.supportedNetworks)
+						? c.supportedNetworks
+						: [],
+					links: pickLinks(c.links),
+					url: `https://stellarlight.xyz/project/${c.slug}`,
+				};
+			};
+			// Single pass, first-occurrence-wins: a shadow becomes its canonical AT
+			// THE SHADOW'S RANK (the shadow earned that position — usually via
+			// exact-name — and the canonical is the record that deserves it); any
+			// later duplicate of an already-emitted slug is skipped. This also
+			// covers canonical-before-shadow (shadow simply dropped).
+			const seen = new Set<string>();
+			const folded: typeof baseProjects = [];
+			for (const row of baseProjects) {
+				const target =
+					row.canonicalSlug && row.canonicalSlug !== row.slug
+						? row.canonicalSlug
+						: null;
+				const c = target ? canBySlug.get(target) : null;
+				// dangling pointer → keep the shadow rather than lose the hit
+				const effective = target && c ? swapped(row, c) : row;
+				if (seen.has(effective.slug)) continue;
+				seen.add(effective.slug);
+				folded.push(effective);
+			}
+			baseProjects = folded;
 		} catch {
 			// fold is best-effort — serving the shadow beats erroring the search
 		}
