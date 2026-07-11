@@ -64,7 +64,10 @@ jobs:
       # wave). Scheduled runs get their own hardcoded step.
       - name: Daily backlog wave (schedule)
         if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * *'
-        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --limit 60
+        # --lang all (2026-07-11): the default is Rust-only, which structurally
+        # excluded every JS/TS repo from the daily wave — js-stellar-sdk never
+        # got real symbols, so symbol lookups failed for the main SDK.
+        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --limit 60 --lang all
       - name: Weekly stale-first re-scan (schedule)
         if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * 1'
         run: pnpm exec tsx scripts/scan/scan-repo-code.ts --stale-first --execute --limit 60

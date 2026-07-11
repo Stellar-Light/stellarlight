@@ -163,7 +163,13 @@ async function main() {
 		const res = await payload.find({
 			collection: "repos",
 			where,
-			sort: "-lastCommitAt",
+			// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
+			// alone let stellar/js-stellar-sdk (repoScore 74, THE symbol-lookup
+			// target) sit behind hundreds of recently-pushed small repos — real
+			// symbol queries failed while R-SYM read 100% on the 5 repos that
+			// happened to be scanned. Canonical/high-score repos are what
+			// consumers actually look up; scan them first.
+			sort: ["-repoScore", "-lastCommitAt"],
 			limit: LIMIT,
 			depth: 0,
 			select: {
