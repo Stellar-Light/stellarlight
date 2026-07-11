@@ -34,7 +34,8 @@ const API_BASE = process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz";
 // again — 1.1.6 shipped reporting "1.1.5" because this was a hardcoded string.
 // Same fix as api-client's CLIENT_VERSION (#226).
 const VERSION = pkgVersion;
-const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
+const USER_AGENT =
+	process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}`;
 
 /**
  * Centralized fetch with error handling. Returns the parsed JSON or a structured
@@ -43,7 +44,9 @@ const USER_AGENT = process.env.SCOUT_USER_AGENT ?? `stellar-scout-mcp/${VERSION}
 async function callScout<T = unknown>(
 	path: string,
 	init?: RequestInit,
-): Promise<{ ok: true; data: T } | { ok: false; error: string; status?: number }> {
+): Promise<
+	{ ok: true; data: T } | { ok: false; error: string; status?: number }
+> {
 	const url = `${API_BASE}${path}`;
 	try {
 		const res = await fetch(url, {
@@ -116,10 +119,7 @@ server.registerTool(
 		description:
 			"Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos.",
 		inputSchema: {
-			query: z
-				.string()
-				.min(2)
-				.describe("Natural-language search query."),
+			query: z.string().min(2).describe("Natural-language search query."),
 			source: z
 				.enum([
 					// Keep in sync with VALID_SOURCES in src/app/api/research/route.ts
@@ -216,7 +216,9 @@ server.registerTool(
 		},
 	},
 	async ({ slug }) => {
-		const result = await callScout(`/api/hackathons/${encodeURIComponent(slug)}`);
+		const result = await callScout(
+			`/api/hackathons/${encodeURIComponent(slug)}`,
+		);
 		return asToolResult(result);
 	},
 );
@@ -296,10 +298,13 @@ server.registerTool(
 				.describe(
 					"Filter by category (Infrastructure, Tooling, User-Facing App, Asset, Protocol/Contract, Anchor, Partner Integration).",
 				),
-			hackathon: z
+			hackathon: z.string().optional().describe("Filter by hackathon slug."),
+			status: z
 				.string()
 				.optional()
-				.describe("Filter by hackathon slug."),
+				.describe(
+					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release, Pre-Development). status=Inactive lists retired/defunct projects — useful for 'is X still alive' and post-mortem queries.",
+				),
 			scfAwarded: z
 				.boolean()
 				.optional()
@@ -313,17 +318,16 @@ server.registerTool(
 				.describe("Max results (default 20)."),
 		},
 	},
-	async ({ q, category, hackathon, scfAwarded, limit }) => {
+	async ({ q, category, hackathon, status, scfAwarded, limit }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
 		if (hackathon) params.set("hackathon", hackathon);
+		if (status) params.set("status", status);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
 		const qs = params.toString();
-		const result = await callScout(
-			`/api/projects/search${qs ? `?${qs}` : ""}`,
-		);
+		const result = await callScout(`/api/projects/search${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );
@@ -477,7 +481,9 @@ server.registerTool(
 			name: z
 				.string()
 				.min(1)
-				.describe("Skill name (e.g. 'soroban', 'anchors', 'agentic-payments')."),
+				.describe(
+					"Skill name (e.g. 'soroban', 'anchors', 'agentic-payments').",
+				),
 		},
 	},
 	async ({ name }) => {
@@ -533,13 +539,7 @@ server.registerTool(
 			"Write-back channel to report a Scout failure — wrong answer, missing/stale data, a bug, or a suggestion. POSTs {kind, message, context?} into Stellarlight's curator queue (reviewed weekly); rate-limited to 6/min/IP. `kind` ∈ bug | missing-data | wrong-answer | suggestion | other; `message` 10–4000 chars; optional context (query, endpoint, agentName) helps curators reproduce. **Use when:** a Scout query returned something wrong/empty that you believe SHOULD exist, or data looks stale — file it so the corpus/endpoint gets fixed. **Not for:** reading freshness or checking the API is up (a read, not a report) → use get_status; finding the data you actually want → use the relevant search tool (search_projects / search_repos / search_research).",
 		inputSchema: {
 			kind: z
-				.enum([
-					"bug",
-					"missing-data",
-					"wrong-answer",
-					"suggestion",
-					"other",
-				])
+				.enum(["bug", "missing-data", "wrong-answer", "suggestion", "other"])
 				.describe("Category of feedback."),
 			message: z
 				.string()
@@ -623,9 +623,7 @@ server.registerTool(
 			dimension: z
 				.enum(["all", "hackathons", "categories", "funding"])
 				.optional()
-				.describe(
-					"Which slice to return. Default 'all' returns everything.",
-				),
+				.describe("Which slice to return. Default 'all' returns everything."),
 		},
 	},
 	async ({ dimension }) => {

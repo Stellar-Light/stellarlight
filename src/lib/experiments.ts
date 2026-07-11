@@ -71,7 +71,7 @@ export const EXPERIMENTS: Experiment[] = [
 		metric:
 			"Ground truth: (1) every scoreboard number traces to a committed engine artifact (no hand-set values); (2) a cold outsider can verify one claim end-to-end from the page alone; (3) first consumer report answers 'what changed for YOUR queries this month' from Engine D data. Adoption signal: Tyler/Raven cites or links the scoreboard.",
 		status: "proposed",
-		// Design brief: improvements/idea-scale-model.md. Not a request-flag
+		// Design brief: improvements/ideas/idea-scale-model.md. Not a request-flag
 		// experiment (it's a surface, not a response variant) — the flag stays
 		// off until the /quality page ships behind it.
 		defaultOn: false,
