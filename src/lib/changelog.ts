@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-11",
+		surfaces: ["api-client", "mcp"],
+		type: "changed",
+		summary:
+			"@stellar-light/api-client 1.5.3 + @stellar-light/scout-mcp 1.1.9 published: client types regenerated for spec 1.7.15 (status + type filters, meta.warnings, provenance fields statusAsOf/statusSourceUrl/statusBasis + tvlSource/tvlMethod, builder match provenance, rfps rowType, analyze tvl dimension, population digests); MCP search_projects gains the status param and drops the false scfTier claim from get_builders.",
+		detail:
+			"If you generated against api-client 1.5.1 (spec 1.6.1-era) or 1.5.2, regenerate once — three spec revisions (1.7.13/1.7.14/1.7.15) landed between publishes. All changes additive.",
+	},
+	{
+		date: "2026-07-11",
 		surfaces: ["api"],
 		version: "spec 1.7.15",
 		type: "added",
