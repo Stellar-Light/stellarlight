@@ -85,6 +85,9 @@ async function semanticProjectRows(
 				category: 1,
 				shortDescription: 1,
 				status: 1,
+				statusAsOf: 1,
+				statusSourceUrl: 1,
+				statusBasis: 1,
 				canonicalSlug: 1,
 				lifecycle: 1,
 				logo: 1,
@@ -95,6 +98,13 @@ async function semanticProjectRows(
 				types: 1,
 				prominence: 1,
 				hackathonPlacement: 1,
+				// F8/sls-031: TVL facts + provenance must be PROJECTED to be served —
+				// the mapper already read tvlUSD/tvlAsOf but this $project omitted
+				// them (F3 class), so semantic rows serialized TVL as null.
+				tvlUSD: 1,
+				tvlAsOf: 1,
+				tvlSource: 1,
+				tvlMethod: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},
@@ -122,6 +132,10 @@ async function semanticProjectRows(
 			category: p.category,
 			shortDescription: p.shortDescription ?? null,
 			status: p.status,
+			// sls-024: status provenance (when/what evidence dated the label)
+			statusAsOf: p.statusAsOf ?? null,
+			statusSourceUrl: p.statusSourceUrl ?? null,
+			statusBasis: p.statusBasis ?? null,
 			canonicalSlug: p.canonicalSlug ?? null,
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
@@ -141,6 +155,9 @@ async function semanticProjectRows(
 			// F8: TVL facts (DefiLlama; null = not tracked there, never zero)
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
+			// sls-031: TVL methodology provenance (which source, computed how)
+			tvlSource: p.tvlSource ?? null,
+			tvlMethod: p.tvlMethod ?? null,
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -183,8 +200,16 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	// sls-024: status provenance — when the label was asserted, the primary
+	// evidence URL, and what kind of evidence it is. Null on legacy rows.
+	statusAsOf?: string | null;
+	statusSourceUrl?: string | null;
+	statusBasis?: string | null;
 	tvlUSD?: number | null;
 	tvlAsOf?: string | null;
+	// sls-031: TVL provenance — which source produced tvlUSD and how.
+	tvlSource?: string | null;
+	tvlMethod?: string | null;
 	canonicalSlug: string | null;
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
@@ -597,8 +622,13 @@ export async function GET(req: NextRequest) {
 					category: string;
 					shortDescription?: string;
 					status: string;
+					statusAsOf?: string | null;
+					statusSourceUrl?: string | null;
+					statusBasis?: string | null;
 					tvlUSD?: number | null;
 					tvlAsOf?: string | null;
+					tvlSource?: string | null;
+					tvlMethod?: string | null;
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
@@ -665,10 +695,17 @@ export async function GET(req: NextRequest) {
 					category: p.category,
 					shortDescription: p.shortDescription ?? null,
 					status: p.status,
+					// sls-024: status provenance rides every row (null on legacy rows)
+					statusAsOf: p.statusAsOf ?? null,
+					statusSourceUrl: p.statusSourceUrl ?? null,
+					statusBasis: p.statusBasis ?? null,
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
+					// sls-031: TVL methodology provenance
+					tvlSource: p.tvlSource ?? null,
+					tvlMethod: p.tvlMethod ?? null,
 					canonicalSlug: p.canonicalSlug ?? null,
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,

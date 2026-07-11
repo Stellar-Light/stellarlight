@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Provenance fields on searchProjects rows (sls-023/024/029/031, additive): `statusAsOf` (when the lifecycle label was last asserted, ISO 8601), `statusSourceUrl` (primary evidence URL), `statusBasis` (what KIND of evidence: operator-announcement | site-liveness | onchain-activity | human-verified | source-inherited), `tvlSource` (which source produced tvlUSD, e.g. 'defillama'), `tvlMethod` (how it was computed — inclusion scope for reconciling cross-source differences). Data: DTCC corrected Live → Development (its own announcement says DTC tokenization on Stellar is expected H1 2027 — an entity being live is not a live Stellar deployment); Band + Lightecho oracles gain supportedNetworks from primary evidence (Stellar-docs-listed mainnet contract + Band's own Soroban repo; Lightecho's README mainnet contract).",
+		detail:
+			"All five fields are optional/nullable and null on legacy rows — zero writes to existing data; curation and the TVL enricher populate them going forward. Semantic-fallback rows also now carry tvlUSD/tvlAsOf (they were silently null on that path). Consumers should read a bare status as source-relative and undated; statusBasis 'operator-announcement' can describe PLANS (like DTCC's H1-2027 target), so pair it with statusAsOf and the description before claiming a live deployment. Cite TVL as '<tvlSource> as of <tvlAsOf>' — concurrent sources legitimately differ by pricing time and inclusion scope.",
+	},
+	{
+		date: "2026-07-11",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"searchProjects intent upgrades (spec 1.7.12): new `status` filter (the 81-record Inactive corpus is now reachable: ?status=Inactive); unknown query params are no longer silently ignored (meta.warnings names them and points at the supported set); 'X vs Y' comparison queries guarantee BOTH named subjects in results; TVL-superlative queries ('highest tvl') admit and rank the actual tvlUSD leaders; negated prose ('non-custodial') no longer matches the positive intent ('custody'). Research: recency-intent queries ('latest/recent/current…') rank by dated freshness — evergreen-doc scoring no longer serves a 2024 protocol section for 'latest soroban release'.",
 		detail:
 			"All additive; nothing removed or renamed. meta.warnings is a new optional string[] on searchProjects responses; meta.filters gains `status` (echoed, null when absent). Ranking changes are query-intent-scoped: plain topical queries rank exactly as before; only vs/tvl/recency/negation intents change. Consumers that guessed unsupported params (country/sep/network) now get an explicit warning instead of silently-unfiltered results — put those terms in q (structured coverage is matched from query text).",

@@ -1544,7 +1544,34 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
 						description:
-							"Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory.",
+							"Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. Status describes the PROJECT/entity lifecycle, not proof that a specific product is deployed on Stellar mainnet — check statusAsOf/statusSourceUrl/statusBasis for the label's provenance, and supportedNetworks/description for deployment scope.",
+					},
+					statusAsOf: {
+						type: "string",
+						nullable: true,
+						description:
+							"When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label — treat the status as source-relative, not freshly confirmed.",
+					},
+					statusSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows.",
+					},
+					statusBasis: {
+						type: "string",
+						nullable: true,
+						// nullable carries the null case; a null literal in the enum crashes
+						// Spectral's JSONPath engine (see scfAmountStatus).
+						enum: [
+							"operator-announcement",
+							"site-liveness",
+							"onchain-activity",
+							"human-verified",
+							"source-inherited",
+						],
+						description:
+							"What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.",
 					},
 					builtBy: {
 						type: "object",
@@ -1640,6 +1667,18 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+					},
+					tvlSource: {
+						type: "string",
+						nullable: true,
+						description:
+							"Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope — cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth.",
+					},
+					tvlMethod: {
+						type: "string",
+						nullable: true,
+						description:
+							"How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions.",
 					},
 					canonicalSlug: {
 						type: "string",
