@@ -36,6 +36,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Contract artifacts fresh (snapshot + generated client types)
         run: pnpm contract:check
+      - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
+        run: pnpm exec tsx scripts/eval/routing-surface-check.ts
       - name: Spec change requires a changelog entry
         if: github.event_name == 'pull_request'
         run: |

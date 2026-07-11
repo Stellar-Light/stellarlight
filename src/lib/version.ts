@@ -16,7 +16,7 @@
  *   - the Scout skill/service release line (`SCOUT_SERVICE_VERSION`),
  *   - the independently-versioned npm packages (scout-mcp, api-client).
  */
-export const API_VERSION = "1.7.15";
+export const API_VERSION = "1.7.16";
 
 /** The Scout skill/service release line — surfaced at /api/status as `version`. */
 export const SCOUT_SERVICE_VERSION = "scout-1.0.0";
