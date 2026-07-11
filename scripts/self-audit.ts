@@ -172,6 +172,163 @@ async function main() {
 		bad("projects ground truth", `fetch failed: ${String(err)}`);
 	}
 
+	// sls-043 award-facts lock: the official Band Protocol record
+	// (communityfund.stellar.org/project/band-protocol-2ob) shows exactly ONE
+	// award — SCF #16, $60K. The canonical row once carried an unsourced
+	// #41/$100K; red here means award facts drifted from the official page.
+	try {
+		const d = await j("/api/projects/search?q=band+protocol+oracle&limit=10");
+		const band = (d.projects ?? []).find(
+			(p: { slug: string }) => p.slug === "band",
+		);
+		if (!band) bad("band award lock", "slug 'band' not in top-10");
+		else if (
+			band.scfAwarded === true &&
+			band.scfTotalAwardedUSD === 60000 &&
+			JSON.stringify(band.scfAwardedRounds) === "[16]"
+		)
+			ok("band award facts match the official record (SCF #16, $60K)");
+		else
+			bad(
+				"band award lock (sls-043)",
+				`served scfAwarded=${band.scfAwarded} total=${band.scfTotalAwardedUSD} rounds=${JSON.stringify(band.scfAwardedRounds)}; official = awarded, $60000, [16]`,
+			);
+	} catch (err) {
+		bad("band award lock", `fetch failed: ${String(err)}`);
+	}
+
+	// sls-045 rfps row/count contract: synthetic scf-round rows must be
+	// discriminated (rowType/synthetic) and the counts must be internally
+	// consistent — open counts BRIEFS, returned counts ROWS incl. synthetic.
+	try {
+		const d = await j("/api/rfps?status=open");
+		const rows: Array<{ rowType?: string; synthetic?: boolean }> = d.rfps ?? [];
+		const untyped = rows.filter(
+			(r) => r.rowType !== "rfp" && r.rowType !== "scf-round",
+		);
+		const briefs = rows.filter((r) => r.rowType === "rfp");
+		const synth = rows.filter((r) => r.synthetic === true);
+		if (untyped.length)
+			bad(
+				"rfps row contract (sls-045)",
+				`${untyped.length} rows without a rowType discriminator`,
+			);
+		else if (synth.some((r) => r.rowType !== "scf-round"))
+			bad("rfps row contract (sls-045)", "synthetic row not typed scf-round");
+		else
+			ok(
+				`rfps rows discriminated (${briefs.length} rfp + ${synth.length} scf-round)`,
+			);
+		const c = d.meta?.counts ?? {};
+		if (c.returned !== rows.length)
+			bad(
+				"rfps counts (sls-045)",
+				`counts.returned=${c.returned} but ${rows.length} rows returned`,
+			);
+		else if (c.returned === c.matched && briefs.length !== c.open)
+			bad(
+				"rfps counts (sls-045)",
+				`unpaginated open read: ${briefs.length} rfp-typed rows ≠ counts.open=${c.open} — brief/row bookkeeping drifted`,
+			);
+		else ok("rfps counts consistent (open=briefs, returned=rows)");
+	} catch (err) {
+		bad("rfps contract (sls-045)", `fetch failed: ${String(err)}`);
+	}
+
+	// sls-042 population parity: clusters and analyze aggregate the SAME
+	// active-project population — per-category sizes and funded counts must
+	// agree (small tolerance: the two reads aren't atomic). Before the fix,
+	// clusters silently truncated at 500 of ~840 and the two endpoints named
+	// different funded-share winners.
+	try {
+		const [an, cl] = await Promise.all([
+			j("/api/analyze?dimension=categories"),
+			j("/api/clusters?dimension=category&minSize=1"),
+		]);
+		const aPop = an.meta?.population?.id;
+		const cPop = cl.meta?.population?.id;
+		if (!aPop || aPop !== cPop)
+			bad(
+				"clusters⇄analyze population (sls-042/048)",
+				`population ids differ or missing: analyze=${aPop} clusters=${cPop}`,
+			);
+		else if (cl.meta?.population?.truncated)
+			bad(
+				"clusters truncation (sls-042)",
+				`clusters population truncated: included=${cl.meta.population.included} < totalAvailable=${cl.meta.population.totalAvailable}`,
+			);
+		else {
+			const aByCat = new Map<string, { n: number; f: number }>(
+				(an.categories?.distribution ?? []).map(
+					(r: {
+						category: string;
+						projectCount: number;
+						scfFundedCount: number;
+					}) => [r.category, { n: r.projectCount, f: r.scfFundedCount }],
+				),
+			);
+			let drift = "";
+			for (const c of cl.clusters ?? []) {
+				const a = aByCat.get(c.key);
+				if (!a) continue; // clusters bucket only projects WITH a category
+				const tol = Math.max(2, Math.ceil(a.n * 0.02));
+				if (
+					Math.abs(a.n - c.size) > tol ||
+					Math.abs(a.f - c.scfFundedCount) > tol
+				) {
+					drift = `${c.key}: analyze ${a.n}/${a.f} vs clusters ${c.size}/${c.scfFundedCount}`;
+					break;
+				}
+			}
+			if (drift) bad("clusters⇄analyze parity (sls-042)", drift);
+			else ok("clusters⇄analyze category sizes/funded counts agree");
+		}
+	} catch (err) {
+		bad("clusters⇄analyze parity", `fetch failed: ${String(err)}`);
+	}
+
+	// sls-046/047 repo classification + ranking evidence: stellar-core must
+	// never serve isDeployableContract=true, and a Stellar-scoped topic query
+	// must not rank a no-evidence toolchain above Stellar-evidenced repos.
+	try {
+		const d = await j("/api/repos/search?q=consensus&limit=5");
+		const core = (d.repos ?? []).find(
+			(r: { fullName: string }) => r.fullName === "stellar/stellar-core",
+		);
+		if (!core)
+			warn("stellar-core classification", "not in top-5 for q=consensus");
+		else if (
+			core.codeVerified &&
+			core.codeVerified.isDeployableContract !== false
+		)
+			bad(
+				"stellar-core classification (sls-046)",
+				`isDeployableContract=${core.codeVerified.isDeployableContract} — core protocol software served as a deployable contract`,
+			);
+		else ok("stellar-core served as NOT a deployable contract");
+	} catch (err) {
+		bad("stellar-core classification", `fetch failed: ${String(err)}`);
+	}
+	try {
+		const d = await j("/api/repos/search?q=zero-knowledge&limit=5");
+		const rows: Array<{ fullName: string; stellarEvidence?: string }> =
+			d.repos ?? [];
+		const hasEvidenced = rows.some(
+			(r) =>
+				r.stellarEvidence === "code-verified" ||
+				r.stellarEvidence === "sdf-org" ||
+				r.stellarEvidence === "curated",
+		);
+		if (rows.length && hasEvidenced && rows[0].stellarEvidence === "none")
+			bad(
+				"repo ranking evidence (sls-047)",
+				`top-1 ${rows[0].fullName} has stellarEvidence=none while Stellar-evidenced repos rank below it`,
+			);
+		else ok("zero-knowledge top-1 is Stellar-evidenced (or none available)");
+	} catch (err) {
+		bad("repo ranking evidence (sls-047)", `fetch failed: ${String(err)}`);
+	}
+
 	// Bridge corridor guard (2026-07-09): every Bridge-typed project must
 	// carry a non-empty supportedNetworks — an empty list is the
 	// omission-equals-negation trap that made Solana/EVM corridor queries
@@ -294,6 +451,15 @@ async function main() {
 			match: "soroswap",
 			topK: 20,
 			why: "flagship Soroban AMM — control that must never regress",
+		},
+		{
+			// sls-050: Vibrant → Vesseo rename continuity. The OLD name must keep
+			// resolving to the renamed record (synonym-mapped, not dependent on
+			// the description happening to contain "formerly Vibrant").
+			q: "vibrant wallet",
+			match: "vesseo",
+			topK: 10,
+			why: "sls-050: rename continuity — old brand name reaches the current record",
 		},
 	];
 	for (const r of RECALL) {

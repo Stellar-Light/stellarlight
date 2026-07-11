@@ -129,6 +129,14 @@ const SCF_FIX: Record<
 	},
 	// sls-030: official pages show $150K (r13) + $141K (r18); record said false.
 	comet: { awarded: true, totalAwarded: 291000, awardedRounds: [13, 18] },
+	// sls-043: the canonical band row claimed SCF #41 / $100K while the alias
+	// row (band-protocol, merged 2026-07-10 S3b wave) carried the OFFICIAL
+	// facts. communityfund.stellar.org/project/band-protocol-2ob (read
+	// 2026-07-11): ONE awarded submission — "Band Protocol Oracle Solution,
+	// SCF #16, $60.0K, Legacy v4.0 Award, Awarded"; Total awarded $60.0K.
+	// No round-41 award exists on the official record, so the canonical row's
+	// #41/$100K had no source and contradicted its own shadow.
+	band: { awarded: true, totalAwarded: 60000, awardedRounds: [16] },
 };
 
 const TYPES_SET: Record<string, string[]> = {
@@ -1171,7 +1179,7 @@ const DUPE_MERGES: Array<{
 	// (shared apex = shared entity; canonical = SCF-funded record, else the
 	// richer one; org product-families went to the sweep ALLOWLIST instead,
 	// never merged). Decision matrix in scratchpad s3b-triage.json. ──
-	{ dupe: "band-protocol", canonical: "band" }, // both SCF ($100k/$60k) — shadow keeps its own award facts, lineage note explains the split
+	{ dupe: "band-protocol", canonical: "band" }, // sls-043: the "$100k/#41" on the canonical was unsourced — official record (project/band-protocol-2ob) shows ONE award, SCF #16 $60K; SCF_FIX aligns the canonical to it, shadow already agreed
 	{ dupe: "gateway", canonical: "gatewayfm" },
 	{ dupe: "reclaim-protocol", canonical: "reclaim" },
 	{ dupe: "volta", canonical: "volta-circuit" },

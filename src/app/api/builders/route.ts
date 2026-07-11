@@ -27,6 +27,34 @@ interface BuilderProject {
 	status?: string;
 }
 
+/** sls-041: WHY a row matched the skill query — candidate discovery is a TEXT
+ * match over profile/project prose, and consumers must be able to tell a
+ * strong repository-backed match from a weak bio mention without re-running
+ * the investigation. */
+interface BuilderMatch {
+	/** Profile fields the query matched (e.g. "bio", "roleTitle", "projects.name"). */
+	matchedFields: string[];
+	/** Projects whose name/description matched the query. */
+	matchedProjects: Array<{ name: string; slug: string | null }>;
+	/** Per query token, the literal term that hit (a token can match via a
+	 * synonym — e.g. "payments" hitting via "remittance"). */
+	matchedTerms: Record<string, string>;
+	/** What this match IS: free-text profile evidence, not verified experience. */
+	basis: "profile-text";
+}
+
+/** sls-041: indexed repository evidence for the query, kept SEPARATE from the
+ * subjective profile text — the repo, its language and last activity are
+ * observable facts; bio/role claims are not. */
+interface BuilderCodeEvidence {
+	fullName: string;
+	url: string | null;
+	primaryLanguage: string | null;
+	stars: number;
+	lastCommitAt: string | null;
+	repoScore: number;
+}
+
 interface BuilderRow {
 	githubUsername: string;
 	displayName: string;
@@ -41,6 +69,12 @@ interface BuilderRow {
 	projectCount: number;
 	projects: BuilderProject[];
 	url: string;
+	/** null when the request had no q/skill filter. */
+	match: BuilderMatch | null;
+	/** Indexed repos owned by this GitHub account that match the query; [] =
+	 * no direct code evidence in our index (an explicitly weaker match), null
+	 * when the request had no q/skill filter. */
+	codeEvidence: BuilderCodeEvidence[] | null;
 }
 
 // Region umbrella → the free-text country values builder profiles actually
@@ -249,37 +283,137 @@ export async function GET(req: NextRequest) {
 				projectCount: (b.projects ?? []).length,
 				projects: b.projects ?? [],
 				url: `https://stellarlight.xyz/builders/${b.github_username}`,
+				match: null,
+				codeEvidence: null,
 			}));
 
 			// Free-text filter across bio + role + projects — done in-memory so
-			// we don't need full-text indexes in the DB.
+			// we don't need full-text indexes in the DB. sls-041: while filtering,
+			// record WHERE each token hit (field + literal term + project) so a
+			// row carries its own match provenance instead of presenting a bio
+			// mention as if it were verified experience.
 			if (q) {
 				const tokens = q.split(/\s+/).filter(Boolean);
 				builders = builders.filter((b) => {
-					const haystack = [
-						b.githubUsername, // F1: githubUsername is the record's primary key — q must match it
-						b.displayName,
-						b.bio,
-						b.roleTitle,
-						b.location,
-						...(b.projects ?? []).flatMap((p) => [
-							p.name,
-							p.short_description ?? "",
-						]),
-					]
-						.join(" ")
-						.toLowerCase();
+					const fields: Array<[field: string, text: string]> = [
+						// F1: githubUsername is the record's primary key — q must match it
+						["githubUsername", b.githubUsername],
+						["displayName", b.displayName],
+						["bio", b.bio ?? ""],
+						["roleTitle", b.roleTitle ?? ""],
+						["location", b.location ?? ""],
+					];
+					const projectTexts = (b.projects ?? []).map(
+						(p) =>
+							[p, `${p.name} ${p.short_description ?? ""}`.toLowerCase()] as [
+								BuilderProject,
+								string,
+							],
+					);
+					const matchedFields = new Set<string>();
+					const matchedProjects = new Map<string, string | null>();
+					const matchedTerms: Record<string, string> = {};
 					// Each concept must be present (AND across tokens), but a token
 					// matches via any of its synonyms/stems (sls-010) — so
 					// "payments" also hits a "boleto/PIX/remittance" bio.
-					return tokens.every((t) =>
-						expandBuilderTerm(t).some((v) => haystack.includes(v)),
-					);
+					for (const t of tokens) {
+						let tokenHit = false;
+						for (const v of expandBuilderTerm(t)) {
+							for (const [field, text] of fields) {
+								if (text.toLowerCase().includes(v)) {
+									matchedFields.add(field);
+									if (!tokenHit) matchedTerms[t] = v;
+									tokenHit = true;
+								}
+							}
+							for (const [p, text] of projectTexts) {
+								if (text.includes(v)) {
+									matchedFields.add("projects");
+									matchedProjects.set(p.name, p.slug ?? null);
+									if (!tokenHit) matchedTerms[t] = v;
+									tokenHit = true;
+								}
+							}
+						}
+						if (!tokenHit) return false;
+					}
+					b.match = {
+						matchedFields: [...matchedFields],
+						matchedProjects: [...matchedProjects.entries()].map(
+							([name, slug]) => ({ name, slug }),
+						),
+						matchedTerms,
+						basis: "profile-text",
+					};
+					return true;
 				});
 			}
 
 			totalMatching = builders.length;
 			builders = builders.slice(offset, offset + limit);
+
+			// sls-041: repository-backed evidence, fetched ONLY for the returned
+			// page — indexed repos owned by each builder's GitHub account that
+			// match the query. Kept separate from the profile-text match: the
+			// repo/language/last-commit are observable facts, the bio is a claim.
+			// Best-effort — rows ship with codeEvidence: [] on any error, which
+			// itself is signal ("no direct code evidence in the index").
+			if (q && builders.length) {
+				const tokens = q.split(/\s+/).filter(Boolean);
+				for (const b of builders) b.codeEvidence = [];
+				try {
+					const byOwner = new Map(
+						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
+					);
+					const rres = await payload.find({
+						collection: "repos",
+						where: { owner: { in: builders.map((b) => b.githubUsername) } },
+						limit: 300,
+						depth: 0,
+						select: {
+							fullName: true,
+							owner: true,
+							url: true,
+							description: true,
+							topics: true,
+							primaryLanguage: true,
+							stars: true,
+							lastCommitAt: true,
+							repoScore: true,
+						},
+					});
+					for (const d of rres.docs as unknown as Array<
+						Record<string, unknown>
+					>) {
+						const ownerKey = String(d.owner ?? "").toLowerCase();
+						const holder = byOwner.get(ownerKey);
+						if (!holder?.codeEvidence) continue;
+						const hay = [
+							d.fullName,
+							d.description,
+							Array.isArray(d.topics) ? (d.topics as unknown[]).join(" ") : "",
+							d.primaryLanguage,
+						]
+							.map((x) => String(x ?? ""))
+							.join(" ")
+							.toLowerCase();
+						const hits = tokens.some((t) =>
+							expandBuilderTerm(t).some((v) => hay.includes(v)),
+						);
+						if (!hits || holder.codeEvidence.length >= 5) continue;
+						holder.codeEvidence.push({
+							fullName: String(d.fullName ?? ""),
+							url: (d.url as string) ?? null,
+							primaryLanguage: (d.primaryLanguage as string) ?? null,
+							stars: typeof d.stars === "number" ? d.stars : 0,
+							lastCommitAt: (d.lastCommitAt as string) ?? null,
+							repoScore: typeof d.repoScore === "number" ? d.repoScore : 0,
+						});
+					}
+				} catch {
+					// best-effort — codeEvidence stays [] on error
+				}
+			}
 		} catch {
 			// fall through
 		}
@@ -344,6 +478,10 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				filters: { q, location, limit, offset },
 				counts: { returned: builders.length, total: totalMatching },
+				// sls-041: what a skill match IS (and is not). Rows are candidate
+				// discovery, not verified experience/seniority/availability.
+				matchBasis:
+					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},
 			builders,

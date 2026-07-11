@@ -44,6 +44,16 @@ interface RfpRow extends Idea {
 	quarterLabel: string;
 	status: RfpStatus;
 	url: string;
+	/**
+	 * sls-045 discriminator: "rfp" = a curated sponsor brief; "scf-round" = a
+	 * SYNTHETIC row representing the live SCF round's open submission window
+	 * (served as a first-class row since Emir's demo miss — row-reading agents
+	 * skipped meta-only round info and concluded "nothing is open"). Synthetic
+	 * rows are NOT briefs: count/render briefs by filtering rowType === "rfp".
+	 */
+	rowType: "rfp" | "scf-round";
+	/** True only on synthetic scf-round rows — mirror of rowType for quick checks. */
+	synthetic: boolean;
 }
 
 function toRow(i: Idea): RfpRow {
@@ -53,6 +63,8 @@ function toRow(i: Idea): RfpRow {
 		quarterLabel: QUARTER_LABELS[i.quarter],
 		status: rfpStatus(i.quarter),
 		url: `https://stellarlight.xyz/ideas/${i.id}`,
+		rowType: "rfp",
+		synthetic: false,
 	};
 }
 
@@ -123,6 +135,8 @@ export async function GET(req: NextRequest) {
 			quarterLabel: "Live round",
 			status: "open",
 			url: "https://communityfund.stellar.org/awards",
+			rowType: "scf-round",
+			synthetic: true,
 		}));
 	rfps = [...roundRows, ...rfps];
 
@@ -190,7 +204,14 @@ export async function GET(req: NextRequest) {
 					closed: closedCount,
 					matched: matchedCount,
 					returned: rfps.length,
+					// sls-045: synthetic scf-round rows in the returned page.
+					// total/open/closed count curated BRIEFS only; matched/returned
+					// count ROWS incl. synthetic ones — so open=5 with returned=6 is
+					// consistent, not a discrepancy. Count briefs via rowType==="rfp".
+					syntheticRounds: rfps.filter((r) => r.synthetic).length,
 				},
+				countBasis:
+					"total/open/closed = curated RFP briefs only. matched/returned = result rows, which ALSO include synthetic 'scf-round' rows (rowType: 'scf-round', synthetic: true) representing the live SCF round's open submission window. To count or render briefs, filter rowType === 'rfp'; round context is also in meta.scfRound.",
 				activeQuarter: ACTIVE_QUARTER,
 				activeQuarterLabel: QUARTER_LABELS[ACTIVE_QUARTER],
 				// SCF round identity + submission window (sls-007, LIVE since sls-014).

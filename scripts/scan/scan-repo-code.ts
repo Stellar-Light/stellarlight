@@ -36,6 +36,7 @@ import {
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
 import { computeJsDepth } from "../../src/lib/js-depth";
+import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
@@ -283,6 +284,16 @@ async function main() {
 					},
 					nowIso,
 				);
+				// sls-046: platform/SDK/tooling repos (stellar-core, rs-soroban-env,
+				// the SDKs/CLI…) vendor cdylib crates that are runtime/fixtures, not
+				// a deployable contract product — pin the stored flag false so the
+				// data converges to the same truth the serving-time override reads.
+				if (
+					isKnownInfraNotDeployable(full) &&
+					data.isDeployableContract === true
+				) {
+					data.isDeployableContract = false;
+				}
 				if (r.outcome === "ok") {
 					scanned++;
 					const cur = typeof doc.repoScore === "number" ? doc.repoScore : 0;

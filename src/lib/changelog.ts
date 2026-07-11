@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-11",
 		surfaces: ["api"],
+		version: "spec 1.7.15",
+		type: "added",
+		summary:
+			"sls-041..050 wave (all additive): getBuilders rows carry `match` (matchedFields/matchedProjects/matchedTerms — WHY a skill query hit) + `codeEvidence` (indexed repos owned by the builder that match the query) + meta.matchBasis; getClusters no longer truncates its input at 500 active projects and both it and analyzeEcosystem carry a `meta.population` scope digest (id/totalAvailable/included/truncated — identical ids ⇒ comparable numbers); getStatus sources gain `populationId`; analyze funding gains `projectSetHash` (stable digest of the awarded-project SET — distinguishes amount corrections from membership changes across snapshots); getRfps rows carry a `rowType` discriminator ('rfp' vs synthetic 'scf-round') + counts.syntheticRounds + meta.countBasis (open counts briefs; returned counts rows); searchRepos rows carry `stellarEvidence` (code-verified/sdf-org/curated/mentioned/none — why a repo ranks), scanned-but-proof-'none' repos no longer rank as Stellar-proven, and `codeVerified.isDeployableContract` is pinned false for known platform/SDK/tooling repos (stellar-core, rs-soroban-env, CLI/SDKs — their cdylibs are runtime/fixtures, not deployable products); searchProjects anchorProfile gains `profileState` + meta.anchorProfileBasis (empty capability arrays = unknown, never a negative claim).",
+		detail:
+			"Data fixes riding the wave: Band award facts aligned to the official SCF record (SCF #16, $60K — the canonical row's unsourced #41/$100K corrected); Bitso anchor profile filled from Bitso's own sources (USDC on/off-ramp over Stellar); Vibrant→Vesseo rename mapped bidirectionally in search synonyms. Regression guards ship in the daily self-audit (band award lock, rfps row/count contract, clusters⇄analyze population parity, stellar-core classification, zero-knowledge ranking evidence, vibrant→vesseo recall).",
+	},
+	{
+		date: "2026-07-11",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"Version disambiguation: spec bumped to 1.7.14 with no contract change. Two parallel additive changes (status/TVL provenance fields; type filter + leaderboard metricDefinitions + analyze tvl dimension + repo alias recall) both shipped labeled 1.7.13, so for a window that version string covered two different contracts. 1.7.14 marks the union state so drift CI re-baselines cleanly.",

@@ -328,6 +328,17 @@ const RAMP_ENRICH: Record<
 			"virtual-accounts-kes-usd-ghs-ngn",
 		],
 	},
+	// sls-049: Bitso's profile served all-empty capability arrays while its
+	// description asserts live USDC↔fiat corridors. Bitso serves NO stellar.toml
+	// (bitso.com/.well-known/stellar.toml → marketing redirect, checked
+	// 2026-07-11) — its ramp is the exchange platform/API, so the toml enricher
+	// can never fill it. Grounded in Bitso's OWN sources: bitso.com/blog/
+	// usdc-stellar (2026-06-11, "You can send, receive, transfer, deposit and
+	// withdraw your USDC with the Stellar network") + docs.bitso.com
+	// "Withdrawing USDC on Stellar". Fiat legs (MXN/BRL/ARS/COP) are already on
+	// the compliance group above; SEPs stay empty (Bitso publishes no SEP
+	// endpoints — profileState/anchorProfileBasis explain empty-vs-unknown).
+	"anchor-bitso": { rampTypes: ["on-ramp", "off-ramp"], addAssets: ["USDC"] },
 };
 // ──────────────────────────────────────────────────────────────────────────────
 

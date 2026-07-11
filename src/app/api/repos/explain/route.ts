@@ -16,6 +16,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { askDeepWiki } from "@/lib/deepwiki";
+import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
@@ -168,7 +169,14 @@ export async function GET(req: NextRequest) {
 						stellarProof: d.stellarProof as string,
 						codeDepth:
 							typeof d.codeDepth === "number" ? (d.codeDepth as number) : null,
-						isDeployableContract: !!d.isDeployableContract,
+						// sls-046: known platform/SDK/tooling repos (stellar-core,
+						// rs-soroban-env, the SDKs/CLI…) are pinned NOT-deployable —
+						// their cdylib crates are the runtime/fixtures, not a
+						// deployable contract product. Flag semantics: "this repo's
+						// PRODUCT is a deployable Soroban contract".
+						isDeployableContract: isKnownInfraNotDeployable(repo)
+							? false
+							: !!d.isDeployableContract,
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,

@@ -137,6 +137,13 @@ export const SYNONYMS: Record<string, string[]> = {
 	],
 	europe: ["europe", "european", "eu"],
 	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
+	// Rename continuity (sls-050): SDF/Sunship's consumer USDC wallet rebranded
+	// Vibrant → Vesseo (record slug `vesseo`, description carries "formerly
+	// Vibrant"). Both names must resolve to the one canonical entity — mapped
+	// BIDIRECTIONALLY so neither the old nor the new name depends on the
+	// description text happening to contain the other.
+	vibrant: ["vibrant", "vesseo"],
+	vesseo: ["vesseo", "vibrant"],
 	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
 	rpc: ["rpc", "node", "endpoint", "horizon"],
 	sdk: ["sdk", "library", "client library", "kit"],

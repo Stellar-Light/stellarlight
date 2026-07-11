@@ -271,7 +271,7 @@ export const DEEP_FRONTIER: LabeledRepo[] = [
 	},
 	{
 		fullName: "bandprotocol/band-std-reference-contracts-soroban",
-		why: "Official Band Protocol org repo with the real StandardReference Soroban contract sources (full relay/admin implementation + tests + built wasm); corroborated by SCF r41 award ($100k) and Band's live mainnet oracle lis...",
+		why: "Official Band Protocol org repo with the real StandardReference Soroban contract sources (full relay/admin implementation + tests + built wasm); corroborated by SCF r16 award ($60k, official record — sls-043) and Band's live mainnet oracle lis...",
 	},
 	{
 		fullName: "stellar-broker/router-contract",
