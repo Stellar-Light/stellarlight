@@ -124,6 +124,7 @@ const TYPES_SET: Record<string, string[]> = {
 	swiftex: ["Wallet", "DEX"], // SwiftExWallet README: multichain wallet; bridging via third-party Allbridge
 	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
 	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
+	cobo: ["Infrastructure", "Wallet"], // cobo.com: institutional omni-custody / wallet-as-a-service platform — custody, not a bridge
 };
 
 const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
@@ -132,6 +133,13 @@ const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
 		// airdrop-farming product; zero mentions of Stellar/Soroban/courses on
 		// the live page. The described Stellar-education product no longer
 		// exists at the listed URL.
+		// boxy-confirmed dead 2026-07-11 (surfaced by the #414 bridge-corridor
+		// tail: Bridge-typed, empty networks, product gone).
+		apay: {
+			from: "Live",
+			to: "Inactive",
+			note: "Product dead (human-confirmed 2026-07-11).",
+		},
 		venalabs: {
 			from: "Live",
 			to: "Inactive",
