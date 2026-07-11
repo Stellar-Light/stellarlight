@@ -511,8 +511,11 @@ export function buildHaystack(p: MatchableProject): string {
 function hasPositiveHit(hay: string, v: string): boolean {
 	let i = hay.indexOf(v);
 	while (i !== -1) {
-		const before = hay.slice(Math.max(0, i - 4), i);
-		if (!/non[-\s]?$/.test(before)) return true;
+		const before = hay.slice(Math.max(0, i - 6), i);
+		// "self-custodial" contradicts custody-seeking exactly like
+		// "non-custodial" does (re-measure 2026-07-11: sava leaked through on
+		// the self- prefix hours after the non- guard shipped).
+		if (!/(non|self)[-\s]?$/.test(before)) return true;
 		i = hay.indexOf(v, i + 1);
 	}
 	return false;
@@ -524,7 +527,7 @@ export function scoreTokens(hay: string, tokens: string[]): number {
 	if (!tokens.length) return 1;
 	// …unless the QUERY is itself negation-seeking ("non custodial wallet") —
 	// then negated prose is exactly what it's asking for.
-	const negSeeking = tokens.some((t) => t.startsWith("non"));
+	const negSeeking = tokens.some((t) => t.startsWith("non") || t === "self");
 	return tokens.reduce(
 		(s, t) =>
 			s +
