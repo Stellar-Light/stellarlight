@@ -118,6 +118,12 @@ const TYPES_SET: Record<string, string[]> = {
 	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
 	perun: ["Infrastructure", "SDK"], // polycry.pt: state-channel framework (go-perun + perun-stellar-backend)
 	"peridot-finance": ["Lending"], // peridot.finance: cross-chain lending platform — product is lending
+	// batch 2 (self-audit re-run surfaced 8 more, mostly 07-10 seeds):
+	"volta-circuit": ["Security", "Wallet"], // voltacircuit.com: multi-sig wallet security/controls product
+	upwealth: ["AI", "Analytics"], // upwealth.io: AI investment/advisory platform for wealth managers
+	swiftex: ["Wallet", "DEX"], // SwiftExWallet README: multichain wallet; bridging via third-party Allbridge
+	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
+	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
 };
 
 const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
@@ -923,6 +929,9 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	"via-labs": ["evm"], // docs.vialabs.io omnichain messaging/bridging; public chain registry is exclusively EVM chain IDs — only evm verifiable
 	transfuse: ["stellar", "evm"], // github transfuselabs/transfuse-bridge: Stellar⇄Ethereum USDC/USDT bridge (testnet-only per README)
 	"bim-exchange": ["evm"], // bim.finance: swap/bridge interface aggregating Kyberswap/Bungee — EVM aggregator stacks; no non-EVM chain named
+	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
+	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
+	estrela: ["stellar", "evm", "solana", "tron", "sui"], // Estrela = Allbridge Core (SCF #22; links → allbridge.io); docs-core.allbridge.io chain list
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
