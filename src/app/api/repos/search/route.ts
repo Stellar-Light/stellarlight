@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
-	const { repos, total, canonical } = await searchRepos(payload, q, {
+	const { repos, total, canonical, searched } = await searchRepos(payload, q, {
 		limit,
 		offset,
 		language,
@@ -72,6 +72,24 @@ export async function GET(req: NextRequest) {
 								note: "Curated canonical Stellar repos for this infra/protocol query, floated to the top (e.g. error codes → stellar-core/Horizon/SDKs; Horizon lives in stellar/go). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
 							}
 						: null,
+				// sls-025: a zero-result page says exactly what WAS searched, so an
+				// empty answer can't silently read as "this repo/standard doesn't
+				// exist" when the real cause is an alias form or an index-coverage gap.
+				...(q && repos.length === 0
+					? {
+							searched: {
+								tokens: searched.tokens,
+								expandedTerms: searched.expandedTerms,
+								fields: [
+									"fullName (owner + repo name, raw and hyphen/slash/underscore-insensitive)",
+									"description",
+									"topics",
+									"codeSymbols",
+								],
+								note: "0 indexed repos matched. The tokens above (with their synonym/alias expansions) were searched across the listed fields, including owner names and separator-insensitive forms of the query. The index covers curated Stellar-ecosystem repos and can lag or miss new/renamed ones — an empty result is NOT evidence that the repo, standard, or implementation doesn't exist. Try the bare repo name, the owner name alone, or a broader vertical term; if the repo exists publicly but is missing here, report it via POST /api/feedback.",
+							},
+						}
+					: {}),
 				counts: { returned: repos.length, total },
 			},
 			repos,

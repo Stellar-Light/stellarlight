@@ -184,7 +184,30 @@ function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
 	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1));
 	for (const syn of SYNONYMS[t] ?? []) out.add(syn);
+	// sls-025 alias recall: identifier tokens come in separator variants, and a
+	// lookup must not care which form the repo's name happens to use. These
+	// variants feed BOTH the DB candidate fetch and the in-memory scorer.
+	//   hyphen/underscore-stripped: "erc-8004"→"erc8004", "smart-account-kit"→"smartaccountkit"
+	if (/[-_]/.test(t)) out.add(t.replace(/[-_]/g, ""));
+	//   separator inserted at letter↔digit transitions: "stellar8004"→"stellar-8004"
+	const dashed = t
+		.replace(/([a-z])(\d)/g, "$1-$2")
+		.replace(/(\d)([a-z])/g, "$1-$2");
+	if (dashed !== t) out.add(dashed);
+	//   standards identifiers (ERC-8004, EIP-3643, SRC-8004…): the number IS the
+	//   identifier — q=erc-8004 must reach repos named stellar-8004/stellar8004.
+	//   ≥3 digits so sep-6/cap-35-class tokens don't dissolve into noisy bare numbers.
+	const std = t.match(/^(?:erc|eip|src)-?(\d{3,})$/);
+	if (std) out.add(std[1]);
 	return [...out];
+}
+
+// sls-025: separator-insensitive identity form — normAlias("stellar-8004") ===
+// normAlias("stellar8004"), normAlias("subquery/stellar-subql-starter") matches
+// the repo's full path however the caller separated it. Used for exact-ish
+// owner/name/full-path lookups so they can't silently zero on punctuation.
+function normAlias(s: string): string {
+	return s.toLowerCase().replace(/[-_/.\s]/g, "");
 }
 
 // Match a term at a WORD BOUNDARY (prefix, suffix, or whole word) rather than
@@ -627,6 +650,14 @@ export function flagshipsFor(q: string): string[] {
 	return out;
 }
 
+/** What a search actually looked for — served on zero-result responses so an
+ * empty page is honest about its scope (sls-025: a silent 0 reads as "doesn't
+ * exist" when the real cause is an alias/index miss). */
+export interface RepoSearchSearched {
+	tokens: string[];
+	expandedTerms: string[];
+}
+
 export async function searchRepos(
 	payload: PayloadLike | null,
 	q: string,
@@ -636,11 +667,20 @@ export async function searchRepos(
 		language?: string;
 		minScore?: number;
 	} = {},
-): Promise<{ repos: RepoResult[]; total: number; canonical: string[] }> {
+): Promise<{
+	repos: RepoResult[];
+	total: number;
+	canonical: string[];
+	searched: RepoSearchSearched;
+}> {
 	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
-	if (!payload) return { repos: [], total: 0, canonical: [] };
+	const tokens = contentTokens(q);
+	const searched: RepoSearchSearched = {
+		tokens,
+		expandedTerms: [...new Set(tokens.flatMap(termsForToken))].slice(0, 40),
+	};
+	if (!payload) return { repos: [], total: 0, canonical: [], searched };
 	try {
-		const tokens = contentTokens(q);
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
 		// repos, not the whole collection. It grew past 2,000 docs and pulling
 		// them all (each with a README excerpt) on every call timed the endpoint
@@ -711,6 +751,14 @@ export async function searchRepos(
 				),
 			];
 		}
+		// sls-025: separator-insensitive identity form of the query, computed once.
+		// Alias identity applies ONLY to identifier-form queries (containing a
+		// digit or -,_,/,. — "stellar8004", "passkey-kit", "subquery/stellar-subql-starter").
+		// A broad vocabulary query ("wallet", "nft marketplace") must never ride
+		// name-identity over the F4 Stellar-evidence policy — the audit's tier-0
+		// name-hit class would come straight back.
+		const qIsIdentifier = /[-_/.0-9]/.test(q.trim());
+		const qNorm = qIsIdentifier ? normAlias(q) : "";
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
@@ -725,7 +773,10 @@ export async function searchRepos(
 			// so an org named "Blockchain-Oracle" or "hot-dao" doesn't make its
 			// repos rank for "oracle"/"dao". Owner is still used for SDF + mention.
 			const repoPart = r.fullName.split("/").slice(1).join("/") || r.fullName;
-			const name = wordy(repoPart);
+			// sls-025: the RAW lowercased form rides alongside the wordy split.
+			// wordy("stellar8004") = "stellar 8004", so the joined query token
+			// "stellar8004" could never boundary-match its own repo's name.
+			const name = `${repoPart.toLowerCase()} ${wordy(repoPart)}`;
 			const tops = wordy(topics.join(" "));
 			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
 			const readme = wordy(r.readmeExcerpt ?? "");
@@ -735,8 +786,10 @@ export async function searchRepos(
 			// F4 (audit root #4): owner is searchable — q=allbridge must reach
 			// allbridge-io/* even when the repo name doesn't repeat the org.
 			// Same stopword-filtered tokens as everything else, so generic words
-			// can't pollute via owner.
-			const ownerHay = wordy(r.fullName.split("/")[0]);
+			// can't pollute via owner. Raw form too (sls-025: q=progax01 must hit
+			// owner "progax01" — wordy alone splits it to "progax 01").
+			const ownerRaw = r.fullName.split("/")[0].toLowerCase();
+			const ownerHay = `${ownerRaw} ${wordy(ownerRaw)}`;
 			let score = 0;
 			let matched = 0;
 			if (tokens.length) {
@@ -760,7 +813,19 @@ export async function searchRepos(
 			} else {
 				score = 1;
 			}
-			const owner = r.fullName.split("/")[0].toLowerCase();
+			const owner = ownerRaw;
+			// sls-025: separator-insensitive identity — the normalized query IS
+			// this repo's owner, name, or full path (q="subquery/stellar-subql-starter",
+			// q="stellar8004", q="progax01"). An exact-identity hit is admitted
+			// regardless of token score and outranks keyword/semantic neighbors.
+			// ≥3 chars so degenerate short queries can't ride it.
+			const alias =
+				qNorm.length >= 3 &&
+				(normAlias(repoPart) === qNorm ||
+					normAlias(ownerRaw) === qNorm ||
+					normAlias(r.fullName) === qNorm)
+					? 1
+					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose
 			// only Stellar evidence is its README is still Stellar-evidenced).
 			const hay = `${wordy(r.fullName)} ${tops} ${desc} ${readme}`;
@@ -788,6 +853,7 @@ export async function searchRepos(
 				topics,
 				score,
 				matched,
+				alias,
 				sdf,
 				alive,
 				mention,
@@ -797,8 +863,13 @@ export async function searchRepos(
 			};
 		});
 		// Keep canonical + curated-flagship repos even when they didn't keyword-match.
+		// Alias-identity hits too (sls-025): an exact owner/name/path lookup is
+		// admitted even when tokenized scoring missed (e.g. a "/" in the query).
 		let filtered = tokens.length
-			? docs.filter((d) => d.matched >= 1 || d.crank < 9999 || d.frank < 9999)
+			? docs.filter(
+					(d) =>
+						d.matched >= 1 || d.crank < 9999 || d.frank < 9999 || d.alias > 0,
+				)
 			: docs;
 		if (minScore > 0)
 			filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
@@ -812,6 +883,10 @@ export async function searchRepos(
 			(a, b) =>
 				a.crank - b.crank ||
 				a.frank - b.frank ||
+				// Exact alias identity (sls-025) beats everything below the curated
+				// floats: when the query IS a repo's owner/name/path, that repo must
+				// outrank keyword and semantic neighbors.
+				b.alias - a.alias ||
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
 				// relevance still dominates within a tier.
 				b.stellarness - a.stellarness ||
@@ -858,8 +933,9 @@ export async function searchRepos(
 			repos,
 			total,
 			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
+			searched,
 		};
 	} catch {
-		return { repos: [], total: 0, canonical: [] };
+		return { repos: [], total: 0, canonical: [], searched };
 	}
 }

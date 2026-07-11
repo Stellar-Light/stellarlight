@@ -192,7 +192,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Projects"],
 				summary: "Search Stellar projects (prior art / competitor lookup)",
 				description:
-					"Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, `builtBy` (the org/entity behind it — 'who built X'), the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters. Use for 'who has built / is there a / which projects / give me a directory of' questions about Stellar apps, products, protocols, dApps, teams, companies and startups by category — DeFi, lending, credit, yield, AMM, DEX, swap, NFT marketplace, wallets, anchors and on/off-ramps, RWA and real-world-asset tokenization, stablecoins, payments, oracles, identity, gaming, infrastructure, tooling. Also 'is there a mature X I could integrate', 'who is building Y', projects operating as anchors, and named products (Etherfuse Stablebonds, Soroswap) — for DIRECTORY FACTS about those products only (status, funding, builder, links); for editorial/analysis content about them (articles, interviews, metrics commentary, deep dives) use content platforms instead. Also answers list/enumerate/compare questions from the curated directory: which wallets exist and how they differ, anchors and anchor infrastructure, the main DeFi projects (directory / market map), NFT marketplaces, perpetuals/derivatives DEXes, block explorers (stellar.expert, StellarChain), AMM/liquidity protocols and their yields, and specific products like Etherfuse Stablebonds (USTRY/CETES) — again as directory records, not articles about them.",
+					"Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). For an exact product-type roster use the `type` filter (server-side `types[]` membership, e.g. `type=Wallet`) — keyword hits alone are NOT exact type matches. Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, `builtBy` (the org/entity behind it — 'who built X'), the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters. Use for 'who has built / is there a / which projects / give me a directory of' questions about Stellar apps, products, protocols, dApps, teams, companies and startups by category — DeFi, lending, credit, yield, AMM, DEX, swap, NFT marketplace, wallets, anchors and on/off-ramps, RWA and real-world-asset tokenization, stablecoins, payments, oracles, identity, gaming, infrastructure, tooling. Also 'is there a mature X I could integrate', 'who is building Y', projects operating as anchors, and named products (Etherfuse Stablebonds, Soroswap) — for DIRECTORY FACTS about those products only (status, funding, builder, links); for editorial/analysis content about them (articles, interviews, metrics commentary, deep dives) use content platforms instead. Also answers list/enumerate/compare questions from the curated directory: which wallets exist and how they differ, anchors and anchor infrastructure, the main DeFi projects (directory / market map), NFT marketplaces, perpetuals/derivatives DEXes, block explorers (stellar.expert, StellarChain), AMM/liquidity protocols and their yields, and specific products like Etherfuse Stablebonds (USTRY/CETES) — again as directory records, not articles about them.",
 				parameters: [
 					{ $ref: "#/components/parameters/q" },
 					{
@@ -209,6 +209,38 @@ export const spec: OpenAPISpec = {
 								"Protocol/Contract",
 								"Anchor",
 								"Partner Integration",
+							],
+						},
+					},
+					{
+						name: "type",
+						in: "query",
+						description:
+							"Filter to projects whose `types[]` includes this product type — server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes.",
+						schema: {
+							type: "string",
+							enum: [
+								"Wallet",
+								"DEX",
+								"Lending",
+								"Bridge",
+								"Infrastructure",
+								"Payments",
+								"Anchor",
+								"SDK",
+								"Indexer",
+								"Explorer",
+								"Analytics",
+								"AI",
+								"Gaming",
+								"Education",
+								"Security",
+								"NFT",
+								"RWA",
+								"Stablecoin",
+								"Social Impact",
+								"RPC",
+								"Faucet",
 							],
 						},
 					},
@@ -553,7 +585,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Builders"],
 				summary: "Search Stellar builders",
 				description:
-					"The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, scfTier, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*/activity stats → use get_leaderboard. Use for recruiting or hiring: find developers, engineers, contributors, or teammates to recruit or hire by skill, SCF tier, or track record of SCF awards. Filter/find PEOPLE by region (Latin America, India, Africa, Asia, Europe) or by stack — e.g. 'experienced Soroban devs I could reach out to', 'Rust builders to hire', or 'builders in LatAm working on payments'.",
+					"The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, and the projects[] each has shipped. Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*/activity stats → use get_leaderboard; SCF-tier or award-track filtering — NOT supported: profiles carry no populated SCF-tier/award data (the response's `scfTier` field is empty on every profile today), so a project's SCF award history must come from search_projects, not from a person's profile. Use for recruiting or hiring: find developers, engineers, contributors, or teammates by skill, location, or the projects they've shipped. Filter/find PEOPLE by region (Latin America, India, Africa, Asia, Europe) or by stack — e.g. 'experienced Soroban devs I could reach out to', 'Rust builders to hire', or 'builders in LatAm working on payments'.",
 				parameters: [
 					{
 						name: "q",
@@ -1144,7 +1176,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), or `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons. Use for ecosystem-wide totals and macro stats — project counts by category, total SCF funding, hackathon totals, and developer-activity aggregates across the whole ecosystem. Includes ecosystem-wide DeFi TVL rollups (as-of dated — never an exact to-the-dollar live figure) and totals across all events/categories.",
+					"Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel), or `tvl` (the DeFi TVL rollup: totalTvlUSD + top10 projects by tvlUSD, DefiLlama-sourced per-project figures, as-of dated — never an exact to-the-dollar live figure, and directory-scoped: protocols not tracked on DefiLlama are absent, so it undercounts chain-wide TVL). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons', 'total/top DeFi TVL on Stellar'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons. Use for ecosystem-wide totals and macro stats — project counts by category, total SCF funding, hackathon totals, TVL rollups, and developer-activity aggregates across the whole ecosystem.",
 				parameters: [
 					{
 						name: "dimension",
@@ -1152,7 +1184,7 @@ export const spec: OpenAPISpec = {
 						description: "Which slice to return",
 						schema: {
 							type: "string",
-							enum: ["all", "hackathons", "categories", "funding"],
+							enum: ["all", "hackathons", "categories", "funding", "tvl"],
 							default: "all",
 						},
 					},
@@ -1171,7 +1203,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Returns a **ranked list of active Stellar projects** (default top 50, max 300) sortable by `sort=activity|stars|issues` over a `range` (7d/30d/90d/1y/all), with per-project GitHub rollups (`totalStars`, `openIssuesTotal`, `lastActivityAt`, `repoCount`) and `scfAwarded`; optional `category` filter and `format=csv`. Also bundles an **Electric Capital ecosystem dev macro** block (28-day active / Stellar-only / multichain dev counts, commits28d, full-time/part-time/one-time dev splits). **Use when:** 'who/what are the top/most-active Stellar projects', 'most-starred projects', 'which projects shipped recently (last 30d)', 'how many active Stellar devs / how does Stellar's dev activity look', or you need a CSV/Dune-style export of ranked projects. **Not for:** category counts or crowded-vs-underbuilt whitespace → use get_clusters; ecosystem-wide hackathon/funding/status-funnel totals → use analyze_ecosystem; finding a specific project's profile/funding/competitors → use search_projects; ranking individual developers (this ranks PROJECTS, plus an EC macro snapshot — it does not list named devs) → use get_builders.",
+					"Returns a **ranked list of active Stellar projects** (default top 50, max 300) sortable by `sort=activity|stars|issues` over a `range` (7d/30d/90d/1y/all), with per-project GitHub rollups (`totalStars`, `openIssuesTotal`, `lastActivityAt`, `repoCount`) and `scfAwarded`; optional `category` filter and `format=csv`. `meta.metricDefinitions` states exactly what each served metric counts — read it before relabeling a ranking: `activity`/`lastActivityAt` = latest default-branch commit across the project's indexed repos (a recency signal, NOT commit volume — commit counts are not served); `issues` = the OPEN-issue backlog rollup (issue-only, excludes PRs — a backlog snapshot, not activity or quality); `repoCount` = indexed-repo coverage. Also bundles an **Electric Capital ecosystem dev macro** block (28-day active / Stellar-only / multichain dev counts, commits28d, full-time/part-time/one-time dev splits). **Use when:** 'who/what are the top/most-active Stellar projects', 'most-starred projects', 'which projects shipped recently (last 30d)', 'how many active Stellar devs / how does Stellar's dev activity look', or you need a CSV/Dune-style export of ranked projects. **Not for:** category counts or crowded-vs-underbuilt whitespace → use get_clusters; ecosystem-wide hackathon/funding/status-funnel totals → use analyze_ecosystem; finding a specific project's profile/funding/competitors → use search_projects; ranking individual developers (this ranks PROJECTS, plus an EC macro snapshot — it does not list named devs) → use get_builders.",
 				parameters: [
 					{
 						name: "sort",

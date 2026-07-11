@@ -5,6 +5,7 @@
  *   GET /api/analyze?dimension=hackathons     — per-hackathon stats only
  *   GET /api/analyze?dimension=categories     — category distribution only
  *   GET /api/analyze?dimension=funding        — SCF funding distribution
+ *   GET /api/analyze?dimension=tvl            — DeFi TVL rollup (DefiLlama)
  *
  * Mirrors Colosseum Copilot's /analyze. Returns the macro picture that
  * `/api/hackathons/{slug}` (single-event detail) and `/api/clusters`
@@ -33,6 +34,7 @@ const VALID_DIMENSIONS = [
 	"hackathons",
 	"categories",
 	"funding",
+	"tvl",
 ] as const;
 
 interface CategoryStats {
@@ -45,12 +47,18 @@ interface CategoryStats {
 
 interface ProjectDoc {
 	id: string;
+	slug?: string;
+	name?: string;
 	category?: string;
 	status?: string;
 	hackathonStatus?: string;
 	hackathonPlacement?: string;
 	hackathonPrize?: number;
 	scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
+	// DefiLlama TVL facts (scripts/enrich-tvl.ts): null = not tracked there,
+	// never "zero TVL". Every value is dated via tvlAsOf.
+	tvlUSD?: number | null;
+	tvlAsOf?: string | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -72,6 +80,7 @@ export async function GET(req: NextRequest) {
 		dimensionParam === "all" || dimensionParam === "categories";
 	const includeFunding =
 		dimensionParam === "all" || dimensionParam === "funding";
+	const includeTvl = dimensionParam === "all" || dimensionParam === "tvl";
 
 	const payload = await getPayloadSafe();
 
@@ -111,9 +120,9 @@ export async function GET(req: NextRequest) {
 		};
 	}
 
-	// ── Categories + funding share a projects fetch
+	// ── Categories + funding + tvl share a projects fetch
 	let projects: ProjectDoc[] = [];
-	if (payload && (includeCategories || includeFunding)) {
+	if (payload && (includeCategories || includeFunding || includeTvl)) {
 		try {
 			const r = await payload.find({
 				collection: "projects",
@@ -128,6 +137,8 @@ export async function GET(req: NextRequest) {
 				limit: 5000,
 				depth: 0,
 				select: {
+					slug: true,
+					name: true,
 					category: true,
 					scf: true,
 					hackathonPlacement: true,
@@ -135,6 +146,9 @@ export async function GET(req: NextRequest) {
 					// every project counted as "Unknown" no matter what the DB held.
 					hackathonStatus: true,
 					status: true,
+					// sls-038: TVL facts for the tvl rollup (null = not DefiLlama-tracked).
+					tvlUSD: true,
+					tvlAsOf: true,
 				},
 			});
 			projects = r.docs as unknown as ProjectDoc[];
@@ -248,6 +262,40 @@ export async function GET(req: NextRequest) {
 					totalUSD: Math.round(stat.totalUSD),
 				}))
 				.sort((a, b) => b.totalUSD - a.totalUSD),
+		};
+	}
+
+	// ── DeFi TVL rollup (sls-038): the catalog description promised an
+	// ecosystem TVL rollup that dimension=all never served — a caller couldn't
+	// tell unavailable from soft-empty. Serve it, dated and provenance-labeled,
+	// from the per-project DefiLlama facts (scripts/enrich-tvl.ts).
+	if (includeTvl) {
+		const tracked = projects.filter((p) => typeof p.tvlUSD === "number");
+		const totalTvlUSD = Math.round(
+			tracked.reduce((s, p) => s + (p.tvlUSD ?? 0), 0),
+		);
+		const top10 = [...tracked]
+			.sort((a, b) => (b.tvlUSD ?? 0) - (a.tvlUSD ?? 0))
+			.slice(0, 10)
+			.map((p) => ({
+				slug: p.slug ?? null,
+				name: p.name ?? null,
+				tvlUSD: Math.round(p.tvlUSD ?? 0),
+				tvlAsOf: p.tvlAsOf ?? null,
+			}));
+		// Most recent per-project refresh date = the rollup's as-of.
+		const asOf = tracked.reduce<string | null>(
+			(m, p) => (p.tvlAsOf && (!m || p.tvlAsOf > m) ? p.tvlAsOf : m),
+			null,
+		);
+		result.tvl = {
+			totalTvlUSD,
+			trackedProjects: tracked.length,
+			asOf,
+			provider: "DefiLlama",
+			top10,
+			basis:
+				"Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero — untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed on a curated cadence (asOf = most recent per-project tvlAsOf), CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated — never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf also ride each /api/projects/search row.",
 		};
 	}
 

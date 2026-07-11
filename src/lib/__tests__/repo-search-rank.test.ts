@@ -90,3 +90,88 @@ describe("searchRepos F4 ranking", () => {
 		expect(repos[0]?.fullName).toBe("allbridge-io/core-contracts");
 	});
 });
+
+/** sls-025: exact aliases/identifiers must not return silent zeros. */
+describe("searchRepos sls-025 alias recall", () => {
+	const trion = doc({
+		fullName: "trionlabs/stellar-8004",
+		description: "ERC-8004-style agent registries for Stellar",
+	});
+	const progax = doc({
+		fullName: "progax01/stellar8004",
+		description: "independent agent registry",
+	});
+
+	it("digit-joined form finds the hyphenated repo and vice versa (q=stellar8004)", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([trion, progax]),
+			"stellar8004",
+			{ limit: 5 },
+		);
+		const names = repos.map((r) => r.fullName);
+		expect(names).toContain("trionlabs/stellar-8004");
+		expect(names).toContain("progax01/stellar8004");
+	});
+
+	it("raw owner segment matches (q=progax01)", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([trion, progax]),
+			"progax01",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("progax01/stellar8004");
+	});
+
+	it("standards identifier expands to its number (q=ERC-8004)", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([trion, progax]),
+			"ERC-8004",
+			{ limit: 5 },
+		);
+		expect(repos.length).toBeGreaterThan(0);
+	});
+
+	it("owner/name full-path lookup resolves via alias identity", async () => {
+		const target = doc({
+			fullName: "subquery/stellar-subql-starter",
+			description: "SubQuery starter project",
+		});
+		const noise = doc({
+			fullName: "someone/indexer-tool",
+			description: "a stellar indexer starter",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([target, noise]),
+			"subquery/stellar-subql-starter",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("subquery/stellar-subql-starter");
+	});
+
+	it("hyphenated name lookup matches separator-insensitively (q=smart-account-kit)", async () => {
+		const target = doc({
+			fullName: "kalepail/smart-account-kit",
+			description: "smart account tooling",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([target]),
+			"smart-account-kit",
+			{
+				limit: 5,
+			},
+		);
+		expect(repos[0]?.fullName).toBe("kalepail/smart-account-kit");
+	});
+
+	it("zero results still report what WAS searched (honest empty)", async () => {
+		const { repos, searched } = await searchRepos(
+			mockPayload([]),
+			"erc-8004 registry",
+			{ limit: 5 },
+		);
+		expect(repos).toHaveLength(0);
+		expect(searched.tokens).toContain("erc-8004");
+		expect(searched.expandedTerms).toContain("erc8004");
+		expect(searched.expandedTerms).toContain("8004");
+	});
+});

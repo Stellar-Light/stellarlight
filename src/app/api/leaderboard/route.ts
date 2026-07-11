@@ -319,6 +319,23 @@ export async function GET(req: NextRequest) {
 				// page was referenced here historically but never built — caught
 				// by scripts/verify-claims.ts.
 				docs: "https://stellarlight.xyz/scout/api-reference",
+				// sls-036: define each served metric WHERE the numbers appear, so a
+				// consumer can't relabel the activity ordering as "commit count" or
+				// read the issues rollup as an activity/quality ranking.
+				metricDefinitions: {
+					activity:
+						"sort=activity orders by github.lastActivityAt — the most recent default-branch commit timestamp (falling back to last push) across the project's indexed repos. A recency signal, NOT commit volume/velocity; per-project commit counts are not served.",
+					stars:
+						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
+					issues:
+						"github.openIssuesTotal = sum of OPEN issues across the project's indexed repos — an issue-only count (GitHub GraphQL issues(states:OPEN); EXCLUDES pull requests, so it will not match GitHub's REST open_issues_count, which includes PRs). This is a BACKLOG snapshot, not an activity or quality ranking.",
+					repoCount:
+						"github.repoCount = how many indexed repos are attributed to the project — our index's coverage, not the project's total GitHub footprint.",
+					lastActivityAt:
+						"Latest default-branch commit (fallback: last push) across the project's indexed repos, as of the last index refresh — a dated repo-source timestamp, not a live GitHub read.",
+					range:
+						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups — they are NOT recomputed within the window.",
+				},
 			},
 			ecosystem: {
 				asOf: ec.asOf,
