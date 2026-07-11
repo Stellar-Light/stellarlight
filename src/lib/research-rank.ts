@@ -98,6 +98,32 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 	return tokens.filter((t) => hay.includes(t)).length / tokens.length;
 }
 
+// Recency INTENT — the query literally asks for what's newest ("latest
+// soroban release", "recent mainnet upgrade", "stellar news 2026"). The
+// standard confidence blend scores canonical docs EVERGREEN (freshness=1,
+// no decay), which is right for "what is sep-10" but inverts these queries:
+// the 2026-07-11 audit showed "latest soroban release" serving the undated
+// Protocol 20 section of software-versions at full freshness while the
+// dated Protocol 27 (Zipper) content sat lower. When intent is detected we
+// re-sort with DATED freshness (short half-life, evergreen NOT exempt:
+// undated → 0.35) blended with confidence — structured truth (publishedAt)
+// must drive ranking for the query that asks for it.
+const RECENCY_INTENT_RE =
+	/\b(latest|newest|most recent|recent(ly)?|current(ly)?|this (year|month|week)|today|new in|202[5-9])\b/i;
+const RECENCY_HALF_LIFE_DAYS = 120;
+
+export function recencyIntent(query: string | undefined): boolean {
+	return !!query && RECENCY_INTENT_RE.test(query);
+}
+
+function datedFreshness(publishedAt: string | null, now: number): number {
+	if (!publishedAt) return 0.35; // undated can't prove currency
+	const ts = new Date(publishedAt).getTime();
+	if (!Number.isFinite(ts)) return 0.35;
+	const ageDays = Math.max(0, (now - ts) / 86_400_000);
+	return 2 ** (-ageDays / RECENCY_HALF_LIFE_DAYS);
+}
+
 export function rankResearchChunks<T extends RankableChunk>(
 	pool: T[],
 	opts: {
@@ -142,6 +168,16 @@ export function rankResearchChunks<T extends RankableChunk>(
 				b.confidence.score - a.confidence.score ||
 				(b.score ?? 0) - (a.score ?? 0),
 		);
+
+	// Recency-intent re-sort (see RECENCY_INTENT_RE above): blend confidence
+	// with dated freshness so provably-current chunks top "latest/recent"
+	// queries. Confidence still carries 60% — a fresh-but-irrelevant chunk
+	// can't hijack the page.
+	if (recencyIntent(opts.query)) {
+		const key = (c: (typeof scored)[number]) =>
+			0.6 * c.confidence.score + 0.4 * datedFreshness(c.publishedAt, now);
+		scored.sort((a, b) => key(b) - key(a));
+	}
 
 	// Best chunk per document first — also collapsing exact-duplicate content
 	// served under different URLs (index-page mirrors of the same recap).
