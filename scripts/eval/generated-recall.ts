@@ -115,7 +115,7 @@ async function main() {
 			"Anchor",
 			"Partner Integration",
 		];
-	const projects: any[] = [];
+	let projects: any[] = [];
 	for (const c of cats)
 		projects.push(
 			...(await pageAll(
@@ -123,8 +123,19 @@ async function main() {
 				"projects",
 			)),
 		);
+	// Lineage shadows (canonicalSlug → another record) are merged-away dupes:
+	// search deliberately serves their CANONICAL instead (shadow-fold,
+	// 2026-07-11), so generating "expect <shadow> in top-3" probes from them
+	// manufactures failures whenever the canonical correctly wins
+	// (band-protocol vs band, gatewayfm vs gateway). Probe canonicals only.
+	const shadowCount = projects.filter(
+		(p) => p.canonicalSlug && p.canonicalSlug !== p.slug,
+	).length;
+	projects = projects.filter(
+		(p) => !p.canonicalSlug || p.canonicalSlug === p.slug,
+	);
 	console.error(
-		`frame: ${projects.length} projects across ${cats.length} categories`,
+		`frame: ${projects.length} projects across ${cats.length} categories (${shadowCount} lineage shadows excluded)`,
 	);
 
 	// P-KNOWN — every record's own name must reach top-3.

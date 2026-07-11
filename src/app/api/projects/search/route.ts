@@ -871,10 +871,88 @@ export async function GET(req: NextRequest) {
 	// slugs) + bounded, best-effort.
 	// F2: `hay` is internal scoring state — strip it here so it can never
 	// serialize into the API response (rows past this point feed projectsOut).
-	const baseProjects = [...scored, ...semanticAdds].map((p) => {
+	let baseProjects = [...scored, ...semanticAdds].map((p) => {
 		const { hay: _hay, ...rest } = p as typeof p & { hay?: string };
 		return rest;
 	});
+	// Shadow-fold (2026-07-11 audit, WRONG-RESULT high): a merged duplicate
+	// ("lineage shadow": canonicalSlug → another record, status Inactive) must
+	// never be SERVED — q=stellarexpert ranked the Inactive tombstone #1 while
+	// the Live canonical was absent, telling a cold consumer the flagship
+	// explorer is dead. Shadows stay in the index so alias names keep MATCHING;
+	// here each surfaced shadow is swapped for its canonical record at the
+	// shadow's rank (or dropped if the canonical already surfaced). Runs before
+	// the liveness float so the canonical's real status drives ordering.
+	const shadowRows = baseProjects.filter(
+		(p) => p.canonicalSlug && p.canonicalSlug !== p.slug,
+	);
+	if (shadowRows.length && payload) {
+		try {
+			const want = [
+				...new Set(shadowRows.map((s) => s.canonicalSlug as string)),
+			];
+			const canRes = await payload.find({
+				collection: "projects",
+				where: { slug: { in: want } },
+				limit: want.length,
+				depth: 1,
+			});
+			// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+			const canBySlug = new Map<string, any>(
+				// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+				(canRes.docs as any[]).map((d) => [d.slug, d]),
+			);
+			const present = new Set(baseProjects.map((p) => p.slug));
+			baseProjects = baseProjects.flatMap((row) => {
+				const target = row.canonicalSlug;
+				if (!target || target === row.slug) return [row];
+				if (present.has(target)) return []; // canonical already serves this hit
+				const c = canBySlug.get(target);
+				if (!c) return [row]; // dangling pointer — the shadow beats nothing
+				present.add(target);
+				let logoUrl: string | null = null;
+				if (c.logo && typeof c.logo === "object") {
+					if (c.logo.url) logoUrl = c.logo.url;
+					else if (c.logo.filename)
+						logoUrl = `/api/media/file/${c.logo.filename}`;
+				}
+				return [
+					{
+						...row,
+						id: String(c.id),
+						name: c.name,
+						slug: c.slug,
+						category: c.category,
+						shortDescription: c.shortDescription ?? null,
+						status: c.status,
+						tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
+						tvlAsOf: c.tvlAsOf ?? null,
+						canonicalSlug: null,
+						lifecycle: pickLifecycle(c.lifecycle),
+						logoUrl,
+						scfAwarded: !!c.scf?.awarded,
+						scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
+						scfAmountStatus: scfAmountStatus(
+							!!c.scf?.awarded,
+							c.scf?.totalAwarded,
+						),
+						scfAwardedRounds: c.scf?.awardedRounds ?? [],
+						prominence: typeof c.prominence === "number" ? c.prominence : 0,
+						verificationLevel: c.verificationLevel ?? null,
+						types: Array.isArray(c.types) ? c.types : [],
+						coverage: pickCoverage(c.coverage),
+						supportedNetworks: Array.isArray(c.supportedNetworks)
+							? c.supportedNetworks
+							: [],
+						links: pickLinks(c.links),
+						url: `https://stellarlight.xyz/project/${c.slug}`,
+					},
+				];
+			});
+		} catch {
+			// fold is best-effort — serving the shadow beats erroring the search
+		}
+	}
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
 	// not sit above the live semantic neighbours appended after it — e.g.

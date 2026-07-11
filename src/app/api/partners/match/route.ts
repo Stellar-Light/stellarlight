@@ -26,6 +26,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { scorePartners } from "@/lib/partner-match";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -273,7 +274,17 @@ export async function POST(req: NextRequest) {
 	}
 
 	const bySlug = new Map(eligible.map((p) => [p.slug, p]));
-	const candidates = eligible.slice(0, MAX_CANDIDATES).map(toCandidate);
+	// Pre-select by NEED-relevance, not insertion order. The old
+	// `eligible.slice(0, 40)` silently dropped whichever partners sorted last
+	// in the collection — in practice all 5 audit firms, so an audit request
+	// was told to "look outside this ecosystem (e.g. OtterSec)" while OtterSec
+	// sat in our own directory (2026-07-11 audit, MATCH-FAIL high).
+	// scorePartners is the same deterministic ranking GET ?q= uses, so the cap
+	// now trims the least-relevant tail instead of an arbitrary one.
+	const candidates = scorePartners(need, eligible, MAX_CANDIDATES)
+		.map((s) => bySlug.get(s.partner.slug))
+		.filter((p): p is NonNullable<typeof p> => Boolean(p))
+		.map(toCandidate);
 
 	try {
 		const res = await anthropic.messages.create({
