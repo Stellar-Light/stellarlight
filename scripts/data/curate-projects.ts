@@ -101,6 +101,25 @@ const TYPES_ADD: Record<string, string[]> = {
  *    language ("Preparation for bringing WarpDrive to Stellar — Milestone 1").
  * Writes only when the stored status matches the WRONG value, so a later
  * manual correction is never clobbered; rows retire once applied. */
+/** EXACT-SYNC types for curated slugs — the corrective sibling of TYPES_ADD.
+ * Use when a record carries a WRONG type (self-audit #414: 12 records typed
+ * Bridge with empty supportedNetworks — most were mis-typed oracles/wallets/
+ * security tools, so "Bridge" broke the bridge-corridor ground-truth check
+ * and polluted Bridge browses). Each row = the record's full verified types. */
+const TYPES_SET: Record<string, string[]> = {
+	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
+	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
+	// evidence per row). Bridge removed; remaining types verified.
+	orally: ["Infrastructure", "AI", "SDK", "Security"], // orally.network: oracle service (data feeds/automation), not an asset bridge
+	tezoro: ["Lending"], // tezoro.io: yield aggregator over Ethereum lending protocols
+	"soroban-optimistic-oracle": ["Infrastructure"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one
+	"unstoppable-wallet": ["Wallet"], // unstoppable.money: multichain wallet; swaps via DEXes, no own bridge
+	sorobanhooks: ["Infrastructure", "Analytics", "SDK"], // sorobanhooks.xyz: webhook/notification tooling; moves no assets
+	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
+	perun: ["Infrastructure", "SDK"], // polycry.pt: state-channel framework (go-perun + perun-stellar-backend)
+	"peridot-finance": ["Lending"], // peridot.finance: cross-chain lending platform — product is lending
+};
+
 const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
 	{
 		// 2026-07-11 audit DATA-TRUTH cell: venalabs.com now serves a crypto
@@ -886,6 +905,24 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	tricorn: ["stellar", "evm"], // Coinspect-audited Stellar⇄EVM bridge; live as Utexo (boxy-confirmed 2026-07-09)
 	helix: ["canton"], // helixlabs.org: "not live on any chain other than Canton"; Stellar = roadmap (see STATUS_FIX)
 	zkcross: ["stellar", "evm"],
+	// #414 real bridges (verified 2026-07-11):
+	rubic: [
+		"stellar",
+		"evm",
+		"solana",
+		"bitcoin",
+		"tron",
+		"near",
+		"polkadot",
+		"cosmos",
+		"sui",
+		"aptos",
+		"xrpl",
+		"ton",
+	], // Rubic's own chains API (api-v2.rubic.exchange/api/info/chains): 101 chains incl. STELLAR + dedicated rubic_stellar_api provider
+	"via-labs": ["evm"], // docs.vialabs.io omnichain messaging/bridging; public chain registry is exclusively EVM chain IDs — only evm verifiable
+	transfuse: ["stellar", "evm"], // github transfuselabs/transfuse-bridge: Stellar⇄Ethereum USDC/USDT bridge (testnet-only per README)
+	"bim-exchange": ["evm"], // bim.finance: swap/bridge interface aggregating Kyberswap/Bungee — EVM aggregator stacks; no non-EVM chain named
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
@@ -1368,6 +1405,29 @@ async function main() {
 	}
 
 	console.log("\n── Supported networks (fill-if-empty) ──");
+	for (const [slug, want] of Object.entries(TYPES_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const cur: string[] = Array.isArray(d.types) ? d.types : [];
+		if (cur.join(",") === want.join(",")) {
+			console.log(`  ${slug}: types already in sync, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: types [${cur.join(", ")}] → [${want.join(", ")}]`);
+		writes.push({ id: d.id, slug, data: { types: want } });
+	}
+
 	for (const [slug, nets] of Object.entries(SUPPORTED_NETWORKS)) {
 		const r = await payload.find({
 			collection: "projects",
