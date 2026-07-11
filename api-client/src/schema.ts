@@ -607,10 +607,19 @@ export interface components {
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
             shortDescription?: string;
             /**
-             * @description Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory.
+             * @description Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. Status describes the PROJECT/entity lifecycle, not proof that a specific product is deployed on Stellar mainnet — check statusAsOf/statusSourceUrl/statusBasis for the label's provenance, and supportedNetworks/description for deployment scope.
              * @enum {string}
              */
             status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
+            /** @description When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label — treat the status as source-relative, not freshly confirmed. */
+            statusAsOf?: string | null;
+            /** @description Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows. */
+            statusSourceUrl?: string | null;
+            /**
+             * @description What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.
+             * @enum {string|null}
+             */
+            statusBasis?: "operator-announcement" | "site-liveness" | "onchain-activity" | "human-verified" | "source-inherited" | null;
             /** @description The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}. */
             builtBy?: {
                 name?: string;
@@ -654,6 +663,10 @@ export interface components {
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
+            /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope — cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
+            tvlSource?: string | null;
+            /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
+            tvlMethod?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
             canonicalSlug?: string | null;
             /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records. */

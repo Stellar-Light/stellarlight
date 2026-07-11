@@ -2,7 +2,7 @@
  * DefiLlama TVL enrichment — the TVL truth axis (boxy, 2026-07-09).
  *
  *   pnpm exec tsx scripts/enrich-tvl.ts            # dry run (default)
- *   pnpm exec tsx scripts/enrich-tvl.ts --execute  # write tvlUSD/tvlAsOf
+ *   pnpm exec tsx scripts/enrich-tvl.ts --execute  # write tvlUSD/tvlAsOf (+ tvlSource/tvlMethod provenance, sls-031)
  *
  * Design rules (lesson classes baked in):
  *   - null = NOT TRACKED on DefiLlama, never "zero TVL" (class 3). Only
@@ -57,6 +57,14 @@ const LLAMA_MAP: Record<string, string[]> = {
 };
 
 const LIVENESS_THRESHOLD_USD = 5_000;
+
+// sls-031: TVL methodology provenance, written alongside every tvlUSD write so
+// a consumer can reconcile our number with operator/Dune/DefiLlama readings
+// (they legitimately differ by pricing time + inclusion scope) instead of
+// treating ours as exact universal truth. ONE stable string — reruns no-op.
+const TVL_SOURCE = "defillama";
+const TVL_METHOD =
+	"sum of the project's mapped DefiLlama protocol rows (see llamaSlugs; e.g. Blend = pools + backstops), USD at DefiLlama's pricing time; refreshed weekly (tvlAsOf)";
 
 interface LlamaProtocol {
 	slug: string;
@@ -122,7 +130,14 @@ async function main() {
 				await payload.update({
 					collection: "projects",
 					id: d.id,
-					data: { tvlUSD: tvl, tvlAsOf: asOf, llamaSlugs },
+					data: {
+						tvlUSD: tvl,
+						tvlAsOf: asOf,
+						llamaSlugs,
+						// sls-031: provenance rides every write (additive fields)
+						tvlSource: TVL_SOURCE,
+						tvlMethod: TVL_METHOD,
+					},
 					overrideAccess: true,
 				});
 				written++;

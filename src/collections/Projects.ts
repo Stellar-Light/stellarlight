@@ -114,6 +114,46 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// sls-024: lifecycle-label provenance. A bare status ("Live"/"Inactive")
+			// gives consumers no way to reconcile it with a conflicting operator
+			// surface (Slender/Laina/K2/OrbitCDP class) — an operator page can be
+			// stale, an app can outlive its team, and "Live" can describe an org
+			// rather than a mainnet product. These three OPTIONAL fields date the
+			// label, point at its evidence, and say what KIND of evidence it is.
+			// All default null — additive, zero writes to existing data; populated
+			// by curation flows (STATUS_FIX in scripts/data/curate-projects.ts)
+			// going forward.
+			name: "statusAsOf",
+			type: "date",
+			admin: {
+				description:
+					"When the current `status` value was last asserted/verified (sls-024). Null = undated legacy label.",
+			},
+		},
+		{
+			name: "statusSourceUrl",
+			type: "text",
+			admin: {
+				description:
+					"Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe, triage note).",
+			},
+		},
+		{
+			name: "statusBasis",
+			type: "select",
+			options: [
+				"operator-announcement",
+				"site-liveness",
+				"onchain-activity",
+				"human-verified",
+				"source-inherited",
+			],
+			admin: {
+				description:
+					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
+			},
+		},
+		{
 			// Dedupe / lineage pointer (sls-008). When this record is a duplicate
 			// or former name of another project — same team, same site, split by a
 			// naming artifact (e.g. orbit-finance → orbitcdp, both Zenith Protocols)
@@ -361,7 +401,31 @@ export const Projects: CollectionConfig = {
 		{
 			name: "tvlAsOf",
 			type: "date",
-			admin: { description: "When tvlUSD was fetched (class 8: dated metrics)." },
+			admin: {
+				description: "When tvlUSD was fetched (class 8: dated metrics).",
+			},
+		},
+		{
+			// sls-031: TVL methodology provenance. Concurrent observers legitimately
+			// disagree on TVL (operator ~16.57M vs DefiLlama 16.49M vs ours 16.386M
+			// vs Dune 16.255M for DeFindex, 2026-07-10) — without source+method a
+			// consumer either treats our number as exact universal truth or concludes
+			// no current TVL exists. Optional; written by scripts/enrich-tvl.ts
+			// alongside tvlUSD/tvlAsOf.
+			name: "tvlSource",
+			type: "text",
+			admin: {
+				description:
+					'Source that produced tvlUSD (e.g. "defillama"). Null = legacy value predating provenance.',
+			},
+		},
+		{
+			name: "tvlMethod",
+			type: "text",
+			admin: {
+				description:
+					"How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time).",
+			},
 		},
 		{
 			// Curated mapping to DefiLlama protocol slugs (several per project —

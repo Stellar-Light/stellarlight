@@ -287,6 +287,20 @@ export interface Project {
    */
   status: 'Draft' | 'Development' | 'Pre-Release' | 'Live' | 'Inactive';
   /**
+   * When the current `status` value was last asserted/verified (sls-024). Null = undated legacy label.
+   */
+  statusAsOf?: string | null;
+  /**
+   * Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe, triage note).
+   */
+  statusSourceUrl?: string | null;
+  /**
+   * What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).
+   */
+  statusBasis?:
+    | ('operator-announcement' | 'site-liveness' | 'onchain-activity' | 'human-verified' | 'source-inherited')
+    | null;
+  /**
    * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
    */
   canonicalSlug?: string | null;
@@ -395,6 +409,14 @@ export interface Project {
    * When tvlUSD was fetched (class 8: dated metrics).
    */
   tvlAsOf?: string | null;
+  /**
+   * Source that produced tvlUSD (e.g. "defillama"). Null = legacy value predating provenance.
+   */
+  tvlSource?: string | null;
+  /**
+   * How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time).
+   */
+  tvlMethod?: string | null;
   llamaSlugs?: string[] | null;
   provenance: {
     source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
@@ -1939,6 +1961,9 @@ export interface ProjectsSelect<T extends boolean = true> {
   category?: T;
   types?: T;
   status?: T;
+  statusAsOf?: T;
+  statusSourceUrl?: T;
+  statusBasis?: T;
   canonicalSlug?: T;
   lifecycle?:
     | T
@@ -2001,6 +2026,8 @@ export interface ProjectsSelect<T extends boolean = true> {
   embedding?: T;
   tvlUSD?: T;
   tvlAsOf?: T;
+  tvlSource?: T;
+  tvlMethod?: T;
   llamaSlugs?: T;
   provenance?:
     | T
