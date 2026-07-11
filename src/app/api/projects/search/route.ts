@@ -985,11 +985,6 @@ export async function GET(req: NextRequest) {
 		const { hay: _hay, ...rest } = p as typeof p & { hay?: string };
 		return rest;
 	});
-	// An explicit ?status= filter is a hard contract on EVERY path — semantic
-	// augmentation must not smuggle other-status rows past it.
-	if (statusParam) {
-		baseProjects = baseProjects.filter((p) => p.status === statusParam);
-	}
 	// Shadow-fold (2026-07-11 audit, WRONG-RESULT high): a merged duplicate
 	// ("lineage shadow": canonicalSlug → another record, status Inactive) must
 	// never be SERVED — q=stellarexpert ranked the Inactive tombstone #1 while
@@ -1079,6 +1074,13 @@ export async function GET(req: NextRequest) {
 		} catch {
 			// fold is best-effort — serving the shadow beats erroring the search
 		}
+	}
+	// An explicit ?status= filter is a hard contract on EVERY path — applied
+	// AFTER the shadow-fold (live-verify 2026-07-11 caught the leak: a folded
+	// shadow re-introduced its Live canonical into ?status=Inactive results)
+	// and after semantic augmentation, so nothing smuggles other-status rows.
+	if (statusParam) {
+		baseProjects = baseProjects.filter((p) => p.status === statusParam);
 	}
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
