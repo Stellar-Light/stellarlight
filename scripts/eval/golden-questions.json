@@ -407,6 +407,21 @@
 				"answerRegex": ["protocol\\s*2[6-9]|zipper"],
 				"minTopScore": 0.5
 			}
+		},
+		{
+			"id": "blend-incident-facts",
+			"category": "incident-truth",
+			"mode": "research",
+			"question": "blend oracle manipulation incident",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["february 2026|2026-02|drained"],
+				"forbiddenRegex": [
+					"may 2026.{0,40}(attempted|contained)",
+					"\\$61 ?m|61 million dollars"
+				],
+				"minTopScore": 0.4
+			}
 		}
 	]
 }

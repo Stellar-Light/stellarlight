@@ -984,6 +984,7 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
 	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
 	estrela: ["stellar", "evm", "solana", "tron", "sui"], // Estrela = Allbridge Core (SCF #22; links → allbridge.io); docs-core.allbridge.io chain list
+	rarible: ["stellar", "evm"], // sls-037: rarible.com multichain NFT marketplace (Ethereum-origin, EVM chains) + announced Stellar integration — deployment basis for its Live status
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
