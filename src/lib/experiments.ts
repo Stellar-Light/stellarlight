@@ -63,6 +63,20 @@ export const EXPERIMENTS: Experiment[] = [
 		envFlag: "EXP_PARTNER_ONCHAIN_LIVE",
 		since: "2026-07-07",
 	},
+	{
+		id: "scale-model-quality-products",
+		title: "Quality-as-product: sell verified data quality, Scale-AI style",
+		hypothesis:
+			"The engine system's measurements (recall floors, data-truth cross-checks vs SCF/DeepWiki, demand-side OK rate, corpus health) are themselves the product: a public /quality scoreboard + a monthly per-consumer quality report + a DATA_SLA.md turn 'our data is good' from a claim into a verifiable contract — the trust layer that makes stellarlight the default data dependency for Raven and future agents.",
+		metric:
+			"Ground truth: (1) every scoreboard number traces to a committed engine artifact (no hand-set values); (2) a cold outsider can verify one claim end-to-end from the page alone; (3) first consumer report answers 'what changed for YOUR queries this month' from Engine D data. Adoption signal: Tyler/Raven cites or links the scoreboard.",
+		status: "proposed",
+		// Design brief: improvements/idea-scale-model.md. Not a request-flag
+		// experiment (it's a surface, not a response variant) — the flag stays
+		// off until the /quality page ships behind it.
+		defaultOn: false,
+		since: "2026-07-10",
+	},
 ];
 
 export const experimentById = (id: string): Experiment | undefined =>

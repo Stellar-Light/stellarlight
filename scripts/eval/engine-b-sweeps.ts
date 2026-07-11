@@ -193,6 +193,26 @@ async function main() {
 		"logoUrl",
 		"tvlUSD",
 	];
+	// Census only (category, field) pairs where the field is MEANINGFUL —
+	// otherwise the weekly report cries wolf forever on structural zeros
+	// (Tooling·tvlUSD 0% is not a gap: a CLI has no TVL; that noise buried
+	// the real gap, Asset·supportedNetworks 0%, in the same list). Fields
+	// not listed here are expected on every category.
+	const FIELD_APPLICABILITY: Record<string, string[]> = {
+		// value-locked protocols only — an SDK, anchor, or wallet has no TVL
+		tvlUSD: ["Protocol/Contract"],
+		// multichain reach: real for assets/protocols/apps/infra/anchors;
+		// not a data gap for Tooling or Partner Integration rows
+		supportedNetworks: [
+			"Asset",
+			"Protocol/Contract",
+			"User-Facing App",
+			"Infrastructure",
+			"Anchor",
+		],
+	};
+	const applies = (cat: string, f: string) =>
+		!FIELD_APPLICABILITY[f] || FIELD_APPLICABILITY[f].includes(cat);
 	const census: Record<
 		string,
 		Record<string, { total: number; populated: number }>
@@ -201,6 +221,7 @@ async function main() {
 		const cat = p.category ?? "?";
 		census[cat] ??= {};
 		for (const f of FIELDS) {
+			if (!applies(cat, f)) continue;
 			census[cat][f] ??= { total: 0, populated: 0 };
 			census[cat][f].total++;
 			const v = p[f];
