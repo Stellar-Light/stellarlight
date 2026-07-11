@@ -18,6 +18,9 @@ import configPromise from "../../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 
 const DESCRIPTION_FIXES: Record<string, string> = {
+	// sls-030: represent the funded-historical + embedded-implementation truth.
+	comet:
+		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",
 	// S1 prose⇄structure divergence (2026-07-11 engine run): these two
 	// descriptions asserted chains the records' CURATED supportedNetworks
 	// (verified from primary sources 2026-07-09) do not carry. The prose was
@@ -106,6 +109,21 @@ const TYPES_ADD: Record<string, string[]> = {
  * Bridge with empty supportedNetworks — most were mis-typed oracles/wallets/
  * security tools, so "Bridge" broke the bridge-corridor ground-truth check
  * and polluted Bridge browses). Each row = the record's full verified types. */
+/** SCF fact corrections vs the OFFICIAL communityfund project pages (sls-027/
+ * sls-030, dual-lane verified by our consumer 2026-07-10). Overwrites the scf
+ * group for listed slugs — the official page is the source of truth. */
+const SCF_FIX: Record<
+	string,
+	{ awarded: boolean; totalAwarded: number; awardedRounds: number[] }
+> = {
+	// sls-027: official page shows 7 submissions, 4 AWARDED (#16 $150K, #20
+	// $100K, #25 $94.5K + Q1-2024 Liquidity $50K); #18/#24 explicitly NOT
+	// awarded. Total was right, membership wasn't.
+	phoenix: { awarded: true, totalAwarded: 394500, awardedRounds: [16, 20, 25] },
+	// sls-030: official pages show $150K (r13) + $141K (r18); record said false.
+	comet: { awarded: true, totalAwarded: 291000, awardedRounds: [13, 18] },
+};
+
 const TYPES_SET: Record<string, string[]> = {
 	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
 	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
@@ -139,6 +157,25 @@ const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
 			from: "Live",
 			to: "Inactive",
 			note: "Product dead (human-confirmed 2026-07-11).",
+		},
+		// sls-028: domains REPURPOSED to unrelated gambling content (dual-lane
+		// verified 2026-07-10) — a Live row pointing there is unsafe navigation.
+		"the-blue-marble": {
+			from: "Live",
+			to: "Inactive",
+			note: "Domain repurposed to unrelated content (verified 2026-07-10) — the recorded NFT product is gone; do not follow the historical link.",
+		},
+		octoplace: {
+			from: "Live",
+			to: "Inactive",
+			note: "Domain repurposed to unrelated content (verified 2026-07-10) — the recorded NFT product is gone; do not follow the historical link.",
+		},
+		// sls-030: standalone venue stale; implementation lives on embedded as
+		// Blend's 80/20 BLND:USDC backstop pool. Historical funded project.
+		comet: {
+			from: "Live",
+			to: "Inactive",
+			note: "Standalone Comet venue is no longer maintained; its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
 		},
 		venalabs: {
 			from: "Live",
@@ -1422,6 +1459,35 @@ async function main() {
 	}
 
 	console.log("\n── Supported networks (fill-if-empty) ──");
+	for (const [slug, fix] of Object.entries(SCF_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const cur = d.scf ?? {};
+		if (
+			cur.awarded === fix.awarded &&
+			cur.totalAwarded === fix.totalAwarded &&
+			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",")
+		) {
+			console.log(`  ${slug}: scf already in sync, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]`,
+		);
+		writes.push({ id: d.id, slug, data: { scf: { ...cur, ...fix } } });
+	}
+
 	for (const [slug, want] of Object.entries(TYPES_SET)) {
 		const r = await payload.find({
 			collection: "projects",
