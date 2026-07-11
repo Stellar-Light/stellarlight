@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-11",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Version disambiguation: spec bumped to 1.7.14 with no contract change. Two parallel additive changes (status/TVL provenance fields; type filter + leaderboard metricDefinitions + analyze tvl dimension + repo alias recall) both shipped labeled 1.7.13, so for a window that version string covered two different contracts. 1.7.14 marks the union state so drift CI re-baselines cleanly.",
+		detail:
+			"No fields or operations change in this bump. If your catalog was generated from 1.7.13, regenerate once against 1.7.14 to be certain you have the union (both changelog entries dated 2026-07-11 describe the two constituent changes).",
+	},
+	{
+		date: "2026-07-11",
+		surfaces: ["api"],
 		version: "openapi@1.7.13",
 		type: "added",
 		summary:
