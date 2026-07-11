@@ -117,7 +117,7 @@ server.registerTool(
 	{
 		title: "Search the Stellar research corpus",
 		description:
-			"Semantic ($vectorSearch over Voyage embeddings) search across the Stellar **knowledge corpus** — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, SCF proposals, security audits, incident reports, and Lumenloop/EC research. Returns the top matching text chunks with source attribution, section, URL, and a confidence score (relevance + freshness + authority); audit chunks add auditor/protocol/severity. Filterable by `source`; falls back to BM25-lite keyword search if vectors are unavailable. **Use when:** 'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X', or you need primary-source citations for a thesis or design question. **Not for:** what products exist or their funding/status → use search_projects; GitHub source code ranked by quality → use search_repos.",
+			"Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence (audits add auditor/severity). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use search_projects.",
 		inputSchema: {
 			query: z.string().min(2).describe("Natural-language search query."),
 			source: z
@@ -164,7 +164,7 @@ server.registerTool(
 	{
 		title: "List Stellar hackathons",
 		description:
-			"Browse/LIST Stellar hackathon **events** — a merged, de-duplicated feed of curated Payload events (rich detail, internal pages) + live DoraHacks events (SDF org IDs 3096/3853), sorted upcoming→active→completed then newest-first. Each row carries name, slug, dates, status, organizer, source, and (for DoraHacks) prizePoolUSD + hackersCount. Filter by `status` (upcoming|active|completed), `organizer` slug, or `source` (curated|dorahacks). **Use when:** 'what Stellar hackathons are coming up / running now / recently ended', 'list SDF hackathons', or you need the slug of an event before drilling in. When a forward-looking query (status=upcoming|active) returns zero, it adds `meta.fallbackChannels` (BuildOnStellar, stellarlight.xyz, DoraHacks) — surface those rather than dead-ending. **Not for:** one event's winners/submissions/tracks → use get_hackathon; comparing 2+ named events → use compare_hackathons; ecosystem-wide rollups (total prize pools, category/funding totals across ALL events) → use analyze_ecosystem; RFPs/bounties/grants → use get_rfps.",
+			"Browse/LIST Stellar hackathon events — a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use get_hackathon.",
 		inputSchema: {
 			status: z
 				.enum(["upcoming", "active", "completed"])
@@ -207,7 +207,7 @@ server.registerTool(
 	{
 		title: "Get one hackathon's full detail",
 		description:
-			"Full detail for ONE hackathon by slug — its metadata plus every submission with placement, prize amount, prize track, post-hack status (Built/In Progress/Abandoned), and scfAwarded flag; derives `winners`, per-`tracks` aggregates (prize $ + winner/submission counts), and a `stats` outcome funnel. Dual-shape: curated events return full DB detail; DoraHacks-only events read submissions/winners/tracks live from DoraHacks (degrading to a curated winner roster + `meta.note` when the live feed is unavailable). **Use when:** 'who won [event] / its soroban track', 'what projects were submitted to [event]', 'what tracks did [event] have and what did they pay', 'how many [event] submissions are still being built'. Needs an exact slug — get it from get_hackathons first if unknown. **Not for:** listing/browsing many events → use get_hackathons; comparing stats across 2+ events → use compare_hackathons; ecosystem-wide aggregates → use analyze_ecosystem; a winning project's own repo/funding/status outside the hackathon context → use search_projects / search_repos.",
+			"Full detail for ONE hackathon by slug — every submission with placement, prize, track, and post-hack status; derives `winners`, per-track aggregates, and a `stats` outcome funnel. DoraHacks-only events read live, degrading to a winner roster + `meta.note`. Needs an exact slug — resolve via get_hackathons first. Not for listing/browsing events → use get_hackathons.",
 		inputSchema: {
 			slug: z
 				.string()
@@ -229,7 +229,7 @@ server.registerTool(
 	{
 		title: "Compare 2–5 Stellar hackathons side-by-side",
 		description:
-			"Side-by-side comparison of 2–5 named hackathons (by slug). Returns each event's snapshot (dates, status, source, prizePoolUSD, hackersCount, submissionCount, winnerCount, prizePerWinnerUSD where derivable) plus a `deltas` block flagging the spreads agents care about — prize-pool range, submission-count range, prize-per-winner, registered-hacker counts — with human-readable `notes` like '2× spread'. Unresolved slugs come back as `source:\"not-found\"` and are listed in deltas.notes without inflating `returned`. **Use when:** 'which Stellar hackathon should I enter', 'how did [event A] compare to [event B] on prizes/turnout', 'was [A] or [B] bigger'. Requires ≥2 known slugs (max 5; iterate beyond that) — resolve them via get_hackathons first. **Not for:** one event's deep detail/winners → use get_hackathon; discovering/listing events → use get_hackathons; ecosystem-wide totals across ALL events → use analyze_ecosystem.",
+			"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, hackers, prize-per-winner) plus a `deltas` block flagging the spreads. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via get_hackathons. Not for ecosystem-wide totals across ALL events → use analyze_ecosystem.",
 		inputSchema: {
 			slugs: z
 				.array(z.string().min(1))
@@ -253,7 +253,7 @@ server.registerTool(
 	{
 		title: "Search Stellar builders",
 		description:
-			"The Stellar **people directory** — curated builder PROFILES (synced from Stellar Passport): displayName, githubUsername, bio, roleTitle, location, and the projects[] each has shipped. (No populated SCF-tier/award data on profiles — the response's `scfTier` field is empty on every profile today; a project's SCF award history comes from search_projects.) Free-text `q`/`skill` searches across bio + role + project names/descriptions; `location` filters by place; featured builders sort first. **Use when:** 'find me a teammate/collaborator who has shipped X', 'Stellar devs in Lagos who've done Soroban', 'who can I hire for an anchor build' — i.e. you want a PERSON to contact. **Not for:** a funded project/product or 'who built X (the company)' → use search_projects; the GitHub repo/code itself → use search_repos; ecosystem-wide dev *counts*/activity stats → use get_leaderboard.",
+			"The Stellar PEOPLE directory — builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use search_projects. Profiles carry NO populated SCF-tier/award data (`scfTier` is empty on every profile today).",
 		inputSchema: {
 			location: z
 				.string()
@@ -289,7 +289,7 @@ server.registerTool(
 	{
 		title: "Find Stellar projects, protocols & services (ecosystem directory)",
 		description:
-			"Search the curated Stellar **project/product directory** — what's been *built*, by whom, with SCF-funding and live/inactive status (wallets, DEXes, anchors, lending, oracles, RWAs, tooling). Keyword + synonym match (dex→amm/swap, rosca→susu/chama) ranked by curated **prominence**, SDF/community verification, SCF funding, and Live status; falls back to semantic vector search when keyword hits are thin. Each result carries status, scfAwarded/scfTotalAwardedUSD, the project's own links, a confidence score, and its top indexed `repos` inline. **Use when:** 'who/what already exists for X', 'has anyone built X', 'is there a live/funded project for X', or you need a project's funding/status/competitors. **Not for:** raw GitHub source repos ranked by code quality → use search_repos; docs, SEPs, audits, how-to/feasibility knowledge → use search_research; category counts or whitespace → use get_clusters.",
+			"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, links, and indexed repos inline. Answers 'who/what already exists for X' with directory records. Not for docs, standards, or how-to/reference knowledge → use search_research.",
 		inputSchema: {
 			q: z.string().optional().describe("Keyword query."),
 			category: z
@@ -338,7 +338,7 @@ server.registerTool(
 	{
 		title: "Search the Stellar GitHub repo / code-reference index",
 		description:
-			"Search the indexed Stellar ecosystem **GitHub code repos** — the actual source, graded for quality. Indexes GitHub topics + description + language + README, expands tech synonyms (zk→zero-knowledge/snark, oracle→price-feed), and ranks by **repoScore (0-100) = code-depth (verified from the repo's actual source) + freshness + traction + hackathon/SCF/builder authority**. Each result carries a **`codeVerified`** block (`stellarProof`, `codeDepth` 0-1, `isDeployableContract`, `sorobanSdkVersion`+`versionStatus`), or null until code-scanned — use it to prefer a real deployable contract on a current soroban-sdk over a repo that merely mentions Stellar. Filterable by `language` and `minScore`. **Use when:** 'show me the code / repos for X', 'find a Rust/Soroban implementation of X', 'what GitHub repos exist for X', or you need prior-art source to read, fork, or cite. **Not for:** what products/companies exist or their funding/live status → use search_projects; conceptual docs, SEPs, audits, or how-to/feasibility knowledge → use search_research; a known project's metadata (those repos already ride inline on search_projects results).",
+			"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: code-depth + freshness + traction + ecosystem authority), each with a `codeVerified` block once scanned (prefer a real deployable contract on a current soroban-sdk). Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X'. Not for products/companies and their funding/status → use search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -393,7 +393,7 @@ server.registerTool(
 	{
 		title: "Explain a Stellar repo's internals (deep code answer)",
 		description:
-			"Get a **source-grounded answer** to a deep code question about a Stellar repo — not just a link. StellarLight routes the question to the authoritative repo (error codes / consensus / XDR → `stellar/stellar-core`; Horizon → `stellar/go`; RPC → `stellar/stellar-rpc`; SEP reference impls, SDKs…), then DeepWiki answers from that repo's internals with the source files. **Use when:** 'where is X defined / how does Y work' for a Stellar internal — error/result codes, SCP/consensus, ledger, XDR, a SEP's implementation. **Not for:** which repos/projects exist → use search_repos / search_projects; ecosystem docs, SEP text, or audits → use search_research. Returns the routed `repo`, the grounded `answer`, `alternateRepos`, and `sources` (repoUrl + deepWikiUrl). Pass `repo` to pin one, or omit to auto-route.",
+			"Source-grounded ANSWER to a deep code question about a Stellar internal — routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls), then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. Not for discovering which repos/projects exist → use search_repos / search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -423,7 +423,7 @@ server.registerTool(
 	{
 		title: "List Stellar RFPs (SCF-funded sponsor briefs)",
 		description:
-			"The curated set of Stellar **RFPs / sponsor briefs** (mirrors the /ideas page) — open ones are eligible for **SCF grant funding** when winners are picked; closed ones are past rounds kept for context. Each brief has title, description, technicalRequirements, category, quarter, and a quarter-derived status (open|closed). Filter by `q`, `category`, `quarter`, or `status`; response carries open/closed counts + the activeQuarter. **Use when:** 'what RFPs/bounties match my idea', 'what's the SCF funding asking for this quarter', 'is there a sponsor brief for X I could get funded to build'. **Not for:** projects already BUILT/funded → use search_projects; hackathons + their prizes → use get_hackathons; how-to / SCF Handbook / standards knowledge → use search_research.",
+			"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use search_research.",
 		inputSchema: {
 			status: z
 				.enum(["open", "closed"])
@@ -461,7 +461,7 @@ server.registerTool(
 	{
 		title: "List Stellar AI skills",
 		description:
-			"Catalog of installable Stellar **AI skills/tools** — a unified, filterable list merging SDF's 7 official skills.stellar.org skills, Stellarlight + lumenloop + trusted third-party curated entries, and approved community submissions. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), `source`, repo/homepage/docs, and `meta.counts.bySource`; filter by `source` or `kind`. **Use when:** 'what Stellar AI skills / MCP servers / SDKs can I install', 'is there a skill for soroban / anchors / payments', or matching a builder's idea to the right installable tool. **Not for:** the full SKILL.md text or install details of ONE named skill → use get_skill; built/funded products in the ecosystem (not installable agent skills) → use search_projects; GitHub source repos → use search_repos; docs/standards/how-to knowledge → use search_research.",
+			"Catalog of installable Stellar AI skills/tools — SDF's official skills.stellar.org set merged with curated and community entries. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use get_skill.",
 		inputSchema: {},
 	},
 	async () => {
@@ -476,7 +476,7 @@ server.registerTool(
 	{
 		title: "Get the full content of one Stellar AI skill",
 		description:
-			"Full detail for ONE skill by slug or display name — returns its metadata plus, for SDF official skills, the complete raw SKILL.md text under `.skill.content` (fetched live from skills.stellar.org); curated/community entries return metadata (and inlined content for Stellarlight's own skills). Accepts either the slug ('agentic-payments') or display name ('Agentic Payments'); 404s with a hint to list /api/skills if unknown. **Use when:** you already know a skill name and need its actual instructions / install command / SKILL.md body to follow or quote. **Not for:** browsing or discovering which skills exist → use list_skills; conceptual docs or standards behind a topic (not a packaged skill) → use search_research.",
+			"Full detail for ONE skill by slug or display name — metadata plus, for SDF official skills, the complete raw SKILL.md text (`.skill.content`, fetched live from skills.stellar.org). 404s with a hint to list skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use list_skills.",
 		inputSchema: {
 			name: z
 				.string()
@@ -498,7 +498,7 @@ server.registerTool(
 	{
 		title: "Get Stellar ecosystem developer activity",
 		description:
-			"Returns a **ranked list of active Stellar projects** (default top 50, max 300) sortable by `sort=activity|stars|issues` over a `range` (7d/30d/90d/1y/all), with per-project GitHub rollups (`totalStars`, `openIssuesTotal`, `lastActivityAt`, `repoCount`) and `scfAwarded`; optional `category` filter and `format=csv`. Also bundles an **Electric Capital ecosystem dev macro** block (28-day active / Stellar-only / multichain dev counts, commits28d, full-time/part-time/one-time dev splits). **Use when:** 'who/what are the top/most-active Stellar projects', 'most-starred projects', 'which projects shipped recently (last 30d)', 'how many active Stellar devs / how does Stellar's dev activity look', or you need a CSV/Dune-style export of ranked projects. **Not for:** category counts or crowded-vs-underbuilt whitespace → use get_clusters; ecosystem-wide hackathon/funding/status-funnel totals → use analyze_ecosystem; finding a specific project's profile/funding/competitors → use search_projects; ranking individual developers (this ranks PROJECTS, plus an EC macro snapshot — it does not list named devs) → use get_builders.",
+			"Ranked list of active Stellar projects with per-project GitHub rollups (stars, open-issue backlog, last activity), plus an Electric Capital dev-count macro block ('how many active Stellar devs'). Metrics are recency/backlog signals, not commit volume. Ranks PROJECTS, not people → use get_builders for individual developers.",
 		inputSchema: {
 			include: z
 				.string()
@@ -521,7 +521,7 @@ server.registerTool(
 	{
 		title: "Get Scout API health + endpoint enumeration",
 		description:
-			"Self-describe / health endpoint for Stellar Scout — returns service ok + version, `generatedAt`, per-source freshness & size (`sources[]`: projects, hackathons, builders, repos, ecosystemStats, sdfSkills, each with count + lastUpdatedAt + notes), recent `usage` stats, and an enumeration of every available `/api/*` endpoint. Cheap (count-only queries, no params). **Use when:** you need to know how fresh/large the data is before answering ('as of when?', 'how many projects are indexed?'), discover what endpoints exist, or sanity-check the API is up. **Not for:** the actual project/repo/research DATA itself → call the matching search tool (search_projects, search_repos, search_research); ecosystem developer-activity macro stats → use get_leaderboard.",
+			"Self-describe / health endpoint — service ok + versions, per-source freshness and counts (`sources[]`), recent usage, and an enumeration of every /api/* endpoint. Cheap, no params. Use to check how fresh/large the data is or to discover endpoints. Not for the data itself → call the matching search tool.",
 		inputSchema: {},
 	},
 	async () => {
@@ -536,7 +536,7 @@ server.registerTool(
 	{
 		title: "Submit feedback on Stellar Scout",
 		description:
-			"Write-back channel to report a Scout failure — wrong answer, missing/stale data, a bug, or a suggestion. POSTs {kind, message, context?} into Stellarlight's curator queue (reviewed weekly); rate-limited to 6/min/IP. `kind` ∈ bug | missing-data | wrong-answer | suggestion | other; `message` 10–4000 chars; optional context (query, endpoint, agentName) helps curators reproduce. **Use when:** a Scout query returned something wrong/empty that you believe SHOULD exist, or data looks stale — file it so the corpus/endpoint gets fixed. **Not for:** reading freshness or checking the API is up (a read, not a report) → use get_status; finding the data you actually want → use the relevant search tool (search_projects / search_repos / search_research).",
+			"Write-back channel to report a Scout failure — wrong answer, missing/stale data, a bug, or a suggestion. POSTs {kind, message, context?} into the curator queue (reviewed weekly); rate-limited 6/min/IP. Use when a query returned something wrong/stale/empty that SHOULD exist. Not for finding the data you actually want → use the relevant search tool.",
 		inputSchema: {
 			kind: z
 				.enum(["bug", "missing-data", "wrong-answer", "suggestion", "other"])
@@ -588,7 +588,7 @@ server.registerTool(
 	{
 		title: "Get Stellar project topic clusters with crowdedness scores",
 		description:
-			"Groups the active Stellar **project directory into topic clusters** and scores each on **crowdedness (1–10, log-scaled)** so you can see saturated vs underbuilt lanes — i.e. *where to build*. Each cluster returns `size`, `crowdedness`, `scfFundedCount`, `scfTotalUSD`, `hackathonWinnerCount`, and up to 5 sample projects; cluster by `dimension=category` (coarse 7-cat) or `dimension=types` (finer: Wallet/DEX/Lending/RWA/Oracle…), or pass `key`/`type` to get one cluster. **Use when:** 'what's the most crowded category on Stellar', 'show me an underbuilt/whitespace area', 'how many projects/funded projects are in RWA vs wallets', 'where is the competition thin'. **Not for:** ranking the top projects/repos by stars or activity → use get_leaderboard; ecosystem-wide totals (events + funding + status funnel) → use analyze_ecosystem; finding/looking up an actual named project in a category → use search_projects.",
+			"Groups the active Stellar project directory into topic clusters scored on crowdedness (1–10, log-scaled) — the market-map view of saturated vs underbuilt lanes, i.e. WHERE TO BUILD. Per cluster: size, SCF funding, hackathon winners, sample projects; `dimension=category|types`. Answers 'what's crowded / where is whitespace'. Not for looking up a named project → use search_projects.",
 		inputSchema: {
 			dimension: z
 				.enum(["category", "types"])
@@ -618,7 +618,7 @@ server.registerTool(
 	{
 		title: "Cross-event Stellar ecosystem analytics rollup",
 		description:
-			"Returns the **cross-everything ecosystem rollup** — the macro totals that single-event or single-cluster tools can't answer alone. `dimension=all` (default) or slice to `hackathons` (totalEvents, upcoming/active/completed counts, totalPrizePoolUSD, totalRegisteredHackers — live from DoraHacks), `categories` (project-count distribution + scfFunded + hackathon winners per category), or `funding` (scfAwardedProjects, scfTotalDistributedUSD, meanAwardUSD, per-round breakdown, and the post-hackathon Built/In-Progress/Abandoned status funnel). **Use when:** 'what's the overall state of Stellar hackathons/grants', 'total SCF funding distributed / mean award size', 'how much prize money across all hackathons', 'how many projects get built vs abandoned after hackathons'. **Not for:** crowdedness or whitespace per category → use get_clusters; a ranked list of top/active projects → use get_leaderboard; one specific hackathon's details → use get_hackathon; comparing two hackathons head-to-head → use compare_hackathons.",
+			"The cross-ecosystem macro rollup — totals no single-event tool answers: hackathon totals (prize pools, hackers), SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), and per-category distribution. Slice via `dimension=hackathons|categories|funding`. Not for per-category crowdedness/whitespace → use get_clusters.",
 		inputSchema: {
 			dimension: z
 				.enum(["all", "hackathons", "categories", "funding"])
@@ -639,7 +639,7 @@ server.registerTool(
 	{
 		title: "Search Stellar ecosystem partners (audit firms, anchors, infra)",
 		description:
-			"The curated **ecosystem partner directory** — vetted service providers a builder hires or integrates: audit firms (Veridise, OtterSec, Runtime Verification, Certora, Halborn), anchors & on/off-ramps, infrastructure, tooling, wallets, legal, agencies. Filter by `type` (audit-firm | anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | legal | agency | other), `sector`, `region`, or free-text `q`. **Use when:** 'who can audit my Soroban contract', 'find a Stellar anchor / on-ramp in <region>', 'which infra/tooling/wallet providers exist' — i.e. you want a PROVIDER to hire or integrate. **Not for:** a built product/project or its funding/status → use search_projects; a person/teammate to collaborate with → use get_builders; the GitHub source code → use search_repos.",
+			"The curated ecosystem partner directory — vetted service providers a builder hires or integrates: audit firms, anchors & on/off-ramps, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor in <region>'. Not for a built product/project → use search_projects.",
 		inputSchema: {
 			type: z
 				.string()
@@ -675,7 +675,7 @@ server.registerTool(
 	{
 		title: "Get the Scout API/MCP contract changelog",
 		description:
-			"Latest-first feed of **contract-affecting changes** to the Scout API, MCP tools, and typed client — new/removed endpoints or tools, param/enum changes, response-shape changes, routing/description rewrites. Each entry carries `date`, `surfaces[]`, `type` (added | changed | fixed | removed), a one-line `summary`, and optional `detail`. Filter with `since` (ISO date) / `limit`. **Use when:** you cached Scout's shape earlier and want to know what changed before relying on it, or you're debugging a field/param that moved. **Not for:** the actual ecosystem DATA → use the relevant search tool; current health / data freshness / version → use get_status.",
+			"Latest-first feed of contract-affecting changes to the Scout API, MCP tools, and typed client — new/removed endpoints & tools, param/enum changes, description/routing rewrites. Filter with `since`/`limit`. Use when you cached Scout's shape earlier and want to know what moved. Not for current health / data freshness → use get_status.",
 		inputSchema: {
 			since: z
 				.string()

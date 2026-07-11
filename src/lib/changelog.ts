@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-11",
+		surfaces: ["api"],
+		version: "spec 1.7.16",
+		type: "changed",
+		summary:
+			"sls-051 structural fix — operation descriptions rewritten as terse purpose statements (every one now ≤600 chars; searchProjects was 2,330, searchResearch 2,395), and the routing vocabulary they carried (category/product enumerations, synonym chains, question exemplars) MOVED — not deleted — to a new machine-readable `x-routing` extension on each operation: {purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}. WHY: enumeration-heavy description prose was lexically capturing question families other operations answer (22/122 extended-lane docs-shaped questions ranked searchProjects top-1 at the 1.7.15 absorb), and each prose repair just moved the capture to a new family — 1.7.15 fixed editorial capture and created docs capture. Consumers that cached operation descriptions should re-baseline against 1.7.16; lexical/embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (convention documented in info.description under 'Routing metadata').",
+		detail:
+			"17 operations shrank (before→after chars): searchResearch 2395→399, searchProjects 2330→362, getLeaderboard 1551→390, analyzeEcosystem 1510→390, searchRepos 1436→381, getBuilders 1321→353, getClusters 1241→382, getRfps 1174→385, getHackathon 1066→364, getHackathons 1061→384, compareHackathons 928→370, listSkills 890→398, explainRepo 826→370, getStatus 757→309, getPartners 738→393, getSkill 720→369, partnerAssistant 659→374. No parameter or response-shape changes — operation descriptions + the additive x-routing extension only. Guarded in contract CI by scripts/eval/routing-surface-check.ts: asserts every description ≤600 chars and that sls-051's docs-shaped probes ('which Wasm target does the current Stellar CLI build to?' et al.) never rank searchProjects' description as top token-coverage nor ≥0.35 absolute. scout-mcp tool descriptions received the same shrink and ride the next npm publish.",
+	},
+	{
+		date: "2026-07-11",
 		surfaces: ["api-client", "mcp"],
 		type: "changed",
 		summary:
