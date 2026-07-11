@@ -10,6 +10,7 @@
  */
 
 import { symbolsHaystack } from "./code-symbols";
+import { isKnownInfraNotDeployable } from "./known-infra";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -82,6 +83,22 @@ export interface RepoResult {
 	/** True when this repo was surfaced as a curated canonical answer for an infra/protocol query. */
 	canonical: boolean;
 	/**
+	 * WHY this repo ranks as Stellar-relevant (sls-047 transparency — ranking
+	 * puts Stellar evidence ABOVE raw keyword score, so this names the tier):
+	 * "code-verified" (scan found real Stellar/Soroban code), "sdf-org",
+	 * "curated" (canonical/flagship map), "mentioned" (stellar/soroban in its
+	 * own name/topics/description/README), or "none" — a general-purpose
+	 * toolchain/dependency with no direct Stellar evidence; it can still match
+	 * a topic query but ranks below Stellar-evidenced repos and must not be
+	 * cited as a Stellar reference implementation.
+	 */
+	stellarEvidence:
+		| "code-verified"
+		| "sdf-org"
+		| "curated"
+		| "mentioned"
+		| "none";
+	/**
 	 * Code-verified truth from analyzing the repo's ACTUAL source (not stars or
 	 * topics): how we know it's Stellar (stellarProof), how substantial the
 	 * Soroban code is (codeDepth 0-1), whether it's a deployable contract, and
@@ -117,12 +134,29 @@ export interface CodeVerified {
 	sdkCapabilities: string[];
 }
 
+// A scan finished AND produced actual Stellar code evidence. stellarProof
+// "none" means "scanned, found NO direct Stellar code" — treating that row as
+// code-verified-Stellar was the sls-047 defect (noir-lang/noir, scanned with
+// proof none, ranked tier-2 above deployable Stellar repos for
+// q=zero-knowledge purely on a topic hit).
+export function hasStellarCodeProof(d: RepoDoc): boolean {
+	return (
+		d.codeScanState === "scanned" &&
+		!!d.stellarProof &&
+		d.stellarProof !== "none"
+	);
+}
+
 function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 	if (d.codeScanState !== "scanned" || !d.stellarProof) return null;
 	return {
 		stellarProof: d.stellarProof,
 		codeDepth: typeof d.codeDepth === "number" ? d.codeDepth : null,
-		isDeployableContract: !!d.isDeployableContract,
+		// sls-046: known platform/SDK/tooling repos are pinned NOT-deployable —
+		// their cdylib crates are runtime/fixtures, not a deployable product.
+		isDeployableContract: isKnownInfraNotDeployable(d.fullName)
+			? false
+			: !!d.isDeployableContract,
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
@@ -835,15 +869,20 @@ export async function searchRepos(
 			const crank = canonRank.get(r.fullName.toLowerCase()) ?? 9999;
 			const frank = flagRank.get(r.fullName.toLowerCase()) ?? 9999;
 			// F4 (audit root #4): STELLARNESS ranks above raw keyword score.
-			// 2 = proven (code-scanned with stellarProof, SDF org, or curated
-			//     canonical/flagship), 1 = evidenced (stellar/soroban appears in
-			//     its own name/topics/desc/readme), 0 = no Stellar evidence at
-			//     all (org-swept other-chain repos). The audit showed tier-0
-			//     repos beating code-verified Stellar repos on 7 verticals
-			//     purely on name-token hits — for a Stellar data layer a tier-0
-			//     repo is never the right answer over a tier-1/2 one.
+			// 2 = proven (code-scanned with a REAL stellarProof, SDF org, or
+			//     curated canonical/flagship), 1 = evidenced (stellar/soroban
+			//     appears in its own name/topics/desc/readme), 0 = no Stellar
+			//     evidence at all (org-swept other-chain repos, general
+			//     toolchains). The audit showed tier-0 repos beating
+			//     code-verified Stellar repos on 7 verticals purely on
+			//     name-token hits — for a Stellar data layer a tier-0 repo is
+			//     never the right answer over a tier-1/2 one.
+			// sls-047: "scanned" alone is NOT proof — stellarProof "none" means
+			// the scan found no Stellar code, so such repos fall through to the
+			// mention check (noir-lang/noir was tier-2 via the scanned-check and
+			// outranked deployable Stellar ZK repos for q=zero-knowledge).
 			const stellarness =
-				codeVerifiedOf(r) !== null || sdf === 1 || crank < 9999 || frank < 9999
+				hasStellarCodeProof(r) || sdf === 1 || crank < 9999 || frank < 9999
 					? 2
 					: mention === 1
 						? 1
@@ -900,7 +939,7 @@ export async function searchRepos(
 		const total = filtered.length;
 		const repos = filtered
 			.slice(offset, offset + limit)
-			.map(({ r, topics, score, crank }) => ({
+			.map(({ r, topics, score, crank, frank, sdf, mention }) => ({
 				fullName: r.fullName,
 				owner: r.owner ?? null,
 				name: r.name ?? null,
@@ -927,6 +966,18 @@ export async function searchRepos(
 				score,
 				deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
 				canonical: crank < 9999,
+				// sls-047: name the evidence tier driving the rank so a consumer
+				// can tell a Stellar reference implementation from a general
+				// toolchain that merely topic-matched the query.
+				stellarEvidence: (hasStellarCodeProof(r)
+					? "code-verified"
+					: sdf === 1
+						? "sdf-org"
+						: crank < 9999 || frank < 9999
+							? "curated"
+							: mention === 1
+								? "mentioned"
+								: "none") as RepoResult["stellarEvidence"],
 				codeVerified: codeVerifiedOf(r),
 			}));
 		return {

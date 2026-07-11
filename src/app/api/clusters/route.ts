@@ -27,6 +27,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	ACTIVE_PROJECT_STATUSES,
+	type PopulationScope,
+	populationScope,
+} from "@/lib/population";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -177,20 +182,47 @@ export async function GET(req: NextRequest) {
 	let clusters: ClusterRow[] = [];
 	let availableKeys: string[] = [];
 	let matchedDimension: Dimension | null = null;
+	let population: PopulationScope | null = null;
 
 	if (payload) {
 		try {
 			const result = await payload.find({
 				collection: "projects",
-				where: { status: { in: ["Development", "Pre-Release", "Live"] } },
-				limit: 500,
+				where: { status: { in: [...ACTIVE_PROJECT_STATUSES] } },
+				// sls-042: this was `limit: 500` with no pagination, so the cluster
+				// input silently truncated at 500 of ~840 active projects — and the
+				// missing tail wasn't category-neutral, so /api/clusters and
+				// /api/analyze?dimension=categories named DIFFERENT funded-share
+				// winners from what looked like the same population. Mirror
+				// analyze's fetch: positive `select` of only the aggregation fields
+				// (cheap on the M0 tier — the old `embedding:false` exclusion still
+				// dragged every other heavy field) + a cap far above the collection
+				// size. `population.truncated` (below) makes any future overflow
+				// answer-visible instead of silent.
+				limit: 5000,
 				depth: 0,
-				// Exclude the json voyage-3 vector — fetching it for every project
-				// dragged megabytes off the M0 free tier and timed this endpoint out
-				// (same root cause as projects/search). The cluster math never reads it.
-				select: { embedding: false },
+				select: {
+					name: true,
+					slug: true,
+					category: true,
+					types: true,
+					status: true,
+					shortDescription: true,
+					scf: true,
+					hackathonPlacement: true,
+					hackathonPrize: true,
+				},
 			});
 			const docs = result.docs as unknown as ProjectDoc[];
+			// sls-048: answer-visible scope digest — same shape as /api/analyze,
+			// so callers can verify the two populations are mechanically
+			// comparable before merging/summing their numbers.
+			population = populationScope({
+				collection: "projects",
+				statusScope: ACTIVE_PROJECT_STATUSES,
+				totalAvailable: result.totalDocs ?? docs.length,
+				included: docs.length,
+			});
 
 			if (valueFilter) {
 				// Resolve the value across both dimensions, prefer an exact
@@ -233,6 +265,14 @@ export async function GET(req: NextRequest) {
 					...(valueFilter ? { valueFilter, matchedDimension } : {}),
 				},
 				counts: { returned: clusters.length },
+				// sls-042/048: the population this clustering aggregated. Compare
+				// `population.id` with other quantitative endpoints before merging
+				// numbers; `truncated: true` would mean the clusters are a sample,
+				// not the full population. NOTE: category clusters bucket only
+				// projects that HAVE the dimension value, so the sum of cluster
+				// sizes can be ≤ population.included (analyze buckets the remainder
+				// as "Uncategorized").
+				population,
 				dimensions: VALID_DIMENSIONS,
 				notes: {
 					crowdedness:

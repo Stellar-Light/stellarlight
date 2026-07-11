@@ -89,6 +89,74 @@ describe("searchRepos F4 ranking", () => {
 		);
 		expect(repos[0]?.fullName).toBe("allbridge-io/core-contracts");
 	});
+
+	// sls-047: "scanned" alone is not Stellar proof. The live defect: noir-lang/
+	// noir (scanned, stellarProof "none", topic hit "zero-knowledge", repoScore
+	// 60) ranked #1 for q=zero-knowledge above deployable cargo-sdk Stellar
+	// repos — the tier-2 check read `codeVerified !== null`, and a proof-"none"
+	// scan still serializes a codeVerified object.
+	it("a scanned repo with stellarProof 'none' does NOT outrank code-proven Stellar repos", async () => {
+		const toolchain = doc({
+			fullName: "noir-lang/noir",
+			description: "The universal language of zero-knowledge",
+			topics: ["zero-knowledge"],
+			codeScanState: "scanned",
+			stellarProof: "none",
+			repoScore: 60,
+			stars: 5000,
+		});
+		const stellarZk = doc({
+			fullName: "team/zk-verifier-soroban",
+			description: "zero-knowledge proof verifier contract",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			isDeployableContract: true,
+			repoScore: 40,
+			stars: 10,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([toolchain, stellarZk]),
+			"zero-knowledge",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("team/zk-verifier-soroban");
+		// transparency: the toolchain is still returned, but labeled.
+		const noir = repos.find((r) => r.fullName === "noir-lang/noir");
+		expect(noir?.stellarEvidence).toBe("none");
+		expect(repos[0]?.stellarEvidence).toBe("code-verified");
+	});
+
+	// sls-046: known platform/SDK/tooling repos are pinned NOT-deployable at
+	// serving time even when the stored scan row says otherwise (their cdylib
+	// crates are runtime/fixtures, not a deployable contract product).
+	it("pins isDeployableContract false for known infra repos, leaves real contracts alone", async () => {
+		const core = doc({
+			fullName: "stellar/stellar-core",
+			description:
+				"stellar-core is the reference implementation for the peer-to-peer agent that manages the Stellar network",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			isDeployableContract: true,
+			repoScore: 90,
+		});
+		const realContract = doc({
+			fullName: "soroswap/core",
+			description: "Core smart contracts of the Soroswap.Finance protocol",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			isDeployableContract: true,
+			repoScore: 80,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([core, realContract]),
+			"core",
+			{ limit: 5 },
+		);
+		const coreRow = repos.find((r) => r.fullName === "stellar/stellar-core");
+		const contractRow = repos.find((r) => r.fullName === "soroswap/core");
+		expect(coreRow?.codeVerified?.isDeployableContract).toBe(false);
+		expect(contractRow?.codeVerified?.isDeployableContract).toBe(true);
+	});
 });
 
 /** sls-025: exact aliases/identifiers must not return silent zeros. */

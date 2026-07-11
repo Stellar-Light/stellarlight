@@ -20,11 +20,17 @@
  * grants overall" rather than "tell me about hackathon X".
  */
 
+import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	ACTIVE_PROJECT_STATUSES,
+	type PopulationScope,
+	populationScope,
+} from "@/lib/population";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -122,12 +128,13 @@ export async function GET(req: NextRequest) {
 
 	// ── Categories + funding + tvl share a projects fetch
 	let projects: ProjectDoc[] = [];
+	let population: PopulationScope | null = null;
 	if (payload && (includeCategories || includeFunding || includeTvl)) {
 		try {
 			const r = await payload.find({
 				collection: "projects",
 				where: {
-					status: { in: ["Development", "Pre-Release", "Live"] },
+					status: { in: [...ACTIVE_PROJECT_STATUSES] },
 				},
 				// Select only the aggregation fields + raise the cap so the
 				// breakdown covers ALL active projects. Was capped at 500, which
@@ -137,6 +144,8 @@ export async function GET(req: NextRequest) {
 				limit: 5000,
 				depth: 0,
 				select: {
+					// sls-044: slug also feeds the funding projectSetHash — a stable
+					// identity digest of WHICH projects are in the awarded set.
 					slug: true,
 					name: true,
 					category: true,
@@ -152,6 +161,15 @@ export async function GET(req: NextRequest) {
 				},
 			});
 			projects = r.docs as unknown as ProjectDoc[];
+			// sls-048: answer-visible scope digest, same shape as /api/clusters —
+			// identical `population.id` ⇒ the two responses aggregated the same
+			// population and their numbers are mechanically comparable.
+			population = populationScope({
+				collection: "projects",
+				statusScope: ACTIVE_PROJECT_STATUSES,
+				totalAvailable: r.totalDocs ?? projects.length,
+				included: projects.length,
+			});
 		} catch {
 			// fall through with empty
 		}
@@ -238,6 +256,20 @@ export async function GET(req: NextRequest) {
 				stat.totalUSD += share;
 			}
 		}
+		// sls-044: a stable identity digest of WHICH awarded projects are in this
+		// snapshot (sha256 of the sorted slug set, truncated). The cumulative
+		// total and project count can legitimately move between reads (award
+		// corrections, dupe merges, status reclassification) — the hash lets a
+		// consumer distinguish "same project set, amounts corrected" from "the
+		// set itself changed", and detect set changes across their own snapshots
+		// without diffing full payloads.
+		const awardedSlugs = scfProjects
+			.map((p) => p.slug ?? p.id)
+			.sort((a, b) => a.localeCompare(b));
+		const projectSetHash = createHash("sha256")
+			.update(awardedSlugs.join("\n"))
+			.digest("hex")
+			.slice(0, 16);
 		result.funding = {
 			scfAwardedProjects: scfProjects.length,
 			scfTotalDistributedUSD: totalUSD,
@@ -249,6 +281,12 @@ export async function GET(req: NextRequest) {
 			// headline swing unexplained.
 			computedAt: new Date().toISOString(),
 			methodologyVersion: "funding-v2 (2026-07-05)",
+			// sls-044: compare across your own snapshots — same hash ⇒ same
+			// project SET (only amounts/labels can differ); different hash ⇒ the
+			// membership changed (projects added/removed/reclassified), which is
+			// the honest explanation for a shrinking cumulative total under an
+			// unchanged methodology.
+			projectSetHash,
 			countBasis:
 				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects — never add round counts to get a project total.",
 			postHackathonStatusFunnel: {
@@ -312,6 +350,10 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				dimension: dimensionParam,
 				validDimensions: VALID_DIMENSIONS,
+				// sls-048: the population the categories/funding aggregations ran
+				// over (null when neither dimension was requested). Same shape as
+				// /api/clusters — identical `population.id` ⇒ comparable numbers.
+				...(population ? { population } : {}),
 			},
 			...result,
 		},

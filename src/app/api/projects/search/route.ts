@@ -1367,6 +1367,12 @@ export async function GET(req: NextRequest) {
 		rampTypes: string[];
 		asOf: string | null;
 		url: string;
+		/** sls-049: empty capability arrays are NOT negative claims. "profiled"
+		 * = at least one capability field is verified-filled; "not-profiled" =
+		 * we haven't verified this anchor's capabilities yet (unknown, not
+		 * absent). Capability fields fill only from verifiable sources
+		 * (stellar.toml / the provider's own docs). */
+		profileState: "profiled" | "not-profiled";
 	}
 	let anchorProfiles = new Map<string, AnchorProfile>();
 	const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -1413,15 +1419,25 @@ export async function GET(req: NextRequest) {
 								)
 								.filter(Boolean)
 						: [];
+				const assets = tags(d.assets);
+				const seps = tags(d.seps);
+				const rampTypes = tags(d.rampTypes);
 				m.set(norm(String(d.name)), {
 					slug: String(d.slug),
 					country: (d.country as string) ?? null,
 					regions: tags(d.regions),
-					assets: tags(d.assets),
-					seps: tags(d.seps),
-					rampTypes: tags(d.rampTypes),
+					assets,
+					seps,
+					rampTypes,
 					asOf: (d.lastPartnerUpdateAt as string) ?? null,
 					url: `https://stellarlight.xyz/partners/${d.slug}`,
+					// sls-049: make empty-vs-unknown answer-visible — an anchor whose
+					// narrative asserts live corridors but whose capability arrays
+					// are all empty is UNPROFILED, not capability-free.
+					profileState:
+						assets.length || seps.length || rampTypes.length
+							? "profiled"
+							: "not-profiled",
 				});
 			}
 			anchorProfiles = m;
@@ -1523,6 +1539,14 @@ export async function GET(req: NextRequest) {
 				// won; per-round amounts are unpublished. Full breakdown at /api/analyze?dimension=funding.
 				scfCountBasis:
 					"scfTotalAwardedUSD is an in-house reconstruction (SCF doesn't publish all per-award amounts — some XLM-denominated/undisclosed, see scfAmountStatus); it can legitimately differ from SDF's submission-based counters. scfAwardedRounds = rounds this project won (per-round amounts unpublished). Full per-round breakdown: /api/analyze?dimension=funding.",
+				// sls-049: empty-field semantics for the anchorProfile join — only
+				// emitted when the page actually carries anchor rows.
+				...(projectsWithOrg.some((p) => p.anchorProfile)
+					? {
+							anchorProfileBasis:
+								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState) — NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
+						}
+					: {}),
 				// When BOTH keyword and semantic came back empty, point the agent
 				// at thesis-level retrieval. Project search can't answer "is x402
 				// possible on Stellar?" — /api/research can.

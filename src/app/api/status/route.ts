@@ -29,6 +29,12 @@ interface SourceStatus {
 	name: string;
 	count: number | null;
 	lastUpdatedAt: string | null;
+	/** sls-048: scope digest of what `count` counts — same id format as the
+	 * `population.id` on /api/analyze and /api/clusters. `status:all` = the
+	 * FULL collection (incl. Inactive), which is why this number is larger
+	 * than analyze/clusters' active-only populations; different ids are
+	 * different populations — never merge/sum them without labeling scope. */
+	populationId?: string;
 	notes?: string;
 }
 
@@ -50,6 +56,7 @@ async function collectionStatus(
 			name,
 			count: result.totalDocs,
 			lastUpdatedAt: result.docs[0]?.updatedAt ?? null,
+			populationId: `${collection}|status:all`,
 			notes,
 		};
 	} catch {

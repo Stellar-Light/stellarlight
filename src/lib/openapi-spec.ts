@@ -395,7 +395,11 @@ export const spec: OpenAPISpec = {
 											properties: {
 												stellarProof: { type: "string" },
 												codeDepth: { type: "number", nullable: true },
-												isDeployableContract: { type: "boolean" },
+												isDeployableContract: {
+													type: "boolean",
+													description:
+														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable' (sls-046).",
+												},
 												sorobanSdkVersion: { type: "string", nullable: true },
 												versionStatus: { type: "string", nullable: true },
 												scannedAt: {
@@ -613,7 +617,98 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Builder list",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchBasis: {
+													type: "string",
+													description:
+														"What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts.",
+												},
+											},
+										},
+										builders: {
+											type: "array",
+											items: {
+												type: "object",
+												description:
+													"A builder profile row. When the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance (sls-041).",
+												properties: {
+													match: {
+														type: "object",
+														nullable: true,
+														description:
+															"WHY this row matched (null without a q/skill filter). Free-text profile evidence — treat bio/role text as claims, not verified experience.",
+														properties: {
+															matchedFields: {
+																type: "array",
+																items: { type: "string" },
+																description:
+																	"Profile fields the query hit (bio, roleTitle, displayName, githubUsername, location, projects).",
+															},
+															matchedProjects: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		name: { type: "string" },
+																		slug: {
+																			type: "string",
+																			nullable: true,
+																		},
+																	},
+																},
+																description:
+																	"Projects whose name/description matched the query.",
+															},
+															matchedTerms: {
+																type: "object",
+																additionalProperties: { type: "string" },
+																description:
+																	"Per query token, the literal term that hit — a token can match via a synonym (e.g. 'payments' via 'remittance').",
+															},
+															basis: {
+																type: "string",
+																enum: ["profile-text"],
+															},
+														},
+													},
+													codeEvidence: {
+														type: "array",
+														nullable: true,
+														description:
+															"Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+														items: {
+															type: "object",
+															properties: {
+																fullName: { type: "string" },
+																url: { type: "string", nullable: true },
+																primaryLanguage: {
+																	type: "string",
+																	nullable: true,
+																},
+																stars: { type: "integer" },
+																lastCommitAt: {
+																	type: "string",
+																	format: "date-time",
+																	nullable: true,
+																},
+																repoScore: { type: "number" },
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -954,6 +1049,28 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											properties: {
 												activeQuarter: { type: "string" },
+												counts: {
+													type: "object",
+													description:
+														"total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy (sls-045). See countBasis.",
+													properties: {
+														total: { type: "integer" },
+														open: { type: "integer" },
+														closed: { type: "integer" },
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+														syntheticRounds: {
+															type: "integer",
+															description:
+																"Synthetic scf-round rows in the returned page (rowType 'scf-round').",
+														},
+													},
+												},
+												countBasis: {
+													type: "string",
+													description:
+														"Plain-language statement of what each count counts and how to count briefs (filter rowType === 'rfp').",
+												},
 												scfRound: {
 													type: "object",
 													description:
@@ -994,7 +1111,27 @@ export const spec: OpenAPISpec = {
 												},
 											},
 										},
-										rfps: { type: "array", items: { type: "object" } },
+										rfps: {
+											type: "array",
+											items: {
+												type: "object",
+												description:
+													"An RFP row. rowType discriminates real briefs from the synthetic live-round row (sls-045).",
+												properties: {
+													rowType: {
+														type: "string",
+														enum: ["rfp", "scf-round"],
+														description:
+															"'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs — count/render briefs by filtering rowType === 'rfp'.",
+													},
+													synthetic: {
+														type: "boolean",
+														description:
+															"True only on synthetic scf-round rows — mirror of rowType.",
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -1165,7 +1302,24 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Cluster list",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												population: {
+													$ref: "#/components/schemas/PopulationScope",
+												},
+											},
+										},
+										clusters: { type: "array", items: { type: "object" } },
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1192,7 +1346,31 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Analytics rollup",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												population: {
+													$ref: "#/components/schemas/PopulationScope",
+												},
+											},
+										},
+										funding: {
+											type: "object",
+											description:
+												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology.",
+											properties: {
+												projectSetHash: { type: "string" },
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1497,6 +1675,41 @@ export const spec: OpenAPISpec = {
 					},
 				},
 			},
+			PopulationScope: {
+				type: "object",
+				nullable: true,
+				description:
+					"sls-048: the population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed.",
+				properties: {
+					id: {
+						type: "string",
+						description:
+							"Stable digest of collection + filters (NOT count/time), e.g. 'projects|status:Development+Live+Pre-Release'. /api/status sources use 'projects|status:all' (full collection).",
+					},
+					basis: { type: "string" },
+					statusScope: {
+						type: "array",
+						items: { type: "string" },
+						nullable: true,
+						description: "Status filter applied; null = no status filter.",
+					},
+					totalAvailable: {
+						type: "integer",
+						description:
+							"Docs matching the scope in the DB at generation time.",
+					},
+					included: {
+						type: "integer",
+						description: "Docs actually aggregated into this response.",
+					},
+					truncated: {
+						type: "boolean",
+						description:
+							"included < totalAvailable — the response is a sample, not the population.",
+					},
+					generatedAt: { type: "string", format: "date-time" },
+				},
+			},
 			StatusResponse: {
 				type: "object",
 				required: ["ok", "service", "version", "generatedAt", "endpoints"],
@@ -1524,6 +1737,11 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									format: "date-time",
 									nullable: true,
+								},
+								populationId: {
+									type: "string",
+									description:
+										"Scope digest of what `count` counts (sls-048) — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
 								},
 								notes: { type: "string" },
 							},
@@ -1674,7 +1892,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS (sls-049): capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
@@ -1687,6 +1905,12 @@ export const spec: OpenAPISpec = {
 							},
 							asOf: { type: "string", nullable: true },
 							url: { type: "string" },
+							profileState: {
+								type: "string",
+								enum: ["profiled", "not-profiled"],
+								description:
+									"'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).",
+							},
 						},
 					},
 					tvlUSD: {
@@ -1827,6 +2051,11 @@ export const spec: OpenAPISpec = {
 											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.',
 									},
 									matchModeLabel: { type: "string" },
+									anchorProfileBasis: {
+										type: "string",
+										description:
+											"Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+									},
 								},
 							},
 						],
@@ -1963,6 +2192,12 @@ export const spec: OpenAPISpec = {
 						description:
 							"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
 					},
+					stellarEvidence: {
+						type: "string",
+						enum: ["code-verified", "sdf-org", "curated", "mentioned", "none"],
+						description:
+							"WHY this repo ranks as Stellar-relevant (sls-047) — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.",
+					},
 					codeVerified: {
 						type: "object",
 						nullable: true,
@@ -1977,9 +2212,10 @@ export const spec: OpenAPISpec = {
 									"lang-sdk",
 									"js-sdk",
 									"stellar-toml",
+									"none",
 								],
 								description:
-									"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml.",
+									"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml. 'none' = the repo WAS scanned and no direct Stellar code evidence was found (a scanned general-purpose dependency) — such repos rank below Stellar-evidenced ones and carry stellarEvidence 'none' unless their own text mentions Stellar.",
 							},
 							codeDepth: {
 								type: "number",
@@ -1990,7 +2226,7 @@ export const spec: OpenAPISpec = {
 							isDeployableContract: {
 								type: "boolean",
 								description:
-									"Cargo cdylib — a real deployable Soroban contract (vs a CLI/indexer/frontend that only uses Stellar).",
+									"This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product (sls-046).",
 							},
 							sorobanSdkVersion: {
 								type: "string",
