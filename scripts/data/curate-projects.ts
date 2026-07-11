@@ -150,6 +150,22 @@ const TYPES_SET: Record<string, string[]> = {
 	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
 	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
 	cobo: ["Infrastructure", "Wallet"], // cobo.com: institutional omni-custody / wallet-as-a-service platform — custody, not a bridge
+	// sls-035 DEX-taxonomy wave (2026-07-11): the types=DEX cluster mixed real
+	// trading venues with aggregators/routers/analytics platforms that run no
+	// venue of their own — polluting DEX browses and venue ground-truth checks
+	// (the amm→rango class). Each row below is re-typed from the project's OWN
+	// primary source (quoted); actual venues and SDEX trading clients were left
+	// untouched. Cross-chain swap aggregators keep/carry Bridge — the
+	// user-meaningful corridor capability (the rubic #414 precedent) —
+	// Stellar-only routers/services go Infrastructure.
+	stellarbroker: ["Infrastructure"], // stellar.broker: "Multi-source liquidity swap router for Stellar, providing access to AMMs and Stellar DEX" — routes across venues, runs none
+	wowmax: ["Bridge"], // wowmax.exchange: "combines a powerful DEX aggregator with an on-chain copy-trading protocol… trade crypto at the best possible prices across multiple decentralized exchanges" — aggregator, not a venue
+	rango: ["Bridge"], // rango.exchange: "a new layer on top of all Bridges and DEXs, working as a Bridge Aggregator and DEX Aggregator at the same time" — router, not a venue
+	houdiniswap: ["Bridge"], // houdiniswap.com: "non-custodial liquidity aggregator… sources swap routes from vetted, compliant exchange partners"; explicitly does not pool assets
+	rubic: ["Bridge"], // rubic.exchange: "an aggregator of Bridges, Dexs, Intent Protocols, & Private Solutions" (340+ integrations) — routing layer, no own pools
+	"dex-tools": ["Analytics"], // dextools.io + info.dextools.io: DeFi charting/pair-explorer/portfolio "data hub"; connects existing wallets, holds no liquidity
+	"mobula-labs": ["Analytics", "AI", "SDK"], // mobula.io: "Stream-based, modular & blazing fast APIs powering the best onchain products" — data/API provider, not a venue
+	spinach: ["Infrastructure"], // spinach.fi: "Liquidity Competitions — projects earn daily rewards for integrating and growing liquidity" — incentive-campaign platform, not a venue
 };
 
 const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
@@ -895,6 +911,68 @@ const SEEDS: Array<{
 		links: {
 			website: "https://sunereum.com",
 			github: "https://github.com/Sunereum-Labs",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	// ── sls-034 stablecoin-coverage wave (2026-07-11): four major stablecoins
+	// verifiably LIVE on Stellar had no Asset row — EURAU/YLDS fully absent
+	// (semantic-only search fallback), PYUSD/MGUSD present only as prose
+	// mentions inside OTHER records (usdc/redstone-finance/rosen;
+	// moneygram/bridge) — so stablecoin-coverage queries omitted them. Each
+	// entry is grounded in the issuer's/SDF's own launch materials (cited per
+	// row); slugs follow the directory's asset-code convention (usdc, eurc,
+	// glousd, audd). ──
+	{
+		slug: "eurau",
+		name: "EURAU",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"EURAU is a fully-reserved euro stablecoin issued by AllUnity — the DWS, Flow Traders and Galaxy joint venture, a BaFin-licensed e-money institution — under the EU's MiCAR framework (Germany's first MiCAR-compliant EUR stablecoin, launched on Ethereum July 2025). Live on Stellar since April 2026 (stellar.org press: 'EURAU Launches on the Stellar Network') for regulated euro payments, payouts and remittances; early Stellar-ecosystem adopters include PwC DE, Noumena and Crossmint, and a June 2026 AllUnity–Zebec pilot streams payroll and employee benefits in EURAU on Stellar.",
+		links: { website: "https://allunity.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "ylds",
+		name: "YLDS",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin", "RWA"],
+		supportedNetworks: ["stellar", "provenance", "solana"],
+		shortDescription:
+			"YLDS is an SEC-registered, yield-bearing US-dollar stablecoin issued by Figure Certificate Company (an affiliate of Figure Technology Solutions, Nasdaq: FIGR). Holders earn interest at roughly SOFR minus 0.50%, accrued daily and paid monthly — stablecoin liquidity with money-market-style earning. Launched on Provenance (Feb 2025) and Solana (Nov 2025), YLDS went live on Stellar in May 2026 (stellar.org press: 'Figure Announces Launch of YLDS on Stellar Network') as the network's first regulated yield-bearing dollar product, aimed at fintechs and neobanks offering compliant on-chain dollar savings, notably in Argentina and Brazil.",
+		links: { website: "https://www.ylds.com" },
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "pyusd",
+		name: "PYUSD",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin"],
+		supportedNetworks: ["stellar", "evm", "solana"],
+		shortDescription:
+			"PayPal USD (PYUSD) is PayPal's US-dollar stablecoin, issued by Paxos Trust Company (regulated by the New York State Department of Financial Services) and fully backed 1:1 by USD deposits, US Treasuries and cash equivalents. Live on Stellar since September 18, 2025 (stellar.org press: 'PayPal USD is Now Available on Stellar'), extending PYUSD beyond Ethereum and Solana into Stellar wallets and platforms including LOBSTR, Bitcoin.com, Chipper Cash, Decaf, Arculus, Meru, CiNKO and COCA — for everyday payments and real-time SMB working capital ('PayFi') on Stellar rails.",
+		links: {
+			website:
+				"https://www.paypal.com/us/digital-wallet/manage-money/crypto/pyusd",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "mgusd",
+		name: "MGUSD",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MGUSD is MoneyGram's US-dollar stablecoin, launched June 2, 2026 and native to Stellar — the first dollar token issued by a global cash-payments network on a public chain. Bridge (a Stripe company) is the regulated, GENIUS Act-ready issuer; tokens are minted and burned on M0's smart-contract infrastructure with Fireblocks providing wallet infrastructure. MGUSD is embedded in the MoneyGram app as a self-custodial dollar balance, launching US-first with planned global rollout across MoneyGram's ~60M customers and ~500K retail locations.",
+		links: {
+			website:
+				"https://www.prnewswire.com/news-releases/moneygram-launches-mgusd-a-stablecoin-to-power-its-own-global-network-302787799.html",
 		},
 		provenance: { source: "AdminEdit" },
 	},

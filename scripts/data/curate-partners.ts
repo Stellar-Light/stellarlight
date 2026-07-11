@@ -294,15 +294,40 @@ const FOUNDED_YEARS: Record<string, number> = {
 /** raven#8 / sls-018 (data half): ramp capability for providers whose ramp is a
  * PROPRIETARY API rather than SEP-6/24 — the stellar.toml enrichment can never
  * pick those up, so they need a curated, grounded entry. Fill-if-empty on
- * rampTypes; addAssets appends codes not already present (never removes).
- * Grounding required per entry (the provider's own docs). */
+ * rampTypes; addAssets/addServices append rows not already present (never
+ * remove or overwrite). Grounding required per entry (the provider's own docs). */
 const RAMP_ENRICH: Record<
 	string,
-	{ rampTypes: ("on-ramp" | "off-ramp")[]; addAssets?: string[] }
+	{
+		rampTypes: ("on-ramp" | "off-ramp")[];
+		addAssets?: string[];
+		addServices?: string[];
+	}
 > = {
 	// Etherfuse FX: Mexico USDC↔MXN on/off-ramp API (etherfuse/ramp-api-example;
 	// their public docs + raven#8: bps-level pricing, both directions).
 	etherfuse: { rampTypes: ["on-ramp", "off-ramp"], addAssets: ["USDC"] },
+	// sls-021: HoneyCoin's ramp is a proprietary API (honeycoin.app publishes
+	// NO stellar.toml — verified 404 on /.well-known/stellar.toml 2026-07-11),
+	// so toml enrichment never fills its capability fields and off-ramp /
+	// mobile-money matching omitted it despite the description carrying the
+	// facts. Grounded in its own pages 2026-07-11: honeycoin.app home
+	// ("seamless on and off-ramps for USDC, USDT, and local currencies";
+	// KES/USD/GHS/NGN virtual accounts; OTC desk), honeycoin.app/coverage +
+	// docs.honeycoin.app (mobile-money charge API — M-Pesa Kenya/Ethiopia,
+	// Airtel Money KE/TZ/UG/RW, MTN MoMo UG/RW, Halopesa/Vodacom/Tigo TZ,
+	// Telebirr ET — plus bank rails across 18+ African markets). `seps` stays
+	// honestly empty: no SEP-6/24/31 server is published.
+	"anchor-honey-coin": {
+		rampTypes: ["on-ramp", "off-ramp"],
+		addAssets: ["USDC", "USDT"],
+		addServices: [
+			"mobile-money-on-off-ramp",
+			"m-pesa-airtel-mtn-momo-rails",
+			"usdc-usdt-off-ramp-africa",
+			"virtual-accounts-kes-usd-ghs-ngn",
+		],
+	},
 };
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -474,6 +499,21 @@ async function main() {
 			if (add.length) {
 				data.assets = [...rows, ...add.map((code) => ({ code }))];
 				notes.push(`assets += ${add.join("/")}`);
+			}
+		}
+		if (e.addServices?.length) {
+			// services is an array of { tag } rows (the matcher's weighted
+			// capability tags); append tags not already present — never removes
+			// or overwrites a partner-entered tag.
+			// biome-ignore lint/suspicious/noExplicitAny: Payload array-field rows
+			const rows: any[] = Array.isArray(d.services) ? d.services : [];
+			const have = new Set(
+				rows.map((r) => String(r?.tag ?? "").toLowerCase()).filter(Boolean),
+			);
+			const add = e.addServices.filter((t) => !have.has(t.toLowerCase()));
+			if (add.length) {
+				data.services = [...rows, ...add.map((tag) => ({ tag }))];
+				notes.push(`services += ${add.join("/")}`);
 			}
 		}
 		if (Object.keys(data).length === 0) {
