@@ -18,6 +18,15 @@ import configPromise from "../../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 
 const DESCRIPTION_FIXES: Record<string, string> = {
+	// S1 prose⇄structure divergence (2026-07-11 engine run): these two
+	// descriptions asserted chains the records' CURATED supportedNetworks
+	// (verified from primary sources 2026-07-09) do not carry. The prose was
+	// the overclaiming side — fixed here rather than adding unverified
+	// networks (precision over recall).
+	helix:
+		"Institutional staking infrastructure by Helix Labs. The protocol is currently live only on Canton — Stellar integration is on the roadmap, not launched. Helix Labs separately operates validator infrastructure across major L1 ecosystems.",
+	"templar-protocol":
+		"Templar is a decentralized 'cypher lending' protocol that lets Stellar users borrow USDC against XLM collateral directly from their Stellar wallets, without bridges or wrapped tokens. It uses NEAR's multi-party-computation (MPC) network and Chain Signatures to custody deposits and settle cross-chain. On Stellar the collateral asset is XLM; Bitcoin-collateral and Ethereum/NEAR markets exist on its other deployments. The Stellar integration was announced November 2025.",
 	// boxy 2026-07-09: CCTP entry read like a bridge product; it's the RAIL.
 	// An agent answering "how do I bridge USDC to Stellar" should name CCTP
 	// as the mechanism and a bridge built on it as the actionable route.
@@ -94,6 +103,15 @@ const TYPES_ADD: Record<string, string[]> = {
  * manual correction is never clobbered; rows retire once applied. */
 const STATUS_FIX: Record<string, { from: string; to: string; note?: string }> =
 	{
+		// 2026-07-11 audit DATA-TRUTH cell: venalabs.com now serves a crypto
+		// airdrop-farming product; zero mentions of Stellar/Soroban/courses on
+		// the live page. The described Stellar-education product no longer
+		// exists at the listed URL.
+		venalabs: {
+			from: "Live",
+			to: "Inactive",
+			note: "Pivoted away from Stellar education to an airdrop-farming platform (site verified 2026-07-11 — no Stellar/Soroban/course content remains).",
+		},
 		helix: { from: "Live", to: "Development" },
 		warpdrive: { from: "Live", to: "Development" },
 		// boxy 2026-07-09 (human-confirmed dead) + hard evidence: DefiLlama TVL
@@ -347,6 +365,26 @@ const SEEDS: Array<{
 	links: { website?: string; github?: string };
 	provenance: { source: "LumenloopSeed" | "UserSubmitted" | "AdminEdit" };
 }> = [
+	// 2026-07-11 audit: kalepail/passkey-kit — THE ecosystem passkey smart-
+	// wallet kit (named in our own STELLAR_SIGNAL regex and depth answer key)
+	// — was missing from the repo index entirely because discovery is
+	// project-seeded and no record linked it. Precedent for SDK/tooling
+	// records: javascript-stellar-sdk, stellar-cli.
+	{
+		slug: "passkey-kit",
+		name: "Passkey Kit",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"TypeScript SDK for building Stellar smart wallets secured by passkeys (WebAuthn/secp256r1) — client, server and Soroban contract components for signing with device biometrics instead of seed phrases. By kalepail (Tyler van der Hoeven).",
+		links: {
+			website: "https://github.com/kalepail/passkey-kit",
+			github: "https://github.com/kalepail/passkey-kit",
+		},
+		provenance: { source: "AdminEdit" },
+	},
 	// boxy 2026-07-09: the launching-vs-launched contrast needs the launching
 	// side represented. Identity verified via the Certora audit PDF (Certora/
 	// SecurityReports 06_10_2026_Certora_SpectraBridge_AuditReport.pdf), whose
