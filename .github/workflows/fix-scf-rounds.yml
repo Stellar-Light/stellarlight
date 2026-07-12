@@ -1,0 +1,28 @@
+name: Fix SCF rounds (manual)
+# Applies verdict-grounded SCF round-membership corrections against prod
+# (scripts/data/fix-scf-rounds.ts — the 74-record badge-scrape corruption).
+# Dry-run by default; set execute=true to write. Always uploads the plan JSON
+# as an artifact for review — inspect the dry-run plan BEFORE executing.
+on:
+  workflow_dispatch:
+    inputs:
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/fix-scf-rounds.ts --out=scf-rounds-plan.json ${{ inputs.execute && '--execute' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: scf-rounds-plan, path: scf-rounds-plan.json }

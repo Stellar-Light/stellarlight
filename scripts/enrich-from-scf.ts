@@ -14,6 +14,7 @@
 import "dotenv/config";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { parseRoundVerdicts } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -92,6 +93,8 @@ async function scrapeDetailPage(slug: string): Promise<{
 	github?: string;
 	totalAwarded?: number;
 	awardedRounds?: number[];
+	verdictSubmissions?: number;
+	verdictAwardedAny?: number;
 } | null> {
 	try {
 		const res = await fetch(
@@ -153,14 +156,24 @@ async function scrapeDetailPage(slug: string): Promise<{
 			}
 		}
 
-		// Extract all funded rounds from "SCF #N" patterns on the page
-		const roundMatches = html.matchAll(/SCF #(\d+)/g);
-		const rounds = [
-			...new Set([...roundMatches].map((m) => parseInt(m[1], 10))),
-		].sort((a, b) => a - b);
-		if (rounds.length > 0) {
-			result.awardedRounds = rounds;
+		// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
+		// The old "grab every SCF #N on the page" scrape read the badge/
+		// submission arrays, which include NOT-awarded submission rounds —
+		// that corrupted round membership on 74 records (fixed by
+		// scripts/data/fix-scf-rounds.ts; verdict parser shared via
+		// scripts/eval/scf-official.ts). No parseable verdicts → leave
+		// awardedRounds unset rather than guess.
+		const verdicts = parseRoundVerdicts(html);
+		if (verdicts.awarded.size > 0) {
+			result.awardedRounds = [...verdicts.awarded]
+				.map(Number)
+				.sort((a, b) => a - b);
 		}
+		// Surfaced for the no-resurrect guard below (main loop): a page that
+		// parses ≥1 submission with ZERO awarded is affirmative evidence of
+		// non-award.
+		result.verdictSubmissions = verdicts.submissions;
+		result.verdictAwardedAny = verdicts.awardedAnyCount;
 
 		return Object.keys(result).length > 0 ? result : null;
 	} catch {
@@ -301,7 +314,23 @@ async function main() {
 				JSON.stringify(currentScf.awardedRounds) !==
 					JSON.stringify(detail.awardedRounds));
 
-		if (hasNewData) {
+		// No-resurrect guard (2026-07-11): if this record is already
+		// awarded=false and the official page affirmatively shows ZERO awarded
+		// submissions, don't let API round-codes flip it back to true (the
+		// coopstable class, corrected by scripts/data/fix-scf-rounds.ts).
+		// Narrow on purpose: records currently awarded=true are unaffected,
+		// and this script still never auto-flips true→false.
+		const skipResurrect =
+			currentScf.awarded === false &&
+			isAwarded &&
+			(detail?.verdictSubmissions ?? 0) > 0 &&
+			(detail?.verdictAwardedAny ?? 0) === 0;
+
+		if (hasNewData && skipResurrect) {
+			console.log(
+				`    SCF: NO-RESURRECT — awarded=false stands (official page shows ${detail?.verdictSubmissions} submission(s), zero awarded)`,
+			);
+		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
 				lastAwardedRound: scf.lastAwardedRound,
