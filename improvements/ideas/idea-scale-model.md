@@ -19,3 +19,13 @@ Ship `/quality` reading real artifacts (flag off) → boxy review → flip on + 
 ## Why this could be the breakthrough (honest version)
 
 It converts work we already do into a differentiated public asset at near-zero marginal cost, and it aligns exactly with the north-star (be Raven's trusted data layer — trust is the product). It is NOT a breakthrough by itself: it needs the engines to keep being right (a public scoreboard showing red is only a win if we fix reds fast), and its ceiling is the ecosystem's size. It makes us the obvious default; it doesn't create demand that isn't there.
+
+## Verdict addendum (2026-07-12, post sls-020..051 week): still the right frame — with one upgrade
+
+The week stress-tested the premise, and the answer is **yes, keep the Scale frame — but the product is stronger than the original brief claimed.**
+
+What the week proved:
+- **The mechanics work at incident scale.** 51 externally-filed findings + 74 systemically-corrupted records were closed in days *because* the Scale-style machinery existed (ground-truth cross-checks, dry-run curation, per-item verification, evidence artifacts). Quality-as-process survived contact with a hostile week.
+- **The differentiator is BILATERAL, which Scale's vendor model doesn't have.** Scale sells one-directional quality (vendor asserts, customer trusts the SLA). Ours is co-verified: the #1 consumer's CI lints our contract (his live-contract lint gate), consumes our machine-routing metadata as a ranking input (`x-routing` = his "lever 7", absorbed within a day of shipping), files signed findings into a public ledger, and re-baselines on every changelog handshake. Nobody can fake that — the consumer's own commit log is the testimonial.
+
+The upgrade to the productization: keep the trio (`/quality` scoreboard, per-consumer monthly report, `DATA_SLA.md`) and add a **fourth artifact — the interlock spec itself**: a short doc standardizing `x-routing`, the changelog re-baseline handshake, the intake-ledger convention, and per-ship eval expectations. That's the piece other data providers could adopt (and the piece Tyler's intake.json says lumenloop lacks) — it converts "our quality process" into "a protocol we authored," which is the actual network-effect play. Positioning shift: not "Scale for Stellar data" but **"the verified-data protocol between agent data layers — reference implementation."**
