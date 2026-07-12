@@ -40,48 +40,22 @@
  * The awarded BOOLEAN and the round set are the reliably-comparable facts.
  */
 import { writeFileSync } from "node:fs";
+import {
+	canon,
+	fetchDetailHtml,
+	fetchScf,
+	parseRoundVerdicts,
+	type ScfEntry,
+} from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
 	"",
 );
-const SCF = "https://communityfund.stellar.org";
 const JSON_OUT = process.argv.includes("--json");
 const OUT_FILE = process.argv
 	.find((x) => x.startsWith("--out="))
 	?.slice("--out=".length);
-
-const canon = (s: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-
-interface ScfEntry {
-	base: string;
-	rounds: string[];
-	url: string;
-}
-
-async function fetchScf(): Promise<ScfEntry[]> {
-	const res = await fetch(`${SCF}/projects`, {
-		headers: { "User-Agent": "stellarlight-scf-crosscheck" },
-	});
-	if (!res.ok) throw new Error(`SCF listing: ${res.status}`);
-	const html = await res.text();
-	const matches = [...html.matchAll(/href="\/project\/([a-z0-9-]+)"/g)];
-	const out = new Map<string, ScfEntry>();
-	for (let i = 0; i < matches.length; i++) {
-		const slug = matches[i][1];
-		if (out.has(slug)) continue;
-		const base = slug.replace(/-[a-z0-9]{3}$/, "");
-		const start = matches[i].index ?? 0;
-		const end = matches[i + 1]?.index ?? Math.min(html.length, start + 6000);
-		const rounds = [
-			...new Set(
-				[...html.slice(start, end).matchAll(/SCF\s*#(\d+)/g)].map((m) => m[1]),
-			),
-		];
-		out.set(slug, { base, rounds, url: `${SCF}/project/${slug}` });
-	}
-	return [...out.values()];
-}
 
 /**
  * Awarded verdict from a detail page. Run-1 calibration: the `SCF #N` round
@@ -111,52 +85,9 @@ async function detailAwarded(url: string): Promise<boolean | null> {
 	}
 }
 
-/**
- * Per-round award verdicts from a detail page's submission cards. The page
- * embeds each submission as structured data with an explicit status:
- *   {"status":"Not Awarded", …, "roundName":"SCF #24", …}
- * (present twice — flight chunks + inline props — with escaped quotes; we
- * unescape and dedupe via sets). A round counts as AWARDED if ANY submission
- * in it was awarded (projects resubmit within a round — phoenix's Liquidity
- * round has both verdicts), and NOT-awarded only when every submission in the
- * round says "Not Awarded". Rounds without an SCF #N number (e.g. "Liquidity
- * Award…") don't map onto our numeric scfAwardedRounds and are ignored.
- * NOTE: the page's `buildAwardRounds` array is NOT usable — it includes
- * not-awarded rounds (verified on phoenix-svj, 2026-07-11).
- */
-function parseRoundVerdicts(html: string): {
-	awarded: Set<string>;
-	notAwarded: Set<string>;
-	submissions: number;
-} {
-	const txt = html.replace(/\\"/g, '"');
-	const awarded = new Set<string>();
-	const negative = new Set<string>();
-	let submissions = 0;
-	const re = /"status":"(Awarded|Not Awarded)"[^{}]*?"roundName":"([^"]+)"/g;
-	for (const m of txt.matchAll(re)) {
-		submissions++;
-		const num = m[2].match(/SCF\s*#\s*(\d+)/i)?.[1];
-		if (!num) continue;
-		const round = String(Number(num));
-		if (m[1] === "Awarded") awarded.add(round);
-		else negative.add(round);
-	}
-	const notAwarded = new Set([...negative].filter((r) => !awarded.has(r)));
-	return { awarded, notAwarded, submissions };
-}
-
-async function fetchDetailHtml(url: string): Promise<string | null> {
-	try {
-		const res = await fetch(url, {
-			headers: { "User-Agent": "stellarlight-scf-crosscheck" },
-		});
-		if (!res.ok) return null;
-		return await res.text();
-	} catch {
-		return null;
-	}
-}
+// parseRoundVerdicts / fetchDetailHtml / fetchScf / canon live in
+// ./scf-official (shared with scripts/data/fix-scf-rounds.ts, which applies
+// the corrections this report finds). Same calibrated logic, one copy.
 
 interface DirRow {
 	slug: string;
