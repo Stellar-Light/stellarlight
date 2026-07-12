@@ -137,6 +137,82 @@ const SCF_FIX: Record<
 	// No round-41 award exists on the official record, so the canonical row's
 	// #41/$100K had no source and contradicted its own shadow.
 	band: { awarded: true, totalAwarded: 60000, awardedRounds: [16] },
+	// ── ambiguous-13 wave (2026-07-11, scf-membership-postwave
+	// roundsOverstated) ── each record claimed rounds whose submissions the
+	// official page marks with NEGATIVE verdicts the fix-wave parser doesn't
+	// read ("Prescreen Failed" / "Rejected - timeout" / "Panel Review Failed"
+	// / "Ineligible") — hand-verified per record against the page's RENDERED
+	// submission cards AND the official SCF round recaps
+	// (medium.com/stellar-community, full awardee lists). Every total below
+	// equals the already-stored value AND reconciles exactly with the
+	// per-round recap amounts — these rows change ROUNDS only.
+	// page grantfox-4zq: #40 Awarded, #38 Not Awarded, #37 Prescreen Failed;
+	// SCF #40 recap lists "Grant Fox — $60,000" = page total $60.0K; absent
+	// from the #37 recap's full 19-project list.
+	grantfox: { awarded: true, totalAwarded: 60000, awardedRounds: [40] },
+	// page cartwey-aku: #38 Awarded, #35 Prescreen Failed, #34 Not Awarded;
+	// #38 recap lists Cartwey $60,000 = page total $60.0K; absent from the
+	// #35 recap's full 21-project list.
+	cartwey: { awarded: true, totalAwarded: 60000, awardedRounds: [38] },
+	// page freedom-pay-wallet-umi: #38 Awarded, #30/#31 Prescreen Failed,
+	// #22 Not Awarded (Kickstart #9 card is non-numeric "Information
+	// Collection"); #38 recap lists Freedom Pay Wallet $150,000 = page total;
+	// absent from the #30 and #31 recaps' full 22-project lists.
+	"freedom-pay-wallet": {
+		awarded: true,
+		totalAwarded: 150000,
+		awardedRounds: [38],
+	},
+	// page alternun-16y: #27 Awarded (card: Legacy v5.0 Activation Award,
+	// budget 32000 = page total $32.0K), #30 Prescreen Failed, #37 Not
+	// Awarded, #40 "Rejected - timeout" (same verdict on its own
+	// communityfund awards-record page); absent from the #30/#37/#40 recap
+	// full lists.
+	alternun: { awarded: true, totalAwarded: 32000, awardedRounds: [27] },
+	// page nobak-ncp: #23 Awarded, #31 Not Awarded, and NO #8 card at all;
+	// the official "Announcing the winners of SCF#8" post (11 winners) does
+	// NOT include Nobak; #23 recap: "Nobak: Custodial Wallet Signer —
+	// $34,500" = page total $34.5K.
+	nobak: { awarded: true, totalAwarded: 34500, awardedRounds: [23] },
+	// page sorobanhooks-slr: Awarded ONLY #33 ($25.0K) + #37 ($30.0K) = page
+	// total $55.0K; #31(x2)/#32/#41/#42 Not Awarded or Prescreen Failed, #39
+	// Prescreen Failed; recap amounts match (#33 $25,000 + #37 $30,000) and
+	// it is absent from the #31/#32/#39/#41/#42 recap full lists.
+	sorobanhooks: { awarded: true, totalAwarded: 55000, awardedRounds: [33, 37] },
+	// identity: our surgepay (surgepay.tech) = page surgepay-e9w (site
+	// www.surgepay.tech); the other listing match (surge-pay-jze) is a
+	// different zero-award record (only a Kickstart #10 "Information
+	// Collection" card). Page: #41 Awarded, #38/#40 Not Awarded, #36
+	// Prescreen Failed; #41 recap lists SurgePay $115,000 = page total;
+	// absent from the #36/#38/#40 recap full lists.
+	surgepay: { awarded: true, totalAwarded: 115000, awardedRounds: [41] },
+	// page joonapay-ego: #41 Awarded, #32/#35 Not Awarded, #30/#31 Prescreen
+	// Failed; #41 recap lists JoonaPay $90,000 = page total $90.0K; absent
+	// from the #30/#31/#32/#35 recap full lists.
+	"joona-pay": { awarded: true, totalAwarded: 90000, awardedRounds: [41] },
+	// page airgap-3ht: #35 Awarded, #34 Not Awarded, #44 Prescreen Failed
+	// (no #44 recap published yet — the page verdict is the negative);
+	// #35 recap lists AirGap $60,000 = page total $60.0K.
+	airgap: { awarded: true, totalAwarded: 60000, awardedRounds: [35] },
+	// page peerpesa-tjf: #33 Awarded only; #32 Not Awarded, #37/#39/#42/#44
+	// Prescreen Failed, #43 Panel Review Failed; #33 recap lists PeerPesa
+	// $45,000 = page total $45.0K; absent from the #37/#39/#42/#43 recap
+	// full lists (no #44 recap published yet — page verdict).
+	peerpesa: { awarded: true, totalAwarded: 45000, awardedRounds: [33] },
+	// page sytemap-c7p: #29 Awarded only; #30/#31/#33/#39 Not Awarded,
+	// #36/#37 Prescreen Failed; #29 recap lists "HouseAfrica's Sytemap"
+	// $35,000 = page total $35.0K; absent from the #30/#31/#33/#36/#37/#39
+	// recap full lists.
+	sytemap: { awarded: true, totalAwarded: 35000, awardedRounds: [29] },
+	// page venerez-bvc: #36 Awarded, #34/#35 Not Awarded, #30 Prescreen
+	// Failed (Kickstart #9 card is non-numeric); #36 recap lists Venerez
+	// $99,675 = page total $99.7K; absent from the #30/#35 recap full lists.
+	venerez: { awarded: true, totalAwarded: 99675, awardedRounds: [36] },
+	// page abroad-lxb: #32 + #35 Awarded, #31 Not Awarded, #40 Ineligible
+	// (the aquarius paid-awards-only precedent); #32 recap $56,120 + #35
+	// recap $93,700 = page total $149,820 EXACTLY; absent from the #40
+	// recap's full 24-project list.
+	abroad: { awarded: true, totalAwarded: 149820, awardedRounds: [32, 35] },
 };
 
 const TYPES_SET: Record<string, string[]> = {
