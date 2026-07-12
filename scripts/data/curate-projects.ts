@@ -1100,7 +1100,7 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
 	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
 	estrela: ["stellar", "evm", "solana", "tron", "sui"], // Estrela = Allbridge Core (SCF #22; links → allbridge.io); docs-core.allbridge.io chain list
-	rarible: ["stellar", "evm"], // sls-037: rarible.com multichain NFT marketplace (Ethereum-origin, EVM chains) + announced Stellar integration — deployment basis for its Live status
+	rarible: ["evm"], // sls-037 precision fix: SCF award + Rarible STELLAR schema enum establish the RELATIONSHIP, but public Stellar support is not verifiable on Rarible's live API/UI (Tyler GT-19 blind lane + our recheck) — evm only until it is; the award/integration story lives in prose+statusSourceUrl, not the deployment field
 	// sls-029 oracle network evidence (Live oracles with EMPTY networks made
 	// materially different deployment claims look equivalent). Both rows below
 	// verified from PRIMARY sources 2026-07-11:
