@@ -111,6 +111,7 @@ interface Op {
 	operationId: string;
 	description: string;
 	hasRouting: boolean;
+	routingText: string;
 }
 
 const ops: Op[] = [];
@@ -123,6 +124,7 @@ for (const methods of Object.values(spec.paths as Record<string, unknown>)) {
 			operationId: o.operationId,
 			description: typeof o.description === "string" ? o.description : "",
 			hasRouting: "x-routing" in o,
+			routingText: JSON.stringify(o["x-routing"] ?? "").toLowerCase(),
 		});
 	}
 }
@@ -177,6 +179,45 @@ if (!target) {
 				`${TARGET_OP} description coverage ${targetCov.toFixed(3)} >= ${CAPTURE_CEILING} for docs probe "${probe}"`,
 			);
 		}
+	}
+}
+
+// ── Inverse guard (sls-052): win-coverage. The capture checks above assert
+// descriptions DON'T steal others' questions; this asserts each op's
+// x-routing DOES cover the vocabulary of questions it is expected to WIN.
+// Probes = the three families Tyler measured as unrecovered at the 1.7.16
+// absorb (routing A/B, issue #21). Coverage here scores the x-routing block
+// (keywords + useWhen + exampleQuestions), not the description.
+const WIN_PROBES: Array<[string, string]> = [
+	["which leaderboard projects have open issues", "getLeaderboard"],
+	["what is the SDF enterprise fund and its mandate", "searchResearch"],
+	["who are experienced Rust Soroban devs", "getBuilders"],
+];
+for (const [probe, expectOp] of WIN_PROBES) {
+	const qTokens = contentTokens(probe);
+	const scores = ops
+		.map((op) => ({
+			operationId: op.operationId,
+			cov: qTokens.length
+				? qTokens.filter((t) => op.routingText.includes(t)).length /
+					qTokens.length
+				: 0,
+		}))
+		.sort((a, b) => b.cov - a.cov);
+	const target = scores.find((sc) => sc.operationId === expectOp);
+	const top = scores[0];
+	console.log(
+		`win-probe "${probe}" → top ${top.operationId} ${top.cov.toFixed(3)} · ${expectOp} ${target?.cov.toFixed(3) ?? "?"}`,
+	);
+	if (!target || target.cov < 0.4) {
+		fail(
+			`${expectOp} x-routing covers only ${target?.cov.toFixed(3) ?? "0"} of win-probe "${probe}" (need >= 0.4)`,
+		);
+	}
+	if (top.operationId !== expectOp) {
+		fail(
+			`win-probe "${probe}" x-routing max is ${top.operationId}, expected ${expectOp}`,
+		);
 	}
 }
 

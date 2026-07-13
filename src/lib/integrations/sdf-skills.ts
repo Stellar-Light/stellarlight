@@ -8,10 +8,17 @@
  * 24h so we don't hammer SDF's site.
  */
 
-/** Stable list of SDF skill names (from skills.stellar.org/sitemap.xml).
- *  If SDF adds more, we can either re-read the sitemap or extend this. */
+/** Fallback list of SDF skill names — used ONLY when the live llms.txt
+ *  fetch fails. sls-053: the previous hardcode still carried the superseded
+ *  `soroban` skill (its URL kept serving 200 while SDF's own site data and
+ *  llms.txt had moved to `smart-contracts`) and missed two newer skills —
+ *  the stale-snapshot class. The catalog is now derived from llms.txt (24h
+ *  cache) so SDF renames/additions propagate without a code change; this
+ *  list mirrors llms.txt as of 2026-07-12. */
 export const SDF_SKILL_NAMES = [
-	"soroban",
+	"smart-contracts",
+	"setup-stellar-contracts",
+	"agent-browser-webauthn",
 	"dapp",
 	"assets",
 	"data",
@@ -21,6 +28,30 @@ export const SDF_SKILL_NAMES = [
 ] as const;
 
 export type SdfSkillName = (typeof SDF_SKILL_NAMES)[number];
+
+/** Derive the CURRENT skill list from SDF's own llms.txt (their agent-facing
+ *  index — the source of truth for what is maintained). Falls back to the
+ *  static list above on any fetch/parse failure. */
+export async function fetchSdfSkillNames(): Promise<string[]> {
+	try {
+		const res = await fetch(`${BASE}/llms.txt`, {
+			next: { revalidate: 86_400 }, // 24h, same cadence as the skills
+			headers: {
+				"User-Agent": "StellarLight/1.0 (https://stellarlight.xyz/scout)",
+			},
+		});
+		if (!res.ok) return [...SDF_SKILL_NAMES];
+		const txt = await res.text();
+		const names = [
+			...new Set(
+				[...txt.matchAll(/skills\/([a-z0-9-]+)\/SKILL\.md/g)].map((m) => m[1]),
+			),
+		];
+		return names.length >= 3 ? names : [...SDF_SKILL_NAMES];
+	} catch {
+		return [...SDF_SKILL_NAMES];
+	}
+}
 
 const BASE = "https://skills.stellar.org";
 
@@ -108,9 +139,8 @@ export async function fetchSdfSkill(
 
 /** Fetch the full catalog (parallel) and return summaries. */
 export async function fetchSdfSkillCatalog(): Promise<SdfSkillSummary[]> {
-	const results = await Promise.allSettled(
-		SDF_SKILL_NAMES.map((n) => fetchSdfSkill(n)),
-	);
+	const names = await fetchSdfSkillNames();
+	const results = await Promise.allSettled(names.map((n) => fetchSdfSkill(n)));
 	return results
 		.flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []))
 		.map(({ content, wordCount, ...summary }) => {

@@ -906,6 +906,19 @@ export const spec: OpenAPISpec = {
 					purpose:
 						"Find Stellar builders (people) by skill, location, or shipped projects — recruiting/hiring.",
 					keywords: [
+						// sls-052: stack+role/seniority question family
+						"developers",
+						"devs",
+						"engineers",
+						"contributors",
+						"experienced",
+						"senior",
+						"hire",
+						"typescript",
+						"javascript",
+						"frontend",
+						"backend",
+						"smart contract developer",
 						"builder",
 						"builders",
 						"developer",
@@ -933,6 +946,7 @@ export const spec: OpenAPISpec = {
 						"soroban",
 					],
 					useWhen: [
+						"find developers by stack + role/seniority (e.g. experienced Rust Soroban devs)",
 						"find me a teammate/collaborator who has shipped X",
 						"Stellar devs in [place] who've done Soroban / 'Rust builders to hire' / 'builders in LatAm working on payments'",
 						"who can I hire for an anchor build — you want a PERSON to contact",
@@ -945,6 +959,7 @@ export const spec: OpenAPISpec = {
 						"SCF-tier or award-track filtering (unsupported — the `scfTier` field is empty on every profile today; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
+						"Who are experienced Rust Soroban devs I could work with?",
 						"Find experienced Soroban devs I could reach out to",
 						"Rust builders to hire in LatAm working on payments",
 						"Who in Lagos has shipped a Stellar project?",
@@ -1615,6 +1630,16 @@ export const spec: OpenAPISpec = {
 					purpose:
 						"Cited knowledge/docs answers from the Stellar research corpus ($vectorSearch over Voyage embeddings; BM25-lite keyword fallback when vectors are unavailable).",
 					keywords: [
+						// sls-052: SDF-organizational question family
+						"SDF",
+						"Stellar Development Foundation",
+						"enterprise fund",
+						"mandate",
+						"organizational structure",
+						"leadership",
+						"chief scientist",
+						"roadmap",
+						"grants program",
 						"sep",
 						"seps",
 						"cap",
@@ -1691,6 +1716,7 @@ export const spec: OpenAPISpec = {
 						"stellar.expert",
 					],
 					useWhen: [
+						"SDF organizational questions (enterprise fund, mandate, leadership, structure)",
 						"'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X'",
 						"primary-source citations for a thesis or design question; ecosystem KNOWLEDGE & explainer questions ('what is / how does / who / why / is it true that…')",
 						"security & risk (audits, exploits, incidents, post-mortems, oracle manipulation), compliance & regulation (Travel Rule, FATF, KYC/AML, sanctions)",
@@ -1704,6 +1730,7 @@ export const spec: OpenAPISpec = {
 						"GitHub source code ranked by quality -> searchRepos",
 					],
 					exampleQuestions: [
+						"What is the SDF enterprise fund and what is its mandate?",
 						"How does the Stellar Consensus Protocol work?",
 						"What does the SCF Handbook say about award tiers?",
 						"Has there been a reentrancy incident on Soroban?",
@@ -2098,6 +2125,17 @@ export const spec: OpenAPISpec = {
 					purpose:
 						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats.",
 					keywords: [
+						// sls-052: repo-health question family
+						"open issues",
+						"issue tracker",
+						"issue backlog",
+						"repo health",
+						"repository health",
+						"maintenance",
+						"activity",
+						"most active",
+						"commits",
+						"stars",
 						"leaderboard",
 						"top projects",
 						"most active",
@@ -2120,6 +2158,8 @@ export const spec: OpenAPISpec = {
 						"repoCount",
 					],
 					useWhen: [
+						"which projects have open issues / the biggest issue backlog",
+						"repo health / maintenance / activity comparisons across projects",
 						"who/what are the top/most-active Stellar projects",
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
@@ -2132,6 +2172,7 @@ export const spec: OpenAPISpec = {
 						"ranking individual developers (this ranks PROJECTS + an EC macro snapshot; it lists no named devs) -> getBuilders",
 					],
 					exampleQuestions: [
+						"Which leaderboard projects have open issues?",
 						"What are the most active Stellar projects in the last 30 days?",
 						"How many active developers does Stellar have?",
 						"Export the top 100 Stellar projects as CSV",

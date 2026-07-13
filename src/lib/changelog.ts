@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-12",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"sls-052 + sls-053: x-routing vocabulary curation (repo-health terms on getLeaderboard, SDF-organizational terms on searchResearch, stack+role terms on getBuilders — the three families measured as unrecovered at the 1.7.16 absorb) and the skills directory now derives the SDF catalog from skills.stellar.org/llms.txt (24h cache): superseded `soroban` is gone; `smart-contracts`, `setup-stellar-contracts`, and `agent-browser-webauthn` now listed.",
+		detail:
+			"x-routing additions are additive curation inside the 1.7.16 structure — descriptions unchanged, capture guards hold. The routing-surface CI check gains the inverse guard sls-052 recommends: each operation's x-routing must cover the vocabulary of the question families it is expected to win. Skills consumers should refresh: the soroban slug no longer appears; smart-contracts is the maintained successor.",
+	},
+	{
 		date: "2026-07-11",
 		surfaces: ["api"],
 		version: "spec 1.7.16",

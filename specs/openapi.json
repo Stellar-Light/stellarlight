@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.7.16",
+		"version": "1.7.17",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -1003,6 +1003,18 @@
 				"x-routing": {
 					"purpose": "Find Stellar builders (people) by skill, location, or shipped projects — recruiting/hiring.",
 					"keywords": [
+						"developers",
+						"devs",
+						"engineers",
+						"contributors",
+						"experienced",
+						"senior",
+						"hire",
+						"typescript",
+						"javascript",
+						"frontend",
+						"backend",
+						"smart contract developer",
 						"builder",
 						"builders",
 						"developer",
@@ -1030,6 +1042,7 @@
 						"soroban"
 					],
 					"useWhen": [
+						"find developers by stack + role/seniority (e.g. experienced Rust Soroban devs)",
 						"find me a teammate/collaborator who has shipped X",
 						"Stellar devs in [place] who've done Soroban / 'Rust builders to hire' / 'builders in LatAm working on payments'",
 						"who can I hire for an anchor build — you want a PERSON to contact",
@@ -1042,6 +1055,7 @@
 						"SCF-tier or award-track filtering (unsupported — the `scfTier` field is empty on every profile today; a project's award history) -> searchProjects"
 					],
 					"exampleQuestions": [
+						"Who are experienced Rust Soroban devs I could work with?",
 						"Find experienced Soroban devs I could reach out to",
 						"Rust builders to hire in LatAm working on payments",
 						"Who in Lagos has shipped a Stellar project?"
@@ -1879,6 +1893,15 @@
 				"x-routing": {
 					"purpose": "Cited knowledge/docs answers from the Stellar research corpus ($vectorSearch over Voyage embeddings; BM25-lite keyword fallback when vectors are unavailable).",
 					"keywords": [
+						"SDF",
+						"Stellar Development Foundation",
+						"enterprise fund",
+						"mandate",
+						"organizational structure",
+						"leadership",
+						"chief scientist",
+						"roadmap",
+						"grants program",
 						"sep",
 						"seps",
 						"cap",
@@ -1955,6 +1978,7 @@
 						"stellar.expert"
 					],
 					"useWhen": [
+						"SDF organizational questions (enterprise fund, mandate, leadership, structure)",
 						"'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X'",
 						"primary-source citations for a thesis or design question; ecosystem KNOWLEDGE & explainer questions ('what is / how does / who / why / is it true that…')",
 						"security & risk (audits, exploits, incidents, post-mortems, oracle manipulation), compliance & regulation (Travel Rule, FATF, KYC/AML, sanctions)",
@@ -1968,6 +1992,7 @@
 						"GitHub source code ranked by quality -> searchRepos"
 					],
 					"exampleQuestions": [
+						"What is the SDF enterprise fund and what is its mandate?",
 						"How does the Stellar Consensus Protocol work?",
 						"What does the SCF Handbook say about award tiers?",
 						"Has there been a reentrancy incident on Soroban?",
@@ -2408,6 +2433,16 @@
 				"x-routing": {
 					"purpose": "Ranked active-project leaderboard + Electric Capital ecosystem developer stats.",
 					"keywords": [
+						"open issues",
+						"issue tracker",
+						"issue backlog",
+						"repo health",
+						"repository health",
+						"maintenance",
+						"activity",
+						"most active",
+						"commits",
+						"stars",
 						"leaderboard",
 						"top projects",
 						"most active",
@@ -2430,6 +2465,8 @@
 						"repoCount"
 					],
 					"useWhen": [
+						"which projects have open issues / the biggest issue backlog",
+						"repo health / maintenance / activity comparisons across projects",
 						"who/what are the top/most-active Stellar projects",
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
@@ -2442,6 +2479,7 @@
 						"ranking individual developers (this ranks PROJECTS + an EC macro snapshot; it lists no named devs) -> getBuilders"
 					],
 					"exampleQuestions": [
+						"Which leaderboard projects have open issues?",
 						"What are the most active Stellar projects in the last 30 days?",
 						"How many active developers does Stellar have?",
 						"Export the top 100 Stellar projects as CSV"
