@@ -181,7 +181,7 @@ Use this when the user asks a **conceptual / thesis / design-tradeoff / security
 
 Always cite the source URL from each returned chunk — that's the whole point. **Audit chunks** carry extra metadata: `.auditor`, `.protocol`, and `.severity` (`critical | high | medium | low | informational | unknown`) — surface these inline ("per a HIGH-severity finding in the Certora audit of Blend Protocol V2…"). **EC Developer Report chunks** are historical (2019–2023 PDFs); for the most recent year cross-reference `developerreport.com/ecosystems/stellar`.
 
-**Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|incident|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`.
+**Params:** `q={query}` (required), `source={sdf-blog|scf-handbook|sep|cap|dev-docs|paper|scf-proposal|lumenloop|lumenloop-research|audit|incident|security-program|ec-developer-report}` (optional filter), `limit=N` (default 8, max 25). Invalid source returns 400 with `validSources`. Use `security-program` for bug-bounty / vulnerability-disclosure program status (which program is current, where to report).
 
 **Returns:** `.results[*]` with `{id, source, title, section, url, content, chunkIndex, score}`. `.meta.mode` indicates `"vector"` (semantic search via Atlas $vectorSearch) or `"keyword"`. **Mode is chosen per query (dynamic), not per source** — the *same* `source` can return either mode depending on the query string, so don't pin a mode to a source. `.meta.model` reports the embedding model used.
 

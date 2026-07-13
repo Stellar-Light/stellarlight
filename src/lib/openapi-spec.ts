@@ -1657,6 +1657,10 @@ export const spec: OpenAPISpec = {
 						"ec research",
 						"security",
 						"bug bounty",
+						"hackerone",
+						"immunefi",
+						"security program",
+						"responsible disclosure",
 						"vulnerability disclosure",
 						"security audit",
 						"exploit",
@@ -1719,7 +1723,7 @@ export const spec: OpenAPISpec = {
 						"SDF organizational questions (enterprise fund, mandate, leadership, structure)",
 						"'how does X work', 'is X possible / has X been discussed on Stellar', 'what does the SEP/spec/audit say about X'",
 						"primary-source citations for a thesis or design question; ecosystem KNOWLEDGE & explainer questions ('what is / how does / who / why / is it true that…')",
-						"security & risk (audits, exploits, incidents, post-mortems, oracle manipulation), compliance & regulation (Travel Rule, FATF, KYC/AML, sanctions)",
+						"security & risk (audits, exploits, incidents, post-mortems, oracle manipulation), bug-bounty / disclosure program status (source=security-program: which program is current, HackerOne vs Immunefi, where to report), compliance & regulation (Travel Rule, FATF, KYC/AML, sanctions)",
 						"funding & governance (SCF v7.0, award tiers, Neural Quorum Governance) and SCF program mechanics — how to apply step-by-step, Build/Instawards/Liquidity/Public-Goods awards, eligibility, review timeline (prescreen, panel review, community vote, KYC), deadlines",
 						"SDF org/mission/legal structure; protocol history (SCP whitepaper, authors); ecosystem programs (ambassadors, regional chapters, bootcamps)",
 						"Soroban security incidents (reentrancy, sdk advisories/CVEs, DoS); ecosystem history (Protocol 20 mainnet launch, XLM initial supply, UNHCR aid, Enterprise Fund)",
@@ -1750,7 +1754,7 @@ export const spec: OpenAPISpec = {
 						name: "source",
 						in: "query",
 						description:
-							"Optional source filter. Use 'audit' for security questions, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
+							"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
 						schema: {
 							type: "string",
 							enum: [
@@ -1765,6 +1769,7 @@ export const spec: OpenAPISpec = {
 								"lumenloop-research",
 								"audit",
 								"incident",
+								"security-program",
 								"ec-developer-report",
 							],
 						},

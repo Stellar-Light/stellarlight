@@ -86,6 +86,10 @@ export const ResearchDocs: CollectionConfig = {
 					value: "incident",
 				},
 				{
+					label: "Security program (bug-bounty / disclosure policy)",
+					value: "security-program",
+				},
+				{
 					label: "Electric Capital Developer Report",
 					value: "ec-developer-report",
 				},

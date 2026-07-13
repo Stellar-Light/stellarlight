@@ -46,11 +46,22 @@ interface Question {
 	category: string;
 	mode: "research" | "projects" | "repos";
 	question: string;
+	/** Optional ?source= filter (research mode) — mirrors real agent calls. */
+	source?: string;
+	/** Optional per-question result count (default TOP_K). Use to lock a
+	 *  rank window: limit 3 + answerRegex = "must surface in the top 3". */
+	limit?: number;
 	expect: {
 		liveSource?: boolean;
 		answerRegex?: string[];
 		forbiddenRegex?: string[];
 		expectUrlIncludes?: string;
+		/** The FIRST result's URL must contain this substring — a rank-1 lock
+		 *  (sls-019: exact-ID retrieval must put the named doc first). */
+		top1UrlIncludes?: string;
+		/** No URL may appear twice in the returned page — the per-document
+		 *  dedup contract (sls-019: cap-0035 served 9× on one page). */
+		uniqueUrls?: boolean;
 		minTopScore?: number;
 		note?: string;
 	};
@@ -97,6 +108,8 @@ interface Graded {
 	topScore: number | null;
 	urlOk: boolean | null;
 	scoreOk: boolean | null;
+	top1Ok: boolean | null;
+	uniqueOk: boolean | null;
 	thin: boolean;
 	junk: number;
 	badTitle: number;
@@ -104,7 +117,9 @@ interface Graded {
 }
 
 async function gradeResearch(q: Question): Promise<Graded> {
-	const url = `${BASE_URL}/api/research?q=${encodeURIComponent(q.question)}&limit=${TOP_K}`;
+	const limit = q.limit ?? TOP_K;
+	const src = q.source ? `&source=${encodeURIComponent(q.source)}` : "";
+	const url = `${BASE_URL}/api/research?q=${encodeURIComponent(q.question)}&limit=${limit}${src}`;
 	const data = (await fetchJson(url)) as { results?: ResearchResult[] };
 	const results = data.results ?? [];
 	const haystacks = results.map((r) =>
@@ -132,6 +147,18 @@ async function gradeResearch(q: Question): Promise<Graded> {
 			? results.some((r) => (r.url ?? "").includes(q.expect.expectUrlIncludes!))
 			: null;
 
+	// Rank-1 lock: the first result must be the named document (sls-019).
+	const top1Ok =
+		q.expect.top1UrlIncludes != null
+			? (results[0]?.url ?? "").includes(q.expect.top1UrlIncludes)
+			: null;
+
+	// Per-document dedup lock: no URL twice in the returned page (sls-019).
+	const urls = results.map((r) => r.url ?? "");
+	const uniqueOk = q.expect.uniqueUrls
+		? new Set(urls).size === urls.length
+		: null;
+
 	// Best-matching chunk for the "thin" check: first result that hits answerRegex.
 	let thin = false;
 	if (missing.length === 0) {
@@ -152,7 +179,12 @@ async function gradeResearch(q: Question): Promise<Graded> {
 		JUNK_TITLE.test((r.title ?? "").trim()),
 	).length;
 
-	const pass = matched && scoreOk !== false && urlOk !== false;
+	const pass =
+		matched &&
+		scoreOk !== false &&
+		urlOk !== false &&
+		top1Ok !== false &&
+		uniqueOk !== false;
 	return {
 		id: q.id,
 		category: q.category,
@@ -164,6 +196,8 @@ async function gradeResearch(q: Question): Promise<Graded> {
 		topScore,
 		urlOk,
 		scoreOk,
+		top1Ok,
+		uniqueOk,
 		thin,
 		junk,
 		badTitle,
@@ -203,6 +237,8 @@ async function gradeProjects(q: Question): Promise<Graded> {
 		topScore: null,
 		urlOk: null,
 		scoreOk: null,
+		top1Ok: null,
+		uniqueOk: null,
 		thin: false,
 		junk: 0,
 		badTitle: 0,
@@ -254,6 +290,8 @@ async function gradeRepos(q: Question): Promise<Graded> {
 		topScore,
 		urlOk: null,
 		scoreOk,
+		top1Ok: null,
+		uniqueOk: null,
 		thin: false,
 		junk: 0,
 		badTitle: 0,
@@ -283,6 +321,8 @@ async function main() {
 				topScore: null,
 				urlOk: null,
 				scoreOk: null,
+				top1Ok: null,
+				uniqueOk: null,
 				thin: false,
 				junk: 0,
 				badTitle: 0,
@@ -310,6 +350,8 @@ async function main() {
 				topScore: null,
 				urlOk: null,
 				scoreOk: null,
+				top1Ok: null,
+				uniqueOk: null,
 				thin: false,
 				junk: 0,
 				badTitle: 0,
@@ -340,6 +382,8 @@ async function main() {
 			g.badTitle ? `${g.badTitle} bad-title` : "",
 			g.scoreOk === false ? "low-score" : "",
 			g.urlOk === false ? "url-miss" : "",
+			g.top1Ok === false ? "top1-miss" : "",
+			g.uniqueOk === false ? "dup-url" : "",
 			g.missingRegexes.length ? `missing:${g.missingRegexes.join(",")}` : "",
 		]
 			.filter(Boolean)

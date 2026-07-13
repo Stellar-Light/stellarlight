@@ -422,6 +422,90 @@
 				],
 				"minTopScore": 0.4
 			}
+		},
+		{
+			"id": "yieldblox-incident-facts",
+			"category": "incident-truth",
+			"mode": "research",
+			"question": "yieldblox oracle incident",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"2026-02-22|february 2026|2026-02",
+					"61,249,278|61[.,]2 million xlm|10\\.2 million",
+					"quarantin"
+				],
+				"forbiddenRegex": [
+					"may 2026.{0,40}(attempted|contained)",
+					"\\$61 ?m|61 million dollars"
+				],
+				"top1UrlIncludes": "blockaid.io",
+				"note": "sls-022 (upstream #513): the incident row served 'May 2026, attempted & contained, $61 million in XLM'. Truth (Blockaid 2026-05-20 + BlockSec 2026-02-26): COMPLETED drain on 2026-02-22 of 61,249,278 XLM + ~1,000,197 USDC (~$10.2M); ~48M XLM later quarantined — quarantine is not recovery. The corrected curated record (cited to Blockaid) must be the top result; the wrong dating/amount phrasing must not surface. Expected to fail until the next refresh-research-corpus incident run lands."
+			}
+		},
+		{
+			"id": "cap-exact-id-0038",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "CAP-0038",
+			"source": "cap",
+			"limit": 10,
+			"expect": {
+				"top1UrlIncludes": "cap-0038.md",
+				"uniqueUrls": true,
+				"note": "sls-019 (upstream #510): q=CAP-0038&source=cap ranked its own document 23rd — cross-referencing CAPs won the vector race. An exact canonical identifier is a retrieval KEY: the named doc must be rank 1, and no URL may fill two slots of the page."
+			}
+		},
+		{
+			"id": "cap-exact-id-0021",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "cap-21",
+			"source": "cap",
+			"expect": {
+				"top1UrlIncludes": "cap-0021.md",
+				"note": "sls-019 variant-form lock: the short form cap-21 must normalize to cap-0021 and retrieve it at rank 1 (live rank was 7)."
+			}
+		},
+		{
+			"id": "cap-exact-id-0058",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "CAP 58",
+			"source": "cap",
+			"expect": {
+				"top1UrlIncludes": "cap-0058.md",
+				"note": "sls-019 variant-form lock: the space form CAP 58 must normalize to cap-0058 and retrieve it at rank 1 (live rank was 11)."
+			}
+		},
+		{
+			"id": "cap-dedup-asset-clawback",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "Asset Clawback",
+			"source": "cap",
+			"limit": 10,
+			"expect": {
+				"top1UrlIncludes": "cap-0035.md",
+				"uniqueUrls": true,
+				"note": "sls-019 dedup lock: q=Asset+Clawback&source=cap served cap-0035.md nine times in one 25-slot page — the source-starved vector pool made the per-doc collapse refill with duplicates. With the widened filtered pool, every URL in the page must be unique while distinct CAP docs exist."
+			}
+		},
+		{
+			"id": "security-program-consolidation",
+			"category": "security-program",
+			"mode": "research",
+			"question": "Effective 7 MAY 2026 SDF consolidated bug bounty single HackerOne Immunefi deprecated",
+			"limit": 3,
+			"expect": {
+				"answerRegex": [
+					"hackerone",
+					"immunefi",
+					"2026-05-07|7 may 2026|may 7,? 2026",
+					"openzeppelin"
+				],
+				"note": "sls-020 (Tyler's exact transition wording, expected top-3 → limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
+			}
 		}
 	]
 }

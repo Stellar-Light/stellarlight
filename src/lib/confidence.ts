@@ -34,6 +34,11 @@ const AUTHORITY: Record<string, number> = {
 	// A real exploit/incident is the single most safety-relevant signal for a
 	// "is it safe to build on?" question — at least as authoritative as an audit.
 	incident: 0.9,
+	// SDF's controlling bug-bounty / vulnerability-disclosure policy (the
+	// HackerOne program page + curated supersession records). Policy-grade —
+	// same tier as audits/incidents. NOT evergreen: which program is current
+	// is exactly the kind of claim that goes stale (sls-020).
+	"security-program": 0.9,
 	"scf-handbook": 0.85,
 	"ec-developer-report": 0.8,
 	"scf-proposal": 0.72,
@@ -60,9 +65,10 @@ const EVERGREEN = new Set([
 	"dev-docs",
 	"paper",
 	"audit",
-	// A past incident is a durable historical fact — "Blend was hit by an
-	// attempted oracle attack in May 2026" stays true and stays relevant to
-	// safety due-diligence, so it shouldn't decay out of confidence over time.
+	// A past incident is a durable historical fact — "a YieldBlox Blend V2
+	// pool was drained via oracle misconfiguration on 2026-02-22" stays true
+	// and stays relevant to safety due-diligence, so it shouldn't decay out
+	// of confidence over time.
 	"incident",
 	"scf-handbook",
 ]);
@@ -133,6 +139,14 @@ export interface ConfidenceInput {
 	 * the composite stays explainable as relevance+freshness+authority.
 	 */
 	titleMatch?: number;
+	/**
+	 * The query names THIS document by its canonical identifier (CAP-0038,
+	 * SEP-0010). An exact-key hit is the strongest relevance evidence there is
+	 * — and precisely the signal cosine similarity can't encode (sls-019: the
+	 * named CAP ranked 23rd for its own ID) — so relevance is floored at 0.9
+	 * rather than left to the retrieval score.
+	 */
+	exactIdMatch?: boolean;
 	/** Injectable clock so callers/tests are deterministic. Defaults to now. */
 	now?: number;
 }
@@ -168,10 +182,11 @@ export function composeConfidence(
 
 export function researchConfidence(input: ConfidenceInput): Confidence {
 	const now = input.now ?? Date.now();
-	const relevance = clamp01(
+	let relevance = clamp01(
 		relevanceFrom(input.score ?? 0, input.mode, input.maxScore) +
 			0.15 * clamp01(input.titleMatch ?? 0),
 	);
+	if (input.exactIdMatch) relevance = Math.max(relevance, 0.9);
 	const authority = AUTHORITY[input.source] ?? DEFAULT_AUTHORITY;
 	const { freshness, ageDays } = freshnessFrom(
 		input.source,
