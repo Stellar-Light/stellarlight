@@ -73,6 +73,27 @@ const DOCS_LINKS: Record<string, string> = {
 	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
 };
 
+// sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
+// links.github points at a BIG org — enrich-repos keyword-gates large orgs
+// (only repo names matching "stellar" survive), so a Stellar-relevant repo
+// with a non-stellar name is invisible to discovery even though its org is
+// linked. Merges missing pairs, never removes; enrich-repos indexes them on
+// its next sweep. Each row is hand-verified against the repo's own README.
+const GITHUB_REPOS_ADD: Record<
+	string,
+	Array<{ owner: string; name: string }>
+> = {
+	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
+	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
+	// implemented as a Relayer plugin (Stellar support today)", networks
+	// stellar:testnet, type "stellar" (current support). The openzeppelin
+	// record links github.com/openzeppelin (org, >>20 repos → keyword gate),
+	// and the repo name lacks "stellar" — hence the recall zero.
+	openzeppelin: [
+		{ owner: "OpenZeppelin", name: "relayer-plugin-x402-facilitator" },
+	],
+};
+
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
 // EVERY capability they demonstrably have, not a single dominant category.
 // ADDITIVE — merges into `types`, never removes. Grounded in the provider's
@@ -256,6 +277,15 @@ const TYPES_SET: Record<string, string[]> = {
 	"dex-tools": ["Analytics"], // dextools.io + info.dextools.io: DeFi charting/pair-explorer/portfolio "data hub"; connects existing wallets, holds no liquidity
 	"mobula-labs": ["Analytics", "AI", "SDK"], // mobula.io: "Stream-based, modular & blazing fast APIs powering the best onchain products" — data/API provider, not a venue
 	spinach: ["Infrastructure"], // spinach.fi: "Liquidity Competitions — projects earn daily rewards for integrating and growing liquidity" — incentive-campaign platform, not a venue
+	// sls-033 (#519) wallet product-kind wave (2026-07-13): the record's own
+	// description already says WalletConnect "is not a wallet itself" but an
+	// "open connection protocol … a natively supported Stellar Wallets Kit
+	// module" — yet types was EMPTY, so the connectivity-protocol-vs-wallet
+	// distinction #519 demands existed only in prose (the prose-only-facts bug
+	// class) and the record was invisible to every type filter. Typed to the
+	// taxonomy truth we have today; the richer per-record productKind enum is
+	// a batch-D field.
+	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
 };
 
 /** Rebrands — name, website, and description move together so both the old
@@ -613,6 +643,50 @@ async function main() {
 			`  ${slug}: types [${existing.join(", ")}] → [${next.join(", ")}]`,
 		);
 		writes.push({ id: d.id, slug, data: { types: next } });
+	}
+
+	// ── sls-025: additive github.repos rows (merge, never remove) ──
+	console.log("\n── GitHub repos add (merge, never remove) ──");
+	for (const [slug, addRepos] of Object.entries(GITHUB_REPOS_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const existing: Array<{ owner?: string; name?: string }> =
+			d.github?.repos ?? [];
+		const key = (o?: string, n?: string) =>
+			`${(o ?? "").toLowerCase()}/${(n ?? "").toLowerCase()}`;
+		const have = new Set(existing.map((e) => key(e.owner, e.name)));
+		const missing = addRepos.filter((a) => !have.has(key(a.owner, a.name)));
+		if (!missing.length) {
+			console.log(`  ${slug}: github.repos already include all rows, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: github.repos +${missing.map((m) => `${m.owner}/${m.name}`).join(", ")}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				github: {
+					...(d.github ?? {}),
+					repos: [
+						...existing.map((e) => ({ owner: e.owner, name: e.name })),
+						...missing,
+					],
+				},
+			},
+		});
 	}
 
 	// ── raven#8 sweep (REPORT-ONLY): other dual-identity ramp providers ──

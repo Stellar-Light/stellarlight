@@ -197,6 +197,85 @@ async function main() {
 		bad("band award lock", `fetch failed: ${String(err)}`);
 	}
 
+	// sls-033 (#519) wallet-taxonomy fixtures: StellarTerm is a DEX/trading
+	// client, NOT a wallet product — it must never (re)gain the Wallet type
+	// (it appears in wallet-oriented SEMANTIC results, which is fine; the
+	// exact-type enumeration is the contract). And the type=Wallet enumeration
+	// must not regress to duplicate-name rows (the observed duplicate Stellar
+	// Passport records under different slugs).
+	try {
+		const d = await j("/api/projects/search?q=stellarterm&limit=5");
+		const st = (d.projects ?? []).find(
+			(p: { slug: string }) => p.slug === "stellarterm",
+		);
+		if (!st) bad("stellarterm fixture (sls-033)", "slug not found in top-5");
+		else if ((st.types ?? []).includes("Wallet"))
+			bad(
+				"stellarterm fixture (sls-033)",
+				`typed Wallet — it is a DEX/trading client, not a wallet product (types=${JSON.stringify(st.types)})`,
+			);
+		else if ((st.types ?? []).includes("DEX"))
+			ok("stellarterm typed DEX, not Wallet (sls-033 fixture)");
+		else
+			warn(
+				"stellarterm fixture (sls-033)",
+				`types=${JSON.stringify(st.types)} — DEX expected`,
+			);
+	} catch (err) {
+		bad("stellarterm fixture (sls-033)", `fetch failed: ${String(err)}`);
+	}
+	try {
+		const d = await j("/api/projects/search?type=Wallet&limit=100");
+		const byName = new Map<string, string[]>();
+		for (const p of d.projects ?? []) {
+			const k = String(p.name ?? "").toLowerCase();
+			byName.set(k, [...(byName.get(k) ?? []), p.slug]);
+		}
+		const dups = [...byName.entries()].filter(([, slugs]) => slugs.length > 1);
+		if (dups.length)
+			bad(
+				"wallet-enum duplicates (sls-033)",
+				dups
+					.map(([n, slugs]) => `'${n}' served twice: ${slugs.join(", ")}`)
+					.join("; "),
+			);
+		else ok("type=Wallet enumeration has no duplicate-name rows (sls-033)");
+	} catch (err) {
+		bad("wallet-enum duplicates (sls-033)", `fetch failed: ${String(err)}`);
+	}
+
+	// sls-034 (#518) exact-asset lookups: each named stablecoin/asset CODE must
+	// resolve to its own Asset-category record — never only the issuer/org row
+	// (Circle≠USDC-class conflation). usdy warns (not fails) until the seed
+	// wave (curate-projects SEEDS) executes; PROMOTE to hard once live.
+	for (const code of ["pyusd", "eurau", "mgusd", "ylds", "usdy"]) {
+		try {
+			const d = await j(`/api/projects/search?q=${code}&limit=5`);
+			const row = (d.projects ?? []).find(
+				(p: { slug: string }) => p.slug === code,
+			);
+			if (row?.category === "Asset")
+				ok(`asset row '${code}' resolves as its own Asset record (sls-034)`);
+			else if (row)
+				bad(
+					"asset-row fixture (sls-034)",
+					`'${code}' resolves but category=${row.category} (Asset expected)`,
+				);
+			else if (code === "usdy")
+				warn(
+					"asset-row fixture (sls-034)",
+					"usdy Asset row absent — seed wave pending (curate-projects SEEDS); promote to hard-fail once executed",
+				);
+			else
+				bad(
+					"asset-row fixture (sls-034)",
+					`no '${code}' Asset row in top-5 for q=${code} — exact-asset lookup depends on an issuer/org row again`,
+				);
+		} catch (err) {
+			bad("asset-row fixture (sls-034)", `fetch failed: ${String(err)}`);
+		}
+	}
+
 	// sls-045 rfps row/count contract: synthetic scf-round rows must be
 	// discriminated (rowType/synthetic) and the counts must be internally
 	// consistent — open counts BRIEFS, returned counts ROWS incl. synthetic.
