@@ -154,6 +154,34 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// Identity continuity (sls-050). When a project RENAMES (Vibrant →
+			// Vesseo), a consumer looking up either name must land on one entity
+			// WITH the continuity as data — not via invisible synonym patches.
+			// aliases join name-matching (an exact alias hit ranks like an exact
+			// name hit) and rows serve an `identity` block with provenance.
+			name: "aliases",
+			type: "text",
+			hasMany: true,
+			admin: {
+				description:
+					"Former/alternate names this project is known by (e.g. Vibrant for Vesseo). Alias lookups resolve to this record and rows disclose the continuity.",
+			},
+		},
+		{
+			name: "renamedAt",
+			type: "date",
+			admin: {
+				description: "When the current name took effect (if known).",
+			},
+		},
+		{
+			name: "renameSourceUrl",
+			type: "text",
+			admin: {
+				description: "Source substantiating the rename (announcement, site).",
+			},
+		},
+		{
 			// Dedupe / lineage pointer (sls-008). When this record is a duplicate
 			// or former name of another project — same team, same site, split by a
 			// naming artifact (e.g. orbit-finance → orbitcdp, both Zenith Protocols)

@@ -692,6 +692,17 @@ export interface components {
             tvlMethod?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
             canonicalSlug?: string | null;
+            /** @description Rename continuity (sls-050). Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it. */
+            identity?: {
+                currentName?: string;
+                aliases?: string[];
+                /**
+                 * Format: date
+                 * @description When the current name took effect (if known).
+                 */
+                renamedAt?: string | null;
+                sourceUrl?: string | null;
+            } | null;
             /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records. */
             lifecycle?: {
                 wasLive?: boolean;
