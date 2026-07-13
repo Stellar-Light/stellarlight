@@ -1,0 +1,37 @@
+name: Backfill status provenance (manual)
+
+# sls-024 backfill wave: derive statusBasis/statusAsOf/statusSourceUrl for
+# project records from evidence the repo already holds (STATUS_FIX rows,
+# liveness-triage survivors, curated seeds, human-confirmed verdicts, seed
+# provenance) — see scripts/data/backfill-status-provenance.ts for the rule
+# table. Dry-run by default; the plan JSON is uploaded as an artifact either
+# way. Run dry first, read the plan, then re-dispatch with execute=true.
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run (plan artifact only)."
+        type: boolean
+        default: false
+permissions: { contents: read }
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/backfill-status-provenance.ts --out=provenance-plan.json ${{ inputs.execute && '--execute' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provenance-plan-${{ inputs.execute && 'execute' || 'dry-run' }}
+          path: provenance-plan.json
+          if-no-files-found: warn

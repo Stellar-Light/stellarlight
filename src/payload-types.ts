@@ -301,6 +301,18 @@ export interface Project {
     | ('operator-announcement' | 'site-liveness' | 'onchain-activity' | 'human-verified' | 'source-inherited')
     | null;
   /**
+   * Former/alternate names this project is known by (e.g. Vibrant for Vesseo). Alias lookups resolve to this record and rows disclose the continuity.
+   */
+  aliases?: string[] | null;
+  /**
+   * When the current name took effect (if known).
+   */
+  renamedAt?: string | null;
+  /**
+   * Source substantiating the rename (announcement, site).
+   */
+  renameSourceUrl?: string | null;
+  /**
    * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
    */
   canonicalSlug?: string | null;
@@ -1964,6 +1976,9 @@ export interface ProjectsSelect<T extends boolean = true> {
   statusAsOf?: T;
   statusSourceUrl?: T;
   statusBasis?: T;
+  aliases?: T;
+  renamedAt?: T;
+  renameSourceUrl?: T;
   canonicalSlug?: T;
   lifecycle?:
     | T
