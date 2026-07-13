@@ -956,7 +956,7 @@ export const spec: OpenAPISpec = {
 						"a funded project/product or 'who built X (the company)' -> searchProjects",
 						"the GitHub repo/code itself -> searchRepos",
 						"ecosystem-wide dev counts/activity stats -> getLeaderboard",
-						"SCF-tier or award-track filtering (unsupported — the `scfTier` field is empty on every profile today; a project's award history) -> searchProjects",
+						"SCF-tier or award-track filtering (unsupported — no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
 						"Who are experienced Rust Soroban devs I could work with?",

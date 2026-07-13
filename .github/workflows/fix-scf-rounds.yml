@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+      dropProvenNegatives: { description: "Surgical mode (sls-026 residual): for records exact-sync must skip (some round unverdicted), drop ONLY rounds the page affirmatively marks negative; keep unverdicted rounds. Never adds.", type: boolean, default: false }
 permissions: { contents: read }
 jobs:
   fix:
@@ -22,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/data/fix-scf-rounds.ts --out=scf-rounds-plan.json ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/fix-scf-rounds.ts --out=scf-rounds-plan.json ${{ inputs.execute && '--execute' || '' }} ${{ inputs.dropProvenNegatives && '--drop-proven-negatives' || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: scf-rounds-plan, path: scf-rounds-plan.json }

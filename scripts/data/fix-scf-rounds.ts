@@ -10,12 +10,16 @@
  *   pnpm exec tsx scripts/data/fix-scf-rounds.ts                 # dry run
  *   pnpm exec tsx scripts/data/fix-scf-rounds.ts --execute       # writes
  *   pnpm exec tsx scripts/data/fix-scf-rounds.ts --out=plan.json # plan path
+ *   pnpm exec tsx scripts/data/fix-scf-rounds.ts --drop-proven-negatives
+ *                                                 # surgical mode (see below)
  *
  * TRUTH RULES (precision over recall — ambiguity NEVER accuses):
  *  - officialAwardedRounds comes from per-submission VERDICTS only
  *    (parseRoundVerdicts in scripts/eval/scf-official.ts, the calibrated
  *    parser shared with scripts/eval/scf-crosscheck.ts). Badge arrays are
- *    never trusted.
+ *    never trusted. The parser reads the full negative-verdict vocabulary
+ *    ("Not Awarded" / "Prescreen Failed" / "Panel Review Failed" /
+ *    "Ineligible" / "Rejected…"); neutral in-flight statuses verdict nothing.
  *  - A rounds write is planned ONLY when (a) the page parse is unambiguous —
  *    ≥1 clearly-parsed submission AND every round we currently list carries a
  *    verdict — and (b) our set ≠ the official set. The write syncs
@@ -23,6 +27,15 @@
  *  - Records with any unverdicted round (the crosscheck's roundsUnverifiable
  *    class), unfetchable/unparseable pages, or MULTIPLE matching SCF pages
  *    are SKIPPED with a reason and listed in the plan for hand review.
+ *  - --drop-proven-negatives (sls-026 residual, the "ambiguous 13" class):
+ *    SURGICAL mode for records the exact-sync rule must skip because SOME
+ *    listed round has no verdict. Instead of skipping wholesale, remove ONLY
+ *    the rounds the detail page AFFIRMATIVELY marks with a negative verdict
+ *    on every submission in that round, and KEEP awarded + unverdicted rounds
+ *    exactly as stored (never adds rounds either). Ambiguity shrinks without
+ *    accusing: an unverdicted round stays until a human or a future verdict
+ *    resolves it, and the plan lists what was kept-unverdicted per write.
+ *    Fully-verdicted records still take the exact-sync path.
  *  - scf.totalAwarded is NEVER touched by rounds writes (amounts are
  *    separately sourced — see the crosscheck header for why).
  *  - Boolean flips are ALLOWLIST-ONLY (BOOLEAN_FIXES below): no matter what
@@ -46,6 +59,10 @@ import {
 } from "../eval/scf-official";
 
 const EXECUTE = process.argv.includes("--execute");
+/** Surgical mode (sls-026 residual): for records exact-sync must skip because
+ * some listed round is unverdicted, drop ONLY affirmatively-negative rounds
+ * and keep the rest. See TRUTH RULES in the header. */
+const DROP_PROVEN_NEGATIVES = process.argv.includes("--drop-proven-negatives");
 const OUT_FILE =
 	process.argv.find((x) => x.startsWith("--out="))?.slice("--out=".length) ||
 	"scf-rounds-plan.json";
@@ -94,6 +111,11 @@ interface RoundsWrite {
 	to: number[];
 	removed: number[];
 	added: number[];
+	/** --drop-proven-negatives write: removed only affirmative negatives,
+	 * never synced/added; `keptUnverdicted` lists the rounds retained WITHOUT
+	 * a verdict (still ambiguous — hand-review candidates). */
+	surgical?: true;
+	keptUnverdicted?: number[];
 }
 
 interface BooleanFix {
@@ -297,12 +319,41 @@ async function main() {
 			if (unknown.length) {
 				// The crosscheck's roundsUnverifiable class — ambiguity never
 				// accuses, so we can't prove what the full official set is.
+				if (DROP_PROVEN_NEGATIVES) {
+					// Surgical mode (sls-026 residual): the page can't verdict the
+					// FULL set, but rounds it AFFIRMATIVELY marks negative on every
+					// submission are still proven wrong on our record. Drop only
+					// those; keep awarded + unverdicted rounds byte-identical.
+					const provenNegative = ours.filter((r) => v.notAwarded.has(r));
+					if (provenNegative.length) {
+						const kept = ours.filter((r) => !v.notAwarded.has(r));
+						const keptNums = kept.map(Number).sort((a, b) => a - b);
+						roundsWrites.push({
+							slug: d.slug,
+							name: d.name,
+							url: entry.url,
+							from: oursNums,
+							to: keptNums,
+							removed: provenNegative.map(Number),
+							added: [],
+							surgical: true,
+							keptUnverdicted: unknown.map(Number),
+						});
+						updates.push({
+							id: d.id,
+							slug: d.slug,
+							// awardedRounds ONLY (same rule as exact-sync below).
+							data: { scf: { ...(d.scf ?? {}), awardedRounds: keptNums } },
+						});
+						continue;
+					}
+				}
 				skips.push({
 					slug: d.slug,
 					name: d.name,
 					url: entry.url,
 					ourRounds: oursNums,
-					reason: `no submission verdict found for round(s) ${unknown.map((r) => `#${r}`).join(" ")} — unverifiable, review by hand`,
+					reason: `no submission verdict found for round(s) ${unknown.map((r) => `#${r}`).join(" ")} — unverifiable, review by hand${DROP_PROVEN_NEGATIVES ? " (surgical mode: no listed round is affirmatively negative, nothing to drop)" : ""}`,
 				});
 				continue;
 			}
@@ -339,6 +390,7 @@ async function main() {
 
 	const plan = {
 		mode: EXECUTE ? "execute" : "dry-run",
+		dropProvenNegatives: DROP_PROVEN_NEGATIVES,
 		generatedAt: new Date().toISOString(),
 		source:
 			"communityfund.stellar.org per-submission verdicts (scripts/eval/scf-official.ts parser — badge arrays never trusted)",
@@ -351,6 +403,7 @@ async function main() {
 		},
 		summary: {
 			roundsWrites: roundsWrites.length,
+			surgicalWrites: roundsWrites.filter((w) => w.surgical).length,
 			booleanFixes: booleanFixes.length,
 			skips: skips.length,
 			noops: noops.length,
@@ -371,7 +424,7 @@ async function main() {
 	);
 	for (const w of roundsWrites)
 		log(
-			`  WRITE ${w.slug}: [${w.from.join(", ")}] → [${w.to.join(", ")}]${w.removed.length ? ` (drop ${w.removed.map((r) => `#${r}`).join(" ")})` : ""}${w.added.length ? ` (add ${w.added.map((r) => `#${r}`).join(" ")})` : ""}`,
+			`  ${w.surgical ? "SURGICAL" : "WRITE"} ${w.slug}: [${w.from.join(", ")}] → [${w.to.join(", ")}]${w.removed.length ? ` (drop ${w.removed.map((r) => `#${r}`).join(" ")})` : ""}${w.added.length ? ` (add ${w.added.map((r) => `#${r}`).join(" ")})` : ""}${w.keptUnverdicted?.length ? ` (kept-unverdicted ${w.keptUnverdicted.map((r) => `#${r}`).join(" ")})` : ""}`,
 		);
 	for (const b of booleanFixes)
 		log(

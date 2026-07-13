@@ -64,7 +64,11 @@ interface BuilderRow {
 	websiteUrl: string | null;
 	twitterHandle: string | null;
 	avatarUrl: string | null;
-	scfTier: string | null;
+	// `scfTier` REMOVED in spec 1.7.19 (sls-040 / #521): the source field was
+	// never populated (116/116 live profiles empty), so the always-blank value
+	// contradicted the documented "SCF-tier data unsupported" contract. Person-
+	// level SCF tier, if it ever gets a real source, returns as a typed,
+	// documented field — not a blank placeholder.
 	isFeatured: boolean;
 	projectCount: number;
 	projects: BuilderProject[];
@@ -265,7 +269,6 @@ export async function GET(req: NextRequest) {
 					website_url?: string;
 					twitter_handle?: string;
 					avatar_url?: string;
-					scf_tier?: string;
 					is_featured?: boolean;
 					projects?: BuilderProject[];
 				}>
@@ -278,7 +281,6 @@ export async function GET(req: NextRequest) {
 				websiteUrl: b.website_url ?? null,
 				twitterHandle: b.twitter_handle ?? null,
 				avatarUrl: b.avatar_url ?? null,
-				scfTier: b.scf_tier ?? null,
 				isFeatured: !!b.is_featured,
 				projectCount: (b.projects ?? []).length,
 				projects: b.projects ?? [],

@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-13",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec 1.7.19",
+		type: "removed",
+		summary:
+			"sls-040 (upstream #521): removed the always-blank `scfTier` field from /api/builders rows. The source field was never populated (116/116 live profiles empty), so the emitted empty string contradicted the documented contract that SCF-tier data is unsupported — an observable ambiguity a machine consumer could misread as a supported-but-empty signal. Builder rows no longer carry the key at all.",
+		detail:
+			"getBuilders response rows drop `scfTier` entirely (it was \"\" on every row; no consumer could ever have read a real value from it). The routing guidance is unchanged: SCF-tier/award-track filtering remains unsupported on /api/builders — a project's award history lives on /api/projects/search rows. If person-level SCF tier ever gains a real source it will return as a typed, documented field with provenance, per #521's option 2. The MCP get_builders tool description and the skill API reference now state the removal. Note: an unsupported scfTier QUERY parameter is still silently ignored (no 4xx) — explicit unknown-param rejection is tracked separately.",
+	},
+	{
 		date: "2026-07-12",
 		surfaces: ["api"],
 		type: "added",

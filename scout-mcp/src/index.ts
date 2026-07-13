@@ -253,7 +253,7 @@ server.registerTool(
 	{
 		title: "Search Stellar builders",
 		description:
-			"The Stellar PEOPLE directory — builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use search_projects. Profiles carry NO populated SCF-tier/award data (`scfTier` is empty on every profile today).",
+			"The Stellar PEOPLE directory — builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use search_projects. Profiles carry NO SCF-tier/award data (the never-populated `scfTier` response field was removed in API spec 1.7.19).",
 		inputSchema: {
 			location: z
 				.string()

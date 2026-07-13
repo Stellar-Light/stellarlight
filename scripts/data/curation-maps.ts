@@ -360,6 +360,102 @@ export const SEEDS: Array<{
 		},
 		provenance: { source: "AdminEdit" },
 	},
+	// sls-025 residual (rec=3, GT-56 2026-07-11 + upstream #512 family):
+	// kalepail/smart-account-kit was ABSENT from the repo index while sibling
+	// kalepail repos are indexed — same class as passkey-kit above (discovery
+	// is project-seeded; no record linked it). Verified 2026-07-13: repo
+	// exists, non-archived, non-fork, pushed 2026-07-13, 15 stars. Description
+	// is the repo's own line verbatim; README: "The kit is a client for the
+	// OpenZeppelin stellar-contracts smart-account contract." Also the
+	// sls-033 (#519) "passkey/smart-account tooling ≠ wallet product"
+	// distinction: typed SDK, not Wallet.
+	{
+		slug: "smart-account-kit",
+		name: "Smart Account Kit",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"TypeScript SDK for deploying and managing OpenZeppelin smart account contracts on Stellar with WebAuthn passkey authentication — passkey/Ed25519/delegated signers, context rules, typed policy clients, fee sponsoring. A client for the OpenZeppelin stellar-contracts smart-account contract, by kalepail (Tyler van der Hoeven). Smart-account TOOLING for developers, not an end-user wallet.",
+		links: {
+			website: "https://github.com/kalepail/smart-account-kit",
+			github: "https://github.com/kalepail/smart-account-kit",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	// sls-025 (GT-18 x402 family): RouteDock is named in Tyler's probe list but
+	// exact q=RouteDock returned only noise — winsznx/routedock was never
+	// indexed (no record linked it). Verified 2026-07-13: repo exists,
+	// non-archived, non-fork, pushed 2026-07-09; routedock.xyz returns 200;
+	// published on npm as @routedock/routedock (0.1.2). Description grounded
+	// in the repo's own README ("Unified payment execution layer for
+	// autonomous agents on Stellar" — x402 / MPP charge / MPP session behind
+	// one client.pay() call, mode selected from the provider's routedock.json
+	// manifest).
+	{
+		slug: "routedock",
+		name: "RouteDock",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"RouteDock is a unified payment execution layer for autonomous agents on Stellar: one SDK (@routedock/routedock on npm) whose single client.pay() call routes across the three Stellar agent-payment protocols — x402 (Coinbase), MPP charge, and MPP session channels — selecting the mode from the provider's routedock.json manifest. Supports Stellar testnet and mainnet.",
+		links: {
+			website: "https://routedock.xyz",
+			github: "https://github.com/winsznx/routedock",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	// sls-033 (#519): a useful wallet comparison "must distinguish … Creit-Tech
+	// Wallets Kit" from end-user wallet products — but the kit had NO directory
+	// record at all (only its repo, creit-tech/Stellar-Wallets-Kit, was
+	// indexed), so kit-vs-wallet was indistinguishable at the project layer.
+	// Verified 2026-07-13: stellarwalletskit.dev returns 200; the repo's own
+	// self-description is "A kit to handle all Stellar Wallets at once".
+	// Typed SDK (integration kit), NOT Wallet — the distinction #519 asks for,
+	// expressed in the taxonomy we have today.
+	{
+		slug: "stellar-wallets-kit",
+		name: "Stellar Wallets Kit",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Stellar Wallets Kit (by Creit Tech) is a single TypeScript library that handles integration with all major Stellar ecosystem wallets at once — xBull, Freighter, Albedo, Rabet, Ledger, Trezor, WalletConnect, HOT Wallet and more behind one interface, so dApps integrate every wallet without shipping per-wallet code. An INTEGRATION KIT for developers, not an end-user wallet product.",
+		links: {
+			website: "https://stellarwalletskit.dev",
+			github: "https://github.com/Creit-Tech/Stellar-Wallets-Kit",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	// sls-034 (#518): exact-asset lookup for USDY returned only the Ondo
+	// ORGANIZATION row — no separate asset record (the issue's remaining gap
+	// after PYUSD/EURAU/MGUSD/YLDS landed). USDY-on-Stellar verified on
+	// PRIMARY sources 2026-07-13: ondo.finance/.well-known/stellar.toml lists
+	// code=USDY issuer=GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6
+	// ("Ondo US Dollar Yield", attestation_of_reserve=ondo.finance/usdy,
+	// redemption via app.ondo.finance); stellar.expert shows that asset live
+	// with ~35k payments / ~2.4k trustlines and Ondo's domain binding. Typed
+	// Stablecoin+RWA (the YLDS yield-bearing precedent); the toml's own desc
+	// notes the price appreciates as yield accrues — a yield-bearing
+	// instrument, not a payment stablecoin (product-class field is batch D).
+	{
+		slug: "usdy",
+		name: "USDY",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin", "RWA"],
+		supportedNetworks: ["stellar", "evm", "solana"],
+		shortDescription:
+			"USDY (Ondo US Dollar Yield) is Ondo Finance's yield-bearing tokenized US-dollar asset, backed by short-term US Treasuries and bank deposits, issued natively on Stellar (issuer GAJMPX…DAZ6, published in ondo.finance's stellar.toml with attestation of reserve and redemption via app.ondo.finance). Unlike a payment stablecoin its price appreciates as yield accrues to holders. Also issued on Ethereum, Solana and other networks.",
+		links: {
+			website: "https://ondo.finance/usdy",
+		},
+		provenance: { source: "AdminEdit" },
+	},
 	// boxy 2026-07-09: the launching-vs-launched contrast needs the launching
 	// side represented. Identity verified via the Certora audit PDF (Certora/
 	// SecurityReports 06_10_2026_Certora_SpectraBridge_AuditReport.pdf), whose

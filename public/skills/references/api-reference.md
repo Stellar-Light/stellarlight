@@ -105,7 +105,7 @@ Stellar builder directory (synced from Stellar Passport). **Populated but small 
 
 **Params:** `q={text}`, `location={city}`, `skill={tech}` (alias for `q`).
 
-**Returns:** `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, projects[]. (A `scfTier` field exists on rows but is unpopulated — empty for every profile; never present it as SCF-tier/award-track data. A project's SCF award history lives on `/api/projects/search` rows.) When `.meta.counts.returned === 0`, the response also includes `.meta.advisory` with a one-line summary + 2 fallback channels (Stellar Discord + GitHub topic:stellar) — relay these verbatim to the user. The advisory exists specifically so you don't confabulate ecosystem-level claims from an empty directory.
+**Returns:** `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, projects[]. (Rows carry NO SCF-tier/award-track data — the never-populated `scfTier` field was removed in spec 1.7.19; never present SCF-tier claims about people. A project's SCF award history lives on `/api/projects/search` rows.) When `.meta.counts.returned === 0`, the response also includes `.meta.advisory` with a one-line summary + 2 fallback channels (Stellar Discord + GitHub topic:stellar) — relay these verbatim to the user. The advisory exists specifically so you don't confabulate ecosystem-level claims from an empty directory.
 
 ---
 

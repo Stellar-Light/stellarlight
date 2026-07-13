@@ -54,6 +54,32 @@ export async function fetchScf(): Promise<ScfEntry[]> {
 }
 
 /**
+ * Statuses the SCF detail page uses that are AFFIRMATIVE negative verdicts —
+ * the submission was considered and did NOT result in an award. Calibrated on
+ * the 2026-07-11 "ambiguous 13" hand-verification wave (grantfox/cartwey/
+ * freedom-pay-wallet/alternun/nobak/sorobanhooks/surgepay/joona-pay/airgap/
+ * peerpesa/sytemap/venerez/abroad — every one carried at least one of these on
+ * its rendered submission cards, cross-checked against the official per-round
+ * recap winner lists) plus the sls-026 Aquarius "Ineligible" round-30 row.
+ * "Rejected" appears with suffixes ("Rejected - timeout" on alternun's #40),
+ * so it matches as a prefix. Anything NOT listed here and not "Awarded"
+ * (e.g. "Information Collection", "Pending", "Test Transaction", "Ready for
+ * Payment") is NEUTRAL — in-flight or ambiguous, never negative evidence.
+ */
+const NEGATIVE_STATUSES = [
+	"Not Awarded",
+	"Prescreen Failed",
+	"Panel Review Failed",
+	"Ineligible",
+] as const;
+export function isNegativeVerdict(status: string): boolean {
+	return (
+		(NEGATIVE_STATUSES as readonly string[]).includes(status) ||
+		/^Rejected\b/.test(status)
+	);
+}
+
+/**
  * Per-round award verdicts from a detail page's submission cards. The page
  * embeds each submission as structured data with an explicit status:
  *   {"status":"Not Awarded", …, "roundName":"SCF #24", …}
@@ -61,17 +87,27 @@ export async function fetchScf(): Promise<ScfEntry[]> {
  * unescape and dedupe via sets). A round counts as AWARDED if ANY submission
  * in it was awarded (projects resubmit within a round — phoenix's Liquidity
  * round has both verdicts), and NOT-awarded only when every submission in the
- * round says "Not Awarded". Rounds without an SCF #N number (e.g. "Liquidity
- * Award…") don't map onto our numeric scfAwardedRounds and are ignored for
- * the round sets, but still count toward `awardedAnyCount` so a caller can
- * tell "zero awarded submissions AT ALL" from "awards only in non-numeric
- * rounds" (the coopstable boolean-fix precondition).
+ * round carries an affirmative NEGATIVE verdict (isNegativeVerdict above:
+ * "Not Awarded" / "Prescreen Failed" / "Panel Review Failed" / "Ineligible" /
+ * "Rejected…"). Neutral/in-flight statuses (e.g. "Information Collection",
+ * "Pending", "Ready for Payment") verdict NOTHING — those rounds stay out of
+ * both sets, so ambiguity still never accuses (sls-026/GT-17: a populated
+ * amount or Build award_type must not imply Awarded — nor Not-Awarded).
+ * Rounds without an SCF #N number (e.g. "Liquidity Award…") don't map onto
+ * our numeric scfAwardedRounds and are ignored for the round sets, but still
+ * count toward `awardedAnyCount` so a caller can tell "zero awarded
+ * submissions AT ALL" from "awards only in non-numeric rounds" (the
+ * coopstable boolean-fix precondition).
  * NOTE: the page's `buildAwardRounds` array is NOT usable — it includes
  * not-awarded rounds (verified on phoenix-svj, 2026-07-11).
  */
 export function parseRoundVerdicts(html: string): {
 	awarded: Set<string>;
 	notAwarded: Set<string>;
+	/** Submission cards with a DECISIVE status (Awarded or a negative verdict).
+	 * Neutral/in-flight cards are excluded — preserved semantics from when the
+	 * parser only read Awarded/Not Awarded: `submissions === 0` still means
+	 * "the page verdicts nothing", the never-accuse skip condition. */
 	submissions: number;
 	/** Submissions with status "Awarded" in ANY round, numeric or not. */
 	awardedAnyCount: number;
@@ -81,14 +117,18 @@ export function parseRoundVerdicts(html: string): {
 	const negative = new Set<string>();
 	let submissions = 0;
 	let awardedAnyCount = 0;
-	const re = /"status":"(Awarded|Not Awarded)"[^{}]*?"roundName":"([^"]+)"/g;
+	const re = /"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"/g;
 	for (const m of txt.matchAll(re)) {
+		const status = m[1];
+		const isAward = status === "Awarded";
+		const isNegative = isNegativeVerdict(status);
+		if (!isAward && !isNegative) continue; // neutral — verdicts nothing
 		submissions++;
-		if (m[1] === "Awarded") awardedAnyCount++;
+		if (isAward) awardedAnyCount++;
 		const num = m[2].match(/SCF\s*#\s*(\d+)/i)?.[1];
 		if (!num) continue;
 		const round = String(Number(num));
-		if (m[1] === "Awarded") awarded.add(round);
+		if (isAward) awarded.add(round);
 		else negative.add(round);
 	}
 	const notAwarded = new Set([...negative].filter((r) => !awarded.has(r)));
