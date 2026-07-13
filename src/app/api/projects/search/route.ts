@@ -137,6 +137,7 @@ async function semanticProjectRows(
 			statusSourceUrl: p.statusSourceUrl ?? null,
 			statusBasis: p.statusBasis ?? null,
 			canonicalSlug: p.canonicalSlug ?? null,
+			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
@@ -211,6 +212,14 @@ interface ProjectRow {
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
 	canonicalSlug: string | null;
+	// sls-050: rename continuity as data — aliases resolve here in search and
+	// the block carries provenance. Null when the project never renamed.
+	identity: {
+		currentName: string;
+		aliases: string[];
+		renamedAt: string | null;
+		sourceUrl: string | null;
+	} | null;
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
@@ -240,14 +249,35 @@ interface ProjectRow {
 	url: string;
 }
 
+// sls-050: identity block served when a record carries aliases.
+// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+function pickIdentity(p: any): ProjectRow["identity"] {
+	const aliases = Array.isArray(p.aliases) ? p.aliases.filter(Boolean) : [];
+	if (!aliases.length) return null;
+	return {
+		currentName: p.name,
+		aliases,
+		renamedAt: p.renamedAt ?? null,
+		sourceUrl: p.renameSourceUrl ?? null,
+	};
+}
+
 // Name-lookup rank (sls-009): the standard directory-search contract — a
 // query that IS a project's name must return that project first, regardless
 // of how much authority (prominence/SCF/stars) other keyword matches carry.
-function nameMatchScore(name: string, slug: string, q: string): number {
+function nameMatchScore(
+	name: string,
+	slug: string,
+	q: string,
+	aliases?: string[] | null,
+): number {
 	const qq = q.trim().toLowerCase();
 	if (!qq) return 0;
 	const n = name.trim().toLowerCase();
 	if (n === qq || slug.toLowerCase() === qq) return 3;
+	// sls-050: an exact former-name hit IS an exact name hit — rename
+	// continuity served as data, not synonym patches.
+	if ((aliases ?? []).some((a) => a.trim().toLowerCase() === qq)) return 3;
 	if (n.startsWith(qq)) return 2;
 	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
@@ -605,6 +635,7 @@ export async function GET(req: NextRequest) {
 			const baseOr = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
 					{ name: { like: v } },
+					{ aliases: { like: v } },
 					{ shortDescription: { like: v } },
 					{ category: { like: v } },
 				]),
@@ -752,6 +783,7 @@ export async function GET(req: NextRequest) {
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
 					canonicalSlug: p.canonicalSlug ?? null,
+					identity: pickIdentity(p),
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
@@ -860,7 +892,12 @@ export async function GET(req: NextRequest) {
 						let best: (typeof projects)[number] | null = null;
 						let bestRank = 1; // require ≥2 (prefix or exact)
 						for (const p of projects) {
-							const r = nameMatchScore(p.name, p.slug, subject);
+							const r = nameMatchScore(
+								p.name,
+								p.slug,
+								subject,
+								p.identity?.aliases,
+							);
 							if (r > bestRank) {
 								bestRank = r;
 								best = p;
@@ -877,7 +914,10 @@ export async function GET(req: NextRequest) {
 				// Reflector (authority-heavy) above the project literally named
 				// Blend. Exact=3, prefix=2, whole-word-in-name=1, else 0.
 				const nameRank = new Map(
-					filtered.map((p) => [p.id, nameMatchScore(p.name, p.slug, q)]),
+					filtered.map((p) => [
+						p.id,
+						nameMatchScore(p.name, p.slug, q, p.identity?.aliases),
+					]),
 				);
 				// Primary rank = keyword-match count. Tiebreak by composite
 				// confidence (status-freshness + SCF/hackathon authority) so on a
@@ -928,7 +968,12 @@ export async function GET(req: NextRequest) {
 						let best: (typeof filtered)[number] | null = null;
 						let bestRank = 1;
 						for (const p of filtered) {
-							const r = nameMatchScore(p.name, p.slug, subject);
+							const r = nameMatchScore(
+								p.name,
+								p.slug,
+								subject,
+								p.identity?.aliases,
+							);
 							if (r > bestRank) {
 								bestRank = r;
 								best = p;
@@ -1158,6 +1203,7 @@ export async function GET(req: NextRequest) {
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					canonicalSlug: null,
+					identity: pickIdentity(c),
 					lifecycle: pickLifecycle(c.lifecycle),
 					logoUrl,
 					scfAwarded: !!c.scf?.awarded,
@@ -1242,8 +1288,14 @@ export async function GET(req: NextRequest) {
 	// careful within-group order. An EXACT name/slug match still wins first, so
 	// q="OrbitCDP" keeps returning it even though it's Inactive.
 	if (q) {
-		const exact = (p: { name: string; slug: string }) =>
-			nameMatchScore(p.name ?? "", p.slug ?? "", q) === 3 ? 1 : 0;
+		const exact = (p: {
+			name: string;
+			slug: string;
+			identity?: ProjectRow["identity"];
+		}) =>
+			nameMatchScore(p.name ?? "", p.slug ?? "", q, p.identity?.aliases) === 3
+				? 1
+				: 0;
 		const act = (p: { status: string }) => (p.status === "Inactive" ? 0 : 1);
 		baseProjects.sort((a, b) => exact(b) - exact(a) || act(b) - act(a));
 	}

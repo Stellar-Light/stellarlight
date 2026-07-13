@@ -2738,6 +2738,23 @@ export const spec: OpenAPISpec = {
 						description:
 							"When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding.",
 					},
+					identity: {
+						type: "object",
+						nullable: true,
+						description:
+							"Rename continuity (sls-050). Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it.",
+						properties: {
+							currentName: { type: "string" },
+							aliases: { type: "array", items: { type: "string" } },
+							renamedAt: {
+								type: "string",
+								format: "date",
+								nullable: true,
+								description: "When the current name took effect (if known).",
+							},
+							sourceUrl: { type: "string", nullable: true },
+						},
+					},
 					lifecycle: {
 						type: "object",
 						nullable: true,

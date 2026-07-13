@@ -215,6 +215,21 @@ const SCF_FIX: Record<
 	abroad: { awarded: true, totalAwarded: 149820, awardedRounds: [32, 35] },
 };
 
+// sls-050: rename continuity — served as the `identity` block and matched as
+// exact-name in search. Exact-sync per slug (source-verified renames only).
+const IDENTITY_FIX: Record<
+	string,
+	{ aliases: string[]; renamedAt?: string; renameSourceUrl?: string }
+> = {
+	// Vesseo is SDF-subsidiary Sunship's consumer USDC wallet, formerly
+	// Vibrant (the record's own description + vesseoapp.com; Tyler's P4 H3
+	// primary-source extraction cites current material as "the Vesseo app").
+	vesseo: {
+		aliases: ["Vibrant"],
+		renameSourceUrl: "https://vesseoapp.com/",
+	},
+};
+
 const TYPES_SET: Record<string, string[]> = {
 	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
 	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
@@ -1669,6 +1684,45 @@ async function main() {
 	}
 
 	console.log("\n── Supported networks (fill-if-empty) ──");
+	for (const [slug, fix] of Object.entries(IDENTITY_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" for IDENTITY_FIX — skipped`);
+			continue;
+		}
+		const cur: string[] = Array.isArray(d.aliases) ? d.aliases : [];
+		if (
+			cur.join(",") === fix.aliases.join(",") &&
+			(d.renameSourceUrl ?? undefined) === fix.renameSourceUrl &&
+			(d.renamedAt ?? undefined) === fix.renamedAt
+		) {
+			console.log(`  ${slug}: identity already in sync, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: identity aliases=[${cur.join(", ")}] → [${fix.aliases.join(", ")}]`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				aliases: fix.aliases,
+				...(fix.renamedAt ? { renamedAt: fix.renamedAt } : {}),
+				...(fix.renameSourceUrl
+					? { renameSourceUrl: fix.renameSourceUrl }
+					: {}),
+			},
+		});
+	}
+
 	for (const [slug, fix] of Object.entries(SCF_FIX)) {
 		const r = await payload.find({
 			collection: "projects",

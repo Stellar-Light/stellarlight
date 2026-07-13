@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-12",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"sls-050: rename continuity as structured data. Project rows gain a nullable `identity` block ({currentName, aliases, renamedAt, sourceUrl}) served whenever a record carries former names; alias lookups now rank as exact-name matches in searchProjects (q=vibrant resolves to vesseo with the continuity disclosed, not via invisible synonyms). Additive.",
+		detail:
+			"Schema: projects gain optional aliases[]/renamedAt/renameSourceUrl. Search: aliases join the candidate query and nameMatchScore (exact alias = rank 3). First populated record: vesseo (formerly Vibrant). The general mechanism replaces per-case synonym patches for renames.",
+	},
+	{
+		date: "2026-07-12",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"sls-052 + sls-053: x-routing vocabulary curation (repo-health terms on getLeaderboard, SDF-organizational terms on searchResearch, stack+role terms on getBuilders — the three families measured as unrecovered at the 1.7.16 absorb) and the skills directory now derives the SDF catalog from skills.stellar.org/llms.txt (24h cache): superseded `soroban` is gone; `smart-contracts`, `setup-stellar-contracts`, and `agent-browser-webauthn` now listed.",
