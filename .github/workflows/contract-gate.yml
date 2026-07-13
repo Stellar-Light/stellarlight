@@ -38,6 +38,10 @@ jobs:
         run: pnpm contract:check
       - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
         run: pnpm exec tsx scripts/eval/routing-surface-check.ts
+      - name: Changelog⇄contract assertion (sls-054)
+        # The newest changelog entry may not name response fields absent from
+        # the published schema — the changelog is a consumption contract.
+        run: pnpm exec tsx scripts/eval/changelog-contract-check.ts
       - name: Spec change requires a changelog entry
         if: github.event_name == 'pull_request'
         run: |
