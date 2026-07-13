@@ -30,7 +30,10 @@ import {
 	CURATED_SKILLS,
 	type CuratedSkill,
 } from "@/lib/integrations/curated-skills";
-import { fetchSdfSkill, SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import {
+	fetchSdfSkill,
+	fetchSdfSkillNames,
+} from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
@@ -67,7 +70,9 @@ export async function GET(
 	const slug = generateSlug(rawName);
 
 	// 1. SDF skill? Fetch full content live from skills.stellar.org.
-	if ((SDF_SKILL_NAMES as readonly string[]).includes(slug)) {
+	// sls-053: gate against the LIVE llms.txt-derived list (24h cache), not a
+	// static snapshot — so renamed/added SDF skills resolve without a deploy.
+	if ((await fetchSdfSkillNames()).includes(slug)) {
 		const skill = await fetchSdfSkill(slug);
 		if (!skill) {
 			return NextResponse.json(
