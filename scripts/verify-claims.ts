@@ -79,7 +79,7 @@ const ENDPOINT_PROBES = [
 	"/api/rfps?limit=1",
 	"/api/research?q=test&limit=1",
 	"/api/skills",
-	"/api/skills/soroban",
+	"/api/skills/smart-contracts", // sls-053: soroban superseded — claim tracks the maintained successor
 	"/api/clusters?dimension=category",
 	"/api/analyze?dimension=all",
 	"/api/leaderboard",

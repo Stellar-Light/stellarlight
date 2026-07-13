@@ -147,9 +147,9 @@ const SESSIONS = [
 		userPrompt:
 			'"I want to write a Soroban smart contract. What do I need to know first?"',
 		steps: [
-			"GET /api/skills/soroban → load full SDF Soroban skill (~8k words).",
+			"GET /api/skills/smart-contracts → load the full SDF smart-contracts skill.",
 			"Quote relevant sections inline (setup, storage types, authorization, security pitfalls).",
-			"Recommend installing https://skills.stellar.org/skills/soroban/SKILL.md for ongoing work.",
+			"Recommend installing https://skills.stellar.org/skills/smart-contracts/SKILL.md for ongoing work.",
 			"Cross-reference: assets (for SAC bridge), data (for RPC queries), standards (for SEP work).",
 		],
 		response: {
@@ -183,7 +183,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Install the full skill at .claude/skills/stellar-soroban/SKILL.md from https://skills.stellar.org/skills/soroban/SKILL.md. For SAC bridge specifically, also grab the assets skill.",
+				"Install the full skill at .claude/skills/stellar-smart-contracts/SKILL.md from https://skills.stellar.org/skills/smart-contracts/SKILL.md. For SAC bridge specifically, also grab the assets skill.",
 		},
 	},
 	{
