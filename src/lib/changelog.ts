@@ -37,7 +37,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"sls-050: rename continuity as structured data. Project rows gain a nullable `identity` block ({currentName, aliases, renamedAt, sourceUrl}) served whenever a record carries former names; alias lookups now rank as exact-name matches in searchProjects (q=vibrant resolves to vesseo with the continuity disclosed, not via invisible synonyms). Additive.",
 		detail:
-			"Schema: projects gain optional aliases[]/renamedAt/renameSourceUrl. Search: aliases join the candidate query and nameMatchScore (exact alias = rank 3). First populated record: vesseo (formerly Vibrant). The general mechanism replaces per-case synonym patches for renames.",
+			"Response shape (byte-aligned with the OpenAPI schema): project rows gain an optional nullable `identity` object — `identity.currentName`, `identity.aliases` (array), `identity.renamedAt`, `identity.sourceUrl` — served only when a record carries former names; NO new top-level fields. Search: aliases join the candidate query and name matching (exact alias = exact-name rank). First populated record: vesseo (formerly Vibrant). The general mechanism replaces per-case synonym patches for renames. (Detail corrected 2026-07-13 per consumer report sls-054: the original sentence described internal storage field names, not the served shape.)",
 	},
 	{
 		date: "2026-07-12",
