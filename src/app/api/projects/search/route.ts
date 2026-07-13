@@ -105,6 +105,12 @@ async function semanticProjectRows(
 				tvlAsOf: 1,
 				tvlSource: 1,
 				tvlMethod: 1,
+				// sls-039: mapped provider identifiers ride semantic rows too
+				llamaSlugs: 1,
+				// sls-032/035: route evidence + venue role must be PROJECTED to be
+				// served (the F3 class — the mapper can't read omitted fields).
+				routes: 1,
+				venueRole: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},
@@ -159,6 +165,12 @@ async function semanticProjectRows(
 			// sls-031: TVL methodology provenance (which source, computed how)
 			tvlSource: p.tvlSource ?? null,
 			tvlMethod: p.tvlMethod ?? null,
+			// sls-039: mapped DefiLlama identifiers + citation URL
+			llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
+			tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+			// sls-032/035: route-level bridge evidence + DEX-landscape role
+			routes: pickRoutes(p.routes),
+			venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -211,6 +223,16 @@ interface ProjectRow {
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
+	// sls-039: mapped DefiLlama protocol identifiers + a citation URL, so a
+	// consumer can follow tvlUSD to the provider's own page/series. Null when
+	// the project isn't llama-mapped.
+	llamaSlugs?: string[] | null;
+	tvlMethodUrl?: string | null;
+	// sls-032: curated route-level bridge evidence (null = not curated, NOT
+	// route-free). See pickRoutes.
+	routes?: BridgeRoute[] | null;
+	// sls-035: DEX-landscape role (null = unclassified, not "not a venue").
+	venueRole?: string | null;
 	canonicalSlug: string | null;
 	// sls-050: rename continuity as data — aliases resolve here in search and
 	// the block carries provenance. Null when the project never renamed.
@@ -384,6 +406,65 @@ function pickCoverage(
 	const asOf = typeof c.asOf === "string" && c.asOf ? c.asOf : null;
 	if (!countries.length && !currencies.length && !seps.length) return null;
 	return { countries, currencies, seps, asOf };
+}
+
+// sls-032 (#516): a served route-level bridge fact. A Bridge-typed project
+// hit is DISCOVERY-level; these curated rows are the route-level evidence
+// (chain pair, direction, assets, destination representation, mechanism),
+// each grounded in the provider's own docs (sourceUrl + asOf).
+interface BridgeRoute {
+	fromChain: string;
+	toChain: string;
+	direction: string | null;
+	assets: string[];
+	assetRepresentation: string | null;
+	mechanism: string | null;
+	sourceUrl: string | null;
+	asOf: string | null;
+}
+
+// Only surfaced when curated route rows exist — null means "no curated route
+// evidence" (unknown), never "no routes". Strips Payload's internal row ids.
+function pickRoutes(
+	// biome-ignore lint/suspicious/noExplicitAny: payload array field shape
+	rows: any,
+): BridgeRoute[] | null {
+	if (!Array.isArray(rows) || rows.length === 0) return null;
+	const out: BridgeRoute[] = [];
+	for (const r of rows) {
+		if (!r || typeof r !== "object") continue;
+		if (typeof r.fromChain !== "string" || typeof r.toChain !== "string")
+			continue;
+		out.push({
+			fromChain: r.fromChain,
+			toChain: r.toChain,
+			direction: typeof r.direction === "string" ? r.direction : null,
+			assets: Array.isArray(r.assets)
+				? r.assets.filter((a: unknown) => typeof a === "string" && a)
+				: [],
+			assetRepresentation:
+				typeof r.assetRepresentation === "string"
+					? r.assetRepresentation
+					: null,
+			mechanism: typeof r.mechanism === "string" ? r.mechanism : null,
+			sourceUrl: typeof r.sourceUrl === "string" ? r.sourceUrl : null,
+			asOf: typeof r.asOf === "string" ? r.asOf : null,
+		});
+	}
+	return out.length ? out : null;
+}
+
+// sls-039: served llamaSlugs (null when unmapped — mirrors tvlUSD's "null =
+// not tracked" semantics) + a citation URL to the provider's own protocol
+// page, where the full TVL time series lives.
+function pickLlamaSlugs(slugs: unknown): string[] | null {
+	const arr = Array.isArray(slugs)
+		? slugs.filter((s): s is string => typeof s === "string" && s.length > 0)
+		: [];
+	return arr.length ? arr : null;
+}
+function tvlMethodUrlFor(slugs: string[] | null): string | null {
+	return slugs?.length ? `https://defillama.com/protocol/${slugs[0]}` : null;
 }
 
 export async function GET(req: NextRequest) {
@@ -705,6 +786,9 @@ export async function GET(req: NextRequest) {
 					tvlAsOf?: string | null;
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
+					llamaSlugs?: string[] | null;
+					routes?: unknown;
+					venueRole?: string | null;
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
@@ -782,6 +866,12 @@ export async function GET(req: NextRequest) {
 					// sls-031: TVL methodology provenance
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
+					// sls-039: mapped DefiLlama identifiers + citation URL
+					llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
+					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+					// sls-032/035: route-level bridge evidence + DEX-landscape role
+					routes: pickRoutes(p.routes),
+					venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
 					canonicalSlug: p.canonicalSlug ?? null,
 					identity: pickIdentity(p),
 					lifecycle: pickLifecycle(p.lifecycle),
@@ -1202,6 +1292,14 @@ export async function GET(req: NextRequest) {
 					status: c.status,
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
+					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
+					// inherited from the shadow via the spread.
+					tvlSource: c.tvlSource ?? null,
+					tvlMethod: c.tvlMethod ?? null,
+					llamaSlugs: pickLlamaSlugs(c.llamaSlugs),
+					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(c.llamaSlugs)),
+					routes: pickRoutes(c.routes),
+					venueRole: typeof c.venueRole === "string" ? c.venueRole : null,
 					canonicalSlug: null,
 					identity: pickIdentity(c),
 					lifecycle: pickLifecycle(c.lifecycle),

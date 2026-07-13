@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-13",
+		surfaces: ["api"],
+		version: "spec 1.7.20",
+		type: "added",
+		summary:
+			"sls schema wave (all additive): sls-032 #516 — project rows gain nullable `routes` (curated route-level bridge evidence: `fromChain`/`toChain`, `direction`, `assets`, `assetRepresentation` canonical|wrapped|bridged|interchain, `mechanism`, `sourceUrl`, `asOf`; null = not curated, NEVER 'no routes'; a Bridge project hit stays discovery-only). sls-035 #517 — rows gain nullable `venueRole` (amm | native-orderbook | aggregator-router | trading-ui | wallet-integrated) so a DEX cluster count stops reading as a competitor count. sls-036 #524 residual — getLeaderboard meta gains `dataAsOf` (the repo-index rollup timestamp the served github numbers are as-of; distinct from `generatedAt`). sls-039 #522 — rows gain `llamaSlugs` (the mapped DefiLlama identifiers `tvlMethod` refers to) + `tvlMethodUrl` (provider citation URL; the provider page carries the full TVL time series — this API serves the dated current point). sls-044 #520 — analyze funding gains `snapshotAsOf`, `previousSnapshot`, `snapshotDelta` (`addedProjects`/`removedProjects` slug lists + `removedReasons` with mechanical codes dedupe | eligibility-reclassification | source-correction | unknown), `deltaBasis`, and an explicit `deltaUnavailable` reason when no comparison exists yet.",
+		detail:
+			"Response-shape notes: `routes` and `venueRole` are curator-populated (grounded in provider docs with source URL + as-of date) — most records serve null, which means UNKNOWN/not-yet-curated, never a negative claim; do not answer canonical-USDC route questions from a bare Bridge project hit (that is the sls-032 finding — quote-time facts like fees/availability are intentionally not encoded). `llamaSlugs`/`tvlMethodUrl` serve the existing enricher mapping (null = not DefiLlama-tracked, matching `tvlUSD` semantics). Funding delta: snapshots persist server-side one-per-set-state (keyed by `projectSetHash`); the first read after this deploy serves `deltaUnavailable` honestly until a second, different set state is observed. First curated data rides the same wave: bridge routes for usdc-swap / allbridge / estrela / CCTP (rubic deliberately not route-encoded — its evidence is chain-level integration, and an aggregator's asset outcome is quote-time), and `venueRole` for the ten clearest DEX-landscape records (soroswap/aquarius/phoenix/sushi/comet = amm, stellarterm/stellarx = trading-ui, lobstr/scopuly = wallet-integrated, stellarbroker = aggregator-router).",
+	},
+	{
+		date: "2026-07-13",
 		surfaces: ["api", "mcp", "skill"],
 		version: "spec 1.7.19",
 		type: "removed",

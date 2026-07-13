@@ -88,6 +88,7 @@ export interface Config {
     'community-skills': CommunitySkill;
     'partner-accounts': PartnerAccount;
     'partner-leads': PartnerLead;
+    'funding-snapshots': FundingSnapshot;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -123,6 +124,7 @@ export interface Config {
     'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
     'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
     'partner-leads': PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
+    'funding-snapshots': FundingSnapshotsSelect<false> | FundingSnapshotsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -378,6 +380,38 @@ export interface Project {
    * Networks this project supports, lowercase (e.g. 'stellar', 'xrpl'). Curator-maintained.
    */
   supportedNetworks?: string[] | null;
+  /**
+   * Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only — empty means not-yet-curated, not route-free.
+   */
+  routes?:
+    | {
+        fromChain: string;
+        toChain: string;
+        direction?: ('one-way' | 'bidirectional') | null;
+        /**
+         * Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time) — unknown, not none.
+         */
+        assets?: string[] | null;
+        /**
+         * What the DESTINATION asset is: canonical (issuer-native, e.g. Circle-issued USDC via CCTP), wrapped, bridged, or interchain (e.g. USDC.axl). Null = quote-time/unverified.
+         */
+        assetRepresentation?: ('canonical' | 'wrapped' | 'bridged' | 'interchain') | null;
+        /**
+         * Settlement mechanism, e.g. cctp-burn-mint, native-liquidity-pool, lock-mint, aggregator-router.
+         */
+        mechanism?: string | null;
+        sourceUrl?: string | null;
+        /**
+         * YYYY-MM-DD the route evidence was verified.
+         */
+        asOf?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Role in the DEX/trading landscape (sls-035): amm / native-orderbook = independent liquidity venues; aggregator-router routes across venues and runs none; trading-ui = an interface over other venues (e.g. the native SDEX); wallet-integrated = trading embedded in a wallet. Null = not yet classified (unknown, not 'not a venue').
+   */
+  venueRole?: ('amm' | 'native-orderbook' | 'aggregator-router' | 'trading-ui' | 'wallet-integrated') | null;
   /**
    * Stellar Community Fund data
    */
@@ -1674,6 +1708,37 @@ export interface PartnerLead {
   createdAt: string;
 }
 /**
+ * System-written funding-v2 snapshot ledger (sls-044): one row per distinct awarded-project set, used by /api/analyze?dimension=funding to serve added/removed delta provenance. Do not edit by hand.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "funding-snapshots".
+ */
+export interface FundingSnapshot {
+  id: string;
+  /**
+   * sha256-prefix digest of the sorted awarded-project slug set — identical to funding.projectSetHash in the API response.
+   */
+  projectSetHash: string;
+  scfAwardedProjects: number;
+  scfTotalDistributedUSD: number;
+  methodologyVersion: string;
+  awardedSlugs:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * When this project-set state was first observed.
+   */
+  computedAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1868,6 +1933,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'partner-leads';
         value: string | PartnerLead;
+      } | null)
+    | ({
+        relationTo: 'funding-snapshots';
+        value: string | FundingSnapshot;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2028,6 +2097,20 @@ export interface ProjectsSelect<T extends boolean = true> {
         asOf?: T;
       };
   supportedNetworks?: T;
+  routes?:
+    | T
+    | {
+        fromChain?: T;
+        toChain?: T;
+        direction?: T;
+        assets?: T;
+        assetRepresentation?: T;
+        mechanism?: T;
+        sourceUrl?: T;
+        asOf?: T;
+        id?: T;
+      };
+  venueRole?: T;
   scf?:
     | T
     | {
@@ -2597,6 +2680,20 @@ export interface PartnerLeadsSelect<T extends boolean = true> {
   need?: T;
   source?: T;
   notified?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "funding-snapshots_select".
+ */
+export interface FundingSnapshotsSelect<T extends boolean = true> {
+  projectSetHash?: T;
+  scfAwardedProjects?: T;
+  scfTotalDistributedUSD?: T;
+  methodologyVersion?: T;
+  awardedSlugs?: T;
+  computedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -380,6 +380,125 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	lightecho: ["stellar"], // github.com/bp-ventures/lightecho-stellar-oracle README: deployed MAINNET contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T (+ testnet CA335...); Stellar-only Soroban oracle (BP Ventures). Deployment evidence, NOT freshness — sls-029's probe observed its mainnet price state ~4 months stale (2026-07-10).
 };
 
+/** sls-032 (#516): curated route-level bridge evidence — the first rows of
+ * the `routes` field on Projects. EXACT-SYNC for listed slugs (the canonical
+ * place to update a listed project's routes is HERE). Every row is grounded
+ * in the provider's OWN docs/APIs, re-using the #414-wave primary-source
+ * evidence recorded on SUPPORTED_NETWORKS above; chain names re-use the same
+ * vocabulary ("evm" umbrella). Rules:
+ *   - assetRepresentation states what the DESTINATION asset is (canonical =
+ *     issuer-native, e.g. Circle-issued USDC via CCTP burn-mint).
+ *   - Quote-time facts (fees, availability, current quotes) are NOT encoded.
+ *   - rubic deliberately gets NO route rows: its verified #414 evidence is
+ *     chain-level integration (its own chains API), not per-pair/per-asset
+ *     route evidence — an aggregator's asset outcome is quote-time, which is
+ *     exactly the sls-032 caveat. Its chain matrix stays on supportedNetworks.
+ */
+interface CuratedRoute {
+	fromChain: string;
+	toChain: string;
+	direction: "one-way" | "bidirectional";
+	assets: string[];
+	assetRepresentation:
+		| "canonical"
+		| "wrapped"
+		| "bridged"
+		| "interchain"
+		| null;
+	mechanism: string;
+	sourceUrl: string;
+	asOf: string;
+}
+/** Fan a common route template out over destination chains (all rows here are
+ * Stellar-anchored: fromChain stellar, direction covers the reverse leg). */
+const stellarRoutes = (
+	toChains: string[],
+	base: Omit<CuratedRoute, "fromChain" | "toChain">,
+): CuratedRoute[] =>
+	toChains.map((toChain) => ({ fromChain: "stellar", toChain, ...base }));
+
+const ROUTES_SET: Record<string, CuratedRoute[]> = {
+	// usdcswap.com sitemap enumerates STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes;
+	// Circle CCTP + horizon shipped in the app bundle (verified 2026-07-11,
+	// #414 wave). All seven destinations are CCTP domains → burn-mint canonical
+	// Circle USDC, both directions.
+	"usdc-swap": stellarRoutes(
+		[
+			"ethereum",
+			"arbitrum",
+			"optimism",
+			"base",
+			"polygon",
+			"avalanche",
+			"solana",
+		],
+		{
+			direction: "bidirectional",
+			assets: ["USDC"],
+			assetRepresentation: "canonical",
+			mechanism: "cctp-burn-mint",
+			sourceUrl: "https://usdcswap.com",
+			asOf: "2026-07-11",
+		},
+	),
+	// docs-core.allbridge.io chain list + live SRB (Soroban) USDC pool on the
+	// core API (verified 2026-07-09). Allbridge Core swaps between NATIVE-asset
+	// liquidity pools on each chain — destination USDC is the chain's canonical
+	// issue, which is also what the sls-032 quote-time audit observed.
+	allbridge: stellarRoutes(["evm", "solana", "tron", "sui"], {
+		direction: "bidirectional",
+		assets: ["USDC"],
+		assetRepresentation: "canonical",
+		mechanism: "native-liquidity-pool",
+		sourceUrl: "https://docs-core.allbridge.io",
+		asOf: "2026-07-09",
+	}),
+	// Estrela = Allbridge Core (SCF #22; its links resolve to allbridge.io) —
+	// same verified route matrix as allbridge above.
+	estrela: stellarRoutes(["evm", "solana", "tron", "sui"], {
+		direction: "bidirectional",
+		assets: ["USDC"],
+		assetRepresentation: "canonical",
+		mechanism: "native-liquidity-pool",
+		sourceUrl: "https://docs-core.allbridge.io",
+		asOf: "2026-07-09",
+	}),
+	// developers.circle.com/cctp/concepts/supported-chains-and-domains: Stellar
+	// is CCTP V2 domain 27 (verified 2026-07-09, #414 wave). CCTP is the RAIL
+	// (see its description): burn-and-mint of Circle-issued canonical USDC —
+	// the positive half of the sls-032 canonical-vs-USDC.axl regression.
+	"circle-cctp-cross-chain-transfer-protocol": stellarRoutes(
+		["evm", "solana", "sui", "aptos", "noble", "starknet"],
+		{
+			direction: "bidirectional",
+			assets: ["USDC"],
+			assetRepresentation: "canonical",
+			mechanism: "cctp-burn-mint",
+			sourceUrl:
+				"https://developers.circle.com/cctp/concepts/supported-chains-and-domains",
+			asOf: "2026-07-09",
+		},
+	),
+};
+
+/** sls-035 (#517): DEX-landscape role for the clearest records — makes the
+ * venue/aggregator/UI distinction data instead of prose, so a DEX cluster
+ * count stops reading as a competitor count. EXACT-SYNC for listed slugs.
+ * Only unambiguous assignments (one-line evidence each); ambiguous records
+ * (hoops, normal, lumenswap, multi-role platforms) stay null = unclassified. */
+const VENUE_ROLE: Record<string, string> = {
+	soroswap: "amm", // soroswap.finance: AMM protocol on Soroban running its own pools; DefiLlama `soroswap` TVL row
+	aquarius: "amm", // aqua.network: AMM pools + liquidity-incentive voting on Stellar; DefiLlama `aquarius-stellar` TVL row
+	phoenix: "amm", // Phoenix DeFi Hub: constant-product + stableswap pools (PHO) on Soroban — runs its own liquidity
+	sushi: "amm", // Sushi's Stellar deployment runs its own AMM pools; DefiLlama `sushi-stellar` TVL row
+	comet: "amm", // WAS a Balancer-style weighted-pool AMM on Soroban (record Inactive — status carries liveness; role is the taxonomy fact)
+	stellarterm: "trading-ui", // stellarterm.com: open-source trading client for the native Stellar DEX — hosts no liquidity of its own
+	stellarx: "trading-ui", // stellarx.com: trading interface over Stellar's native orderbook — no own pools
+	lobstr: "wallet-integrated", // lobstr.co: wallet with in-app swap/SDEX trading — venue access inside a wallet, not an independent venue
+	scopuly: "wallet-integrated", // scopuly.com: wallet + SDEX trading app (typed Wallet/DEX)
+	stellarbroker: "aggregator-router", // stellar.broker: "multi-source liquidity swap router … access to AMMs and Stellar DEX" — routes across venues, runs none
+};
+
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
  * identity-verified 2026-07-10 — every pair shares the same website, so these
  * are the same entity twice, not name collisions (class 21 check done).
@@ -1025,6 +1144,71 @@ async function main() {
 		}
 		console.log(`  ${slug}: [${cur.join(", ")}] → [${nets.join(", ")}]`);
 		writes.push({ id: d.id, slug, data: { supportedNetworks: nets } });
+	}
+
+	console.log("\n── Bridge routes (sls-032 #516, EXACT-SYNC) ──");
+	// Normalize to the curated shape (drop Payload row ids) so reruns no-op.
+	// biome-ignore lint/suspicious/noExplicitAny: Payload array-field row shape
+	const normRoutes = (rows: any): string =>
+		JSON.stringify(
+			(Array.isArray(rows) ? rows : []).map((r) => ({
+				fromChain: r.fromChain ?? null,
+				toChain: r.toChain ?? null,
+				direction: r.direction ?? null,
+				assets: Array.isArray(r.assets) ? r.assets : [],
+				assetRepresentation: r.assetRepresentation ?? null,
+				mechanism: r.mechanism ?? null,
+				sourceUrl: r.sourceUrl ?? null,
+				asOf: r.asOf ?? null,
+			})),
+		);
+	for (const [slug, routes] of Object.entries(ROUTES_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (normRoutes(d.routes) === normRoutes(routes)) {
+			console.log(`  ${slug}: routes already in sync, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: routes ← ${routes.length} row(s) (${routes
+				.map((rt) => `${rt.fromChain}↔${rt.toChain}`)
+				.join(", ")})`,
+		);
+		writes.push({ id: d.id, slug, data: { routes } });
+	}
+
+	console.log("\n── DEX venue roles (sls-035 #517, EXACT-SYNC) ──");
+	for (const [slug, role] of Object.entries(VENUE_ROLE)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.venueRole === role) {
+			console.log(`  ${slug}: venueRole already '${role}', skip`);
+			continue;
+		}
+		console.log(`  ${slug}: venueRole ${d.venueRole ?? "null"} → ${role}`);
+		writes.push({ id: d.id, slug, data: { venueRole: role } });
 	}
 
 	console.log("\n── Duplicate merges (canonicalSlug lineage, class 10) ──");

@@ -16,7 +16,9 @@
  *   - the Scout skill/service release line (`SCOUT_SERVICE_VERSION`),
  *   - the independently-versioned npm packages (scout-mcp, api-client).
  */
-export const API_VERSION = "1.7.19";
+// NOTE: 1.7.19 = the parallel taxonomy/membership batch (#528); the sls
+// schema wave (routes/venueRole/llamaSlugs/dataAsOf/funding delta) is 1.7.20.
+export const API_VERSION = "1.7.20";
 
 /** The Scout skill/service release line — surfaced at /api/status as `version`. */
 export const SCOUT_SERVICE_VERSION = "scout-1.0.0";

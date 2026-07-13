@@ -352,6 +352,87 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// sls-032 (#516): route-level bridge evidence. A Bridge-typed project
+			// hit is DISCOVERY-level — it cannot tell a caller which mechanism a
+			// transfer would use, whether the direction is supported, or whether
+			// the destination asset is canonical (Circle-issued USDC) vs a bridged
+			// representation (USDC.axl). Each row here is a CURATED route fact
+			// grounded in the provider's own docs/APIs (sourceUrl + asOf), written
+			// by ROUTES_SET in scripts/data/curate-projects.ts. Empty = no curated
+			// route evidence yet (unknown), NEVER "no routes exist". Quote-time
+			// facts (fees, availability, current quotes) intentionally stay out.
+			name: "routes",
+			type: "array",
+			admin: {
+				description:
+					"Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only — empty means not-yet-curated, not route-free.",
+			},
+			fields: [
+				{ name: "fromChain", type: "text", required: true },
+				{ name: "toChain", type: "text", required: true },
+				{
+					name: "direction",
+					type: "select",
+					options: ["one-way", "bidirectional"],
+				},
+				{
+					name: "assets",
+					type: "text",
+					hasMany: true,
+					admin: {
+						description:
+							"Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time) — unknown, not none.",
+					},
+				},
+				{
+					name: "assetRepresentation",
+					type: "select",
+					options: ["canonical", "wrapped", "bridged", "interchain"],
+					admin: {
+						description:
+							"What the DESTINATION asset is: canonical (issuer-native, e.g. Circle-issued USDC via CCTP), wrapped, bridged, or interchain (e.g. USDC.axl). Null = quote-time/unverified.",
+					},
+				},
+				{
+					name: "mechanism",
+					type: "text",
+					admin: {
+						description:
+							"Settlement mechanism, e.g. cctp-burn-mint, native-liquidity-pool, lock-mint, aggregator-router.",
+					},
+				},
+				{ name: "sourceUrl", type: "text" },
+				{
+					name: "asOf",
+					type: "text",
+					admin: {
+						description: "YYYY-MM-DD the route evidence was verified.",
+					},
+				},
+			],
+		},
+		{
+			// sls-035 (#517): DEX-cluster role taxonomy. The DEX type mixes
+			// independent liquidity venues (AMMs, the native orderbook) with
+			// aggregators/routers, trading UIs, and wallet-integrated trading —
+			// so a cluster count is a taxonomy count, NOT a competitor count.
+			// Curated only (VENUE_ROLE in scripts/data/curate-projects.ts), each
+			// assignment grounded in the operator's own product description.
+			name: "venueRole",
+			type: "select",
+			options: [
+				"amm",
+				"native-orderbook",
+				"aggregator-router",
+				"trading-ui",
+				"wallet-integrated",
+			],
+			admin: {
+				description:
+					"Role in the DEX/trading landscape (sls-035): amm / native-orderbook = independent liquidity venues; aggregator-router routes across venues and runs none; trading-ui = an interface over other venues (e.g. the native SDEX); wallet-integrated = trading embedded in a wallet. Null = not yet classified (unknown, not 'not a venue').",
+			},
+		},
+		{
 			name: "scf",
 			type: "group",
 			admin: {

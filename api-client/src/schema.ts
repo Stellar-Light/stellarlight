@@ -666,6 +666,35 @@ export interface components {
             } | null;
             /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown. */
             supportedNetworks?: string[];
+            /** @description sls-032: curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time. */
+            routes?: {
+                /** @description Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella). */
+                fromChain: string;
+                toChain: string;
+                /**
+                 * @description 'bidirectional' = the reverse leg is also evidenced; 'one-way' = only fromChain→toChain is. Null = direction not verified.
+                 * @enum {string|null}
+                 */
+                direction?: "one-way" | "bidirectional" | null;
+                /** @description Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (unknown, not none). */
+                assets?: string[];
+                /**
+                 * @description What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified — never assume canonical.
+                 * @enum {string|null}
+                 */
+                assetRepresentation?: "canonical" | "wrapped" | "bridged" | "interchain" | null;
+                /** @description Settlement mechanism, e.g. 'cctp-burn-mint', 'native-liquidity-pool', 'lock-mint', 'aggregator-router'. */
+                mechanism?: string | null;
+                /** @description Provider source the route evidence was verified from. */
+                sourceUrl?: string | null;
+                /** @description YYYY-MM-DD the route evidence was verified — routes are dated facts, re-verify before relying on them for a live transfer. */
+                asOf?: string | null;
+            }[] | null;
+            /**
+             * @description sls-035: role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').
+             * @enum {string|null}
+             */
+            venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated" | null;
             /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS (sls-049): capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
             anchorProfile?: {
                 slug?: string;
@@ -690,6 +719,13 @@ export interface components {
             tvlSource?: string | null;
             /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
             tvlMethod?: string | null;
+            /** @description sls-039: the curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
+            llamaSlugs?: string[] | null;
+            /**
+             * Format: uri
+             * @description sls-039: citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
+             */
+            tvlMethodUrl?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
             canonicalSlug?: string | null;
             /** @description Rename continuity (sls-050). Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it. */
@@ -1732,9 +1768,44 @@ export interface operations {
                         meta?: {
                             population?: components["schemas"]["PopulationScope"];
                         };
-                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. */
+                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
                         funding?: {
                             projectSetHash?: string;
+                            /**
+                             * Format: date-time
+                             * @description When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.
+                             */
+                            snapshotAsOf?: string | null;
+                            /** @description The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable). */
+                            previousSnapshot?: {
+                                projectSetHash?: string;
+                                /** Format: date-time */
+                                computedAt?: string | null;
+                                scfAwardedProjects?: number | null;
+                                scfTotalDistributedUSD?: number | null;
+                            } | null;
+                            /** @description Membership diff: this response's awarded set vs previousSnapshot's. Null when previousSnapshot is null (deltaUnavailable says why). */
+                            snapshotDelta?: {
+                                /** @description Slugs in the current set but not the previous snapshot. */
+                                addedProjects?: string[];
+                                removedProjects?: string[];
+                                addedCount?: number;
+                                removedCount?: number;
+                                /** @description This response's scfTotalDistributedUSD minus the previous snapshot's. */
+                                totalUSDDelta?: number;
+                                /** @description Per removed slug, a MECHANICAL reason from the record's current state — never a guess. */
+                                removedReasons?: {
+                                    slug?: string;
+                                    /**
+                                     * @description 'dedupe' = record now points at a canonical slug (duplicate merged); 'eligibility-reclassification' = record left the active status pool; 'source-correction' = scf.awarded corrected to false; 'unknown' = record missing or no mechanical signal.
+                                     * @enum {string}
+                                     */
+                                    reason?: "dedupe" | "eligibility-reclassification" | "source-correction" | "unknown";
+                                }[];
+                            } | null;
+                            /** @description Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable) — an explicit reason, never a silent omission. */
+                            deltaUnavailable?: string | null;
+                            deltaBasis?: string;
                         };
                     };
                 };
@@ -1767,7 +1838,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Carries filters, metricDefinitions (what each served metric IS), generatedAt, and dataAsOf. */
+                        meta?: {
+                            /**
+                             * Format: date-time
+                             * @description sls-036: the repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
+                             */
+                            dataAsOf?: string | null;
+                            metricDefinitions?: {
+                                [key: string]: string;
+                            };
+                        };
+                        ecosystem?: Record<string, never>;
+                        projects?: Record<string, never>[];
+                    };
                 };
             };
         };
