@@ -89,6 +89,9 @@ export interface Config {
     'partner-accounts': PartnerAccount;
     'partner-leads': PartnerLead;
     'funding-snapshots': FundingSnapshot;
+    'award-rounds': AwardRound;
+    'award-nominees': AwardNominee;
+    'award-voters': AwardVoter;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -125,6 +128,9 @@ export interface Config {
     'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
     'partner-leads': PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
     'funding-snapshots': FundingSnapshotsSelect<false> | FundingSnapshotsSelect<true>;
+    'award-rounds': AwardRoundsSelect<false> | AwardRoundsSelect<true>;
+    'award-nominees': AwardNomineesSelect<false> | AwardNomineesSelect<true>;
+    'award-voters': AwardVotersSelect<false> | AwardVotersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1741,6 +1747,94 @@ export interface FundingSnapshot {
   createdAt: string;
 }
 /**
+ * i³ Awards voting rounds. Votes are recorded on Stellar TESTNET; this collection only defines the ballot.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-rounds".
+ */
+export interface AwardRound {
+  id: string;
+  /**
+   * Display title, e.g. "i³ Awards 2026"
+   */
+  title: string;
+  /**
+   * Lowercase, hyphenated. Becomes part of the on-chain vote key (i3.<slug>.<category>) — keep it short and NEVER change it after voting opens.
+   */
+  slug: string;
+  /**
+   * Only an OPEN round accepts ballots (and only inside the opensAt/closesAt window, when set).
+   */
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * How many nominees a voter may pick per category. Only one-per-category exists today; the field leaves room for future modes without a schema change.
+   */
+  ballotMode: 'one-per-category';
+  /**
+   * Ballot categories. `key` goes on-chain (i3.<round>.<key>) — lowercase, short, never renamed mid-round.
+   */
+  categories: {
+    key: string;
+    name: string;
+    tagline?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Optional. Before this instant, an 'open' round still rejects ballots.
+   */
+  opensAt?: string | null;
+  /**
+   * Optional. After this instant ballots are rejected. Voters may change their vote until then.
+   */
+  closesAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Shortlisted projects per round + category. Display data resolves live from the projects directory.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-nominees".
+ */
+export interface AwardNominee {
+  id: string;
+  round: string | AwardRound;
+  /**
+   * Category KEY from the round (e.g. impact / innovation / interoperability).
+   */
+  category: string;
+  /**
+   * Directory project this nominee points at. Name, logo and description come from here.
+   */
+  project: string | Project;
+  /**
+   * Why nominated — shown on the ballot card instead of the project's shortDescription when set.
+   */
+  customBlurb?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Whitelisted voter addresses per round. A ballot is only relayed if its source account is listed here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-voters".
+ */
+export interface AwardVoter {
+  id: string;
+  round: string | AwardRound;
+  /**
+   * Stellar public key (G...). TESTNET account for the pilot.
+   */
+  address: string;
+  /**
+   * Human label, e.g. "Pilot — Decaf team" (never public).
+   */
+  label?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1939,6 +2033,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'funding-snapshots';
         value: string | FundingSnapshot;
+      } | null)
+    | ({
+        relationTo: 'award-rounds';
+        value: string | AwardRound;
+      } | null)
+    | ({
+        relationTo: 'award-nominees';
+        value: string | AwardNominee;
+      } | null)
+    | ({
+        relationTo: 'award-voters';
+        value: string | AwardVoter;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2696,6 +2802,51 @@ export interface FundingSnapshotsSelect<T extends boolean = true> {
   methodologyVersion?: T;
   awardedSlugs?: T;
   computedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-rounds_select".
+ */
+export interface AwardRoundsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  ballotMode?: T;
+  categories?:
+    | T
+    | {
+        key?: T;
+        name?: T;
+        tagline?: T;
+        id?: T;
+      };
+  opensAt?: T;
+  closesAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-nominees_select".
+ */
+export interface AwardNomineesSelect<T extends boolean = true> {
+  round?: T;
+  category?: T;
+  project?: T;
+  customBlurb?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-voters_select".
+ */
+export interface AwardVotersSelect<T extends boolean = true> {
+  round?: T;
+  address?: T;
+  label?: T;
   updatedAt?: T;
   createdAt?: T;
 }

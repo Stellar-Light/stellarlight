@@ -31,6 +31,10 @@ const nextConfig = {
 		"thread-stream",
 		"pino",
 		"pino-pretty",
+		// Stellar SDK (awards ballot building/validation) stays unbundled on the
+		// server — it carries optional native bindings (sodium-native) that
+		// webpack shouldn't try to resolve. Client code never imports it.
+		"@stellar/stellar-sdk",
 	],
 	webpack: (webpackConfig, { isServer, webpack }) => {
 		webpackConfig.resolve.extensionAlias = {
@@ -45,7 +49,7 @@ const nextConfig = {
 			new webpack.IgnorePlugin({
 				resourceRegExp: /\.(test|spec)\.(js|ts|mjs|cjs|tsx|jsx)$/,
 				contextRegExp: /node_modules/,
-			})
+			}),
 		);
 
 		// Ignore non-JS files that shouldn't be processed
@@ -53,7 +57,7 @@ const nextConfig = {
 			new webpack.IgnorePlugin({
 				resourceRegExp: /\.(md|txt|zip|sh|yml|yaml|LICENSE)$/,
 				contextRegExp: /node_modules\/thread-stream/,
-			})
+			}),
 		);
 
 		return webpackConfig;
