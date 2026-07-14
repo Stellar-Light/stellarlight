@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-14",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Spec 1.7.23 — three consumer-reported contract fixes: projects rows gain optional `productKind`/`availability` wallet-taxonomy fields (sls-033/#519); /api/builders rejects unsupported query params with 400 + supportedParams, closing the Engine E invalid-accepted class (#521); /api/leaderboard gains a validated `type` filter (was silently ignored) + per-row `types` (#524).",
+		detail:
+			"Wallet productKind (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit) + availability serve where curated (null = not-yet-classified, never a negative claim). Unsupported-param rejection is additive-safe (only previously-ignored params now 400). Leaderboard type validates against the projects types enum, filters at the DB layer before ranking, echoes in meta.filters.",
+	},
+	{
+		date: "2026-07-14",
 		surfaces: ["api", "mcp"],
 		version: "spec 1.7.22",
 		type: "added",
