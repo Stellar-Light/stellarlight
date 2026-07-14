@@ -52,6 +52,15 @@ export interface ResearchChunk {
 	contentHash: string;
 	tags: string[];
 	publishedAt?: string;
+	/**
+	 * Crawl-observation time (ISO): when the ingester last OBSERVED this content
+	 * live at the source — stamped every run, even when the content hash is
+	 * unchanged (distinct from `publishedAt`, the page's own stated date, and
+	 * from Payload `updatedAt`, which only advances on a content change). Set by
+	 * ingesters that fetch a live source; when set, upsertChunks re-stamps it on
+	 * unchanged chunks via the metadata-only path (no re-embed).
+	 */
+	observedAt?: string;
 	// Audit-specific (only set when source='audit')
 	auditor?: string;
 	protocol?: string;
@@ -323,6 +332,12 @@ export async function upsertChunks(opts: {
 			if (titleDrift || dateDrift) {
 				metaOnly.push(chunk);
 				stats.updated += 1;
+			} else if (chunk.observedAt !== undefined) {
+				// Content + metadata identical, but the ingester observed this page
+				// live again — re-stamp the crawl-observation time (metadata-only, no
+				// re-embed). Counts as unchanged: the CONTENT did not change.
+				metaOnly.push(chunk);
+				stats.unchanged += 1;
 			} else {
 				stats.unchanged += 1;
 			}
@@ -344,7 +359,11 @@ export async function upsertChunks(opts: {
 				await payload.update({
 					collection: "research-docs",
 					id: prev.id,
-					data: { title: chunk.title, publishedAt: chunk.publishedAt },
+					data: {
+						title: chunk.title,
+						publishedAt: chunk.publishedAt,
+						observedAt: chunk.observedAt,
+					},
 				});
 			} catch (err) {
 				console.error(
@@ -383,6 +402,7 @@ export async function upsertChunks(opts: {
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
 			publishedAt: chunk.publishedAt,
+			observedAt: chunk.observedAt,
 			auditor: chunk.auditor,
 			protocol: chunk.protocol,
 			severity: chunk.severity,

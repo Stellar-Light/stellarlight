@@ -26,8 +26,14 @@
  *   - publishedAt only when the page states a date (Terms' "EFFECTIVE DATE:
  *     MARCH 23, 2026" line). Undated pages stay undated (freshness neutral);
  *     historical mandates say "historical" in their titles instead of
- *     carrying invented dates. Crawl-observation time = each row's Payload
- *     `updatedAt` (set whenever ingest observes changed content).
+ *     carrying invented dates. Crawl-observation time is stamped explicitly on
+ *     `observedAt` every run (even when content is unchanged) — NOT inferred
+ *     from Payload `updatedAt`, which only advances on a content change.
+ *
+ * Embedded-data extraction (Tyler 2026-07-14): pages with
+ * `extractStrategy: "next-data-person-cards"` (the Team page) also parse the
+ * roster's ROLES out of the __NEXT_DATA__ card blocks — the names render in
+ * <main> but the roles live only in the embedded data.
  *
  * Usage:
  *   pnpm exec tsx scripts/ingest-sdf-org.ts             # dry run (fetch + chunk, no write)
@@ -50,6 +56,10 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import {
+	extractPersonCards,
+	renderRosterMarkdown,
+} from "../src/lib/team-cards";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
@@ -80,6 +90,8 @@ export function extractMain(html: string): string | null {
 
 async function run() {
 	const startedAt = Date.now();
+	// Crawl-observation time for this run — stamped on every chunk we fetch.
+	const observedAtIso = new Date(startedAt).toISOString();
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 
 	const rows = CANONICAL_PAGES.filter(
@@ -114,7 +126,25 @@ async function run() {
 
 		// Drop the in-page nav scaffold stellar.org renders at the top of <main>
 		// ("Jump to...") so it never leads a chunk.
-		const md = stripHtml(main).replace(/^Jump to\.\.\.\s*/i, "");
+		let md = stripHtml(main).replace(/^Jump to\.\.\.\s*/i, "");
+
+		// Richer extraction: pages whose quotable facts live in embedded page
+		// data (the Team page's leadership/board ROLES live only in the
+		// __NEXT_DATA__ cards, never in <main> prose). Recover the "Name — Role"
+		// roster and append it as its own section so the pairing is embeddable.
+		if (row.extractStrategy === "next-data-person-cards") {
+			const cards = extractPersonCards(html);
+			const roster = renderRosterMarkdown(cards);
+			if (roster) {
+				console.log(`  + ${cards.length} person card(s) from __NEXT_DATA__`);
+				md = `${md}\n\n${roster}`;
+			} else {
+				console.error(
+					"  ⚠ next-data-person-cards found no cards — the signature guard below will red if roles were lost",
+				);
+			}
+		}
+
 		if (md.length < MIN_EXTRACTED_CHARS) {
 			console.error(
 				`  ✗ extraction too thin (${md.length} chars < ${MIN_EXTRACTED_CHARS}) — likely a JS shell; SKIPPED`,
@@ -141,6 +171,12 @@ async function run() {
 			tags: [...BASE_TAGS, row.family, ...(row.tags ?? [])],
 			publishedAt,
 		});
+
+		// Stamp the crawl-observation time: we just fetched this page live, so
+		// every chunk carries the run timestamp (re-stamped even when content is
+		// unchanged — see upsertChunks' metadata-only path). Distinct from
+		// publishedAt (the page's own stated date).
+		for (const c of chunks) c.observedAt = observedAtIso;
 
 		// Signature self-check on the CHUNKED output — exactly the contract
 		// the corpus-coverage guard asserts later. Refuse to write a page

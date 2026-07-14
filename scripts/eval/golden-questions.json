@@ -530,6 +530,18 @@
 				"expectUrlIncludes": "enterprise-fund",
 				"note": "urlIncludes carries the page lock; phrase regex relaxed to intro-chunk content (the $100m phrase lives in a sibling chunk the per-doc collapse drops)"
 			}
+		},
+		{
+			"id": "q-org-sdf-leadership-roles",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "Who is the Stellar Development Foundation's Chief Scientist, and who leads its Ecosystem team?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["Chief Scientist", "VP of Ecosystem"],
+				"expectUrlIncludes": "foundation/team",
+				"note": "Tyler 2026-07-14 leadership-rendering probe: member ROLES live only in the Team page's embedded __NEXT_DATA__ cards, recovered by the next-data-person-cards extraction (David Mazieres = Founder and Chief Scientist; Justin Rice = VP of Ecosystem). Expected to fail until the ingest-sdf-org re-run with the roster lands."
+			}
 		}
 	]
 }

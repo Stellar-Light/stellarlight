@@ -219,6 +219,14 @@ export const ResearchDocs: CollectionConfig = {
 			},
 		},
 		{
+			name: "observedAt",
+			type: "date",
+			admin: {
+				description:
+					"Crawl-observation time: when the ingester last observed this content live at the source (stamped every run, even when content is unchanged). Distinct from publishedAt (the page's own stated date) and updatedAt (advances only on a content change). Set by live-fetch ingesters; null for sources that don't stamp it.",
+			},
+		},
+		{
 			name: "embedding",
 			type: "json",
 			admin: {
