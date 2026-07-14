@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-14",
+		surfaces: ["api-client", "mcp"],
+		type: "changed",
+		summary:
+			"@stellar-light/api-client 1.6.0 (major-minor: the never-populated builder `scfTier` property is REMOVED from generated types — matching the live contract — alongside six spec revisions of new fields: `identity`, `routes`, `venueRole`, status provenance, `llamaSlugs`/`tvlMethodUrl`, funding snapshot deltas, the `type`/`status` filters, and the `security-program` research source) and @stellar-light/scout-mcp 1.1.10 (terse tool descriptions per the sls-051 split, `cap` + `security-program` source enums, scfTier claim removal).",
+		detail:
+			"If you generated against api-client 1.5.3 (spec 1.7.15-era), regenerate once against 1.6.0 for the 1.7.16→1.7.21 union. The only removal is builder `scfTier` (was empty string on every row since introduction; the live API stopped emitting it in spec 1.7.19 per sls-040/#521).",
+	},
+	{
 		date: "2026-07-13",
 		surfaces: ["api", "mcp"],
 		version: "spec 1.7.21",
