@@ -243,3 +243,61 @@ describe("searchRepos sls-025 alias recall", () => {
 		expect(searched.expandedTerms).toContain("8004");
 	});
 });
+
+describe("streaming-payments vertical flagships (golden repos-streaming-payments)", () => {
+	it("floats the thin-description streaming repos above generic payment repos", async () => {
+		// Live shape 2026-07-14: fluxity-v1-core's description is "Soroban
+		// contract V1" and sstream's is empty — neither carries a
+		// streaming/payments token, so generic x402/MPP repos filled the page.
+		const flagship = doc({
+			fullName: "luanlabs/fluxity-v1-core",
+			description: "Soroban contract V1",
+			repoScore: 47,
+		});
+		const generic = doc({
+			fullName: "big/generic-payments",
+			description: "payments platform on Stellar with streaming access",
+			repoScore: 85,
+			stars: 900,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([generic, flagship]),
+			"streaming payments",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("luanlabs/fluxity-v1-core");
+		expect(repos[0]?.stellarEvidence).toBe("curated");
+	});
+
+	it("fires on the vertical's word orders, not on unrelated payment queries", async () => {
+		const flagship = doc({
+			fullName: "rahimklaber/sstream",
+			description: "",
+			repoScore: 46,
+		});
+		const other = doc({
+			fullName: "x/x402-market",
+			description: "x402 payments marketplace on Stellar",
+			repoScore: 80,
+		});
+		for (const q of [
+			"payment streaming",
+			"token streaming",
+			"money streaming",
+		]) {
+			const { repos } = await searchRepos(mockPayload([other, flagship]), q, {
+				limit: 5,
+			});
+			expect(repos[0]?.fullName, `query: ${q}`).toBe("rahimklaber/sstream");
+		}
+		// A plain payments query must NOT float the streaming vertical.
+		const { repos } = await searchRepos(
+			mockPayload([other, flagship]),
+			"payments",
+			{
+				limit: 5,
+			},
+		);
+		expect(repos[0]?.fullName).toBe("x/x402-market");
+	});
+});

@@ -179,12 +179,221 @@ export function recencyIntent(query: string | undefined): boolean {
 	return !!query && RECENCY_INTENT_RE.test(query);
 }
 
-function datedFreshness(publishedAt: string | null, now: number): number {
+// Sources whose publishedAt is a MAINTENANCE date, not a publication date.
+// dev-docs rows derive publishedAt from the page's "Last updated on …" footer
+// (ingest-developers-docs.ts, added for data honesty with the explicit note
+// "dev-docs remain evergreen for freshness"). A lastmod proves the page was
+// recently EDITED — it says nothing about whether the CONTENT answers a
+// "latest/recent" question. Counting it as publication evidence re-created
+// the exact failure the recency re-sort was built for: lastmod-fresh generic
+// guides (Hardhat migration, edited 8 days ago) outranked the actual dated
+// Protocol 27 (Zipper) announcement for "latest soroban release". In the
+// recency re-sort these sources score like undated (0.35); their lastmod
+// still serves on the row so consumers see the true page age.
+const LASTMOD_DATED_SOURCES = new Set(["dev-docs"]);
+
+function datedFreshness(
+	publishedAt: string | null,
+	now: number,
+	source?: string,
+): number {
 	if (!publishedAt) return 0.35; // undated can't prove currency
+	if (source && LASTMOD_DATED_SOURCES.has(source)) return 0.35; // lastmod ≠ publication
 	const ts = new Date(publishedAt).getTime();
 	if (!Number.isFinite(ts)) return 0.35;
 	const ageDays = Math.max(0, (now - ts) / 86_400_000);
 	return 2 ** (-ageDays / RECENCY_HALF_LIFE_DAYS);
+}
+
+// ── Recency pool supplement (fetch-stage sibling of the re-sort above) ──
+// The re-sort can only promote what the vector pool FETCHED. For "latest
+// soroban release" the Protocol 27 (Zipper) announcement never entered the
+// 48-chunk pool (cosine can't encode publishedAt any more than it can encode
+// a CAP number — same class as the sls-019 identifier direct-fetch), so no
+// rank-stage logic could serve it. When recency intent fires, the route
+// supplements the pool with the corpus's most-recent PUBLICATION-dated chunks
+// that share ≥1 content token with the query, scored with their real stored-
+// embedding cosine (no invented relevance — an off-topic-but-fresh chunk
+// still ranks by its true similarity). Selection is pure and unit-tested
+// here; the DB fetch + cosine live in the route / research-pipeline.
+export const RECENCY_SUPPLEMENT_WINDOW_DAYS = 120;
+export const RECENCY_SUPPLEMENT_MAX = 15;
+export const RECENCY_SUPPLEMENT_PER_DOC_CAP = 3;
+/** Publication-dated sources eligible for the supplement fetch. Excluded:
+ * dev-docs (lastmod-dated, see LASTMOD_DATED_SOURCES), sep/cap/scf-handbook
+ * (undated — the date filter would drop them anyway). */
+export const RECENCY_SUPPLEMENT_SOURCES = [
+	"sdf-blog",
+	"lumenloop-research",
+	"lumenloop",
+	"ec-developer-report",
+	"scf-proposal",
+	"incident",
+	"audit",
+	"security-program",
+	"sdf-org",
+	"paper",
+];
+
+// Query words that express the recency ASK rather than the topic — they must
+// not count as content overlap ("latest" appearing in a chunk is not evidence
+// the chunk is about soroban releases). Closed-class stopwords + the recency
+// vocabulary + bare years.
+const RECENCY_STOP = new Set([
+	"the",
+	"a",
+	"an",
+	"and",
+	"or",
+	"of",
+	"to",
+	"in",
+	"on",
+	"for",
+	"with",
+	"by",
+	"is",
+	"are",
+	"was",
+	"what",
+	"which",
+	"how",
+	"latest",
+	"newest",
+	"most",
+	"recent",
+	"recently",
+	"current",
+	"currently",
+	"this",
+	"year",
+	"month",
+	"week",
+	"today",
+	"new",
+]);
+
+/** Topic tokens of a recency query — the words the supplement must overlap. */
+export function recencyContentTokens(query: string | undefined): string[] {
+	if (!query) return [];
+	return [
+		...new Set(
+			query
+				.toLowerCase()
+				.split(/[^a-z0-9]+/)
+				.filter(
+					(t) => t.length > 2 && !RECENCY_STOP.has(t) && !/^20\d\d$/.test(t),
+				),
+		),
+	];
+}
+
+/**
+ * Pure selection stage for the recency supplement: from `candidates` (chunk
+ * rows the route fetched by publishedAt desc), keep rows that (a) carry a
+ * date within the window, (b) share ≥1 content token with the query in
+ * title+content (all rows qualify when the query is a pure recency ask with
+ * no topic tokens), capped per document so one heavily-chunked roundup can't
+ * consume the whole budget, newest first.
+ */
+export function selectRecencySupplement<
+	T extends {
+		url: string;
+		content: string;
+		title?: string | null;
+		publishedAt?: string | null;
+	},
+>(
+	candidates: T[],
+	query: string | undefined,
+	opts: { now?: number; max?: number; perDocCap?: number } = {},
+): T[] {
+	const now = opts.now ?? Date.now();
+	const max = opts.max ?? RECENCY_SUPPLEMENT_MAX;
+	const perDocCap = opts.perDocCap ?? RECENCY_SUPPLEMENT_PER_DOC_CAP;
+	const cutoff = now - RECENCY_SUPPLEMENT_WINDOW_DAYS * 86_400_000;
+	const tokens = recencyContentTokens(query);
+
+	const dated = candidates.filter((c) => {
+		if (!c.publishedAt) return false;
+		const ts = new Date(c.publishedAt).getTime();
+		if (!Number.isFinite(ts) || ts < cutoff || ts > now + 86_400_000)
+			return false;
+		if (!tokens.length) return true;
+		const hay = `${c.title ?? ""} ${c.content}`.toLowerCase();
+		return tokens.some((t) => hay.includes(t));
+	});
+
+	dated.sort(
+		(a, b) =>
+			new Date(b.publishedAt ?? 0).getTime() -
+			new Date(a.publishedAt ?? 0).getTime(),
+	);
+
+	const perDoc = new Map<string, number>();
+	const out: T[] = [];
+	for (const c of dated) {
+		const n = perDoc.get(c.url) ?? 0;
+		if (n >= perDocCap) continue;
+		perDoc.set(c.url, n + 1);
+		out.push(c);
+		if (out.length >= max) break;
+	}
+	return out;
+}
+
+// ── Curated vertical ANCHOR docs (research sibling of the repos lane's ──
+// VERTICAL_FLAGSHIPS). For a recognized consumer-intent class, the corpus's
+// curated canonical answer docs get their relevance FLOORED (confidence.ts
+// anchorMatch, 0.85) so embedding myopia can't bury them — and the route
+// direct-fetches them into the pool when the vector stage missed them
+// entirely (same inclusion-not-just-ranking principle as sls-018/019).
+// The bridge case is the archetype (golden bridge-evm-to-stellar, the
+// 2026-07-09 demo miss): "bridge assets from EVM to Stellar" embeds next to
+// EVM CONTRACT-MIGRATION docs, so the canonical CCTP cross-chain-transfers
+// how-to sat below rank 40 and the corpus's authoritative Allbridge-on-
+// Stellar record (its Quarkslab bridge audit — the only Allbridge doc any of
+// our sources carry) sat at 11-16, while the top-5 answered a question the
+// user didn't ask. Discipline mirrors VERTICAL_FLAGSHIPS: every URL verified
+// present in the corpus at registry-write time; add a vertical ONLY for a
+// demonstrated embedding-myopia class with human-verified canonical docs —
+// never to make an eval green.
+export const RESEARCH_ANCHORS: Array<{
+	id: string;
+	/** Intent word — the verb/noun naming the vertical. */
+	intent: RegExp;
+	/** Context word — asset-movement vocabulary that separates consumer
+	 *  "move my assets" intent from e.g. "the starbridge paper" or
+	 *  "tricorn bridge audit findings". Both must hit. */
+	context: RegExp;
+	urls: string[];
+}> = [
+	{
+		id: "bridge-assets",
+		intent: /\bbridg(?:e|es|ing)\b|\bcross[\s-]?chain\b/i,
+		context:
+			/\b(?:assets?|tokens?|usdc|usdt|xlm|stablecoins?|funds?|money|transfer|move|send|swap|from|to|into|onto|evm|ethereum|eth|solana|polygon|arbitrum|base|bnb|avalanche|tron)\b/i,
+		urls: [
+			// Verified in-corpus 2026-07-14 (cosine 0.82 for a direct CCTP query):
+			// the canonical dev-docs how-to for moving assets into Stellar.
+			"https://developers.stellar.org/docs/tokens/cross-chain-transfers",
+			// Verified in-corpus 2026-07-14: Quarkslab's Allbridge Core Soroban
+			// bridge audit — the corpus's authoritative record that Allbridge
+			// (the general-asset EVM↔Stellar route) runs on Stellar.
+			"https://stellarsecurityportal.com/report/4",
+		],
+	},
+];
+
+/** Anchor-doc URLs for a query — empty unless an intent class fires. */
+export function anchorDocUrls(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const a of RESEARCH_ANCHORS) {
+		if (a.intent.test(query) && a.context.test(query))
+			for (const u of a.urls) if (!out.includes(u)) out.push(u);
+	}
+	return out;
 }
 
 export function rankResearchChunks<T extends RankableChunk>(
@@ -216,6 +425,11 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const pinned = (c: RankableChunk) =>
 		targets.length > 0 && matchesTarget(c.url, targets);
 
+	// Curated vertical anchors (see RESEARCH_ANCHORS): relevance floor, not a
+	// hard pin — identifier lookups and genuinely-stronger matches stay ahead.
+	const anchors = anchorDocUrls(opts.query);
+	const anchored = (c: RankableChunk) => anchors.includes(c.url);
+
 	const scored = filtered
 		.map((c) => {
 			const eff = meetingReclass(c);
@@ -239,6 +453,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 							? titleMatchFraction(c, opts.query)
 							: 0,
 					exactIdMatch: isPinned,
+					anchorMatch: anchored(c),
 					now,
 				}),
 			};
@@ -255,10 +470,14 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// Recency-intent re-sort (see RECENCY_INTENT_RE above): blend confidence
 	// with dated freshness so provably-current chunks top "latest/recent"
 	// queries. Confidence still carries 60% — a fresh-but-irrelevant chunk
-	// can't hijack the page. Identifier pins still take precedence.
+	// can't hijack the page. Identifier pins still take precedence. Dated
+	// freshness is source-aware: a lastmod-dated source (dev-docs) can't
+	// spend its edit date as publication evidence, while meeting recaps'
+	// URL-derived dates (reclassified above) still count.
 	if (recencyIntent(opts.query)) {
 		const key = (c: (typeof scored)[number]) =>
-			0.6 * c.confidence.score + 0.4 * datedFreshness(c.publishedAt, now);
+			0.6 * c.confidence.score +
+			0.4 * datedFreshness(c.publishedAt, now, meetingReclass(c).source);
 		scored.sort(
 			(a, b) => Number(pinned(b)) - Number(pinned(a)) || key(b) - key(a),
 		);
