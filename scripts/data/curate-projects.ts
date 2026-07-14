@@ -298,6 +298,150 @@ const TYPES_SET: Record<string, string[]> = {
 	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
 };
 
+/** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
+ * is, so a consumer can tell an end-user wallet from adjacent tooling (Tyler's
+ * exact ask: distinguish hardware wallets, connectivity protocols, wallet SDKs,
+ * integration kits, and passkey/smart-account tooling). Enum matches
+ * Projects.ts productKind options EXACTLY. Fill-if-different (single value,
+ * equality-guarded). Each row grounded in the project's OWN curated description
+ * (which is itself primary-source-derived). A slug left OFF this map keeps
+ * productKind null = "not yet classified" (NOT "not a wallet") — precision over
+ * recall: DEX/DeFi-platform/portfolio-tool/pure-B2B-infra rows (swiftex,
+ * hedgepay, equilibre, cobo, openxswitch, lumexo, pakananet, stellarfolio) and
+ * the ambiguous hardware-card arculus are deliberately unclassified rather than
+ * asserted. */
+const PRODUCT_KIND: Record<string, string> = {
+	// hardware-wallet — description literally says "hardware wallet"
+	ledger: "hardware-wallet", // "Ledger is a hardware wallet designed to securely store…"
+	trezor: "hardware-wallet", // "Trezor is a hardware wallet…"
+	onekey: "hardware-wallet", // "Open-source hardware and software wallet with Stellar support"
+	// wallet-sdk — a library/builder for BUILDING wallets
+	spatium: "wallet-sdk", // "open-source Web3 Wallet Builder for businesses"
+	// integration-kit — integrating existing wallets into dApps / host wallets
+	"simple-signer": "integration-kit", // "in-browser transaction signer that supports different stellar wallets"
+	"stellar-metamask": "integration-kit", // "Stellar Integration on MetaMask… MetaMask Snaps Platform" — a snap adding Stellar to an existing wallet
+	// smart-account-tooling — passkey / smart-account infrastructure
+	"stellar-passport": "smart-account-tooling", // "passkey-secured identity and participation layer"
+	"volta-circuit": "smart-account-tooling", // "smart contract-based security protocol… automated asset protection, recovery"
+	humantech: "smart-account-tooling", // "keys, wallets, and identity infrastructure for personhood, self-custody"
+	// end-user-wallet — a consumer/institutional app users hold funds in
+	lobstr: "end-user-wallet",
+	xbull: "end-user-wallet",
+	freighter: "end-user-wallet",
+	hana: "end-user-wallet",
+	beans: "end-user-wallet",
+	albedo: "end-user-wallet",
+	rabet: "end-user-wallet",
+	vesseo: "end-user-wallet",
+	"solar-wallet": "end-user-wallet",
+	"hot-wallet": "end-user-wallet",
+	"bitget-wallet": "end-user-wallet",
+	klever: "end-user-wallet",
+	mpcvault: "end-user-wallet",
+	"unstoppable-wallet": "end-user-wallet",
+	sollpay: "end-user-wallet",
+	sentit: "end-user-wallet",
+	freelii: "end-user-wallet",
+	"freedom-pay-wallet": "end-user-wallet",
+	coca: "end-user-wallet",
+	bousol: "end-user-wallet",
+	"ben-wallet": "end-user-wallet",
+	peer: "end-user-wallet",
+	meru: "end-user-wallet",
+	lemon: "end-user-wallet",
+	"kotani-pay": "end-user-wallet",
+	bebop: "end-user-wallet",
+	blaze: "end-user-wallet",
+	cypher: "end-user-wallet",
+	scopuly: "end-user-wallet",
+	"neon-wallet": "end-user-wallet",
+	bexo: "end-user-wallet",
+	akuna: "end-user-wallet",
+	stellarport: "end-user-wallet",
+	interstellar: "end-user-wallet",
+	empowch: "end-user-wallet",
+	elsa: "end-user-wallet",
+	"boss-revolution": "end-user-wallet",
+	"tago-cash": "end-user-wallet",
+	ripio: "end-user-wallet",
+	emigro: "end-user-wallet",
+	nemorixpay: "end-user-wallet",
+	airgap: "end-user-wallet", // "turn a spare smartphone into a fully offline cold wallet" — end-user cold wallet app (software, not a hardware product)
+};
+
+/** sls-033 (#519): per-platform app availability — DATED, store-checked facts,
+ * deliberately separate from lifecycle `status` (a Live project can have a dead
+ * store listing — Tyler's own xBull evidence). Shape matches Projects.ts
+ * availability{platform,state,storeUrl,checkedAt,note}. EXACT-SYNC for listed
+ * slugs. Every `available` row below was curl-verified live on 2026-07-14 (200
+ * on the exact surface URL); the xBull ios/android `unavailable` rows carry
+ * Tyler's own 2026-07-13 re-check date + note (the evidence the issue cited).
+ * Seeded for the flagship set only — a wallet left off keeps availability empty
+ * = "not yet curated", never "unavailable": each platform row is a claim we
+ * only make once the surface is checked. checkedAt dates it; re-verify before
+ * relying. */
+interface AvailabilityRow {
+	platform: string;
+	state: string;
+	storeUrl?: string;
+	checkedAt: string;
+	note?: string;
+}
+const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
+	xbull: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://xbull.app",
+			checkedAt: "2026-07-14",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+			checkedAt: "2026-07-14",
+		},
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-07-13",
+			note: "formerly-listed iOS app not reachable (sls-033 #519 re-check) — web + Chrome extension remain live",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-07-13",
+			note: "formerly-listed Play app not reachable (sls-033 #519 re-check) — web + Chrome extension remain live",
+		},
+	],
+	freighter: [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk",
+			checkedAt: "2026-07-14",
+		},
+	],
+	ledger: [
+		{
+			platform: "hardware-device",
+			state: "available",
+			storeUrl: "https://shop.ledger.com",
+			checkedAt: "2026-07-14",
+		},
+	],
+	lobstr: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://lobstr.co",
+			checkedAt: "2026-07-14",
+		},
+	],
+};
+
 /** Rebrands — name, website, and description move together so both the old
  * and new brand stay searchable. Equality no-ops keep reruns clean. */
 const REBRANDS: Record<
@@ -1154,6 +1298,71 @@ async function main() {
 		}
 		console.log(`  ${slug}: [${cur.join(", ")}] → [${nets.join(", ")}]`);
 		writes.push({ id: d.id, slug, data: { supportedNetworks: nets } });
+	}
+
+	console.log("\n── Wallet productKind (sls-033 #519, fill-if-different) ──");
+	for (const [slug, want] of Object.entries(PRODUCT_KIND)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.productKind === want) {
+			console.log(`  ${slug}: productKind already ${want}, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: productKind ${d.productKind ?? "null"} → ${want}`);
+		writes.push({ id: d.id, slug, data: { productKind: want } });
+	}
+
+	console.log("\n── Wallet availability (sls-033 #519, EXACT-SYNC) ──");
+	// Normalize to the curated shape (drop Payload row ids) so reruns no-op.
+	// biome-ignore lint/suspicious/noExplicitAny: Payload array-field row shape
+	const normAvail = (rows: any): string =>
+		JSON.stringify(
+			(Array.isArray(rows) ? rows : []).map((r) => ({
+				platform: r.platform ?? null,
+				state: r.state ?? null,
+				storeUrl: r.storeUrl ?? null,
+				checkedAt: r.checkedAt ?? null,
+				note: r.note ?? null,
+			})),
+		);
+	for (const [slug, avail] of Object.entries(AVAILABILITY_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const want = avail.map((a) => ({
+			platform: a.platform,
+			state: a.state,
+			storeUrl: a.storeUrl ?? null,
+			checkedAt: a.checkedAt,
+			note: a.note ?? null,
+		}));
+		if (normAvail(d.availability) === normAvail(want)) {
+			console.log(`  ${slug}: availability already in sync, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: availability → ${want.length} platform row(s)`);
+		writes.push({ id: d.id, slug, data: { availability: want } });
 	}
 
 	console.log("\n── Bridge routes (sls-032 #516, EXACT-SYNC) ──");
