@@ -217,10 +217,24 @@ export async function POST(req: NextRequest) {
 	}
 
 	const turns = sanitizeMessages((body as { messages?: unknown }).messages);
-	const convo: Anthropic.MessageParam[] =
-		turns.length > 0
-			? turns.map((t) => ({ role: t.role, content: t.content }))
-			: [{ role: "user", content: "Hi — I'm exploring Stellar partners." }];
+	// Validation (sls-040 residual #521, Engine E invalid-accepted): POST {}
+	// used to 200 by inventing a greeting turn — an empty/invalid body burned a
+	// model call and returned a reply the caller never asked for. The contract
+	// (spec: `messages` required) now gets the 400 it owes; the chat UI always
+	// sends at least one real user turn.
+	if (turns.length === 0) {
+		return NextResponse.json(
+			{
+				error:
+					"`messages` is required: a non-empty array of chat turns [{role: 'user'|'assistant', content: string}], oldest first.",
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const convo: Anthropic.MessageParam[] = turns.map((t) => ({
+		role: t.role,
+		content: t.content,
+	}));
 
 	let matches: PublicPartner[] | undefined;
 	let lastNeed = "";

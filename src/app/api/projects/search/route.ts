@@ -111,6 +111,9 @@ async function semanticProjectRows(
 				// served (the F3 class — the mapper can't read omitted fields).
 				routes: 1,
 				venueRole: 1,
+				// sls-033: wallet product kind + per-platform availability
+				productKind: 1,
+				availability: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},
@@ -171,6 +174,9 @@ async function semanticProjectRows(
 			// sls-032/035: route-level bridge evidence + DEX-landscape role
 			routes: pickRoutes(p.routes),
 			venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
+			// sls-033: wallet product kind + per-platform availability
+			productKind: typeof p.productKind === "string" ? p.productKind : null,
+			availability: pickAvailability(p.availability),
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -233,6 +239,11 @@ interface ProjectRow {
 	routes?: BridgeRoute[] | null;
 	// sls-035: DEX-landscape role (null = unclassified, not "not a venue").
 	venueRole?: string | null;
+	// sls-033: wallet-landscape product kind (null = unclassified, not "not a
+	// wallet") + per-platform app availability (null = not curated, NOT
+	// "unavailable") — availability is deliberately separate from `status`.
+	productKind?: string | null;
+	availability?: PlatformAvailability[] | null;
 	canonicalSlug: string | null;
 	// sls-050: rename continuity as data — aliases resolve here in search and
 	// the block carries provenance. Null when the project never renamed.
@@ -454,6 +465,39 @@ function pickRoutes(
 	return out.length ? out : null;
 }
 
+// sls-033 (#519): a served per-platform availability fact — deliberately
+// separate from the lifecycle `status` (a Live project can have a dead store
+// listing). Each row is store-checked and dated by curation.
+interface PlatformAvailability {
+	platform: string;
+	state: string;
+	storeUrl: string | null;
+	checkedAt: string | null;
+	note: string | null;
+}
+
+// Only surfaced when curated availability rows exist — null means "not yet
+// curated" (unknown), never "not available". Strips Payload's internal row ids.
+function pickAvailability(
+	// biome-ignore lint/suspicious/noExplicitAny: payload array field shape
+	rows: any,
+): PlatformAvailability[] | null {
+	if (!Array.isArray(rows) || rows.length === 0) return null;
+	const out: PlatformAvailability[] = [];
+	for (const r of rows) {
+		if (!r || typeof r !== "object") continue;
+		if (typeof r.platform !== "string" || typeof r.state !== "string") continue;
+		out.push({
+			platform: r.platform,
+			state: r.state,
+			storeUrl: typeof r.storeUrl === "string" ? r.storeUrl : null,
+			checkedAt: typeof r.checkedAt === "string" ? r.checkedAt : null,
+			note: typeof r.note === "string" ? r.note : null,
+		});
+	}
+	return out.length ? out : null;
+}
+
 // sls-039: served llamaSlugs (null when unmapped — mirrors tvlUSD's "null =
 // not tracked" semantics) + a citation URL to the provider's own protocol
 // page, where the full TVL time series lives.
@@ -481,14 +525,28 @@ export async function GET(req: NextRequest) {
 			sp.get("search")
 		)?.trim() ?? "";
 	const category = sp.get("category");
-	// Accept 1/true/yes (and the `scfAwardedOnly` alias) — agents naturally send
-	// `scfAwarded=true`, which previously fell through to UNFILTERED results
-	// while the caller believed they'd filtered to SCF-funded projects.
+	// Accept 1/true/yes/on (and the `scfAwardedOnly` alias) — agents naturally
+	// send `scfAwarded=true`, which previously fell through to UNFILTERED
+	// results while the caller believed they'd filtered to SCF-funded projects.
+	// sls-040 residual (#521, Engine E invalid-accepted): any OTHER value used
+	// to be silently coerced (bogus → falsy → unfiltered) — a documented
+	// boolean param with an unrecognized value now 400s like type/status/
+	// category do, instead of pretending the filter applied (or didn't).
 	const scfRaw = (sp.get("scfAwarded") ?? sp.get("scfAwardedOnly"))
 		?.toLowerCase()
 		.trim();
-	const scfAwardedOnly =
-		scfRaw === "1" || scfRaw === "true" || scfRaw === "yes";
+	const SCF_TRUE = ["1", "true", "yes", "on"];
+	const SCF_FALSE = ["0", "false", "no", "off"];
+	if (scfRaw && !SCF_TRUE.includes(scfRaw) && !SCF_FALSE.includes(scfRaw)) {
+		return NextResponse.json(
+			{
+				error: `Invalid scfAwarded value '${scfRaw}' — it is a boolean filter.`,
+				acceptedValues: { true: SCF_TRUE, false: SCF_FALSE },
+			},
+			{ status: 400 },
+		);
+	}
+	const scfAwardedOnly = !!scfRaw && SCF_TRUE.includes(scfRaw);
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 	// status filter (2026-07-11 audit): 81 Inactive projects were UNREACHABLE —
@@ -789,6 +847,8 @@ export async function GET(req: NextRequest) {
 					llamaSlugs?: string[] | null;
 					routes?: unknown;
 					venueRole?: string | null;
+					productKind?: string | null;
+					availability?: unknown;
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
@@ -872,6 +932,9 @@ export async function GET(req: NextRequest) {
 					// sls-032/035: route-level bridge evidence + DEX-landscape role
 					routes: pickRoutes(p.routes),
 					venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
+					// sls-033: wallet product kind + per-platform availability
+					productKind: typeof p.productKind === "string" ? p.productKind : null,
+					availability: pickAvailability(p.availability),
 					canonicalSlug: p.canonicalSlug ?? null,
 					identity: pickIdentity(p),
 					lifecycle: pickLifecycle(p.lifecycle),
@@ -1300,6 +1363,9 @@ export async function GET(req: NextRequest) {
 					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(c.llamaSlugs)),
 					routes: pickRoutes(c.routes),
 					venueRole: typeof c.venueRole === "string" ? c.venueRole : null,
+					// sls-033: product kind + availability must be the CANONICAL's too
+					productKind: typeof c.productKind === "string" ? c.productKind : null,
+					availability: pickAvailability(c.availability),
 					canonicalSlug: null,
 					identity: pickIdentity(c),
 					lifecycle: pickLifecycle(c.lifecycle),
