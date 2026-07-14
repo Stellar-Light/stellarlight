@@ -47,6 +47,30 @@ export interface RankableChunk {
 // mirrors, tag/date indexes). The ingester excludes them going forward (F5a
 // JUNK_URL); this drops rows already in the corpus at serve time — audit R2:
 // /meetings/authors/*/page/2-3 mirrors served the same chunk 3× in one page.
+// Known-wrong-fact corrections (serve-time guard): a chunk whose URL matches
+// urlRe AND whose content matches wrongRe is SUPPRESSED until the upstream
+// source is corrected and re-ingested. The fact-level sibling of the
+// CANONICAL_PAGES registry: we cannot edit other people's articles, but we
+// can refuse to serve renderings we have verified to be wrong. Each entry
+// documents the verified truth. Remove entries once the source re-ingests
+// clean (the golden forbiddenRegex lock stays as the permanent guard).
+export const FACT_CORRECTIONS: Array<{
+	urlRe: RegExp;
+	wrongRe: RegExp;
+	note: string;
+}> = [
+	{
+		// lumenloop weekly roundups (week-1 AND week-15 confirmed 2026-07-14)
+		// mis-state the Blend/YieldBlox incident as "May 2026, attempted &
+		// contained, $61M". Verified truth (Blockaid/BlockSec): 2026-02-22,
+		// COMPLETED drain of 61,249,278 XLM ≈ $10.2M, pool-operator oracle
+		// misconfiguration; ~48M XLM quarantined.
+		urlRe: /lumenloop\.com\/research\/stellar-weekly-roundup/i,
+		wrongRe: /\$61 ?m|61 million dollars|may 2026.{0,60}(attempted|contained)/i,
+		note: "Blend/YieldBlox incident facts mis-stated upstream",
+	},
+];
+
 export const JUNK_URL_RE =
 	/\/(authors|tags)\/|\/page\/\d+|\/meetings\/?$|\/meetings\/archive/i;
 
@@ -174,7 +198,12 @@ export function rankResearchChunks<T extends RankableChunk>(
 ): Array<T & { confidence: Confidence }> {
 	const now = opts.now ?? Date.now();
 	const filtered = pool.filter(
-		(c) => !isLowValueChunk(c.content) && !JUNK_URL_RE.test(c.url),
+		(c) =>
+			!isLowValueChunk(c.content) &&
+			!JUNK_URL_RE.test(c.url) &&
+			!FACT_CORRECTIONS.some(
+				(fc) => fc.urlRe.test(c.url) && fc.wrongRe.test(c.content),
+			),
 	);
 
 	// Keyword-mode relevance normalizes against the pool max (not the sliced
