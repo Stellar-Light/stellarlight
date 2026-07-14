@@ -58,9 +58,11 @@
 		--chart-segment-background: rgba(253, 218, 36, 0.1);
 		--chart-segment-line: rgba(253, 218, 36, 0.3);
 
-		--font-sans: Inter, sans-serif;
-		--font-serif: Source Serif 4, serif;
-		--font-mono: JetBrains Mono, monospace;
+		/* --font-sans/serif/mono are set by next/font on <html> (layout.tsx) —
+		   the single source. Declaring them here shadowed those variables at
+		   equal specificity, and the unquoted "Source Serif 4" (identifier
+		   starting with a digit) was invalid CSS, so every font-serif element
+		   silently fell back to Inter. Do not re-add fallbacks here. */
 	}
 
 	.dark {
