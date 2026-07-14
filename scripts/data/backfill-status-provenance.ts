@@ -226,6 +226,34 @@ function buildExplicitPlans(): Map<string, Plan> {
 		requireStatus: ["Live"],
 	});
 
+	// R2b — #494 residual (Tyler 2026-07-14 recheck): DIA + RedStone were the
+	// two Live oracles still serving statusBasis null after the first wave.
+	add("dia", {
+		rule: "R2-oracle-onchain",
+		basis: "operator-announcement",
+		asOf: "2026-07-14",
+		// SDF's official oracle-providers page lists DIA as available to
+		// Stellar dApps ("cross-chain, trustless oracle network... dApps on
+		// Stellar"). Listing-level evidence — no specific contract id named
+		// on the page, hence operator-announcement rather than onchain.
+		sourceUrl:
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		requireStatus: ["Live"],
+	});
+	add("redstone-finance", {
+		rule: "R2-oracle-onchain",
+		basis: "human-verified",
+		asOf: "2026-07-14",
+		// The RedStone Stellar Connector was independently audited by Veridise
+		// (stellarsecurityportal report/68, 2025-10); the record's Mar-2026
+		// mainnet/10-feed claim is curated launch coverage. Audit artifact +
+		// curated claim = human-verified; feed-level liveness not yet
+		// independently re-confirmed.
+		sourceUrl: "https://stellarsecurityportal.com/report/68",
+		note: "Stellar connector audited by Veridise (Oct 2025). Mainnet launch (Mar 2026, 10 feeds) per curated launch coverage; current feed-level liveness not independently re-confirmed (sls-029/#494 residual).",
+		requireStatus: ["Live"],
+	});
+
 	// R3 — sls-028 / issue #515: explicit uncertainty state instead of a
 	// status downgrade. The operator site is up but does not by itself
 	// substantiate the recorded Stellar product.
