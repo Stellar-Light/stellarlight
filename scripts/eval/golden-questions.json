@@ -506,6 +506,30 @@
 				],
 				"note": "sls-020 (Tyler's exact transition wording, expected top-3 → limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
 			}
+		},
+		{
+			"id": "q-org-sdf-structure-mandate",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "How is the Stellar Development Foundation structured and funded? Is SDF a nonprofit, and does it pay taxes?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["self-funded", "pays taxes"],
+				"expectUrlIncludes": "foundation/mandate",
+				"note": "sls-055 q-org-sdf-structure-mandate (broad lane, no source filter — mirrors the consumer's own fan-out): the current Mandate page's self-funded/pays-taxes wording must surface top-3 (the Terms page carries the companion Delaware non-profit wording). Expected to fail until the first ingest-sdf-org run lands."
+			}
+		},
+		{
+			"id": "q-org-sdf-enterprise-fund",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "What is the Stellar Enterprise Fund and how large is its portfolio?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["venture-style", "over \\$100m"],
+				"expectUrlIncludes": "enterprise-fund",
+				"note": "sls-055 q-org-sdf-enterprise-fund (broad lane, no source filter): the CURRENT Enterprise Fund page's venture-style description and portfolio-totaling-over-$100m wording must surface top-3, not only historical portfolio scalars from blog posts. Expected to fail until the first ingest-sdf-org run lands."
+			}
 		}
 	]
 }

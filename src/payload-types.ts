@@ -1267,6 +1267,7 @@ export interface ResearchDoc {
     | 'audit'
     | 'incident'
     | 'security-program'
+    | 'sdf-org'
     | 'ec-developer-report';
   /**
    * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.

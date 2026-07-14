@@ -19,6 +19,12 @@ import type { CollectionConfig } from "payload";
  *                      sorobansecurity.com/api/v1/reports (Certora, OtterSec,
  *                      Halborn, OpenZeppelin, Code4rena, etc.) — chunked by
  *                      severity heading, tagged with auditor + protocol
+ *   - sdf-org        : canonical non-blog stellar.org organizational pages
+ *                      (Mandate current+historical, Terms of Service,
+ *                      Foundation, Team, Enterprise Fund, Quarterly Reports
+ *                      index) — the CANONICAL_PAGES registry family
+ *                      (sls-055), ingested by scripts/ingest-sdf-org.ts and
+ *                      class-guarded by scripts/eval/corpus-coverage-check.ts
  *   - ec-developer-report : Annual + geographic developer reports published
  *                      by Electric Capital (github.com/electric-capital/
  *                      developer-reports) — macro ecosystem stats, peer-L1
@@ -88,6 +94,11 @@ export const ResearchDocs: CollectionConfig = {
 				{
 					label: "Security program (bug-bounty / disclosure policy)",
 					value: "security-program",
+				},
+				{
+					label:
+						"SDF organizational pages (mandate, terms, foundation, team, enterprise fund)",
+					value: "sdf-org",
 				},
 				{
 					label: "Electric Capital Developer Report",

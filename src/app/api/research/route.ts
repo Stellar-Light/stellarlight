@@ -102,6 +102,7 @@ export async function GET(req: NextRequest) {
 		"audit",
 		"incident",
 		"security-program",
+		"sdf-org",
 		"ec-developer-report",
 	] as const;
 

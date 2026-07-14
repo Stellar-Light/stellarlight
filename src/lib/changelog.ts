@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-14",
+		surfaces: ["api", "mcp"],
+		version: "spec 1.7.22",
+		type: "added",
+		summary:
+			"sls-055/#533: new 'sdf-org' research source — canonical non-blog stellar.org organizational pages, quotable. Covers the SDF Mandate (current + 2019/2017 historical, incl. the self-funded / pays-taxes structure wording), Terms of Service (incl. the Delaware non-profit corporation wording), Foundation, Team (leadership + board roster), Enterprise Fund (venture-style fund, portfolio totaling over $100m), and the Quarterly Reports index.",
+		detail:
+			"searchResearch's `source` enum gains 'sdf-org'. The page family is declared once in a CANONICAL_PAGES registry (URL + per-page verbatim signature phrases, verified live 2026-07-13) that drives BOTH the ingester (scripts/ingest-sdf-org.ts: rendered-page text scoped to the page's main element, publishedAt only when the page states a date, e.g. the Terms effective-date line) and a weekly corpus-coverage class guard that reds the health tracker if any family member's page or quotable wording goes missing — the sls-020 security-program pages are folded into the same registry, so the family is guarded as a class rather than patched per query. Corpus rows land with the next research-corpus refresh after deploy.",
+	},
+	{
+		date: "2026-07-14",
 		surfaces: ["api-client", "mcp"],
 		type: "changed",
 		summary:

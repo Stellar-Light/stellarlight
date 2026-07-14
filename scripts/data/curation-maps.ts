@@ -290,6 +290,17 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): whalestack.com has 303-redirected to btcpayserver.org since at least 2025-09 (Wayback CDX), site now refuses connections, coinqvest.com broken TLS, the WordPress coinqvest plugin delisted, GitHub s\u2026",
 	},
+	// sls-024 recurrence (#533 batch): the Live label was source-inherited
+	// (never verified) while every checkable surface is dead \u2014 live-verified
+	// 2026-07-13.
+	centaurus: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-13",
+		sourceUrl: "https://github.com/centaurus-project/centaurus",
+		basis: "human-verified",
+		note: "Confirmed inactive 2026-07-13 (sls-024 recheck): the centaurus-project repos have had no activity since January 2022 (centaurus last push 2022-01-05; centaurus-ban-extension 2020-05-18), the recorded website is the GitHub org itself (no product surface exists), and no current deployment evidence was located. The previous Live label was source-inherited, never verified.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the

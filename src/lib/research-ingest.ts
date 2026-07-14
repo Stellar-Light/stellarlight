@@ -28,6 +28,10 @@ export type ResearchSource =
 	| "audit"
 	| "incident"
 	| "security-program"
+	// Canonical non-blog stellar.org organizational pages (sls-055): Mandate
+	// (current + historical), Terms, Foundation, Team, Enterprise Fund,
+	// Quarterly Reports index — the CANONICAL_PAGES registry family.
+	| "sdf-org"
 	| "ec-developer-report";
 
 export type AuditSeverity =

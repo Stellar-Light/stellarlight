@@ -33,6 +33,7 @@ loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
+import { canonicalPage } from "../src/lib/canonical-pages";
 import {
 	chunkMarkdown,
 	loadExistingChunks,
@@ -45,8 +46,12 @@ const args = process.argv.slice(2);
 const execute = args.includes("--execute");
 
 const HACKERONE_GRAPHQL = "https://hackerone.com/graphql";
-const HACKERONE_PROGRAM_URL = "https://hackerone.com/stellar";
-const SDF_LANDING_URL = "https://stellar.org/grants-and-funding/bug-bounty";
+// sls-055: these pages are registered in the CANONICAL_PAGES registry
+// (src/lib/canonical-pages.ts) so the weekly corpus-coverage-check guards
+// them alongside the sdf-org family — the URLs come FROM the registry so the
+// ingester and the guard can never drift apart.
+const HACKERONE_PROGRAM_URL = canonicalPage("security-program-hackerone").url;
+const SDF_LANDING_URL = canonicalPage("security-program-supersession").url;
 
 const TAGS = [
 	"security-program",
