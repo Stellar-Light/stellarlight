@@ -103,6 +103,52 @@ describe("researchConfidence", () => {
 		expect(c.freshness).toBe(0.6);
 		expect(c.ageDays).toBeNull();
 	});
+
+	it("floors relevance at 0.85 for a curated vertical-anchor doc", () => {
+		// The bridge case: the canonical CCTP how-to scored ~0.70 cosine
+		// (relevance ~0.5) for "bridge assets from EVM to Stellar".
+		const c = researchConfidence({
+			score: 0.7,
+			source: "dev-docs",
+			mode: "vector",
+			maxScore: 0.8,
+			anchorMatch: true,
+			now: NOW,
+		});
+		expect(c.relevance).toBe(0.85);
+		// …and a direct-fetched anchor with NO retrieval score still floors.
+		const scoreless = researchConfidence({
+			score: undefined,
+			source: "dev-docs",
+			mode: "vector",
+			maxScore: 0.8,
+			anchorMatch: true,
+			now: NOW,
+		});
+		expect(scoreless.relevance).toBe(0.85);
+	});
+
+	it("exact-ID floor (0.9) wins over the anchor floor, and a genuinely stronger score wins over both", () => {
+		const both = researchConfidence({
+			score: 0.6,
+			source: "cap",
+			mode: "vector",
+			maxScore: 0.8,
+			exactIdMatch: true,
+			anchorMatch: true,
+			now: NOW,
+		});
+		expect(both.relevance).toBe(0.9);
+		const strong = researchConfidence({
+			score: 0.85,
+			source: "cap",
+			mode: "vector",
+			maxScore: 0.85,
+			anchorMatch: true,
+			now: NOW,
+		});
+		expect(strong.relevance).toBeGreaterThan(0.85); // real evidence not capped
+	});
 });
 
 describe("projectConfidence", () => {

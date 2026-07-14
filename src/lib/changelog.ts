@@ -33,11 +33,22 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-14",
 		surfaces: ["api"],
+		version: "spec 1.7.24",
 		type: "changed",
 		summary:
-			"Spec 1.7.23 — three consumer-reported contract fixes: projects rows gain optional `productKind`/`availability` wallet-taxonomy fields (sls-033/#519); /api/builders rejects unsupported query params with 400 + supportedParams, closing the Engine E invalid-accepted class (#521); /api/leaderboard gains a validated `type` filter (was silently ignored) + per-row `types` (#524).",
+			"Golden-eval standing-miss fixes: searchResearch recency-intent queries now pool-supplement the corpus's newest publication-dated docs (fetch-stage fix — the Protocol 27 'Zipper' announcement never entered the vector pool for 'latest soroban release') and stop counting dev-docs 'Last updated' maintenance dates as publication evidence in the recency re-rank; a curated vertical-anchor registry floors relevance for the canonical docs of a recognized consumer intent (first vertical: bridge-assets — the CCTP cross-chain-transfers how-to and the Allbridge Soroban bridge audit); searchRepos gains a streaming-payments vertical flagship set (fluxity/sstream — canonical Stellar streaming repos whose descriptions carry no 'streaming payments' tokens).",
 		detail:
-			"Wallet productKind (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit) + availability serve where curated (null = not-yet-classified, never a negative claim). Unsupported-param rejection is additive-safe (only previously-ignored params now 400). Leaderboard type validates against the projects types enum, filters at the DB layer before ranking, echoes in meta.filters.",
+			"Supplemented chunks are scored with their real stored-embedding cosine on the same scale as the vector pool — no invented relevance; anchor docs are direct-fetched into the pool when the vector stage missed them (the sls-019 inclusion-not-just-ranking principle). Also fixes a JSON-over-escaped regex in the scf-handbook-link golden lock (the expectation could never match any URL; retrieval was already serving stellar.gitbook.io/scf-handbook at rank 1).",
+	},
+	{
+		date: "2026-07-14",
+		surfaces: ["api"],
+		version: "spec 1.7.23",
+		type: "changed",
+		summary:
+			"Three consumer-reported contract fixes: projects rows gain optional productKind/availability wallet-taxonomy fields (sls-033/#519); /api/builders rejects unsupported query params with 400 + supportedParams, closing the Engine E invalid-accepted class (#521); /api/leaderboard gains a validated type filter (was silently ignored) + per-row types (#524).",
+		detail:
+			"Wallet productKind (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit) + availability serve where curated (null = not-yet-classified, never a negative claim). Unsupported-param rejection is additive-safe (only previously-ignored params now 400). Leaderboard type validates against the projects types enum, filters at the DB layer before ranking.",
 	},
 	{
 		date: "2026-07-14",

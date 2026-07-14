@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	buildResearchVectorPipeline,
+	cosineVectorScore,
 	researchOverfetch,
 } from "../research-pipeline";
 
@@ -53,5 +54,28 @@ describe("buildResearchVectorPipeline", () => {
 		expect(vs(p).limit).toBeLessThanOrEqual(10_000);
 		expect(vs(p).numCandidates).toBeLessThanOrEqual(10_000);
 		expect(vs(p).numCandidates).toBeGreaterThanOrEqual(vs(p).limit);
+	});
+});
+
+describe("cosineVectorScore", () => {
+	// Atlas cosine vectorSearchScore = (1 + cosine) / 2 — supplemented chunks
+	// must land on the SAME scale as pool chunks or ranking silently biases
+	// by fetch path.
+	it("matches the Atlas (1 + cosine) / 2 scale", () => {
+		expect(cosineVectorScore([1, 0], [1, 0])).toBeCloseTo(1); // identical
+		expect(cosineVectorScore([1, 0], [0, 1])).toBeCloseTo(0.5); // orthogonal
+		expect(cosineVectorScore([1, 0], [-1, 0])).toBeCloseTo(0); // opposite
+	});
+
+	it("is magnitude-invariant (true cosine, not dot product)", () => {
+		expect(cosineVectorScore([2, 0], [7, 0])).toBeCloseTo(1);
+	});
+
+	it("returns null for missing, mismatched, or degenerate vectors", () => {
+		expect(cosineVectorScore([1, 0], null)).toBeNull();
+		expect(cosineVectorScore([1, 0], undefined)).toBeNull();
+		expect(cosineVectorScore([1, 0], [1, 0, 0])).toBeNull(); // dim mismatch
+		expect(cosineVectorScore([0, 0], [1, 0])).toBeNull(); // zero norm
+		expect(cosineVectorScore([], [])).toBeNull();
 	});
 });

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { identifierTargets, rankResearchChunks } from "../research-rank";
+import {
+	anchorDocUrls,
+	identifierTargets,
+	rankResearchChunks,
+	recencyContentTokens,
+	selectRecencySupplement,
+} from "../research-rank";
 
 /** 2026-07-09 — fixed clock so freshness math is deterministic. */
 const NOW = Date.parse("2026-07-09T00:00:00Z");
@@ -430,5 +436,242 @@ describe("rankResearchChunks", () => {
 		expect(out[0].confidence.relevance).toBeGreaterThan(
 			out[1].confidence.relevance,
 		);
+	});
+
+	// ── golden latest-protocol-release: recency re-sort honesty ──
+
+	it("recency intent: a lastmod-dated dev-docs page cannot outspend a dated announcement", () => {
+		// Live shape (2026-07-14): dev-docs rows carry publishedAt from the
+		// page's "Last updated on …" footer. A generic Hardhat guide edited
+		// 8 days ago outranked the Protocol 27 (Zipper) announcement for
+		// "latest soroban release" — an edit date is not publication evidence.
+		const pool = [
+			chunk({
+				url: "https://developers.stellar.org/docs/learn/migrate/evm/smart-contract-deployment",
+				score: 0.7,
+				source: "dev-docs",
+				publishedAt: "2026-07-06", // lastmod, 3 days before NOW
+			}),
+			chunk({
+				url: "https://stellar.org/blog/foundation-news/stellar-zipper-protocol-27-upgrade-guide",
+				score: 0.64,
+				source: "sdf-blog",
+				publishedAt: "2026-06-04", // true publication date
+			}),
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 2,
+			mode: "vector",
+			query: "latest soroban release",
+			now: NOW,
+		});
+		expect(out[0].url).toContain("zipper-protocol-27");
+	});
+
+	it("recency intent: publication-dated sources still compete on their real dates", () => {
+		// Meeting recaps (URL-dated) and blogs keep their dated freshness —
+		// only maintenance-dated sources are excluded from the recency credit.
+		const pool = [
+			chunk({
+				url: "https://stellar.org/blog/old-announcement",
+				score: 0.7,
+				source: "sdf-blog",
+				publishedAt: "2025-01-01",
+			}),
+			chunk({
+				url: "https://stellar.org/blog/new-announcement",
+				score: 0.68,
+				source: "sdf-blog",
+				publishedAt: "2026-07-01",
+			}),
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 2,
+			mode: "vector",
+			query: "latest news",
+			now: NOW,
+		});
+		expect(out[0].url).toContain("new-announcement");
+	});
+});
+
+describe("recencyContentTokens", () => {
+	it("keeps topic words, drops the recency ask and stopwords", () => {
+		expect(recencyContentTokens("latest soroban release")).toEqual([
+			"soroban",
+			"release",
+		]);
+		expect(
+			recencyContentTokens("what is new in 2026 for the ecosystem"),
+		).toEqual(["ecosystem"]);
+	});
+
+	it("is empty for a pure recency ask and for no query", () => {
+		expect(recencyContentTokens("what's new this month?")).toEqual([]);
+		expect(recencyContentTokens(undefined)).toEqual([]);
+	});
+});
+
+describe("selectRecencySupplement", () => {
+	const NOW_TS = NOW; // 2026-07-09
+	const cand = (over: {
+		url: string;
+		publishedAt: string | null;
+		content?: string;
+		title?: string;
+	}) => ({
+		url: over.url,
+		publishedAt: over.publishedAt,
+		title: over.title ?? "",
+		content: over.content ?? "generic ecosystem paragraph",
+	});
+
+	it("keeps only dated, in-window docs sharing a topic token, newest first", () => {
+		const out = selectRecencySupplement(
+			[
+				cand({
+					url: "https://a.dev/zipper",
+					publishedAt: "2026-06-04",
+					content: "Protocol 27 Zipper upgrades the Soroban release process.",
+				}),
+				cand({
+					url: "https://a.dev/yardstick",
+					publishedAt: "2026-05-05",
+					content: "Yardstick is the Protocol 26 soroban mainnet release.",
+				}),
+				cand({
+					url: "https://a.dev/off-topic",
+					publishedAt: "2026-07-01",
+					content: "A partner spotlight about anchors and ramps.",
+				}),
+				cand({
+					url: "https://a.dev/too-old",
+					publishedAt: "2025-01-01",
+					content: "An ancient soroban release note.",
+				}),
+				cand({ url: "https://a.dev/undated", publishedAt: null }),
+			],
+			"latest soroban release",
+			{ now: NOW_TS },
+		);
+		expect(out.map((c) => c.url)).toEqual([
+			"https://a.dev/zipper",
+			"https://a.dev/yardstick",
+		]);
+	});
+
+	it("caps chunks per document so one heavily-chunked roundup can't spend the budget", () => {
+		const many = Array.from({ length: 10 }, (_, i) =>
+			cand({
+				url: "https://a.dev/roundup",
+				publishedAt: "2026-07-01",
+				content: `soroban roundup part ${i}`,
+			}),
+		);
+		const out = selectRecencySupplement(
+			[
+				...many,
+				cand({
+					url: "https://a.dev/other",
+					publishedAt: "2026-06-20",
+					content: "another soroban update",
+				}),
+			],
+			"latest soroban",
+			{ now: NOW_TS },
+		);
+		expect(out.filter((c) => c.url.includes("roundup")).length).toBe(3);
+		expect(out.some((c) => c.url.includes("other"))).toBe(true);
+	});
+
+	it("a pure recency ask admits any dated in-window doc, bounded by max", () => {
+		const out = selectRecencySupplement(
+			Array.from({ length: 30 }, (_, i) =>
+				cand({
+					url: `https://a.dev/p${i}`,
+					publishedAt: "2026-07-01",
+				}),
+			),
+			"what's new this month?",
+			{ now: NOW_TS },
+		);
+		expect(out.length).toBe(15); // RECENCY_SUPPLEMENT_MAX
+	});
+});
+
+describe("vertical anchor docs (RESEARCH_ANCHORS)", () => {
+	const CCTP =
+		"https://developers.stellar.org/docs/tokens/cross-chain-transfers";
+	const ALLBRIDGE_AUDIT = "https://stellarsecurityportal.com/report/4";
+
+	it("fires on consumer bridge intent — any wording with intent + movement context", () => {
+		for (const q of [
+			"bridge assets from EVM to Stellar",
+			"how do I bridge USDC to stellar",
+			"cross-chain transfer from ethereum",
+			"bridging tokens onto stellar",
+		]) {
+			expect(anchorDocUrls(q), `query: ${q}`).toEqual([CCTP, ALLBRIDGE_AUDIT]);
+		}
+	});
+
+	it("does not fire without movement context, on compounds, or off-topic", () => {
+		expect(anchorDocUrls("starbridge protocol verification")).toEqual([]); // compound word
+		expect(anchorDocUrls("tricorn bridge audit findings")).toEqual([]); // no movement context
+		expect(anchorDocUrls("soroban authorization")).toEqual([]);
+		expect(anchorDocUrls(undefined)).toEqual([]);
+	});
+
+	it("floors anchor relevance so embedding myopia can't bury the canonical how-to", () => {
+		// Live shape: the CCTP how-to scored below the pool cutoff while
+		// contract-MIGRATION docs (higher cosine, wrong intent) filled the top.
+		const pool = [
+			chunk({
+				url: "https://developers.stellar.org/docs/learn/migrate/evm",
+				score: 0.78,
+				source: "dev-docs",
+			}),
+			{
+				...chunk({ url: CCTP, score: 0.68, source: "dev-docs" }),
+				title: "Cross-Chain USDC Transfers with CCTP",
+			},
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 2,
+			mode: "vector",
+			query: "bridge assets from EVM to Stellar",
+			now: NOW,
+		});
+		expect(out[0].url).toBe(CCTP);
+		expect(out[0].confidence.relevance).toBeGreaterThanOrEqual(0.85);
+		// …and the same pool WITHOUT bridge intent keeps vector order.
+		const plain = rankResearchChunks(pool, {
+			limit: 2,
+			mode: "vector",
+			query: "migrate a solidity contract",
+			now: NOW,
+		});
+		expect(plain[0].url).toContain("/migrate/evm");
+	});
+
+	it("an identifier pin still outranks an anchor floor", () => {
+		const capUrl =
+			"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0049.md";
+		const out = rankResearchChunks(
+			[
+				chunk({ url: capUrl, score: 0.6, source: "cap" }),
+				{
+					...chunk({ url: CCTP, score: 0.7, source: "dev-docs" }),
+					title: "Cross-Chain USDC Transfers with CCTP",
+				},
+			],
+			{
+				limit: 2,
+				mode: "vector",
+				query: "cap-49 bridge assets from evm",
+				now: NOW,
+			},
+		);
+		expect(out[0].url).toBe(capUrl);
 	});
 });

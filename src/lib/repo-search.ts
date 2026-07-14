@@ -670,6 +670,26 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\blending\b|\bmoney[\s-]?markets?\b/,
 		repos: ["blend-capital/blend-contracts-v2", "xycloo/xycloans"],
 	},
+	// streaming payments / money streaming (golden repos-streaming-payments,
+	// 2026-07-14). Textbook thin-description case: the curated directory has a
+	// rich Live streaming vertical (Fluxity, SStream, Paystreme, Zentra) but the
+	// canonical contract repos carry NO "streaming"/"payment" token — fluxity-
+	// v1-core's description is literally "Soroban contract V1" and SStream's is
+	// empty — so q="streaming payments" served only generic x402/MPP payment
+	// repos. All three verified in-index AND live on GitHub 2026-07-14: fluxity-
+	// v1-core (Rust Soroban streaming contracts of curated-Live Fluxity),
+	// rahimklaber/sstream (Rust, curated-Live SStream "Composable streaming
+	// payments on Soroban"), fluxity-interface ("token streaming solution" UI).
+	// Paystreme has no repo in the index (its GitHub isn't linked from the
+	// curated project) — an index-coverage gap tracked separately, not seedable.
+	{
+		test: /\b(?:stream|streaming)\s+(?:payments?|money|tokens?)\b|\b(?:payments?|money|token)[\s-]?stream(?:ing|s)?\b/,
+		repos: [
+			"luanlabs/fluxity-v1-core",
+			"rahimklaber/sstream",
+			"luanlabs/fluxity-interface",
+		],
+	},
 ];
 
 // Curated flagship repos for a query, priority order, deduped. Empty for queries

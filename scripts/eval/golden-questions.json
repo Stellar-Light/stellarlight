@@ -370,10 +370,10 @@
 			"question": "SCF handbook link",
 			"expect": {
 				"answerRegex": [
-					"stellar\\\\.gitbook\\\\.io/scf-handbook",
+					"stellar\\.gitbook\\.io/scf-handbook",
 					"Welcome to the SCF Handbook"
 				],
-				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it."
+				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it. 2026-07-14: the URL regex was JSON-over-escaped (\\\\\\\\. parsed to a regex demanding a literal backslash, which no URL contains) — the lock could never match even though live serves https://stellar.gitbook.io/scf-handbook at rank 1. Expectation fixed, retrieval was already correct."
 			}
 		},
 		{

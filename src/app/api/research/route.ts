@@ -26,8 +26,20 @@ import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { buildResearchVectorPipeline } from "@/lib/research-pipeline";
-import { identifierTargets, rankResearchChunks } from "@/lib/research-rank";
+import {
+	buildResearchVectorPipeline,
+	cosineVectorScore,
+} from "@/lib/research-pipeline";
+import {
+	anchorDocUrls,
+	identifierTargets,
+	RECENCY_SUPPLEMENT_SOURCES,
+	RECENCY_SUPPLEMENT_WINDOW_DAYS,
+	rankResearchChunks,
+	recencyContentTokens,
+	recencyIntent,
+	selectRecencySupplement,
+} from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -142,11 +154,14 @@ export async function GET(req: NextRequest) {
 
 	let mode: "vector" | "keyword" = "vector";
 	let chunks: ResearchRow[] = [];
+	// Kept in scope past the try so the recency pool supplement can score
+	// direct-fetched chunks with the same cosine scale as the vector pool.
+	let queryEmbedding: number[] | null = null;
 
 	// Try vector search first. If Atlas vector search isn't configured
 	// or the corpus is empty, fall back to keyword.
 	try {
-		const queryEmbedding = await embed(q);
+		queryEmbedding = await embed(q);
 
 		// We use the underlying mongoose connection to run the $vectorSearch
 		// aggregation since Payload's `find()` doesn't expose vector ops.
@@ -384,6 +399,120 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Raw Payload row → response row, for the two pool supplements below.
+	interface RawResearchDoc {
+		id: string;
+		source: string;
+		title: string;
+		section?: string;
+		url: string;
+		content: string;
+		chunkIndex: number;
+		publishedAt?: string;
+		auditor?: string;
+		protocol?: string;
+		severity?: string;
+		embedding?: number[];
+	}
+	const toRow = (d: RawResearchDoc, score?: number): ResearchRow => ({
+		id: String(d.id),
+		source: d.source,
+		title: d.title,
+		section: d.section ?? null,
+		url: d.url,
+		content: d.content,
+		chunkIndex: d.chunkIndex,
+		publishedAt: d.publishedAt ?? null,
+		auditor: d.auditor ?? null,
+		protocol: d.protocol ?? null,
+		severity: d.severity ?? null,
+		...(score != null ? { score } : {}),
+	});
+
+	// Recency pool supplement (research-rank.ts): a "latest/recent" query's
+	// answer is keyed on publishedAt — a signal cosine retrieval can't encode,
+	// so the actually-newest dated docs routinely miss the over-fetched pool
+	// (the Protocol 27 "Zipper" announcement never entered the pool for
+	// "latest soroban release"; rank-stage recency logic can't promote what
+	// isn't fetched — the same fetch-not-rank root as the sls-019 identifier
+	// lookup above). Fetch the most-recent publication-dated chunks sharing
+	// ≥1 content token with the query and score them with their REAL stored-
+	// embedding cosine — same scale as the pool, no invented relevance.
+	if (mode === "vector" && queryEmbedding && recencyIntent(q)) {
+		try {
+			const cutoffISO = new Date(
+				Date.now() - RECENCY_SUPPLEMENT_WINDOW_DAYS * 86_400_000,
+			).toISOString();
+			const topicTokens = recencyContentTokens(q);
+			// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
+			const recentWhere: any = {
+				and: [
+					{ publishedAt: { greater_than_equal: cutoffISO } },
+					{ source: { in: RECENCY_SUPPLEMENT_SOURCES } },
+					...(sourceFilter ? [{ source: { equals: sourceFilter } }] : []),
+					...(topicTokens.length
+						? [
+								{
+									or: topicTokens.map((t) => ({
+										or: [
+											{ title: { contains: t } },
+											{ content: { contains: t } },
+										],
+									})),
+								},
+							]
+						: []),
+				],
+			};
+			const recent = await payload.find({
+				collection: "research-docs",
+				where: recentWhere,
+				sort: "-publishedAt",
+				limit: 40,
+				depth: 0,
+			});
+			const have = new Set(chunks.map((c) => c.id));
+			const candidates = (recent.docs as unknown as RawResearchDoc[]).filter(
+				(d) => !have.has(String(d.id)),
+			);
+			for (const d of selectRecencySupplement(candidates, q)) {
+				const score = cosineVectorScore(queryEmbedding, d.embedding);
+				if (score == null) continue; // no stored vector — can't score honestly
+				chunks.push(toRow(d, score));
+			}
+		} catch {
+			// supplement is best-effort — the pool result still serves
+		}
+	}
+
+	// Curated vertical-anchor inclusion (research-rank.ts RESEARCH_ANCHORS):
+	// when the query hits a recognized consumer-intent class, the registry's
+	// canonical docs must at least be IN the pool — the ranking stage floors
+	// their relevance (confidence anchorMatch), but it can't rank what the
+	// vector stage never fetched (the CCTP how-to sat below the 200-chunk
+	// pool for "bridge assets from EVM to Stellar").
+	const anchorMissing = anchorDocUrls(q).filter(
+		(u) => !chunks.some((c) => c.url === u),
+	);
+	if (anchorMissing.length) {
+		try {
+			const direct = await payload.find({
+				collection: "research-docs",
+				where: {
+					url: { in: anchorMissing },
+					...(sourceFilter ? { source: { equals: sourceFilter } } : {}),
+				},
+				limit: 24,
+				depth: 0,
+			});
+			for (const d of direct.docs as unknown as RawResearchDoc[]) {
+				chunks.push(toRow(d));
+			}
+		} catch {
+			// anchor fetch is best-effort — the pool result still serves
+		}
+	}
+
 	// Shared ranking stage (src/lib/research-rank.ts): drop low-value chunks,
 	// collapse to the best chunk per document, and order by the attached
 	// confidence signal (relevance + freshness + authority) with raw-score
@@ -423,7 +552,7 @@ export async function GET(req: NextRequest) {
 				scoreModel: {
 					version: SCORE_MODEL_VERSION,
 					fields: ["relevance", "freshness", "authority"],
-					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9.",
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85.",
 				},
 			},
 			results,

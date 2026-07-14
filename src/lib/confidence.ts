@@ -153,6 +153,17 @@ export interface ConfidenceInput {
 	 * rather than left to the retrieval score.
 	 */
 	exactIdMatch?: boolean;
+	/**
+	 * This document is a curated vertical ANCHOR for the query's intent class
+	 * (RESEARCH_ANCHORS in research-rank.ts — e.g. the canonical CCTP
+	 * cross-chain-transfers doc for consumer bridge intent). Registry-asserted
+	 * relevance the embedding demonstrably under-measures (the CCTP how-to
+	 * scored below rank 40 for "bridge assets from EVM to Stellar"), so
+	 * relevance is floored at 0.85 — just under the exact-ID floor: a curated
+	 * intent match is strong evidence, but weaker than the user naming the
+	 * document by its own key.
+	 */
+	anchorMatch?: boolean;
 	/** Injectable clock so callers/tests are deterministic. Defaults to now. */
 	now?: number;
 }
@@ -193,6 +204,7 @@ export function researchConfidence(input: ConfidenceInput): Confidence {
 			0.15 * clamp01(input.titleMatch ?? 0),
 	);
 	if (input.exactIdMatch) relevance = Math.max(relevance, 0.9);
+	else if (input.anchorMatch) relevance = Math.max(relevance, 0.85);
 	const authority = AUTHORITY[input.source] ?? DEFAULT_AUTHORITY;
 	const { freshness, ageDays } = freshnessFrom(
 		input.source,
