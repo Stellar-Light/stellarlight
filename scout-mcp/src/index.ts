@@ -127,6 +127,7 @@ server.registerTool(
 					"sdf-blog",
 					"scf-handbook",
 					"sep",
+					"cap",
 					"dev-docs",
 					"paper",
 					"scf-proposal",
@@ -134,11 +135,12 @@ server.registerTool(
 					"lumenloop-research",
 					"audit",
 					"incident",
+					"security-program",
 					"ec-developer-report",
 				])
 				.optional()
 				.describe(
-					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
+					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
 				),
 			limit: z
 				.number()

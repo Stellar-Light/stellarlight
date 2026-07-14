@@ -26,7 +26,8 @@ import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { rankResearchChunks } from "@/lib/research-rank";
+import { buildResearchVectorPipeline } from "@/lib/research-pipeline";
+import { identifierTargets, rankResearchChunks } from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -100,6 +101,7 @@ export async function GET(req: NextRequest) {
 		"lumenloop-research",
 		"audit",
 		"incident",
+		"security-program",
 		"ec-developer-report",
 	] as const;
 
@@ -155,44 +157,17 @@ export async function GET(req: NextRequest) {
 		// NOTE: source filter is applied as a post-pipeline $match rather
 		// than $vectorSearch.filter. The latter requires `source` to be
 		// declared as a filter field in the vector index definition, which
-		// our minimal index doesn't have. We over-fetch (3x) and post-filter
-		// instead so callers can use ?source= without an index rebuild.
-		// Over-fetch generously: low-value chunks (nav cards, breadcrumb stubs)
-		// are filtered out of the results below, so we need headroom to still
-		// return `limitParam` real chunks. The early $limit is dropped for the
-		// same reason — trimming happens after the low-value filter.
-		// 8× (was 4×): per-doc collapse needs DISTINCT documents — audit R2
-		// found pages of 10 with only 6 docs because the 40-chunk pool was
-		// dominated by multi-chunk hits on the same few documents.
-		const overfetch = Math.max(limitParam * 8, 48);
-		const pipeline: Record<string, unknown>[] = [
-			{
-				$vectorSearch: {
-					index: "research_vector_index",
-					path: "embedding",
-					queryVector: queryEmbedding,
-					numCandidates: Math.max(200, overfetch * 10),
-					limit: overfetch,
-				},
-			},
-			...(sourceFilter ? [{ $match: { source: sourceFilter } }] : []),
-			{
-				$project: {
-					_id: 1,
-					source: 1,
-					title: 1,
-					section: 1,
-					url: 1,
-					content: 1,
-					chunkIndex: 1,
-					publishedAt: 1,
-					auditor: 1,
-					protocol: 1,
-					severity: 1,
-					score: { $meta: "vectorSearchScore" },
-				},
-			},
-		];
+		// our minimal index doesn't have. The builder over-fetches and
+		// post-filters instead so callers can use ?source= without an index
+		// rebuild — and widens the vector stage for filtered queries so the
+		// pool keeps enough DISTINCT in-source documents for the per-doc
+		// collapse (sls-019: a starved cap pool made the refill serve
+		// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
+		const pipeline = buildResearchVectorPipeline({
+			queryEmbedding,
+			limit: limitParam,
+			sourceFilter,
+		});
 
 		const docs = await collection.aggregate(pipeline).toArray();
 		// If Atlas Vector Search index isn't created yet, $vectorSearch
@@ -351,6 +326,63 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Exact-identifier retrieval guarantee (sls-019): when the query names a
+	// CAP/SEP by canonical ID, an over-fetched vector pool that happens to
+	// miss the named document must not mean the lookup fails — fetch its
+	// chunks directly by parentDocId and add them to the pool. The ranking
+	// stage pins them to the top (see identifierTargets in research-rank.ts).
+	const idTargets = identifierTargets(q);
+	if (idTargets.length) {
+		const targetRe = new RegExp(
+			`/(${idTargets.join("|")})\\.md(?:$|[#?])`,
+			"i",
+		);
+		if (!chunks.some((c) => targetRe.test(c.url))) {
+			try {
+				const direct = await payload.find({
+					collection: "research-docs",
+					where: {
+						parentDocId: { in: idTargets },
+						...(sourceFilter ? { source: { equals: sourceFilter } } : {}),
+					},
+					limit: 25,
+					depth: 0,
+				});
+				for (const d of direct.docs as unknown as Array<{
+					id: string;
+					source: string;
+					title: string;
+					section?: string;
+					url: string;
+					content: string;
+					chunkIndex: number;
+					publishedAt?: string;
+					auditor?: string;
+					protocol?: string;
+					severity?: string;
+				}>) {
+					chunks.push({
+						id: String(d.id),
+						source: d.source,
+						title: d.title,
+						section: d.section ?? null,
+						url: d.url,
+						content: d.content,
+						chunkIndex: d.chunkIndex,
+						publishedAt: d.publishedAt ?? null,
+						auditor: d.auditor ?? null,
+						protocol: d.protocol ?? null,
+						severity: d.severity ?? null,
+						// No retrieval score: confidence floors relevance for
+						// exact-ID matches, and the pin sets the rank.
+					});
+				}
+			} catch {
+				// direct lookup is best-effort — the pool result still serves
+			}
+		}
+	}
+
 	// Shared ranking stage (src/lib/research-rank.ts): drop low-value chunks,
 	// collapse to the best chunk per document, and order by the attached
 	// confidence signal (relevance + freshness + authority) with raw-score
@@ -390,7 +422,7 @@ export async function GET(req: NextRequest) {
 				scoreModel: {
 					version: SCORE_MODEL_VERSION,
 					fields: ["relevance", "freshness", "authority"],
-					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document.",
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9.",
 				},
 			},
 			results,

@@ -98,6 +98,45 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 	return tokens.filter((t) => hay.includes(t)).length / tokens.length;
 }
 
+// ── sls-019: exact CAP/SEP identifiers are retrieval KEYS, not hints ──
+// Vector embeddings can't key on proposal numbers: for q=CAP-0038 the
+// cross-referencing CAPs outrank the named document (live sweep 2026-07-13:
+// rank 23; five of seven exact IDs missed top-5 — upstream issue #510).
+// Detection normalizes every form (CAP-38, cap 0038, sep#10, SEP-0024) to the
+// canonical zero-padded slug; ranking pins the identified document(s) above
+// vector order and floors their relevance (see exactIdMatch in confidence.ts).
+const IDENTIFIER_RE = /\b(cap|sep)[\s\-_#]*(\d{1,4})\b/gi;
+// "Sep 24, 2025" / "24 Sep 2026" are DATES, not SEP-0024. When the query
+// carries a date-shaped 'sep', skip its space/bare-separated matches; the
+// hyphen/hash forms (sep-24, sep#24) still count as identifiers.
+const SEP_DATE_RE =
+	/\b(?:\d{1,2}(?:st|nd|rd|th)?\s+sep\b|sep\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+(?:19|20)\d{2})/i;
+
+/**
+ * Canonical proposal slugs named by the query (e.g. "cap-0038", "sep-0010"),
+ * deduped, in mention order. Empty when the query names none.
+ */
+export function identifierTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const sepLooksLikeDate = SEP_DATE_RE.test(query);
+	const out: string[] = [];
+	for (const m of query.matchAll(IDENTIFIER_RE)) {
+		const kind = m[1].toLowerCase();
+		// Space/bare-separated "sep 24" inside a date-shaped query is a month.
+		if (kind === "sep" && sepLooksLikeDate && !/[-#_]/.test(m[0])) continue;
+		const id = `${kind}-${String(Number.parseInt(m[2], 10)).padStart(4, "0")}`;
+		if (!out.includes(id)) out.push(id);
+	}
+	return out;
+}
+
+/** Does this chunk belong to one of the identifier-named documents? */
+function matchesTarget(url: string, targets: string[]): boolean {
+	return targets.some((id) =>
+		new RegExp(`/${id}\\.md(?:$|[#?])`, "i").test(url),
+	);
+}
+
 // Recency INTENT — the query literally asks for what's newest ("latest
 // soroban release", "recent mainnet upgrade", "stellar news 2026"). The
 // standard confidence blend scores canonical docs EVERGREEN (freshness=1,
@@ -142,9 +181,16 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// page max, as before — the pool is the honest denominator).
 	const maxScore = filtered.reduce((m, c) => Math.max(m, c.score ?? 0), 0);
 
+	// Exact CAP/SEP identifier pin (sls-019): the named document must rank
+	// ahead of vector order — an exact-ID query is a lookup, not a search.
+	const targets = identifierTargets(opts.query);
+	const pinned = (c: RankableChunk) =>
+		targets.length > 0 && matchesTarget(c.url, targets);
+
 	const scored = filtered
 		.map((c) => {
 			const eff = meetingReclass(c);
+			const isPinned = pinned(c);
 			return {
 				...c,
 				// Serve the URL-derived date on meeting rows too — the row must
@@ -156,15 +202,23 @@ export function rankResearchChunks<T extends RankableChunk>(
 					mode: opts.mode,
 					maxScore,
 					publishedAt: eff.publishedAt,
-					titleMatch: opts.query ? titleMatchFraction(c, opts.query) : 0,
+					// An identifier hit is a full title match: the user asked about
+					// THIS document by its canonical ID (same rule as protocol hits).
+					titleMatch: isPinned
+						? 1
+						: opts.query
+							? titleMatchFraction(c, opts.query)
+							: 0,
+					exactIdMatch: isPinned,
 					now,
 				}),
 			};
 		})
-		// Confidence order; raw retrieval score breaks ties (confidence rounds
-		// to 2dp, so near-equals happen).
+		// Identifier-named docs first; then confidence order; raw retrieval
+		// score breaks ties (confidence rounds to 2dp, so near-equals happen).
 		.sort(
 			(a, b) =>
+				Number(pinned(b)) - Number(pinned(a)) ||
 				b.confidence.score - a.confidence.score ||
 				(b.score ?? 0) - (a.score ?? 0),
 		);
@@ -172,11 +226,13 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// Recency-intent re-sort (see RECENCY_INTENT_RE above): blend confidence
 	// with dated freshness so provably-current chunks top "latest/recent"
 	// queries. Confidence still carries 60% — a fresh-but-irrelevant chunk
-	// can't hijack the page.
+	// can't hijack the page. Identifier pins still take precedence.
 	if (recencyIntent(opts.query)) {
 		const key = (c: (typeof scored)[number]) =>
 			0.6 * c.confidence.score + 0.4 * datedFreshness(c.publishedAt, now);
-		scored.sort((a, b) => key(b) - key(a));
+		scored.sort(
+			(a, b) => Number(pinned(b)) - Number(pinned(a)) || key(b) - key(a),
+		);
 	}
 
 	// Best chunk per document first — also collapsing exact-duplicate content

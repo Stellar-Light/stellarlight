@@ -54,15 +54,20 @@ interface IncidentSeed {
 
 const INCIDENTS: IncidentSeed[] = [
 	{
+		// NOTE the slug says "2026-05" but the EVENT is 2026-02-22 — the id is
+		// a stable upsert key, NOT a fact. Keep it: renaming would create a new
+		// row and leave the old wrong-facts row (sls-022, upstream #513) live
+		// in the corpus forever (the ingest never deletes).
 		id: "blend-2026-05-oracle-manipulation",
-		protocol: "Blend",
-		severity: "high",
+		protocol: "YieldBlox",
+		severity: "critical",
 		title:
-			"Blend Protocol — oracle-manipulation incident (May 2026, attempted & contained)",
-		url: "https://lumenloop.com/research/stellar-weekly-roundup-week-15-2026",
-		publishedAt: "2026-05-22",
+			"YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfiguration drain (event 2026-02-22, ~$10.2M)",
+		url: "https://www.blockaid.io/blog/73-quarantined-how-blockaid-and-stellar-validators-contained-a-10m-price-manipulation-attack",
+		publishedAt: "2026-05-20",
 		tags: [
 			"incident",
+			"yieldblox",
 			"blend",
 			"oracle",
 			"reflector",
@@ -71,13 +76,19 @@ const INCIDENTS: IncidentSeed[] = [
 			"ustry",
 			"exploit",
 		],
-		body: `**Is Blend safe to build on?** Blend is one of the most-audited lending protocols on Stellar/Soroban (OtterSec, Certora, Code4rena), but in May 2026 it was the target of an attempted ~$10 million oracle-manipulation attack — so a "safe to build on?" assessment has to weigh this security incident, not only the audit history.
+		// sls-022 fact discipline: event date ≠ publication date; token
+		// quantities ≠ dated USD valuations; drain / quarantine / remediation /
+		// recovery are SEPARATE states (quarantine is not recovery); the
+		// misconfigured pool ≠ Blend core ≠ Reflector core ≠ Stellar protocol.
+		body: `**Key facts.** Event date: 2026-02-22 (UTC). Retrospectives published later: BlockSec analysis 2026-02-26; Blockaid post-mortem 2026-05-20 — May is when the write-ups appeared, not when the exploit happened. Completed drain: 61,249,278 XLM plus approximately 1,000,197 USDC borrowed against fraudulently inflated collateral, roughly $10.2 million USD at the time (the 61M figure is an XLM quantity — rendering it as a dollar amount overstates the loss ~6x). Quarantine: Stellar Tier-1 validators later deployed transaction-filtering configuration that effectively quarantined about 48 million XLM (~$7.3 million) of the drained funds on-chain — quarantined funds are restricted, NOT returned; part of the remainder had already been bridged to Base, BSC, and Ethereum. Quarantine is not recovery, and no attacker-fund recovery is established by these sources.
 
-**What happened.** Security firm Blockaid published a detailed post-mortem on an attempted oracle-manipulation exploit against Blend. An attacker inflated the price of USTRY (Etherfuse's tokenized US-Treasury token) by roughly 100x by exploiting low-liquidity Reflector oracle price feeds, then used the fraudulently-inflated collateral to borrow about $61 million in XLM from Blend and began bridging the funds off-chain. Stellar validators coordinated in real time to quarantine approximately 48 million XLM on-chain before significant losses occurred — so the attack was largely contained rather than a completed theft.
+**What happened.** An attacker manipulated the price of USTRY (Etherfuse's tokenized US-Treasury asset) on its very shallow USTRY/USDC market on the Stellar DEX, inflating it from roughly $1.06 to about $107 (~100x). The community-managed YieldBlox DAO lending pool — a Blend V2 pool deployment — priced USTRY collateral from that manipulable market via Reflector's volume-weighted feed, so the attacker deposited inflated USTRY and completed a drain of the pool's XLM and USDC before validator-level filtering restricted the attacker's accounts.
 
-**Root cause and lesson for builders.** Thin-liquidity oracle feeds remain a concrete exploit vector when a lending protocol lacks fallback price checks. The audited contract code did not prevent the manipulation, because the weakness was in the price-feed integration, not the core contracts. Any Soroban protocol that prices collateral from a single low-liquidity Reflector feed inherits this risk; treat oracle/feed liquidity and fallback price validation as a first-class security consideration rather than assuming audits alone cover this class of risk.
+**Root cause.** A pool-operator (YieldBlox DAO) oracle configuration choice: pricing collateral from a thin, manipulable USTRY/USDC market through the Reflector feed. Per BlockSec, this was a pool configuration issue, not a flaw in the Blend V2 core contracts, in Reflector's own contracts, or in the Stellar protocol — none of those was exploited. Blockaid additionally notes Blend's oracle wrapper compared each new price only to the immediately preceding window, which a sustained multi-window manipulation defeats.
 
-Source: Blockaid incident post-mortem, via LumenLoop Stellar Weekly Roundup (week of May 15, 2026).`,
+**Lesson for builders.** Any Soroban lending pool that prices collateral from a single thin-liquidity market inherits this risk regardless of audit history. Treat oracle feed liquidity, manipulation resistance, and fallback price validation as first-class security requirements when configuring a pool.
+
+Sources: Blockaid post-mortem (2026-05-20, primary): blockaid.io/blog/73-quarantined-how-blockaid-and-stellar-validators-contained-a-10m-price-manipulation-attack; BlockSec analysis (2026-02-26): blocksec.com/blog/yieldblox-dao-incident-on-stellar-oracle-misconfiguration-enabled-a-10m-drain.`,
 	},
 ];
 

@@ -1266,6 +1266,7 @@ export interface ResearchDoc {
     | 'lumenloop-research'
     | 'audit'
     | 'incident'
+    | 'security-program'
     | 'ec-developer-report';
   /**
    * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.

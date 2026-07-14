@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rankResearchChunks } from "../research-rank";
+import { identifierTargets, rankResearchChunks } from "../research-rank";
 
 /** 2026-07-09 — fixed clock so freshness math is deterministic. */
 const NOW = Date.parse("2026-07-09T00:00:00Z");
@@ -26,6 +26,40 @@ function chunk(over: {
 			).join(" ")}.`,
 	};
 }
+
+describe("identifierTargets", () => {
+	it("normalizes every CAP/SEP variant to the canonical zero-padded slug", () => {
+		expect(identifierTargets("CAP-0038")).toEqual(["cap-0038"]);
+		expect(identifierTargets("cap-38")).toEqual(["cap-0038"]);
+		expect(identifierTargets("cap 38")).toEqual(["cap-0038"]);
+		expect(identifierTargets("CAP #38")).toEqual(["cap-0038"]);
+		expect(identifierTargets("cap0038")).toEqual(["cap-0038"]);
+		expect(identifierTargets("SEP-10 web auth")).toEqual(["sep-0010"]);
+		expect(identifierTargets("what does sep 24 cover?")).toEqual(["sep-0024"]);
+	});
+
+	it("dedupes and keeps mention order for multi-identifier queries", () => {
+		expect(identifierTargets("cap-46 vs CAP-0038 vs cap 46")).toEqual([
+			"cap-0046",
+			"cap-0038",
+		]);
+	});
+
+	it("does not read a calendar date as a SEP identifier", () => {
+		expect(identifierTargets("what happened on Sep 24, 2025?")).toEqual([]);
+		expect(identifierTargets("the outage of 24 Sep 2026")).toEqual([]);
+		// …but an explicit hyphen form still counts even near a date.
+		expect(identifierTargets("sep-24 changes on Sep 1, 2026")).toContain(
+			"sep-0024",
+		);
+	});
+
+	it("names nothing for ordinary queries", () => {
+		expect(identifierTargets("asset clawback")).toEqual([]);
+		expect(identifierTargets("recap 38 of the meeting")).toEqual([]);
+		expect(identifierTargets(undefined)).toEqual([]);
+	});
+});
 
 describe("rankResearchChunks", () => {
 	it("collapses multiple chunks of the same document to the best one", () => {
@@ -268,6 +302,102 @@ describe("rankResearchChunks", () => {
 		expect(out[0].confidence.relevance).toBeGreaterThan(
 			out[1].confidence.relevance,
 		);
+	});
+
+	// ── sls-019: exact CAP/SEP identifier queries (upstream #510) ──
+
+	it("pins the identifier-named CAP above higher-cosine cross-references", () => {
+		// Live shape: q=CAP-0038 ranked its own doc 23rd — chunks of OTHER CAPs
+		// that mention CAP-0038 carried higher cosine than the doc itself.
+		const capUrl = (id: string) =>
+			`https://github.com/stellar/stellar-protocol/blob/master/core/${id}.md`;
+		const pool = [
+			chunk({ url: capUrl("cap-0021"), score: 0.78, source: "cap" }),
+			chunk({ url: capUrl("cap-0035"), score: 0.75, source: "cap" }),
+			chunk({ url: capUrl("cap-0038"), score: 0.6, source: "cap" }),
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 3,
+			mode: "vector",
+			query: "CAP-0038",
+			now: NOW,
+		});
+		expect(out[0].url).toContain("cap-0038.md");
+		// Exact-key hit floors relevance — the confidence must agree with the
+		// served order, not read "low relevance" on the rank-1 row.
+		expect(out[0].confidence.relevance).toBeGreaterThanOrEqual(0.9);
+	});
+
+	it("pins every variant form of the identifier (cap-38, cap 38, CAP #0038)", () => {
+		const capUrl =
+			"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0038.md";
+		for (const q of ["cap-38", "cap 38", "CAP #0038", "what is cap0038?"]) {
+			const out = rankResearchChunks(
+				[
+					chunk({
+						url: "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0021.md",
+						score: 0.8,
+						source: "cap",
+					}),
+					chunk({ url: capUrl, score: 0.6, source: "cap" }),
+				],
+				{ limit: 2, mode: "vector", query: q, now: NOW },
+			);
+			expect(out[0].url, `query: ${q}`).toBe(capUrl);
+		}
+	});
+
+	it("a compare query pins BOTH named documents ahead of bystanders", () => {
+		const capUrl = (id: string) =>
+			`https://github.com/stellar/stellar-protocol/blob/master/core/${id}.md`;
+		const out = rankResearchChunks(
+			[
+				chunk({ url: capUrl("cap-0021"), score: 0.9, source: "cap" }),
+				chunk({ url: capUrl("cap-0038"), score: 0.6, source: "cap" }),
+				chunk({ url: capUrl("cap-0046"), score: 0.65, source: "cap" }),
+			],
+			{
+				limit: 3,
+				mode: "vector",
+				query: "difference between cap-38 and cap-46",
+				now: NOW,
+			},
+		);
+		expect(out.slice(0, 2).map((c) => c.url)).toEqual([
+			capUrl("cap-0046"), // higher cosine of the two pinned docs
+			capUrl("cap-0038"),
+		]);
+	});
+
+	it("no URL is served twice while distinct documents can fill the page", () => {
+		// The sls-019 dedup leak: a starved source-filtered pool let leftover
+		// chunks of already-served docs fill the page. With enough distinct
+		// docs in the pool, every served URL must be unique.
+		const capUrl = (id: string) =>
+			`https://github.com/stellar/stellar-protocol/blob/master/core/${id}.md`;
+		const pool = Array.from({ length: 12 }, (_, i) => {
+			const id = `cap-00${String(35 + i).padStart(2, "0")}`;
+			return [
+				chunk({ url: capUrl(id), score: 0.8 - i * 0.01, source: "cap" }),
+				chunk({
+					url: capUrl(id),
+					score: 0.79 - i * 0.01,
+					source: "cap",
+					content: `A second distinct section of ${id} covering ledger entries, operations, thresholds, signatures, sponsorship, reserves, and upgrade semantics. ${Array.from(
+						{ length: 40 },
+						(_, k) => `w${i}x${k}`,
+					).join(" ")}.`,
+				}),
+			];
+		}).flat();
+		const out = rankResearchChunks(pool, {
+			limit: 10,
+			mode: "vector",
+			query: "Asset Clawback",
+			now: NOW,
+		});
+		expect(out).toHaveLength(10);
+		expect(new Set(out.map((c) => c.url)).size).toBe(10);
 	});
 
 	it("named-protocol match beats a generic title-word hit on the wrong record", () => {
