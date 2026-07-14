@@ -775,6 +775,16 @@ export interface components {
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
             prominence?: number;
             verificationLevel?: string | null;
+            /** @description sls-033/#519: curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim). */
+            productKind?: string | null;
+            /** @description sls-033/#519: per-platform availability with as-of dates. null = not curated. */
+            availability?: {
+                platform?: string;
+                state?: string;
+                storeUrl?: string | null;
+                checkedAt?: string | null;
+                note?: string | null;
+            }[] | null;
             /** @description Capability tags (Wallet, DEX, Lending, Oracle, SDK, RPC, Faucet, NFT, RWA, Anchor, Stablecoin, Indexer, Explorer, Security, Gaming). */
             types?: string[];
             /** @description The project OWN canonical homes - cite these as the primary source, not StellarLight or any directory. Only present, non-empty fields are included. */

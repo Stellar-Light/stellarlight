@@ -3662,6 +3662,39 @@
 						"type": "string",
 						"nullable": true
 					},
+					"productKind": {
+						"type": "string",
+						"nullable": true,
+						"description": "sls-033/#519: curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim)."
+					},
+					"availability": {
+						"type": "array",
+						"nullable": true,
+						"items": {
+							"type": "object",
+							"properties": {
+								"platform": {
+									"type": "string"
+								},
+								"state": {
+									"type": "string"
+								},
+								"storeUrl": {
+									"type": "string",
+									"nullable": true
+								},
+								"checkedAt": {
+									"type": "string",
+									"nullable": true
+								},
+								"note": {
+									"type": "string",
+									"nullable": true
+								}
+							}
+						},
+						"description": "sls-033/#519: per-platform availability with as-of dates. null = not curated."
+					},
 					"types": {
 						"type": "array",
 						"items": {
