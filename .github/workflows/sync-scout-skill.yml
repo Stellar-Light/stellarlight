@@ -28,6 +28,7 @@ on:
     branches: [main]
     paths:
       - "public/skills/stellar-scout.md"
+      - "public/skills/references/**"
   workflow_dispatch:
 
 permissions:
@@ -57,6 +58,7 @@ jobs:
             out
 
           cp public/skills/stellar-scout.md out/SKILL.md
+          mkdir -p out/references && cp public/skills/references/*.md out/references/
 
           cd out
           git config user.name "stellarlight-bot"
