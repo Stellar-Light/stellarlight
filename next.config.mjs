@@ -27,7 +27,15 @@ const nextConfig = {
 	},
 	// Exclude problematic packages from server-side bundling
 	// This prevents Next.js from trying to bundle these packages
-	serverExternalPackages: ["thread-stream", "pino", "pino-pretty"],
+	serverExternalPackages: [
+		"thread-stream",
+		"pino",
+		"pino-pretty",
+		// Stellar SDK (awards ballot building/validation) stays unbundled on the
+		// server — it carries optional native bindings (sodium-native) that
+		// webpack shouldn't try to resolve. Client code never imports it.
+		"@stellar/stellar-sdk",
+	],
 	webpack: (webpackConfig, { isServer, webpack }) => {
 		webpackConfig.resolve.extensionAlias = {
 			".cjs": [".cts", ".cjs"],

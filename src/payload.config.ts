@@ -9,6 +9,9 @@ import sharp from "sharp";
 import { fileURLToPath } from "url";
 import { ApiUsage } from "./collections/ApiUsage";
 import { Audits } from "./collections/Audits";
+import { AwardNominees } from "./collections/AwardNominees";
+import { AwardRounds } from "./collections/AwardRounds";
+import { AwardVoters } from "./collections/AwardVoters";
 import { Blog } from "./collections/Blog";
 import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
@@ -80,6 +83,9 @@ export default buildConfig({
 		Projects,
 		Repos,
 		Audits,
+		AwardRounds,
+		AwardNominees,
+		AwardVoters,
 		Blog,
 		Builders,
 		RSSFeeds,
