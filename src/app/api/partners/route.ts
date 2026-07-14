@@ -19,7 +19,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
-import { boolParam, clampLimit } from "@/lib/http-params";
+import {
+	BOOL_FALSE_VALUES,
+	BOOL_TRUE_VALUES,
+	clampLimit,
+	strictBoolParam,
+} from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
@@ -184,8 +189,31 @@ export async function GET(req: NextRequest) {
 	const sector = sp.get("sector");
 	const region = sp.get("region");
 	const ramps = sp.get("ramps");
-	const accepting = boolParam(sp.get("accepting"));
-	const all = boolParam(sp.get("all"));
+	// Strict boolean parse (sls-040 residual #521, Engine E invalid-accepted):
+	// `?accepting=__bogus__` / `?all=__bogus__` used to coerce silently to
+	// false — an unfiltered 200 the caller read as "filter applied". Garbage
+	// values now 400 with the accepted forms, matching the type/ramps pattern.
+	const acceptingParsed = strictBoolParam(sp.get("accepting"));
+	const allParsed = strictBoolParam(sp.get("all"));
+	for (const [name, parsed] of [
+		["accepting", acceptingParsed],
+		["all", allParsed],
+	] as const) {
+		if (parsed === "invalid") {
+			return NextResponse.json(
+				{
+					error: `Invalid ${name} value '${sp.get(name)}' — it is a boolean flag.`,
+					acceptedValues: {
+						true: BOOL_TRUE_VALUES,
+						false: BOOL_FALSE_VALUES,
+					},
+				},
+				{ status: 400 },
+			);
+		}
+	}
+	const accepting = acceptingParsed === true;
+	const all = allParsed === true;
 	const q = sp.get("q")?.toLowerCase().trim();
 	const limit = clampLimit(sp.get("limit"), 50, 100);
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);

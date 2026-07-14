@@ -203,8 +203,38 @@ function expandBuilderTerm(t: string): string[] {
 	return [...out];
 }
 
+// The FULL query-param vocabulary this endpoint honors. Anything else 400s —
+// see the unknown-param rejection below.
+const SUPPORTED_PARAMS = [
+	"q",
+	"skill",
+	"tech",
+	"location",
+	"limit",
+	"offset",
+] as const;
+
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Strict unknown-param rejection (sls-040 / #521): `?scfTier=high` (and any
+	// other unsupported key) was silently ignored — the caller got the full
+	// unfiltered roster while believing they'd filtered it. No SCF-tier data
+	// exists on builder profiles (the never-populated `scfTier` response field
+	// was removed in 1.7.19), so the honest contract is a machine-readable 400
+	// naming the supported vocabulary — mirroring the strict-reject pattern
+	// leaderboard uses for sort/range.
+	const unknownParams = [...new Set(sp.keys())].filter(
+		(k) => !(SUPPORTED_PARAMS as readonly string[]).includes(k),
+	);
+	if (unknownParams.length) {
+		return NextResponse.json(
+			{
+				error: `Unsupported query parameter(s): ${unknownParams.join(", ")}. This endpoint does not filter by them (no SCF-tier/award data exists on builder profiles — a project's award history lives on /api/projects/search rows).`,
+				supportedParams: SUPPORTED_PARAMS,
+			},
+			{ status: 400 },
+		);
+	}
 	// `skill`/`tech` alias `q` — the free-text filter below already searches
 	// bio + role + projects, which is exactly "find a builder who's done X".
 	// Agents commonly pass the tech under `skill`; without this it was dropped.

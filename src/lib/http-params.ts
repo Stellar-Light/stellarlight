@@ -31,3 +31,29 @@ export function boolParam(raw: string | null): boolean {
 	const v = raw.toLowerCase().trim();
 	return v === "1" || v === "true" || v === "yes" || v === "on";
 }
+
+/** The value vocabularies strictBoolParam accepts — exported so 400 responses
+ * can echo the accepted forms machine-readably. */
+export const BOOL_TRUE_VALUES = ["1", "true", "yes", "on"] as const;
+export const BOOL_FALSE_VALUES = ["0", "false", "no", "off"] as const;
+
+/**
+ * STRICT boolean query-param parse (sls-040 residual / Engine E
+ * invalid-accepted class): `boolParam` silently coerces any unrecognized
+ * value to `false`, so `?accepting=__bogus__` returned an unfiltered 200 and
+ * the caller believed the filter applied. This variant distinguishes the
+ * three honest cases so routes can 400 on garbage:
+ *
+ *   absent / empty  -> false      (param not supplied)
+ *   1/true/yes/on   -> true       (case-insensitive)
+ *   0/false/no/off  -> false      (explicit off)
+ *   anything else   -> "invalid"  (route should 400 with the accepted forms)
+ */
+export function strictBoolParam(raw: string | null): boolean | "invalid" {
+	if (!raw) return false;
+	const v = raw.toLowerCase().trim();
+	if (!v) return false;
+	if ((BOOL_TRUE_VALUES as readonly string[]).includes(v)) return true;
+	if ((BOOL_FALSE_VALUES as readonly string[]).includes(v)) return false;
+	return "invalid";
+}

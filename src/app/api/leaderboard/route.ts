@@ -27,6 +27,11 @@ interface ProjectRow {
 	name: string;
 	slug: string;
 	category: string;
+	// sls-036 / #524: per-row product-type taxonomy (the same `types[]` the
+	// projects directory carries), so a consumer can see WHY a row matched a
+	// ?type= filter — and build explicit groupings (DEX + Lending) instead of
+	// inferring them from the broad category.
+	types: string[];
 	shortDescription: string | null;
 	scfAwarded: boolean;
 	github: {
@@ -50,6 +55,7 @@ function toCsv(rows: ProjectRow[]): string {
 		"name",
 		"slug",
 		"category",
+		"types",
 		"scf_awarded",
 		"stars",
 		"open_issues",
@@ -63,6 +69,7 @@ function toCsv(rows: ProjectRow[]): string {
 			r.name,
 			r.slug,
 			r.category,
+			r.types.join(";"),
 			r.scfAwarded,
 			r.github.totalStars,
 			r.github.openIssuesTotal,
@@ -125,6 +132,51 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// Project-type filter (sls-036 / #524): ?type= was silently ignored — a
+	// caller sending type=DEX got the byte-identical unfiltered ranking while
+	// believing they'd scoped it. Repeatable (?type=DEX&type=Lending) and
+	// comma-separable (?type=DEX,Lending) so a consumer-defined grouping like
+	// "DeFi = DEX + Lending" is EXPLICIT rather than implied by a broad
+	// category. Values validate against the same `types` select options the
+	// projects directory uses (src/collections/Projects.ts — mirrors the
+	// /api/projects/search type param); unknown values 400 with the valid list.
+	const VALID_TYPES = [
+		"Wallet",
+		"DEX",
+		"Lending",
+		"Bridge",
+		"Infrastructure",
+		"Payments",
+		"Anchor",
+		"SDK",
+		"Indexer",
+		"Explorer",
+		"Analytics",
+		"AI",
+		"Gaming",
+		"Education",
+		"Security",
+		"NFT",
+		"RWA",
+		"Stablecoin",
+		"Social Impact",
+		"RPC",
+		"Faucet",
+	] as const;
+	const typeList = sp
+		.getAll("type")
+		.flatMap((v) => v.split(","))
+		.map((v) => v.trim())
+		.filter(Boolean);
+	const badType = typeList.find(
+		(t) => !(VALID_TYPES as readonly string[]).includes(t),
+	);
+	if (badType !== undefined) {
+		return NextResponse.json(
+			{ error: `Invalid type '${badType}'.`, validTypes: VALID_TYPES },
+			{ status: 400 },
+		);
+	}
 	const VALID_FORMATS = ["json", "csv"] as const;
 	if (!(VALID_FORMATS as readonly string[]).includes(format)) {
 		return NextResponse.json(
@@ -150,6 +202,14 @@ export async function GET(req: NextRequest) {
 			};
 			if (category && category !== "all") {
 				projectWhere.category = { equals: category };
+			}
+			if (typeList.length) {
+				// sls-036 / #524: `types` is a hasMany select — `in` matches any
+				// membership, so ?type=DEX&type=Lending keeps projects typed EITHER
+				// (an explicit consumer-defined grouping). Applied in the DB query,
+				// i.e. BEFORE ranking and limiting.
+				projectWhere.types =
+					typeList.length === 1 ? { contains: typeList[0] } : { in: typeList };
 			}
 
 			const projectsResult = await payload.find({
@@ -220,6 +280,7 @@ export async function GET(req: NextRequest) {
 					name: string;
 					slug: string;
 					category: string;
+					types?: string[];
 					shortDescription?: string | null;
 					scf?: { awarded?: boolean };
 				}>
@@ -247,6 +308,7 @@ export async function GET(req: NextRequest) {
 					name: project.name,
 					slug: project.slug,
 					category: project.category,
+					types: Array.isArray(project.types) ? project.types : [],
 					shortDescription: project.shortDescription ?? null,
 					scfAwarded: !!project.scf?.awarded,
 					github: {

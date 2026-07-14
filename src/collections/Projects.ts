@@ -433,6 +433,95 @@ export const Projects: CollectionConfig = {
 			},
 		},
 		{
+			// sls-033 (#519): wallet-landscape product kind. The Wallet type mixes
+			// end-user wallet products with hardware wallets, connectivity
+			// protocols (WalletConnect), wallet-building SDKs, integration kits
+			// (Stellar Wallets Kit), and passkey/smart-account tooling — a
+			// directory/module row alone does not establish what KIND of product
+			// a record is. Curated only (PRODUCT_KIND in
+			// scripts/data/curate-projects.ts), each assignment grounded in the
+			// operator's own product description. Follows the venueRole precedent
+			// (#517).
+			name: "productKind",
+			type: "select",
+			options: [
+				"end-user-wallet",
+				"hardware-wallet",
+				"connectivity-protocol",
+				"wallet-sdk",
+				"integration-kit",
+				"smart-account-tooling",
+			],
+			admin: {
+				description:
+					"What KIND of wallet-landscape product this is (sls-033): end-user-wallet = a consumer app users hold funds in; hardware-wallet = a physical signing device product; connectivity-protocol = a wallet↔dApp connection protocol (not a wallet); wallet-sdk = a library for BUILDING wallets; integration-kit = a library for integrating existing wallets into dApps; smart-account-tooling = passkey/smart-account infrastructure. Null = not yet classified (unknown, NOT 'not a wallet').",
+			},
+		},
+		{
+			// sls-033 (#519): per-platform APP availability, deliberately separate
+			// from the project lifecycle `status` — a Live project can have a dead
+			// store listing (xBull: product Live via web + Chrome extension while
+			// its formerly-listed iOS/Android store apps 404, checked 2026-07-13).
+			// Each row is a dated, store-checked fact (AVAILABILITY_SET in
+			// scripts/data/curate-projects.ts). Empty = availability not yet
+			// curated (unknown), NEVER "not available anywhere".
+			name: "availability",
+			type: "array",
+			admin: {
+				description:
+					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only — empty means not-yet-curated, not unavailable.",
+			},
+			fields: [
+				{
+					name: "platform",
+					type: "select",
+					required: true,
+					options: [
+						"ios",
+						"android",
+						"web",
+						"browser-extension",
+						"desktop",
+						"hardware-device",
+					],
+				},
+				{
+					name: "state",
+					type: "select",
+					required: true,
+					options: ["available", "unavailable"],
+					admin: {
+						description:
+							"available = the store listing / product surface was reachable when checked; unavailable = a previously-listed surface is gone (404 / delisted).",
+					},
+				},
+				{
+					name: "storeUrl",
+					type: "text",
+					admin: {
+						description:
+							"The store listing / product surface URL that was checked (App Store, Google Play, Chrome Web Store, vendor shop, web app). Null for an unavailable row whose listing no longer exists.",
+					},
+				},
+				{
+					name: "checkedAt",
+					type: "text",
+					admin: {
+						description:
+							"YYYY-MM-DD the availability state was last verified — availability is a dated fact, re-check before relying on it.",
+					},
+				},
+				{
+					name: "note",
+					type: "text",
+					admin: {
+						description:
+							"Optional one-line evidence note (e.g. 'Play listing for app.xbull.mobile 404s').",
+					},
+				},
+			],
+		},
+		{
 			name: "scf",
 			type: "group",
 			admin: {
