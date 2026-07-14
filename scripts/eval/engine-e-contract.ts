@@ -46,7 +46,11 @@ const UA = { "User-Agent": "stellarlight-engine-e" };
 
 /** Params whose effect is pagination/relevance, not a contract filter. */
 const SKIP_PARAMS = new Set(["limit", "offset", "q"]);
-const LIMIT = 5;
+// 200, not a small page: filters that bite in the TAIL are invisible on a
+// short first page (the leaderboard ?range= false-positive, 2026-07-14 —
+// every range value shares the same recently-active top-5 while the full
+// row-set shrinks 200→39). Param-effect probes must see the whole window.
+const LIMIT = 200;
 
 /**
  * Baseline query strings for ops that need one to return rows at all
