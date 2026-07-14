@@ -1405,6 +1405,10 @@ export interface ResearchDoc {
 	 */
 	publishedAt?: string | null;
 	/**
+	 * Crawl-observation time: when the ingester last observed this content live at the source (stamped every run, even when content is unchanged). Distinct from publishedAt (the page's own stated date) and updatedAt (advances only on a content change). Set by live-fetch ingesters; null for sources that don't stamp it.
+	 */
+	observedAt?: string | null;
+	/**
 	 * Voyage AI voyage-3 vector (1024 floats). Atlas $vectorSearch is configured on this field.
 	 */
 	embedding?:
@@ -2613,6 +2617,7 @@ export interface ResearchDocsSelect<T extends boolean = true> {
 				id?: T;
 		  };
 	publishedAt?: T;
+	observedAt?: T;
 	embedding?: T;
 	updatedAt?: T;
 	createdAt?: T;

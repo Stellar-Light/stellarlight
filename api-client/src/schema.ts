@@ -339,7 +339,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence (audits add auditor/severity). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
+         * @description Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
          */
         get: operations["searchResearch"];
         put?: never;

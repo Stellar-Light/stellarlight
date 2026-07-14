@@ -89,6 +89,7 @@ export function buildResearchVectorPipeline(opts: {
 				content: 1,
 				chunkIndex: 1,
 				publishedAt: 1,
+				observedAt: 1,
 				auditor: 1,
 				protocol: 1,
 				severity: 1,

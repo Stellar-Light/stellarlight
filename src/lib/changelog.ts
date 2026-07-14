@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-14",
 		surfaces: ["api"],
+		version: "spec 1.7.26",
+		type: "added",
+		summary:
+			"searchResearch now answers SDF leadership-role questions and stamps crawl-observation dates. The Team page's per-member ROLES ('Founder and Chief Scientist', 'VP of Ecosystem') live only in the page's embedded card data — a plain <main> scrape yielded a role-less name list — so ingestion now recovers the Name→Role roster from that embedded data. Every research chunk also carries a new `observedAt` (crawl-observation date: when ingest last observed the content live at the source), distinct from `publishedAt` (the source's own stated date).",
+		detail:
+			"Team-page extraction parses the embedded Sanity card blocks (fail-safe: if the structure changes the ingester's signature guard REFUSES the page rather than silently re-ingesting a role-less list); the leadership roles are now registered signatures. `observedAt` is stamped on every ingest run — re-written even when content is unchanged (metadata-only, no re-embed) — so it reflects last-observation, not last-change like Payload updatedAt. First lit on the sdf-org corpus.",
+	},
+	{
+		date: "2026-07-14",
+		surfaces: ["api"],
 		version: "spec 1.7.25",
 		type: "fixed",
 		summary:

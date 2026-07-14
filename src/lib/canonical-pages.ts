@@ -32,10 +32,12 @@
  *   - stable (prefer the sentence's spine over dates/figures that move —
  *     unless the figure IS the claim, e.g. the Enterprise Fund portfolio).
  *
- * Crawl-observation time: each chunk row's Payload `updatedAt` records when
- * its content last changed at ingest; `publishedAt` is set only when the page
- * itself states a date (see each row's `dateStrategy`). Historical pages are
- * labeled historical in their titles rather than given invented dates.
+ * Crawl-observation time: each chunk carries an explicit `observedAt`, stamped
+ * every ingest run (even when content is unchanged) — distinct from
+ * `publishedAt`, which is set only when the page itself states a date (see each
+ * row's `dateStrategy`), and from Payload `updatedAt`, which advances only on a
+ * content change. Historical pages are labeled historical in their titles
+ * rather than given invented dates.
  */
 
 import type { ResearchSource } from "./research-ingest";
@@ -83,6 +85,16 @@ export interface CanonicalPage {
 	 * "undated" here as a no-op.
 	 */
 	dateStrategy: "effective-date-line" | "undated";
+	/**
+	 * Optional richer extraction for pages whose quotable facts live in embedded
+	 * page data rather than <main> prose:
+	 *  - "next-data-person-cards": also parse the page's __NEXT_DATA__ Sanity
+	 *    `card` blocks into a "Name — Role" roster and append it before chunking
+	 *    (the Team page renders member NAMES as bare text in <main> but their
+	 *    ROLES only in the embedded cards — Tyler 2026-07-14). Undefined = the
+	 *    default <main>-scrape path only.
+	 */
+	extractStrategy?: "next-data-person-cards";
 	/** Extra topic tags beyond ["sdf-org", "sdf", family]. */
 	tags?: string[];
 }
@@ -110,9 +122,18 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 			"SDF Team — leadership and board of directors (stellar.org/foundation/team)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
-		// Leadership-page rendering probe (sls-055): the CEO's name must
-		// survive extraction — the roster renders as headings in <main>.
-		signatures: ["Denelle Dixon", "Board of directors"],
+		// Leadership-rendering probe (sls-055 / Tyler 2026-07-14): names render as
+		// bare text in <main> but ROLES live only in the embedded __NEXT_DATA__
+		// cards. next-data-person-cards recovers the pairing; these role
+		// signatures force the guard to red if that extraction ever silently
+		// regresses to a role-less name list again.
+		extractStrategy: "next-data-person-cards",
+		signatures: [
+			"Denelle Dixon",
+			"Board of directors",
+			"Founder and Chief Scientist",
+			"VP of Ecosystem",
+		],
 		quotable: true,
 		dateStrategy: "undated",
 		tags: ["team", "leadership", "board"],
