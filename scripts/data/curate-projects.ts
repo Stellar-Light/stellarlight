@@ -60,6 +60,16 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// false negative from a text-strip curl of a data-rendered page).
 	alchemy:
 		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
+	// sls-024 recurrence (#533 batch): the record claimed "iOS and Android
+	// mobile apps" while neither store lists the app — the Play listing for
+	// app.xbull.mobile (the applicationId in Creit-Tech/xBull-Wallet's own
+	// capacitor.config.ts / android build.gradle) returns 404 and an App
+	// Store bundleId lookup returns 0 results (both checked 2026-07-13).
+	// The product IS live: xbull.app (web wallet, HTTP 200) and the Chrome
+	// Web Store extension (HTTP 200), both verified 2026-07-13 — so the
+	// stale platform claim is removed instead of the status.
+	xbull:
+		"xBull is an open-source, non-custodial Stellar wallet by Creit Tech, available as a browser extension and web app. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps. Its formerly listed iOS and Android store apps are no longer available on either app store (store listings checked 2026-07-13).",
 };
 
 // Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's

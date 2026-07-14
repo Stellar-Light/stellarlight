@@ -16,8 +16,16 @@
 import { readFileSync } from "node:fs";
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-const [aPath, bPath, dPath, corpusPath, scfPath, goldenPath, ePath] =
-	positional;
+const [
+	aPath,
+	bPath,
+	dPath,
+	corpusPath,
+	scfPath,
+	goldenPath,
+	ePath,
+	coveragePath,
+] = positional;
 // --prev=<dir>: last successful run's evidence artifact (a.json/b.json/
 // d.json/corpus.json) — enables week-over-week deltas. Absent on the first
 // run or when the artifact expired; the report degrades to absolute values.
@@ -26,7 +34,7 @@ const prevDir = process.argv
 	?.slice("--prev=".length);
 if (!aPath || !bPath) {
 	console.error(
-		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json] [scf.json] [golden.json] [engine-e.json] [--prev=dir]",
+		"usage: engine-c-report.ts <engine-a.json> <engine-b.json> [engine-d.json] [corpus.json] [scf.json] [golden.json] [engine-e.json] [coverage.json] [--prev=dir]",
 	);
 	process.exit(2);
 }
@@ -341,6 +349,37 @@ if (goldenPath) {
 			lines.push(`- MISS \`${m.id ?? m.question ?? "?"}\``);
 	} else {
 		lines.push(`⚠ Golden output unreadable: ${g?._error ?? "empty"}`);
+	}
+}
+
+// ── Corpus coverage: canonical page families (sls-055 class guard) ──
+if (coveragePath) {
+	const cov = readJson(coveragePath);
+	lines.push("");
+	lines.push("### Corpus coverage — canonical page families (sls-055)");
+	if (cov?.degraded) {
+		lines.push(`⚠ degraded: ${cov.reason ?? "no DB credentials"}`);
+	} else if (cov && !cov._error && Array.isArray(cov.rows)) {
+		// A registered canonical page (or its quotable signature wording)
+		// missing from the corpus is exactly the family omission sls-055
+		// filed — red the run instead of waiting for a consumer filing.
+		if (cov.failed > 0) red = true;
+		lines.push(
+			`**${cov.ok}/${cov.total} registered pages covered${cov.failed ? " 🔴" : " 🟢"}.** Registry: \`src/lib/canonical-pages.ts\` (families: mandate, terms, foundation, enterprise-fund, quarterly-reports, security-program).`,
+		);
+		for (const r of cov.rows.filter(
+			(x: { status: string }) => x.status !== "OK",
+		)) {
+			lines.push(
+				`- ${r.status === "MISSING_PAGE" ? "MISSING-PAGE" : "MISSING-SIGNATURE"} \`${r.id}\` (${r.family}/${r.source}) — ${
+					r.status === "MISSING_PAGE"
+						? `no chunk for ${r.url} (ingester: ${r.ingestedBy})`
+						: `lost wording: ${(r.missingSignatures ?? []).map((s: string) => `"${s}"`).join(", ")}`
+				}`,
+			);
+		}
+	} else {
+		lines.push(`⚠ Coverage output unreadable: ${cov?._error ?? "empty"}`);
 	}
 }
 

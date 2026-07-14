@@ -39,6 +39,12 @@ const AUTHORITY: Record<string, number> = {
 	// same tier as audits/incidents. NOT evergreen: which program is current
 	// is exactly the kind of claim that goes stale (sls-020).
 	"security-program": 0.9,
+	// Canonical stellar.org organizational pages (sls-055): SDF's own
+	// first-party statements of its legal structure, mandate, fund scope,
+	// and leadership. For org/legal claims these ARE the controlling source
+	// — same policy-grade tier as security-program. NOT evergreen: the
+	// mandate and fund figures are current-state claims that move.
+	"sdf-org": 0.9,
 	"scf-handbook": 0.85,
 	"ec-developer-report": 0.8,
 	"scf-proposal": 0.72,

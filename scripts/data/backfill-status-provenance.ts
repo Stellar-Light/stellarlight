@@ -251,6 +251,23 @@ function buildExplicitPlans(): Map<string, Plan> {
 		requireStatus: ["Live"],
 	});
 
+	// R9 — sls-024 recurrence (#533 batch): xBull stays Live — the product
+	// surface is verifiably alive (xbull.app HTTP 200 + the Chrome Web Store
+	// extension HTTP 200, both checked 2026-07-13) — but the record's
+	// mobile-store claims were stale: the Play listing for app.xbull.mobile
+	// (the applicationId in Creit-Tech/xBull-Wallet's own repo config) 404s
+	// and an App Store bundleId lookup returns 0 results. The description
+	// fix lives in curate-projects.ts DESCRIPTION_FIXES; this row dates the
+	// Live label to the checked surfaces.
+	add("xbull", {
+		rule: "R9-sls024-storefront-recheck",
+		basis: "site-liveness",
+		asOf: "2026-07-13",
+		sourceUrl: "https://xbull.app/",
+		note: "Live basis = web wallet (xbull.app) + Chrome Web Store extension, both verified 2026-07-13. The formerly listed iOS and Android store apps are no longer available on either store (Play listing for app.xbull.mobile 404s; App Store bundleId lookup empty, checked 2026-07-13) — platform claims in the description were corrected accordingly (sls-024/#533).",
+		requireStatus: ["Live"],
+	});
+
 	// R1 — STATUS_FIX flips (only once the flip has been applied: current
 	// status === fix.to). basis defaults to human-verified: every row was
 	// owner-reviewed (boxy-approved liveness triage / boxy-confirmed deaths /

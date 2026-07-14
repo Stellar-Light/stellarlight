@@ -58,6 +58,16 @@ jobs:
         # live API — was manual-only until 2026-07-11; now standing weekly.
         continue-on-error: true
         run: pnpm exec tsx scripts/eval/run-golden.ts --json > /tmp/golden.json 2> /tmp/golden.log
+      - name: Corpus coverage (canonical page families, sls-055)
+        # Class guard for the CANONICAL_PAGES registry: every registered SDF
+        # organizational/security page must have corpus chunks carrying its
+        # quotable signature wording. A family member going missing or a page
+        # moving reds the tracker without waiting for a consumer filing.
+        continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: pnpm exec tsx scripts/eval/corpus-coverage-check.ts --out=/tmp/coverage.json 2> /tmp/coverage.log
       - name: Engine E (contract honesty)
         # Spec-derived param-effect + field-coverage probes against live —
         # the silent-param / advertised-but-absent guard. Public API only,
@@ -82,7 +92,7 @@ jobs:
         run: |
           PREV_FLAG=""
           [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
-          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json /tmp/scf.json /tmp/golden.json /tmp/e.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
+          pnpm exec tsx scripts/eval/engine-c-report.ts /tmp/a.json /tmp/b.json /tmp/d.json /tmp/corpus.json /tmp/scf.json /tmp/golden.json /tmp/e.json /tmp/coverage.json $PREV_FLAG > /tmp/health.md 2> /tmp/c.log || echo "C_RED=1" >> $GITHUB_ENV
           cat /tmp/health.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling health issue
         run: |
@@ -111,6 +121,7 @@ jobs:
             /tmp/scf.json
             /tmp/golden.json
             /tmp/e.json
+            /tmp/coverage.json
           retention-days: 30
       - name: Fail run on floor breach
         if: env.A_RED == '1' || env.C_RED == '1'
