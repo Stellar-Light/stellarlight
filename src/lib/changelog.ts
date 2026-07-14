@@ -33,7 +33,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-13",
 		surfaces: ["api", "mcp"],
-		version: "spec 1.7.20",
+		version: "spec 1.7.21",
 		type: "added",
 		summary:
 			"sls-020: new `security-program` research source — SDF's bug-bounty / vulnerability-disclosure program status. Covers the 2026-05-07 consolidation into a single HackerOne program (general Stellar Immunefi program deprecated; the OpenZeppelin-on-Stellar Immunefi bounty remains active and separate) and labels the stale stellar.org bug-bounty landing page as superseded for program-status claims.",
@@ -43,12 +43,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-13",
 		surfaces: ["api"],
-		version: "spec 1.7.20",
+		version: "spec 1.7.21",
 		type: "fixed",
 		summary:
 			"sls-019: exact CAP/SEP identifier queries now retrieve their own document at rank 1 (q=CAP-0038 had ranked its target 23rd), and source-filtered pages no longer serve duplicate chunks of one document while distinct in-source documents exist (q=Asset+Clawback&source=cap had served cap-0035.md 9× in one page). sls-022: the YieldBlox incident record now carries verified facts — event 2026-02-22, completed drain of 61,249,278 XLM + ~1,000,197 USDC (≈$10.2M USD), pool-operator oracle misconfiguration (USTRY/Reflector), ~48M XLM later quarantined (quarantine ≠ recovery) — replacing the wrong 'May 2026, attempted & contained, $61M' row.",
 		detail:
 			"Identifier forms (CAP-38 / cap 0038 / sep#10 / SEP-0024 …) normalize to the canonical slug; the named document is pinned above vector order with relevance floored at 0.9 (the scoreModel note now states exact-identifier matches rank first). If the vector pool misses the named doc it is fetched directly by ID. Source-filtered $vectorSearch surveys a deeper candidate pool BEFORE the source $match and re-trims after it, so the best-chunk-per-document collapse has enough distinct documents to fill a page. Golden eval gains exact-ID rank-1 locks (cap-0021/0038/0058), a no-duplicate-URLs dedup lock, a security-program transition lock, and a YieldBlox incident-facts lock (forbids 'May 2026 attempted' and '$61M' renderings).",
+	},
+	{
+		date: "2026-07-13",
 		surfaces: ["api"],
 		version: "spec 1.7.20",
 		type: "added",
