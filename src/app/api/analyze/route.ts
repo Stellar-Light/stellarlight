@@ -43,6 +43,33 @@ const VALID_DIMENSIONS = [
 	"tvl",
 ] as const;
 
+// One place for the funding methodology label — it is served in the response
+// AND stamped on every persisted snapshot (sls-044), so the two can't drift.
+const FUNDING_METHODOLOGY_VERSION = "funding-v2 (2026-07-05)";
+
+// sls-044 (#520): a persisted funding-v2 snapshot row (funding-snapshots
+// collection) — one per observed awarded-project SET, keyed by its hash.
+interface FundingSnapshotDoc {
+	projectSetHash?: string;
+	scfAwardedProjects?: number;
+	scfTotalDistributedUSD?: number;
+	methodologyVersion?: string;
+	awardedSlugs?: unknown;
+	computedAt?: string;
+}
+
+// Reason codes for removed-slug delta rows, per the #520 request. Derived
+// mechanically from the removed record's CURRENT state — never guessed:
+//   dedupe                       — the record now points at a canonical slug
+//   eligibility-reclassification — the record left the active status pool
+//   source-correction            — scf.awarded was corrected to false
+//   unknown                      — record missing or no mechanical signal
+type RemovalReason =
+	| "dedupe"
+	| "eligibility-reclassification"
+	| "source-correction"
+	| "unknown";
+
 interface CategoryStats {
 	category: string;
 	projectCount: number;
@@ -270,6 +297,164 @@ export async function GET(req: NextRequest) {
 			.update(awardedSlugs.join("\n"))
 			.digest("hex")
 			.slice(0, 16);
+
+		// sls-044 (#520): answer-visible set-delta provenance. The hash alone
+		// says WHETHER the awarded set changed; consumers also need WHAT changed
+		// and WHY. We persist one snapshot per observed set state (best-effort;
+		// a new row only when the hash is new — ~weekly, not per-request) and
+		// serve current-vs-previous added/removed slug lists with mechanical
+		// reason codes. Empty history degrades to an explicit deltaUnavailable
+		// note — never a silent omission.
+		let snapshotAsOf: string | null = null;
+		let previousSnapshot: {
+			projectSetHash: string;
+			computedAt: string | null;
+			scfAwardedProjects: number | null;
+			scfTotalDistributedUSD: number | null;
+		} | null = null;
+		let snapshotDelta: {
+			addedProjects: string[];
+			removedProjects: string[];
+			addedCount: number;
+			removedCount: number;
+			totalUSDDelta: number;
+			removedReasons: Array<{ slug: string; reason: RemovalReason }>;
+		} | null = null;
+		let deltaUnavailable: string | null = null;
+		if (payload) {
+			try {
+				const snapRes = await payload.find({
+					collection: "funding-snapshots",
+					sort: "-computedAt",
+					limit: 2,
+					depth: 0,
+					overrideAccess: true,
+				});
+				const snaps = snapRes.docs as FundingSnapshotDoc[];
+				const latest = snaps[0] ?? null;
+				let prev: FundingSnapshotDoc | null = null;
+				if (!latest || latest.projectSetHash !== projectSetHash) {
+					// New set state (or first run): record it. Best-effort — a full
+					// storage tier must degrade the delta, never the funding numbers.
+					snapshotAsOf = new Date().toISOString();
+					try {
+						await payload.create({
+							collection: "funding-snapshots",
+							data: {
+								projectSetHash,
+								scfAwardedProjects: scfProjects.length,
+								scfTotalDistributedUSD: totalUSD,
+								methodologyVersion: FUNDING_METHODOLOGY_VERSION,
+								awardedSlugs,
+								computedAt: snapshotAsOf,
+							},
+							overrideAccess: true,
+						});
+					} catch {
+						// persistence failed (e.g. storage full) — delta still computes
+						// against the last stored state; only durability is affected.
+					}
+					prev = latest;
+				} else {
+					// Same set as the stored latest — this response IS that snapshot
+					// (amounts may still drift within a set: amount revisions).
+					snapshotAsOf = latest.computedAt ?? null;
+					prev = snaps[1] ?? null;
+				}
+				if (prev?.projectSetHash) {
+					previousSnapshot = {
+						projectSetHash: prev.projectSetHash,
+						computedAt: prev.computedAt ?? null,
+						scfAwardedProjects:
+							typeof prev.scfAwardedProjects === "number"
+								? prev.scfAwardedProjects
+								: null,
+						scfTotalDistributedUSD:
+							typeof prev.scfTotalDistributedUSD === "number"
+								? prev.scfTotalDistributedUSD
+								: null,
+					};
+					const prevSlugs = Array.isArray(prev.awardedSlugs)
+						? (prev.awardedSlugs as unknown[]).filter(
+								(s): s is string => typeof s === "string",
+							)
+						: [];
+					const prevSet = new Set(prevSlugs);
+					const curSet = new Set(awardedSlugs);
+					const added = awardedSlugs.filter((s) => !prevSet.has(s));
+					const removed = prevSlugs.filter((s) => !curSet.has(s)).sort();
+					// Mechanical reason codes from the removed records' CURRENT state.
+					let removedReasons: Array<{ slug: string; reason: RemovalReason }> =
+						removed.map((slug) => ({ slug, reason: "unknown" as const }));
+					if (removed.length) {
+						try {
+							const rres = await payload.find({
+								collection: "projects",
+								where: { slug: { in: removed } },
+								limit: removed.length,
+								depth: 0,
+								overrideAccess: true,
+								select: {
+									slug: true,
+									status: true,
+									canonicalSlug: true,
+									scf: true,
+								},
+							});
+							const bySlug = new Map(
+								(
+									rres.docs as Array<{
+										slug?: string;
+										status?: string;
+										canonicalSlug?: string | null;
+										scf?: { awarded?: boolean };
+									}>
+								).map((d) => [d.slug, d]),
+							);
+							removedReasons = removed.map((slug) => {
+								const d = bySlug.get(slug);
+								let reason: RemovalReason = "unknown";
+								if (d?.canonicalSlug) reason = "dedupe";
+								else if (
+									d?.status &&
+									!(ACTIVE_PROJECT_STATUSES as readonly string[]).includes(
+										d.status,
+									)
+								)
+									reason = "eligibility-reclassification";
+								else if (d && d.scf?.awarded === false)
+									reason = "source-correction";
+								return { slug, reason };
+							});
+						} catch {
+							// classification is best-effort; "unknown" rows already set
+						}
+					}
+					snapshotDelta = {
+						addedProjects: added,
+						removedProjects: removed,
+						addedCount: added.length,
+						removedCount: removed.length,
+						totalUSDDelta:
+							typeof prev.scfTotalDistributedUSD === "number"
+								? Math.round((totalUSD - prev.scfTotalDistributedUSD) * 100) /
+									100
+								: 0,
+						removedReasons,
+					};
+				} else {
+					deltaUnavailable =
+						"No prior funding snapshot with a different project set is recorded yet — snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
+				}
+			} catch {
+				deltaUnavailable =
+					"Snapshot store unavailable this request — the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
+			}
+		} else {
+			deltaUnavailable =
+				"Snapshot store unavailable this request — the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
+		}
+
 		result.funding = {
 			scfAwardedProjects: scfProjects.length,
 			scfTotalDistributedUSD: totalUSD,
@@ -280,13 +465,23 @@ export async function GET(req: NextRequest) {
 			// re-indexing from methodology change instead of watching the
 			// headline swing unexplained.
 			computedAt: new Date().toISOString(),
-			methodologyVersion: "funding-v2 (2026-07-05)",
+			methodologyVersion: FUNDING_METHODOLOGY_VERSION,
 			// sls-044: compare across your own snapshots — same hash ⇒ same
 			// project SET (only amounts/labels can differ); different hash ⇒ the
 			// membership changed (projects added/removed/reclassified), which is
 			// the honest explanation for a shrinking cumulative total under an
 			// unchanged methodology.
 			projectSetHash,
+			// sls-044 (#520): answer-visible set-delta provenance vs the preceding
+			// PERSISTED snapshot (stored snapshots differ by set, so the delta is
+			// always a membership change; amount drift within one set shows up as
+			// totalUSDDelta against that older set).
+			snapshotAsOf,
+			previousSnapshot,
+			snapshotDelta,
+			deltaUnavailable,
+			deltaBasis:
+				"snapshotAsOf = when the CURRENT projectSetHash was first observed (persisted snapshot time). previousSnapshot = the most recent stored snapshot with a DIFFERENT project set; snapshotDelta lists the slugs added/removed between it and this response, with mechanical reason codes for removals (dedupe = record now points at a canonical slug; eligibility-reclassification = record left the active status pool; source-correction = scf.awarded corrected to false; unknown = no mechanical signal). totalUSDDelta = this response's total minus the previous snapshot's. When snapshotDelta is null, deltaUnavailable says why (no differing prior snapshot yet, or store unavailable) — never infer a cause from headline drift alone.",
 			countBasis:
 				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects — never add round counts to get a project total.",
 			postHackathonStatusFunnel: {

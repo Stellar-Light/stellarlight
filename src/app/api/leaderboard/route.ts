@@ -135,6 +135,12 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
+	// sls-036 residual: the repository-index rollup timestamp — when the repo
+	// rows this response aggregates were last refreshed (max updatedAt across
+	// the fetched index rows). Distinct from meta.generatedAt (serialization
+	// time): the served stars/issues/lastActivityAt are as-of THIS timestamp,
+	// not a live GitHub read. Null when no repos matched.
+	let dataAsOf: string | null = null;
 
 	if (payload) {
 		try {
@@ -187,6 +193,8 @@ export async function GET(req: NextRequest) {
 						stars: true,
 						openIssues: true,
 						lastCommitAt: true,
+						// sls-036: index-refresh timestamp feeds meta.dataAsOf
+						updatedAt: true,
 					},
 				});
 				for (const r of reposResult.docs as Array<{
@@ -194,7 +202,11 @@ export async function GET(req: NextRequest) {
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
+					updatedAt?: string | null;
 				}>) {
+					// ISO-8601 strings compare correctly lexicographically.
+					if (r.updatedAt && (!dataAsOf || r.updatedAt > dataAsOf))
+						dataAsOf = r.updatedAt;
 					if (!r.projectSlug) continue;
 					if (!reposByProjectSlug.has(r.projectSlug))
 						reposByProjectSlug.set(r.projectSlug, []);
@@ -314,6 +326,9 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/leaderboard",
 				generatedAt: new Date().toISOString(),
+				// sls-036 residual: the real rollup timestamp of the repo index this
+				// response aggregated — the as-of for stars/issues/lastActivityAt.
+				dataAsOf,
 				filters: { sort, range, category, limit },
 				// /scout/api-reference is the live API docs page. A /methodology
 				// page was referenced here historically but never built — caught
@@ -335,6 +350,8 @@ export async function GET(req: NextRequest) {
 						"Latest default-branch commit (fallback: last push) across the project's indexed repos, as of the last index refresh — a dated repo-source timestamp, not a live GitHub read.",
 					range:
 						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups — they are NOT recomputed within the window.",
+					dataAsOf:
+						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated — every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
 				},
 			},
 			ecosystem: {

@@ -2101,9 +2101,92 @@ export const spec: OpenAPISpec = {
 										funding: {
 											type: "object",
 											description:
-												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology.",
+												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
 											properties: {
 												projectSetHash: { type: "string" },
+												snapshotAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.",
+												},
+												previousSnapshot: {
+													type: "object",
+													nullable: true,
+													description:
+														"The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable).",
+													properties: {
+														projectSetHash: { type: "string" },
+														computedAt: {
+															type: "string",
+															format: "date-time",
+															nullable: true,
+														},
+														scfAwardedProjects: {
+															type: "integer",
+															nullable: true,
+														},
+														scfTotalDistributedUSD: {
+															type: "number",
+															nullable: true,
+														},
+													},
+												},
+												snapshotDelta: {
+													type: "object",
+													nullable: true,
+													description:
+														"Membership diff: this response's awarded set vs previousSnapshot's. Null when previousSnapshot is null (deltaUnavailable says why).",
+													properties: {
+														addedProjects: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Slugs in the current set but not the previous snapshot.",
+														},
+														removedProjects: {
+															type: "array",
+															items: { type: "string" },
+														},
+														addedCount: { type: "integer" },
+														removedCount: { type: "integer" },
+														totalUSDDelta: {
+															type: "number",
+															description:
+																"This response's scfTotalDistributedUSD minus the previous snapshot's.",
+														},
+														removedReasons: {
+															type: "array",
+															description:
+																"Per removed slug, a MECHANICAL reason from the record's current state — never a guess.",
+															items: {
+																type: "object",
+																properties: {
+																	slug: { type: "string" },
+																	reason: {
+																		type: "string",
+																		enum: [
+																			"dedupe",
+																			"eligibility-reclassification",
+																			"source-correction",
+																			"unknown",
+																		],
+																		description:
+																			"'dedupe' = record now points at a canonical slug (duplicate merged); 'eligibility-reclassification' = record left the active status pool; 'source-correction' = scf.awarded corrected to false; 'unknown' = record missing or no mechanical signal.",
+																	},
+																},
+															},
+														},
+													},
+												},
+												deltaUnavailable: {
+													type: "string",
+													nullable: true,
+													description:
+														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable) — an explicit reason, never a silent omission.",
+												},
+												deltaBasis: { type: "string" },
 											},
 										},
 									},
@@ -2219,7 +2302,35 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Leaderboard + ecosystem stats",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											description:
+												"Carries filters, metricDefinitions (what each served metric IS), generatedAt, and dataAsOf.",
+											properties: {
+												dataAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"sls-036: the repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.",
+												},
+												metricDefinitions: {
+													type: "object",
+													additionalProperties: { type: "string" },
+												},
+											},
+										},
+										ecosystem: { type: "object" },
+										projects: { type: "array", items: { type: "object" } },
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2684,6 +2795,75 @@ export const spec: OpenAPISpec = {
 						description:
 							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown.",
 					},
+					routes: {
+						type: "array",
+						nullable: true,
+						description:
+							"sls-032: curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time.",
+						items: {
+							type: "object",
+							required: ["fromChain", "toChain"],
+							properties: {
+								fromChain: {
+									type: "string",
+									description:
+										"Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella).",
+								},
+								toChain: { type: "string" },
+								direction: {
+									type: "string",
+									nullable: true,
+									enum: ["one-way", "bidirectional"],
+									description:
+										"'bidirectional' = the reverse leg is also evidenced; 'one-way' = only fromChain→toChain is. Null = direction not verified.",
+								},
+								assets: {
+									type: "array",
+									items: { type: "string" },
+									description:
+										"Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (unknown, not none).",
+								},
+								assetRepresentation: {
+									type: "string",
+									nullable: true,
+									enum: ["canonical", "wrapped", "bridged", "interchain"],
+									description:
+										"What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified — never assume canonical.",
+								},
+								mechanism: {
+									type: "string",
+									nullable: true,
+									description:
+										"Settlement mechanism, e.g. 'cctp-burn-mint', 'native-liquidity-pool', 'lock-mint', 'aggregator-router'.",
+								},
+								sourceUrl: {
+									type: "string",
+									nullable: true,
+									description:
+										"Provider source the route evidence was verified from.",
+								},
+								asOf: {
+									type: "string",
+									nullable: true,
+									description:
+										"YYYY-MM-DD the route evidence was verified — routes are dated facts, re-verify before relying on them for a live transfer.",
+								},
+							},
+						},
+					},
+					venueRole: {
+						type: "string",
+						nullable: true,
+						enum: [
+							"amm",
+							"native-orderbook",
+							"aggregator-router",
+							"trading-ui",
+							"wallet-integrated",
+						],
+						description:
+							"sls-035: role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
+					},
 					anchorProfile: {
 						type: "object",
 						nullable: true,
@@ -2731,6 +2911,20 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions.",
+					},
+					llamaSlugs: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"sls-039: the curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
+					},
+					tvlMethodUrl: {
+						type: "string",
+						nullable: true,
+						format: "uri",
+						description:
+							"sls-039: citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
 					},
 					canonicalSlug: {
 						type: "string",
