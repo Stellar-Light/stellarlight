@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-14",
 		surfaces: ["api"],
+		version: "spec 1.7.25",
+		type: "fixed",
+		summary:
+			"Leaderboard `type` filter correctness + documentation (#524): the `type` param added in 1.7.23 was served but (a) undocumented in the OpenAPI spec and (b) matched by SUBSTRING — so type=DEX false-included Indexer/Codex rows. It now uses exact whole-element membership, documents the `type` query parameter with its full enum and multi-value (repeatable + comma-separable, EITHER-membership) semantics, and echoes the applied scope at meta.filters.type.",
+		detail:
+			"Root cause: Payload's contains operator compiles to a case-insensitive substring regex, so as an array-membership filter it silently leaks partial matches (projects/search stayed correct only because it also post-filters in JS). The leaderboard now selects with the exact `in` operator and re-asserts membership with a JS backstop — the same belt-and-suspenders gate. Documenting the previously-undocumented `type` param also closes a served-but-undocumented drift. No response-schema field change: each row already carried `types`.",
+	},
+	{
+		date: "2026-07-14",
+		surfaces: ["api"],
 		version: "spec 1.7.24",
 		type: "changed",
 		summary:

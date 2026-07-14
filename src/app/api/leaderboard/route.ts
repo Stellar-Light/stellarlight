@@ -204,12 +204,15 @@ export async function GET(req: NextRequest) {
 				projectWhere.category = { equals: category };
 			}
 			if (typeList.length) {
-				// sls-036 / #524: `types` is a hasMany select — `in` matches any
-				// membership, so ?type=DEX&type=Lending keeps projects typed EITHER
-				// (an explicit consumer-defined grouping). Applied in the DB query,
-				// i.e. BEFORE ranking and limiting.
-				projectWhere.types =
-					typeList.length === 1 ? { contains: typeList[0] } : { in: typeList };
+				// sls-036 / #524: `types` is a hasMany select. Use `in` (EXACT element
+				// match, any-membership) for BOTH the single- and multi-value case —
+				// NEVER `contains`. Payload's `contains` compiles to a case-insensitive
+				// SUBSTRING regex, so `contains: "DEX"` false-matched "In-DEX-er" and
+				// "Co-dex" (live #524 recheck: type=DEX returned Indexer rows). `in`
+				// matches whole elements, so ?type=DEX&type=Lending keeps projects
+				// typed EITHER. Applied in the DB query, BEFORE ranking and limiting;
+				// a JS exact-membership backstop below re-asserts it regardless.
+				projectWhere.types = { in: typeList };
 			}
 
 			const projectsResult = await payload.find({
@@ -320,6 +323,15 @@ export async function GET(req: NextRequest) {
 				};
 			});
 
+			// Exact-membership backstop (mirrors projects/search's belt-and-
+			// suspenders type gate): the DB `in` above is already exact for this
+			// field, but re-asserting membership in JS means a future operator or
+			// field-config change can never silently leak a substring false-positive
+			// back into a contract endpoint Tyler audits (#524).
+			if (typeList.length) {
+				rows = rows.filter((r) => r.types.some((t) => typeList.includes(t)));
+			}
+
 			// Time-range filter
 			if (range !== "all") {
 				const cutoff = new Date();
@@ -362,7 +374,7 @@ export async function GET(req: NextRequest) {
 	logApiHit({
 		req,
 		endpoint: "/api/leaderboard",
-		filters: { sort, range, category, limit, format },
+		filters: { sort, range, category, limit, format, type: typeList.join(",") },
 	});
 
 	if (format === "csv") {
@@ -391,7 +403,17 @@ export async function GET(req: NextRequest) {
 				// sls-036 residual: the real rollup timestamp of the repo index this
 				// response aggregated — the as-of for stars/issues/lastActivityAt.
 				dataAsOf,
-				filters: { sort, range, category, limit },
+				// #524: echo the APPLIED project-type scope so a consumer can confirm
+				// the filter took (null = no type filter; an array = the exact types
+				// kept, EITHER-membership). Was silently absent while the filter was
+				// broken, which is how #524 diagnosed the no-op.
+				filters: {
+					sort,
+					range,
+					category,
+					limit,
+					type: typeList.length ? typeList : null,
+				},
 				// /scout/api-reference is the live API docs page. A /methodology
 				// page was referenced here historically but never built — caught
 				// by scripts/verify-claims.ts.
