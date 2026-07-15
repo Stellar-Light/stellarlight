@@ -296,6 +296,15 @@ const TYPES_SET: Record<string, string[]> = {
 	// taxonomy truth we have today; the richer per-record productKind enum is
 	// a batch-D field.
 	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
+	// Bridge-cluster mistags (boxy 2026-07-15: "templar is a lending protocol, why
+	// is it a bridge"). #414 wave left non-bridge records Bridge-typed. Re-typed
+	// from each record's OWN primary source; deliberate aggregators (rubic/rango/
+	// houdiniswap/wowmax — routing layers whose corridor capability IS the point)
+	// stay Bridge. Frontend /directory reads the same projects.types as the API,
+	// so this fixes both surfaces at once.
+	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
+	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
+	nethermind: ["Infrastructure"], // nethermind.io: blockchain research + engineering firm building core infrastructure — not a bridge.
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
