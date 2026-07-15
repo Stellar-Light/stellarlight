@@ -304,9 +304,25 @@ const TYPES_SET: Record<string, string[]> = {
 	// so this fixes both surfaces at once.
 	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
 	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
-	nethermind: ["Infrastructure"], // nethermind.io: blockchain research + engineering firm building core infrastructure — not a bridge.
+	nethermind: ["Infrastructure", "Security"], // nethermind.io: research/engineering firm + Nethermind Security (audits, formal verification, ZK); Stellar work = RISC Zero zkVM verifier + private-payments. Verifier-confirmed 2026-07-15.
 	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
 	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
+	// Directory-quality engine — verifier-confirmed re-tags (2026-07-15). Each
+	// agent-verified from the product's own live site (evidence in the
+	// directory-quality-verify run). Auto-apply tier (high confidence).
+	"cactus-link": ["Wallet"], // mycactus.com + Chrome Web Store: institutional browser-extension wallet (Cactus Custody). A wallet's security is a property, not its category.
+	"hito-wallet": ["Wallet"], // hito.xyz: NFC thin hardware crypto wallet (for sale). Hardware wallet = Wallet, not Security.
+	keystone: ["Wallet"], // keyst.one: hardware wallet.
+	mxlet: ["Wallet"], // xlet.io: open Stellar hardware wallet.
+	decaf: ["Wallet", "Payments"], // decaf.so: non-custodial wallet for cross-border money movement — Wallet + Payments, not Payments alone.
+	reclaim: ["Security", "SDK"], // reclaimprotocol.org: zkTLS credential/proof-of-personhood protocol + zkFetch SDK (Soroban example). Security + the developer SDK.
+	trustline: ["Security", "SDK", "Infrastructure"], // trustline.id: security SDK + smart-contract insurance. Adds the SDK it ships.
+	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
+	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
+	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
+	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
+	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
+	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
