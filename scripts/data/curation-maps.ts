@@ -409,6 +409,17 @@ export const SEEDS: Array<{
 	shortDescription: string;
 	links: { website?: string; github?: string };
 	provenance: { source: "LumenloopSeed" | "UserSubmitted" | "AdminEdit" };
+	// sls-024: freshly web-verified seeds carry their own status provenance on
+	// create (passed straight through `data: seed`), so a brand-new Live record
+	// isn't left for the source-inherited backfill floor to stamp. Optional.
+	statusAsOf?: string;
+	statusSourceUrl?: string;
+	statusBasis?:
+		| "operator-announcement"
+		| "site-liveness"
+		| "onchain-activity"
+		| "human-verified"
+		| "source-inherited";
 }> = [
 	// 2026-07-11 audit: kalepail/passkey-kit — THE ecosystem passkey smart-
 	// wallet kit (named in our own STELLAR_SIGNAL regex and depth answer key)
@@ -1023,5 +1034,51 @@ export const SEEDS: Array<{
 				"https://www.prnewswire.com/news-releases/moneygram-launches-mgusd-a-stablecoin-to-power-its-own-global-network-302787799.html",
 		},
 		provenance: { source: "AdminEdit" },
+	},
+	// 2026-07-15 (boxy): two just-launched Stellar DeFi records, both absent
+	// from the directory (no strict match on /api/projects/search). Grounded in
+	// the Sentora launch post (medium.com/sentora/sentora-launches-vaults-on-the-
+	// stellar-network...) + each product's own site. Web-verified live today, so
+	// they carry site-liveness provenance on create (not the source-inherited
+	// backfill floor).
+	{
+		slug: "stellar-defi-hub",
+		name: "Stellar DeFi Hub",
+		category: "User-Facing App",
+		status: "Live",
+		// Aggregator/portal — a unified access point across DeFi primitives, not
+		// itself a single-function venue. No enum type captures "DeFi hub", so
+		// types stay empty (the oracle/aggregator convention: don't mistag a
+		// primary function it doesn't have) and category carries it.
+		types: [],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Stellar DeFi Hub is a unified access point for DeFi activity on the Stellar network — operated by Ultrastellar (a Stellar ecosystem participant since 2014). Its launch surface is Sentora's curated non-custodial vaults on Stellar (also reachable via yield.xyz), with a roadmap spanning additional vault strategies across DeFi and real-world assets (RWAs).",
+		links: { website: "https://stellardefihub.com/" },
+		provenance: { source: "UserSubmitted" },
+		statusAsOf: "2026-07-15",
+		statusSourceUrl:
+			"https://medium.com/sentora/sentora-launches-vaults-on-the-stellar-network-accessible-via-stellar-defi-hub-2b09749cd789",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "sentora",
+		name: "Sentora",
+		category: "Infrastructure",
+		status: "Live",
+		// Institutional DeFi vault infrastructure + risk models; roadmap/products
+		// span tokenized real-world assets (the STEY tokenized-equity product).
+		types: ["Infrastructure", "RWA"],
+		// Multichain platform ($3B+ deployed); Stellar is its first Stellar
+		// integration (curated vaults) — listed here for the Stellar corridor.
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Sentora is an institutional DeFi platform (formed from the merger of IntoTheBlock and Trident Digital) providing curated non-custodial vaults, risk management and capital-deployment tools for professional allocators, DAOs, treasuries and fintechs. In its first Stellar integration it launched curated vaults on the Stellar network, accessible via Stellar DeFi Hub and yield.xyz.",
+		links: { website: "https://sentora.com/" },
+		provenance: { source: "UserSubmitted" },
+		statusAsOf: "2026-07-15",
+		statusSourceUrl:
+			"https://medium.com/sentora/sentora-launches-vaults-on-the-stellar-network-accessible-via-stellar-defi-hub-2b09749cd789",
+		statusBasis: "site-liveness",
 	},
 ];
