@@ -1,0 +1,97 @@
+# Tag watch — monthly delta-only review queue for MISTAGGED projects.
+# The tagging counterpart to liveness-watch: runs the read-only
+# report-tag-mismatch detector and diffs its candidate list against last
+# month's, so the owner reviews only NEW mistag candidates. REPORT ONLY:
+# type changes stay owner-approved TYPES_SET rows in curate-projects.ts,
+# grounded in each project's own materials (verify via the
+# directory-quality-verify workflow before curating). Same detector→verify→
+# curate flywheel as liveness.
+name: tag-watch
+on:
+  schedule:
+    # 07:30 UTC on the 1st of each month (just after liveness-watch)
+    - cron: "30 7 1 * *"
+  workflow_dispatch: {}
+concurrency:
+  group: tag-watch
+  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run tag-mismatch report
+        run: pnpm exec tsx scripts/report-tag-mismatch.ts --json > /tmp/tags.json 2> /tmp/tags.log
+      - name: Fetch previous month's artifact
+        continue-on-error: true
+        run: |
+          PREV=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=tag-watch.yml --status=success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$PREV" ]; then
+            gh run download "$PREV" --repo "$GITHUB_REPOSITORY" -n tag-mismatch-evidence -D /tmp/prev || true
+          fi
+      - name: Build delta report
+        run: |
+          python3 - <<'EOF' > /tmp/watch.md
+          import json, os
+          now = json.load(open('/tmp/tags.json'))
+          cur = {r['slug']: r for r in now['flagged']}
+          prev = {}
+          if os.path.exists('/tmp/prev/tags.json'):
+              prev = {r['slug']: r for r in json.load(open('/tmp/prev/tags.json'))['flagged']}
+          new = [cur[s] for s in cur if s not in prev]
+          resolved = [s for s in prev if s not in cur]
+          def strong(r):
+              return not any(t in r['impliedTypes'] for t in r['currentTypes'])
+          print("## Tag watch — monthly mistag review queue")
+          print()
+          print(f"_Candidates whose description names a PRIMARY function their `types` omit (the Templar-as-Bridge class). Report-only; the `directory-quality-verify` workflow web-verifies each, then curate via owner-reviewed TYPES_SET (never bulk)._")
+          print()
+          print(f"**Current candidates: {len(cur)} | NEW since last month: {len(new)} | resolved: {len(resolved)}**")
+          if new:
+              print()
+              print("### New candidates (‼ = current types share NOTHING with the implied function — highest priority)")
+              print()
+              print("| project | current types | implied (missing) | strong? | status |")
+              print("|---|---|---|---|---|")
+              for r in sorted(new, key=lambda x: (not strong(x), x['slug'])):
+                  print(f"| {r['slug']} | {', '.join(r['currentTypes'])} | +{', '.join(r['missing'])} | {'‼' if strong(r) else ''} | {r['status']} |")
+          else:
+              print()
+              print("No new mistag candidates this month.")
+          if resolved:
+              print()
+              print(f"### Resolved since last month: {', '.join(sorted(resolved))}")
+          if not prev:
+              print()
+              print("_(first tracked run — everything counts as current, deltas start next month)_")
+          EOF
+          cat /tmp/watch.md | tee $GITHUB_STEP_SUMMARY
+      - name: Upsert rolling watch issue
+        run: |
+          TITLE="Tag watch — monthly mistag review queue"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file /tmp/watch.md
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file /tmp/watch.md
+          fi
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tag-mismatch-evidence
+          path: /tmp/tags.json
+          retention-days: 45
