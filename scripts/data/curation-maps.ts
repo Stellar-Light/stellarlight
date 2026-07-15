@@ -66,6 +66,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Defunct: swplug.com dead (ECONNREFUSED, dead IBM Cloud IP); no WordPress.org plugin listing, no repo; all content 2019-2021. Supported tokens (MOBI/SLT/RMT) are themselves defunct.",
 	},
+	// (The sls-033 wallet-verification workflow (2026-07-15) also flagged mxlet
+	// and equilibre as dead-domain "wallets" — both were already retired in the
+	// 2026-07-10 liveness triage below, so no new STATUS_FIX rows are needed.)
 	plutus: {
 		from: "Live",
 		to: "Inactive",
