@@ -305,6 +305,8 @@ const TYPES_SET: Record<string, string[]> = {
 	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
 	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
 	nethermind: ["Infrastructure"], // nethermind.io: blockchain research + engineering firm building core infrastructure — not a bridge.
+	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
+	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
