@@ -35,17 +35,22 @@
  *   R7 human-confirmed       boxy/owner-confirmed rows outside STATUS_FIX
  *                            (keybase, the mark-defunct DAO targets, the
  *                            tricorn→Utexo live confirmation) → human-verified.
- *   R8 source-inherited-bulk any remaining ACTIVE record (Live/Development/
- *                            Pre-Release) whose provenance.source is
- *                            LumenloopSeed or UserSubmitted and whose
- *                            statusBasis is empty → source-inherited, asOf =
- *                            provenance.firstSeenAt. This is the honest floor
- *                            sls-024 asks for: the lumenloop mapper hardcodes
- *                            status "Live" for every synced entry, so the
- *                            label demonstrably came from the seed source and
- *                            must say so instead of reading as verified.
+ *   R8 source-inherited-bulk UNIVERSAL floor — any remaining ACTIVE record
+ *                            (Live/Development/Pre-Release) with an empty
+ *                            statusBasis → source-inherited, asOf =
+ *                            provenance.firstSeenAt ?? createdAt. This is the
+ *                            honest floor sls-024 asks for ("populate for EACH
+ *                            record ... an explicit unknown basis when it is
+ *                            not [verified]"): a label with no cited evidence
+ *                            came from the original import/curation and must
+ *                            say so instead of reading as verified. (Earlier
+ *                            this floor only covered LumenloopSeed/UserSubmitted
+ *                            rows, leaving ~25% of the directory null — the
+ *                            partial fix the 2026-07-15 recheck caught.)
  *
- * Records matching NO rule stay untouched and are counted in the plan.
+ * Records matching NO rule stay untouched and are counted in the plan
+ * (after R8 this should be zero active records — only lineage shadows and
+ * already-provenanced rows skip).
  * All field writes are FILL-IF-EMPTY (an existing statusBasis/statusAsOf/
  * statusSourceUrl/lifecycle.note is never overwritten), so re-runs no-op and a
  * later manual correction is never clobbered. supportedNetworks (rarible only)
@@ -253,6 +258,22 @@ function buildExplicitPlans(): Map<string, Plan> {
 		note: "Stellar connector audited by Veridise (Oct 2025). Mainnet launch (Mar 2026, 10 feeds) per curated launch coverage; current feed-level liveness not independently re-confirmed (sls-029/#494 residual).",
 		requireStatus: ["Live"],
 	});
+	// R2c — sls-029 recheck (user 2026-07-15): reflector was Live with a null
+	// basis. The official oracle-providers page lists Reflector as "Live on
+	// mainnet" with THREE deployed Soroban contracts (verified 2026-07-15):
+	// CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M (Stellar Mainnet
+	// DEX), CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN (External
+	// CEXs & DEXs), CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC
+	// (Fiat exchange rates). Deployed-mainnet-contract evidence → onchain-activity.
+	add("reflector", {
+		rule: "R2-oracle-onchain",
+		basis: "onchain-activity",
+		asOf: "2026-07-15",
+		sourceUrl:
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		note: "Live on mainnet per the official oracle-providers page with 3 deployed Soroban oracle contracts (DEX / External CEXs & DEXs / Fiat FX). Deployment evidence, not per-feed freshness.",
+		requireStatus: ["Live"],
+	});
 
 	// R3 — sls-028 / issue #515: explicit uncertainty state instead of a
 	// status downgrade. The operator site is up but does not by itself
@@ -363,6 +384,7 @@ const PROJECT_SELECT = {
 	lifecycle: true,
 	supportedNetworks: true,
 	canonicalSlug: true,
+	createdAt: true,
 } as const;
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -466,7 +488,7 @@ async function main() {
 	}
 
 	// ── R8: source-inherited bulk over remaining ACTIVE records ──
-	console.log("\n── R8 source-inherited bulk (active + seed-sourced) ──");
+	console.log("\n── R8 source-inherited bulk (active, UNIVERSAL floor) ──");
 	let page = 1;
 	let scanned = 0;
 	for (;;) {
@@ -491,12 +513,20 @@ async function main() {
 				bump(skips, "already-provenanced");
 				continue;
 			}
-			const source = doc.provenance?.source;
-			if (source !== "LumenloopSeed" && source !== "UserSubmitted") {
-				bump(skips, "no-derivable-evidence");
-				continue;
-			}
-			const firstSeen: string | undefined = doc.provenance?.firstSeenAt;
+			// Universal honest floor (sls-024, user 2026-07-15 recheck): EVERY
+			// active record with an empty basis gets `source-inherited` — its label
+			// came from the original import/curation and has NOT been independently
+			// re-verified with a cited source. The earlier gate only floored
+			// LumenloopSeed/UserSubmitted-sourced rows, leaving ~25% of the
+			// directory null (freighter, blend, reflector, ripe, …) — the exact
+			// "populate for EACH record" gap Tyler's finding names. `source-inherited`
+			// is the honest value his finding calls for (inherited/unverified data);
+			// a stronger evidence-based basis (R1–R7) always wins because it runs
+			// first and is recorded in `considered`, so this only fills true blanks.
+			// asOf falls back to the record's createdAt when no provenance
+			// firstSeenAt exists, so the floor is always dated.
+			const firstSeen: string | undefined =
+				doc.provenance?.firstSeenAt ?? doc.createdAt;
 			const set: Record<string, unknown> = {
 				statusBasis: "source-inherited" satisfies StatusBasis,
 			};
