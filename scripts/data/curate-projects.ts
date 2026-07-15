@@ -327,6 +327,12 @@ const TYPES_SET: Record<string, string[]> = {
 	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
 	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.
 	indentura: ["Lending", "RWA"], // thawdigital.com: "on-chain CREDIT infrastructure — trade credit and receivables financing" — credit/lending against RWA receivables.
+	// sls-033 (2026-07-15): mis-typed as Wallet — web-verified NOT wallets, so an
+	// exact type=Wallet enumeration wrongly returned them (the StellarTerm-in-the-
+	// wallet-list class the finding names). Drop Wallet; keep their real types.
+	pakananet: ["Payments", "AI", "RWA", "Security"], // pakana.net: private ZK payments/compliance infrastructure, not a wallet (multisig-escrow is one feature)
+	stellarfolio: ["Analytics"], // stellarfolio.app: read-only portfolio viewer — enter ANY public address to view its assets; holds no keys
+	equilibre: ["Analytics"], // equilibre.io: portfolio rebalancer / DEX trading tool, wallet-independent (also already defunct — see STATUS_FIX)
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
@@ -398,6 +404,21 @@ const PRODUCT_KIND: Record<string, string> = {
 	emigro: "end-user-wallet",
 	nemorixpay: "end-user-wallet",
 	airgap: "end-user-wallet", // "turn a spare smartphone into a fully offline cold wallet" — end-user cold wallet app (software, not a hardware product)
+	// sls-033 residual (2026-07-15, boxy): the 14 remaining null-productKind
+	// type=Wallet rows, each web-verified via the directory-quality-verify
+	// workflow. 10 live wallets classified here; 3 non-wallets get Wallet dropped
+	// in TYPES_SET (pakananet/stellarfolio/equilibre); mxlet + equilibre are
+	// dead-domain (NXDOMAIN) and were already Inactive from the earlier triage.
+	decaf: "end-user-wallet", // App Store "Decaf Wallet", non-custodial Solana+Stellar, MoneyGram off-ramp
+	"cactus-link": "end-user-wallet", // Cactus Link Chrome-extension wallet (Matrixport / Cactus Custody)
+	lumexo: "end-user-wallet", // lumexo.io "Your Stellar Wallet & DEX" — self-custody accounts (in-app swap ≠ standalone DEX)
+	swiftex: "end-user-wallet", // App Store "SwiftEx Wallet — Multi-Chain Wallet & Swaps", self-custody (wallet-first, swap is a feature)
+	hedgepay: "end-user-wallet", // "Your Self-Custodial App" — stablecoin wallet on Stellar/Soroban (yield is an in-app feature)
+	cobo: "wallet-sdk", // Wallet-as-a-Service: one API/SDK stack; institutional WaaS + custody infra (Cobo Guard is a companion)
+	openxswitch: "wallet-sdk", // wallet-as-a-service / WaaS + custody infra for African fintechs (B2B, developer-facing)
+	"hito-wallet": "hardware-wallet", // Hito HOLD — physical $150 NFC hardware wallet device
+	arculus: "hardware-wallet", // Arculus Key Card — physical signing device + companion app
+	keystone: "hardware-wallet", // Keystone 3 Pro — air-gapped cold hardware wallet
 };
 
 /** sls-033 (#519): per-platform app availability — DATED, store-checked facts,
@@ -469,6 +490,142 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			state: "available",
 			storeUrl: "https://lobstr.co",
 			checkedAt: "2026-07-14",
+		},
+	],
+	// sls-033 residual (2026-07-15): app availability for the newly-classified
+	// wallets, each URL reached live via the directory-quality-verify workflow.
+	decaf: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/decaf-wallet/id1616564038",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=so.decaf.wallet",
+			checkedAt: "2026-07-15",
+		},
+	],
+	"cactus-link": [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/cactus-link/chiilpgkfmcopocdffapngjcbggdehmj",
+			checkedAt: "2026-07-15",
+			note: "Chrome Web Store, v2.1.30, offered by Matrixport (Cactus Custody)",
+		},
+	],
+	lumexo: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://app.lumexo.io/",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-07-15",
+			note: "mobile app 'arriving soon' — no App Store listing yet",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-07-15",
+			note: "mobile app 'arriving soon' — no Play listing yet",
+		},
+	],
+	swiftex: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/swiftex-wallet/id6759080930",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=org.app.swiftEx.wallet",
+			checkedAt: "2026-07-15",
+		},
+	],
+	"hito-wallet": [
+		{
+			platform: "hardware",
+			state: "available",
+			storeUrl: "https://shop.hito.xyz/products/hold",
+			checkedAt: "2026-07-15",
+			note: "physical HOLD device ($150); listing live, currently sold out (limited edition)",
+		},
+	],
+	hedgepay: [
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=finance.nabla.hedgepay",
+			checkedAt: "2026-07-15",
+			note: "developer Nabla Finance OU",
+		},
+	],
+	cobo: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://www.cobo.com/products/wallet/mpc",
+			checkedAt: "2026-07-15",
+			note: "Cobo Portal WaaS dashboard",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/cobo-guard/id6450997458",
+			checkedAt: "2026-07-15",
+			note: "Cobo Guard — companion MPC key-share/signing app",
+		},
+	],
+	arculus: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/arculus-wallet/id1575425801",
+			checkedAt: "2026-07-15",
+			note: "companion app to the Arculus Key Card",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=co.arculus.wallet.android",
+			checkedAt: "2026-07-15",
+		},
+	],
+	keystone: [
+		{
+			platform: "hardware",
+			state: "available",
+			storeUrl: "https://keyst.one/shop/products/keystone-3-pro",
+			checkedAt: "2026-07-15",
+			note: "Keystone 3 Pro air-gapped cold wallet ($149)",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/keystone-nexus/id6742313403",
+			checkedAt: "2026-07-15",
+			note: "Keystone Nexus companion app",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.keystone.wallet",
+			checkedAt: "2026-07-15",
+			note: "Keystone Nexus companion app",
 		},
 	],
 };
