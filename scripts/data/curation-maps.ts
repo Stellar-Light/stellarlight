@@ -37,6 +37,24 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// SCOPE removal, NOT a defunct call (boxy 2026-07-15). lobster (the
+	// LP-optimizer / on-chain-market-making-as-a-service for DEXs — distinct
+	// from the lobstr wallet) is an SCF #36 grantee ($109K,
+	// communityfund.stellar.org/project/lobster-vzw) with an active
+	// `stellar-integrations` repo, so it is NOT defunct. But its product is
+	// EVM-primary (Solidity `contracts` + EVM AMM/calldata bot toolbox; the
+	// Stellar repos are side integrations) and the owner scoped it out of the
+	// Stellar projects directory. Inactive is used only as the hide-from-
+	// directory lever here; the note keeps the data honest ("active, scoped
+	// out" — not "dead").
+	lobster: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://github.com/lobster-protocol",
+		note: "Scoped out of the Stellar directory 2026-07-15 (owner curation) — NOT defunct. Lobster is a multichain on-chain-market-making / LP-optimization service for DEXs (SCF #36 grantee, $109K; active stellar-integrations repo) whose product is EVM-primary; removed from the Stellar projects directory as out of scope. Distinct from the lobstr wallet.",
+	},
 	// Dead-project pass (boxy 2026-07-15). Each verified defunct by adversarial
 	// web-check (dead/parked domain + no moved site + no recent activity + no
 	// product presence) — NOT a staleness heuristic. High-confidence only; the

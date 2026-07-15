@@ -508,14 +508,6 @@ const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 // so omission ≠ negation on wallet/multichain records.
 const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	lobstr: ["stellar", "xrpl"],
-	// lobster (LP-optimizer, distinct from the lobstr wallet above) shipped with
-	// supportedNetworks empty — which is why it "looked" non-Stellar despite its
-	// own description ("...on Stellar"). Verified 2026-07-15 from github.com/
-	// lobster-protocol: a pinned `stellar` repo + `stellar-integrations`
-	// ("Lobster integrations on Stellar blockchain"). The org also has a Solidity
-	// `contracts` repo (EVM scaffolding), but Stellar is its verified productized
-	// chain, so we assert stellar only rather than over-claim an EVM deployment.
-	lobster: ["stellar"],
 	"ultra-stellar": ["stellar", "xrpl"],
 	// Bridge corridor matrix (boxy 2026-07-09: "same issue for Solana?" — yes).
 	// Every row below verified from PRIMARY sources on 2026-07-09 (vendor
