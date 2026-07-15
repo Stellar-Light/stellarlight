@@ -555,7 +555,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 	],
 	"hito-wallet": [
 		{
-			platform: "hardware",
+			platform: "hardware-device",
 			state: "available",
 			storeUrl: "https://shop.hito.xyz/products/hold",
 			checkedAt: "2026-07-15",
@@ -606,7 +606,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 	],
 	keystone: [
 		{
-			platform: "hardware",
+			platform: "hardware-device",
 			state: "available",
 			storeUrl: "https://keyst.one/shop/products/keystone-3-pro",
 			checkedAt: "2026-07-15",
