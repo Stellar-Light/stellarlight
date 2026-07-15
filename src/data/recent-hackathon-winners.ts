@@ -10,7 +10,7 @@ export interface RecentWinner {
 	rank: number; // 1 = 1st, 2 = 2nd, 3 = 3rd, etc.
 	placementLabel: string; // "1st", "2nd", "Track Winner", etc.
 	projectName: string;
-	builder: string;
+	builder?: string; // omitted for live-derived winners (DoraHacks buidls don't expose a clean builder name)
 	description: string;
 	prizeUsd: number;
 	dorahacksBuidlUrl?: string; // direct link to the DoraHacks BUIDL page

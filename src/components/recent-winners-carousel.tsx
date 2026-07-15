@@ -9,8 +9,8 @@ import {
 	CarouselItem,
 } from "@/components/ui/carousel";
 import {
-	getWinnerLink,
 	LATEST_WINNERS,
+	type RecentHackathonWinners,
 	type RecentWinner,
 } from "@/data/recent-hackathon-winners";
 
@@ -21,8 +21,14 @@ function placementBadgeClasses(rank: number): string {
 	return "bg-white/5 text-muted-foreground border-border/50";
 }
 
-function WinnerCard({ winner }: { winner: RecentWinner }) {
-	const href = getWinnerLink(winner);
+function WinnerCard({
+	winner,
+	fallbackHref,
+}: {
+	winner: RecentWinner;
+	fallbackHref: string;
+}) {
+	const href = winner.dorahacksBuidlUrl ?? fallbackHref;
 
 	return (
 		<a
@@ -36,22 +42,24 @@ function WinnerCard({ winner }: { winner: RecentWinner }) {
 					<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
 						{winner.projectName}
 					</h3>
-					<p className="text-xs text-muted-foreground mt-0.5 truncate">
-						by{" "}
-						{winner.builderPassportUrl ? (
-							<a
-								href={winner.builderPassportUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								onClick={(e) => e.stopPropagation()}
-								className="text-foreground hover:text-white hover:underline underline-offset-2"
-							>
-								{winner.builder}
-							</a>
-						) : (
-							<span className="text-foreground/80">{winner.builder}</span>
-						)}
-					</p>
+					{winner.builder && (
+						<p className="text-xs text-muted-foreground mt-0.5 truncate">
+							by{" "}
+							{winner.builderPassportUrl ? (
+								<a
+									href={winner.builderPassportUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									onClick={(e) => e.stopPropagation()}
+									className="text-foreground hover:text-white hover:underline underline-offset-2"
+								>
+									{winner.builder}
+								</a>
+							) : (
+								<span className="text-foreground/80">{winner.builder}</span>
+							)}
+						</p>
+					)}
 				</div>
 				<span
 					className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border flex-shrink-0 ${placementBadgeClasses(winner.rank)}`}
@@ -78,7 +86,12 @@ function WinnerCard({ winner }: { winner: RecentWinner }) {
 	);
 }
 
-export function RecentWinnersCarousel() {
+export function RecentWinnersCarousel({
+	data = LATEST_WINNERS,
+}: {
+	data?: RecentHackathonWinners;
+}) {
+	const winnerPage = `https://dorahacks.io/hackathon/${data.hackathonUname}/winner`;
 	const [api, setApi] = useState<CarouselApi | undefined>();
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
@@ -109,11 +122,11 @@ export function RecentWinnersCarousel() {
 						Recent Winners
 					</h2>
 					<p className="text-sm text-muted-foreground mt-1">
-						{LATEST_WINNERS.hackathonName}
+						{data.hackathonName}
 					</p>
 				</div>
 				<a
-					href={`https://dorahacks.io/hackathon/${LATEST_WINNERS.hackathonUname}/winner`}
+					href={winnerPage}
 					target="_blank"
 					rel="noopener noreferrer"
 					className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors mt-1"
@@ -130,12 +143,12 @@ export function RecentWinnersCarousel() {
 				className="w-full"
 			>
 				<CarouselContent className="-ml-4">
-					{LATEST_WINNERS.winners.map((w) => (
+					{data.winners.map((w) => (
 						<CarouselItem
-							key={w.projectName}
+							key={`${w.rank}-${w.projectName}`}
 							className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
 						>
-							<WinnerCard winner={w} />
+							<WinnerCard winner={w} fallbackHref={winnerPage} />
 						</CarouselItem>
 					))}
 				</CarouselContent>
