@@ -87,6 +87,15 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://github.com/blueorionblockchain",
 		note: "Defunct: blueorion.cc dead (all variants fail). GitHub org last push 2020-02-08; repo still advertises a Feb-2020 meetup. SCF participation was 2019. No activity in 5+ years.",
 	},
+	// Directory-quality engine verify pass (2026-07-15).
+	nebula: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://github.com/eigerco/nebula",
+		note: "Defunct: Eiger merged into Equilibrium Labs — eiger.co 308-redirects to equilibrium.co; the nebula.eiger.co frontend 404s; eigerco/nebula last release v0.2.0 (Nov 2023), README says 'production usage is discouraged'. No moved Stellar product. (Also mistagged — retyped SDK; it's a Soroban contract library, not an oracle.)",
+	},
 	// sls-023 (the DTCC class: entity Live ≠ Stellar product deployed).
 	// DTCC's own announcement — mirrored by SDF's case study — says the DTC
 	// tokenization service's Stellar connection is EXPECTED H1 2027 (SEC
