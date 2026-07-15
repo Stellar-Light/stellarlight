@@ -205,6 +205,87 @@ export async function fetchHackathonSubmissions(
 	return out;
 }
 
+/** Parse a DoraHacks placement label ("1st Place - $5,000 in XLM") into a
+ * sortable rank, a clean label, and the prize in USD. Non-ordinal placements
+ * ("Track Winner", "Winner") sort after the numbered ones. */
+export function parsePlacement(raw: string | null): {
+	rank: number;
+	label: string;
+	prizeUsd: number;
+} {
+	if (!raw) return { rank: 99, label: "Winner", prizeUsd: 0 };
+	const ord = raw.match(/^\s*(\d+)\s*(?:st|nd|rd|th)/i);
+	const rank = ord ? Number(ord[1]) : 99;
+	const label = raw.split(/\s+[-–]\s+/)[0].trim() || "Winner";
+	const money = raw.match(/\$\s*([\d,]+)/);
+	const prizeUsd = money ? Number(money[1].replace(/,/g, "")) : 0;
+	return { rank, label, prizeUsd };
+}
+
+/** Shape the /hackathons "Recent Winners" highlight consumes. Kept structurally
+ * identical to the curated fallback (src/data/recent-hackathon-winners.ts). */
+export interface LiveRecentWinners {
+	hackathonName: string;
+	hackathonUname: string;
+	endedAt: string; // YYYY-MM-DD
+	totalPrizePool: number;
+	winners: Array<{
+		rank: number;
+		placementLabel: string;
+		projectName: string;
+		description: string;
+		prizeUsd: number;
+		dorahacksBuidlUrl?: string;
+	}>;
+}
+
+/**
+ * Build the "Recent Winners" highlight LIVE from DoraHacks: the most-recent
+ * ended hackathon whose winners are announced, with its ranked winners derived
+ * from each buidl's `winner_prizes`. This is what makes the highlight
+ * auto-update the moment DoraHacks marks winners — no manual data edit. Returns
+ * null if none resolve (the caller falls back to the curated constant), and
+ * tries the two most-recent ended events in case the very newest hasn't
+ * propagated its per-buidl prizes yet.
+ */
+export async function fetchLatestHackathonWinners(
+	hackathons: DoraHacksHackathon[],
+): Promise<LiveRecentWinners | null> {
+	const ended = hackathons
+		.filter((h) => h.status === 2 && h.winner_announced)
+		.sort((a, b) => b.end_time - a.end_time);
+	for (const h of ended.slice(0, 2)) {
+		const subs = await fetchHackathonSubmissions(h.uname);
+		const winners = subs
+			.filter((s) => s.isWinner)
+			.map((s) => {
+				const { rank, label, prizeUsd } = parsePlacement(s.hackathonPlacement);
+				return {
+					rank,
+					placementLabel: label,
+					projectName: s.name,
+					description: s.description ?? "",
+					prizeUsd,
+					dorahacksBuidlUrl: s.url,
+				};
+			})
+			.sort((a, b) => a.rank - b.rank);
+		if (winners.length) {
+			return {
+				hackathonName: h.title,
+				hackathonUname: h.uname,
+				endedAt: new Date(h.end_time * 1000).toISOString().slice(0, 10),
+				totalPrizePool:
+					typeof h.bonus_price === "number" && h.bonus_price > 0
+						? h.bonus_price
+						: winners.reduce((sum, w) => sum + w.prizeUsd, 0),
+				winners,
+			};
+		}
+	}
+	return null;
+}
+
 /**
  * Formats a Unix timestamp to a human-readable date
  */

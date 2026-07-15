@@ -17,7 +17,12 @@ import { HackathonsSearchInput } from "@/components/hackathons-search-input";
 import { RecentWinnersCarousel } from "@/components/recent-winners-carousel";
 import { Badge } from "@/components/ui/badge";
 import {
+	LATEST_WINNERS,
+	type RecentHackathonWinners,
+} from "@/data/recent-hackathon-winners";
+import {
 	fetchAllDoraHacksHackathons,
+	fetchLatestHackathonWinners,
 	formatPrize,
 	formatShortDate,
 	getDaysRemaining,
@@ -179,6 +184,12 @@ export default async function HackathonsPage({
 	const activeHackathons = hackathons.filter((h) => isHackathonActive(h));
 	let pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
 
+	// "Recent Winners" highlight — LIVE from DoraHacks (most-recent ended event
+	// whose winners are announced), so it auto-updates the moment winners land.
+	// Falls back to the curated constant only if the live derivation is empty.
+	const recentWinners: RecentHackathonWinners =
+		(await fetchLatestHackathonWinners(hackathons)) ?? LATEST_WINNERS;
+
 	// Build the set of distinct years, organizers, and tags from past hackathons (for filter UI).
 	const years = Array.from(
 		new Set(
@@ -304,7 +315,7 @@ export default async function HackathonsPage({
 				</div>
 
 				{/* Recent winners highlight */}
-				<RecentWinnersCarousel />
+				<RecentWinnersCarousel data={recentWinners} />
 
 				{/* Cross-hackathon stats banner */}
 				<div
