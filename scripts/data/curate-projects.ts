@@ -279,7 +279,7 @@ const TYPES_SET: Record<string, string[]> = {
 	// untouched. Cross-chain swap aggregators keep/carry Bridge — the
 	// user-meaningful corridor capability (the rubic #414 precedent) —
 	// Stellar-only routers/services go Infrastructure.
-	stellarbroker: ["Infrastructure"], // stellar.broker: "Multi-source liquidity swap router for Stellar, providing access to AMMs and Stellar DEX" — routes across venues, runs none
+	stellarbroker: ["Infrastructure", "SDK"], // stellar.broker: Stellar-only multi-source liquidity swap ROUTER/aggregator — best routing across AMMs + Stellar DEX, runs no venue (so NOT a DEX venue; the verifier's DEX call was wrong), and it's integrable by other apps/wallets (boxy 2026-07-15) → +SDK.
 	wowmax: ["Bridge"], // wowmax.exchange: "combines a powerful DEX aggregator with an on-chain copy-trading protocol… trade crypto at the best possible prices across multiple decentralized exchanges" — aggregator, not a venue
 	rango: ["Bridge"], // rango.exchange: "a new layer on top of all Bridges and DEXs, working as a Bridge Aggregator and DEX Aggregator at the same time" — router, not a venue
 	houdiniswap: ["Bridge"], // houdiniswap.com: "non-custodial liquidity aggregator… sources swap routes from vetted, compliant exchange partners"; explicitly does not pool assets
@@ -323,6 +323,10 @@ const TYPES_SET: Record<string, string[]> = {
 	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
 	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
 	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
+	// Held-queue resolutions after a closer look (boxy 2026-07-15).
+	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
+	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.
+	indentura: ["Lending", "RWA"], // thawdigital.com: "on-chain CREDIT infrastructure — trade credit and receivables financing" — credit/lending against RWA receivables.
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
