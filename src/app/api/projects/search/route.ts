@@ -1353,6 +1353,13 @@ export async function GET(req: NextRequest) {
 					category: c.category,
 					shortDescription: c.shortDescription ?? null,
 					status: c.status,
+					// The swap overrides `status` from the canonical, so its provenance
+					// MUST come from the canonical too — otherwise the served canonical
+					// status label carries the merged-away shadow tombstone's basis/
+					// as-of/source (a statusBasis leak; Tyler F3 recheck 2026-07-15).
+					statusAsOf: c.statusAsOf ?? null,
+					statusSourceUrl: c.statusSourceUrl ?? null,
+					statusBasis: c.statusBasis ?? null,
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
