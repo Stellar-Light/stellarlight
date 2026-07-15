@@ -85,10 +85,15 @@ await check("searchResearch", async () => {
 });
 
 await check("listSkills + getSkill", async () => {
-	const list = await scout.listSkills({ kind: "sdk" });
+	const list = await scout.listSkills();
 	assert(Array.isArray(list.skills), "no skills array");
-	const one = await scout.getSkill("soroban");
-	assert(one.skill, "no skill detail");
+	assert(list.skills.length > 0, "empty skills catalog");
+	// Derive the slug from the live catalog rather than hardcoding one — the
+	// skills list is llms.txt-derived and slugs change (e.g. soroban →
+	// smart-contracts), which used to make this assertion go stale.
+	const slug = list.skills[0].slug;
+	const one = await scout.getSkill(slug);
+	assert(one.skill, `no skill detail for ${slug}`);
 });
 
 await check("getClusters", async () => {
