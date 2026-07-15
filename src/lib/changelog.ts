@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-15",
+		surfaces: ["api"],
+		version: "spec 1.7.27",
+		type: "fixed",
+		summary:
+			"`/api/projects/search` result counts are now computed AFTER canonical deduplication (sls-056). `meta.counts.returned` and `total` previously counted the pre-fold page, so a query whose results included a lineage-shadow duplicate reported more rows than the payload carried — e.g. q=OrbitCDP served one canonical row while both counts said 2. Counts now hold the invariants returned === projects.length and total >= returned.",
+		detail:
+			"The shadow-fold (a merged-away duplicate whose canonicalSlug points at the surviving record is swapped for its canonical, or dropped if the canonical is already present) and the status/type belt-filters run AFTER the page is assembled, so counting `projects.length + semanticAdds.length` over-reported by exactly the rows those steps removed. `returned` is now the served array length; `total` subtracts the same per-page fold delta from the pre-slice match total (still ≥ returned). No response-shape change — only the count values are corrected.",
+	},
+	{
 		date: "2026-07-14",
 		surfaces: ["api"],
 		version: "spec 1.7.26",

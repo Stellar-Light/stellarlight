@@ -1677,6 +1677,19 @@ export async function GET(req: NextRequest) {
 			: null,
 	}));
 
+	// sls-056: report counts from the FINAL served array. The page
+	// (`projects` + `semanticAdds`) is assembled BEFORE the shadow-fold and the
+	// status/type belt-filters, which drop duplicate lineage shadows (a shadow
+	// whose canonical is already present) and any stray off-filter row. Counting
+	// before them over-reported the payload — q=OrbitCDP served 1 row while
+	// returned/total both said 2. Subtract exactly the rows the fold removed on
+	// this page so the invariants hold: returned === projects.length (served) and
+	// total >= returned (totalMatching >= projects.length is guaranteed — it is
+	// the pre-slice count set just before the offset/limit slice).
+	const returnedCount = projectsWithOrg.length;
+	const foldRemoved = projects.length + semanticAdds.length - returnedCount;
+	const totalCount = totalMatching + semanticAdds.length - foldRemoved;
+
 	logApiHit({
 		req,
 		endpoint: "/api/projects/search",
@@ -1686,7 +1699,7 @@ export async function GET(req: NextRequest) {
 			scfAwarded: scfAwardedOnly,
 			limit,
 		},
-		resultCount: projects.length + semanticAdds.length,
+		resultCount: returnedCount,
 		matchMode,
 	});
 
@@ -1745,8 +1758,8 @@ export async function GET(req: NextRequest) {
 				// of `total`) so a consumer can separate keyword truth from
 				// similarity guesses.
 				counts: {
-					returned: projects.length + semanticAdds.length,
-					total: totalMatching + semanticAdds.length,
+					returned: returnedCount,
+					total: totalCount,
 					semantic: semanticAdds.length,
 				},
 				// `semantic: true` means the keyword pass was thin and we filled
