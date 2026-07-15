@@ -37,6 +37,56 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// Dead-project pass (boxy 2026-07-15). Each verified defunct by adversarial
+	// web-check (dead/parked domain + no moved site + no recent activity + no
+	// product presence) — NOT a staleness heuristic. High-confidence only; the
+	// medium/uncertain candidates were held for human review.
+	swplug: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		note: "Defunct: swplug.com dead (ECONNREFUSED, dead IBM Cloud IP); no WordPress.org plugin listing, no repo; all content 2019-2021. Supported tokens (MOBI/SLT/RMT) are themselves defunct.",
+	},
+	plutus: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://expireddomains.com/domain/plutus.rentals",
+		note: "Defunct: plutus.rentals 301s to an expired-domain/for-sale marketplace; the plutus.property rebrand domain is NXDOMAIN. No live product or repo.",
+	},
+	"soroban-learn": {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://github.com/Soroban-Learn/soroban-learn",
+		note: "Defunct: sorobanlearn.com down (ECONNREFUSED); sole GitHub repo is a public ARCHIVE (archived Nov 2023, last commit Jun 2023). SCF awards all pre-2024; the IDE/course never shipped a live site.",
+	},
+	localcoin: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		note: "Defunct: builder UrbanChange Foundation formally announced shutdown ('UrbanChange Foundation and App Closing', May 5 2024 — their last post ever); urbanchange.com now parked (HugeDomains); localcoin.us serves only an empty Loading SPA shell.",
+	},
+	stex: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://github.com/xycloo",
+		note: "Defunct: stex.xycloo.com DNS gone. Builder Xycloo Labs is alive but fully pivoted to Soroban DeFi/infra (Mercury/Zephyr) — no sTeX repo or mention in years; the 2021 LaTeX-editor product is abandoned.",
+	},
+	"blue-orion": {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-07-15",
+		basis: "human-verified",
+		sourceUrl: "https://github.com/blueorionblockchain",
+		note: "Defunct: blueorion.cc dead (all variants fail). GitHub org last push 2020-02-08; repo still advertises a Feb-2020 meetup. SCF participation was 2019. No activity in 5+ years.",
+	},
 	// sls-023 (the DTCC class: entity Live ≠ Stellar product deployed).
 	// DTCC's own announcement — mirrored by SDF's case study — says the DTC
 	// tokenization service's Stellar connection is EXPECTED H1 2027 (SEC
