@@ -1,0 +1,128 @@
+# Coverage watch — monthly delta-only review queue for ECOSYSTEM GAPS.
+# The third detector next to liveness-watch and tag-watch: runs the read-only
+# report-coverage-gaps detector (external rosters vs what we serve + freshness)
+# and diffs its gap list against last month's, so the owner reviews only NEW
+# gaps. REPORT ONLY: missing projects become human-reviewed SEEDS and partner
+# surfaces become ingest candidates (verify via the directory-quality-verify
+# workflow before curating). Same detect→verify→curate flywheel.
+#
+# This is the "move faster to find, index and serve" metric (raven#18):
+# the summary line IS the number we hold ourselves to over time.
+name: coverage-watch
+on:
+  schedule:
+    # 08:00 UTC on the 1st of each month (after liveness-watch and tag-watch)
+    - cron: "0 8 1 * *"
+  workflow_dispatch: {}
+concurrency:
+  group: coverage-watch
+  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run coverage-gap report
+        run: pnpm exec tsx scripts/report-coverage-gaps.ts --json > /tmp/coverage.json 2> /tmp/coverage.log
+      - name: Fetch previous month's artifact
+        continue-on-error: true
+        run: |
+          PREV=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=coverage-watch.yml --status=success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$PREV" ]; then
+            gh run download "$PREV" --repo "$GITHUB_REPOSITORY" -n coverage-gap-evidence -D /tmp/prev || true
+          fi
+      - name: Build delta report
+        run: |
+          python3 - <<'EOF' > /tmp/watch.md
+          import json, os
+          now = json.load(open('/tmp/coverage.json'))
+          prev = None
+          if os.path.exists('/tmp/prev/coverage.json'):
+              prev = json.load(open('/tmp/prev/coverage.json'))
+
+          def gapkeys(rep):
+              """Stable identity for every itemized gap, across lanes."""
+              keys = set()
+              lanes = rep.get('lanes', {})
+              for m in lanes.get('defillama', {}).get('missing', []):
+                  keys.add(f"llama:{m['slug']}")
+              for s in lanes.get('scf', {}).get('sample', []):
+                  keys.add(f"scf:{s.get('scfSlug')}")
+              for p in lanes.get('partnerDocs', []):
+                  if p.get('verdict') != 'own':
+                      keys.add(f"partner:{p['partner']}")
+              for r in lanes.get('freshness', {}).get('research', []):
+                  if r.get('stale') or r.get('empty'):
+                      keys.add(f"research:{r['source']}")
+              return keys
+
+          cur = gapkeys(now)
+          old = gapkeys(prev) if prev else set()
+          new = sorted(cur - old)
+          resolved = sorted(old - cur)
+          s = now.get('summary', {})
+
+          print("## Coverage watch — ecosystem gap report")
+          print()
+          print("_External rosters (DefiLlama / SCF / partner doc surfaces) vs what we serve, plus corpus freshness. Report-only; missing entries become human-reviewed SEEDS and partner surfaces become ingest candidates — verify via the directory-quality-verify workflow, never bulk-create._")
+          print()
+          print(f"**Summary:** {s.get('missingDefillama','?')} llama-missing | {s.get('missingScf','?')} scf-missing | {s.get('partnerDocsWithoutOwnContent','?')} partner surfaces without own content | {s.get('staleOrEmptyResearchSources','?')} stale/empty research sources | {s.get('unstampedResearchSources','?')} undated research sources")
+          print()
+          print(f"**NEW gaps since last month: {len(new)} | resolved: {len(resolved)}**")
+          if new:
+              print()
+              for k in new: print(f"- 🆕 `{k}`")
+          if resolved:
+              print()
+              print(f"### Resolved since last month: {', '.join(f'`{k}`' for k in resolved)}")
+          lanes = now.get('lanes', {})
+          miss = lanes.get('defillama', {}).get('missing', [])
+          if miss:
+              print()
+              print("### DefiLlama missing (by TVL)")
+              print()
+              print("| protocol | category | TVL | site |")
+              print("|---|---|---|---|")
+              for m in miss:
+                  print(f"| {m['name']} | {m['category']} | ${m['tvlUSD']:,} | {m.get('url') or '—'} |")
+          pd = [p for p in lanes.get('partnerDocs', []) if p.get('verdict') != 'own']
+          if pd:
+              print()
+              print("### Partner doc surfaces without own content indexed")
+              print()
+              for p in pd:
+                  print(f"- **{p['partner']}** ({p['surface']}): {p['verdict']} — {p['url']}")
+          if not prev:
+              print()
+              print("_(first tracked run — everything counts as current, deltas start next month)_")
+          EOF
+          cat /tmp/watch.md | tee $GITHUB_STEP_SUMMARY
+      - name: Upsert rolling watch issue
+        run: |
+          TITLE="Coverage watch — ecosystem gap report"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file /tmp/watch.md
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file /tmp/watch.md
+          fi
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-gap-evidence
+          path: /tmp/coverage.json
+          retention-days: 45
