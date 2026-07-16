@@ -772,3 +772,38 @@ describe("full lexical coverage (brand/lookup queries)", () => {
 		expect(out[0].url).toBe("https://x/strong");
 	});
 });
+
+describe("full lexical coverage — discriminating gate", () => {
+	// Golden regression (first deploy, 2026-07-16): "SCF handbook link" served
+	// seven uniform-floored pages that merely CONTAIN scf/handbook/link,
+	// crowding out the actual handbook root. When many chunks cover the token
+	// set, the tokens are generic vocabulary — floor nothing.
+	it("floors nothing when >5 chunks cover the tokens (generic vocabulary)", () => {
+		const generic = (i: number) => ({
+			...chunk({ url: `https://x/generic-${i}`, score: 0.6 }),
+			title: `Tool ${i}`,
+			content: `The scf handbook link and related resources. ${Array.from(
+				{ length: 40 },
+				(_, j) => `filler${j}`,
+			).join(" ")}.`,
+		});
+		const out = rankResearchChunks(
+			[
+				// six full-coverage generic chunks at cosine 0.6...
+				...Array.from({ length: 6 }, (_, i) => generic(i)),
+				// ...and the genuinely-closer doc WITHOUT the word "link"
+				{
+					...chunk({ url: "https://gitbook/root", score: 0.78 }),
+					title: "Welcome to the SCF Handbook",
+					content: `Welcome to the SCF Handbook, the guide to the Stellar Community Fund. ${Array.from(
+						{ length: 40 },
+						(_, j) => `detail${j}`,
+					).join(" ")}.`,
+				},
+			],
+			{ limit: 3, mode: "vector", query: "SCF handbook link", now: NOW },
+		);
+		// with the gate, no floor fires — the strongest embedding wins
+		expect(out[0].url).toBe("https://gitbook/root");
+	});
+});

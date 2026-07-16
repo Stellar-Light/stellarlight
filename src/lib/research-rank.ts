@@ -132,8 +132,16 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 // exact IDs; see fullLexicalMatch in confidence.ts). Guards: 1–8 tokens
 // (longer NL questions are genuinely semantic, and a degenerate token list
 // would make coverage meaningless), tokens ≥2 chars (same tokenization as the
-// keyword fallback).
+// keyword fallback), and — critically — the floor applies only when coverage
+// is DISCRIMINATING: at most 5 chunks in the pool carry it. First deploy
+// skipped that gate and golden regressed 3 cases ("SCF handbook link" served
+// seven uniform-floored lumenloop tool pages that merely contain the words
+// scf/handbook/link, crowding out the actual handbook root; "latest soroban
+// release" floored generic evergreen version pages over the dated Zipper
+// post). When many chunks cover the tokens, the tokens are generic and
+// coverage carries no lookup signal — floor nothing and let cosine decide.
 const FULL_LEXICAL_MAX_TOKENS = 8;
+const FULL_LEXICAL_DISCRIMINATING_MAX = 5;
 
 export function queryLexTokens(query: string | undefined): string[] {
 	if (!query) return [];
@@ -473,8 +481,18 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const anchored = (c: RankableChunk) => anchors.includes(c.url);
 
 	// Full lexical coverage (brand/lookup queries): every query token verbatim
-	// in the chunk → relevance floor 0.8 (see hasFullLexicalCoverage above).
+	// in the chunk → relevance floor 0.8 — but ONLY while coverage is
+	// discriminating (≤ FULL_LEXICAL_DISCRIMINATING_MAX chunks carry it); a
+	// widely-covered token set is generic vocabulary, not a lookup key.
 	const lexTokens = queryLexTokens(opts.query);
+	const coveredIds = new Set<RankableChunk>();
+	if (lexTokens.length) {
+		for (const c of filtered) {
+			if (hasFullLexicalCoverage(c, lexTokens)) coveredIds.add(c);
+		}
+	}
+	const lexFloorActive =
+		coveredIds.size >= 1 && coveredIds.size <= FULL_LEXICAL_DISCRIMINATING_MAX;
 
 	const scored = filtered
 		.map((c) => {
@@ -500,7 +518,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 							: 0,
 					exactIdMatch: isPinned,
 					anchorMatch: anchored(c),
-					fullLexicalMatch: hasFullLexicalCoverage(c, lexTokens),
+					fullLexicalMatch: lexFloorActive && coveredIds.has(c),
 					now,
 				}),
 			};
