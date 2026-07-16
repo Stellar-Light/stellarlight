@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-16",
+		surfaces: ["api"],
+		version: "spec 1.7.28",
+		type: "fixed",
+		summary:
+			"searchResearch brand/lookup queries: a chunk containing EVERY query token verbatim is now fetched into the pool even when cosine retrieval missed it, and carries a relevance floor of 0.8. Live failures this fixes: bare q=Alchemy returned 0 results (the lone-word embedding's nearest neighbours were all low-value chunks), and 'Alchemy Stellar Data API transfers balances' ranked the official Indexers chunk that literally documents Alchemy's Data API below top-15, behind pages merely titled 'Balances'/'Token Transfers'.",
+		detail:
+			"Same fetch-not-rank root as the sls-019 identifier lookup and the recency supplement: the pool is supplemented with full-lexical-coverage chunks (AND-match over ≤8 de-pluralized query tokens; gated on the vector pool lacking any full-coverage chunk so the hot path pays the extra find only on a real miss), each carrying its REAL stored-embedding cosine. Ranking floors full-coverage relevance at 0.8 — under curated anchors (0.85) and exact CAP/SEP IDs (0.9), so genuinely-closer embeddings still win and raw cosine orders full-coverage peers. scoreModel.note documents the new floor.",
+	},
+	{
 		date: "2026-07-15",
 		surfaces: ["api"],
 		version: "spec 1.7.27",

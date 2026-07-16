@@ -122,6 +122,48 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 	return tokens.filter((t) => hay.includes(t)).length / tokens.length;
 }
 
+// ── full lexical coverage: every query token present verbatim ──
+// Brand/proper-noun queries are lookups cosine under-measures: for "Alchemy
+// Stellar Data API transfers balances" the chunk that literally documents
+// Alchemy's Data API ranked below top-15 behind pages merely TITLED
+// "Balances"/"Token Transfers", and bare q=Alchemy served 0 (its lone-word
+// embedding's nearest neighbours were all low-value chunks). A chunk carrying
+// EVERY query token verbatim gets a relevance floor (0.8 — under anchors and
+// exact IDs; see fullLexicalMatch in confidence.ts). Guards: 1–8 tokens
+// (longer NL questions are genuinely semantic, and a degenerate token list
+// would make coverage meaningless), tokens ≥2 chars (same tokenization as the
+// keyword fallback).
+const FULL_LEXICAL_MAX_TOKENS = 8;
+
+export function queryLexTokens(query: string | undefined): string[] {
+	if (!query) return [];
+	const tokens = [
+		...new Set(
+			query
+				.toLowerCase()
+				.split(/[^a-z0-9]+/)
+				.filter((t) => t.length > 1)
+				// Trailing-s de-plural (len>3): the query said "transfers" but the
+				// chunk says "transfer history" — substring matching on the stem
+				// covers both forms in the coverage check AND the supplement's
+				// `contains` fetch ("transfer" matches transfer/transfers).
+				.map((t) => (t.length > 3 && t.endsWith("s") ? t.slice(0, -1) : t)),
+		),
+	];
+	return tokens.length >= 1 && tokens.length <= FULL_LEXICAL_MAX_TOKENS
+		? tokens
+		: [];
+}
+
+export function hasFullLexicalCoverage(
+	c: { title?: string | null; section?: string | null; content: string },
+	tokens: string[],
+): boolean {
+	if (!tokens.length) return false;
+	const hay = `${c.title ?? ""} ${c.section ?? ""} ${c.content}`.toLowerCase();
+	return tokens.every((t) => hay.includes(t));
+}
+
 // ── sls-019: exact CAP/SEP identifiers are retrieval KEYS, not hints ──
 // Vector embeddings can't key on proposal numbers: for q=CAP-0038 the
 // cross-referencing CAPs outrank the named document (live sweep 2026-07-13:
@@ -430,6 +472,10 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const anchors = anchorDocUrls(opts.query);
 	const anchored = (c: RankableChunk) => anchors.includes(c.url);
 
+	// Full lexical coverage (brand/lookup queries): every query token verbatim
+	// in the chunk → relevance floor 0.8 (see hasFullLexicalCoverage above).
+	const lexTokens = queryLexTokens(opts.query);
+
 	const scored = filtered
 		.map((c) => {
 			const eff = meetingReclass(c);
@@ -454,6 +500,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 							: 0,
 					exactIdMatch: isPinned,
 					anchorMatch: anchored(c),
+					fullLexicalMatch: hasFullLexicalCoverage(c, lexTokens),
 					now,
 				}),
 			};

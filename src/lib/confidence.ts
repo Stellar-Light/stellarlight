@@ -164,6 +164,18 @@ export interface ConfidenceInput {
 	 * document by its own key.
 	 */
 	anchorMatch?: boolean;
+	/**
+	 * EVERY query token appears verbatim in the chunk (title+section+content) —
+	 * lookup-grade lexical evidence cosine demonstrably under-measures for
+	 * brand/proper-noun queries: "Alchemy Stellar Data API transfers balances"
+	 * ranked the chunk that literally documents Alchemy's Data API below
+	 * top-15, and bare q=Alchemy returned 0 (2026-07-16 live probes). Floored
+	 * at 0.8 — under anchors (curated assertion) and exact IDs (the user named
+	 * the document): full token coverage is strong but circumstantial, so
+	 * genuinely-closer embeddings still win. Raw cosine orders full-coverage
+	 * peers among themselves.
+	 */
+	fullLexicalMatch?: boolean;
 	/** Injectable clock so callers/tests are deterministic. Defaults to now. */
 	now?: number;
 }
@@ -205,6 +217,7 @@ export function researchConfidence(input: ConfidenceInput): Confidence {
 	);
 	if (input.exactIdMatch) relevance = Math.max(relevance, 0.9);
 	else if (input.anchorMatch) relevance = Math.max(relevance, 0.85);
+	else if (input.fullLexicalMatch) relevance = Math.max(relevance, 0.8);
 	const authority = AUTHORITY[input.source] ?? DEFAULT_AUTHORITY;
 	const { freshness, ageDays } = freshnessFrom(
 		input.source,
