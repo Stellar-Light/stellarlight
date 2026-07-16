@@ -683,6 +683,14 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	// from the project's OWN materials 2026-07-16 (precision over recall —
 	// verified subset, never the marketing chain-count).
 	proofbridge: ["stellar", "evm"], // pfbridge.xyz / its own description: "connecting Stellar and Ethereum" ZK bridge
+	// Second wave (2026-07-16, same red): the check's q=bridge window surfaced
+	// wowmax once the first four cleared — preempting every remaining Live
+	// Bridge-typed row with empty networks in one pass (full type=Bridge sweep,
+	// not the window).
+	wowmax: ["evm"], // wowmax.exchange: multi-chain EVM DEX/bridge aggregator; its own description says "EXPANDING to Stellar" — stellar deliberately NOT asserted until the deployment is live
+	usher: ["stellar"], // usher.so: "Enhancing Stellar's Anchors with the T Node" — Stellar-native anchor infrastructure
+	"soroban-polygon-interop": ["stellar", "evm"], // EEA crosschain spec: Soroban ↔ Polygon (EVM) asset transfers
+	"one-click": ["stellar"], // oneclick.fi: DeFi onboarding listed for its Stellar corridor; other chains not per-chain verified
 	rango: ["stellar", "evm"], // rango.exchange aggregates 70+ chains; asserting the verified subset (Stellar routing is why it is listed; EVM is its core business)
 	liquidsfi: ["stellar"], // liquids.fi (ex-ZKLiquid, Stellar-origin SCF-track project); cross-chain expansion claims not yet per-chain verified
 	lobstr: ["stellar", "xrpl"],
