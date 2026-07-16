@@ -310,7 +310,7 @@ export async function upsertChunks(opts: {
 	chunks: ResearchChunk[];
 	existing: Map<string, Map<number, ExistingChunkRef>>;
 }): Promise<UpsertStats> {
-	const { payload, source, chunks, existing } = opts;
+	const { payload, source, chunks: rawChunks, existing } = opts;
 	const stats: UpsertStats = {
 		new: 0,
 		updated: 0,
@@ -318,6 +318,16 @@ export async function upsertChunks(opts: {
 		embedTokens: 0,
 		errors: 0,
 	};
+
+	// Blank chunks can never be written (Payload's required `content` rejects
+	// them), so attempting to is a permanent error loop: dev-docs
+	// getTransactions#4 counted "new: 1" and failed "field is invalid: Content"
+	// on EVERY refresh (2026-07-16). Skip them loudly instead.
+	const chunks = rawChunks.filter((c) => {
+		if (c.content?.trim()) return true;
+		console.log(`  skip empty chunk: ${c.parentDocId}#${c.chunkIndex}`);
+		return false;
+	});
 
 	const toEmbed: ResearchChunk[] = [];
 	const metaOnly: ResearchChunk[] = [];
