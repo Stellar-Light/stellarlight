@@ -678,6 +678,13 @@ const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 // sls-017 (durable half): chains a project supports, lowercase. Fill-if-empty —
 // so omission ≠ negation on wallet/multichain records.
 const SUPPORTED_NETWORKS: Record<string, string[]> = {
+	// Self-audit "bridge corridors" red (persistent since 2026-07-11): Bridge-
+	// typed rows must carry non-empty verified networks. Each below asserted
+	// from the project's OWN materials 2026-07-16 (precision over recall —
+	// verified subset, never the marketing chain-count).
+	proofbridge: ["stellar", "evm"], // pfbridge.xyz / its own description: "connecting Stellar and Ethereum" ZK bridge
+	rango: ["stellar", "evm"], // rango.exchange aggregates 70+ chains; asserting the verified subset (Stellar routing is why it is listed; EVM is its core business)
+	liquidsfi: ["stellar"], // liquids.fi (ex-ZKLiquid, Stellar-origin SCF-track project); cross-chain expansion claims not yet per-chain verified
 	lobstr: ["stellar", "xrpl"],
 	"ultra-stellar": ["stellar", "xrpl"],
 	// Bridge corridor matrix (boxy 2026-07-09: "same issue for Solana?" — yes).
@@ -976,6 +983,13 @@ const DUPE_MERGES: Array<{
 			github: "https://github.com/balancednetwork",
 		},
 	},
+	// zkliquid rebranded to LiquidsFi — zkliquid's OWN description says so
+	// ("ZKLiquid has rebranded to LiquidsFi (liquids.fi)") and both records
+	// carry the same website + github. Held-queue item from the 2026-07-15
+	// tag pass, closed 2026-07-16; also clears half the self-audit
+	// bridge-corridors red (the shadow stops serving as an empty-networks
+	// Bridge row). No SCF on either record — plain lineage merge.
+	{ dupe: "zkliquid", canonical: "liquidsfi" },
 ];
 
 const ASOF = new Date().toISOString().slice(0, 10);

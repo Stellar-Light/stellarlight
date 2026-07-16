@@ -21,7 +21,10 @@ name: Curator Agent — Link health check
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    # Weekly (Mon 02:00 UTC) — was daily, but at ~18 min/run this single job
+    # burned ~540 Actions-min/month (a quarter of the private-repo free tier)
+    # for a signal that moves on a weeks cadence (link rot). 2026-07-16.
+    - cron: "0 2 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -49,7 +52,7 @@ jobs:
     # run now checks 2,106 URLs (10s ceiling each, concurrency 5) + ~4,200
     # sequential DB round-trips AFTER the checks — a kill mid-write corrupts
     # the freshness counters. Sized for worst case.
-    timeout-minutes: 60
+    timeout-minutes: 25 # run is ~18 min; cap runaway cost (was 60)
     steps:
       - uses: actions/checkout@v4
 

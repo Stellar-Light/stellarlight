@@ -19,6 +19,18 @@ on:
       - "scripts/check-content-freshness.ts"
   push:
     branches: [main]
+    # Same paths as the PR trigger — the bare push trigger fired on EVERY
+    # merge to main (~10 runs in 2 days), duplicating the daily schedule for
+    # changes that can't affect content freshness. 2026-07-16 minutes audit.
+    paths:
+      - "public/skills/**"
+      - "references/**"
+      - "src/lib/stellar-scout-skill.ts"
+      - "src/lib/stellar-developer-activity-skill.ts"
+      - "scout-mcp/README.md"
+      - "api-client/README.md"
+      - "README.md"
+      - "scripts/check-content-freshness.ts"
   schedule:
     - cron: "23 13 * * *" # daily ~13:23 UTC (near the api-drift guard)
   workflow_dispatch: {}
