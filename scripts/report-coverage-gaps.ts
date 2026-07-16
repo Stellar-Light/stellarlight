@@ -271,19 +271,27 @@ async function lanePartnerDocs() {
 		let via: string | null = null;
 		try {
 			const d = await j(
-				`${BASE}/api/research?q=${encodeURIComponent(s.probe)}&limit=5`,
+				`${BASE}/api/research?q=${encodeURIComponent(s.probe)}&limit=15`,
 			);
 			const rows = d.results ?? d.data ?? [];
 			for (const r of rows) {
 				const u: string = r.url ?? r.sourceUrl ?? "";
-				if (!s.match.test(u)) continue;
+				// Judge by URL *and* served text. URL-only produced a FALSE
+				// NEGATIVE (2026-07-16): the official Indexers page carries the
+				// full Alchemy Stellar Data API entry — the capability content IS
+				// retrievable — but its URL is developers.stellar.org, so the lane
+				// reported "not served at all". Text match = content served.
+				const text: string = `${r.title ?? ""} ${r.excerpt ?? r.content ?? ""}`;
+				const urlHit = s.match.test(u);
+				if (!urlHit && !s.match.test(text)) continue;
 				const host = hostOf(u) ?? "";
-				// stellar.org / developers.stellar.org hosting = SDF's own post or
-				// guide ABOUT the partner - honest tier is "mention", not "own"
-				// (the first run showed Chainlink "served" off an SDF blog post).
-				const tier: PartnerVerdict = host.endsWith("stellar.org")
-					? "mention"
-					: "own";
+				// Partner's own domain in the result URL = their OWN content is
+				// indexed. A stellar.org-hosted hit (SDF post/guide/docs entry
+				// about the partner) = "mention" — the substance may be fully
+				// served, but it refreshes on the DOCS' cadence, not the
+				// partner's (the raven#18 distinction).
+				const tier: PartnerVerdict =
+					urlHit && !host.endsWith("stellar.org") ? "own" : "mention";
 				if (tier === "own") {
 					verdict = "own";
 					via = r.source ?? null;
@@ -466,7 +474,7 @@ async function main() {
 			p.verdict === "own"
 				? `own content indexed (via ${p.via})`
 				: p.verdict === "mention"
-					? `stellar.org mention only (via ${p.via}) - partner's own docs NOT indexed`
+					? `served via stellar.org-hosted content (via ${p.via}) - partner's OWN domain not indexed`
 					: "NOT SERVED at all";
 		console.log(`| ${p.partner} | ${p.surface} | ${label} |`);
 	}
