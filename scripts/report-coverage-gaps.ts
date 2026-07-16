@@ -362,30 +362,47 @@ async function laneFreshness() {
 		note: KNOWN_EMPTY_OK[s.name] ?? null,
 	}));
 
+	// Staleness = "we stopped REFRESHING it", which is `observedAt` (ingest time)
+	// — NOT `publishedAt` (the source's own date). Archival sources (audit, cap,
+	// sep, paper) are FULL of legitimately-old content: a 2023 audit is dated
+	// 2023 forever, and flagging it "STALE" is a category error (the 2026-07-16
+	// false-stale on the audit corpus, which was actually current). Two fixes:
+	// (1) sample 25 not 5 — the newest doc rarely lands in the 5 vector-nearest
+	//     to a single generic word;
+	// (2) flag refreshStale ONLY from observedAt; a source that doesn't stamp it
+	//     (audit/cap/sep/incident today) is `staleUnknown`, never asserted stale.
 	const research = [];
 	for (const source of RESEARCH_SOURCES) {
 		try {
 			const d = await j(
-				`${BASE}/api/research?q=stellar&source=${source}&limit=5`,
+				`${BASE}/api/research?q=stellar&source=${source}&limit=25`,
 			);
 			const rows = d.results ?? d.data ?? [];
-			let newest: string | null = null;
-			let stamped = 0;
+			let newestObserved: string | null = null;
+			let newestPublished: string | null = null;
 			for (const r of rows) {
-				const t = r.observedAt ?? r.publishedAt ?? null;
-				if (t) {
-					stamped++;
-					if (!newest || t > newest) newest = t;
-				}
+				if (r.observedAt && (!newestObserved || r.observedAt > newestObserved))
+					newestObserved = r.observedAt;
+				if (
+					r.publishedAt &&
+					(!newestPublished || r.publishedAt > newestPublished)
+				)
+					newestPublished = r.publishedAt;
 			}
+			const observedAge = ageDays(newestObserved);
 			research.push({
 				source,
 				sampled: rows.length,
 				empty: rows.length === 0,
-				newestSeen: newest,
-				ageDays: ageDays(newest),
-				dateStamped: stamped > 0,
-				stale: newest != null && (ageDays(newest) ?? 0) > RESEARCH_STALE_DAYS,
+				// ingest recency (the real freshness signal) vs content date
+				newestObserved,
+				newestPublished,
+				observedAgeDays: observedAge,
+				// refresh-stale is only knowable when the source stamps observedAt
+				refreshStale:
+					newestObserved != null && (observedAge ?? 0) > RESEARCH_STALE_DAYS,
+				// no observedAt on any sampled row → can't measure refresh recency
+				staleUnknown: rows.length > 0 && newestObserved == null,
 			});
 		} catch (e) {
 			research.push({
@@ -430,13 +447,17 @@ async function main() {
 				// biome-ignore lint/suspicious/noExplicitAny: local shape
 				(c: any) => c.stale,
 			).length,
+			// "stale" now means refresh-stale (observedAt old) or empty — NOT
+			// content-old. Archival sources full of old-dated docs no longer count.
 			staleOrEmptyResearchSources: freshness.research.filter(
 				// biome-ignore lint/suspicious/noExplicitAny: local shape
-				(r: any) => r.stale || r.empty,
+				(r: any) => r.refreshStale || r.empty,
 			).length,
-			unstampedResearchSources: freshness.research.filter(
+			// sources we CAN'T measure refresh-recency for (no observedAt stamp) —
+			// the real gap to close (add observedAt to audit/cap/sep/incident ingesters)
+			refreshUnmeasurableSources: freshness.research.filter(
 				// biome-ignore lint/suspicious/noExplicitAny: local shape
-				(r: any) => !r.empty && !r.dateStamped,
+				(r: any) => r.staleUnknown,
 			).length,
 		},
 	};
@@ -486,16 +507,26 @@ async function main() {
 		console.log(
 			`| ${c.name} | ${c.count} | ${c.ageDays ?? "-"} | ${c.empty ? "EMPTY" : c.stale ? "STALE" : c.note ? `ok (${c.note})` : ""} |`,
 		);
-	console.log("\n| research source | newest seen | stamped? | flag |");
+	console.log(
+		"\n| research source | ingest recency (observedAt) | newest content (publishedAt) | flag |",
+	);
 	console.log("|---|---|---|---|");
 	for (const r of freshness.research)
 		console.log(
-			`| ${r.source} | ${r.newestSeen ?? "-"} | ${r.dateStamped ? "yes" : r.empty ? "-" : "NO DATES"} | ${r.empty ? "EMPTY" : r.stale ? "STALE" : ""} |`,
+			`| ${r.source} | ${r.newestObserved?.slice(0, 10) ?? "— (not stamped)"} | ${r.newestPublished?.slice(0, 10) ?? "-"} | ${
+				r.empty
+					? "EMPTY"
+					: r.refreshStale
+						? "REFRESH-STALE"
+						: r.staleUnknown
+							? "can't measure refresh (no observedAt)"
+							: "ok"
+			} |`,
 		);
 
 	const s = report.summary;
 	console.log(
-		`\n**Summary:** ${s.missingDefillama} llama-missing | ${s.missingScf ?? "?"} scf-missing | ${s.partnerDocsWithoutOwnContent}/${partnerDocs.length} partner surfaces without own content | ${s.staleCollections} stale collections | ${s.staleOrEmptyResearchSources} stale/empty research sources | ${s.unstampedResearchSources} undated research sources`,
+		`\n**Summary:** ${s.missingDefillama} llama-missing | ${s.missingScf ?? "?"} scf-missing | ${s.partnerDocsWithoutOwnContent}/${partnerDocs.length} partner surfaces without own content | ${s.staleCollections} stale collections | ${s.staleOrEmptyResearchSources} refresh-stale/empty research sources | ${s.refreshUnmeasurableSources} sources missing observedAt (refresh unmeasurable)`,
 	);
 }
 
