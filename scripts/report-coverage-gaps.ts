@@ -45,7 +45,7 @@ const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	"",
 );
 const JSON_OUT = process.argv.includes("--json");
-const TVL_REPORT_FLOOR_USD = 50_000; // below this a missing llama listing is dust - counted, not itemized
+const TVL_REPORT_FLOOR_USD = 50_000; // below this ON STELLAR (chainTvls.Stellar, not the cross-chain total) a missing llama listing is dust - counted, not itemized
 const STATUS_STALE_DAYS = 7; // collection freshness (status sources refresh daily-ish)
 const RESEARCH_STALE_DAYS = 45; // research corpus: sources re-ingest on cron cadences
 
@@ -124,7 +124,12 @@ interface LlamaMiss {
 	name: string;
 	slug: string;
 	category: string;
-	tvlUSD: number;
+	/** TVL actually deployed ON STELLAR (chainTvls.Stellar) — the number that
+	 * decides whether a listing is a real gap. Llama's headline `tvl` is the
+	 * CROSS-CHAIN total: NEAR Intents showed $92M total with $11.5k on Stellar
+	 * (26 chains) — boxy correctly flagged that as not-a-Stellar-gap. */
+	stellarTvlUSD: number;
+	totalTvlUSD: number;
 	url: string | null;
 }
 
@@ -171,16 +176,24 @@ async function laneDefillama(dir: DirRow[]) {
 			matched++;
 			continue;
 		}
+		const stellarTvl = p.chainTvls?.Stellar;
 		missing.push({
 			name: p.name,
 			slug: p.slug,
 			category: p.category ?? "?",
-			tvlUSD: Math.round(p.tvl ?? 0),
+			stellarTvlUSD: Math.round(
+				typeof stellarTvl === "number" ? stellarTvl : 0,
+			),
+			totalTvlUSD: Math.round(p.tvl ?? 0),
 			url: p.url ?? null,
 		});
 	}
-	missing.sort((a, b) => b.tvlUSD - a.tvlUSD);
-	const itemized = missing.filter((m) => m.tvlUSD >= TVL_REPORT_FLOOR_USD);
+	// Floor + rank on the STELLAR slice — a multichain protocol's headline TVL
+	// says nothing about its Stellar footprint.
+	missing.sort((a, b) => b.stellarTvlUSD - a.stellarTvlUSD);
+	const itemized = missing.filter(
+		(m) => m.stellarTvlUSD >= TVL_REPORT_FLOOR_USD,
+	);
 	return {
 		stellarListed: stellar.length,
 		cexExcluded: cexCount,
@@ -430,13 +443,15 @@ async function main() {
 	);
 
 	console.log(
-		`## DefiLlama (Stellar chain): ${defillama.missing.length} missing of ${defillama.stellarListed} listed (${defillama.cexExcluded} CEX excluded, ${defillama.matched} matched, ${defillama.belowFloor} below $${TVL_REPORT_FLOOR_USD / 1000}k floor)\n`,
+		`## DefiLlama (Stellar chain): ${defillama.missing.length} missing of ${defillama.stellarListed} listed (${defillama.cexExcluded} CEX excluded, ${defillama.matched} matched, ${defillama.belowFloor} below $${TVL_REPORT_FLOOR_USD / 1000}k-on-Stellar floor)\n`,
 	);
-	console.log("| protocol | category | TVL | site |");
-	console.log("|---|---|---|---|");
+	console.log(
+		"| protocol | category | TVL on Stellar | total (all chains) | site |",
+	);
+	console.log("|---|---|---|---|---|");
 	for (const m of defillama.missing)
 		console.log(
-			`| ${m.name} (${m.slug}) | ${m.category} | $${m.tvlUSD.toLocaleString()} | ${m.url ?? "-"} |`,
+			`| ${m.name} (${m.slug}) | ${m.category} | $${m.stellarTvlUSD.toLocaleString()} | $${m.totalTvlUSD.toLocaleString()} | ${m.url ?? "-"} |`,
 		);
 
 	console.log(
