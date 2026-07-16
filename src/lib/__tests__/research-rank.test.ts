@@ -807,3 +807,38 @@ describe("full lexical coverage — discriminating gate", () => {
 		expect(out[0].url).toBe("https://gitbook/root");
 	});
 });
+
+describe("full lexical coverage — recency-intent guard", () => {
+	it("never floors on recency-intent queries (dated freshness stays the signal)", () => {
+		const out = rankResearchChunks(
+			[
+				// undated evergreen page covering latest/soroban/release verbatim
+				{
+					...chunk({
+						url: "https://x/software-versions",
+						score: 0.6,
+						source: "dev-docs",
+						publishedAt: null,
+					}),
+					title: "Software Versions",
+					content: `The latest soroban release and software versions for every network. ${Array.from(
+						{ length: 40 },
+						(_, j) => `filler${j}`,
+					).join(" ")}.`,
+				},
+				// dated protocol announcement WITHOUT full coverage
+				{
+					...chunk({
+						url: "https://x/protocol-27",
+						score: 0.68,
+						source: "sdf-blog",
+						publishedAt: "2026-07-08",
+					}),
+					title: "Protocol 27 Zipper upgrade vote",
+				},
+			],
+			{ limit: 2, mode: "vector", query: "latest soroban release", now: NOW },
+		);
+		expect(out[0].url).toBe("https://x/protocol-27");
+	});
+});

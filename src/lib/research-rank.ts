@@ -491,8 +491,17 @@ export function rankResearchChunks<T extends RankableChunk>(
 			if (hasFullLexicalCoverage(c, lexTokens)) coveredIds.add(c);
 		}
 	}
+	// Recency-intent queries ("latest soroban release", "recent mainnet
+	// upgrade") are time-anchored, not lookups: covering the words latest/
+	// release/upgrade is noise by construction, and the floored evergreen rows
+	// (Software Versions, Network Status — conf 0.86, undated) displaced the
+	// dated Protocol-27 posts the recency blend exists to serve (golden
+	// protocol-currency cases, 2026-07-16). The floor never applies here —
+	// dated freshness stays the ranking signal.
 	const lexFloorActive =
-		coveredIds.size >= 1 && coveredIds.size <= FULL_LEXICAL_DISCRIMINATING_MAX;
+		!recencyIntent(opts.query) &&
+		coveredIds.size >= 1 &&
+		coveredIds.size <= FULL_LEXICAL_DISCRIMINATING_MAX;
 
 	const scored = filtered
 		.map((c) => {
