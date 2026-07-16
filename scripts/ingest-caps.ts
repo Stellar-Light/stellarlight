@@ -56,9 +56,21 @@ function sha256(s: string): string {
 	return createHash("sha256").update(s).digest("hex");
 }
 
+// Unauthenticated GitHub API is 60 req/hr per IP — shared across every Action
+// on a runner, so the corpus refresh's CAP list intermittently 4xx'd and (until
+// the workflow guard was added) aborted the whole job. Send the token when the
+// runner provides one; still works locally without it.
+const GH_HEADERS: Record<string, string> = {
+	"User-Agent": "stellarlight-scout-ingest",
+	Accept: "application/vnd.github+json",
+	...(process.env.GITHUB_TOKEN
+		? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+		: {}),
+};
+
 async function listCapFiles(): Promise<CapFile[]> {
 	const res = await fetch(`${GITHUB_API}/contents/core`, {
-		headers: { "User-Agent": "stellarlight-scout-ingest" },
+		headers: GH_HEADERS,
 	});
 	if (!res.ok) {
 		throw new Error(`GitHub list failed: ${res.status} ${await res.text()}`);
