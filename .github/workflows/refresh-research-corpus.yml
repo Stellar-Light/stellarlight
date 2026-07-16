@@ -74,10 +74,15 @@ jobs:
         run: pnpm exec tsx scripts/ingest-seps.ts --execute
 
       - name: Ingest CAPs (core protocol proposals)
+        if: inputs.source == '' || inputs.source == 'cap'
+        continue-on-error: true
         env:
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
           VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+          # Authenticated GitHub API (5000/hr vs 60/hr shared per runner IP) —
+          # the unauthenticated core/ listing intermittently 4xx'd.
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-caps.ts --execute
 
       - name: Ingest lumenloop (awesome-stellar-community-fund)
