@@ -32,7 +32,9 @@ import {
 } from "@/lib/research-pipeline";
 import {
 	anchorDocUrls,
+	hasFullLexicalCoverage,
 	identifierTargets,
+	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
 	RECENCY_SUPPLEMENT_WINDOW_DAYS,
 	rankResearchChunks,
@@ -497,6 +499,52 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Lexical pool supplement (brand/lookup queries): a chunk containing EVERY
+	// query token verbatim is lookup-grade evidence cosine can miss entirely —
+	// bare q="Alchemy" embedded alone lands among low-value chunks (all dropped
+	// by the rank stage → returned:0) while the chunk that literally documents
+	// Alchemy's Stellar Data API sat unfetched; the full brand query ranked it
+	// below top-15 (live probes 2026-07-16). Same fetch-not-rank root as the
+	// sls-019 identifier lookup and the recency supplement above. Gated on the
+	// pool LACKING any full-coverage chunk so the hot path pays the extra
+	// regex find only when vector retrieval actually missed (M0 discipline).
+	// Rows carry their REAL stored-embedding cosine — no invented relevance;
+	// promotion is the rank stage's full-lexical floor (confidence.ts).
+	if (mode === "vector" && queryEmbedding) {
+		const lexTokens = queryLexTokens(q);
+		const poolCovered =
+			!lexTokens.length ||
+			chunks.some((c) => hasFullLexicalCoverage(c, lexTokens));
+		if (!poolCovered) {
+			try {
+				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
+				const lexWhere: any = {
+					and: [
+						...lexTokens.map((t) => ({
+							or: [{ title: { contains: t } }, { content: { contains: t } }],
+						})),
+						...(sourceFilter ? [{ source: { equals: sourceFilter } }] : []),
+					],
+				};
+				const lex = await payload.find({
+					collection: "research-docs",
+					where: lexWhere,
+					limit: 30,
+					depth: 0,
+				});
+				const have = new Set(chunks.map((c) => c.id));
+				for (const d of lex.docs as unknown as RawResearchDoc[]) {
+					if (have.has(String(d.id))) continue;
+					const score = cosineVectorScore(queryEmbedding, d.embedding);
+					if (score == null) continue; // no stored vector — can't score honestly
+					chunks.push(toRow(d, score));
+				}
+			} catch {
+				// supplement is best-effort — the pool result still serves
+			}
+		}
+	}
+
 	// Curated vertical-anchor inclusion (research-rank.ts RESEARCH_ANCHORS):
 	// when the query hits a recognized consumer-intent class, the registry's
 	// canonical docs must at least be IN the pool — the ranking stage floors
@@ -564,7 +612,7 @@ export async function GET(req: NextRequest) {
 				scoreModel: {
 					version: SCORE_MODEL_VERSION,
 					fields: ["relevance", "freshness", "authority"],
-					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85.",
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it.",
 				},
 			},
 			results,

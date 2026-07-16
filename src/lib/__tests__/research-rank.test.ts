@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
 	anchorDocUrls,
+	hasFullLexicalCoverage,
 	identifierTargets,
+	queryLexTokens,
 	rankResearchChunks,
 	recencyContentTokens,
 	selectRecencySupplement,
@@ -673,5 +675,100 @@ describe("vertical anchor docs (RESEARCH_ANCHORS)", () => {
 			},
 		);
 		expect(out[0].url).toBe(capUrl);
+	});
+});
+
+describe("full lexical coverage (brand/lookup queries)", () => {
+	// 2026-07-16 live probes: "Alchemy Stellar Data API transfers balances"
+	// ranked the chunk that literally documents Alchemy's Data API below
+	// top-15 behind pages merely TITLED "Balances"/"Token Transfers", and bare
+	// q=Alchemy returned 0. Full token coverage now floors relevance at 0.8.
+	const ALCHEMY = "https://developers.stellar.org/docs/data/indexers";
+	const coverageContent = `Portfolio APIs are offered by well-known companies. Alchemy is a widely-used data provider now live on Stellar. Its Stellar Data API serves indexed transfer history, account balances, and NFT holdings across assets and contract tokens, with pageKey pagination and RPC access. ${Array.from(
+		{ length: 40 },
+		(_, i) => `detail${i}`,
+	).join(" ")}.`;
+
+	it("queryLexTokens: tokenizes short queries, refuses degenerate ones", () => {
+		expect(queryLexTokens("Alchemy")).toEqual(["alchemy"]);
+		expect(queryLexTokens("Alchemy Stellar Data API")).toEqual([
+			"alchemy",
+			"stellar",
+			"data",
+			"api",
+		]);
+		// trailing-s de-plural: "transfers" must match a chunk saying
+		// "transfer history" (the real Alchemy chunk's wording)
+		expect(queryLexTokens("transfers balances")).toEqual([
+			"transfer",
+			"balance",
+		]);
+		// 9+ distinct tokens → semantic territory, no coverage floor
+		expect(
+			queryLexTokens("one two three four five six seven eight nine"),
+		).toEqual([]);
+		expect(queryLexTokens("")).toEqual([]);
+		expect(queryLexTokens(undefined)).toEqual([]);
+	});
+
+	it("hasFullLexicalCoverage: every token verbatim, else false", () => {
+		const c = { title: "Indexers Overview", content: coverageContent };
+		expect(hasFullLexicalCoverage(c, ["alchemy", "stellar", "data"])).toBe(
+			true,
+		);
+		expect(hasFullLexicalCoverage(c, ["alchemy", "nonexistenttoken"])).toBe(
+			false,
+		);
+		expect(hasFullLexicalCoverage(c, [])).toBe(false);
+	});
+
+	it("full-coverage chunk outranks a semantically-closer chunk without the tokens", () => {
+		const out = rankResearchChunks(
+			[
+				// cosine 0.75 → relevance ~0.67, no coverage ("balances" page noise)
+				{
+					...chunk({ url: "https://x/balances", score: 0.75 }),
+					title: "Balances",
+				},
+				// cosine 0.62 → relevance ~0.23, but EVERY query token verbatim →
+				// floored at 0.8
+				{
+					...chunk({ url: ALCHEMY, score: 0.62 }),
+					title: "Indexers Overview",
+					content: coverageContent,
+				},
+			],
+			{
+				limit: 2,
+				mode: "vector",
+				query: "Alchemy Stellar Data API transfers balances",
+				now: NOW,
+			},
+		);
+		expect(out[0].url).toBe(ALCHEMY);
+	});
+
+	it("a genuinely stronger embedding still wins over the floor", () => {
+		const out = rankResearchChunks(
+			[
+				// cosine 0.88 → relevance 1.0 — stronger than the 0.8 floor
+				{
+					...chunk({ url: "https://x/strong", score: 0.88 }),
+					title: "Strong Semantic Match",
+				},
+				{
+					...chunk({ url: ALCHEMY, score: 0.6 }),
+					title: "Indexers Overview",
+					content: coverageContent,
+				},
+			],
+			{
+				limit: 2,
+				mode: "vector",
+				query: "alchemy stellar data",
+				now: NOW,
+			},
+		);
+		expect(out[0].url).toBe("https://x/strong");
 	});
 });
