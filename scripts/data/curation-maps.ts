@@ -1102,4 +1102,49 @@ export const SEEDS: Array<{
 			"https://medium.com/sentora/sentora-launches-vaults-on-the-stellar-network-accessible-via-stellar-defi-hub-2b09749cd789",
 		statusBasis: "site-liveness",
 	},
+	// Coverage-gap report, first curation pass (2026-07-16): the two verified
+	// DefiLlama misses. Both measured by llama's STELLAR-chain adapter
+	// (chainTvls.Stellar — on-chain TVL, not the cross-chain headline), which is
+	// the inclusion bar after boxy caught NEAR Intents ($92M total, $11.5k on
+	// Stellar) as not-a-Stellar-gap. TVL wiring in scripts/enrich-tvl.ts
+	// LLAMA_MAP; dated figures below are point-in-time context, not live data.
+	{
+		slug: "gami-labs",
+		name: "Gami Labs",
+		category: "Infrastructure",
+		status: "Live",
+		// Risk curator (Gauntlet-class): curates + dynamically rebalances vaults
+		// on other protocols' venues; runs no venue itself → Infrastructure.
+		types: ["Infrastructure"],
+		// llama chain breakdown 2026-07-16: Ethereum $22.5M, Stellar $19.7M
+		// (its 2nd-largest chain), Flare $4.3M, Base $2.5M, Avalanche $2.0M.
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"Gami Labs runs institutional-grade curated DeFi vaults with active on-chain curation and dynamic risk management (a professional 'risk curator'). Stellar is one of its largest deployments — roughly $19.7M of curated TVL on Stellar as of 2026-07-16 (DefiLlama) — alongside Ethereum, Base, Avalanche and Flare.",
+		links: { website: "https://gamilabs.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-07-16",
+		statusSourceUrl: "https://defillama.com/protocol/gami-labs",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "defa-invoicemate",
+		name: "DeFa by InvoiceMate",
+		category: "Protocol/Contract",
+		status: "Live",
+		// Receivables financing = credit/lending against RWA (the indentura
+		// convention: Lending + RWA).
+		types: ["Lending", "RWA"],
+		// llama lists Stellar first (Stellar $4.0M of $7.2M total, 2026-07-16);
+		// also on ZIGChain and Starknet — only the verified Stellar deployment
+		// is asserted here (precision over recall).
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"DeFa by InvoiceMate is on-chain Liquidity-as-a-Service infrastructure that tokenizes verified trade receivables and payment settlements, letting stablecoin liquidity finance real-world economic activity (invoice financing, PayFi settlement, growth capital). Private mainnet is live with gated early access; Stellar is its primary deployment (~$4M TVL on Stellar as of 2026-07-16 per DefiLlama).",
+		links: { website: "https://imdefa.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-07-16",
+		statusSourceUrl: "https://defillama.com/protocol/defa-by-invoicemate",
+		statusBasis: "onchain-activity",
+	},
 ];

@@ -19,6 +19,20 @@ import { SEEDS, STATUS_FIX, WEBSITE_FIXES } from "./curation-maps";
 const EXECUTE = process.argv.includes("--execute");
 
 const DESCRIPTION_FIXES: Record<string, string> = {
+	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
+	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
+	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-
+	// network-by-joining-as-tier-1-validators. The fact is recorded on each
+	// record (dated) since /press pages are not in the research corpus.
+	moneygram:
+		"MoneyGram Access (MoneyGram Ramps) is a fiat on- and off-ramp anchor on Stellar. Via the SEP-24 standard, users deposit and withdraw cash to and from USDC at ~500K retail locations across 170+ cash-out countries, with no bank account required. In June 2026 MoneyGram launched MGUSD, a self-custodial USD stablecoin issued by Bridge on Stellar. In July 2026 MoneyGram joined Stellar's Tier 1 validator set — the core organizations whose quorum secures network consensus.",
+	figure:
+		"Figure is America's #1 non-bank HELOC lender, building the future of capital markets on blockchain. Built on Provenance Blockchain, Figure also issues YLDS — a yield-bearing stablecoin deployed on Stellar — enabling compliance-first real-world asset access for a global audience. In July 2026 Figure (Figure Markets) joined Stellar's Tier 1 validator set, bringing a regulated capital-markets operator into network consensus.",
+	// range's old description was raw SCF-proposal prose ("This proposal seeks
+	// to build a Steller Bridge Explorer…", typo included) — rewritten to
+	// describe the product.
+	range:
+		"Range is a cross-chain security and intelligence platform: real-time transaction monitoring, forensic tracing (Range Trail), and a cross-chain explorer covering Stellar among other ecosystems, including Stellar bridge-explorer integration. In July 2026 Range joined Stellar's Tier 1 validator set as a blockchain-security validator organization.",
 	// sls-030: represent the funded-historical + embedded-implementation truth.
 	comet:
 		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",

@@ -54,6 +54,12 @@ const LLAMA_MAP: Record<string, string[]> = {
 	"normal-stellar-amm": ["normal"],
 	whalehub: ["whalehub"],
 	upshift: ["upshift"],
+	// Coverage-gap pass 2026-07-16: the two verified llama misses (seeded the
+	// same day) + sentora (seeded 2026-07-15 without TVL wiring). All three
+	// have llama chainTvls.Stellar — TVL rows fill from the Stellar slice.
+	"gami-labs": ["gami-labs"],
+	"defa-invoicemate": ["defa-by-invoicemate"],
+	sentora: ["sentora"],
 };
 
 const LIVENESS_THRESHOLD_USD = 5_000;
@@ -64,7 +70,7 @@ const LIVENESS_THRESHOLD_USD = 5_000;
 // treating ours as exact universal truth. ONE stable string — reruns no-op.
 const TVL_SOURCE = "defillama";
 const TVL_METHOD =
-	"sum of the project's mapped DefiLlama protocol rows (see llamaSlugs; e.g. Blend = pools + backstops), USD at DefiLlama's pricing time; refreshed weekly (tvlAsOf)";
+	"sum of the project's mapped DefiLlama protocol rows (see llamaSlugs; e.g. Blend = pools + backstops), STELLAR-chain slice (chainTvls.Stellar) where DefiLlama publishes a per-chain breakdown — a multichain protocol's cross-chain total is not its Stellar footprint — falling back to the protocol total only when no breakdown exists; USD at DefiLlama's pricing time; refreshed weekly (tvlAsOf)";
 
 interface LlamaProtocol {
 	slug: string;
@@ -72,6 +78,16 @@ interface LlamaProtocol {
 	category?: string;
 	chains?: string[];
 	tvl?: number | null;
+	chainTvls?: Record<string, number | null>;
+}
+
+/** TVL on Stellar. Multichain rows (Gami Labs, Sentora, Allbridge…) carry a
+ * per-chain breakdown; summing the headline `tvl` wrote the CROSS-CHAIN total
+ * as "Stellar TVL" (Sentora: $2.06B total vs $1.3k actually on Stellar —
+ * caught 2026-07-16 via the coverage-gap report's per-chain fix). */
+function stellarTvlOf(p: LlamaProtocol): number {
+	const s = p.chainTvls?.Stellar;
+	return typeof s === "number" ? s : (p.tvl ?? 0);
 }
 
 async function main() {
@@ -108,7 +124,7 @@ async function main() {
 			);
 			continue;
 		}
-		const tvl = Math.round(rows.reduce((s, r) => s + (r.tvl ?? 0), 0));
+		const tvl = Math.round(rows.reduce((s, r) => s + stellarTvlOf(r), 0));
 		const found = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: ourSlug } },
@@ -153,7 +169,10 @@ async function main() {
 		"\n── LIVENESS candidates (llama-listed, TVL < $5k, status Live) ──",
 	);
 	for (const [ourSlug, llamaSlugs] of Object.entries(LLAMA_MAP)) {
-		const tvl = llamaSlugs.reduce((s, ls) => s + (bySlug.get(ls)?.tvl ?? 0), 0);
+		const tvl = llamaSlugs.reduce((s, ls) => {
+			const row = bySlug.get(ls);
+			return s + (row ? stellarTvlOf(row) : 0);
+		}, 0);
 		if (tvl >= LIVENESS_THRESHOLD_USD) continue;
 		const found = await payload.find({
 			collection: "projects",
