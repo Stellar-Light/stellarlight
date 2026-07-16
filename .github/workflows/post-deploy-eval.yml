@@ -31,7 +31,7 @@ permissions:
 jobs:
   eval:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12 # avg run ~7.5 min; tight cap = hang insurance priced at 12 not 25 (2026-07-16 minutes audit)
     env:
       GH_TOKEN: ${{ github.token }}
       TRACKER_ISSUE: "436"
