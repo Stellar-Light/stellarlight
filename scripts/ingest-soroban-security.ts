@@ -306,6 +306,13 @@ function promoteAuditHeadings(md: string): string {
 
 async function run() {
 	const startedAt = Date.now();
+	// Crawl-observation time for this run — stamped on every chunk we fetch, so
+	// the corpus can answer "when did we last SEE this report at the portal?"
+	// (Distinct from publishedAt = the report's own date. Without it, refresh
+	// recency for the audit source is unmeasurable from the API — the gap the
+	// coverage report's freshness lane surfaced once it stopped conflating
+	// content-age with refresh-staleness. Same pattern as ingest-sdf-org.)
+	const observedAtIso = new Date(startedAt).toISOString();
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log("source: stellarsecurityportal.com\n");
 
@@ -370,6 +377,9 @@ async function run() {
 			// prefers the section heading; falls back to body-content scan
 			// (most audit PDFs come out with H1-only and lose section info).
 			for (const c of chunks) {
+				// Re-stamped every run, even when the content hash is unchanged
+				// (upsertChunks' metadata-only path — no re-embed cost).
+				c.observedAt = observedAtIso;
 				c.auditor = meta.auditorName;
 				c.protocol = meta.protocolName;
 				const fromHeading = inferSeverity(c.section);
