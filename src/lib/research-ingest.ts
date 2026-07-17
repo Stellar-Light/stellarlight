@@ -56,9 +56,11 @@ export interface ResearchChunk {
 	 * Crawl-observation time (ISO): when the ingester last OBSERVED this content
 	 * live at the source — stamped every run, even when the content hash is
 	 * unchanged (distinct from `publishedAt`, the page's own stated date, and
-	 * from Payload `updatedAt`, which only advances on a content change). Set by
-	 * ingesters that fetch a live source; when set, upsertChunks re-stamps it on
-	 * unchanged chunks via the metadata-only path (no re-embed).
+	 * from Payload `updatedAt`, which only advances on a content change).
+	 * upsertChunks DEFAULTS this to the run time for EVERY source (an ingester
+	 * may still set it explicitly), and re-stamps unchanged chunks with one bulk
+	 * updateMany (no re-embed) — so refresh recency is measurable for the whole
+	 * corpus, not just the ingesters that opt in.
 	 */
 	observedAt?: string;
 	// Audit-specific (only set when source='audit')
@@ -329,8 +331,18 @@ export async function upsertChunks(opts: {
 		return false;
 	});
 
+	// Every ingest run re-observes its source's content live, so the crawl-
+	// observation stamp defaults to now for any chunk whose ingester didn't set
+	// one — refresh-recency is now measurable for EVERY source (the coverage
+	// freshness lane), not just the two ingesters that opted in. Unchanged
+	// chunks are re-stamped in ONE bulk update below, not a write each, so this
+	// stays cheap even for the ~3k-chunk dev-docs corpus (no re-embed, no
+	// per-chunk write storm — the Action-minutes trap).
+	const runObservedAt = new Date().toISOString();
+
 	const toEmbed: ResearchChunk[] = [];
-	const metaOnly: ResearchChunk[] = [];
+	const metaOnly: ResearchChunk[] = []; // per-doc: title/date drift
+	const restampIds: (string | number)[] = []; // uniform observedAt re-stamp
 	for (const chunk of chunks) {
 		const prev = existing.get(chunk.parentDocId)?.get(chunk.chunkIndex);
 		if (prev && prev.contentHash === chunk.contentHash) {
@@ -340,15 +352,14 @@ export async function upsertChunks(opts: {
 				chunk.publishedAt !== undefined &&
 				normalizeDate(prev.publishedAt) !== normalizeDate(chunk.publishedAt);
 			if (titleDrift || dateDrift) {
+				// content identical but title/date changed → per-doc update (also
+				// advances observedAt).
 				metaOnly.push(chunk);
 				stats.updated += 1;
-			} else if (chunk.observedAt !== undefined) {
-				// Content + metadata identical, but the ingester observed this page
-				// live again — re-stamp the crawl-observation time (metadata-only, no
-				// re-embed). Counts as unchanged: the CONTENT did not change.
-				metaOnly.push(chunk);
-				stats.unchanged += 1;
 			} else {
+				// content + metadata identical — only the observation time advances.
+				// Collected for a single bulk re-stamp; CONTENT unchanged.
+				restampIds.push(prev.id);
 				stats.unchanged += 1;
 			}
 			continue;
@@ -372,7 +383,7 @@ export async function upsertChunks(opts: {
 					data: {
 						title: chunk.title,
 						publishedAt: chunk.publishedAt,
-						observedAt: chunk.observedAt,
+						observedAt: chunk.observedAt ?? runObservedAt,
 					},
 				});
 			} catch (err) {
@@ -381,6 +392,39 @@ export async function upsertChunks(opts: {
 				);
 				stats.errors += 1;
 			}
+		}
+	}
+
+	// One raw Mongo updateMany re-stamps observedAt on all unchanged chunks —
+	// cheap regardless of count (dev-docs re-stamps ~3k rows in a single op, not
+	// 3k writes). Raw driver on purpose: a Payload where-update would hydrate and
+	// RETURN every matched doc WITH its 1024-dim embedding array (a memory bomb
+	// at 3k docs), and run per-doc hooks. No re-embed: content is byte-identical,
+	// only the observation time advances. Best-effort — a failure here never
+	// blocks the content writes below.
+	if (restampIds.length) {
+		console.log(
+			`  Re-stamping observedAt on ${restampIds.length} unchanged chunk(s) (bulk)…`,
+		);
+		try {
+			// The mongoose MODEL (not the raw driver collection) auto-casts the
+			// hex-string ids to ObjectId — so no `mongoose` import (a transitive dep)
+			// and no manual ObjectId conversion. Same handle other scripts use
+			// (eval-research-retrieval.ts). $set only observedAt; content + embedding
+			// untouched.
+			// biome-ignore lint/suspicious/noExplicitAny: payload.db mongoose internals
+			const model = (payload.db as any)?.collections?.["research-docs"];
+			if (model?.updateMany) {
+				await model.updateMany(
+					{ _id: { $in: restampIds } },
+					{ $set: { observedAt: runObservedAt } },
+				);
+			}
+		} catch (err) {
+			console.error(
+				`    ✗ observedAt bulk re-stamp: ${(err as Error).message}`,
+			);
+			stats.errors += 1;
 		}
 	}
 
@@ -412,7 +456,7 @@ export async function upsertChunks(opts: {
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
 			publishedAt: chunk.publishedAt,
-			observedAt: chunk.observedAt,
+			observedAt: chunk.observedAt ?? runObservedAt,
 			auditor: chunk.auditor,
 			protocol: chunk.protocol,
 			severity: chunk.severity,
