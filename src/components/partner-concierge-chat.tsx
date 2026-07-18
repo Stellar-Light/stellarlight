@@ -17,6 +17,7 @@
  */
 
 import {
+	ArrowDown,
 	ArrowUpRight,
 	CheckCircle2,
 	Loader2,
@@ -26,7 +27,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
 	REGION_LABELS,
 	SECTOR_LABELS,
@@ -147,7 +148,14 @@ export function PartnerConciergeChat({
 	const [canList, setCanList] = useState(false);
 	const [unavailable, setUnavailable] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	// Scroll engineering (shadcn's "never move the reader against their intent"):
+	// each sent message becomes the ANCHOR turn, positioned near the top of the
+	// box with reserved space below it (the spacer) that the reply grows into —
+	// so nothing on screen moves when the answer, cards, or an error arrive.
+	const [anchorIdx, setAnchorIdx] = useState<number | null>(null);
+	const [belowFold, setBelowFold] = useState(false);
 	const chatBoxRef = useRef<HTMLDivElement>(null);
+	const spacerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	// Guards the mount effect against React's double-invoke (StrictMode /
 	// remount), which otherwise auto-sent the opener twice → two answers to the
@@ -203,6 +211,7 @@ export function PartnerConciergeChat({
 			if (handoff) {
 				const first: Msg[] = [{ role: "user", content: handoff }];
 				setMessages(first);
+				setAnchorIdx(0);
 				const res = await callAssistant(first);
 				if (res?.reply) {
 					setMessages((m) => [
@@ -235,17 +244,75 @@ export function PartnerConciergeChat({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Scroll ONLY the chat box — scrollIntoView scrolls every ancestor, which
-	// yanked the whole PAGE down on each message.
-	useEffect(() => {
+	// Sliver of the previous turn kept visible above the anchor, so the reader
+	// always knows where they are in the conversation.
+	const CONTEXT_PX = 48;
+
+	/** Content below the fold that ISN'T just reserved empty space → show the pill. */
+	function updateBelowFold() {
 		const box = chatBoxRef.current;
-		if (box) box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
-	}, [messages, phase]);
+		if (!box) return;
+		const spacer = spacerRef.current?.offsetHeight ?? 0;
+		const dist = box.scrollHeight - spacer - box.scrollTop - box.clientHeight;
+		setBelowFold(dist > 40);
+	}
+
+	// Size the spacer so the anchor turn + its incoming reply fill the box from
+	// CONTEXT_PX down. The reply then renders INTO that reserved space — zero
+	// scrolling on arrival, and errors/retries never move the conversation.
+	// The spacer height is set directly on the DOM (not state) to avoid render loops.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: content deps are re-measure triggers, not reads
+	useLayoutEffect(() => {
+		const box = chatBoxRef.current;
+		const spacer = spacerRef.current;
+		if (!box || !spacer) return;
+		const el =
+			anchorIdx != null
+				? box.querySelector<HTMLElement>(`[data-mi="${anchorIdx}"]`)
+				: null;
+		if (!el) {
+			spacer.style.height = "0px";
+			updateBelowFold();
+			return;
+		}
+		// Real content ends where the spacer begins — scrollHeight can't be used
+		// here because it never reads below clientHeight (a box sitting at its
+		// min-height would inflate the measure with empty slack). Sizing the
+		// spacer can grow the box up to its max-height, which changes
+		// clientHeight, so iterate to a fixed point (2 passes in practice).
+		for (let pass = 0; pass < 3; pass++) {
+			const contentBelow = spacer.offsetTop - el.offsetTop;
+			const next = Math.max(0, box.clientHeight - CONTEXT_PX - contentBelow);
+			if (next === spacer.offsetHeight) break;
+			spacer.style.height = `${next}px`;
+		}
+		updateBelowFold();
+	}, [messages, busy, anchorIdx, canList, phase]);
+
+	// The ONE programmatic scroll: when the user sends a message (that's them
+	// asking to move), bring the new turn near the top of the box so the answer
+	// can be read from its beginning as it grows into the space below.
+	useLayoutEffect(() => {
+		if (anchorIdx == null) return;
+		const box = chatBoxRef.current;
+		const el = box?.querySelector<HTMLElement>(`[data-mi="${anchorIdx}"]`);
+		if (!box || !el) return;
+		// Instant, not smooth: throttled tabs pause smooth-scroll animations
+		// indefinitely, which would leave the box unpositioned.
+		box.scrollTop = Math.max(0, el.offsetTop - CONTEXT_PX);
+	}, [anchorIdx]);
+
+	function jumpToLatest() {
+		const box = chatBoxRef.current;
+		if (!box) return;
+		box.scrollTop = box.scrollHeight;
+	}
 
 	async function sendText(text: string) {
 		if (!text.trim() || busy) return;
 		const next: Msg[] = [...messages, { role: "user", content: text.trim() }];
 		setMessages(next);
+		setAnchorIdx(next.length - 1);
 		setInput("");
 		setBusy(true);
 		const res = await callAssistant(next);
@@ -468,54 +535,75 @@ export function PartnerConciergeChat({
 	// chat phase
 	return (
 		<div className="space-y-4">
-			<div
-				ref={chatBoxRef}
-				className="rounded-2xl border border-border bg-card p-4 min-h-[340px] max-h-[60vh] overflow-y-auto space-y-4 scroll-smooth"
-			>
-				{messages.map((m, i) => (
-					<div key={i} className="space-y-3">
-						<div
-							className={
-								m.role === "user" ? "flex justify-end" : "flex justify-start"
-							}
-						>
+			<div className="relative">
+				<div
+					ref={chatBoxRef}
+					onScroll={updateBelowFold}
+					role="log"
+					aria-label="Concierge conversation"
+					className="relative rounded-2xl border border-border bg-card p-4 min-h-[340px] max-h-[60vh] overflow-y-auto space-y-4"
+				>
+					{messages.map((m, i) => (
+						<div key={i} data-mi={i} className="space-y-3">
 							<div
 								className={
-									m.role === "user"
-										? "max-w-[80%] rounded-2xl rounded-br-sm bg-white/10 px-3.5 py-2 text-sm text-foreground whitespace-pre-wrap"
-										: "max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.03] border border-border px-3.5 py-2 text-sm text-foreground/90 whitespace-pre-wrap"
+									m.role === "user" ? "flex justify-end" : "flex justify-start"
 								}
 							>
-								{m.role === "assistant"
-									? renderMarkdownBold(m.content)
-									: m.content}
-							</div>
-						</div>
-						{m.matches && m.matches.length > 0 && (
-							<div className="grid sm:grid-cols-2 gap-2.5">
-								{m.matches.map((p) => (
-									<MatchCard key={p.slug} p={p} />
-								))}
-							</div>
-						)}
-						{m.askNudge && (
-							<div className="flex justify-start">
-								<Link
-									href={`/ask?q=${encodeURIComponent(m.askNudge)}`}
-									className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+								<div
+									className={
+										m.role === "user"
+											? "max-w-[80%] rounded-2xl rounded-br-sm bg-white/10 px-3.5 py-2 text-sm text-foreground whitespace-pre-wrap"
+											: "max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.03] border border-border px-3.5 py-2 text-sm text-foreground/90 whitespace-pre-wrap"
+									}
 								>
-									Research question? Ask Stellar →
-								</Link>
+									{m.role === "assistant"
+										? renderMarkdownBold(m.content)
+										: m.content}
+								</div>
 							</div>
-						)}
-					</div>
-				))}
-				{busy && (
-					<div className="flex justify-start">
-						<div className="rounded-2xl bg-white/[0.03] border border-border px-3.5 py-2">
-							<Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+							{m.matches && m.matches.length > 0 && (
+								<div className="grid sm:grid-cols-2 gap-2.5">
+									{m.matches.map((p) => (
+										<MatchCard key={p.slug} p={p} />
+									))}
+								</div>
+							)}
+							{m.askNudge && (
+								<div className="flex justify-start">
+									<Link
+										href={`/ask?q=${encodeURIComponent(m.askNudge)}`}
+										className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+									>
+										Research question? Ask Stellar →
+									</Link>
+								</div>
+							)}
 						</div>
-					</div>
+					))}
+					{busy && (
+						<div className="flex justify-start">
+							<div className="rounded-2xl bg-white/[0.03] border border-border px-3.5 py-2">
+								<Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+								<output className="sr-only">
+									Assistant is replying…
+								</output>
+							</div>
+						</div>
+					)}
+					{/* Reserved space the current turn's reply renders into — sized by
+					    the layout effect, shrinks as content arrives so nothing moves. */}
+					<div ref={spacerRef} aria-hidden="true" />
+				</div>
+				{belowFold && (
+					<button
+						type="button"
+						onClick={jumpToLatest}
+						className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-1.5 rounded-full border border-border bg-background/85 backdrop-blur px-3 py-1.5 text-xs text-muted-foreground shadow-lg hover:text-foreground transition-colors"
+					>
+						{busy ? "Streaming below" : "Jump to latest"}
+						<ArrowDown className="w-3.5 h-3.5" />
+					</button>
 				)}
 			</div>
 

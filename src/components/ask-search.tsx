@@ -18,7 +18,7 @@
 import { ArrowUpRight, Loader2, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { partnerQueryFor } from "@/lib/ask-intent";
 
 interface ResearchResult {
@@ -119,6 +119,37 @@ export function AskSearch() {
 	const [answer, setAnswer] = useState<GroundedAnswer | null>(null);
 	const [answerLoading, setAnswerLoading] = useState(false);
 	const answerAbort = useRef<AbortController | null>(null);
+	// Scroll engineering (shadcn's "never move the reader against their intent"):
+	// a new query is the reader asking to move — bring the question back to the
+	// top of the viewport so the answer reads from its beginning. Nothing else
+	// ever moves the page.
+	const rootRef = useRef<HTMLDivElement>(null);
+	const prevQ = useRef(q);
+	useEffect(() => {
+		if (prevQ.current === q) return;
+		prevQ.current = q;
+		const el = rootRef.current;
+		if (!q || !el) return;
+		// Only if the reader is scrolled past the form (deep in old sources).
+		if (el.getBoundingClientRect().top < 0)
+			el.scrollIntoView({ behavior: "smooth", block: "start" });
+	}, [q]);
+
+	// Keep the reader's place when the answer expands above the sources they're
+	// reading. Chrome/Firefox handle this via native scroll anchoring; Safari
+	// doesn't, so compensate manually there (and only there).
+	const answerBoxRef = useRef<HTMLElement>(null);
+	const prevAnswerH = useRef(0);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: answer/answerLoading are re-measure triggers, not reads
+	useLayoutEffect(() => {
+		const h = answerBoxRef.current?.offsetHeight ?? 0;
+		const delta = h - prevAnswerH.current;
+		prevAnswerH.current = h;
+		const anchored = CSS.supports?.("overflow-anchor", "auto") ?? false;
+		if (anchored || delta === 0) return;
+		const rect = answerBoxRef.current?.getBoundingClientRect();
+		if (rect && rect.bottom < 0) window.scrollBy(0, delta);
+	}, [answer, answerLoading]);
 
 	const run = useCallback(async (query: string) => {
 		if (!query.trim()) return;
@@ -210,7 +241,7 @@ export function AskSearch() {
 		partners.length === 0;
 
 	return (
-		<div className="w-full">
+		<div ref={rootRef} className="w-full">
 			<form onSubmit={submit} className="relative">
 				<Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
 				<input
@@ -282,7 +313,7 @@ export function AskSearch() {
 					    sentence cites one. Renders nothing when unavailable (cards-only,
 					    the pre-answer behavior). */}
 						{(answer || answerLoading) && (
-							<section>
+							<section ref={answerBoxRef} aria-live="polite">
 								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
 									Answer
 								</h2>
