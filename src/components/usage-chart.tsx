@@ -1,11 +1,15 @@
 "use client";
 
 /**
- * Daily API-calls line chart for /analytics — a client component so hover
- * actually works. The previous server-rendered SVG relied on native <title>
- * tooltips, which need a ~1s still hover, never fire on touch, and proved
- * unreliable across browsers. A pointer-tracked crosshair + tooltip replaces
- * them; the visuals (glow line, peak label, sparse ticks) are unchanged.
+ * Cumulative API-calls chart for /analytics — a client component so hover
+ * actually works (native SVG <title> tooltips need a ~1s still hover and
+ * never fire on touch). A pointer-tracked crosshair + tooltip shows the
+ * running total plus each day's new calls.
+ *
+ * Cumulative, not daily, on purpose: the chart's job is to show accumulated
+ * adoption — a monotonic curve ending at the all-time headline number. Daily
+ * counts read at the scale of one day and undersell the usage; they live in
+ * the tooltip instead. Axis stays 0-based so the scale is honest.
  */
 
 import { useRef, useState } from "react";
@@ -49,16 +53,29 @@ function smoothPath(pts: Array<[number, number]>): string {
 	return d;
 }
 
-export function UsageChart({ series }: { series: DayPoint[] }) {
+export function UsageChart({
+	series,
+	baseline = 0,
+}: {
+	series: DayPoint[];
+	/** All-time calls BEFORE the charted window — the curve starts here. */
+	baseline?: number;
+}) {
 	const wrapRef = useRef<HTMLDivElement>(null);
 	const [hover, setHover] = useState<number | null>(null);
 	const plotH = H - PAD_TOP - PAD_BOTTOM;
-	const max = Math.max(1, ...series.map((p) => p.count));
-	const maxIdx = series.findIndex((p) => p.count === max);
+	const cum: number[] = [];
+	let run = Math.max(0, baseline);
+	for (const p of series) {
+		run += p.count;
+		cum.push(run);
+	}
+	const max = Math.max(1, cum[cum.length - 1] ?? 1);
+	const endIdx = series.length - 1;
 	const step = W / Math.max(1, series.length - 1);
-	const pts: Array<[number, number]> = series.map((p, i) => [
+	const pts: Array<[number, number]> = cum.map((v, i) => [
 		i * step,
-		PAD_TOP + plotH - (p.count / max) * plotH,
+		PAD_TOP + plotH - (v / max) * plotH,
 	]);
 	const line = smoothPath(pts);
 	const tickEvery = 7; // sparse date ticks
@@ -90,9 +107,9 @@ export function UsageChart({ series }: { series: DayPoint[] }) {
 				viewBox={`0 0 ${W} ${H}`}
 				className="block w-full h-auto"
 				role="img"
-				aria-label={`Daily API calls, last ${series.length} days. Peak ${fmt(max)} on ${monthDay(series[maxIdx]?.date ?? "")}.`}
+				aria-label={`Cumulative API calls over the last ${series.length} days, ending at ${fmt(max)} total.`}
 			>
-				<title>Daily API calls</title>
+				<title>Total API calls</title>
 				<line
 					x1="0"
 					y1={H - PAD_BOTTOM}
@@ -138,18 +155,18 @@ export function UsageChart({ series }: { series: DayPoint[] }) {
 						/>
 					</g>
 				)}
-				{maxIdx >= 0 && hover !== maxIdx && (
+				{endIdx >= 0 && hover !== endIdx && (
 					<g className="text-foreground">
 						<circle
-							cx={pts[maxIdx][0]}
-							cy={pts[maxIdx][1]}
+							cx={pts[endIdx][0]}
+							cy={pts[endIdx][1]}
 							r="3.5"
 							fill={LINE_COLOR}
 						/>
 						<text
-							x={Math.min(Math.max(pts[maxIdx][0], 30), W - 60)}
-							y={Math.max(pts[maxIdx][1] - 10, 12)}
-							textAnchor="middle"
+							x={Math.min(pts[endIdx][0], W - 4)}
+							y={Math.max(pts[endIdx][1] - 12, 12)}
+							textAnchor="end"
 							fontSize="12"
 							fill="currentColor"
 							fillOpacity="0.9"
@@ -194,7 +211,10 @@ export function UsageChart({ series }: { series: DayPoint[] }) {
 							{monthDay(h.p.date)}
 						</div>
 						<div className="text-xs font-medium text-foreground tabular-nums">
-							{fmt(h.p.count)} calls
+							{fmt(hover != null ? cum[hover] : 0)} total
+						</div>
+						<div className="text-[11px] text-muted-foreground tabular-nums">
+							+{fmt(h.p.count)} that day
 						</div>
 					</div>
 				</div>

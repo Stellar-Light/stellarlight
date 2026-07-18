@@ -244,8 +244,8 @@ export default async function AnalyticsPage() {
 				{series && series.length > 1 && (
 					<div className="mb-12">
 						<Card
-							title="Daily API calls"
-							description="Every request to the public API, bucketed by UTC day."
+							title="API calls — all time"
+							description="Cumulative total of every request to the public API. Hover a day for its new calls (UTC)."
 							right={<span>Last 30 days</span>}
 						>
 							<div className="flex items-center gap-2 mb-3">
@@ -254,7 +254,7 @@ export default async function AnalyticsPage() {
 									style={{ backgroundColor: LINE_COLOR }}
 								/>
 								<span className="text-xs font-medium text-foreground">
-									API calls
+									Total calls
 								</span>
 							</div>
 							<div
@@ -265,7 +265,14 @@ export default async function AnalyticsPage() {
 									backgroundSize: "18px 18px",
 								}}
 							>
-								<UsageChart series={series} />
+								<UsageChart
+									series={series}
+									baseline={Math.max(
+										0,
+										(usage?.total ?? 0) -
+											series.reduce((a, p) => a + p.count, 0),
+									)}
+								/>
 							</div>
 						</Card>
 					</div>
