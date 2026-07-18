@@ -177,7 +177,10 @@ export function UsageChart({
 					</g>
 				)}
 				{series.map((p, i) =>
-					i % tickEvery === 0 || i === series.length - 1 ? (
+					// The last date always shows; periodic ticks within 3 days of it
+					// are dropped so the two labels can't overlap.
+					(i % tickEvery === 0 && i < series.length - 4) ||
+					i === series.length - 1 ? (
 						<text
 							key={p.date}
 							x={pts[i][0]}
@@ -206,14 +209,13 @@ export function UsageChart({
 							: "translate(-50%, calc(-100% - 14px))",
 					}}
 				>
-					<div className="rounded-lg border border-border bg-background/95 px-2.5 py-1.5 shadow-lg whitespace-nowrap text-left">
-						<div className="text-[11px] text-muted-foreground">
-							{monthDay(h.p.date)}
-						</div>
-						<div className="text-xs font-medium text-foreground tabular-nums">
+					{/* Fully opaque — a translucent tooltip blends into the line/grid. */}
+					<div className="rounded-lg border border-white/20 bg-background px-3 py-2 shadow-xl shadow-black/50 whitespace-nowrap text-left">
+						<div className="text-[11px] text-white/60">{monthDay(h.p.date)}</div>
+						<div className="text-sm font-semibold text-white tabular-nums">
 							{fmt(hover != null ? cum[hover] : 0)} total
 						</div>
-						<div className="text-[11px] text-muted-foreground tabular-nums">
+						<div className="text-[11px] text-white/60 tabular-nums">
 							+{fmt(h.p.count)} that day
 						</div>
 					</div>
