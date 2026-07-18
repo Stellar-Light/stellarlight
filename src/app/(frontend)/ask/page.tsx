@@ -36,6 +36,9 @@ export default function AskPage() {
 						providers, protocols, audits, SEPs, and dev docs. The same data
 						layer our agents query, now yours to ask directly.
 					</p>
+					<p className="text-xs text-muted-foreground mt-2">
+						Free, no account. Rate limit: 60 requests per minute per IP.
+					</p>
 				</div>
 
 				<Suspense

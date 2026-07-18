@@ -50,6 +50,9 @@ export default async function PartnerConciergePage({
 						</Link>
 						.
 					</p>
+					<p className="text-xs text-muted-foreground mt-2">
+						Free, no account. Rate limit: 30 messages per minute per IP.
+					</p>
 				</div>
 
 				<PartnerFinder initialQuery={q} />

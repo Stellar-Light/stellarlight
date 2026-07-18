@@ -182,3 +182,39 @@ export async function getUsageStats(): Promise<{
 		return null;
 	}
 }
+
+/**
+ * Agent-vs-human usage split over the last 7 days, from the same coarse
+ * UA buckets logApiHit records. Page-only (the /analytics page) — kept off
+ * /api/status so this adds no contract surface.
+ */
+export async function getUsageUaSplit(): Promise<Array<{
+	bucket: string;
+	count: number;
+}> | null> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return null;
+		const weekAgo = new Date(
+			Date.now() - 7 * 24 * 60 * 60 * 1000,
+		).toISOString();
+		const sample = await payload.find({
+			collection: "api-usage",
+			where: { createdAt: { greater_than: weekAgo } },
+			limit: 10_000,
+			depth: 0,
+			pagination: false,
+			select: { uaBucket: true },
+		});
+		const map = new Map<string, number>();
+		for (const row of sample.docs as Array<{ uaBucket?: string }>) {
+			const b = row.uaBucket ?? "other";
+			map.set(b, (map.get(b) ?? 0) + 1);
+		}
+		return [...map.entries()]
+			.map(([bucket, count]) => ({ bucket, count }))
+			.sort((a, b) => b.count - a.count);
+	} catch {
+		return null;
+	}
+}
