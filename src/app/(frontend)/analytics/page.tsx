@@ -1,6 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+	type DayPoint,
+	LINE_COLOR,
+	UsageChart,
+} from "@/components/usage-chart";
 import { getUsageStats, getUsageUaSplit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -13,10 +18,6 @@ export const metadata: Metadata = {
 	description:
 		"Live, public usage and ecosystem analytics for the StellarLight data layer — API consumption over time, by endpoint and by consumer type, plus the maintained dataset's key figures.",
 };
-
-// The single-series accent (bklit's soft violet). Identity also carried by the
-// legend dot + title; values/labels stay in text tokens.
-const LINE_COLOR = "#c4b5fd";
 
 const BUCKET_LABELS: Record<string, string> = {
 	claude: "Claude (agents)",
@@ -105,11 +106,6 @@ function Card({
 	);
 }
 
-interface DayPoint {
-	date: string; // YYYY-MM-DD
-	count: number;
-}
-
 /** Daily API-call counts for the last `days` days (UTC buckets). */
 async function getDailySeries(days: number): Promise<DayPoint[] | null> {
 	const payload = await getPayloadSafe();
@@ -148,132 +144,6 @@ async function getDailySeries(days: number): Promise<DayPoint[] | null> {
 	} catch {
 		return null;
 	}
-}
-
-/** Smooth cubic path through points (1/3-gap control points). */
-function smoothPath(pts: Array<[number, number]>): string {
-	if (pts.length < 2) return "";
-	let d = `M ${pts[0][0]},${pts[0][1]}`;
-	for (let i = 1; i < pts.length; i++) {
-		const [x0, y0] = pts[i - 1];
-		const [x1, y1] = pts[i];
-		const dx = (x1 - x0) / 3;
-		d += ` C ${x0 + dx},${y0} ${x1 - dx},${y1} ${x1},${y1}`;
-	}
-	return d;
-}
-
-/** The big area chart — server-rendered SVG, per-day native hover tooltips. */
-function UsageChart({ series }: { series: DayPoint[] }) {
-	const W = 900;
-	const H = 240;
-	const PAD_TOP = 24;
-	const PAD_BOTTOM = 28;
-	const plotH = H - PAD_TOP - PAD_BOTTOM;
-	const max = Math.max(1, ...series.map((p) => p.count));
-	const maxIdx = series.findIndex((p) => p.count === max);
-	const step = W / Math.max(1, series.length - 1);
-	const pts: Array<[number, number]> = series.map((p, i) => [
-		i * step,
-		PAD_TOP + plotH - (p.count / max) * plotH,
-	]);
-	const line = smoothPath(pts);
-	const tickEvery = 7; // sparse date ticks
-	const monthDay = (iso: string) => {
-		const d = new Date(`${iso}T00:00:00Z`);
-		return d.toLocaleDateString("en-US", {
-			month: "short",
-			day: "numeric",
-			timeZone: "UTC",
-		});
-	};
-
-	return (
-		<svg
-			viewBox={`0 0 ${W} ${H}`}
-			className="w-full h-auto"
-			role="img"
-			aria-label={`Daily API calls, last ${series.length} days. Peak ${fmt(max)} on ${monthDay(series[maxIdx]?.date ?? "")}.`}
-		>
-			<title>Daily API calls</title>
-			<line
-				x1="0"
-				y1={H - PAD_BOTTOM}
-				x2={W}
-				y2={H - PAD_BOTTOM}
-				stroke="currentColor"
-				strokeOpacity="0.12"
-			/>
-			{/* soft glow under-stroke, then the line — the bklit look */}
-			<path
-				d={line}
-				fill="none"
-				stroke={LINE_COLOR}
-				strokeOpacity="0.25"
-				strokeWidth="6"
-				strokeLinecap="round"
-			/>
-			<path
-				d={line}
-				fill="none"
-				stroke={LINE_COLOR}
-				strokeOpacity="0.95"
-				strokeWidth="2"
-				strokeLinecap="round"
-			/>
-			{maxIdx >= 0 && (
-				<g className="text-foreground">
-					<circle
-						cx={pts[maxIdx][0]}
-						cy={pts[maxIdx][1]}
-						r="3.5"
-						fill={LINE_COLOR}
-					/>
-					<text
-						x={Math.min(Math.max(pts[maxIdx][0], 30), W - 60)}
-						y={Math.max(pts[maxIdx][1] - 10, 12)}
-						textAnchor="middle"
-						fontSize="12"
-						fill="currentColor"
-						fillOpacity="0.9"
-						className="tabular-nums"
-					>
-						{fmt(max)}
-					</text>
-				</g>
-			)}
-			{series.map((p, i) =>
-				i % tickEvery === 0 || i === series.length - 1 ? (
-					<text
-						key={p.date}
-						x={pts[i][0]}
-						y={H - 8}
-						textAnchor={
-							i === 0 ? "start" : i === series.length - 1 ? "end" : "middle"
-						}
-						fontSize="11"
-						fill="currentColor"
-						fillOpacity="0.45"
-						className="text-muted-foreground"
-					>
-						{monthDay(p.date)}
-					</text>
-				) : null,
-			)}
-			{series.map((p, i) => (
-				<rect
-					key={`h-${p.date}`}
-					x={i * step - step / 2}
-					y={0}
-					width={step}
-					height={H - PAD_BOTTOM}
-					fill="transparent"
-				>
-					<title>{`${monthDay(p.date)} — ${fmt(p.count)} calls`}</title>
-				</rect>
-			))}
-		</svg>
-	);
 }
 
 async function getEcosystemTopline() {
