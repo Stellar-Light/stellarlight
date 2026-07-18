@@ -12,9 +12,6 @@ export const metadata: Metadata = {
 		"Live, public usage and ecosystem analytics for the StellarLight data layer — API consumption by endpoint and by consumer type, plus the maintained dataset's key figures.",
 };
 
-/** Buckets that are AI agents/tools rather than humans in a browser. */
-const AGENT_BUCKETS = new Set(["claude", "codex", "cursor", "agent"]);
-
 const BUCKET_LABELS: Record<string, string> = {
 	claude: "Claude (agents)",
 	codex: "Codex (agents)",
@@ -105,11 +102,6 @@ export default async function AnalyticsPage() {
 	]);
 
 	const ua7dTotal = (uaSplit ?? []).reduce((s, r) => s + r.count, 0);
-	const agentCount = (uaSplit ?? [])
-		.filter((r) => AGENT_BUCKETS.has(r.bucket))
-		.reduce((s, r) => s + r.count, 0);
-	const agentPct =
-		ua7dTotal > 0 ? Math.round((agentCount / ua7dTotal) * 100) : 0;
 	const maxEndpoint = Math.max(
 		1,
 		...(usage?.byEndpoint ?? []).map((e) => e.count),
@@ -154,9 +146,9 @@ export default async function AnalyticsPage() {
 					<Tile label="Last 7 days" value={fmt(usage?.last7d)} />
 					<Tile label="Last 24 hours" value={fmt(usage?.last24h)} />
 					<Tile
-						label="AI-agent share (7d)"
-						value={ua7dTotal > 0 ? `${agentPct}%` : "—"}
-						sub="Claude, Codex, Cursor + other agents"
+						label="Endpoints serving traffic (7d)"
+						value={fmt((usage?.byEndpoint ?? []).length)}
+						sub="Open REST + MCP, no keys"
 					/>
 				</div>
 
@@ -219,8 +211,12 @@ export default async function AnalyticsPage() {
 						</div>
 						<div className="text-[11px] text-muted-foreground mt-3 border-t border-border pt-2">
 							User agents are bucketed coarsely at log time (no IPs, no full UA
-							strings). Agent traffic includes the AI systems — like SDF's Raven
-							— that ground their ecosystem answers on this data.
+							strings), which limits attribution: server-side agent systems —
+							including SDF's Raven, which grounds its ecosystem answers on this
+							data — send generic clients and appear under "Other", while the
+							named agent buckets only catch interactive AI tools. "Monitoring
+							probes" is largely our own automated quality checks auditing the
+							service daily.
 						</div>
 					</div>
 				</div>
