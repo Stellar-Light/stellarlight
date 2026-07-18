@@ -217,11 +217,18 @@ export function PartnerConciergeChat({
 					if (res.canList) setCanList(true);
 				}
 			} else {
-				const res = await callAssistant([]);
-				if (res?.reply)
-					setMessages([
-						{ role: "assistant", content: res.reply, matches: res.matches },
-					]);
+				// Static greeting - no API call. The assistant endpoint (correctly)
+				// rejects an empty `messages` array since the strict-param work, so the
+				// old callAssistant([]) greeting 400'd and every cold visitor saw "hit
+				// a snag" on page load (the bug the Q2 review reported). A greeting
+				// needs no LLM anyway - this is faster and free.
+				setMessages([
+					{
+						role: "assistant",
+						content:
+							"Tell me what you're building and I'll match you with real Stellar partners - anchors, on/off-ramps, auditors, wallets, infrastructure. If you're a partner yourself, say \"list us\" and I'll help you get listed.",
+					},
+				]);
 			}
 			setBusy(false);
 		})();
