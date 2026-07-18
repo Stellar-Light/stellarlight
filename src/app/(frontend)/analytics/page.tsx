@@ -14,6 +14,10 @@ export const metadata: Metadata = {
 		"Live, public usage and ecosystem analytics for the StellarLight data layer — API consumption over time, by endpoint and by consumer type, plus the maintained dataset's key figures.",
 };
 
+// The single-series accent (bklit's soft violet). Identity also carried by the
+// legend dot + title; values/labels stay in text tokens.
+const LINE_COLOR = "#c4b5fd";
+
 const BUCKET_LABELS: Record<string, string> = {
 	claude: "Claude (agents)",
 	codex: "Codex (agents)",
@@ -55,6 +59,48 @@ function Stat({
 				{value}
 			</div>
 			{sub && <div className="text-xs text-muted-foreground mt-1.5">{sub}</div>}
+		</div>
+	);
+}
+
+/** bklit-style card: elevated surface, subtle border, corner crosshair dots. */
+function Card({
+	title,
+	description,
+	right,
+	children,
+	className = "",
+}: {
+	title: string;
+	description?: string;
+	right?: React.ReactNode;
+	children: React.ReactNode;
+	className?: string;
+}) {
+	const dot =
+		"absolute w-[5px] h-[5px] rounded-full bg-foreground/25 border border-background";
+	return (
+		<div
+			className={`relative rounded-xl border border-border bg-white/[0.02] ${className}`}
+		>
+			<span className={`${dot} -top-[3px] -left-[3px]`} />
+			<span className={`${dot} -top-[3px] -right-[3px]`} />
+			<span className={`${dot} -bottom-[3px] -left-[3px]`} />
+			<span className={`${dot} -bottom-[3px] -right-[3px]`} />
+			<div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
+				<div>
+					<h2 className="text-base font-semibold text-foreground">{title}</h2>
+					{description && (
+						<p className="text-xs text-muted-foreground mt-1 max-w-xl">
+							{description}
+						</p>
+					)}
+				</div>
+				{right && (
+					<div className="text-xs text-muted-foreground shrink-0">{right}</div>
+				)}
+			</div>
+			<div className="px-5 pb-5">{children}</div>
 		</div>
 	);
 }
@@ -132,7 +178,6 @@ function UsageChart({ series }: { series: DayPoint[] }) {
 		PAD_TOP + plotH - (p.count / max) * plotH,
 	]);
 	const line = smoothPath(pts);
-	const area = `${line} L ${W},${H - PAD_BOTTOM} L 0,${H - PAD_BOTTOM} Z`;
 	const tickEvery = 7; // sparse date ticks
 	const monthDay = (iso: string) => {
 		const d = new Date(`${iso}T00:00:00Z`);
@@ -151,12 +196,6 @@ function UsageChart({ series }: { series: DayPoint[] }) {
 			aria-label={`Daily API calls, last ${series.length} days. Peak ${fmt(max)} on ${monthDay(series[maxIdx]?.date ?? "")}.`}
 		>
 			<title>Daily API calls</title>
-			<defs>
-				<linearGradient id="usage-fill" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stopColor="currentColor" stopOpacity="0.14" />
-					<stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-				</linearGradient>
-			</defs>
 			<line
 				x1="0"
 				y1={H - PAD_BOTTOM}
@@ -165,14 +204,22 @@ function UsageChart({ series }: { series: DayPoint[] }) {
 				stroke="currentColor"
 				strokeOpacity="0.12"
 			/>
-			<path d={area} fill="url(#usage-fill)" className="text-foreground" />
+			{/* soft glow under-stroke, then the line — the bklit look */}
 			<path
 				d={line}
 				fill="none"
-				stroke="currentColor"
-				strokeOpacity="0.75"
+				stroke={LINE_COLOR}
+				strokeOpacity="0.25"
+				strokeWidth="6"
+				strokeLinecap="round"
+			/>
+			<path
+				d={line}
+				fill="none"
+				stroke={LINE_COLOR}
+				strokeOpacity="0.95"
 				strokeWidth="2"
-				className="text-foreground"
+				strokeLinecap="round"
 			/>
 			{maxIdx >= 0 && (
 				<g className="text-foreground">
@@ -180,7 +227,7 @@ function UsageChart({ series }: { series: DayPoint[] }) {
 						cx={pts[maxIdx][0]}
 						cy={pts[maxIdx][1]}
 						r="3.5"
-						fill="currentColor"
+						fill={LINE_COLOR}
 					/>
 					<text
 						x={Math.min(Math.max(pts[maxIdx][0], 30), W - 60)}
@@ -325,28 +372,38 @@ export default async function AnalyticsPage() {
 
 				{/* The big chart */}
 				{series && series.length > 1 && (
-					<div className="mb-14">
-						<div className="flex items-baseline justify-between mb-2">
-							<h2 className="text-sm font-medium text-foreground">
-								Daily API calls
-							</h2>
-							<span className="text-xs text-muted-foreground">
-								Last 30 days
-							</span>
-						</div>
-						<UsageChart series={series} />
+					<div className="mb-12">
+						<Card
+							title="Daily API calls"
+							description="Every request to the public API, bucketed by UTC day."
+							right={<span>Last 30 days</span>}
+						>
+							<div className="flex items-center gap-2 mb-3">
+								<span
+									className="w-2 h-2 rounded-full"
+									style={{ backgroundColor: LINE_COLOR }}
+								/>
+								<span className="text-xs font-medium text-foreground">
+									API calls
+								</span>
+							</div>
+							<div
+								className="rounded-lg"
+								style={{
+									backgroundImage:
+										"radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+									backgroundSize: "18px 18px",
+								}}
+							>
+								<UsageChart series={series} />
+							</div>
+						</Card>
 					</div>
 				)}
 
-				{/* Borderless lists */}
-				<div className="grid md:grid-cols-2 gap-x-12 gap-y-10 mb-14">
-					<div>
-						<h2 className="text-sm font-medium text-foreground mb-4">
-							By endpoint{" "}
-							<span className="text-muted-foreground font-normal">
-								· last 7 days
-							</span>
-						</h2>
+				{/* Lists */}
+				<div className="grid md:grid-cols-2 gap-6 mb-12 items-start">
+					<Card title="By endpoint" right={<span>Last 7 days</span>}>
 						<div className="space-y-2.5">
 							{(usage?.byEndpoint ?? []).slice(0, 10).map((e) => (
 								<div key={e.endpoint} className="text-xs">
@@ -372,15 +429,9 @@ export default async function AnalyticsPage() {
 								</div>
 							)}
 						</div>
-					</div>
+					</Card>
 
-					<div>
-						<h2 className="text-sm font-medium text-foreground mb-4">
-							By consumer type{" "}
-							<span className="text-muted-foreground font-normal">
-								· last 7 days
-							</span>
-						</h2>
+					<Card title="By consumer type" right={<span>Last 7 days</span>}>
 						<div className="space-y-2.5">
 							{(uaSplit ?? []).map((r) => (
 								<div
@@ -413,32 +464,35 @@ export default async function AnalyticsPage() {
 							interactive AI tools. &quot;Monitoring probes&quot; is largely our
 							own automated quality checks auditing the service daily.
 						</p>
-					</div>
+					</Card>
 				</div>
 
 				{/* The maintained dataset */}
-				<h2 className="text-sm font-medium text-foreground mb-6">
-					The maintained dataset
-				</h2>
-				<div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-8 mb-14">
-					<Stat label="Project records" value={fmt(eco?.projects)} />
-					<Stat label="Indexed repositories" value={fmt(eco?.repos)} />
-					<Stat
-						label="Research documents"
-						value={fmt(eco?.research)}
-						sub="SEPs, CAPs, dev docs, audits + more"
-					/>
-					<Stat label="Partners & anchors" value={fmt(eco?.partners)} />
-					<Stat
-						label="SCF-funded projects"
-						value={fmt(eco?.scfFundedProjects)}
-					/>
-					<Stat
-						label="SCF funding tracked"
-						value={fmtUSD(eco?.scfTotalUSD)}
-						sub="In-house reconstruction — see /api/analyze"
-					/>
-				</div>
+				<Card
+					title="The maintained dataset"
+					description="What the verification engine keeps true — live collection counts."
+					className="mb-12"
+				>
+					<div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-8 pt-1">
+						<Stat label="Project records" value={fmt(eco?.projects)} />
+						<Stat label="Indexed repositories" value={fmt(eco?.repos)} />
+						<Stat
+							label="Research documents"
+							value={fmt(eco?.research)}
+							sub="SEPs, CAPs, dev docs, audits + more"
+						/>
+						<Stat label="Partners & anchors" value={fmt(eco?.partners)} />
+						<Stat
+							label="SCF-funded projects"
+							value={fmt(eco?.scfFundedProjects)}
+						/>
+						<Stat
+							label="SCF funding tracked"
+							value={fmtUSD(eco?.scfTotalUSD)}
+							sub="In-house reconstruction — see /api/analyze"
+						/>
+					</div>
+				</Card>
 
 				<div className="text-xs text-muted-foreground border-t border-border pt-4 leading-relaxed">
 					Methodology: usage counts come from the API&apos;s own request log
