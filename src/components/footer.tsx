@@ -58,6 +58,14 @@ export default function Footer() {
 							</li>
 							<li>
 								<Link
+									href="/analytics"
+									className="hover:text-foreground transition-all duration-150"
+								>
+									Usage &amp; analytics
+								</Link>
+							</li>
+							<li>
+								<Link
 									href="/partners/chat"
 									className="hover:text-foreground transition-all duration-150"
 								>
