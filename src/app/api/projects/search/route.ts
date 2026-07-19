@@ -1045,6 +1045,34 @@ export async function GET(req: NextRequest) {
 						}
 					}
 				}
+				// Identity under-fill bypass (2026-07-19, custody re-measure): the
+				// tier ladder only relaxes on EMPTY, so a strict page part-filled by
+				// prose-mentioners locks out the record that IS the anchor thing but
+				// misses a secondary token — on "custody with staking" the custody
+				// provider could only arrive via the semantic rung, appended last.
+				// On an under-filled page, admit majority-tier rows whose anchor
+				// hits their IDENTITY zone (name/category/types/coverage/description
+				// lead); the mention-vs-identity sort key then ranks them on merit.
+				// matchMode reports "majority" — the page now carries majority-
+				// admitted rows, and saying "strict" would be a lie.
+				if (
+					filtered.length > 0 &&
+					filtered.length < limit &&
+					tokens.length >= 2
+				) {
+					const majorityAdmit = admit(Math.ceil(tokens.length / 2));
+					const have = new Set(filtered.map((p) => p.id));
+					let added = 0;
+					for (const p of projects) {
+						if (have.has(p.id) || p.anchorIdentity !== true) continue;
+						if (!majorityAdmit(p)) continue;
+						filtered.push(p);
+						have.add(p.id);
+						added += 1;
+					}
+					if (added > 0 && matchMode === "strict") matchMode = "majority";
+				}
+
 				// "X vs Y": guarantee BOTH named subjects are present — pick each
 				// subject's best name-match from the full candidate pool (exact or
 				// prefix, ≥2) and admit it if the tiers dropped it.
