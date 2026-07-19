@@ -8,9 +8,20 @@ on:
         default: false
   schedule:
     - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
+  # Chase DISPATCHED scan waves automatically: repoGrade only ingests
+  # persisted codeDepth when enrich runs, so a big backlog burst otherwise
+  # sat up to a week before moving any ranking (2026-07-19 converge plan).
+  # Scheduled daily scans do NOT trigger this — only deliberate manual waves.
+  workflow_run:
+    workflows: ["Scan repo code (signals-only)"]
+    types: [completed]
 permissions: { contents: read }
 jobs:
   enrich:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
@@ -27,4 +38,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Scheduled runs ALWAYS execute (the whole point of the weekly refresh);
       # manual dispatch stays dry-run unless the execute box is ticked.
-      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }}
