@@ -1,0 +1,58 @@
+# Turn a scheduled detector's outcome into a TRACKED signal instead of an
+# exit-1 dead end (2026-07-19 engine recon: Engine A/B, api-drift,
+# content-freshness all ended at a step summary nobody is paged on, and
+# self-audit issues never closed on green — #487 sat open days after the
+# audit went back to 54/54).
+#
+# Failure  → upsert ONE rolling issue (comment on the open one, create if
+#            none) — never a new issue per red day.
+# Success  → comment + close the open rolling issue, so the queue reflects
+#            reality and reds stay meaningful.
+name: rolling-issue
+description: Upsert a rolling issue on detector failure; auto-close it on green.
+inputs:
+  title-prefix:
+    description: Stable issue-title prefix (search + creation key)
+    required: true
+  outcome:
+    description: The detector step's outcome (success | failure)
+    required: true
+  body-file:
+    description: Optional file with failure context to embed
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PREFIX: ${{ inputs.title-prefix }}
+        OUTCOME: ${{ inputs.outcome }}
+        BODY_FILE: ${{ inputs.body-file }}
+        REPO: ${{ github.repository }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        NUM=$(gh issue list --repo "$REPO" --state open --search "\"$PREFIX\" in:title" \
+          --json number,title \
+          --jq "[.[] | select(.title | startswith(\"$PREFIX\"))][0].number // empty")
+        if [ "$OUTCOME" = "failure" ]; then
+          {
+            echo "Red run: $RUN_URL"
+            if [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ]; then
+              echo ""
+              echo '```'
+              tail -c 60000 "$BODY_FILE"
+              echo '```'
+            fi
+          } > /tmp/rolling-issue-body.md
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --repo "$REPO" --body-file /tmp/rolling-issue-body.md
+          else
+            gh issue create --repo "$REPO" --title "$PREFIX — $(date -u +%Y-%m-%d)" \
+              --body-file /tmp/rolling-issue-body.md
+          fi
+        elif [ -n "$NUM" ]; then
+          gh issue comment "$NUM" --repo "$REPO" --body "Green again: $RUN_URL — closing."
+          gh issue close "$NUM" --repo "$REPO"
+        fi

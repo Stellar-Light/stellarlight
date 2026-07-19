@@ -1,10 +1,11 @@
-# Engine B — data-consistency sweeps (weekly, report-only). Prose⇄structure
+# Engine B — data-consistency sweeps (dispatch-only). Prose⇄structure
 # divergence, field-population census, dupe detection, staleness exposure.
-# The report feeds the Part-3 human-verified waves; Engine C files issues.
+# Schedule RETIRED 2026-07-19: engine-c-health re-runs A+B an hour later
+# and upserts the tracker issue, so this standalone Sunday run produced a
+# step summary with no consumer while Actions minutes are rationed. Run it
+# by hand when you want the raw B report alone.
 name: engine-b-sweeps
 on:
-  schedule:
-    - cron: "0 8 * * 0"
   workflow_dispatch: {}
 concurrency:
   group: engine-b-sweeps

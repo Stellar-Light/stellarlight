@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   drift:
@@ -25,6 +26,17 @@ jobs:
         with:
           node-version: "20"
       - name: Run API drift guard
+        id: drift
+        continue-on-error: true
         env:
           SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
-        run: npx -y tsx scripts/check-api-drift.ts
+        run: npx -y tsx scripts/check-api-drift.ts 2>&1 | tee drift.log
+      - name: Track the signal (rolling issue)
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "API drift guard red"
+          outcome: ${{ steps.drift.outcome }}
+          body-file: drift.log
+      - name: Propagate the red
+        if: steps.drift.outcome == 'failure'
+        run: exit 1

@@ -1,7 +1,7 @@
 # Engine A — the generated recall matrix (weekly). Derives probes from the
 # live data itself (every record's fields imply its queries) and scores
-# recall per bucket. Report-only: red = a bucket fell below its floor.
-# Engine C will file issues from this; for now the red run IS the signal.
+# recall per bucket. Red = a bucket fell below its floor; the rolling-issue
+# step files/updates one tracked issue and closes it again on green.
 name: generated-recall
 on:
   schedule:
@@ -10,6 +10,9 @@ on:
 concurrency:
   group: generated-recall
   cancel-in-progress: false
+permissions:
+  contents: read
+  issues: write
 jobs:
   recall:
     runs-on: ubuntu-latest
@@ -23,4 +26,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run Engine A
-        run: pnpm exec tsx scripts/eval/generated-recall.ts | tee $GITHUB_STEP_SUMMARY
+        id: engine
+        continue-on-error: true
+        run: pnpm exec tsx scripts/eval/generated-recall.ts | tee engine-a.log $GITHUB_STEP_SUMMARY
+      - name: Track the signal (rolling issue)
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "Engine A (generated recall) red"
+          outcome: ${{ steps.engine.outcome }}
+          body-file: engine-a.log
+      - name: Propagate the red
+        if: steps.engine.outcome == 'failure'
+        run: exit 1
