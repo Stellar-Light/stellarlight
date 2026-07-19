@@ -1619,13 +1619,107 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/audits": {
+			get: {
+				operationId: "listAudits",
+				tags: ["Research"],
+				summary: "Enumerable registry of Stellar security-audit reports",
+				description:
+					"One row per security-audit report from stellarsecurityportal.com — the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source — NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.",
+				"x-routing": {
+					purpose:
+						"List/filter security-audit reports as structured rows: which audits exist, for which project, by which firm, when.",
+					keywords: [
+						"audit",
+						"audits",
+						"audit report",
+						"security audit",
+						"audited",
+						"auditor",
+						"ottersec",
+						"certora",
+						"code4rena",
+						"veridise",
+						"halborn",
+						"which projects are audited",
+						"audit history",
+					],
+					useWhen: [
+						"'list all audits for project X' / 'is X audited' (with the absence caveat)",
+						"'what has firm Y audited on Stellar'",
+						"enumerating or counting the audit corpus, newest-first audit activity",
+					],
+					notFor: [
+						"what a specific audit FOUND (findings text, vulnerabilities discussed) -> searchResearch with source=audit",
+						"security incidents/exploits that happened in production -> searchResearch with source=incident",
+					],
+					exampleQuestions: [
+						"Which audit firms have reviewed Blend?",
+						"List the OtterSec audits of Stellar projects",
+						"What are the newest Soroban audits?",
+					],
+				},
+				parameters: [
+					{
+						name: "project",
+						in: "query",
+						description: "Directory project slug (exact), e.g. blend",
+						schema: { type: "string" },
+					},
+					{
+						name: "auditor",
+						in: "query",
+						description:
+							"Auditor firm, case/homoglyph-insensitive exact match (e.g. OtterSec)",
+						schema: { type: "string" },
+					},
+					{
+						name: "q",
+						in: "query",
+						description: "Substring match on title / protocol / project name",
+						schema: { type: "string" },
+					},
+					{
+						name: "since",
+						in: "query",
+						description:
+							"Only reports published on/after this date (YYYY-MM-DD)",
+						schema: { type: "string", format: "date" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Max rows (default 100, max 100)",
+						schema: { type: "integer", minimum: 1, maximum: 100, default: 100 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						description: "Pagination offset",
+						schema: { type: "integer", minimum: 0, default: 0 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Audit registry rows (meta.counts.total = corpus size; meta.counts.matched = after filters)",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+					"400": {
+						description:
+							"Unknown parameter or invalid value (params are never silently ignored)",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
 		"/api/research": {
 			get: {
 				operationId: "searchResearch",
 				tags: ["Research"],
 				summary: "Vector search over the Stellar research corpus",
 				description:
-					"Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.",
+					"Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity — filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Cited knowledge/docs answers from the Stellar research corpus ($vectorSearch over Voyage embeddings; BM25-lite keyword fallback when vectors are unavailable).",
@@ -1773,6 +1867,37 @@ export const spec: OpenAPISpec = {
 								"security-program",
 								"sdf-org",
 								"ec-developer-report",
+							],
+						},
+					},
+					{
+						name: "auditor",
+						in: "query",
+						description:
+							"Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Only audit-source chunks carry this metadata, so using it narrows results to audits. For report-level enumeration prefer listAudits.",
+						schema: { type: "string" },
+					},
+					{
+						name: "protocol",
+						in: "query",
+						description:
+							"Audit-metadata filter: audited protocol/codebase name (substring match). Narrows results to audit-source chunks.",
+						schema: { type: "string" },
+					},
+					{
+						name: "severity",
+						in: "query",
+						description:
+							"Audit-metadata filter: per-chunk inferred severity. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
+						schema: {
+							type: "string",
+							enum: [
+								"critical",
+								"high",
+								"medium",
+								"low",
+								"informational",
+								"unknown",
 							],
 						},
 					},

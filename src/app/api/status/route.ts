@@ -68,7 +68,7 @@ export async function GET() {
 	const payload = await getPayloadSafe();
 	const generatedAt = new Date().toISOString();
 
-	const [projects, hackathons, builders, repos] = payload
+	const [projects, hackathons, builders, repos, auditsReg] = payload
 		? await Promise.all([
 				collectionStatus(payload, "projects", "projects"),
 				collectionStatus(
@@ -89,12 +89,19 @@ export async function GET() {
 					"repos",
 					"Indexed-and-scored Stellar GitHub repos (powers /api/repos/search)",
 				),
+				collectionStatus(
+					payload,
+					"audits",
+					"audits",
+					"Security-audit registry from stellarsecurityportal.com (powers /api/audits; full text via /api/research?source=audit)",
+				),
 			])
 		: [
 				{ name: "projects", count: null, lastUpdatedAt: null },
 				{ name: "hackathons", count: null, lastUpdatedAt: null },
 				{ name: "builders", count: null, lastUpdatedAt: null },
 				{ name: "repos", count: null, lastUpdatedAt: null },
+				{ name: "audits", count: null, lastUpdatedAt: null },
 			];
 
 	const ecosystemStats: SourceStatus = {
@@ -128,6 +135,7 @@ export async function GET() {
 				hackathons,
 				builders,
 				repos,
+				auditsReg,
 				ecosystemStats,
 				sdfSkills,
 			],
@@ -140,6 +148,7 @@ export async function GET() {
 			},
 			endpoints: [
 				"/api/status",
+				"/api/audits",
 				"/api/changelog",
 				"/api/leaderboard",
 				"/api/hackathons",

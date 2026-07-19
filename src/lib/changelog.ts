@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-19",
+		surfaces: ["api"],
+		version: "openapi@1.8.0",
+		type: "added",
+		summary:
+			"New GET /api/audits — enumerable security-audit registry (one row per report, hand-verified projectSlug links); /api/research now honors auditor/protocol/severity filters instead of silently ignoring them.",
+		detail:
+			"The audit corpus gains a structured half: /api/audits lists every stellarsecurityportal.com report with normalized auditor, publication date, and a verified directory-project link (project=, auditor=, q=, since= filters; unknown params 400). Agents can now answer 'list all audits for X' / 'what has firm Y audited' by enumeration instead of vector retrieval. On /api/research, the previously-ignored auditor/protocol/severity params now filter audit-chunk metadata (unknown severity values 400); severity remains section-inferred and mostly 'unknown' on PDF-derived chunks — /api/audits is the reliable report-level surface. /api/status gains an 'audits' source row. Registry rows carry findingsTotal/severityCounts as null until deterministic extraction lands (null = not extracted, NOT zero).",
+	},
+	{
 		date: "2026-07-16",
 		surfaces: ["api"],
 		version: "spec 1.7.28",

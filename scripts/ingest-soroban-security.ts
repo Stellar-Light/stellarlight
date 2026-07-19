@@ -27,6 +27,11 @@ loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 import {
+	canonicalAuditor,
+	normalizeIdentityText,
+	resolveAuditProjectSlug,
+} from "../src/lib/audit-identity";
+import {
 	type AuditSeverity,
 	chunkMarkdown,
 	loadExistingChunks,
@@ -299,6 +304,8 @@ function promoteAuditHeadings(md: string): string {
 		/^# (Critical|High|Medium|Low|Informational|Info|Severity)(\s|$)/gim,
 		/^# (\[[A-Z]?\d+\]\s*)/gm, // "# [A1] Foo"
 		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo"
+		/^# (F-\d{4}-\d+\s*)/gm, // Hacken "# F-2026-15609 Foo"
+		/^# ([A-Z]{3}\d{3}\s+)/gm, // Coinspect "# TRI001 Foo"
 	];
 	for (const re of promoters) md = md.replace(re, "## $1");
 	return md;
@@ -334,6 +341,20 @@ async function run() {
 	}
 
 	const allChunks: ResearchChunk[] = [];
+	interface RegistryRow {
+		reportId: number;
+		title: string;
+		reportUrl: string;
+		auditor: string;
+		protocol: string;
+		projectSlug: string | null;
+		linkBasis: "name-exact" | "alias" | "unmatched" | null;
+		linkMapped: boolean;
+		publishedAt: string;
+		observedAt: string;
+		chunksIndexed: number;
+	}
+	const registryRows: RegistryRow[] = [];
 	let reportErrors = 0;
 	let tooShort = 0;
 
@@ -355,14 +376,19 @@ async function run() {
 				continue;
 			}
 			const parentDocId = `audit-${meta.id}`;
-			const title = `${meta.protocolName} — ${meta.auditorName}${
-				meta.name ? ` (${meta.name})` : ""
+			// Identity hygiene: the portal ships homoglyphs ("\u0421oinspect" with a
+			// Cyrillic Es), trailing whitespace, and lowercase firm names — repair
+			// before anything becomes a title, tag, or filterable field.
+			const auditorClean = canonicalAuditor(meta.auditorName);
+			const protocolClean = normalizeIdentityText(meta.protocolName);
+			const title = `${protocolClean} — ${auditorClean}${
+				meta.name ? ` (${normalizeIdentityText(meta.name)})` : ""
 			}`;
 			const url = REPORT_URL(meta.id);
 			const tags = [
 				"audit",
-				meta.auditorName.toLowerCase().replace(/\s+/g, "-"),
-				meta.protocolName.toLowerCase().replace(/\s+/g, "-"),
+				auditorClean.toLowerCase().replace(/\s+/g, "-"),
+				protocolClean.toLowerCase().replace(/\s+/g, "-"),
 			];
 			const md = promoteAuditHeadings(`# ${title}\n\n${reassembled}`);
 			const chunks = chunkMarkdown({
@@ -380,8 +406,8 @@ async function run() {
 				// Re-stamped every run, even when the content hash is unchanged
 				// (upsertChunks' metadata-only path — no re-embed cost).
 				c.observedAt = observedAtIso;
-				c.auditor = meta.auditorName;
-				c.protocol = meta.protocolName;
+				c.auditor = auditorClean;
+				c.protocol = protocolClean;
 				const fromHeading = inferSeverity(c.section);
 				c.severity =
 					fromHeading !== "unknown"
@@ -389,6 +415,20 @@ async function run() {
 						: inferSeverityFromBody(c.content);
 			}
 			allChunks.push(...chunks);
+			const link = resolveAuditProjectSlug(protocolClean);
+			registryRows.push({
+				reportId: meta.id,
+				title,
+				reportUrl: url,
+				auditor: auditorClean,
+				protocol: protocolClean,
+				projectSlug: link.slug,
+				linkBasis: link.basis,
+				linkMapped: link.mapped,
+				publishedAt: meta.date,
+				observedAt: observedAtIso,
+				chunksIndexed: chunks.length,
+			});
 		} catch (err) {
 			console.log(`✗ ${(err as Error).message}`);
 			reportErrors += 1;
@@ -416,10 +456,73 @@ async function run() {
 		`  to embed: ${stats.toEmbed} | report errors: ${reportErrors} | too short: ${tooShort}`,
 	);
 
+	// ---- Structured registry (audits collection) ----------------------------
+	// One row per report, so agents can enumerate/filter audits instead of
+	// hoping vector retrieval surfaces the right chunk. Linked to directory
+	// projects via the hand-verified alias map in src/lib/audit-identity.ts.
+	const linked = registryRows.filter((r) => r.projectSlug);
+	const untriaged = registryRows.filter((r) => !r.linkMapped);
+	console.log(
+		`\nRegistry: ${registryRows.length} reports — ${linked.length} linked to projects, ${
+			registryRows.filter((r) => r.linkBasis === "unmatched").length
+		} verified no-match, ${untriaged.length} UNTRIAGED`,
+	);
+	for (const r of untriaged) {
+		console.log(
+			`  UNTRIAGED: [${r.reportId}] ${r.protocol} — needs alias-map entry`,
+		);
+	}
+
 	if (!execute || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
+
+	// Resolve display names for linked projects in one query.
+	const linkedSlugs = [...new Set(linked.map((r) => r.projectSlug as string))];
+	const nameBySlug = new Map<string, string>();
+	if (linkedSlugs.length) {
+		const projDocs = await payload.find({
+			collection: "projects",
+			where: { slug: { in: linkedSlugs } },
+			limit: linkedSlugs.length,
+			depth: 0,
+			select: { slug: true, name: true },
+		});
+		for (const d of projDocs.docs as Array<{ slug: string; name: string }>) {
+			nameBySlug.set(d.slug, d.name);
+		}
+	}
+
+	let regCreated = 0;
+	let regUpdated = 0;
+	for (const r of registryRows) {
+		const { linkMapped: _drop, ...rest } = r;
+		const data = {
+			...rest,
+			projectName: r.projectSlug
+				? (nameBySlug.get(r.projectSlug) ?? null)
+				: null,
+		};
+		const prior = await payload.find({
+			collection: "audits",
+			where: { reportId: { equals: r.reportId } },
+			limit: 1,
+			depth: 0,
+		});
+		if (prior.docs.length) {
+			await payload.update({
+				collection: "audits",
+				id: (prior.docs[0] as { id: string | number }).id,
+				data,
+			});
+			regUpdated += 1;
+		} else {
+			await payload.create({ collection: "audits", data });
+			regCreated += 1;
+		}
+	}
+	console.log(`Registry upsert: ${regCreated} created, ${regUpdated} updated`);
 
 	const r = await upsertChunks({
 		payload,

@@ -19,6 +19,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
 import { clampLimit } from "@/lib/http-params";
@@ -103,6 +104,13 @@ export async function GET(req: NextRequest) {
 			sp.get("search")
 		)?.trim() ?? "";
 	const sourceFilter = sp.get("source");
+	// Audit-metadata filters. These fields exist only on source=audit chunks,
+	// so using any of them implicitly narrows results to audit documents.
+	// They used to be silently ignored — an agent sending severity=critical
+	// got unfiltered results and believed it filtered (the omission trap).
+	const auditorFilter = sp.get("auditor");
+	const protocolFilter = sp.get("protocol");
+	const severityFilter = sp.get("severity");
 	const limitParam = clampLimit(sp.get("limit"), 8, 25);
 
 	// Single source of truth for valid `source` values. Kept in sync with
@@ -145,6 +153,25 @@ export async function GET(req: NextRequest) {
 				error: `unknown source: '${sourceFilter}'`,
 				hint: "see validSources for the full list",
 				validSources: VALID_SOURCES,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+
+	const VALID_SEVERITIES = [
+		"critical",
+		"high",
+		"medium",
+		"low",
+		"informational",
+		"unknown",
+	] as const;
+	if (severityFilter && !VALID_SEVERITIES.includes(severityFilter as never)) {
+		return NextResponse.json(
+			{
+				error: `unknown severity: '${severityFilter}'`,
+				hint: "severity reflects per-chunk section inference and is 'unknown' for most PDF-derived chunks — filter with that caveat. For report-level enumeration use /api/audits.",
+				validSeverities: VALID_SEVERITIES,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -573,6 +600,33 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Audit-metadata post-filters (normalization-aware exact match for
+	// auditor, substring for protocol, exact for severity). Non-audit chunks
+	// carry null metadata and thus drop out whenever a filter is present.
+	if (auditorFilter || protocolFilter || severityFilter) {
+		const wantAuditor = auditorFilter
+			? normalizeIdentityText(auditorFilter).toLowerCase()
+			: null;
+		const wantProtocol = protocolFilter
+			? normalizeIdentityText(protocolFilter).toLowerCase()
+			: null;
+		chunks = chunks.filter((c) => {
+			if (
+				wantAuditor &&
+				(!c.auditor ||
+					normalizeIdentityText(c.auditor).toLowerCase() !== wantAuditor)
+			)
+				return false;
+			if (
+				wantProtocol &&
+				!(c.protocol ?? "").toLowerCase().includes(wantProtocol)
+			)
+				return false;
+			if (severityFilter && c.severity !== severityFilter) return false;
+			return true;
+		});
+	}
+
 	// Shared ranking stage (src/lib/research-rank.ts): drop low-value chunks,
 	// collapse to the best chunk per document, and order by the attached
 	// confidence signal (relevance + freshness + authority) with raw-score
@@ -588,7 +642,14 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/research",
 		query: q,
-		filters: { source: sourceFilter, limit: limitParam, mode },
+		filters: {
+			source: sourceFilter,
+			auditor: auditorFilter,
+			protocol: protocolFilter,
+			severity: severityFilter,
+			limit: limitParam,
+			mode,
+		},
 		resultCount: results.length,
 		matchMode: mode,
 	});
@@ -604,7 +665,13 @@ export async function GET(req: NextRequest) {
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
-				filters: { source: sourceFilter, limit: limitParam },
+				filters: {
+					source: sourceFilter,
+					auditor: auditorFilter,
+					protocol: protocolFilter,
+					severity: severityFilter,
+					limit: limitParam,
+				},
 				counts: { returned: results.length },
 				// Per-result `confidence`: a 0–1 score + label (high/medium/low)
 				// blending relevance, source-aware freshness, and source

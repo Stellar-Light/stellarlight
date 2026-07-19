@@ -21,6 +21,7 @@ import { Media } from "./collections/Media";
 import { PartnerLeads } from "./collections/PartnerLeads";
 import { Partners } from "./collections/Partners";
 import { Projects } from "./collections/Projects";
+import { Audits } from "./collections/Audits";
 import { Repos } from "./collections/Repos";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
@@ -78,6 +79,7 @@ export default buildConfig({
 		Media,
 		Projects,
 		Repos,
+		Audits,
 		Blog,
 		Builders,
 		RSSFeeds,
