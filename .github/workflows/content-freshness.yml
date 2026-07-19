@@ -36,6 +36,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
+  issues: write
   contents: read
 
 jobs:
@@ -47,4 +48,16 @@ jobs:
         with:
           node-version: "20"
       - name: Scan authored content for stale Stellar CLI commands
-        run: npx -y tsx scripts/check-content-freshness.ts
+        id: scan
+        continue-on-error: true
+        run: npx -y tsx scripts/check-content-freshness.ts 2>&1 | tee freshness.log
+      - name: Track the signal (rolling issue)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "Content freshness check red"
+          outcome: ${{ steps.scan.outcome }}
+          body-file: freshness.log
+      - name: Propagate the red
+        if: steps.scan.outcome == 'failure'
+        run: exit 1
