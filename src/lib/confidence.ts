@@ -241,25 +241,47 @@ const PROJECT_STATUS_FRESHNESS: Record<string, number> = {
 	"Pre-Development": 0.55,
 };
 
+// A row whose anchor tokens hit only mid-prose ("mentions custody") may not
+// read as a high-trust match for the thing itself — cap just under the
+// "high" threshold, same honesty rule as the semantic-fallback cap.
+const MENTION_CONFIDENCE_CAP = 0.7;
+
 export function projectConfidence(input: {
 	score: number;
 	maxScore: number;
 	status?: string | null;
 	scfAwarded?: boolean;
 	hackathonPlacement?: string | null;
+	/**
+	 * Where the query's anchor (non-generic) tokens hit this record:
+	 * "identity" = name/category/types/coverage/description-lead — the record
+	 * IS the anchor thing (relevance floored: missing a secondary token must
+	 * not bury it under prose-mentioners); "mention" = mid-prose only
+	 * (relevance halved + composite capped below "high"); null/undefined =
+	 * rule not applicable (no anchors, or no query).
+	 */
+	anchorPlacement?: "identity" | "mention" | null;
 }): Confidence {
-	const relevance =
+	let relevance =
 		input.maxScore > 0 ? clamp01(input.score / input.maxScore) : 0;
+	if (input.anchorPlacement === "identity") {
+		relevance = Math.max(relevance, 0.75);
+	} else if (input.anchorPlacement === "mention") {
+		relevance = relevance * 0.5;
+	}
 	const freshness = PROJECT_STATUS_FRESHNESS[input.status ?? ""] ?? 0.5;
 	let authority = 0.6;
 	if (input.scfAwarded) authority += 0.25; // SCF-vetted
 	if (input.hackathonPlacement) authority += 0.1; // placed in a hackathon
-	return composeConfidence(
+	const c = composeConfidence(
 		relevance,
 		clamp01(freshness),
 		clamp01(authority),
 		null,
 	);
+	if (input.anchorPlacement === "mention" && c.score > MENTION_CONFIDENCE_CAP)
+		return { ...c, score: MENTION_CONFIDENCE_CAP, label: "medium" };
+	return c;
 }
 
 /**

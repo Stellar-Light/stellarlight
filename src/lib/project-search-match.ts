@@ -547,6 +547,40 @@ export function scoreTokens(hay: string, tokens: string[]): number {
 	);
 }
 
+/**
+ * Mention-vs-identity (2026-07-19 re-measure of the 07-11 audit's item 1):
+ * token-coverage scoring read "tokens held in qualified custody" as a 0.97
+ * custody match while the actual custody provider sat 5th — a record whose
+ * prose merely MENTIONS the query's anchor noun mid-sentence is not the
+ * thing the query asks for. The identity zone is where a record states what
+ * it IS: name, category, types, coverage vocabulary, and the leading clause
+ * of the description (the "what-it-is" position).
+ */
+export function identityZone(p: MatchableProject): string {
+	const cov = covValues(p);
+	const types = Array.isArray(p.types) ? p.types.join(" ") : "";
+	const lead = (p.shortDescription ?? "").slice(0, 60);
+	return `${p.name ?? ""} ${p.category ?? ""} ${types} ${cov.join(" ")} ${lead}`.toLowerCase();
+}
+
+/**
+ * Does any anchor (non-generic) token hit the record's identity zone?
+ * Negation-guarded like all matching ("non-custodial" in the lead clause is
+ * not a custody identity). All-generic queries return true — the rule only
+ * discriminates when the query names a real anchor noun.
+ */
+export function anchorIdentityHit(
+	p: MatchableProject,
+	tokens: string[],
+): boolean {
+	const anchors = anchorTokens(tokens);
+	if (!anchors.length) return true;
+	const zone = identityZone(p);
+	return anchors.some((t) =>
+		termsForToken(t).some((v) => hasPositiveHit(zone, v)),
+	);
+}
+
 // Does the record's own `types` match the query's implied category?
 export function typeMatch(
 	p: MatchableProject,
