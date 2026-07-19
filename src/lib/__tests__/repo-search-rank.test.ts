@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchRepos } from "../repo-search";
+import { flagshipsFor, searchRepos } from "../repo-search";
 
 /** F4 (audit root #4): stellarness ranks above raw keyword score. */
 
@@ -301,3 +301,76 @@ describe("streaming-payments vertical flagships (golden repos-streaming-payments
 		expect(repos[0]?.fullName).toBe("x/x402-market");
 	});
 });
+
+describe("staleness vs org authority (2026-07-19 answer-key eval)", () => {
+	it("a live flagship outranks a 4-year-dead SDF MVP at equal relevance", async () => {
+		const deadSdfMvp = doc({
+			// The moneygram-access-wallet-mvp class: SDF-org, name-token hit,
+			// last commit 49 months ago.
+			fullName: "stellar/payments-access-mvp",
+			description: "MVP demo",
+			lastCommitAt: "2022-06-24T00:00:00Z",
+			stellarProof: "soroban-sdk",
+			codeScanState: "scanned",
+		});
+		const liveFlagship = doc({
+			fullName: "kalepail/payments-kit",
+			description: "kit",
+			lastCommitAt: "2026-06-13T00:00:00Z",
+			stellarProof: "soroban-sdk",
+			codeScanState: "scanned",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([deadSdfMvp, liveFlagship]),
+			"payments",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("kalepail/payments-kit");
+	});
+
+	it("unknown lastCommitAt is NOT treated as dead", async () => {
+		const unknownAge = doc({
+			fullName: "team/unknown-age",
+			description: "a payments tool on Soroban",
+			lastCommitAt: null,
+			stellarProof: "soroban-sdk",
+			codeScanState: "scanned",
+		});
+		const stale = doc({
+			fullName: "team/old-thing",
+			description: "a payments tool on Soroban",
+			lastCommitAt: "2021-01-01T00:00:00Z",
+			stellarProof: "soroban-sdk",
+			codeScanState: "scanned",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([stale, unknownAge]),
+			"payments",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("team/unknown-age");
+	});
+});
+
+describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", () => {
+	it("q=wallet floats the verified flagship wallets", () => {
+		const f = flagshipsFor("wallet");
+		expect(f).toContain("stellar/freighter");
+		expect(f).toContain("creit-tech/xbull-wallet");
+		expect(f).toContain("kalepail/passkey-kit");
+	});
+	it("smart wallet queries hit the wallet vertical too", () => {
+		expect(flagshipsFor("smart wallet passkeys")).toContain(
+			"kalepail/passkey-kit",
+		);
+	});
+	it("q=anchor floats the open anchor tooling (operators are closed-source)", () => {
+		const f = flagshipsFor("anchor integration");
+		expect(f).toContain("stellar/anchor-platform");
+		expect(f).toContain("stellar/stellar-anchor-tests");
+	});
+	it("off-vertical queries stay untouched", () => {
+		expect(flagshipsFor("zk proofs")).toEqual([]);
+	});
+});
+
