@@ -107,6 +107,17 @@ Stellar builder directory (synced from Stellar Passport). **Populated but small 
 
 **Returns:** `.builders[*]` with githubUsername, displayName, bio, roleTitle, location, projects[]. (Rows carry NO SCF-tier/award-track data — the never-populated `scfTier` field was removed in spec 1.7.19; never present SCF-tier claims about people. A project's SCF award history lives on `/api/projects/search` rows.) When `.meta.counts.returned === 0`, the response also includes `.meta.advisory` with a one-line summary + 2 fallback channels (Stellar Discord + GitHub topic:stellar) — relay these verbatim to the user. The advisory exists specifically so you don't confabulate ecosystem-level claims from an empty directory.
 
+**Person lookups:** this index is GitHub-contributor builders only. A name query for an SDF staffer/leader/board member (e.g. "justin rice", "tomer weller") that matches nobody returns `.meta.advisory` with the person's identification from the SDF roster (when known) and a pointer to `/api/people` — don't treat it as "person doesn't exist".
+
+---
+
+## `GET /api/people`
+The SDF team/people index — **leadership, board of directors, and advisors** (name → role → org), quoted from `stellar.org/foundation/team` with provenance (`.meta.source`, `.meta.observedAt`). Deliberately distinct from `/api/builders`: a VP of Ecosystem or a board member is **not** a GitHub-contributor "builder". Use for *"who is {person}"*, *"what's {person}'s role at SDF"*, *"who leads {area}"*, *"who's on the board"*.
+
+**Params:** `q={name|role|org}` (all tokens must match), `section={Leadership|Board of directors|Advisors}` (aliases `board`/`advisor` accepted; invalid → 400), `limit`/`offset`. Unknown params 400.
+
+**Returns:** `.people[*]` with `name`, `role`, `section`, `org` (SDF for leadership, the external org for board/advisors), `sourceUrl`, `observedAt`. `.meta.sections` lists the sections present. A 0-result `.meta.advisory` routes to `/api/builders` (GitHub contributors) or `/api/research` (doc/spec authorship). Exposed as the `get_people` MCP tool.
+
 ---
 
 ## `GET /api/projects/search`

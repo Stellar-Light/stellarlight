@@ -190,6 +190,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/people": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SDF team / people index
+         * @description The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.
+         */
+        get: operations["getPeople"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/partners": {
         parameters: {
             query?: never;
@@ -1380,6 +1400,64 @@ export interface operations {
                         }[];
                     };
                 };
+            };
+        };
+    };
+    getPeople: {
+        parameters: {
+            query?: {
+                /** @description Name / role / org text filter (e.g. 'justin rice', 'ecosystem', 'openai'). All tokens must match. */
+                q?: string;
+                /** @description Restrict to one roster section. Accepts 'Leadership', 'Board of directors', 'Advisors' (and aliases 'board'/'advisor'). */
+                section?: string;
+                /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
+                limit?: components["parameters"]["limit"];
+                /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
+                offset?: components["parameters"]["offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SDF roster */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
+                            source?: string;
+                            /** @description Date the roster was last observed from the source (YYYY-MM-DD). */
+                            observedAt?: string;
+                            /** @description Distinct roster sections present (Leadership, Board of directors, Advisors). */
+                            sections?: string[];
+                            /** @description This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability. */
+                            matchBasis?: string;
+                        };
+                        people?: {
+                            name?: string;
+                            /** @description Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'. */
+                            role?: string;
+                            /** @description Roster section: 'Leadership' | 'Board of directors' | 'Advisors'. */
+                            section?: string;
+                            /** @description Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none. */
+                            org?: string;
+                            sourceUrl?: string;
+                            observedAt?: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Invalid section value, or an unsupported query parameter. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

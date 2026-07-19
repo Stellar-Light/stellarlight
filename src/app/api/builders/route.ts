@@ -16,6 +16,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findPeopleByName } from "@/lib/sdf-people";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -537,6 +538,10 @@ export async function GET(req: NextRequest) {
 	// ecosystem people. Say that honestly and point at where people/authorship
 	// live, instead of "broaden your filter" (which implies the person is here).
 	const personLookup = !!q && !location && looksLikePersonName(q);
+	// Cross-link into the SDF people index: if the name IS on the SDF roster,
+	// identify them concretely (name/role/section) instead of just saying "not a
+	// builder" — this is the honest, positive answer to "who is <person>".
+	const sdfMatches = personLookup && q ? findPeopleByName(q) : [];
 
 	const builderAdvisory =
 		totalMatching > 0
@@ -547,23 +552,45 @@ export async function GET(req: NextRequest) {
 							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
 						channels: builderChannels,
 					}
-				: personLookup
+				: sdfMatches.length
 					? {
-							summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person, their role, or doc/spec authorship, query /api/research (which carries SDF docs, team pages, and blog authorship).`,
+							summary: `${sdfMatches
+								.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
+								.join(
+									"; ",
+								)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
 							scope:
 								"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+							sdfPeople: sdfMatches,
 							tryInstead: [
 								{
-									endpoint: "/api/research",
-									why: "named people, roles, and doc/spec/blog authorship across the SDF corpus",
+									endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+									why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
 								},
 							],
 							channels: builderChannels,
 						}
-					: {
-							summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
-							channels: builderChannels,
-						};
+					: personLookup
+						? {
+								summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+								scope:
+									"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+								tryInstead: [
+									{
+										endpoint: "/api/people",
+										why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
+									},
+									{
+										endpoint: "/api/research",
+										why: "doc/spec/blog authorship across the SDF corpus",
+									},
+								],
+								channels: builderChannels,
+							}
+						: {
+								summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
+								channels: builderChannels,
+							};
 
 	return NextResponse.json(
 		{

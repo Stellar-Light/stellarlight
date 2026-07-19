@@ -1,6 +1,6 @@
 {
 	"name": "@stellar-light/scout-mcp",
-	"version": "1.1.10",
+	"version": "1.1.11",
 	"description": "Stellar Scout MCP server \u2014 agentic ecosystem research for Stellar builders, callable from Claude.ai / ChatGPT / Cursor / Gemini and any MCP client.",
 	"keywords": [
 		"mcp",

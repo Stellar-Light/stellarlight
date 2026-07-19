@@ -27,11 +27,7 @@ const nextConfig = {
 	},
 	// Exclude problematic packages from server-side bundling
 	// This prevents Next.js from trying to bundle these packages
-	serverExternalPackages: [
-		"thread-stream",
-		"pino",
-		"pino-pretty",
-	],
+	serverExternalPackages: ["thread-stream", "pino", "pino-pretty"],
 	webpack: (webpackConfig, { isServer, webpack }) => {
 		webpackConfig.resolve.extensionAlias = {
 			".cjs": [".cts", ".cjs"],
@@ -45,7 +41,7 @@ const nextConfig = {
 			new webpack.IgnorePlugin({
 				resourceRegExp: /\.(test|spec)\.(js|ts|mjs|cjs|tsx|jsx)$/,
 				contextRegExp: /node_modules/,
-			})
+			}),
 		);
 
 		// Ignore non-JS files that shouldn't be processed
@@ -53,7 +49,7 @@ const nextConfig = {
 			new webpack.IgnorePlugin({
 				resourceRegExp: /\.(md|txt|zip|sh|yml|yaml|LICENSE)$/,
 				contextRegExp: /node_modules\/thread-stream/,
-			})
+			}),
 		);
 
 		return webpackConfig;
@@ -81,6 +77,7 @@ const nextConfig = {
 			"/api/hackathons/:slug",
 			"/api/hackathons/compare",
 			"/api/builders",
+			"/api/people",
 			"/api/partners",
 			"/api/partners/:slug",
 			"/api/rfps",

@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.2",
+		"version": "1.8.3",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -1198,6 +1198,154 @@
 								}
 							}
 						}
+					}
+				}
+			}
+		},
+		"/api/people": {
+			"get": {
+				"operationId": "getPeople",
+				"tags": [
+					"Builders"
+				],
+				"summary": "SDF team / people index",
+				"description": "The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.",
+				"x-routing": {
+					"purpose": "Look up a named person on the SDF roster (leadership / board / advisors) and their current role/affiliation.",
+					"keywords": [
+						"who is",
+						"role",
+						"title",
+						"leadership",
+						"executive",
+						"ceo",
+						"cto",
+						"cfo",
+						"chief",
+						"vp",
+						"vp of ecosystem",
+						"board",
+						"board of directors",
+						"director",
+						"advisor",
+						"advisors",
+						"sdf team",
+						"stellar development foundation team",
+						"founder",
+						"staff",
+						"person",
+						"people"
+					],
+					"useWhen": [
+						"who is <person> / what is <person>'s role at SDF",
+						"who leads ecosystem / product / engineering at the SDF",
+						"who sits on the SDF board of directors or advisory board",
+						"a named SDF staffer or leader that getBuilders (GitHub contributors) doesn't cover"
+					],
+					"notFor": [
+						"a GitHub-contributor / builder to hire -> getBuilders",
+						"who authored a doc/spec/blog post -> searchResearch",
+						"a funded project/product or 'who built X (the company)' -> searchProjects"
+					],
+					"exampleQuestions": [
+						"Who is Justin Rice and what does he do at SDF?",
+						"Who is the SDF Chief Scientist?",
+						"Who's on the Stellar Development Foundation board of directors?"
+					]
+				},
+				"parameters": [
+					{
+						"name": "q",
+						"in": "query",
+						"description": "Name / role / org text filter (e.g. 'justin rice', 'ecosystem', 'openai'). All tokens must match.",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "section",
+						"in": "query",
+						"description": "Restrict to one roster section. Accepts 'Leadership', 'Board of directors', 'Advisors' (and aliases 'board'/'advisor').",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/limit"
+					},
+					{
+						"$ref": "#/components/parameters/offset"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "SDF roster",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"meta": {
+											"type": "object",
+											"properties": {
+												"source": {
+													"type": "string",
+													"description": "The roster page each row is quoted from (stellar.org/foundation/team)."
+												},
+												"observedAt": {
+													"type": "string",
+													"description": "Date the roster was last observed from the source (YYYY-MM-DD)."
+												},
+												"sections": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													},
+													"description": "Distinct roster sections present (Leadership, Board of directors, Advisors)."
+												},
+												"matchBasis": {
+													"type": "string",
+													"description": "This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability."
+												}
+											}
+										},
+										"people": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"description": "One roster entry: person, current role, section, and affiliation.",
+												"properties": {
+													"name": {
+														"type": "string"
+													},
+													"role": {
+														"type": "string",
+														"description": "Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'."
+													},
+													"section": {
+														"type": "string",
+														"description": "Roster section: 'Leadership' | 'Board of directors' | 'Advisors'."
+													},
+													"org": {
+														"type": "string",
+														"description": "Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none."
+													},
+													"sourceUrl": {
+														"type": "string"
+													},
+													"observedAt": {
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid section value, or an unsupported query parameter."
 					}
 				}
 			}
