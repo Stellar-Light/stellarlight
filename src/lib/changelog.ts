@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-19",
+		surfaces: ["api"],
+		version: "openapi@1.8.4",
+		type: "fixed",
+		summary:
+			"Audit filters now scope retrieval (no more silent false negatives); /api/audits gains real-date since validation, didYouMean on filtered empties, and a dateBasis honesty field.",
+		detail:
+			"Cold-audit fixes on the new surfaces: (1) /api/research auditor/protocol/severity filters previously post-filtered an unscoped pool — a query whose top-K lacked audit chunks returned 0 even when matching audit chunks existed; the filters now imply source=audit at retrieval, and a contradictory explicit source= is a 400. severity is case-insensitive. (2) /api/audits: since= rejects impossible YYYY-MM-DD dates (2026-13-01 previously passed and matched nothing); filtered empties return meta.didYouMean suggestions from the registry's own values; rows carry dateBasis (published | portal-record) so wall-clock portal timestamps aren't mistaken for publication recency.",
+	},
+	{
+		date: "2026-07-19",
 		surfaces: ["api", "mcp"],
 		version: "openapi@1.8.3 / scout-mcp@1.1.11",
 		type: "added",

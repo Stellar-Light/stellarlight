@@ -78,6 +78,15 @@ export const Audits: CollectionConfig = {
 			admin: { description: "Report date as published by the portal" },
 		},
 		{
+			name: "dateBasis",
+			type: "select",
+			options: ["published", "portal-record"],
+			admin: {
+				description:
+					"published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time) — do not treat as publication recency",
+			},
+		},
+		{
 			name: "observedAt",
 			type: "date",
 			admin: { description: "When our crawler last saw this report live" },

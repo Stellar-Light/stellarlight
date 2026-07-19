@@ -2031,7 +2031,7 @@ export const spec: OpenAPISpec = {
 						name: "auditor",
 						in: "query",
 						description:
-							"Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Only audit-source chunks carry this metadata, so using it narrows results to audits. For report-level enumeration prefer listAudits.",
+							"Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Using any audit-metadata filter scopes RETRIEVAL to source=audit (an explicit contradictory source= is rejected with 400). For report-level enumeration prefer listAudits.",
 						schema: { type: "string" },
 					},
 					{
@@ -2045,7 +2045,7 @@ export const spec: OpenAPISpec = {
 						name: "severity",
 						in: "query",
 						description:
-							"Audit-metadata filter: per-chunk inferred severity. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
+							"Audit-metadata filter, case-insensitive. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
 						schema: {
 							type: "string",
 							enum: [
@@ -2834,6 +2834,11 @@ export const spec: OpenAPISpec = {
 							"Provenance of the project link: name-exact | alias | unmatched (verified no-match); null = not yet triaged",
 					},
 					publishedAt: { type: ["string", "null"], format: "date-time" },
+					dateBasis: {
+						type: ["string", "null"],
+						description:
+							"published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time) — not publication recency; null = pre-dateBasis row",
+					},
 					observedAt: {
 						type: ["string", "null"],
 						format: "date-time",

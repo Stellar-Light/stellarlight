@@ -877,6 +877,10 @@ export interface Audit {
 	 */
 	publishedAt?: string | null;
 	/**
+	 * published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time) — do not treat as publication recency
+	 */
+	dateBasis?: ("published" | "portal-record") | null;
+	/**
 	 * When our crawler last saw this report live
 	 */
 	observedAt?: string | null;
@@ -2466,6 +2470,7 @@ export interface AuditsSelect<T extends boolean = true> {
 	projectName?: T;
 	linkBasis?: T;
 	publishedAt?: T;
+	dateBasis?: T;
 	observedAt?: T;
 	findingsTotal?: T;
 	severityCounts?: T;

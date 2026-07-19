@@ -559,6 +559,8 @@ export interface components {
             linkBasis?: string | null;
             /** Format: date-time */
             publishedAt?: string | null;
+            /** @description published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time) — not publication recency; null = pre-dateBasis row */
+            dateBasis?: string | null;
             /**
              * Format: date-time
              * @description When our crawler last saw the report live
@@ -1844,11 +1846,11 @@ export interface operations {
                 q: string;
                 /** @description Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags). */
                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
-                /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Only audit-source chunks carry this metadata, so using it narrows results to audits. For report-level enumeration prefer listAudits. */
+                /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Using any audit-metadata filter scopes RETRIEVAL to source=audit (an explicit contradictory source= is rejected with 400). For report-level enumeration prefer listAudits. */
                 auditor?: string;
                 /** @description Audit-metadata filter: audited protocol/codebase name (substring match). Narrows results to audit-source chunks. */
                 protocol?: string;
-                /** @description Audit-metadata filter: per-chunk inferred severity. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
+                /** @description Audit-metadata filter, case-insensitive. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
                 severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;

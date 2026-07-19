@@ -373,4 +373,3 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 		expect(flagshipsFor("zk proofs")).toEqual([]);
 	});
 });
-
