@@ -662,6 +662,61 @@ async function main() {
 		bad("advertised versions", `check failed: ${String(err)}`);
 	}
 
+	// ---- Event recall: is the LATEST protocol/core release actually servable? ----
+	// 2026-07-19: Protocol 27 "Zipper" reached mainnet (vote 07-08) and no
+	// check noticed the corpus couldn't answer "what's the latest protocol
+	// release" — source-freshness lanes only prove crons ran, not that a real
+	// ecosystem EVENT is retrievable. This lane pins the class: fetch the
+	// newest stable stellar-core tag from GitHub, then require our own
+	// /api/research (source=release) to serve a doc for it. 5-day grace for
+	// the daily refresh to pick a brand-new release up.
+	try {
+		const gh = await fetch(
+			"https://api.github.com/repos/stellar/stellar-core/releases?per_page=5",
+			{ headers: { "user-agent": "stellarlight-self-audit" } },
+		);
+		if (!gh.ok) throw new Error(`GitHub HTTP ${gh.status}`);
+		const rels = (
+			(await gh.json()) as Array<{
+				tag_name: string;
+				published_at: string;
+				prerelease: boolean;
+				draft: boolean;
+			}>
+		).filter((r) => !r.prerelease && !r.draft);
+		const latest = rels[0];
+		if (!latest) {
+			warn("event recall", "GitHub returned no stable stellar-core releases");
+		} else {
+			const ageDays =
+				(Date.now() - new Date(latest.published_at).getTime()) / 86_400_000;
+			const res = await j(
+				`/api/research?q=${encodeURIComponent(`stellar-core ${latest.tag_name}`)}&source=release&limit=5`,
+			);
+			const hit = (res.results ?? []).some(
+				(r: { title?: string; url?: string }) =>
+					(r.title ?? "").includes(latest.tag_name) ||
+					(r.url ?? "").includes(latest.tag_name),
+			);
+			if (hit)
+				ok(
+					`event recall: stellar-core ${latest.tag_name} servable via source=release`,
+				);
+			else if (ageDays < 5)
+				warn(
+					"event recall",
+					`stellar-core ${latest.tag_name} (${ageDays.toFixed(1)}d old) not yet in the release corpus — inside the 5d ingest grace`,
+				);
+			else
+				bad(
+					"event recall",
+					`stellar-core ${latest.tag_name} released ${ageDays.toFixed(0)}d ago but /api/research?source=release cannot serve it — the release ingest is stalled or broken (the Protocol-27 class)`,
+				);
+		}
+	} catch (err) {
+		warn("event recall", `check skipped: ${String(err)}`);
+	}
+
 	console.log(
 		`\n${fails ? "✗ FAIL" : "✓ PASS"} — ${passes} passed, ${warns} warnings, ${fails} failures`,
 	);

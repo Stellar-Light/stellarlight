@@ -104,6 +104,10 @@ export const ResearchDocs: CollectionConfig = {
 					label: "Electric Capital Developer Report",
 					value: "ec-developer-report",
 				},
+				{
+					label: "Protocol/tooling releases (stellar-core, CLI, SDKs)",
+					value: "release",
+				},
 			],
 		},
 		{

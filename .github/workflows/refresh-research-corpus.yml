@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report). Leave empty to run all."
+        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report|release). Leave empty to run all."
         required: false
         default: ""
       prune_execute:
@@ -128,6 +128,10 @@ jobs:
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-papers.ts --execute
 
+      - name: Ingest protocol/tooling releases (GitHub)
+        if: inputs.source == '' || inputs.source == 'release'
+        continue-on-error: true
+        run: pnpm exec tsx scripts/ingest-protocol-releases.ts --execute
       - name: Ingest Soroban audit reports (sorobansecurity.com)
         if: inputs.source == '' || inputs.source == 'audit'
         continue-on-error: true
