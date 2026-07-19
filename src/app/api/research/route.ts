@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
 	// got unfiltered results and believed it filtered (the omission trap).
 	const auditorFilter = sp.get("auditor");
 	const protocolFilter = sp.get("protocol");
-	const severityFilter = sp.get("severity");
+	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
 	const limitParam = clampLimit(sp.get("limit"), 8, 25);
 
 	// Single source of truth for valid `source` values. Kept in sync with
@@ -178,6 +178,27 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
+	// Audit-metadata filters imply source=audit — and must scope RETRIEVAL,
+	// not just post-filter it. The 2026-07-19 cold audit found the post-only
+	// version returned 0 whenever the unfiltered vector pool happened to lack
+	// audit chunks, even though perfectly-matching audit chunks existed: a
+	// silent false negative that reads as "this firm never audited this"
+	// (omission=negation). A contradictory explicit source is rejected rather
+	// than silently producing that same guaranteed-empty page.
+	const auditScoped = Boolean(
+		auditorFilter || protocolFilter || severityFilter,
+	);
+	if (auditScoped && sourceFilter && sourceFilter !== "audit") {
+		return NextResponse.json(
+			{
+				error: `auditor/protocol/severity filters apply only to audit-source chunks, which contradicts source='${sourceFilter}'`,
+				hint: "drop the source param (audit scope is implied) or use source=audit",
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const effectiveSource = auditScoped ? "audit" : sourceFilter;
+
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
@@ -216,7 +237,7 @@ export async function GET(req: NextRequest) {
 		const pipeline = buildResearchVectorPipeline({
 			queryEmbedding,
 			limit: limitParam,
-			sourceFilter,
+			sourceFilter: effectiveSource,
 		});
 
 		const docs = await collection.aggregate(pipeline).toArray();
@@ -276,7 +297,7 @@ export async function GET(req: NextRequest) {
 
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
 			const where: any = {};
-			if (sourceFilter) where.source = { equals: sourceFilter };
+			if (effectiveSource) where.source = { equals: effectiveSource };
 			if (tokens.length) {
 				where.or = tokens.map((t) => ({
 					or: [{ title: { contains: t } }, { content: { contains: t } }],
@@ -397,7 +418,7 @@ export async function GET(req: NextRequest) {
 					collection: "research-docs",
 					where: {
 						parentDocId: { in: idTargets },
-						...(sourceFilter ? { source: { equals: sourceFilter } } : {}),
+						...(effectiveSource ? { source: { equals: effectiveSource } } : {}),
 					},
 					limit: 25,
 					depth: 0,
@@ -491,7 +512,7 @@ export async function GET(req: NextRequest) {
 				and: [
 					{ publishedAt: { greater_than_equal: cutoffISO } },
 					{ source: { in: RECENCY_SUPPLEMENT_SOURCES } },
-					...(sourceFilter ? [{ source: { equals: sourceFilter } }] : []),
+					...(effectiveSource ? [{ source: { equals: effectiveSource } }] : []),
 					...(topicTokens.length
 						? [
 								{
@@ -551,7 +572,9 @@ export async function GET(req: NextRequest) {
 						...lexTokens.map((t) => ({
 							or: [{ title: { contains: t } }, { content: { contains: t } }],
 						})),
-						...(sourceFilter ? [{ source: { equals: sourceFilter } }] : []),
+						...(effectiveSource
+							? [{ source: { equals: effectiveSource } }]
+							: []),
 					],
 				};
 				const lex = await payload.find({
@@ -588,7 +611,7 @@ export async function GET(req: NextRequest) {
 				collection: "research-docs",
 				where: {
 					url: { in: anchorMissing },
-					...(sourceFilter ? { source: { equals: sourceFilter } } : {}),
+					...(effectiveSource ? { source: { equals: effectiveSource } } : {}),
 				},
 				limit: 24,
 				depth: 0,

@@ -351,6 +351,7 @@ async function run() {
 		linkBasis: "name-exact" | "alias" | "unmatched" | null;
 		linkMapped: boolean;
 		publishedAt: string;
+		dateBasis: "published" | "portal-record";
 		observedAt: string;
 		chunksIndexed: number;
 	}
@@ -426,6 +427,19 @@ async function run() {
 				linkBasis: link.basis,
 				linkMapped: link.mapped,
 				publishedAt: meta.date,
+				// A human-published report date is a date-stamp; wall-clock
+				// minutes/seconds betray a portal upload timestamp masquerading as
+				// a publication date (12/58 rows) — mark it so consumers don't
+				// treat scrape time as recency (undated-metrics class).
+				dateBasis: (() => {
+					const d = new Date(meta.date);
+					return Number.isNaN(d.getTime()) ||
+						d.getUTCMinutes() !== 0 ||
+						d.getUTCSeconds() !== 0 ||
+						d.getUTCMilliseconds() !== 0
+						? ("portal-record" as const)
+						: ("published" as const);
+				})(),
 				observedAt: observedAtIso,
 				chunksIndexed: chunks.length,
 			});

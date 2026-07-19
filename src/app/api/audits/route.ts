@@ -42,6 +42,7 @@ interface AuditRow {
 	projectName: string | null;
 	linkBasis: string | null;
 	publishedAt: string | null;
+	dateBasis: string | null;
 	observedAt: string | null;
 	findingsTotal: number | null;
 	severityCounts: Record<string, number> | null;
@@ -92,11 +93,22 @@ export async function GET(req: NextRequest) {
 	const limitParam = clampLimit(sp.get("limit"), 100, 100);
 	const offset = Math.max(0, Number.parseInt(sp.get("offset") ?? "0", 10) || 0);
 
-	if (since && !/^\d{4}-\d{2}-\d{2}$/.test(since)) {
-		return NextResponse.json(
-			{ error: "invalid `since` — use YYYY-MM-DD" },
-			{ status: 400, headers: rateLimitHeaders(limit) },
-		);
+	// Shape AND round-trip validation: "2026-13-01" and "2026-06-31" match the
+	// regex but produce Invalid Date / a shifted date, and every row would then
+	// silently fail the comparison — matched:0 indistinguishable from "no
+	// audits since then" on a plausible typo (2026-07-19 cold audit).
+	if (since) {
+		const roundTrip = new Date(`${since}T00:00:00Z`);
+		if (
+			!/^\d{4}-\d{2}-\d{2}$/.test(since) ||
+			Number.isNaN(roundTrip.getTime()) ||
+			roundTrip.toISOString().slice(0, 10) !== since
+		) {
+			return NextResponse.json(
+				{ error: `invalid \`since\` date: '${since}' — use a real YYYY-MM-DD` },
+				{ status: 400, headers: rateLimitHeaders(limit) },
+			);
+		}
 	}
 
 	const payload = await getPayloadSafe();
@@ -127,6 +139,7 @@ export async function GET(req: NextRequest) {
 		projectName: d.projectName ?? null,
 		linkBasis: d.linkBasis ?? null,
 		publishedAt: d.publishedAt ?? null,
+		dateBasis: d.dateBasis ?? null,
 		observedAt: d.observedAt ?? null,
 		findingsTotal: d.findingsTotal ?? null,
 		severityCounts: d.severityCounts ?? null,
@@ -159,6 +172,36 @@ export async function GET(req: NextRequest) {
 	}
 
 	const matched = rows.length;
+
+	// A filtered empty with a name-form miss must not masquerade as "no audits
+	// on record" (the meta.note actively steers that way). Cheap fuzzy pass
+	// over the registry's own values: strip non-alphanumerics and compare.
+	let didYouMean: string[] | undefined;
+	if (matched === 0 && (project || auditor)) {
+		const squash = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, "");
+		const suggestions = new Set<string>();
+		if (project) {
+			const want = squash(project);
+			for (const r of found.docs as unknown as AuditRow[]) {
+				const slug = r.projectSlug;
+				if (!slug) continue;
+				const have = squash(slug);
+				if (have.includes(want) || want.includes(have))
+					suggestions.add(`project=${slug}`);
+			}
+		}
+		if (auditor) {
+			const want = squash(normalizeIdentityText(auditor));
+			for (const r of found.docs as unknown as AuditRow[]) {
+				if (!r.auditor) continue;
+				const have = squash(normalizeIdentityText(r.auditor));
+				if (have.includes(want) || want.includes(have))
+					suggestions.add(`auditor=${r.auditor}`);
+			}
+		}
+		if (suggestions.size) didYouMean = [...suggestions].slice(0, 5);
+	}
+
 	rows = rows.slice(offset, offset + limitParam);
 
 	logApiHit({
@@ -176,6 +219,7 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				filters: { project, auditor, q, since, limit: limitParam, offset },
 				counts: { total, matched, returned: rows.length },
+				...(didYouMean ? { didYouMean } : {}),
 				note: "One row per audit report from stellarsecurityportal.com. A project absent here has no audit on record at our source — NOT a claim that it is unaudited. findingsTotal/severityCounts null = not extracted, NOT zero. Full report text: /api/research?source=audit.",
 			},
 			audits: rows,
