@@ -1703,7 +1703,20 @@ export const spec: OpenAPISpec = {
 					"200": {
 						description:
 							"Audit registry rows (meta.counts.total = corpus size; meta.counts.matched = after filters)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { $ref: "#/components/schemas/Meta" },
+										audits: {
+											type: "array",
+											items: { $ref: "#/components/schemas/Audit" },
+										},
+									},
+								},
+							},
+						},
 					},
 					"400": {
 						description:
@@ -1912,7 +1925,20 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Research results",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { $ref: "#/components/schemas/Meta" },
+										results: {
+											type: "array",
+											items: { $ref: "#/components/schemas/ResearchResult" },
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2632,6 +2658,99 @@ export const spec: OpenAPISpec = {
 				properties: {
 					error: { type: "string" },
 					details: { type: "object", additionalProperties: true },
+				},
+			},
+			Audit: {
+				type: "object",
+				description:
+					"One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero.",
+				properties: {
+					reportId: {
+						type: "integer",
+						description: "stellarsecurityportal.com report id (natural key)",
+					},
+					title: { type: "string" },
+					reportUrl: { type: ["string", "null"] },
+					auditor: {
+						type: ["string", "null"],
+						description: "Normalized auditor firm (canonical casing)",
+					},
+					protocol: {
+						type: ["string", "null"],
+						description: "Audited protocol/codebase name as published",
+					},
+					projectSlug: {
+						type: ["string", "null"],
+						description:
+							"Verified directory-project link; null = no directory project for this codebase (NOT 'unaudited')",
+					},
+					projectName: { type: ["string", "null"] },
+					linkBasis: {
+						type: ["string", "null"],
+						description:
+							"Provenance of the project link: name-exact | alias | unmatched (verified no-match); null = not yet triaged",
+					},
+					publishedAt: { type: ["string", "null"], format: "date-time" },
+					observedAt: {
+						type: ["string", "null"],
+						format: "date-time",
+						description: "When our crawler last saw the report live",
+					},
+					findingsTotal: {
+						type: ["integer", "null"],
+						description: "null = not extracted, NOT zero",
+					},
+					severityCounts: {
+						type: ["object", "null"],
+						description:
+							"{critical, high, medium, low, informational} counts; null = not extracted, NOT zero",
+					},
+					chunksIndexed: {
+						type: "integer",
+						description:
+							"Full-text chunks serving this report via /api/research?source=audit",
+					},
+				},
+			},
+			ResearchResult: {
+				type: "object",
+				description:
+					"One ranked research chunk from /api/research (best chunk per document).",
+				properties: {
+					id: { type: "string" },
+					source: { type: "string" },
+					title: { type: "string" },
+					section: { type: ["string", "null"] },
+					url: { type: "string" },
+					content: { type: "string" },
+					chunkIndex: { type: "integer" },
+					publishedAt: {
+						type: ["string", "null"],
+						description: "The source's own stated date",
+					},
+					observedAt: {
+						type: ["string", "null"],
+						description: "When ingest last crawled the page live",
+					},
+					auditor: {
+						type: ["string", "null"],
+						description: "Audit-source chunks only",
+					},
+					protocol: {
+						type: ["string", "null"],
+						description: "Audit-source chunks only",
+					},
+					severity: {
+						type: ["string", "null"],
+						description:
+							"Audit-source chunks only; section-inferred, 'unknown' for most PDF-derived chunks",
+					},
+					score: { type: ["number", "null"] },
+					confidence: {
+						type: "object",
+						description:
+							"0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays",
+					},
 				},
 			},
 			Partner: {

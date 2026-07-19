@@ -662,6 +662,43 @@ async function main() {
 		bad("advertised versions", `check failed: ${String(err)}`);
 	}
 
+	// ---- Skill-mirror freshness: advertised skill ⊆ reality (class 12) ----
+	// The Stellar-Light/stellar-scout mirror is pinned by consumers (Raven
+	// re-reviews on drift) and its sync PAT has a history of being unwired —
+	// verify-claims checks this weekly/on-PR; this daily lane closes the
+	// window where a stale mirror silently serves an old contract.
+	try {
+		const { readFile } = await import("node:fs/promises");
+		const MIRRORS = [
+			["public/skills/stellar-scout.md", "SKILL.md"],
+			[
+				"public/skills/references/api-reference.md",
+				"references/api-reference.md",
+			],
+			["public/skills/references/examples.md", "references/examples.md"],
+		];
+		for (const [local, remote] of MIRRORS) {
+			const ours = (await readFile(local, "utf8")).trim();
+			const r = await fetch(
+				`https://raw.githubusercontent.com/Stellar-Light/stellar-scout/main/${remote}`,
+				{ headers: { "user-agent": "stellarlight-self-audit" } },
+			);
+			if (!r.ok) {
+				bad(`skill mirror ${remote}`, `mirror fetch HTTP ${r.status}`);
+				continue;
+			}
+			const theirs = (await r.text()).trim();
+			if (ours === theirs) ok(`skill mirror ${remote} in sync`);
+			else
+				bad(
+					`skill mirror ${remote}`,
+					`mirror content differs from public/skills source (${ours.length} vs ${theirs.length} chars) — consumers pin the mirror; sync it before it serves a stale contract`,
+				);
+		}
+	} catch (err) {
+		warn("skill mirror", `check skipped: ${String(err)}`);
+	}
+
 	// ---- Event recall: is the LATEST protocol/core release actually servable? ----
 	// 2026-07-19: Protocol 27 "Zipper" reached mainnet (vote 07-08) and no
 	// check noticed the corpus couldn't answer "what's the latest protocol

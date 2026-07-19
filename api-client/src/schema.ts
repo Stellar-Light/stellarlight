@@ -522,6 +522,58 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** @description One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero. */
+        Audit: {
+            /** @description stellarsecurityportal.com report id (natural key) */
+            reportId?: number;
+            title?: string;
+            reportUrl?: string | null;
+            /** @description Normalized auditor firm (canonical casing) */
+            auditor?: string | null;
+            /** @description Audited protocol/codebase name as published */
+            protocol?: string | null;
+            /** @description Verified directory-project link; null = no directory project for this codebase (NOT 'unaudited') */
+            projectSlug?: string | null;
+            projectName?: string | null;
+            /** @description Provenance of the project link: name-exact | alias | unmatched (verified no-match); null = not yet triaged */
+            linkBasis?: string | null;
+            /** Format: date-time */
+            publishedAt?: string | null;
+            /**
+             * Format: date-time
+             * @description When our crawler last saw the report live
+             */
+            observedAt?: string | null;
+            /** @description null = not extracted, NOT zero */
+            findingsTotal?: number | null;
+            /** @description {critical, high, medium, low, informational} counts; null = not extracted, NOT zero */
+            severityCounts?: Record<string, never> | null;
+            /** @description Full-text chunks serving this report via /api/research?source=audit */
+            chunksIndexed?: number;
+        };
+        /** @description One ranked research chunk from /api/research (best chunk per document). */
+        ResearchResult: {
+            id?: string;
+            source?: string;
+            title?: string;
+            section?: string | null;
+            url?: string;
+            content?: string;
+            chunkIndex?: number;
+            /** @description The source's own stated date */
+            publishedAt?: string | null;
+            /** @description When ingest last crawled the page live */
+            observedAt?: string | null;
+            /** @description Audit-source chunks only */
+            auditor?: string | null;
+            /** @description Audit-source chunks only */
+            protocol?: string | null;
+            /** @description Audit-source chunks only; section-inferred, 'unknown' for most PDF-derived chunks */
+            severity?: string | null;
+            score?: number | null;
+            /** @description 0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays */
+            confidence?: Record<string, never>;
+        };
         /** @description An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained. */
         Partner: {
             slug?: string;
@@ -1690,7 +1742,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: components["schemas"]["Meta"];
+                        audits?: components["schemas"]["Audit"][];
+                    };
                 };
             };
             /** @description Unknown parameter or invalid value (params are never silently ignored) */
@@ -1732,7 +1787,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: components["schemas"]["Meta"];
+                        results?: components["schemas"]["ResearchResult"][];
+                    };
                 };
             };
         };

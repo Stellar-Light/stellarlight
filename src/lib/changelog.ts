@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-19",
 		surfaces: ["api"],
+		version: "openapi@1.8.2",
+		type: "changed",
+		summary:
+			"Audit and ResearchResult row schemas fully documented in the spec (previously generic objects); daily drift guard now field-covers both.",
+		detail:
+			"components.schemas.Audit and components.schemas.ResearchResult document every served field with null semantics (projectSlug null = no directory project, NOT unaudited; findingsTotal/severityCounts null = not extracted, NOT zero; severity is section-inferred). The daily api-drift field-coverage check now asserts live rows ⊆ spec for /api/audits and /api/research alongside projects/partners — a new field that ships undocumented turns the guard red.",
+	},
+	{
+		date: "2026-07-19",
+		surfaces: ["api"],
 		version: "openapi@1.8.1",
 		type: "added",
 		summary:

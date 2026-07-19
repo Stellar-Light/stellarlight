@@ -585,9 +585,7 @@ export function PartnerConciergeChat({
 						<div className="flex justify-start">
 							<div className="rounded-2xl bg-white/[0.03] border border-border px-3.5 py-2">
 								<Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-								<output className="sr-only">
-									Assistant is replying…
-								</output>
+								<output className="sr-only">Assistant is replying…</output>
 							</div>
 						</div>
 					)}
