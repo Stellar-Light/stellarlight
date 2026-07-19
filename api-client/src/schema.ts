@@ -330,6 +330,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/audits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Enumerable registry of Stellar security-audit reports
+         * @description One row per security-audit report from stellarsecurityportal.com — the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source — NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.
+         */
+        get: operations["listAudits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/research": {
         parameters: {
             query?: never;
@@ -339,7 +359,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
+         * @description Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity — filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
          */
         get: operations["searchResearch"];
         put?: never;
@@ -1642,6 +1662,48 @@ export interface operations {
             };
         };
     };
+    listAudits: {
+        parameters: {
+            query?: {
+                /** @description Directory project slug (exact), e.g. blend */
+                project?: string;
+                /** @description Auditor firm, case/homoglyph-insensitive exact match (e.g. OtterSec) */
+                auditor?: string;
+                /** @description Substring match on title / protocol / project name */
+                q?: string;
+                /** @description Only reports published on/after this date (YYYY-MM-DD) */
+                since?: string;
+                /** @description Max rows (default 100, max 100) */
+                limit?: number;
+                /** @description Pagination offset */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audit registry rows (meta.counts.total = corpus size; meta.counts.matched = after filters) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Unknown parameter or invalid value (params are never silently ignored) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     searchResearch: {
         parameters: {
             query: {
@@ -1649,6 +1711,12 @@ export interface operations {
                 q: string;
                 /** @description Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions. */
                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report";
+                /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Only audit-source chunks carry this metadata, so using it narrows results to audits. For report-level enumeration prefer listAudits. */
+                auditor?: string;
+                /** @description Audit-metadata filter: audited protocol/codebase name (substring match). Narrows results to audit-source chunks. */
+                protocol?: string;
+                /** @description Audit-metadata filter: per-chunk inferred severity. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
+                severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;
             };
