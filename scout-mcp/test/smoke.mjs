@@ -137,13 +137,27 @@ async function main() {
 		`  API base: ${process.env.SCOUT_API_BASE ?? "https://stellarlight.xyz"}\n`,
 	);
 
-	// ── Session 1: tools/list returns 15 tools ──────────────────────────────
+	// ── Session 1: tools/list matches the source registry ────────────────────
+	// Derive the expected count from src/index.ts instead of hardcoding it —
+	// the hardcoded "15" silently rotted as tools were added and then BLOCKED
+	// the 1.1.11/1.1.12 publishes (2026-07-19) when the server hit 20.
 	console.log("◆ Tools registry");
 	try {
+		const { readFileSync } = await import("node:fs");
+		const src = readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
+		const expectedCount = (src.match(/registerTool\(/g) ?? []).length;
 		const resp = await callMcp("tools/list", {});
 		const tools = resp?.result?.tools ?? [];
-		if (tools.length === 15) pass(`tools/list returns 15 tools`);
-		else fail("tools/list returns 15 tools", `got ${tools.length}`);
+		if (expectedCount > 0 && tools.length === expectedCount)
+			pass(`tools/list returns all ${expectedCount} registered tools`);
+		else
+			fail(
+				`tools/list returns all ${expectedCount} registered tools`,
+				`got ${tools.length}`,
+			);
+		const names = tools.map((t) => t.name);
+		if (new Set(names).size === names.length) pass("tool names are unique");
+		else fail("tool names are unique", names.join(","));
 
 		const expected = [
 			"search_research",
@@ -161,6 +175,11 @@ async function main() {
 			"submit_feedback",
 			"get_clusters",
 			"analyze_ecosystem",
+			"get_partners",
+			"get_changelog",
+			"explain_repo",
+			"get_people",
+			"get_audits",
 		];
 		const got = tools.map((t) => t.name).sort();
 		const missing = expected.filter((n) => !got.includes(n));
