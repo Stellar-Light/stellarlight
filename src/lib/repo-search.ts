@@ -679,6 +679,33 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\blending\b|\bmoney[\s-]?markets?\b/,
 		repos: ["blend-capital/blend-contracts-v2", "xycloo/xycloans"],
 	},
+	// wallets (2026-07-19 answer-key eval): 0 of 5 directory-flagship wallets
+	// appeared in the top 10 — flagship wallet repos don't carry the literal
+	// "wallet" token in name/topics/desc (freighter's don't), so SDK/demo repos
+	// swept the page. All three verified in-index 2026-07-19: stellar/freighter
+	// (the canonical extension wallet, alive), creit-tech/xbull-wallet, and
+	// kalepail/passkey-kit (the actively-maintained smart-wallet kit).
+	{
+		test: /\bwallets?\b|\bsmart[\s-]?wallets?\b/,
+		repos: [
+			"stellar/freighter",
+			"creit-tech/xbull-wallet",
+			"kalepail/passkey-kit",
+		],
+	},
+	// anchors / ramps (2026-07-19 eval): flagship anchor OPERATORS are closed-
+	// source, so the open anchor tooling must lead — and the bare token
+	// "anchor" collides with Solana's Anchor framework (spl-governance-anchor
+	// surfaced in the top 10). All verified in-index: anchor-platform (the
+	// canonical anchor server), stellar-anchor-tests, php-anchor-sdk.
+	{
+		test: /\banchors?\b|\bon[\s-]?ramps?\b|\boff[\s-]?ramps?\b/,
+		repos: [
+			"stellar/anchor-platform",
+			"stellar/stellar-anchor-tests",
+			"argo-navis-dev/php-anchor-sdk",
+		],
+	},
 	// streaming payments / money streaming (golden repos-streaming-payments,
 	// 2026-07-14). Textbook thin-description case: the curated directory has a
 	// rich Live streaming vertical (Fluxity, SStream, Paystreme, Zentra) but the
@@ -894,6 +921,16 @@ export async function searchRepos(
 			const hay = `${wordy(r.fullName)} ${tops} ${desc} ${readme}`;
 			const sdf = isSdfOwned(owner) ? 1 : 0;
 			const alive = isAlive(r.lastCommitAt) ? 1 : 0;
+			// Hard-stale (2026-07-19 answer-key eval): a KNOWN last commit >24
+			// months old. Null lastCommitAt stays 0 — unknown is not evidence of
+			// death. Demotes 4-year-dead org MVPs below live flagships at equal
+			// keyword score (moneygram-access-wallet-mvp above passkey-kit).
+			const stale2y =
+				r.lastCommitAt &&
+				Date.now() - new Date(r.lastCommitAt).getTime() >
+					24 * 30.44 * 86_400_000
+					? 1
+					: 0;
 			const mention = hasStellarMention(hay) ? 1 : 0;
 			const crank = canonRank.get(r.fullName.toLowerCase()) ?? 9999;
 			const frank = flagRank.get(r.fullName.toLowerCase()) ?? 9999;
@@ -924,6 +961,7 @@ export async function searchRepos(
 				alias,
 				sdf,
 				alive,
+				stale2y,
 				mention,
 				stellarness,
 				crank,
@@ -959,8 +997,13 @@ export async function searchRepos(
 				// relevance still dominates within a tier.
 				b.stellarness - a.stellarness ||
 				b.score - a.score ||
-				b.sdf - a.sdf ||
+				// Hard-stale demotion, then liveness, BEFORE org authority: a
+				// dead SDF MVP must not outrank a live flagship at equal
+				// relevance (2026-07-19 answer-key eval — `sdf` deciding before
+				// `alive` let 49-month-dead repos ride org ownership).
+				a.stale2y - b.stale2y ||
 				b.alive - a.alive ||
+				b.sdf - a.sdf ||
 				b.mention - a.mention ||
 				(b.r.repoScore ?? 0) - (a.r.repoScore ?? 0) ||
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
