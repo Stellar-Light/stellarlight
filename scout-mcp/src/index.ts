@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 18 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's 19 public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -282,6 +282,46 @@ server.registerTool(
 		if (limit !== undefined) params.set("limit", String(limit));
 		const qs = params.toString();
 		const result = await callScout(`/api/builders${qs ? `?${qs}` : ""}`);
+		return asToolResult(result);
+	},
+);
+
+// 5b. get_people — SDF team/people index (leadership, board, advisors)
+server.registerTool(
+	"get_people",
+	{
+		title: "SDF team / people index",
+		description:
+			"The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from get_builders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use search_research.",
+		inputSchema: {
+			q: z
+				.string()
+				.optional()
+				.describe(
+					"Name / role / org filter (e.g. 'justin rice', 'ecosystem', 'openai'). All tokens must match.",
+				),
+			section: z
+				.string()
+				.optional()
+				.describe(
+					"Restrict to one section: 'Leadership', 'Board of directors', or 'Advisors' (aliases 'board'/'advisor' accepted).",
+				),
+			limit: z
+				.number()
+				.int()
+				.min(1)
+				.max(100)
+				.optional()
+				.describe("Max results (default 50)."),
+		},
+	},
+	async ({ q, section, limit }) => {
+		const params = new URLSearchParams();
+		if (q) params.set("q", q);
+		if (section) params.set("section", section);
+		if (limit !== undefined) params.set("limit", String(limit));
+		const qs = params.toString();
+		const result = await callScout(`/api/people${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );

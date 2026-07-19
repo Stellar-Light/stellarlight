@@ -28,6 +28,10 @@ export interface PersonCard {
 	name: string;
 	/** Role/title/affiliation, e.g. "Founder and Chief Scientist". */
 	role: string;
+	/** Roster section the card was grouped under on the page, taken from the
+	 * enclosing group's `heading` — "Leadership", "Board of directors", or
+	 * "Advisors". null if the card had no ancestor heading (structure changed). */
+	section: string | null;
 }
 
 /** Longest a `description` can be and still be a role, not prose. Real roles
@@ -64,9 +68,16 @@ export function extractPersonCards(html: string): PersonCard[] {
 	const out: PersonCard[] = [];
 	const seen = new Set<string>();
 
-	const visit = (node: unknown): void => {
+	// `section` is the nearest ANCESTOR section container's title ("Leadership" /
+	// "Board of directors" / "Advisors"): the roster nests its person cards under
+	// a container object (`content[i]`) whose `title` names the section, in an
+	// `items` array. A person card ALSO carries a `title` (the person's name), so
+	// the section must come from the container we descended THROUGH — never the
+	// card itself. It's threaded as a param that only updates when we recurse INTO
+	// a non-card node that has a title.
+	const visit = (node: unknown, section: string | null): void => {
 		if (Array.isArray(node)) {
-			for (const v of node) visit(v);
+			for (const v of node) visit(v, section);
 			return;
 		}
 		if (!node || typeof node !== "object") return;
@@ -86,13 +97,21 @@ export function extractPersonCards(html: string): PersonCard[] {
 				const key = `${name}||${role}`;
 				if (!seen.has(key)) {
 					seen.add(key);
-					out.push({ name, role });
+					out.push({ name, role, section });
 				}
 			}
 		}
-		for (const v of Object.values(rec)) visit(v);
+		// Children inherit this node's title as their section when it's a non-card
+		// container with a title (`content[i].title` = the section name); cards
+		// keep the section they were entered with, so a person's name never
+		// becomes a section.
+		const childSection =
+			rec._type !== "card" && typeof rec.title === "string" && rec.title.trim()
+				? rec.title.trim()
+				: section;
+		for (const v of Object.values(rec)) visit(v, childSection);
 	};
-	visit(data);
+	visit(data, null);
 	return out;
 }
 
@@ -104,6 +123,24 @@ export function extractPersonCards(html: string): PersonCard[] {
  */
 export function renderRosterMarkdown(cards: PersonCard[]): string {
 	if (!cards.length) return "";
-	const lines = cards.map((c) => `- ${c.name} — ${c.role}`);
-	return `## SDF leadership and board — names and current roles\n\n${lines.join("\n")}`;
+	// Group by roster section in first-seen order so the corpus prose reads as
+	// "## …leadership / board / advisors" instead of one flat list — a single
+	// role stays a clean, quotable line under its section heading.
+	const order: string[] = [];
+	const bySection = new Map<string, PersonCard[]>();
+	for (const c of cards) {
+		const key = c.section ?? "Team";
+		if (!bySection.has(key)) {
+			bySection.set(key, []);
+			order.push(key);
+		}
+		bySection.get(key)?.push(c);
+	}
+	const blocks = order.map((section) => {
+		const lines = (bySection.get(section) ?? []).map(
+			(c) => `- ${c.name} — ${c.role}`,
+		);
+		return `### ${section}\n${lines.join("\n")}`;
+	});
+	return `## SDF team — names and current roles\n\n${blocks.join("\n\n")}`;
 }

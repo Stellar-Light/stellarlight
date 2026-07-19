@@ -21,7 +21,9 @@ const FIXTURE = page({
 						"Our goal is to unlock the world's economic potential by making money more fluid, markets more open, and people more empowered.",
 				},
 				{
+					// The container's `title` is the section every card under it inherits.
 					_type: "section",
+					title: "Leadership",
 					items: [
 						{
 							_type: "card",
@@ -37,12 +39,6 @@ const FIXTURE = page({
 							_type: "card",
 							title: "Denelle Dixon",
 							description: "CEO and Executive Director",
-						},
-						// board affiliation (longer but still a role)
-						{
-							_type: "card",
-							title: "Patrick Collison",
-							description: "CEO of Stripe",
 						},
 						// duplicate — must dedupe
 						{
@@ -63,6 +59,18 @@ const FIXTURE = page({
 						},
 					],
 				},
+				{
+					_type: "section",
+					title: "Board of directors",
+					items: [
+						// board affiliation (longer but still a role)
+						{
+							_type: "card",
+							title: "Patrick Collison",
+							description: "CEO of Stripe",
+						},
+					],
+				},
 				// prose block with title+description but NOT a person (_type != card, long desc)
 				{
 					_type: "drawerPanel",
@@ -76,23 +84,29 @@ const FIXTURE = page({
 });
 
 describe("extractPersonCards", () => {
-	it("pairs each leadership/board name with its role", () => {
+	it("pairs each leadership/board name with its role and section", () => {
 		const cards = extractPersonCards(FIXTURE);
 		expect(cards).toContainEqual({
 			name: "David Mazières",
 			role: "Founder and Chief Scientist",
+			section: "Leadership",
 		});
 		expect(cards).toContainEqual({
 			name: "Justin Rice",
 			role: "VP of Ecosystem",
+			section: "Leadership",
 		});
 		expect(cards).toContainEqual({
 			name: "Denelle Dixon",
 			role: "CEO and Executive Director",
+			section: "Leadership",
 		});
+		// Board members inherit their container's title, NOT the card's own title
+		// (the person's name) — proving the section comes from the enclosing group.
 		expect(cards).toContainEqual({
 			name: "Patrick Collison",
 			role: "CEO of Stripe",
+			section: "Board of directors",
 		});
 	});
 
@@ -118,11 +132,22 @@ describe("extractPersonCards", () => {
 		expect(extractPersonCards("<html><main>no data</main></html>")).toEqual([]);
 	});
 
-	it("renders one quotable line per pair", () => {
+	it("renders one quotable line per pair, grouped under its section heading", () => {
 		const md = renderRosterMarkdown([
-			{ name: "David Mazières", role: "Founder and Chief Scientist" },
+			{
+				name: "David Mazières",
+				role: "Founder and Chief Scientist",
+				section: "Leadership",
+			},
+			{
+				name: "Patrick Collison",
+				role: "CEO of Stripe",
+				section: "Board of directors",
+			},
 		]);
 		expect(md).toContain("- David Mazières — Founder and Chief Scientist");
-		expect(md).toMatch(/^## SDF leadership and board/);
+		expect(md).toMatch(/^## SDF team/);
+		expect(md).toContain("### Leadership");
+		expect(md).toContain("### Board of directors");
 	});
 });

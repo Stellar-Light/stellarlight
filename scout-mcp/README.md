@@ -2,7 +2,7 @@
 
 > Stellar Scout, as an MCP server. Use it in Claude desktop, Cursor, ChatGPT, Gemini, Cline, Continue, Zed, or any [Model Context Protocol](https://modelcontextprotocol.io) client.
 
-Exposes 18 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs — the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
+Exposes 19 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs — the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
 
 ```
 npx @stellar-light/scout-mcp
@@ -68,7 +68,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 }
 ```
 
-Restart Claude Desktop. The 18 Scout tools appear in the slash-menu.
+Restart Claude Desktop. The 19 Scout tools appear in the slash-menu.
 
 ### Cursor
 
@@ -107,7 +107,7 @@ pnpm build
 
 ## Tools
 
-All 18 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
+All 19 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
 
 | Tool | What it does |
 |------|--------------|
@@ -115,7 +115,8 @@ All 18 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `get_hackathons` | List curated Stellar hackathons + live DoraHacks events. Status-scoped queries include fallback channels when empty. |
 | `get_hackathon` | One hackathon's full detail (submissions, winners, prize tracks, status funnel). |
 | `compare_hackathons` | Side-by-side comparison of 2–5 hackathons with delta notes. |
-| `get_builders` | Stellar Passport builder directory. Filter by location, skill, SCF tier. |
+| `get_builders` | Stellar Passport builder directory (GitHub contributors). Filter by location or skill. |
+| `get_people` | SDF team/people index — leadership, board of directors, advisors (name → role → org). Filter by `q` or `section`. |
 | `search_projects` | Prior-art / competitor lookup across 741+ curated projects. Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. |
 | `search_repos` | Code-reference index: ~1,900 indexed-and-scored Stellar GitHub repos ranked by repoScore. Synonym expansion + `language` / `minScore` filters. The repo layer beneath the project directory. |
 | `explain_repo` | Architectural explainer for one Stellar GitHub repo — structure, entry points, and key modules. |

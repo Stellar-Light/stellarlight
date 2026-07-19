@@ -1088,6 +1088,149 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/people": {
+			get: {
+				operationId: "getPeople",
+				tags: ["Builders"],
+				summary: "SDF team / people index",
+				description:
+					"The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.",
+				"x-routing": {
+					purpose:
+						"Look up a named person on the SDF roster (leadership / board / advisors) and their current role/affiliation.",
+					keywords: [
+						"who is",
+						"role",
+						"title",
+						"leadership",
+						"executive",
+						"ceo",
+						"cto",
+						"cfo",
+						"chief",
+						"vp",
+						"vp of ecosystem",
+						"board",
+						"board of directors",
+						"director",
+						"advisor",
+						"advisors",
+						"sdf team",
+						"stellar development foundation team",
+						"founder",
+						"staff",
+						"person",
+						"people",
+					],
+					useWhen: [
+						"who is <person> / what is <person>'s role at SDF",
+						"who leads ecosystem / product / engineering at the SDF",
+						"who sits on the SDF board of directors or advisory board",
+						"a named SDF staffer or leader that getBuilders (GitHub contributors) doesn't cover",
+					],
+					notFor: [
+						"a GitHub-contributor / builder to hire -> getBuilders",
+						"who authored a doc/spec/blog post -> searchResearch",
+						"a funded project/product or 'who built X (the company)' -> searchProjects",
+					],
+					exampleQuestions: [
+						"Who is Justin Rice and what does he do at SDF?",
+						"Who is the SDF Chief Scientist?",
+						"Who's on the Stellar Development Foundation board of directors?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						description:
+							"Name / role / org text filter (e.g. 'justin rice', 'ecosystem', 'openai'). All tokens must match.",
+						schema: { type: "string" },
+					},
+					{
+						name: "section",
+						in: "query",
+						description:
+							"Restrict to one roster section. Accepts 'Leadership', 'Board of directors', 'Advisors' (and aliases 'board'/'advisor').",
+						schema: { type: "string" },
+					},
+					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/offset" },
+				],
+				responses: {
+					"200": {
+						description: "SDF roster",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: {
+													type: "string",
+													description:
+														"The roster page each row is quoted from (stellar.org/foundation/team).",
+												},
+												observedAt: {
+													type: "string",
+													description:
+														"Date the roster was last observed from the source (YYYY-MM-DD).",
+												},
+												sections: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Distinct roster sections present (Leadership, Board of directors, Advisors).",
+												},
+												matchBasis: {
+													type: "string",
+													description:
+														"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
+												},
+											},
+										},
+										people: {
+											type: "array",
+											items: {
+												type: "object",
+												description:
+													"One roster entry: person, current role, section, and affiliation.",
+												properties: {
+													name: { type: "string" },
+													role: {
+														type: "string",
+														description:
+															"Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'.",
+													},
+													section: {
+														type: "string",
+														description:
+															"Roster section: 'Leadership' | 'Board of directors' | 'Advisors'.",
+													},
+													org: {
+														type: "string",
+														description:
+															"Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none.",
+													},
+													sourceUrl: { type: "string" },
+													observedAt: { type: "string" },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Invalid section value, or an unsupported query parameter.",
+					},
+				},
+			},
+		},
 		"/api/partners": {
 			get: {
 				operationId: "getPartners",
