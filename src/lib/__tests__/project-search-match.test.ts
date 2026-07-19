@@ -217,6 +217,21 @@ describe("review finding 2 — identifier-form queries", () => {
 		// Multi-word queries are untouched — no joined form appended.
 		expect(tokenize("release escrow")).toEqual(["release", "escrow"]);
 	});
+	it("StellarX class: a camelCase query that collapses to an over-common fragment falls back to the joined identity form", () => {
+		// "StellarX" split to [stellar, x]; "x" drops (too short) and "stellar"
+		// is a corpus stopword, so tokenization fell back to the bare ecosystem
+		// word ["stellar"] — matching everything and flooding the candidate window
+		// so the record named StellarX never loaded. q=stellarx worked; q=StellarX
+		// didn't. All casings must now resolve to the joined discriminator.
+		expect(tokenize("StellarX")).toEqual(["stellarx"]);
+		expect(tokenize("stellarx")).toEqual(["stellarx"]);
+		expect(tokenize("STELLARX")).toEqual(["stellarx"]);
+		// A discriminating fragment still rides along with the joined form; only
+		// the ecosystem stopword is dropped.
+		expect(tokenize("StellarTerm")).toEqual(["term", "stellarterm"]);
+		// A bare ecosystem query is degenerate but unchanged (joined === token).
+		expect(tokenize("Stellar")).toEqual(["stellar"]);
+	});
 	it("hyphenated vocabulary stays intact", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
 	});
