@@ -203,6 +203,47 @@ function expandBuilderTerm(t: string): string[] {
 	return [...out];
 }
 
+// Common tech/role vocabulary that marks a query as skill-search, not a person
+// lookup — so "rust developer" / "soroban engineer" don't get mistaken for a
+// name. Complements the BUILDER_SYNONYMS keys already checked below.
+const SKILL_HINT = new Set([
+	"rust",
+	"react",
+	"typescript",
+	"javascript",
+	"node",
+	"python",
+	"go",
+	"solidity",
+	"frontend",
+	"backend",
+	"fullstack",
+	"developer",
+	"engineer",
+	"dev",
+	"devs",
+	"smart",
+	"contract",
+	"contracts",
+	"builder",
+	"builders",
+	"designer",
+	"founder",
+]);
+
+// A zero-result query that looks like a specific PERSON lookup (2–4 all-letter
+// tokens, none a skill/tech term). This index only carries GitHub-contributor
+// builder profiles from Stellar Passport — SDF team members and ecosystem
+// leadership (e.g. a VP of Ecosystem) are not "builders" in that sense and
+// won't appear here, so a name lookup must be routed to where people/authorship
+// live (/api/research) instead of getting a generic "broaden your filter".
+function looksLikePersonName(query: string): boolean {
+	const toks = query.split(/\s+/).filter(Boolean);
+	if (toks.length < 2 || toks.length > 4) return false;
+	if (!toks.every((t) => /^[\p{L}.'-]+$/u.test(t))) return false;
+	return !toks.some((t) => BUILDER_SYNONYMS[t] || SKILL_HINT.has(t));
+}
+
 // The FULL query-param vocabulary this endpoint honors. Anything else 400s —
 // see the unknown-param rejection below.
 const SUPPORTED_PARAMS = [
@@ -489,6 +530,14 @@ export async function GET(req: NextRequest) {
 		},
 	];
 
+	// Person-lookup steer: a name query (e.g. "justin rice", "tomer weller") that
+	// matched no builder is almost never a filter miss — this Passport-sourced
+	// index only holds GitHub-contributor profiles, so SDF team members and
+	// ecosystem leadership don't appear here even though they're well-known
+	// ecosystem people. Say that honestly and point at where people/authorship
+	// live, instead of "broaden your filter" (which implies the person is here).
+	const personLookup = !!q && !location && looksLikePersonName(q);
+
 	const builderAdvisory =
 		totalMatching > 0
 			? undefined
@@ -498,10 +547,23 @@ export async function GET(req: NextRequest) {
 							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
 						channels: builderChannels,
 					}
-				: {
-						summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
-						channels: builderChannels,
-					};
+				: personLookup
+					? {
+							summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person, their role, or doc/spec authorship, query /api/research (which carries SDF docs, team pages, and blog authorship).`,
+							scope:
+								"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+							tryInstead: [
+								{
+									endpoint: "/api/research",
+									why: "named people, roles, and doc/spec/blog authorship across the SDF corpus",
+								},
+							],
+							channels: builderChannels,
+						}
+					: {
+							summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
+							channels: builderChannels,
+						};
 
 	return NextResponse.json(
 		{

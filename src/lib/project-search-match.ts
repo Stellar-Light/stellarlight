@@ -18,7 +18,7 @@
 // "dex" → "amm"/"swap", "pool" → "liquidity", "on-ramp" → "anchor". Each query
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
-import { contentTokens } from "./repo-search";
+import { contentTokens, isContentStopword } from "./repo-search";
 
 export const SYNONYMS: Record<string, string[]> = {
 	wallet: ["wallet", "custody", "signer", "keystore"],
@@ -308,15 +308,26 @@ export function tokenize(q: string): string[] {
 	// passes strict; token-soup matches that only hit the fragments drop a
 	// tier. Space-containing queries are untouched.
 	const rawWord = q.trim();
-	if (!/\s/.test(rawWord) && tokens.length > 1) {
+	if (!/\s/.test(rawWord) && rawWord) {
 		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
-		if (joined.length > 2 && !tokens.includes(joined)) {
-			// Drop sub-3-char fragments once the joined form exists: 'DeRisk' →
-			// [risk, derisk], 'DeFi' → [defi]. Two-char fragments ('de', 'fi')
-			// substring-match half the directory and flood the DB candidate
-			// window, so the actual named record never loads (the live DeRisk
-			// miss) — and they add no discrimination the joined form lacks.
-			const kept = tokens.filter((t) => t.length >= 3);
+		// Fire whenever the joined identity form isn't already the sole token —
+		// INCLUDING when tokenization collapsed to a single over-common fragment.
+		// "StellarX" camelCase-splits to [stellar, x]; "x" is dropped (too short)
+		// and "stellar" is a corpus stopword, so contentTokens fell back to the
+		// bare ecosystem word ["stellar"] — which matches the whole directory and
+		// floods the 500-candidate window, so the record literally named StellarX
+		// never loads (q=stellarx worked, q=StellarX didn't). Rebuild around the
+		// joined form as the discriminator.
+		const alreadyJoined = tokens.length === 1 && tokens[0] === joined;
+		if (joined.length > 2 && !alreadyJoined) {
+			// Keep only fragments that add discrimination the joined form lacks:
+			// ≥3 chars AND not a corpus stopword (stellar/protocol). Sub-3-char
+			// fragments ('de','fi') and the ecosystem word substring-match half the
+			// directory and flood the DB candidate window without adding signal.
+			// 'DeRisk' → [risk, derisk]; 'DeFi' → [defi]; 'StellarX' → [stellarx].
+			const kept = tokens.filter(
+				(t) => t.length >= 3 && !isContentStopword(t) && t !== joined,
+			);
 			tokens.length = 0;
 			tokens.push(...kept, joined);
 		}

@@ -447,6 +447,15 @@ export function contentTokens(q: string): string[] {
 	return content.length ? content : raw;
 }
 
+// Corpus stopword membership — articles/aux plus the ecosystem-generic
+// "stellar"/"protocol". Exported so the project-search tokenizer can drop an
+// over-common split fragment in favour of the joined identity form: "StellarX"
+// splits to [stellar, x], and "stellar" alone matches the whole ecosystem
+// (the StellarX name-lookup miss).
+export function isContentStopword(t: string): boolean {
+	return STOPWORDS.has(t);
+}
+
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
 const SDF_OWNERS = new Set([
