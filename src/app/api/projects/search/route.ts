@@ -20,6 +20,7 @@ import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
+	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
 	corridorMatch,
@@ -213,6 +214,10 @@ function scfAmountStatus(
 interface ProjectRow {
 	/** Searchable haystack (F2: relaxed-tier anchor guard re-tests it). Semantic rows may omit it. */
 	hay?: string;
+	/** Mention-vs-identity: anchor token hits the record's identity zone (name/
+	 * category/types/coverage/description lead). Absent on semantic/browse rows
+	 * — the discriminator then treats the row as identity (rule off). */
+	anchorIdentity?: boolean;
 	id: string;
 	name: string;
 	slug: string;
@@ -889,6 +894,9 @@ export async function GET(req: NextRequest) {
 				// it demonstrably IS, not only on how its prose happens to be phrased.
 				const hay = buildHaystack(p);
 				const score = scoreTokens(hay, tokens);
+				// Mention-vs-identity: does an anchor token hit where the record
+				// says what it IS (name/category/types/coverage/description lead)?
+				const anchorIdentity = anchorIdentityHit(p, tokens);
 				const hk =
 					p.hackathon && typeof p.hackathon === "object"
 						? {
@@ -908,6 +916,7 @@ export async function GET(req: NextRequest) {
 				}
 				return {
 					hay, // F2: relaxed-tier anchor guard re-tests tokens on the row
+					anchorIdentity,
 
 					id: String(p.id),
 					name: p.name,
@@ -1102,6 +1111,13 @@ export async function GET(req: NextRequest) {
 					(a, b) =>
 						exactName(b.id) - exactName(a.id) ||
 						isActive(b) - isActive(a) ||
+						// Mention-vs-identity leads over raw token coverage: a record
+						// that IS the anchor thing (custody provider) outranks records
+						// that merely MENTION it mid-prose plus a secondary token
+						// ("...held in qualified custody... staking" ≠ custody+staking
+						// product). 2026-07-19 re-measure of audit item 1.
+						Number(b.anchorIdentity ?? true) -
+							Number(a.anchorIdentity ?? true) ||
 						b.score - a.score ||
 						// Structured relevance (type-match OR corridor coverage-match)
 						// leads over pure prose matches at the same keyword score.
@@ -1228,6 +1244,12 @@ export async function GET(req: NextRequest) {
 			status: p.status,
 			scfAwarded: p.scfAwarded,
 			hackathonPlacement: p.hackathonPlacement,
+			anchorPlacement:
+				qTokenCount === 0 || p.anchorIdentity == null
+					? null
+					: p.anchorIdentity
+						? "identity"
+						: "mention",
 		}),
 	}));
 
@@ -1307,7 +1329,11 @@ export async function GET(req: NextRequest) {
 	// F2: `hay` is internal scoring state — strip it here so it can never
 	// serialize into the API response (rows past this point feed projectsOut).
 	let baseProjects = [...scored, ...semanticAdds].map((p) => {
-		const { hay: _hay, ...rest } = p as typeof p & { hay?: string };
+		const {
+			hay: _hay,
+			anchorIdentity: _ai,
+			...rest
+		} = p as typeof p & { hay?: string; anchorIdentity?: boolean };
 		return rest;
 	});
 	// Shadow-fold (2026-07-11 audit, WRONG-RESULT high): a merged duplicate

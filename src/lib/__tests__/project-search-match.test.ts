@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
 	corridorMatch,
 	hitsAnyToken,
+	identityZone,
 	intentTypesFor,
 	isRampIntent,
 	scoreTokens,
@@ -274,5 +276,57 @@ describe("review finding 2 — identifier-form queries", () => {
 			true,
 		);
 		expect(hitsAnyToken("a payments wallet", ["gold"])).toBe(false);
+	});
+});
+
+// Live records behind the 2026-07-19 re-measure of audit item 1: "custody
+// with staking" ranked prose-mentioners at 0.97 above the custody provider.
+const COBO = {
+	name: "Cobo",
+	shortDescription:
+		"Institutional-grade digital asset custody and wallet infrastructure with support for Stellar assets.",
+	category: "Infrastructure",
+	types: ["Infrastructure", "Wallet"],
+};
+const NORMAL_FINANCE = {
+	name: "Normal",
+	shortDescription:
+		"A wrapped asset protocol helping institutions turn any token held in qualified custody into yield-generating staking assets.",
+	category: "DeFi",
+	types: ["DEX"],
+};
+const SELF_CUSTODY_WALLET = {
+	name: "Solar",
+	shortDescription:
+		"Non-custodial wallet for the Stellar network with staking support.",
+	category: "Wallet",
+	types: ["Wallet"],
+};
+
+describe("mention-vs-identity (custody re-measure 2026-07-19)", () => {
+	const tokens = tokenize("custody with staking");
+
+	it("identity zone carries the lead clause but not late prose", () => {
+		expect(identityZone(COBO)).toContain("custody");
+		// Normal's custody mention sits past the 60-char lead clause
+		expect(identityZone(NORMAL_FINANCE)).not.toContain("custody");
+	});
+
+	it("the custody provider hits identity; the prose-mentioner does not", () => {
+		expect(anchorIdentityHit(COBO, tokens)).toBe(true);
+		expect(anchorIdentityHit(NORMAL_FINANCE, tokens)).toBe(false);
+	});
+
+	it("negated identity does not count (non-custodial wallet)", () => {
+		// "non-custodial" in the lead clause is the OPPOSITE of custody —
+		// but "staking" legitimately hits Solar's identity zone, so probe the
+		// custody anchor alone.
+		expect(anchorIdentityHit(SELF_CUSTODY_WALLET, tokenize("custody"))).toBe(
+			false,
+		);
+	});
+
+	it("anchor-free queries switch the rule off", () => {
+		expect(anchorIdentityHit(NORMAL_FINANCE, [])).toBe(true);
 	});
 });
