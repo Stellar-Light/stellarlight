@@ -138,10 +138,29 @@ server.registerTool(
 					"security-program",
 					"sdf-org",
 					"ec-developer-report",
+					"release",
 				])
 				.optional()
 				.describe(
-					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions.",
+					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags).",
+				),
+			auditor: z
+				.string()
+				.optional()
+				.describe(
+					"Audit-metadata filter: exact auditor firm (case-insensitive, e.g. OtterSec). Implies source=audit — retrieval is scoped to audit chunks.",
+				),
+			protocol: z
+				.string()
+				.optional()
+				.describe(
+					"Audit-metadata filter: audited protocol/codebase name (substring). Implies source=audit.",
+				),
+			severity: z
+				.enum(["critical", "high", "medium", "low", "informational", "unknown"])
+				.optional()
+				.describe(
+					"Audit-metadata filter (per-chunk inferred severity; 'unknown' for most PDF-derived chunks). Implies source=audit. For report-level enumeration use get_audits.",
 				),
 			limit: z
 				.number()
@@ -152,11 +171,62 @@ server.registerTool(
 				.describe("Max results to return (default 8, max 25)."),
 		},
 	},
-	async ({ query, source, limit }) => {
+	async ({ query, source, auditor, protocol, severity, limit }) => {
 		const params = new URLSearchParams({ q: query });
 		if (source) params.set("source", source);
+		if (auditor) params.set("auditor", auditor);
+		if (protocol) params.set("protocol", protocol);
+		if (severity) params.set("severity", severity);
 		if (limit !== undefined) params.set("limit", String(limit));
 		const result = await callScout(`/api/research?${params}`);
+		return asToolResult(result);
+	},
+);
+
+// 1b. get_audits — the enumerable security-audit registry
+server.registerTool(
+	"get_audits",
+	{
+		title: "List Stellar security-audit reports",
+		description:
+			"Enumerable registry of Stellar security-audit reports — one row per report (normalized auditor, publication date, verified directory-project link). Answers 'list all audits for project X', 'what has firm Y audited on Stellar', 'newest Soroban audits'. Absence of a report = no audit ON RECORD at our source, NOT a claim the project is unaudited; findingsTotal/severityCounts null = not extracted, NOT zero. For what an audit FOUND (findings text) → search_research with source=audit.",
+		inputSchema: {
+			project: z
+				.string()
+				.optional()
+				.describe("Directory project slug (exact), e.g. blend."),
+			auditor: z
+				.string()
+				.optional()
+				.describe(
+					"Auditor firm, case-insensitive exact match (e.g. OtterSec).",
+				),
+			query: z
+				.string()
+				.optional()
+				.describe("Substring match on title / protocol / project name."),
+			since: z
+				.string()
+				.optional()
+				.describe("Only reports published on/after this date (YYYY-MM-DD)."),
+			limit: z
+				.number()
+				.int()
+				.min(1)
+				.max(100)
+				.optional()
+				.describe("Max rows (default 100)."),
+		},
+	},
+	async ({ project, auditor, query, since, limit }) => {
+		const params = new URLSearchParams();
+		if (project) params.set("project", project);
+		if (auditor) params.set("auditor", auditor);
+		if (query) params.set("q", query);
+		if (since) params.set("since", since);
+		if (limit !== undefined) params.set("limit", String(limit));
+		const qs = params.toString();
+		const result = await callScout(`/api/audits${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );
