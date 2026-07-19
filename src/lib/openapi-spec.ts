@@ -2846,12 +2846,13 @@ export const spec: OpenAPISpec = {
 					},
 					findingsTotal: {
 						type: ["integer", "null"],
-						description: "null = not extracted, NOT zero",
+						description:
+							"Populated when the auditor's report format parses deterministically AND round-trips its own stated count (OtterSec, Veridise, Certora, Code4rena, Hacken). null = not extracted, NOT zero.",
 					},
 					severityCounts: {
 						type: ["object", "null"],
 						description:
-							"{critical, high, medium, low, informational} counts; null = not extracted, NOT zero",
+							"{critical, high, medium, low, informational} counts, only for formats carrying per-finding severity that agrees with its finding-ID prefix (Certora tables, Code4rena tier headings). null = not extracted, NOT zero.",
 					},
 					chunksIndexed: {
 						type: "integer",

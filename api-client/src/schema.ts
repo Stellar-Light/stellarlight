@@ -566,9 +566,9 @@ export interface components {
              * @description When our crawler last saw the report live
              */
             observedAt?: string | null;
-            /** @description null = not extracted, NOT zero */
+            /** @description Populated when the auditor's report format parses deterministically AND round-trips its own stated count (OtterSec, Veridise, Certora, Code4rena, Hacken). null = not extracted, NOT zero. */
             findingsTotal?: number | null;
-            /** @description {critical, high, medium, low, informational} counts; null = not extracted, NOT zero */
+            /** @description {critical, high, medium, low, informational} counts, only for formats carrying per-finding severity that agrees with its finding-ID prefix (Certora tables, Code4rena tier headings). null = not extracted, NOT zero. */
             severityCounts?: Record<string, never> | null;
             /** @description Full-text chunks serving this report via /api/research?source=audit */
             chunksIndexed?: number;

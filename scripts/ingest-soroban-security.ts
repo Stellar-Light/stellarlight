@@ -26,6 +26,7 @@ loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
+import { extractFindings } from "../src/lib/audit-findings";
 import {
 	canonicalAuditor,
 	normalizeIdentityText,
@@ -350,6 +351,8 @@ async function run() {
 		projectSlug: string | null;
 		linkBasis: "name-exact" | "alias" | "unmatched" | null;
 		linkMapped: boolean;
+		findingsTotal: number | null;
+		severityCounts: Record<string, number> | null;
 		publishedAt: string;
 		dateBasis: "published" | "portal-record";
 		observedAt: string;
@@ -417,6 +420,9 @@ async function run() {
 			}
 			allChunks.push(...chunks);
 			const link = resolveAuditProjectSlug(protocolClean);
+			// Deterministic per-auditor findings extraction — null unless the
+			// report's format round-trips (see src/lib/audit-findings.ts).
+			const findings = extractFindings(auditorClean, reassembled);
 			registryRows.push({
 				reportId: meta.id,
 				title,
@@ -426,6 +432,8 @@ async function run() {
 				projectSlug: link.slug,
 				linkBasis: link.basis,
 				linkMapped: link.mapped,
+				findingsTotal: findings?.findingsTotal ?? null,
+				severityCounts: findings?.severityCounts ?? null,
 				publishedAt: meta.date,
 				// A human-published report date is a date-stamp; wall-clock
 				// minutes/seconds betray a portal upload timestamp masquerading as
@@ -476,6 +484,12 @@ async function run() {
 	// projects via the hand-verified alias map in src/lib/audit-identity.ts.
 	const linked = registryRows.filter((r) => r.projectSlug);
 	const untriaged = registryRows.filter((r) => !r.linkMapped);
+	const extracted = registryRows.filter((r) => r.findingsTotal != null);
+	console.log(
+		`Findings extraction: ${extracted.length}/${registryRows.length} reports round-tripped (${
+			[...new Set(extracted.map((r) => r.auditor))].join(", ") || "none"
+		})`,
+	);
 	console.log(
 		`\nRegistry: ${registryRows.length} reports — ${linked.length} linked to projects, ${
 			registryRows.filter((r) => r.linkBasis === "unmatched").length
