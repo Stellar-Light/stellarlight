@@ -107,11 +107,12 @@ pnpm build
 
 ## Tools
 
-All 19 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
+All 20 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
 
 | Tool | What it does |
 |------|--------------|
-| `search_research` | Vector search over the 4,541-chunk Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, EC reports). Use `source=audit` for security, `source=ec-developer-report` for ecosystem stats. |
+| `search_research` | Vector search over the Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, incident reports, EC reports, core/CLI/SDK release notes). Use `source=audit` for security, `source=release` for what-shipped-when, or the `auditor`/`protocol`/`severity` filters (they imply audit scope). |
+| `get_audits` | Enumerable security-audit registry — one row per report with normalized auditor, date, and a verified project link. 'List all audits for X' / 'what has firm Y audited'. Absence ≠ unaudited. |
 | `get_hackathons` | List curated Stellar hackathons + live DoraHacks events. Status-scoped queries include fallback channels when empty. |
 | `get_hackathon` | One hackathon's full detail (submissions, winners, prize tracks, status funnel). |
 | `compare_hackathons` | Side-by-side comparison of 2–5 hackathons with delta notes. |
