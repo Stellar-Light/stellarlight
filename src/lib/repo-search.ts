@@ -179,7 +179,7 @@ function topicList(topics: unknown): string[] {
 }
 
 // A query token matches if ANY of its expansions hits the repo's text.
-const SYNONYMS: Record<string, string[]> = {
+export const SYNONYMS: Record<string, string[]> = {
 	zk: [
 		"zk",
 		"zero-knowledge",
