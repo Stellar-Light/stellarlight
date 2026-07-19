@@ -130,6 +130,7 @@ export async function GET(req: NextRequest) {
 		"security-program",
 		"sdf-org",
 		"ec-developer-report",
+		"release",
 	] as const;
 
 	if (!q) {

@@ -119,9 +119,19 @@ async function fetchPost(url: string): Promise<Post> {
 		html.match(
 			/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
 		) || html.match(/<title[^>]*>([^<]+)<\/title>/i);
-	const title = titleMatch
-		? titleMatch[1].replace(/\s+\|\s+Stellar.*$/i, "").trim()
-		: url;
+	// Brand-segment cleanup, BOTH orderings: developers posts use
+	// "Real Title | Stellar", but foundation-news uses "Stellar | Real Title" —
+	// the old suffix-only strip matched the FIRST " | Stellar" there and
+	// deleted the whole real title, leaving ~50 posts titled just "Stellar"
+	// (the Protocol 27 "Zipper" upgrade guide was invisible to retrieval:
+	// title carries 3x keyword weight).
+	const cleanTitle = (raw: string): string => {
+		const t = raw.trim();
+		if (/^Stellar\s*\|\s*\S/i.test(t))
+			return t.replace(/^Stellar\s*\|\s*/i, "").trim();
+		return t.replace(/\s+\|\s+Stellar.*$/i, "").trim();
+	};
+	const title = titleMatch ? cleanTitle(titleMatch[1]) : url;
 
 	const dateMatch =
 		html.match(

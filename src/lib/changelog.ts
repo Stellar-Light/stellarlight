@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-19",
 		surfaces: ["api"],
+		version: "openapi@1.8.1",
+		type: "added",
+		summary:
+			"New research source 'release' — stellar-core/stellar-cli/SDK GitHub release notes (protocol upgrade tags, dated); sdf-blog titles repaired for foundation-news posts.",
+		detail:
+			"The corpus was snapshot-shaped: Protocol 27 'Zipper' reached mainnet with no document saying what shipped when. /api/research?source=release now serves one dated doc per stable GitHub release of stellar/stellar-core, stellar-cli, js-stellar-sdk, and rs-soroban-sdk. Separately, ~50 stellar.org foundation-news posts (including the Protocol 27 and 26 upgrade guides) were ingested with their titles collapsed to 'Stellar' (brand-prefix og:title ordering) — titles now extract correctly, restoring their retrieval weight.",
+	},
+	{
+		date: "2026-07-19",
+		surfaces: ["api"],
 		version: "openapi@1.8.0",
 		type: "added",
 		summary:

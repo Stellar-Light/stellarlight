@@ -32,7 +32,10 @@ export type ResearchSource =
 	// (current + historical), Terms, Foundation, Team, Enterprise Fund,
 	// Quarterly Reports index — the CANONICAL_PAGES registry family.
 	| "sdf-org"
-	| "ec-developer-report";
+	| "ec-developer-report"
+	// GitHub releases of stellar-core / stellar-cli / SDKs — the event-shaped
+	// record (what shipped, when) the snapshot-shaped sources can't answer.
+	| "release";
 
 export type AuditSeverity =
 	| "critical"
