@@ -211,7 +211,9 @@ export function UsageChart({
 				>
 					{/* Fully opaque — a translucent tooltip blends into the line/grid. */}
 					<div className="rounded-lg border border-white/20 bg-background px-3 py-2 shadow-xl shadow-black/50 whitespace-nowrap text-left">
-						<div className="text-[11px] text-white/60">{monthDay(h.p.date)}</div>
+						<div className="text-[11px] text-white/60">
+							{monthDay(h.p.date)}
+						</div>
 						<div className="text-sm font-semibold text-white tabular-nums">
 							{fmt(hover != null ? cum[hover] : 0)} total
 						</div>

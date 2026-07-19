@@ -18,7 +18,13 @@
 import { ArrowUpRight, Loader2, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { partnerQueryFor } from "@/lib/ask-intent";
 
 interface ResearchResult {

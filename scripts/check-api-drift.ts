@@ -245,6 +245,20 @@ async function main() {
 			listKey: "partners",
 			component: "Partner",
 		},
+		{
+			name: "audits row",
+			path: "/api/audits?limit=3",
+			listKey: "audits",
+			component: "Audit",
+		},
+		{
+			// audit-source query so the audit-only metadata fields (auditor/
+			// protocol/severity) are populated and their absence would be caught.
+			name: "research row",
+			path: "/api/research?q=blend%20audit&source=audit&limit=3",
+			listKey: "results",
+			component: "ResearchResult",
+		},
 	];
 	for (const fc of fieldCoverage) {
 		try {
