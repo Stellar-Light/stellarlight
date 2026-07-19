@@ -51,7 +51,11 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Account-wide PAT (5,000/hr, read-only public fetches) — the built-in
+      # Actions token capped waves at ~60 repos, putting the 1,342-repo
+      # backlog 22 days out (2026-07-19 converge plan). Falls back to the
+      # Actions token when the secret is absent.
+      GITHUB_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

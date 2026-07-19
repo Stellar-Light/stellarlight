@@ -51,5 +51,8 @@ jobs:
           # budget); push-to-main + schedule + dispatch run the FULL gate with the
           # account-wide PAT (5,000/hr, read-only public fetches).
           GITHUB_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN || secrets.GITHUB_TOKEN }}
-          DEPTH_EVAL_SAMPLE: ${{ github.event_name == 'pull_request' && '6' || '0' }}
+          # Full gate on every event: PR sampling existed because fork PRs
+          # couldn't read the PAT secret — the 2026-07-19 public flip detached
+          # the fork and PRs come from in-repo branches, which can.
+          DEPTH_EVAL_SAMPLE: "0"
         run: pnpm exec tsx scripts/scan/depth-eval.ts
