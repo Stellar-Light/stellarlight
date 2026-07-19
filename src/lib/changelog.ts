@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-19",
 		surfaces: ["api"],
+		version: "openapi@1.8.5",
+		type: "added",
+		summary:
+			"findingsTotal/severityCounts now populate on /api/audits for auditor formats that parse deterministically — 20 of 58 reports carry verified counts (previously 100% null).",
+		detail:
+			"Per-auditor grammars (OtterSec, Veridise, Certora, Code4rena, Hacken) extract findings counts ONLY when the report round-trips an internal consistency check: enumerated finding IDs must equal the report's own stated total, and per-finding severity words must agree with their ID prefixes. One failed check → null (= not extracted, NOT zero — unchanged semantics). severityCounts populate where the format carries per-finding severity (Certora tables, Code4rena tier headings). Shattered formats (Halborn, Runtime Verification, Quarkslab...) deliberately stay null rather than guessed.",
+	},
+	{
+		date: "2026-07-19",
+		surfaces: ["api"],
 		version: "openapi@1.8.4",
 		type: "fixed",
 		summary:
