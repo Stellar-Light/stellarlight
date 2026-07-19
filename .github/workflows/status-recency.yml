@@ -1,0 +1,41 @@
+# Status-recency detector (ideas/status-recency-detector.md → shipped
+# 2026-07-19): the directory's "what's Live" claim ages silently — median
+# statusAsOf age was 131d with no watcher. Weekly, this ranks the most
+# overdue status claims and upserts ONE rolling queue issue for the
+# human adversarial-verify pass. Read-only; it never demotes anything
+# (stale repo ≠ dead project).
+name: Status recency queue
+on:
+  schedule:
+    - cron: "30 7 * * 2" # weekly, Tue 07:30 UTC
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  issues: write
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Build the queue
+        run: pnpm exec tsx scripts/status-recency-report.ts --limit=10 | tee queue.md | tee -a $GITHUB_STEP_SUMMARY
+      - name: Upsert the rolling queue issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="Status re-verification queue (weekly)"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" \
+            --json number,title \
+            --jq "[.[] | select(.title == \"$TITLE\")][0].number // empty")
+          if [ -n "$NUM" ]; then
+            gh issue edit "$NUM" --body-file queue.md
+            gh issue comment "$NUM" --body "Queue refreshed by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          else
+            gh issue create --title "$TITLE" --body-file queue.md
+          fi
