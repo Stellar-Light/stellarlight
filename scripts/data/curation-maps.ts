@@ -37,6 +37,41 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// Provenance REFRESH (Live → Live), not a flip: the Raven cold-agent runs
+	// (2026-07-20) flagged blend serving statusAsOf 2025-12-17
+	// source-inherited while its TVL refreshed same-day — status freshness
+	// lagged fact freshness on the most-consumed DeFi row. Verified live:
+	// mainnet.blend.capital serves the functional app (200, IPFS-backed).
+	blend: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-20",
+		sourceUrl: "https://mainnet.blend.capital/",
+		basis: "site-liveness",
+	},
+	// Same refresh class: vesseo's row asserted basis source-inherited with
+	// no sourceUrl. vesseoapp.com verified live 2026-07-20 (product landing,
+	// app links, AR/MX/BR/US pages).
+	vesseo: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-20",
+		sourceUrl: "https://vesseoapp.com/",
+		basis: "site-liveness",
+	},
+	// boxy 2026-07-20 (evidence reviewed, approved flip): up-but-abandoned.
+	// eascrow.xyz serves 200 but the bundle froze 2025-03-06 (Last-Modified);
+	// dapp.eascrow.xyz froze 2025-06-25 — the EXACT day of the org's last
+	// GitHub commit (Eascrow/Eascrow, its only repo). Zero product mentions
+	// anywhere in 2025-26. SCF-funded ~$147,950; the note keeps the history.
+	eascrow: {
+		from: "Live",
+		to: "Inactive",
+		note: "Was a Soroban escrow dapp (SCF-funded ~$148K). Every mutable surface froze in H1 2025 — site bundle 2025-03-06, dapp bundle and last GitHub commit both 2025-06-25 — with no public signal since; the pages still serve but are abandoned static exports.",
+		asOf: "2026-07-20",
+		sourceUrl: "https://eascrow.xyz/",
+		basis: "human-verified",
+	},
 	// SCOPE removal, NOT a defunct call (boxy 2026-07-15). lobster (the
 	// LP-optimizer / on-chain-market-making-as-a-service for DEXs — distinct
 	// from the lobstr wallet) is an SCF #36 grantee ($109K,
@@ -449,6 +484,29 @@ export const SEEDS: Array<{
 		| "human-verified"
 		| "source-inherited";
 }> = [
+	// PG-award recon 2026-07-20: Soneso's BASE Flutter SDK is a CSV-confirmed
+	// Public Goods Award recipient (Q4'25+Q1'26) with NO directory record —
+	// only the sibling stellar_wallet_flutter_sdk was indexed
+	// (flutter-wallet-sdk). Verified same day: repo pushed 2026-07-20,
+	// pub.dev v3.4.0 published 2026-07-20, ~1.97k weekly downloads.
+	{
+		slug: "flutter-stellar-sdk",
+		name: "Stellar Flutter SDK",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Soneso's open-source Stellar SDK for Flutter/Dart — build and sign transactions, query Horizon, and interact with Soroban smart contracts via RPC, with support for 18 SEPs.",
+		links: {
+			website: "https://pub.dev/packages/stellar_flutter_sdk",
+			github: "https://github.com/Soneso/stellar_flutter_sdk",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-07-20",
+		statusSourceUrl: "https://pub.dev/packages/stellar_flutter_sdk",
+		statusBasis: "site-liveness",
+	},
 	// 2026-07-11 audit: kalepail/passkey-kit — THE ecosystem passkey smart-
 	// wallet kit (named in our own STELLAR_SIGNAL regex and depth answer key)
 	// — was missing from the repo index entirely because discovery is
