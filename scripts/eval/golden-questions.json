@@ -560,7 +560,8 @@
 			"category": "ecosystem",
 			"mode": "projects",
 			"question": "which projects have received the SCF Public Goods Award",
-			"expect": {
+			"limit": 10,
+  "expect": {
 				"answerRegex": [
 					"opengrants",
 					"scaffold[ -]stellar",
