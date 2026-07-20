@@ -182,6 +182,49 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 };
 
 /**
+ * Transactional verbs and container nouns that appear in half the corpus —
+ * the ring OUTSIDE stopwords. A query token in this set can still match and
+ * score, but it never counts as the query's ANCHOR (the intent-bearing noun
+ * that mention-vs-identity ranking keys on). Shared by project search and
+ * repo search so the identity rule means the same thing on both surfaces.
+ */
+export const GENERIC_QUERY_TOKENS = new Set([
+	"buy",
+	"sell",
+	"get",
+	"send",
+	"receive",
+	"make",
+	"use",
+	"need",
+	"want",
+	"find",
+	"money",
+	"crypto",
+	"token",
+	"tokens",
+	"coin",
+	"coins",
+	"app",
+	"apps",
+	"platform",
+	"service",
+	"services",
+	"tool",
+	"tools",
+	"solution",
+	"project",
+	"projects",
+	"way",
+	"sol", // ambiguous: Solana's ticker vs spanish "sol" — never a lone anchor
+]);
+
+/** The intent-bearing (non-generic, non-trivial) tokens of a query. */
+export function anchorTokens(tokens: string[]): string[] {
+	return tokens.filter((t) => !GENERIC_QUERY_TOKENS.has(t) && t.length > 2);
+}
+
+/**
  * Union-merge a surface overlay onto the core registry. Overlay entries
  * extend (never replace) core entries; keys unique to either side pass
  * through. Consumers all Set-dedupe expansions, so ordering is cosmetic.

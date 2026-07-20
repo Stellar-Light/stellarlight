@@ -11,7 +11,11 @@
 
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
-import { CORE_SYNONYMS, mergeVocabulary } from "./search-vocabulary";
+import {
+	anchorTokens,
+	CORE_SYNONYMS,
+	mergeVocabulary,
+} from "./search-vocabulary";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -257,6 +261,52 @@ function wordy(s: string): string {
 		.replace(/([a-z])([A-Z])/g, "$1 $2")
 		.replace(/([A-Za-z])([0-9])/g, "$1 $2")
 		.toLowerCase();
+}
+
+// ── Mention-vs-identity (port of the project-search fix, #590/#592) ──
+// A repo whose text merely MENTIONS an anchor noun mid-prose (plus one
+// secondary token and the coverage multiplier: 3+3=6 ×1.3 = 7.8) used to
+// outrank the repo NAMED for the term (weight 5). Identity = the zones
+// where a repo states what it IS: name, topics, code symbols (a pub fn
+// named for the term is implementation identity), and the LEAD of the
+// description (first 60 chars — "Institutional custody for…" is identity,
+// "…held in qualified custody" past the lead is mention territory). Owner
+// is EXCLUDED (org names must not make repos rank — same rule as scoring)
+// and README is excluded (pure mention territory).
+export const IDENTITY_LEAD_CHARS = 60;
+
+// Negation-aware boundary hit (mirror of project search's hasPositiveHit):
+// the hyphen is a word boundary, so \bcustodial\b matches inside
+// "non-custodial" — a match preceded by non-/self- must not count as
+// identity. Global-flag regexes cached separately from termRe.
+const termReG = new Map<string, RegExp>();
+function positiveIdentityHit(hay: string, term: string): boolean {
+	let re = termReG.get(term);
+	if (!re) {
+		const esc = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		re = new RegExp(`\\b${esc}\\b`, "g");
+		termReG.set(term, re);
+	}
+	re.lastIndex = 0;
+	let m = re.exec(hay);
+	while (m !== null) {
+		if (!/(non|self)[-\s]$/.test(hay.slice(0, m.index))) return true;
+		m = re.exec(hay);
+	}
+	return false;
+}
+
+/**
+ * Does any ANCHOR token (intent-bearing, non-generic) hit an identity zone?
+ * All-generic queries return true — the rule switches OFF rather than
+ * demoting everything (same contract as project search).
+ */
+export function repoAnchorIdentity(tokens: string[], zones: string[]): boolean {
+	const anchors = anchorTokens(tokens);
+	if (!anchors.length) return true;
+	return anchors.some((t) =>
+		termsForToken(t).some((v) => zones.some((z) => positiveIdentityHit(z, v))),
+	);
 }
 
 // Natural-language filler that must NOT be scored as a query term. A question
@@ -824,6 +874,35 @@ export async function searchRepos(
 				),
 			];
 		}
+		// #592 analog for the DB candidate window: the 600-candidate fetch sorts
+		// by -repoScore, so a low-authority repo NAMED for the anchor term can be
+		// flooded out by high-authority description-mentioners before ranking
+		// ever sees it. A small identity-only supplemental fetch guarantees
+		// name/topic-anchored candidates enter the pool; the anchorIdentity sort
+		// key below then ranks them on merit within their stellarness tier.
+		const queryAnchors = anchorTokens(tokens);
+		if (queryAnchors.length) {
+			const ares = await payload.find({
+				collection: "repos",
+				where: {
+					or: queryAnchors.flatMap((t) => [
+						{ fullName: { like: t } },
+						{ topics: { like: t } },
+					]),
+				},
+				limit: 100,
+				sort: "-repoScore",
+				depth: 0,
+				select: { readmeExcerpt: false },
+			});
+			const seenA = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
+			rawDocs = [
+				...rawDocs,
+				...(ares.docs as unknown as RepoDoc[]).filter(
+					(d) => !seenA.has(d.fullName.toLowerCase()),
+				),
+			];
+		}
 		// sls-025: separator-insensitive identity form of the query, computed once.
 		// Alias identity applies ONLY to identifier-form queries (containing a
 		// digit or -,_,/,. — "stellar8004", "passkey-kit", "subquery/stellar-subql-starter").
@@ -863,6 +942,20 @@ export async function searchRepos(
 			// owner "progax01" — wordy alone splits it to "progax 01").
 			const ownerRaw = r.fullName.split("/")[0].toLowerCase();
 			const ownerHay = `${ownerRaw} ${wordy(ownerRaw)}`;
+			// Mention-vs-identity: does an anchor token hit an identity zone
+			// (name / topics / symbols / description lead)? Owner + README are
+			// deliberately excluded — see repoAnchorIdentity.
+			const descLead = wordy(
+				(r.description ?? "").slice(0, IDENTITY_LEAD_CHARS),
+			);
+			const anchorIdentity = repoAnchorIdentity(tokens, [
+				name,
+				tops,
+				syms,
+				descLead,
+			])
+				? 1
+				: 0;
 			let score = 0;
 			let matched = 0;
 			if (tokens.length) {
@@ -947,6 +1040,7 @@ export async function searchRepos(
 				stale2y,
 				mention,
 				stellarness,
+				anchorIdentity,
 				crank,
 				frank,
 			};
@@ -979,6 +1073,12 @@ export async function searchRepos(
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
 				// relevance still dominates within a tier.
 				b.stellarness - a.stellarness ||
+				// Mention-vs-identity ABOVE raw token coverage, BELOW Stellar
+				// evidence (#590 port): within a stellarness tier, the repo that
+				// IS the anchor thing outranks repos that merely mention it
+				// mid-prose plus a secondary token — but identity never lets a
+				// no-evidence repo beat a code-verified one (the F4 contract).
+				b.anchorIdentity - a.anchorIdentity ||
 				b.score - a.score ||
 				// Hard-stale demotion, then liveness, BEFORE org authority: a
 				// dead SDF MVP must not outrank a live flagship at equal

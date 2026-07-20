@@ -19,7 +19,11 @@
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
 import { contentTokens, isContentStopword } from "./repo-search";
-import { CORE_SYNONYMS, mergeVocabulary } from "./search-vocabulary";
+import {
+	anchorTokens,
+	CORE_SYNONYMS,
+	mergeVocabulary,
+} from "./search-vocabulary";
 
 // Project-surface overlay. Core chain/vertical/region vocabulary lives in
 // CORE_SYNONYMS (src/lib/search-vocabulary.ts) and is merged in below — add
@@ -172,40 +176,10 @@ export function termsForToken(t: string): string[] {
  * STOPWORDS already remove pure filler; this set is the next ring out:
  * transactional verbs and container nouns that appear in half the corpus.
  */
-export const GENERIC_QUERY_TOKENS = new Set([
-	"buy",
-	"sell",
-	"get",
-	"send",
-	"receive",
-	"make",
-	"use",
-	"need",
-	"want",
-	"find",
-	"money",
-	"crypto",
-	"token",
-	"tokens",
-	"coin",
-	"coins",
-	"app",
-	"apps",
-	"platform",
-	"service",
-	"services",
-	"tool",
-	"tools",
-	"solution",
-	"project",
-	"projects",
-	"way",
-	"sol", // ambiguous: Solana's ticker vs spanish "sol" — never a lone anchor
-]);
-
-export function anchorTokens(tokens: string[]): string[] {
-	return tokens.filter((t) => !GENERIC_QUERY_TOKENS.has(t) && t.length > 2);
-}
+// GENERIC_QUERY_TOKENS + anchorTokens moved to search-vocabulary.ts (shared
+// with repo search so mention-vs-identity means the same thing on both
+// surfaces); re-exported here for existing consumers/tests.
+export { anchorTokens, GENERIC_QUERY_TOKENS } from "./search-vocabulary";
 
 /** Does the record hit ANY of these tokens (via expanded terms)? */
 export function hitsAnyToken(hay: string, tokens: string[]): boolean {
