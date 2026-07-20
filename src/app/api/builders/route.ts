@@ -14,7 +14,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { findPeopleByName } from "@/lib/sdf-people";
@@ -218,6 +218,7 @@ const SUPPORTED_PARAMS = [
 	"location",
 	"limit",
 	"offset",
+	"fields",
 ] as const;
 
 export async function GET(req: NextRequest) {
@@ -249,6 +250,7 @@ export async function GET(req: NextRequest) {
 		.trim();
 	const location = sp.get("location");
 	const limit = clampLimit(sp.get("limit"), 50, 200);
+	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
@@ -569,7 +571,7 @@ export async function GET(req: NextRequest) {
 					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},
-			builders,
+			builders: builders.map((b) => pickFields(b, fieldsWanted)),
 		},
 		{
 			headers: {

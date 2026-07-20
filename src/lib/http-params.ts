@@ -57,3 +57,50 @@ export function strictBoolParam(raw: string | null): boolean | "invalid" {
 	if ((BOOL_FALSE_VALUES as readonly string[]).includes(v)) return false;
 	return "invalid";
 }
+
+/**
+ * Field selection (?fields=name,slug,score) — response-row projection so
+ * agents fetch only what they need (projects/search rows carry TVL/onchain/
+ * routes/repos blocks a routing query never reads).
+ *
+ * Rules: comma-split, trimmed, case-insensitive; each row's identity keys
+ * are always kept (so a projected row still joins back to its record);
+ * unknown names are ignored, never 400 — field names churn as the schema
+ * grows, and a caller naming a renamed field must degrade, not break
+ * (additive-contract ethos; enum VALUES still 400 elsewhere). Nested
+ * objects are whole-key selections — no dot-paths in v1. meta is a sibling
+ * of the rows array and is never projected.
+ */
+const FIELDS_ALWAYS_KEEP = new Set([
+	"id",
+	"slug",
+	"fullName",
+	"githubUsername",
+	"url",
+	"source",
+]);
+
+/** Parse ?fields= → lowercased name Set, or null when absent/empty (= full row). */
+export function parseFields(raw: string | null): Set<string> | null {
+	if (!raw) return null;
+	const names = raw
+		.split(",")
+		.map((s) => s.trim().toLowerCase())
+		.filter(Boolean);
+	return names.length ? new Set(names) : null;
+}
+
+/** Project one response row to the requested top-level keys. */
+export function pickFields<T extends object>(
+	row: T,
+	wanted: Set<string> | null,
+): Partial<T> {
+	if (!wanted) return row;
+	const out: Record<string, unknown> = {};
+	for (const k of Object.keys(row)) {
+		if (FIELDS_ALWAYS_KEEP.has(k) || wanted.has(k.toLowerCase())) {
+			out[k] = (row as Record<string, unknown>)[k];
+		}
+	}
+	return out as Partial<T>;
+}

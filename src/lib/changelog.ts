@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.10",
+		type: "added",
+		summary:
+			"?fields= response projection on the five heaviest list endpoints (projects/search, repos/search, research, builders, partners) — agents can request only the row fields they need.",
+		detail:
+			"fields=name,slug,tvlUSD returns rows with just those keys (case-insensitive). Identity keys (id/slug/fullName/githubUsername/url/source, where present on a row) are always included so projected rows still join back to their records; unknown field names are ignored rather than rejected (additive-contract ethos — a renamed field must degrade, not break callers); meta blocks are never projected. Nested objects are whole-key selections (fields=onchain returns the whole onchain block; dot-paths unsupported). Absent fields= returns the exact previous full response — purely additive.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.9",
 		type: "added",
 		summary:

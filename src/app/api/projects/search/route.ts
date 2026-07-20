@@ -15,7 +15,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -602,6 +602,7 @@ export async function GET(req: NextRequest) {
 	}
 	const scfAwardedOnly = !!scfRaw && SCF_TRUE.includes(scfRaw);
 	const limit = clampLimit(sp.get("limit"), 20, 100);
+	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 	// status filter (2026-07-11 audit): 81 Inactive projects were UNREACHABLE —
 	// nothing filtered on status, and unknown params were silently ignored, so
@@ -682,6 +683,7 @@ export async function GET(req: NextRequest) {
 		"limit",
 		"offset",
 		"exp",
+		"fields",
 	]);
 	const unknownParams = [...new Set([...sp.keys()])].filter(
 		(k) => !KNOWN_PARAMS.has(k),
@@ -1911,7 +1913,9 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 			},
-			projects: projectsWithOrg,
+			// ?fields= projection runs LAST so every enrichment (builtBy,
+			// anchorProfile, repos, onchain) is present before filtering.
+			projects: projectsWithOrg.map((p) => pickFields(p, fieldsWanted)),
 			// Inline graded code references (GitHub repos) for the same query, so
 			// consumers get existing-repo prior-art without a separate tool call.
 			// Each carries the repo url + homepage to cite. See /api/repos/search.
