@@ -26,6 +26,7 @@ import {
 	stripHtml,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import { JUNK_URL_RE } from "../src/lib/research-rank";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
@@ -91,7 +92,12 @@ async function run() {
 
 	console.log("Listing research articles via sitemap…");
 	const allUrls = await fetchSitemapUrls(SITEMAP, BASE);
-	const researchUrls = allUrls.filter((u) => u.startsWith(RESEARCH_PREFIX));
+	// JUNK_URL_RE hardening is defensive: lumenloop's sitemap has no
+	// tag/author/pagination URLs today, but the dev-docs ingest learned this
+	// the hard way (author-archive mirrors served the same chunk 3x).
+	const researchUrls = allUrls.filter(
+		(u) => u.startsWith(RESEARCH_PREFIX) && !JUNK_URL_RE.test(u),
+	);
 	console.log(`  ${researchUrls.length} research articles`);
 
 	const allChunks: ReturnType<typeof chunkMarkdown> = [];

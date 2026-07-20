@@ -107,6 +107,19 @@ async function fetchPage(url: string): Promise<PageData> {
 		if (h && !isJunkyDocTitle(h)) title = h;
 	}
 
+	// Meeting recaps defeat the salvage: their <title> AND first heading are
+	// both the bare date, so the guard above no-ops and 75 docs carried
+	// bare-date titles (golden eval BAD-TITLE). Synthesize a citation-grade
+	// title instead. Date from the URL, not the h1 — the h1 is TZ-drifted
+	// +1 day vs the URL/byline.
+	const mtg = url.match(/\/meetings\/(\d{4})\/(\d{2})\/(\d{2})/);
+	if (mtg && isJunkyDocTitle(title)) {
+		const kind = /\bprotocol meeting\b/i.test(body)
+			? "Protocol Meeting"
+			: "Developer Meeting";
+		title = `Stellar ${kind} ${mtg[1]}-${mtg[2]}-${mtg[3]}`;
+	}
+
 	return { url, title, body };
 }
 

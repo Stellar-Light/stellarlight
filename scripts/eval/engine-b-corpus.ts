@@ -54,13 +54,16 @@ const BARE_DATE_RE = /^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\w+ \d{1,2}, \d{4})$/;
 /**
  * Evidence-calibrated (first live run): 'starts-lowercase' false-positived
  * on CLI/RPC reference pages whose titles ARE lowercase identifiers
- * ('tx sign and tx send', 'request_trust'); meeting recaps are inherently
- * date-titled. A real body-fragment title reads like a SENTENCE.
+ * ('tx sign and tx send', 'request_trust'). Meeting recaps USED to be
+ * excused as "inherently date-titled" — no longer: the ingester now
+ * synthesizes "Stellar Protocol Meeting YYYY-MM-DD" titles, so a bare-date
+ * meeting title is a regression this sweep must catch (same bar as
+ * run-golden's BAD-TITLE).
  */
-function titleIssue(title: string, url: string): string | null {
+function titleIssue(title: string, _url: string): string | null {
 	const t = (title ?? "").trim();
 	if (!t) return "empty";
-	if (BARE_DATE_RE.test(t) && !/\/meetings\//.test(url)) return "bare-date";
+	if (BARE_DATE_RE.test(t)) return "bare-date";
 	if (t.length > 110) return "overlong (sentence, not a title)";
 	// Run-3 evidence: word-count flagged 296 legit SEO-style docs titles
 	// ('Issue an Asset on Stellar: Set Trustlines…'). A body fragment ENDS

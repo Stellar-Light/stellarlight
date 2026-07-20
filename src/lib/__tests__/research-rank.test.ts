@@ -842,3 +842,79 @@ describe("full lexical coverage — recency-intent guard", () => {
 		expect(out[0].url).toBe("https://x/protocol-27");
 	});
 });
+
+// BAD-TITLE (golden eval): meeting recaps carry bare-date titles because the
+// page's <title> AND <h1> are both the date — serve-time synthesis turns
+// them into quotable citations. Date must come from the URL, not the h1
+// (the h1 is TZ-drifted +1 day).
+describe("meeting title synthesis", () => {
+	it("synthesizes a Protocol Meeting title from a bare-date title", () => {
+		const pool = [
+			{
+				...chunk({
+					url: "https://developers.stellar.org/meetings/2024/08/22",
+					score: 0.9,
+					content: `Core developers discussed CAP-58 constructor semantics in this week's Protocol Meeting. ${Array.from({ length: 40 }, (_, i) => `detail${i}`).join(" ")}.`,
+				}),
+				title: "2024-08-23",
+			},
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 1,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(out[0].title).toBe("Stellar Protocol Meeting 2024-08-22");
+	});
+
+	it("falls back to Developer Meeting when the chunk never says protocol", () => {
+		const pool = [
+			{
+				...chunk({
+					url: "https://developers.stellar.org/meetings/2025/02/20",
+					score: 0.9,
+				}),
+				title: "2025-02-20",
+			},
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 1,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(out[0].title).toBe("Stellar Developer Meeting 2025-02-20");
+	});
+
+	it("leaves a real meeting title alone", () => {
+		const pool = [
+			{
+				...chunk({
+					url: "https://developers.stellar.org/meetings/2026/06/18",
+					score: 0.9,
+				}),
+				title: "Protocol 23 upgrade retrospective",
+			},
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 1,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(out[0].title).toBe("Protocol 23 upgrade retrospective");
+	});
+
+	it("does not touch bare-date titles on non-meeting URLs", () => {
+		const pool = [
+			{
+				...chunk({ url: "https://a.com/changelog", score: 0.9 }),
+				title: "2026-01-01",
+			},
+		];
+		const out = rankResearchChunks(pool, {
+			limit: 1,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(out[0].title).toBe("2026-01-01");
+	});
+});
