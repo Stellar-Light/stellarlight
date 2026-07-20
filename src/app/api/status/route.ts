@@ -68,7 +68,15 @@ export async function GET() {
 	const payload = await getPayloadSafe();
 	const generatedAt = new Date().toISOString();
 
-	const [projects, hackathons, builders, repos, auditsReg] = payload
+	const [
+		projects,
+		hackathons,
+		builders,
+		repos,
+		auditsReg,
+		researchDocs,
+		partners,
+	] = payload
 		? await Promise.all([
 				collectionStatus(payload, "projects", "projects"),
 				collectionStatus(
@@ -95,6 +103,18 @@ export async function GET() {
 					"audits",
 					"Security-audit registry from stellarsecurityportal.com (powers /api/audits; full text via /api/research?source=audit)",
 				),
+				collectionStatus(
+					payload,
+					"research-docs",
+					"researchDocs",
+					"Primary research corpus (SEPs, dev docs, releases, audit full text, ecosystem writing) powering /api/research — refreshed daily",
+				),
+				collectionStatus(
+					payload,
+					"partner-accounts",
+					"partners",
+					"Partner directory profiles (powers /api/partners + /api/partners/match). Counts ALL rows incl. unpublished drafts — /api/partners serves published-only, so its total can be smaller.",
+				),
 			])
 		: [
 				{ name: "projects", count: null, lastUpdatedAt: null },
@@ -102,6 +122,8 @@ export async function GET() {
 				{ name: "builders", count: null, lastUpdatedAt: null },
 				{ name: "repos", count: null, lastUpdatedAt: null },
 				{ name: "audits", count: null, lastUpdatedAt: null },
+				{ name: "researchDocs", count: null, lastUpdatedAt: null },
+				{ name: "partners", count: null, lastUpdatedAt: null },
 			];
 
 	const ecosystemStats: SourceStatus = {
@@ -136,6 +158,8 @@ export async function GET() {
 				builders,
 				repos,
 				auditsReg,
+				researchDocs,
+				partners,
 				ecosystemStats,
 				sdfSkills,
 			],
