@@ -392,6 +392,13 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	afriex: "https://www.afriex.com/",
 	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
 	arst: "https://www.arst.finance/en",
+	// boss-pay's recorded bossmoney.africa lapsed and was re-registered by
+	// strangers (2026-07-06: 301 → Turkish gambling site; 2026-07-20: 301 →
+	// drakorindo.live streaming site). The live product is IDT Corporation's
+	// bossmoney.com (NMLS 935577; Stellar per idt.net + stellar.org blog). The
+	// PARTNER side was corrected in curate-partners URL_CORRECTIONS on 07-06;
+	// this fixes the PROJECT row that kept serving the hijacked domain.
+	"boss-pay": "https://www.bossmoney.com/",
 	// Product site live at https://www.bravepay.net/ (wallet/POS/payments content), help.bravepay.net 200; only the recorded apex bravepay.net DNS record is broken.
 	bravepay: "https://www.bravepay.net/",
 	// BRZ stablecoin actively offered by issuer Transfero, live at transfero.com featuring BRZ; recorded brztoken.io returns 404.

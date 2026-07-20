@@ -1,13 +1,13 @@
 /**
- * Populate partners.projectSlug from the hand-verified identity map below —
- * the join that lets partner-owned data (verified on-chain assets, anchor
+ * Populate partners.projectSlug from the hand-verified identity map — the
+ * join that lets partner-owned data (verified on-chain assets, anchor
  * coverage) flow onto the matching directory project.
  *
- * Identity matching is the Spectra-near-miss class: a partner and a project
- * with similar names are NOT automatically the same entity. Every entry in
- * the map was verified (name + description agreement, fan-out pass
- * 2026-07-20) before landing here; partners absent from the map stay
- * unlinked on purpose.
+ * The map itself lives in src/lib/partner-project-identity.ts (with the
+ * domain cross-check plumbing that keeps it honest — see that header for
+ * the Spectra-near-miss rationale). This script only performs the write;
+ * the dry run additionally smoke-checks each pair's domains so a wrong
+ * identity is visible BEFORE --execute.
  *
  * Usage:
  *   pnpm exec tsx scripts/data/link-partner-projects.ts             # dry run
@@ -19,55 +19,13 @@ loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
+import {
+	PARTNER_PROJECT_LINKS,
+	registrableDomain,
+} from "../../src/lib/partner-project-identity";
 import configPromise from "../../src/payload.config";
 
 const execute = process.argv.includes("--execute");
-
-/** partnerSlug → directory projectSlug. Verified-only; see file header. */
-export const PARTNER_PROJECT_LINKS: Record<string, string> = {
-	albedo: "albedo",
-	"anchor-alfred-pay": "alfred",
-	"anchor-anclap": "anclap",
-	"anchor-bitso": "bitso",
-	"anchor-blox-global": "blox",
-	"anchor-boss-pay": "boss-pay",
-	"anchor-cash-abroad": "cash-abroad",
-	"anchor-clickspesa": "clickspesa",
-	"anchor-coca-wallet": "coca",
-	"anchor-coins-ph": "coins-ph",
-	"anchor-elroy-app": "elroy",
-	"anchor-fonbnk": "fonbnk",
-	"anchor-honey-coin": "honey-coin",
-	"anchor-moneygram": "moneygram",
-	"anchor-mykobo": "mykobo",
-	"anchor-ping": "ping",
-	"anchor-ripe-money": "ripe",
-	"anchor-trace-finance": "trace",
-	"anchor-wallet-guru": "wallet-guru",
-	"anchor-yellow-card": "yellow-card",
-	aquarius: "aquarius",
-	audd: "audd",
-	blend: "blend",
-	certora: "certora",
-	defindex: "defindex",
-	etherfuse: "etherfuse",
-	"franklin-templeton": "benji",
-	freighter: "freighter",
-	"gmo-zcom-trust": "gyen",
-	halborn: "halborn",
-	"hana-wallet": "hana",
-	lobstr: "lobstr",
-	ntokens: "brl",
-	ottersec: "ottersec",
-	"phoenix-protocol": "phoenix",
-	reflector: "reflector",
-	"runtime-verification": "runtime-verification",
-	soroswap: "soroswap",
-	stellarexpert: "stellar-expert",
-	"trustless-work": "trustless-work",
-	veridise: "veridise",
-	"xbull-wallet": "xbull",
-};
 
 async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
@@ -94,12 +52,28 @@ async function run() {
 			where: { slug: { equals: projectSlug } },
 			limit: 1,
 			depth: 0,
-			select: { slug: true, name: true },
+			select: { slug: true, name: true, links: true },
 		});
 		if (!project.docs.length) {
 			console.log(`SKIP ${partnerSlug}: project '${projectSlug}' not found`);
 			skipped += 1;
 			continue;
+		}
+		// Authoring-time identity smoke check (report-only): a domain mismatch
+		// between the two sides is the Spectra-near-miss smell. WARN, don't
+		// stop — the full verdict incl. the verified allowlist lives in
+		// scripts/data/check-partner-project-identity.ts.
+		const partnerDom = registrableDomain(
+			(partner.docs[0] as { websiteUrl?: string | null }).websiteUrl,
+		);
+		const projectDom = registrableDomain(
+			(project.docs[0] as { links?: { website?: string | null } }).links
+				?.website,
+		);
+		if (partnerDom && projectDom && partnerDom !== projectDom) {
+			console.log(
+				`  WARN ${partnerSlug} → ${projectSlug}: domain mismatch (${partnerDom} vs ${projectDom}) — verify identity or allowlist in src/lib/partner-project-identity.ts`,
+			);
 		}
 		const current = (partner.docs[0] as { projectSlug?: string | null })
 			.projectSlug;

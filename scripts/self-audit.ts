@@ -747,6 +747,78 @@ async function main() {
 		warn("audit coverage", `check skipped: ${String(err)}`);
 	}
 
+	// ---- Partner→project identity: the join map still points at the same
+	// real-world entities (Spectra-near-miss guard). Hand-verified at
+	// authoring time, but identities DRIFT afterwards — the boss-pay class:
+	// a lapsed domain on either side gets re-registered by a stranger while
+	// the join silently keeps flowing partner data onto the project row.
+	// Re-assert every mapped pair: partner.websiteUrl and
+	// project.links.website must share a registrable domain unless the EXACT
+	// domain pair is human-allowlisted. ----
+	try {
+		const {
+			ALLOWED_DOMAIN_MISMATCHES,
+			PARTNER_PROJECT_LINKS,
+			registrableDomain,
+		} = await import("../src/lib/partner-project-identity");
+		const pd = await j("/api/partners?all=1&limit=100");
+		const partnersBySlug = new Map<string, { websiteUrl?: string | null }>(
+			(pd.partners ?? []).map((p: { slug: string }) => [p.slug, p]),
+		);
+		let consistent = 0;
+		for (const [partnerSlug, projectSlug] of Object.entries(
+			PARTNER_PROJECT_LINKS,
+		)) {
+			const partner = partnersBySlug.get(partnerSlug);
+			if (!partner) {
+				warn(`identity ${partnerSlug}`, "not in live /api/partners");
+				continue;
+			}
+			let project: { links?: { website?: string | null } } | undefined;
+			try {
+				const d = await j(
+					`/api/projects/search?q=${encodeURIComponent(projectSlug)}&limit=10`,
+				);
+				project = (d.projects ?? []).find(
+					(p: { slug: string; canonicalSlug?: string }) =>
+						p.slug === projectSlug || p.canonicalSlug === projectSlug,
+				);
+			} catch (err) {
+				warn(
+					`identity ${partnerSlug} → ${projectSlug}`,
+					`project search failed: ${String(err)}`,
+				);
+				continue;
+			}
+			const pDom = registrableDomain(partner.websiteUrl);
+			const prDom = registrableDomain(project?.links?.website);
+			if (!project || !pDom || !prDom) {
+				warn(
+					`identity ${partnerSlug} → ${projectSlug}`,
+					!project
+						? "project not resolvable via search"
+						: "missing website on one side",
+				);
+				continue;
+			}
+			const allow = ALLOWED_DOMAIN_MISMATCHES[partnerSlug];
+			if (
+				pDom === prDom ||
+				(allow && allow.partner === pDom && allow.project === prDom)
+			) {
+				consistent++;
+				continue;
+			}
+			bad(
+				`identity ${partnerSlug} → ${projectSlug}`,
+				`domain mismatch ${pDom} vs ${prDom} — not allowlisted; verify the join (scripts/data/check-partner-project-identity.ts)`,
+			);
+		}
+		ok(`partner→project identity: ${consistent} pair(s) domain-consistent`);
+	} catch (err) {
+		warn("partner→project identity", `check skipped: ${String(err)}`);
+	}
+
 	// ---- Event recall: is the LATEST protocol/core release actually servable? ----
 	// 2026-07-19: Protocol 27 "Zipper" reached mainnet (vote 07-08) and no
 	// check noticed the corpus couldn't answer "what's the latest protocol
