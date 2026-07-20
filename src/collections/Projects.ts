@@ -290,27 +290,61 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			// On-chain metrics (2026-07-20): populated by
+			// scripts/data/enrich-onchain-projects.ts from stellar.expert, join
+			// keys hand-verified in src/data/onchain-contracts.ts. Semantics:
+			// absence/null = not tracked here, NEVER "no activity". events and
+			// subinvocations are lifetime counts (stellar.expert's direct
+			// invocation counter is currently broken service-wide, so these are
+			// the honest activity signals available).
 			name: "onchain",
 			type: "group",
 			fields: [
+				{ name: "assetCode", type: "text" },
+				{ name: "issuer", type: "text" },
 				{
-					name: "assetCode",
-					type: "text",
+					name: "assetHolders",
+					type: "number",
+					admin: { description: "Trustline holders of the issued asset" },
 				},
 				{
-					name: "issuer",
-					type: "text",
+					name: "assetSupply",
+					type: "number",
+					admin: { description: "Circulating supply in whole asset units" },
 				},
 				{
 					name: "contracts",
 					type: "array",
 					fields: [
+						{ name: "address", type: "text" },
+						{ name: "label", type: "text" },
 						{
-							name: "address",
+							name: "events",
+							type: "number",
+							admin: { description: "Lifetime contract events emitted" },
+						},
+						{
+							name: "subinvocations",
+							type: "number",
+							admin: {
+								description:
+									"Lifetime times called as a subcall — low for contracts users hit directly; read WITH events",
+							},
+						},
+						{ name: "storageEntries", type: "number" },
+						{ name: "createdAt", type: "date" },
+						{
+							name: "verifiedRepo",
 							type: "text",
+							admin: {
+								description:
+									"GitHub repo from stellar.expert's wasm validation, when the team ran it",
+							},
 						},
 					],
 				},
+				{ name: "source", type: "text" },
+				{ name: "asOf", type: "date" },
 			],
 		},
 		{
