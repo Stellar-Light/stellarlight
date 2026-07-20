@@ -19,6 +19,11 @@ import { SEEDS, STATUS_FIX, WEBSITE_FIXES } from "./curation-maps";
 const EXECUTE = process.argv.includes("--execute");
 
 const DESCRIPTION_FIXES: Record<string, string> = {
+	// gyen had NO description. The issuer's own stellar.toml
+	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
+	// issuance is wound down with a 1:1 redemption window through Nov 11
+	// 2026 — material lifecycle truth an agent must see on the row.
+	gyen: "GYEN is a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. Per the issuer's own stellar.toml (July 2026), new issuance is wound down; 1:1 redemption remains open through November 11, 2026.",
 	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
 	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
 	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-
@@ -116,6 +121,36 @@ const GITHUB_REPOS_ADD: Record<
 	openzeppelin: [
 		{ owner: "OpenZeppelin", name: "relayer-plugin-x402-facilitator" },
 	],
+	// Q2 cold-agent run (2026-07-20): aquarius had NO repo commit data, so it
+	// never entered activity leaderboards. Cause: the org renamed
+	// AquaToken→AquariusDeFi (old link is an empty shell; repo API 301s).
+	// These four are Aquarius-owned and active this month (dao web app,
+	// voting tracker, governance, bribes). The audited AMM contracts repo
+	// (AquaToken/soroban-amm) went private/deleted — cannot be linked.
+	aquarius: [
+		{ owner: "AquariusDeFi", name: "dao-aquarius-soroban" },
+		{ owner: "AquariusDeFi", name: "aqua-voting-tracker" },
+		{ owner: "AquariusDeFi", name: "aqua-governance" },
+		{ owner: "AquariusDeFi", name: "aqua-bribes" },
+	],
+	// PG recon 2026-07-20: the registry split out of theahaco/scaffold-stellar
+	// into its own org ~2026-05-19 (proof chain: proposal PR #65 →
+	// scaffold-stellar docs → cargo install --git stellar-registry/cli;
+	// oz-combined-wasms homepage = rgstry.xyz closes the loop).
+	"stellar-registry": [
+		{ owner: "stellar-registry", name: "contracts" },
+		{ owner: "stellar-registry", name: "cli" },
+	],
+};
+
+/** links.github corrections — equality-guarded overwrites for records whose
+ * repo link points at the WRONG place (org renames, project splits). */
+const GITHUB_LINK_FIX: Record<string, string> = {
+	// org renamed AquaToken→AquariusDeFi (old page is an empty shell)
+	aquarius: "https://github.com/AquariusDeFi",
+	// registry split out of scaffold-stellar into its own org 2026-05-19;
+	// the old link now literally shows a different product's code
+	"stellar-registry": "https://github.com/stellar-registry/contracts",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
@@ -178,6 +213,13 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 		evidence:
 			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
 	},
+	// Seeded this run (see SEEDS) — Soneso's base Flutter SDK, CSV-confirmed
+	// Q4'25+Q1'26 awardee; the PG loop runs after Seeds so it lands same-run.
+	"flutter-stellar-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
 	"scaffold-stellar": {
 		rounds: ["2026Q1"],
 		evidence:
@@ -186,7 +228,9 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 };
 
 const TYPES_ADD: Record<string, string[]> = {
-	etherfuse: ["Anchor"],
+	// Stablecoin appended per boxy triage 2026-07-20 (issued-asset + sectors
+	// axes both fired — domain-matched stellar.expert issuance).
+	etherfuse: ["Anchor", "Stablecoin"],
 	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
 	// USDT across Base, Stellar, Solana, Ethereum, BNB" — rozo.ai homepage,
 	// linked not coming-soon; Hacken audit of ROZO Intents in our corpus).
@@ -201,6 +245,27 @@ const TYPES_ADD: Record<string, string[]> = {
 	// indexers page classifies it there) — RPC-only typing hid it from every
 	// indexer/portfolio-API query. Same multi-product class as etherfuse.
 	alchemy: ["Indexer"],
+	// boxy triage 2026-07-20 of the capability-mismatch sweep's first report
+	// (25 candidates): the anchor axis batch, approved "all except benji"
+	// (FT's benji is a tokenized fund; the anchor is FT-the-company — held).
+	// Each partner here is an operating anchor in the anchors directory whose
+	// project row never carried the type — the exact Etherfuse class.
+	gyen: ["Anchor"],
+	brl: ["Anchor"],
+	audd: ["Anchor"],
+	blox: ["Anchor"],
+	coca: ["Anchor"],
+	elroy: ["Anchor"],
+	ripe: ["Anchor"],
+	alfred: ["Anchor"],
+	trace: ["Anchor"],
+	// boxy triage 2026-07-20, issued-asset axis: domain-matched on-chain
+	// issuance (stellar.expert, issuer domain == partner domain). etherfuse
+	// fired on TWO independent axes (sectors + issuance); anclap issues
+	// ARS/PEN anchored tokens. Payments-on-wallets (hana/xbull/lobstr) was
+	// explicitly DECLINED — wallets stay wallets; the sweep keeps reporting.
+	// (etherfuse Anchor already added above; this appends Stablecoin.)
+	anclap: ["Stablecoin"],
 };
 
 /** EXACT-SYNC types for curated slugs — the corrective sibling of TYPES_ADD.
@@ -325,7 +390,13 @@ const IDENTITY_FIX: Record<
 	// primary-source extraction cites current material as "the Vesseo app").
 	vesseo: {
 		aliases: ["Vibrant"],
-		renameSourceUrl: "https://vesseoapp.com/",
+		// "Adiós Vibrant, hola Vesseo" — Vesseo's own announcement, dated
+		// Apr 22 2025; corroborated by Wayback (vesseoapp.com's first 200
+		// snapshot same day) and the vibrantapp.com 301. Q4 cold-agent run
+		// flagged renamedAt null as asserted-but-absent provenance.
+		renamedAt: "2025-04-22",
+		renameSourceUrl:
+			"https://vesseoapp.com/blog-ar/adi%C3%B3s-vibrant-hola-vesseo",
 	},
 };
 
@@ -1205,41 +1276,6 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { types: next } });
 	}
 
-	// ── PG Award truth (merge rounds, never remove; CSV-confirmed only) ──
-	console.log("\n── Public Goods Award rounds (merge, never remove) ──");
-	for (const [slug, pg] of Object.entries(PG_AWARDS)) {
-		const r = await payload.find({
-			collection: "projects",
-			where: { slug: { equals: slug } },
-			limit: 1,
-			depth: 0,
-			overrideAccess: true,
-		});
-		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		const d = r.docs[0] as any;
-		if (!d) {
-			console.log(`  WARN: no project "${slug}" — skipped`);
-			continue;
-		}
-		const existing: string[] = Array.isArray(d.publicGoods?.awardRounds)
-			? d.publicGoods.awardRounds
-			: [];
-		const missing = pg.rounds.filter((x) => !existing.includes(x));
-		if (!missing.length && d.publicGoods?.evidenceUrl === pg.evidence) {
-			console.log(`  ${slug}: rounds already [${existing.join(", ")}], skip`);
-			continue;
-		}
-		const next = [...existing, ...missing];
-		console.log(
-			`  ${slug}: pgAwardRounds [${existing.join(", ")}] → [${next.join(", ")}]`,
-		);
-		writes.push({
-			id: d.id,
-			slug,
-			data: { publicGoods: { awardRounds: next, evidenceUrl: pg.evidence } },
-		});
-	}
-
 	// ── sls-025: additive github.repos rows (merge, never remove) ──
 	console.log("\n── GitHub repos add (merge, never remove) ──");
 	for (const [slug, addRepos] of Object.entries(GITHUB_REPOS_ADD)) {
@@ -1522,6 +1558,41 @@ async function main() {
 	}
 
 	// ── launch-status corrections (from-guarded, retire once applied) ──
+	// ── PG Award truth (merge rounds, never remove; CSV-confirmed only) ──
+	console.log("\n── Public Goods Award rounds (merge, never remove) ──");
+	for (const [slug, pg] of Object.entries(PG_AWARDS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const existing: string[] = Array.isArray(d.publicGoods?.awardRounds)
+			? d.publicGoods.awardRounds
+			: [];
+		const missing = pg.rounds.filter((x) => !existing.includes(x));
+		if (!missing.length && d.publicGoods?.evidenceUrl === pg.evidence) {
+			console.log(`  ${slug}: rounds already [${existing.join(", ")}], skip`);
+			continue;
+		}
+		const next = [...existing, ...missing];
+		console.log(
+			`  ${slug}: pgAwardRounds [${existing.join(", ")}] → [${next.join(", ")}]`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { publicGoods: { awardRounds: next, evidenceUrl: pg.evidence } },
+		});
+	}
+
 	console.log("\n── Status fixes (from-guarded) ──");
 	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
 		const r = await payload.find({
@@ -1589,6 +1660,33 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { links: { ...(d.links ?? {}), website } },
+		});
+	}
+
+	console.log("\n── GitHub link fixes (equality-guarded) ──");
+	for (const [slug, github] of Object.entries(GITHUB_LINK_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if ((d.links?.github ?? "").replace(/\/+$/, "") === github) {
+			console.log(`  ${slug}: github link already current, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: github ${d.links?.github ?? "(none)"} → ${github}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), github } },
 		});
 	}
 
