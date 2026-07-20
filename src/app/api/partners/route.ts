@@ -23,6 +23,8 @@ import {
 	BOOL_FALSE_VALUES,
 	BOOL_TRUE_VALUES,
 	clampLimit,
+	parseFields,
+	pickFields,
 	strictBoolParam,
 } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
@@ -216,6 +218,7 @@ export async function GET(req: NextRequest) {
 	const all = allParsed === true;
 	const q = sp.get("q")?.toLowerCase().trim();
 	const limit = clampLimit(sp.get("limit"), 50, 100);
+	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	if (type && !PARTNER_TYPES.includes(type)) {
@@ -353,7 +356,7 @@ export async function GET(req: NextRequest) {
 				validRamps: RAMP_TYPES,
 				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
 			},
-			partners,
+			partners: partners.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {

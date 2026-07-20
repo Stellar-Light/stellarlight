@@ -14,7 +14,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
 	const limit = clampLimit(sp.get("limit"), 20, 100);
+	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
@@ -92,7 +93,7 @@ export async function GET(req: NextRequest) {
 					: {}),
 				counts: { returned: repos.length, total },
 			},
-			repos,
+			repos: repos.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {

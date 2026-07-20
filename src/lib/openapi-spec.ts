@@ -384,6 +384,7 @@ export const spec: OpenAPISpec = {
 					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
+					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
@@ -487,6 +488,7 @@ export const spec: OpenAPISpec = {
 					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
+					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
@@ -990,6 +992,7 @@ export const spec: OpenAPISpec = {
 					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
+					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
@@ -1251,6 +1254,7 @@ export const spec: OpenAPISpec = {
 					},
 					{ $ref: "#/components/parameters/q" },
 					{ $ref: "#/components/parameters/limit" },
+					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
@@ -1961,6 +1965,7 @@ export const spec: OpenAPISpec = {
 						description: "Max results (default 8, max 25)",
 						schema: { type: "integer", minimum: 1, maximum: 25, default: 8 },
 					},
+					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
@@ -2713,6 +2718,13 @@ export const spec: OpenAPISpec = {
 				description:
 					"Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total.",
 				schema: { type: "integer", minimum: 0, default: 0 },
+			},
+			fields: {
+				name: "fields",
+				in: "query",
+				description:
+					"Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths).",
+				schema: { type: "string" },
 			},
 		},
 		schemas: {

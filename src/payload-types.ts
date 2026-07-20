@@ -13,998 +13,1062 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | 'Pacific/Midway'
-  | 'Pacific/Niue'
-  | 'Pacific/Honolulu'
-  | 'Pacific/Rarotonga'
-  | 'America/Anchorage'
-  | 'Pacific/Gambier'
-  | 'America/Los_Angeles'
-  | 'America/Tijuana'
-  | 'America/Denver'
-  | 'America/Phoenix'
-  | 'America/Chicago'
-  | 'America/Guatemala'
-  | 'America/New_York'
-  | 'America/Bogota'
-  | 'America/Caracas'
-  | 'America/Santiago'
-  | 'America/Buenos_Aires'
-  | 'America/Sao_Paulo'
-  | 'Atlantic/South_Georgia'
-  | 'Atlantic/Azores'
-  | 'Atlantic/Cape_Verde'
-  | 'Europe/London'
-  | 'Europe/Berlin'
-  | 'Africa/Lagos'
-  | 'Europe/Athens'
-  | 'Africa/Cairo'
-  | 'Europe/Moscow'
-  | 'Asia/Riyadh'
-  | 'Asia/Dubai'
-  | 'Asia/Baku'
-  | 'Asia/Karachi'
-  | 'Asia/Tashkent'
-  | 'Asia/Calcutta'
-  | 'Asia/Dhaka'
-  | 'Asia/Almaty'
-  | 'Asia/Jakarta'
-  | 'Asia/Bangkok'
-  | 'Asia/Shanghai'
-  | 'Asia/Singapore'
-  | 'Asia/Tokyo'
-  | 'Asia/Seoul'
-  | 'Australia/Brisbane'
-  | 'Australia/Sydney'
-  | 'Pacific/Guam'
-  | 'Pacific/Noumea'
-  | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+	| "Pacific/Midway"
+	| "Pacific/Niue"
+	| "Pacific/Honolulu"
+	| "Pacific/Rarotonga"
+	| "America/Anchorage"
+	| "Pacific/Gambier"
+	| "America/Los_Angeles"
+	| "America/Tijuana"
+	| "America/Denver"
+	| "America/Phoenix"
+	| "America/Chicago"
+	| "America/Guatemala"
+	| "America/New_York"
+	| "America/Bogota"
+	| "America/Caracas"
+	| "America/Santiago"
+	| "America/Buenos_Aires"
+	| "America/Sao_Paulo"
+	| "Atlantic/South_Georgia"
+	| "Atlantic/Azores"
+	| "Atlantic/Cape_Verde"
+	| "Europe/London"
+	| "Europe/Berlin"
+	| "Africa/Lagos"
+	| "Europe/Athens"
+	| "Africa/Cairo"
+	| "Europe/Moscow"
+	| "Asia/Riyadh"
+	| "Asia/Dubai"
+	| "Asia/Baku"
+	| "Asia/Karachi"
+	| "Asia/Tashkent"
+	| "Asia/Calcutta"
+	| "Asia/Dhaka"
+	| "Asia/Almaty"
+	| "Asia/Jakarta"
+	| "Asia/Bangkok"
+	| "Asia/Shanghai"
+	| "Asia/Singapore"
+	| "Asia/Tokyo"
+	| "Asia/Seoul"
+	| "Australia/Brisbane"
+	| "Australia/Sydney"
+	| "Pacific/Guam"
+	| "Pacific/Noumea"
+	| "Pacific/Auckland"
+	| "Pacific/Fiji";
 
 export interface Config {
-  auth: {
-    users: UserAuthOperations;
-    'partner-accounts': PartnerAccountAuthOperations;
-  };
-  blocks: {};
-  collections: {
-    users: User;
-    media: Media;
-    projects: Project;
-    repos: Repo;
-    audits: Audit;
-    blog: Blog;
-    builders: Builder;
-    'rss-feeds': RssFeed;
-    signals: Signal;
-    entities: Entity;
-    'transparency-logs': TransparencyLog;
-    carousel: Carousel;
-    hackathons: Hackathon;
-    'link-checks': LinkCheck;
-    'idea-submissions': IdeaSubmission;
-    'api-usage': ApiUsage;
-    'research-docs': ResearchDoc;
-    'scout-feedback': ScoutFeedback;
-    'community-skills': CommunitySkill;
-    'partner-accounts': PartnerAccount;
-    'partner-leads': PartnerLead;
-    'funding-snapshots': FundingSnapshot;
-    'payload-kv': PayloadKv;
-    'payload-jobs': PayloadJob;
-    'payload-locked-documents': PayloadLockedDocument;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  collectionsJoins: {
-    projects: {
-      relatedEntities: 'entities';
-    };
-    hackathons: {
-      projects: 'projects';
-    };
-  };
-  collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    projects: ProjectsSelect<false> | ProjectsSelect<true>;
-    repos: ReposSelect<false> | ReposSelect<true>;
-    audits: AuditsSelect<false> | AuditsSelect<true>;
-    blog: BlogSelect<false> | BlogSelect<true>;
-    builders: BuildersSelect<false> | BuildersSelect<true>;
-    'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
-    signals: SignalsSelect<false> | SignalsSelect<true>;
-    entities: EntitiesSelect<false> | EntitiesSelect<true>;
-    'transparency-logs': TransparencyLogsSelect<false> | TransparencyLogsSelect<true>;
-    carousel: CarouselSelect<false> | CarouselSelect<true>;
-    hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
-    'link-checks': LinkChecksSelect<false> | LinkChecksSelect<true>;
-    'idea-submissions': IdeaSubmissionsSelect<false> | IdeaSubmissionsSelect<true>;
-    'api-usage': ApiUsageSelect<false> | ApiUsageSelect<true>;
-    'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
-    'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
-    'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
-    'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
-    'partner-leads': PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
-    'funding-snapshots': FundingSnapshotsSelect<false> | FundingSnapshotsSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-  };
-  db: {
-    defaultIDType: string;
-  };
-  globals: {
-    banner: Banner;
-  };
-  globalsSelect: {
-    banner: BannerSelect<false> | BannerSelect<true>;
-  };
-  locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PartnerAccount & {
-        collection: 'partner-accounts';
-      });
-  jobs: {
-    tasks: {
-      'sync-rss-feed': SyncRSSFeedTask;
-      inline: {
-        input: unknown;
-        output: unknown;
-      };
-    };
-    workflows: unknown;
-  };
+	auth: {
+		users: UserAuthOperations;
+		"partner-accounts": PartnerAccountAuthOperations;
+	};
+	blocks: {};
+	collections: {
+		users: User;
+		media: Media;
+		projects: Project;
+		repos: Repo;
+		audits: Audit;
+		blog: Blog;
+		builders: Builder;
+		"rss-feeds": RssFeed;
+		signals: Signal;
+		entities: Entity;
+		"transparency-logs": TransparencyLog;
+		carousel: Carousel;
+		hackathons: Hackathon;
+		"link-checks": LinkCheck;
+		"idea-submissions": IdeaSubmission;
+		"api-usage": ApiUsage;
+		"research-docs": ResearchDoc;
+		"scout-feedback": ScoutFeedback;
+		"community-skills": CommunitySkill;
+		"partner-accounts": PartnerAccount;
+		"partner-leads": PartnerLead;
+		"funding-snapshots": FundingSnapshot;
+		"payload-kv": PayloadKv;
+		"payload-jobs": PayloadJob;
+		"payload-locked-documents": PayloadLockedDocument;
+		"payload-preferences": PayloadPreference;
+		"payload-migrations": PayloadMigration;
+	};
+	collectionsJoins: {
+		projects: {
+			relatedEntities: "entities";
+		};
+		hackathons: {
+			projects: "projects";
+		};
+	};
+	collectionsSelect: {
+		users: UsersSelect<false> | UsersSelect<true>;
+		media: MediaSelect<false> | MediaSelect<true>;
+		projects: ProjectsSelect<false> | ProjectsSelect<true>;
+		repos: ReposSelect<false> | ReposSelect<true>;
+		audits: AuditsSelect<false> | AuditsSelect<true>;
+		blog: BlogSelect<false> | BlogSelect<true>;
+		builders: BuildersSelect<false> | BuildersSelect<true>;
+		"rss-feeds": RssFeedsSelect<false> | RssFeedsSelect<true>;
+		signals: SignalsSelect<false> | SignalsSelect<true>;
+		entities: EntitiesSelect<false> | EntitiesSelect<true>;
+		"transparency-logs":
+			| TransparencyLogsSelect<false>
+			| TransparencyLogsSelect<true>;
+		carousel: CarouselSelect<false> | CarouselSelect<true>;
+		hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
+		"link-checks": LinkChecksSelect<false> | LinkChecksSelect<true>;
+		"idea-submissions":
+			| IdeaSubmissionsSelect<false>
+			| IdeaSubmissionsSelect<true>;
+		"api-usage": ApiUsageSelect<false> | ApiUsageSelect<true>;
+		"research-docs": ResearchDocsSelect<false> | ResearchDocsSelect<true>;
+		"scout-feedback": ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
+		"community-skills":
+			| CommunitySkillsSelect<false>
+			| CommunitySkillsSelect<true>;
+		"partner-accounts":
+			| PartnerAccountsSelect<false>
+			| PartnerAccountsSelect<true>;
+		"partner-leads": PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
+		"funding-snapshots":
+			| FundingSnapshotsSelect<false>
+			| FundingSnapshotsSelect<true>;
+		"payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
+		"payload-jobs": PayloadJobsSelect<false> | PayloadJobsSelect<true>;
+		"payload-locked-documents":
+			| PayloadLockedDocumentsSelect<false>
+			| PayloadLockedDocumentsSelect<true>;
+		"payload-preferences":
+			| PayloadPreferencesSelect<false>
+			| PayloadPreferencesSelect<true>;
+		"payload-migrations":
+			| PayloadMigrationsSelect<false>
+			| PayloadMigrationsSelect<true>;
+	};
+	db: {
+		defaultIDType: string;
+	};
+	globals: {
+		banner: Banner;
+	};
+	globalsSelect: {
+		banner: BannerSelect<false> | BannerSelect<true>;
+	};
+	locale: null;
+	user:
+		| (User & {
+				collection: "users";
+		  })
+		| (PartnerAccount & {
+				collection: "partner-accounts";
+		  });
+	jobs: {
+		tasks: {
+			"sync-rss-feed": SyncRSSFeedTask;
+			inline: {
+				input: unknown;
+				output: unknown;
+			};
+		};
+		workflows: unknown;
+	};
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
+	forgotPassword: {
+		email: string;
+		password: string;
+	};
+	login: {
+		email: string;
+		password: string;
+	};
+	registerFirstUser: {
+		email: string;
+		password: string;
+	};
+	unlock: {
+		email: string;
+		password: string;
+	};
 }
 export interface PartnerAccountAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
+	forgotPassword: {
+		email: string;
+		password: string;
+	};
+	login: {
+		email: string;
+		password: string;
+	};
+	registerFirstUser: {
+		email: string;
+		password: string;
+	};
+	unlock: {
+		email: string;
+		password: string;
+	};
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
+	id: string;
+	updatedAt: string;
+	createdAt: string;
+	email: string;
+	resetPasswordToken?: string | null;
+	resetPasswordExpiration?: string | null;
+	salt?: string | null;
+	hash?: string | null;
+	loginAttempts?: number | null;
+	lockUntil?: string | null;
+	sessions?:
+		| {
+				id: string;
+				createdAt?: string | null;
+				expiresAt: string;
+		  }[]
+		| null;
+	password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+	id: string;
+	alt: string;
+	updatedAt: string;
+	createdAt: string;
+	url?: string | null;
+	thumbnailURL?: string | null;
+	filename?: string | null;
+	mimeType?: string | null;
+	filesize?: number | null;
+	width?: number | null;
+	height?: number | null;
+	focalX?: number | null;
+	focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
-  id: string;
-  name: string;
-  slug: string;
-  /**
-   * Project logo image. If not provided, a default logo will be used.
-   */
-  logo?: (string | null) | Media;
-  shortDescription?: string | null;
-  category:
-    | 'Infrastructure'
-    | 'Tooling'
-    | 'Partner Integration'
-    | 'User-Facing App'
-    | 'Asset'
-    | 'Protocol/Contract'
-    | 'Anchor';
-  types?:
-    | (
-        | 'Wallet'
-        | 'DEX'
-        | 'Lending'
-        | 'Bridge'
-        | 'Infrastructure'
-        | 'Payments'
-        | 'Anchor'
-        | 'SDK'
-        | 'Indexer'
-        | 'Explorer'
-        | 'Analytics'
-        | 'AI'
-        | 'Gaming'
-        | 'Education'
-        | 'Security'
-        | 'NFT'
-        | 'RWA'
-        | 'Stablecoin'
-        | 'Social Impact'
-        | 'RPC'
-        | 'Faucet'
-      )[]
-    | null;
-  /**
-   * Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).
-   */
-  status: 'Draft' | 'Development' | 'Pre-Release' | 'Live' | 'Inactive';
-  /**
-   * When the current `status` value was last asserted/verified (sls-024). Null = undated legacy label.
-   */
-  statusAsOf?: string | null;
-  /**
-   * Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe, triage note).
-   */
-  statusSourceUrl?: string | null;
-  /**
-   * What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).
-   */
-  statusBasis?:
-    | ('operator-announcement' | 'site-liveness' | 'onchain-activity' | 'human-verified' | 'source-inherited')
-    | null;
-  /**
-   * Former/alternate names this project is known by (e.g. Vibrant for Vesseo). Alias lookups resolve to this record and rows disclose the continuity.
-   */
-  aliases?: string[] | null;
-  /**
-   * When the current name took effect (if known).
-   */
-  renamedAt?: string | null;
-  /**
-   * Source substantiating the rename (announcement, site).
-   */
-  renameSourceUrl?: string | null;
-  /**
-   * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
-   */
-  canonicalSlug?: string | null;
-  lifecycle?: {
-    /**
-     * True if this project ever reached Live/production (distinguishes a real product that later died from one abandoned in development). Lets consumers say 'used to be live'.
-     */
-    wasLive?: boolean | null;
-    /**
-     * Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents — keep it factual and dated.
-     */
-    note?: string | null;
-  };
-  links?: {
-    website?: string | null;
-    github?: string | null;
-    docs?: string | null;
-    /**
-     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
-     */
-    twitter?: string | null;
-    discord?: string | null;
-  };
-  /**
-   * Link GitHub data to this project
-   */
-  github?: {
-    /**
-     * GitHub org login (optional), e.g. "stellar"
-     */
-    orgLogin?: string | null;
-    /**
-     * Specific repositories for this project (owner/name)
-     */
-    repos?:
-      | {
-          owner: string;
-          name: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  onchain?: {
-    assetCode?: string | null;
-    issuer?: string | null;
-    /**
-     * Trustline holders of the issued asset
-     */
-    assetHolders?: number | null;
-    /**
-     * Circulating supply in whole asset units
-     */
-    assetSupply?: number | null;
-    contracts?:
-      | {
-          address?: string | null;
-          label?: string | null;
-          /**
-           * Lifetime contract events emitted
-           */
-          events?: number | null;
-          /**
-           * Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity
-           */
-          eventsDelta?: number | null;
-          /**
-           * Subinvocations since the previous snapshot
-           */
-          subinvocationsDelta?: number | null;
-          /**
-           * Lifetime times called as a subcall — low for contracts users hit directly; read WITH events
-           */
-          subinvocations?: number | null;
-          storageEntries?: number | null;
-          createdAt?: string | null;
-          /**
-           * GitHub repo from stellar.expert's wasm validation, when the team ran it
-           */
-          verifiedRepo?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Holder change since the previous snapshot
-     */
-    assetHoldersDelta?: number | null;
-    source?: string | null;
-    asOf?: string | null;
-    /**
-     * Timestamp of the snapshot the deltas compare against
-     */
-    prevAsOf?: string | null;
-    /**
-     * Days between snapshots (delta window length)
-     */
-    deltaDays?: number | null;
-  };
-  /**
-   * Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.
-   */
-  coverage?: {
-    countries?: string[] | null;
-    currencies?: string[] | null;
-    seps?: ('sep-6' | 'sep-24' | 'sep-31')[] | null;
-    asOf?: string | null;
-  };
-  /**
-   * Networks this project supports, lowercase (e.g. 'stellar', 'xrpl'). Curator-maintained.
-   */
-  supportedNetworks?: string[] | null;
-  /**
-   * Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only — empty means not-yet-curated, not route-free.
-   */
-  routes?:
-    | {
-        fromChain: string;
-        toChain: string;
-        direction?: ('one-way' | 'bidirectional') | null;
-        /**
-         * Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time) — unknown, not none.
-         */
-        assets?: string[] | null;
-        /**
-         * What the DESTINATION asset is: canonical (issuer-native, e.g. Circle-issued USDC via CCTP), wrapped, bridged, or interchain (e.g. USDC.axl). Null = quote-time/unverified.
-         */
-        assetRepresentation?: ('canonical' | 'wrapped' | 'bridged' | 'interchain') | null;
-        /**
-         * Settlement mechanism, e.g. cctp-burn-mint, native-liquidity-pool, lock-mint, aggregator-router.
-         */
-        mechanism?: string | null;
-        sourceUrl?: string | null;
-        /**
-         * YYYY-MM-DD the route evidence was verified.
-         */
-        asOf?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Role in the DEX/trading landscape (sls-035): amm / native-orderbook = independent liquidity venues; aggregator-router routes across venues and runs none; trading-ui = an interface over other venues (e.g. the native SDEX); wallet-integrated = trading embedded in a wallet. Null = not yet classified (unknown, not 'not a venue').
-   */
-  venueRole?: ('amm' | 'native-orderbook' | 'aggregator-router' | 'trading-ui' | 'wallet-integrated') | null;
-  /**
-   * What KIND of wallet-landscape product this is (sls-033): end-user-wallet = a consumer app users hold funds in; hardware-wallet = a physical signing device product; connectivity-protocol = a wallet↔dApp connection protocol (not a wallet); wallet-sdk = a library for BUILDING wallets; integration-kit = a library for integrating existing wallets into dApps; smart-account-tooling = passkey/smart-account infrastructure. Null = not yet classified (unknown, NOT 'not a wallet').
-   */
-  productKind?:
-    | (
-        | 'end-user-wallet'
-        | 'hardware-wallet'
-        | 'connectivity-protocol'
-        | 'wallet-sdk'
-        | 'integration-kit'
-        | 'smart-account-tooling'
-      )
-    | null;
-  /**
-   * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only — empty means not-yet-curated, not unavailable.
-   */
-  availability?:
-    | {
-        platform: 'ios' | 'android' | 'web' | 'browser-extension' | 'desktop' | 'hardware-device';
-        /**
-         * available = the store listing / product surface was reachable when checked; unavailable = a previously-listed surface is gone (404 / delisted).
-         */
-        state: 'available' | 'unavailable';
-        /**
-         * The store listing / product surface URL that was checked (App Store, Google Play, Chrome Web Store, vendor shop, web app). Null for an unavailable row whose listing no longer exists.
-         */
-        storeUrl?: string | null;
-        /**
-         * YYYY-MM-DD the availability state was last verified — availability is a dated fact, re-check before relying on it.
-         */
-        checkedAt?: string | null;
-        /**
-         * Optional one-line evidence note (e.g. 'Play listing for app.xbull.mobile 404s').
-         */
-        note?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Stellar Community Fund data
-   */
-  scf?: {
-    /**
-     * Whether this project has received SCF funding
-     */
-    awarded?: boolean | null;
-    /**
-     * Last SCF round this project was awarded in
-     */
-    lastAwardedRound?: number | null;
-    /**
-     * SCF project slug (used for linking to communityfund.stellar.org)
-     */
-    slug?: string | null;
-    /**
-     * Total funding amount awarded from SCF (in USD)
-     */
-    totalAwarded?: number | null;
-    /**
-     * Round numbers this project was funded in, e.g. 2, 17, 22
-     */
-    awardedRounds?: number[] | null;
-  };
-  verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
-  embedding?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.
-   */
-  tvlUSD?: number | null;
-  /**
-   * When tvlUSD was fetched (class 8: dated metrics).
-   */
-  tvlAsOf?: string | null;
-  /**
-   * Source that produced tvlUSD (e.g. "defillama"). Null = legacy value predating provenance.
-   */
-  tvlSource?: string | null;
-  /**
-   * How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time).
-   */
-  tvlMethod?: string | null;
-  llamaSlugs?: string[] | null;
-  provenance: {
-    source: 'LumenloopSeed' | 'UserSubmitted' | 'AdminEdit';
-    sourceId?: string | null;
-    firstSeenAt?: string | null;
-  };
-  lastVerifiedAt?: string | null;
-  /**
-   * Featured projects appear first in the directory when sorted by Featured.
-   */
-  featured?: boolean | null;
-  /**
-   * Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.
-   */
-  relevanceScore?: number | null;
-  /**
-   * Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed) — this is curated.
-   */
-  prominence?: number | null;
-  /**
-   * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
-   */
-  communityPick?: boolean | null;
-  /**
-   * Entities/organizations linked to this project. Edit from either side.
-   */
-  relatedEntities?: {
-    docs?: (string | Entity)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  /**
-   * Hackathon this project originated from (if applicable)
-   */
-  hackathon?: (string | null) | Hackathon;
-  /**
-   * Post-hackathon project status
-   */
-  hackathonStatus?: ('Built' | 'In Progress' | 'Abandoned') | null;
-  /**
-   * If this project won a placement at the hackathon, surface it in the Winners section
-   */
-  hackathonPlacement?: ('grand-prize' | '1st' | '2nd' | '3rd' | 'honorable-mention' | 'track-winner') | null;
-  /**
-   * Prize amount won (USD)
-   */
-  hackathonPrize?: number | null;
-  /**
-   * Track or sponsor that awarded the prize (e.g. 'Best DeFi', 'Coinbase Track')
-   */
-  hackathonPrizeTrack?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	name: string;
+	slug: string;
+	/**
+	 * Project logo image. If not provided, a default logo will be used.
+	 */
+	logo?: (string | null) | Media;
+	shortDescription?: string | null;
+	category:
+		| "Infrastructure"
+		| "Tooling"
+		| "Partner Integration"
+		| "User-Facing App"
+		| "Asset"
+		| "Protocol/Contract"
+		| "Anchor";
+	types?:
+		| (
+				| "Wallet"
+				| "DEX"
+				| "Lending"
+				| "Bridge"
+				| "Infrastructure"
+				| "Payments"
+				| "Anchor"
+				| "SDK"
+				| "Indexer"
+				| "Explorer"
+				| "Analytics"
+				| "AI"
+				| "Gaming"
+				| "Education"
+				| "Security"
+				| "NFT"
+				| "RWA"
+				| "Stablecoin"
+				| "Social Impact"
+				| "RPC"
+				| "Faucet"
+		  )[]
+		| null;
+	/**
+	 * Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).
+	 */
+	status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
+	/**
+	 * When the current `status` value was last asserted/verified (sls-024). Null = undated legacy label.
+	 */
+	statusAsOf?: string | null;
+	/**
+	 * Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe, triage note).
+	 */
+	statusSourceUrl?: string | null;
+	/**
+	 * What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).
+	 */
+	statusBasis?:
+		| (
+				| "operator-announcement"
+				| "site-liveness"
+				| "onchain-activity"
+				| "human-verified"
+				| "source-inherited"
+		  )
+		| null;
+	/**
+	 * Former/alternate names this project is known by (e.g. Vibrant for Vesseo). Alias lookups resolve to this record and rows disclose the continuity.
+	 */
+	aliases?: string[] | null;
+	/**
+	 * When the current name took effect (if known).
+	 */
+	renamedAt?: string | null;
+	/**
+	 * Source substantiating the rename (announcement, site).
+	 */
+	renameSourceUrl?: string | null;
+	/**
+	 * Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.
+	 */
+	canonicalSlug?: string | null;
+	lifecycle?: {
+		/**
+		 * True if this project ever reached Live/production (distinguishes a real product that later died from one abandoned in development). Lets consumers say 'used to be live'.
+		 */
+		wasLive?: boolean | null;
+		/**
+		 * Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents — keep it factual and dated.
+		 */
+		note?: string | null;
+	};
+	links?: {
+		website?: string | null;
+		github?: string | null;
+		docs?: string | null;
+		/**
+		 * X (formerly Twitter) profile URL (e.g., https://x.com/username)
+		 */
+		twitter?: string | null;
+		discord?: string | null;
+	};
+	/**
+	 * Link GitHub data to this project
+	 */
+	github?: {
+		/**
+		 * GitHub org login (optional), e.g. "stellar"
+		 */
+		orgLogin?: string | null;
+		/**
+		 * Specific repositories for this project (owner/name)
+		 */
+		repos?:
+			| {
+					owner: string;
+					name: string;
+					id?: string | null;
+			  }[]
+			| null;
+	};
+	onchain?: {
+		assetCode?: string | null;
+		issuer?: string | null;
+		/**
+		 * Trustline holders of the issued asset
+		 */
+		assetHolders?: number | null;
+		/**
+		 * Circulating supply in whole asset units
+		 */
+		assetSupply?: number | null;
+		contracts?:
+			| {
+					address?: string | null;
+					label?: string | null;
+					/**
+					 * Lifetime contract events emitted
+					 */
+					events?: number | null;
+					/**
+					 * Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity
+					 */
+					eventsDelta?: number | null;
+					/**
+					 * Subinvocations since the previous snapshot
+					 */
+					subinvocationsDelta?: number | null;
+					/**
+					 * Lifetime times called as a subcall — low for contracts users hit directly; read WITH events
+					 */
+					subinvocations?: number | null;
+					storageEntries?: number | null;
+					createdAt?: string | null;
+					/**
+					 * GitHub repo from stellar.expert's wasm validation, when the team ran it
+					 */
+					verifiedRepo?: string | null;
+					id?: string | null;
+			  }[]
+			| null;
+		/**
+		 * Holder change since the previous snapshot
+		 */
+		assetHoldersDelta?: number | null;
+		source?: string | null;
+		asOf?: string | null;
+		/**
+		 * Timestamp of the snapshot the deltas compare against
+		 */
+		prevAsOf?: string | null;
+		/**
+		 * Days between snapshots (delta window length)
+		 */
+		deltaDays?: number | null;
+	};
+	/**
+	 * Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.
+	 */
+	coverage?: {
+		countries?: string[] | null;
+		currencies?: string[] | null;
+		seps?: ("sep-6" | "sep-24" | "sep-31")[] | null;
+		asOf?: string | null;
+	};
+	/**
+	 * Networks this project supports, lowercase (e.g. 'stellar', 'xrpl'). Curator-maintained.
+	 */
+	supportedNetworks?: string[] | null;
+	/**
+	 * Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only — empty means not-yet-curated, not route-free.
+	 */
+	routes?:
+		| {
+				fromChain: string;
+				toChain: string;
+				direction?: ("one-way" | "bidirectional") | null;
+				/**
+				 * Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time) — unknown, not none.
+				 */
+				assets?: string[] | null;
+				/**
+				 * What the DESTINATION asset is: canonical (issuer-native, e.g. Circle-issued USDC via CCTP), wrapped, bridged, or interchain (e.g. USDC.axl). Null = quote-time/unverified.
+				 */
+				assetRepresentation?:
+					| ("canonical" | "wrapped" | "bridged" | "interchain")
+					| null;
+				/**
+				 * Settlement mechanism, e.g. cctp-burn-mint, native-liquidity-pool, lock-mint, aggregator-router.
+				 */
+				mechanism?: string | null;
+				sourceUrl?: string | null;
+				/**
+				 * YYYY-MM-DD the route evidence was verified.
+				 */
+				asOf?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Role in the DEX/trading landscape (sls-035): amm / native-orderbook = independent liquidity venues; aggregator-router routes across venues and runs none; trading-ui = an interface over other venues (e.g. the native SDEX); wallet-integrated = trading embedded in a wallet. Null = not yet classified (unknown, not 'not a venue').
+	 */
+	venueRole?:
+		| (
+				| "amm"
+				| "native-orderbook"
+				| "aggregator-router"
+				| "trading-ui"
+				| "wallet-integrated"
+		  )
+		| null;
+	/**
+	 * What KIND of wallet-landscape product this is (sls-033): end-user-wallet = a consumer app users hold funds in; hardware-wallet = a physical signing device product; connectivity-protocol = a wallet↔dApp connection protocol (not a wallet); wallet-sdk = a library for BUILDING wallets; integration-kit = a library for integrating existing wallets into dApps; smart-account-tooling = passkey/smart-account infrastructure. Null = not yet classified (unknown, NOT 'not a wallet').
+	 */
+	productKind?:
+		| (
+				| "end-user-wallet"
+				| "hardware-wallet"
+				| "connectivity-protocol"
+				| "wallet-sdk"
+				| "integration-kit"
+				| "smart-account-tooling"
+		  )
+		| null;
+	/**
+	 * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only — empty means not-yet-curated, not unavailable.
+	 */
+	availability?:
+		| {
+				platform:
+					| "ios"
+					| "android"
+					| "web"
+					| "browser-extension"
+					| "desktop"
+					| "hardware-device";
+				/**
+				 * available = the store listing / product surface was reachable when checked; unavailable = a previously-listed surface is gone (404 / delisted).
+				 */
+				state: "available" | "unavailable";
+				/**
+				 * The store listing / product surface URL that was checked (App Store, Google Play, Chrome Web Store, vendor shop, web app). Null for an unavailable row whose listing no longer exists.
+				 */
+				storeUrl?: string | null;
+				/**
+				 * YYYY-MM-DD the availability state was last verified — availability is a dated fact, re-check before relying on it.
+				 */
+				checkedAt?: string | null;
+				/**
+				 * Optional one-line evidence note (e.g. 'Play listing for app.xbull.mobile 404s').
+				 */
+				note?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Stellar Community Fund data
+	 */
+	scf?: {
+		/**
+		 * Whether this project has received SCF funding
+		 */
+		awarded?: boolean | null;
+		/**
+		 * Last SCF round this project was awarded in
+		 */
+		lastAwardedRound?: number | null;
+		/**
+		 * SCF project slug (used for linking to communityfund.stellar.org)
+		 */
+		slug?: string | null;
+		/**
+		 * Total funding amount awarded from SCF (in USD)
+		 */
+		totalAwarded?: number | null;
+		/**
+		 * Round numbers this project was funded in, e.g. 2, 17, 22
+		 */
+		awardedRounds?: number[] | null;
+	};
+	verificationLevel: "Unverified" | "Verified (SDF)" | "Verified (Community)";
+	embedding?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.
+	 */
+	tvlUSD?: number | null;
+	/**
+	 * When tvlUSD was fetched (class 8: dated metrics).
+	 */
+	tvlAsOf?: string | null;
+	/**
+	 * Source that produced tvlUSD (e.g. "defillama"). Null = legacy value predating provenance.
+	 */
+	tvlSource?: string | null;
+	/**
+	 * How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time).
+	 */
+	tvlMethod?: string | null;
+	llamaSlugs?: string[] | null;
+	provenance: {
+		source: "LumenloopSeed" | "UserSubmitted" | "AdminEdit";
+		sourceId?: string | null;
+		firstSeenAt?: string | null;
+	};
+	lastVerifiedAt?: string | null;
+	/**
+	 * Featured projects appear first in the directory when sorted by Featured.
+	 */
+	featured?: boolean | null;
+	/**
+	 * Computed relevance score (0-100). Higher = more relevant. Auto-calculated from TVL, GitHub activity, completeness, etc.
+	 */
+	relevanceScore?: number | null;
+	/**
+	 * Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed) — this is curated.
+	 */
+	prominence?: number | null;
+	/**
+	 * Mark this project as a community pick. Note: Projects must have an X (Twitter) profile link in the Links section to appear in the Community Picks section on the homepage.
+	 */
+	communityPick?: boolean | null;
+	/**
+	 * Entities/organizations linked to this project. Edit from either side.
+	 */
+	relatedEntities?: {
+		docs?: (string | Entity)[];
+		hasNextPage?: boolean;
+		totalDocs?: number;
+	};
+	/**
+	 * Hackathon this project originated from (if applicable)
+	 */
+	hackathon?: (string | null) | Hackathon;
+	/**
+	 * Post-hackathon project status
+	 */
+	hackathonStatus?: ("Built" | "In Progress" | "Abandoned") | null;
+	/**
+	 * If this project won a placement at the hackathon, surface it in the Winners section
+	 */
+	hackathonPlacement?:
+		| (
+				| "grand-prize"
+				| "1st"
+				| "2nd"
+				| "3rd"
+				| "honorable-mention"
+				| "track-winner"
+		  )
+		| null;
+	/**
+	 * Prize amount won (USD)
+	 */
+	hackathonPrize?: number | null;
+	/**
+	 * Track or sponsor that awarded the prize (e.g. 'Best DeFi', 'Coinbase Track')
+	 */
+	hackathonPrizeTrack?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "entities".
  */
 export interface Entity {
-  id: string;
-  name: string;
-  slug: string;
-  /**
-   * Entity logo image. If not provided, a default icon will be used.
-   */
-  logo?: (string | null) | Media;
-  /**
-   * Description of the entity/organization.
-   */
-  description?: string | null;
-  domains?:
-    | {
-        domain: string;
-        id?: string | null;
-      }[]
-    | null;
-  links?: {
-    website?: string | null;
-    github?: string | null;
-    /**
-     * X (formerly Twitter) profile URL (e.g., https://x.com/username)
-     */
-    twitter?: string | null;
-  };
-  projects?: (string | Project)[] | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	name: string;
+	slug: string;
+	/**
+	 * Entity logo image. If not provided, a default icon will be used.
+	 */
+	logo?: (string | null) | Media;
+	/**
+	 * Description of the entity/organization.
+	 */
+	description?: string | null;
+	domains?:
+		| {
+				domain: string;
+				id?: string | null;
+		  }[]
+		| null;
+	links?: {
+		website?: string | null;
+		github?: string | null;
+		/**
+		 * X (formerly Twitter) profile URL (e.g., https://x.com/username)
+		 */
+		twitter?: string | null;
+	};
+	projects?: (string | Project)[] | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hackathons".
  */
 export interface Hackathon {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string | null;
-  startDate: string;
-  endDate: string;
-  /**
-   * The organization running this hackathon
-   */
-  organizer?: (string | null) | Entity;
-  /**
-   * Link to the hackathon's external page
-   */
-  externalUrl?: string | null;
-  status: 'upcoming' | 'active' | 'completed';
-  /**
-   * Projects that originated from this hackathon
-   */
-  projects?: {
-    docs?: (string | Project)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	name: string;
+	slug: string;
+	description?: string | null;
+	startDate: string;
+	endDate: string;
+	/**
+	 * The organization running this hackathon
+	 */
+	organizer?: (string | null) | Entity;
+	/**
+	 * Link to the hackathon's external page
+	 */
+	externalUrl?: string | null;
+	status: "upcoming" | "active" | "completed";
+	/**
+	 * Projects that originated from this hackathon
+	 */
+	projects?: {
+		docs?: (string | Project)[];
+		hasNextPage?: boolean;
+		totalDocs?: number;
+	};
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "repos".
  */
 export interface Repo {
-  id: string;
-  /**
-   * owner/name — natural key
-   */
-  fullName: string;
-  owner?: string | null;
-  name?: string | null;
-  url?: string | null;
-  description?: string | null;
-  /**
-   * GitHub topics (array of strings) — the tech signal for search (zk, soroban, oracle, ...)
-   */
-  topics?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  primaryLanguage?: string | null;
-  stars?: number | null;
-  openIssues?: number | null;
-  lastCommitAt?: string | null;
-  homepageUrl?: string | null;
-  isFork?: boolean | null;
-  isArchived?: boolean | null;
-  /**
-   * First ~4k chars of the README — the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)
-   */
-  readmeExcerpt?: string | null;
-  projectSlug?: string | null;
-  projectName?: string | null;
-  hackathonWinner?: boolean | null;
-  scfAwarded?: boolean | null;
-  /**
-   * 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
-   */
-  builderReputation?: number | null;
-  /**
-   * 0-1 hackathon AI/judge review score
-   */
-  judgeScore?: number | null;
-  /**
-   * hackathon this repo's judge score came from
-   */
-  judgedHackathon?: string | null;
-  /**
-   * 0-100 quality grade (freshness + traction + authority)
-   */
-  repoScore?: number | null;
-  repoScoreLabel?: string | null;
-  lastEnrichedAt?: string | null;
-  enrichError?: string | null;
-  /**
-   * Code-verified Stellar relevance (cargo-sdk strongest)
-   */
-  stellarProof?:
-    | ('cargo-sdk' | 'contract-macros' | 'js-sdk' | 'lang-sdk' | 'stellar-toml' | 'weak-mention' | 'none')
-    | null;
-  /**
-   * 0-1 Soroban code depth (feeds repoGrade)
-   */
-  codeDepth?: number | null;
-  /**
-   * Raw soroban-sdk version requirement (sourced fact)
-   */
-  sorobanSdkVersion?: string | null;
-  /**
-   * soroban-sdk status vs latest protocol (unknown never lowers tier)
-   */
-  versionStatus?: ('current' | 'supported' | 'deprecated' | 'unknown') | null;
-  contractMacroCount?: number | null;
-  /**
-   * Cargo cdylib — real deployable contract
-   */
-  isDeployableContract?: boolean | null;
-  hasAuthPatterns?: boolean | null;
-  hasStoragePatterns?: boolean | null;
-  hasEvents?: boolean | null;
-  usesNoStd?: boolean | null;
-  /**
-   * Matched @stellar/* JS dependency
-   */
-  stellarJsDep?: string | null;
-  /**
-   * Farm signal count (>=2 = archive; real code forces 0)
-   */
-  farmScore?: number | null;
-  /**
-   * Farm reasons — so explain can say WHY it declined
-   */
-  farmFlags?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Extracted pub fn/type names (array of strings) — code-content search signal
-   */
-  codeSymbols?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)
-   */
-  mainnetContractId?: string | null;
-  /**
-   * Alive but no code-proof — soft-excluded, never archived
-   */
-  unverifiedStellar?: boolean | null;
-  /**
-   * CTL scan state — pending/error/incomplete are never demoted
-   */
-  codeScanState?: ('pending' | 'scanned' | 'error' | 'incomplete') | null;
-  codeScanError?: string | null;
-  /**
-   * e.g. submodule-contracts, tree-incomplete, blob-unreadable
-   */
-  codeScanNote?: string | null;
-  codeScannedAt?: string | null;
-  /**
-   * Tier before the last CTL change (for rollback)
-   */
-  priorTier?: string | null;
-  /**
-   * Why the tier changed (enum reasons)
-   */
-  tierReason?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  tierChangedAt?: string | null;
-  /**
-   * Scan run that set the signals — rollback key
-   */
-  tierRunId?: string | null;
-  priorUnverified?: boolean | null;
-  unverifiedRunId?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * owner/name — natural key
+	 */
+	fullName: string;
+	owner?: string | null;
+	name?: string | null;
+	url?: string | null;
+	description?: string | null;
+	/**
+	 * GitHub topics (array of strings) — the tech signal for search (zk, soroban, oracle, ...)
+	 */
+	topics?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	primaryLanguage?: string | null;
+	stars?: number | null;
+	openIssues?: number | null;
+	lastCommitAt?: string | null;
+	homepageUrl?: string | null;
+	isFork?: boolean | null;
+	isArchived?: boolean | null;
+	/**
+	 * First ~4k chars of the README — the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)
+	 */
+	readmeExcerpt?: string | null;
+	projectSlug?: string | null;
+	projectName?: string | null;
+	hackathonWinner?: boolean | null;
+	scfAwarded?: boolean | null;
+	/**
+	 * 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
+	 */
+	builderReputation?: number | null;
+	/**
+	 * 0-1 hackathon AI/judge review score
+	 */
+	judgeScore?: number | null;
+	/**
+	 * hackathon this repo's judge score came from
+	 */
+	judgedHackathon?: string | null;
+	/**
+	 * 0-100 quality grade (freshness + traction + authority)
+	 */
+	repoScore?: number | null;
+	repoScoreLabel?: string | null;
+	lastEnrichedAt?: string | null;
+	enrichError?: string | null;
+	/**
+	 * Code-verified Stellar relevance (cargo-sdk strongest)
+	 */
+	stellarProof?:
+		| (
+				| "cargo-sdk"
+				| "contract-macros"
+				| "js-sdk"
+				| "lang-sdk"
+				| "stellar-toml"
+				| "weak-mention"
+				| "none"
+		  )
+		| null;
+	/**
+	 * 0-1 Soroban code depth (feeds repoGrade)
+	 */
+	codeDepth?: number | null;
+	/**
+	 * Raw soroban-sdk version requirement (sourced fact)
+	 */
+	sorobanSdkVersion?: string | null;
+	/**
+	 * soroban-sdk status vs latest protocol (unknown never lowers tier)
+	 */
+	versionStatus?: ("current" | "supported" | "deprecated" | "unknown") | null;
+	contractMacroCount?: number | null;
+	/**
+	 * Cargo cdylib — real deployable contract
+	 */
+	isDeployableContract?: boolean | null;
+	hasAuthPatterns?: boolean | null;
+	hasStoragePatterns?: boolean | null;
+	hasEvents?: boolean | null;
+	usesNoStd?: boolean | null;
+	/**
+	 * Matched @stellar/* JS dependency
+	 */
+	stellarJsDep?: string | null;
+	/**
+	 * Farm signal count (>=2 = archive; real code forces 0)
+	 */
+	farmScore?: number | null;
+	/**
+	 * Farm reasons — so explain can say WHY it declined
+	 */
+	farmFlags?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * Extracted pub fn/type names (array of strings) — code-content search signal
+	 */
+	codeSymbols?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)
+	 */
+	mainnetContractId?: string | null;
+	/**
+	 * Alive but no code-proof — soft-excluded, never archived
+	 */
+	unverifiedStellar?: boolean | null;
+	/**
+	 * CTL scan state — pending/error/incomplete are never demoted
+	 */
+	codeScanState?: ("pending" | "scanned" | "error" | "incomplete") | null;
+	codeScanError?: string | null;
+	/**
+	 * e.g. submodule-contracts, tree-incomplete, blob-unreadable
+	 */
+	codeScanNote?: string | null;
+	codeScannedAt?: string | null;
+	/**
+	 * Tier before the last CTL change (for rollback)
+	 */
+	priorTier?: string | null;
+	/**
+	 * Why the tier changed (enum reasons)
+	 */
+	tierReason?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	tierChangedAt?: string | null;
+	/**
+	 * Scan run that set the signals — rollback key
+	 */
+	tierRunId?: string | null;
+	priorUnverified?: boolean | null;
+	unverifiedRunId?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audits".
  */
 export interface Audit {
-  id: string;
-  /**
-   * stellarsecurityportal.com report id — natural key
-   */
-  reportId: number;
-  title: string;
-  /**
-   * https://stellarsecurityportal.com/report/{id}
-   */
-  reportUrl?: string | null;
-  /**
-   * Normalized auditor firm (homoglyph-repaired, canonical casing)
-   */
-  auditor?: string | null;
-  /**
-   * Audited protocol/codebase name, as published
-   */
-  protocol?: string | null;
-  /**
-   * Verified directory-project link. null = audited codebase has no directory project (NOT 'unaudited').
-   */
-  projectSlug?: string | null;
-  projectName?: string | null;
-  /**
-   * Provenance of the projectSlug link (unmatched = verified no-match)
-   */
-  linkBasis?: ('name-exact' | 'alias' | 'unmatched') | null;
-  /**
-   * Report date as published by the portal
-   */
-  publishedAt?: string | null;
-  /**
-   * published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time) — do not treat as publication recency
-   */
-  dateBasis?: ('published' | 'portal-record') | null;
-  /**
-   * When our crawler last saw this report live
-   */
-  observedAt?: string | null;
-  /**
-   * Total findings, when deterministically extractable. null = unknown, NOT zero.
-   */
-  findingsTotal?: number | null;
-  /**
-   * {critical, high, medium, low, informational} counts when deterministically extractable. null = unknown, NOT zero.
-   */
-  severityCounts?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * How many full-text research chunks serve this report via /api/research
-   */
-  chunksIndexed?: number | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * stellarsecurityportal.com report id — natural key
+	 */
+	reportId: number;
+	title: string;
+	/**
+	 * https://stellarsecurityportal.com/report/{id}
+	 */
+	reportUrl?: string | null;
+	/**
+	 * Normalized auditor firm (homoglyph-repaired, canonical casing)
+	 */
+	auditor?: string | null;
+	/**
+	 * Audited protocol/codebase name, as published
+	 */
+	protocol?: string | null;
+	/**
+	 * Verified directory-project link. null = audited codebase has no directory project (NOT 'unaudited').
+	 */
+	projectSlug?: string | null;
+	projectName?: string | null;
+	/**
+	 * Provenance of the projectSlug link (unmatched = verified no-match)
+	 */
+	linkBasis?: ("name-exact" | "alias" | "unmatched") | null;
+	/**
+	 * Report date as published by the portal
+	 */
+	publishedAt?: string | null;
+	/**
+	 * published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time) — do not treat as publication recency
+	 */
+	dateBasis?: ("published" | "portal-record") | null;
+	/**
+	 * When our crawler last saw this report live
+	 */
+	observedAt?: string | null;
+	/**
+	 * Total findings, when deterministically extractable. null = unknown, NOT zero.
+	 */
+	findingsTotal?: number | null;
+	/**
+	 * {critical, high, medium, low, informational} counts when deterministically extractable. null = unknown, NOT zero.
+	 */
+	severityCounts?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * How many full-text research chunks serve this report via /api/research
+	 */
+	chunksIndexed?: number | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog".
  */
 export interface Blog {
-  id: string;
-  /**
-   * The main title of the blog post
-   */
-  title: string;
-  /**
-   * URL-friendly version of the title
-   */
-  slug: string;
-  /**
-   * Author name
-   */
-  author: string;
-  /**
-   * Short summary for preview cards (150-200 characters)
-   */
-  excerpt: string;
-  /**
-   * Hero image for the blog post
-   */
-  featuredImage?: (string | null) | Media;
-  /**
-   * Image URL from RSS feed (for external posts)
-   */
-  rssImageUrl?: string | null;
-  /**
-   * Show in highlights section
-   */
-  featured?: boolean | null;
-  /**
-   * Choose how you want to create this post
-   */
-  contentType: 'richText' | 'markdown';
-  /**
-   * Rich text content (used when Content Type is Rich Text Editor)
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Markdown content (used when Content Type is Markdown)
-   */
-  markdownContent?: string | null;
-  /**
-   * If this post was imported from an RSS feed, link to the feed source
-   */
-  rssFeed?: (string | null) | RssFeed;
-  /**
-   * Unique identifier from RSS feed item (for duplicate detection)
-   */
-  rssItemId?: string | null;
-  /**
-   * If true, this post links to an external RSS article instead of displaying content here
-   */
-  isRSSExternal?: boolean | null;
-  /**
-   * Original URL of the RSS article (for external posts)
-   */
-  externalUrl?: string | null;
-  /**
-   * Description from RSS feed (for external posts)
-   */
-  rssDescription?: string | null;
-  category?:
-    | ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update' | 'Ecosystem')
-    | null;
-  /**
-   * Add tags to help categorize this post
-   */
-  tags?: string[] | null;
-  /**
-   * Publication date
-   */
-  publishedAt?: string | null;
-  status: 'draft' | 'published';
-  /**
-   * SEO and social media metadata
-   */
-  meta?: {
-    /**
-     * Meta description for SEO
-     */
-    description?: string | null;
-    /**
-     * SEO keywords
-     */
-    keywords?: string[] | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+	id: string;
+	/**
+	 * The main title of the blog post
+	 */
+	title: string;
+	/**
+	 * URL-friendly version of the title
+	 */
+	slug: string;
+	/**
+	 * Author name
+	 */
+	author: string;
+	/**
+	 * Short summary for preview cards (150-200 characters)
+	 */
+	excerpt: string;
+	/**
+	 * Hero image for the blog post
+	 */
+	featuredImage?: (string | null) | Media;
+	/**
+	 * Image URL from RSS feed (for external posts)
+	 */
+	rssImageUrl?: string | null;
+	/**
+	 * Show in highlights section
+	 */
+	featured?: boolean | null;
+	/**
+	 * Choose how you want to create this post
+	 */
+	contentType: "richText" | "markdown";
+	/**
+	 * Rich text content (used when Content Type is Rich Text Editor)
+	 */
+	content?: {
+		root: {
+			type: string;
+			children: {
+				type: any;
+				version: number;
+				[k: string]: unknown;
+			}[];
+			direction: ("ltr" | "rtl") | null;
+			format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
+			indent: number;
+			version: number;
+		};
+		[k: string]: unknown;
+	} | null;
+	/**
+	 * Markdown content (used when Content Type is Markdown)
+	 */
+	markdownContent?: string | null;
+	/**
+	 * If this post was imported from an RSS feed, link to the feed source
+	 */
+	rssFeed?: (string | null) | RssFeed;
+	/**
+	 * Unique identifier from RSS feed item (for duplicate detection)
+	 */
+	rssItemId?: string | null;
+	/**
+	 * If true, this post links to an external RSS article instead of displaying content here
+	 */
+	isRSSExternal?: boolean | null;
+	/**
+	 * Original URL of the RSS article (for external posts)
+	 */
+	externalUrl?: string | null;
+	/**
+	 * Description from RSS feed (for external posts)
+	 */
+	rssDescription?: string | null;
+	category?:
+		| (
+				| "Announcement"
+				| "Tutorial"
+				| "News"
+				| "Technical"
+				| "Community"
+				| "Partnership"
+				| "Update"
+				| "Ecosystem"
+		  )
+		| null;
+	/**
+	 * Add tags to help categorize this post
+	 */
+	tags?: string[] | null;
+	/**
+	 * Publication date
+	 */
+	publishedAt?: string | null;
+	status: "draft" | "published";
+	/**
+	 * SEO and social media metadata
+	 */
+	meta?: {
+		/**
+		 * Meta description for SEO
+		 */
+		description?: string | null;
+		/**
+		 * SEO keywords
+		 */
+		keywords?: string[] | null;
+	};
+	updatedAt: string;
+	createdAt: string;
+	_status?: ("draft" | "published") | null;
 }
 /**
  * Manage RSS feeds that automatically import blog posts. Visit the RSS Management page to sync feeds.
@@ -1013,57 +1077,67 @@ export interface Blog {
  * via the `definition` "rss-feeds".
  */
 export interface RssFeed {
-  id: string;
-  /**
-   * A friendly name for this RSS feed (e.g., 'Stellar Blog')
-   */
-  name: string;
-  /**
-   * The full URL of the RSS feed
-   */
-  feedUrl: string;
-  /**
-   * Enable or disable automatic syncing for this feed
-   */
-  enabled?: boolean | null;
-  /**
-   * How often to sync this feed
-   */
-  syncFrequency: '15min' | '30min' | 'hourly' | '6hours' | 'daily' | 'manual';
-  /**
-   * Default author name for posts from this feed (if not specified in RSS)
-   */
-  author?: string | null;
-  /**
-   * Default category for posts from this feed
-   */
-  category?: ('Announcement' | 'Tutorial' | 'News' | 'Technical' | 'Community' | 'Partnership' | 'Update') | null;
-  /**
-   * Default tags to add to all posts from this feed
-   */
-  tags?: string[] | null;
-  /**
-   * Automatically publish imported posts (otherwise they'll be drafts)
-   */
-  autoPublish?: boolean | null;
-  /**
-   * Last time this feed was successfully synced
-   */
-  lastSyncedAt?: string | null;
-  /**
-   * Status of the last sync attempt
-   */
-  lastSyncStatus?: ('Success' | 'Failed' | 'Never') | null;
-  /**
-   * Error message from the last failed sync (if any)
-   */
-  lastSyncError?: string | null;
-  /**
-   * Total number of posts imported from this feed
-   */
-  totalPostsImported?: number | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * A friendly name for this RSS feed (e.g., 'Stellar Blog')
+	 */
+	name: string;
+	/**
+	 * The full URL of the RSS feed
+	 */
+	feedUrl: string;
+	/**
+	 * Enable or disable automatic syncing for this feed
+	 */
+	enabled?: boolean | null;
+	/**
+	 * How often to sync this feed
+	 */
+	syncFrequency: "15min" | "30min" | "hourly" | "6hours" | "daily" | "manual";
+	/**
+	 * Default author name for posts from this feed (if not specified in RSS)
+	 */
+	author?: string | null;
+	/**
+	 * Default category for posts from this feed
+	 */
+	category?:
+		| (
+				| "Announcement"
+				| "Tutorial"
+				| "News"
+				| "Technical"
+				| "Community"
+				| "Partnership"
+				| "Update"
+		  )
+		| null;
+	/**
+	 * Default tags to add to all posts from this feed
+	 */
+	tags?: string[] | null;
+	/**
+	 * Automatically publish imported posts (otherwise they'll be drafts)
+	 */
+	autoPublish?: boolean | null;
+	/**
+	 * Last time this feed was successfully synced
+	 */
+	lastSyncedAt?: string | null;
+	/**
+	 * Status of the last sync attempt
+	 */
+	lastSyncStatus?: ("Success" | "Failed" | "Never") | null;
+	/**
+	 * Error message from the last failed sync (if any)
+	 */
+	lastSyncError?: string | null;
+	/**
+	 * Total number of posts imported from this feed
+	 */
+	totalPostsImported?: number | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Builder profiles from Stellar Passport
@@ -1072,211 +1146,211 @@ export interface RssFeed {
  * via the `definition` "builders".
  */
 export interface Builder {
-  id: string;
-  /**
-   * GitHub username for the builder
-   */
-  github_username: string;
-  /**
-   * Display name of the builder
-   */
-  display_name: string;
-  /**
-   * URL to the builder avatar image
-   */
-  avatar_url?: string | null;
-  /**
-   * Builder biography
-   */
-  bio?: string | null;
-  /**
-   * Professional role or title
-   */
-  role_title?: string | null;
-  /**
-   * Geographic location
-   */
-  location?: string | null;
-  /**
-   * Personal or professional website
-   */
-  website_url?: string | null;
-  /**
-   * Twitter/X handle
-   */
-  twitter_handle?: string | null;
-  /**
-   * Telegram handle
-   */
-  telegram_handle?: string | null;
-  /**
-   * Discord handle
-   */
-  discord_handle?: string | null;
-  /**
-   * Stellar blockchain address
-   */
-  stellar_address?: string | null;
-  /**
-   * Featured builder on homepage
-   */
-  is_featured?: boolean | null;
-  /**
-   * GitHub user ID
-   */
-  github_id?: string | null;
-  /**
-   * Discord username
-   */
-  discord_username?: string | null;
-  /**
-   * SCF funding tier
-   */
-  scf_tier?: string | null;
-  /**
-   * Profile visibility
-   */
-  visibility?: ('public' | 'private') | null;
-  projects?:
-    | {
-        name: string;
-        slug: string;
-        short_description?: string | null;
-        status?: ('building' | 'live' | 'deprecated') | null;
-        website_url?: string | null;
-        demo_url?: string | null;
-        docs_url?: string | null;
-        contract_address?: string | null;
-        repos?:
-          | {
-              full_name: string;
-              html_url: string;
-              primary_language?: string | null;
-              stars?: number | null;
-              forks?: number | null;
-              description?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * Activity heatmap data
-         */
-        heatmap?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  stats?: {
-    /**
-     * Total commits in last 30 days
-     */
-    totalCommits30d?: number | null;
-    /**
-     * Active days in last 30 days
-     */
-    activeDays30d?: number | null;
-    /**
-     * Last active date
-     */
-    lastActiveDate?: string | null;
-  };
-  /**
-   * When the passport profile was created
-   */
-  passport_created_at?: string | null;
-  /**
-   * Last sync from Stellar Passport API
-   */
-  last_synced?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * GitHub username for the builder
+	 */
+	github_username: string;
+	/**
+	 * Display name of the builder
+	 */
+	display_name: string;
+	/**
+	 * URL to the builder avatar image
+	 */
+	avatar_url?: string | null;
+	/**
+	 * Builder biography
+	 */
+	bio?: string | null;
+	/**
+	 * Professional role or title
+	 */
+	role_title?: string | null;
+	/**
+	 * Geographic location
+	 */
+	location?: string | null;
+	/**
+	 * Personal or professional website
+	 */
+	website_url?: string | null;
+	/**
+	 * Twitter/X handle
+	 */
+	twitter_handle?: string | null;
+	/**
+	 * Telegram handle
+	 */
+	telegram_handle?: string | null;
+	/**
+	 * Discord handle
+	 */
+	discord_handle?: string | null;
+	/**
+	 * Stellar blockchain address
+	 */
+	stellar_address?: string | null;
+	/**
+	 * Featured builder on homepage
+	 */
+	is_featured?: boolean | null;
+	/**
+	 * GitHub user ID
+	 */
+	github_id?: string | null;
+	/**
+	 * Discord username
+	 */
+	discord_username?: string | null;
+	/**
+	 * SCF funding tier
+	 */
+	scf_tier?: string | null;
+	/**
+	 * Profile visibility
+	 */
+	visibility?: ("public" | "private") | null;
+	projects?:
+		| {
+				name: string;
+				slug: string;
+				short_description?: string | null;
+				status?: ("building" | "live" | "deprecated") | null;
+				website_url?: string | null;
+				demo_url?: string | null;
+				docs_url?: string | null;
+				contract_address?: string | null;
+				repos?:
+					| {
+							full_name: string;
+							html_url: string;
+							primary_language?: string | null;
+							stars?: number | null;
+							forks?: number | null;
+							description?: string | null;
+							id?: string | null;
+					  }[]
+					| null;
+				/**
+				 * Activity heatmap data
+				 */
+				heatmap?:
+					| {
+							[k: string]: unknown;
+					  }
+					| unknown[]
+					| string
+					| number
+					| boolean
+					| null;
+				id?: string | null;
+		  }[]
+		| null;
+	stats?: {
+		/**
+		 * Total commits in last 30 days
+		 */
+		totalCommits30d?: number | null;
+		/**
+		 * Active days in last 30 days
+		 */
+		activeDays30d?: number | null;
+		/**
+		 * Last active date
+		 */
+		lastActiveDate?: string | null;
+	};
+	/**
+	 * When the passport profile was created
+	 */
+	passport_created_at?: string | null;
+	/**
+	 * Last sync from Stellar Passport API
+	 */
+	last_synced?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals".
  */
 export interface Signal {
-  id: string;
-  project: string | Project;
-  fetchedAt?: string | null;
-  github?: {
-    lastActivityAt?: string | null;
-    openIssuesTotal?: number | null;
-    totalStars?: number | null;
-    repos?:
-      | {
-          owner?: string | null;
-          name?: string | null;
-          url?: string | null;
-          lastCommitAt?: string | null;
-          openIssues?: number | null;
-          stargazerCount?: number | null;
-          error?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	project: string | Project;
+	fetchedAt?: string | null;
+	github?: {
+		lastActivityAt?: string | null;
+		openIssuesTotal?: number | null;
+		totalStars?: number | null;
+		repos?:
+			| {
+					owner?: string | null;
+					name?: string | null;
+					url?: string | null;
+					lastCommitAt?: string | null;
+					openIssues?: number | null;
+					stargazerCount?: number | null;
+					error?: string | null;
+					id?: string | null;
+			  }[]
+			| null;
+	};
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "transparency-logs".
  */
 export interface TransparencyLog {
-  id: string;
-  action: 'Create' | 'Update' | 'SyncImport' | 'Intake';
-  actorType: 'System' | 'User' | 'Admin';
-  targetCollection: string;
-  targetId: string;
-  diff?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  timestamp: string;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	action: "Create" | "Update" | "SyncImport" | "Intake";
+	actorType: "System" | "User" | "Admin";
+	targetCollection: string;
+	targetId: string;
+	diff?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	timestamp: string;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carousel".
  */
 export interface Carousel {
-  id: string;
-  /**
-   * Name/identifier for this carousel item
-   */
-  name: string;
-  /**
-   * Logo/image to display in the carousel
-   */
-  image: string | Media;
-  /**
-   * Optional URL to link to when clicked
-   */
-  url?: string | null;
-  /**
-   * Display order (lower numbers appear first)
-   */
-  order?: number | null;
-  /**
-   * Show this item in the carousel
-   */
-  active?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * Name/identifier for this carousel item
+	 */
+	name: string;
+	/**
+	 * Logo/image to display in the carousel
+	 */
+	image: string | Media;
+	/**
+	 * Optional URL to link to when clicked
+	 */
+	url?: string | null;
+	/**
+	 * Display order (lower numbers appear first)
+	 */
+	order?: number | null;
+	/**
+	 * Show this item in the carousel
+	 */
+	active?: boolean | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Daily link health checks across Projects, Builders, Entities, Hackathons, and curated skills. Sorted broken-first.
@@ -1285,78 +1359,78 @@ export interface Carousel {
  * via the `definition` "link-checks".
  */
 export interface LinkCheck {
-  id: string;
-  /**
-   * The URL being health-checked.
-   */
-  url: string;
-  status: 'ok' | 'redirect' | 'blocked' | 'error';
-  /**
-   * HTTP status from the last check, or null on network errors (DNS, timeout, TLS).
-   */
-  statusCode?: number | null;
-  /**
-   * Short reason when status=error and statusCode is null — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert'.
-   */
-  errorReason?: string | null;
-  /**
-   * Final URL after following redirects.
-   */
-  redirectTo?: string | null;
-  /**
-   * How many consecutive check runs this URL has returned ERROR (redirect/blocked reset it — they are reachability, not death). 0 = currently healthy.
-   */
-  consecutiveFailures?: number | null;
-  /**
-   * When the URL first started failing. Null = never failed since first observed.
-   */
-  firstFailedAt?: string | null;
-  /**
-   * Last time the URL returned 2xx. Null = never succeeded since first observed.
-   */
-  lastSuccessAt?: string | null;
-  lastChecked: string;
-  /**
-   * Every record in the directory that references this URL. Click through to the source to fix the link or remove the reference.
-   */
-  targets?:
-    | {
-        /**
-         * Source collection slug — projects / builders / entities / hackathons / curated-skills.
-         */
-        collection: string;
-        /**
-         * Slug or identifier within the source collection.
-         */
-        recordSlug: string;
-        /**
-         * Human-readable name (helps in the admin UI).
-         */
-        recordName?: string | null;
-        /**
-         * Field path within the record — e.g. 'links.github', 'website_url', 'docs'.
-         */
-        field: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * The URL being health-checked.
+	 */
+	url: string;
+	status: "ok" | "redirect" | "blocked" | "error";
+	/**
+	 * HTTP status from the last check, or null on network errors (DNS, timeout, TLS).
+	 */
+	statusCode?: number | null;
+	/**
+	 * Short reason when status=error and statusCode is null — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert'.
+	 */
+	errorReason?: string | null;
+	/**
+	 * Final URL after following redirects.
+	 */
+	redirectTo?: string | null;
+	/**
+	 * How many consecutive check runs this URL has returned ERROR (redirect/blocked reset it — they are reachability, not death). 0 = currently healthy.
+	 */
+	consecutiveFailures?: number | null;
+	/**
+	 * When the URL first started failing. Null = never failed since first observed.
+	 */
+	firstFailedAt?: string | null;
+	/**
+	 * Last time the URL returned 2xx. Null = never succeeded since first observed.
+	 */
+	lastSuccessAt?: string | null;
+	lastChecked: string;
+	/**
+	 * Every record in the directory that references this URL. Click through to the source to fix the link or remove the reference.
+	 */
+	targets?:
+		| {
+				/**
+				 * Source collection slug — projects / builders / entities / hackathons / curated-skills.
+				 */
+				collection: string;
+				/**
+				 * Slug or identifier within the source collection.
+				 */
+				recordSlug: string;
+				/**
+				 * Human-readable name (helps in the admin UI).
+				 */
+				recordName?: string | null;
+				/**
+				 * Field path within the record — e.g. 'links.github', 'website_url', 'docs'.
+				 */
+				field: string;
+				id?: string | null;
+		  }[]
+		| null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "idea-submissions".
  */
 export interface IdeaSubmission {
-  id: string;
-  name: string;
-  email?: string | null;
-  ecosystemNeed: string;
-  needSize: 'critical' | 'important' | 'nice-to-have';
-  approach: 'net-new-rfp' | 'existing-team' | 'unsure';
-  additionalContext?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	name: string;
+	email?: string | null;
+	ecosystemNeed: string;
+	needSize: "critical" | "important" | "nice-to-have";
+	approach: "net-new-rfp" | "existing-team" | "unsure";
+	additionalContext?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Public-API hit log. Append-only, used to measure Scout skill adoption.
@@ -1365,38 +1439,50 @@ export interface IdeaSubmission {
  * via the `definition` "api-usage".
  */
 export interface ApiUsage {
-  id: string;
-  /**
-   * Endpoint path (e.g. /api/projects/search)
-   */
-  endpoint: string;
-  /**
-   * Query keywords (truncated to 100 chars, lowercased)
-   */
-  query?: string | null;
-  uaBucket?: ('claude' | 'codex' | 'cursor' | 'agent' | 'curl' | 'browser' | 'bot' | 'probe' | 'other') | null;
-  /**
-   * Value of the X-Scout-Version header, if sent
-   */
-  scoutVersion?: string | null;
-  /**
-   * ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)
-   */
-  country?: string | null;
-  /**
-   * Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}
-   */
-  filtersJson?: string | null;
-  /**
-   * Rows returned on this response (0 = miss)
-   */
-  resultCount?: number | null;
-  /**
-   * Match tier / retrieval mode served
-   */
-  matchMode?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * Endpoint path (e.g. /api/projects/search)
+	 */
+	endpoint: string;
+	/**
+	 * Query keywords (truncated to 100 chars, lowercased)
+	 */
+	query?: string | null;
+	uaBucket?:
+		| (
+				| "claude"
+				| "codex"
+				| "cursor"
+				| "agent"
+				| "curl"
+				| "browser"
+				| "bot"
+				| "probe"
+				| "other"
+		  )
+		| null;
+	/**
+	 * Value of the X-Scout-Version header, if sent
+	 */
+	scoutVersion?: string | null;
+	/**
+	 * ISO country code from edge geo header (Vercel x-vercel-ip-country / CF cf-ipcountry)
+	 */
+	country?: string | null;
+	/**
+	 * Compact JSON snapshot of filter params (truncated). e.g. {category:'defi',scfAwarded:1}
+	 */
+	filtersJson?: string | null;
+	/**
+	 * Rows returned on this response (0 = miss)
+	 */
+	resultCount?: number | null;
+	/**
+	 * Match tier / retrieval mode served
+	 */
+	matchMode?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.
@@ -1405,94 +1491,96 @@ export interface ApiUsage {
  * via the `definition` "research-docs".
  */
 export interface ResearchDoc {
-  id: string;
-  source:
-    | 'sdf-blog'
-    | 'scf-handbook'
-    | 'sep'
-    | 'cap'
-    | 'dev-docs'
-    | 'paper'
-    | 'scf-proposal'
-    | 'lumenloop'
-    | 'lumenloop-research'
-    | 'audit'
-    | 'incident'
-    | 'security-program'
-    | 'sdf-org'
-    | 'ec-developer-report'
-    | 'release';
-  /**
-   * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
-   */
-  auditor?: string | null;
-  /**
-   * Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.
-   */
-  protocol?: string | null;
-  /**
-   * Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.
-   */
-  severity?: ('critical' | 'high' | 'medium' | 'low' | 'informational' | 'unknown') | null;
-  /**
-   * Parent doc title (e.g. SEP name, blog post title, paper title)
-   */
-  title: string;
-  /**
-   * Section heading this chunk lives under (H2/H3) — used to scope citations
-   */
-  section?: string | null;
-  /**
-   * Canonical source URL for citation
-   */
-  url: string;
-  /**
-   * Stable ID for the parent document (used to dedupe + delete obsolete chunks)
-   */
-  parentDocId: string;
-  /**
-   * 0-based index of this chunk within its parent document
-   */
-  chunkIndex: number;
-  /**
-   * The actual text content of this chunk (≤ 1500 tokens, markdown preserved)
-   */
-  content: string;
-  /**
-   * SHA-256 of `content` — used by ingestion scripts to skip re-embedding unchanged chunks
-   */
-  contentHash?: string | null;
-  /**
-   * Topic tags inferred from the source (e.g. soroban, anchor, sep-24)
-   */
-  tags?:
-    | {
-        tag?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Original publish date of the parent doc, if known
-   */
-  publishedAt?: string | null;
-  /**
-   * Crawl-observation time: when the ingester last observed this content live at the source (stamped every run, even when content is unchanged). Distinct from publishedAt (the page's own stated date) and updatedAt (advances only on a content change). Set by live-fetch ingesters; null for sources that don't stamp it.
-   */
-  observedAt?: string | null;
-  /**
-   * Voyage AI voyage-3 vector (1024 floats). Atlas $vectorSearch is configured on this field.
-   */
-  embedding?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	source:
+		| "sdf-blog"
+		| "scf-handbook"
+		| "sep"
+		| "cap"
+		| "dev-docs"
+		| "paper"
+		| "scf-proposal"
+		| "lumenloop"
+		| "lumenloop-research"
+		| "audit"
+		| "incident"
+		| "security-program"
+		| "sdf-org"
+		| "ec-developer-report"
+		| "release";
+	/**
+	 * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
+	 */
+	auditor?: string | null;
+	/**
+	 * Protocol the chunk is about (Blend, Soroswap, …). Set when source='audit' or source='incident'.
+	 */
+	protocol?: string | null;
+	/**
+	 * Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.
+	 */
+	severity?:
+		| ("critical" | "high" | "medium" | "low" | "informational" | "unknown")
+		| null;
+	/**
+	 * Parent doc title (e.g. SEP name, blog post title, paper title)
+	 */
+	title: string;
+	/**
+	 * Section heading this chunk lives under (H2/H3) — used to scope citations
+	 */
+	section?: string | null;
+	/**
+	 * Canonical source URL for citation
+	 */
+	url: string;
+	/**
+	 * Stable ID for the parent document (used to dedupe + delete obsolete chunks)
+	 */
+	parentDocId: string;
+	/**
+	 * 0-based index of this chunk within its parent document
+	 */
+	chunkIndex: number;
+	/**
+	 * The actual text content of this chunk (≤ 1500 tokens, markdown preserved)
+	 */
+	content: string;
+	/**
+	 * SHA-256 of `content` — used by ingestion scripts to skip re-embedding unchanged chunks
+	 */
+	contentHash?: string | null;
+	/**
+	 * Topic tags inferred from the source (e.g. soroban, anchor, sep-24)
+	 */
+	tags?:
+		| {
+				tag?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Original publish date of the parent doc, if known
+	 */
+	publishedAt?: string | null;
+	/**
+	 * Crawl-observation time: when the ingester last observed this content live at the source (stamped every run, even when content is unchanged). Distinct from publishedAt (the page's own stated date) and updatedAt (advances only on a content change). Set by live-fetch ingesters; null for sources that don't stamp it.
+	 */
+	observedAt?: string | null;
+	/**
+	 * Voyage AI voyage-3 vector (1024 floats). Atlas $vectorSearch is configured on this field.
+	 */
+	embedding?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.
@@ -1501,38 +1589,38 @@ export interface ResearchDoc {
  * via the `definition` "scout-feedback".
  */
 export interface ScoutFeedback {
-  id: string;
-  kind: 'bug' | 'missing-data' | 'wrong-answer' | 'suggestion' | 'other';
-  /**
-   * The freeform feedback text from the agent.
-   */
-  message: string;
-  /**
-   * The user query the agent was answering, if it was forwarded.
-   */
-  query?: string | null;
-  /**
-   * Which /api/* endpoint was being called.
-   */
-  endpoint?: string | null;
-  /**
-   * SKILL.md frontmatter version (e.g. 1.0.0).
-   */
-  skillVersion?: string | null;
-  /**
-   * Agent harness (claude-code, codex, openclaw).
-   */
-  agentName?: string | null;
-  /**
-   * Raw User-Agent header (best-effort).
-   */
-  userAgent?: string | null;
-  /**
-   * SHA-256(ip + secret). De-duplicate floods without logging raw IPs.
-   */
-  ipHash?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	kind: "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other";
+	/**
+	 * The freeform feedback text from the agent.
+	 */
+	message: string;
+	/**
+	 * The user query the agent was answering, if it was forwarded.
+	 */
+	query?: string | null;
+	/**
+	 * Which /api/* endpoint was being called.
+	 */
+	endpoint?: string | null;
+	/**
+	 * SKILL.md frontmatter version (e.g. 1.0.0).
+	 */
+	skillVersion?: string | null;
+	/**
+	 * Agent harness (claude-code, codex, openclaw).
+	 */
+	agentName?: string | null;
+	/**
+	 * Raw User-Agent header (best-effort).
+	 */
+	userAgent?: string | null;
+	/**
+	 * SHA-256(ip + secret). De-duplicate floods without logging raw IPs.
+	 */
+	ipHash?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Community-submitted AI skills for the Stellar marketplace. POST submissions land here as 'pending' — review and approve to publish.
@@ -1541,86 +1629,86 @@ export interface ScoutFeedback {
  * via the `definition` "community-skills".
  */
 export interface CommunitySkill {
-  id: string;
-  status: 'pending' | 'approved' | 'rejected';
-  /**
-   * Display name shown on the skill card (e.g. 'Soroban Audit Helper').
-   */
-  name: string;
-  /**
-   * URL-safe slug (kebab-case). Used as the dedup key.
-   */
-  slug: string;
-  /**
-   * One-line tagline (≤ 160 chars).
-   */
-  tagline: string;
-  /**
-   * Longer description (1-2 paragraphs).
-   */
-  description: string;
-  kind: 'skill-md' | 'mcp-server' | 'sdk' | 'cli' | 'agent-kit' | 'tool';
-  /**
-   * Install command shown on the card (e.g. "npx skills add user/skill").
-   */
-  install: string;
-  /**
-   * GitHub repo URL.
-   */
-  repository?: string | null;
-  /**
-   * Homepage / landing page URL.
-   */
-  homepage?: string | null;
-  /**
-   * Documentation URL.
-   */
-  docs?: string | null;
-  /**
-   * Compatible agents (Claude Code, Cursor, ChatGPT, etc.).
-   */
-  compatibility?:
-    | {
-        agent?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  targetUser?: ('dev' | 'founder' | 'agent')[] | null;
-  /**
-   * Topic tags shown as chips on the card.
-   */
-  tags?:
-    | {
-        tag?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Submitter contact info (collected on the submission form).
-   */
-  submittedBy?: {
-    name?: string | null;
-    email?: string | null;
-    githubHandle?: string | null;
-  };
-  /**
-   * When the submission landed.
-   */
-  submittedAt?: string | null;
-  /**
-   * When the submission was approved.
-   */
-  approvedAt?: string | null;
-  /**
-   * Why it was rejected (shown to submitter if they ask).
-   */
-  rejectionReason?: string | null;
-  /**
-   * SHA-256(ip + secret). De-duplicate spam without logging raw IPs.
-   */
-  ipHash?: string | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	status: "pending" | "approved" | "rejected";
+	/**
+	 * Display name shown on the skill card (e.g. 'Soroban Audit Helper').
+	 */
+	name: string;
+	/**
+	 * URL-safe slug (kebab-case). Used as the dedup key.
+	 */
+	slug: string;
+	/**
+	 * One-line tagline (≤ 160 chars).
+	 */
+	tagline: string;
+	/**
+	 * Longer description (1-2 paragraphs).
+	 */
+	description: string;
+	kind: "skill-md" | "mcp-server" | "sdk" | "cli" | "agent-kit" | "tool";
+	/**
+	 * Install command shown on the card (e.g. "npx skills add user/skill").
+	 */
+	install: string;
+	/**
+	 * GitHub repo URL.
+	 */
+	repository?: string | null;
+	/**
+	 * Homepage / landing page URL.
+	 */
+	homepage?: string | null;
+	/**
+	 * Documentation URL.
+	 */
+	docs?: string | null;
+	/**
+	 * Compatible agents (Claude Code, Cursor, ChatGPT, etc.).
+	 */
+	compatibility?:
+		| {
+				agent?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	targetUser?: ("dev" | "founder" | "agent")[] | null;
+	/**
+	 * Topic tags shown as chips on the card.
+	 */
+	tags?:
+		| {
+				tag?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Submitter contact info (collected on the submission form).
+	 */
+	submittedBy?: {
+		name?: string | null;
+		email?: string | null;
+		githubHandle?: string | null;
+	};
+	/**
+	 * When the submission landed.
+	 */
+	submittedAt?: string | null;
+	/**
+	 * When the submission was approved.
+	 */
+	approvedAt?: string | null;
+	/**
+	 * Why it was rejected (shown to submitter if they ask).
+	 */
+	rejectionReason?: string | null;
+	/**
+	 * SHA-256(ip + secret). De-duplicate spam without logging raw IPs.
+	 */
+	ipHash?: string | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.
@@ -1629,215 +1717,247 @@ export interface CommunitySkill {
  * via the `definition` "partner-accounts".
  */
 export interface PartnerAccount {
-  id: string;
-  name: string;
-  /**
-   * Auto-generated from name if left empty.
-   */
-  slug?: string | null;
-  partnerType:
-    | 'anchor'
-    | 'on-off-ramp'
-    | 'infrastructure'
-    | 'tooling'
-    | 'protocol'
-    | 'wallet'
-    | 'audit-firm'
-    | 'legal'
-    | 'agency'
-    | 'other';
-  /**
-   * One line a builder sees first (≤140 chars).
-   */
-  tagline?: string | null;
-  description?: string | null;
-  /**
-   * Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)
-   */
-  logoUrl?: string | null;
-  websiteUrl?: string | null;
-  foundedYear?: number | null;
-  /**
-   * Granular, searchable service tags — e.g. 'sep-24-ngn', 'soroban-audit-rust', 'usdc-off-ramp-mexico'. The AI matchmaker matches on these.
-   */
-  services?:
-    | {
-        tag: string;
-        id?: string | null;
-      }[]
-    | null;
-  sectors?: ('defi' | 'payments' | 'rwa' | 'stablecoins' | 'identity' | 'data' | 'ai' | 'gaming' | 'other')[] | null;
-  regions?: ('global' | 'north-america' | 'latam' | 'europe' | 'africa' | 'mena' | 'asia' | 'oceania')[] | null;
-  /**
-   * Assets this anchor issues/supports, from stellar.toml CURRENCIES (e.g. USDC, EURC, NGNT).
-   */
-  assets?:
-    | {
-        code: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * SEP standards implemented, from stellar.toml keys.
-   */
-  seps?: ('sep-6' | 'sep-24' | 'sep-31')[] | null;
-  /**
-   * Fiat ramps offered.
-   */
-  rampTypes?: ('on-ramp' | 'off-ramp')[] | null;
-  /**
-   * Primary jurisdiction/market, from stellar.toml DOCUMENTATION.ORG_* (e.g. 'Mexico', 'Nigeria', 'Global').
-   */
-  country?: string | null;
-  /**
-   * VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry — never inferred.
-   */
-  compliance?: {
-    /**
-     * Regulatory licenses/registrations — cite the authority + jurisdiction.
-     */
-    licenses?:
-      | {
-          authority: string;
-          jurisdiction?: string | null;
-          type?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Performs KYC (stated on their own site).
-     */
-    kycRequired?: boolean | null;
-    /**
-     * Travel Rule / FATF compliant (explicitly stated).
-     */
-    travelRule?: boolean | null;
-    /**
-     * Fiat currencies supported, comma-separated (e.g. 'MXN, USD').
-     */
-    currencies?: string | null;
-    /**
-     * e.g. 'instant', '<1hr', 'T+1'.
-     */
-    settlementTime?: string | null;
-    /**
-     * Publicly-named customers/partners, comma-separated.
-     */
-    notableCustomers?: string | null;
-  };
-  /**
-   * Domain-matched live on-chain assets (holders, payments, rating) from stellar.expert. Enrichment-owned.
-   */
-  onchain?:
-    | {
-        code: string;
-        issuer?: string | null;
-        holders?: number | null;
-        payments?: number | null;
-        rating?: number | null;
-        asOf?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Slug of this partner's project in the directory. System-set by the verified identity map; blank = not the same entity as any project.
-   */
-  projectSlug?: string | null;
-  /**
-   * Currently taking new integrations/clients?
-   */
-  acceptingClients?: boolean | null;
-  /**
-   * e.g. '2-6 week integration', 'self-serve API', 'retainer'
-   */
-  typicalEngagement?: string | null;
-  /**
-   * How fast can a new team start? e.g. 'same week', '2-4 weeks'
-   */
-  leadTime?: string | null;
-  pricingModel?:
-    | ('free' | 'freemium' | 'subscription' | 'usage-based' | 'fixed' | 'hourly' | 'rev-share' | 'custom')
-    | null;
-  pricingNotes?: string | null;
-  docsUrl?: string | null;
-  /**
-   * GitHub org/user (e.g. 'paltalabs'). Drives the verified GitHub signals below.
-   */
-  githubOrg?: string | null;
-  contactEmail?: string | null;
-  /**
-   * Preferred channel — Discord handle, Telegram, lead form URL…
-   */
-  contactChannel?: string | null;
-  /**
-   * e.g. 'within 24h on weekdays'
-   */
-  responseSla?: string | null;
-  caseStudies?:
-    | {
-        title: string;
-        url?: string | null;
-        /**
-         * Slug in the stellarlight projects directory, if listed.
-         */
-        projectSlug?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Auto-computed from GitHub / on-chain / SCF data. Partners can see but not edit — this is what makes profiles trustworthy to agents and the matchmaker.
-   */
-  verified?: {
-    githubLastCommitAt?: string | null;
-    githubCommits90d?: number | null;
-    /**
-     * Mainnet activity detected for their contracts/accounts.
-     */
-    onchainActive?: boolean | null;
-    onchainNote?: string | null;
-    /**
-     * e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.
-     */
-    scfInvolvement?: string | null;
-    lastAutoVerifyAt?: string | null;
-  };
-  freshnessStatus?: ('fresh' | 'aging' | 'stale' | 'archived') | null;
-  /**
-   * Last time the PARTNER touched their profile. Drives the freshness loop.
-   */
-  lastPartnerUpdateAt?: string | null;
-  nextReminderAt?: string | null;
-  /**
-   * Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.
-   */
-  pilot?: boolean | null;
-  /**
-   * Set once the publish-invite email has been sent. Guards re-publish from re-inviting.
-   */
-  invitedAt?: string | null;
-  /**
-   * Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save — that auto-sends them a set-your-password invite and clears this field.
-   */
-  claimRequestedBy?: string | null;
-  claimRequestedAt?: string | null;
-  status: 'draft' | 'published' | 'archived';
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
+	id: string;
+	name: string;
+	/**
+	 * Auto-generated from name if left empty.
+	 */
+	slug?: string | null;
+	partnerType:
+		| "anchor"
+		| "on-off-ramp"
+		| "infrastructure"
+		| "tooling"
+		| "protocol"
+		| "wallet"
+		| "audit-firm"
+		| "legal"
+		| "agency"
+		| "other";
+	/**
+	 * One line a builder sees first (≤140 chars).
+	 */
+	tagline?: string | null;
+	description?: string | null;
+	/**
+	 * Hosted logo URL. (Kept as a URL so partners don't need media-upload permissions.)
+	 */
+	logoUrl?: string | null;
+	websiteUrl?: string | null;
+	foundedYear?: number | null;
+	/**
+	 * Granular, searchable service tags — e.g. 'sep-24-ngn', 'soroban-audit-rust', 'usdc-off-ramp-mexico'. The AI matchmaker matches on these.
+	 */
+	services?:
+		| {
+				tag: string;
+				id?: string | null;
+		  }[]
+		| null;
+	sectors?:
+		| (
+				| "defi"
+				| "payments"
+				| "rwa"
+				| "stablecoins"
+				| "identity"
+				| "data"
+				| "ai"
+				| "gaming"
+				| "other"
+		  )[]
+		| null;
+	regions?:
+		| (
+				| "global"
+				| "north-america"
+				| "latam"
+				| "europe"
+				| "africa"
+				| "mena"
+				| "asia"
+				| "oceania"
+		  )[]
+		| null;
+	/**
+	 * Assets this anchor issues/supports, from stellar.toml CURRENCIES (e.g. USDC, EURC, NGNT).
+	 */
+	assets?:
+		| {
+				code: string;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * SEP standards implemented, from stellar.toml keys.
+	 */
+	seps?: ("sep-6" | "sep-24" | "sep-31")[] | null;
+	/**
+	 * Fiat ramps offered.
+	 */
+	rampTypes?: ("on-ramp" | "off-ramp")[] | null;
+	/**
+	 * Primary jurisdiction/market, from stellar.toml DOCUMENTATION.ORG_* (e.g. 'Mexico', 'Nigeria', 'Global').
+	 */
+	country?: string | null;
+	/**
+	 * VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry — never inferred.
+	 */
+	compliance?: {
+		/**
+		 * Regulatory licenses/registrations — cite the authority + jurisdiction.
+		 */
+		licenses?:
+			| {
+					authority: string;
+					jurisdiction?: string | null;
+					type?: string | null;
+					id?: string | null;
+			  }[]
+			| null;
+		/**
+		 * Performs KYC (stated on their own site).
+		 */
+		kycRequired?: boolean | null;
+		/**
+		 * Travel Rule / FATF compliant (explicitly stated).
+		 */
+		travelRule?: boolean | null;
+		/**
+		 * Fiat currencies supported, comma-separated (e.g. 'MXN, USD').
+		 */
+		currencies?: string | null;
+		/**
+		 * e.g. 'instant', '<1hr', 'T+1'.
+		 */
+		settlementTime?: string | null;
+		/**
+		 * Publicly-named customers/partners, comma-separated.
+		 */
+		notableCustomers?: string | null;
+	};
+	/**
+	 * Domain-matched live on-chain assets (holders, payments, rating) from stellar.expert. Enrichment-owned.
+	 */
+	onchain?:
+		| {
+				code: string;
+				issuer?: string | null;
+				holders?: number | null;
+				payments?: number | null;
+				rating?: number | null;
+				asOf?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Slug of this partner's project in the directory. System-set by the verified identity map; blank = not the same entity as any project.
+	 */
+	projectSlug?: string | null;
+	/**
+	 * Currently taking new integrations/clients?
+	 */
+	acceptingClients?: boolean | null;
+	/**
+	 * e.g. '2-6 week integration', 'self-serve API', 'retainer'
+	 */
+	typicalEngagement?: string | null;
+	/**
+	 * How fast can a new team start? e.g. 'same week', '2-4 weeks'
+	 */
+	leadTime?: string | null;
+	pricingModel?:
+		| (
+				| "free"
+				| "freemium"
+				| "subscription"
+				| "usage-based"
+				| "fixed"
+				| "hourly"
+				| "rev-share"
+				| "custom"
+		  )
+		| null;
+	pricingNotes?: string | null;
+	docsUrl?: string | null;
+	/**
+	 * GitHub org/user (e.g. 'paltalabs'). Drives the verified GitHub signals below.
+	 */
+	githubOrg?: string | null;
+	contactEmail?: string | null;
+	/**
+	 * Preferred channel — Discord handle, Telegram, lead form URL…
+	 */
+	contactChannel?: string | null;
+	/**
+	 * e.g. 'within 24h on weekdays'
+	 */
+	responseSla?: string | null;
+	caseStudies?:
+		| {
+				title: string;
+				url?: string | null;
+				/**
+				 * Slug in the stellarlight projects directory, if listed.
+				 */
+				projectSlug?: string | null;
+				id?: string | null;
+		  }[]
+		| null;
+	/**
+	 * Auto-computed from GitHub / on-chain / SCF data. Partners can see but not edit — this is what makes profiles trustworthy to agents and the matchmaker.
+	 */
+	verified?: {
+		githubLastCommitAt?: string | null;
+		githubCommits90d?: number | null;
+		/**
+		 * Mainnet activity detected for their contracts/accounts.
+		 */
+		onchainActive?: boolean | null;
+		onchainNote?: string | null;
+		/**
+		 * e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.
+		 */
+		scfInvolvement?: string | null;
+		lastAutoVerifyAt?: string | null;
+	};
+	freshnessStatus?: ("fresh" | "aging" | "stale" | "archived") | null;
+	/**
+	 * Last time the PARTNER touched their profile. Drives the freshness loop.
+	 */
+	lastPartnerUpdateAt?: string | null;
+	nextReminderAt?: string | null;
+	/**
+	 * Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.
+	 */
+	pilot?: boolean | null;
+	/**
+	 * Set once the publish-invite email has been sent. Guards re-publish from re-inviting.
+	 */
+	invitedAt?: string | null;
+	/**
+	 * Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save — that auto-sends them a set-your-password invite and clears this field.
+	 */
+	claimRequestedBy?: string | null;
+	claimRequestedAt?: string | null;
+	status: "draft" | "published" | "archived";
+	updatedAt: string;
+	createdAt: string;
+	email: string;
+	resetPasswordToken?: string | null;
+	resetPasswordExpiration?: string | null;
+	salt?: string | null;
+	hash?: string | null;
+	loginAttempts?: number | null;
+	lockUntil?: string | null;
+	sessions?:
+		| {
+				id: string;
+				createdAt?: string | null;
+				expiresAt: string;
+		  }[]
+		| null;
+	password?: string | null;
 }
 /**
  * Builder searches that surfaced a partner. Batched into the weekly partner digest.
@@ -1846,29 +1966,29 @@ export interface PartnerAccount {
  * via the `definition` "partner-leads".
  */
 export interface PartnerLead {
-  id: string;
-  /**
-   * Slug of the partner that was surfaced.
-   */
-  partnerSlug: string;
-  /**
-   * Denormalized name for the digest email.
-   */
-  partnerName?: string | null;
-  /**
-   * The builder's stated need that matched.
-   */
-  need: string;
-  /**
-   * Which surface generated the lead.
-   */
-  source?: ('concierge' | 'match-api') | null;
-  /**
-   * True once a weekly digest has included this lead.
-   */
-  notified?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * Slug of the partner that was surfaced.
+	 */
+	partnerSlug: string;
+	/**
+	 * Denormalized name for the digest email.
+	 */
+	partnerName?: string | null;
+	/**
+	 * The builder's stated need that matched.
+	 */
+	need: string;
+	/**
+	 * Which surface generated the lead.
+	 */
+	source?: ("concierge" | "match-api") | null;
+	/**
+	 * True once a weekly digest has included this lead.
+	 */
+	notified?: boolean | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * System-written funding-v2 snapshot ledger (sls-044): one row per distinct awarded-project set, used by /api/analyze?dimension=funding to serve added/removed delta provenance. Do not edit by hand.
@@ -1877,1113 +1997,1113 @@ export interface PartnerLead {
  * via the `definition` "funding-snapshots".
  */
 export interface FundingSnapshot {
-  id: string;
-  /**
-   * sha256-prefix digest of the sorted awarded-project slug set — identical to funding.projectSetHash in the API response.
-   */
-  projectSetHash: string;
-  scfAwardedProjects: number;
-  scfTotalDistributedUSD: number;
-  methodologyVersion: string;
-  awardedSlugs:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * When this project-set state was first observed.
-   */
-  computedAt: string;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * sha256-prefix digest of the sorted awarded-project slug set — identical to funding.projectSetHash in the API response.
+	 */
+	projectSetHash: string;
+	scfAwardedProjects: number;
+	scfTotalDistributedUSD: number;
+	methodologyVersion: string;
+	awardedSlugs:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * When this project-set state was first observed.
+	 */
+	computedAt: string;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+	id: string;
+	key: string;
+	data:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
-  /**
-   * Input data provided to the job
-   */
-  input?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  taskStatus?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  completedAt?: string | null;
-  totalTried?: number | null;
-  /**
-   * If hasError is true this job will not be retried
-   */
-  hasError?: boolean | null;
-  /**
-   * If hasError is true, this is the error that caused it
-   */
-  error?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Task execution log
-   */
-  log?:
-    | {
-        executedAt: string;
-        completedAt: string;
-        taskSlug: 'inline' | 'sync-rss-feed';
-        taskID: string;
-        input?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        output?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        state: 'failed' | 'succeeded';
-        error?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  taskSlug?: ('inline' | 'sync-rss-feed') | null;
-  queue?: string | null;
-  waitUntil?: string | null;
-  processing?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	/**
+	 * Input data provided to the job
+	 */
+	input?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	taskStatus?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	completedAt?: string | null;
+	totalTried?: number | null;
+	/**
+	 * If hasError is true this job will not be retried
+	 */
+	hasError?: boolean | null;
+	/**
+	 * If hasError is true, this is the error that caused it
+	 */
+	error?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * Task execution log
+	 */
+	log?:
+		| {
+				executedAt: string;
+				completedAt: string;
+				taskSlug: "inline" | "sync-rss-feed";
+				taskID: string;
+				input?:
+					| {
+							[k: string]: unknown;
+					  }
+					| unknown[]
+					| string
+					| number
+					| boolean
+					| null;
+				output?:
+					| {
+							[k: string]: unknown;
+					  }
+					| unknown[]
+					| string
+					| number
+					| boolean
+					| null;
+				state: "failed" | "succeeded";
+				error?:
+					| {
+							[k: string]: unknown;
+					  }
+					| unknown[]
+					| string
+					| number
+					| boolean
+					| null;
+				id?: string | null;
+		  }[]
+		| null;
+	taskSlug?: ("inline" | "sync-rss-feed") | null;
+	queue?: string | null;
+	waitUntil?: string | null;
+	processing?: boolean | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'projects';
-        value: string | Project;
-      } | null)
-    | ({
-        relationTo: 'repos';
-        value: string | Repo;
-      } | null)
-    | ({
-        relationTo: 'audits';
-        value: string | Audit;
-      } | null)
-    | ({
-        relationTo: 'blog';
-        value: string | Blog;
-      } | null)
-    | ({
-        relationTo: 'builders';
-        value: string | Builder;
-      } | null)
-    | ({
-        relationTo: 'rss-feeds';
-        value: string | RssFeed;
-      } | null)
-    | ({
-        relationTo: 'signals';
-        value: string | Signal;
-      } | null)
-    | ({
-        relationTo: 'entities';
-        value: string | Entity;
-      } | null)
-    | ({
-        relationTo: 'transparency-logs';
-        value: string | TransparencyLog;
-      } | null)
-    | ({
-        relationTo: 'carousel';
-        value: string | Carousel;
-      } | null)
-    | ({
-        relationTo: 'hackathons';
-        value: string | Hackathon;
-      } | null)
-    | ({
-        relationTo: 'link-checks';
-        value: string | LinkCheck;
-      } | null)
-    | ({
-        relationTo: 'idea-submissions';
-        value: string | IdeaSubmission;
-      } | null)
-    | ({
-        relationTo: 'api-usage';
-        value: string | ApiUsage;
-      } | null)
-    | ({
-        relationTo: 'research-docs';
-        value: string | ResearchDoc;
-      } | null)
-    | ({
-        relationTo: 'scout-feedback';
-        value: string | ScoutFeedback;
-      } | null)
-    | ({
-        relationTo: 'community-skills';
-        value: string | CommunitySkill;
-      } | null)
-    | ({
-        relationTo: 'partner-accounts';
-        value: string | PartnerAccount;
-      } | null)
-    | ({
-        relationTo: 'partner-leads';
-        value: string | PartnerLead;
-      } | null)
-    | ({
-        relationTo: 'funding-snapshots';
-        value: string | FundingSnapshot;
-      } | null);
-  globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'partner-accounts';
-        value: string | PartnerAccount;
-      };
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	document?:
+		| ({
+				relationTo: "users";
+				value: string | User;
+		  } | null)
+		| ({
+				relationTo: "media";
+				value: string | Media;
+		  } | null)
+		| ({
+				relationTo: "projects";
+				value: string | Project;
+		  } | null)
+		| ({
+				relationTo: "repos";
+				value: string | Repo;
+		  } | null)
+		| ({
+				relationTo: "audits";
+				value: string | Audit;
+		  } | null)
+		| ({
+				relationTo: "blog";
+				value: string | Blog;
+		  } | null)
+		| ({
+				relationTo: "builders";
+				value: string | Builder;
+		  } | null)
+		| ({
+				relationTo: "rss-feeds";
+				value: string | RssFeed;
+		  } | null)
+		| ({
+				relationTo: "signals";
+				value: string | Signal;
+		  } | null)
+		| ({
+				relationTo: "entities";
+				value: string | Entity;
+		  } | null)
+		| ({
+				relationTo: "transparency-logs";
+				value: string | TransparencyLog;
+		  } | null)
+		| ({
+				relationTo: "carousel";
+				value: string | Carousel;
+		  } | null)
+		| ({
+				relationTo: "hackathons";
+				value: string | Hackathon;
+		  } | null)
+		| ({
+				relationTo: "link-checks";
+				value: string | LinkCheck;
+		  } | null)
+		| ({
+				relationTo: "idea-submissions";
+				value: string | IdeaSubmission;
+		  } | null)
+		| ({
+				relationTo: "api-usage";
+				value: string | ApiUsage;
+		  } | null)
+		| ({
+				relationTo: "research-docs";
+				value: string | ResearchDoc;
+		  } | null)
+		| ({
+				relationTo: "scout-feedback";
+				value: string | ScoutFeedback;
+		  } | null)
+		| ({
+				relationTo: "community-skills";
+				value: string | CommunitySkill;
+		  } | null)
+		| ({
+				relationTo: "partner-accounts";
+				value: string | PartnerAccount;
+		  } | null)
+		| ({
+				relationTo: "partner-leads";
+				value: string | PartnerLead;
+		  } | null)
+		| ({
+				relationTo: "funding-snapshots";
+				value: string | FundingSnapshot;
+		  } | null);
+	globalSlug?: string | null;
+	user:
+		| {
+				relationTo: "users";
+				value: string | User;
+		  }
+		| {
+				relationTo: "partner-accounts";
+				value: string | PartnerAccount;
+		  };
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'partner-accounts';
-        value: string | PartnerAccount;
-      };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	user:
+		| {
+				relationTo: "users";
+				value: string | User;
+		  }
+		| {
+				relationTo: "partner-accounts";
+				value: string | PartnerAccount;
+		  };
+	key?: string | null;
+	value?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+	id: string;
+	name?: string | null;
+	batch?: number | null;
+	updatedAt: string;
+	createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+	updatedAt?: T;
+	createdAt?: T;
+	email?: T;
+	resetPasswordToken?: T;
+	resetPasswordExpiration?: T;
+	salt?: T;
+	hash?: T;
+	loginAttempts?: T;
+	lockUntil?: T;
+	sessions?:
+		| T
+		| {
+				id?: T;
+				createdAt?: T;
+				expiresAt?: T;
+		  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+	alt?: T;
+	updatedAt?: T;
+	createdAt?: T;
+	url?: T;
+	thumbnailURL?: T;
+	filename?: T;
+	mimeType?: T;
+	filesize?: T;
+	width?: T;
+	height?: T;
+	focalX?: T;
+	focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  logo?: T;
-  shortDescription?: T;
-  category?: T;
-  types?: T;
-  status?: T;
-  statusAsOf?: T;
-  statusSourceUrl?: T;
-  statusBasis?: T;
-  aliases?: T;
-  renamedAt?: T;
-  renameSourceUrl?: T;
-  canonicalSlug?: T;
-  lifecycle?:
-    | T
-    | {
-        wasLive?: T;
-        note?: T;
-      };
-  links?:
-    | T
-    | {
-        website?: T;
-        github?: T;
-        docs?: T;
-        twitter?: T;
-        discord?: T;
-      };
-  github?:
-    | T
-    | {
-        orgLogin?: T;
-        repos?:
-          | T
-          | {
-              owner?: T;
-              name?: T;
-              id?: T;
-            };
-      };
-  onchain?:
-    | T
-    | {
-        assetCode?: T;
-        issuer?: T;
-        assetHolders?: T;
-        assetSupply?: T;
-        contracts?:
-          | T
-          | {
-              address?: T;
-              label?: T;
-              events?: T;
-              eventsDelta?: T;
-              subinvocationsDelta?: T;
-              subinvocations?: T;
-              storageEntries?: T;
-              createdAt?: T;
-              verifiedRepo?: T;
-              id?: T;
-            };
-        assetHoldersDelta?: T;
-        source?: T;
-        asOf?: T;
-        prevAsOf?: T;
-        deltaDays?: T;
-      };
-  coverage?:
-    | T
-    | {
-        countries?: T;
-        currencies?: T;
-        seps?: T;
-        asOf?: T;
-      };
-  supportedNetworks?: T;
-  routes?:
-    | T
-    | {
-        fromChain?: T;
-        toChain?: T;
-        direction?: T;
-        assets?: T;
-        assetRepresentation?: T;
-        mechanism?: T;
-        sourceUrl?: T;
-        asOf?: T;
-        id?: T;
-      };
-  venueRole?: T;
-  productKind?: T;
-  availability?:
-    | T
-    | {
-        platform?: T;
-        state?: T;
-        storeUrl?: T;
-        checkedAt?: T;
-        note?: T;
-        id?: T;
-      };
-  scf?:
-    | T
-    | {
-        awarded?: T;
-        lastAwardedRound?: T;
-        slug?: T;
-        totalAwarded?: T;
-        awardedRounds?: T;
-      };
-  verificationLevel?: T;
-  embedding?: T;
-  tvlUSD?: T;
-  tvlAsOf?: T;
-  tvlSource?: T;
-  tvlMethod?: T;
-  llamaSlugs?: T;
-  provenance?:
-    | T
-    | {
-        source?: T;
-        sourceId?: T;
-        firstSeenAt?: T;
-      };
-  lastVerifiedAt?: T;
-  featured?: T;
-  relevanceScore?: T;
-  prominence?: T;
-  communityPick?: T;
-  relatedEntities?: T;
-  hackathon?: T;
-  hackathonStatus?: T;
-  hackathonPlacement?: T;
-  hackathonPrize?: T;
-  hackathonPrizeTrack?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	slug?: T;
+	logo?: T;
+	shortDescription?: T;
+	category?: T;
+	types?: T;
+	status?: T;
+	statusAsOf?: T;
+	statusSourceUrl?: T;
+	statusBasis?: T;
+	aliases?: T;
+	renamedAt?: T;
+	renameSourceUrl?: T;
+	canonicalSlug?: T;
+	lifecycle?:
+		| T
+		| {
+				wasLive?: T;
+				note?: T;
+		  };
+	links?:
+		| T
+		| {
+				website?: T;
+				github?: T;
+				docs?: T;
+				twitter?: T;
+				discord?: T;
+		  };
+	github?:
+		| T
+		| {
+				orgLogin?: T;
+				repos?:
+					| T
+					| {
+							owner?: T;
+							name?: T;
+							id?: T;
+					  };
+		  };
+	onchain?:
+		| T
+		| {
+				assetCode?: T;
+				issuer?: T;
+				assetHolders?: T;
+				assetSupply?: T;
+				contracts?:
+					| T
+					| {
+							address?: T;
+							label?: T;
+							events?: T;
+							eventsDelta?: T;
+							subinvocationsDelta?: T;
+							subinvocations?: T;
+							storageEntries?: T;
+							createdAt?: T;
+							verifiedRepo?: T;
+							id?: T;
+					  };
+				assetHoldersDelta?: T;
+				source?: T;
+				asOf?: T;
+				prevAsOf?: T;
+				deltaDays?: T;
+		  };
+	coverage?:
+		| T
+		| {
+				countries?: T;
+				currencies?: T;
+				seps?: T;
+				asOf?: T;
+		  };
+	supportedNetworks?: T;
+	routes?:
+		| T
+		| {
+				fromChain?: T;
+				toChain?: T;
+				direction?: T;
+				assets?: T;
+				assetRepresentation?: T;
+				mechanism?: T;
+				sourceUrl?: T;
+				asOf?: T;
+				id?: T;
+		  };
+	venueRole?: T;
+	productKind?: T;
+	availability?:
+		| T
+		| {
+				platform?: T;
+				state?: T;
+				storeUrl?: T;
+				checkedAt?: T;
+				note?: T;
+				id?: T;
+		  };
+	scf?:
+		| T
+		| {
+				awarded?: T;
+				lastAwardedRound?: T;
+				slug?: T;
+				totalAwarded?: T;
+				awardedRounds?: T;
+		  };
+	verificationLevel?: T;
+	embedding?: T;
+	tvlUSD?: T;
+	tvlAsOf?: T;
+	tvlSource?: T;
+	tvlMethod?: T;
+	llamaSlugs?: T;
+	provenance?:
+		| T
+		| {
+				source?: T;
+				sourceId?: T;
+				firstSeenAt?: T;
+		  };
+	lastVerifiedAt?: T;
+	featured?: T;
+	relevanceScore?: T;
+	prominence?: T;
+	communityPick?: T;
+	relatedEntities?: T;
+	hackathon?: T;
+	hackathonStatus?: T;
+	hackathonPlacement?: T;
+	hackathonPrize?: T;
+	hackathonPrizeTrack?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "repos_select".
  */
 export interface ReposSelect<T extends boolean = true> {
-  fullName?: T;
-  owner?: T;
-  name?: T;
-  url?: T;
-  description?: T;
-  topics?: T;
-  primaryLanguage?: T;
-  stars?: T;
-  openIssues?: T;
-  lastCommitAt?: T;
-  homepageUrl?: T;
-  isFork?: T;
-  isArchived?: T;
-  readmeExcerpt?: T;
-  projectSlug?: T;
-  projectName?: T;
-  hackathonWinner?: T;
-  scfAwarded?: T;
-  builderReputation?: T;
-  judgeScore?: T;
-  judgedHackathon?: T;
-  repoScore?: T;
-  repoScoreLabel?: T;
-  lastEnrichedAt?: T;
-  enrichError?: T;
-  stellarProof?: T;
-  codeDepth?: T;
-  sorobanSdkVersion?: T;
-  versionStatus?: T;
-  contractMacroCount?: T;
-  isDeployableContract?: T;
-  hasAuthPatterns?: T;
-  hasStoragePatterns?: T;
-  hasEvents?: T;
-  usesNoStd?: T;
-  stellarJsDep?: T;
-  farmScore?: T;
-  farmFlags?: T;
-  codeSymbols?: T;
-  mainnetContractId?: T;
-  unverifiedStellar?: T;
-  codeScanState?: T;
-  codeScanError?: T;
-  codeScanNote?: T;
-  codeScannedAt?: T;
-  priorTier?: T;
-  tierReason?: T;
-  tierChangedAt?: T;
-  tierRunId?: T;
-  priorUnverified?: T;
-  unverifiedRunId?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	fullName?: T;
+	owner?: T;
+	name?: T;
+	url?: T;
+	description?: T;
+	topics?: T;
+	primaryLanguage?: T;
+	stars?: T;
+	openIssues?: T;
+	lastCommitAt?: T;
+	homepageUrl?: T;
+	isFork?: T;
+	isArchived?: T;
+	readmeExcerpt?: T;
+	projectSlug?: T;
+	projectName?: T;
+	hackathonWinner?: T;
+	scfAwarded?: T;
+	builderReputation?: T;
+	judgeScore?: T;
+	judgedHackathon?: T;
+	repoScore?: T;
+	repoScoreLabel?: T;
+	lastEnrichedAt?: T;
+	enrichError?: T;
+	stellarProof?: T;
+	codeDepth?: T;
+	sorobanSdkVersion?: T;
+	versionStatus?: T;
+	contractMacroCount?: T;
+	isDeployableContract?: T;
+	hasAuthPatterns?: T;
+	hasStoragePatterns?: T;
+	hasEvents?: T;
+	usesNoStd?: T;
+	stellarJsDep?: T;
+	farmScore?: T;
+	farmFlags?: T;
+	codeSymbols?: T;
+	mainnetContractId?: T;
+	unverifiedStellar?: T;
+	codeScanState?: T;
+	codeScanError?: T;
+	codeScanNote?: T;
+	codeScannedAt?: T;
+	priorTier?: T;
+	tierReason?: T;
+	tierChangedAt?: T;
+	tierRunId?: T;
+	priorUnverified?: T;
+	unverifiedRunId?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audits_select".
  */
 export interface AuditsSelect<T extends boolean = true> {
-  reportId?: T;
-  title?: T;
-  reportUrl?: T;
-  auditor?: T;
-  protocol?: T;
-  projectSlug?: T;
-  projectName?: T;
-  linkBasis?: T;
-  publishedAt?: T;
-  dateBasis?: T;
-  observedAt?: T;
-  findingsTotal?: T;
-  severityCounts?: T;
-  chunksIndexed?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	reportId?: T;
+	title?: T;
+	reportUrl?: T;
+	auditor?: T;
+	protocol?: T;
+	projectSlug?: T;
+	projectName?: T;
+	linkBasis?: T;
+	publishedAt?: T;
+	dateBasis?: T;
+	observedAt?: T;
+	findingsTotal?: T;
+	severityCounts?: T;
+	chunksIndexed?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog_select".
  */
 export interface BlogSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  author?: T;
-  excerpt?: T;
-  featuredImage?: T;
-  rssImageUrl?: T;
-  featured?: T;
-  contentType?: T;
-  content?: T;
-  markdownContent?: T;
-  rssFeed?: T;
-  rssItemId?: T;
-  isRSSExternal?: T;
-  externalUrl?: T;
-  rssDescription?: T;
-  category?: T;
-  tags?: T;
-  publishedAt?: T;
-  status?: T;
-  meta?:
-    | T
-    | {
-        description?: T;
-        keywords?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
+	title?: T;
+	slug?: T;
+	author?: T;
+	excerpt?: T;
+	featuredImage?: T;
+	rssImageUrl?: T;
+	featured?: T;
+	contentType?: T;
+	content?: T;
+	markdownContent?: T;
+	rssFeed?: T;
+	rssItemId?: T;
+	isRSSExternal?: T;
+	externalUrl?: T;
+	rssDescription?: T;
+	category?: T;
+	tags?: T;
+	publishedAt?: T;
+	status?: T;
+	meta?:
+		| T
+		| {
+				description?: T;
+				keywords?: T;
+		  };
+	updatedAt?: T;
+	createdAt?: T;
+	_status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "builders_select".
  */
 export interface BuildersSelect<T extends boolean = true> {
-  github_username?: T;
-  display_name?: T;
-  avatar_url?: T;
-  bio?: T;
-  role_title?: T;
-  location?: T;
-  website_url?: T;
-  twitter_handle?: T;
-  telegram_handle?: T;
-  discord_handle?: T;
-  stellar_address?: T;
-  is_featured?: T;
-  github_id?: T;
-  discord_username?: T;
-  scf_tier?: T;
-  visibility?: T;
-  projects?:
-    | T
-    | {
-        name?: T;
-        slug?: T;
-        short_description?: T;
-        status?: T;
-        website_url?: T;
-        demo_url?: T;
-        docs_url?: T;
-        contract_address?: T;
-        repos?:
-          | T
-          | {
-              full_name?: T;
-              html_url?: T;
-              primary_language?: T;
-              stars?: T;
-              forks?: T;
-              description?: T;
-              id?: T;
-            };
-        heatmap?: T;
-        id?: T;
-      };
-  stats?:
-    | T
-    | {
-        totalCommits30d?: T;
-        activeDays30d?: T;
-        lastActiveDate?: T;
-      };
-  passport_created_at?: T;
-  last_synced?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	github_username?: T;
+	display_name?: T;
+	avatar_url?: T;
+	bio?: T;
+	role_title?: T;
+	location?: T;
+	website_url?: T;
+	twitter_handle?: T;
+	telegram_handle?: T;
+	discord_handle?: T;
+	stellar_address?: T;
+	is_featured?: T;
+	github_id?: T;
+	discord_username?: T;
+	scf_tier?: T;
+	visibility?: T;
+	projects?:
+		| T
+		| {
+				name?: T;
+				slug?: T;
+				short_description?: T;
+				status?: T;
+				website_url?: T;
+				demo_url?: T;
+				docs_url?: T;
+				contract_address?: T;
+				repos?:
+					| T
+					| {
+							full_name?: T;
+							html_url?: T;
+							primary_language?: T;
+							stars?: T;
+							forks?: T;
+							description?: T;
+							id?: T;
+					  };
+				heatmap?: T;
+				id?: T;
+		  };
+	stats?:
+		| T
+		| {
+				totalCommits30d?: T;
+				activeDays30d?: T;
+				lastActiveDate?: T;
+		  };
+	passport_created_at?: T;
+	last_synced?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rss-feeds_select".
  */
 export interface RssFeedsSelect<T extends boolean = true> {
-  name?: T;
-  feedUrl?: T;
-  enabled?: T;
-  syncFrequency?: T;
-  author?: T;
-  category?: T;
-  tags?: T;
-  autoPublish?: T;
-  lastSyncedAt?: T;
-  lastSyncStatus?: T;
-  lastSyncError?: T;
-  totalPostsImported?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	feedUrl?: T;
+	enabled?: T;
+	syncFrequency?: T;
+	author?: T;
+	category?: T;
+	tags?: T;
+	autoPublish?: T;
+	lastSyncedAt?: T;
+	lastSyncStatus?: T;
+	lastSyncError?: T;
+	totalPostsImported?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signals_select".
  */
 export interface SignalsSelect<T extends boolean = true> {
-  project?: T;
-  fetchedAt?: T;
-  github?:
-    | T
-    | {
-        lastActivityAt?: T;
-        openIssuesTotal?: T;
-        totalStars?: T;
-        repos?:
-          | T
-          | {
-              owner?: T;
-              name?: T;
-              url?: T;
-              lastCommitAt?: T;
-              openIssues?: T;
-              stargazerCount?: T;
-              error?: T;
-              id?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
+	project?: T;
+	fetchedAt?: T;
+	github?:
+		| T
+		| {
+				lastActivityAt?: T;
+				openIssuesTotal?: T;
+				totalStars?: T;
+				repos?:
+					| T
+					| {
+							owner?: T;
+							name?: T;
+							url?: T;
+							lastCommitAt?: T;
+							openIssues?: T;
+							stargazerCount?: T;
+							error?: T;
+							id?: T;
+					  };
+		  };
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "entities_select".
  */
 export interface EntitiesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  logo?: T;
-  description?: T;
-  domains?:
-    | T
-    | {
-        domain?: T;
-        id?: T;
-      };
-  links?:
-    | T
-    | {
-        website?: T;
-        github?: T;
-        twitter?: T;
-      };
-  projects?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	slug?: T;
+	logo?: T;
+	description?: T;
+	domains?:
+		| T
+		| {
+				domain?: T;
+				id?: T;
+		  };
+	links?:
+		| T
+		| {
+				website?: T;
+				github?: T;
+				twitter?: T;
+		  };
+	projects?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "transparency-logs_select".
  */
 export interface TransparencyLogsSelect<T extends boolean = true> {
-  action?: T;
-  actorType?: T;
-  targetCollection?: T;
-  targetId?: T;
-  diff?: T;
-  timestamp?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	action?: T;
+	actorType?: T;
+	targetCollection?: T;
+	targetId?: T;
+	diff?: T;
+	timestamp?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carousel_select".
  */
 export interface CarouselSelect<T extends boolean = true> {
-  name?: T;
-  image?: T;
-  url?: T;
-  order?: T;
-  active?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	image?: T;
+	url?: T;
+	order?: T;
+	active?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hackathons_select".
  */
 export interface HackathonsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  description?: T;
-  startDate?: T;
-  endDate?: T;
-  organizer?: T;
-  externalUrl?: T;
-  status?: T;
-  projects?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	slug?: T;
+	description?: T;
+	startDate?: T;
+	endDate?: T;
+	organizer?: T;
+	externalUrl?: T;
+	status?: T;
+	projects?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "link-checks_select".
  */
 export interface LinkChecksSelect<T extends boolean = true> {
-  url?: T;
-  status?: T;
-  statusCode?: T;
-  errorReason?: T;
-  redirectTo?: T;
-  consecutiveFailures?: T;
-  firstFailedAt?: T;
-  lastSuccessAt?: T;
-  lastChecked?: T;
-  targets?:
-    | T
-    | {
-        collection?: T;
-        recordSlug?: T;
-        recordName?: T;
-        field?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
+	url?: T;
+	status?: T;
+	statusCode?: T;
+	errorReason?: T;
+	redirectTo?: T;
+	consecutiveFailures?: T;
+	firstFailedAt?: T;
+	lastSuccessAt?: T;
+	lastChecked?: T;
+	targets?:
+		| T
+		| {
+				collection?: T;
+				recordSlug?: T;
+				recordName?: T;
+				field?: T;
+				id?: T;
+		  };
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "idea-submissions_select".
  */
 export interface IdeaSubmissionsSelect<T extends boolean = true> {
-  name?: T;
-  email?: T;
-  ecosystemNeed?: T;
-  needSize?: T;
-  approach?: T;
-  additionalContext?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	email?: T;
+	ecosystemNeed?: T;
+	needSize?: T;
+	approach?: T;
+	additionalContext?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "api-usage_select".
  */
 export interface ApiUsageSelect<T extends boolean = true> {
-  endpoint?: T;
-  query?: T;
-  uaBucket?: T;
-  scoutVersion?: T;
-  country?: T;
-  filtersJson?: T;
-  resultCount?: T;
-  matchMode?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	endpoint?: T;
+	query?: T;
+	uaBucket?: T;
+	scoutVersion?: T;
+	country?: T;
+	filtersJson?: T;
+	resultCount?: T;
+	matchMode?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "research-docs_select".
  */
 export interface ResearchDocsSelect<T extends boolean = true> {
-  source?: T;
-  auditor?: T;
-  protocol?: T;
-  severity?: T;
-  title?: T;
-  section?: T;
-  url?: T;
-  parentDocId?: T;
-  chunkIndex?: T;
-  content?: T;
-  contentHash?: T;
-  tags?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
-  publishedAt?: T;
-  observedAt?: T;
-  embedding?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	source?: T;
+	auditor?: T;
+	protocol?: T;
+	severity?: T;
+	title?: T;
+	section?: T;
+	url?: T;
+	parentDocId?: T;
+	chunkIndex?: T;
+	content?: T;
+	contentHash?: T;
+	tags?:
+		| T
+		| {
+				tag?: T;
+				id?: T;
+		  };
+	publishedAt?: T;
+	observedAt?: T;
+	embedding?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "scout-feedback_select".
  */
 export interface ScoutFeedbackSelect<T extends boolean = true> {
-  kind?: T;
-  message?: T;
-  query?: T;
-  endpoint?: T;
-  skillVersion?: T;
-  agentName?: T;
-  userAgent?: T;
-  ipHash?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	kind?: T;
+	message?: T;
+	query?: T;
+	endpoint?: T;
+	skillVersion?: T;
+	agentName?: T;
+	userAgent?: T;
+	ipHash?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-skills_select".
  */
 export interface CommunitySkillsSelect<T extends boolean = true> {
-  status?: T;
-  name?: T;
-  slug?: T;
-  tagline?: T;
-  description?: T;
-  kind?: T;
-  install?: T;
-  repository?: T;
-  homepage?: T;
-  docs?: T;
-  compatibility?:
-    | T
-    | {
-        agent?: T;
-        id?: T;
-      };
-  targetUser?: T;
-  tags?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
-  submittedBy?:
-    | T
-    | {
-        name?: T;
-        email?: T;
-        githubHandle?: T;
-      };
-  submittedAt?: T;
-  approvedAt?: T;
-  rejectionReason?: T;
-  ipHash?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	status?: T;
+	name?: T;
+	slug?: T;
+	tagline?: T;
+	description?: T;
+	kind?: T;
+	install?: T;
+	repository?: T;
+	homepage?: T;
+	docs?: T;
+	compatibility?:
+		| T
+		| {
+				agent?: T;
+				id?: T;
+		  };
+	targetUser?: T;
+	tags?:
+		| T
+		| {
+				tag?: T;
+				id?: T;
+		  };
+	submittedBy?:
+		| T
+		| {
+				name?: T;
+				email?: T;
+				githubHandle?: T;
+		  };
+	submittedAt?: T;
+	approvedAt?: T;
+	rejectionReason?: T;
+	ipHash?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "partner-accounts_select".
  */
 export interface PartnerAccountsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  partnerType?: T;
-  tagline?: T;
-  description?: T;
-  logoUrl?: T;
-  websiteUrl?: T;
-  foundedYear?: T;
-  services?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
-  sectors?: T;
-  regions?: T;
-  assets?:
-    | T
-    | {
-        code?: T;
-        id?: T;
-      };
-  seps?: T;
-  rampTypes?: T;
-  country?: T;
-  compliance?:
-    | T
-    | {
-        licenses?:
-          | T
-          | {
-              authority?: T;
-              jurisdiction?: T;
-              type?: T;
-              id?: T;
-            };
-        kycRequired?: T;
-        travelRule?: T;
-        currencies?: T;
-        settlementTime?: T;
-        notableCustomers?: T;
-      };
-  onchain?:
-    | T
-    | {
-        code?: T;
-        issuer?: T;
-        holders?: T;
-        payments?: T;
-        rating?: T;
-        asOf?: T;
-        id?: T;
-      };
-  projectSlug?: T;
-  acceptingClients?: T;
-  typicalEngagement?: T;
-  leadTime?: T;
-  pricingModel?: T;
-  pricingNotes?: T;
-  docsUrl?: T;
-  githubOrg?: T;
-  contactEmail?: T;
-  contactChannel?: T;
-  responseSla?: T;
-  caseStudies?:
-    | T
-    | {
-        title?: T;
-        url?: T;
-        projectSlug?: T;
-        id?: T;
-      };
-  verified?:
-    | T
-    | {
-        githubLastCommitAt?: T;
-        githubCommits90d?: T;
-        onchainActive?: T;
-        onchainNote?: T;
-        scfInvolvement?: T;
-        lastAutoVerifyAt?: T;
-      };
-  freshnessStatus?: T;
-  lastPartnerUpdateAt?: T;
-  nextReminderAt?: T;
-  pilot?: T;
-  invitedAt?: T;
-  claimRequestedBy?: T;
-  claimRequestedAt?: T;
-  status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+	name?: T;
+	slug?: T;
+	partnerType?: T;
+	tagline?: T;
+	description?: T;
+	logoUrl?: T;
+	websiteUrl?: T;
+	foundedYear?: T;
+	services?:
+		| T
+		| {
+				tag?: T;
+				id?: T;
+		  };
+	sectors?: T;
+	regions?: T;
+	assets?:
+		| T
+		| {
+				code?: T;
+				id?: T;
+		  };
+	seps?: T;
+	rampTypes?: T;
+	country?: T;
+	compliance?:
+		| T
+		| {
+				licenses?:
+					| T
+					| {
+							authority?: T;
+							jurisdiction?: T;
+							type?: T;
+							id?: T;
+					  };
+				kycRequired?: T;
+				travelRule?: T;
+				currencies?: T;
+				settlementTime?: T;
+				notableCustomers?: T;
+		  };
+	onchain?:
+		| T
+		| {
+				code?: T;
+				issuer?: T;
+				holders?: T;
+				payments?: T;
+				rating?: T;
+				asOf?: T;
+				id?: T;
+		  };
+	projectSlug?: T;
+	acceptingClients?: T;
+	typicalEngagement?: T;
+	leadTime?: T;
+	pricingModel?: T;
+	pricingNotes?: T;
+	docsUrl?: T;
+	githubOrg?: T;
+	contactEmail?: T;
+	contactChannel?: T;
+	responseSla?: T;
+	caseStudies?:
+		| T
+		| {
+				title?: T;
+				url?: T;
+				projectSlug?: T;
+				id?: T;
+		  };
+	verified?:
+		| T
+		| {
+				githubLastCommitAt?: T;
+				githubCommits90d?: T;
+				onchainActive?: T;
+				onchainNote?: T;
+				scfInvolvement?: T;
+				lastAutoVerifyAt?: T;
+		  };
+	freshnessStatus?: T;
+	lastPartnerUpdateAt?: T;
+	nextReminderAt?: T;
+	pilot?: T;
+	invitedAt?: T;
+	claimRequestedBy?: T;
+	claimRequestedAt?: T;
+	status?: T;
+	updatedAt?: T;
+	createdAt?: T;
+	email?: T;
+	resetPasswordToken?: T;
+	resetPasswordExpiration?: T;
+	salt?: T;
+	hash?: T;
+	loginAttempts?: T;
+	lockUntil?: T;
+	sessions?:
+		| T
+		| {
+				id?: T;
+				createdAt?: T;
+				expiresAt?: T;
+		  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "partner-leads_select".
  */
 export interface PartnerLeadsSelect<T extends boolean = true> {
-  partnerSlug?: T;
-  partnerName?: T;
-  need?: T;
-  source?: T;
-  notified?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	partnerSlug?: T;
+	partnerName?: T;
+	need?: T;
+	source?: T;
+	notified?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "funding-snapshots_select".
  */
 export interface FundingSnapshotsSelect<T extends boolean = true> {
-  projectSetHash?: T;
-  scfAwardedProjects?: T;
-  scfTotalDistributedUSD?: T;
-  methodologyVersion?: T;
-  awardedSlugs?: T;
-  computedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	projectSetHash?: T;
+	scfAwardedProjects?: T;
+	scfTotalDistributedUSD?: T;
+	methodologyVersion?: T;
+	awardedSlugs?: T;
+	computedAt?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+	key?: T;
+	data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
-  input?: T;
-  taskStatus?: T;
-  completedAt?: T;
-  totalTried?: T;
-  hasError?: T;
-  error?: T;
-  log?:
-    | T
-    | {
-        executedAt?: T;
-        completedAt?: T;
-        taskSlug?: T;
-        taskID?: T;
-        input?: T;
-        output?: T;
-        state?: T;
-        error?: T;
-        id?: T;
-      };
-  taskSlug?: T;
-  queue?: T;
-  waitUntil?: T;
-  processing?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	input?: T;
+	taskStatus?: T;
+	completedAt?: T;
+	totalTried?: T;
+	hasError?: T;
+	error?: T;
+	log?:
+		| T
+		| {
+				executedAt?: T;
+				completedAt?: T;
+				taskSlug?: T;
+				taskID?: T;
+				input?: T;
+				output?: T;
+				state?: T;
+				error?: T;
+				id?: T;
+		  };
+	taskSlug?: T;
+	queue?: T;
+	waitUntil?: T;
+	processing?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T;
-  globalSlug?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	document?: T;
+	globalSlug?: T;
+	user?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	user?: T;
+	key?: T;
+	value?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T;
-  batch?: T;
-  updatedAt?: T;
-  createdAt?: T;
+	name?: T;
+	batch?: T;
+	updatedAt?: T;
+	createdAt?: T;
 }
 /**
  * Configure the site-wide top banner
@@ -2992,59 +3112,60 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "banner".
  */
 export interface Banner {
-  id: string;
-  /**
-   * Turn the banner ON or OFF
-   */
-  enabled?: boolean | null;
-  /**
-   * Banner message to display (max 150 characters)
-   */
-  message?: string | null;
-  /**
-   * Optional URL - when set, the banner becomes clickable
-   */
-  linkUrl?: string | null;
-  /**
-   * Choose a background color for the banner
-   */
-  backgroundColor?: ('primary' | 'blue' | 'green' | 'amber' | 'red' | 'gray') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+	id: string;
+	/**
+	 * Turn the banner ON or OFF
+	 */
+	enabled?: boolean | null;
+	/**
+	 * Banner message to display (max 150 characters)
+	 */
+	message?: string | null;
+	/**
+	 * Optional URL - when set, the banner becomes clickable
+	 */
+	linkUrl?: string | null;
+	/**
+	 * Choose a background color for the banner
+	 */
+	backgroundColor?:
+		| ("primary" | "blue" | "green" | "amber" | "red" | "gray")
+		| null;
+	updatedAt?: string | null;
+	createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "banner_select".
  */
 export interface BannerSelect<T extends boolean = true> {
-  enabled?: T;
-  message?: T;
-  linkUrl?: T;
-  backgroundColor?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+	enabled?: T;
+	message?: T;
+	linkUrl?: T;
+	backgroundColor?: T;
+	updatedAt?: T;
+	createdAt?: T;
+	globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "SyncRSSFeedTask".
  */
 export interface SyncRSSFeedTask {
-  input: {
-    feedId?: string | null;
-    syncAll?: boolean | null;
-  };
-  output?: unknown;
+	input: {
+		feedId?: string | null;
+		syncAll?: boolean | null;
+	};
+	output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-  [k: string]: unknown;
+	[k: string]: unknown;
 }
 
-
-declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
+declare module "payload" {
+	export interface GeneratedTypes extends Config {}
 }

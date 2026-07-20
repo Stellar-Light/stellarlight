@@ -22,7 +22,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -112,6 +112,7 @@ export async function GET(req: NextRequest) {
 	const protocolFilter = sp.get("protocol");
 	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
 	const limitParam = clampLimit(sp.get("limit"), 8, 25);
+	const fieldsWanted = parseFields(sp.get("fields"));
 
 	// Single source of truth for valid `source` values. Kept in sync with
 	// the ResearchSource type in src/lib/research-ingest.ts.
@@ -706,7 +707,7 @@ export async function GET(req: NextRequest) {
 					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it — applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key).",
 				},
 			},
-			results,
+			results: results.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {

@@ -1284,6 +1284,8 @@ export interface components {
         limit: number;
         /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
         offset: number;
+        /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+        fields: string;
     };
     requestBodies: never;
     headers: never;
@@ -1370,6 +1372,8 @@ export interface operations {
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                fields?: components["parameters"]["fields"];
             };
             header?: never;
             path?: never;
@@ -1401,6 +1405,8 @@ export interface operations {
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                fields?: components["parameters"]["fields"];
             };
             header?: never;
             path?: never;
@@ -1599,6 +1605,8 @@ export interface operations {
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                fields?: components["parameters"]["fields"];
             };
             header?: never;
             path?: never;
@@ -1690,6 +1698,8 @@ export interface operations {
                 q?: components["parameters"]["q"];
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                fields?: components["parameters"]["fields"];
             };
             header?: never;
             path?: never;
@@ -2056,6 +2066,8 @@ export interface operations {
                 severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                fields?: components["parameters"]["fields"];
             };
             header?: never;
             path?: never;
