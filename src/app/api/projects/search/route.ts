@@ -520,6 +520,8 @@ function pickOnchain(o: any) {
 		assetCode: o.assetCode ?? null,
 		issuer: o.issuer ?? null,
 		assetHolders: typeof o.assetHolders === "number" ? o.assetHolders : null,
+		assetHoldersDelta:
+			typeof o.assetHoldersDelta === "number" ? o.assetHoldersDelta : null,
 		assetSupply: typeof o.assetSupply === "number" ? o.assetSupply : null,
 		contracts: Array.isArray(o.contracts)
 			? o.contracts.map(
@@ -528,6 +530,12 @@ function pickOnchain(o: any) {
 						address: c.address ?? null,
 						label: c.label ?? null,
 						events: typeof c.events === "number" ? c.events : null,
+						eventsDelta:
+							typeof c.eventsDelta === "number" ? c.eventsDelta : null,
+						subinvocationsDelta:
+							typeof c.subinvocationsDelta === "number"
+								? c.subinvocationsDelta
+								: null,
 						subinvocations:
 							typeof c.subinvocations === "number" ? c.subinvocations : null,
 						storageEntries:
@@ -539,6 +547,8 @@ function pickOnchain(o: any) {
 			: [],
 		source: o.source ?? null,
 		asOf: o.asOf ?? null,
+		prevAsOf: o.prevAsOf ?? null,
+		deltaDays: typeof o.deltaDays === "number" ? o.deltaDays : null,
 	};
 }
 

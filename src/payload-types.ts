@@ -401,6 +401,14 @@ export interface Project {
 					 */
 					events?: number | null;
 					/**
+					 * Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity
+					 */
+					eventsDelta?: number | null;
+					/**
+					 * Subinvocations since the previous snapshot
+					 */
+					subinvocationsDelta?: number | null;
+					/**
 					 * Lifetime times called as a subcall — low for contracts users hit directly; read WITH events
 					 */
 					subinvocations?: number | null;
@@ -413,8 +421,20 @@ export interface Project {
 					id?: string | null;
 			  }[]
 			| null;
+		/**
+		 * Holder change since the previous snapshot
+		 */
+		assetHoldersDelta?: number | null;
 		source?: string | null;
 		asOf?: string | null;
+		/**
+		 * Timestamp of the snapshot the deltas compare against
+		 */
+		prevAsOf?: string | null;
+		/**
+		 * Days between snapshots (delta window length)
+		 */
+		deltaDays?: number | null;
 	};
 	/**
 	 * Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.
@@ -2352,14 +2372,19 @@ export interface ProjectsSelect<T extends boolean = true> {
 							address?: T;
 							label?: T;
 							events?: T;
+							eventsDelta?: T;
+							subinvocationsDelta?: T;
 							subinvocations?: T;
 							storageEntries?: T;
 							createdAt?: T;
 							verifiedRepo?: T;
 							id?: T;
 					  };
+				assetHoldersDelta?: T;
 				source?: T;
 				asOf?: T;
+				prevAsOf?: T;
+				deltaDays?: T;
 		  };
 	coverage?:
 		| T

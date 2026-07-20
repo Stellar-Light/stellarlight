@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.7",
+		type: "added",
+		summary:
+			"On-chain deltas + partner-asset join: projects.onchain gains eventsDelta/subinvocationsDelta/assetHoldersDelta with prevAsOf/deltaDays; partner-linked issuer assets auto-join their projects.",
+		detail:
+			"Snapshot-over-snapshot activity: from the second enrichment run, each contract carries eventsDelta and subinvocationsDelta and assets carry assetHoldersDelta, with prevAsOf + deltaDays defining the comparison window — lifetime counts can't distinguish a dead contract from a busy one; deltas can. null delta = no prior snapshot, NOT zero activity. Coverage: partner records with a projectSlug and enrichment-verified on-chain assets now auto-join their canonical (top-holders) asset to the project row.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.6",
 		type: "added",
 		summary:

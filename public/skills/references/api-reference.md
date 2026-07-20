@@ -139,6 +139,8 @@ When `matchMode === "majority"` still returns 0, the response includes `.meta.ad
 
 ---
 
+**On-chain metrics (`.projects[*].onchain`):** projects with hand-verified contract/asset join keys carry per-contract lifetime `events`/`subinvocations`/`storageEntries` (+ `eventsDelta`/`subinvocationsDelta` once two snapshots exist) and per-asset `assetHolders`/`assetSupply`, from stellar.expert with `source` + `asOf`. Semantics: `onchain` null = not tracked in our registry, NEVER 'no on-chain activity'; null deltas = no prior snapshot yet. subinvocations undercounts contracts users call directly — read `events` alongside.
+
 ## `GET /api/rfps`
 Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"what's currently fundable?"*. Use in Deep Dive step 8 (next steps) AND lead with this when the user asks generally what to build.
 
