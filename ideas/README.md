@@ -23,11 +23,11 @@ Two provenance streams feed this folder:
 - **Fee-transparency axis** — structured `feeBps` + `asOf` on ramp corridors so "ranked by fee" is answerable (raven#8 / Raph; class 1). Needs grounded doc-crawling per provider.
 
 ### Data honesty / guards
-- **[Audit findings extraction v2](./audit-findings-extraction.md)** — per-auditor deterministic parsers populate findingsTotal/severityCounts (null≠zero today on 58/58 rows); the natural next audits step after the registry (#589).
-- **[Audit coverage watch](./audit-coverage-watch.md)** — UNTRIAGED portal protocols must reach the tracked issue queue, not a workflow log.
-- **[Status-recency detector](./status-recency-detector.md)** — statusAsOf is median 130d old on prominent projects with no watcher; weekly verification batches, never bulk demotion.
-- **[/api/status rows for research + partners](./status-source-rows.md)** — the daily freshness guard is blind to the #2 endpoint's corpus; audits row (#589) is the template.
-- **[On-chain metrics (Q3 COMMITTED)](./onchain-metrics.md)** — Soroban contract data + tx volumes + active addresses on profiles, with TVL-grade provenance.
+- ~~Audit findings extraction v2~~ — **shipped 2026-07-19 (#603)**: deterministic parsers put verified findingsTotal/severityCounts on 20/58 reports; PDF-mangled remainder stays honestly null (null≠zero) — see [the idea](./audit-findings-extraction.md) for the residue.
+- ~~Audit coverage watch~~ — **shipped 2026-07-20**: daily self-audit lane compares approved portal reports against `AUDIT_PROJECT_ALIASES`; untriaged protocols now land in the tracked red queue, not a workflow log.
+- ~~Status-recency detector~~ — **shipped 2026-07-19 (#604)**: weekly verification queue (statusAsOf age × prominence), human-verified flips only, never bulk demotion.
+- ~~/api/status rows for research + partners~~ — **shipped 2026-07-20**: researchDocs + partners rows on `sources[]` + self-audit staleness thresholds (audits 7d / researchDocs 3d / partners 45d).
+- ~~On-chain metrics~~ — **shipped 2026-07-20 (#608–#615)**: verified contract/asset registry + stellar.expert enrichment + weekly snapshot deltas + partner-asset join, served on searchProjects rows. Tx-volumes/active-addresses per-project still open in [the idea](./onchain-metrics.md).
 - **[Feedback → quality loop](./feedback-quality-loop.md)** — `success_rate` from the existing feedback intake into `confidence` (the one self-improving axis we lack).
 - **[Research-doc freshness + SDK-version tagging](./research-doc-freshness.md)** — per-doc `lastVerifiedAt` + version-status on tutorials/setup guides (classes 8/18, Beacon Q2).
 - ~~Field coverage on every endpoint~~ — **audits + research rows shipped 2026-07-19 (#594)** and caught two missing-CORS-header bugs pre-merge the same day; remaining row shapes (builders/rfps/hackathons/skills) still open in [the idea](./field-coverage-all-endpoints.md).

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.8",
+		type: "added",
+		summary:
+			"/api/status sources[] gains researchDocs and partners rows — the freshness guard now covers the research corpus and partner directory crons.",
+		detail:
+			"Two new rows in sources[]: researchDocs (the primary research corpus behind /api/research — previously the #2 endpoint by usage had no freshness row) and partners (partner directory profiles; counts ALL rows incl. unpublished drafts, populationId partner-accounts|status:all — /api/partners serves published-only, so its total can be smaller). The daily self-audit now applies staleness thresholds to audits/researchDocs/partners, so a stalled ingest cron surfaces as a tracked failure instead of silence.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.7",
 		type: "added",
 		summary:

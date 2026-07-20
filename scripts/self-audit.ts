@@ -105,6 +105,13 @@ async function main() {
 		repos: 7,
 		builders: 14,
 		ecosystemStats: 45,
+		// The daily research-corpus workflow re-stamps docs every run (audits
+		// ride the same cron), so these advance daily when healthy — a stall
+		// shows within the threshold. Partners are touched by enrichment +
+		// freshness crons on a much slower cadence.
+		audits: 7,
+		researchDocs: 3,
+		partners: 45,
 	};
 	const now = Date.now();
 	for (const s of sources) {
@@ -697,6 +704,47 @@ async function main() {
 		}
 	} catch (err) {
 		warn("skill mirror", `check skipped: ${String(err)}`);
+	}
+
+	// ---- Audit coverage watch: every portal report reaches human triage ----
+	// The audits ingest prints "UNTRIAGED:" for portal protocols missing an
+	// AUDIT_PROJECT_ALIASES entry — but only into a workflow log nobody reads
+	// (the engine-signal dead-end class fixed in #591). This lane puts new
+	// untriaged protocols into the tracked daily red queue. Alias triage
+	// itself stays human-verified: the fix is a reviewed map entry, never an
+	// automatic guess.
+	try {
+		const { resolveAuditProjectSlug } = await import(
+			"../src/lib/audit-identity"
+		);
+		const r = await fetch("https://stellarsecurityportal.com/api/v1/reports", {
+			headers: {
+				Accept: "application/json",
+				"user-agent": "stellarlight-self-audit",
+			},
+		});
+		if (!r.ok) throw new Error(`portal HTTP ${r.status}`);
+		const reports = (await r.json()) as Array<{
+			id: number;
+			status: string;
+			protocolName: string;
+		}>;
+		const untriaged = reports
+			.filter((rep) => rep.status === "approved")
+			.filter((rep) => !resolveAuditProjectSlug(rep.protocolName ?? "").mapped);
+		if (untriaged.length === 0)
+			ok("audit coverage: every approved portal report has a triaged alias");
+		else
+			bad(
+				"audit coverage",
+				`${untriaged.length} approved portal report(s) with no AUDIT_PROJECT_ALIASES entry: ${untriaged
+					.map((rep) => `[${rep.id}] ${rep.protocolName}`)
+					.join(
+						", ",
+					)} — add human-verified entries (slug or verified no-match) to src/lib/audit-identity.ts`,
+			);
+	} catch (err) {
+		warn("audit coverage", `check skipped: ${String(err)}`);
 	}
 
 	// ---- Event recall: is the LATEST protocol/core release actually servable? ----

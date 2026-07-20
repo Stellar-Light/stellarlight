@@ -1,5 +1,5 @@
-# On-chain metrics on project profiles (Q3 COMMITTED)
+# On-chain metrics on project profiles — SHIPPED
 
-**Status: committed for Q3** (PG-award review response, 2026-07-19): profiles gain Soroban contract data, transaction volumes, and active-address counts — the deliverable conceded as not-met-as-written for Q2.
+**Status: shipped 2026-07-20** (v1 #608/#609, expansion #610, v2 deltas #611, partner links #612-614; openapi@1.8.6/1.8.7). Briefly descoped earlier the same day, then rebuilt on boxy's call with the duplication concern answered by design: we don't re-serve explorer data as our product — we store the **join** (contract/asset ↔ curated project identity, hand-verified with primary-source URLs) plus snapshot metrics with full provenance, refreshed weekly. 17+ projects served; deltas (eventsDelta/subinvocationsDelta/assetHoldersDelta) activate per-project from the second snapshot.
 
-**How (candidate sources, verify before building):** SDF Hubble/BigQuery public datasets (aggregates), Horizon/RPC per-contract stats, stellar.expert contract APIs. Same provenance discipline as TVL: every number carries a source + asOf date; per-project mapping via the existing contract-address/codeVerified.mainnetContractId links. Weekly refresh Action; profile + API + spec + changelog in one contract bump.
+Remaining (tracked, not open-ended): wire deltas into confidence freshness (capped) + the status-recency detector once a week of delta history exists; expansion pass 3 over the remaining verified-candidate list.

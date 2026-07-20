@@ -132,6 +132,8 @@ export const spec: OpenAPISpec = {
 						"repos count",
 						"ecosystemStats",
 						"sdfSkills",
+						"researchDocs",
+						"partners count",
 					],
 					useWhen: [
 						"how fresh or large is the data ('as of when?', 'how many projects are indexed?')",
