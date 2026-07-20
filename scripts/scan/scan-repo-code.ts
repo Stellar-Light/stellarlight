@@ -52,6 +52,13 @@ const argOf = (name: string, dflt: string) => {
 	const i = process.argv.indexOf(name);
 	return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : dflt;
 };
+// Targeted rescan: --only owner/repo pins the wave to ONE repo regardless of
+// scan state or staleness. Needed when a repo's DEFAULT BRANCH switches after
+// its scan (trustlesswork 2026-07-20): the new branch's commits predate
+// codeScannedAt, so stale-first (lastCommitAt > codeScannedAt) never re-picks
+// it while the indexed snapshot describes a branch that no longer fronts the
+// repo.
+const ONLY = argOf("--only", "");
 const LIMIT = Math.max(1, Number(argOf("--limit", "60")) || 60);
 const LANG = argOf("--lang", "Rust");
 const CALL_BUDGET = Math.max(100, Number(argOf("--budget", "650")) || 650);
@@ -124,7 +131,19 @@ async function main() {
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	let docs: any[];
 	let eligible: number;
-	if (STALE_FIRST) {
+	if (ONLY) {
+		const res = await payload.find({
+			collection: "repos",
+			where: { fullName: { equals: ONLY } },
+			limit: 1,
+			depth: 0,
+		});
+		docs = res.docs;
+		eligible = res.docs.length;
+		if (!docs.length) {
+			console.log(`--only ${ONLY}: no such repo in the index`);
+		}
+	} else if (STALE_FIRST) {
 		// Stale = scanned, but pushed since the scan. Payload where can't compare
 		// two fields, so fetch the scanned set (small select) + filter in memory.
 		const scanned = await payload.find({
