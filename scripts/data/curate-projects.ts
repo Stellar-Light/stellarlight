@@ -1298,13 +1298,14 @@ async function main() {
 		// bridge value; supportedNetworks is project-only) — and multichain ≠
 		// bridge (LOBSTR spans stellar+xrpl and is a Wallet), so this keys on
 		// routes[], never supportedNetworks.
-		// where on an array-index path is adapter-fragile — fetch the field
-		// and JS-filter (the `in` + post-filter discipline from the
-		// contains-substring lesson).
+		// NO where clause at all: `{ routes: { exists: true } }` on the array
+		// field crashes in the mongo adapter's Query cast (first live run,
+		// 2026-07-20). Fetch the narrow projection of the whole collection
+		// and JS-filter — the `in` + post-filter discipline from the
+		// contains-substring lesson, taken to its safe extreme.
 		const routed = await payload.find({
 			collection: "projects",
-			where: { routes: { exists: true } },
-			limit: 500,
+			limit: 2000,
 			depth: 0,
 			overrideAccess: true,
 			select: { slug: true, category: true, types: true, routes: true },
