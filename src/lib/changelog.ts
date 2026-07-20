@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.11",
+		type: "changed",
+		summary:
+			"Discovery-facing spec text: searchProjects documents its onchain metrics block (contract events/subinvocations, asset holders/supply, deltas); searchResearch documents the existing `query` alias of `q`.",
+		detail:
+			"Documentation-only; no serving behavior changed. searchProjects' operation description now names the on-chain vocabulary its rows already carry, so downstream operation catalogs (agent gateways rank ops by this text) surface it for on-chain activity questions. searchResearch's long-accepted `query` alias is now in the parameter schema, so spec-derived client validators stop rejecting natural `{query: ...}` calls that the live API accepts (q wins when both present; neither returns 400).",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.10",
 		type: "added",
 		summary:

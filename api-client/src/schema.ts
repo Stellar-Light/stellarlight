@@ -59,7 +59,7 @@ export interface paths {
         };
         /**
          * Search Stellar projects (prior art / competitor lookup)
-         * @description Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, and indexed repos inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.
+         * @description Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.
          */
         get: operations["searchProjects"];
         put?: never;
@@ -2053,9 +2053,11 @@ export interface operations {
     };
     searchResearch: {
         parameters: {
-            query: {
-                /** @description Natural-language search query */
-                q: string;
+            query?: {
+                /** @description Natural-language search query. Required unless the `query` alias is supplied — requests with neither return 400. */
+                q?: string;
+                /** @description Alias of `q` (agents commonly send the term under this name; both are accepted, `q` wins when both are present). */
+                query?: string;
                 /** @description Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags). */
                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
                 /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Using any audit-metadata filter scopes RETRIEVAL to source=audit (an explicit contradictory source= is rejected with 400). For report-level enumeration prefer listAudits. */

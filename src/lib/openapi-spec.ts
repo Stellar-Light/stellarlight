@@ -234,7 +234,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Projects"],
 				summary: "Search Stellar projects (prior art / competitor lookup)",
 				description:
-					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, and indexed repos inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
+					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Directory lookup of built Stellar projects/products — status, SCF funding, builder, links. Keyword+synonym ranked by prominence/verification/funding/Live status, semantic fallback when keyword hits are thin.",
@@ -249,6 +249,13 @@ export const spec: OpenAPISpec = {
 						"startups",
 						"directory",
 						"market map",
+						"on-chain activity",
+						"onchain metrics",
+						"contract events",
+						"contract invocations",
+						"asset holders",
+						"circulating supply",
+						"tvl",
 						"prior art",
 						"competitors",
 						"defi",
@@ -1898,8 +1905,15 @@ export const spec: OpenAPISpec = {
 					{
 						name: "q",
 						in: "query",
-						required: true,
-						description: "Natural-language search query",
+						description:
+							"Natural-language search query. Required unless the `query` alias is supplied — requests with neither return 400.",
+						schema: { type: "string", minLength: 2 },
+					},
+					{
+						name: "query",
+						in: "query",
+						description:
+							"Alias of `q` (agents commonly send the term under this name; both are accepted, `q` wins when both are present).",
 						schema: { type: "string", minLength: 2 },
 					},
 					{
