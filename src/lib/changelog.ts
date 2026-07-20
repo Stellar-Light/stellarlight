@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.12",
+		type: "added",
+		summary:
+			"searchProjects rows carry an `audits` rollup ({count, auditors, latestAt}) from the audit registry — 'is X audited' is now a closed-world row read, not a semantic sample.",
+		detail:
+			"Batched per-page join over /api/audits' hand-verified projectSlug links. Semantics match the registry: null = no audit on record at our source, NOT a claim the project is unaudited; full report rows stay on /api/audits, findings text via searchResearch source=audit. Surfaced by live agent-in-the-loop testing through the Raven gateway: a cold agent answering 'is Blend audited' found six reports in the corpus but flagged that the project row itself carried no audit signal, making the complete list unreachable as structured truth.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.11",
 		type: "changed",
 		summary:

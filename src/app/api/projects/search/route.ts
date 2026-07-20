@@ -1777,12 +1777,61 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Audit rollup (Raven cold-agent finding, 2026-07-20): "is X audited" was
+	// answerable only as a semantic sample over the research corpus — the row
+	// itself carried no audit signal despite the audits registry holding the
+	// join (audits.projectSlug). One batched find per page; null = no audit
+	// on record at our source, NOT a claim the project is unaudited (same
+	// semantics as /api/audits).
+	const auditsBySlug = new Map<
+		string,
+		{ count: number; auditors: string[]; latestAt: string | null }
+	>();
+	if (payload && projectsOut.length > 0) {
+		try {
+			const slugs = [
+				...new Set(
+					projectsOut
+						.map((p) => p.slug)
+						.filter((s): s is string => typeof s === "string" && s.length > 0),
+				),
+			];
+			const auditRows = await payload.find({
+				collection: "audits",
+				where: { projectSlug: { in: slugs } },
+				limit: 500,
+				depth: 0,
+				overrideAccess: true,
+				select: { projectSlug: true, auditor: true, publishedAt: true },
+			});
+			// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
+			for (const a of auditRows.docs as any[]) {
+				if (!a.projectSlug) continue;
+				const cur = auditsBySlug.get(a.projectSlug) ?? {
+					count: 0,
+					auditors: [],
+					latestAt: null,
+				};
+				cur.count += 1;
+				if (a.auditor && !cur.auditors.includes(a.auditor))
+					cur.auditors.push(a.auditor);
+				const at =
+					typeof a.publishedAt === "string" ? a.publishedAt.slice(0, 10) : null;
+				if (at && (!cur.latestAt || at > cur.latestAt)) cur.latestAt = at;
+				auditsBySlug.set(a.projectSlug, cur);
+			}
+		} catch {
+			// rollup is additive best-effort — a failed join serves null, never 500s
+		}
+	}
+
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
 		builtBy: builtByMap.get(p.id) ?? null,
 		anchorProfile: isAnchorRow(p)
 			? (anchorProfiles.get(norm(p.name)) ?? null)
 			: null,
+		audits: auditsBySlug.get(p.slug as string) ?? null,
 	}));
 
 	// sls-056: report counts from the FINAL served array. The page
