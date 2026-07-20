@@ -467,6 +467,21 @@ export const Partners: CollectionConfig = {
 			],
 		}),
 
+		// Verified identity link to the projects directory. Payload silently
+		// drops unknown keys on update, so this field must exist here for
+		// scripts/data/link-partner-projects.ts writes to persist — absence of
+		// this field is why the first link run reported success but stored
+		// nothing. Populated only from the hand-verified map in that script.
+		autoField({
+			name: "projectSlug",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"Slug of this partner's project in the directory. System-set by the verified identity map; blank = not the same entity as any project.",
+			},
+		}),
+
 		// ── Capacity & pricing (partner-owned) ────────────────────────────
 		{
 			name: "acceptingClients",
