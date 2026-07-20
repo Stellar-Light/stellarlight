@@ -27,7 +27,7 @@ Two provenance streams feed this folder:
 - **[Audit coverage watch](./audit-coverage-watch.md)** — UNTRIAGED portal protocols must reach the tracked issue queue, not a workflow log.
 - **[Status-recency detector](./status-recency-detector.md)** — statusAsOf is median 130d old on prominent projects with no watcher; weekly verification batches, never bulk demotion.
 - **[/api/status rows for research + partners](./status-source-rows.md)** — the daily freshness guard is blind to the #2 endpoint's corpus; audits row (#589) is the template.
-- **[On-chain metrics (Q3 COMMITTED)](./onchain-metrics.md)** — Soroban contract data + tx volumes + active addresses on profiles, with TVL-grade provenance.
+- ~~On-chain metrics~~ — **descoped 2026-07-20** ([reasoning](./onchain-metrics.md)): explorers already serve it; duplication isn't a public good.
 - **[Feedback → quality loop](./feedback-quality-loop.md)** — `success_rate` from the existing feedback intake into `confidence` (the one self-improving axis we lack).
 - **[Research-doc freshness + SDK-version tagging](./research-doc-freshness.md)** — per-doc `lastVerifiedAt` + version-status on tutorials/setup guides (classes 8/18, Beacon Q2).
 - ~~Field coverage on every endpoint~~ — **audits + research rows shipped 2026-07-19 (#594)** and caught two missing-CORS-header bugs pre-merge the same day; remaining row shapes (builders/rfps/hackathons/skills) still open in [the idea](./field-coverage-all-endpoints.md).
