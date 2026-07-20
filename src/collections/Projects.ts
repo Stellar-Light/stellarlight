@@ -324,6 +324,21 @@ export const Projects: CollectionConfig = {
 							admin: { description: "Lifetime contract events emitted" },
 						},
 						{
+							name: "eventsDelta",
+							type: "number",
+							admin: {
+								description:
+									"Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity",
+							},
+						},
+						{
+							name: "subinvocationsDelta",
+							type: "number",
+							admin: {
+								description: "Subinvocations since the previous snapshot",
+							},
+						},
+						{
 							name: "subinvocations",
 							type: "number",
 							admin: {
@@ -343,8 +358,27 @@ export const Projects: CollectionConfig = {
 						},
 					],
 				},
+				{
+					name: "assetHoldersDelta",
+					type: "number",
+					admin: { description: "Holder change since the previous snapshot" },
+				},
 				{ name: "source", type: "text" },
 				{ name: "asOf", type: "date" },
+				{
+					name: "prevAsOf",
+					type: "date",
+					admin: {
+						description: "Timestamp of the snapshot the deltas compare against",
+					},
+				},
+				{
+					name: "deltaDays",
+					type: "number",
+					admin: {
+						description: "Days between snapshots (delta window length)",
+					},
+				},
 			],
 		},
 		{

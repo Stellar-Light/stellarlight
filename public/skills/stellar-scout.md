@@ -218,6 +218,7 @@ Full docs in `references/api-reference.md`. Quick lookup table:
 | `/api/skills/{name}` | GET | Full content of one SDF skill |
 | `/api/research` | GET | Vector search over ~4,700-chunk research corpus (14 sources incl. audits, incidents, core/SDK release notes) |
 | `/api/audits` | GET | Enumerable audit registry — one row per published report, hand-verified project links, findings counts where deterministically extracted |
+| — | — | Project rows carry `onchain` metrics (contract events/subinvocations + asset holders/supply, weekly deltas) for verified join keys — null = not tracked, never 'inactive' |
 | `/api/feedback` | POST | In-skill feedback channel (bug/missing-data/wrong-answer/suggestion) |
 
 All endpoints rate-limited per IP. All return `.meta.counts` + `.meta.source` for traceability.

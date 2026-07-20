@@ -3330,7 +3330,7 @@ export const spec: OpenAPISpec = {
 					onchain: {
 						type: ["object", "null"],
 						description:
-							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). assetHolders = funded trustlines; assetSupply = whole asset units. source + asOf date every payload.",
+							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). assetHolders = funded trustlines; assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, with prevAsOf + deltaDays defining the window — null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload.",
 					},
 					tvlUSD: {
 						type: "number",

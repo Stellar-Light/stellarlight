@@ -122,8 +122,37 @@ async function run() {
 		}
 		bySlug.set(r.projectSlug, entry);
 	}
+	// Partner-asset auto-join: partner records carry domain-matched, live
+	// on-chain assets (enrichment-owned, holders-sorted — the top entry is the
+	// canonical asset) plus an explicit projectSlug link. Verified-grade
+	// already; no new judgment here.
+	let partnerDerived = 0;
+	try {
+		const partners = await payload.find({
+			collection: "partners",
+			limit: 500,
+			depth: 0,
+		});
+		for (const pt of partners.docs as unknown as Array<{
+			projectSlug?: string | null;
+			onchain?: Array<{ code?: string; issuer?: string | null }> | null;
+		}>) {
+			const slug = pt.projectSlug;
+			const top = pt.onchain?.[0];
+			if (!slug || !top?.code || !top.issuer) continue;
+			const entry = bySlug.get(slug) ?? { contracts: [] };
+			if (!entry.asset) {
+				entry.asset = { code: top.code, issuer: top.issuer };
+				bySlug.set(slug, entry);
+				partnerDerived += 1;
+			}
+		}
+	} catch (e) {
+		console.log(`partner-asset join skipped: ${(e as Error).message}`);
+	}
+
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded projects + ${repoDerived} repo-derived contracts → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset → ${bySlug.size} projects\n`,
 	);
 
 	let updated = 0;
@@ -134,7 +163,7 @@ async function run() {
 			where: { slug: { equals: slug } },
 			limit: 1,
 			depth: 0,
-			select: { slug: true, name: true },
+			select: { slug: true, name: true, onchain: true },
 		});
 		if (!proj.docs.length) {
 			console.log(`SKIP ${slug}: no directory project with this slug`);
@@ -201,6 +230,40 @@ async function run() {
 			continue;
 		}
 
+		// Deltas vs the previous snapshot (v2): activity-over-time is the signal
+		// lifetime counts can't give. null until a real prior snapshot exists.
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		const prior: any = (proj.docs[0] as any)?.onchain;
+		const priorAsOf = prior?.asOf ? new Date(prior.asOf).getTime() : null;
+		const deltaDays = priorAsOf
+			? Math.round(((Date.now() - priorAsOf) / 86_400_000) * 100) / 100
+			: null;
+		if (priorAsOf && Array.isArray(prior?.contracts)) {
+			for (const c of contracts) {
+				// biome-ignore lint/suspicious/noExplicitAny: stored array row
+				const old = prior.contracts.find((p: any) => p.address === c.address);
+				if (
+					old &&
+					typeof old.events === "number" &&
+					typeof c.events === "number"
+				)
+					c.eventsDelta = (c.events as number) - old.events;
+				if (
+					old &&
+					typeof old.subinvocations === "number" &&
+					typeof c.subinvocations === "number"
+				)
+					c.subinvocationsDelta =
+						(c.subinvocations as number) - old.subinvocations;
+			}
+		}
+		const assetHoldersDelta =
+			priorAsOf &&
+			typeof prior?.assetHolders === "number" &&
+			typeof assetHolders === "number"
+				? assetHolders - prior.assetHolders
+				: null;
+
 		const summary = [
 			contracts.length ? `${contracts.length} contracts` : null,
 			keys.asset ? `${keys.asset.code} holders=${assetHolders}` : null,
@@ -224,9 +287,12 @@ async function run() {
 						issuer: keys.asset?.issuer ?? null,
 						assetHolders,
 						assetSupply,
+						assetHoldersDelta,
 						contracts,
 						source: "stellar.expert",
 						asOf,
+						prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
+						deltaDays,
 					},
 				},
 			});
