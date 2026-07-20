@@ -396,11 +396,9 @@ describe("mention-vs-identity ranking", () => {
 			}),
 			doc({ fullName: "team/custody-kit", ...scanned }),
 		];
-		const { repos } = await searchRepos(
-			mockPayload(docs),
-			"custody staking",
-			5,
-		);
+		const { repos } = await searchRepos(mockPayload(docs), "custody staking", {
+			limit: 5,
+		});
 		expect(repos[0].fullName).toBe("team/custody-kit");
 	});
 
@@ -413,7 +411,9 @@ describe("mention-vs-identity ranking", () => {
 				...scanned,
 			}),
 		];
-		const { repos } = await searchRepos(mockPayload(docs), "custody", 5);
+		const { repos } = await searchRepos(mockPayload(docs), "custody", {
+			limit: 5,
+		});
 		expect(repos[0].fullName).toBe("stellarteam/vault");
 	});
 
@@ -432,7 +432,9 @@ describe("mention-vs-identity ranking", () => {
 				...scanned,
 			}),
 		];
-		const { repos } = await searchRepos(mockPayload(docs), "escrow", 5);
+		const { repos } = await searchRepos(mockPayload(docs), "escrow", {
+			limit: 5,
+		});
 		expect(repos[0].fullName).toBe("team/generic-b");
 	});
 
@@ -453,7 +455,9 @@ describe("mention-vs-identity ranking", () => {
 				...scanned,
 			}),
 		];
-		const { repos } = await searchRepos(mockPayload(docs), "custodial", 5);
+		const { repos } = await searchRepos(mockPayload(docs), "custodial", {
+			limit: 5,
+		});
 		expect(repos[0].fullName).toBe("team/vault-b");
 	});
 
@@ -474,7 +478,7 @@ describe("mention-vs-identity ranking", () => {
 		];
 		// "app" is generic → no anchors → identity rule off; equal score, so
 		// the pre-port tiebreak (repoScore) must still decide.
-		const { repos } = await searchRepos(mockPayload(docs), "app", 5);
+		const { repos } = await searchRepos(mockPayload(docs), "app", { limit: 5 });
 		expect(repos[0].fullName).toBe("team/alpha");
 	});
 
@@ -493,7 +497,9 @@ describe("mention-vs-identity ranking", () => {
 				...scanned,
 			}),
 		];
-		const { repos } = await searchRepos(mockPayload(docs), "escrow", 5);
+		const { repos } = await searchRepos(mockPayload(docs), "escrow", {
+			limit: 5,
+		});
 		expect(repos[0].fullName).toBe("team/milestone-pay");
 	});
 });
