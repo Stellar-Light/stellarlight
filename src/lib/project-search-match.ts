@@ -427,7 +427,7 @@ export function buildHaystack(p: MatchableProject): string {
 	// rarely says "public goods" — the confirmed award itself is what makes
 	// the row match the query.
 	const pg = p.publicGoods?.awardRounds?.length
-		? "public goods award maintenance pilots"
+		? "scf public goods award maintenance pilots"
 		: "";
 	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
 }
