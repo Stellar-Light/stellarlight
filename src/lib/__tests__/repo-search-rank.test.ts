@@ -373,3 +373,127 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 		expect(flagshipsFor("zk proofs")).toEqual([]);
 	});
 });
+
+// ── Mention-vs-identity (#590/#592 port) ────────────────────────────────
+// A repo whose prose merely MENTIONS the anchor noun (plus a secondary
+// token and the ×1.3 coverage multiplier) must not outrank the repo that
+// IS the thing — within the same stellarness tier, never across tiers.
+describe("mention-vs-identity ranking", () => {
+	const scanned = {
+		codeScanState: "scanned",
+		stellarProof: "cargo-sdk",
+	};
+
+	it("identity beats a two-token mentioner at equal stellarness", async () => {
+		// mentioner: desc mention past char 60 + "staking" → 3+3=6×1.3=7.8
+		// identity holder: name hit only → 5. Pre-port the mentioner won.
+		const docs = [
+			doc({
+				fullName: "team/yield-vault",
+				description:
+					"Automated vault strategies turning any token held in qualified custody into staking assets",
+				...scanned,
+			}),
+			doc({ fullName: "team/custody-kit", ...scanned }),
+		];
+		const { repos } = await searchRepos(
+			mockPayload(docs),
+			"custody staking",
+			5,
+		);
+		expect(repos[0].fullName).toBe("team/custody-kit");
+	});
+
+	it("identity does NOT override stellarness (F4 contract)", async () => {
+		const docs = [
+			doc({ fullName: "evmcorp/custody-kit" }), // name identity, NO evidence
+			doc({
+				fullName: "stellarteam/vault",
+				description: "Custody infrastructure for Stellar asset issuers",
+				...scanned,
+			}),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), "custody", 5);
+		expect(repos[0].fullName).toBe("stellarteam/vault");
+	});
+
+	it("description LEAD is identity; the same term past char 60 is not", async () => {
+		const docs = [
+			doc({
+				fullName: "team/generic-a",
+				description:
+					"A broad multi-purpose asset toolkit for many chains that also supports escrow flows for marketplaces",
+				stars: 500,
+				...scanned,
+			}),
+			doc({
+				fullName: "team/generic-b",
+				description: "Escrow contracts for Soroban with milestone release",
+				...scanned,
+			}),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), "escrow", 5);
+		expect(repos[0].fullName).toBe("team/generic-b");
+	});
+
+	it("negation guard: non-custodial lead is not custodial identity", async () => {
+		// The hyphen is a word boundary, so \bcustodial\b matches inside
+		// "non-custodial" — the guard must reject that as identity while the
+		// term still scores as a plain match.
+		const docs = [
+			doc({
+				fullName: "team/dex-app",
+				description: "Non-custodial swap interface for traders",
+				stars: 999,
+				...scanned,
+			}),
+			doc({
+				fullName: "team/vault-b",
+				description: "Custodial vault for institutions",
+				...scanned,
+			}),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), "custodial", 5);
+		expect(repos[0].fullName).toBe("team/vault-b");
+	});
+
+	it("all-generic query: rule off, ordering falls through unchanged", async () => {
+		const docs = [
+			doc({
+				fullName: "team/alpha",
+				description: "Payments app for merchants",
+				repoScore: 90,
+				...scanned,
+			}),
+			doc({
+				fullName: "team/beta",
+				description: "Payments app for consumers",
+				repoScore: 40,
+				...scanned,
+			}),
+		];
+		// "app" is generic → no anchors → identity rule off; equal score, so
+		// the pre-port tiebreak (repoScore) must still decide.
+		const { repos } = await searchRepos(mockPayload(docs), "app", 5);
+		expect(repos[0].fullName).toBe("team/alpha");
+	});
+
+	it("a pub symbol named for the term counts as identity", async () => {
+		const docs = [
+			doc({
+				fullName: "team/contract-lib",
+				description:
+					"General Soroban contract utilities for many application patterns including payment escrow helpers",
+				stars: 800,
+				...scanned,
+			}),
+			doc({
+				fullName: "team/milestone-pay",
+				codeSymbols: ["release_escrow", "EscrowState"],
+				...scanned,
+			}),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), "escrow", 5);
+		expect(repos[0].fullName).toBe("team/milestone-pay");
+	});
+});
