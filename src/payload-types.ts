@@ -384,12 +384,37 @@ export interface Project {
 	onchain?: {
 		assetCode?: string | null;
 		issuer?: string | null;
+		/**
+		 * Trustline holders of the issued asset
+		 */
+		assetHolders?: number | null;
+		/**
+		 * Circulating supply in whole asset units
+		 */
+		assetSupply?: number | null;
 		contracts?:
 			| {
 					address?: string | null;
+					label?: string | null;
+					/**
+					 * Lifetime contract events emitted
+					 */
+					events?: number | null;
+					/**
+					 * Lifetime times called as a subcall — low for contracts users hit directly; read WITH events
+					 */
+					subinvocations?: number | null;
+					storageEntries?: number | null;
+					createdAt?: string | null;
+					/**
+					 * GitHub repo from stellar.expert's wasm validation, when the team ran it
+					 */
+					verifiedRepo?: string | null;
 					id?: string | null;
 			  }[]
 			| null;
+		source?: string | null;
+		asOf?: string | null;
 	};
 	/**
 	 * Structured fiat/corridor coverage for anchors & ramps (currencies, SEPs, countries), synced from the partner record. Empty for non-anchors.
@@ -2319,12 +2344,22 @@ export interface ProjectsSelect<T extends boolean = true> {
 		| {
 				assetCode?: T;
 				issuer?: T;
+				assetHolders?: T;
+				assetSupply?: T;
 				contracts?:
 					| T
 					| {
 							address?: T;
+							label?: T;
+							events?: T;
+							subinvocations?: T;
+							storageEntries?: T;
+							createdAt?: T;
+							verifiedRepo?: T;
 							id?: T;
 					  };
+				source?: T;
+				asOf?: T;
 		  };
 	coverage?:
 		| T

@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-20",
+		surfaces: ["api"],
+		version: "openapi@1.8.6",
+		type: "added",
+		summary:
+			"On-chain metrics on project rows: projects.onchain — per-contract activity (events, subinvocations, storage) + asset holders/supply from stellar.expert, hand-verified join keys.",
+		detail:
+			"searchProjects rows gain an `onchain` group for projects with verified on-chain join keys (contract addresses from the projects' own deployment manifests/READMEs; assets from canonical issuer accounts). Per contract: lifetime events + subinvocations + storageEntries + createdAt + the wasm-validation repo when available. Per asset: funded-trustline holders + supply in whole units. Semantics: onchain null = not tracked in our registry, never 'no activity'; stellar.expert's direct invocation counter is currently null service-wide, so events/subinvocations are the honest activity signals. Refreshed weekly.",
+	},
+	{
 		date: "2026-07-19",
 		surfaces: ["api"],
 		version: "openapi@1.8.5",

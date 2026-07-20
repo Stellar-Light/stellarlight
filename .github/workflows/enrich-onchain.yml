@@ -1,0 +1,32 @@
+# On-chain metrics enrichment (2026-07-20): populates projects.onchain
+# (contract events/subinvocations/storage + asset holders/supply) from
+# stellar.expert, join keys hand-verified in src/data/onchain-contracts.ts.
+# Weekly + dispatchable; dry-run by default on dispatch.
+name: Enrich on-chain metrics
+on:
+  schedule:
+    - cron: "0 6 * * 2" # weekly, Tue 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write (default = dry run)"
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Enrich (scheduled runs execute; dispatch honors the input)
+        run: pnpm exec tsx scripts/data/enrich-onchain-projects.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

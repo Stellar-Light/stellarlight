@@ -108,6 +108,8 @@ async function semanticProjectRows(
 				tvlMethod: 1,
 				// sls-039: mapped provider identifiers ride semantic rows too
 				llamaSlugs: 1,
+				// on-chain metrics (2026-07-20): absent = not tracked, never zero
+				onchain: 1,
 				// sls-032/035: route evidence + venue role must be PROJECTED to be
 				// served (the F3 class — the mapper can't read omitted fields).
 				routes: 1,
@@ -164,6 +166,7 @@ async function semanticProjectRows(
 			types: Array.isArray(p.types) ? p.types : [],
 			prominence: typeof p.prominence === "number" ? p.prominence : null,
 			// F8: TVL facts (DefiLlama; null = not tracked there, never zero)
+			onchain: pickOnchain(p.onchain),
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
 			// sls-031: TVL methodology provenance (which source, computed how)
@@ -230,6 +233,8 @@ interface ProjectRow {
 	statusSourceUrl?: string | null;
 	statusBasis?: string | null;
 	tvlUSD?: number | null;
+	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
+	onchain?: any;
 	tvlAsOf?: string | null;
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
@@ -501,6 +506,40 @@ function pickAvailability(
 		});
 	}
 	return out.length ? out : null;
+}
+
+/**
+ * On-chain metrics passthrough (2026-07-20). null = not tracked in our
+ * registry — NEVER "no on-chain activity". Rows serve only when the enrich
+ * pipeline populated the group (asOf present).
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Payload group shape
+function pickOnchain(o: any) {
+	if (!o || !o.asOf) return null;
+	return {
+		assetCode: o.assetCode ?? null,
+		issuer: o.issuer ?? null,
+		assetHolders: typeof o.assetHolders === "number" ? o.assetHolders : null,
+		assetSupply: typeof o.assetSupply === "number" ? o.assetSupply : null,
+		contracts: Array.isArray(o.contracts)
+			? o.contracts.map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array row
+					(c: any) => ({
+						address: c.address ?? null,
+						label: c.label ?? null,
+						events: typeof c.events === "number" ? c.events : null,
+						subinvocations:
+							typeof c.subinvocations === "number" ? c.subinvocations : null,
+						storageEntries:
+							typeof c.storageEntries === "number" ? c.storageEntries : null,
+						createdAt: c.createdAt ?? null,
+						verifiedRepo: c.verifiedRepo ?? null,
+					}),
+				)
+			: [],
+		source: o.source ?? null,
+		asOf: o.asOf ?? null,
+	};
 }
 
 // sls-039: served llamaSlugs (null when unmapped — mirrors tvlUSD's "null =
@@ -846,6 +885,8 @@ export async function GET(req: NextRequest) {
 					statusSourceUrl?: string | null;
 					statusBasis?: string | null;
 					tvlUSD?: number | null;
+					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
+					onchain?: any;
 					tvlAsOf?: string | null;
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
@@ -930,6 +971,7 @@ export async function GET(req: NextRequest) {
 					statusBasis: p.statusBasis ?? null,
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
+					onchain: pickOnchain(p.onchain),
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
 					// sls-031: TVL methodology provenance

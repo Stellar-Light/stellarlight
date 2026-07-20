@@ -3327,6 +3327,11 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					onchain: {
+						type: ["object", "null"],
+						description:
+							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). assetHolders = funded trustlines; assetSupply = whole asset units. source + asOf date every payload.",
+					},
 					tvlUSD: {
 						type: "number",
 						nullable: true,
