@@ -19,67 +19,26 @@
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
 import { contentTokens, isContentStopword } from "./repo-search";
+import { CORE_SYNONYMS, mergeVocabulary } from "./search-vocabulary";
 
-export const SYNONYMS: Record<string, string[]> = {
+// Project-surface overlay. Core chain/vertical/region vocabulary lives in
+// CORE_SYNONYMS (src/lib/search-vocabulary.ts) and is merged in below — add
+// a lesson THERE when it applies to every surface, here only when it is
+// project-specific (substring matching makes some repo-safe terms too loose
+// for this surface, and coverage/ramp vocabulary only exists on projects).
+const PROJECT_SYNONYM_OVERLAY: Record<string, string[]> = {
 	wallet: ["wallet", "custody", "signer", "keystore"],
-	dex: ["dex", "amm", "swap", "exchange", "orderbook", "liquidity"],
-	amm: ["amm", "liquidity", "pool", "swap", "dex"],
-	swap: ["swap", "dex", "amm", "exchange", "liquidity"],
-	// pool/liquidity cross-map: Sushi's record says "liquidity provision", the
-	// query said "liquidity pool" — one missing literal word ("pool") dropped a
-	// battle-tested DEX from a strict AMM query (sls-019).
-	pool: ["pool", "liquidity", "amm", "dex", "swap"],
-	liquidity: ["liquidity", "pool", "amm", "dex", "swap"],
-	lending: ["lending", "lend", "borrow", "loan", "money market"],
 	lend: ["lend", "lending", "borrow", "loan"],
 	borrow: ["borrow", "borrowing", "lend", "lending", "loan"],
-	oracle: ["oracle", "price feed", "data feed", "feed"],
-	bridge: ["bridge", "cross-chain", "interoperability", "cctp", "wrapped"],
-	// Chain-name vocabulary: bridge/multichain records say "EVM" or "cross-chain";
-	// users name the chain ("Ethereum", "Polygon"). Both directions mapped so
-	// "move tokens from Ethereum to Stellar" reaches Allbridge/CCTP-class records
-	// whose prose never contains the literal chain name (Beacon Q3 feedback).
-	evm: ["evm", "ethereum", "erc-20", "erc20", "cross-chain", "bridge"],
-	solana: ["solana", "sol", "cross-chain", "bridge"],
-	sol: ["sol", "solana", "cross-chain"],
-	tron: ["tron", "trx", "cross-chain"],
-	xrpl: ["xrpl", "xrp", "ripple", "cross-chain"],
-	xrp: ["xrp", "xrpl", "cross-chain"],
-	bitcoin: ["bitcoin", "btc", "cross-chain"],
-	btc: ["btc", "bitcoin", "cross-chain"],
-	polkadot: ["polkadot", "dot", "kusama", "cross-chain"],
-	kusama: ["kusama", "polkadot", "cross-chain"],
-	sui: ["sui", "cross-chain"],
-	near: ["near", "cross-chain"],
-	base: ["base", "evm", "cross-chain"],
-	bnb: ["bnb", "bsc", "binance", "evm", "cross-chain"],
-	bsc: ["bsc", "bnb", "binance", "evm", "cross-chain"],
-	optimism: ["optimism", "evm", "cross-chain"],
-	avalanche: ["avalanche", "evm", "cross-chain"],
-	ethereum: ["ethereum", "evm", "erc-20", "eth", "cross-chain", "bridge"],
-	polygon: ["polygon", "evm", "cross-chain"],
-	arbitrum: ["arbitrum", "evm", "cross-chain"],
-	cctp: ["cctp", "cross-chain transfer protocol", "circle", "usdc", "bridge"],
-	stablecoin: ["stablecoin", "stable", "usdc", "eurc"],
+	// "feed" bare is safe under substring matching here but too noisy for the
+	// repo surface (RSS/event feeds) — stays project-side.
+	oracle: ["oracle", "feed"],
 	staking: ["staking", "stake", "yield", "apy", "earn"],
 	yield: ["yield", "apy", "earn", "staking", "vault"],
-	nft: ["nft", "collectible", "collectibles", "mint"],
 	gaming: ["gaming", "game", "gamefi", "play-to-earn", "play2earn"],
 	game: ["game", "gaming", "gamefi", "play-to-earn"],
-	// Ramp/anchor vertical. "on-ramp"/"off-ramp"/"fiat"/"cash-in" all map onto
-	// the anchor/ramp/SEP vocabulary records and coverage use, so a corridor
-	// query reaches issuers whose prose never says "anchor" (sls-018).
-	anchor: [
-		"anchor",
-		"on-ramp",
-		"off-ramp",
-		"ramp",
-		"sep-24",
-		"sep24",
-		"sep-6",
-		"sep6",
-		"fiat",
-	],
+	// Ramp direction/spelling variants beyond the shared anchor entry
+	// (sls-018): coverage vocabulary only projects carry.
 	"on-ramp": [
 		"on-ramp",
 		"onramp",
@@ -109,34 +68,6 @@ export const SYNONYMS: Record<string, string[]> = {
 		"send money",
 		"payout",
 	],
-	// Region umbrellas → the country vocabulary records actually use. Raven's
-	// launch demo ("LatAm asset issuers") missed PagFinance/CashAbroad because
-	// their records say "Brazil"/"Mexico", never the umbrella term "LatAm".
-	latam: [
-		"latam",
-		"latin america",
-		"brazil",
-		"brazilian",
-		"mexico",
-		"mexican",
-		"argentina",
-		"colombia",
-		"chile",
-		"peru",
-	],
-	africa: ["africa", "african", "nigeria", "kenya", "ghana", "south africa"],
-	asia: [
-		"asia",
-		"asian",
-		"india",
-		"indian",
-		"philippines",
-		"indonesia",
-		"vietnam",
-		"singapore",
-	],
-	europe: ["europe", "european", "eu"],
-	payments: ["payments", "payment", "checkout", "merchant", "settlement"],
 	// Rename continuity (sls-050): SDF/Sunship's consumer USDC wallet rebranded
 	// Vibrant → Vesseo (record slug `vesseo`, description carries "formerly
 	// Vibrant"). Both names must resolve to the one canonical entity — mapped
@@ -144,22 +75,12 @@ export const SYNONYMS: Record<string, string[]> = {
 	// description text happening to contain the other.
 	vibrant: ["vibrant", "vesseo"],
 	vesseo: ["vesseo", "vibrant"],
-	indexer: ["indexer", "indexing", "data pipeline", "subgraph", "etl"],
 	rpc: ["rpc", "node", "endpoint", "horizon"],
-	sdk: ["sdk", "library", "client library", "kit"],
 	explorer: ["explorer", "block explorer"],
 	faucet: ["faucet", "friendbot"],
-	identity: ["identity", "kyc", "did", "credential", "compliance"],
 	governance: ["governance", "dao", "voting"],
 	custody: ["custody", "custodial", "mpc", "multisig", "key management"],
 	domains: ["domains", "domain", "name service", "naming"],
-	rwa: [
-		"rwa",
-		"real world asset",
-		"real-world asset",
-		"tokenized",
-		"tokenization",
-	],
 	// Machine/agent payments (x402). Expand to the phrases real records actually
 	// use — ApiCharge says "pay-per-call"/"API monetization", Benkiko says
 	// "micropayment" — never the literal "x402". Keep to specific phrases, not
@@ -217,6 +138,11 @@ export const SYNONYMS: Record<string, string[]> = {
 	stokvel: ["stokvel", "rosca", "rotating savings", "savings group"],
 	tanda: ["tanda", "rosca", "rotating savings", "savings circle"],
 };
+
+export const SYNONYMS: Record<string, string[]> = mergeVocabulary(
+	CORE_SYNONYMS,
+	PROJECT_SYNONYM_OVERLAY,
+);
 
 export function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
