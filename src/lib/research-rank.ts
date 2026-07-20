@@ -82,15 +82,35 @@ export const JUNK_URL_RE =
 // as "meeting-notes" and their date comes from their own URL.
 const MEETING_URL_RE = /\/meetings\/(\d{4})\/(\d{2})\/(\d{2})/;
 
+// A bare-date or placeholder title is not a citation an agent can quote.
+// The meeting pages' <title> AND <h1> are both the bare date, so ingest
+// can't copy a better one — synthesize from what the row knows. Date comes
+// from the URL (the h1 date is TZ-drifted +1 day vs the URL/byline).
+const JUNK_MEETING_TITLE_RE = /^(\d{4}-\d{2}-\d{2}|meeting notes)$/i;
+
 function meetingReclass(c: RankableChunk): {
 	source: string;
 	publishedAt: string | null;
+	title: string | null | undefined;
 } {
 	const m = c.url.match(MEETING_URL_RE);
-	if (!m) return { source: c.source, publishedAt: c.publishedAt };
+	if (!m) {
+		return { source: c.source, publishedAt: c.publishedAt, title: c.title };
+	}
+	let title = c.title;
+	const t = (title ?? "").trim();
+	if (!t || JUNK_MEETING_TITLE_RE.test(t)) {
+		// "Protocol Meeting" only when the chunk itself says so; otherwise the
+		// neutral truth (every /meetings/ page is a developer meeting recap).
+		const kind = /\bprotocol meeting\b/i.test(c.content)
+			? "Protocol Meeting"
+			: "Developer Meeting";
+		title = `Stellar ${kind} ${m[1]}-${m[2]}-${m[3]}`;
+	}
 	return {
 		source: "meeting-notes",
 		publishedAt: c.publishedAt ?? `${m[1]}-${m[2]}-${m[3]}`,
+		title,
 	};
 }
 
@@ -512,6 +532,8 @@ export function rankResearchChunks<T extends RankableChunk>(
 				// Serve the URL-derived date on meeting rows too — the row must
 				// not say publishedAt:null while its confidence prices in age.
 				publishedAt: eff.publishedAt,
+				// Bare-date meeting titles become quotable citations (BAD-TITLE).
+				title: eff.title,
 				confidence: researchConfidence({
 					score: c.score,
 					source: eff.source,
