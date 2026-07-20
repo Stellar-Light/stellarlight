@@ -554,6 +554,19 @@
 				"answerRegex": ["cobo"]
 			},
 			"$comment": "Mention-vs-identity (2026-07-19): the custody provider must rank in the top 3 above records that merely mention custody mid-prose plus a secondary token."
+		},
+		{
+			"id": "pg-award-recipients",
+			"category": "ecosystem",
+			"mode": "projects",
+			"question": "which projects have received the SCF Public Goods Award",
+			"expect": {
+				"answerRegex": [
+					"opengrants",
+					"scaffold[ -]stellar",
+					"(php|java|python) sdk"
+				]
+			}
 		}
 	]
 }

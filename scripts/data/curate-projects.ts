@@ -122,6 +122,69 @@ const GITHUB_REPOS_ADD: Record<
 // EVERY capability they demonstrably have, not a single dominant category.
 // ADDITIVE — merges into `types`, never removes. Grounded in the provider's
 // own products (Etherfuse FX = a live Mexico on/off-ramp API).
+/**
+ * SCF Public Goods Award recipients — CSV-CONFIRMED rounds only (pg-atlas-
+ * frontend Airtable exports, Status=Awarded). Merged proposal PRs are NOT
+ * award proof (rejected proposals get merged too); Q2'26 outcomes live on
+ * Tansu and are excluded until readable. Recon 2026-07-20: 17 proposal
+ * projects, 12 CSV-confirmed awardees, 10 with CERTAIN directory slugs
+ * (the Soneso Flutter base SDK has no directory record; Hardware Wallet
+ * Support is a multi-repo workstream with no dedicated record).
+ */
+const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
+	"stellar-php-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"ios-stellar-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"java-stellar-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"python-stellar-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"net-stellar-sdk": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	opengrants: {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	// CoinFabrik's audit tooling — distinct from our stellar-scout
+	scout: {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"stellar-light": {
+		rounds: ["2025Q4", "2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	stellarchain: {
+		rounds: ["2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+	"scaffold-stellar": {
+		rounds: ["2026Q1"],
+		evidence:
+			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
+	},
+};
+
 const TYPES_ADD: Record<string, string[]> = {
 	etherfuse: ["Anchor"],
 	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
@@ -1140,6 +1203,41 @@ async function main() {
 			`  ${slug}: types [${existing.join(", ")}] → [${next.join(", ")}]`,
 		);
 		writes.push({ id: d.id, slug, data: { types: next } });
+	}
+
+	// ── PG Award truth (merge rounds, never remove; CSV-confirmed only) ──
+	console.log("\n── Public Goods Award rounds (merge, never remove) ──");
+	for (const [slug, pg] of Object.entries(PG_AWARDS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const existing: string[] = Array.isArray(d.publicGoods?.awardRounds)
+			? d.publicGoods.awardRounds
+			: [];
+		const missing = pg.rounds.filter((x) => !existing.includes(x));
+		if (!missing.length && d.publicGoods?.evidenceUrl === pg.evidence) {
+			console.log(`  ${slug}: rounds already [${existing.join(", ")}], skip`);
+			continue;
+		}
+		const next = [...existing, ...missing];
+		console.log(
+			`  ${slug}: pgAwardRounds [${existing.join(", ")}] → [${next.join(", ")}]`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { publicGoods: { awardRounds: next, evidenceUrl: pg.evidence } },
+		});
 	}
 
 	// ── sls-025: additive github.repos rows (merge, never remove) ──

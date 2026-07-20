@@ -110,6 +110,8 @@ async function semanticProjectRows(
 				llamaSlugs: 1,
 				// on-chain metrics (2026-07-20): absent = not tracked, never zero
 				onchain: 1,
+				// PG Award truth rides semantic rows too (F3 class)
+				publicGoods: 1,
 				// sls-032/035: route evidence + venue role must be PROJECTED to be
 				// served (the F3 class — the mapper can't read omitted fields).
 				routes: 1,
@@ -167,6 +169,7 @@ async function semanticProjectRows(
 			prominence: typeof p.prominence === "number" ? p.prominence : null,
 			// F8: TVL facts (DefiLlama; null = not tracked there, never zero)
 			onchain: pickOnchain(p.onchain),
+			publicGoods: pickPublicGoods(p.publicGoods),
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
 			// sls-031: TVL methodology provenance (which source, computed how)
@@ -513,6 +516,18 @@ function pickAvailability(
  * registry — NEVER "no on-chain activity". Rows serve only when the enrich
  * pipeline populated the group (asOf present).
  */
+/** PG Award passthrough: null = not a confirmed recipient at our source —
+ * NEVER "not a public good". */
+// biome-ignore lint/suspicious/noExplicitAny: Payload group shape
+function pickPublicGoods(g: any) {
+	if (!g || !Array.isArray(g.awardRounds) || g.awardRounds.length === 0)
+		return null;
+	return {
+		awardRounds: g.awardRounds,
+		evidenceUrl: g.evidenceUrl ?? null,
+	};
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: Payload group shape
 function pickOnchain(o: any) {
 	if (!o || !o.asOf) return null;
@@ -899,6 +914,8 @@ export async function GET(req: NextRequest) {
 					tvlUSD?: number | null;
 					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 					onchain?: any;
+					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
+					publicGoods?: any;
 					tvlAsOf?: string | null;
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
@@ -984,6 +1001,7 @@ export async function GET(req: NextRequest) {
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
+					publicGoods: pickPublicGoods(p.publicGoods),
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
 					// sls-031: TVL methodology provenance

@@ -78,6 +78,9 @@ const PROJECT_SYNONYM_OVERLAY: Record<string, string[]> = {
 	// BIDIRECTIONALLY so neither the old nor the new name depends on the
 	// description text happening to contain the other.
 	vibrant: ["vibrant", "vesseo"],
+	// PG Award vocabulary: "goods" is the distinctive token ("public" is too
+	// generic to expand). Rows match via the buildHaystack inclusion above.
+	goods: ["goods", "public goods", "public good", "maintenance award"],
 	vesseo: ["vesseo", "vibrant"],
 	rpc: ["rpc", "node", "endpoint", "horizon"],
 	explorer: ["explorer", "block explorer"],
@@ -384,6 +387,7 @@ export interface MatchableProject {
 		currencies?: string[] | null;
 		seps?: string[] | null;
 	} | null;
+	publicGoods?: { awardRounds?: string[] | null } | null;
 }
 
 function covValues(p: MatchableProject): string[] {
@@ -419,7 +423,13 @@ export function buildHaystack(p: MatchableProject): string {
 	const nets = Array.isArray(p.supportedNetworks)
 		? p.supportedNetworks.join(" ")
 		: "";
-	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText}`.toLowerCase();
+	// Structured truth drives INCLUSION (F1): PG-award recipients' prose
+	// rarely says "public goods" — the confirmed award itself is what makes
+	// the row match the query.
+	const pg = p.publicGoods?.awardRounds?.length
+		? "public goods award maintenance pilots"
+		: "";
+	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
 }
 
 // Negation guard (2026-07-11 audit): substring matching means "custodial"

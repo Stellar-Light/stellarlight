@@ -590,6 +590,32 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			name: "publicGoods",
+			type: "group",
+			admin: {
+				description:
+					"SCF Public Goods Award (Pilots) recipient data — CSV-confirmed rounds only (pg-atlas-frontend Airtable exports), never merged-proposal inference (both accepted AND rejected proposals get merged upstream). Q2'26 outcomes live on Tansu and are excluded until readable.",
+			},
+			fields: [
+				{
+					name: "awardRounds",
+					type: "text",
+					hasMany: true,
+					admin: {
+						description:
+							"Confirmed award rounds, e.g. 2025Q4, 2026Q1 (Status=Awarded in the round CSV; requested-amount tranches, not payout proof)",
+					},
+				},
+				{
+					name: "evidenceUrl",
+					type: "text",
+					admin: {
+						description: "Proposal PR / round-CSV evidence for the award claim",
+					},
+				},
+			],
+		},
+		{
 			name: "scf",
 			type: "group",
 			admin: {

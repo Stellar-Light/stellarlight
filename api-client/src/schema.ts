@@ -807,6 +807,11 @@ export interface components {
             } | null;
             /** @description On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). assetHolders = funded trustlines; assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, with prevAsOf + deltaDays defining the window — null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload. */
             onchain?: Record<string, never> | null;
+            /** @description SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4 — CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source — NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable. */
+            publicGoods?: {
+                awardRounds?: string[];
+                evidenceUrl?: string | null;
+            } | null;
             /** @description Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. null = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit. */
             audits?: {
                 count?: number;
