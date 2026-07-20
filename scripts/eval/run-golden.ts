@@ -206,7 +206,7 @@ async function gradeResearch(q: Question): Promise<Graded> {
 }
 
 async function gradeProjects(q: Question): Promise<Graded> {
-	const url = `${BASE_URL}/api/projects/search?q=${encodeURIComponent(q.question)}&limit=${TOP_K}`;
+	const url = `${BASE_URL}/api/projects/search?q=${encodeURIComponent(q.question)}&limit=${q.limit ?? TOP_K}`;
 	const data = (await fetchJson(url)) as {
 		projects?: Array<{
 			name?: string;
