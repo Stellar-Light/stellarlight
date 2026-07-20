@@ -65,8 +65,9 @@ interface ExpertContract {
 
 interface ExpertAsset {
 	supply?: string | number;
-	/** stellar.expert serves trustlines as [total, authorized, funded] */
-	trustlines?: number[] | number;
+	/** Object {total, authorized, funded} on the current API (verified live
+	 * 2026-07-20 on AQUA); older/partner-era responses used an array. */
+	trustlines?: { total?: number; funded?: number } | number[] | number;
 	decimals?: number;
 }
 
@@ -177,9 +178,19 @@ async function run() {
 			await sleep(PAUSE_MS);
 			if (!a) failed = true;
 			else {
-				// Same parse the partner enrichment has used in prod for weeks.
+				// Shape verified live 2026-07-20: object {total, authorized, funded}.
+				// funded = accounts actually holding the asset — the honest
+				// "holders" number. Array/number fallbacks for older shapes; a
+				// non-numeric result stays null, never a stringified object (the
+				// dry run caught exactly that).
 				const tl = a.trustlines;
-				assetHolders = Array.isArray(tl) ? (tl[0] ?? null) : (tl ?? null);
+				const rawHolders =
+					tl && typeof tl === "object" && !Array.isArray(tl)
+						? (tl.funded ?? tl.total)
+						: Array.isArray(tl)
+							? tl[0]
+							: tl;
+				assetHolders = typeof rawHolders === "number" ? rawHolders : null;
 				assetSupply = toWholeUnits(a.supply);
 			}
 		}
