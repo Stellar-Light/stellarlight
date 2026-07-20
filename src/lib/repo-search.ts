@@ -11,6 +11,7 @@
 
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
+import { CORE_SYNONYMS, mergeVocabulary } from "./search-vocabulary";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -179,41 +180,23 @@ function topicList(topics: unknown): string[] {
 }
 
 // A query token matches if ANY of its expansions hits the repo's text.
-export const SYNONYMS: Record<string, string[]> = {
-	zk: [
-		"zk",
-		"zero-knowledge",
-		"zero knowledge",
-		"zkp",
-		"snark",
-		"stark",
-		"plonk",
-		"groth16",
-		"circuit",
-		"proof",
-	],
-	zkp: ["zkp", "zk", "zero-knowledge", "proof"],
-	oracle: ["oracle", "price feed", "data feed", "datafeed"],
-	amm: ["amm", "dex", "liquidity", "swap"],
-	dex: ["dex", "amm", "swap", "exchange", "orderbook"],
+// Core chain/vertical/region vocabulary lives in CORE_SYNONYMS
+// (src/lib/search-vocabulary.ts) and is merged in below — add a lesson
+// THERE when it applies to every surface, here only when the term is safe
+// under this surface's word-boundary matcher but too loose for project
+// substring matching (e.g. "client", "circuit", "proof").
+const REPO_SYNONYM_OVERLAY: Record<string, string[]> = {
+	zk: ["zk", "circuit", "proof"],
+	zkp: ["zkp", "proof"],
 	wallet: ["wallet", "keypair", "signer", "passkey"],
-	nft: ["nft", "non-fungible", "collectible"],
-	rwa: [
-		"rwa",
-		"real-world asset",
-		"real world asset",
-		"tokenization",
-		"tokenized",
-	],
-	lending: ["lending", "lend", "borrow", "money market"],
-	bridge: ["bridge", "cross-chain", "interoperability", "cctp"],
-	indexer: ["indexer", "indexing", "subgraph", "data pipeline", "etl"],
-	sdk: ["sdk", "library", "client"],
-	soroban: ["soroban", "smart contract", "contract"],
-	contract: ["contract", "soroban", "smart contract"],
-	stablecoin: ["stablecoin", "usdc", "anchor"],
-	defi: ["defi", "decentralized finance", "amm", "lending"],
+	sdk: ["sdk", "client"],
+	stablecoin: ["stablecoin", "anchor"],
 };
+
+export const SYNONYMS: Record<string, string[]> = mergeVocabulary(
+	CORE_SYNONYMS,
+	REPO_SYNONYM_OVERLAY,
+);
 function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
 	if (t.length > 4 && t.endsWith("s")) out.add(t.slice(0, -1));

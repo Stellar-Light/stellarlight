@@ -1,19 +1,29 @@
 /**
- * Canonical search-vocabulary contract (ideas/shared-synonym-registry.md,
- * guard phase). Three surfaces each maintain their own synonym expansions —
- * project search, repo search, builders — and every vocabulary lesson
- * ("LatAm→countries", "pool→liquidity") historically had to be hand-copied
- * between them; the next retrieval miss is always a term fixed in one map
- * and absent in another (project search lacked stopwords repo search had
- * for weeks).
+ * Canonical search-vocabulary registry (ideas/shared-synonym-registry.md).
+ * Three surfaces each maintain synonym expansions — project search, repo
+ * search, builders — and every vocabulary lesson ("LatAm→countries",
+ * "pool→liquidity") historically had to be hand-copied between them; the
+ * next retrieval miss is always a term fixed in one map and absent in
+ * another (project search lacked stopwords repo search had for weeks).
  *
- * This module does NOT merge the expansion VALUES (each surface's
- * expansions differ deliberately: "wallet" implies custody vocabulary on
- * projects but repo-topic vocabulary on repos). It pins the KEY coverage:
- * every noun listed here must have an expansion entry on the surfaces that
- * owe it one, enforced by src/lib/__tests__/search-vocabulary.test.ts.
- * Add a vertical here when a lesson lands, and the test forces you to
- * teach every surface — not just the one that missed.
+ * Two layers:
+ *  - CORE_SYNONYMS — expansions every content surface owes. Each surface's
+ *    exported SYNONYMS is mergeVocabulary(core, overlay), so a lesson added
+ *    here reaches project search AND repo search in one edit (builders
+ *    merges the subset of core keys it owns — builder queries are
+ *    skill-shaped, so it doesn't take chains/regions).
+ *  - Per-surface overlays — deliberately divergent vocabulary stays with
+ *    its surface ("wallet" implies custody vocabulary on projects but
+ *    keypair/passkey vocabulary on repos; "sdk"→"client" is safe under repo
+ *    search's word-boundary matcher but too loose for project substring
+ *    matching). An overlay entry EXTENDS the core entry, never replaces it.
+ *
+ * KEY coverage (which nouns must exist per surface) is pinned by
+ * CORE_VERTICALS / BUILDER_CORE_VERTICALS; VALUE coverage (core expansions
+ * actually reaching each surface) is pinned by
+ * src/lib/__tests__/search-vocabulary.test.ts. Keep this module
+ * import-free: repo-search and project-search-match both import it, and it
+ * must never point back at either.
  */
 
 /** Vertical nouns BOTH project search and repo search must expand. */
@@ -43,3 +53,147 @@ export const BUILDER_CORE_VERTICALS = [
 	"stablecoin",
 	"wallet",
 ] as const;
+
+/**
+ * Shared expansions. Values here must be safe under EVERY surface's
+ * matcher (project search substring-matches; repo search word-boundary
+ * matches) — surface-tuned riskier terms belong in that surface's overlay.
+ * Sources of truth for the lessons: sls-018 (ramp vocabulary), sls-019
+ * (pool/liquidity), Beacon Q3 (chain names), Raven launch demo
+ * (LatAm→countries).
+ */
+export const CORE_SYNONYMS: Record<string, string[]> = {
+	// ── Verticals ──
+	amm: ["amm", "liquidity", "pool", "swap", "dex"],
+	dex: ["dex", "amm", "swap", "exchange", "orderbook", "liquidity"],
+	swap: ["swap", "dex", "amm", "exchange", "liquidity"],
+	pool: ["pool", "liquidity", "amm", "dex", "swap"],
+	liquidity: ["liquidity", "pool", "amm", "dex", "swap"],
+	lending: ["lending", "lend", "borrow", "loan", "money market"],
+	oracle: [
+		"oracle",
+		"price feed",
+		"data feed",
+		"datafeed",
+		"pricefeed",
+		"price-feed",
+	],
+	bridge: ["bridge", "cross-chain", "interoperability", "cctp", "wrapped"],
+	indexer: ["indexer", "indexing", "subgraph", "data pipeline", "etl"],
+	sdk: ["sdk", "library", "client library", "kit"],
+	nft: ["nft", "non-fungible", "collectible", "collectibles", "mint"],
+	rwa: [
+		"rwa",
+		"real world asset",
+		"real-world asset",
+		"tokenized",
+		"tokenization",
+	],
+	stablecoin: ["stablecoin", "stable", "usdc", "eurc"],
+	// Divergence deliberate past the noun itself: custody/keystore vocabulary
+	// on projects, keypair/passkey on repos — overlays carry those.
+	wallet: ["wallet"],
+	defi: ["defi", "decentralized finance", "amm", "lending", "yield"],
+	soroban: ["soroban", "smart contract", "contract"],
+	contract: ["contract", "soroban", "smart contract"],
+	zk: [
+		"zk",
+		"zero-knowledge",
+		"zero knowledge",
+		"zkp",
+		"snark",
+		"stark",
+		"plonk",
+		"groth16",
+	],
+	zkp: ["zkp", "zk", "zero-knowledge"],
+	identity: ["identity", "kyc", "did", "credential", "compliance"],
+	// Ramp/anchor vertical (sls-018): corridor queries must reach issuers
+	// whose prose never says "anchor" — on every surface.
+	anchor: [
+		"anchor",
+		"on-ramp",
+		"off-ramp",
+		"ramp",
+		"sep-24",
+		"sep24",
+		"sep-6",
+		"sep6",
+		"fiat",
+	],
+	payments: [
+		"payments",
+		"payment",
+		"checkout",
+		"merchant",
+		"settlement",
+		"remittance",
+		"cross-border",
+	],
+	payment: ["payment", "payments", "remittance"],
+	// ── Chains (Beacon Q3): users name the chain, records say "EVM"/"cross-chain" ──
+	evm: ["evm", "ethereum", "erc-20", "erc20", "cross-chain", "bridge"],
+	ethereum: ["ethereum", "evm", "erc-20", "eth", "cross-chain", "bridge"],
+	solana: ["solana", "sol", "cross-chain", "bridge"],
+	sol: ["sol", "solana", "cross-chain"],
+	tron: ["tron", "trx", "cross-chain"],
+	xrpl: ["xrpl", "xrp", "ripple", "cross-chain"],
+	xrp: ["xrp", "xrpl", "cross-chain"],
+	bitcoin: ["bitcoin", "btc", "cross-chain"],
+	btc: ["btc", "bitcoin", "cross-chain"],
+	polkadot: ["polkadot", "dot", "kusama", "cross-chain"],
+	kusama: ["kusama", "polkadot", "cross-chain"],
+	sui: ["sui", "cross-chain"],
+	near: ["near", "cross-chain"],
+	base: ["base", "evm", "cross-chain"],
+	bnb: ["bnb", "bsc", "binance", "evm", "cross-chain"],
+	bsc: ["bsc", "bnb", "binance", "evm", "cross-chain"],
+	optimism: ["optimism", "evm", "cross-chain"],
+	avalanche: ["avalanche", "evm", "cross-chain"],
+	polygon: ["polygon", "evm", "cross-chain"],
+	arbitrum: ["arbitrum", "evm", "cross-chain"],
+	cctp: ["cctp", "cross-chain transfer protocol", "circle", "usdc", "bridge"],
+	// ── Regions (Raven launch demo): umbrella terms → the country vocabulary
+	// records actually use ──
+	latam: [
+		"latam",
+		"latin america",
+		"brazil",
+		"brazilian",
+		"mexico",
+		"mexican",
+		"argentina",
+		"colombia",
+		"chile",
+		"peru",
+	],
+	africa: ["africa", "african", "nigeria", "kenya", "ghana", "south africa"],
+	asia: [
+		"asia",
+		"asian",
+		"india",
+		"indian",
+		"philippines",
+		"indonesia",
+		"vietnam",
+		"singapore",
+	],
+	europe: ["europe", "european", "eu"],
+};
+
+/**
+ * Union-merge a surface overlay onto the core registry. Overlay entries
+ * extend (never replace) core entries; keys unique to either side pass
+ * through. Consumers all Set-dedupe expansions, so ordering is cosmetic.
+ */
+export function mergeVocabulary(
+	core: Record<string, string[]>,
+	overlay: Record<string, string[]>,
+): Record<string, string[]> {
+	const out: Record<string, string[]> = {};
+	for (const [k, vs] of Object.entries(core)) out[k] = [...vs];
+	for (const [k, vs] of Object.entries(overlay)) {
+		out[k] = [...new Set([...(out[k] ?? []), ...vs])];
+	}
+	return out;
+}
