@@ -132,6 +132,8 @@ async function run() {
 			collection: "partner-accounts",
 			limit: 500,
 			depth: 0,
+			// Auth collection: match the proven enrich-partner-onchain access mode.
+			overrideAccess: true,
 		});
 		for (const pt of partners.docs as unknown as Array<{
 			projectSlug?: string | null;
@@ -147,6 +149,15 @@ async function run() {
 				partnerDerived += 1;
 			}
 		}
+		// Diagnostics: the join failed silently twice (wrong slug, then a race);
+		// make its inputs visible so a zero is explainable from the log alone.
+		const pdocs = partners.docs as unknown as Array<{
+			projectSlug?: string | null;
+			onchain?: unknown[] | null;
+		}>;
+		console.log(
+			`  partner join inputs: ${pdocs.length} docs, ${pdocs.filter((x) => x.projectSlug).length} with projectSlug, ${pdocs.filter((x) => Array.isArray(x.onchain) && x.onchain.length).length} with onchain assets`,
+		);
 	} catch (e) {
 		console.log(`partner-asset join skipped: ${(e as Error).message}`);
 	}
