@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.12",
+		"version": "1.8.13",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -315,7 +315,8 @@
 						"how-to / reference / docs questions (CLI usage, bindings, SEP or standards text, feasibility) -> searchResearch",
 						"raw GitHub source repos ranked by code quality -> searchRepos",
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
-						"category counts or whitespace -> getClusters"
+						"category counts or whitespace -> getClusters",
+						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)"
 					],
 					"exampleQuestions": [
 						"Which wallets exist on Stellar and how do they differ?",
@@ -2142,6 +2143,10 @@
 						"instawards",
 						"liquidity award",
 						"public goods award",
+						"security audit reports",
+						"audit findings",
+						"what did the audit find",
+						"vulnerabilities found",
 						"eligibility",
 						"review timeline",
 						"prescreen",
@@ -2255,7 +2260,7 @@
 					{
 						"name": "severity",
 						"in": "query",
-						"description": "Audit-metadata filter, case-insensitive. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
+						"description": "Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding — an architecture chunk can carry 'high' while the findings table reads 'unknown' — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
 						"schema": {
 							"type": "string",
 							"enum": [
@@ -2780,7 +2785,7 @@
 				"summary": "Stellar ecosystem developer activity",
 				"description": "Ranked list of active Stellar projects (`sort=activity|stars|issues` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
-					"purpose": "Ranked active-project leaderboard + Electric Capital ecosystem developer stats.",
+					"purpose": "Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
 					"keywords": [
 						"open issues",
 						"issue tracker",
@@ -3337,7 +3342,7 @@
 							"string",
 							"null"
 						],
-						"description": "Audit-source chunks only; section-inferred, 'unknown' for most PDF-derived chunks"
+						"description": "Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks"
 					},
 					"score": {
 						"type": [
@@ -4173,7 +4178,7 @@
 						"type": "string",
 						"format": "date-time",
 						"nullable": true,
-						"description": "Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null when no repo has a known commit date."
+						"description": "Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap — e.g. a closed-source product), never 'no activity'."
 					},
 					"via": {
 						"type": "string",

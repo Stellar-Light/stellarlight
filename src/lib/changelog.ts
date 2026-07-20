@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.13",
+		type: "fixed",
+		summary:
+			"getLeaderboard ranked an ARBITRARY 300 of ~850 eligible projects (unsorted capped fetch) — blend/phoenix/soroswap never entered the board. Population is now every eligible project. Plus agent-loop clarity fixes: chunk-level severity semantics, lastActivityAt null = index gap, TVL-rollup routing pointer, escrow vocabulary.",
+		detail:
+			"Found by agent-in-the-loop testing through the Raven gateway: a cold agent noticed the top-200 activity board contained 4 of 13 major DeFi names; probing confirmed the population fetch was limit:300 with no sort, so ranking ran over whichever 300 rows the DB returned first. The fetch now covers all eligible (Live/Development/Pre-Release) projects with a narrow 6-field select. Also from the same runs: searchResearch severity documented as CHUNK-level (an architecture chunk can carry 'high' while the findings table reads 'unknown'); searchProjects lastActivityAt null documented as an index gap (closed-source products), never 'no activity'; searchProjects routes TVL-complete rollups to analyzeEcosystem (the types taxonomy has no DeFi umbrella; RWA-typed Spiko carries most TVL); escrow/milestone added to the shared synonym registry and an escrow flagship float added so the audited canonical platform outranks name-luck demos.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.12",
 		type: "added",
 		summary:

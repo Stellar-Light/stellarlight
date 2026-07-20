@@ -639,6 +639,19 @@ export function canonicalFor(q: string): string[] {
 // silently skipped by the `in` fetch). Add a vertical ONLY when it has this
 // thin-description problem AND a human-verified flagship set — never guess.
 const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
+	// escrow / milestone payments. Q5 cold-agent run (2026-07-20): for
+	// q="escrow" the canonical AUDITED escrow platform (Trustless Work —
+	// Runtime Verification report, stellarsecurityportal.com/report/64)
+	// ranked 16/20 because its repo name lacks the word, while a 0-star
+	// hackathon demo led. Verified in-index 2026-07-20: both repos served
+	// by searchRepos with live scores/commit dates.
+	{
+		test: /\bescrows?\b|\bmilestone/,
+		repos: [
+			"Trustless-Work/trustlesswork-smart-contract-stellar",
+			"devasignhq/soroban-escrow",
+		],
+	},
 	// cross-chain bridges. Verified in-index 2026-07-06 (descriptions confirm each
 	// is a real Stellar bridge, not a wallet/aggregator): allbridge (Soroban
 	// contracts + js-sdk), rozo (USDC intents), crossmesh (EVM→Stellar forwarder),

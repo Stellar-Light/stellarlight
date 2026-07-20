@@ -70,6 +70,10 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	pool: ["pool", "liquidity", "amm", "dex", "swap"],
 	liquidity: ["liquidity", "pool", "amm", "dex", "swap"],
 	lending: ["lending", "lend", "borrow", "loan", "money market"],
+	// Q5 cold-agent run (2026-07-20): "escrow" queries must reach milestone/
+	// conditional-payment vocabulary — the canonical audited escrow platform's
+	// repo name doesn't contain the word.
+	escrow: ["escrow", "milestone", "milestones", "conditional payment"],
 	oracle: [
 		"oracle",
 		"price feed",
