@@ -307,6 +307,7 @@ export const spec: OpenAPISpec = {
 						"raw GitHub source repos ranked by code quality -> searchRepos",
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
 						"category counts or whitespace -> getClusters",
+						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)",
 					],
 					exampleQuestions: [
 						"Which wallets exist on Stellar and how do they differ?",
@@ -1851,6 +1852,10 @@ export const spec: OpenAPISpec = {
 						"instawards",
 						"liquidity award",
 						"public goods award",
+						"security audit reports",
+						"audit findings",
+						"what did the audit find",
+						"vulnerabilities found",
 						"eligibility",
 						"review timeline",
 						"prescreen",
@@ -1960,7 +1965,7 @@ export const spec: OpenAPISpec = {
 						name: "severity",
 						in: "query",
 						description:
-							"Audit-metadata filter, case-insensitive. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
+							"Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding \u2014 an architecture chunk can carry 'high' while the findings table reads 'unknown' — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
 						schema: {
 							type: "string",
 							enum: [
@@ -2440,7 +2445,7 @@ export const spec: OpenAPISpec = {
 					"Ranked list of active Stellar projects (`sort=activity|stars|issues` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
-						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats.",
+						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
 					keywords: [
 						// sls-052: repo-health question family
 						"open issues",
@@ -2870,7 +2875,7 @@ export const spec: OpenAPISpec = {
 					severity: {
 						type: ["string", "null"],
 						description:
-							"Audit-source chunks only; section-inferred, 'unknown' for most PDF-derived chunks",
+							"Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks",
 					},
 					score: { type: ["number", "null"] },
 					confidence: {
@@ -3430,7 +3435,7 @@ export const spec: OpenAPISpec = {
 						format: "date-time",
 						nullable: true,
 						description:
-							"Most recent commit across the project's own indexed repos \u2014 attach as the as-of date for 'is this project active?' answers. Null when no repo has a known commit date.",
+							"Most recent commit across the project's own indexed repos \u2014 attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap \u2014 e.g. a closed-source product), never 'no activity'.",
 					},
 					via: {
 						type: "string",

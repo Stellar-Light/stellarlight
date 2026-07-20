@@ -590,7 +590,7 @@ export interface components {
             auditor?: string | null;
             /** @description Audit-source chunks only */
             protocol?: string | null;
-            /** @description Audit-source chunks only; section-inferred, 'unknown' for most PDF-derived chunks */
+            /** @description Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks */
             severity?: string | null;
             score?: number | null;
             /** @description 0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays */
@@ -867,7 +867,7 @@ export interface components {
             repos?: components["schemas"]["Repo"][];
             /**
              * Format: date-time
-             * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null when no repo has a known commit date.
+             * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap — e.g. a closed-source product), never 'no activity'.
              */
             lastActivityAt?: string | null;
             /** @description How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback). */
@@ -2070,7 +2070,7 @@ export interface operations {
                 auditor?: string;
                 /** @description Audit-metadata filter: audited protocol/codebase name (substring match). Narrows results to audit-source chunks. */
                 protocol?: string;
-                /** @description Audit-metadata filter, case-insensitive. CAVEAT: severity is inferred from PDF-derived section headings and is 'unknown' for most chunks — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
+                /** @description Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding — an architecture chunk can carry 'high' while the findings table reads 'unknown' — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
                 severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;

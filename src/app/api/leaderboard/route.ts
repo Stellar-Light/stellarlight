@@ -218,13 +218,22 @@ export async function GET(req: NextRequest) {
 			const projectsResult = await payload.find({
 				collection: "projects",
 				where: projectWhere,
-				limit: 300,
+				// Raven cold-agent catch (2026-07-20): limit 300 with NO sort made
+				// the ranking population an ARBITRARY 300 of ~850 eligible projects
+				// — blend/phoenix/soroswap never entered the leaderboard at all.
+				// Fetch every eligible row; the narrow select keeps this cheap on
+				// M0 (the old {embedding:false} still dragged descriptions and
+				// coverage for rows we only read 6 scalars from).
+				limit: 2000,
 				depth: 0,
-				// Exclude the json voyage-3 vector — pulling it for up to 300
-				// projects dragged megabytes off the M0 free tier and timed this
-				// endpoint out (same root cause as projects/search). Only the
-				// scalar stats below are used.
-				select: { embedding: false },
+				select: {
+					name: true,
+					slug: true,
+					category: true,
+					types: true,
+					shortDescription: true,
+					scf: true,
+				},
 			});
 
 			// Per-project GitHub stats come from the enriched `repos` collection
