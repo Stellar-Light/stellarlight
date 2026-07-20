@@ -822,6 +822,11 @@ export async function GET(req: NextRequest) {
 			// returned five tvl=null records while Blend ($139M) sat unfetched —
 			// the structured field the query literally asks about played no part.
 			const tvlIntent = /\btvl\b|total value locked/i.test(q);
+			// PG-award intent: recipients' prose rarely says "public goods" — the
+			// structured award must pull them into the candidate pool (sls-018
+			// class at the FETCH layer; the haystack inclusion alone can't score
+			// rows that were never fetched).
+			const pgIntent = /\bpublic goods?\b/i.test(q);
 			// "X vs Y" comparison (audit: blend vs yieldblox dropped Blend): both
 			// SUBJECTS must be present — tiered token matching can drop one.
 			const vsMatch = q.match(/^(.+?)\s+(?:vs\.?|versus)\s+(.+)$/i);
@@ -866,6 +871,12 @@ export async function GET(req: NextRequest) {
 					// "highest tvl" must consider the actual TVL leaders, whose prose
 					// never contains the word "tvl".
 					...(tvlIntent ? [{ tvlUSD: { greater_than: 0 } }] : []),
+					// PG intent: every CSV-confirmed award recipient joins the pool.
+					// exists on the group's TEXT subfield — never the hasMany array
+					// (adapter Query-cast trap, routes-axis crash 2026-07-20).
+					...(pgIntent
+						? [{ "publicGoods.evidenceUrl": { exists: true } }]
+						: []),
 				];
 			}
 
