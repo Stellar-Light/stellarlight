@@ -1186,12 +1186,65 @@ async function main() {
 		});
 	}
 
-	// ── raven#8 sweep (REPORT-ONLY): other dual-identity ramp providers ──
-	// Partners with anchor type / ramp capability whose matching PROJECT record
-	// lacks the Anchor type — the same pattern that hid Etherfuse. Prints
-	// candidates for owner review; add confirmed ones to TYPES_ADD. Never writes.
-	console.log("\n── Dual-identity sweep (report-only, no writes) ──");
+	// ── raven#8 sweep (REPORT-ONLY): capability-mismatch axes ──
+	// Generalizes the dual-identity ramp sweep (the pattern that hid
+	// Etherfuse) to a table of axes: partner capability evidence → the
+	// project type that evidence implies. A CANDIDATE fires when the linked
+	// project carries NONE of the implied types (and its category doesn't
+	// already cover it). Prints for owner review; confirmed rows are
+	// hand-promoted into TYPES_ADD above. Never writes.
+	// (idea: capability-mismatch-sweep.md — raven#8 asked to "audit for
+	// other multi-product projects"; audd is the proving candidate.)
+	console.log("\n── Capability-mismatch sweep (report-only, no writes) ──");
 	{
+		// Narrow on purpose: only sectors whose implied type is unambiguous.
+		// defi→DEX/Lending, identity, data→Indexer/Analytics are too loose —
+		// a "defi"-sector wallet is not thereby a DEX (report noise, not truth).
+		const SECTOR_TYPE: Record<string, string> = {
+			payments: "Payments",
+			rwa: "RWA",
+			stablecoins: "Stablecoin",
+			ai: "AI",
+			gaming: "Gaming",
+		};
+		const CAP_AXES: Array<{
+			id: string;
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			implied: (pt: any) => string[];
+			coveredByCategory?: (cat: string) => boolean;
+		}> = [
+			{
+				id: "anchor",
+				implied: (pt) =>
+					pt.partnerType === "anchor" ||
+					pt.partnerType === "on-off-ramp" ||
+					(Array.isArray(pt.rampTypes) && pt.rampTypes.length > 0)
+						? ["Anchor"]
+						: [],
+				coveredByCategory: (c) => c === "Anchor",
+			},
+			{
+				id: "sectors",
+				implied: (pt) =>
+					(Array.isArray(pt.sectors) ? pt.sectors : [])
+						.map((s: string) => SECTOR_TYPE[s])
+						.filter(Boolean),
+			},
+			{
+				// Keyed on onchain[] (domain-matched PROVEN issuance from
+				// stellar.expert), never on assets[] — that field conflates
+				// "issues" with "supports" (Bitso supports USDC; Circle
+				// issues it). The issues-vs-supports cousin of the
+				// contains-substring trap.
+				id: "issued-asset",
+				implied: (pt) =>
+					Array.isArray(pt.onchain) && pt.onchain.length > 0
+						? ["Stablecoin", "RWA"]
+						: [],
+				coveredByCategory: (c) => c === "Asset",
+			},
+		];
+
 		const anchorsRes = await payload.find({
 			collection: "partner-accounts",
 			where: { status: { equals: "published" } },
@@ -1202,11 +1255,14 @@ async function main() {
 		let candidates = 0;
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 		for (const pt of anchorsRes.docs as any[]) {
-			const isRampCapable =
-				pt.partnerType === "anchor" ||
-				(Array.isArray(pt.rampTypes) && pt.rampTypes.length > 0);
-			if (!isRampCapable) continue;
-			const slugCands = [pt.slug, String(pt.slug).replace(/^anchor-/, "")];
+			// Resolve the project once per partner: the verified projectSlug
+			// join first (covers franklin-templeton→benji, gmo-zcom-trust→gyen
+			// etc., where the strip heuristic fails), heuristic as fallback.
+			const slugCands = [
+				pt.projectSlug,
+				pt.slug,
+				String(pt.slug).replace(/^anchor-/, ""),
+			].filter(Boolean);
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 			let proj: any = null;
 			for (const slug of slugCands) {
@@ -1224,16 +1280,48 @@ async function main() {
 			}
 			if (!proj) continue;
 			const types: string[] = Array.isArray(proj.types) ? proj.types : [];
-			if (types.includes("Anchor") || proj.category === "Anchor") continue;
+			for (const axis of CAP_AXES) {
+				const implied = axis.implied(pt);
+				if (!implied.length) continue;
+				if (axis.coveredByCategory?.(proj.category)) continue;
+				const missing = implied.filter((t) => !types.includes(t));
+				if (!missing.length) continue;
+				candidates++;
+				console.log(
+					`  CANDIDATE [${axis.id}] ${proj.slug}: category=${proj.category} types=[${types.join(", ")}] → add [${missing.join("/")}] ← partner ${pt.slug} (type=${pt.partnerType}, sectors=${(Array.isArray(pt.sectors) ? pt.sectors : []).join("/") || "-"})`,
+				);
+			}
+		}
+
+		// Axis D (project-internal): curated bridge-route evidence without the
+		// Bridge type. No partner-side bridge signal exists (partnerType has no
+		// bridge value; supportedNetworks is project-only) — and multichain ≠
+		// bridge (LOBSTR spans stellar+xrpl and is a Wallet), so this keys on
+		// routes[], never supportedNetworks.
+		// where on an array-index path is adapter-fragile — fetch the field
+		// and JS-filter (the `in` + post-filter discipline from the
+		// contains-substring lesson).
+		const routed = await payload.find({
+			collection: "projects",
+			where: { routes: { exists: true } },
+			limit: 500,
+			depth: 0,
+			overrideAccess: true,
+			select: { slug: true, category: true, types: true, routes: true },
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const proj of routed.docs as any[]) {
+			if (!Array.isArray(proj.routes) || proj.routes.length === 0) continue;
+			const types: string[] = Array.isArray(proj.types) ? proj.types : [];
+			if (types.includes("Bridge")) continue;
 			candidates++;
 			console.log(
-				`  CANDIDATE ${proj.slug}: category=${proj.category} types=[${types.join(", ")}] ← partner ${pt.slug} (type=${pt.partnerType}, ramps=${(pt.rampTypes ?? []).join("/") || "-"})`,
+				`  CANDIDATE [routes] ${proj.slug}: category=${proj.category} types=[${types.join(", ")}] → add [Bridge] ← ${proj.routes.length} curated route(s) on the row itself`,
 			);
 		}
+
 		if (!candidates)
-			console.log(
-				"  (none — all ramp-capable partners' projects carry Anchor)",
-			);
+			console.log("  (none — every capability axis agrees with its project)");
 	}
 
 	// ── finding 27: corridor-country corrections (OVERWRITE, equality-guarded) ──
