@@ -181,6 +181,7 @@ export async function GET() {
 				"/api/analyze",
 				"/api/clusters",
 				"/api/builders",
+				"/api/people",
 				"/api/projects/search",
 				"/api/repos/search",
 				"/api/repos/explain",
