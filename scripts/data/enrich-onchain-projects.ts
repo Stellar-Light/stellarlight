@@ -129,7 +129,7 @@ async function run() {
 	let partnerDerived = 0;
 	try {
 		const partners = await payload.find({
-			collection: "partners",
+			collection: "partner-accounts",
 			limit: 500,
 			depth: 0,
 		});
