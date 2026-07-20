@@ -1,0 +1,29 @@
+# Partner→project identity links (2026-07-20): writes partners.projectSlug
+# from the hand-verified map in scripts/data/link-partner-projects.ts.
+# Dispatch-only; dry-run by default. Activates the partner-asset join in
+# enrich-onchain (verified partner assets flow onto project rows).
+name: Link partner projects
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write (default = dry run)"
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/link-partner-projects.ts ${{ inputs.execute && '--execute' || '' }}
