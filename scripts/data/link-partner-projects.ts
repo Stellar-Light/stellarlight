@@ -79,7 +79,7 @@ async function run() {
 		PARTNER_PROJECT_LINKS,
 	)) {
 		const partner = await payload.find({
-			collection: "partners",
+			collection: "partner-accounts",
 			where: { slug: { equals: partnerSlug } },
 			limit: 1,
 			depth: 0,
@@ -112,7 +112,7 @@ async function run() {
 		);
 		if (execute) {
 			await payload.update({
-				collection: "partners",
+				collection: "partner-accounts",
 				id: (partner.docs[0] as { id: string | number }).id,
 				data: { projectSlug },
 			});
