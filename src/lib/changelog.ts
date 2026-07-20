@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.9",
+		type: "added",
+		summary:
+			"Full row schemas documented for builders, people, rfps, hackathons, skills, clusters, and leaderboard — every list endpoint's item shape is now a named component, guarded by the daily live⊆spec field-coverage check.",
+		detail:
+			"Previously only Project/Partner/Audit/ResearchResult rows had documented shapes; the other seven list operations served rows the spec typed as bare objects (the anchorProfile under-documentation class, unguarded on 7 of ~10 shapes). New components: Builder (incl. match/codeEvidence provenance semantics), Person, Rfp (rowType discriminator), Hackathon (absent prizePoolUSD/hackersCount = unknown, never zero), Skill (absent optional fields = not-applicable, never false), Cluster (size is a taxonomy count, not a competitor count), LeaderboardProject (github.* numbers are as-of meta.dataAsOf). Also documented: the /api/rfps top-level `funding` string and the /api/leaderboard `ecosystem` Electric-Capital block. No serving behavior changed — this is documentation of existing responses, now drift-guarded.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.8",
 		type: "added",
 		summary:

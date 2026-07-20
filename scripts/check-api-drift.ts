@@ -259,6 +259,48 @@ async function main() {
 			listKey: "results",
 			component: "ResearchResult",
 		},
+		{
+			name: "builders row",
+			path: "/api/builders?q=soroban&limit=3",
+			listKey: "builders",
+			component: "Builder",
+		},
+		{
+			name: "people row",
+			path: "/api/people?limit=3",
+			listKey: "people",
+			component: "Person",
+		},
+		{
+			name: "rfps row",
+			path: "/api/rfps",
+			listKey: "rfps",
+			component: "Rfp",
+		},
+		{
+			name: "hackathons row",
+			path: "/api/hackathons",
+			listKey: "hackathons",
+			component: "Hackathon",
+		},
+		{
+			name: "skills row",
+			path: "/api/skills",
+			listKey: "skills",
+			component: "Skill",
+		},
+		{
+			name: "clusters row",
+			path: "/api/clusters?dimension=types",
+			listKey: "clusters",
+			component: "Cluster",
+		},
+		{
+			name: "leaderboard row",
+			path: "/api/leaderboard?limit=3",
+			listKey: "projects",
+			component: "LeaderboardProject",
+		},
 	];
 	for (const fc of fieldCoverage) {
 		try {

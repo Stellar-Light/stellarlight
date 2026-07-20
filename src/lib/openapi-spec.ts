@@ -1011,76 +1011,7 @@ export const spec: OpenAPISpec = {
 										},
 										builders: {
 											type: "array",
-											items: {
-												type: "object",
-												description:
-													"A builder profile row. When the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance (sls-041).",
-												properties: {
-													match: {
-														type: "object",
-														nullable: true,
-														description:
-															"WHY this row matched (null without a q/skill filter). Free-text profile evidence — treat bio/role text as claims, not verified experience.",
-														properties: {
-															matchedFields: {
-																type: "array",
-																items: { type: "string" },
-																description:
-																	"Profile fields the query hit (bio, roleTitle, displayName, githubUsername, location, projects).",
-															},
-															matchedProjects: {
-																type: "array",
-																items: {
-																	type: "object",
-																	properties: {
-																		name: { type: "string" },
-																		slug: {
-																			type: "string",
-																			nullable: true,
-																		},
-																	},
-																},
-																description:
-																	"Projects whose name/description matched the query.",
-															},
-															matchedTerms: {
-																type: "object",
-																additionalProperties: { type: "string" },
-																description:
-																	"Per query token, the literal term that hit — a token can match via a synonym (e.g. 'payments' via 'remittance').",
-															},
-															basis: {
-																type: "string",
-																enum: ["profile-text"],
-															},
-														},
-													},
-													codeEvidence: {
-														type: "array",
-														nullable: true,
-														description:
-															"Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
-														items: {
-															type: "object",
-															properties: {
-																fullName: { type: "string" },
-																url: { type: "string", nullable: true },
-																primaryLanguage: {
-																	type: "string",
-																	nullable: true,
-																},
-																stars: { type: "integer" },
-																lastCommitAt: {
-																	type: "string",
-																	format: "date-time",
-																	nullable: true,
-																},
-																repoScore: { type: "number" },
-															},
-														},
-													},
-												},
-											},
+											items: { $ref: "#/components/schemas/Builder" },
 										},
 									},
 								},
@@ -1195,31 +1126,7 @@ export const spec: OpenAPISpec = {
 										},
 										people: {
 											type: "array",
-											items: {
-												type: "object",
-												description:
-													"One roster entry: person, current role, section, and affiliation.",
-												properties: {
-													name: { type: "string" },
-													role: {
-														type: "string",
-														description:
-															"Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'.",
-													},
-													section: {
-														type: "string",
-														description:
-															"Roster section: 'Leadership' | 'Board of directors' | 'Advisors'.",
-													},
-													org: {
-														type: "string",
-														description:
-															"Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none.",
-													},
-													sourceUrl: { type: "string" },
-													observedAt: { type: "string" },
-												},
-											},
+											items: { $ref: "#/components/schemas/Person" },
 										},
 									},
 								},
@@ -1737,24 +1644,12 @@ export const spec: OpenAPISpec = {
 										},
 										rfps: {
 											type: "array",
-											items: {
-												type: "object",
-												description:
-													"An RFP row. rowType discriminates real briefs from the synthetic live-round row (sls-045).",
-												properties: {
-													rowType: {
-														type: "string",
-														enum: ["rfp", "scf-round"],
-														description:
-															"'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs — count/render briefs by filtering rowType === 'rfp'.",
-													},
-													synthetic: {
-														type: "boolean",
-														description:
-															"True only on synthetic scf-round rows — mirror of rowType.",
-													},
-												},
-											},
+											items: { $ref: "#/components/schemas/Rfp" },
+										},
+										funding: {
+											type: "string",
+											description:
+												"Funding-context sentence for the whole list: winners of OPEN RFPs are eligible for SCF grant funding in the current round; closed RFPs are past rounds, surfaced for context but no longer fundable.",
 										},
 									},
 								},
@@ -2167,7 +2062,20 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Skills catalog",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { $ref: "#/components/schemas/Meta" },
+										skills: {
+											type: "array",
+											items: { $ref: "#/components/schemas/Skill" },
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2312,7 +2220,10 @@ export const spec: OpenAPISpec = {
 												},
 											},
 										},
-										clusters: { type: "array", items: { type: "object" } },
+										clusters: {
+											type: "array",
+											items: { $ref: "#/components/schemas/Cluster" },
+										},
 									},
 								},
 							},
@@ -2666,8 +2577,47 @@ export const spec: OpenAPISpec = {
 												},
 											},
 										},
-										ecosystem: { type: "object" },
-										projects: { type: "array", items: { type: "object" } },
+										ecosystem: {
+											type: "object",
+											description:
+												"Electric Capital Developer Report snapshot — ecosystem-wide developer activity. Dated numbers: always cite asOf (they are NOT live). stellarOnlyDevs28d + multichainDevs28d sum to activeDevs28d; fullTimeDevs + partTimeDevs + oneTimeDevs is the same 28-day-active population split by EC tenure class.",
+											properties: {
+												asOf: {
+													type: "string",
+													format: "date",
+													description:
+														"Snapshot date of the EC dataset every number below is as-of.",
+												},
+												activeDevs28d: {
+													type: "integer",
+													description:
+														"Developers with commit activity in the trailing 28 days.",
+												},
+												stellarOnlyDevs28d: {
+													type: "integer",
+													description:
+														"28-day active devs committing ONLY in the Stellar ecosystem.",
+												},
+												multichainDevs28d: {
+													type: "integer",
+													description:
+														"28-day active devs also active in other ecosystems.",
+												},
+												commits28d: {
+													type: "integer",
+													description: "Total commits in the trailing 28 days.",
+												},
+												fullTimeDevs: { type: "integer" },
+												partTimeDevs: { type: "integer" },
+												oneTimeDevs: { type: "integer" },
+											},
+										},
+										projects: {
+											type: "array",
+											items: {
+												$ref: "#/components/schemas/LeaderboardProject",
+											},
+										},
 									},
 								},
 							},
@@ -3578,7 +3528,10 @@ export const spec: OpenAPISpec = {
 							},
 						],
 					},
-					hackathons: { type: "array", items: { type: "object" } },
+					hackathons: {
+						type: "array",
+						items: { $ref: "#/components/schemas/Hackathon" },
+					},
 				},
 			},
 			HackathonDetailResponse: {
@@ -3771,6 +3724,486 @@ export const spec: OpenAPISpec = {
 					repos: {
 						type: "array",
 						items: { $ref: "#/components/schemas/Repo" },
+					},
+				},
+			},
+			Builder: {
+				type: "object",
+				description:
+					"A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance (sls-041). Nullable profile fields are null (or empty-string) when unset — never a negative claim.",
+				properties: {
+					githubUsername: {
+						type: "string",
+						description:
+							"Natural key; also the stellarlight.xyz/builders/{githubUsername} page slug.",
+					},
+					displayName: {
+						type: "string",
+						description:
+							"Display name; falls back to githubUsername when unset.",
+					},
+					bio: { type: "string", nullable: true },
+					roleTitle: { type: "string", nullable: true },
+					location: {
+						type: "string",
+						nullable: true,
+						description:
+							"Free-text location as entered (e.g. 'Rio de Janeiro, RJ, Brasil') — the ?location= filter substring-matches this.",
+					},
+					websiteUrl: { type: "string", nullable: true },
+					twitterHandle: {
+						type: "string",
+						nullable: true,
+						description:
+							"As entered by the builder — can be a bare handle OR a full profile URL; normalize before constructing links.",
+					},
+					avatarUrl: { type: "string", nullable: true },
+					isFeatured: { type: "boolean" },
+					projectCount: {
+						type: "integer",
+						description:
+							"Length of `projects` — the builder's own synced entries, not an ecosystem-wide attribution count.",
+					},
+					projects: {
+						type: "array",
+						description:
+							"Projects synced from the builder's Stellar Passport profile. Raw sync rows: keys are snake_case, and extra passthrough fields (id, website_url, demo_url, docs_url, contract_address, repos, heatmap…) may ride along.",
+						items: {
+							type: "object",
+							properties: {
+								name: { type: "string" },
+								slug: { type: "string" },
+								short_description: { type: "string" },
+								status: { type: "string" },
+							},
+							additionalProperties: true,
+						},
+					},
+					url: {
+						type: "string",
+						format: "uri",
+						description: "Canonical builder profile page on stellarlight.xyz.",
+					},
+					match: {
+						type: "object",
+						nullable: true,
+						description:
+							"WHY this row matched (null without a q/skill filter). Free-text profile evidence — treat bio/role text as claims, not verified experience.",
+						properties: {
+							matchedFields: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Profile fields the query hit (bio, roleTitle, displayName, githubUsername, location, projects).",
+							},
+							matchedProjects: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										name: { type: "string" },
+										slug: { type: "string", nullable: true },
+									},
+								},
+								description:
+									"Projects whose name/description matched the query.",
+							},
+							matchedTerms: {
+								type: "object",
+								additionalProperties: { type: "string" },
+								description:
+									"Per query token, the literal term that hit — a token can match via a synonym (e.g. 'payments' via 'remittance').",
+							},
+							basis: {
+								type: "string",
+								enum: ["profile-text"],
+							},
+						},
+					},
+					codeEvidence: {
+						type: "array",
+						nullable: true,
+						description:
+							"Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+						items: {
+							type: "object",
+							properties: {
+								fullName: { type: "string" },
+								url: { type: "string", nullable: true },
+								primaryLanguage: { type: "string", nullable: true },
+								stars: { type: "integer" },
+								lastCommitAt: {
+									type: "string",
+									format: "date-time",
+									nullable: true,
+								},
+								repoScore: { type: "number" },
+							},
+						},
+					},
+				},
+			},
+			Person: {
+				type: "object",
+				description:
+					"One SDF roster entry from /api/people: person, current role, section, and affiliation — quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability.",
+				properties: {
+					name: { type: "string" },
+					role: {
+						type: "string",
+						description:
+							"Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'.",
+					},
+					section: {
+						type: "string",
+						description:
+							"Roster section: 'Leadership' | 'Board of directors' | 'Advisors'.",
+					},
+					org: {
+						type: "string",
+						description:
+							"Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none.",
+					},
+					sourceUrl: { type: "string" },
+					observedAt: {
+						type: "string",
+						description:
+							"Date this entry was last observed from the source (YYYY-MM-DD).",
+					},
+				},
+			},
+			Rfp: {
+				type: "object",
+				description:
+					"An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row (sls-045) — count/render briefs by filtering rowType === 'rfp'.",
+				properties: {
+					id: {
+						type: "string",
+						description:
+							"Brief slug (also the stellarlight.xyz/ideas/{id} page). Synthetic rows use 'scf-round-{n}'.",
+					},
+					title: { type: "string" },
+					description: { type: "string" },
+					technicalRequirements: {
+						type: "string",
+						nullable: true,
+						description:
+							"The sponsor's technical requirements text. Null when the brief carries none — and always null on synthetic scf-round rows.",
+					},
+					category: {
+						type: "string",
+						description:
+							"Category slug — the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row.",
+					},
+					categoryLabel: {
+						type: "string",
+						description: "Display label for category (e.g. 'DeFi').",
+					},
+					authorName: {
+						type: "string",
+						description:
+							"Sponsor/author of the brief; 'Stellar Community Fund' on synthetic rows.",
+					},
+					quarter: {
+						type: "string",
+						description:
+							"Quarter slug (e.g. 'q1-2026') — the ?quarter= filter vocabulary. Synthetic rows carry the active quarter.",
+					},
+					quarterLabel: {
+						type: "string",
+						description:
+							"Display label ('Q1 2026'); 'Live round' on synthetic rows.",
+					},
+					status: {
+						type: "string",
+						enum: ["open", "closed"],
+						description:
+							"'open' = fundable in the current SCF quarter; 'closed' = a prior round, surfaced for context.",
+					},
+					url: {
+						type: "string",
+						format: "uri",
+						description:
+							"Brief page (stellarlight.xyz/ideas/{id}); the SCF awards page on synthetic scf-round rows.",
+					},
+					rowType: {
+						type: "string",
+						enum: ["rfp", "scf-round"],
+						description:
+							"'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs — count/render briefs by filtering rowType === 'rfp'.",
+					},
+					synthetic: {
+						type: "boolean",
+						description:
+							"True only on synthetic scf-round rows — mirror of rowType.",
+					},
+				},
+			},
+			Hackathon: {
+				type: "object",
+				description:
+					"One hackathon event row from /api/hackathons — merged from the curated collection and the live DoraHacks feed (`source` says which). prizePoolUSD/hackersCount are ABSENT when the source publishes none: unknown, never zero.",
+				properties: {
+					id: {
+						type: "string",
+						description:
+							"'dorahacks-{id}' for DoraHacks rows; the curated collection id otherwise.",
+					},
+					name: { type: "string" },
+					slug: {
+						type: "string",
+						description:
+							"Event slug — the key /api/hackathons/{slug} (getHackathon) resolves.",
+					},
+					description: {
+						type: "string",
+						nullable: true,
+						description: "Event description (DoraHacks rows carry markdown).",
+					},
+					startDate: { type: "string", format: "date", nullable: true },
+					endDate: { type: "string", format: "date", nullable: true },
+					status: {
+						type: "string",
+						enum: ["upcoming", "active", "completed"],
+						description:
+							"Derived from start/end vs now for DoraHacks rows; curated rows carry their stored status.",
+					},
+					externalUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The event's own page (the DoraHacks detail page for dorahacks rows). Null when the curated row has none.",
+					},
+					organizer: {
+						type: "object",
+						nullable: true,
+						description:
+							"Organizing org; slug is the ?organizer= filter value. Null when the source names none.",
+						properties: {
+							id: { type: "string" },
+							name: { type: "string" },
+							slug: { type: "string" },
+						},
+					},
+					url: {
+						type: "string",
+						format: "uri",
+						description:
+							"Canonical link: the DoraHacks detail page for dorahacks rows, stellarlight.xyz/hackathons/{slug} for curated rows.",
+					},
+					source: {
+						type: "string",
+						enum: ["curated", "dorahacks"],
+						description:
+							"Which feed served this row — the ?source= filter vocabulary.",
+					},
+					prizePoolUSD: {
+						type: "number",
+						description:
+							"Total prize pool in USD. ABSENT when the source publishes none — unknown, not zero.",
+					},
+					hackersCount: {
+						type: "integer",
+						description:
+							"Registered hackers (DoraHacks). Absent when unknown; individual builder names are not available from the source.",
+					},
+				},
+			},
+			Skill: {
+				type: "object",
+				description:
+					"One installable Stellar AI skill/tool from /api/skills — SDF's skills.stellar.org set, curated entries, and approved community submissions mapped onto one unified shape. Optional fields are OMITTED when not applicable (absent = not applicable, never null and never false).",
+				properties: {
+					slug: {
+						type: "string",
+						description:
+							"Skill slug — resolves via /api/skills/{name} (getSkill).",
+					},
+					name: { type: "string" },
+					tagline: {
+						type: "string",
+						description: "One-line summary. Absent on some rows.",
+					},
+					description: { type: "string" },
+					source: {
+						type: "string",
+						enum: ["sdf", "stellarlight", "lumenloop", "external", "community"],
+					},
+					kind: {
+						type: "string",
+						enum: ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"],
+					},
+					install: {
+						type: "string",
+						description:
+							"Primary install command (e.g. 'npx skills add stellar/{slug}'). Absent when the entry has no one-line install.",
+					},
+					installAlt: {
+						type: "array",
+						description:
+							"Alternate install commands for other agent runtimes — an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies.",
+						items: {
+							type: "object",
+							properties: {
+								label: { type: "string" },
+								command: { type: "string" },
+							},
+						},
+					},
+					repository: {
+						type: "string",
+						description: "Source repository URL. Absent when not published.",
+					},
+					homepage: { type: "string" },
+					docs: {
+						type: "string",
+						description: "Docs URL. Absent on most rows.",
+					},
+					rawUrl: {
+						type: "string",
+						description:
+							"Direct raw SKILL.md URL (SDF skills). Absent elsewhere.",
+					},
+					compatibility: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Agent runtimes the skill is known to work in (e.g. 'Claude Code', 'Codex', 'Cursor').",
+					},
+					targetUser: {
+						type: "array",
+						items: { type: "string" },
+						description: "Intended audience tags (dev, founder, agent).",
+					},
+					tags: { type: "array", items: { type: "string" } },
+					featured: {
+						type: "boolean",
+						description:
+							"Editorially featured. Absent (not false) on most rows.",
+					},
+					userInvocable: {
+						type: "boolean",
+						description:
+							"SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere.",
+					},
+					argumentHint: {
+						type: "string",
+						description:
+							"SDF skills only — argument hint (e.g. '[payment task]'). Absent elsewhere.",
+					},
+				},
+			},
+			Cluster: {
+				type: "object",
+				description:
+					"One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count (sls-035): the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues.",
+				properties: {
+					key: {
+						type: "string",
+						description:
+							"The cluster label — a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'.",
+					},
+					dimension: {
+						type: "string",
+						enum: ["category", "types"],
+						description:
+							"Which taxonomy this cluster was computed over (echoes ?dimension=).",
+					},
+					size: {
+						type: "integer",
+						description:
+							"Projects in the cluster — a taxonomy count (see component description).",
+					},
+					scfFundedCount: {
+						type: "integer",
+						description: "Cluster projects with an SCF award.",
+					},
+					scfTotalUSD: {
+						type: "number",
+						description:
+							"Sum of known SCF award amounts across the cluster — an in-house reconstruction (per-award amounts aren't published for all rounds): comparable across clusters, not an official figure.",
+					},
+					hackathonWinnerCount: {
+						type: "integer",
+						description: "Cluster projects with a top hackathon placement.",
+					},
+					crowdedness: {
+						type: "integer",
+						minimum: 1,
+						maximum: 10,
+						description:
+							"1-10 log-scaled crowding score: round(log2(size+1) + log2(scfFundedCount+1) + 0.5*log2(hackathonWinnerCount+1)), clamped to 1..10 — SCF funding and winners add a modifier, so a well-funded small cluster can outrank a huge unfunded one. Sort descending for 'most crowded', ascending for whitespace.",
+					},
+					sampleProjects: {
+						type: "array",
+						description:
+							"A few showcase projects, sorted by SCF funding + hackathon prize — a SAMPLE of the cluster, not its full membership (enumerate via searchProjects).",
+						items: {
+							type: "object",
+							properties: {
+								name: { type: "string" },
+								slug: { type: "string" },
+								shortDescription: { type: "string", nullable: true },
+								scfAwarded: { type: "boolean" },
+								url: { type: "string", format: "uri" },
+							},
+						},
+					},
+				},
+			},
+			LeaderboardProject: {
+				type: "object",
+				description:
+					"One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS (sls-036).",
+				properties: {
+					rank: {
+						type: "integer",
+						description:
+							"1-based position under THIS response's sort/range/category/type scope — recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters).",
+					},
+					id: { type: "string" },
+					name: { type: "string" },
+					slug: {
+						type: "string",
+						description:
+							"Directory slug — join key to searchProjects for the full profile.",
+					},
+					category: { type: "string" },
+					types: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Granular product-type tags — the same types[] taxonomy as project-search rows, echoed so a consumer can see WHY a row matched a ?type= filter (#524).",
+					},
+					shortDescription: { type: "string", nullable: true },
+					scfAwarded: { type: "boolean" },
+					github: {
+						type: "object",
+						description:
+							"Rollup across the project's INDEXED repos, as-of meta.dataAsOf.",
+						properties: {
+							totalStars: {
+								type: "integer",
+								description: "Sum of stargazer counts across indexed repos.",
+							},
+							openIssuesTotal: {
+								type: "integer",
+								description:
+									"Sum of OPEN issues (EXCLUDES pull requests — will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking.",
+							},
+							lastActivityAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+								description:
+									"Latest default-branch commit (fallback: last push) across indexed repos. Null when no indexed repo has a known date.",
+							},
+							repoCount: {
+								type: "integer",
+								description:
+									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
+							},
+						},
 					},
 				},
 			},
