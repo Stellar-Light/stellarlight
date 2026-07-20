@@ -1,6 +1,6 @@
 # Shared synonym registry
 
-**Projects from:** lessons class 5 (literal matching). **Status: proposed.**
+**Projects from:** lessons class 5 (literal matching). **Status: SHIPPED 2026-07-20 (#618)** — guard phase (canonical key list + CI coverage) landed #601; phase 2 (the value merge) merged the core vocabulary into all three surfaces (project/repo/builders) via `src/lib/search-vocabulary.ts`, so a vocabulary lesson taught once reaches every surface.
 
 **What:** one vocabulary module (core chain/vertical/region synonyms) with per-surface extensions, consumed by all four search surfaces.
 

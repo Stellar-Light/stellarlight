@@ -15,11 +15,11 @@ Two provenance streams feed this folder:
 - ~~Semantic / code-content indexing~~ — **shipped 2026-07-08** as `codeVerified.symbols` (search matches pub fn/type names).
 
 ### Retrieval quality
-- **[Shared synonym registry](./shared-synonym-registry.md)** — guard phase **shipped 2026-07-19 (#601)** (canonical key list + 27 CI coverage tests); phase 2 (value merge) open.
+- ~~[Shared synonym registry](./shared-synonym-registry.md)~~ — **shipped 2026-07-20**: guard phase (#601) + phase 2 value merge (#618) — one core vocabulary in `search-vocabulary.ts`, consumed by all three search surfaces.
 - **Hybrid lexical+vector research retrieval** — "fastest cheapest way to move assets from Ethereum to Stellar" retrieves payments dev-docs, not bridge routes: the answer exists but embeddings never fetch it (class 19 residual). Union lexical matches into the vector pool before ranking. Aligns with raven#12's atlas+lexical+semantic direction — coordinate, don't pre-build. *(Projects from: class 19)*
 - **Research ingest title/dedupe hygiene** — meeting-notes chunks surface under nav/date titles ("11 posts tagged with …", "2024-08-23") and the same content appears under multiple URLs (tag page + canonical page), which per-URL dedupe can't collapse. Fix at ingest: title from page h1, skip tag-aggregation URLs, content-hash dedupe. Golden eval counts BAD-TITLE 11 today. *(Projects from: classes 10/19)*
 - **[Capability-mismatch sweep](./capability-mismatch-sweep.md)** — generalize the dual-identity sweep beyond ramps (class 14; `audd` is the open candidate).
-- **[Mention-vs-identity for repo search](./mention-vs-identity-repo-search.md)** — port the 2026-07-19 project-search identity fix (#590/#592) to repos. *(Projects from: the custody re-measure)*
+- ~~[Mention-vs-identity for repo search](./mention-vs-identity-repo-search.md)~~ — **shipped 2026-07-20 (#621)**: identityZone + identity-over-mention sort key + candidate-pool admission ported to repo search, so a repo that IS the thing outranks one that merely mentions it. *(Projects from: the custody re-measure)*
 - **Fee-transparency axis** — structured `feeBps` + `asOf` on ramp corridors so "ranked by fee" is answerable (raven#8 / Raph; class 1). Needs grounded doc-crawling per provider.
 
 ### Data honesty / guards
@@ -30,9 +30,9 @@ Two provenance streams feed this folder:
 - ~~On-chain metrics~~ — **shipped 2026-07-20 (#608–#615)**: verified contract/asset registry + stellar.expert enrichment + weekly snapshot deltas + partner-asset join, served on searchProjects rows. Tx-volumes/active-addresses per-project still open in [the idea](./onchain-metrics.md).
 - **[Feedback → quality loop](./feedback-quality-loop.md)** — `success_rate` from the existing feedback intake into `confidence` (the one self-improving axis we lack).
 - **[Research-doc freshness + SDK-version tagging](./research-doc-freshness.md)** — per-doc `lastVerifiedAt` + version-status on tutorials/setup guides (classes 8/18, Beacon Q2).
-- ~~Field coverage on every endpoint~~ — **audits + research rows shipped 2026-07-19 (#594)** and caught two missing-CORS-header bugs pre-merge the same day; remaining row shapes (builders/rfps/hackathons/skills) still open in [the idea](./field-coverage-all-endpoints.md).
+- ~~Field coverage on every endpoint~~ — **fully shipped 2026-07-20**: audits + research rows (#594, caught two missing-CORS-header bugs pre-merge) + the remaining seven shapes (builders/people/rfps/hackathons/skills/clusters/leaderboard) got named component schemas + live-⊆-spec guards (#620, openapi@1.8.9). Every list op is guarded — see [the idea](./field-coverage-all-endpoints.md).
 - ~~Skill-mirror freshness guard~~ — **shipped 2026-07-19 (#594)**: daily self-audit lane, 3 files hash-compared.
-- **Slug-join identity cross-check** — partner→project joins match by slug with no entity verification (review 2026-07-08 #21); the Spectra near-miss proved the class live (class 21). Add a domain/website cross-check to the join before the next curation wave adds partners.
+- ~~Slug-join identity cross-check~~ — **shipped 2026-07-20 (#619)**: registrable-domain (eTLD+1) cross-check over the 42 partner→project links, with a reviewed allowlist for legitimately-different pairs and a self-audit lane; the pass also caught the boss-pay hijacked-domain case. *(class 21, the Spectra near-miss)*
 
 ### Agent contract
 - **Field selection** (`?fields=`) and **webhooks** (`POST /api/subscribe`) — let agents ask for only what they need / get pushed changes instead of polling.

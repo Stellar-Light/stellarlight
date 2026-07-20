@@ -1,6 +1,6 @@
 # Mention-vs-identity for repo search
 
-**Projects from:** the 2026-07-19 custody fix on PROJECT search (#590/#592) applied forward. **Status: proposed.**
+**Projects from:** the 2026-07-19 custody fix on PROJECT search (#590/#592) applied forward. **Status: SHIPPED 2026-07-20 (#621)** — ported `identityZone` + the identity-over-mention sort key + candidate-pool admission to repo-search.ts; regression-guarded with mock-payload rank tests.
 
 **What:** the same class exists on repos: a repo whose README merely MENTIONS an anchor noun outranks the repo that IS the thing when the latter misses a secondary token. Port `identityZone` (name/topics/description-lead) + the identity-over-mention sort key + under-fill admission to repo-search.ts.
 
