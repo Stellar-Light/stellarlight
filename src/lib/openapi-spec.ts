@@ -250,6 +250,8 @@ export const spec: OpenAPISpec = {
 						"directory",
 						"market map",
 						"on-chain activity",
+						"public goods",
+						"public goods award",
 						"onchain metrics",
 						"contract events",
 						"contract invocations",
@@ -3314,6 +3316,15 @@ export const spec: OpenAPISpec = {
 						type: ["object", "null"],
 						description:
 							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). assetHolders = funded trustlines; assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, with prevAsOf + deltaDays defining the window — null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload.",
+					},
+					publicGoods: {
+						type: ["object", "null"],
+						description:
+							"SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4 \u2014 CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source \u2014 NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable.",
+						properties: {
+							awardRounds: { type: "array", items: { type: "string" } },
+							evidenceUrl: { type: ["string", "null"] },
+						},
 					},
 					audits: {
 						type: ["object", "null"],

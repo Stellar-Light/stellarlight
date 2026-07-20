@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-20",
 		surfaces: ["api"],
+		version: "openapi@1.8.14",
+		type: "added",
+		summary:
+			"SCF Public Goods Award as structured truth: searchProjects rows carry publicGoods {awardRounds, evidenceUrl} for CSV-confirmed recipients, and 'public goods' queries reach them via structured inclusion.",
+		detail:
+			"Asked in the ecosystem today ('do we have an eval for public goods projects? they're not really indexed in the stellar docs') — they're not in the docs because they live in the directory, but 'public goods' wasn't a structured concept anywhere. Now: 10 CSV-confirmed recipients (pg-atlas-frontend Airtable exports, Status=Awarded) carry publicGoods.awardRounds + evidence; the award itself drives keyword INCLUSION (recipients' prose rarely says 'public goods'); null = not a confirmed recipient at our source, never 'not a public good'. Deliberately excluded: merged-proposal inference (rejected proposals merge too) and Q2'26 outcomes (on Tansu, unreadable via REST). A golden-eval question now guards the recall.",
+	},
+	{
+		date: "2026-07-20",
+		surfaces: ["api"],
 		version: "openapi@1.8.13",
 		type: "fixed",
 		summary:
