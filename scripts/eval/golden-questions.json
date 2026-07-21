@@ -551,9 +551,9 @@
 			"limit": 3,
 			"expect": {
 				"liveSource": false,
-				"answerRegex": ["cobo"]
+				"answerRegex": ["cobo|bitgo|dfns|mpcvault|fordefi"]
 			},
-			"$comment": "Mention-vs-identity (2026-07-19): the custody provider must rank in the top 3 above records that merely mention custody mid-prose plus a secondary token."
+			"$comment": "Mention-vs-identity (2026-07-19; key re-grounded 2026-07-21): 'staking' is deliberate noise — a custody-IDENTITY record must rank top-3 above records that merely mention custody mid-prose. Key = any custody-identity record in the directory (cobo was the lone one on 07-19; dfns/bitgo/mpcvault/fordefi are now equally correct — none carries 'staking', by design)."
 		},
 		{
 			"id": "pg-award-recipients",

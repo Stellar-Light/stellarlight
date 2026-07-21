@@ -214,25 +214,36 @@ export function getGuardRows(): GuardRow[] {
 	}
 
 	// Golden retrieval eval — correctness against a ground-truth answer key.
+	// N/A = liveSource questions the static corpus is NOT meant to answer;
+	// run-golden excludes them from scoring and so does this row (counting
+	// them as failures was the same rows-only grader bug the consumer report
+	// had — read the eval's own semantics, don't re-grade them).
 	{
 		const graded = goldenEval.graded as Array<{ status: string }>;
-		const passed = graded.filter((g) => g.status === "PASS").length;
+		const scored = graded.filter((g) => g.status !== "N/A");
+		const na = graded.length - scored.length;
+		const passed = scored.filter((g) => g.status === "PASS").length;
 		rows.push({
 			key: "golden-eval",
 			title: "Golden retrieval eval",
 			promise:
 				"Known-true questions (answer key derived from the canonical directory) keep passing after every ship.",
-			value: `${passed}/${graded.length}`,
-			sub: "golden questions passing",
+			value: `${passed}/${scored.length}`,
+			sub: "golden questions passing (scored)",
 			details: [
-				passed === graded.length
+				passed === scored.length
 					? "full pass"
-					: `${graded.length - passed} failing — each names its expected evidence`,
+					: `${scored.length - passed} failing — each names its expected evidence`,
+				...(na > 0
+					? [
+							`${na} N/A by design (live-source questions the static corpus doesn't answer)`,
+						]
+					: []),
 				"re-run on every production deploy + weekly",
 			],
 			asOf: "latest weekly run",
 			artifact: "improvements/engine/weekly/golden-eval-latest.json",
-			ok: passed === graded.length,
+			ok: passed === scored.length,
 		});
 	}
 
