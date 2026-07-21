@@ -372,6 +372,24 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 	it("off-vertical queries stay untouched", () => {
 		expect(flagshipsFor("zk proofs")).toEqual([]);
 	});
+
+	// Query-aware order within the float (2026-07-21 persona battery): the
+	// curated order is the default for the bare vertical noun, but a query
+	// naming a specific flagship's own identity puts that flagship first.
+	it("bare vertical noun keeps the curated order (freighter leads)", () => {
+		expect(flagshipsFor("wallet")[0]).toBe("stellar/freighter");
+	});
+	it("a query naming a flagship's identity floats that flagship first", () => {
+		expect(flagshipsFor("passkey smart wallet kit")[0]).toBe(
+			"kalepail/passkey-kit",
+		);
+		expect(flagshipsFor("xbull wallet")[0]).toBe("creit-tech/xbull-wallet");
+	});
+	it("identity tokens absent → curated order holds on the tie", () => {
+		expect(flagshipsFor("anchor integration")[0]).toBe(
+			"stellar/anchor-platform",
+		);
+	});
 });
 
 // ── Mention-vs-identity (#590/#592 port) ────────────────────────────────

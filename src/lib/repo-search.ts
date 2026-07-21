@@ -789,11 +789,34 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 export function flagshipsFor(q: string): string[] {
 	const hay = wordy(q);
 	const out: string[] = [];
+	const firedTests: RegExp[] = [];
 	for (const v of VERTICAL_FLAGSHIPS) {
-		if (v.test.test(hay))
+		if (v.test.test(hay)) {
+			firedTests.push(v.test);
 			for (const r of v.repos) if (!out.includes(r)) out.push(r);
+		}
 	}
-	return out;
+	if (out.length < 2) return out;
+	// Query-aware order within the float (2026-07-21 persona battery):
+	// "passkey smart wallet kit" floated freighter/xbull ABOVE passkey-kit.
+	// The seeded order is the right default for the bare vertical noun
+	// ("wallet" → freighter leads), but when the query names a specific
+	// flagship's own identity, the named flagship must lead. Count query
+	// tokens hitting the repo's name — ignoring tokens the firing vertical
+	// regex itself matches (the vertical nouns flagships notoriously don't
+	// carry) — and stable-sort so curated order holds on ties.
+	const qTokens = contentTokens(q).filter(
+		(t) => !firedTests.some((re) => re.test(t)),
+	);
+	if (!qTokens.length) return out;
+	const nameHits = (fn: string): number => {
+		const name = fn.toLowerCase();
+		return qTokens.filter((t) => name.includes(t)).length;
+	};
+	return out
+		.map((fn, i) => ({ fn, i, hits: nameHits(fn) }))
+		.sort((a, b) => b.hits - a.hits || a.i - b.i)
+		.map((x) => x.fn);
 }
 
 /** What a search actually looked for — served on zero-result responses so an
