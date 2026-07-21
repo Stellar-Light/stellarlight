@@ -1,6 +1,6 @@
 # Idea: quality-as-product (the "Scale model") — design brief
 
-**Status: proposed** (experiment `scale-model-quality-products` on /experiments). Boxy 2026-07-10: plan around it, don't pivot to it. This brief is the parking spot so the design survives between sessions.
+**Status: step 1 SHIPPED 2026-07-21 (#646), pending review.** `/quality` (hidden: noindex, unlinked, off-sitemap) renders committed artifacts only via `src/lib/quality-artifacts.ts`; `DATA_SLA.md` + `docs/interlock-spec.md` live. Deliverable 2 tooling (per-consumer report generator + monthly workflow) followed same-day. Graduation gate unchanged: boxy review → flip-on (nav link + drop noindex + sitemap). Original framing (2026-07-10, "plan around it, don't pivot") below, kept for context.
 
 ## The thesis
 
