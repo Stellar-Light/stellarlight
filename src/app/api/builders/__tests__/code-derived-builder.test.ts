@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { codeDerivedBuilderRow, isHandleQuery } from "../route";
+import {
+	codeDerivedBuilderRow,
+	isHandleQuery,
+} from "@/lib/builder-code-derived";
 
 describe("isHandleQuery (P2 code-derived-builder gate)", () => {
 	it("accepts login-shaped handles", () => {
