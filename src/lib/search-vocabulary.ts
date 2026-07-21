@@ -74,6 +74,18 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	// conditional-payment vocabulary — the canonical audited escrow platform's
 	// repo name doesn't contain the word.
 	escrow: ["escrow", "milestone", "milestones", "conditional payment"],
+	// Real-demand fixes (2026-07-21 Raven battery / consumer report):
+	// "is blend audited?" tokenizes to [blend, audited] and records carry
+	// "audit(s)" — the suffixed forms must reach the stem or the subject
+	// record loses strict AND to prose-mentioners.
+	audited: ["audited", "audit", "audits"],
+	auditor: ["auditor", "audit", "audits"],
+	auditors: ["auditors", "auditor", "audit", "audits"],
+	// "strupey" = misspelled STROOPY, the former Stellar mascot (17 real asks
+	// in 30 days) — route both to "stroop", the official unit named after it
+	// (dev-docs Fees + Glossary hold the grounded content).
+	stroopy: ["stroopy", "stroop"],
+	strupey: ["strupey", "stroopy", "stroop"],
 	oracle: [
 		"oracle",
 		"price feed",

@@ -468,14 +468,24 @@ export function contentTokens(q: string): string[] {
 	// (release_escrow → "release escrow") but a query token kept its raw form,
 	// so the most literal lookup the symbols feature advertises
 	// (q=release_escrow, q=EscrowContract) could never match. snake_case and
-	// camelCase become separate tokens ("release_escrow" → [release, escrow]);
-	// hyphenated terms ("on-ramp") are untouched.
+	// camelCase become separate tokens ("release_escrow" → [release, escrow]).
+	//
+	// Hyphens split the same way (real-demand fix 2026-07-21: q=zk-snark had
+	// 22 asks and matched NOTHING while q="zk snark" returned 5 repos; same
+	// class hit q=passkey-kit on projects). The hyphenated form additionally
+	// survives as a token so vocabulary keyed on it ("on-ramp") still hits,
+	// and project search's joined-form logic ("zksnark") is unaffected.
+	const hyphenated = q
+		.toLowerCase()
+		.split(/\s+/)
+		.filter((t) => t.includes("-") && t.length > 1);
 	const raw = q
-		.replace(/_/g, " ")
+		.replace(/[_-]/g, " ")
 		.replace(/([a-z])([A-Z])/g, "$1 $2")
 		.toLowerCase()
 		.split(/\s+/)
 		.filter((t) => t.length > 1);
+	raw.push(...hyphenated);
 	const content = raw.filter((t) => !STOPWORDS.has(t));
 	return content.length ? content : raw;
 }

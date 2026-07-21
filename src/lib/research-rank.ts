@@ -439,6 +439,27 @@ export const RESEARCH_ANCHORS: Array<{
 	urls: string[];
 }> = [
 	{
+		// Golden latest-protocol-release residual (2026-07-21): "latest soroban
+		// release" pulled sdk point-releases + roundups; the family cap freed
+		// slots but the actual protocol upgrade guide never entered the pool —
+		// its title carries neither "soroban" nor "release". Anchor the current
+		// protocol docs for release-currency intent so the flagship answer is
+		// guaranteed into the page. Update urls[] when the NEXT protocol's
+		// upgrade guide publishes (the corpus refresh ingests it; this list is
+		// the routing pin).
+		id: "protocol-release-currency",
+		intent: /\b(?:latest|newest|current|recent)\b/i,
+		context: /\breleas(?:e|es|ed)\b|\bupgrade\b|\bprotocol\s*version\b/i,
+		urls: [
+			// Verified in-corpus 2026-07-21 (title: "Stellar Zipper, Protocol 27
+			// Upgrade Guide", published 2026-06-04).
+			"https://stellar.org/blog/foundation-news/stellar-zipper-protocol-27-upgrade-guide",
+			// Verified in-corpus 2026-07-21: the always-current software/protocol
+			// versions matrix (lastmod-dated dev-docs page).
+			"https://developers.stellar.org/docs/networks/software-versions",
+		],
+	},
+	{
 		id: "bridge-assets",
 		intent: /\bbridg(?:e|es|ing)\b|\bcross[\s-]?chain\b/i,
 		context:

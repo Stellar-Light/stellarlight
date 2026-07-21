@@ -503,3 +503,29 @@ describe("mention-vs-identity ranking", () => {
 		expect(repos[0].fullName).toBe("team/milestone-pay");
 	});
 });
+
+describe("contentTokens hyphen split (real-demand 2026-07-21: zk-snark 22 asks)", () => {
+	it("splits hyphenated queries into fragments AND keeps the hyphenated form", async () => {
+		const { contentTokens } = await import("../repo-search");
+		const toks = contentTokens("zk-snark");
+		expect(toks).toContain("zk");
+		expect(toks).toContain("snark");
+		expect(toks).toContain("zk-snark"); // hyphen-keyed vocabulary still hits
+	});
+
+	it("finds a repo whose text carries the space-separated form for a hyphenated query", async () => {
+		const docs = [
+			doc({
+				fullName: "zkorg/zk-proofs",
+				description: "zk snark proving system for Soroban",
+				codeScanState: "scanned",
+				stellarProof: "cargo-sdk",
+			}),
+			doc({ fullName: "x/unrelated", description: "wallet sdk" }),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), "zk-snark", {
+			limit: 5,
+		});
+		expect(repos.map((r) => r.fullName)).toContain("zkorg/zk-proofs");
+	});
+});

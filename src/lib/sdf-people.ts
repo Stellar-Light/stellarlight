@@ -64,8 +64,18 @@ export function sectionsAvailable(): string[] {
 	return seen;
 }
 
+/**
+ * Accent-fold for name matching (real-demand fix 2026-07-21): the roster
+ * stores "David Mazières" but consumers type "mazieres" — 3 real asks hit
+ * EMPTY while the accented form matched. Fold BOTH sides (NFD strip) so
+ * either spelling resolves.
+ */
+function fold(s: string): string {
+	return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
 function tokens(q: string): string[] {
-	return q.toLowerCase().split(/\s+/).filter(Boolean);
+	return fold(q).split(/\s+/).filter(Boolean);
 }
 
 /**
@@ -85,7 +95,7 @@ export function searchPeople(
 	const toks = q ? tokens(q) : [];
 	if (toks.length) {
 		rows = rows.filter((p) => {
-			const hay = `${p.name} ${p.role} ${p.org}`.toLowerCase();
+			const hay = fold(`${p.name} ${p.role} ${p.org}`);
 			return toks.every((t) => hay.includes(t));
 		});
 	}
@@ -111,7 +121,7 @@ export function findPeopleByName(name: string): PersonResult[] {
 	const out: PersonResult[] = [];
 	const seen = new Set<string>();
 	for (const p of SDF_PEOPLE) {
-		const n = p.name.toLowerCase();
+		const n = fold(p.name);
 		if (toks.every((t) => n.includes(t)) && !seen.has(p.name)) {
 			seen.add(p.name);
 			out.push(decorate(p));
