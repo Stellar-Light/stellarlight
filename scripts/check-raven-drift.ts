@@ -5,9 +5,15 @@
  * This one asserts the #1 consumer's DISCOVERY INDEX agrees with our contract:
  * Raven's codemode catalog is built from our OpenAPI text (the spec IS the
  * discovery index), so an op missing there is a whole capability Raven cannot
- * route to — invisible in our own CI. First confirmed catch: listAudits +
- * getPeople (added openapi@1.8.0/1.8.3) absent from the catalog 12 days later
- * → kalepail/stellar-raven#38.
+ * route to — invisible in our own CI.
+ *
+ * CADENCE, NOT DEFECT: the consumer re-baselines on their own schedule, and
+ * their daily drift CI already detects our additions — an op we shipped days
+ * ago being absent is EXPECTED lag, not drift (lesson from over-filing
+ * kalepail/stellar-raven#38 for a 2-day lag; closed as noise). So a missing op
+ * younger than RAVEN_DRIFT_GRACE_DAYS (default 10, dated via /api/changelog)
+ * only WARNS; it FAILS when it outlives the grace window or can't be dated
+ * (i.e. it's old and should have been absorbed long ago).
  *
  *   RAVEN_MCP_URL=https://agents.stellar.buzz/mcp \
  *   RAVEN_MCP_TOKEN=<token> \
@@ -23,6 +29,8 @@
 const SCOUT_BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 const MCP_URL = process.env.RAVEN_MCP_URL || "";
 const MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || "";
+// How long a newly-shipped op may stay un-cataloged before lag becomes drift.
+const GRACE_DAYS = Number(process.env.RAVEN_DRIFT_GRACE_DAYS || 10);
 // Cloudflare 1010-blocks some non-browser signatures (python-urllib); a curl
 // UA passes. Keep our name in the string for their logs.
 const UA = "curl/8 stellarlight-raven-drift-guard";
@@ -39,14 +47,65 @@ const CATALOG_EXCLUDED = new Set([
 interface DriftReport {
 	generatedAt: string;
 	specVersion: string;
+	graceDays: number;
 	expectedOps: string[];
 	catalogOps: string[] | null;
+	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
+	/** Absent but recently shipped — expected re-baseline lag, warn only. */
+	laggingInCatalog: { op: string; addedAt: string; ageDays: number }[];
 	extraInCatalog: string[];
 	claimedOpCount: number | null;
 	auditArchetypeRoutesToRegistry: boolean | null;
 	checked: boolean;
 	notes: string[];
+}
+
+/**
+ * Date each op's public introduction from /api/changelog. Entries name either
+ * the operationId ("getPeople") or the path ("New GET /api/audits"), so try
+ * needles most-specific-first and take the EARLIEST entry of the first needle
+ * that matches at all (avoids a parent path pre-dating a newer sub-path op).
+ * Undatable = predates the recent changelog window = old enough that absence
+ * is drift, not lag.
+ */
+async function addedDates(
+	ops: string[],
+	pathByOp: Map<string, string>,
+): Promise<Map<string, string>> {
+	const dated = new Map<string, string>();
+	if (ops.length === 0) return dated;
+	try {
+		const res = await fetch(`${SCOUT_BASE}/api/changelog?limit=100`, {
+			headers: { "User-Agent": UA },
+		});
+		if (!res.ok) return dated;
+		const body = await res.json();
+		const entries: { date?: string; summary?: string; detail?: string }[] =
+			body.entries ?? [];
+		for (const op of ops) {
+			const path = pathByOp.get(op) ?? "";
+			const needles = [
+				op.toLowerCase(),
+				...(path && !path.includes("{") ? [path.toLowerCase()] : []),
+				...(path.includes("{") ? [path.split("{")[0].toLowerCase()] : []),
+			];
+			for (const needle of needles) {
+				let earliest: string | null = null;
+				for (const e of entries) {
+					const text = `${e.summary ?? ""} ${e.detail ?? ""}`.toLowerCase();
+					if (text.includes(needle) && e.date) earliest = e.date; // latest-first → last hit = earliest
+				}
+				if (earliest) {
+					dated.set(op, earliest);
+					break;
+				}
+			}
+		}
+	} catch {
+		// changelog unreachable → treat all as undatable (drift)
+	}
+	return dated;
 }
 
 let rpcId = 0;
@@ -88,23 +147,35 @@ async function rpc(method: string, params?: unknown): Promise<any> {
 	return payload ? JSON.parse(payload) : {};
 }
 
-async function expectedFromSpec(): Promise<{ version: string; ops: string[] }> {
+async function expectedFromSpec(): Promise<{
+	version: string;
+	ops: string[];
+	pathByOp: Map<string, string>;
+}> {
 	const res = await fetch(`${SCOUT_BASE}/api/openapi.json`, {
 		headers: { "User-Agent": UA },
 	});
 	if (!res.ok) throw new Error(`openapi.json → HTTP ${res.status}`);
 	const spec = await res.json();
 	const ops: string[] = [];
-	for (const methods of Object.values(spec.paths ?? {})) {
+	const pathByOp = new Map<string, string>();
+	for (const [path, methods] of Object.entries(spec.paths ?? {})) {
 		for (const op of Object.values(methods as Record<string, unknown>)) {
 			const id =
 				op && typeof op === "object"
 					? (op as { operationId?: string }).operationId
 					: undefined;
-			if (id && !CATALOG_EXCLUDED.has(id)) ops.push(id);
+			if (id && !CATALOG_EXCLUDED.has(id)) {
+				ops.push(id);
+				pathByOp.set(id, path);
+			}
 		}
 	}
-	return { version: String(spec.info?.version ?? "?"), ops: ops.sort() };
+	return {
+		version: String(spec.info?.version ?? "?"),
+		ops: ops.sort(),
+		pathByOp,
+	};
 }
 
 async function catalogOps(): Promise<{
@@ -163,9 +234,11 @@ async function main() {
 	const report: DriftReport = {
 		generatedAt: new Date().toISOString(),
 		specVersion: spec.version,
+		graceDays: GRACE_DAYS,
 		expectedOps: spec.ops,
 		catalogOps: null,
 		missingFromCatalog: [],
+		laggingInCatalog: [],
 		extraInCatalog: [],
 		claimedOpCount: null,
 		auditArchetypeRoutesToRegistry: null,
@@ -184,14 +257,33 @@ async function main() {
 		report.catalogOps = cat.ops;
 		report.claimedOpCount = cat.claimed;
 		report.auditArchetypeRoutesToRegistry = cat.auditRouted;
-		report.missingFromCatalog = spec.ops.filter((o) => !cat.ops.includes(o));
+		const absent = spec.ops.filter((o) => !cat.ops.includes(o));
 		report.extraInCatalog = cat.ops.filter((o) => !spec.ops.includes(o));
+
+		// Split absent ops into expected re-baseline lag vs real drift.
+		const dates = await addedDates(absent, spec.pathByOp);
+		const now = Date.now();
+		for (const op of absent) {
+			const addedAt = dates.get(op);
+			const ageDays = addedAt
+				? Math.floor((now - new Date(addedAt).getTime()) / 86_400_000)
+				: null;
+			if (addedAt && ageDays !== null && ageDays <= GRACE_DAYS) {
+				report.laggingInCatalog.push({ op, addedAt, ageDays });
+			} else {
+				report.missingFromCatalog.push(op);
+			}
+		}
 
 		console.log(
 			`catalog — ${cat.ops.length} scout ops (instructions claim ${cat.claimed ?? "?"})`,
 		);
+		for (const l of report.laggingInCatalog)
+			console.log(
+				`  ⚠ lagging (expected): ${l.op} shipped ${l.ageDays}d ago — awaiting their re-baseline (grace ${GRACE_DAYS}d)`,
+			);
 		for (const m of report.missingFromCatalog)
-			console.log(`  ✗ missing from catalog: ${m}`);
+			console.log(`  ✗ missing beyond grace: ${m}`);
 		for (const e of report.extraInCatalog)
 			console.log(`  ✗ in catalog but not in spec: ${e}`);
 		if (report.auditArchetypeRoutesToRegistry === false)
@@ -200,6 +292,7 @@ async function main() {
 			);
 		if (
 			report.missingFromCatalog.length === 0 &&
+			report.laggingInCatalog.length === 0 &&
 			report.extraInCatalog.length === 0
 		)
 			console.log("  ✓ catalog op list matches the contract");
@@ -213,7 +306,7 @@ async function main() {
 
 	if (report.checked && report.missingFromCatalog.length > 0) {
 		console.log(
-			`\nDRIFT: ${report.missingFromCatalog.length} op(s) invisible to Raven (tracking: kalepail/stellar-raven#38)`,
+			`\nDRIFT: ${report.missingFromCatalog.length} op(s) absent beyond the ${GRACE_DAYS}d grace window — worth a (polite) upstream ping.`,
 		);
 		process.exit(1);
 	}
