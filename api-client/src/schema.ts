@@ -459,7 +459,7 @@ export interface paths {
         };
         /**
          * Cross-event Stellar ecosystem analytics rollup
-         * @description The cross-ecosystem macro rollup — totals no single-event tool answers: hackathon totals, SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), per-category distribution, and the DeFi TVL rollup (DefiLlama-sourced, as-of dated, directory-scoped), and `dimension=gaps` — per-vertical whitespace (which product types are under-built / built-but-unproven / absent) for the 'what should I build?' question. Slice via `dimension=hackathons|categories|funding|tvl|gaps`. Gaps are SUPPLY-side coverage, NOT demand — validate demand before treating a gap as an opportunity.
+         * @description The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers`: hackathon + SCF-funding totals (per-round + Built/Abandoned funnel), per-category distribution, DeFi TVL (DefiLlama, dated), `gaps` (per-vertical whitespace — under-built/unproven/absent, for 'what should I build?'), and `developers` (current Electric Capital monthly-active-dev count + month/year trend, tenure, geography, peer scale). gaps + developers are SUPPLY/commit-side and as-of dated — never demand or a headcount.
          */
         get: operations["analyzeEcosystem"];
         put?: never;
@@ -2264,7 +2264,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Which slice to return */
-                dimension?: "all" | "hackathons" | "categories" | "funding" | "tvl" | "gaps";
+                dimension?: "all" | "hackathons" | "categories" | "funding" | "tvl" | "gaps" | "developers";
             };
             header?: never;
             path?: never;

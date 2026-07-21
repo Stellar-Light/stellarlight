@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.23",
+		type: "added",
+		summary:
+			"analyzeEcosystem dimension=developers answers 'how many active developers build on Stellar?' with the current Electric Capital monthly-active-dev count (total + Stellar-exclusive), month/year trend, tenure, top countries, and peer-chain scale — commit-derived and as-of dated.",
+		detail:
+			"SDF/institution battery: 'how many developers' fell back to stale 2022/2023 EC PDFs in the research corpus even though a fresh EC snapshot (monthly-active devs, refreshed weekly) already lived in the repo with no queryable surface. The new dimension serves it structured and dated — 3,784 MAD (2,566 Stellar-exclusive) as of the snapshot, with vs-30d/90d/1y deltas, full-time/part-time tenure, top countries, and peer-chain MAD for scale. Basis spells out it's Electric Capital commit-derived methodology, not a headcount. Routing/keywords/exampleQuestions updated so agents discover it.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.22",
 		type: "added",
 		summary:

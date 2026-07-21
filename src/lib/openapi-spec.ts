@@ -2274,7 +2274,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"The cross-ecosystem macro rollup — totals no single-event tool answers: hackathon totals, SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), per-category distribution, and the DeFi TVL rollup (DefiLlama-sourced, as-of dated, directory-scoped), and `dimension=gaps` — per-vertical whitespace (which product types are under-built / built-but-unproven / absent) for the 'what should I build?' question. Slice via `dimension=hackathons|categories|funding|tvl|gaps`. Gaps are SUPPLY-side coverage, NOT demand — validate demand before treating a gap as an opportunity.",
+					"The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers`: hackathon + SCF-funding totals (per-round + Built/Abandoned funnel), per-category distribution, DeFi TVL (DefiLlama, dated), `gaps` (per-vertical whitespace — under-built/unproven/absent, for 'what should I build?'), and `developers` (current Electric Capital monthly-active-dev count + month/year trend, tenure, geography, peer scale). gaps + developers are SUPPLY/commit-side and as-of dated — never demand or a headcount.",
 				"x-routing": {
 					purpose:
 						"Ecosystem-wide macro totals: hackathons, SCF funding, category distribution, TVL.",
@@ -2310,6 +2310,16 @@ export const spec: OpenAPISpec = {
 						"opportunity",
 						"which verticals are thin",
 						"no live projects",
+						"how many developers",
+						"active developers",
+						"developer count",
+						"monthly active developers",
+						"developer growth",
+						"developer trend",
+						"full-time developers",
+						"electric capital",
+						"devs building on stellar",
+						"how many devs",
 					],
 					useWhen: [
 						"what's the overall state of Stellar hackathons/grants",
@@ -2318,6 +2328,7 @@ export const spec: OpenAPISpec = {
 						"how many projects get built vs abandoned after hackathons",
 						"total/top DeFi TVL on Stellar (DefiLlama-tracked protocols only — undercounts chain-wide TVL; as-of dated, never an exact to-the-dollar live figure)",
 						"what to build / where the whitespace is: dimension=gaps returns per-vertical coverage + which product types are under-built, built-but-unproven (nothing Live), or absent — SUPPLY-side, not demand",
+						"how many active developers build on Stellar / developer growth or trend / where they are: dimension=developers returns the current Electric Capital monthly-active-dev count (total + Stellar-exclusive), month/year deltas, full-time/part-time tenure, top countries, and peer-chain scale — commit-derived and as-of dated, not a headcount",
 					],
 					notFor: [
 						"per-category project COUNTS / crowdedness (raw distribution) -> getClusters; dimension=gaps is the richer whitespace view (proven/funded/absent)",
@@ -2331,6 +2342,8 @@ export const spec: OpenAPISpec = {
 						"What's the total DeFi TVL on Stellar?",
 						"What should I build on Stellar / where are the gaps?",
 						"Which product verticals have no Live projects yet?",
+						"How many active developers are building on Stellar? (dimension=developers)",
+						"Is Stellar's developer base growing year over year?",
 					],
 				},
 				parameters: [
@@ -2347,6 +2360,7 @@ export const spec: OpenAPISpec = {
 								"funding",
 								"tvl",
 								"gaps",
+								"developers",
 							],
 							default: "all",
 						},
