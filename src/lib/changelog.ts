@@ -33,13 +33,22 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.22",
+		type: "added",
+		summary:
+			"getBuilders by GitHub login now answers for indexed repo owners without a Passport profile: a handle query (e.g. kalepail) that matched no builder but owns indexed Stellar repos returns one CODE-DERIVED row (match.basis 'repo-owner', evidence in codeEvidence).",
+		detail:
+			"P2 from the improvement-loop triage: the builders collection is Stellar-Passport only, so a prolific GitHub contributor whose repos we DO index (kalepail — passkey-kit, kale-sc, smart-account-kit) returned a bare 0, and a single-token login didn't even trip the person-lookup steer. Now, only when Passport profiles matched none AND the query is handle-shaped (one login-charset token, not a skill/vocabulary term) AND it EXACTLY matches an indexed repo owner, we synthesize one builder row from repo OWNERSHIP: bio/roleTitle null (not a claimed profile), projects from the owner's linked repos, and codeEvidence carrying the repos. Skill/topic queries never reach this path. New match.basis value 'repo-owner' distinguishes it from Passport 'profile-text' rows. Names still route to /api/people (SDF roster) / /api/research as before.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.21",
 		type: "changed",
 		summary:
 			"searchProjects now documents the accountability/diligence filter composition: `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that later went inactive, and `meta.counts.total` is the count. The words 'inactive/defunct/abandoned' don't route from free-text `q` — they must be passed as `status=Inactive`.",
 		detail:
 			"Cross-cutting persona battery (SDF/institution view): a natural-language 'which SCF projects are now inactive' returned Live projects because status-intent words don't route from `q`. The capability already existed (status + scfAwarded filters compose server-side, 12 SCF-funded Inactive projects with amounts) but wasn't discoverable from the spec. Added the composition to the status param description, an exampleQuestion, and a useWhen entry so the discovery index teaches it. No behavior change — routing/description only.",
-	},
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
@@ -49,7 +58,6 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"analyzeEcosystem dimension=gaps no longer reports 'Oracle' as an absent vertical. Oracle isn't a `types` value (oracles are typed category=Infrastructure with types=[] by convention), so it was a permanent false-absent; removed from the measured vertical set.",
 		detail:
 			"Caught live within the hour: dimension=gaps returned absent:['Oracle'] even though Reflector/Band/RedStone are Live oracles — they carry types=[] and 'Oracle' isn't a projects `types` option at all, so a types-based tally can never see them. The gap vertical universe now contains only real `types` values, and the basis documents that category-conventioned verticals (oracles) aren't measurable on the types axis (use searchProjects/category for oracle discovery). No other vertical was affected.",
-	},
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],

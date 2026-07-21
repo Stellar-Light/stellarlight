@@ -41,8 +41,12 @@ interface BuilderMatch {
 	/** Per query token, the literal term that hit (a token can match via a
 	 * synonym — e.g. "payments" hitting via "remittance"). */
 	matchedTerms: Record<string, string>;
-	/** What this match IS: free-text profile evidence, not verified experience. */
-	basis: "profile-text";
+	/** What this match IS. "profile-text" = free-text profile/project hit (a
+	 * Stellar Passport builder). "repo-owner" = a code-DERIVED row: the query is
+	 * a GitHub login that owns indexed Stellar repos but has no Passport profile
+	 * (P2 — e.g. `kalepail`), so the row is built from repo OWNERSHIP, not a
+	 * profile; `bio`/`roleTitle` are null and the evidence is in `codeEvidence`. */
+	basis: "profile-text" | "repo-owner";
 }
 
 /** sls-041: indexed repository evidence for the query, kept SEPARATE from the
@@ -207,6 +211,72 @@ function looksLikePersonName(query: string): boolean {
 	if (toks.length < 2 || toks.length > 4) return false;
 	if (!toks.every((t) => /^[\p{L}.'-]+$/u.test(t))) return false;
 	return !toks.some((t) => BUILDER_SYNONYMS[t] || SKILL_HINT.has(t));
+}
+
+// A single-token query shaped like a GitHub login (the P2 code-derived-builder
+// trigger): one whitespace-free token in GitHub's login charset, and NOT a
+// skill/vocabulary term (so q="rust"/"soroban" stay skill searches, never a
+// handle lookup). Used only as a fallback when Passport profiles matched none —
+// then, if it's also an indexed repo owner, we surface a code-derived row.
+export function isHandleQuery(query: string): boolean {
+	if (query.length < 2 || /\s/.test(query)) return false;
+	if (BUILDER_SYNONYMS[query] || SKILL_HINT.has(query)) return false;
+	return /^[a-z0-9][a-z0-9-]*$/.test(query);
+}
+
+// P2: synthesize a code-DERIVED builder row from the repos a GitHub login owns
+// (the exact-owner subset already cut by the caller — `mine`). Pure so it's
+// unit-testable: bio/roleTitle stay null (not a Passport profile), projects come
+// from the owner's linked repos (deduped), codeEvidence is the top repos by
+// repoScore. Returns null when `mine` is empty. `q` is the raw handle the caller
+// matched (recorded as the matched term). The owner casing comes from the repos.
+export function codeDerivedBuilderRow(
+	q: string,
+	mine: Array<Record<string, unknown>>,
+): BuilderRow | null {
+	if (!mine.length) return null;
+	const sorted = [...mine].sort(
+		(a, b) => Number(b.repoScore ?? 0) - Number(a.repoScore ?? 0),
+	);
+	const login = String(sorted[0].owner);
+	const projectsMap = new Map<string, string | null>();
+	for (const d of sorted) {
+		const pname = d.projectName ? String(d.projectName) : "";
+		if (pname && !projectsMap.has(pname))
+			projectsMap.set(pname, d.projectSlug ? String(d.projectSlug) : null);
+	}
+	const codeEvidence: BuilderCodeEvidence[] = sorted.slice(0, 5).map((d) => ({
+		fullName: String(d.fullName ?? ""),
+		url: (d.url as string) ?? null,
+		primaryLanguage: (d.primaryLanguage as string) ?? null,
+		stars: typeof d.stars === "number" ? d.stars : 0,
+		lastCommitAt: (d.lastCommitAt as string) ?? null,
+		repoScore: typeof d.repoScore === "number" ? d.repoScore : 0,
+	}));
+	return {
+		githubUsername: login,
+		displayName: login,
+		bio: null,
+		roleTitle: null,
+		location: null,
+		websiteUrl: null,
+		twitterHandle: null,
+		avatarUrl: null,
+		isFeatured: false,
+		projectCount: projectsMap.size,
+		projects: [...projectsMap.keys()].map((name) => ({ name })),
+		url: `https://github.com/${login}`,
+		match: {
+			matchedFields: ["githubUsername (repo owner)"],
+			matchedProjects: [...projectsMap.entries()].map(([name, slug]) => ({
+				name,
+				slug,
+			})),
+			matchedTerms: { [q]: login },
+			basis: "repo-owner",
+		},
+		codeEvidence,
+	};
 }
 
 // The FULL query-param vocabulary this endpoint honors. Anything else 400s —
@@ -454,6 +524,46 @@ export async function GET(req: NextRequest) {
 					// best-effort — codeEvidence stays [] on error
 				}
 			}
+
+			// P2 (builders-by-name): the builders collection is Stellar-Passport
+			// only, so a prolific GitHub contributor with indexed Stellar repos but
+			// no Passport profile (e.g. `kalepail` — passkey-kit, kale-sc, …)
+			// returned a bare 0 — and a single-token login doesn't even trip the
+			// person-lookup steer. When a handle-shaped query matched NO profile
+			// but IS an indexed repo owner, synthesize ONE builder row from repo
+			// OWNERSHIP: code evidence (observable facts), never fuzzy (exact owner
+			// login), clearly marked basis "repo-owner" (not a Passport profile,
+			// so bio/roleTitle stay null). Skill/topic queries never reach here —
+			// they either matched profiles above or aren't handle-shaped.
+			if (q && !location && totalMatching === 0 && isHandleQuery(q)) {
+				// `like` is a substring/case-insensitive net; the exact-login filter
+				// below is the precise cut (q="kale" must NOT become owner kalepail).
+				const owned = await payload.find({
+					collection: "repos",
+					where: { owner: { like: q } },
+					limit: 200,
+					depth: 0,
+					select: {
+						fullName: true,
+						owner: true,
+						url: true,
+						primaryLanguage: true,
+						stars: true,
+						lastCommitAt: true,
+						repoScore: true,
+						projectSlug: true,
+						projectName: true,
+					},
+				});
+				const mine = (
+					owned.docs as unknown as Array<Record<string, unknown>>
+				).filter((d) => String(d.owner ?? "").toLowerCase() === q);
+				const row = codeDerivedBuilderRow(q, mine);
+				if (row) {
+					builders = [row];
+					totalMatching = 1;
+				}
+			}
 		} catch {
 			// fall through
 		}
@@ -568,7 +678,7 @@ export async function GET(req: NextRequest) {
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification.",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name).",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 			},
 			builders: builders.map((b) => pickFields(b, fieldsWanted)),
