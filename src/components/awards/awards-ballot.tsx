@@ -20,6 +20,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
 	ArrowUpRight,
 	Check,
+	ChevronLeft,
 	ChevronRight,
 	Eye,
 	Info,
@@ -38,6 +39,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
 	AWARDS_WALLETS,
 	type AwardsWalletId,
@@ -248,36 +250,60 @@ function TopBar({
 
 // ── How-it-works modal ─────────────────────────────────────────────────────
 
+const HIW_STEPS = [
+	{
+		t: "Connect a Pilot wallet",
+		d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only.",
+	},
+	{
+		t: "Pick one per category",
+		d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
+	},
+	{
+		t: "Sign one transaction",
+		d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
+	},
+	{
+		t: "Change your mind anytime",
+		d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
+	},
+];
+
+// Step-through modal: one step at a time, ‹ dots › navigation, "Got it" on
+// the last. Centered on desktop, bottom sheet on mobile.
 function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
+	const [i, setI] = useState(0);
+	const [dir, setDir] = useState(1);
+	const last = HIW_STEPS.length - 1;
+
+	// Reset to step 1 each time it opens.
+	useEffect(() => {
+		if (open) {
+			setI(0);
+			setDir(1);
+		}
+	}, [open]);
+
+	const go = useCallback(
+		(next: number) => {
+			setDir(next > i ? 1 : -1);
+			setI(Math.max(0, Math.min(last, next)));
+		},
+		[i, last],
+	);
+
 	useEffect(() => {
 		if (!open) return;
-		const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onClose();
+			else if (e.key === "ArrowRight" && i < last) go(i + 1);
+			else if (e.key === "ArrowLeft" && i > 0) go(i - 1);
+		};
 		document.addEventListener("keydown", onKey);
 		return () => document.removeEventListener("keydown", onKey);
-	}, [open, onClose]);
+	}, [open, onClose, i, last, go]);
 
-	const steps = [
-		{
-			n: "1",
-			t: "Connect a Pilot wallet",
-			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only.",
-		},
-		{
-			n: "2",
-			t: "Pick one per category",
-			d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
-		},
-		{
-			n: "3",
-			t: "Sign one transaction",
-			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
-		},
-		{
-			n: "4",
-			t: "Change your mind anytime",
-			d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
-		},
-	];
+	const step = HIW_STEPS[i];
 
 	return (
 		<AnimatePresence>
@@ -303,17 +329,12 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: 16, scale: 0.98 }}
 						transition={{ duration: 0.28, ease: EASE }}
-						className="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+						className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
-						<div className="flex items-start justify-between gap-4 mb-6">
-							<div>
-								<h2 className="text-xl font-semibold tracking-tight text-neutral-100">
-									How voting works
-								</h2>
-								<p className="mt-1 text-sm text-neutral-400">
-									A community vote, settled on Stellar testnet.
-								</p>
-							</div>
+						<div className="flex items-center justify-between gap-4 mb-6">
+							<span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
+								How voting works · {i + 1} of {HIW_STEPS.length}
+							</span>
 							<button
 								type="button"
 								onClick={onClose}
@@ -322,38 +343,69 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 								<X className="h-4 w-4" />
 							</button>
 						</div>
-						<ol className="space-y-4">
-							{steps.map((s, i) => (
-								<motion.li
-									key={s.n}
-									initial={{ opacity: 0, x: -8 }}
+
+						{/* one step, slide-swapped */}
+						<div className="relative min-h-[132px] overflow-hidden">
+							<AnimatePresence mode="wait" initial={false}>
+								<motion.div
+									key={i}
+									initial={{ opacity: 0, x: dir * 28 }}
 									animate={{ opacity: 1, x: 0 }}
-									transition={{
-										delay: 0.08 + i * 0.06,
-										duration: 0.3,
-										ease: EASE,
-									}}
-									className="flex gap-3.5"
+									exit={{ opacity: 0, x: dir * -28 }}
+									transition={{ duration: 0.26, ease: EASE }}
 								>
-									<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#3a3a3a] text-xs font-semibold text-neutral-100 tabular-nums">
-										{s.n}
+									<span className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-lg font-semibold text-black tabular-nums mb-4">
+										{i + 1}
 									</span>
-									<div className="min-w-0">
-										<p className="text-sm font-semibold text-neutral-100">
-											{s.t}
-										</p>
-										<p className="mt-0.5 text-sm text-neutral-400 leading-relaxed">
-											{s.d}
-										</p>
-									</div>
-								</motion.li>
-							))}
-						</ol>
-						<p className="mt-6 pt-5 border-t border-[#2a2a2a] text-xs text-neutral-500 leading-relaxed">
-							Every ballot is a public testnet transaction — auditable by
-							anyone, tallied directly from the chain. This is a pilot; no
-							mainnet funds are involved.
-						</p>
+									<h2 className="text-xl font-semibold tracking-tight text-neutral-50 mb-2">
+										{step.t}
+									</h2>
+									<p className="text-sm text-neutral-400 leading-relaxed">
+										{step.d}
+									</p>
+								</motion.div>
+							</AnimatePresence>
+						</div>
+
+						{/* footer: dots + back / next */}
+						<div className="mt-7 flex items-center justify-between gap-3">
+							<div className="flex items-center gap-1.5">
+								{HIW_STEPS.map((s, idx) => (
+									<button
+										key={s.t}
+										type="button"
+										aria-label={`Step ${idx + 1}`}
+										onClick={() => go(idx)}
+										className="h-1.5 rounded-full transition-all duration-200"
+										style={{
+											width: idx === i ? 20 : 6,
+											background:
+												idx === i ? "#fafafa" : "rgba(255,255,255,0.25)",
+										}}
+									/>
+								))}
+							</div>
+							<div className="flex items-center gap-2">
+								{i > 0 && (
+									<button
+										type="button"
+										onClick={() => go(i - 1)}
+										className="inline-flex items-center h-9 rounded-full border border-[#2f2f2f] px-4 text-sm font-medium text-neutral-300 hover:text-neutral-100 hover:border-[#454545] transition-colors"
+									>
+										Back
+									</button>
+								)}
+								<motion.button
+									type="button"
+									whileTap={{ scale: 0.97 }}
+									onClick={() => (i < last ? go(i + 1) : onClose())}
+									className="inline-flex items-center gap-1.5 h-9 rounded-full bg-neutral-100 px-4 text-sm font-semibold text-black hover:bg-white transition-colors"
+								>
+									{i < last ? "Next" : "Got it"}
+									{i < last && <ChevronRight className="h-4 w-4" />}
+								</motion.button>
+							</div>
+						</div>
 					</motion.div>
 				</div>
 			)}
@@ -403,6 +455,8 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const [txHash, setTxHash] = useState<string | null>(null);
 	const [funding, setFunding] = useState(false);
 	const prefilled = useRef(false);
+	const [ballotPage, setBallotPage] = useState(0);
+	const isMobile = useIsMobile();
 
 	const nomineesByCategory = useMemo(() => {
 		const map = new Map<string, Nominee[]>();
@@ -863,55 +917,212 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				</aside>
 			</div>
 
-			{/* ── Mobile sticky bar ── */}
+			{/* ── Mobile ballot toast (floating card, swipeable pager) ── */}
 			{voting.open && !readOnly && (
 				<motion.div
 					initial={{ y: 24, opacity: 0 }}
 					animate={{ y: 0, opacity: 1 }}
 					transition={{ duration: 0.4, ease: EASE }}
-					className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#2a2a2a] bg-[#171717]/90 backdrop-blur-xl"
+					className="lg:hidden fixed left-3 right-3 z-40 rounded-2xl border border-[#2f2f2f] bg-[#161616]/95 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.55)]"
+					style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
 				>
-					<div
-						className="max-w-6xl mx-auto px-4 py-3"
-						style={{
-							paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
-						}}
-					>
+					<div className="p-3.5">
 						{error && (
 							<p className="mb-2 text-xs text-red-400 flex items-center gap-1.5">
 								<X className="h-3.5 w-3.5 flex-shrink-0" />
 								{error}
 							</p>
 						)}
-						<div className="flex items-center justify-between gap-3">
-							<div className="flex items-center gap-2 min-w-0">
-								<div className="flex items-center gap-1">
-									{categories.map((c) => (
-										<motion.span
-											key={c.key}
-											title={c.name}
-											animate={
-												selections[c.key]
-													? { backgroundColor: "#fafafa", scale: 1 }
-													: { backgroundColor: "#3a3a3a", scale: 0.85 }
-											}
-											transition={SPRING}
-											className="h-2 w-2 rounded-full"
-										/>
-									))}
-								</div>
-								<span className="text-sm font-medium text-neutral-100">
-									{selectedCount} of {categories.length}
-								</span>
-							</div>
-							<PrimaryButton />
+						{/* header + swipe pager over the categories */}
+						<div className="flex items-center justify-between mb-2.5">
+							<span className="text-xs font-semibold text-neutral-200">
+								Your ballot
+							</span>
+							<span className="text-xs tabular-nums text-neutral-500">
+								{selectedCount}/{categories.length}
+							</span>
 						</div>
+						<div className="relative flex items-center gap-2 mb-3">
+							<button
+								type="button"
+								aria-label="Previous"
+								onClick={() =>
+									setBallotPage(
+										(p) => (p - 1 + categories.length) % categories.length,
+									)
+								}
+								className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 active:scale-90 transition-transform"
+							>
+								<ChevronLeft className="h-4 w-4" />
+							</button>
+							<div className="relative flex-1 overflow-hidden h-11">
+								<AnimatePresence initial={false} mode="popLayout">
+									{(() => {
+										const c = categories[ballotPage % categories.length];
+										const picked = nomineeName(c.key, selections[c.key]);
+										return (
+											<motion.div
+												key={c.key}
+												drag="x"
+												dragConstraints={{ left: 0, right: 0 }}
+												dragElastic={0.35}
+												onDragEnd={(_, info) => {
+													if (info.offset.x < -50 || info.velocity.x < -300)
+														setBallotPage((p) => (p + 1) % categories.length);
+													else if (info.offset.x > 50 || info.velocity.x > 300)
+														setBallotPage(
+															(p) =>
+																(p - 1 + categories.length) % categories.length,
+														);
+												}}
+												initial={{ opacity: 0, x: 24 }}
+												animate={{ opacity: 1, x: 0 }}
+												exit={{ opacity: 0, x: -24 }}
+												transition={{ duration: 0.24, ease: EASE }}
+												className="absolute inset-0 flex flex-col justify-center cursor-grab active:cursor-grabbing"
+											>
+												<span className="text-[11px] uppercase tracking-wide text-neutral-500">
+													{c.name}
+												</span>
+												<span
+													className={`text-sm font-semibold truncate ${
+														picked ? "text-neutral-100" : "text-neutral-600"
+													}`}
+												>
+													{picked ?? "Not picked yet"}
+												</span>
+											</motion.div>
+										);
+									})()}
+								</AnimatePresence>
+							</div>
+							<button
+								type="button"
+								aria-label="Next"
+								onClick={() =>
+									setBallotPage((p) => (p + 1) % categories.length)
+								}
+								className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 active:scale-90 transition-transform"
+							>
+								<ChevronRight className="h-4 w-4" />
+							</button>
+						</div>
+						{/* dots reflect pick state per category */}
+						<div className="flex items-center justify-center gap-1.5 mb-3">
+							{categories.map((c, idx) => (
+								<button
+									key={c.key}
+									type="button"
+									aria-label={c.name}
+									onClick={() => setBallotPage(idx)}
+									className="h-1.5 rounded-full transition-all duration-200"
+									style={{
+										width: idx === ballotPage % categories.length ? 16 : 6,
+										background: selections[c.key]
+											? "#fafafa"
+											: idx === ballotPage % categories.length
+												? "#6a6a6a"
+												: "rgba(255,255,255,0.2)",
+									}}
+								/>
+							))}
+						</div>
+						<PrimaryButton full />
 					</div>
 				</motion.div>
 			)}
 
-			{/* ── Wallet picker ── */}
-			<Drawer open={walletOpen} onOpenChange={setWalletOpen}>
+			{/* ── Wallet picker (modal on desktop, drawer on mobile) ── */}
+			<WalletPicker
+				open={walletOpen}
+				onOpenChange={setWalletOpen}
+				isMobile={isMobile}
+				connecting={phase === "connecting"}
+				error={error}
+				onPick={handleConnect}
+			/>
+
+			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+		</>
+	);
+}
+
+// ── Wallet picker (RainbowKit pattern: modal on desktop, drawer on mobile) ──
+
+function WalletList({
+	connecting,
+	error,
+	onPick,
+}: {
+	connecting: boolean;
+	error: string | null;
+	onPick: (id: AwardsWalletId) => void;
+}) {
+	return (
+		<div className="w-full space-y-2">
+			{error && (
+				<p className="text-xs text-red-400 text-center pb-1 flex items-center justify-center gap-1.5">
+					<X className="h-3.5 w-3.5 flex-shrink-0" />
+					{error}
+				</p>
+			)}
+			{AWARDS_WALLETS.map((wallet) => (
+				<button
+					key={wallet.id}
+					type="button"
+					disabled={connecting}
+					onClick={() => onPick(wallet.id)}
+					className="w-full rounded-xl border border-[#2f2f2f] bg-[#1f1f1f] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:border-[#454545] transition-colors disabled:opacity-60"
+				>
+					<span>
+						<span className="block text-sm font-semibold text-neutral-100">
+							{wallet.name}
+						</span>
+						<span className="block text-xs text-neutral-500">
+							{wallet.hint}
+						</span>
+					</span>
+					{connecting ? (
+						<Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
+					) : (
+						<ChevronRight className="h-4 w-4 text-neutral-500" />
+					)}
+				</button>
+			))}
+		</div>
+	);
+}
+
+function WalletPicker({
+	open,
+	onOpenChange,
+	isMobile,
+	connecting,
+	error,
+	onPick,
+}: {
+	open: boolean;
+	onOpenChange: (v: boolean) => void;
+	isMobile: boolean;
+	connecting: boolean;
+	error: string | null;
+	onPick: (id: AwardsWalletId) => void;
+}) {
+	// Desktop modal closes on Escape (RainbowKit parity); the mobile Drawer
+	// handles Escape / swipe-down itself.
+	useEffect(() => {
+		if (!open || isMobile) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onOpenChange(false);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [open, isMobile, onOpenChange]);
+
+	// Mobile → bottom sheet (thumb-reachable). Desktop → centered modal.
+	if (isMobile) {
+		return (
+			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader className="text-center sm:text-center">
 						<DrawerTitle className="text-xl font-semibold">
@@ -922,42 +1133,62 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
-					<div className="mx-auto w-full max-w-sm space-y-2 pb-6">
-						{error && (
-							<p className="text-xs text-red-400 text-center pb-1 flex items-center justify-center gap-1.5">
-								<X className="h-3.5 w-3.5 flex-shrink-0" />
-								{error}
-							</p>
-						)}
-						{AWARDS_WALLETS.map((wallet) => (
-							<button
-								key={wallet.id}
-								type="button"
-								disabled={phase === "connecting"}
-								onClick={() => handleConnect(wallet.id)}
-								className="w-full rounded-xl border border-[#2f2f2f] bg-[#1f1f1f] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:border-[#454545] transition-colors disabled:opacity-60"
-							>
-								<span>
-									<span className="block text-sm font-semibold text-neutral-100">
-										{wallet.name}
-									</span>
-									<span className="block text-xs text-neutral-500">
-										{wallet.hint}
-									</span>
-								</span>
-								{phase === "connecting" ? (
-									<Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
-								) : (
-									<ChevronRight className="h-4 w-4 text-neutral-500" />
-								)}
-							</button>
-						))}
+					<div className="mx-auto w-full max-w-sm pb-6">
+						<WalletList connecting={connecting} error={error} onPick={onPick} />
 					</div>
 				</DrawerContent>
 			</Drawer>
+		);
+	}
 
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
-		</>
+	return (
+		<AnimatePresence>
+			{open && (
+				<div
+					className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Connect a wallet"
+				>
+					<motion.button
+						type="button"
+						aria-label="Close"
+						onClick={() => onOpenChange(false)}
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.2 }}
+						className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+					/>
+					<motion.div
+						initial={{ opacity: 0, y: 16, scale: 0.98 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 16, scale: 0.98 }}
+						transition={{ duration: 0.28, ease: EASE }}
+						className="relative w-full max-w-sm rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+					>
+						<div className="flex items-start justify-between gap-4 mb-5">
+							<div>
+								<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
+									Connect a wallet
+								</h2>
+								<p className="mt-1 text-sm text-neutral-400">
+									You'll sign a Stellar testnet transaction — no real funds.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={() => onOpenChange(false)}
+								className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 hover:text-neutral-100 hover:border-[#454545] transition-colors flex-shrink-0"
+							>
+								<X className="h-4 w-4" />
+							</button>
+						</div>
+						<WalletList connecting={connecting} error={error} onPick={onPick} />
+					</motion.div>
+				</div>
+			)}
+		</AnimatePresence>
 	);
 }
 
