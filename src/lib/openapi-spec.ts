@@ -2484,6 +2484,12 @@ export const spec: OpenAPISpec = {
 						"total value locked",
 						"top defi",
 						"biggest protocols",
+						"supply",
+						"circulating supply",
+						"biggest stablecoin",
+						"largest stablecoin",
+						"asset supply",
+						"token holders",
 					],
 					useWhen: [
 						"which projects have open issues / the biggest issue backlog",
@@ -2492,6 +2498,7 @@ export const spec: OpenAPISpec = {
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
 						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending) — DefiLlama-verified, dated per-row by tvlAsOf",
+						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin) — assetSupply + assetHolders from stellar.expert",
 						"a CSV/Dune-style export of ranked projects (default top 50, max 300)",
 					],
 					notFor: [
@@ -2504,6 +2511,7 @@ export const spec: OpenAPISpec = {
 						"Which leaderboard projects have open issues?",
 						"What are the most active Stellar projects in the last 30 days?",
 						"How many active developers does Stellar have?",
+						"What's the biggest stablecoin on Stellar by supply?",
 						"Export the top 100 Stellar projects as CSV",
 					],
 				},
@@ -2512,10 +2520,10 @@ export const spec: OpenAPISpec = {
 						name: "sort",
 						in: "query",
 						description:
-							"Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD (null = untracked — those rows sort last, never treated as $0).",
+							"Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = untracked → those rows sort last, never treated as 0.",
 						schema: {
 							type: "string",
-							enum: ["activity", "stars", "issues", "tvl"],
+							enum: ["activity", "stars", "issues", "tvl", "supply"],
 							default: "activity",
 						},
 					},
@@ -4246,6 +4254,24 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
+					},
+					assetCode: {
+						type: "string",
+						nullable: true,
+						description:
+							"Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set.",
+					},
+					assetSupply: {
+						type: "number",
+						nullable: true,
+						description:
+							"Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED — never 'zero supply'; untracked issuers sort below every tracked one.",
+					},
+					assetHolders: {
+						type: "number",
+						nullable: true,
+						description:
+							"Trustline holder count of the issued asset. Null when untracked.",
 					},
 					github: {
 						type: "object",

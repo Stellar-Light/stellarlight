@@ -1265,6 +1265,12 @@ export interface components {
              * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
              */
             tvlAsOf?: string | null;
+            /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
+            assetCode?: string | null;
+            /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED — never 'zero supply'; untracked issuers sort below every tracked one. */
+            assetSupply?: number | null;
+            /** @description Trustline holder count of the issued asset. Null when untracked. */
+            assetHolders?: number | null;
             /** @description Rollup across the project's INDEXED repos, as-of meta.dataAsOf. */
             github?: {
                 /** @description Sum of stargazer counts across indexed repos. */
@@ -2268,8 +2274,8 @@ export interface operations {
     getLeaderboard: {
         parameters: {
             query?: {
-                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD (null = untracked — those rows sort last, never treated as $0). */
-                sort?: "activity" | "stars" | "issues" | "tvl";
+                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = untracked → those rows sort last, never treated as 0. */
+                sort?: "activity" | "stars" | "issues" | "tvl" | "supply";
                 /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
                 range?: "7d" | "30d" | "90d" | "1y" | "all";
                 /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */

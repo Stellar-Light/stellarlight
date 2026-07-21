@@ -40,6 +40,14 @@ interface ProjectRow {
 	// (class 8).
 	tvlUSD: number | null;
 	tvlAsOf: string | null;
+	// On-chain issued-asset stats (2026-07-21 institutional battery: "biggest
+	// stablecoin by supply" had no sort). From stellar.expert via
+	// enrich-onchain-projects.ts; null = NOT TRACKED (no verified issued asset
+	// in our on-chain seed set), never "zero supply". assetSupply is circulating
+	// supply in whole asset units; assetCode names the asset (USDC, CETES, …).
+	assetCode: string | null;
+	assetSupply: number | null;
+	assetHolders: number | null;
 	github: {
 		totalStars: number;
 		openIssuesTotal: number;
@@ -68,6 +76,9 @@ function toCsv(rows: ProjectRow[]): string {
 		"repo_count",
 		"last_activity_at",
 		"tvl_usd",
+		"asset_code",
+		"asset_supply",
+		"asset_holders",
 		"short_description",
 	].join(",");
 	const lines = rows.map((r) =>
@@ -83,6 +94,9 @@ function toCsv(rows: ProjectRow[]): string {
 			r.github.repoCount,
 			r.github.lastActivityAt ?? "",
 			r.tvlUSD ?? "",
+			r.assetCode ?? "",
+			r.assetSupply ?? "",
+			r.assetHolders ?? "",
 			r.shortDescription ?? "",
 		]
 			.map(csvEscape)
@@ -102,7 +116,7 @@ export async function GET(req: NextRequest) {
 	// Reject unrecognized sort/range instead of silently falling back to a
 	// surprising order or an empty set. Matches the 400+validX pattern used
 	// elsewhere (hackathons/research/skills).
-	const VALID_SORTS = ["activity", "stars", "issues", "tvl"] as const;
+	const VALID_SORTS = ["activity", "stars", "issues", "tvl", "supply"] as const;
 	const VALID_RANGES = ["7d", "30d", "90d", "1y", "all"] as const;
 	if (!(VALID_SORTS as readonly string[]).includes(sort)) {
 		return NextResponse.json(
@@ -243,6 +257,7 @@ export async function GET(req: NextRequest) {
 					scf: true,
 					tvlUSD: true,
 					tvlAsOf: true,
+					onchain: true,
 				},
 			});
 
@@ -307,6 +322,11 @@ export async function GET(req: NextRequest) {
 					scf?: { awarded?: boolean };
 					tvlUSD?: number | null;
 					tvlAsOf?: string | null;
+					onchain?: {
+						assetCode?: string | null;
+						assetSupply?: number | null;
+						assetHolders?: number | null;
+					} | null;
 				}>
 			).map((project) => {
 				const repos = reposByProjectSlug.get(project.slug) ?? [];
@@ -337,6 +357,18 @@ export async function GET(req: NextRequest) {
 					scfAwarded: !!project.scf?.awarded,
 					tvlUSD: project.tvlUSD ?? null,
 					tvlAsOf: project.tvlAsOf ?? null,
+					assetCode:
+						typeof project.onchain?.assetCode === "string"
+							? project.onchain.assetCode
+							: null,
+					assetSupply:
+						typeof project.onchain?.assetSupply === "number"
+							? project.onchain.assetSupply
+							: null,
+					assetHolders:
+						typeof project.onchain?.assetHolders === "number"
+							? project.onchain.assetHolders
+							: null,
 					github: {
 						totalStars,
 						openIssuesTotal,
@@ -395,6 +427,17 @@ export async function GET(req: NextRequest) {
 					if (a.tvlUSD === null) return 1;
 					if (b.tvlUSD === null) return -1;
 					return b.tvlUSD - a.tvlUSD;
+				});
+			} else if (sort === "supply") {
+				// Circulating supply of the project's issued asset (USDC, CETES,
+				// …). null = NOT TRACKED (no verified issued asset in our on-chain
+				// seed set) — sorts BELOW every tracked one, never as "zero
+				// supply". Pair with ?type=Stablecoin for a stablecoin board.
+				rows.sort((a, b) => {
+					if (a.assetSupply === null && b.assetSupply === null) return 0;
+					if (a.assetSupply === null) return 1;
+					if (b.assetSupply === null) return -1;
+					return b.assetSupply - a.assetSupply;
 				});
 			}
 
@@ -470,6 +513,8 @@ export async function GET(req: NextRequest) {
 					dataAsOf:
 						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated — every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
 					tvl: "sort=tvl orders by tvlUSD — DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only — most projects are legitimately untracked.",
+					supply:
+						"sort=supply orders by assetSupply — circulating supply of the project's issued asset in whole asset units (assetCode names it: USDC, CETES, …), from stellar.expert. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. Covers asset ISSUERS (stablecoins, tokenized RWAs) — pair with ?type=Stablecoin for a stablecoin-only board. assetHolders = trustline holder count of the same asset.",
 				},
 			},
 			ecosystem: {

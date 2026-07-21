@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.15",
+		"version": "1.8.16",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -2822,7 +2822,13 @@
 						"tvl",
 						"total value locked",
 						"top defi",
-						"biggest protocols"
+						"biggest protocols",
+						"supply",
+						"circulating supply",
+						"biggest stablecoin",
+						"largest stablecoin",
+						"asset supply",
+						"token holders"
 					],
 					"useWhen": [
 						"which projects have open issues / the biggest issue backlog",
@@ -2831,6 +2837,7 @@
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
 						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending) — DefiLlama-verified, dated per-row by tvlAsOf",
+						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin) — assetSupply + assetHolders from stellar.expert",
 						"a CSV/Dune-style export of ranked projects (default top 50, max 300)"
 					],
 					"notFor": [
@@ -2843,6 +2850,7 @@
 						"Which leaderboard projects have open issues?",
 						"What are the most active Stellar projects in the last 30 days?",
 						"How many active developers does Stellar have?",
+						"What's the biggest stablecoin on Stellar by supply?",
 						"Export the top 100 Stellar projects as CSV"
 					]
 				},
@@ -2850,14 +2858,15 @@
 					{
 						"name": "sort",
 						"in": "query",
-						"description": "Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD (null = untracked — those rows sort last, never treated as $0).",
+						"description": "Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = untracked → those rows sort last, never treated as 0.",
 						"schema": {
 							"type": "string",
 							"enum": [
 								"activity",
 								"stars",
 								"issues",
-								"tvl"
+								"tvl",
+								"supply"
 							],
 							"default": "activity"
 						}
@@ -5219,6 +5228,21 @@
 						"format": "date-time",
 						"nullable": true,
 						"description": "When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked."
+					},
+					"assetCode": {
+						"type": "string",
+						"nullable": true,
+						"description": "Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set."
+					},
+					"assetSupply": {
+						"type": "number",
+						"nullable": true,
+						"description": "Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED — never 'zero supply'; untracked issuers sort below every tracked one."
+					},
+					"assetHolders": {
+						"type": "number",
+						"nullable": true,
+						"description": "Trustline holder count of the issued asset. Null when untracked."
 					},
 					"github": {
 						"type": "object",
