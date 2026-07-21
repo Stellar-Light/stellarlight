@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-07-21T17:31:15.203Z",
+  "total": 11,
+  "ok": 11,
+  "failed": 0,
+  "rows": [
+    {
+      "id": "foundation",
+      "family": "foundation",
+      "source": "sdf-org",
+      "url": "https://stellar.org/foundation",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 8,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "foundation-team",
+      "family": "foundation",
+      "source": "sdf-org",
+      "url": "https://stellar.org/foundation/team",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 6,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "mandate",
+      "family": "mandate",
+      "source": "sdf-org",
+      "url": "https://stellar.org/foundation/mandate",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 9,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "mandate-2019",
+      "family": "mandate",
+      "source": "sdf-org",
+      "url": "https://stellar.org/foundation/mandate/2019",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 8,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "mandate-2017",
+      "family": "mandate",
+      "source": "sdf-org",
+      "url": "https://stellar.org/foundation/mandate/2017",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 13,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "enterprise-fund",
+      "family": "enterprise-fund",
+      "source": "sdf-org",
+      "url": "https://stellar.org/enterprise-fund",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 7,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "terms-of-service",
+      "family": "terms",
+      "source": "sdf-org",
+      "url": "https://stellar.org/terms-of-service",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 23,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "quarterly-reports",
+      "family": "quarterly-reports",
+      "source": "sdf-org",
+      "url": "https://stellar.org/quarterly-reports",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 3,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "quarterly-report-latest",
+      "family": "quarterly-reports",
+      "source": "sdf-blog",
+      "url": "https://stellar.org/blog/foundation-news/q1-2026-execution-at-network-scale",
+      "ingestedBy": "ingest-sdf-blog.ts",
+      "chunkCount": 9,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "security-program-hackerone",
+      "family": "security-program",
+      "source": "security-program",
+      "url": "https://hackerone.com/stellar",
+      "ingestedBy": "ingest-security-program.ts",
+      "chunkCount": 9,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "security-program-supersession",
+      "family": "security-program",
+      "source": "security-program",
+      "url": "https://stellar.org/grants-and-funding/bug-bounty",
+      "ingestedBy": "ingest-security-program.ts",
+      "chunkCount": 1,
+      "missingSignatures": [],
+      "status": "OK"
+    }
+  ]
+}

@@ -1,0 +1,350 @@
+{
+ "frame": {
+  "scf": 570,
+  "directory": 895,
+  "matched": 319,
+  "roundsChecked": 271
+ },
+ "overstated": [],
+ "understated": [],
+ "roundsBackfill": [],
+ "roundsOverstated": [
+  {
+   "slug": "boundless",
+   "name": "Boundless",
+   "ourRounds": [
+    "36",
+    "40"
+   ],
+   "url": "https://communityfund.stellar.org/project/boundless-xqk",
+   "officialAwardedRounds": [
+    "40"
+   ],
+   "evidence": "SCF page marks round(s) #36 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "aida",
+   "name": "AIDA",
+   "ourRounds": [
+    "38",
+    "39"
+   ],
+   "url": "https://communityfund.stellar.org/project/aida-mz0",
+   "officialAwardedRounds": [
+    "39"
+   ],
+   "evidence": "SCF page marks round(s) #38 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "stride",
+   "name": "Stride",
+   "ourRounds": [
+    "32",
+    "33"
+   ],
+   "url": "https://communityfund.stellar.org/project/stride-4uu",
+   "officialAwardedRounds": [],
+   "evidence": "SCF page marks round(s) #32 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "freelii",
+   "name": "Freelii",
+   "ourRounds": [
+    "32",
+    "34"
+   ],
+   "url": "https://communityfund.stellar.org/project/freelii-bl8",
+   "officialAwardedRounds": [
+    "32"
+   ],
+   "evidence": "SCF page marks round(s) #34 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "token-tails",
+   "name": "Token Tails",
+   "ourRounds": [
+    "26",
+    "30",
+    "41",
+    "42"
+   ],
+   "url": "https://communityfund.stellar.org/project/token-tails-gov",
+   "officialAwardedRounds": [
+    "26",
+    "30"
+   ],
+   "evidence": "SCF page marks round(s) #41 #42 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "stellar-metamask",
+   "name": "Stellar-MetaMask",
+   "ourRounds": [
+    "19",
+    "32"
+   ],
+   "url": "https://communityfund.stellar.org/project/stellar-metamask-cjp",
+   "officialAwardedRounds": [
+    "19"
+   ],
+   "evidence": "SCF page marks round(s) #32 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "swift-wallet-sdk",
+   "name": "Swift Wallet SDK",
+   "ourRounds": [
+    "30",
+    "31",
+    "36"
+   ],
+   "url": "https://communityfund.stellar.org/project/swift-wallet-sdk-pjg",
+   "officialAwardedRounds": [
+    "31",
+    "36"
+   ],
+   "evidence": "SCF page marks round(s) #30 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "easya",
+   "name": "EasyA",
+   "ourRounds": [
+    "17",
+    "23",
+    "30"
+   ],
+   "url": "https://communityfund.stellar.org/project/easya-4eg",
+   "officialAwardedRounds": [
+    "17",
+    "23"
+   ],
+   "evidence": "SCF page marks round(s) #30 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "noether",
+   "name": "Noether",
+   "ourRounds": [
+    "41",
+    "44"
+   ],
+   "url": "https://communityfund.stellar.org/project/noether-vsn",
+   "officialAwardedRounds": [
+    "41"
+   ],
+   "evidence": "SCF page marks round(s) #44 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "rendbit",
+   "name": "RendBit",
+   "ourRounds": [
+    "36",
+    "39"
+   ],
+   "url": "https://communityfund.stellar.org/project/rendbit-7pm",
+   "officialAwardedRounds": [
+    "39"
+   ],
+   "evidence": "SCF page marks round(s) #36 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "minah",
+   "name": "Minah",
+   "ourRounds": [
+    "37",
+    "38",
+    "40"
+   ],
+   "url": "https://communityfund.stellar.org/project/minah-hww",
+   "officialAwardedRounds": [
+    "38"
+   ],
+   "evidence": "SCF page marks round(s) #37 #40 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "alula",
+   "name": "Alula",
+   "ourRounds": [
+    "33",
+    "34"
+   ],
+   "url": "https://communityfund.stellar.org/project/alula-quk",
+   "officialAwardedRounds": [
+    "34"
+   ],
+   "evidence": "SCF page marks round(s) #33 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "untangled",
+   "name": "Untangled",
+   "ourRounds": [
+    "30",
+    "31"
+   ],
+   "url": "https://communityfund.stellar.org/project/untangled-qcs",
+   "officialAwardedRounds": [
+    "31"
+   ],
+   "evidence": "SCF page marks round(s) #30 \"Not Awarded\" on every submission in that round"
+  },
+  {
+   "slug": "via-labs",
+   "name": "VIA Labs",
+   "ourRounds": [
+    "35",
+    "40"
+   ],
+   "url": "https://communityfund.stellar.org/project/via-labs-a1k",
+   "officialAwardedRounds": [
+    "35"
+   ],
+   "evidence": "SCF page marks round(s) #40 \"Not Awarded\" on every submission in that round"
+  }
+ ],
+ "roundsUnverifiable": [
+  {
+   "slug": "sendin",
+   "name": "SendIN",
+   "ourRounds": [
+    "27",
+    "29",
+    "36"
+   ],
+   "url": "https://communityfund.stellar.org/project/sendin-vsg",
+   "officialAwardedRounds": [
+    "29",
+    "36"
+   ],
+   "reason": "no submission verdict found for round(s) #27"
+  },
+  {
+   "slug": "stride",
+   "name": "Stride",
+   "ourRounds": [
+    "32",
+    "33"
+   ],
+   "url": "https://communityfund.stellar.org/project/stride-4uu",
+   "officialAwardedRounds": [],
+   "reason": "no submission verdict found for round(s) #33"
+  },
+  {
+   "slug": "palremit",
+   "name": "Palremit",
+   "ourRounds": [
+    "32"
+   ],
+   "url": "https://communityfund.stellar.org/project/palremit-eks",
+   "officialAwardedRounds": [],
+   "reason": "no parseable submission cards on the page — never accuse"
+  },
+  {
+   "slug": "meru",
+   "name": "Meru",
+   "ourRounds": [
+    "14",
+    "22",
+    "25",
+    "31"
+   ],
+   "url": "https://communityfund.stellar.org/project/meru-xma",
+   "officialAwardedRounds": [
+    "14",
+    "22",
+    "25"
+   ],
+   "reason": "no submission verdict found for round(s) #31"
+  },
+  {
+   "slug": "surgepay",
+   "name": "SurgePay",
+   "ourRounds": [
+    "41"
+   ],
+   "url": "https://communityfund.stellar.org/project/surge-pay-jze",
+   "officialAwardedRounds": [],
+   "reason": "no parseable submission cards on the page — never accuse"
+  },
+  {
+   "slug": "autoaction",
+   "name": "AutoAction",
+   "ourRounds": [
+    "29"
+   ],
+   "url": "https://communityfund.stellar.org/project/autoaction-ybl",
+   "officialAwardedRounds": [],
+   "reason": "no parseable submission cards on the page — never accuse"
+  },
+  {
+   "slug": "scout",
+   "name": "Scout",
+   "ourRounds": [
+    "20",
+    "23",
+    "27",
+    "30"
+   ],
+   "url": "https://communityfund.stellar.org/project/scout-a0w",
+   "officialAwardedRounds": [
+    "20",
+    "23",
+    "27"
+   ],
+   "reason": "no submission verdict found for round(s) #30"
+  },
+  {
+   "slug": "houdiniswap",
+   "name": "Houdiniswap",
+   "ourRounds": [
+    "38",
+    "40",
+    "43"
+   ],
+   "url": "https://communityfund.stellar.org/project/houdiniswap-rdw",
+   "officialAwardedRounds": [
+    "40"
+   ],
+   "reason": "no submission verdict found for round(s) #38 #43"
+  },
+  {
+   "slug": "0xauth",
+   "name": "0xAuth",
+   "ourRounds": [
+    "27",
+    "29",
+    "31"
+   ],
+   "url": "https://communityfund.stellar.org/project/0xauth-gfh",
+   "officialAwardedRounds": [
+    "27",
+    "29"
+   ],
+   "reason": "no submission verdict found for round(s) #31"
+  },
+  {
+   "slug": "alterscope",
+   "name": "Alterscope",
+   "ourRounds": [
+    "24",
+    "26",
+    "31"
+   ],
+   "url": "https://communityfund.stellar.org/project/alterscope-soa",
+   "officialAwardedRounds": [
+    "24",
+    "26"
+   ],
+   "reason": "no submission verdict found for round(s) #31"
+  },
+  {
+   "slug": "gatewayfm",
+   "name": "Gateway.fm",
+   "ourRounds": [
+    "16",
+    "30"
+   ],
+   "url": "https://communityfund.stellar.org/project/gatewayfm-noq",
+   "officialAwardedRounds": [
+    "16"
+   ],
+   "reason": "no submission verdict found for round(s) #30"
+  }
+ ]
+}

@@ -1,0 +1,342 @@
+{
+ "frame": {
+  "chunks": 9414,
+  "docs": 1782
+ },
+ "s5_junk_urls": {
+  "count": 1,
+  "sample": [
+   "https://developers.stellar.org/meetings/archive"
+  ]
+ },
+ "s6_bad_titles": {
+  "count": 113,
+  "byIssue": {
+   "sentence-like (body fragment?)": 56,
+   "overlong (sentence, not a title)": 9,
+   "html-entities": 47,
+   "bare-date": 1
+  },
+  "sample": [
+   {
+    "url": "https://developers.stellar.org/docs/build/smart-contracts/example-contracts/complex-account",
+    "source": "dev-docs",
+    "title": "Implement a contract account with multisig and custom authorization policies.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://stellar.org/grants-and-funding/bug-bounty",
+    "source": "security-program",
+    "title": "SDF bug-bounty consolidation (effective 2026-05-07): single HackerOne program; s",
+    "issue": "overlong (sentence, not a title)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/types/fully-typed-contracts",
+    "source": "dev-docs",
+    "title": "Smart contract WASM files contain a machine-readable description of the\n  interf",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/types/custom-types",
+    "source": "dev-docs",
+    "title": "Struct, union, and enum types defined by contracts.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/types/built-in-types",
+    "source": "dev-docs",
+    "title": "Built-in types used as smart contract inputs and outputs.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/state-archival",
+    "source": "dev-docs",
+    "title": "Smart contract state archival.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/persisting-data",
+    "source": "dev-docs",
+    "title": "Store and access smart contract data.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/errors-and-debugging/errors",
+    "source": "dev-docs",
+    "title": "Generating errors from smart contracts.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/errors-and-debugging/debugging",
+    "source": "dev-docs",
+    "title": "Debug smart contracts natively and as WASM.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/environment-concepts",
+    "source": "dev-docs",
+    "title": "The interface that defines objects, functions, and data available to smart\n  con",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/contract-lifecycle",
+    "source": "dev-docs",
+    "title": "The process of developing, deploying, and maintaining smart contracts.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/contract-interactions/stellar-transaction",
+    "source": "dev-docs",
+    "title": "Invoke and deploy smart contracts with the InvokeHostFunctionOp operation.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/contract-interactions/overview",
+    "source": "dev-docs",
+    "title": "Interact with smart contracts.",
+    "issue": "sentence-like (body fragment?)"
+   },
+   {
+    "url": "https://stellar.org/blog/policy/representing-blockchain-on-the-commodity-futures-trading-commissions-global-market-advisory-committee",
+    "source": "sdf-blog",
+    "title": "Stellar | Representing Blockchain on the Commodity Futures Trading Commission’s ",
+    "issue": "overlong (sentence, not a title)"
+   },
+   {
+    "url": "https://stellar.org/blog/foundation-news/stellar-development-foundation-2023-strategy",
+    "source": "sdf-blog",
+    "title": "Stellar | The Stellar Development Foundation&#x27;s 2023 Strategy",
+    "issue": "html-entities"
+   }
+  ]
+ },
+ "s7_coverage": {
+  "release": {
+   "chunks": 152,
+   "datedPct": 100,
+   "newestAgeDays": 0,
+   "undated": false,
+   "stalled": false
+  },
+  "sdf-blog": {
+   "chunks": 2163,
+   "datedPct": 100,
+   "newestAgeDays": 2,
+   "undated": false,
+   "stalled": false
+  },
+  "lumenloop-research": {
+   "chunks": 213,
+   "datedPct": 100,
+   "newestAgeDays": 1,
+   "undated": false,
+   "stalled": false
+  },
+  "sep": {
+   "chunks": 657,
+   "datedPct": 0,
+   "newestAgeDays": null,
+   "undated": true,
+   "stalled": false
+  },
+  "audit": {
+   "chunks": 922,
+   "datedPct": 100,
+   "newestAgeDays": 82,
+   "undated": false,
+   "stalled": false
+  },
+  "dev-docs": {
+   "chunks": 3883,
+   "datedPct": 75,
+   "newestAgeDays": 2,
+   "undated": false,
+   "stalled": false
+  },
+  "sdf-org": {
+   "chunks": 77,
+   "datedPct": 30,
+   "newestAgeDays": 121,
+   "undated": false,
+   "stalled": false
+  },
+  "security-program": {
+   "chunks": 10,
+   "datedPct": 100,
+   "newestAgeDays": 76,
+   "undated": false,
+   "stalled": false
+  },
+  "cap": {
+   "chunks": 911,
+   "datedPct": 0,
+   "newestAgeDays": null,
+   "undated": true,
+   "stalled": false
+  },
+  "scf-handbook": {
+   "chunks": 115,
+   "datedPct": 0,
+   "newestAgeDays": null,
+   "undated": true,
+   "stalled": false
+  },
+  "incident": {
+   "chunks": 1,
+   "datedPct": 100,
+   "newestAgeDays": 63,
+   "undated": false,
+   "stalled": false
+  },
+  "lumenloop": {
+   "chunks": 246,
+   "datedPct": 62,
+   "newestAgeDays": 38,
+   "undated": false,
+   "stalled": false
+  },
+  "ec-developer-report": {
+   "chunks": 37,
+   "datedPct": 100,
+   "newestAgeDays": 1298,
+   "undated": false,
+   "stalled": false
+  },
+  "paper": {
+   "chunks": 27,
+   "datedPct": 0,
+   "newestAgeDays": null,
+   "undated": true,
+   "stalled": false
+  }
+ },
+ "s7_stalled": [],
+ "s8_mirrors": {
+  "count": 130,
+  "sample": [
+   {
+    "hash": "e6d2b910b7a4",
+    "urls": [
+     "https://github.com/stellar/rs-soroban-sdk/releases/tag/v22.0.10",
+     "https://github.com/stellar/rs-soroban-sdk/releases/tag/v23.5.2",
+     "https://github.com/stellar/rs-soroban-sdk/releases/tag/v25.1.1"
+    ]
+   },
+   {
+    "hash": "90bf46f7072d",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep6/integration",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep24/integration"
+    ]
+   },
+   {
+    "hash": "88e687a9c79c",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep6/integration",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep24/integration"
+    ]
+   },
+   {
+    "hash": "f349e64c7baf",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/request_trust",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_on_hold"
+    ]
+   },
+   {
+    "hash": "4ecf7b552312",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_expired",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_error",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/do_stellar_payment"
+    ]
+   },
+   {
+    "hash": "3a15bfb2650b",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_refund_sent",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_refund_pending"
+    ]
+   },
+   {
+    "hash": "76a28a9e6063",
+    "urls": [
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_offchain_funds_pending",
+     "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_offchain_funds_available"
+    ]
+   },
+   {
+    "hash": "8d3676097351",
+    "urls": [
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0086.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0085.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0079.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0078.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0076.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0073.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0072.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0071.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0066.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0064.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0063.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0062.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0057.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0043.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0042.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0005.md"
+    ]
+   },
+   {
+    "hash": "45a4c0b65c6b",
+    "urls": [
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0086.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0085.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0079.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0078.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0073.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0072.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0066.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0064.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0063.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0062.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0056.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0055.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0054.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0043.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0042.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0005.md"
+    ]
+   },
+   {
+    "hash": "f14ffa6ebcac",
+    "urls": [
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0086.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0085.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0081.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0079.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0078.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0076.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0073.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0072.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0071.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0066.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0065.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0064.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0063.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0062.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0060.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0058.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0057.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0056.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0055.md",
+     "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0054.md"
+    ]
+   }
+  ]
+ }
+}

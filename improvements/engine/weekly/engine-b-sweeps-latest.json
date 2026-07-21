@@ -1,0 +1,233 @@
+{
+ "s1_prose_structure_divergence": {
+  "count": 2,
+  "sample": [
+   {
+    "slug": "wowmax",
+    "field": "supportedNetworks",
+    "prose": "near",
+    "missing": "near"
+   },
+   {
+    "slug": "pyusd",
+    "field": "supportedNetworks",
+    "prose": "bitcoin",
+    "missing": "bitcoin"
+   }
+  ]
+ },
+ "s2_field_population": {
+  "Infrastructure": {
+   "shortDescription": "99% (190/192)",
+   "types": "92% (177/192)",
+   "supportedNetworks": "7% (13/192)",
+   "logoUrl": "79% (152/192)"
+  },
+  "Tooling": {
+   "shortDescription": "97% (160/165)",
+   "types": "93% (154/165)",
+   "logoUrl": "81% (133/165)"
+  },
+  "User-Facing App": {
+   "shortDescription": "99% (351/356)",
+   "types": "95% (338/356)",
+   "supportedNetworks": "7% (25/356)",
+   "logoUrl": "82% (293/356)"
+  },
+  "Asset": {
+   "shortDescription": "31% (11/35)",
+   "types": "100% (35/35)",
+   "supportedNetworks": "14% (5/35)",
+   "logoUrl": "80% (28/35)"
+  },
+  "Protocol/Contract": {
+   "shortDescription": "100% (131/131)",
+   "types": "89% (117/131)",
+   "supportedNetworks": "15% (19/131)",
+   "logoUrl": "73% (96/131)",
+   "tvlUSD": "9% (12/131)"
+  },
+  "Anchor": {
+   "shortDescription": "93% (14/15)",
+   "types": "100% (15/15)",
+   "supportedNetworks": "13% (2/15)",
+   "logoUrl": "80% (12/15)"
+  },
+  "Partner Integration": {
+   "shortDescription": "100% (1/1)",
+   "types": "0% (0/1)",
+   "logoUrl": "0% (0/1)"
+  }
+ },
+ "s3_duplicates": {
+  "count": 0,
+  "resolved": 0,
+  "groups": []
+ },
+ "s3b_domain_duplicates": {
+  "count": 1,
+  "groups": [
+   {
+    "apex": "bossmoney.com",
+    "records": [
+     {
+      "slug": "boss-revolution",
+      "name": "Boss Revolution",
+      "scfAwarded": false
+     },
+     {
+      "slug": "boss-pay",
+      "name": "Boss Pay",
+      "scfAwarded": false
+     }
+    ]
+   }
+  ]
+ },
+ "s4_staleness": {
+  "liveNoDatedSignal": 385,
+  "liveStale365": 140,
+  "sample": [
+   {
+    "slug": "nodies",
+    "name": "Nodies",
+    "ageDays": 505,
+    "hasDated": true,
+    "tvlUSD": null
+   },
+   {
+    "slug": "band",
+    "name": "Band",
+    "ageDays": 873,
+    "hasDated": true,
+    "tvlUSD": null
+   },
+   {
+    "slug": "circle",
+    "name": "Circle",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "hubble",
+    "name": "Hubble",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "nownodes",
+    "name": "NOWNodes",
+    "ageDays": 2273,
+    "hasDated": true,
+    "tvlUSD": null
+   },
+   {
+    "slug": "friendbot",
+    "name": "Friendbot",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "validation-cloud",
+    "name": "Validation Cloud",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "quicknode",
+    "name": "QuickNode",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "infstones",
+    "name": "InfStones",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "alchemy",
+    "name": "Alchemy",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "redstone-finance",
+    "name": "Redstone Finance",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "didstellar",
+    "name": "DID:STELLAR",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "bitgo",
+    "name": "BitGo",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "stellar-disbursement-platform-sdp",
+    "name": "Stellar Disbursement Platform (SDP)",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "lightsail-network-quasar",
+    "name": "Lightsail Network (Quasar)",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "zettablock",
+    "name": "ZettaBlock",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "circle-cctp-cross-chain-transfer-protocol",
+    "name": "Circle CCTP (Cross-Chain Transfer Protocol)",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "stronghold",
+    "name": "Stronghold",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "onfinality",
+    "name": "OnFinality",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   },
+   {
+    "slug": "fordefi",
+    "name": "Fordefi",
+    "ageDays": null,
+    "hasDated": false,
+    "tvlUSD": null
+   }
+  ]
+ }
+}

@@ -1,0 +1,353 @@
+{
+ "windowDays": 14,
+ "frame": {
+  "loggedHits": 39066,
+  "realHits": 2633,
+  "distinctQueries": 1749,
+  "replayed": 250
+ },
+ "okRate": 89,
+ "misses": [
+  {
+   "endpoint": "/api/research",
+   "query": "test",
+   "hits": 42,
+   "lastSeen": "2026-07-20T23:03:51.221Z",
+   "days": 6,
+   "buckets": [
+    "other"
+   ],
+   "class": "WEAK",
+   "evidence": "top confidence 0.4"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "tyler van der hoeven",
+   "hits": 23,
+   "lastSeen": "2026-07-20T15:19:37.299Z",
+   "days": 6,
+   "buckets": [
+    "browser",
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/repos/search",
+   "query": "zk-snark",
+   "hits": 22,
+   "lastSeen": "2026-07-21T16:33:18.419Z",
+   "days": 3,
+   "buckets": [
+    "browser",
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "strupey",
+   "hits": 17,
+   "lastSeen": "2026-07-14T17:31:27.385Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "justin rice",
+   "hits": 9,
+   "lastSeen": "2026-07-18T00:35:19.232Z",
+   "days": 3,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "tyler",
+   "hits": 6,
+   "lastSeen": "2026-07-21T16:33:21.468Z",
+   "days": 1,
+   "buckets": [
+    "browser",
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "strupey",
+   "hits": 6,
+   "lastSeen": "2026-07-14T13:04:25.332Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "saleem",
+   "hits": 3,
+   "lastSeen": "2026-07-17T16:21:49.351Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "sorted",
+   "hits": 3,
+   "lastSeen": "2026-07-17T16:21:38.703Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "kutana",
+   "hits": 3,
+   "lastSeen": "2026-07-17T16:21:48.118Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "tomer weller",
+   "hits": 3,
+   "lastSeen": "2026-07-16T19:01:12.250Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "kalepail",
+   "hits": 3,
+   "lastSeen": "2026-07-14T13:07:18.379Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "david mazières",
+   "hits": 3,
+   "lastSeen": "2026-07-14T13:04:58.332Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "8004",
+   "hits": 3,
+   "lastSeen": "2026-07-13T05:30:57.518Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/partners",
+   "query": "tell me about solana",
+   "hits": 2,
+   "lastSeen": "2026-07-20T21:31:05.891Z",
+   "days": 1,
+   "buckets": [
+    "other",
+    "browser"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "is blend audited and by who?",
+   "hits": 2,
+   "lastSeen": "2026-07-20T14:08:21.786Z",
+   "days": 1,
+   "buckets": [
+    "other",
+    "claude"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "bastian",
+   "hits": 2,
+   "lastSeen": "2026-07-17T16:21:27.336Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "hypertron",
+   "hits": 2,
+   "lastSeen": "2026-07-17T13:31:05.956Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "jobs hiring bounty freelance contributor platform talent marketplace",
+   "hits": 2,
+   "lastSeen": "2026-07-16T17:41:11.576Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "hito-wallet",
+   "hits": 2,
+   "lastSeen": "2026-07-15T17:35:13.380Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "kelvin truong",
+   "hits": 2,
+   "lastSeen": "2026-07-15T06:24:08.035Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "passkey-kit",
+   "hits": 2,
+   "lastSeen": "2026-07-14T20:40:23.345Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "rice",
+   "hits": 2,
+   "lastSeen": "2026-07-14T12:58:24.739Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "reflector",
+   "hits": 2,
+   "lastSeen": "2026-07-14T03:13:34.494Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "zzzznonexistentquery12345",
+   "hits": 2,
+   "lastSeen": "2026-07-13T05:00:37.755Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "stxlm",
+   "hits": 2,
+   "lastSeen": "2026-07-13T04:00:14.133Z",
+   "days": 2,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  },
+  {
+   "endpoint": "/api/builders",
+   "query": "zzzzznonexistentxyz123",
+   "hits": 2,
+   "lastSeen": "2026-07-12T04:07:02.336Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "EMPTY",
+   "evidence": "0 results"
+  },
+  {
+   "endpoint": "/api/projects/search",
+   "query": "octoplace",
+   "hits": 2,
+   "lastSeen": "2026-07-11T16:54:31.126Z",
+   "days": 1,
+   "buckets": [
+    "other"
+   ],
+   "class": "FALLBACK",
+   "evidence": "matchMode=semantic (10 fallback rows)"
+  }
+ ]
+}
