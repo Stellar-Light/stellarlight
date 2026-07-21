@@ -5,7 +5,7 @@
 		"other"
 	],
 	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
-	"generatedAt": "2026-07-21T16:34:09.879Z",
+	"generatedAt": "2026-07-21T16:50:18.443Z",
 	"window": {
 		"since": "2026-07-11T00:00:00.000Z",
 		"days": 30
@@ -124,7 +124,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.92
+				"topConfidence": 0.92,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -136,7 +137,8 @@
 				"status": "weak",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": 0.4
+				"topConfidence": 0.4,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -148,7 +150,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -160,7 +163,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": 0.5
+				"topConfidence": 0.5,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -172,7 +176,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -184,7 +189,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -196,7 +202,8 @@
 				"status": "empty",
 				"returned": 0,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -208,7 +215,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -220,7 +228,8 @@
 				"status": "ok",
 				"returned": 6,
 				"matchMode": "strict",
-				"topConfidence": 0.92
+				"topConfidence": 0.92,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -232,7 +241,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.92
+				"topConfidence": 0.92,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -244,7 +254,8 @@
 				"status": "ok",
 				"returned": 5,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -256,7 +267,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": 0.75
+				"topConfidence": 0.75,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -265,10 +277,11 @@
 			"hits": 11,
 			"lastSeen": "2026-07-19T14:20:09.846Z",
 			"today": {
-				"status": "empty",
+				"status": "advisory",
 				"returned": 0,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": "scoped out + redirected (/api/people)"
 			}
 		},
 		{
@@ -280,7 +293,8 @@
 				"status": "ok",
 				"returned": 2,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -292,7 +306,8 @@
 				"status": "ok",
 				"returned": 6,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -304,7 +319,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -316,7 +332,8 @@
 				"status": "ok",
 				"returned": 2,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -328,7 +345,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": 0.78
+				"topConfidence": 0.78,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -340,7 +358,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": 0.94
+				"topConfidence": 0.94,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -349,10 +368,11 @@
 			"hits": 9,
 			"lastSeen": "2026-07-18T00:35:19.232Z",
 			"today": {
-				"status": "empty",
+				"status": "advisory",
 				"returned": 0,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": "answered via advisory (Justin Rice)"
 			}
 		},
 		{
@@ -364,7 +384,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -376,7 +397,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -388,7 +410,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -400,7 +423,8 @@
 				"status": "ok",
 				"returned": 10,
 				"matchMode": "strict",
-				"topConfidence": 0.97
+				"topConfidence": 0.97,
+				"advisoryNote": null
 			}
 		},
 		{
@@ -412,14 +436,15 @@
 				"status": "ok",
 				"returned": 2,
 				"matchMode": null,
-				"topConfidence": null
+				"topConfidence": null,
+				"advisoryNote": null
 			}
 		}
 	],
 	"replaySummary": {
 		"graded": 25,
-		"ok": 21,
-		"okRate": 84
+		"ok": 23,
+		"okRate": 92
 	},
 	"contractChangesInWindow": 36
 }
