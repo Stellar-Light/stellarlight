@@ -55,6 +55,29 @@ jobs:
         # scfAwarded booleans against the authoritative source.
         continue-on-error: true
         run: pnpm exec tsx scripts/eval/scf-crosscheck.ts --out=/tmp/scf.json 2> /tmp/scf.log
+      - name: SCF round-membership drift guard
+        id: scf_rounds_guard
+        # Promotes the crosscheck's roundsOverstated finding (P4 — a round we
+        # list that the official page marks "Not Awarded" on every submission)
+        # from buried weekly evidence to a TRACKED rolling issue. Reuses the
+        # /tmp/scf.json from the step above — no extra scrape, no extra Actions
+        # minutes. A missing report never accuses (scrape-failure safe).
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          if [ ! -s /tmp/scf.json ]; then
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+            echo "scf.json absent — crosscheck did not report; skipping (never accuse on a scrape failure)."
+            exit 0
+          fi
+          pnpm exec tsx scripts/eval/scf-rounds-guard.ts /tmp/scf.json 2>&1 | tee scf-rounds.log
+      - name: Track SCF round drift (rolling issue)
+        if: steps.scf_rounds_guard.outputs.skip != '1'
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "SCF round-membership drift"
+          outcome: ${{ steps.scf_rounds_guard.outcome }}
+          body-file: scf-rounds.log
       - name: Golden retrieval eval
         # Correctness eval (forbidden-hits/junk/bad-titles/thin) against the
         # live API — was manual-only until 2026-07-11; now standing weekly.
