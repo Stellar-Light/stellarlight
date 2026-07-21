@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.16",
+		"version": "1.8.17",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -3111,6 +3111,121 @@
 					}
 				}
 			}
+		},
+		"/api/stablecoins": {
+			"get": {
+				"operationId": "getStablecoins",
+				"tags": [
+					"Ecosystem"
+				],
+				"summary": "Stellar stablecoins ranked by USD market cap",
+				"description": "Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.",
+				"x-routing": {
+					"purpose": "Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
+					"keywords": [
+						"stablecoin",
+						"stablecoins",
+						"biggest stablecoin",
+						"largest stablecoin",
+						"top stablecoin",
+						"market cap",
+						"circulating supply",
+						"usdc",
+						"usdy",
+						"ondo",
+						"pyusd",
+						"eurc",
+						"gyen",
+						"issuer",
+						"peg",
+						"holders"
+					],
+					"useWhen": [
+						"the biggest / largest stablecoin on Stellar (by USD market cap)",
+						"top stablecoin issuers, total stablecoin market cap, or a stablecoin's supply/holders/peg",
+						"comparing stablecoins by size — use marketCapUSD, never raw supply across different pegs"
+					],
+					"notFor": [
+						"DeFi protocol TVL -> getLeaderboard sort=tvl",
+						"a stablecoin project's full profile/funding/repos -> searchProjects",
+						"non-stablecoin issued assets (governance/utility tokens) -> getLeaderboard sort=supply"
+					],
+					"exampleQuestions": [
+						"What's the biggest stablecoin on Stellar?",
+						"Which stablecoin has the most holders?",
+						"List USD-pegged stablecoins by market cap",
+						"What's the total stablecoin market cap on Stellar?"
+					]
+				},
+				"parameters": [
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Ranking order. marketcap (default, USD-comparable) | supply (raw peg units — comparable only within one peg) | holders | volume. Unrecognized values return 400.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"marketcap",
+								"supply",
+								"holders",
+								"volume"
+							],
+							"default": "marketcap"
+						}
+					},
+					{
+						"name": "peg",
+						"in": "query",
+						"description": "Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs.",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"description": "Max rows (default 50, max 100).",
+						"schema": {
+							"type": "integer",
+							"default": 50,
+							"maximum": 100
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Ranked stablecoins",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"meta": {
+											"$ref": "#/components/schemas/Meta"
+										},
+										"stablecoins": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/Stablecoin"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid sort or unknown query param",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"components": {
@@ -5267,6 +5382,85 @@
 								"description": "Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint."
 							}
 						}
+					}
+				}
+			},
+			"Stablecoin": {
+				"type": "object",
+				"description": "One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
+				"properties": {
+					"ticker": {
+						"type": "string",
+						"description": "Asset code (USDC, USDY, GYEN, …)."
+					},
+					"name": {
+						"type": "string",
+						"nullable": true
+					},
+					"issuer": {
+						"type": "string",
+						"nullable": true,
+						"description": "Stellar issuer account (G…) — the universal join key."
+					},
+					"issuerDomain": {
+						"type": "string",
+						"nullable": true
+					},
+					"company": {
+						"type": "string",
+						"nullable": true
+					},
+					"website": {
+						"type": "string",
+						"nullable": true
+					},
+					"peg": {
+						"type": "string",
+						"nullable": true,
+						"description": "Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD."
+					},
+					"country": {
+						"type": "string",
+						"nullable": true
+					},
+					"supply": {
+						"type": "number",
+						"nullable": true,
+						"description": "Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported."
+					},
+					"marketCapUSD": {
+						"type": "number",
+						"nullable": true,
+						"description": "Supply valued in USD (supply × USD price) — THE comparable ranking metric (default sort). Null = unpriced."
+					},
+					"priceUSD": {
+						"type": "number",
+						"nullable": true,
+						"description": "USD price of one unit (≈1 for USD pegs)."
+					},
+					"holders": {
+						"type": "number",
+						"nullable": true,
+						"description": "Trustline holder count."
+					},
+					"volume24hUSD": {
+						"type": "number",
+						"nullable": true,
+						"description": "24h transfer volume in USD."
+					},
+					"supplyChange7d": {
+						"type": "string",
+						"nullable": true,
+						"description": "7-day supply change (display string, e.g. '-5.80%')."
+					},
+					"verified": {
+						"type": "boolean"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When this snapshot row was refreshed (dated-metrics rule)."
 					}
 				}
 			},
