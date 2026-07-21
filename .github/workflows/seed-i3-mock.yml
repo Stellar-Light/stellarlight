@@ -1,0 +1,44 @@
+name: Seed i³ Awards mock round
+
+# Seeds the MOCK i³ Awards round (scripts/data/seed-i3-mock.ts) for testing the
+# HIDDEN /awards ballot end-to-end on prod. Creates round `i3-2026-test` (open,
+# closes in 14 days), 12 nominees (each slug verified against the LIVE directory
+# API first — fail-closed), and 3 mock TESTNET voters. IDEMPOTENT (create-only,
+# skips existing). REVERSIBLE: flip the round to `draft` in the admin to hide it.
+#
+# ⚠ With --execute the mock voters' TESTNET secret keys are printed to THIS log
+#   (repo is private; keys are throwaway testnet-only, stored nowhere). Import
+#   one into Freighter/xBull on testnet to cast a test ballot.
+#
+# Run dry first (execute=false), read the log, then execute=true (+ fund=true to
+# friendbot-fund the mock voters so 'Sign & submit' works immediately).
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+      fund:
+        description: "Friendbot-fund the mock voters (only with execute)."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/seed-i3-mock.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.fund && '--fund' || '' }}
