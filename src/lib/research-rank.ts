@@ -460,6 +460,41 @@ export const RESEARCH_ANCHORS: Array<{
 		],
 	},
 	{
+		// Privacy-honesty class (2026-07-21 privacy battery): "is stellar
+		// anonymous?" embeds next to ledger-STRUCTURE docs (accounts/balances,
+		// CLI manual) because the corpus says privacy/confidential, never
+		// "anonymous" — the canonical answer doc (public-by-default + what
+		// privacy actually exists) never entered the page. Anchor it for
+		// anonymity-vocabulary intent so the honest answer is guaranteed in.
+		id: "privacy-anonymity",
+		intent: /\banonym(?:ous|ity|ised|ized)?\b|\bmixer\b|\buntraceable\b|\bshielded\b/i,
+		context:
+			/\bstellar\b|\bledger\b|\btransactions?\b|\bpayments?\b|\btransfers?\b|\baccounts?\b|\btokens?\b/i,
+		urls: [
+			// Verified in-corpus 2026-07-21 (title: "Privacy on Stellar",
+			// published 2026-07-16).
+			"https://developers.stellar.org/docs/build/apps/privacy",
+		],
+	},
+	{
+		// MPP abbreviation class (2026-07-21 privacy/x402/mpp battery): bare
+		// "mpp" and "machine payments protocol overview" embed degenerately
+		// (3-letter token) — sub-guides surface at 0.4 beside IPFS/data-format
+		// junk and the overview doc stays absent. The abbreviation IS the
+		// intent, so context accepts the token itself and single-word agent
+		// queries fire. (Bare "x402" needs no anchor — its token is
+		// distinctive enough that the right docs already lead.)
+		id: "mpp-protocol",
+		intent: /\bmpp\b|\bmachine\s+payments?\b/i,
+		context:
+			/\bmpp\b|\bmachine\b|\bpayments?\b|\bcharge\b|\bsessions?\b|\bagents?\b|\b402\b|\bprotocols?\b/i,
+		urls: [
+			// Verified in-corpus 2026-07-21 (title: "MPP on Stellar",
+			// published 2026-06-17).
+			"https://developers.stellar.org/docs/build/agentic-payments/mpp",
+		],
+	},
+	{
 		id: "bridge-assets",
 		intent: /\bbridg(?:e|es|ing)\b|\bcross[\s-]?chain\b/i,
 		context:
