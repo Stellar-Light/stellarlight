@@ -389,10 +389,19 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			{/* ── Hero ── */}
 			<header className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-12 text-center">
 				<I3Mark className="mb-6" />
-				<p className="text-xs font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
-					Stellar Community Awards · Testnet vote
+				<p className="mb-4">
+					<span
+						className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em]"
+						style={{
+							background: `${GOLD}14`,
+							color: GOLD,
+							border: `1px solid ${GOLD}33`,
+						}}
+					>
+						Stellar Community Awards · Testnet vote
+					</span>
 				</p>
-				<h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-tight mb-5">
+				<h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground leading-tight mb-5">
 					{round.title}
 				</h1>
 				<p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
@@ -428,12 +437,29 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			{phase === "submitted" && txHash && (
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-10 animate-fade-in-up">
 					<div
-						className="rounded-2xl border p-6 sm:p-8 text-center"
+						className="relative rounded-[18px] border p-6 sm:p-8 text-center overflow-hidden"
 						style={{
 							borderColor: `${GOLD}66`,
-							background: `linear-gradient(180deg, ${GOLD}14, transparent)`,
+							background: `linear-gradient(180deg, ${GOLD}14, #171717)`,
+							boxShadow: `0 8px 32px ${GOLD}1A`,
 						}}
 					>
+						<span className="sm-confetti" aria-hidden="true">
+							{Array.from({ length: 14 }, (_, i) => (
+								<i
+									// biome-ignore lint/suspicious/noArrayIndexKey: static burst
+									key={i}
+									style={{
+										["--sm-i" as string]: i,
+										["--sm-x" as string]: `${(i % 2 ? 1 : -1) * (14 + ((i * 37) % 110))}px`,
+										["--sm-y" as string]: `${-(70 + ((i * 53) % 120))}px`,
+										["--sm-r" as string]: `${140 + ((i * 97) % 320)}deg`,
+										["--sm-c" as string]:
+											i % 3 === 0 ? "#FFF3B0" : i % 3 === 1 ? GOLD : "#B8930A",
+									}}
+								/>
+							))}
+						</span>
 						<span
 							className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
 							style={{ background: GOLD }}
@@ -490,15 +516,15 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-16">
 				{categories.map((category, index) => (
 					<section key={category.key} aria-label={category.name}>
-						<div className="mb-6 flex items-baseline gap-4">
+						<div className="mb-6 flex items-center gap-3.5">
 							<span
-								className="font-mono text-sm tabular-nums"
-								style={{ color: GOLD }}
+								className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-extrabold tabular-nums flex-shrink-0"
+								style={{ background: `${GOLD}1F`, color: GOLD }}
 							>
 								{String(index + 1).padStart(2, "0")}
 							</span>
 							<div>
-								<h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+								<h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
 									{category.name}
 								</h2>
 								{category.tagline && (
@@ -531,7 +557,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			{voting.open && !readOnly && (
 				<div className="fixed inset-x-0 bottom-0 z-40">
 					<div
-						className="border-t border-border bg-[#171717]/90 backdrop-blur-xl"
+						className="rounded-t-[20px] border-t border-x border-white/10 bg-[#171717]/92 backdrop-blur-xl shadow-[0_-8px_32px_rgba(0,0,0,0.5)] sm:mx-4"
 						style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
 					>
 						<div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -607,7 +633,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										type="button"
 										onClick={handleSubmit}
 										disabled={selectedCount === 0 || busy}
-										className="inline-flex items-center gap-2 rounded-full px-5 sm:px-6 h-11 text-sm font-semibold flex-shrink-0 transition-all duration-200 disabled:opacity-40 active:scale-[0.98]"
+										className="inline-flex items-center gap-2 rounded-full px-6 sm:px-7 h-12 text-sm font-extrabold flex-shrink-0 transition-all duration-200 disabled:opacity-40 active:scale-[0.97]"
 										style={{
 											background: selectedCount > 0 && !busy ? GOLD : "#404040",
 											color: selectedCount > 0 && !busy ? "#171717" : "#A3A3A3",
@@ -712,17 +738,21 @@ function NomineeCard({
 			aria-pressed={selected}
 			disabled={disabled}
 			onClick={onToggle}
-			className={`idea-card group relative rounded-2xl p-5 text-left flex flex-col min-h-[180px] transition-all duration-300 disabled:cursor-default ${
+			className={`group relative rounded-[18px] border p-5 text-left flex flex-col min-h-[184px] transition-all duration-300 disabled:cursor-default ${
 				dimmed ? "opacity-55" : ""
-			} ${selected ? "scale-[1.015]" : disabled ? "" : "active:scale-[0.985]"}`}
+			} ${selected ? "scale-[1.015]" : disabled ? "" : "active:scale-[0.985] hover:border-white/20"}`}
 			style={
 				selected
 					? {
 							borderColor: GOLD,
 							boxShadow: `0 0 0 1px ${GOLD}, 0 8px 32px ${GOLD}26`,
-							background: `linear-gradient(180deg, ${GOLD}0F, #262626)`,
+							background: `linear-gradient(180deg, ${GOLD}0F, #1c1c1c)`,
 						}
-					: undefined
+					: {
+							background: "#171717",
+							borderColor: "rgba(255,255,255,0.08)",
+							boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+						}
 			}
 		>
 			{/* selection badge */}
@@ -744,10 +774,14 @@ function NomineeCard({
 					alt=""
 					width={44}
 					height={44}
-					className="rounded-full object-cover w-11 h-11 border border-border/50 flex-shrink-0"
+					className="rounded-full object-cover w-11 h-11 flex-shrink-0 border"
+					style={{
+						background: "#0f0f0f",
+						borderColor: "rgba(255,255,255,0.1)",
+					}}
 					onError={() => setLogoError(true)}
 				/>
-				<span className="text-base font-semibold text-foreground leading-tight">
+				<span className="text-[15px] font-bold text-foreground leading-tight tracking-tight">
 					{nominee.name}
 				</span>
 			</div>
@@ -756,19 +790,26 @@ function NomineeCard({
 				{nominee.blurb ?? "Shortlisted by the community."}
 			</span>
 
-			<span className="mt-4 pt-3 border-t border-border/70 flex items-center justify-between">
+			<span className="mt-4 pt-3 border-t border-white/[0.07] flex items-center justify-between">
 				<span
-					className="text-xs font-medium"
-					style={{ color: selected ? GOLD : undefined }}
+					className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold transition-all duration-150"
+					style={
+						selected
+							? { background: `${GOLD}1F`, color: GOLD }
+							: {
+									border: "1px solid rgba(255,255,255,0.12)",
+									color: "var(--muted-foreground, #8e8e97)",
+								}
+					}
 				>
-					{selected ? "Your pick" : "Tap to select"}
+					{selected ? "Your pick" : "Select"}
 				</span>
 				<a
 					href={nominee.projectUrl}
 					target="_blank"
 					rel="noopener noreferrer"
 					onClick={(e) => e.stopPropagation()}
-					className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					className="inline-flex items-center gap-0.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
 				>
 					About
 					<ArrowUpRight className="h-3 w-3" />
@@ -804,10 +845,19 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 		<div className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32">
 			<header className="text-center mb-14">
 				<I3Mark className="mb-6" />
-				<p className="text-xs font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
-					Voting closed
+				<p className="mb-4">
+					<span
+						className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em]"
+						style={{
+							background: `${GOLD}14`,
+							color: GOLD,
+							border: `1px solid ${GOLD}33`,
+						}}
+					>
+						Voting closed
+					</span>
 				</p>
-				<h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-tight">
+				<h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground leading-tight">
 					{round.title}
 				</h1>
 				{results && (
@@ -834,44 +884,84 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 				<div className="space-y-10">
 					{results.categories.map((category) => {
 						const [winner, ...rest] = category.results;
+						const total = Math.max(1, category.totalVotes);
+						const pct = (votes: number) => Math.round((votes / total) * 100);
 						return (
 							<section key={category.key}>
-								<h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-4 flex items-center gap-2.5">
+								<h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mb-4 flex items-center gap-2.5">
 									<Trophy className="h-5 w-5" style={{ color: GOLD }} />
 									{category.name}
 								</h2>
 								{winner && (
 									<div
-										className="rounded-2xl border p-5 mb-3 flex items-center justify-between gap-4"
+										className="sm-row rounded-[18px] border p-5 mb-3"
 										style={{
 											borderColor: `${GOLD}66`,
-											background: `linear-gradient(180deg, ${GOLD}12, transparent)`,
+											background: `linear-gradient(180deg, ${GOLD}12, #171717)`,
+											boxShadow: `0 8px 32px ${GOLD}1A`,
 										}}
 									>
-										<div>
-											<p className="text-lg font-semibold text-foreground">
-												{winner.name}
-											</p>
-											<p className="text-xs text-muted-foreground">Winner</p>
+										<div className="flex items-center justify-between gap-4 mb-3">
+											<div className="flex items-center gap-2.5 min-w-0">
+												<span
+													className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold flex-shrink-0"
+													style={{ background: `${GOLD}1F`, color: GOLD }}
+												>
+													Winner
+												</span>
+												<p className="text-lg font-bold text-foreground tracking-tight truncate">
+													{winner.name}
+												</p>
+											</div>
+											<span
+												className="rounded-md px-2 py-0.5 text-sm font-extrabold tabular-nums flex-shrink-0"
+												style={{ background: `${GOLD}1F`, color: GOLD }}
+											>
+												{winner.votes} · {pct(winner.votes)}%
+											</span>
 										</div>
-										<span
-											className="text-2xl font-bold tabular-nums"
-											style={{ color: GOLD }}
-										>
-											{winner.votes}
-										</span>
+										<div className="sm-bar-track">
+											<div
+												className="sm-bar-fill"
+												style={{
+													width: `${pct(winner.votes)}%`,
+													background: GOLD,
+												}}
+											/>
+										</div>
 									</div>
 								)}
-								<ul className="space-y-1.5">
-									{rest.map((r) => (
+								<ul className="space-y-2">
+									{rest.map((r, i) => (
 										<li
 											key={r.slug}
-											className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2.5"
+											className="sm-row rounded-[14px] border px-4 py-3"
+											style={{
+												background: "#171717",
+												borderColor: "rgba(255,255,255,0.08)",
+												["--sm-i" as string]: i + 1,
+											}}
 										>
-											<span className="text-sm text-foreground">{r.name}</span>
-											<span className="text-sm text-muted-foreground tabular-nums">
-												{r.votes}
-											</span>
+											<div className="flex items-center justify-between gap-3 mb-2">
+												<span className="text-sm font-semibold text-foreground truncate">
+													{r.name}
+												</span>
+												<span
+													className="rounded-md px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-muted-foreground flex-shrink-0"
+													style={{ background: "rgba(255,255,255,0.07)" }}
+												>
+													{r.votes} · {pct(r.votes)}%
+												</span>
+											</div>
+											<div className="sm-bar-track" style={{ height: 6 }}>
+												<div
+													className="sm-bar-fill"
+													style={{
+														width: `${pct(r.votes)}%`,
+														background: "rgba(255,255,255,0.28)",
+													}}
+												/>
+											</div>
 										</li>
 									))}
 								</ul>

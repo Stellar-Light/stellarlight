@@ -3,6 +3,7 @@ import {
 	AwardsBallot,
 	type AwardsRoundData,
 } from "@/components/awards/awards-ballot";
+import "@/components/awards/awards.css";
 import { roundOpenState } from "@/lib/awards/ballot";
 import { loadRound, toPublicRound } from "@/lib/awards/round";
 
@@ -49,7 +50,7 @@ async function getRoundData(): Promise<AwardsRoundData | null> {
 export default async function AwardsPage() {
 	const data = await getRoundData();
 	return (
-		<div className="min-h-screen relative">
+		<div className="awards-sm min-h-screen relative">
 			<AwardsBallot data={data} />
 		</div>
 	);
