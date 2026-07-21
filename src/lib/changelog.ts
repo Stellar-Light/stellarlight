@@ -49,6 +49,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"searchProjects now documents the accountability/diligence filter composition: `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that later went inactive, and `meta.counts.total` is the count. The words 'inactive/defunct/abandoned' don't route from free-text `q` — they must be passed as `status=Inactive`.",
 		detail:
 			"Cross-cutting persona battery (SDF/institution view): a natural-language 'which SCF projects are now inactive' returned Live projects because status-intent words don't route from `q`. The capability already existed (status + scfAwarded filters compose server-side, 12 SCF-funded Inactive projects with amounts) but wasn't discoverable from the spec. Added the composition to the status param description, an exampleQuestion, and a useWhen entry so the discovery index teaches it. No behavior change — routing/description only.",
+	},
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
