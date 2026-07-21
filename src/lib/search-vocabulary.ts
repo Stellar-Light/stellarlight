@@ -123,6 +123,16 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 		"groth16",
 	],
 	zkp: ["zkp", "zk", "zero-knowledge"],
+	// Privacy vertical (2026-07-21 privacy battery): street vocabulary
+	// ("anonymous", "mixer", "monero-style") never appears in privacy
+	// records — they say privacy/confidential ("privacy-preserving token
+	// distribution", "Privacy pools protocol", "confidential transactions").
+	// Route the asked words to the record words so "anonymous mixer" reaches
+	// the actual privacy projects instead of falling through to semantic
+	// neighbors.
+	anonymous: ["anonymous", "anonymity", "privacy", "private", "confidential"],
+	anonymity: ["anonymity", "anonymous", "privacy", "confidential"],
+	mixer: ["mixer", "privacy", "tumbler", "confidential"],
 	identity: ["identity", "kyc", "did", "credential", "compliance"],
 	// Ramp/anchor vertical (sls-018): corridor queries must reach issuers
 	// whose prose never says "anchor" — on every surface.
@@ -158,6 +168,9 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	bitcoin: ["bitcoin", "btc", "cross-chain"],
 	btc: ["btc", "bitcoin", "cross-chain"],
 	polkadot: ["polkadot", "dot", "kusama", "cross-chain"],
+	// "monero-style X" queries are privacy-intent, not corridor-intent — the
+	// chain name doubles as privacy vocabulary (2026-07-21 privacy battery).
+	monero: ["monero", "xmr", "privacy", "cross-chain"],
 	kusama: ["kusama", "polkadot", "cross-chain"],
 	sui: ["sui", "cross-chain"],
 	near: ["near", "cross-chain"],

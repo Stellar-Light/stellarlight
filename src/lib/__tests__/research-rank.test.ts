@@ -624,6 +624,36 @@ describe("vertical anchor docs (RESEARCH_ANCHORS)", () => {
 		expect(anchorDocUrls(undefined)).toEqual([]);
 	});
 
+	const PRIVACY_DOC = "https://developers.stellar.org/docs/build/apps/privacy";
+	const MPP_DOC =
+		"https://developers.stellar.org/docs/build/agentic-payments/mpp";
+
+	it("fires on anonymity-vocabulary intent — corpus says privacy, asker says anonymous", () => {
+		for (const q of [
+			"is stellar anonymous?",
+			"monero style mixer for stellar tokens",
+			"shielded transfers on stellar",
+			"untraceable payments",
+		]) {
+			expect(anchorDocUrls(q), `query: ${q}`).toEqual([PRIVACY_DOC]);
+		}
+		// Context gate: anonymity words without a ledger/payments noun stay out.
+		expect(anchorDocUrls("anonymous feedback form")).toEqual([]);
+	});
+
+	it("fires on the MPP abbreviation — including the bare single-token query", () => {
+		for (const q of [
+			"mpp",
+			"what is MPP?",
+			"machine payments protocol overview",
+			"mpp charge guide",
+		]) {
+			expect(anchorDocUrls(q), `query: ${q}`).toEqual([MPP_DOC]);
+		}
+		// Distinctive-token neighbors don't trip it.
+		expect(anchorDocUrls("x402 quickstart")).toEqual([]);
+	});
+
 	it("floors anchor relevance so embedding myopia can't bury the canonical how-to", () => {
 		// Live shape: the CCTP how-to scored below the pool cutoff while
 		// contract-MIGRATION docs (higher cosine, wrong intent) filled the top.
