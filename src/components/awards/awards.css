@@ -1,0 +1,93 @@
+/**
+ * i³ Awards — scoped design layer (stellar-markets language, dark).
+ *
+ * The reference (theboycoder/stellar-markets) is a light Polymarket-style UI
+ * whose signature is SF Pro Rounded, big soft-radius cards, pill chips, and
+ * chunky animated share bars. This layer reproduces that language on the
+ * site's dark tokens WITHOUT bundling Apple's font: `ui-rounded` resolves to
+ * real SF Rounded on Apple devices and falls back to the site sans elsewhere.
+ * Scoped under .awards-sm so nothing leaks into the rest of the site.
+ */
+
+.awards-sm {
+	font-family:
+		ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont,
+		var(--font-sans, Inter), system-ui, sans-serif;
+	letter-spacing: -0.011em;
+}
+
+/* Chunky results share bar — width animates like the reference's 0.6s fill. */
+.awards-sm .sm-bar-track {
+	height: 10px;
+	border-radius: 99px;
+	background: rgba(255, 255, 255, 0.08);
+	overflow: hidden;
+}
+.awards-sm .sm-bar-fill {
+	height: 100%;
+	border-radius: 99px;
+	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Result rows fade up with a small stagger (set --sm-i per row). */
+.awards-sm .sm-row {
+	opacity: 0;
+	animation: sm-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	animation-delay: calc(var(--sm-i, 0) * 60ms);
+}
+@keyframes sm-fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Confetti burst on ballot submission — 12 gold shards, pure CSS. */
+.awards-sm .sm-confetti {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	border-radius: inherit;
+}
+.awards-sm .sm-confetti i {
+	position: absolute;
+	top: 42%;
+	left: 50%;
+	width: 7px;
+	height: 11px;
+	border-radius: 2px;
+	opacity: 0;
+	animation: sm-confetti-pop 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	animation-delay: calc(var(--sm-i, 0) * 28ms);
+	background: var(--sm-c, #fdda24);
+	transform-origin: center;
+}
+@keyframes sm-confetti-pop {
+	0% {
+		opacity: 0;
+		transform: translate(0, 0) rotate(0deg) scale(0.6);
+	}
+	12% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(var(--sm-x, 0px), var(--sm-y, -120px))
+			rotate(var(--sm-r, 260deg)) scale(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-bar-fill,
+	.awards-sm .sm-row,
+	.awards-sm .sm-confetti i {
+		animation: none;
+		transition: none;
+		opacity: 1;
+	}
+}
