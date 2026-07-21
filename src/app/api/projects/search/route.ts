@@ -23,6 +23,7 @@ import {
 	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
+	chainCorridorHit,
 	corridorMatch,
 	hitsAnyToken,
 	intentTypesFor,
@@ -224,6 +225,10 @@ interface ProjectRow {
 	 * category/types/coverage/description lead). Absent on semantic/browse rows
 	 * — the discriminator then treats the row as identity (rule off). */
 	anchorIdentity?: boolean;
+	/** Chain-corridor discriminator: false only when the query names an external
+	 * chain and this Bridge record demonstrably does NOT serve it (supportedNetworks
+	 * proof). Absent/true on non-bridge or chain-agnostic queries (rule off). */
+	chainCorridor?: boolean;
 	id: string;
 	name: string;
 	slug: string;
@@ -1031,6 +1036,11 @@ export async function GET(req: NextRequest) {
 				// Mention-vs-identity: does an anchor token hit where the record
 				// says what it IS (name/category/types/coverage/description lead)?
 				const anchorIdentity = anchorIdentityHit(p, tokens);
+				// Chain-corridor: when the query names an external chain, a Bridge
+				// record must prove it in supportedNetworks (spacewalk = polkadot/
+				// kusama ≠ a "solana bridge"). Inert on non-bridge/chain-agnostic
+				// queries.
+				const chainCorridor = chainCorridorHit(p, tokens);
 				const hk =
 					p.hackathon && typeof p.hackathon === "object"
 						? {
@@ -1051,6 +1061,7 @@ export async function GET(req: NextRequest) {
 				return {
 					hay, // F2: relaxed-tier anchor guard re-tests tokens on the row
 					anchorIdentity,
+					chainCorridor,
 
 					id: String(p.id),
 					name: p.name,
@@ -1207,6 +1218,10 @@ export async function GET(req: NextRequest) {
 					let added = 0;
 					for (const p of projects) {
 						if (have.has(p.id) || p.anchorIdentity !== true) continue;
+						// Don't pull a wrong-chain bridge in via the identity bypass:
+						// "solana bridge" must not admit a polkadot-only bridge just
+						// because it IS a bridge (2026-07-21 corridor discriminator).
+						if (p.chainCorridor === false) continue;
 						if (!majorityAdmit(p)) continue;
 						filtered.push(p);
 						have.add(p.id);
@@ -1288,6 +1303,12 @@ export async function GET(req: NextRequest) {
 						// product). 2026-07-19 re-measure of audit item 1.
 						Number(b.anchorIdentity ?? true) -
 							Number(a.anchorIdentity ?? true) ||
+						// Chain-corridor: among bridges, one that PROVES the queried
+						// chain (allbridge serves solana) outranks one that doesn't
+						// (spacewalk = polkadot/kusama). Inert unless the query names
+						// an external chain — 2026-07-21 persona battery.
+						Number(b.chainCorridor ?? true) -
+							Number(a.chainCorridor ?? true) ||
 						b.score - a.score ||
 						// Structured relevance (type-match OR corridor coverage-match)
 						// leads over pure prose matches at the same keyword score.
@@ -1502,8 +1523,13 @@ export async function GET(req: NextRequest) {
 		const {
 			hay: _hay,
 			anchorIdentity: _ai,
+			chainCorridor: _cc,
 			...rest
-		} = p as typeof p & { hay?: string; anchorIdentity?: boolean };
+		} = p as typeof p & {
+			hay?: string;
+			anchorIdentity?: boolean;
+			chainCorridor?: boolean;
+		};
 		return rest;
 	});
 	// Shadow-fold (2026-07-11 audit, WRONG-RESULT high): a merged duplicate

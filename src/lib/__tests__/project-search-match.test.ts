@@ -3,11 +3,13 @@ import {
 	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
+	chainCorridorHit,
 	corridorMatch,
 	hitsAnyToken,
 	identityZone,
 	intentTypesFor,
 	isRampIntent,
+	namedChains,
 	scoreTokens,
 	structuredHit,
 	structuredSelectClauses,
@@ -343,5 +345,84 @@ describe("mention-vs-identity (custody re-measure 2026-07-19)", () => {
 
 	it("anchor-free queries switch the rule off", () => {
 		expect(anchorIdentityHit(NORMAL_FINANCE, [])).toBe(true);
+	});
+});
+
+describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
+	// Real supportedNetworks captured live 2026-07-21.
+	const SPACEWALK = {
+		name: "Spacewalk",
+		shortDescription:
+			"Spacewalk is a trust-minimized cross-chain bridge connecting Stellar and Polkadot, built by Pendulum.",
+		category: "Bridge",
+		types: ["Bridge"],
+		supportedNetworks: ["stellar", "polkadot", "kusama"],
+		coverage: null,
+	};
+	const ALLBRIDGE = {
+		name: "Allbridge",
+		shortDescription:
+			"Allbridge enables users to access the Stellar ecosystem through cross-chain bridge swaps.",
+		category: "Bridge",
+		types: ["Bridge"],
+		supportedNetworks: ["stellar", "evm", "solana", "tron", "sui"],
+		coverage: null,
+	};
+	// A bridge whose supportedNetworks is not yet enriched — must fall back to
+	// prose so we never penalize a record we simply haven't enriched.
+	const UNENRICHED_SOL_BRIDGE = {
+		name: "SolLink",
+		shortDescription: "A Solana ⇄ Stellar bridge for SPL tokens.",
+		category: "Bridge",
+		types: ["Bridge"],
+		supportedNetworks: [],
+		coverage: null,
+	};
+
+	it("names external chains, ignoring Stellar and ambiguous English-word tickers", () => {
+		expect([...namedChains(tokenize("solana to stellar bridge"))]).toEqual([
+			"solana",
+		]);
+		expect([...namedChains(tokenize("ethereum bridge"))]).toEqual(["ethereum"]);
+		// "stellar" is the home chain, never an external corridor.
+		expect(namedChains(tokenize("stellar bridge")).size).toBe(0);
+		// bare "sol"/"base"/"near" are English words / ambiguous → not chains.
+		expect(namedChains(tokenize("cross-chain bridge")).size).toBe(0);
+	});
+
+	it("a solana-serving bridge proves the corridor; a polkadot-only one does not", () => {
+		const t = tokenize("solana to stellar bridge");
+		expect(chainCorridorHit(ALLBRIDGE, t)).toBe(true);
+		expect(chainCorridorHit(SPACEWALK, t)).toBe(false); // polkadot/kusama ≠ solana
+	});
+
+	it("EVM-family queries are proven by the generic evm tag", () => {
+		expect(chainCorridorHit(ALLBRIDGE, tokenize("ethereum bridge"))).toBe(true);
+		expect(chainCorridorHit(SPACEWALK, tokenize("ethereum bridge"))).toBe(false);
+	});
+
+	it("unenriched bridges fall back to a prose mention", () => {
+		expect(
+			chainCorridorHit(UNENRICHED_SOL_BRIDGE, tokenize("solana bridge")),
+		).toBe(true);
+	});
+
+	it("is inert on chain-agnostic queries and non-bridge records", () => {
+		// No external chain named → rule off, every bridge passes.
+		expect(chainCorridorHit(SPACEWALK, tokenize("cross-chain bridge"))).toBe(
+			true,
+		);
+		// A non-bridge record that merely mentions a chain isn't a corridor claim.
+		const SOLANA_WALLET = {
+			name: "Phantom-ish",
+			shortDescription: "A wallet that also supports Solana accounts.",
+			category: "User-Facing App",
+			types: ["Wallet"],
+			supportedNetworks: ["stellar"],
+			coverage: null,
+		};
+		expect(chainCorridorHit(SOLANA_WALLET, tokenize("solana wallet"))).toBe(
+			true,
+		);
 	});
 });
