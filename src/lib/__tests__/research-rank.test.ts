@@ -641,6 +641,27 @@ describe("vertical anchor docs (RESEARCH_ANCHORS)", () => {
 		expect(anchorDocUrls("anonymous feedback form")).toEqual([]);
 	});
 
+	const PROVIDERS_DOC =
+		"https://developers.stellar.org/docs/data/apis/rpc/providers";
+	const INDEXERS_DOC = "https://developers.stellar.org/docs/data/indexers";
+
+	it("fires on provider-roster intent — vendor names are their own context", () => {
+		for (const q of [
+			"alchemy",
+			"is there an Alchemy for Stellar?",
+			"quicknode stellar support",
+			"rpc providers",
+			"which node providers exist",
+		]) {
+			expect(anchorDocUrls(q), `query: ${q}`).toEqual([
+				PROVIDERS_DOC,
+				INDEXERS_DOC,
+			]);
+		}
+		// Generic infrastructure talk without a vendor/provider noun stays out.
+		expect(anchorDocUrls("infrastructure costs on stellar")).toEqual([]);
+	});
+
 	it("fires on the MPP abbreviation — including the bare single-token query", () => {
 		for (const q of [
 			"mpp",

@@ -479,7 +479,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Ranked list of active Stellar projects (`sort=activity|stars|issues` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity). Ranks PROJECTS, not people → use getBuilders.
+         * @description Ranked list of active Stellar projects (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
          */
         get: operations["getLeaderboard"];
         put?: never;
@@ -1258,6 +1258,13 @@ export interface components {
             types?: string[];
             shortDescription?: string | null;
             scfAwarded?: boolean;
+            /** @description DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama — never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf. */
+            tvlUSD?: number | null;
+            /**
+             * Format: date-time
+             * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
+             */
+            tvlAsOf?: string | null;
             /** @description Rollup across the project's INDEXED repos, as-of meta.dataAsOf. */
             github?: {
                 /** @description Sum of stargazer counts across indexed repos. */
@@ -2261,8 +2268,8 @@ export interface operations {
     getLeaderboard: {
         parameters: {
             query?: {
-                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. */
-                sort?: "activity" | "stars" | "issues";
+                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD (null = untracked — those rows sort last, never treated as $0). */
+                sort?: "activity" | "stars" | "issues" | "tvl";
                 /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
                 range?: "7d" | "30d" | "90d" | "1y" | "all";
                 /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */

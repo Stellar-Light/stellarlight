@@ -2444,7 +2444,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Ranked list of active Stellar projects (`sort=activity|stars|issues` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity). Ranks PROJECTS, not people → use getBuilders.",
+					"Ranked list of active Stellar projects (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
 						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
@@ -2480,6 +2480,10 @@ export const spec: OpenAPISpec = {
 						"part-time",
 						"multichain",
 						"repoCount",
+						"tvl",
+						"total value locked",
+						"top defi",
+						"biggest protocols",
 					],
 					useWhen: [
 						"which projects have open issues / the biggest issue backlog",
@@ -2487,6 +2491,7 @@ export const spec: OpenAPISpec = {
 						"who/what are the top/most-active Stellar projects",
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
+						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending) — DefiLlama-verified, dated per-row by tvlAsOf",
 						"a CSV/Dune-style export of ranked projects (default top 50, max 300)",
 					],
 					notFor: [
@@ -2507,10 +2512,10 @@ export const spec: OpenAPISpec = {
 						name: "sort",
 						in: "query",
 						description:
-							"Order the project leaderboard. An unrecognized value returns 400 with the valid list.",
+							"Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD (null = untracked — those rows sort last, never treated as $0).",
 						schema: {
 							type: "string",
-							enum: ["activity", "stars", "issues"],
+							enum: ["activity", "stars", "issues", "tvl"],
 							default: "activity",
 						},
 					},
@@ -4229,6 +4234,19 @@ export const spec: OpenAPISpec = {
 					},
 					shortDescription: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
+					tvlUSD: {
+						type: "number",
+						nullable: true,
+						description:
+							"DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama — never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf.",
+					},
+					tvlAsOf: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
+					},
 					github: {
 						type: "object",
 						description:

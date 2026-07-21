@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-21",
+		surfaces: ["api"],
+		version: "openapi@1.8.15",
+		type: "added",
+		summary:
+			"getLeaderboard sort=tvl: rank projects by DefiLlama-verified TVL. Rows now carry tvlUSD + tvlAsOf (null = not tracked on DefiLlama, never 'zero TVL'; untracked rows sort last).",
+		detail:
+			"Found by persona-battery testing through the Raven gateway: an institution asking 'top Stellar DeFi by TVL' sent sort=tvl and got a 400 — the natural leaderboard ask had no sort, and rows carried no TVL at all even though the directory tracks DefiLlama-verified tvlUSD per project. Now: sort=tvl orders tracked projects descending with untracked (tvlUSD null) always below every tracked row; combine with type=DEX,Lending for a DeFi board. tvl_usd added as a trailing CSV column; meta.metricDefinitions.tvl states the semantics where the numbers appear.",
+	},
+	{
 		date: "2026-07-20",
 		surfaces: ["api"],
 		version: "openapi@1.8.14",

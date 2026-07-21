@@ -495,6 +495,27 @@ export const RESEARCH_ANCHORS: Array<{
 		],
 	},
 	{
+		// Provider-roster class (2026-07-21 persona battery, raven#18's exact
+		// case): "alchemy" — a builder asking whether an Alchemy-style indexed
+		// data API exists on Stellar — pulled event-INGEST guides at 0.34 while
+		// the roster docs that answer it (Providers, Indexers Overview — whose
+		// content names Alchemy, QuickNode, etc.) sat below them. Vendor names
+		// double as their own context so bare vendor queries fire.
+		id: "data-providers",
+		intent:
+			/\balchemy\b|\bquicknode\b|\bblockdaemon\b|\b(?:rpc|node|data\s*api|infra(?:structure)?)\s+providers?\b/i,
+		context:
+			/\balchemy\b|\bquicknode\b|\bblockdaemon\b|\bstellar\b|\brpc\b|\bapi\b|\bdata\b|\bnodes?\b|\bindexers?\b|\bendpoints?\b|\btransfers?\b|\bbalances?\b|\bnfts?\b/i,
+		urls: [
+			// Verified in-corpus 2026-07-21 (title: "Providers" — the RPC
+			// provider roster).
+			"https://developers.stellar.org/docs/data/apis/rpc/providers",
+			// Verified in-corpus 2026-07-21 (title: "Indexers Overview" —
+			// content names Alchemy's Stellar Data API post stellar-docs#2573).
+			"https://developers.stellar.org/docs/data/indexers",
+		],
+	},
+	{
 		id: "bridge-assets",
 		intent: /\bbridg(?:e|es|ing)\b|\bcross[\s-]?chain\b/i,
 		context:
