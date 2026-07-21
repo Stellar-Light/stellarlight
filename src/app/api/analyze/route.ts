@@ -23,6 +23,7 @@
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { computeEcosystemGaps } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -41,6 +42,35 @@ const VALID_DIMENSIONS = [
 	"categories",
 	"funding",
 	"tvl",
+	"gaps",
+] as const;
+
+// Buildable product verticals (mirrors the projects `types` select options) —
+// the universe the `gaps` dimension measures coverage against, so a canonical
+// vertical with ZERO active projects surfaces as whitespace rather than being
+// invisible. The broad catch-alls (Infrastructure / SDK / Tooling / Analytics)
+// are NOT verticals and are excluded from the absent/underbuilt signals; a
+// caveat in the response says so.
+const GAP_VERTICALS = [
+	"Wallet",
+	"DEX",
+	"Lending",
+	"Bridge",
+	"Payments",
+	"Anchor",
+	"Indexer",
+	"Explorer",
+	"AI",
+	"Gaming",
+	"Education",
+	"Security",
+	"NFT",
+	"RWA",
+	"Stablecoin",
+	"Social Impact",
+	"RPC",
+	"Faucet",
+	"Oracle",
 ] as const;
 
 // One place for the funding methodology label — it is served in the response
@@ -83,6 +113,7 @@ interface ProjectDoc {
 	slug?: string;
 	name?: string;
 	category?: string;
+	types?: string[];
 	status?: string;
 	hackathonStatus?: string;
 	hackathonPlacement?: string;
@@ -114,6 +145,7 @@ export async function GET(req: NextRequest) {
 	const includeFunding =
 		dimensionParam === "all" || dimensionParam === "funding";
 	const includeTvl = dimensionParam === "all" || dimensionParam === "tvl";
+	const includeGaps = dimensionParam === "all" || dimensionParam === "gaps";
 
 	const payload = await getPayloadSafe();
 
@@ -156,7 +188,10 @@ export async function GET(req: NextRequest) {
 	// ── Categories + funding + tvl share a projects fetch
 	let projects: ProjectDoc[] = [];
 	let population: PopulationScope | null = null;
-	if (payload && (includeCategories || includeFunding || includeTvl)) {
+	if (
+		payload &&
+		(includeCategories || includeFunding || includeTvl || includeGaps)
+	) {
 		try {
 			const r = await payload.find({
 				collection: "projects",
@@ -176,6 +211,10 @@ export async function GET(req: NextRequest) {
 					slug: true,
 					name: true,
 					category: true,
+					// sls-gaps: the fine product-type taxonomy the `gaps` dimension
+					// measures vertical coverage against (the actionable verticals,
+					// vs the coarse 7-category `category`).
+					types: true,
 					scf: true,
 					hackathonPlacement: true,
 					// sls-013: the funnel read hackathonStatus without selecting it —
@@ -530,6 +569,14 @@ export async function GET(req: NextRequest) {
 			basis:
 				"Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero — untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed on a curated cadence (asOf = most recent per-project tvlAsOf), CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated — never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf also ride each /api/projects/search row.",
 		};
+	}
+
+	if (includeGaps) {
+		// Whitespace signal (2026-07-21): the "where should I build / what's
+		// under-served" question, derived from the SAME active-project fetch —
+		// per-vertical coverage + three honest gap kinds (see ecosystem-gaps.ts).
+		// Supply-side only; the basis field spells out that gap ≠ demand.
+		result.gaps = computeEcosystemGaps(projects, GAP_VERTICALS);
 	}
 
 	logApiHit({

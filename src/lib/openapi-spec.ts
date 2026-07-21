@@ -2264,7 +2264,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"The cross-ecosystem macro rollup — totals no single-event tool answers: hackathon totals, SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), per-category distribution, and the DeFi TVL rollup (DefiLlama-sourced, as-of dated, directory-scoped). Slice via `dimension=hackathons|categories|funding|tvl`. Not for per-category crowdedness/whitespace → use getClusters.",
+					"The cross-ecosystem macro rollup — totals no single-event tool answers: hackathon totals, SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), per-category distribution, and the DeFi TVL rollup (DefiLlama-sourced, as-of dated, directory-scoped), and `dimension=gaps` — per-vertical whitespace (which product types are under-built / built-but-unproven / absent) for the 'what should I build?' question. Slice via `dimension=hackathons|categories|funding|tvl|gaps`. Gaps are SUPPLY-side coverage, NOT demand — validate demand before treating a gap as an opportunity.",
 				"x-routing": {
 					purpose:
 						"Ecosystem-wide macro totals: hackathons, SCF funding, category distribution, TVL.",
@@ -2291,6 +2291,15 @@ export const spec: OpenAPISpec = {
 						"defi tvl",
 						"defillama",
 						"top protocols by tvl",
+						"gaps",
+						"whitespace",
+						"what should i build",
+						"underserved",
+						"under-built",
+						"missing",
+						"opportunity",
+						"which verticals are thin",
+						"no live projects",
 					],
 					useWhen: [
 						"what's the overall state of Stellar hackathons/grants",
@@ -2298,9 +2307,10 @@ export const spec: OpenAPISpec = {
 						"how much prize money across all hackathons (totalEvents, prize pools, registered hackers — live from DoraHacks)",
 						"how many projects get built vs abandoned after hackathons",
 						"total/top DeFi TVL on Stellar (DefiLlama-tracked protocols only — undercounts chain-wide TVL; as-of dated, never an exact to-the-dollar live figure)",
+						"what to build / where the whitespace is: dimension=gaps returns per-vertical coverage + which product types are under-built, built-but-unproven (nothing Live), or absent — SUPPLY-side, not demand",
 					],
 					notFor: [
-						"crowdedness or whitespace per category -> getClusters",
+						"per-category project COUNTS / crowdedness (raw distribution) -> getClusters; dimension=gaps is the richer whitespace view (proven/funded/absent)",
 						"a ranked list of top/active projects -> getLeaderboard",
 						"one specific hackathon's details -> getHackathon",
 						"comparing two hackathons head-to-head -> compareHackathons",
@@ -2309,6 +2319,8 @@ export const spec: OpenAPISpec = {
 						"How much SCF funding has been distributed in total?",
 						"What's the total prize money across all Stellar hackathons?",
 						"What's the total DeFi TVL on Stellar?",
+						"What should I build on Stellar / where are the gaps?",
+						"Which product verticals have no Live projects yet?",
 					],
 				},
 				parameters: [
@@ -2318,7 +2330,14 @@ export const spec: OpenAPISpec = {
 						description: "Which slice to return",
 						schema: {
 							type: "string",
-							enum: ["all", "hackathons", "categories", "funding", "tvl"],
+							enum: [
+								"all",
+								"hackathons",
+								"categories",
+								"funding",
+								"tvl",
+								"gaps",
+							],
 							default: "all",
 						},
 					},
