@@ -20,7 +20,6 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
 	ArrowUpRight,
 	Check,
-	ChevronLeft,
 	ChevronRight,
 	Eye,
 	Info,
@@ -40,6 +39,7 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { NomineeHighlightsModal } from "./nominee-highlights-modal";
 import {
 	AWARDS_WALLETS,
 	type AwardsWalletId,
@@ -65,6 +65,7 @@ interface Nominee {
 	logoUrl: string | null;
 	projectUrl: string;
 	projectCategory: string | null;
+	tvl: { usd: number; source: string | null; asOf: string | null } | null;
 }
 
 export interface AwardsRoundData {
@@ -203,9 +204,6 @@ function TopBar({
 					<span className="text-sm font-semibold tracking-tight text-neutral-100 truncate">
 						i³ Awards
 					</span>
-					<span className="hidden sm:inline text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 border border-[#2f2f2f] rounded px-1.5 py-0.5">
-						Testnet
-					</span>
 				</div>
 				<div className="flex items-center gap-2">
 					<button
@@ -333,7 +331,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 					>
 						<div className="flex items-center justify-between gap-4 mb-6">
 							<span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
-								How voting works · {i + 1} of {HIW_STEPS.length}
+								How voting works
 							</span>
 							<button
 								type="button"
@@ -354,10 +352,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 									exit={{ opacity: 0, x: dir * -28 }}
 									transition={{ duration: 0.26, ease: EASE }}
 								>
-									<span className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-lg font-semibold text-black tabular-nums mb-4">
-										{i + 1}
-									</span>
-									<h2 className="text-xl font-semibold tracking-tight text-neutral-50 mb-2">
+									<h2 className="text-2xl font-semibold tracking-tight text-neutral-50 mb-2.5">
 										{step.t}
 									</h2>
 									<p className="text-sm text-neutral-400 leading-relaxed">
@@ -456,6 +451,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const [funding, setFunding] = useState(false);
 	const prefilled = useRef(false);
 	const [ballotPage, setBallotPage] = useState(0);
+	const [highlightNominee, setHighlightNominee] = useState<Nominee | null>(
+		null,
+	);
 	const isMobile = useIsMobile();
 
 	const nomineesByCategory = useMemo(() => {
@@ -818,22 +816,17 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 pb-32 lg:pb-20">
 				{/* nominee grid */}
 				<div className="lg:col-span-8 space-y-14">
-					{categories.map((category, index) => (
+					{categories.map((category) => (
 						<section key={category.key} aria-label={category.name}>
-							<div className="mb-5 flex items-baseline gap-3">
-								<span className="font-mono text-xs tabular-nums text-neutral-600">
-									{String(index + 1).padStart(2, "0")}
-								</span>
-								<div>
-									<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
-										{category.name}
-									</h2>
-									{category.tagline && (
-										<p className="mt-0.5 text-sm text-neutral-500">
-											{category.tagline}
-										</p>
-									)}
-								</div>
+							<div className="mb-5">
+								<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
+									{category.name}
+								</h2>
+								{category.tagline && (
+									<p className="mt-0.5 text-sm text-neutral-500">
+										{category.tagline}
+									</p>
+								)}
 							</div>
 							<motion.div
 								initial="hidden"
@@ -852,6 +845,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										selected={selections[category.key] === nominee.slug}
 										disabled={readOnly || !voting.open}
 										onToggle={() => toggleNominee(category.key, nominee.slug)}
+										onHighlights={() => setHighlightNominee(nominee)}
 									/>
 								))}
 							</motion.div>
@@ -917,7 +911,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				</aside>
 			</div>
 
-			{/* ── Mobile ballot toast (floating card, swipeable pager) ── */}
+			{/* ── Mobile ballot deck (whole-card swipe, stacked like a deck) ── */}
 			{voting.open && !readOnly && (
 				<motion.div
 					initial={{ y: 24, opacity: 0 }}
@@ -933,8 +927,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								{error}
 							</p>
 						)}
-						{/* header + swipe pager over the categories */}
-						<div className="flex items-center justify-between mb-2.5">
+						<div className="flex items-center justify-between mb-3">
 							<span className="text-xs font-semibold text-neutral-200">
 								Your ballot
 							</span>
@@ -942,85 +935,101 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								{selectedCount}/{categories.length}
 							</span>
 						</div>
-						<div className="relative flex items-center gap-2 mb-3">
-							<button
-								type="button"
-								aria-label="Previous"
-								onClick={() =>
-									setBallotPage(
-										(p) => (p - 1 + categories.length) % categories.length,
-									)
-								}
-								className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 active:scale-90 transition-transform"
-							>
-								<ChevronLeft className="h-4 w-4" />
-							</button>
-							<div className="relative flex-1 overflow-hidden h-11">
-								<AnimatePresence initial={false} mode="popLayout">
-									{(() => {
-										const c = categories[ballotPage % categories.length];
-										const picked = nomineeName(c.key, selections[c.key]);
-										return (
-											<motion.div
-												key={c.key}
-												drag="x"
-												dragConstraints={{ left: 0, right: 0 }}
-												dragElastic={0.35}
-												onDragEnd={(_, info) => {
-													if (info.offset.x < -50 || info.velocity.x < -300)
-														setBallotPage((p) => (p + 1) % categories.length);
-													else if (info.offset.x > 50 || info.velocity.x > 300)
-														setBallotPage(
-															(p) =>
-																(p - 1 + categories.length) % categories.length,
-														);
-												}}
-												initial={{ opacity: 0, x: 24 }}
-												animate={{ opacity: 1, x: 0 }}
-												exit={{ opacity: 0, x: -24 }}
-												transition={{ duration: 0.24, ease: EASE }}
-												className="absolute inset-0 flex flex-col justify-center cursor-grab active:cursor-grabbing"
-											>
-												<span className="text-[11px] uppercase tracking-wide text-neutral-500">
-													{c.name}
+
+						{/* the deck: swipe the whole top card; the rest peek behind it */}
+						<div className="relative mb-3" style={{ height: 104 }}>
+							{categories.map((category, idx) => {
+								const depth =
+									(idx - ballotPage + categories.length) % categories.length;
+								const isTop = depth === 0;
+								const pickedSlug = selections[category.key];
+								const pickedNominee = pickedSlug
+									? ((nomineesByCategory.get(category.key) ?? []).find(
+											(n) => n.slug === pickedSlug,
+										) ?? null)
+									: null;
+								return (
+									<motion.div
+										key={category.key}
+										drag={isTop ? "x" : false}
+										dragConstraints={{ left: 0, right: 0 }}
+										dragElastic={0.7}
+										onDragEnd={(_, info) => {
+											if (!isTop) return;
+											if (info.offset.x < -70 || info.velocity.x < -450)
+												setBallotPage((p) => (p + 1) % categories.length);
+											else if (info.offset.x > 70 || info.velocity.x > 450)
+												setBallotPage(
+													(p) =>
+														(p - 1 + categories.length) % categories.length,
+												);
+										}}
+										animate={{
+											scale: 1 - depth * 0.05,
+											y: depth * 7,
+											opacity: depth >= 3 ? 0 : 1 - depth * 0.08,
+										}}
+										transition={SPRING}
+										style={{
+											zIndex: categories.length - depth,
+											touchAction: "pan-y",
+										}}
+										className={`absolute inset-x-0 top-0 flex min-h-[92px] flex-col justify-center rounded-xl border p-3.5 ${
+											isTop ? "cursor-grab active:cursor-grabbing" : ""
+										} ${
+											pickedNominee
+												? "border-neutral-300 bg-[#242424] shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]"
+												: "border-[#2f2f2f] bg-[#1e1e1e]"
+										}`}
+									>
+										<div className="mb-2 flex items-center gap-2">
+											<span className="text-[11px] uppercase tracking-wide text-neutral-500">
+												{category.name}
+											</span>
+											{pickedNominee && (
+												<Check
+													className="ml-auto h-3.5 w-3.5 text-neutral-300"
+													strokeWidth={3}
+												/>
+											)}
+										</div>
+										{pickedNominee ? (
+											<div className="flex items-center gap-2.5">
+												<Image
+													src={pickedNominee.logoUrl || "/logo.png"}
+													alt=""
+													width={30}
+													height={30}
+													className="h-[30px] w-[30px] flex-shrink-0 rounded-md border border-[#2f2f2f] bg-[#111] object-cover"
+												/>
+												<span className="truncate text-sm font-semibold text-neutral-100">
+													{pickedNominee.name}
 												</span>
-												<span
-													className={`text-sm font-semibold truncate ${
-														picked ? "text-neutral-100" : "text-neutral-600"
-													}`}
-												>
-													{picked ?? "Not picked yet"}
-												</span>
-											</motion.div>
-										);
-									})()}
-								</AnimatePresence>
-							</div>
-							<button
-								type="button"
-								aria-label="Next"
-								onClick={() =>
-									setBallotPage((p) => (p + 1) % categories.length)
-								}
-								className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 active:scale-90 transition-transform"
-							>
-								<ChevronRight className="h-4 w-4" />
-							</button>
+											</div>
+										) : (
+											<span className="text-sm text-neutral-500">
+												Not picked yet — tap a nominee above
+											</span>
+										)}
+									</motion.div>
+								);
+							})}
 						</div>
-						{/* dots reflect pick state per category */}
+
+						{/* dots: tappable, reflect pick state per category */}
 						<div className="flex items-center justify-center gap-1.5 mb-3">
-							{categories.map((c, idx) => (
+							{categories.map((category, idx) => (
 								<button
-									key={c.key}
+									key={category.key}
 									type="button"
-									aria-label={c.name}
+									aria-label={category.name}
 									onClick={() => setBallotPage(idx)}
 									className="h-1.5 rounded-full transition-all duration-200"
 									style={{
-										width: idx === ballotPage % categories.length ? 16 : 6,
-										background: selections[c.key]
+										width: idx === ballotPage ? 16 : 6,
+										background: selections[category.key]
 											? "#fafafa"
-											: idx === ballotPage % categories.length
+											: idx === ballotPage
 												? "#6a6a6a"
 												: "rgba(255,255,255,0.2)",
 									}}
@@ -1043,6 +1052,24 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			/>
 
 			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+
+			<NomineeHighlightsModal
+				nominee={highlightNominee}
+				isSelected={
+					highlightNominee
+						? selections[highlightNominee.category] === highlightNominee.slug
+						: false
+				}
+				onClose={() => setHighlightNominee(null)}
+				onVote={(slug) => {
+					if (highlightNominee && !readOnly && voting.open) {
+						const cat = highlightNominee.category;
+						setError(null);
+						setSelections((prev) => ({ ...prev, [cat]: slug }));
+					}
+					setHighlightNominee(null);
+				}}
+			/>
 		</>
 	);
 }
@@ -1199,21 +1226,36 @@ function NomineeCard({
 	selected,
 	disabled,
 	onToggle,
+	onHighlights,
 }: {
 	nominee: Nominee;
 	selected: boolean;
 	disabled: boolean;
 	onToggle: () => void;
+	onHighlights: () => void;
 }) {
 	const [logoError, setLogoError] = useState(false);
 	const logoSrc = !logoError && nominee.logoUrl ? nominee.logoUrl : "/logo.png";
 
+	// A div (not a button) so it can hold the real "Highlights" button; keeps
+	// keyboard-select via role=button + Enter/Space.
 	return (
-		<motion.button
-			type="button"
+		<motion.div
+			role="button"
+			tabIndex={disabled ? -1 : 0}
 			aria-pressed={selected}
-			disabled={disabled}
-			onClick={onToggle}
+			aria-disabled={disabled}
+			onClick={disabled ? undefined : onToggle}
+			onKeyDown={
+				disabled
+					? undefined
+					: (e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								onToggle();
+							}
+						}
+			}
 			variants={{
 				hidden: { opacity: 0, y: 16 },
 				visible: {
@@ -1225,9 +1267,11 @@ function NomineeCard({
 			whileHover={disabled ? undefined : { y: -3 }}
 			whileTap={disabled ? undefined : { scale: 0.985 }}
 			transition={SPRING}
-			className={`group relative rounded-xl border p-4 text-left flex flex-col min-h-[150px] disabled:cursor-default ${
+			className={`group relative flex min-h-[150px] flex-col rounded-xl border p-4 text-left ${
+				disabled ? "cursor-default" : "cursor-pointer"
+			} ${
 				selected
-					? "border-neutral-200 bg-[#242424] shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]"
+					? "border-[#6a6a6a] bg-[#242424] shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]"
 					: "border-[#2f2f2f] bg-[#1e1e1e] hover:border-[#4a4a4a] shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
 			}`}
 			style={{ transition: "border-color .15s, background-color .15s" }}
@@ -1236,7 +1280,7 @@ function NomineeCard({
 			<span
 				className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
 					selected
-						? "bg-neutral-100 border-neutral-100"
+						? "bg-neutral-200 border-neutral-200"
 						: "border-[#3f3f3f] group-hover:border-[#5a5a5a]"
 				}`}
 				aria-hidden="true"
@@ -1281,18 +1325,19 @@ function NomineeCard({
 				>
 					{selected ? "Selected" : "Tap to select"}
 				</span>
-				<a
-					href={nominee.projectUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					onClick={(e) => e.stopPropagation()}
-					className="inline-flex items-center gap-0.5 text-xs text-neutral-500 hover:text-neutral-200 transition-colors"
+				<button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation();
+						onHighlights();
+					}}
+					className="-mr-1 inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-medium text-neutral-400 transition-colors hover:bg-[#2a2a2a] hover:text-neutral-100"
 				>
-					About
-					<ArrowUpRight className="h-3 w-3" />
-				</a>
+					Highlights
+					<ChevronRight className="h-3.5 w-3.5" />
+				</button>
 			</span>
-		</motion.button>
+		</motion.div>
 	);
 }
 

@@ -125,7 +125,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 			suppressHydrationWarning
 			className={`dark ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} ${vt323.variable}`}
 		>
-			<body className="min-h-screen font-sans antialiased overflow-x-hidden">
+			{/* overflow-x-clip (not -hidden): still blocks horizontal scroll but
+			    does NOT create a scroll container, so `position: sticky`
+			    descendants (e.g. the /awards ballot rail) actually pin. */}
+			<body className="min-h-screen font-sans antialiased overflow-x-clip">
 				<Providers>
 					{/* HideOnStandalone is a client visibility gate; the chrome it
 					    wraps stays SERVER-rendered (so Navigation's payload deps
