@@ -34,6 +34,12 @@ interface ProjectRow {
 	types: string[];
 	shortDescription: string | null;
 	scfAwarded: boolean;
+	// DefiLlama-verified TVL (2026-07-21 institutional battery: sort=tvl was
+	// the natural "top DeFi by TVL" ask and 400'd). null = NOT TRACKED on
+	// DefiLlama — never "zero TVL" (class 3); tvlAsOf dates the number
+	// (class 8).
+	tvlUSD: number | null;
+	tvlAsOf: string | null;
 	github: {
 		totalStars: number;
 		openIssuesTotal: number;
@@ -61,6 +67,7 @@ function toCsv(rows: ProjectRow[]): string {
 		"open_issues",
 		"repo_count",
 		"last_activity_at",
+		"tvl_usd",
 		"short_description",
 	].join(",");
 	const lines = rows.map((r) =>
@@ -75,6 +82,7 @@ function toCsv(rows: ProjectRow[]): string {
 			r.github.openIssuesTotal,
 			r.github.repoCount,
 			r.github.lastActivityAt ?? "",
+			r.tvlUSD ?? "",
 			r.shortDescription ?? "",
 		]
 			.map(csvEscape)
@@ -94,7 +102,7 @@ export async function GET(req: NextRequest) {
 	// Reject unrecognized sort/range instead of silently falling back to a
 	// surprising order or an empty set. Matches the 400+validX pattern used
 	// elsewhere (hackathons/research/skills).
-	const VALID_SORTS = ["activity", "stars", "issues"] as const;
+	const VALID_SORTS = ["activity", "stars", "issues", "tvl"] as const;
 	const VALID_RANGES = ["7d", "30d", "90d", "1y", "all"] as const;
 	if (!(VALID_SORTS as readonly string[]).includes(sort)) {
 		return NextResponse.json(
@@ -233,6 +241,8 @@ export async function GET(req: NextRequest) {
 					types: true,
 					shortDescription: true,
 					scf: true,
+					tvlUSD: true,
+					tvlAsOf: true,
 				},
 			});
 
@@ -295,6 +305,8 @@ export async function GET(req: NextRequest) {
 					types?: string[];
 					shortDescription?: string | null;
 					scf?: { awarded?: boolean };
+					tvlUSD?: number | null;
+					tvlAsOf?: string | null;
 				}>
 			).map((project) => {
 				const repos = reposByProjectSlug.get(project.slug) ?? [];
@@ -323,6 +335,8 @@ export async function GET(req: NextRequest) {
 					types: Array.isArray(project.types) ? project.types : [],
 					shortDescription: project.shortDescription ?? null,
 					scfAwarded: !!project.scf?.awarded,
+					tvlUSD: project.tvlUSD ?? null,
+					tvlAsOf: project.tvlAsOf ?? null,
 					github: {
 						totalStars,
 						openIssuesTotal,
@@ -372,6 +386,16 @@ export async function GET(req: NextRequest) {
 				rows.sort(
 					(a, b) => b.github.openIssuesTotal - a.github.openIssuesTotal,
 				);
+			} else if (sort === "tvl") {
+				// null = NOT TRACKED on DefiLlama (class 3) — untracked projects
+				// sort BELOW every tracked one (including tracked ~$0), never
+				// interleaved as if they had zero TVL.
+				rows.sort((a, b) => {
+					if (a.tvlUSD === null && b.tvlUSD === null) return 0;
+					if (a.tvlUSD === null) return 1;
+					if (b.tvlUSD === null) return -1;
+					return b.tvlUSD - a.tvlUSD;
+				});
 			}
 
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
@@ -445,6 +469,7 @@ export async function GET(req: NextRequest) {
 						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups — they are NOT recomputed within the window.",
 					dataAsOf:
 						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated — every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
+					tvl: "sort=tvl orders by tvlUSD — DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only — most projects are legitimately untracked.",
 				},
 			},
 			ecosystem: {
