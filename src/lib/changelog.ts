@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.18",
+		type: "added",
+		summary:
+			"analyzeEcosystem dimension=gaps: the 'what should I build / where's the whitespace' answer. Per-vertical coverage + three honest gap kinds — unproven (built, nothing Live), underbuilt (very few), absent (canonical vertical with zero) — flagged supply-side, NOT demand.",
+		detail:
+			"The Scout-skill question agents kept inferring from raw counts now has a direct field. dimension=gaps tallies the ACTIVE directory by product TYPE (the fine vertical taxonomy, not the coarse 7-category one): byType carries total/live/inProgress/scfFunded/hackathonWinners per vertical (thinnest-first), and signals splits the whitespace into unproven / underbuilt (total ≤ 3) / absent. Deliberately descriptive, never prescriptive: the basis field states this is SUPPLY-side coverage of our directory, not market demand — a thin vertical may be under-served OR low-demand, so validate demand (real asks, RFPs) before treating a gap as an opportunity. Signals restrict to canonical buildable verticals; broad catch-alls (Infrastructure/SDK/Tooling/Analytics) are excluded. Included in dimension=all.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.17",
 		type: "added",
 		summary:
