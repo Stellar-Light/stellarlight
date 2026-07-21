@@ -1,0 +1,26 @@
+name: Fix research titles (manual)
+# Decodes raw HTML entities in research-doc titles against prod
+# (scripts/fix-research-entity-titles.ts — the corpus-health S6 html-entity
+# class). Dry-run by default; set apply=true to write. Safe by construction:
+# only decodes a title, only when the result differs and is non-empty; content
+# is never touched. Inspect the dry-run log BEFORE applying.
+on:
+  workflow_dispatch:
+    inputs:
+      apply: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/fix-research-entity-titles.ts ${{ inputs.apply && '--apply' || '' }}
