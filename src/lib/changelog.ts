@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.19",
+		type: "added",
+		summary:
+			"compareHackathons now reports cohort DURABILITY: each event's snapshot carries stillActiveCount / liveCount / activeRatePct (how many of its projects are still alive in the directory today), and deltas flags which event's cohort survived best.",
+		detail:
+			"The endpoint compared prize/turnout but not OUTCOME durability — 'event A had 2× the submissions but half survived' wasn't answerable. Each curated snapshot now cross-references its projects against current directory status: stillActiveCount (status Live/Pre-Release/Development), liveCount (Live only), and activeRatePct (stillActive/submissions). deltas.activeRatePct names the most/least durable cohort. Curated hackathons only — a DoraHacks-sourced event has no directory project join, so the fields stay undefined (absence = not joinable, never 'zero survived').",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.18",
 		type: "added",
 		summary:
