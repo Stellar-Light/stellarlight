@@ -3,24 +3,17 @@
 /**
  * i³ Awards — the voting experience.
  *
- * Design language: monochrome, editorial, prediction-market layout
- * (Polymarket / godly.website). NO accent color — white is the only active
- * ink; selection reads as a filled white check + hairline-to-solid border,
- * never a glow. Structure:
- *   - a persistent top bar carries "How it works" + the wallet (top-right,
- *     always visible — not a bottom afterthought)
- *   - desktop: two columns — nominee grid (left) + a sticky "Your ballot"
- *     rail (right) that summarizes picks and holds the submit action
- *   - mobile: the grid stacks; a compact sticky bar carries progress + action
+ * Design: monochrome + prediction-market layout (Polymarket / godly.website),
+ * built on Stellar Light's WARM layered dark (bg #171717, raised cards, solid
+ * #2f2f2f borders — never flat black or white hairlines) and animated with
+ * framer-motion for the stellar-markets fluidity (scroll fade-up + stagger,
+ * spring tap/hover, crossfading ballot values, spring selection checks).
  *
- * Interaction model:
- *   - tap a nominee to pick it (one per category; tap again to clear)
- *   - wallets: Freighter / xBull / Albedo via stellar-wallets-kit, loaded
- *     lazily on first connect (SSR-safe)
- *   - non-whitelisted addresses get a polite read-only mode
- *   - unfunded testnet accounts get a one-tap friendbot fund (test mode)
+ *   - persistent top bar: "How it works" + wallet (top-right, always visible)
+ *   - desktop: nominee grid (left) + a sticky "Your ballot" rail (right)
+ *   - mobile: grid stacks; a compact sticky bar carries progress + action
+ *   - wallets: Freighter / xBull / Albedo via stellar-wallets-kit (lazy)
  *   - votes are real TESTNET transactions; success links stellar.expert
- *   - closed rounds swap the ballot for a results reveal
  */
 
 import { format, formatDistanceToNow } from "date-fns";
@@ -35,6 +28,7 @@ import {
 	Wallet,
 	X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -110,6 +104,10 @@ type Phase =
 	| "signing"
 	| "submitting"
 	| "submitted";
+
+// stellar-markets' signature ease.
+const EASE = [0.25, 0.46, 0.45, 0.94] as const;
+const SPRING = { type: "spring", stiffness: 380, damping: 30 } as const;
 
 function shortAddress(address: string): string {
 	return `${address.slice(0, 4)}…${address.slice(-4)}`;
@@ -196,14 +194,14 @@ function TopBar({
 	};
 }) {
 	return (
-		<div className="sticky top-0 z-40 border-b border-white/10 bg-black/60 backdrop-blur-xl">
+		<div className="sticky top-0 z-40 border-b border-[#2a2a2a] bg-[#171717]/80 backdrop-blur-xl">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5 min-w-0">
-					<I3Mark className="h-6 w-6 text-foreground flex-shrink-0" />
-					<span className="text-sm font-semibold tracking-tight text-foreground truncate">
+					<I3Mark className="h-6 w-6 text-neutral-200 flex-shrink-0" />
+					<span className="text-sm font-semibold tracking-tight text-neutral-100 truncate">
 						i³ Awards
 					</span>
-					<span className="hidden sm:inline text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 border border-white/10 rounded px-1.5 py-0.5">
+					<span className="hidden sm:inline text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 border border-[#2f2f2f] rounded px-1.5 py-0.5">
 						Testnet
 					</span>
 				</div>
@@ -211,7 +209,7 @@ function TopBar({
 					<button
 						type="button"
 						onClick={onHowItWorks}
-						className="inline-flex items-center gap-1.5 h-9 rounded-full border border-white/12 px-3.5 text-sm font-medium text-neutral-300 hover:text-foreground hover:border-white/25 transition-colors"
+						className="inline-flex items-center gap-1.5 h-9 rounded-full border border-[#2f2f2f] px-3.5 text-sm font-medium text-neutral-300 hover:text-neutral-100 hover:border-[#454545] transition-colors"
 					>
 						<Info className="h-4 w-4" />
 						<span className="hidden sm:inline">How it works</span>
@@ -221,17 +219,18 @@ function TopBar({
 							<button
 								type="button"
 								onClick={wallet.onDisconnect}
-								className="inline-flex items-center gap-2 h-9 rounded-full border border-white/12 pl-3 pr-3.5 text-sm font-medium text-foreground hover:border-white/25 transition-colors"
+								className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-3.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
 							>
 								<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
 								{shortAddress(wallet.address)}
 							</button>
 						) : (
-							<button
+							<motion.button
 								type="button"
 								onClick={wallet.onConnect}
 								disabled={wallet.busy}
-								className="inline-flex items-center gap-2 h-9 rounded-full bg-white px-4 text-sm font-semibold text-black hover:bg-neutral-200 transition-colors disabled:opacity-60"
+								whileTap={{ scale: 0.96 }}
+								className="inline-flex items-center gap-2 h-9 rounded-full bg-neutral-100 px-4 text-sm font-semibold text-black hover:bg-white transition-colors disabled:opacity-60"
 							>
 								{wallet.busy ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
@@ -239,7 +238,7 @@ function TopBar({
 									<Wallet className="h-4 w-4" />
 								)}
 								Connect
-							</button>
+							</motion.button>
 						))}
 				</div>
 			</div>
@@ -256,8 +255,6 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 		document.addEventListener("keydown", onKey);
 		return () => document.removeEventListener("keydown", onKey);
 	}, [open, onClose]);
-
-	if (!open) return null;
 
 	const steps = [
 		{
@@ -283,58 +280,84 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 	];
 
 	return (
-		<div
-			className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
-			role="dialog"
-			aria-modal="true"
-			aria-label="How voting works"
-		>
-			<button
-				type="button"
-				aria-label="Close"
-				onClick={onClose}
-				className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
-			/>
-			<div className="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-white/12 bg-[#0d0d0d] p-6 sm:p-8 animate-fade-in-up">
-				<div className="flex items-start justify-between gap-4 mb-6">
-					<div>
-						<h2 className="text-xl font-semibold tracking-tight text-foreground">
-							How voting works
-						</h2>
-						<p className="mt-1 text-sm text-neutral-400">
-							A community vote, settled on Stellar testnet.
-						</p>
-					</div>
-					<button
+		<AnimatePresence>
+			{open && (
+				<div
+					className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+					role="dialog"
+					aria-modal="true"
+					aria-label="How voting works"
+				>
+					<motion.button
 						type="button"
+						aria-label="Close"
 						onClick={onClose}
-						className="flex h-8 w-8 items-center justify-center rounded-full border border-white/12 text-neutral-400 hover:text-foreground hover:border-white/25 transition-colors flex-shrink-0"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.2 }}
+						className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+					/>
+					<motion.div
+						initial={{ opacity: 0, y: 16, scale: 0.98 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 16, scale: 0.98 }}
+						transition={{ duration: 0.28, ease: EASE }}
+						className="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
-						<X className="h-4 w-4" />
-					</button>
-				</div>
-				<ol className="space-y-4">
-					{steps.map((s) => (
-						<li key={s.n} className="flex gap-3.5">
-							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/15 text-xs font-semibold text-foreground tabular-nums">
-								{s.n}
-							</span>
-							<div className="min-w-0">
-								<p className="text-sm font-semibold text-foreground">{s.t}</p>
-								<p className="mt-0.5 text-sm text-neutral-400 leading-relaxed">
-									{s.d}
+						<div className="flex items-start justify-between gap-4 mb-6">
+							<div>
+								<h2 className="text-xl font-semibold tracking-tight text-neutral-100">
+									How voting works
+								</h2>
+								<p className="mt-1 text-sm text-neutral-400">
+									A community vote, settled on Stellar testnet.
 								</p>
 							</div>
-						</li>
-					))}
-				</ol>
-				<p className="mt-6 pt-5 border-t border-white/10 text-xs text-neutral-500 leading-relaxed">
-					Every ballot is a public testnet transaction — auditable by anyone,
-					tallied directly from the chain. This is a pilot; no mainnet funds are
-					involved.
-				</p>
-			</div>
-		</div>
+							<button
+								type="button"
+								onClick={onClose}
+								className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 hover:text-neutral-100 hover:border-[#454545] transition-colors flex-shrink-0"
+							>
+								<X className="h-4 w-4" />
+							</button>
+						</div>
+						<ol className="space-y-4">
+							{steps.map((s, i) => (
+								<motion.li
+									key={s.n}
+									initial={{ opacity: 0, x: -8 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{
+										delay: 0.08 + i * 0.06,
+										duration: 0.3,
+										ease: EASE,
+									}}
+									className="flex gap-3.5"
+								>
+									<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#3a3a3a] text-xs font-semibold text-neutral-100 tabular-nums">
+										{s.n}
+									</span>
+									<div className="min-w-0">
+										<p className="text-sm font-semibold text-neutral-100">
+											{s.t}
+										</p>
+										<p className="mt-0.5 text-sm text-neutral-400 leading-relaxed">
+											{s.d}
+										</p>
+									</div>
+								</motion.li>
+							))}
+						</ol>
+						<p className="mt-6 pt-5 border-t border-[#2a2a2a] text-xs text-neutral-500 leading-relaxed">
+							Every ballot is a public testnet transaction — auditable by
+							anyone, tallied directly from the chain. This is a pilot; no
+							mainnet funds are involved.
+						</p>
+					</motion.div>
+				</div>
+			)}
+		</AnimatePresence>
 	);
 }
 
@@ -345,15 +368,20 @@ function EmptyState() {
 	return (
 		<>
 			<TopBar onHowItWorks={() => setHowOpen(true)} />
-			<div className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-32 text-center">
+			<motion.div
+				initial={{ opacity: 0, y: 16 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5, ease: EASE }}
+				className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-32 text-center"
+			>
 				<I3Mark className="mx-auto mb-8 h-16 w-16 text-neutral-600" />
-				<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+				<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-100 mb-3">
 					The stage is being set
 				</h1>
 				<p className="text-neutral-400 leading-relaxed">
 					The i³ Awards ballot isn't live yet. Check back soon.
 				</p>
-			</div>
+			</motion.div>
 			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
 		</>
 	);
@@ -590,11 +618,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 	function PrimaryButton({ full = false }: { full?: boolean }) {
 		return (
-			<button
+			<motion.button
 				type="button"
 				onClick={primary.onClick}
 				disabled={primary.disabled}
-				className={`inline-flex items-center justify-center gap-2 h-11 rounded-full bg-white px-6 text-sm font-semibold text-black transition-all duration-150 hover:bg-neutral-200 active:scale-[0.98] disabled:bg-neutral-700 disabled:text-neutral-400 ${
+				whileTap={{ scale: primary.disabled ? 1 : 0.97 }}
+				className={`inline-flex items-center justify-center gap-2 h-11 rounded-full bg-neutral-100 px-6 text-sm font-semibold text-black transition-colors hover:bg-white disabled:bg-[#333] disabled:text-neutral-500 ${
 					full ? "w-full" : "flex-shrink-0"
 				}`}
 			>
@@ -604,7 +633,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					!address && <Wallet className="h-4 w-4" />
 				)}
 				{primary.label}
-			</button>
+			</motion.button>
 		);
 	}
 
@@ -621,8 +650,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			/>
 
 			{/* ── Hero ── */}
-			<header className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-10 text-center">
-				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-foreground leading-[1.05] mb-5">
+			<motion.header
+				initial={{ opacity: 0, y: 18 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.55, ease: EASE }}
+				className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-10 text-center"
+			>
+				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
 					{round.title}
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
@@ -642,70 +676,83 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 						</span>
 					) : null}
 					{!voting.open && (
-						<span className="text-neutral-400 rounded-full border border-white/10 px-3 py-1">
+						<span className="text-neutral-400 rounded-full border border-[#2f2f2f] px-3 py-1">
 							Voting is not open right now
 							{voting.reason ? ` — ${voting.reason}` : ""}
 						</span>
 					)}
 				</div>
-			</header>
+			</motion.header>
 
 			{/* ── Submitted confirmation ── */}
-			{phase === "submitted" && txHash && (
-				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-10 animate-fade-in-up">
-					<div className="relative overflow-hidden rounded-2xl border border-white/12 bg-[#0f0f0f] p-6 sm:p-7 text-center">
-						<span className="sm-confetti" aria-hidden="true">
-							{Array.from({ length: 14 }, (_, i) => (
-								<i
-									// biome-ignore lint/suspicious/noArrayIndexKey: static burst
-									key={i}
-									style={{
-										["--sm-i" as string]: i,
-										["--sm-x" as string]: `${(i % 2 ? 1 : -1) * (14 + ((i * 37) % 110))}px`,
-										["--sm-y" as string]: `${-(70 + ((i * 53) % 120))}px`,
-										["--sm-r" as string]: `${140 + ((i * 97) % 320)}deg`,
-										["--sm-c" as string]: i % 2 === 0 ? "#ffffff" : "#a3a3a3",
-									}}
-								/>
-							))}
-						</span>
-						<span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white">
-							<Check className="h-6 w-6 text-black" strokeWidth={3} />
-						</span>
-						<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground mb-2">
-							Your vote is on-chain
-						</h2>
-						<p className="text-sm text-neutral-400 leading-relaxed mb-4">
-							Recorded as a Stellar testnet transaction.
-							{closesLabel && (
-								<>
-									{" "}
-									You can change it until{" "}
-									<span className="text-neutral-200">{closesLabel}</span> — pick
-									again and resubmit.
-								</>
-							)}
-						</p>
-						<a
-							href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 hover:text-foreground transition-colors"
-						>
-							View transaction {shortAddress(txHash)}
-							<ArrowUpRight className="h-4 w-4" />
-						</a>
-					</div>
-				</div>
-			)}
+			<AnimatePresence>
+				{phase === "submitted" && txHash && (
+					<motion.div
+						initial={{ opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.45, ease: EASE }}
+						className="max-w-2xl mx-auto px-4 sm:px-6 mb-10"
+					>
+						<div className="relative overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 text-center shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+							<span className="sm-confetti" aria-hidden="true">
+								{Array.from({ length: 14 }, (_, i) => (
+									<i
+										// biome-ignore lint/suspicious/noArrayIndexKey: static burst
+										key={i}
+										style={{
+											["--sm-i" as string]: i,
+											["--sm-x" as string]: `${(i % 2 ? 1 : -1) * (14 + ((i * 37) % 110))}px`,
+											["--sm-y" as string]: `${-(70 + ((i * 53) % 120))}px`,
+											["--sm-r" as string]: `${140 + ((i * 97) % 320)}deg`,
+											["--sm-c" as string]: i % 2 === 0 ? "#ffffff" : "#8a8a8a",
+										}}
+									/>
+								))}
+							</span>
+							<motion.span
+								initial={{ scale: 0 }}
+								animate={{ scale: 1 }}
+								transition={{ ...SPRING, delay: 0.1 }}
+								className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100"
+							>
+								<Check className="h-6 w-6 text-black" strokeWidth={3} />
+							</motion.span>
+							<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-100 mb-2">
+								Your vote is on-chain
+							</h2>
+							<p className="text-sm text-neutral-400 leading-relaxed mb-4">
+								Recorded as a Stellar testnet transaction.
+								{closesLabel && (
+									<>
+										{" "}
+										You can change it until{" "}
+										<span className="text-neutral-200">{closesLabel}</span> —
+										pick again and resubmit.
+									</>
+								)}
+							</p>
+							<a
+								href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 hover:text-neutral-100 transition-colors"
+							>
+								View transaction {shortAddress(txHash)}
+								<ArrowUpRight className="h-4 w-4" />
+							</a>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 
 			{/* ── Read-only notice ── */}
 			{readOnly && (
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
-					<div className="rounded-xl border border-white/10 bg-[#0f0f0f] p-4 flex items-start gap-3">
+					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
 						<Eye className="h-5 w-5 mt-0.5 text-neutral-500 flex-shrink-0" />
 						<p className="text-sm text-neutral-400 leading-relaxed">
-							<span className="text-foreground font-medium">Read-only.</span>{" "}
+							<span className="text-neutral-100 font-medium">Read-only.</span>{" "}
 							{address ? shortAddress(address) : "This address"} isn't on the
 							Pilot voter list — the nominees are still worth a look.
 						</p>
@@ -724,7 +771,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									{String(index + 1).padStart(2, "0")}
 								</span>
 								<div>
-									<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+									<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
 										{category.name}
 									</h2>
 									{category.tagline && (
@@ -734,7 +781,16 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									)}
 								</div>
 							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+							<motion.div
+								initial="hidden"
+								whileInView="visible"
+								viewport={{ once: true, margin: "-60px" }}
+								variants={{
+									hidden: {},
+									visible: { transition: { staggerChildren: 0.05 } },
+								}}
+								className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+							>
 								{(nomineesByCategory.get(category.key) ?? []).map((nominee) => (
 									<NomineeCard
 										key={nominee.slug}
@@ -744,23 +800,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										onToggle={() => toggleNominee(category.key, nominee.slug)}
 									/>
 								))}
-							</div>
+							</motion.div>
 						</section>
 					))}
 				</div>
 
 				{/* ballot rail (desktop) */}
 				<aside className="hidden lg:block lg:col-span-4">
-					<div className="sticky top-20 rounded-2xl border border-white/12 bg-[#0d0d0d] p-5">
+					<div className="sticky top-20 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]">
 						<div className="flex items-center justify-between mb-4">
-							<h3 className="text-sm font-semibold text-foreground">
+							<h3 className="text-sm font-semibold text-neutral-100">
 								Your ballot
 							</h3>
 							<span className="text-xs tabular-nums text-neutral-500">
 								{selectedCount}/{categories.length}
 							</span>
 						</div>
-						<ul className="space-y-2.5 mb-5">
+						<ul className="space-y-3 mb-5">
 							{categories.map((c) => {
 								const picked = nomineeName(c.key, selections[c.key]);
 								return (
@@ -771,13 +827,22 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										<span className="text-xs text-neutral-500 truncate">
 											{c.name}
 										</span>
-										<span
-											className={`text-sm font-medium truncate text-right ${
-												picked ? "text-foreground" : "text-neutral-600"
-											}`}
-										>
-											{picked ?? "—"}
-										</span>
+										<div className="min-w-0 flex-shrink-0 text-right overflow-hidden">
+											<AnimatePresence mode="popLayout" initial={false}>
+												<motion.span
+													key={picked ?? "empty"}
+													initial={{ opacity: 0, y: 6 }}
+													animate={{ opacity: 1, y: 0 }}
+													exit={{ opacity: 0, y: -6 }}
+													transition={{ duration: 0.22, ease: EASE }}
+													className={`block text-sm font-medium truncate ${
+														picked ? "text-neutral-100" : "text-neutral-600"
+													}`}
+												>
+													{picked ?? "—"}
+												</motion.span>
+											</AnimatePresence>
+										</div>
 									</li>
 								);
 							})}
@@ -800,7 +865,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 			{/* ── Mobile sticky bar ── */}
 			{voting.open && !readOnly && (
-				<div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/85 backdrop-blur-xl">
+				<motion.div
+					initial={{ y: 24, opacity: 0 }}
+					animate={{ y: 0, opacity: 1 }}
+					transition={{ duration: 0.4, ease: EASE }}
+					className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#2a2a2a] bg-[#171717]/90 backdrop-blur-xl"
+				>
 					<div
 						className="max-w-6xl mx-auto px-4 py-3"
 						style={{
@@ -817,28 +887,27 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							<div className="flex items-center gap-2 min-w-0">
 								<div className="flex items-center gap-1">
 									{categories.map((c) => (
-										<span
+										<motion.span
 											key={c.key}
 											title={c.name}
-											className="h-2 w-2 rounded-full transition-all"
-											style={
+											animate={
 												selections[c.key]
-													? { background: "#fff" }
-													: {
-															border: "1px solid rgba(255,255,255,0.25)",
-														}
+													? { backgroundColor: "#fafafa", scale: 1 }
+													: { backgroundColor: "#3a3a3a", scale: 0.85 }
 											}
+											transition={SPRING}
+											className="h-2 w-2 rounded-full"
 										/>
 									))}
 								</div>
-								<span className="text-sm font-medium text-foreground">
+								<span className="text-sm font-medium text-neutral-100">
 									{selectedCount} of {categories.length}
 								</span>
 							</div>
 							<PrimaryButton />
 						</div>
 					</div>
-				</div>
+				</motion.div>
 			)}
 
 			{/* ── Wallet picker ── */}
@@ -866,10 +935,10 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								type="button"
 								disabled={phase === "connecting"}
 								onClick={() => handleConnect(wallet.id)}
-								className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:border-white/25 transition-colors disabled:opacity-60"
+								className="w-full rounded-xl border border-[#2f2f2f] bg-[#1f1f1f] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:border-[#454545] transition-colors disabled:opacity-60"
 							>
 								<span>
-									<span className="block text-sm font-semibold text-foreground">
+									<span className="block text-sm font-semibold text-neutral-100">
 										{wallet.name}
 									</span>
 									<span className="block text-xs text-neutral-500">
@@ -909,27 +978,50 @@ function NomineeCard({
 	const logoSrc = !logoError && nominee.logoUrl ? nominee.logoUrl : "/logo.png";
 
 	return (
-		<button
+		<motion.button
 			type="button"
 			aria-pressed={selected}
 			disabled={disabled}
 			onClick={onToggle}
-			className={`group relative rounded-xl border p-4 text-left flex flex-col min-h-[150px] transition-colors duration-150 disabled:cursor-default ${
+			variants={{
+				hidden: { opacity: 0, y: 16 },
+				visible: {
+					opacity: 1,
+					y: 0,
+					transition: { duration: 0.4, ease: EASE },
+				},
+			}}
+			whileHover={disabled ? undefined : { y: -3 }}
+			whileTap={disabled ? undefined : { scale: 0.985 }}
+			transition={SPRING}
+			className={`group relative rounded-xl border p-4 text-left flex flex-col min-h-[150px] disabled:cursor-default ${
 				selected
-					? "border-white bg-white/[0.05]"
-					: "border-white/10 bg-[#111] hover:border-white/25"
+					? "border-neutral-200 bg-[#242424] shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]"
+					: "border-[#2f2f2f] bg-[#1e1e1e] hover:border-[#4a4a4a] shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
 			}`}
+			style={{ transition: "border-color .15s, background-color .15s" }}
 		>
 			{/* selection badge */}
 			<span
 				className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
 					selected
-						? "bg-white border-white"
-						: "border-white/20 group-hover:border-white/40"
+						? "bg-neutral-100 border-neutral-100"
+						: "border-[#3f3f3f] group-hover:border-[#5a5a5a]"
 				}`}
 				aria-hidden="true"
 			>
-				{selected && <Check className="h-3 w-3 text-black" strokeWidth={3.5} />}
+				<AnimatePresence>
+					{selected && (
+						<motion.span
+							initial={{ scale: 0 }}
+							animate={{ scale: 1 }}
+							exit={{ scale: 0 }}
+							transition={SPRING}
+						>
+							<Check className="h-3 w-3 text-black" strokeWidth={3.5} />
+						</motion.span>
+					)}
+				</AnimatePresence>
 			</span>
 
 			<div className="flex items-center gap-3 mb-2.5 pr-7">
@@ -938,10 +1030,10 @@ function NomineeCard({
 					alt=""
 					width={36}
 					height={36}
-					className="rounded-lg object-cover w-9 h-9 flex-shrink-0 border border-white/10 bg-black"
+					className="rounded-lg object-cover w-9 h-9 flex-shrink-0 border border-[#2f2f2f] bg-[#111]"
 					onError={() => setLogoError(true)}
 				/>
-				<span className="text-sm font-semibold text-foreground leading-tight">
+				<span className="text-sm font-semibold text-neutral-100 leading-tight">
 					{nominee.name}
 				</span>
 			</div>
@@ -950,10 +1042,10 @@ function NomineeCard({
 				{nominee.blurb ?? "Shortlisted by the community."}
 			</span>
 
-			<span className="mt-3 pt-2.5 border-t border-white/[0.07] flex items-center justify-between">
+			<span className="mt-3 pt-2.5 border-t border-[#2a2a2a] flex items-center justify-between">
 				<span
 					className={`text-xs font-medium ${
-						selected ? "text-foreground" : "text-neutral-500"
+						selected ? "text-neutral-100" : "text-neutral-500"
 					}`}
 				>
 					{selected ? "Selected" : "Tap to select"}
@@ -963,13 +1055,13 @@ function NomineeCard({
 					target="_blank"
 					rel="noopener noreferrer"
 					onClick={(e) => e.stopPropagation()}
-					className="inline-flex items-center gap-0.5 text-xs text-neutral-500 hover:text-foreground transition-colors"
+					className="inline-flex items-center gap-0.5 text-xs text-neutral-500 hover:text-neutral-200 transition-colors"
 				>
 					About
 					<ArrowUpRight className="h-3 w-3" />
 				</a>
 			</span>
-		</button>
+		</motion.button>
 	);
 }
 
@@ -1000,11 +1092,16 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 		<>
 			<TopBar onHowItWorks={() => setHowOpen(true)} />
 			<div className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32">
-				<header className="text-center mb-14">
+				<motion.header
+					initial={{ opacity: 0, y: 18 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.55, ease: EASE }}
+					className="text-center mb-14"
+				>
 					<p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500 mb-3">
 						Voting closed
 					</p>
-					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-foreground leading-[1.05]">
+					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
 						{round.title}
 					</h1>
 					{results && (
@@ -1013,7 +1110,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 							voted
 						</p>
 					)}
-				</header>
+				</motion.header>
 
 				{!results && !failed && (
 					<p className="text-center text-neutral-500">
@@ -1035,18 +1132,24 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 							const pct = (v: number) => Math.round((v / total) * 100);
 							return (
 								<section key={category.key}>
-									<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground mb-4 flex items-center gap-2.5">
+									<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-50 mb-4 flex items-center gap-2.5">
 										<Trophy className="h-5 w-5 text-neutral-300" />
 										{category.name}
 									</h2>
 									{winner && (
-										<div className="sm-row rounded-xl border border-white/25 bg-white/[0.04] p-4 mb-2.5">
+										<motion.div
+											initial={{ opacity: 0, y: 10 }}
+											whileInView={{ opacity: 1, y: 0 }}
+											viewport={{ once: true }}
+											transition={{ duration: 0.4, ease: EASE }}
+											className="rounded-xl border border-neutral-500/40 bg-[#242424] p-4 mb-2.5 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]"
+										>
 											<div className="flex items-center justify-between gap-4 mb-3">
 												<div className="flex items-center gap-2.5 min-w-0">
-													<span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-black flex-shrink-0">
+													<span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-semibold text-black flex-shrink-0">
 														Winner
 													</span>
-													<p className="text-base font-semibold text-foreground tracking-tight truncate">
+													<p className="text-base font-semibold text-neutral-50 tracking-tight truncate">
 														{winner.name}
 													</p>
 												</div>
@@ -1055,25 +1158,33 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 												</span>
 											</div>
 											<div className="sm-bar-track">
-												<div
+												<motion.div
 													className="sm-bar-fill"
-													style={{
-														width: `${pct(winner.votes)}%`,
-														background: "#fff",
-													}}
+													initial={{ width: 0 }}
+													whileInView={{ width: `${pct(winner.votes)}%` }}
+													viewport={{ once: true }}
+													transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+													style={{ background: "#fafafa" }}
 												/>
 											</div>
-										</div>
+										</motion.div>
 									)}
 									<ul className="space-y-2">
 										{rest.map((r, i) => (
-											<li
+											<motion.li
 												key={r.slug}
-												className="sm-row rounded-xl border border-white/10 bg-[#111] px-4 py-3"
-												style={{ ["--sm-i" as string]: i + 1 }}
+												initial={{ opacity: 0, y: 8 }}
+												whileInView={{ opacity: 1, y: 0 }}
+												viewport={{ once: true }}
+												transition={{
+													duration: 0.35,
+													ease: EASE,
+													delay: (i + 1) * 0.05,
+												}}
+												className="rounded-xl border border-[#2f2f2f] bg-[#1e1e1e] px-4 py-3"
 											>
 												<div className="flex items-center justify-between gap-3 mb-2">
-													<span className="text-sm font-medium text-foreground truncate">
+													<span className="text-sm font-medium text-neutral-100 truncate">
 														{r.name}
 													</span>
 													<span className="text-[11px] font-medium tabular-nums text-neutral-500 flex-shrink-0">
@@ -1081,15 +1192,16 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 													</span>
 												</div>
 												<div className="sm-bar-track" style={{ height: 6 }}>
-													<div
+													<motion.div
 														className="sm-bar-fill"
-														style={{
-															width: `${pct(r.votes)}%`,
-															background: "rgba(255,255,255,0.3)",
-														}}
+														initial={{ width: 0 }}
+														whileInView={{ width: `${pct(r.votes)}%` }}
+														viewport={{ once: true }}
+														transition={{ duration: 0.6, ease: EASE }}
+														style={{ background: "rgba(255,255,255,0.28)" }}
 													/>
 												</div>
-											</li>
+											</motion.li>
 										))}
 									</ul>
 								</section>
