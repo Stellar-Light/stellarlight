@@ -521,6 +521,115 @@ export function corridorMatch(p: MatchableProject, tokens: string[]): boolean {
 	return tokens.some((t) => termsForToken(t).some((v) => vals.has(v)));
 }
 
+// ── Chain-corridor discriminator (2026-07-21 persona battery) ──
+// The bridge analog of corridorMatch. "solana → stellar bridge" surfaced
+// spacewalk (a Polkadot↔Stellar bridge) in the top results: every Bridge-type
+// record matches "bridge" AND the chain-name synonyms all expand to
+// "cross-chain", so the chain token carried no discriminating signal — a
+// bridge for the WRONG chain ranked beside the right ones. Bridges carry the
+// truth in `supportedNetworks` (spacewalk = [stellar, polkadot, kusama];
+// allbridge = [stellar, evm, solana, tron, sui]), so a chain-named bridge
+// query must prove the corridor, exactly as a country-named ramp query does.
+//
+// Canonical query-chain → the supportedNetworks values that PROVE it. EVM-
+// family chains are proven by the generic "evm" tag most bridges store, or by
+// their own name when a record is chain-specific.
+const CHAIN_PROOF: Record<string, string[]> = {
+	solana: ["solana"],
+	ethereum: ["ethereum", "evm"],
+	polygon: ["polygon", "evm"],
+	arbitrum: ["arbitrum", "evm"],
+	optimism: ["optimism", "evm"],
+	avalanche: ["avalanche", "evm"],
+	bnb: ["bnb", "bsc", "evm"],
+	evm: ["evm", "ethereum", "polygon", "arbitrum", "optimism", "avalanche", "bnb", "bsc", "base"],
+	polkadot: ["polkadot"],
+	kusama: ["kusama"],
+	tron: ["tron"],
+	xrpl: ["xrpl"],
+	sui: ["sui"],
+	aptos: ["aptos"],
+	starknet: ["starknet"],
+	bitcoin: ["bitcoin"],
+};
+// Raw query token → canonical chain. DELIBERATELY excludes chain tokens that
+// are also common English words or ambiguous tickers (sol, base, near, dot,
+// op, noble, btc-as-"bit") — a false chain detection would wrongly down-rank a
+// legitimate bridge, and the discriminator's whole value is precision. Only
+// unambiguous chain names/tickers gate.
+const CHAIN_ALIASES: Record<string, string> = {
+	solana: "solana",
+	ethereum: "ethereum",
+	erc20: "ethereum",
+	polygon: "polygon",
+	matic: "polygon",
+	arbitrum: "arbitrum",
+	optimism: "optimism",
+	avalanche: "avalanche",
+	avax: "avalanche",
+	bnb: "bnb",
+	bsc: "bnb",
+	binance: "bnb",
+	evm: "evm",
+	polkadot: "polkadot",
+	kusama: "kusama",
+	tron: "tron",
+	trx: "tron",
+	xrpl: "xrpl",
+	xrp: "xrpl",
+	ripple: "xrpl",
+	sui: "sui",
+	aptos: "aptos",
+	starknet: "starknet",
+	bitcoin: "bitcoin",
+};
+
+/** External (non-Stellar) chains the query names, canonicalized. Empty when
+ *  the query names none — the discriminator is then inert. */
+export function namedChains(tokens: string[]): Set<string> {
+	const out = new Set<string>();
+	for (const t of tokens) {
+		const c = CHAIN_ALIASES[t];
+		if (c) out.add(c);
+	}
+	return out;
+}
+
+/**
+ * Does this record satisfy the query's chain corridor? True unless the query
+ * names an external chain AND the record is a bridge that demonstrably does
+ * NOT serve it. Only BRIDGE records are discriminated — a wallet or oracle
+ * that merely mentions a chain isn't making a corridor claim. When
+ * supportedNetworks is populated it is the authority; an unenriched bridge
+ * falls back to a prose mention so we never penalize a record we simply
+ * haven't enriched. No chain named / non-bridge record → true (inert), like
+ * anchorIdentityHit's all-generic case.
+ */
+export function chainCorridorHit(
+	p: MatchableProject,
+	tokens: string[],
+): boolean {
+	const named = namedChains(tokens);
+	if (!named.size) return true;
+	const isBridge =
+		(p.types ?? []).includes("Bridge") ||
+		/\bbridge\b|\bcross[-\s]?chain\b|\binteroperab/i.test(
+			`${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""}`,
+		);
+	if (!isBridge) return true;
+	const nets = Array.isArray(p.supportedNetworks)
+		? p.supportedNetworks.map((s) => s.toLowerCase())
+		: [];
+	const proves = (c: string): boolean =>
+		(CHAIN_PROOF[c] ?? [c]).some((v) => nets.includes(v));
+	if (nets.length) return [...named].some(proves);
+	// Unenriched supportedNetworks — fall back to a prose/identity mention.
+	const hay = buildHaystack(p);
+	return [...named].some((c) =>
+		(CHAIN_PROOF[c] ?? [c]).some((v) => hay.includes(v)),
+	);
+}
+
 // A structured relevance hit: the record IS the queried category, OR its
 // coverage serves a queried corridor under ramp intent. Structured truth is
 // stronger evidence than one extra prose word, so callers admit a structured
