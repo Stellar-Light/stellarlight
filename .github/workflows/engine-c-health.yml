@@ -11,7 +11,9 @@ concurrency:
   cancel-in-progress: false
 permissions:
   issues: write
-  contents: read
+  # write: the weekly evidence JSONs are committed to improvements/engine/weekly/
+  # so /quality can render them (committed-artifacts-only rule).
+  contents: write
 jobs:
   health:
     runs-on: ubuntu-latest
@@ -123,6 +125,46 @@ jobs:
             /tmp/e.json
             /tmp/coverage.json
           retention-days: 30
+      - name: Commit weekly evidence to improvements/engine/weekly/
+        # The /quality scoreboard renders ONLY committed artifacts — a CI
+        # artifact that expires in 30 days can't back a public number. Each
+        # eval's JSON is committed at a FIXED `<name>-latest.json` path
+        # (static-importable); git history is the dated archive. Runs even on
+        # red weeks (a red the page can show is the whole point). Only files
+        # that parse as JSON are committed — a crashed eval's partial output
+        # stays out. Bot commit ⇒ no Vercel deploy (git-author gate): the
+        # page picks the fresh numbers up on the next human-authored deploy.
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p improvements/engine/weekly
+          declare -A MAP=(
+            [a]=engine-a-recall [b]=engine-b-sweeps [d]=engine-d-demand
+            [corpus]=corpus-health [scf]=scf-crosscheck [golden]=golden-eval
+            [e]=engine-e-contract [coverage]=corpus-coverage
+          )
+          copied=0
+          for key in "${!MAP[@]}"; do
+            src="/tmp/${key}.json"
+            if [ -s "$src" ] && python3 -c "import json;json.load(open('$src'))" 2>/dev/null; then
+              cp "$src" "improvements/engine/weekly/${MAP[$key]}-latest.json"
+              copied=$((copied+1))
+            else
+              echo "skip ${key}.json (missing or not valid JSON)"
+            fi
+          done
+          echo "valid artifacts: $copied/8"
+          [ "$copied" -eq 0 ] && { echo "nothing to commit"; exit 0; }
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/engine/weekly/
+          if git diff --cached --quiet; then
+            echo "evidence unchanged — nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore(engine): weekly evidence $(date -u +%Y-%m-%d) (${copied}/8 evals) [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git push
       - name: Fail run on floor breach
         if: env.A_RED == '1' || env.C_RED == '1'
         run: echo "::error::Engine A recall below floor — see the health tracker issue" && exit 1
