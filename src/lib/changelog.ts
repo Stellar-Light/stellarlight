@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.17",
+		type: "added",
+		summary:
+			"New getStablecoins (/api/stablecoins): every Stellar stablecoin ranked by USD MARKET CAP — the comparable metric. Corrects the 'biggest stablecoin' answer that raw supply got wrong (yen/peso units aren't USD-comparable) and adds the issuers we were missing (USDY/Ondo, PYUSD, EURC, …).",
+		detail:
+			"Boxy review of getLeaderboard sort=supply: circulating supply is denominated in each asset's own peg, so ranking whole-asset units treated GYEN (100.87M yen ≈ $676K) and ARST (243M pesos ≈ $243K) as if comparable to USD stablecoins, and our ~19 on-chain seeds missed the actual largest — USDY/Ondo at $467.5M. getStablecoins proxies the authoritative stablecoin snapshot (stablecoin.stellarlight.xyz, 23 issuers, dated, refreshed continuously), normalizes its display values to raw numbers, and ranks by marketCapUSD (supply × USD price) by default. Rows carry the peg so denomination is explicit; supply is served but flagged within-peg-only. Params: sort=marketcap|supply|holders|volume, peg=USD|EUR|JPY|…, limit. getLeaderboard sort=supply stays (raw issued-asset units incl. governance tokens) with its metricDefinition now pointing here for USD-comparable stablecoin size. null = not tracked, never zero.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.16",
 		type: "added",
 		summary:

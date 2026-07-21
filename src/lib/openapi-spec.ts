@@ -2730,6 +2730,106 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/stablecoins": {
+			get: {
+				operationId: "getStablecoins",
+				tags: ["Ecosystem"],
+				summary: "Stellar stablecoins ranked by USD market cap",
+				description:
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.",
+				"x-routing": {
+					purpose:
+						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
+					keywords: [
+						"stablecoin",
+						"stablecoins",
+						"biggest stablecoin",
+						"largest stablecoin",
+						"top stablecoin",
+						"market cap",
+						"circulating supply",
+						"usdc",
+						"usdy",
+						"ondo",
+						"pyusd",
+						"eurc",
+						"gyen",
+						"issuer",
+						"peg",
+						"holders",
+					],
+					useWhen: [
+						"the biggest / largest stablecoin on Stellar (by USD market cap)",
+						"top stablecoin issuers, total stablecoin market cap, or a stablecoin's supply/holders/peg",
+						"comparing stablecoins by size — use marketCapUSD, never raw supply across different pegs",
+					],
+					notFor: [
+						"DeFi protocol TVL -> getLeaderboard sort=tvl",
+						"a stablecoin project's full profile/funding/repos -> searchProjects",
+						"non-stablecoin issued assets (governance/utility tokens) -> getLeaderboard sort=supply",
+					],
+					exampleQuestions: [
+						"What's the biggest stablecoin on Stellar?",
+						"Which stablecoin has the most holders?",
+						"List USD-pegged stablecoins by market cap",
+						"What's the total stablecoin market cap on Stellar?",
+					],
+				},
+				parameters: [
+					{
+						name: "sort",
+						in: "query",
+						description:
+							"Ranking order. marketcap (default, USD-comparable) | supply (raw peg units — comparable only within one peg) | holders | volume. Unrecognized values return 400.",
+						schema: {
+							type: "string",
+							enum: ["marketcap", "supply", "holders", "volume"],
+							default: "marketcap",
+						},
+					},
+					{
+						name: "peg",
+						in: "query",
+						description:
+							"Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs.",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Max rows (default 50, max 100).",
+						schema: { type: "integer", default: 50, maximum: 100 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Ranked stablecoins",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { $ref: "#/components/schemas/Meta" },
+										stablecoins: {
+											type: "array",
+											items: { $ref: "#/components/schemas/Stablecoin" },
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Invalid sort or unknown query param",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 	components: {
 		parameters: {
@@ -4300,6 +4400,69 @@ export const spec: OpenAPISpec = {
 									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
 							},
 						},
+					},
+				},
+			},
+			Stablecoin: {
+				type: "object",
+				description:
+					"One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
+				properties: {
+					ticker: { type: "string", description: "Asset code (USDC, USDY, GYEN, …)." },
+					name: { type: "string", nullable: true },
+					issuer: {
+						type: "string",
+						nullable: true,
+						description: "Stellar issuer account (G…) — the universal join key.",
+					},
+					issuerDomain: { type: "string", nullable: true },
+					company: { type: "string", nullable: true },
+					website: { type: "string", nullable: true },
+					peg: {
+						type: "string",
+						nullable: true,
+						description:
+							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
+					},
+					country: { type: "string", nullable: true },
+					supply: {
+						type: "number",
+						nullable: true,
+						description:
+							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported.",
+					},
+					marketCapUSD: {
+						type: "number",
+						nullable: true,
+						description:
+							"Supply valued in USD (supply × USD price) — THE comparable ranking metric (default sort). Null = unpriced.",
+					},
+					priceUSD: {
+						type: "number",
+						nullable: true,
+						description: "USD price of one unit (≈1 for USD pegs).",
+					},
+					holders: {
+						type: "number",
+						nullable: true,
+						description: "Trustline holder count.",
+					},
+					volume24hUSD: {
+						type: "number",
+						nullable: true,
+						description: "24h transfer volume in USD.",
+					},
+					supplyChange7d: {
+						type: "string",
+						nullable: true,
+						description: "7-day supply change (display string, e.g. '-5.80%').",
+					},
+					verified: { type: "boolean" },
+					updatedAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description: "When this snapshot row was refreshed (dated-metrics rule).",
 					},
 				},
 			},
