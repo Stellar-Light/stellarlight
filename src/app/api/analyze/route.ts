@@ -22,6 +22,7 @@
 
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
 import { computeEcosystemGaps } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
@@ -43,6 +44,7 @@ const VALID_DIMENSIONS = [
 	"funding",
 	"tvl",
 	"gaps",
+	"developers",
 ] as const;
 
 // Buildable product verticals — the universe the `gaps` dimension measures
@@ -150,6 +152,8 @@ export async function GET(req: NextRequest) {
 		dimensionParam === "all" || dimensionParam === "funding";
 	const includeTvl = dimensionParam === "all" || dimensionParam === "tvl";
 	const includeGaps = dimensionParam === "all" || dimensionParam === "gaps";
+	const includeDevelopers =
+		dimensionParam === "all" || dimensionParam === "developers";
 
 	const payload = await getPayloadSafe();
 
@@ -581,6 +585,60 @@ export async function GET(req: NextRequest) {
 		// per-vertical coverage + three honest gap kinds (see ecosystem-gaps.ts).
 		// Supply-side only; the basis field spells out that gap ≠ demand.
 		result.gaps = computeEcosystemGaps(projects, GAP_VERTICALS);
+	}
+
+	if (includeDevelopers) {
+		// "How many active developers on Stellar?" (2026-07-21 SDF/institution
+		// battery): the fresh Electric Capital snapshot lives in the repo
+		// (src/data/electric-capital-stellar.json, refreshed weekly) but had no
+		// queryable API surface, so the question fell back to stale EC PDFs in
+		// the research corpus. Serve the current structured number here, dated,
+		// with month/year deltas so the trend is answerable — never an undated
+		// count. All figures are Electric Capital's Open Dev Data methodology
+		// (git-commit-derived monthly-active developers), not a headcount.
+		const mad = ecData.mad;
+		const pct = (from: number, to: number): number | null =>
+			from > 0 ? Math.round(((to - from) / from) * 1000) / 10 : null;
+		const topPeers = Array.isArray(ecData.peers)
+			? [...ecData.peers]
+					.sort((a, b) => (b.current ?? 0) - (a.current ?? 0))
+					.slice(0, 6)
+					.map((p) => ({ chain: p.name, monthlyActiveDevs: p.current }))
+			: [];
+		result.developers = {
+			asOf: ecData.asOf,
+			source: ecData.source,
+			sourceUrl: ecData.sourceUrl ?? null,
+			monthlyActiveDevs: {
+				total: mad.total,
+				// Devs building ONLY on Stellar vs. also on other chains — the
+				// "exclusive" figure is the truer measure of committed builders.
+				exclusive: mad.exclusive,
+				multichain: mad.multichain,
+				allTimePeak: mad.allTimePeak,
+				allTimePeakDay: mad.allTimePeakDay,
+				trend: {
+					vs30dAgo: mad.thirtyDaysAgo,
+					vs90dAgo: mad.ninetyDaysAgo,
+					vs1yAgo: mad.oneYearAgo,
+					momPct: pct(mad.thirtyDaysAgo, mad.total),
+					yoyPct: pct(mad.oneYearAgo, mad.total),
+				},
+			},
+			commits28d: ecData.commits28d?.total ?? null,
+			tenure: ecData.tenure ?? null,
+			geography: ecData.geo
+				? {
+						located: ecData.geo.located,
+						unknown: ecData.geo.unknown,
+						topCountries: (ecData.geo.topCountries ?? []).slice(0, 5),
+					}
+				: null,
+			// Peer chains for scale context — Stellar's MAD next to the majors.
+			peerChains: topPeers,
+			basis:
+				"Electric Capital Open Dev Data: monthly-active developers = distinct authors of code commits to Stellar-ecosystem open-source repos in the trailing 28 days (NOT a headcount or payroll figure; closed-source and non-committing contributors are uncounted). `exclusive` builds only on Stellar; `multichain` also commits to other ecosystems. Dated by asOf; deltas are point-in-time vs the snapshot. Peer MAD is the same methodology per chain for scale, not a quality ranking.",
+		};
 	}
 
 	logApiHit({
