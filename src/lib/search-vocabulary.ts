@@ -62,6 +62,19 @@ export const BUILDER_CORE_VERTICALS = [
  * (pool/liquidity), Beacon Q3 (chain names), Raven launch demo
  * (LatAm→countries).
  */
+/** zk proof-system vocabulary, shared by every family entry point (see the
+ * `zk`/`snark`/`zk-snark`/… keys below). One list so the members stay in sync. */
+const ZK_FAMILY: string[] = [
+	"zk",
+	"zero-knowledge",
+	"zero knowledge",
+	"zkp",
+	"snark",
+	"stark",
+	"plonk",
+	"groth16",
+];
+
 export const CORE_SYNONYMS: Record<string, string[]> = {
 	// ── Verticals ──
 	amm: ["amm", "liquidity", "pool", "swap", "dex"],
@@ -112,17 +125,21 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	defi: ["defi", "decentralized finance", "amm", "lending", "yield"],
 	soroban: ["soroban", "smart contract", "contract"],
 	contract: ["contract", "soroban", "smart contract"],
-	zk: [
-		"zk",
-		"zero-knowledge",
-		"zero knowledge",
-		"zkp",
-		"snark",
-		"stark",
-		"plonk",
-		"groth16",
-	],
-	zkp: ["zkp", "zk", "zero-knowledge"],
+	// zk proof-system family. Bidirectional (P5, 2026-07-21): the family used to
+	// be reachable ONLY from "zk" — q=zk found the repos, but q=zk-snark / q=snark
+	// / q=zksnark returned 0 because those were only VALUES under "zk", never keys,
+	// so a query FOR a family member never expanded back to the family. Every entry
+	// point now maps to the same ZK_FAMILY set, so q=zk-snark ≡ q=zk. Kept to
+	// specific proof-system terms (no "proof"/"circuit" — those stay repo-overlay-
+	// only, too loose for project substring matching; see the vocabulary test).
+	zk: [...ZK_FAMILY],
+	zkp: ["zkp", ...ZK_FAMILY],
+	snark: [...ZK_FAMILY],
+	stark: [...ZK_FAMILY],
+	plonk: [...ZK_FAMILY],
+	groth16: [...ZK_FAMILY],
+	zksnark: ["zksnark", ...ZK_FAMILY],
+	"zk-snark": ["zk-snark", "zksnark", ...ZK_FAMILY],
 	// Privacy vertical (2026-07-21 privacy battery): street vocabulary
 	// ("anonymous", "mixer", "monero-style") never appears in privacy
 	// records — they say privacy/confidential ("privacy-preserving token
