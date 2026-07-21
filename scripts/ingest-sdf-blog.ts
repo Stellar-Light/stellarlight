@@ -17,6 +17,7 @@ loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
+import { decodeHtmlEntities } from "../src/lib/decode-entities";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
@@ -126,7 +127,10 @@ async function fetchPost(url: string): Promise<Post> {
 	// (the Protocol 27 "Zipper" upgrade guide was invisible to retrieval:
 	// title carries 3x keyword weight).
 	const cleanTitle = (raw: string): string => {
-		const t = raw.trim();
+		// Decode HTML entities FIRST (S6 hygiene): scraped og:title/<title> carries
+		// raw "&#x27;"/"&amp;" — a title is the citation an agent shows, so it must
+		// be human-readable, not markup. Then the brand-segment cleanup below.
+		const t = decodeHtmlEntities(raw).trim();
 		if (/^Stellar\s*\|\s*\S/i.test(t))
 			return t.replace(/^Stellar\s*\|\s*/i, "").trim();
 		return t.replace(/\s+\|\s+Stellar.*$/i, "").trim();
