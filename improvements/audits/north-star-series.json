@@ -1,0 +1,40 @@
+{
+	"metric": "full-surface audit ok-rate",
+	"unit": "%",
+	"target": 85,
+	"note": "The north-star quality series. Each entry is transcribed from the dated run evidence it links — /quality renders THIS file and never hand-set numbers. New audit runs append here with their evidence path.",
+	"series": [
+		{
+			"date": "2026-07-09",
+			"label": "597-probe baseline",
+			"okRate": 59,
+			"ok": 351,
+			"probes": 597,
+			"evidence": "improvements/audits/audit-2026-07-09-findings.json"
+		},
+		{
+			"date": "2026-07-09",
+			"label": "post-wave rerun",
+			"okRate": 69,
+			"ok": 444,
+			"probes": 648,
+			"evidence": "improvements/audits/audit-2026-07-09-rerun-findings.json"
+		},
+		{
+			"date": "2026-07-11",
+			"label": "198-probe rerun",
+			"okRate": 76,
+			"ok": null,
+			"probes": 198,
+			"evidence": "improvements/engine/engine-analysis-2026-07-11.md"
+		},
+		{
+			"date": "2026-07-11",
+			"label": "post fix-queue re-measure",
+			"okRate": 82,
+			"ok": 163,
+			"probes": 198,
+			"evidence": "improvements/engine/engine-analysis-2026-07-11.md"
+		}
+	]
+}
