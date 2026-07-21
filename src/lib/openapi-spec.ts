@@ -4010,7 +4010,9 @@ export const spec: OpenAPISpec = {
 							},
 							basis: {
 								type: "string",
-								enum: ["profile-text"],
+								enum: ["profile-text", "repo-owner"],
+								description:
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name).",
 							},
 						},
 					},
