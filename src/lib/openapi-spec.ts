@@ -852,7 +852,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Compare 2–5 hackathons side-by-side",
 				description:
-					"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, hackers, prize-per-winner) plus a `deltas` block flagging the spreads. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via getHackathons. Not for ecosystem-wide totals across ALL events → use analyzeEcosystem.",
+					"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, prize-per-winner, and cohort DURABILITY — stillActiveCount/liveCount/activeRatePct, how many of the event's projects are still alive today; curated events only) plus a `deltas` block flagging the spreads incl. the most durable cohort. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via getHackathons. Not for ecosystem-wide totals across ALL events → use analyzeEcosystem.",
 				"x-routing": {
 					purpose:
 						"Compare 2–5 named hackathons on prizes, turnout, and outcomes.",
@@ -867,11 +867,18 @@ export const spec: OpenAPISpec = {
 						"prize-per-winner",
 						"registered hackers",
 						"submission count",
+						"still active",
+						"still alive",
+						"durability",
+						"survival rate",
+						"which projects survived",
+						"most durable cohort",
 					],
 					useWhen: [
 						"which Stellar hackathon should I enter",
 						"how did [event A] compare to [event B] on prizes/turnout",
 						"was [A] or [B] bigger",
+						"which event's projects are still active/alive today (cohort durability — curated events only)",
 					],
 					notFor: [
 						"one event's deep detail/winners -> getHackathon",
@@ -881,6 +888,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Was event A bigger than event B?",
 						"Compare the last two SDF hackathons on prize money",
+						"Which hackathon's projects are still active today?",
 					],
 				},
 				parameters: [

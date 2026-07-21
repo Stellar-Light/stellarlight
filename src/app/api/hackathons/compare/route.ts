@@ -23,6 +23,7 @@ import {
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { ACTIVE_PROJECT_STATUSES } from "@/lib/population";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,16 @@ interface HackathonSnapshot {
 	submissionCount?: number;
 	winnerCount?: number;
 	prizePerWinnerUSD?: number;
+	// Cohort DURABILITY (2026-07-21): of this hackathon's submissions, how many
+	// are STILL ACTIVE in the directory today (status Live/Pre-Release/
+	// Development) and how many reached Live. Curated hackathons only — a
+	// DoraHacks-sourced event has no directory project join, so these stay
+	// undefined (absence = not joinable, never "zero survived").
+	stillActiveCount?: number;
+	liveCount?: number;
+	/** stillActiveCount / submissionCount as a percent — the survival rate that
+	 *  makes "2× the submissions but half as durable" answerable. */
+	activeRatePct?: number;
 }
 
 async function loadOne(slug: string): Promise<HackathonSnapshot> {
@@ -81,6 +92,28 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 					limit: 1,
 					depth: 0,
 				});
+				// Cohort durability: how many of this event's projects are still
+				// active (any active status) and specifically Live, today.
+				const stillActive = await payload.find({
+					collection: "projects",
+					where: {
+						hackathon: { equals: c.docs[0].id },
+						status: { in: [...ACTIVE_PROJECT_STATUSES] },
+					},
+					limit: 1,
+					depth: 0,
+				});
+				const live = await payload.find({
+					collection: "projects",
+					where: {
+						hackathon: { equals: c.docs[0].id },
+						status: { equals: "Live" },
+					},
+					limit: 1,
+					depth: 0,
+				});
+				const submissionCount = subs.totalDocs;
+				const stillActiveCount = stillActive.totalDocs;
 				return {
 					slug: h.slug,
 					source: "curated",
@@ -89,8 +122,14 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 					endDate: h.endDate,
 					status: h.status,
 					externalUrl: h.externalUrl,
-					submissionCount: subs.totalDocs,
+					submissionCount,
 					winnerCount: winners.totalDocs,
+					stillActiveCount,
+					liveCount: live.totalDocs,
+					activeRatePct:
+						submissionCount > 0
+							? Math.round((stillActiveCount / submissionCount) * 100)
+							: undefined,
 				};
 			}
 		} catch {
@@ -132,6 +171,9 @@ interface ComparisonDeltas {
 	submissionCount?: { highest: string; lowest: string; range: number };
 	prizePerWinnerUSD?: { highest: string; lowest: string };
 	hackersCount?: { highest: string; lowest: string };
+	/** Cohort durability spread — which event's projects survived best (highest
+	 *  still-active rate). Curated hackathons only. */
+	activeRatePct?: { highest: string; lowest: string };
 	notes: string[];
 }
 
@@ -196,6 +238,11 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 	const ppw = pickRange("prizePerWinnerUSD", "prize per winner");
 	if (ppw)
 		deltas.prizePerWinnerUSD = { highest: ppw.highest, lowest: ppw.lowest };
+
+	// Cohort durability: which event's projects are most alive today. The note
+	// is the "2× submissions but half survived" insight the endpoint exists for.
+	const ar = pickRange("activeRatePct", "still-active rate (%)");
+	if (ar) deltas.activeRatePct = { highest: ar.highest, lowest: ar.lowest };
 
 	const notFound = snaps.filter((s) => s.source === "not-found");
 	if (notFound.length > 0) {
