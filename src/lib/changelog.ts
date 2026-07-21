@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.20",
+		type: "fixed",
+		summary:
+			"analyzeEcosystem dimension=gaps no longer reports 'Oracle' as an absent vertical. Oracle isn't a `types` value (oracles are typed category=Infrastructure with types=[] by convention), so it was a permanent false-absent; removed from the measured vertical set.",
+		detail:
+			"Caught live within the hour: dimension=gaps returned absent:['Oracle'] even though Reflector/Band/RedStone are Live oracles — they carry types=[] and 'Oracle' isn't a projects `types` option at all, so a types-based tally can never see them. The gap vertical universe now contains only real `types` values, and the basis documents that category-conventioned verticals (oracles) aren't measurable on the types axis (use searchProjects/category for oracle discovery). No other vertical was affected.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.19",
 		type: "added",
 		summary:

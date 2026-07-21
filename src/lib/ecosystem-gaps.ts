@@ -125,7 +125,7 @@ export function computeEcosystemGaps(
 		scope:
 			"Active directory projects (status Live / Pre-Release / Development), tallied by product TYPE (the fine vertical taxonomy, not the coarse category). A project counts under EACH of its types.",
 		basis:
-			"Supply-side COVERAGE of the directory — what exists, NOT market demand. A thin vertical may be genuinely under-served OR simply low-demand; validate demand (real user asks, RFPs) before treating a gap as an opportunity. Signals are restricted to canonical buildable verticals; broad catch-alls (Infrastructure/SDK/Tooling/Analytics) are excluded. `absent` = a canonical vertical with zero active projects in OUR directory (coverage, not proof none exists). Counts are as-of the response.",
+			"Supply-side COVERAGE of the directory — what exists, NOT market demand. A thin vertical may be genuinely under-served OR simply low-demand; validate demand (real user asks, RFPs) before treating a gap as an opportunity. Measured via the `types[]` taxonomy: a vertical a project expresses through its `category` instead of `types` (by convention, oracles = category=Infrastructure with types=[]) is NOT measurable here and is deliberately excluded — its absence would be a typing artifact, not whitespace. Signals restrict to canonical buildable verticals; broad catch-alls (Infrastructure/SDK/Analytics) are excluded. `absent` = a canonical vertical with zero active projects in OUR directory (coverage, not proof none exists). Counts are as-of the response.",
 		byType,
 		signals: { unproven, underbuilt, absent },
 		thresholds: { underbuiltMax: UNDERBUILT_MAX },
