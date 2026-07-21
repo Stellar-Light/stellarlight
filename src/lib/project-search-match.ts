@@ -474,14 +474,24 @@ export function scoreTokens(hay: string, tokens: string[]): number {
  * custody match while the actual custody provider sat 5th — a record whose
  * prose merely MENTIONS the query's anchor noun mid-sentence is not the
  * thing the query asks for. The identity zone is where a record states what
- * it IS: name, category, types, coverage vocabulary, and the leading clause
- * of the description (the "what-it-is" position).
+ * it IS: name, category, types, supportedNetworks, coverage vocabulary, and the
+ * leading clause of the description (the "what-it-is" position).
  */
 export function identityZone(p: MatchableProject): string {
 	const cov = covValues(p);
 	const types = Array.isArray(p.types) ? p.types.join(" ") : "";
+	// P-ATTR (F1, 2026-07-21): a project's declared chain support is identity, not
+	// mere prose. band/gami-labs/warpdrive carry supportedNetworks=[stellar, evm]
+	// with no "evm" in their description, so q=evm ranked them below bridges that
+	// merely say "EVM" (band was #19) — anchorIdentity keyed on this zone and they
+	// weren't in it. A chain a project structurally supports says what it IS, just
+	// like `types`, so it joins the zone. Chain values are specific tokens
+	// (evm/solana/xrpl…), so this fires only for chain-named queries.
+	const nets = Array.isArray(p.supportedNetworks)
+		? p.supportedNetworks.join(" ")
+		: "";
 	const lead = (p.shortDescription ?? "").slice(0, 60);
-	return `${p.name ?? ""} ${p.category ?? ""} ${types} ${cov.join(" ")} ${lead}`.toLowerCase();
+	return `${p.name ?? ""} ${p.category ?? ""} ${types} ${nets} ${cov.join(" ")} ${lead}`.toLowerCase();
 }
 
 /**

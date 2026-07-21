@@ -348,6 +348,44 @@ describe("mention-vs-identity (custody re-measure 2026-07-19)", () => {
 	});
 });
 
+describe("P-ATTR — structured chain support is identity (F1, 2026-07-21)", () => {
+	// Real live shape: an infra project that declares evm support in
+	// supportedNetworks but never says "evm" in its prose. It ranked #19 for
+	// q=evm — below bridges that merely mention EVM — because identityZone
+	// excluded supportedNetworks, so anchorIdentity was false for it.
+	const BAND = {
+		name: "Band Protocol",
+		shortDescription: "Cross-chain data oracle platform.",
+		category: "Infrastructure",
+		types: [],
+		supportedNetworks: ["stellar", "evm", "xrpl", "cosmos"],
+		coverage: null,
+	};
+	// A record that neither declares nor mentions evm anywhere.
+	const STELLAR_ONLY = {
+		name: "Freighter",
+		shortDescription: "A browser-extension wallet for Stellar.",
+		category: "User-Facing App",
+		types: ["Wallet"],
+		supportedNetworks: ["stellar"],
+		coverage: null,
+	};
+
+	it("declared supportedNetworks joins the identity zone", () => {
+		expect(identityZone(BAND)).toContain("evm");
+		expect(identityZone(STELLAR_ONLY)).not.toContain("evm");
+	});
+
+	it("a chain a project structurally supports counts as identity for that chain query", () => {
+		// The P-ATTR fix: BAND now hits identity for q=evm off supportedNetworks
+		// alone, so it ranks with the evm bridges instead of below them.
+		expect(anchorIdentityHit(BAND, tokenize("evm"))).toBe(true);
+		expect(anchorIdentityHit(BAND, tokenize("evm infrastructure"))).toBe(true);
+		// A stellar-only record is not an evm identity.
+		expect(anchorIdentityHit(STELLAR_ONLY, tokenize("evm"))).toBe(false);
+	});
+});
+
 describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
 	// Real supportedNetworks captured live 2026-07-21.
 	const SPACEWALK = {
