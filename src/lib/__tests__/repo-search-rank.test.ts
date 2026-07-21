@@ -242,6 +242,20 @@ describe("searchRepos sls-025 alias recall", () => {
 		expect(searched.expandedTerms).toContain("erc8004");
 		expect(searched.expandedTerms).toContain("8004");
 	});
+
+	// P5 (2026-07-21): the zk proof-system family used to be reachable ONLY from
+	// "zk" — q=zk-snark / q=snark / q=zksnark returned 0 because they were values
+	// under "zk", never keys, so a query FOR a member never expanded to the family.
+	// The registry is now bidirectional; every entry point must reach the family
+	// terms the real zk repos carry as topics (zk, groth16, zero-knowledge).
+	it("zk-family entry points expand to the whole family (P5)", async () => {
+		for (const q of ["zk-snark", "snark", "zksnark", "stark"]) {
+			const { searched } = await searchRepos(mockPayload([]), q, { limit: 5 });
+			for (const term of ["zk", "snark", "zero-knowledge", "groth16"]) {
+				expect(searched.expandedTerms).toContain(term);
+			}
+		}
+	});
 });
 
 describe("streaming-payments vertical flagships (golden repos-streaming-payments)", () => {
