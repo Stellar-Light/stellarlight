@@ -1,0 +1,69 @@
+{
+	"generatedAt": "2026-07-21T15:02:26.026Z",
+	"specVersion": "1.8.14",
+	"graceDays": 10,
+	"expectedOps": [
+		"analyzeEcosystem",
+		"compareHackathons",
+		"explainRepo",
+		"getBuilders",
+		"getChangelog",
+		"getClusters",
+		"getHackathon",
+		"getHackathons",
+		"getLeaderboard",
+		"getPartner",
+		"getPartners",
+		"getPeople",
+		"getRfps",
+		"getSkill",
+		"getStatus",
+		"listAudits",
+		"listSkills",
+		"matchPartners",
+		"partnerOnboard",
+		"searchProjects",
+		"searchRepos",
+		"searchResearch"
+	],
+	"catalogOps": [
+		"analyzeEcosystem",
+		"compareHackathons",
+		"explainRepo",
+		"getBuilders",
+		"getChangelog",
+		"getClusters",
+		"getHackathon",
+		"getHackathons",
+		"getLeaderboard",
+		"getPartner",
+		"getPartners",
+		"getRfps",
+		"getSkill",
+		"getStatus",
+		"listSkills",
+		"matchPartners",
+		"partnerOnboard",
+		"searchProjects",
+		"searchRepos",
+		"searchResearch"
+	],
+	"missingFromCatalog": [],
+	"laggingInCatalog": [
+		{
+			"op": "getPeople",
+			"addedAt": "2026-07-19",
+			"ageDays": 2
+		},
+		{
+			"op": "listAudits",
+			"addedAt": "2026-07-19",
+			"ageDays": 2
+		}
+	],
+	"extraInCatalog": [],
+	"claimedOpCount": 20,
+	"auditArchetypeRoutesToRegistry": false,
+	"checked": true,
+	"notes": []
+}
