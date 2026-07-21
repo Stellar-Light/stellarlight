@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-21",
 		surfaces: ["api"],
+		version: "openapi@1.8.16",
+		type: "added",
+		summary:
+			"getLeaderboard sort=supply: rank asset issuers by circulating supply. Rows now carry assetCode + assetSupply + assetHolders (from stellar.expert; null = no verified issued asset, never 'zero supply').",
+		detail:
+			"Completes the metrics-sort family started by sort=tvl. 'What's the biggest stablecoin on Stellar by supply?' had no answer even though the directory already tracks per-issuer circulating supply (Circle USDC ~272M / 648K holders, Etherfuse CETES, Anclap PEN, all via projects.onchain from stellar.expert). Now: sort=supply orders issuers descending with untracked (assetSupply null) always below every tracked one; pair with type=Stablecoin for a stablecoin-only board. assetCode/assetSupply/assetHolders added as trailing CSV columns and to LeaderboardProject; meta.metricDefinitions.supply states the semantics. Covers verified asset ISSUERS (stablecoins, tokenized RWAs) in our on-chain seed set — not a full-ledger asset census.",
+	},
+	{
+		date: "2026-07-21",
+		surfaces: ["api"],
 		version: "openapi@1.8.15",
 		type: "added",
 		summary:
