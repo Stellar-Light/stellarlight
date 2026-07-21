@@ -18,6 +18,8 @@ export interface PublicNominee extends BallotNominee {
 	/** Directory detail page, e.g. /project/decaf. */
 	projectUrl: string;
 	projectCategory: string | null;
+	/** Real, dated TVL from the directory (DeFiLlama-sourced) — null unless meaningful. */
+	tvl: { usd: number; source: string | null; asOf: string | null } | null;
 }
 
 export interface LoadedRound {
@@ -127,6 +129,10 @@ export async function loadRound(
 				.filter((n) => n.project && typeof n.project === "object")
 				.map((n) => {
 					const project = n.project;
+					// Only surface TVL that's meaningful (> $1k) — filters out the
+					// near-zero mis-mapped values (etherfuse ~$2, allbridge ~$574).
+					const tvlUSD =
+						typeof project.tvlUSD === "number" ? project.tvlUSD : null;
 					return {
 						category: String(n.category),
 						slug: String(project.slug),
@@ -138,6 +144,14 @@ export async function loadRound(
 						logoUrl: projectLogoUrl(project),
 						projectUrl: `/project/${project.slug}`,
 						projectCategory: project.category ?? null,
+						tvl:
+							tvlUSD && tvlUSD > 1000
+								? {
+										usd: tvlUSD,
+										source: project.tvlSource ?? null,
+										asOf: project.tvlAsOf ?? null,
+									}
+								: null,
 					};
 				})
 				.sort(
@@ -185,6 +199,7 @@ export function toPublicRound(loaded: LoadedRound) {
 			logoUrl: n.logoUrl,
 			projectUrl: n.projectUrl,
 			projectCategory: n.projectCategory,
+			tvl: n.tvl,
 		})),
 	};
 }
