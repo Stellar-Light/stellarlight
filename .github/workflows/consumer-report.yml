@@ -1,0 +1,66 @@
+# Per-consumer quality report (scale-model deliverable 2).
+#
+# Generates improvements/consumers/<consumer>-<date>.{md,json} from the
+# api-usage log + a live replay of the consumer's top queries, and commits
+# the artifact pair. Monthly cron (1st, 07:20 UTC — one short run/month) +
+# manual dispatch. Needs the prod DB (read-only) → runs here, not locally.
+#
+# Commit notes (same rationale as refresh-ec-snapshot.yml):
+#   - GITHUB_TOKEN pushes don't re-trigger push-watching workflows.
+#   - Vercel won't auto-deploy the bot commit (git-author gate) — fine:
+#     the artifacts are repo evidence first; any page rendering them picks
+#     them up on the next human-authored deploy.
+name: consumer-report
+
+on:
+  schedule:
+    - cron: "20 7 1 * *"
+  workflow_dispatch:
+    inputs:
+      consumer:
+        description: "Consumer key (raven | claude)"
+        default: "raven"
+        required: false
+      days:
+        description: "Window in days"
+        default: "30"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate report
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: |
+          pnpm exec tsx scripts/consumer-report.ts \
+            --consumer=${{ github.event.inputs.consumer || 'raven' }} \
+            --days=${{ github.event.inputs.days || '30' }}
+
+      - name: Commit artifacts
+        run: |
+          set -euo pipefail
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/consumers/
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore(consumers): $(date -u +%Y-%m-%d) ${{ github.event.inputs.consumer || 'raven' }} workload quality report [skip ci]"
+          git push
