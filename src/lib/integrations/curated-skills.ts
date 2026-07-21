@@ -332,6 +332,243 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tags: ["content", "audit", "citations", "lumenloop"],
 	},
 
+	// ── LumenLoop SCF Skills (awesome-stellar-community-fund plugin) ─────────
+	// The ten Stellar Community Fund skills — the "one service offering" for
+	// SCF applications and reviews, distributed through the marketplace so
+	// founders and reviewers reach them here. Install the whole plugin once
+	// (`/plugin marketplace add lumenloop/awesome-stellar-community-fund` →
+	// `/plugin install awesome-stellar-community-fund@awesome-scf`); each entry
+	// links its individual SKILL.md.
+	{
+		slug: "scf-submission-drafter",
+		name: "SCF Submission Drafter",
+		tagline:
+			"Draft a complete SCF Build Award application interactively, section by section.",
+		description:
+			"Walks you through a full Stellar Community Fund Build Award application one section at a time — problem, solution, integration, team, traction, budget, and ecosystem commitment — producing submission-ready copy grounded in what SCF reviewers actually score.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-submission-drafter",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "grants", "application", "drafting"],
+	},
+	{
+		slug: "scf-interest-form-drafter",
+		name: "SCF Interest Form Drafter",
+		tagline: "Draft a strong SCF Interest Form to get invited to apply.",
+		description:
+			"Drafts a compelling Stellar Community Fund Interest Form — the gate to a Build Award invitation. Sharpens the one-liner, problem framing, and Stellar-fit so the SCF team invites you to the full application.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-interest-form-drafter",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "grants", "interest-form"],
+	},
+	{
+		slug: "scf-prescreen-checker",
+		name: "SCF Prescreen Checker",
+		tagline:
+			"Simulate the SCF team's manual prescreen (completeness + eligibility) before you submit.",
+		description:
+			"Runs your draft through a simulation of the Stellar Community Fund's manual prescreen — the completeness and eligibility pass an application must clear before review — so you catch disqualifiers and gaps before you submit, not after.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-prescreen-checker",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "eligibility", "prescreen"],
+	},
+	{
+		slug: "scf-budget-builder",
+		name: "SCF Budget Builder",
+		tagline:
+			"Build bottom-up SCF budgets with rates, per-deliverable breakdowns, and tranche mapping.",
+		description:
+			"Builds a defensible Stellar Community Fund budget from the bottom up — hourly/role rates, per-deliverable cost breakdowns, and mapping to the award's tranche structure — so the numbers hold up under reviewer scrutiny.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-budget-builder",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "budget", "tranches"],
+	},
+	{
+		slug: "scf-competitor-analyst",
+		name: "SCF Competitor Analyst",
+		tagline:
+			"Research the competitive landscape and articulate your differentiation for SCF.",
+		description:
+			"Maps the competitive landscape for your Stellar Community Fund idea — who else is building this on Stellar and beyond — and helps you articulate crisp differentiation, the section SCF reviewers use to judge whether an award is additive.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-competitor-analyst",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "competitors", "differentiation"],
+	},
+	{
+		slug: "scf-referral-preparer",
+		name: "SCF Referral Preparer",
+		tagline:
+			"Prepare materials for an SCF referral from an approved Referrer.",
+		description:
+			"Prepares the materials an approved Stellar Community Fund Referrer (Ambassador, Navigator, Pilot, partner, or SDF personnel) needs to refer you — a tight brief that makes the referral easy to give and credible to the SCF team.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-referral-preparer",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "referral"],
+	},
+	{
+		slug: "scf-tranche-reporter",
+		name: "SCF Tranche Reporter",
+		tagline:
+			"Write SCF tranche submission reports with deliverable evidence and completion docs.",
+		description:
+			"Writes the tranche submission reports a funded Stellar Community Fund project owes between payments — deliverable-by-deliverable evidence and completion documentation formatted the way the SCF team expects, so your next tranche clears cleanly.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-tranche-reporter",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "funding", "tranches", "reporting"],
+	},
+	{
+		slug: "scf-reviewer",
+		name: "SCF Reviewer",
+		tagline:
+			"Review a single SCF Build Award application with structured, calibrated scoring.",
+		description:
+			"For reviewers: evaluates one Stellar Community Fund Build Award application with structured scoring across integration fit, architecture, team, traction, budget, and ecosystem commitment — the same axes SCF weighs — for consistent, defensible verdicts.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-reviewer",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "review", "scoring", "evaluation"],
+	},
+	{
+		slug: "scf-round-reviewer",
+		name: "SCF Round Reviewer",
+		tagline:
+			"Review and rank an entire SCF round end-to-end from a CSV export.",
+		description:
+			"For reviewers running a whole Stellar Community Fund round: takes a CSV export and orchestrates parallel batch reviews, cross-application calibration, and a final ranking across Open, Integration, and RFP tracks with track-specific scoring. Pairs with the scf-review-boilerplate for a turnkey setup.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/scf-round-reviewer",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["founder", "agent"],
+		tags: ["SCF", "review", "ranking", "round", "calibration"],
+	},
+	{
+		slug: "scf-fetch-external-doc",
+		name: "SCF Fetch External Doc",
+		tagline:
+			"Fetch external docs linked in SCF submissions — Google Docs/Drive, GitHub, Notion, IPFS.",
+		description:
+			"A utility for SCF reviewers and applicants: reliably fetches the external documents submissions link out to — Google Docs, Google Drive PDFs, GitHub, Notion, IPFS — using curl for the Google cases that normally fail, so review context is never missing.",
+		source: "lumenloop",
+		kind: "skill-md",
+		install: "/plugin marketplace add lumenloop/awesome-stellar-community-fund",
+		installAlt: [
+			{
+				label: "Install plugin",
+				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+			},
+		],
+		repository:
+			"https://github.com/lumenloop/awesome-stellar-community-fund/tree/main/skills/fetch-external-doc",
+		homepage: "https://github.com/lumenloop/awesome-stellar-community-fund",
+		compatibility: ["Claude Code"],
+		targetUser: ["dev", "agent"],
+		tags: ["SCF", "review", "utility", "fetch"],
+	},
+
 	// ── Stellar SDKs & libraries ─────────────────────────────────────────────
 
 	{
