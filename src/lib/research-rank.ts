@@ -581,6 +581,22 @@ export function rankResearchChunks<T extends RankableChunk>(
 
 	// Best chunk per document first — also collapsing exact-duplicate content
 	// served under different URLs (index-page mirrors of the same recap).
+	//
+	// Recency family cap (golden latest-protocol-release, 2026-07-21): a
+	// "latest X release" query's freshness re-rank rewards every point-release
+	// note equally, so one repo's serial releases (rs-soroban-sdk v27.0.1,
+	// v27.0.0, v26.1.1, …) filled the whole page and the actual protocol
+	// upgrade guide never surfaced. Under recency intent, at most TWO docs
+	// from the same release FAMILY (the {org}/{repo} behind a /releases/ URL)
+	// serve in primary — the newest still leads, the third-and-later drop to
+	// leftovers, freeing slots for the flagship docs the query is really
+	// after. Non-release URLs are their own family (uncapped in practice).
+	const releaseFamily = (url: string): string => {
+		const m = url.match(/^https?:\/\/github\.com\/([^/]+\/[^/]+)\/releases\//);
+		return m ? `releases:${m[1]}` : url;
+	};
+	const familyCap = recencyIntent(opts.query) ? 2 : Number.POSITIVE_INFINITY;
+	const familyCount = new Map<string, number>();
 	const seenUrl = new Set<string>();
 	const seenContent = new Set<string>();
 	const primary: typeof scored = [];
@@ -589,11 +605,19 @@ export function rankResearchChunks<T extends RankableChunk>(
 		const contentKey = c.content.trim();
 		if (seenContent.has(contentKey)) continue; // mirror — never serve twice
 		seenContent.add(contentKey);
-		if (seenUrl.has(c.url)) leftovers.push(c);
-		else {
-			seenUrl.add(c.url);
-			primary.push(c);
+		if (seenUrl.has(c.url)) {
+			leftovers.push(c);
+			continue;
 		}
+		seenUrl.add(c.url);
+		const fam = releaseFamily(c.url);
+		const n = familyCount.get(fam) ?? 0;
+		if (n >= familyCap) {
+			leftovers.push(c);
+			continue;
+		}
+		familyCount.set(fam, n + 1);
+		primary.push(c);
 	}
 	// …then refill from leftovers only if distinct docs can't fill the page.
 	return [...primary, ...leftovers].slice(0, opts.limit);

@@ -1133,16 +1133,22 @@ export async function GET(req: NextRequest) {
 				// prose-mentioners locks out the record that IS the anchor thing but
 				// misses a secondary token — on "custody with staking" the custody
 				// provider could only arrive via the semantic rung, appended last.
-				// On an under-filled page, admit majority-tier rows whose anchor
-				// hits their IDENTITY zone (name/category/types/coverage/description
-				// lead); the mention-vs-identity sort key then ranks them on merit.
+				// Admit majority-tier rows whose anchor hits their IDENTITY zone
+				// (name/category/types/coverage/description lead); the
+				// mention-vs-identity sort key then ranks them on merit.
 				// matchMode reports "majority" — the page now carries majority-
 				// admitted rows, and saying "strict" would be a lie.
-				if (
-					filtered.length > 0 &&
-					filtered.length < limit &&
-					tokens.length >= 2
-				) {
+				//
+				// Gate fix (2026-07-21, golden capability-custody-identity): the
+				// original `filtered.length < limit` gate made admission depend on
+				// PAGE SIZE — at limit=3 a page full of prose-mentioners blocked
+				// the bypass while limit=50 fired it. What matters is whether the
+				// page already carries identity-grade rows, not whether it's full:
+				// fire while fewer than `limit` admitted rows anchor-hit identity.
+				const identityRows = filtered.filter(
+					(p) => p.anchorIdentity === true,
+				).length;
+				if (filtered.length > 0 && identityRows < limit && tokens.length >= 2) {
 					const majorityAdmit = admit(Math.ceil(tokens.length / 2));
 					const have = new Set(filtered.map((p) => p.id));
 					let added = 0;
