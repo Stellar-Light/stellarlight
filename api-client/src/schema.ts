@@ -1094,8 +1094,11 @@ export interface components {
                 matchedTerms?: {
                     [key: string]: string;
                 };
-                /** @enum {string} */
-                basis?: "profile-text";
+                /**
+                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name).
+                 * @enum {string}
+                 */
+                basis?: "profile-text" | "repo-owner";
             } | null;
             /** @description Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
             codeEvidence?: {
