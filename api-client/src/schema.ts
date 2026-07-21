@@ -1442,7 +1442,7 @@ export interface operations {
                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet";
                 /** @description Filter to SCF-funded projects only */
                 scfAwarded?: boolean;
-                /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Unknown values return 400 with validStatuses. */
+                /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses. */
                 status?: "Live" | "Inactive" | "Development" | "Pre-Release" | "Pre-Development";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
