@@ -303,6 +303,7 @@ export const spec: OpenAPISpec = {
 						"DIRECTORY FACTS about a named product — status, funding, builder, links (e.g. Etherfuse Stablebonds USTRY/CETES, Soroswap)",
 						"is there a mature X I could integrate / who is building Y / projects operating as anchors",
 						"list/enumerate/compare from the curated directory: which wallets exist and how they differ, main DeFi projects, perpetuals/derivatives DEXes, AMM/liquidity protocols and their yields",
+						"ACCOUNTABILITY / DILIGENCE by composing structured filters — which SCF-funded projects went inactive (`?scfAwarded=1&status=Inactive`), which Live projects a category has (`?type=Wallet&status=Live`); the natural-language words 'inactive/defunct/abandoned/dead' do NOT route from `q`, they must be passed as `status=Inactive`. `meta.counts.total` answers the 'how many' form.",
 					],
 					notFor: [
 						"how-to / reference / docs questions (CLI usage, bindings, SEP or standards text, feasibility) -> searchResearch",
@@ -317,6 +318,7 @@ export const spec: OpenAPISpec = {
 						"Is Etherfuse Stablebonds live and SCF-funded?",
 						"Who built Soroswap?",
 						"Give me a market map of Stellar DeFi projects",
+						"Which SCF-funded projects have gone inactive? (?scfAwarded=1&status=Inactive)",
 					],
 				},
 				parameters: [
@@ -380,7 +382,7 @@ export const spec: OpenAPISpec = {
 						name: "status",
 						in: "query",
 						description:
-							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Unknown values return 400 with validStatuses.",
+							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
 						schema: {
 							type: "string",
 							enum: [

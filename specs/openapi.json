@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.20",
+		"version": "1.8.21",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -311,7 +311,8 @@
 						"which projects exist / give me a directory or market map of a category (wallets, DeFi, NFT marketplaces, anchors and anchor infrastructure, explorers)",
 						"DIRECTORY FACTS about a named product — status, funding, builder, links (e.g. Etherfuse Stablebonds USTRY/CETES, Soroswap)",
 						"is there a mature X I could integrate / who is building Y / projects operating as anchors",
-						"list/enumerate/compare from the curated directory: which wallets exist and how they differ, main DeFi projects, perpetuals/derivatives DEXes, AMM/liquidity protocols and their yields"
+						"list/enumerate/compare from the curated directory: which wallets exist and how they differ, main DeFi projects, perpetuals/derivatives DEXes, AMM/liquidity protocols and their yields",
+						"ACCOUNTABILITY / DILIGENCE by composing structured filters — which SCF-funded projects went inactive (`?scfAwarded=1&status=Inactive`), which Live projects a category has (`?type=Wallet&status=Live`); the natural-language words 'inactive/defunct/abandoned/dead' do NOT route from `q`, they must be passed as `status=Inactive`. `meta.counts.total` answers the 'how many' form."
 					],
 					"notFor": [
 						"how-to / reference / docs questions (CLI usage, bindings, SEP or standards text, feasibility) -> searchResearch",
@@ -325,7 +326,8 @@
 						"Has anyone built a ROSCA/susu app on Stellar?",
 						"Is Etherfuse Stablebonds live and SCF-funded?",
 						"Who built Soroswap?",
-						"Give me a market map of Stellar DeFi projects"
+						"Give me a market map of Stellar DeFi projects",
+						"Which SCF-funded projects have gone inactive? (?scfAwarded=1&status=Inactive)"
 					]
 				},
 				"parameters": [
@@ -391,7 +393,7 @@
 					{
 						"name": "status",
 						"in": "query",
-						"description": "Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Unknown values return 400 with validStatuses.",
+						"description": "Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
 						"schema": {
 							"type": "string",
 							"enum": [
