@@ -1,0 +1,425 @@
+{
+	"consumer": "raven",
+	"label": "Raven (agents.stellar.buzz)",
+	"buckets": [
+		"other"
+	],
+	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
+	"generatedAt": "2026-07-21T16:34:09.879Z",
+	"window": {
+		"since": "2026-07-11T00:00:00.000Z",
+		"days": 30
+	},
+	"totals": {
+		"calls": 3585,
+		"activeDays": 11,
+		"endpoints": 16,
+		"distinctReplayableQueries": 1715
+	},
+	"byEndpoint": [
+		{
+			"endpoint": "/api/projects/search",
+			"calls": 1129,
+			"zeroResultCalls": 1,
+			"avgResultCount": 10.8
+		},
+		{
+			"endpoint": "/api/research",
+			"calls": 981,
+			"zeroResultCalls": 5,
+			"avgResultCount": 7.6
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"calls": 375,
+			"zeroResultCalls": 39,
+			"avgResultCount": 10.1
+		},
+		{
+			"endpoint": "/api/builders",
+			"calls": 225,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/leaderboard",
+			"calls": 121,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons",
+			"calls": 116,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/rfps",
+			"calls": 110,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners",
+			"calls": 103,
+			"zeroResultCalls": 4,
+			"avgResultCount": 10.4
+		},
+		{
+			"endpoint": "/api/repos/explain",
+			"calls": 102,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/clusters",
+			"calls": 88,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/analyze",
+			"calls": 75,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/skills",
+			"calls": 63,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/[slug]",
+			"calls": 38,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/match",
+			"calls": 36,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/compare",
+			"calls": 16,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/[slug]",
+			"calls": 7,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		}
+	],
+	"topQueriesReplayed": [
+		{
+			"endpoint": "/api/projects/search",
+			"query": "test",
+			"hits": 44,
+			"lastSeen": "2026-07-20T23:03:50.333Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.92
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "test",
+			"hits": 42,
+			"lastSeen": "2026-07-20T23:03:51.221Z",
+			"today": {
+				"status": "weak",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.4
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "wallet",
+			"hits": 38,
+			"lastSeen": "2026-07-21T15:18:01.138Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "stellar",
+			"hits": 33,
+			"lastSeen": "2026-07-21T15:18:01.716Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.5
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "oracle",
+			"hits": 20,
+			"lastSeen": "2026-07-21T15:18:01.293Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "oracle",
+			"hits": 17,
+			"lastSeen": "2026-07-20T16:33:36.712Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "strupey",
+			"hits": 17,
+			"lastSeen": "2026-07-14T17:31:27.385Z",
+			"today": {
+				"status": "empty",
+				"returned": 0,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "soroswap",
+			"hits": 16,
+			"lastSeen": "2026-07-20T17:57:32.642Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "freighter",
+			"hits": 16,
+			"lastSeen": "2026-07-20T17:57:28.986Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": "strict",
+				"topConfidence": 0.92
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "stablecoin",
+			"hits": 13,
+			"lastSeen": "2026-07-20T16:33:38.453Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.92
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "rust",
+			"hits": 13,
+			"lastSeen": "2026-07-14T14:20:07.164Z",
+			"today": {
+				"status": "ok",
+				"returned": 5,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "justin rice",
+			"hits": 12,
+			"lastSeen": "2026-07-16T18:57:33.854Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.75
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "tyler van der hoeven",
+			"hits": 11,
+			"lastSeen": "2026-07-19T14:20:09.846Z",
+			"today": {
+				"status": "empty",
+				"returned": 0,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "fluxity",
+			"hits": 11,
+			"lastSeen": "2026-07-15T16:51:04.235Z",
+			"today": {
+				"status": "ok",
+				"returned": 2,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "soroban",
+			"hits": 11,
+			"lastSeen": "2026-07-14T14:20:07.105Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "blend",
+			"hits": 10,
+			"lastSeen": "2026-07-20T22:44:06.332Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "reflector",
+			"hits": 10,
+			"lastSeen": "2026-07-20T17:57:31.909Z",
+			"today": {
+				"status": "ok",
+				"returned": 2,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "tyler van der hoeven",
+			"hits": 10,
+			"lastSeen": "2026-07-14T17:51:34.267Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.78
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "cap-0071 protocol 27",
+			"hits": 10,
+			"lastSeen": "2026-07-13T13:35:18.124Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.94
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "justin rice",
+			"hits": 9,
+			"lastSeen": "2026-07-18T00:35:19.232Z",
+			"today": {
+				"status": "empty",
+				"returned": 0,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "zero-knowledge",
+			"hits": 9,
+			"lastSeen": "2026-07-14T14:07:32.425Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "streaming payments",
+			"hits": 9,
+			"lastSeen": "2026-07-13T13:22:49.873Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "streaming payments",
+			"hits": 9,
+			"lastSeen": "2026-07-13T13:22:49.441Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "liquid staking",
+			"hits": 8,
+			"lastSeen": "2026-07-13T13:20:57.311Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "erc-8004",
+			"hits": 8,
+			"lastSeen": "2026-07-13T05:30:47.410Z",
+			"today": {
+				"status": "ok",
+				"returned": 2,
+				"matchMode": null,
+				"topConfidence": null
+			}
+		}
+	],
+	"replaySummary": {
+		"graded": 25,
+		"ok": 21,
+		"okRate": 84
+	},
+	"contractChangesInWindow": 36
+}
