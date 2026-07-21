@@ -6,6 +6,7 @@ import "../globals.css";
 import { BannerWrapper } from "@/components/banner-wrapper";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
+import { HideOnStandalone } from "@/components/site-chrome";
 import { Navigation } from "@/components/ui/navigation";
 import { getAppUrl } from "@/lib/utils/app-url";
 
@@ -126,12 +127,20 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 		>
 			<body className="min-h-screen font-sans antialiased overflow-x-hidden">
 				<Providers>
-					<BannerWrapper />
-					<Navigation />
-					{/* Spacer for fixed banner and navigation */}
-					<div style={{ height: "calc(var(--banner-height, 0px) + 4rem)" }} />
+					{/* HideOnStandalone is a client visibility gate; the chrome it
+					    wraps stays SERVER-rendered (so Navigation's payload deps
+					    never reach the client bundle). /awards renders its own
+					    full-page shell, so it hides this global chrome. */}
+					<HideOnStandalone>
+						<BannerWrapper />
+						<Navigation />
+						{/* Spacer for the fixed banner + navigation. */}
+						<div style={{ height: "calc(var(--banner-height, 0px) + 4rem)" }} />
+					</HideOnStandalone>
 					<main className="min-h-[calc(100vh-4rem)]">{children}</main>
-					<Footer />
+					<HideOnStandalone>
+						<Footer />
+					</HideOnStandalone>
 				</Providers>
 				<Analytics />
 			</body>
