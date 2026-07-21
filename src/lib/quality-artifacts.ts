@@ -13,6 +13,12 @@ import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.
 import engineE from "../../improvements/engine/engine-e-baseline-2026-07-11.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-07-21.json";
 import scfMembership from "../../improvements/engine/scf-membership-postwave-2026-07-11.json";
+// Weekly evidence — fixed -latest paths committed by engine-c-health every
+// Sunday (see improvements/engine/weekly/README.md); git history = archive.
+import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.json";
+import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
+import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
+import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json";
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
 
@@ -150,6 +156,114 @@ export function getGuardRows(): GuardRow[] {
 			asOf: ravenDrift.generatedAt.slice(0, 10),
 			artifact: "improvements/engine/raven-drift-2026-07-21.json",
 			ok: missing === 0,
+		});
+	}
+
+	// ── Weekly evidence rows (fixed -latest artifacts, committed by CI) ─────
+
+	// Engine A — recall matrix vs per-bucket floors (the red-line guard).
+	{
+		const board = engineARecall.board as Array<{
+			bucket: string;
+			ok: number;
+			total: number;
+			rate: number;
+			floor: number;
+			status: string;
+		}>;
+		const breaches = board.filter((b) => b.rate < b.floor);
+		const probes = board.reduce((n, b) => n + b.total, 0);
+		rows.push({
+			key: "engine-a-recall",
+			title: "Recall floors (Engine A)",
+			promise:
+				"Generated known-item probes per bucket stay above their red-line floors — recall can't silently erode.",
+			value: `${board.length - breaches.length}/${board.length}`,
+			sub: `buckets at/above floor · ${probes.toLocaleString("en-US")} probes`,
+			details:
+				breaches.length > 0
+					? breaches.map(
+							(b) =>
+								`${b.bucket} at ${b.rate}% vs floor ${b.floor}% — open red`,
+						)
+					: ["all buckets above floor"],
+			asOf: "latest weekly run",
+			artifact: "improvements/engine/weekly/engine-a-recall-latest.json",
+			ok: breaches.length === 0,
+		});
+	}
+
+	// Engine D — OK-rate on REAL consumer demand (replayed, not log-time).
+	{
+		const frame = engineDDemand.frame;
+		rows.push({
+			key: "engine-d-demand",
+			title: "Real-demand OK-rate (Engine D)",
+			promise:
+				"The queries real consumers actually sent are replayed live — a miss on real demand outranks any synthetic finding.",
+			value: `${engineDDemand.okRate}%`,
+			sub: `top ${frame.replayed} of ${frame.distinctQueries.toLocaleString("en-US")} distinct real queries`,
+			details: [
+				`${frame.realHits.toLocaleString("en-US")} real-consumer calls in the ${engineDDemand.windowDays}-day window`,
+				`${(engineDDemand.misses as unknown[]).length} queries missing today — the standing fix queue`,
+			],
+			asOf: "latest weekly run",
+			artifact: "improvements/engine/weekly/engine-d-demand-latest.json",
+			ok: true, // informational — no committed floor; misses feed the queue
+		});
+	}
+
+	// Golden retrieval eval — correctness against a ground-truth answer key.
+	{
+		const graded = goldenEval.graded as Array<{ status: string }>;
+		const passed = graded.filter((g) => g.status === "PASS").length;
+		rows.push({
+			key: "golden-eval",
+			title: "Golden retrieval eval",
+			promise:
+				"Known-true questions (answer key derived from the canonical directory) keep passing after every ship.",
+			value: `${passed}/${graded.length}`,
+			sub: "golden questions passing",
+			details: [
+				passed === graded.length
+					? "full pass"
+					: `${graded.length - passed} failing — each names its expected evidence`,
+				"re-run on every production deploy + weekly",
+			],
+			asOf: "latest weekly run",
+			artifact: "improvements/engine/weekly/golden-eval-latest.json",
+			ok: passed === graded.length,
+		});
+	}
+
+	// Corpus health — S5-S8 hygiene sweeps over the research corpus.
+	{
+		const frame = corpusHealth.frame;
+		// biome-ignore lint/suspicious/noExplicitAny: sweep keys are dynamic (s5_…s8_)
+		const ch: any = corpusHealth;
+		const sweeps = Object.keys(ch)
+			.filter((k) => /^s[5-8]_/.test(k))
+			.map((k) => ({
+				key: k,
+				count: Number(ch[k]?.count ?? 0),
+			}));
+		const dirty = sweeps.filter((s) => s.count > 0);
+		rows.push({
+			key: "corpus-health",
+			title: "Corpus hygiene (S5–S8)",
+			promise:
+				"The research corpus stays clean — junk URLs, broken titles, staleness and mirror drift are swept weekly.",
+			value: `${sweeps.length - dirty.length}/${sweeps.length}`,
+			sub: `sweeps clean · ${frame.chunks.toLocaleString("en-US")} chunks / ${frame.docs.toLocaleString("en-US")} docs`,
+			details:
+				dirty.length > 0
+					? dirty.map(
+							(s) => `${s.key.replace(/_/g, " ")}: ${s.count} flagged — queued`,
+						)
+					: ["all sweeps clean"],
+			asOf: "latest weekly run",
+			artifact: "improvements/engine/weekly/corpus-health-latest.json",
+			ok: dirty.length === 0,
 		});
 	}
 
