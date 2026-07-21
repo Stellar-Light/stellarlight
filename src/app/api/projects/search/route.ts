@@ -780,6 +780,14 @@ export async function GET(req: NextRequest) {
 	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
 	let matchMode: "strict" | "loose-1" | "majority" | "semantic" | "all" = "all";
+	// Audit rollup (Raven cold-agent finding, 2026-07-20; hoisted 2026-07-21):
+	// populated ONCE before scoring (see the pre-scoring fetch) so the hay can
+	// carry audit vocabulary, and reused at response assembly. null/absent = no
+	// audit on record at our source, NOT a claim the project is unaudited.
+	const auditsBySlug = new Map<
+		string,
+		{ count: number; auditors: string[]; latestAt: string | null }
+	>();
 
 	if (payload) {
 		try {
@@ -911,6 +919,43 @@ export async function GET(req: NextRequest) {
 				);
 			}
 
+			// Audit rollup fetched BEFORE scoring (2026-07-21, closing the Raven
+			// battery's last miss): "is blend audited?" tokenizes to [blend,
+			// audited] but blend's prose carries no audit word — the rollup
+			// existed only at response assembly, AFTER the hay was scored, so the
+			// subject lost strict/majority to audit-FIRM prose and the page fell
+			// to semantic. The registry is tiny (~60 rows): one unfiltered fetch
+			// serves BOTH the hay injection below and the response attachment.
+			try {
+				const auditRows = await payload.find({
+					collection: "audits",
+					limit: 500,
+					depth: 0,
+					overrideAccess: true,
+					select: { projectSlug: true, auditor: true, publishedAt: true },
+				});
+				// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
+				for (const a of auditRows.docs as any[]) {
+					if (!a.projectSlug) continue;
+					const cur = auditsBySlug.get(a.projectSlug) ?? {
+						count: 0,
+						auditors: [],
+						latestAt: null,
+					};
+					cur.count += 1;
+					if (a.auditor && !cur.auditors.includes(a.auditor))
+						cur.auditors.push(a.auditor);
+					const at =
+						typeof a.publishedAt === "string"
+							? a.publishedAt.slice(0, 10)
+							: null;
+					if (at && (!cur.latestAt || at > cur.latestAt)) cur.latestAt = at;
+					auditsBySlug.set(a.projectSlug, cur);
+				}
+			} catch {
+				// additive best-effort — rows score/serve without audit signal
+			}
+
 			projects = (
 				result.docs as Array<{
 					id: string;
@@ -973,7 +1018,15 @@ export async function GET(req: NextRequest) {
 				// values, + injected ramp vocabulary for any covered record) into the
 				// searchable text, so a corridor/category query scores a record on what
 				// it demonstrably IS, not only on how its prose happens to be phrased.
-				const hay = buildHaystack(p);
+				// Audit-registry rows additionally carry audit vocabulary + their
+				// auditor names ("is blend audited?" must score blend on the rollup
+				// fact, not lose to audit-firm prose — 2026-07-21).
+				const auditRoll = p.slug ? auditsBySlug.get(p.slug) : undefined;
+				const hay =
+					buildHaystack(p) +
+					(auditRoll
+						? ` audit audited audits auditor security assessment ${auditRoll.auditors.join(" ").toLowerCase()}`
+						: "");
 				const score = scoreTokens(hay, tokens);
 				// Mention-vs-identity: does an anchor token hit where the record
 				// says what it IS (name/category/types/coverage/description lead)?
@@ -1815,50 +1868,9 @@ export async function GET(req: NextRequest) {
 	// Audit rollup (Raven cold-agent finding, 2026-07-20): "is X audited" was
 	// answerable only as a semantic sample over the research corpus — the row
 	// itself carried no audit signal despite the audits registry holding the
-	// join (audits.projectSlug). One batched find per page; null = no audit
-	// on record at our source, NOT a claim the project is unaudited (same
-	// semantics as /api/audits).
-	const auditsBySlug = new Map<
-		string,
-		{ count: number; auditors: string[]; latestAt: string | null }
-	>();
-	if (payload && projectsOut.length > 0) {
-		try {
-			const slugs = [
-				...new Set(
-					projectsOut
-						.map((p) => p.slug)
-						.filter((s): s is string => typeof s === "string" && s.length > 0),
-				),
-			];
-			const auditRows = await payload.find({
-				collection: "audits",
-				where: { projectSlug: { in: slugs } },
-				limit: 500,
-				depth: 0,
-				overrideAccess: true,
-				select: { projectSlug: true, auditor: true, publishedAt: true },
-			});
-			// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
-			for (const a of auditRows.docs as any[]) {
-				if (!a.projectSlug) continue;
-				const cur = auditsBySlug.get(a.projectSlug) ?? {
-					count: 0,
-					auditors: [],
-					latestAt: null,
-				};
-				cur.count += 1;
-				if (a.auditor && !cur.auditors.includes(a.auditor))
-					cur.auditors.push(a.auditor);
-				const at =
-					typeof a.publishedAt === "string" ? a.publishedAt.slice(0, 10) : null;
-				if (at && (!cur.latestAt || at > cur.latestAt)) cur.latestAt = at;
-				auditsBySlug.set(a.projectSlug, cur);
-			}
-		} catch {
-			// rollup is additive best-effort — a failed join serves null, never 500s
-		}
-	}
+	// join (audits.projectSlug). The map is populated by the pre-scoring fetch
+	// (hoisted 2026-07-21 so the hay carries audit vocabulary); attachment
+	// below just reads it.
 
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
