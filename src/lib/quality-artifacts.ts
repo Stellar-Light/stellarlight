@@ -19,6 +19,10 @@ import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.
 import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
 import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
 import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json";
+// The improvement ledger — the spine: every detector's findings normalized into
+// one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
+// SYSTEM's own health, not any single engine's.
+import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
 
@@ -275,6 +279,34 @@ export function getGuardRows(): GuardRow[] {
 			asOf: "latest weekly run",
 			artifact: "improvements/engine/weekly/corpus-health-latest.json",
 			ok: dirty.length === 0,
+		});
+	}
+
+	// Improvement ledger — the spine that unifies every detector above into one
+	// tracked backlog (detect → wave → verified → lesson), tagged by surface so
+	// "where are we weakest?" is answerable across retrieval/scf/contract/… .
+	{
+		const L = improvementLedger;
+		const surfaces = L.bySurface
+			.map((s) => `${s.surface} ${s.open}`)
+			.join(" · ");
+		rows.push({
+			key: "improvement-ledger",
+			title: "Improvement ledger",
+			promise:
+				"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure — that's this row's red line.",
+			value: `${L.open} open`,
+			sub: `${L.highOpen} high · ${Math.round(L.closingRate * 100)}% closed · oldest ${L.oldestOpenDays}d`,
+			details: [
+				`open by surface: ${surfaces}`,
+				`${L.total} tracked · ${L.verified} verified · ${L.cleared} auto-cleared (detector no longer flags)`,
+				L.staleHighOpen > 0
+					? `${L.staleHighOpen} high-severity finding(s) stale >30d — work them down`
+					: "no high-severity finding neglected past 30 days",
+			],
+			asOf: L.generatedAt.slice(0, 10),
+			artifact: "improvements/ledger/findings.json",
+			ok: L.staleHighOpen === 0,
 		});
 	}
 
