@@ -1113,9 +1113,9 @@ function AwardsToast({
 						type="button"
 						onClick={onDismiss}
 						aria-live="polite"
-						className="pointer-events-auto flex max-w-sm items-start gap-2.5 rounded-2xl border border-[#3a3320] bg-[#181614]/95 px-4 py-3 text-left shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+						className="pointer-events-auto flex max-w-sm items-start gap-2.5 rounded-2xl border border-[#333] bg-[#1c1c1c]/95 px-4 py-3 text-left shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl"
 					>
-						<span className="mt-px flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+						<span className="mt-px flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-neutral-300">
 							<Info className="h-3.5 w-3.5" />
 						</span>
 						<span className="text-[13px] leading-snug text-neutral-200">
