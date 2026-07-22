@@ -904,12 +904,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								);
 							})}
 						</ul>
-						{error && (
-							<p className="mb-3 text-xs text-red-400 flex items-start gap-1.5">
-								<X className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
-								{error}
-							</p>
-						)}
 						{voting.open && !readOnly && <PrimaryButton full />}
 						{closesLabel && voting.open && (
 							<p className="mt-3 text-[11px] text-neutral-600 text-center leading-relaxed">
@@ -930,12 +924,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
 				>
 					<div className="p-3.5">
-						{error && (
-							<p className="mb-2 text-xs text-red-400 flex items-center gap-1.5">
-								<X className="h-3.5 w-3.5 flex-shrink-0" />
-								{error}
-							</p>
-						)}
 						<div className="flex items-center justify-between mb-3">
 							<span className="text-xs font-semibold text-neutral-200">
 								Your ballot
@@ -1056,7 +1044,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				onOpenChange={setWalletOpen}
 				isMobile={isMobile}
 				connecting={phase === "connecting"}
-				error={error}
 				onPick={handleConnect}
 			/>
 
@@ -1079,7 +1066,66 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					setHighlightNominee(null);
 				}}
 			/>
+
+			<AwardsToast
+				message={error}
+				onDismiss={() => setError(null)}
+				raised={voting.open && !readOnly}
+			/>
 		</>
+	);
+}
+
+// ── Error toast (Family.co-style) ──────────────────────────────────────────
+// One surface for every ballot message — connect, funding, sign, submit all
+// route here. A dark pill that springs up, auto-dismisses (~6.5s), and clears
+// on tap; on mobile it floats ABOVE the fixed ballot deck so it never covers
+// the picks. Replaces the inline red-text that used to sit in three places.
+function AwardsToast({
+	message,
+	onDismiss,
+	raised,
+}: {
+	message: string | null;
+	onDismiss: () => void;
+	/** true while the mobile ballot deck is on screen — lift clear of it. */
+	raised: boolean;
+}) {
+	useEffect(() => {
+		if (!message) return;
+		const t = setTimeout(onDismiss, 6500);
+		return () => clearTimeout(t);
+	}, [message, onDismiss]);
+
+	return (
+		<AnimatePresence>
+			{message && (
+				<motion.div
+					className={`pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-4 sm:bottom-8 ${
+						raised ? "bottom-[16.5rem]" : "bottom-6"
+					}`}
+					initial={{ opacity: 0, y: 24, scale: 0.96 }}
+					animate={{ opacity: 1, y: 0, scale: 1 }}
+					exit={{ opacity: 0, y: 18, scale: 0.97 }}
+					transition={{ type: "spring", stiffness: 380, damping: 30 }}
+				>
+					<button
+						type="button"
+						onClick={onDismiss}
+						aria-live="polite"
+						className="pointer-events-auto flex max-w-sm items-start gap-2.5 rounded-2xl border border-[#3a3320] bg-[#181614]/95 px-4 py-3 text-left shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+					>
+						<span className="mt-px flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+							<Info className="h-3.5 w-3.5" />
+						</span>
+						<span className="text-[13px] leading-snug text-neutral-200">
+							{message}
+						</span>
+						<X className="mt-px h-3.5 w-3.5 flex-shrink-0 text-neutral-600" />
+					</button>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 }
 
@@ -1087,21 +1133,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 function WalletList({
 	connecting,
-	error,
 	onPick,
 }: {
 	connecting: boolean;
-	error: string | null;
 	onPick: (id: AwardsWalletId) => void;
 }) {
 	return (
 		<div className="w-full space-y-2">
-			{error && (
-				<p className="text-xs text-red-400 text-center pb-1 flex items-center justify-center gap-1.5">
-					<X className="h-3.5 w-3.5 flex-shrink-0" />
-					{error}
-				</p>
-			)}
 			{AWARDS_WALLETS.map((wallet) => (
 				<button
 					key={wallet.id}
@@ -1143,14 +1181,12 @@ function WalletPicker({
 	onOpenChange,
 	isMobile,
 	connecting,
-	error,
 	onPick,
 }: {
 	open: boolean;
 	onOpenChange: (v: boolean) => void;
 	isMobile: boolean;
 	connecting: boolean;
-	error: string | null;
 	onPick: (id: AwardsWalletId) => void;
 }) {
 	// Desktop modal closes on Escape (RainbowKit parity); the mobile Drawer
@@ -1183,7 +1219,7 @@ function WalletPicker({
 					    button (the "clamped" look). No eyebrow label; the buttons
 					    speak for themselves. */}
 					<div className="mx-auto mt-5 w-full max-w-sm pb-2">
-						<WalletList connecting={connecting} error={error} onPick={onPick} />
+						<WalletList connecting={connecting} onPick={onPick} />
 					</div>
 				</DrawerContent>
 			</Drawer>
@@ -1233,7 +1269,7 @@ function WalletPicker({
 								<X className="h-4 w-4" />
 							</button>
 						</div>
-						<WalletList connecting={connecting} error={error} onPick={onPick} />
+						<WalletList connecting={connecting} onPick={onPick} />
 					</motion.div>
 				</div>
 			)}
