@@ -18,10 +18,29 @@ export const AWARDS_WALLETS: Array<{
 	id: AwardsWalletId;
 	name: string;
 	hint: string;
+	/** Self-hosted brand logo (public/wallets/*.png, from the wallet kit's
+	 *  official icons) — kept local so the picker doesn't depend on an
+	 *  external host at connect time. */
+	icon: string;
 }> = [
-	{ id: "freighter", name: "Freighter", hint: "Browser extension" },
-	{ id: "xbull", name: "xBull", hint: "Extension / mobile" },
-	{ id: "albedo", name: "Albedo", hint: "Web — no install needed" },
+	{
+		id: "freighter",
+		name: "Freighter",
+		hint: "Browser extension",
+		icon: "/wallets/freighter.png",
+	},
+	{
+		id: "xbull",
+		name: "xBull",
+		hint: "Extension / mobile",
+		icon: "/wallets/xbull.png",
+	},
+	{
+		id: "albedo",
+		name: "Albedo",
+		hint: "Web — no install needed",
+		icon: "/wallets/albedo.png",
+	},
 ];
 
 const TESTNET_PASSPHRASE = "Test SDF Network ; September 2015";
