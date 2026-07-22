@@ -1,0 +1,50 @@
+# Full `next build` gate (2026-07-21). #661 exported a helper from a route.ts;
+# tsc + vitest passed but `next build` fails route-export validation — so it
+# merged green and broke EVERY Vercel deploy until #673. #675's static
+# route-exports-check catches that one class cheaply; THIS job catches the whole
+# build-only surface (route/metadata export shapes, RSC boundary violations,
+# generateStaticParams, page-data collection) by running the same build Vercel
+# runs, BEFORE merge instead of after.
+#
+# Needs the DB: compilation + route/type validation pass without it (that's the
+# phase that caught #661's class), but "Collecting page data" connects to
+# MongoDB for static generation and hard-fails otherwise — so we hand it the
+# same read-only secrets Vercel uses. PR-only + path-filtered to source (docs/
+# data/changelog PRs skip it) + cancel-in-progress to bound Actions minutes.
+name: Next build gate
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "next.config.*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - ".github/workflows/next-build-gate.yml"
+
+concurrency:
+  group: next-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: { contents: read }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # `pnpm build` = typecheck (payload importmap + tsc --noEmit) then
+      # `next build --webpack` — the exact Vercel command, so a build-only
+      # failure reds this check instead of a deployment.
+      - run: pnpm build
