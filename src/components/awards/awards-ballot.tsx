@@ -1155,12 +1155,19 @@ function WalletPicker({
 						<DrawerTitle className="text-xl font-semibold">
 							Connect a wallet
 						</DrawerTitle>
-						<DrawerDescription>
+						<DrawerDescription className="text-balance">
 							You'll sign a Stellar <strong>testnet</strong> transaction — no
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
-					<div className="mx-auto w-full max-w-sm pb-6">
+					{/* mt-6 gives the description room to breathe above the list —
+					    without it the drawer's flex-col butts the copy against the
+					    first wallet button (the "clamped" look). The caption sets the
+					    Aave-style rhythm between the header and the picker. */}
+					<div className="mx-auto mt-6 w-full max-w-sm pb-2">
+						<p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600">
+							Select a wallet
+						</p>
 						<WalletList connecting={connecting} error={error} onPick={onPick} />
 					</div>
 				</DrawerContent>
@@ -1194,12 +1201,12 @@ function WalletPicker({
 						transition={{ duration: 0.28, ease: EASE }}
 						className="relative w-full max-w-sm rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
-						<div className="flex items-start justify-between gap-4 mb-5">
+						<div className="flex items-start justify-between gap-4 mb-6">
 							<div>
 								<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
 									Connect a wallet
 								</h2>
-								<p className="mt-1 text-sm text-neutral-400">
+								<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
 									You'll sign a Stellar testnet transaction — no real funds.
 								</p>
 							</div>
@@ -1211,6 +1218,9 @@ function WalletPicker({
 								<X className="h-4 w-4" />
 							</button>
 						</div>
+						<p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600">
+							Select a wallet
+						</p>
 						<WalletList connecting={connecting} error={error} onPick={onPick} />
 					</motion.div>
 				</div>
