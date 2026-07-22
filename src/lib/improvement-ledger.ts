@@ -146,6 +146,8 @@ export interface LedgerSummary {
 	closingRate: number;
 	/** Age of the oldest still-open finding, in whole days. */
 	oldestOpenDays: number;
+	/** Findings a wave has picked up but not yet verified — work in progress. */
+	inWave: number;
 	/** Open high-severity findings — the fires. */
 	highOpen: number;
 	/** High-severity findings left open beyond STALE_DAYS — the real failure:
@@ -173,6 +175,9 @@ export function summarizeLedger(
 	const open = findings.filter(isOpen).length;
 	const verified = findings.filter((f) => f.status === "verified").length;
 	const cleared = findings.filter((f) => f.status === "cleared").length;
+	const inWave = findings.filter(
+		(f) => f.status === "in-wave" || f.status === "fixed",
+	).length;
 	const closed = verified + cleared;
 
 	let oldestOpenDays = 0;
@@ -217,6 +222,7 @@ export function summarizeLedger(
 		cleared,
 		closingRate: total > 0 ? Math.round((closed / total) * 100) / 100 : 1,
 		oldestOpenDays: Math.round(oldestOpenDays),
+		inWave,
 		highOpen,
 		staleHighOpen,
 		bySurface,
@@ -264,4 +270,70 @@ export function upsertFindings(
 		}
 	}
 	return out;
+}
+
+// ── Slice 3: waves close the loop ───────────────────────────────────────────
+// A wave manifest DECLARES which finding-ids it resolves and to what status —
+// the deliberate transitions (in-wave / fixed / verified) a human/fix asserts,
+// vs the automatic `cleared`. Manifests are committed files (git-tracked paper
+// trail) that reference finding-ids; the orchestrator applies them each run so
+// /quality's closing rate reflects real detect→verified work, not just
+// auto-clear. A wave carries an optional lesson slug so a finding links to the
+// durable lesson it generalized.
+
+export interface WaveEntry {
+	id: string;
+	status: "in-wave" | "fixed" | "verified";
+	note?: string;
+}
+export interface WaveManifest {
+	/** short wave id/slug, e.g. "contract-overdoc-cleanup". */
+	wave: string;
+	date: string;
+	/** memory/lesson slug this wave produced, if any. */
+	lesson?: string;
+	findings: WaveEntry[];
+}
+
+/**
+ * Overlay the deliberate wave statuses onto the ledger. A wave's assertion wins
+ * over the detector's auto-status (a human said "this is fixed"). Returns the
+ * updated findings plus:
+ *  - `unmatched`: wave entries whose finding-id isn't in the ledger (typo /
+ *    stale wave — surfaced, never silently dropped).
+ *  - `suspectVerified`: ids a wave marked `verified` that a detector STILL
+ *    reports this run — the fix didn't take; the loop must not claim victory.
+ */
+export function applyWaves(
+	findings: Finding[],
+	manifests: WaveManifest[],
+	stillDetectedIds: ReadonlySet<string>,
+	nowIso: string,
+): { findings: Finding[]; unmatched: string[]; suspectVerified: string[] } {
+	const out = findings.map((f) => ({ ...f }));
+	const byId = new Map(out.map((f) => [f.id, f]));
+	const unmatched: string[] = [];
+	const suspectVerified: string[] = [];
+
+	for (const m of manifests) {
+		for (const e of m.findings) {
+			const f = byId.get(e.id);
+			if (!f) {
+				unmatched.push(e.id);
+				continue;
+			}
+			f.status = e.status;
+			f.wave = m.wave;
+			if (m.lesson) f.lessonRef = m.lesson;
+			if (e.note) f.detail = e.note;
+			if (e.status === "fixed" || e.status === "verified") {
+				f.fixedAt = f.fixedAt ?? nowIso;
+			}
+			if (e.status === "verified") {
+				f.verifiedAt = nowIso;
+				if (stillDetectedIds.has(e.id)) suspectVerified.push(e.id);
+			}
+		}
+	}
+	return { findings: out, unmatched, suspectVerified };
 }

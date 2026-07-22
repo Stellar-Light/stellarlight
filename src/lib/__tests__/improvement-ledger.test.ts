@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+	applyWaves,
 	type Finding,
 	findingId,
 	STALE_DAYS,
 	summarizeLedger,
 	upsertFindings,
+	type WaveManifest,
 } from "../improvement-ledger";
 
 const iso = (daysAgo: number) =>
@@ -47,7 +49,12 @@ describe("upsertFindings — the lifecycle", () => {
 
 	it("keeps a still-present finding and bumps lastSeen (preserves firstSeen)", () => {
 		const prior = [f({ id: "a", source: "s1", firstSeen: iso(10) })];
-		const out = upsertFindings(prior, [f({ id: "a", source: "s1" })], ["s1"], now);
+		const out = upsertFindings(
+			prior,
+			[f({ id: "a", source: "s1" })],
+			["s1"],
+			now,
+		);
 		expect(out).toHaveLength(1);
 		expect(out[0].firstSeen).toBe(iso(10)); // preserved
 		expect(out[0].lastSeen).toBe(now); // bumped
@@ -92,7 +99,12 @@ describe("summarizeLedger — the /quality numbers", () => {
 	});
 
 	it("flags a HIGH-severity finding neglected past STALE_DAYS (the red line)", () => {
-		const fresh = f({ id: "a", source: "s", severity: "high", firstSeen: iso(1) });
+		const fresh = f({
+			id: "a",
+			source: "s",
+			severity: "high",
+			firstSeen: iso(1),
+		});
 		const stale = f({
 			id: "b",
 			source: "s",
@@ -113,5 +125,69 @@ describe("summarizeLedger — the /quality numbers", () => {
 		const s = summarizeLedger(findings, now);
 		expect(s.bySurface[0]).toEqual({ surface: "retrieval", open: 2, total: 2 });
 		expect(s.bySurface.find((x) => x.surface === "scf")?.open).toBe(1);
+	});
+
+	it("counts in-wave (work in progress) separately from closed", () => {
+		const s = summarizeLedger(
+			[
+				f({ id: "a", source: "s", status: "in-wave" }),
+				f({ id: "b", source: "s", status: "open" }),
+			],
+			now,
+		);
+		expect(s.inWave).toBe(1);
+		expect(s.open).toBe(2); // in-wave is still open (not yet verified)
+		expect(s.closingRate).toBe(0); // nothing verified/cleared
+	});
+});
+
+describe("applyWaves — waves close the loop (slice 3)", () => {
+	const now = new Date().toISOString();
+	const wave = (findings: WaveManifest["findings"]): WaveManifest => ({
+		wave: "w1",
+		date: "2026-07-22",
+		lesson: "some-lesson",
+		findings,
+	});
+
+	it("overlays in-wave / verified and stamps the wave + timestamps + lesson", () => {
+		const prior = [f({ id: "a", source: "s", status: "open" })];
+		const { findings } = applyWaves(
+			prior,
+			[wave([{ id: "a", status: "verified", note: "confirmed live" }])],
+			new Set(),
+			now,
+		);
+		expect(findings[0].status).toBe("verified");
+		expect(findings[0].wave).toBe("w1");
+		expect(findings[0].verifiedAt).toBe(now);
+		expect(findings[0].fixedAt).toBe(now); // verified implies fixed
+		expect(findings[0].lessonRef).toBe("some-lesson");
+	});
+
+	it("surfaces wave entries that reference unknown finding-ids (no silent drop)", () => {
+		const { unmatched } = applyWaves(
+			[f({ id: "a", source: "s" })],
+			[wave([{ id: "ghost", status: "fixed" }])],
+			new Set(),
+			now,
+		);
+		expect(unmatched).toEqual(["ghost"]);
+	});
+
+	it("flags a VERIFIED finding a detector still reports — the fix didn't take", () => {
+		const { suspectVerified } = applyWaves(
+			[f({ id: "a", source: "s" })],
+			[wave([{ id: "a", status: "verified" }])],
+			new Set(["a"]), // detector STILL reports `a` this run
+			now,
+		);
+		expect(suspectVerified).toEqual(["a"]);
+	});
+
+	it("does not mutate the input findings array", () => {
+		const prior = [f({ id: "a", source: "s", status: "open" })];
+		applyWaves(prior, [wave([{ id: "a", status: "fixed" }])], new Set(), now);
+		expect(prior[0].status).toBe("open"); // original untouched
 	});
 });

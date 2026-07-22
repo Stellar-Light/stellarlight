@@ -334,10 +334,10 @@ export function getGuardRows(): GuardRow[] {
 			promise:
 				"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure — that's this row's red line.",
 			value: `${L.open} open`,
-			sub: `${L.highOpen} high · ${Math.round(L.closingRate * 100)}% closed · oldest ${L.oldestOpenDays}d`,
+			sub: `${L.highOpen} high · ${L.inWave} in a wave · ${Math.round(L.closingRate * 100)}% closed`,
 			details: [
 				`open by surface: ${surfaces}`,
-				`${L.total} tracked · ${L.verified} verified · ${L.cleared} auto-cleared (detector no longer flags)`,
+				`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
 				L.staleHighOpen > 0
 					? `${L.staleHighOpen} high-severity finding(s) stale >30d — work them down`
 					: "no high-severity finding neglected past 30 days",

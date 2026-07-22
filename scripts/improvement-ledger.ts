@@ -21,12 +21,14 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+	applyWaves,
 	type Finding,
 	findingId,
 	type Severity,
 	type Surface,
 	summarizeLedger,
 	upsertFindings,
+	type WaveManifest,
 } from "../src/lib/improvement-ledger";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -34,6 +36,8 @@ const WEEKLY = join(ROOT, "improvements/engine/weekly");
 const ENGINE = join(ROOT, "improvements/engine");
 const LEDGER_FILE = join(ROOT, "improvements/ledger/findings.json");
 const SUMMARY_FILE = join(WEEKLY, "improvement-ledger-latest.json");
+// Wave manifests — the deliberate detect→verified transitions (slice 3).
+const WAVES_DIR = join(ROOT, "improvements/waves/ledger");
 
 // biome-ignore lint/suspicious/noExplicitAny: detector artifacts are heterogeneous JSON
 type Row = any;
@@ -348,6 +352,22 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	return { detected, sources };
 }
 
+/** Every wave manifest under improvements/waves/ledger/*.json. */
+function readWaveManifests(): WaveManifest[] {
+	let files: string[];
+	try {
+		files = readdirSync(WAVES_DIR).filter((f) => f.endsWith(".json"));
+	} catch {
+		return [];
+	}
+	const out: WaveManifest[] = [];
+	for (const f of files) {
+		const m = readJson(join(WAVES_DIR, f)) as WaveManifest | null;
+		if (m && Array.isArray(m.findings)) out.push(m);
+	}
+	return out;
+}
+
 function main() {
 	const dry = process.argv.includes("--dry");
 	console.log("improvement-ledger: ingesting detector artifacts…");
@@ -355,7 +375,31 @@ function main() {
 	const prior: Finding[] = (readJson(LEDGER_FILE) as Finding[] | null) ?? [];
 	const { detected, sources } = extractFromSpecs();
 	const nowIso = new Date().toISOString();
-	const merged = upsertFindings(prior, detected, sources, nowIso);
+	const upserted = upsertFindings(prior, detected, sources, nowIso);
+
+	// Slice 3: overlay the deliberate wave transitions (in-wave/fixed/verified).
+	const detectedIds = new Set(detected.map((f) => f.id));
+	const waves = readWaveManifests();
+	const {
+		findings: merged,
+		unmatched,
+		suspectVerified,
+	} = applyWaves(upserted, waves, detectedIds, nowIso);
+	if (waves.length) {
+		console.log(
+			`  · waves: applied ${waves.length} manifest(s) referencing ${waves.reduce((n, w) => n + w.findings.length, 0)} finding-id(s)`,
+		);
+	}
+	if (unmatched.length) {
+		console.warn(
+			`  ⚠ ${unmatched.length} wave entr(ies) reference unknown finding-ids (typo/stale): ${unmatched.slice(0, 4).join(", ")}`,
+		);
+	}
+	if (suspectVerified.length) {
+		console.warn(
+			`  ⚠ ${suspectVerified.length} finding(s) marked VERIFIED but a detector still reports them — the fix didn't take: ${suspectVerified.slice(0, 4).join(", ")}`,
+		);
+	}
 	const summary = summarizeLedger(merged, Date.now());
 
 	console.log(
