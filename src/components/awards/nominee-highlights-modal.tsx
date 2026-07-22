@@ -280,7 +280,7 @@ export function NomineeHighlightsModal({
 										initial={{ opacity: 0, y: 6 }}
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ duration: 0.3, ease: EASE, delay: 0.08 }}
-										className="mb-0.5 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500"
+										className="mb-0.5 text-[13px] font-medium text-neutral-400"
 									>
 										Year in review
 									</motion.p>
@@ -383,7 +383,7 @@ export function NomineeHighlightsModal({
 																)}
 															</div>
 															{metric.caption && (
-																<div className="mt-2 text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-500">
+																<div className="mt-2 text-xs text-neutral-400">
 																	{metric.caption}
 																</div>
 															)}
