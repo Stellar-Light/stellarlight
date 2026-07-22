@@ -813,7 +813,16 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			)}
 
 			{/* ── Two-column: grid + ballot rail ── */}
-			<div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 pb-32 lg:pb-20">
+			{/* When the mobile ballot deck is shown it's `fixed` (~230px tall) and
+			    would overlap the last nominees (the Interoperability tail —
+			    rubic/usdc-swap). Reserve room below the grid so they clear it;
+			    fall back to normal padding when the deck is absent (read-only /
+			    voting closed) so there's no dead space. */}
+			<div
+				className={`max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 lg:pb-20 ${
+					voting.open && !readOnly ? "pb-[17rem]" : "pb-32"
+				}`}
+			>
 				{/* nominee grid */}
 				<div className="lg:col-span-8 space-y-14">
 					{categories.map((category) => (

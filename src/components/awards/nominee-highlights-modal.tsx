@@ -214,7 +214,16 @@ export function NomineeHighlightsModal({
 
 	const open = nominee !== null;
 	const data = shown;
-	const highlights = data ? highlightsFor(data.slug) : [];
+	// Lead every sheet with the growth moment so the big TVL number lands in the
+	// SAME place across nominees. highlights.ts authors moments per-project, so
+	// the growth moment (the one carrying the TVL odometer) sat 1st for some and
+	// 3rd/last for others — the number jumping top↔bottom read as a bug. Stable
+	// sort: growth to the front, everything else keeps its authored order.
+	const highlights = data
+		? [...highlightsFor(data.slug)].sort(
+				(a, b) => (a.kind === "growth" ? 0 : 1) - (b.kind === "growth" ? 0 : 1),
+			)
+		: [];
 	const tagline = firstSentence(data?.blurb ?? null);
 
 	return (
