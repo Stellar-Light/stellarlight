@@ -330,7 +330,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 						className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
 						<div className="flex items-center justify-between gap-4 mb-6">
-							<span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
+							<span className="text-sm font-medium text-neutral-300">
 								How voting works
 							</span>
 							<button
@@ -983,7 +983,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										}`}
 									>
 										<div className="mb-2 flex items-center gap-2">
-											<span className="text-[11px] uppercase tracking-wide text-neutral-500">
+											<span className="text-xs font-medium text-neutral-400">
 												{category.name}
 											</span>
 											{pickedNominee && (
@@ -1160,14 +1160,11 @@ function WalletPicker({
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
-					{/* mt-6 gives the description room to breathe above the list —
-					    without it the drawer's flex-col butts the copy against the
-					    first wallet button (the "clamped" look). The caption sets the
-					    Aave-style rhythm between the header and the picker. */}
-					<div className="mx-auto mt-6 w-full max-w-sm pb-2">
-						<p className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600">
-							Select a wallet
-						</p>
+					{/* mt-5 lets the description breathe above the list — without it
+					    the drawer's flex-col butts the copy against the first wallet
+					    button (the "clamped" look). No eyebrow label; the buttons
+					    speak for themselves. */}
+					<div className="mx-auto mt-5 w-full max-w-sm pb-2">
 						<WalletList connecting={connecting} error={error} onPick={onPick} />
 					</div>
 				</DrawerContent>
@@ -1218,9 +1215,6 @@ function WalletPicker({
 								<X className="h-4 w-4" />
 							</button>
 						</div>
-						<p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600">
-							Select a wallet
-						</p>
 						<WalletList connecting={connecting} error={error} onPick={onPick} />
 					</motion.div>
 				</div>
@@ -1384,7 +1378,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					transition={{ duration: 0.55, ease: EASE }}
 					className="text-center mb-14"
 				>
-					<p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500 mb-3">
+					<p className="text-sm font-medium text-neutral-400 mb-3">
 						Voting closed
 					</p>
 					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
