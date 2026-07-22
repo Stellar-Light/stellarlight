@@ -241,6 +241,26 @@ const SPECS: SourceSpec[] = [
 	},
 ];
 
+// The through-Raven feeder (scripts/raven-loop.ts) — golden questions graded via
+// the REAL gateway. Its misses are consumer-path failures our direct-API evals
+// can't see. Lives in improvements/engine/ (local-run, committed as evidence).
+const RAVEN_LOOP_SPEC: SourceSpec = {
+	source: "raven-loop",
+	file: "raven-loop-latest.json",
+	dir: ENGINE,
+	arrays: [
+		{
+			key: "misses",
+			surface: "consumer",
+			mode: "raven-consumer-miss",
+			// A canonical question the SDF gateway can't answer through the real
+			// path is serious — the consumer sees it directly.
+			severity: "high",
+			probe: (r) => str(r?.query),
+		},
+	],
+};
+
 /** raven-drift is a dated file in improvements/engine/, not weekly/. */
 function latestRavenDrift(): string | null {
 	if (!existsSync(ENGINE)) return null;
@@ -263,7 +283,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const detected: Finding[] = [];
 	const sources: string[] = [];
 
-	for (const spec of SPECS) {
+	for (const spec of [...SPECS, RAVEN_LOOP_SPEC]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
 		if (!data) {
