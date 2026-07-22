@@ -1,0 +1,41 @@
+{
+	"wave": "contract-overdoc-cleanup",
+	"date": "2026-07-22",
+	"findings": [
+		{
+			"id": "engine-e-contract:get-api-projects-search-projects-placementrank",
+			"status": "in-wave",
+			"note": "spec documents projects[].placementRank but the API returns it in no sampled row — implement it or drop it from the OpenAPI schema"
+		},
+		{
+			"id": "engine-e-contract:get-api-repos-explain-note",
+			"status": "in-wave",
+			"note": "documented explain `note` absent from responses — remove from spec or populate"
+		},
+		{
+			"id": "engine-e-contract:get-api-repos-explain-note2",
+			"status": "in-wave",
+			"note": "documented explain `note2` absent from responses — remove from spec or populate"
+		},
+		{
+			"id": "engine-e-contract:get-api-hackathons-meta-fallbackchannels",
+			"status": "in-wave",
+			"note": "meta.fallbackChannels may be conditional (empty-state only) — confirm and either document the condition or drop it"
+		},
+		{
+			"id": "engine-e-contract:get-api-hackathons-slug-meta-filters",
+			"status": "in-wave",
+			"note": "meta.filters documented on the single-hackathon route but absent — drop or implement"
+		},
+		{
+			"id": "engine-e-contract:get-api-hackathons-slug-meta-counts",
+			"status": "in-wave",
+			"note": "meta.counts documented on the single-hackathon route but absent — drop or implement"
+		},
+		{
+			"id": "engine-e-contract:get-api-hackathons-slug-winners-hackathonprize",
+			"status": "in-wave",
+			"note": "winners[].hackathonPrize documented but absent — DoraHacks doesn't expose per-winner prize; drop from spec"
+		}
+	]
+}

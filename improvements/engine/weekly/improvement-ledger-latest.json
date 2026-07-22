@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-22T23:20:26.928Z",
+	"generatedAt": "2026-07-22T23:34:07.579Z",
 	"total": 278,
 	"open": 278,
 	"closed": 0,
@@ -7,6 +7,7 @@
 	"cleared": 0,
 	"closingRate": 0,
 	"oldestOpenDays": 0,
+	"inWave": 7,
 	"highOpen": 37,
 	"staleHighOpen": 0,
 	"bySurface": [
