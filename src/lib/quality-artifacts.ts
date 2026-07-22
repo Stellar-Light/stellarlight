@@ -12,6 +12,10 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-07-11.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-07-21.json";
+// Through-Raven consumer path — golden questions graded via the REAL gateway
+// (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
+// this is what the SDF agent actually experiences.
+import ravenLoop from "../../improvements/engine/raven-loop-latest.json";
 import scfMembership from "../../improvements/engine/scf-membership-postwave-2026-07-11.json";
 // Weekly evidence — fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
@@ -279,6 +283,40 @@ export function getGuardRows(): GuardRow[] {
 			asOf: "latest weekly run",
 			artifact: "improvements/engine/weekly/corpus-health-latest.json",
 			ok: dirty.length === 0,
+		});
+	}
+
+	// Through-Raven consumer path — the golden questions run through the LIVE
+	// Raven gateway (routing + our op + envelope + coaching), not our direct API.
+	// This is the co-verified measure interlock-spec promises: what the SDF agent
+	// actually gets.
+	{
+		const rl = ravenLoop;
+		// misses infers `never[]` when the committed artifact has none — cast it.
+		const misses = rl.misses as Array<{
+			query: string;
+			mode: string;
+			failureMode: string;
+		}>;
+		rows.push({
+			key: "raven-consumer-path",
+			title: "Consumer path (through Raven)",
+			promise:
+				"The canonical questions answer correctly through the REAL Raven gateway — routing, our op, the response envelope and coaching — not just our direct API.",
+			value: `${rl.frame.passed}/${rl.frame.graded}`,
+			sub: `golden Qs answered through the live gateway · ${Math.round(rl.okRate * 100)}%`,
+			details:
+				misses.length > 0
+					? misses.map(
+							(m) =>
+								`${m.mode}: "${m.query.slice(0, 48)}" — ${m.failureMode} → consumer finding`,
+						)
+					: [
+							`every gradeable golden question answers correctly through Raven (${rl.frame.graded} checked)`,
+						],
+			asOf: rl.generatedAt.slice(0, 10),
+			artifact: "improvements/engine/raven-loop-latest.json",
+			ok: rl.okRate >= 0.95,
 		});
 	}
 
