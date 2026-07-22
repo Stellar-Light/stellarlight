@@ -38,6 +38,8 @@ jobs:
         run: pnpm contract:check
       - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
         run: pnpm exec tsx scripts/eval/routing-surface-check.ts
+      - name: Route files export only handlers + config (2026-07-21 — non-handler exports break next build, tsc/vitest miss it)
+        run: pnpm exec tsx scripts/eval/route-exports-check.ts
       - name: Changelog⇄contract assertion (sls-054)
         # The newest changelog entry may not name response fields absent from
         # the published schema — the changelog is a consumption contract.
