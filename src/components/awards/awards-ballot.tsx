@@ -1108,20 +1108,29 @@ function WalletList({
 					type="button"
 					disabled={connecting}
 					onClick={() => onPick(wallet.id)}
-					className="w-full rounded-xl border border-[#2f2f2f] bg-[#1f1f1f] px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:border-[#454545] transition-colors disabled:opacity-60"
+					className="w-full rounded-xl border border-[#2f2f2f] bg-[#1f1f1f] px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:border-[#454545] transition-colors disabled:opacity-60"
 				>
-					<span>
-						<span className="block text-sm font-semibold text-neutral-100">
-							{wallet.name}
-						</span>
-						<span className="block text-xs text-neutral-500">
-							{wallet.hint}
+					<span className="flex items-center gap-3 min-w-0">
+						<Image
+							src={wallet.icon}
+							alt=""
+							width={36}
+							height={36}
+							className="h-9 w-9 flex-shrink-0 rounded-lg object-contain bg-[#111] border border-[#2a2a2a] p-0.5"
+						/>
+						<span className="min-w-0">
+							<span className="block text-sm font-semibold text-neutral-100">
+								{wallet.name}
+							</span>
+							<span className="block text-xs text-neutral-500">
+								{wallet.hint}
+							</span>
 						</span>
 					</span>
 					{connecting ? (
-						<Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
+						<Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-neutral-500" />
 					) : (
-						<ChevronRight className="h-4 w-4 text-neutral-500" />
+						<ChevronRight className="h-4 w-4 flex-shrink-0 text-neutral-500" />
 					)}
 				</button>
 			))}
