@@ -262,6 +262,17 @@ const RAVEN_LOOP_SPEC: SourceSpec = {
 			severity: "high",
 			probe: (r) => str(r?.query),
 		},
+		{
+			key: "demandDeadends",
+			surface: "consumer",
+			mode: "consumer-demand-deadend",
+			// A REAL demand query the API answers RIGHT NOW but the through-Raven
+			// path drops to zero — a consumer-path loss (routing/envelope), not a
+			// data gap. Medium: the underlying rows are already fallback-quality
+			// (engine-d flagged them WEAK/FALLBACK); work it down, not on fire.
+			severity: "medium",
+			probe: (r) => str(r?.query),
+		},
 	],
 };
 

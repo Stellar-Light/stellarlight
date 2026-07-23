@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-22T23:18:50.674Z",
+	"generatedAt": "2026-07-23T00:40:53.440Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 44,
@@ -7,5 +7,12 @@
 		"failed": 0
 	},
 	"okRate": 1,
-	"misses": []
+	"misses": [],
+	"demand": {
+		"checked": 13,
+		"parityHeld": 13,
+		"deadends": 0,
+		"goneNow": 0
+	},
+	"demandDeadends": []
 }
