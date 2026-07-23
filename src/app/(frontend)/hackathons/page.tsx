@@ -10,6 +10,7 @@ import {
 	Users,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { HackathonsFilterDropdown } from "@/components/hackathons-filter-dropdown";
@@ -32,12 +33,30 @@ import {
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
 	title: "Hackathons | Stellar Light",
 	description: "Active and past hackathons in the Stellar ecosystem",
 };
+
+// The DoraHacks assembly — 2 org listings + 2 winner-submission fetches, run
+// sequentially — was the page's whole cost: ~15-20s per request, because the
+// page was `force-dynamic`, which disables the `revalidate: 3600` already set
+// on each underlying fetch(), so every hit refetched live. Cache the MERGED
+// result for an hour instead: the external calls happen once per window and are
+// shared across every request, and unstable_cache serves stale-while-
+// revalidating, so no request blocks on the refresh after warm-up. Our own
+// curated data (fetchCuratedHackathons) stays uncached — it's a fast Mongo read
+// and we want it fresh. Bump the key suffix to force an early refresh.
+const getCachedDoraHackathons = unstable_cache(
+	async () => {
+		const hackathons = await fetchAllDoraHacksHackathons();
+		const recentWinners =
+			(await fetchLatestHackathonWinners(hackathons)) ?? LATEST_WINNERS;
+		return { hackathons, recentWinners };
+	},
+	["hackathons:dora-merge:v1"],
+	{ revalidate: 3600, tags: ["hackathons"] },
+);
 
 /**
  * Normalize a hackathon name to a comparable key so we can match a DoraHacks
@@ -176,19 +195,20 @@ export default async function HackathonsPage({
 			: "recent";
 	const searchQuery = (params.q ?? "").trim().toLowerCase();
 
-	const [hackathons, curatedData] = await Promise.all([
-		fetchAllDoraHacksHackathons(),
+	// DoraHacks assembly comes from the hourly cache (see getCachedDoraHackathons);
+	// our own curated data stays a fresh Mongo read.
+	const [dora, curatedData] = await Promise.all([
+		getCachedDoraHackathons(),
 		fetchCuratedHackathons(),
 	]);
+	const hackathons = dora.hackathons;
 	const curatedMap = curatedData.byName;
 	const activeHackathons = hackathons.filter((h) => isHackathonActive(h));
 	let pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
 
 	// "Recent Winners" highlight — LIVE from DoraHacks (most-recent ended event
-	// whose winners are announced), so it auto-updates the moment winners land.
-	// Falls back to the curated constant only if the live derivation is empty.
-	const recentWinners: RecentHackathonWinners =
-		(await fetchLatestHackathonWinners(hackathons)) ?? LATEST_WINNERS;
+	// whose winners are announced), derived inside the same hourly cache.
+	const recentWinners: RecentHackathonWinners = dora.recentWinners;
 
 	// Build the set of distinct years, organizers, and tags from past hackathons (for filter UI).
 	const years = Array.from(
