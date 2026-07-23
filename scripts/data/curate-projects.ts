@@ -38,6 +38,22 @@ const DESCRIPTION_FIXES: Record<string, string> = {
 	// describe the product.
 	range:
 		"Range is a cross-chain security and intelligence platform: real-time transaction monitoring, forensic tracing (Range Trail), and a cross-chain explorer covering Stellar among other ecosystems, including Stellar bridge-explorer integration. In July 2026 Range joined Stellar's Tier 1 validator set as a blockchain-security validator organization.",
+	// Improvement loop 2026-07-23, same class as `gyen` above: material
+	// lifecycle truth an agent must see on the row. Flipside Crypto has
+	// rebranded and repositioned away from crypto analytics. Verified from
+	// their own domains: flipsidecrypto.xyz, flipsidecrypto.com AND
+	// flipsidecrypto.xyz/dashboards all 200-redirect to www.edisyl.com, whose
+	// copy is enterprise data/AI semantics ("Making enterprise data mean
+	// something") and whose patent block reads "Assignee: Flipside Crypto Inc
+	// (edisyl)" with the blockchain work in the past tense ("The
+	// entity-resolution and scoring techniques built for blockchain underpin
+	// the semantic intelligence layer we deploy across enterprise data
+	// environments today"). The product subdomains (app./data.flipsidecrypto.com)
+	// answer 403 behind bot protection — NOT observable either way, so this is
+	// a description fix only; the Live→? status call is queued for owner
+	// review (issue #605) rather than flipped on a redirect.
+	flipside:
+		"Flipside provided free analytics dashboards and a SQL data warehouse over indexed Stellar on-chain data, letting analysts and builders query transactions, accounts, and network activity. As of 2026 the company has rebranded to edisyl and repositioned to enterprise data/AI semantics: every flipsidecrypto.com and flipsidecrypto.xyz marketing URL redirects to edisyl.com, which describes the blockchain entity-resolution work as the foundation of an enterprise product rather than as a live crypto-analytics service. Treat the Stellar dashboards and datasets as unverified from the vendor's public surface after that rebrand.",
 	// sls-030: represent the funded-historical + embedded-implementation truth.
 	comet:
 		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",
@@ -1084,6 +1100,25 @@ const DUPE_MERGES: Array<{
 	{ dupe: "blockeden", canonical: "blockedenxyz" },
 	{ dupe: "ortege-ai", canonical: "ortege" },
 	{ dupe: "aha-labs", canonical: "the-aha-company" }, // same org, two namings; canonical = the richer record (5 repos)
+	// Improvement loop 2026-07-23 — the one open domain-keyed pair left in the
+	// engine-c Engine B sweep (both records store links.website
+	// https://bossmoney.com/). Identity proven from primary sources, never from
+	// the shared apex alone:
+	//  - leafglobalfintech.com (Leaf's OWN site, read 2026-07-23) states
+	//    "Leaf's app is now BOSS Money" — the Leaf → BOSS Money lineage the
+	//    canonical record already describes.
+	//  - stellar.org/blog/ecosystem/bulk-disbursements-with-beans-app-and-boss-money
+	//    (SDF's own) names the Stellar-side wallet "IDT's Boss Money" and calls
+	//    it "also available for non-smartphone users" — verbatim the pitch
+	//    sitting in the DUPE record's prose ("no smartphone required").
+	//  - "BOSS Revolution" is IDT's SEPARATE calling / top-up / money-transfer
+	//    brand (bossrevolution.com, listed as its own brand on idt.net) with no
+	//    Stellar or stablecoin presence on its own site — so the dupe row is
+	//    not that product; its own stored identity is BOSS Money's
+	//    (website bossmoney.com + twitter @bossmoneyoffic).
+	// Canonical = boss-pay (accurate IDT/Leaf description, Anchor + Payments
+	// typing); the dupe is the thinner Wallet-typed row. Lesson class 10.
+	{ dupe: "boss-revolution", canonical: "boss-pay" },
 	// The sorobansecurity.com → stellarsecurityportal.com rebrand (sls-003
 	// URL migration): current brand = canonical, absorbs the SCF award —
 	// the ultra-swap→usdc-swap pattern.

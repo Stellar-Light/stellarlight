@@ -59,6 +59,80 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://vesseoapp.com/",
 		basis: "site-liveness",
 	},
+	// ── Provenance REFRESH wave (improvement loop 2026-07-23), same class as
+	// blend/vesseo above: NOT status flips. The status re-verification queue
+	// (issue #605, run 2026-07-21) surfaced 500/500 Live rows whose statusAsOf
+	// was 133d old, 485 of them with NO statusSourceUrl and basis
+	// source-inherited — i.e. we asserted "Live" with no auditable ground.
+	// Each row below is the queue's top-10 by (age × prominence), re-verified
+	// by hand on 2026-07-23 against the project's OWN site; the verbatim
+	// <title> served is quoted as the evidence. Live→Live only — nothing here
+	// is evidence of death, and a stale repo is never treated as one.
+	// (Two of the ten are deliberately absent: `wisdomtree` —
+	// wisdomtreeprime.com answers 403 behind Cloudflare bot protection, which
+	// is not observable liveness either way; and `flipside` — its domains now
+	// redirect to a rebranded non-crypto company, handled as a description fix
+	// in curate-projects.ts and queued for an owner status call.)
+	nodies: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200 → www.nodies.app, "Nodies - Web3 Infrastructure Platform"
+		sourceUrl: "https://nodies.app/",
+		basis: "site-liveness",
+	},
+	warmancer: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200 → www.warmancer.io, "Warmancer: Black Friday" (a live
+		// campaign page — product surface up; the seasonal title is recorded
+		// verbatim rather than smoothed over, since it is the only signal).
+		sourceUrl: "https://warmancer.io/",
+		basis: "site-liveness",
+	},
+	scorechain: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200 → www.scorechain.com, "Crypto AML Compliance &
+		// Blockchain Analytics Platform | Scorechain"
+		sourceUrl: "https://scorechain.com/",
+		basis: "site-liveness",
+	},
+	spiko: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200 → www.spiko.io, "Spiko | Daily interest on your treasury"
+		sourceUrl: "https://spiko.io/",
+		basis: "site-liveness",
+	},
+	"ultra-stellar": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200, "Ultra Stellar"
+		sourceUrl: "https://ultrastellar.com/",
+		basis: "site-liveness",
+	},
+	katagames: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200, "Kata.Games - Revolutionary Gaming Platform"
+		sourceUrl: "https://kata.games/",
+		basis: "site-liveness",
+	},
+	"stellar-passport": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		// serves 200, "Stellar Passport - The search is over"; the builder org
+		// (github.com/tellus-cooperative) also pushed in 2026-01.
+		sourceUrl: "https://stellarpassport.xyz/",
+		basis: "site-liveness",
+	},
 	// boxy 2026-07-20 (evidence reviewed, approved flip): up-but-abandoned.
 	// eascrow.xyz serves 200 but the bundle froze 2025-03-06 (Last-Modified);
 	// dapp.eascrow.xyz froze 2025-06-25 — the EXACT day of the org's last
