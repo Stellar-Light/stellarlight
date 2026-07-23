@@ -117,10 +117,27 @@ if (b && !b._error) {
 	const s1 = b.s1_prose_structure_divergence;
 	const s3 = b.s3_duplicates;
 	const s4 = b.s4_staleness;
-	if (s1)
+	if (s1) {
 		lines.push(
 			`- **Prose⇄structure divergence:** ${s1.count} records name a chain/country/SEP their structured fields lack`,
 		);
+		// Name them. A count alone is unactionable: the improvement loop's safe
+		// data class is "write a curated row for slug X", so a finding with no
+		// slug cannot be fixed and just re-reports every week. The sweep has
+		// carried `sample` all along (engine-b-sweeps.ts prints it in non-JSON
+		// mode) — this is the JSON consumer catching up.
+		for (const d of (s1.sample ?? []).slice(0, 12) as Array<{
+			slug: string;
+			field: string;
+			prose: string;
+			missing: string;
+		}>)
+			lines.push(
+				`  - \`${d.slug}\` — prose says "${d.prose}" but \`${d.field}\` lacks \`${d.missing}\``,
+			);
+		if ((s1.sample?.length ?? 0) > 12)
+			lines.push(`  - …and ${s1.sample.length - 12} more (see run artifact)`);
+	}
 	if (s3)
 		lines.push(
 			`- **Duplicate slug pairs:** ${s3.count} (canonicalSlug unset → split funding/stats)`,
