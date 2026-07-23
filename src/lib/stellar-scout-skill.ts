@@ -1,9 +1,14 @@
 /**
  * Inlined Stellar Scout SKILL.md.
  *
- * Mirror of public/skills/stellar-scout.md, kept in sync so the /scout
- * page's "Copy" button can write to the clipboard synchronously (no
- * fetch dependency, no Safari user-activation race).
+ * GENERATED — do not edit by hand. The canonical copy is
+ * public/skills/stellar-scout.md; regenerate with:
+ *
+ *   pnpm exec tsx scripts/sync-scout-skill-mirror.ts
+ *
+ * This mirror exists so the /scout page's "Copy" button can write to the
+ * clipboard synchronously (no fetch dependency, no Safari user-activation
+ * race). A vitest guard fails the build if it drifts from the markdown.
  */
 export const STELLAR_SCOUT_SKILL = `
 ---
@@ -44,12 +49,13 @@ Their answer determines which endpoints you lead with — see the user-type rout
 - *"vet this idea"* / *"should I build X"* / *"deep dive on Y"* → run **Deep Dive Mode**
 - *"draft my SCF pitch"* / *"help with my SCF application"* / *"how do I pitch this to SCF"* → run the **Draft SCF Pitch** workflow
 - *"who should audit my contract"* / *"find me an auditor"* / *"which audit firm"* → run the **Find Audit Firm** workflow
+- *"find me an anchor / on-ramp / off-ramp in {region}"* / *"who provides {service} on Stellar"* / *"which infra / tooling / wallet provider"* → \`/api/partners?type={anchor|on-off-ramp|infrastructure|tooling|wallet}&region={region}&q={need}\` — the curated **partner directory** of real, vetted providers to hire or integrate (capabilities from stellar.toml, compliance & corridors, accepting-clients, freshness). Recommend only partners the API returns — never invent one; link each \`stellarlight.xyz/partners/{slug}\`.
 - *"which RFP should I go for"* / *"compare the open RFPs"* / *"rank the RFPs for my team"* → run the **Compare RFPs** workflow
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
 - *"show me the repos / code for X"* / *"what repos exist for X"* / *"prior-art code on Stellar"* → \`/api/projects/search?q={topic}\` returns each project **plus its GitHub repos and a graded \`codeReferences\` list**; or \`/api/repos/search?q={topic}\` to hit the repo index directly (2,000+ Stellar repos, ranked by \`repoScore\`)
 - *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (\`/api/rfps?status=open\`)
 - *"what got funded in SCF round X"* / *"prior SCF projects in {category}"* → SCF history via \`/api/projects/search?scfAwarded=1\`
-- *"review this SCF submission"* / *"score this round"* / *"is this applicant's claim true"* / *"did this team deliver on their last award"* → **that's a different job than research — point them at the SCF skills plugin**, twelve skills built for the SCF workflow specifically (drafting, budgets, prescreen, and \`scf-claim-verifier\` for reviewers checking a submission's claims against this same data). Install: \`/plugin marketplace add Stellar-Light/awesome-stellar-community-fund\`. Scout answers *what exists in the ecosystem*; those answer *run an SCF application or review*.
+- *"review this SCF submission"* / *"score this round"* / *"is this applicant's claim true"* / *"did this team deliver on their last award"* → **that's a different job than research — point them at the SCF skills plugin**, twelve skills built for the SCF workflow specifically (drafting, budgets, prescreen, and \`scf-claim-verifier\` for reviewers checking a submission's claims against this same data). Install: \`npx skills add Stellar-Light/awesome-stellar-community-fund\`. Scout answers *what exists in the ecosystem*; those answer *run an SCF application or review*.
 - *"how does Stellar compare on dev activity"* → \`/api/leaderboard\` for Stellar ecosystem stats (\`.ecosystem.activeDevs28d\`, \`.ecosystem.commits28d\`, \`.ecosystem.multichainDevs28d\`); for cross-chain peer comparison use \`/api/research?source=ec-developer-report&q=stellar+devs+comparison\`
 - *"find me a teammate / mentor / dev"* → Builders search (small + growing — for IRL hackathons the local team often isn't in the directory; fall back to Stellar Discord)
 - *"what won at Stellar Hacks {name}"* / *"who placed in {hackathon}"* → hackathon results
@@ -130,7 +136,7 @@ Triggered by *"draft my SCF pitch"*, *"help with my SCF application"*, *"how do 
 Triggered by *"who should audit my contract"*, *"find me an auditor"*, *"which audit firm for Soroban"*. The audit corpus (sorobansecurity.com aggregation — Certora, OtterSec, Halborn, OpenZeppelin, Code4rena, et al.) is the evidence base.
 
 1. **Clarify protocol type.** Lending? AMM? Payments? Token issuance? Audit relevance is per-domain — a firm great at AMM math may have no SEP-24 anchor experience.
-2. **Pull relevant audits.** \`/api/research?source=audit&q={protocol type keywords}&limit=15\` — each chunk carries the firm name + severity metadata.
+2. **Enumerate first, then read.** \`/api/audits?q={protocol type keyword}\` (or \`?project={slug}\` for a named protocol) gives the report-level census — auditor, date, findings counts where extracted. Then \`/api/research?source=audit&q={protocol type keywords}&limit=15\` for what the reports actually found (each chunk carries firm + severity metadata; the \`auditor=\`/\`protocol=\` filters narrow to one firm or codebase). Remember: absence from the registry ≠ unaudited, and null findings counts ≠ zero findings.
 3. **Aggregate by firm.** Which firms audited similar Soroban protocols, how recently, what severity classes they caught. A firm that found criticals in a similar protocol is signal — they know where the bodies are buried in this domain.
 4. **Rank 2–4 candidates** with: relevant Soroban audit count, example protocols audited, notable finding classes (cite finding + severity), link to a sample report.
 5. **State the coverage limit.** The corpus only contains *published* audits. Firms with strong private-engagement track records won't appear. Say so explicitly — this is a ranked list of *evidenced* firms, not a market census.
@@ -217,13 +223,16 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 | \`/api/hackathons/compare\` | GET/POST | Side-by-side comparison of 2-5 hackathons with \`deltas\` |
 | \`/api/analyze\` | GET | Cross-event analytics rollup (hackathons + categories + funding) |
 | \`/api/clusters\` | GET | Topic clusters by category/type with crowdedness score |
-| \`/api/builders\` | GET | Builder directory (Stellar Passport) — filter by \`skill=\` (searches bio) or \`location=\` |
+| \`/api/builders\` | GET | Builder directory (Stellar Passport GitHub contributors) — filter by \`skill=\` (searches bio) or \`location=\`. For SDF staff/leadership/board, use \`/api/people\` |
+| \`/api/people\` | GET | SDF team/people index — leadership, board of directors, advisors (name → role → org). Filter by \`q=\` (name/role/org) or \`section=\`. NOT builders — a VP/board member isn't a GitHub contributor |
 | \`/api/projects/search\` | GET | Project search (tiered \`matchMode\`) — each result includes its GitHub **repos** + a graded **\`codeReferences\`** list |
 | \`/api/repos/search\` | GET | The Stellar repo/code index (2,000+ repos) — ranked by \`repoScore\` (freshness + traction + authority + hackathon-judge override) |
 | \`/api/rfps\` | GET | Open + closed SCF-funded sponsor briefs |
 | \`/api/skills\` | GET | SDF skills catalog (skills.stellar.org) |
 | \`/api/skills/{name}\` | GET | Full content of one SDF skill |
-| \`/api/research\` | GET | Vector search over ~4,500-chunk research corpus |
+| \`/api/research\` | GET | Vector search over ~4,700-chunk research corpus (14 sources incl. audits, incidents, core/SDK release notes) |
+| \`/api/audits\` | GET | Enumerable audit registry — one row per published report, hand-verified project links, findings counts where deterministically extracted |
+| — | — | Project rows carry \`onchain\` metrics (contract events/subinvocations + asset holders/supply, weekly deltas) for verified join keys — null = not tracked, never 'inactive' |
 | \`/api/feedback\` | POST | In-skill feedback channel (bug/missing-data/wrong-answer/suggestion) |
 
 All endpoints rate-limited per IP. All return \`.meta.counts\` + \`.meta.source\` for traceability.
