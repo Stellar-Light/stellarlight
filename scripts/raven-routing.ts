@@ -196,6 +196,49 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		expect: ["searchHackathonBuilds"],
 		note: "prior-art: winning hackathon builds",
 	},
+	// ── CODE / programming: a dev question must reach a CODE op (searchRepos
+	// example, explainRepo deep-dive, searchResearch docs) — NOT the project
+	// directory or off-Stellar docs. This is why the repos + DeepWiki were indexed.
+	{
+		q: "show me a Rust example of a Soroban token contract",
+		expect: ["searchRepos"],
+		note: "code: example repo by language",
+	},
+	{
+		q: "find the Stellar JavaScript and TypeScript SDK repositories",
+		expect: ["searchRepos"],
+		note: "code: SDK repos",
+	},
+	{
+		q: "flash loan implementation on Soroban",
+		expect: ["searchRepos"],
+		note: "code: example repo (xycloans)",
+	},
+	{
+		q: "how does the Blend lending pool calculate interest rates in the code",
+		expect: ["explainRepo", "searchRepos"],
+		note: "code: deep repo mechanism (DeepWiki)",
+	},
+	{
+		q: "explain how passkey-kit verifies a WebAuthn signature on Soroban",
+		expect: ["explainRepo", "searchRepos"],
+		note: "code: deep repo mechanism (DeepWiki)",
+	},
+	{
+		q: "how do I write a Soroban smart contract in Rust",
+		expect: ["searchResearch", "searchRepos"],
+		note: "code: how-to (docs or example)",
+	},
+	{
+		q: "how does cross-contract invocation and authorization work in Soroban",
+		expect: ["searchResearch", "searchRepos"],
+		note: "code: concept/docs",
+	},
+	{
+		q: "submit a Stellar transaction with the JavaScript SDK",
+		expect: ["searchResearch", "searchRepos"],
+		note: "code: how-to guide",
+	},
 ];
 
 // Adversarial / edge questions — chosen to THROW Raven off: off-topic, no-such-

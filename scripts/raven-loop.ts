@@ -348,6 +348,63 @@ async function main() {
 		}
 	}
 
+	// ── code-depth phase: the repos + DeepWiki were indexed so a dev question gets
+	// a FILE-LEVEL answer, not shallow prose. Drive explainRepo on canonical repos
+	// and check the answer carries a code signal (a file path / backticked
+	// identifier / function call). A miss = explainRepo errored/empty, or the
+	// answer has no code-level grounding — the consumer got hand-wave, not depth.
+	const CODE_PROBES: Array<{ q: string; repo: string }> = [
+		{
+			q: "how does the Blend lending pool calculate interest and handle bad debt",
+			repo: "blend",
+		},
+		{
+			q: "how does passkey-kit verify a WebAuthn signature on Soroban",
+			repo: "passkey-kit",
+		},
+		{
+			q: "how does the KALE proof-of-teamwork farming reward mechanism work",
+			repo: "kale",
+		},
+	];
+	// a file path (pool/src/…​.rs), a `backticked identifier`, or a fn() call
+	const DEPTH =
+		/`[^`\n]{2,}`|[\w-]+\/[\w./-]+\.(?:rs|ts|tsx|js)|\b[a-z_]\w*\(\)/i;
+	const codeMisses: Array<{ query: string; repo: string; reason: string }> = [];
+	let codeChecked = 0;
+	console.log(
+		`\n\nraven-loop: code-depth — ${CODE_PROBES.length} explainRepo deep-dives, file-level answer?`,
+	);
+	for (const p of CODE_PROBES) {
+		codeChecked++;
+		const code = `const r = await scout.explainRepo({q:${JSON.stringify(p.q)}}); return r && r.ok ? String((r.data && (r.data.answer||r.data.summary)) || "") : ("ERR:"+(r&&r.error&&r.error.message||"no-ok"));`;
+		let ans = "";
+		try {
+			ans = await execute(session, code);
+		} catch {
+			ans = "ERR:throw";
+		}
+		if (ans.startsWith("ERR:")) {
+			codeMisses.push({
+				query: p.q,
+				repo: p.repo,
+				reason: "explainRepo errored / no answer",
+			});
+			console.log(`\n  ✗ [error] ${p.repo}: ${p.q.slice(0, 46)}`);
+		} else if (ans.trim().length < 120 || !DEPTH.test(ans)) {
+			codeMisses.push({
+				query: p.q,
+				repo: p.repo,
+				reason: "answer lacks file/function-level depth",
+			});
+			console.log(
+				`\n  ✗ [shallow] ${p.repo}: no code-path/identifier in answer`,
+			);
+		} else {
+			process.stdout.write(".");
+		}
+	}
+
 	const artifact = {
 		generatedAt: new Date().toISOString(),
 		gateway: URL, // the endpoint, not the token
@@ -361,6 +418,12 @@ async function main() {
 			goneNow: demandGone, // API empty NOW → data gap (engine-d owns), not a consumer defect
 		},
 		demandDeadends,
+		code: {
+			checked: codeChecked,
+			passed: codeChecked - codeMisses.length,
+			misses: codeMisses.length,
+		},
+		codeMisses,
 	};
 	writeFileSync(OUT, `${JSON.stringify(artifact, null, "\t")}\n`);
 	console.log(
@@ -369,6 +432,11 @@ async function main() {
 	if (demandChecked || demandGone) {
 		console.log(
 			`raven-loop: demand parity ${demandChecked - demandDeadends.length}/${demandChecked} held · ${demandDeadends.length} consumer-path loss · ${demandGone} data-gap now (engine-d owns)`,
+		);
+	}
+	if (codeChecked) {
+		console.log(
+			`raven-loop: code-depth ${codeChecked - codeMisses.length}/${codeChecked} explainRepo answers carried file-level depth · ${codeMisses.length} shallow`,
 		);
 	}
 	console.log(`  wrote → improvements/engine/raven-loop-latest.json`);

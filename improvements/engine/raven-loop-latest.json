@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-07-23T00:40:53.440Z",
+	"generatedAt": "2026-07-23T04:04:28.776Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 44,
@@ -14,5 +14,17 @@
 		"deadends": 0,
 		"goneNow": 0
 	},
-	"demandDeadends": []
+	"demandDeadends": [],
+	"code": {
+		"checked": 3,
+		"passed": 2,
+		"misses": 1
+	},
+	"codeMisses": [
+		{
+			"query": "how does the KALE proof-of-teamwork farming reward mechanism work",
+			"repo": "kale",
+			"reason": "answer lacks file/function-level depth"
+		}
+	]
 }

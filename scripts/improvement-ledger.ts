@@ -281,6 +281,15 @@ const RAVEN_LOOP_SPEC: SourceSpec = {
 			severity: "medium",
 			probe: (r) => str(r?.query),
 		},
+		{
+			key: "codeMisses",
+			surface: "code",
+			mode: "consumer-code-shallow",
+			// explainRepo returned no file-level depth (or errored) for a code
+			// question — the repos + DeepWiki were indexed exactly to prevent that.
+			severity: "medium",
+			probe: (r) => str(r?.query),
+		},
 	],
 };
 
