@@ -116,7 +116,10 @@ export async function GET(
 					operator: "stellarlight.xyz",
 					generatedAt: new Date().toISOString(),
 				},
-				skill: toUnifiedShape(curated),
+				skill: {
+					...toUnifiedShape(curated),
+					content: await resolveCuratedContent(curated),
+				},
 			},
 			{ sMaxAge: 3600 },
 		);
@@ -175,8 +178,49 @@ function toUnifiedShape(c: CuratedSkill) {
 		tags: c.tags,
 		featured: c.featured,
 		// Inlined SKILL.md for our own kind=skill-md entries; null otherwise.
+		// resolveCuratedContent() fills this in for repo-hosted skills.
 		content: INLINED_SKILL_CONTENT[c.slug] ?? null,
 	};
+}
+
+/**
+ * Resolve a curated skill's SKILL.md body.
+ *
+ * Why this exists: an agent that can LIST our skills but never READ one can
+ * only learn that a workflow exists, not follow it. Content was previously
+ * limited to a two-entry hardcoded map, so every skill in the SCF plugin
+ * answered `content: null` — the reviewer workflow was invisible to any
+ * consumer reaching us over HTTP, Raven included.
+ *
+ * Inlined content still wins (it ships with the deploy and can't fail). For
+ * anything else hosted in a public GitHub repo, fetch the SKILL.md from raw
+ * and cache it for an hour, mirroring how SDF skills already stream in live
+ * from skills.stellar.org. Best-effort by design: a fetch failure returns null,
+ * exactly the behaviour callers already handle, and never fails the request.
+ */
+async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
+	const inlined = INLINED_SKILL_CONTENT[c.slug];
+	if (inlined) return inlined;
+
+	// repository points at the skill's directory, e.g.
+	// https://github.com/<owner>/<repo>/tree/main/skills/<name>
+	const m = c.repository?.match(
+		/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)\/(.+)$/,
+	);
+	if (!m) return null;
+	const [, owner, repo, ref, dir] = m;
+	const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${dir.replace(/\/$/, "")}/SKILL.md`;
+	try {
+		const res = await fetch(raw, {
+			next: { revalidate: 3600 },
+			signal: AbortSignal.timeout(6000),
+		});
+		if (!res.ok) return null;
+		const text = await res.text();
+		return text.trim() || null;
+	} catch {
+		return null;
+	}
 }
 
 async function loadApprovedCommunitySkill(slug: string) {
