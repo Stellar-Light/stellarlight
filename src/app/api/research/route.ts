@@ -22,7 +22,12 @@ import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
 import { EMBEDDING_MODEL, embed } from "@/lib/embed";
-import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import {
+	clampLimit,
+	parseFields,
+	pickFields,
+	unknownParamWarning,
+} from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -94,6 +99,36 @@ export async function GET(req: NextRequest) {
 	}
 
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		[
+			"q",
+			"query",
+			"keyword",
+			"search",
+			"source",
+			"auditor",
+			"protocol",
+			"severity",
+			"limit",
+			"fields",
+		],
+		{
+			advertise: [
+				"q",
+				"source",
+				"auditor",
+				"protocol",
+				"severity",
+				"limit",
+				"fields",
+			],
+			hint: "Research is a semantic corpus: unmatched intents belong in q rather than in a filter.",
+		},
+	);
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -687,6 +722,7 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,

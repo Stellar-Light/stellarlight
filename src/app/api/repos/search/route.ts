@@ -14,7 +14,12 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import {
+	clampLimit,
+	parseFields,
+	pickFields,
+	unknownParamWarning,
+} from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -25,6 +30,27 @@ export const revalidate = 60;
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		[
+			"q",
+			"query",
+			"keyword",
+			"search",
+			"language",
+			"minScore",
+			"limit",
+			"offset",
+			"fields",
+		],
+		{
+			advertise: ["q", "language", "minScore", "limit", "offset", "fields"],
+			hint: "Repo search matches name/description/topics/symbols from q — put language or framework terms in q if the dedicated filter doesn't cover them.",
+		},
+	);
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -64,6 +90,7 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: { q, language: language || null, minScore, limit, offset },
 				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
