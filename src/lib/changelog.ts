@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-23",
+		surfaces: ["api", "mcp"],
+		version: "openapi@1.8.25",
+		type: "added",
+		summary:
+			"searchHackathonBuilds (GET /api/hackathons/builds; scout-mcp search_hackathon_builds) — topic search across EVERY Stellar hackathon submission (DoraHacks buidls), the prototype layer of prior art. Answers 'has anyone already built X at a hackathon?' with each build's event, placement/award, votes, and repo/demo links. Complements searchProjects (shipped products); an empty result is a real whitespace signal.",
+	},
+	{
+		date: "2026-07-23",
 		surfaces: ["api"],
 		version: "openapi@1.8.24",
 		type: "changed",
