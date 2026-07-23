@@ -19,12 +19,19 @@
  *
  * LOCAL RUN ONLY — token from env only, never hardcoded/logged/written.
  */
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isSyntheticQuery } from "../src/lib/improvement-ledger";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "improvements/engine/raven-routing-latest.json");
+// The REAL questions: Engine D mines what consumers actually ask + miss. The
+// engine asks Raven THOSE (ranked by frequency), not only a curated bank.
+const DEMAND = join(
+	ROOT,
+	"improvements/engine/weekly/engine-d-demand-latest.json",
+);
 const URL = process.env.RAVEN_MCP;
 const TOKEN = process.env.RAVEN_TOKEN;
 if (!URL || !TOKEN) {
@@ -38,6 +45,7 @@ if (!URL || !TOKEN) {
  *  Grounded in a live interrogation of Raven's `search`. `expect` lists all ops
  *  that would be a correct route (any one in the top hits = pass). */
 const BANK: Array<{ q: string; expect: string[]; note: string }> = [
+	// ── capability coverage: every scout op should win its natural question ──
 	{
 		q: "biggest stablecoins on Stellar by market cap",
 		expect: ["getStablecoins"],
@@ -97,6 +105,112 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		q: "explain the soroban examples repository",
 		expect: ["explainRepo"],
 		note: "repo explainer",
+	},
+	// ── NEW capability probes (ops never routing-tested before) ──
+	{
+		q: "open RFPs bounties and grants on Stellar",
+		expect: ["getRfps"],
+		note: "RFPs/grants",
+	},
+	{
+		q: "which project categories are most crowded or underbuilt",
+		expect: ["getClusters"],
+		note: "whitespace/clusters",
+	},
+	{
+		q: "ecosystem overview: total projects funding and hackathons",
+		expect: ["analyzeEcosystem"],
+		note: "ecosystem analytics",
+	},
+	{
+		q: "compare the Meridian and Consensus hackathons",
+		expect: ["compareHackathons"],
+		note: "hackathon compare",
+	},
+	{
+		q: "total value locked in Stellar DeFi protocols",
+		expect: ["getLeaderboard", "analyzeEcosystem"],
+		note: "TVL ranking",
+	},
+	{
+		q: "find open source Rust repositories for Soroban",
+		expect: ["searchRepos"],
+		note: "code search",
+	},
+	{
+		q: "how does Soroban authorization work",
+		expect: ["searchResearch"],
+		note: "research/docs corpus",
+	},
+	{
+		q: "what changed recently in the Stellar Scout API",
+		expect: ["getChangelog"],
+		note: "changelog",
+	},
+	{
+		q: "which AI agent skills are available for Stellar",
+		expect: ["listSkills"],
+		note: "skills marketplace",
+	},
+	// ── real demand Raven ACTUALLY gets (from api-usage telemetry) ──
+	{
+		q: "passkey-kit",
+		expect: ["searchProjects"],
+		note: "demand: project by name",
+	},
+	{
+		q: "reflector oracle on Stellar",
+		expect: ["searchProjects"],
+		note: "demand: oracle project",
+	},
+	{
+		q: "octoplace",
+		expect: ["searchProjects"],
+		note: "demand: project by name",
+	},
+	{
+		q: "zk-snark",
+		expect: ["searchRepos", "searchProjects"],
+		note: "demand: tech/repo search (22×)",
+	},
+	{
+		q: "jobs bounties and freelance work for Stellar contributors",
+		expect: ["getRfps"],
+		note: "demand: jobs/bounties (2×)",
+	},
+];
+
+// Adversarial / edge questions — chosen to THROW Raven off: off-topic, no-such-
+// capability, cross-chain, negation, typos. We RECORD what routed (observed, not
+// graded): there's no single "right" scout op, so a scout hit here isn't per se
+// a finding — but a confident scout route to an off-topic/absent-capability
+// question is worth eyeballing (does Raven over-claim, or hand off honestly?).
+const ADVERSARIAL: Array<{ q: string; note: string }> = [
+	{
+		q: "what is the current price of XLM",
+		note: "no price-feed capability — should NOT confidently claim a scout op",
+	},
+	{ q: "tell me about Solana", note: "off-topic (not Stellar)" },
+	{ q: "how do I buy Bitcoin", note: "off-topic" },
+	{
+		q: "compare Ethereum and Stellar total value locked",
+		note: "cross-chain — Ethereum half is out of scope",
+	},
+	{
+		q: "Stellar projects that are NOT funded by SCF",
+		note: "negation — easy to invert",
+	},
+	{
+		q: "sorobon lending protcols",
+		note: "typos — should still fuzzy-route to searchProjects",
+	},
+	{
+		q: "list all Stellar mainnet validators",
+		note: "validator-set capability we don't have",
+	},
+	{
+		q: "who is the CEO of the Stellar Development Foundation",
+		note: "person → getPeople (Denelle Dixon)",
 	},
 ];
 
@@ -231,6 +345,65 @@ async function main() {
 		}
 	}
 
+	// ── DEMAND phase: the questions REAL users ask most and we MISS ──────────────
+	// Not a curated list — the actual high-frequency misses Engine D mined from
+	// api-usage. Ask Raven each: does OUR directory (a scout op) even get REACHED
+	// in the top hits, or does a frequently-asked question route entirely to
+	// docs/lumenloop? A miss here is weighted by how OFTEN it's asked.
+	let demand: Array<{ query: string; hits: number }> = [];
+	try {
+		const dd = JSON.parse(readFileSync(DEMAND, "utf8")) as {
+			misses?: Array<{ query?: string; hits?: number }>;
+		};
+		demand = (dd.misses ?? [])
+			.map((m) => ({ query: String(m.query ?? ""), hits: Number(m.hits ?? 0) }))
+			.filter((m) => m.query && !isSyntheticQuery(m.query))
+			.sort((a, b) => b.hits - a.hits)
+			.slice(0, 15);
+	} catch {}
+	const demandMisses: Array<{ query: string; hits: number; topAll: string[] }> =
+		[];
+	if (demand.length) {
+		console.log(
+			`\n\nraven-routing: demand — ${demand.length} most-asked-and-missed real queries, does OUR directory get reached?`,
+		);
+		for (const d of demand) {
+			const r = await rpc(
+				"tools/call",
+				{ name: "search", arguments: { query: d.query } },
+				sid,
+			);
+			const hits = hitsOf(r.body);
+			const topAll = hits.slice(0, 3).map((h) => h.id);
+			const scoutRank = hits.findIndex((h) => h.service === "scout");
+			const reached = scoutRank >= 0 && scoutRank < TOP_K;
+			if (reached) {
+				process.stdout.write(".");
+			} else {
+				demandMisses.push({ query: d.query, hits: d.hits, topAll });
+				console.log(
+					`\n  ✗ [${d.hits}×] "${d.query.slice(0, 46)}" → ${topAll[0] ?? "none"} (no scout op in top-${TOP_K})`,
+				);
+			}
+		}
+	}
+
+	// ── ADVERSARIAL: questions built to THROW Raven off — observed, not graded ──
+	const adversarial: Array<{ query: string; top: string; note: string }> = [];
+	console.log(
+		`\n\nraven-routing: adversarial — how does Raven route trick questions?`,
+	);
+	for (const a of ADVERSARIAL) {
+		const r = await rpc(
+			"tools/call",
+			{ name: "search", arguments: { query: a.q } },
+			sid,
+		);
+		const top = hitsOf(r.body)[0]?.id ?? "none";
+		adversarial.push({ query: a.q, top, note: a.note });
+		console.log(`  · "${a.q.slice(0, 46)}" → ${top}`);
+	}
+
 	const okRate =
 		graded > 0
 			? Math.round(((graded - misses.length) / graded) * 100) / 100
@@ -243,14 +416,21 @@ async function main() {
 			passed: graded - misses.length,
 			failed: misses.length,
 			lagging: lagging.length,
+			demandChecked: demand.length,
+			demandMissed: demandMisses.length,
 		},
 		okRate,
 		misses,
 		lagging, // cataloged-lag skips — surfaced for context, NOT findings
+		demandMisses, // real high-frequency questions whose answer isn't OUR directory
+		adversarial, // trick questions — observed routing, not graded
 	};
 	writeFileSync(OUT, `${JSON.stringify(artifact, null, "\t")}\n`);
 	console.log(
-		`\n\nraven-routing: ${graded - misses.length}/${graded} questions routed to the right scout op (${okRate * 100}%) · ${misses.length} routing gap(s) · ${lagging.length} skipped (catalog lag)`,
+		`\n\nraven-routing: capability ${graded - misses.length}/${graded} routed (${okRate * 100}%) · ${misses.length} gap(s) · ${lagging.length} lagging`,
+	);
+	console.log(
+		`raven-routing: demand ${demand.length - demandMisses.length}/${demand.length} most-asked queries reach our directory · ${demandMisses.length} don't`,
 	);
 	console.log("  wrote → improvements/engine/raven-routing-latest.json");
 	console.log(

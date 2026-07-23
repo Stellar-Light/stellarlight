@@ -1,7 +1,7 @@
 {
-	"generatedAt": "2026-07-23T01:38:08.372Z",
-	"total": 280,
-	"open": 268,
+	"generatedAt": "2026-07-23T02:37:05.018Z",
+	"total": 290,
+	"open": 278,
 	"closed": 12,
 	"verified": 7,
 	"cleared": 5,
@@ -23,8 +23,8 @@
 		},
 		{
 			"surface": "consumer",
-			"open": 3,
-			"total": 3
+			"open": 13,
+			"total": 13
 		},
 		{
 			"surface": "contract",

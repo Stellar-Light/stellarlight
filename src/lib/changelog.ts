@@ -31,6 +31,14 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-23",
+		surfaces: ["api"],
+		version: "openapi@1.8.24",
+		type: "changed",
+		summary:
+			"searchProjects now describes itself as THE way to look up a specific project by name (not only prior-art/competitor discovery), so a plain project-name question routes to the directory instead of docs/skills.",
+	},
+	{
 		date: "2026-07-21",
 		surfaces: ["api"],
 		version: "openapi@1.8.23",

@@ -304,6 +304,17 @@ const RAVEN_ROUTING_SPEC: SourceSpec = {
 			severity: "medium",
 			probe: (r) => str(r?.query),
 		},
+		{
+			key: "demandMisses",
+			surface: "consumer",
+			mode: "demand-routing-miss",
+			// A question REAL users ask often (Engine D telemetry) whose answer
+			// isn't OUR directory through Raven — high-signal because it's weighted
+			// by real frequency. Medium (same lag caveat), ranked by the ledger's
+			// age/severity; the probe carries the query so waves can target them.
+			severity: "medium",
+			probe: (r) => str(r?.query),
+		},
 	],
 };
 
