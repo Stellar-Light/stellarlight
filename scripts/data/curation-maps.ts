@@ -49,6 +49,41 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://mainnet.blend.capital/",
 		basis: "site-liveness",
 	},
+	// Same refresh class, found 2026-07-23 by sweeping SCF-awarded projects for
+	// "Live but no commit in 500+ days". All three came back as quiet repos, NOT
+	// dead products — which is the whole reason we never mark defunct on repo
+	// staleness. Each site checked directly and serving real content; the labels
+	// were right, the provenance was source-inherited from the 2025-12-17 seed
+	// and had never been verified by anyone.
+	//
+	// Worth noting WHY the repo signal misleads on these: lumenswap/swap-contract,
+	// decafteam/.github and wombat-exchange/v1-core are the only repos we have
+	// linked, and a contract repo or a .github profile repo goes quiet precisely
+	// BECAUSE the thing shipped and stabilised.
+	lumenswap: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		sourceUrl: "https://lumenswap.io/",
+		basis: "site-liveness",
+		note: "Site serves the DEX (title: 'Lumenswap | Decentralized Exchange on Stellar'); linked repo last touched 2024, product is not.",
+	},
+	decaf: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		sourceUrl: "https://decaf.so/",
+		basis: "site-liveness",
+		note: "decaf.so serves the live app; our only linked repo is decafteam/.github, a profile repo, so repo recency says nothing about the product.",
+	},
+	wombat: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-07-23",
+		sourceUrl: "https://wombat.exchange/",
+		basis: "site-liveness",
+		note: "wombat.exchange serves the live app; v1-core is a stable contract repo.",
+	},
 	// Same refresh class: vesseo's row asserted basis source-inherited with
 	// no sourceUrl. vesseoapp.com verified live 2026-07-20 (product landing,
 	// app links, AR/MX/BR/US pages).
