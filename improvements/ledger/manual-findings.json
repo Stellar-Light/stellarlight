@@ -1,0 +1,19 @@
+{
+	"_readme": "Curated findings — structural limits a human observed that NO detector can see. Detectors find things that are wrong; these are things that are MISSING BY CONSTRUCTION (a taxonomy that can't express a category, a guard that can't see a class of drift). Each row carries its own surface/severity and ages through the same lifecycle as detector findings: they auto-clear only via a wave manifest referencing their id, never silently. Keep `probe` stable — it's the finding id.",
+	"findings": [
+		{
+			"probe": "types[] taxonomy has no agentic/AI-infrastructure vertical",
+			"surface": "directory",
+			"severity": "medium",
+			"mode": "taxonomy-cannot-express-category",
+			"detail": "analyzeEcosystem dimension=gaps tallies whitespace by the types[] vertical taxonomy, and there is no agentic / AI-infrastructure vertical in it. So for the fastest-moving category on Stellar (x402 agentic payments, MCP servers, agent wallets, delegated mandates) the gaps engine is STRUCTURALLY BLIND: asked for agentic whitespace across 840 active projects it reported absent=0, unproven=0, underbuilt=1 (\"Faucet\"). That is not a finding of 'no gaps' — it is the engine unable to see the category. The engine's own basis text concedes the limit: a vertical expressed via `category` instead of `types` is 'NOT measurable here and is deliberately excluded'. Evidence: projects like REAPP (x402+AP2 mandates+Soroban enforcement), Stellar AI Agent Kit (SCF r37, $108k) and XBid AI exist and are typed [AI, SDK] / [AI, Payments, SDK] — 'AI' is a coarse tag, not a buildable vertical, so none of them roll up into a measurable agentic vertical. Fix: add agentic verticals to the types[] enum (e.g. Agent-Payments, Agent-Tooling/MCP, Agent-Identity) and re-type the existing AI projects, so whitespace in this category becomes measurable instead of silently empty."
+		},
+		{
+			"probe": "check-raven-drift compares op presence only, not param schemas",
+			"surface": "consumer",
+			"severity": "medium",
+			"mode": "detector-blind-spot",
+			"detail": "The Raven catalog drift guard compares which scout OPS exist in Raven's catalog vs our spec, but never compares each op's PARAMETER schema. So an op that is present-but-stale is invisible to it. Observed live: scout.analyzeEcosystem rejected dimension=\"gaps\" with 'must be one of: all, hackathons, categories, funding, tvl', while our live API's own meta reports validDimensions [all, hackathons, categories, funding, tvl, gaps, developers]. Raven's cataloged schema is stale by exactly the two dimensions we shipped (gaps, developers) — so the purpose-built whitespace tool is unreachable through the consumer path. NOTE (honesty): gaps/developers shipped ~2 days ago, so THIS instance is expected catalog lag within the 10-day grace and is NOT itself drift (feedback_catalog_lag_is_not_drift). The finding is the BLIND SPOT: because the guard only checks op presence, if that enum stayed stale past grace nothing would ever flag it. Fix: extend check-raven-drift.ts to diff per-op param schemas (at minimum enum values) against the spec, with the same grace window as the op-presence check."
+		}
+	]
+}
