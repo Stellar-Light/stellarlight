@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-07-22T23:34:07.579Z",
+	"generatedAt": "2026-07-23T00:04:07.782Z",
 	"total": 278,
-	"open": 278,
-	"closed": 0,
-	"verified": 0,
+	"open": 271,
+	"closed": 7,
+	"verified": 7,
 	"cleared": 0,
-	"closingRate": 0,
+	"closingRate": 0.03,
 	"oldestOpenDays": 0,
-	"inWave": 7,
-	"highOpen": 37,
+	"inWave": 0,
+	"highOpen": 30,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -23,65 +23,65 @@
 		},
 		{
 			"surface": "contract",
-			"open": 8,
+			"open": 1,
 			"total": 8
 		}
 	],
 	"topOpen": [
 		{
-			"id": "engine-e-contract:get-api-projects-search-projects-placementrank",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/projects/search · projects[].placementRank",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-repos-explain-note",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/repos/explain · note",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-repos-explain-note2",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/repos/explain · note2",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-hackathons-meta-fallbackchannels",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/hackathons · meta.fallbackChannels",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-hackathons-slug-meta-filters",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/hackathons/{slug} · meta.filters",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-hackathons-slug-meta-counts",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/hackathons/{slug} · meta.counts",
-			"severity": "high"
-		},
-		{
-			"id": "engine-e-contract:get-api-hackathons-slug-winners-hackathonprize",
-			"surface": "contract",
-			"source": "engine-e-contract",
-			"probe": "GET /api/hackathons/{slug} · winners[].hackathonPrize",
-			"severity": "high"
-		},
-		{
 			"id": "golden-eval:latest-protocol-release",
 			"surface": "retrieval",
 			"source": "golden-eval",
 			"probe": "latest-protocol-release",
+			"severity": "high"
+		},
+		{
+			"id": "golden-eval:capability-custody-identity",
+			"surface": "retrieval",
+			"source": "golden-eval",
+			"probe": "capability-custody-identity",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:test",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "test",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:tyler-van-der-hoeven",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "tyler van der hoeven",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:zk-snark",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "zk-snark",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:strupey",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "strupey",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:justin-rice",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "justin rice",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:tyler",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "tyler",
 			"severity": "high"
 		}
 	]

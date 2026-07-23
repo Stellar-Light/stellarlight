@@ -1,41 +1,42 @@
 {
 	"wave": "contract-overdoc-cleanup",
 	"date": "2026-07-22",
+	"lesson": "reference_optional_absent_is_spec_compliant",
 	"findings": [
 		{
 			"id": "engine-e-contract:get-api-projects-search-projects-placementrank",
-			"status": "in-wave",
-			"note": "spec documents projects[].placementRank but the API returns it in no sampled row — implement it or drop it from the OpenAPI schema"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. placementRank is documented OPTIONAL (not in the schema's required[]); the API emits it only for placed/pinned projects (cold-audit #225), so absence from an unplaced sample is spec-compliant. Fixed the DETECTOR (engine-e now classifies optional-absent as informational `optionalAbsent`, not drift `missingFields`); spec + API unchanged. Re-run: missingFields 0."
 		},
 		{
 			"id": "engine-e-contract:get-api-repos-explain-note",
-			"status": "in-wave",
-			"note": "documented explain `note` absent from responses — remove from spec or populate"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. explain `note` is documented OPTIONAL; the route emits it only on specific answer/error paths, absent otherwise — spec-compliant. Resolved by the detector fix (optional-absent ≠ drift), not a spec/API change."
 		},
 		{
 			"id": "engine-e-contract:get-api-repos-explain-note2",
-			"status": "in-wave",
-			"note": "documented explain `note2` absent from responses — remove from spec or populate"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. explain `note2` is documented OPTIONAL and conditionally emitted; absence is spec-compliant. Resolved by the detector fix."
 		},
 		{
 			"id": "engine-e-contract:get-api-hackathons-meta-fallbackchannels",
-			"status": "in-wave",
-			"note": "meta.fallbackChannels may be conditional (empty-state only) — confirm and either document the condition or drop it"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. meta.fallbackChannels is documented OPTIONAL and emitted ONLY in the empty-state (route.ts ~247/288) — by design absent when hackathons exist. Resolved by the detector fix; the conditional field is real and must stay in the spec."
 		},
 		{
 			"id": "engine-e-contract:get-api-hackathons-slug-meta-filters",
-			"status": "in-wave",
-			"note": "meta.filters documented on the single-hackathon route but absent — drop or implement"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. meta.filters is documented OPTIONAL on the single-hackathon route, conditionally present; absence is spec-compliant. Resolved by the detector fix."
 		},
 		{
 			"id": "engine-e-contract:get-api-hackathons-slug-meta-counts",
-			"status": "in-wave",
-			"note": "meta.counts documented on the single-hackathon route but absent — drop or implement"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. meta.counts is documented OPTIONAL, conditionally present; absence is spec-compliant. Resolved by the detector fix."
 		},
 		{
 			"id": "engine-e-contract:get-api-hackathons-slug-winners-hackathonprize",
-			"status": "in-wave",
-			"note": "winners[].hackathonPrize documented but absent — DoraHacks doesn't expose per-winner prize; drop from spec"
+			"status": "verified",
+			"note": "engine-e FALSE-POSITIVE. winners[].hackathonPrize is documented OPTIONAL and emitted only when DoraHacks exposes a per-winner prize (w.prizeUsd); dropped when undefined — spec-compliant. Resolved by the detector fix; the field is real and correctly optional."
 		}
 	]
 }
