@@ -489,6 +489,74 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
+	// Exact-FIGURE retrieval guarantee — same reasoning as the identifier
+	// guarantee above, for money and other literal numbers.
+	//
+	// A bare figure embeds poorly: "300000" carries almost no semantic signal,
+	// so nearest-neighbour returns unrelated chunks and the page that actually
+	// states the rule never surfaces. Measured 2026-07-23: the handbook says
+	// there is a $300,000 lifetime accumulated funding cap, our corpus holds
+	// that page, and `q=300000` returned nothing containing it while
+	// `q=300,000` found it. For a corpus whose job is answering rules
+	// questions that is the dangerous failure — an empty result reads as
+	// "there is no such rule", so an agent asked "is there a 300000 cap?"
+	// would say no about a rule that exists.
+	//
+	// Source documents write money with separators and people type bare
+	// digits, so match on BOTH spellings. Runs only when the query contains a
+	// 4+ digit number that isn't a year, and never replaces the pool — it
+	// guarantees the stating chunk is IN it.
+	const figures = [...q.matchAll(/\b\$?(\d[\d,]{3,})\b/g)]
+		.map((m) => m[1].replace(/,/g, ""))
+		.filter((n) => !(n.length === 4 && Number(n) >= 1900 && Number(n) <= 2099))
+		.slice(0, 3);
+	if (figures.length) {
+		// both spellings: 300000 and 300,000
+		const spellings = figures.flatMap((n) => [
+			n,
+			n.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+		]);
+		const already = new Set(chunks.map((c) => c.id));
+		try {
+			const direct = await payload.find({
+				collection: "research-docs",
+				where: {
+					and: [
+						{ or: spellings.map((sp) => ({ content: { contains: sp } })) },
+						...(effectiveSource
+							? [{ source: { equals: effectiveSource } }]
+							: []),
+					],
+				},
+				limit: 10,
+				depth: 0,
+			});
+			for (const d of direct.docs as unknown as Array<
+				Record<string, unknown>
+			>) {
+				if (already.has(String(d.id))) continue;
+				chunks.push({
+					id: String(d.id),
+					source: String(d.source),
+					title: String(d.title),
+					section: (d.section as string) ?? null,
+					url: String(d.url),
+					content: String(d.content),
+					chunkIndex: Number(d.chunkIndex ?? 0),
+					publishedAt: (d.publishedAt as string) ?? null,
+					observedAt: (d.observedAt as string) ?? null,
+					auditor: (d.auditor as string) ?? null,
+					protocol: (d.protocol as string) ?? null,
+					severity: (d.severity as string) ?? null,
+					// No score: the chunk literally contains the figure asked
+					// about, which beats any cosine estimate of whether it might.
+				});
+			}
+		} catch {
+			// best-effort, exactly like the identifier guarantee
+		}
+	}
+
 	// Raw Payload row → response row, for the two pool supplements below.
 	interface RawResearchDoc {
 		id: string;
