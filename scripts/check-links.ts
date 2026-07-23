@@ -22,6 +22,16 @@
  * URLs that no longer appear anywhere in the directory get deleted
  * (so the dashboard only shows URLs currently referenced).
  *
+ * Two verdicts, two histories (lessons class 32 — see src/lib/probe-external):
+ *   error   PROVEN broken — 404/410, host does not resolve, connection
+ *           refused. A finding on the first run (consecutiveFailures).
+ *   blocked NO verdict — bot wall, 5xx, timeout, bad certificate. Proves
+ *           nothing on any single run, so it never counts as a failure;
+ *           instead consecutiveUnverifiable tracks the streak and
+ *           UNVERIFIABLE_RUNS_TO_ESCALATE consecutive runs sets needsReview.
+ *           That is how a permanently sick origin still reaches a human
+ *           without a transient 503 being reported as a dead link.
+ *
  * Usage:
  *   pnpm exec tsx scripts/check-links.ts             # report mode only
  *   pnpm exec tsx scripts/check-links.ts --execute   # actually write to DB
@@ -37,7 +47,16 @@ loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
-import { isBotWall } from "../src/lib/probe-external";
+import {
+	type LinkStatus,
+	nextLinkHistory,
+	UNVERIFIABLE_RUNS_TO_ESCALATE,
+} from "../src/lib/link-history";
+import {
+	classifyExternalError,
+	classifyExternalStatus,
+	isBotWall,
+} from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -46,7 +65,7 @@ const TIMEOUT_MS = 10_000;
 const USER_AGENT =
 	"StellarLightLinkChecker/1.0 (+https://stellarlight.xyz; admin@stellarlight.xyz)";
 
-type Status = "ok" | "redirect" | "blocked" | "error";
+type Status = LinkStatus;
 
 interface Target {
 	collection: string;
@@ -317,6 +336,12 @@ async function checkUrl(url: string): Promise<CheckResult> {
 		return summarize(res, url);
 	} catch (err) {
 		const e = err as Error & { code?: string; cause?: unknown };
+		// Class 32: a thrown fetch splits two ways. ENOTFOUND / ECONNREFUSED
+		// means the host is GONE — proven broken on the first run. A timeout or
+		// a bad certificate means we could not look; the cert error in
+		// particular proves a server IS there. Those become `blocked` and are
+		// escalated by streak length, not by a single run.
+		const { verdict } = classifyExternalError(err);
 		let reason: string;
 		if (e.name === "AbortError") {
 			reason = `timeout ${TIMEOUT_MS / 1000}s`;
@@ -329,7 +354,7 @@ async function checkUrl(url: string): Promise<CheckResult> {
 		}
 		return {
 			url,
-			status: "error",
+			status: verdict === "absent" ? "error" : "blocked",
 			statusCode: null,
 			errorReason: reason,
 			redirectTo: null,
@@ -358,13 +383,6 @@ function summarize(res: Response, requestedUrl: string): CheckResult {
 	// it never pollutes the error count — "can't verify" is not "dead".
 	// This file had the idea first; isBotWall now shares the set with every
 	// other detector (src/lib/probe-external, class 32).
-	//
-	// NOTE the deliberate difference from probeExternal: a 5xx stays in `error`
-	// here rather than becoming unverifiable. For a LINK checker, a URL that
-	// serves 500 every day IS a broken link a curator should fix — the right
-	// upgrade is persistence (N consecutive unverifiable runs → finding) using
-	// the LinkChecks history, not a per-probe reclassification. Tracked as
-	// follow-up; do not "fix" this by widening isBotWall.
 	if (isBotWall(res.status)) {
 		return {
 			url,
@@ -382,6 +400,22 @@ function summarize(res: Response, requestedUrl: string): CheckResult {
 			statusCode: res.status,
 			errorReason: null,
 			redirectTo: location ? new URL(location, url).href : null,
+		};
+	}
+	// A 5xx is the ORIGIN failing, not the link being wrong — one run proves
+	// nothing (class 32). It joins the bot walls in `blocked`, and the streak
+	// counter escalates it: a URL nobody could verify for
+	// UNVERIFIABLE_RUNS_TO_ESCALATE consecutive days sets `needsReview`, so a
+	// permanently sick origin still reaches a human instead of resting at
+	// "blocked" forever. Only a verdict of `absent` (404/410 here) is an error
+	// on sight.
+	if (classifyExternalStatus(res.status) !== "absent") {
+		return {
+			url,
+			status: "blocked",
+			statusCode: res.status,
+			errorReason: `server-error HTTP ${res.status}`,
+			redirectTo: null,
 		};
 	}
 	return {
@@ -450,9 +484,9 @@ async function main() {
 	console.log(`  ok:       ${ok}`);
 	console.log(`  redirect: ${redirect}`);
 	console.log(
-		`  blocked:  ${blocked} (bot-protection — unverifiable, not dead)`,
+		`  blocked:  ${blocked} (no verdict this run — bot wall / 5xx / timeout / bad cert)`,
 	);
-	console.log(`  error:    ${error}\n`);
+	console.log(`  error:    ${error} (proven broken — 404/410/DNS/refused)\n`);
 
 	if (error > 0) {
 		console.log(`Errors:`);
@@ -461,6 +495,53 @@ async function main() {
 				? `HTTP ${r.statusCode}`
 				: (r.errorReason ?? "unknown");
 			console.log(`  ${code.padEnd(20)} ${r.url}`);
+			for (const t of r.targets) {
+				console.log(`      ↳ ${t.collection}/${t.recordSlug}.${t.field}`);
+			}
+		}
+		console.log("");
+	}
+
+	// Class 32 escalation: no single unverifiable probe is a finding, but a URL
+	// nobody has been able to verify for UNVERIFIABLE_RUNS_TO_ESCALATE runs is.
+	// Read the stored streaks so the DRY RUN reports this too — otherwise the
+	// escalation would only ever be visible after a write.
+	const blockedResults = results.filter((r) => r.status === "blocked");
+	const streaks = new Map<string, number>();
+	if (blockedResults.length > 0) {
+		try {
+			const prior = await payload.find({
+				collection: "link-checks" as any,
+				where: { url: { in: blockedResults.map((r) => r.url) } },
+				limit: blockedResults.length,
+				depth: 0,
+			});
+			for (const d of prior.docs as Array<{
+				url: string;
+				consecutiveUnverifiable?: number;
+			}>)
+				streaks.set(d.url, d.consecutiveUnverifiable ?? 0);
+		} catch (err) {
+			// A read failure must not sink the run; the streaks are reporting only.
+			console.warn(`  (streak lookup skipped: ${(err as Error).message})`);
+		}
+	}
+	const escalated = blockedResults
+		.map((r) => ({ r, runs: (streaks.get(r.url) ?? 0) + 1 }))
+		.filter(({ runs }) => runs >= UNVERIFIABLE_RUNS_TO_ESCALATE)
+		.sort((a, b) => b.runs - a.runs);
+
+	if (escalated.length > 0) {
+		console.log(
+			`Persistently unverifiable (≥${UNVERIFIABLE_RUNS_TO_ESCALATE} consecutive runs) — THESE ARE FINDINGS:`,
+		);
+		console.log(
+			`  Not proven broken, but nobody has known their state for that many runs.\n`,
+		);
+		for (const { r, runs } of escalated) {
+			console.log(
+				`  ${String(`${runs} runs`).padEnd(10)} ${(r.errorReason ?? "unknown").padEnd(24)} ${r.url}`,
+			);
 			for (const t of r.targets) {
 				console.log(`      ↳ ${t.collection}/${t.recordSlug}.${t.field}`);
 			}
@@ -492,22 +573,12 @@ async function main() {
 					consecutiveFailures: number;
 					firstFailedAt?: string | null;
 					lastSuccessAt?: string | null;
+					consecutiveUnverifiable?: number;
+					firstUnverifiableAt?: string | null;
 			  }
 			| undefined;
 
-		const isFailingNow = r.status === "error";
-		const wasFailing = prev && prev.status !== "ok";
-
-		const consecutiveFailures = isFailingNow
-			? (prev?.consecutiveFailures ?? 0) + 1
-			: 0;
-		const firstFailedAt = isFailingNow
-			? wasFailing
-				? (prev?.firstFailedAt ?? now.toISOString())
-				: now.toISOString()
-			: null;
-		const lastSuccessAt =
-			r.status === "ok" ? now.toISOString() : (prev?.lastSuccessAt ?? null);
+		const h = nextLinkHistory(prev, r.status, now);
 
 		const data = {
 			url: r.url,
@@ -517,9 +588,12 @@ async function main() {
 			statusCode: r.statusCode ?? null,
 			errorReason: r.errorReason ?? null,
 			redirectTo: r.redirectTo ?? null,
-			consecutiveFailures,
-			firstFailedAt: firstFailedAt ?? null,
-			lastSuccessAt: lastSuccessAt ?? undefined,
+			consecutiveFailures: h.consecutiveFailures,
+			firstFailedAt: h.firstFailedAt,
+			lastSuccessAt: h.lastSuccessAt ?? undefined,
+			consecutiveUnverifiable: h.consecutiveUnverifiable,
+			firstUnverifiableAt: h.firstUnverifiableAt,
+			needsReview: h.needsReview,
 			lastChecked: now.toISOString(),
 			targets: r.targets.map((t) => ({
 				collection: t.collection,
