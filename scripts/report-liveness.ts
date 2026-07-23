@@ -10,8 +10,18 @@
  * curate-projects.ts, grounded in each project's own materials.
  *
  * Signals (each independently weak; the shortlist requires ≥2):
- *   WEB   website dead — DNS failure, timeout, HTTP 404/410/5xx.
- *         403/401/429 count as ALIVE (bot walls prove a server exists).
+ *   WEB   website dead — the host does not resolve or refuses connections, or
+ *         it answers 404/410. Everything else that ISN'T a clean response —
+ *         5xx, timeout, EAI_AGAIN, invalid TLS cert — is UNVERIFIABLE and
+ *         contributes NO death signal (class 32; see src/lib/probe-external).
+ *         Until 2026-07-23 this counted 5xx/timeout/EAI_AGAIN/bad-cert as
+ *         positive evidence of death, on a report whose entire purpose is
+ *         deciding what to demote — precision over recall, so they now don't.
+ *         Bot walls (403/401/429) moved from "alive" to "unverifiable" in the
+ *         same change: a Cloudflare challenge proves a SERVER answers, not that
+ *         the product lives. No effect on the shortlist (neither state emits a
+ *         signal) — they just now show up in the unverifiable list instead of
+ *         silently passing as healthy.
  *   CODE  no dated activity signal at all, or newest (lastActivityAt,
  *         tvlAsOf) older than 365d.
  *   TVL   DeFi-typed record tracked by DefiLlama at < $5,000 TVL — the
@@ -19,6 +29,8 @@
  *
  * API-driven (public endpoints only) — no DB credentials, run anywhere.
  */
+
+import { probeExternal } from "../src/lib/probe-external";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -59,41 +71,25 @@ async function pageAll(pathBase: string): Promise<any[]> {
 
 type WebResult = { state: "alive" | "dead" | "unknown"; detail: string };
 
+/** Death evidence comes from probeExternal's `absent` verdict ONLY — the host
+ * failing to resolve / refusing the connection, or answering 404/410. A server
+ * that is broken, slow, walled or presenting a bad cert proves a server EXISTS
+ * or proves nothing; either way it is `unknown` and adds no signal here. */
 async function probeSite(url: string): Promise<WebResult> {
-	const ctrl = new AbortController();
-	const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
-	try {
-		// GET, not HEAD — a surprising number of small sites 405 on HEAD.
-		const res = await fetch(url, {
-			method: "GET",
-			redirect: "follow",
-			signal: ctrl.signal,
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (compatible; StellarLightLivenessReport/1.0; +https://stellarlight.xyz)",
-			},
-		});
-		if (
-			res.ok ||
-			res.status === 403 ||
-			res.status === 401 ||
-			res.status === 429
-		)
-			return { state: "alive", detail: `HTTP ${res.status}` };
-		if (res.status === 404 || res.status === 410 || res.status >= 500)
-			return { state: "dead", detail: `HTTP ${res.status}` };
-		return { state: "unknown", detail: `HTTP ${res.status}` };
-	} catch (e) {
-		const msg = String((e as Error).cause ?? (e as Error).message);
-		// DNS death is the strongest dead signal; timeout slightly weaker but
-		// after 12s with redirects followed, still a real signal.
-		if (/ENOTFOUND|EAI_AGAIN|certificate/i.test(msg))
-			return { state: "dead", detail: "DNS/TLS failure" };
-		if (/abort/i.test(msg)) return { state: "dead", detail: "timeout" };
-		return { state: "unknown", detail: msg.slice(0, 60) };
-	} finally {
-		clearTimeout(timer);
-	}
+	// GET, not HEAD — a surprising number of small sites 405 on HEAD.
+	const p = await probeExternal(url, {
+		method: "GET",
+		timeoutMs: TIMEOUT_MS,
+		userAgent:
+			"Mozilla/5.0 (compatible; StellarLightLivenessReport/1.0; +https://stellarlight.xyz)",
+	});
+	const state =
+		p.verdict === "present"
+			? "alive"
+			: p.verdict === "absent"
+				? "dead"
+				: "unknown";
+	return { state, detail: p.detail };
 }
 
 async function main() {
@@ -189,6 +185,13 @@ async function main() {
 		(r) => r.web.state === "dead" && r.signals.length === 1,
 	);
 	const tvlOnly = rows.filter((r) => r.tvlZombie && r.signals.length === 1);
+	// Class 32: unverifiable gets its own column so it can never be read as
+	// health. These sites answered SOMETHING we couldn't classify (5xx, timeout,
+	// bot wall, bad cert) — before 2026-07-23 several of these shapes silently
+	// counted as death signals.
+	const webUnverifiable = rows.filter(
+		(r) => r.website && r.web.state === "unknown",
+	);
 
 	if (JSON_OUT) {
 		console.log(
@@ -198,6 +201,10 @@ async function main() {
 					shortlist,
 					webDeadOnly: webDeadOnly.map((r) => r.slug),
 					tvlOnly: tvlOnly.map((r) => r.slug),
+					webUnverifiable: webUnverifiable.map((r) => ({
+						slug: r.slug,
+						detail: r.web.detail,
+					})),
 				},
 				null,
 				1,
@@ -228,6 +235,14 @@ async function main() {
 	console.log(
 		`- TVL < $${TVL_FLOOR_USD} only (${tvlOnly.length}): ${tvlOnly.map((r) => r.slug).join(", ")}`,
 	);
+	console.log(
+		`\n## Unverifiable websites (${webUnverifiable.length}) — NOT a death signal\n`,
+	);
+	console.log(
+		"Server error, timeout, bot wall or bad certificate: the probe proved nothing either way, so these contribute NO signal above. Listed so the absence is visible rather than silent.\n",
+	);
+	for (const r of webUnverifiable)
+		console.log(`- ${r.slug} — ${r.web.detail} (${r.website})`);
 }
 
 main().catch((e) => {
