@@ -574,6 +574,52 @@ async function main() {
 	//     "semantic" (never "strict"/"majority" over pure guesses) and no
 	//     via:"semantic" row scoring above the 0.7 cap / "high" label. Guards
 	//     the confident-wrong-answer class for agent consumers.
+	// ---- A count must not depend on the page size ----
+	// q=evm answered total 91 at limit=10 and total 86 at limit=100 — same
+	// query, same data. The shadow-fold correction was computed on the PAGE and
+	// subtracted from the WHOLE-set count, so the number moved with `limit`.
+	// "How many X are there" is one of the most common agent questions; an
+	// answer that changes with an unrelated param is worse than no answer.
+	console.log("\n── counts.total is limit-invariant ──");
+	for (const probe of ["evm", "anchor", "wallet"]) {
+		try {
+			const totals = await Promise.all(
+				[10, 50, 100].map(async (n) => {
+					const d = await j(
+						`/api/projects/search?q=${encodeURIComponent(probe)}&limit=${n}`,
+					);
+					return { n, total: d?.meta?.counts?.total ?? null };
+				}),
+			);
+			const distinct = [...new Set(totals.map((t) => t.total))];
+			if (distinct.length === 1)
+				ok(
+					`counts.total stable for "${probe}" (${distinct[0]} at every limit)`,
+				);
+			else
+				bad(
+					`counts.total varies with limit ("${probe}")`,
+					`${totals.map((t) => `limit=${t.n}→${t.total}`).join(", ")} — a count that moves with page size is not a count`,
+				);
+			// …and at a limit that holds the whole set, total must equal what you
+			// actually got. Stability alone could be stably wrong.
+			const full = await j(
+				`/api/projects/search?q=${encodeURIComponent(probe)}&limit=100`,
+			);
+			const t = full?.meta?.counts?.total ?? 0;
+			const served = (full?.projects ?? []).length;
+			if (t <= 100 && t !== served)
+				bad(
+					`counts.total disagrees with the served page ("${probe}")`,
+					`total=${t} but limit=100 served ${served} row(s) — with the whole set on one page these must match`,
+				);
+			else if (t <= 100)
+				ok(`counts.total equals the served set for "${probe}"`);
+		} catch (e) {
+			bad(`counts.total invariant ("${probe}")`, `fetch failed: ${String(e)}`);
+		}
+	}
+
 	console.log("\n── Semantic-fallback honesty ──");
 	// Queries with no keyword hit in the directory — they exercise the
 	// zero-keyword rescue rung. If a probe starts keyword-matching (record

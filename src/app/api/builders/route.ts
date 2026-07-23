@@ -556,6 +556,23 @@ export async function GET(req: NextRequest) {
 				matchBasis:
 					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name).",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
+				// sls-025 shape, ported from /api/repos/search: a zero-result page
+				// says exactly what WAS searched. `strupey` was the 4th-most-asked
+				// query on this endpoint (17 real hits in 14d) and answered `[]`
+				// with no signal — which an agent reads as "no such person",
+				// though the only honest claim is "not in these two indexes".
+				...(q && builders.length === 0
+					? {
+							searched: {
+								tokens: q.split(/\s+/).filter(Boolean),
+								indexes: [
+									"builder profiles (Stellar Passport: displayName, githubUsername, bio, roleTitle, projects)",
+									"code-derived owners (GitHub logins owning indexed Stellar repos, no profile required)",
+								],
+								note: "0 builders matched. Both identity paths were searched — the curated profile index AND the code-derived owner index — including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
+							},
+						}
+					: {}),
 			},
 			builders: builders.map((b) => pickFields(b, fieldsWanted)),
 		},

@@ -795,6 +795,9 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let totalMatching = 0;
+	/** Lineage shadows dropped by the fold, counted over the FULL match set so
+	 * `total` is the same number at every `limit` (see the assignment site). */
+	let foldedFromTotal = 0;
 	let projects: ProjectRow[] = [];
 	let matchMode: "strict" | "loose-1" | "majority" | "semantic" | "all" = "all";
 	// Audit rollup (Raven cold-agent finding, 2026-07-20; hoisted 2026-07-21):
@@ -1375,6 +1378,25 @@ export async function GET(req: NextRequest) {
 			}
 
 			totalMatching = projects.length;
+			// A count must not depend on how many rows you asked for. The
+			// shadow-fold below drops a lineage shadow whose canonical is ALSO in
+			// the results, but it runs on the page — so `total` was corrected by
+			// however many folds happened to land on THIS page: q=evm reported
+			// total 91 at limit=10 and total 86 at limit=100, same query, same
+			// data. 86 is the honest number (at limit=100 the whole set is one
+			// page, so every fold is visible).
+			//
+			// The drop condition is decidable here, over the FULL set, with no
+			// extra query: a shadow is dropped exactly when its canonical is
+			// already among the matches. (A shadow whose canonical is absent gets
+			// SWAPPED for it — still one row, so it does not change the count.)
+			const matchedSlugs = new Set(projects.map((p) => p.slug));
+			foldedFromTotal = projects.filter(
+				(p) =>
+					p.canonicalSlug &&
+					p.canonicalSlug !== p.slug &&
+					matchedSlugs.has(p.canonicalSlug),
+			).length;
 			projects = projects.slice(offset, offset + limit);
 
 			// Re-populate logo + hackathon for ONLY the returned page. The
@@ -1928,8 +1950,11 @@ export async function GET(req: NextRequest) {
 	// total >= returned (totalMatching >= projects.length is guaranteed — it is
 	// the pre-slice count set just before the offset/limit slice).
 	const returnedCount = projectsWithOrg.length;
-	const foldRemoved = projects.length + semanticAdds.length - returnedCount;
-	const totalCount = totalMatching + semanticAdds.length - foldRemoved;
+	// `returned` is the served array; `total` is the full match set minus the
+	// folds counted over that WHOLE set (foldedFromTotal, computed pre-slice) —
+	// not minus the folds that happened to land on this page, which made the
+	// same query report a different total at a different limit.
+	const totalCount = totalMatching + semanticAdds.length - foldedFromTotal;
 
 	logApiHit({
 		req,
