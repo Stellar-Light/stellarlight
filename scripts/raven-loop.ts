@@ -371,34 +371,56 @@ async function main() {
 	const DEPTH =
 		/`[^`\n]{2,}`|[\w-]+\/[\w./-]+\.(?:rs|ts|tsx|js)|\b[a-z_]\w*\(\)/i;
 	const codeMisses: Array<{ query: string; repo: string; reason: string }> = [];
+	// DeepWiki simply hasn't indexed some repos. The explain route now STATES that
+	// (`answered:false` + note2) instead of returning an empty string, so this is a
+	// known upstream coverage gap — recorded for visibility, NOT a quality finding
+	// against our answer (that distinction is the whole point: don't manufacture a
+	// "shallow answer" defect out of an external index gap).
+	const codeNoCoverage: Array<{ query: string; repo: string }> = [];
 	let codeChecked = 0;
 	console.log(
 		`\n\nraven-loop: code-depth — ${CODE_PROBES.length} explainRepo deep-dives, file-level answer?`,
 	);
 	for (const p of CODE_PROBES) {
 		codeChecked++;
-		const code = `const r = await scout.explainRepo({q:${JSON.stringify(p.q)}}); return r && r.ok ? String((r.data && (r.data.answer||r.data.summary)) || "") : ("ERR:"+(r&&r.error&&r.error.message||"no-ok"));`;
-		let ans = "";
+		const code = `const r = await scout.explainRepo({q:${JSON.stringify(p.q)}}); const d=(r&&r.data)||{}; return r && r.ok ? JSON.stringify({answered:!!d.answered,answer:String(d.answer||"")}) : ("ERR:"+(r&&r.error&&r.error.message||"no-ok"));`;
+		let raw = "";
 		try {
-			ans = await execute(session, code);
+			raw = await execute(session, code);
 		} catch {
-			ans = "ERR:throw";
+			raw = "ERR:throw";
 		}
-		if (ans.startsWith("ERR:")) {
+		let answered = false;
+		let ans = "";
+		if (!raw.startsWith("ERR:")) {
+			try {
+				const j = JSON.parse(raw.split("\n")[0] ?? "{}");
+				answered = !!j.answered;
+				ans = String(j.answer ?? "");
+			} catch {
+				raw = "ERR:unparseable";
+			}
+		}
+		if (raw.startsWith("ERR:")) {
 			codeMisses.push({
 				query: p.q,
 				repo: p.repo,
-				reason: "explainRepo errored / no answer",
+				reason: "explainRepo errored",
 			});
 			console.log(`\n  ✗ [error] ${p.repo}: ${p.q.slice(0, 46)}`);
+		} else if (!answered) {
+			codeNoCoverage.push({ query: p.q, repo: p.repo });
+			console.log(
+				`\n  · [no-coverage] ${p.repo}: DeepWiki has no answer — stated, not silent`,
+			);
 		} else if (ans.trim().length < 120 || !DEPTH.test(ans)) {
 			codeMisses.push({
 				query: p.q,
 				repo: p.repo,
-				reason: "answer lacks file/function-level depth",
+				reason: "answered but no file/function-level depth",
 			});
 			console.log(
-				`\n  ✗ [shallow] ${p.repo}: no code-path/identifier in answer`,
+				`\n  ✗ [shallow] ${p.repo}: answered without a code path/identifier`,
 			);
 		} else {
 			process.stdout.write(".");
@@ -420,10 +442,12 @@ async function main() {
 		demandDeadends,
 		code: {
 			checked: codeChecked,
-			passed: codeChecked - codeMisses.length,
+			passed: codeChecked - codeMisses.length - codeNoCoverage.length,
 			misses: codeMisses.length,
+			noCoverage: codeNoCoverage.length, // upstream DeepWiki gap, stated not silent
 		},
 		codeMisses,
+		codeNoCoverage,
 	};
 	writeFileSync(OUT, `${JSON.stringify(artifact, null, "\t")}\n`);
 	console.log(
@@ -436,7 +460,7 @@ async function main() {
 	}
 	if (codeChecked) {
 		console.log(
-			`raven-loop: code-depth ${codeChecked - codeMisses.length}/${codeChecked} explainRepo answers carried file-level depth · ${codeMisses.length} shallow`,
+			`raven-loop: code-depth ${codeChecked - codeMisses.length - codeNoCoverage.length}/${codeChecked} answers carried file-level depth · ${codeMisses.length} shallow · ${codeNoCoverage.length} no DeepWiki coverage (stated)`,
 		);
 	}
 	console.log(`  wrote → improvements/engine/raven-loop-latest.json`);
