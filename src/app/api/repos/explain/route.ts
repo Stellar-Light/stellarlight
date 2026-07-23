@@ -200,6 +200,46 @@ export async function GET(req: NextRequest) {
 	}
 
 	const dw = await askDeepWiki(repo, q);
+	// DeepWiki can return a RESPONSE whose answer is an empty string (the repo
+	// isn't indexed there yet) — `!!dw` then reports `answered: true` with
+	// `answer: ""`, a silent dead-end that's strictly worse than a stated
+	// failure, and it suppresses note2. Treat a blank answer as unanswered so
+	// `answered` stays honest and the caller gets the explanation; codeVerified
+	// below still carries real code-derived facts about the routed repo.
+	const dwAnswer = dw?.answer?.trim() ? dw.answer : null;
+
+	// DeepWiki doesn't index every repo — but WE scanned these repos precisely so
+	// an uncovered one still gets a CODE-GROUNDED answer instead of a shrug. When
+	// DeepWiki is blank, synthesize from our own source scan (symbols, SDK
+	// version, deployability, mainnet id) and label the provenance via
+	// `answerSource`, so a consumer can always tell a DeepWiki mechanism
+	// walkthrough from our scan-derived facts. Both are real; they answer
+	// different depths of the question.
+	let scanAnswer: string | null = null;
+	if (!dwAnswer && codeVerified) {
+		const cv = codeVerified;
+		const bits: string[] = [
+			`DeepWiki hasn't indexed \`${repo}\`, so this answer is grounded in StellarLight's own source scan${cv.scannedAt ? ` (${cv.scannedAt.slice(0, 10)})` : ""} rather than a DeepWiki walkthrough.`,
+			`\`${repo}\` is ${cv.isDeployableContract ? "a deployable Soroban contract" : "Stellar-related code (its product is not a deployable contract)"}${cv.sorobanSdkVersion ? ` built on soroban-sdk \`${cv.sorobanSdkVersion}\`${cv.versionStatus ? ` (${cv.versionStatus})` : ""}` : ""}.`,
+		];
+		if (cv.stellarProof) bits.push(`Code-verified: ${cv.stellarProof}.`);
+		if (cv.symbols.length)
+			bits.push(
+				`Scanned entry points: ${cv.symbols
+					.slice(0, 12)
+					.map((s) => `\`${s}\``)
+					.join(", ")}.`,
+			);
+		if (cv.sdkCapabilities.length)
+			bits.push(`SDK capabilities: ${cv.sdkCapabilities.join(", ")}.`);
+		if (cv.mainnetContractId)
+			bits.push(`Deployed on mainnet as \`${cv.mainnetContractId}\`.`);
+		bits.push(
+			`For the full mechanism, read the source at https://github.com/${repo}.`,
+		);
+		scanAnswer = bits.join(" ");
+	}
+	const finalAnswer = dwAnswer ?? scanAnswer;
 
 	return NextResponse.json(
 		{
@@ -207,7 +247,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				note: "Repo routed by the StellarLight canonical/repo index; answer grounded by DeepWiki (deepwiki.com). Cite repoUrl as the source of truth; the answer is AI-generated from the repo and should be verified against the code for anything safety-critical.",
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
 			},
 			q,
 			repo,
@@ -221,18 +261,26 @@ export async function GET(req: NextRequest) {
 			alternateRepos: canon.filter(
 				(r) => r.toLowerCase() !== repo.toLowerCase(),
 			),
-			answer: dw?.answer ?? null,
-			answered: !!dw,
+			answer: finalAnswer,
+			answered: !!finalAnswer,
+			// Provenance, always explicit: a DeepWiki mechanism walkthrough vs our
+			// own source scan. They answer different depths — never let a consumer
+			// mistake scan-derived facts for a code walkthrough (or vice versa).
+			answerSource: dwAnswer
+				? "deepwiki"
+				: scanAnswer
+					? "stellarlight-code-scan"
+					: null,
 			sources: {
 				repoUrl: `https://github.com/${repo}`,
 				deepWikiUrl: `https://deepwiki.com/${repo}`,
 				deepWikiSearchUrl: dw?.searchUrl ?? null,
 			},
-			...(dw
+			...(finalAnswer
 				? {}
 				: {
 						note2:
-							"DeepWiki had no answer (repo not indexed, or the service was briefly unavailable). The routed repo above is still the authoritative source — read it directly or retry.",
+							"DeepWiki has no answer for this repo (not indexed there yet, or briefly unavailable) AND it hasn't been code-scanned by us yet, so there is no grounded answer to give — `answer` is null rather than an empty string, making this a stated gap, not a silent one. The routed repo above is still the authoritative source: read it directly, or retry once the code scan lands.",
 					}),
 		},
 		{

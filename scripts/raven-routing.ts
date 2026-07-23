@@ -235,9 +235,15 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		note: "code: concept/docs",
 	},
 	{
-		q: "submit a Stellar transaction with the JavaScript SDK",
-		expect: ["searchResearch", "searchRepos"],
-		note: "code: how-to guide",
+		// NOT "how do I submit a tx with the JS SDK" — that phrasing correctly
+		// routes to stellarDocs.search_sdk_cli_tools_docs (Stellar's OWN SDK docs
+		// are the best source for using the official SDK, and that isn't a scout
+		// op). Expecting our op to beat the official docs there was a mis-specified
+		// probe. The scout-owned version of the question is "find me the example
+		// CODE", which is what searchRepos exists for.
+		q: "find a JavaScript example repo for building and submitting a Stellar transaction",
+		expect: ["searchRepos"],
+		note: "code: JS example repo (how-to phrasing belongs to stellarDocs)",
 	},
 ];
 
