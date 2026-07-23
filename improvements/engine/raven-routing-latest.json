@@ -1,13 +1,15 @@
 {
-	"generatedAt": "2026-07-23T01:34:25.101Z",
+	"generatedAt": "2026-07-23T02:31:06.446Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
-		"graded": 8,
-		"passed": 5,
-		"failed": 3,
-		"lagging": 4
+		"graded": 22,
+		"passed": 15,
+		"failed": 7,
+		"lagging": 4,
+		"demandChecked": 15,
+		"demandMissed": 6
 	},
-	"okRate": 0.63,
+	"okRate": 0.68,
 	"misses": [
 		{
 			"query": "what wallets support Stellar",
@@ -41,6 +43,46 @@
 				"searchRepos"
 			],
 			"note": "activity leaderboard"
+		},
+		{
+			"query": "passkey-kit",
+			"expect": [
+				"searchProjects"
+			],
+			"topScout": [
+				"listSkills",
+				"searchRepos",
+				"getBuilders"
+			],
+			"note": "demand: project by name"
+		},
+		{
+			"query": "reflector oracle on Stellar",
+			"expect": [
+				"searchProjects"
+			],
+			"topScout": [
+				"searchResearch"
+			],
+			"note": "demand: oracle project"
+		},
+		{
+			"query": "octoplace",
+			"expect": [
+				"searchProjects"
+			],
+			"topScout": [],
+			"note": "demand: project by name"
+		},
+		{
+			"query": "jobs bounties and freelance work for Stellar contributors",
+			"expect": [
+				"getRfps"
+			],
+			"topScout": [
+				"getBuilders"
+			],
+			"note": "demand: jobs/bounties (2×)"
 		}
 	],
 	"lagging": [
@@ -67,6 +109,92 @@
 			"expect": [
 				"listAudits"
 			]
+		}
+	],
+	"demandMisses": [
+		{
+			"query": "kutana",
+			"hits": 3,
+			"topAll": []
+		},
+		{
+			"query": "tomer weller",
+			"hits": 3,
+			"topAll": [
+				"lumenloop.find_av_passages",
+				"lumenloop.find_content_about_project",
+				"lumenloop.find_content_by_entity"
+			]
+		},
+		{
+			"query": "kalepail",
+			"hits": 3,
+			"topAll": []
+		},
+		{
+			"query": "8004",
+			"hits": 3,
+			"topAll": []
+		},
+		{
+			"query": "tell me about solana",
+			"hits": 2,
+			"topAll": [
+				"lumenloop.find_content_about_project",
+				"stellarDocs.search_meeting_notes",
+				"skills.lumenloop.stellar-ecosystem-digest"
+			]
+		},
+		{
+			"query": "is blend audited and by who?",
+			"hits": 2,
+			"topAll": [
+				"lumenloop.find_content_by_entity",
+				"lumenloop.list_documents",
+				"lumenloop.search_directory"
+			]
+		}
+	],
+	"adversarial": [
+		{
+			"query": "what is the current price of XLM",
+			"top": "scout.searchResearch",
+			"note": "no price-feed capability — should NOT confidently claim a scout op"
+		},
+		{
+			"query": "tell me about Solana",
+			"top": "lumenloop.find_content_about_project",
+			"note": "off-topic (not Stellar)"
+		},
+		{
+			"query": "how do I buy Bitcoin",
+			"top": "stellarDocs.search_doc_titles",
+			"note": "off-topic"
+		},
+		{
+			"query": "compare Ethereum and Stellar total value locked",
+			"top": "scout.compareHackathons",
+			"note": "cross-chain — Ethereum half is out of scope"
+		},
+		{
+			"query": "Stellar projects that are NOT funded by SCF",
+			"top": "scout.searchProjects",
+			"note": "negation — easy to invert"
+		},
+		{
+			"query": "sorobon lending protcols",
+			"top": "scout.getClusters",
+			"note": "typos — should still fuzzy-route to searchProjects"
+		},
+		{
+			"query": "list all Stellar mainnet validators",
+			"top": "stellarDocs.search_docs",
+			"note": "validator-set capability we don't have"
+		},
+		{
+			"query": "who is the CEO of the Stellar Development Foundation",
+			"top": "skills.lumenloop.stellar-ecosystem-scout",
+			"note": "person → getPeople (Denelle Dixon)"
 		}
 	]
 }

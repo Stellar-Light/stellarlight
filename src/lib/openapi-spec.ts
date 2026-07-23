@@ -232,9 +232,10 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "searchProjects",
 				tags: ["Projects"],
-				summary: "Search Stellar projects (prior art / competitor lookup)",
+				summary:
+					"Search Stellar projects — look up a project by name, or find prior art / competitors",
 				description:
-					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
+					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Directory lookup of built Stellar projects/products — status, SCF funding, builder, links. Keyword+synonym ranked by prominence/verification/funding/Live status, semantic fallback when keyword hits are thin.",
@@ -248,6 +249,10 @@ export const spec: OpenAPISpec = {
 						"companies",
 						"startups",
 						"directory",
+						"look up a project by name",
+						"find a specific project",
+						"named project",
+						"project by name",
 						"market map",
 						"on-chain activity",
 						"public goods",
@@ -4453,12 +4458,16 @@ export const spec: OpenAPISpec = {
 				description:
 					"One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
 				properties: {
-					ticker: { type: "string", description: "Asset code (USDC, USDY, GYEN, …)." },
+					ticker: {
+						type: "string",
+						description: "Asset code (USDC, USDY, GYEN, …).",
+					},
 					name: { type: "string", nullable: true },
 					issuer: {
 						type: "string",
 						nullable: true,
-						description: "Stellar issuer account (G…) — the universal join key.",
+						description:
+							"Stellar issuer account (G…) — the universal join key.",
 					},
 					issuerDomain: { type: "string", nullable: true },
 					company: { type: "string", nullable: true },
@@ -4507,7 +4516,8 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						format: "date-time",
 						nullable: true,
-						description: "When this snapshot row was refreshed (dated-metrics rule).",
+						description:
+							"When this snapshot row was refreshed (dated-metrics rule).",
 					},
 				},
 			},

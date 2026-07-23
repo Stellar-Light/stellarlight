@@ -58,8 +58,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Search Stellar projects (prior art / competitor lookup)
-         * @description Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. Answers 'who/what already exists for X' with directory records; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.
+         * Search Stellar projects — look up a project by name, or find prior art / competitors
+         * @description Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.
          */
         get: operations["searchProjects"];
         put?: never;
