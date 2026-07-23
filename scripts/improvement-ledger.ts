@@ -284,6 +284,29 @@ const RAVEN_LOOP_SPEC: SourceSpec = {
 	],
 };
 
+// The routing-accuracy eval (scripts/raven-routing.ts) — asks Raven's `search`
+// tool a real user's NATURAL question and checks the RIGHT scout op ranks. Only
+// misses on ALREADY-cataloged ops are emitted (the eval skips lagging ops), so
+// a finding here means the op exists in Raven's index but the question doesn't
+// reach it — a description/ranking gap on the consumer path.
+const RAVEN_ROUTING_SPEC: SourceSpec = {
+	source: "raven-routing",
+	file: "raven-routing-latest.json",
+	dir: ENGINE,
+	arrays: [
+		{
+			key: "misses",
+			surface: "consumer",
+			mode: "routing-miss",
+			// Medium: the user still gets an answer (from a fallback op), just not
+			// our purpose-built one; and a stale cataloged description can still be
+			// awaiting re-baseline. Work it down, not on fire.
+			severity: "medium",
+			probe: (r) => str(r?.query),
+		},
+	],
+};
+
 /** raven-drift is a dated file in improvements/engine/, not weekly/. */
 function latestRavenDrift(): string | null {
 	if (!existsSync(ENGINE)) return null;
@@ -306,7 +329,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const detected: Finding[] = [];
 	const sources: string[] = [];
 
-	for (const spec of [...SPECS, RAVEN_LOOP_SPEC]) {
+	for (const spec of [...SPECS, RAVEN_LOOP_SPEC, RAVEN_ROUTING_SPEC]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
 		if (!data) {
