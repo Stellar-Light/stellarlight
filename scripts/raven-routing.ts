@@ -178,6 +178,24 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		expect: ["getRfps"],
 		note: "demand: jobs/bounties (2×)",
 	},
+	// ── prior-art over hackathon prototypes (searchHackathonBuilds, #693) ──
+	// LAGGING until Raven re-baselines its catalog — the eval skips a not-yet-
+	// cataloged op rather than flagging it, then starts grading once it lands.
+	{
+		q: "has anyone built a recurring payments protocol at a Stellar hackathon",
+		expect: ["searchHackathonBuilds"],
+		note: "prior-art: hackathon prototype lookup",
+	},
+	{
+		q: "what prediction markets were built at Stellar hackathons",
+		expect: ["searchHackathonBuilds"],
+		note: "prior-art: hackathon builds by topic",
+	},
+	{
+		q: "winning zero-knowledge privacy builds at Stellar hackathons",
+		expect: ["searchHackathonBuilds"],
+		note: "prior-art: winning hackathon builds",
+	},
 ];
 
 // Adversarial / edge questions — chosen to THROW Raven off: off-topic, no-such-
