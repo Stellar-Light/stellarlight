@@ -48,7 +48,10 @@ describe("upsertFindings — the lifecycle", () => {
 	});
 
 	it("keeps a still-present finding and bumps lastSeen (preserves firstSeen)", () => {
-		const prior = [f({ id: "a", source: "s1", firstSeen: iso(10) })];
+		// capture once — iso() calls Date.now() each time, so recomputing it in
+		// the assertion races the constructor by ~1ms and flakes CI.
+		const firstSeen = iso(10);
+		const prior = [f({ id: "a", source: "s1", firstSeen })];
 		const out = upsertFindings(
 			prior,
 			[f({ id: "a", source: "s1" })],
@@ -56,7 +59,7 @@ describe("upsertFindings — the lifecycle", () => {
 			now,
 		);
 		expect(out).toHaveLength(1);
-		expect(out[0].firstSeen).toBe(iso(10)); // preserved
+		expect(out[0].firstSeen).toBe(firstSeen); // preserved
 		expect(out[0].lastSeen).toBe(now); // bumped
 	});
 
