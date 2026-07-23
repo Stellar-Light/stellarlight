@@ -82,14 +82,18 @@ async function buildIndex(): Promise<IndexedBuild[]> {
 				`${s.name} ${s.description ?? ""} ${s.track ?? ""} ${s.award ?? ""}`.toLowerCase(),
 		}));
 	});
-	// Dedupe by buidl id — DoraHacks can repeat a submission across pages, and a
-	// build can be cross-submitted to sibling events; keep the first occurrence.
-	const seen = new Set<string>();
+	// Dedupe by buidl id AND by event+name — DoraHacks repeats a submission across
+	// pages (same id), and a resubmission gets a NEW id with the same name in the
+	// same event (id-dedup misses that); collapse both, keeping the first.
+	const seenId = new Set<string>();
+	const seenKey = new Set<string>();
 	const flat: IndexedBuild[] = [];
 	for (const arr of perHack) {
 		for (const b of arr) {
-			if (seen.has(b.id)) continue;
-			seen.add(b.id);
+			const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
+			if (seenId.has(b.id) || seenKey.has(key)) continue;
+			seenId.add(b.id);
+			seenKey.add(key);
 			flat.push(b);
 		}
 	}
