@@ -1,15 +1,15 @@
 {
-	"generatedAt": "2026-07-23T02:31:06.446Z",
+	"generatedAt": "2026-07-23T04:05:00.948Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
-		"graded": 22,
-		"passed": 15,
-		"failed": 7,
-		"lagging": 4,
+		"graded": 30,
+		"passed": 22,
+		"failed": 8,
+		"lagging": 7,
 		"demandChecked": 15,
 		"demandMissed": 6
 	},
-	"okRate": 0.68,
+	"okRate": 0.73,
 	"misses": [
 		{
 			"query": "what wallets support Stellar",
@@ -83,6 +83,18 @@
 				"getBuilders"
 			],
 			"note": "demand: jobs/bounties (2×)"
+		},
+		{
+			"query": "submit a Stellar transaction with the JavaScript SDK",
+			"expect": [
+				"searchResearch",
+				"searchRepos"
+			],
+			"topScout": [
+				"explainRepo",
+				"getHackathon"
+			],
+			"note": "code: how-to guide"
 		}
 	],
 	"lagging": [
@@ -108,6 +120,24 @@
 			"query": "security audit reports for Soroban projects",
 			"expect": [
 				"listAudits"
+			]
+		},
+		{
+			"query": "has anyone built a recurring payments protocol at a Stellar hackathon",
+			"expect": [
+				"searchHackathonBuilds"
+			]
+		},
+		{
+			"query": "what prediction markets were built at Stellar hackathons",
+			"expect": [
+				"searchHackathonBuilds"
+			]
+		},
+		{
+			"query": "winning zero-knowledge privacy builds at Stellar hackathons",
+			"expect": [
+				"searchHackathonBuilds"
 			]
 		}
 	],
