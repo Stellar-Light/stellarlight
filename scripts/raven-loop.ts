@@ -30,6 +30,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+// Shared with the ledger's demand ingestion so both filter noise identically.
+import { isSyntheticQuery } from "../src/lib/improvement-ledger";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const GOLDEN = join(ROOT, "scripts/eval/golden-questions.json");
@@ -192,15 +194,6 @@ const DEMAND_OP: Record<
 	},
 };
 
-/** Drop synthetic/probe noise so a dead-end is never manufactured on junk. */
-function isJunkQuery(q: string): boolean {
-	const s = q.trim().toLowerCase();
-	if (s.length < 3) return true;
-	if (s === "test" || s === "testing" || s === "hello") return true;
-	if (/nonexistent|zzz{2,}|^z{4,}/.test(s)) return true;
-	return false;
-}
-
 /** Live row count from OUR API — the parity baseline, checked at loop time. */
 async function directRows(endpoint: string, q: string): Promise<number | null> {
 	const spec = DEMAND_OP[endpoint];
@@ -304,7 +297,7 @@ async function main() {
 			(m) =>
 				DEMAND_OP[m.endpoint] &&
 				(m.cls === "WEAK" || m.cls === "FALLBACK") &&
-				!isJunkQuery(m.query),
+				!isSyntheticQuery(m.query),
 		);
 
 	const demandDeadends: DemandDeadend[] = [];

@@ -106,6 +106,24 @@ export function findingId(source: string, probe: string): string {
 	return `${source}:${slugifyProbe(probe)}`;
 }
 
+/**
+ * A synthetic / test / probe query — NOT real demand. Mining these as findings
+ * manufactures fires on our own noise: health checks, eval probes, fat-finger
+ * "test", `zzzznonexistent…` smoke queries. Conservative by design — only
+ * clearly-synthetic strings, never an ambiguous-but-plausibly-real term (a
+ * person handle, a token pair, a short project name like `stxlm` or `8004`).
+ * Shared by the ledger's demand ingestion and the raven-loop demand phase so
+ * the two filter identically.
+ */
+export function isSyntheticQuery(q: string): boolean {
+	const s = q.trim().toLowerCase();
+	if (s.length < 3) return true;
+	if (["test", "testing", "hello", "foo", "bar", "asdf", "qwerty"].includes(s))
+		return true;
+	if (/nonexistent|zzz{2,}|^z{4,}|^(?:asdf|qwer)/.test(s)) return true;
+	return false;
+}
+
 const SEVERITY_WEIGHT: Record<Severity, number> = {
 	high: 3,
 	medium: 2,
@@ -248,11 +266,18 @@ export function upsertFindings(
 ): Finding[] {
 	const runSources = new Set(sourcesInThisRun);
 	const detectedById = new Map(detected.map((f) => [f.id, f]));
-	const priorById = new Map(prior.map((f) => [f.id, f]));
 	const out: Finding[] = [];
+	// `seen` guarantees the OUTPUT has unique ids — the single invariant. A
+	// finding id can be doubled two ways: a detector emits the same probe on two
+	// endpoints (`strupey` as projects-miss AND builders-miss → identical id), or
+	// an earlier buggy run already persisted a duplicate into `prior`. Either way
+	// the first occurrence wins and the rest collapse.
+	const seen = new Set<string>();
 
-	// carry prior forward, updating
+	// carry prior forward, updating (collapsing any pre-existing duplicate ids)
 	for (const p of prior) {
+		if (seen.has(p.id)) continue;
+		seen.add(p.id);
 		const still = detectedById.get(p.id);
 		if (still) {
 			out.push({ ...p, lastSeen: nowIso });
@@ -263,11 +288,11 @@ export function upsertFindings(
 			out.push(p); // a detector we didn't run this time, or already closed
 		}
 	}
-	// add genuinely new findings
+	// add genuinely new findings (ids not already carried forward), deduped too
 	for (const d of detected) {
-		if (!priorById.has(d.id)) {
-			out.push({ ...d, firstSeen: nowIso, lastSeen: nowIso, status: "open" });
-		}
+		if (seen.has(d.id)) continue;
+		seen.add(d.id);
+		out.push({ ...d, firstSeen: nowIso, lastSeen: nowIso, status: "open" });
 	}
 	return out;
 }
@@ -330,7 +355,9 @@ export function applyWaves(
 				f.fixedAt = f.fixedAt ?? nowIso;
 			}
 			if (e.status === "verified") {
-				f.verifiedAt = nowIso;
+				// preserve the FIRST verification time (like fixedAt) — re-stamping
+				// it every run is pure git churn and loses when it was confirmed.
+				f.verifiedAt = f.verifiedAt ?? nowIso;
 				if (stillDetectedIds.has(e.id)) suspectVerified.push(e.id);
 			}
 		}
