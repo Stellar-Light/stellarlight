@@ -29,7 +29,23 @@ const BASE = (
 ).replace(/\/$/, "");
 
 /** Skills whose instructions are executable and therefore checkable. */
-const SKILLS = ["scf-claim-verifier", "scf-live-context", "stellar-scout"];
+const SKILLS = [
+	"stellar-scout",
+	// All twelve SCF plugin skills. Every one reads live data as of 2026-07-23,
+	// so every one has instructions that can rot.
+	"scf-fetch-external-doc",
+	"scf-budget-builder",
+	"scf-claim-verifier",
+	"scf-competitor-analyst",
+	"scf-interest-form-drafter",
+	"scf-live-context",
+	"scf-prescreen-checker",
+	"scf-referral-preparer",
+	"scf-reviewer",
+	"scf-round-reviewer",
+	"scf-submission-drafter",
+	"scf-tranche-reporter",
+];
 
 /**
  * Field names a skill may tell an agent to read off a project row, mapped to
@@ -105,12 +121,21 @@ async function main() {
 			continue;
 		}
 
-		// Every executable call the instructions hand an agent. Skip placeholder
-		// URLs (<project>, {topic}) — those are templates, not literal calls.
-		const urls = [...content.matchAll(/curl -s(?:i)? "([^"]+)"/g)]
+		// Every executable call the instructions hand an agent. Skip templates —
+		// `<project>` / `{topic}` placeholders, and the fake-ID style docs use for
+		// third-party examples (a Google DOC_ID like 1aBcDeFgHiJkLmNoPqRsTuVwXyZ
+		// is illustrative, and reporting it "dead" is noise that trains a reader
+		// to ignore this check).
+		const isTemplate = (u: string) =>
+			/[<{]/.test(u) ||
+			// alternating-case run of 12+ chars = a placeholder id, not a real one
+			/[a-z][A-Z][a-z][A-Z]|[A-Z][a-z][A-Z][a-z]/.test(
+				u.replace(/^https?:\/\/[^/]+/, ""),
+			);
+		const urls = [...content.matchAll(/curl -s(?:i|L)? "([^"]+)"/g)]
 			.map((m) => m[1])
-			.filter((u) => !/[<{]/.test(u))
-			.filter((u) => u.startsWith("http"));
+			.filter((u) => u.startsWith("http"))
+			.filter((u) => !isTemplate(u));
 
 		let dead = 0;
 		for (const u of urls) {
@@ -129,13 +154,26 @@ async function main() {
 		// read a field that doesn't exist is silently wrong on every row.
 		// Ignore fenced blocks that deliberately quote the wrong spelling as a
 		// warning — only flag it when the skill is instructing, not cautioning.
-		const wrong = WRONG_FIELD_SPELLINGS.filter(
-			(w) =>
-				w.wrong.test(content) &&
-				!new RegExp(
-					`[Nn]ever\\s+\`?${w.wrong.source.replace(/\\b/g, "")}`,
-				).test(content),
-		);
+		// A skill may legitimately NAME a wrong spelling in order to warn against
+		// it — that is the most useful place to mention it. So judge each
+		// occurrence by the ~70 chars before it: preceded by a negation, it is a
+		// caution; otherwise it is an instruction. Flag only if some occurrence
+		// is unguarded. (First cut looked only for "never <field>" and missed
+		// "**not** `repos[0].lastCommitAt`" — a false positive on correct prose,
+		// which is how a guard earns the habit of being ignored.)
+		const NEGATION =
+			/\b(never|not|avoid|instead of|rather than|do not|don't)\b[^.]{0,20}$/i;
+		const wrong = WRONG_FIELD_SPELLINGS.filter((w) => {
+			const re = new RegExp(w.wrong.source, "g");
+			let m: RegExpExecArray | null;
+			// biome-ignore lint/suspicious/noAssignInExpressions: standard exec loop
+			while ((m = re.exec(content)) !== null) {
+				const before = content.slice(Math.max(0, m.index - 70), m.index);
+				// strip markdown emphasis so **not** reads as not
+				if (!NEGATION.test(before.replace(/[*`_]/g, ""))) return true;
+			}
+			return false;
+		});
 		for (const w of wrong) {
 			failures.push({
 				skill: slug,

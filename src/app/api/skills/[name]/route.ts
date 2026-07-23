@@ -212,7 +212,15 @@ async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
 	const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${dir.replace(/\/$/, "")}/SKILL.md`;
 	try {
 		const res = await fetch(raw, {
-			next: { revalidate: 3600 },
+			// 5 minutes, not an hour. These are INSTRUCTIONS an agent executes
+			// literally, so a stale copy is an agent confidently doing the wrong
+			// thing — and today a field-name fix stayed live-wrong for the full
+			// hour after it was corrected at source, long enough that the CI gate
+			// guarding this very failure reported the fixed skill as broken.
+			// Correcting a skill should reach consumers in minutes; the upstream
+			// fetch is one small file from a CDN, so the cost of the shorter
+			// window is negligible.
+			next: { revalidate: 300 },
 			signal: AbortSignal.timeout(6000),
 		});
 		if (!res.ok) return null;
