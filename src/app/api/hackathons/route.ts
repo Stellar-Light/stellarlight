@@ -21,7 +21,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import {
 	type DoraHacksHackathon,
 	fetchAllDoraHacksHackathons,
@@ -88,6 +88,17 @@ function doraToRow(h: DoraHacksHackathon): HackathonRow {
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		["status", "organizer", "source", "limit"],
+		{
+			advertise: ["status", "organizer", "source", "limit"],
+			hint: "Per-event detail (tracks, prizes, winners) lives on /api/hackathons/{slug}.",
+		},
+	);
 	const statusFilter = sp.get("status");
 	const organizerFilter = sp.get("organizer");
 	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
@@ -274,6 +285,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: {
 					status: statusFilter,
 					organizer: organizerFilter,

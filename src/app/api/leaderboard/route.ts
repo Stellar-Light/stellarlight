@@ -14,7 +14,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -107,6 +107,17 @@ function toCsv(rows: ProjectRow[]): string {
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		["sort", "category", "range", "format", "limit"],
+		{
+			advertise: ["sort", "category", "range", "format", "limit"],
+			hint: "Ranking is chosen with `sort`; see meta.metricDefinitions for what each metric means.",
+		},
+	);
 	const sort = (sp.get("sort") || "activity").toLowerCase();
 	const range = (sp.get("range") || "all").toLowerCase();
 	const category = sp.get("category");
@@ -476,6 +487,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/leaderboard",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				// sls-036 residual: the real rollup timestamp of the repo index this
 				// response aggregated — the as-of for stars/issues/lastActivityAt.
 				dataAsOf,
