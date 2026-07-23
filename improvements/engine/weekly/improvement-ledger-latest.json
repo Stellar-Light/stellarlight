@@ -1,7 +1,7 @@
 {
-	"generatedAt": "2026-07-23T01:14:21.412Z",
-	"total": 277,
-	"open": 265,
+	"generatedAt": "2026-07-23T01:38:08.372Z",
+	"total": 280,
+	"open": 268,
 	"closed": 12,
 	"verified": 7,
 	"cleared": 5,
@@ -20,6 +20,11 @@
 			"surface": "scf",
 			"open": 14,
 			"total": 14
+		},
+		{
+			"surface": "consumer",
+			"open": 3,
+			"total": 3
 		},
 		{
 			"surface": "contract",

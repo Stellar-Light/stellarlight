@@ -1,0 +1,72 @@
+{
+	"generatedAt": "2026-07-23T01:34:25.101Z",
+	"gateway": "https://agents.stellar.buzz/mcp",
+	"frame": {
+		"graded": 8,
+		"passed": 5,
+		"failed": 3,
+		"lagging": 4
+	},
+	"okRate": 0.63,
+	"misses": [
+		{
+			"query": "what wallets support Stellar",
+			"expect": [
+				"getPartners"
+			],
+			"topScout": [
+				"getClusters",
+				"searchResearch",
+				"searchProjects"
+			],
+			"note": "partner directory (wallets)"
+		},
+		{
+			"query": "on and off ramps for Stellar payments",
+			"expect": [
+				"getPartners"
+			],
+			"topScout": [
+				"searchProjects"
+			],
+			"note": "anchors/ramps"
+		},
+		{
+			"query": "top Stellar projects by GitHub activity",
+			"expect": [
+				"getLeaderboard"
+			],
+			"topScout": [
+				"searchProjects",
+				"searchRepos"
+			],
+			"note": "activity leaderboard"
+		}
+	],
+	"lagging": [
+		{
+			"query": "biggest stablecoins on Stellar by market cap",
+			"expect": [
+				"getStablecoins"
+			]
+		},
+		{
+			"query": "which are the largest stablecoins issued on Stellar",
+			"expect": [
+				"getStablecoins"
+			]
+		},
+		{
+			"query": "is Blend audited and by whom",
+			"expect": [
+				"listAudits"
+			]
+		},
+		{
+			"query": "security audit reports for Soroban projects",
+			"expect": [
+				"listAudits"
+			]
+		}
+	]
+}
