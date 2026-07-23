@@ -12,7 +12,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { applyBuilderNameOverride } from "@/data/builder-name-overrides";
+import {
+	applyBuilderNameOverride,
+	handleForName,
+} from "@/data/builder-name-overrides";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	type BuilderProject,
@@ -399,12 +402,21 @@ export async function GET(req: NextRequest) {
 			// login), clearly marked basis "repo-owner" (not a Passport profile,
 			// so bio/roleTitle stay null). Skill/topic queries never reach here —
 			// they either matched profiles above or aren't handle-shaped.
-			if (q && !location && totalMatching === 0 && isHandleQuery(q)) {
+			// Resolve q to a GitHub handle: a handle-shaped query IS one; a curated
+			// real name ("tyler van der hoeven") reverse-resolves to its handle
+			// ("kalepail"), so a builder with only a code-derived (handle-named)
+			// profile is still findable by the name humans use.
+			const derivedHandle = q
+				? isHandleQuery(q)
+					? q
+					: handleForName(q)
+				: null;
+			if (q && !location && totalMatching === 0 && derivedHandle) {
 				// `like` is a substring/case-insensitive net; the exact-login filter
 				// below is the precise cut (q="kale" must NOT become owner kalepail).
 				const owned = await payload.find({
 					collection: "repos",
-					where: { owner: { like: q } },
+					where: { owner: { like: derivedHandle } },
 					limit: 200,
 					depth: 0,
 					select: {
@@ -421,8 +433,8 @@ export async function GET(req: NextRequest) {
 				});
 				const mine = (
 					owned.docs as unknown as Array<Record<string, unknown>>
-				).filter((d) => String(d.owner ?? "").toLowerCase() === q);
-				const row = codeDerivedBuilderRow(q, mine);
+				).filter((d) => String(d.owner ?? "").toLowerCase() === derivedHandle);
+				const row = codeDerivedBuilderRow(derivedHandle, mine);
 				if (row) {
 					builders = [row];
 					totalMatching = 1;

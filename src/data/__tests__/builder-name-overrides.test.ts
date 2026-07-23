@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { codeDerivedBuilderRow } from "../../lib/builder-code-derived";
 import {
 	applyBuilderNameOverride,
 	BUILDER_NAME_OVERRIDES,
+	handleForName,
 } from "../builder-name-overrides";
 
 describe("applyBuilderNameOverride — real name for handle-only builders", () => {
@@ -50,5 +52,29 @@ describe("applyBuilderNameOverride — real name for handle-only builders", () =
 			expect(ov.name.trim().length).toBeGreaterThan(0);
 			expect(ov.name.toLowerCase()).not.toBe(handle.toLowerCase());
 		}
+	});
+});
+
+describe("handleForName — resolve a real-name query back to the handle", () => {
+	it("resolves the full name (order-free) to the handle", () => {
+		expect(handleForName("tyler van der hoeven")).toBe("kalepail");
+		expect(handleForName("Tyler Van Der Hoeven")).toBe("kalepail");
+		expect(handleForName("hoeven tyler van der")).toBe("kalepail");
+	});
+	it("does NOT over-resolve a bare first name or an unrelated query", () => {
+		expect(handleForName("tyler")).toBeNull();
+		expect(handleForName("some random person")).toBeNull();
+		expect(handleForName("")).toBeNull();
+	});
+});
+
+describe("codeDerivedBuilderRow — carries the real name", () => {
+	it("names the code-derived row with the curated real name", () => {
+		const row = codeDerivedBuilderRow("kalepail", [
+			{ owner: "kalepail", fullName: "kalepail/passkey-kit", repoScore: 9 },
+			{ owner: "kalepail", fullName: "kalepail/stellar-raven", repoScore: 8 },
+		]);
+		expect(row?.githubUsername).toBe("kalepail"); // handle preserved
+		expect(row?.displayName).toBe("Tyler van der Hoeven"); // findable by name
 	});
 });

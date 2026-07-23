@@ -28,11 +28,14 @@ describe("isHandleQuery (P2 code-derived-builder gate)", () => {
 });
 
 describe("codeDerivedBuilderRow (P2 synthesis)", () => {
+	// uncurated handle → the GENERIC synthesis path (bio null, displayName =
+	// login). The curated-name overlay (kalepail → Tyler van der Hoeven) is
+	// covered in data/__tests__/builder-name-overrides.test.ts.
 	const repos = [
 		{
-			owner: "kalepail",
-			fullName: "kalepail/passkey-kit",
-			url: "https://github.com/kalepail/passkey-kit",
+			owner: "progax01",
+			fullName: "progax01/passkey-kit",
+			url: "https://github.com/progax01/passkey-kit",
 			primaryLanguage: "TypeScript",
 			stars: 200,
 			lastCommitAt: "2026-07-01T00:00:00Z",
@@ -41,9 +44,9 @@ describe("codeDerivedBuilderRow (P2 synthesis)", () => {
 			projectSlug: "passkey-kit",
 		},
 		{
-			owner: "kalepail",
-			fullName: "kalepail/kale-sc",
-			url: "https://github.com/kalepail/kale-sc",
+			owner: "progax01",
+			fullName: "progax01/kale-sc",
+			url: "https://github.com/progax01/kale-sc",
 			primaryLanguage: "Rust",
 			stars: 120,
 			lastCommitAt: "2026-06-01T00:00:00Z",
@@ -53,33 +56,34 @@ describe("codeDerivedBuilderRow (P2 synthesis)", () => {
 		},
 		// duplicate project + missing project (should dedupe / be skipped)
 		{
-			owner: "kalepail",
-			fullName: "kalepail/kale-ui",
+			owner: "progax01",
+			fullName: "progax01/kale-ui",
 			repoScore: 40,
 			projectName: "KALE",
 			projectSlug: "kale",
 		},
-		{ owner: "kalepail", fullName: "kalepail/scratch", repoScore: 10 },
+		{ owner: "progax01", fullName: "progax01/scratch", repoScore: 10 },
 	];
 
 	it("returns null for no repos", () => {
-		expect(codeDerivedBuilderRow("kalepail", [])).toBeNull();
+		expect(codeDerivedBuilderRow("progax01", [])).toBeNull();
 	});
 
 	it("builds a code-derived row: owner casing, repoScore order, deduped projects", () => {
-		const row = codeDerivedBuilderRow("kalepail", repos);
+		const row = codeDerivedBuilderRow("progax01", repos);
 		expect(row).not.toBeNull();
 		if (!row) return;
 		// identity from repo ownership, not a Passport profile
-		expect(row.githubUsername).toBe("kalepail");
+		expect(row.githubUsername).toBe("progax01");
+		expect(row.displayName).toBe("progax01"); // uncurated → login is the name
 		expect(row.bio).toBeNull();
 		expect(row.roleTitle).toBeNull();
-		expect(row.url).toBe("https://github.com/kalepail");
+		expect(row.url).toBe("https://github.com/progax01");
 		expect(row.match?.basis).toBe("repo-owner");
 		// codeEvidence ordered by repoScore desc, top-5, carries the repos
-		expect(row.codeEvidence?.[0].fullName).toBe("kalepail/kale-sc"); // score 95
+		expect(row.codeEvidence?.[0].fullName).toBe("progax01/kale-sc"); // score 95
 		expect(row.codeEvidence?.map((c) => c.fullName)).toContain(
-			"kalepail/passkey-kit",
+			"progax01/passkey-kit",
 		);
 		// projects deduped (KALE once), unnamed repo contributes none
 		expect(row.projectCount).toBe(2);

@@ -56,3 +56,24 @@ export function applyBuilderNameOverride(row: {
 	if (!ov || !thin) return { displayName: row.displayName, bio: row.bio };
 	return { displayName: ov.name, bio: row.bio ?? ov.bio ?? null };
 }
+
+/**
+ * Reverse lookup: a person-NAME query → the GitHub handle it curates, if any.
+ * The builders collection is keyed by handle, and the code-derived-builder path
+ * only triggers on handle-shaped queries — so without this, "tyler van der
+ * hoeven" (a name, with spaces) never reaches the profile that IS Tyler. Matches
+ * when every token of a curated name appears in the query (order-free, so both
+ * "tyler van der hoeven" and "hoeven, tyler van der" resolve); requires ≥2 name
+ * tokens so a bare first name ("tyler") never over-resolves.
+ */
+export function handleForName(query: string): string | null {
+	const q = query.toLowerCase().trim();
+	if (!q) return null;
+	for (const [handle, ov] of Object.entries(BUILDER_NAME_OVERRIDES)) {
+		const name = ov.name.toLowerCase();
+		if (q === name) return handle;
+		const toks = name.split(/\s+/).filter((t) => t.length > 1);
+		if (toks.length >= 2 && toks.every((t) => q.includes(t))) return handle;
+	}
+	return null;
+}
