@@ -19,6 +19,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { unknownParamWarning } from "@/lib/http-params";
 import {
 	CURATED_SKILLS,
 	type CuratedSkillKind,
@@ -79,6 +80,13 @@ interface UnifiedSkill {
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(sp, ["kind", "source"], {
+		advertise: ["kind", "source"],
+		hint: "Skill detail lives on /api/skills/{name}.",
+	});
 	const sourceFilter = sp.get("source");
 	const kindFilter = sp.get("kind");
 
@@ -189,6 +197,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: { source: sourceFilter, kind: kindFilter },
 				counts: {
 					returned: filtered.length,
