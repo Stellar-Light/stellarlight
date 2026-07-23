@@ -543,6 +543,18 @@ function pickOnchain(o: any) {
 		assetHoldersDelta:
 			typeof o.assetHoldersDelta === "number" ? o.assetHoldersDelta : null,
 		assetSupply: typeof o.assetSupply === "number" ? o.assetSupply : null,
+		// Q2 deliverable (PG review): transaction volume + active-address counts.
+		// These are in the DB and on the project profile — projecting them here so
+		// the AGENT-facing API exposes them too, not just the human page. (Absent
+		// from this whitelist = silently dropped, the thin-projection trap.)
+		assetTrustlines:
+			typeof o.assetTrustlines === "number" ? o.assetTrustlines : null,
+		assetPayments: typeof o.assetPayments === "number" ? o.assetPayments : null,
+		assetPaymentsAmount:
+			typeof o.assetPaymentsAmount === "number" ? o.assetPaymentsAmount : null,
+		assetPaymentsDelta:
+			typeof o.assetPaymentsDelta === "number" ? o.assetPaymentsDelta : null,
+		assetTrades: typeof o.assetTrades === "number" ? o.assetTrades : null,
 		contracts: Array.isArray(o.contracts)
 			? o.contracts.map(
 					// biome-ignore lint/suspicious/noExplicitAny: Payload array row
@@ -1307,8 +1319,7 @@ export async function GET(req: NextRequest) {
 						// chain (allbridge serves solana) outranks one that doesn't
 						// (spacewalk = polkadot/kusama). Inert unless the query names
 						// an external chain — 2026-07-21 persona battery.
-						Number(b.chainCorridor ?? true) -
-							Number(a.chainCorridor ?? true) ||
+						Number(b.chainCorridor ?? true) - Number(a.chainCorridor ?? true) ||
 						b.score - a.score ||
 						// Structured relevance (type-match OR corridor coverage-match)
 						// leads over pure prose matches at the same keyword score.

@@ -33,6 +33,14 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-23",
 		surfaces: ["api", "mcp"],
+		version: "openapi@1.8.26",
+		type: "added",
+		summary:
+			"searchProjects `onchain` now carries asset transaction-volume + active-address metrics: assetPayments (lifetime payment-operation count), assetTrades, assetPaymentsAmount (whole asset units, NOT USD), assetPaymentsDelta, and assetTrustlines (accounts that EVER opened a trustline = reach, distinct from assetHolders = active balances today). Contract-based protocols get a per-profile contract-activity rollup (events + subinvocations). All from the same dated stellar.expert snapshot; already in the DB and on project profiles — this projects them onto the API too.",
+	},
+	{
+		date: "2026-07-23",
+		surfaces: ["api", "mcp"],
 		version: "openapi@1.8.25",
 		type: "added",
 		summary:
