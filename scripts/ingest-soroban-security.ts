@@ -29,6 +29,7 @@ import { getPayload } from "payload";
 import { extractFindings } from "../src/lib/audit-findings";
 import {
 	canonicalAuditor,
+	composeAuditTitle,
 	normalizeIdentityText,
 	resolveAuditProjectSlug,
 } from "../src/lib/audit-identity";
@@ -385,9 +386,15 @@ async function run() {
 			// before anything becomes a title, tag, or filterable field.
 			const auditorClean = canonicalAuditor(meta.auditorName);
 			const protocolClean = normalizeIdentityText(meta.protocolName);
-			const title = `${protocolClean} — ${auditorClean}${
-				meta.name ? ` (${normalizeIdentityText(meta.name)})` : ""
-			}`;
+			// The portal's report `name` is usually the PDF's internal doc-title
+			// restating protocol + auditor, which pushed three live titles past
+			// the corpus sweep's 110-char bar. composeAuditTitle appends it only
+			// when it adds a word the prefix lacks AND stays under the bar.
+			const title = composeAuditTitle(
+				meta.protocolName,
+				meta.auditorName,
+				meta.name,
+			);
 			const url = REPORT_URL(meta.id);
 			const tags = [
 				"audit",
