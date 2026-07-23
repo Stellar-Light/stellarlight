@@ -291,10 +291,38 @@ export async function GET(req: NextRequest) {
 		// exactly what production exhibits when VOYAGE_API_KEY is unset.
 		mode = "keyword";
 		try {
-			const tokens = q
+			const rawTokens = q
 				.toLowerCase()
 				.split(/\s+/)
 				.filter((t) => t.length > 1);
+
+			// Money is written with separators in the source documents
+			// ("$300,000") while a person or agent asking about it usually types
+			// the bare digits ("300000"). Tokens are matched with `contains`, a
+			// substring test, so those two never meet: a query for 300000 misses
+			// the handbook page that states the $300,000 lifetime cap, and the
+			// empty result reads as "there is no such rule" — the omission-as-
+			// negation failure this corpus exists to avoid. Emit both spellings
+			// for any numeric token so either phrasing finds the same passage.
+			// Verified 2026-07-23: `300,000` found the rule, `300000` did not.
+			const tokenSet = new Set<string>();
+			for (const t of rawTokens) {
+				tokenSet.add(t);
+				if (/^\$?[\d,]+$/.test(t)) {
+					const bare = t.replace(/[$,]/g, "");
+					// Years are 4-digit numbers too, and grouping one produces a
+					// nonsense token ("2026" → "2,026"). Money at that width is
+					// real ($5,000), so exclude by value rather than by length.
+					const isYear =
+						bare.length === 4 && Number(bare) >= 1900 && Number(bare) <= 2099;
+					if (bare.length > 3 && !isYear) {
+						tokenSet.add(bare);
+						// 300000 → 300,000
+						tokenSet.add(bare.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+					}
+				}
+			}
+			const tokens = [...tokenSet];
 
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
 			const where: any = {};
