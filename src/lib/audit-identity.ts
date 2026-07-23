@@ -171,3 +171,50 @@ export function resolveAuditProjectSlug(protocolName: string): {
 	if (hit) return { slug: hit.slug, basis: hit.basis, mapped: true };
 	return { slug: null, basis: null, mapped: false };
 }
+
+/** Longest a research-doc title may be before the corpus sweep calls it
+ * "overlong (sentence, not a title)" — same bar as engine-b-corpus.ts. */
+export const MAX_TITLE_LEN = 110;
+
+/**
+ * Compose an audit report's title as `Protocol — Auditor (Report name)`.
+ *
+ * The parenthetical is the portal's own `name` for the report, which is often
+ * the PDF's internal doc-title and mostly restates the two fields already in
+ * front of it. Live examples the corpus sweep flags as overlong:
+ *
+ *   PhoenixDeFiHub — Veridise (Auditing Report Hardening Blockchain Security
+ *     with Formal Methods for PhoenixDeFiHub)                        114 chars
+ *   Stellar Timelock Contract — Veridise (Auditing Report Hardening …)     143
+ *   Stellar Soroban Core — Veridise (Soroban Stellar Soroban Core V2.1 …)  128
+ *
+ * So the parenthetical is appended only when it EARNS its place: it must add
+ * at least one word that isn't already in the protocol/auditor prefix, and it
+ * must not push the title past the quality bar. A short, genuinely new name
+ * ("V2.1", "Phase 2") is kept; a restatement of the prefix is dropped.
+ *
+ * Dropping loses nothing retrievable — the full report name stays on the row's
+ * own metadata and in the body; this only decides what the TITLE says.
+ */
+export function composeAuditTitle(
+	protocolName: string,
+	auditorName: string,
+	reportName?: string | null,
+): string {
+	const base = `${normalizeIdentityText(protocolName)} — ${canonicalAuditor(auditorName)}`;
+	const name = reportName ? normalizeIdentityText(reportName) : "";
+	if (!name) return base;
+
+	const words = (s: string) =>
+		new Set(
+			s
+				.toLowerCase()
+				.split(/[^a-z0-9.]+/i)
+				.filter((w) => w.length > 2),
+		);
+	const inBase = words(base);
+	const addsSomething = [...words(name)].some((w) => !inBase.has(w));
+	const withName = `${base} (${name})`;
+	if (!addsSomething || withName.length > MAX_TITLE_LEN) return base;
+	return withName;
+}
