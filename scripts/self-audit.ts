@@ -654,15 +654,44 @@ async function main() {
 			const at = key.lastIndexOf("@");
 			const name = key.slice(0, at);
 			const ver = key.slice(at + 1);
-			const r = await fetch(
-				`https://registry.npmjs.org/${encodeURIComponent(name).replace("%2F", "/")}/${ver}`,
-				{ headers: { "user-agent": "stellarlight-self-audit" } },
-			);
-			if (r.ok) ok(`npm: ${key} installable`);
-			else
+			const url = `https://registry.npmjs.org/${encodeURIComponent(name).replace("%2F", "/")}/${ver}`;
+			// Registry-unavailable is NOT "version missing". A transient 504 from
+			// registry.npmjs.org made the 2026-07-23 audit report api-client@1.5.0
+			// and @1.5.1 as uninstallable while both served 200 seconds later (1.4.0,
+			// probed in the same loop, passed). Same shape as the j() retry above
+			// (review finding 21) — so: retry once, then classify. Only a 404/410
+			// (the registry answering "this version does not exist") is a finding;
+			// a 5xx/429/network error means we could not verify, which is a WARNING
+			// so an upstream outage can never fail our gate or fill the daily
+			// rolling issue with false reds.
+			// (named httpStatus, not status — `status` is already the /api/status
+			// payload in this scope)
+			let httpStatus = 0;
+			let netErr = "";
+			for (let attempt = 0; attempt < 2; attempt++) {
+				try {
+					const r = await fetch(url, {
+						headers: { "user-agent": "stellarlight-self-audit" },
+					});
+					httpStatus = r.status;
+					netErr = "";
+					if (r.ok || r.status === 404 || r.status === 410) break;
+				} catch (e) {
+					httpStatus = 0;
+					netErr = String(e);
+				}
+				if (attempt === 0) await new Promise((res) => setTimeout(res, 3000));
+			}
+			if (httpStatus >= 200 && httpStatus < 300) ok(`npm: ${key} installable`);
+			else if (httpStatus === 404 || httpStatus === 410)
 				bad(
 					"advertised version missing",
-					`changelog names ${key} but the npm registry returns ${r.status} — published changelog must never advertise an uninstallable version (verify-before-advertise)`,
+					`changelog names ${key} but the npm registry returns ${httpStatus} — published changelog must never advertise an uninstallable version (verify-before-advertise)`,
+				);
+			else
+				warn(
+					"advertised version unverifiable",
+					`could not reach the npm registry for ${key} (${netErr || `HTTP ${httpStatus}`}, retried once) — registry unavailable is NOT evidence the version is missing; re-check ${url}`,
 				);
 		}
 	} catch (err) {
