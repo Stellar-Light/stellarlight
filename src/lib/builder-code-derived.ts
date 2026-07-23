@@ -7,6 +7,7 @@
  * unit-testable without polluting the route's export surface.
  */
 
+import { applyBuilderNameOverride } from "../data/builder-name-overrides";
 import { BUILDER_SYNONYMS } from "./builder-vocabulary";
 
 export interface BuilderProject {
@@ -115,6 +116,14 @@ export function codeDerivedBuilderRow(
 		(a, b) => Number(b.repoScore ?? 0) - Number(a.repoScore ?? 0),
 	);
 	const login = String(sorted[0].owner);
+	// A code-derived row has no Passport profile, so displayName falls back to the
+	// bare handle — overlay a curated real name (if any) so the person is findable
+	// and identifiable by name, not only their login.
+	const named = applyBuilderNameOverride({
+		githubUsername: login,
+		displayName: login,
+		bio: null,
+	});
 	const projectsMap = new Map<string, string | null>();
 	for (const d of sorted) {
 		const pname = d.projectName ? String(d.projectName) : "";
@@ -131,8 +140,8 @@ export function codeDerivedBuilderRow(
 	}));
 	return {
 		githubUsername: login,
-		displayName: login,
-		bio: null,
+		displayName: named.displayName,
+		bio: named.bio,
 		roleTitle: null,
 		location: null,
 		websiteUrl: null,
