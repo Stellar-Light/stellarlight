@@ -3,6 +3,7 @@ import {
 	applyWaves,
 	type Finding,
 	findingId,
+	isSyntheticQuery,
 	STALE_DAYS,
 	summarizeLedger,
 	upsertFindings,
@@ -82,6 +83,47 @@ describe("upsertFindings — the lifecycle", () => {
 		// only s1 ran; s2's open finding must stay open (we have no signal on it)
 		const out = upsertFindings(prior, [], ["s1"], now);
 		expect(out[0].status).toBe("open");
+	});
+
+	it("collapses two detected rows with the same id into ONE finding", () => {
+		// a detector can emit the same probe on two endpoints (e.g. `strupey` as
+		// both a projects-miss and a builders-miss) → identical findingId. Both
+		// must collapse to one finding, never double the id in the ledger.
+		const dup = f({ id: "engine-d-demand:strupey", source: "engine-d-demand" });
+		const out = upsertFindings([], [dup, { ...dup }], ["engine-d-demand"], now);
+		expect(out).toHaveLength(1);
+	});
+
+	it("heals a pre-existing duplicate id already in prior", () => {
+		// an earlier buggy run persisted the id twice; a later run must collapse it
+		// back to one (self-healing), whether or not the detector re-raises it.
+		const p = f({ id: "e:strupey", source: "e", status: "open" });
+		const out = upsertFindings(
+			[p, { ...p }],
+			[f({ id: "e:strupey", source: "e" })],
+			["e"],
+			now,
+		);
+		expect(out).toHaveLength(1);
+	});
+});
+
+describe("isSyntheticQuery — noise, not demand", () => {
+	it("flags synthetic/test/probe queries", () => {
+		for (const q of [
+			"test",
+			"TEST",
+			"zzzznonexistentquery12345",
+			"zzzzznonexistentxyz123",
+			"a",
+			"asdf",
+		])
+			expect(isSyntheticQuery(q)).toBe(true);
+	});
+	it("keeps ambiguous-but-plausibly-real terms", () => {
+		// person handles, token pairs, short project names — real demand, never dropped
+		for (const q of ["strupey", "stxlm", "8004", "reflector", "kutana", "rice"])
+			expect(isSyntheticQuery(q)).toBe(false);
 	});
 });
 

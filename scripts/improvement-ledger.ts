@@ -24,6 +24,7 @@ import {
 	applyWaves,
 	type Finding,
 	findingId,
+	isSyntheticQuery,
 	type Severity,
 	type Surface,
 	summarizeLedger,
@@ -97,6 +98,13 @@ const SPECS: SourceSpec[] = [
 				surface: "retrieval",
 				mode: "demand-miss",
 				severity: "high",
+				// Drop synthetic/test noise — a `zzzznonexistent…` smoke query or a
+				// fat-finger `test` returning 0 is CORRECT, not a demand gap. Mining
+				// it as a HIGH fire manufactures a finding on our own probe traffic.
+				keep: (r) => {
+					const q = str(r?.query) ?? str(r?.q) ?? str(r?.question);
+					return !!q && !isSyntheticQuery(q);
+				},
 				probe: (r) => str(r?.query) ?? str(r?.q) ?? str(r?.question),
 			},
 		],

@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8352327346801758,
+      "topScore": 0.8357759714126587,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8108398914337158,
+      "topScore": 0.8109979629516602,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7712048292160034,
+      "topScore": 0.7707698345184326,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8240225315093994,
+      "topScore": 0.8241767883300781,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296413421630859,
+      "topScore": 0.8296041488647461,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7764259576797485,
+      "topScore": 0.7763291597366333,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -521,7 +521,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "reflector-network/reflector-contract"
+      "sample": "diadata-org/soroban-oracle-feeders"
     },
     {
       "id": "repos-streaming-payments",
@@ -653,21 +653,19 @@
       "id": "latest-protocol-release",
       "category": "protocol-currency",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "protocol\\s*2[6-9]|zipper"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7299232482910156,
+      "topScore": 0.7200591564178467,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.1 — 27.0.1"
+      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -677,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6659287258989437,
+      "topScore": 0.6796720623970032,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -685,7 +683,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Weekly Roundup — week of Jun 26, 2026"
+      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
     },
     {
       "id": "blend-incident-facts",
@@ -871,11 +869,9 @@
       "id": "capability-custody-identity",
       "category": "capability-ranking",
       "mode": "projects",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "cobo"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
       "topScore": null,
       "urlOk": null,
@@ -885,7 +881,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Normal"
+      "sample": "DFNS"
     },
     {
       "id": "pg-award-recipients",
