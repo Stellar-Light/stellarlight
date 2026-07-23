@@ -409,6 +409,26 @@ export interface Project {
      * Holder change since the previous snapshot
      */
     assetHoldersDelta?: number | null;
+    /**
+     * Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active) — reach is always >= active, so never read this one as the active-address count
+     */
+    assetTrustlines?: number | null;
+    /**
+     * Lifetime count of payment operations in this asset — the transaction-volume metric. A count, not an amount
+     */
+    assetPayments?: number | null;
+    /**
+     * Lifetime payment volume in whole asset units (NOT USD — a unit count in the asset's own denomination, so it is not comparable across assets without a price)
+     */
+    assetPaymentsAmount?: number | null;
+    /**
+     * Payment-count change since the previous snapshot — the 'is it still being used' signal a lifetime total can't give
+     */
+    assetPaymentsDelta?: number | null;
+    /**
+     * Lifetime count of trades in this asset
+     */
+    assetTrades?: number | null;
     source?: string | null;
     asOf?: string | null;
     /**
@@ -2384,6 +2404,11 @@ export interface ProjectsSelect<T extends boolean = true> {
               id?: T;
             };
         assetHoldersDelta?: T;
+        assetTrustlines?: T;
+        assetPayments?: T;
+        assetPaymentsAmount?: T;
+        assetPaymentsDelta?: T;
+        assetTrades?: T;
         source?: T;
         asOf?: T;
         prevAsOf?: T;

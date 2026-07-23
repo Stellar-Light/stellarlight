@@ -870,6 +870,83 @@ export default async function ProjectDetailPage({
 											</a>
 										</div>
 									)}
+									{/* Q2 deliverable (PG review 2026-07-17): transaction volumes
+									    and active address counts on project profiles. Both come
+									    from the same dated stellar.expert snapshot as the rest of
+									    this card. "Active holders" and "Ever held" are deliberately
+									    separate rows — trustlines-ever is always >= holders-today,
+									    and collapsing them would overstate the active number. */}
+									{(typeof project.onchain.assetPayments === "number" ||
+										typeof project.onchain.assetHolders === "number") && (
+										<div>
+											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+												Activity
+											</div>
+											<div className="grid grid-cols-2 gap-3">
+												{[
+													{
+														label: "Payments",
+														hint: "lifetime transaction count",
+														value: project.onchain.assetPayments,
+														delta: project.onchain.assetPaymentsDelta,
+													},
+													{
+														label: "Trades",
+														hint: "lifetime",
+														value: project.onchain.assetTrades,
+														delta: null,
+													},
+													{
+														label: "Active holders",
+														hint: "accounts holding a balance today",
+														value: project.onchain.assetHolders,
+														delta: project.onchain.assetHoldersDelta,
+													},
+													{
+														label: "Ever held",
+														hint: "accounts that opened a trustline",
+														value: project.onchain.assetTrustlines,
+														delta: null,
+													},
+												]
+													.filter((s) => typeof s.value === "number")
+													.map((s) => (
+														<div
+															key={s.label}
+															className="p-4 rounded-xl bg-background/50 border border-border/50"
+														>
+															<div className="text-xs text-muted-foreground">
+																{s.label}
+															</div>
+															<div className="mt-1 font-mono text-sm text-foreground">
+																{(s.value as number).toLocaleString()}
+																{typeof s.delta === "number" &&
+																	s.delta !== 0 && (
+																		<span className="ml-2 text-xs text-muted-foreground">
+																			{s.delta > 0 ? "+" : ""}
+																			{s.delta.toLocaleString()}
+																		</span>
+																	)}
+															</div>
+															<div className="mt-1 text-[11px] text-muted-foreground/70">
+																{s.hint}
+															</div>
+														</div>
+													))}
+											</div>
+											{typeof project.onchain.assetPaymentsAmount ===
+												"number" && (
+												<div className="mt-3 text-xs text-muted-foreground">
+													Lifetime payment volume:{" "}
+													<span className="font-mono text-foreground">
+														{project.onchain.assetPaymentsAmount.toLocaleString()}
+													</span>{" "}
+													{project.onchain.assetCode ?? "units"} — denominated
+													in the asset, not USD.
+												</div>
+											)}
+										</div>
+									)}
 									{project.onchain.contracts &&
 										project.onchain.contracts.length > 0 &&
 										project.onchain.contracts.map(
