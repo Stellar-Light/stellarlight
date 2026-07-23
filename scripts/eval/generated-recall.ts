@@ -16,7 +16,10 @@
  *   P-KNOWN   projects known-item: exact name → top-3
  *   P-TYPE    type browse: for each type, ≥half of top-10 carries the type
  *   P-ATTR    attributes: coverage.countries / seps / supportedNetworks →
- *             the implying record in top-10
+ *             the implying record within a window that scales with how many
+ *             records actually matched (top-10 of 12 is recall; top-10 of 91
+ *             is a ranking preference). Probe construction + grading live in
+ *             src/lib/recall-probes.ts so they can be unit-tested.
  *   PA-CAP    partners: sector/rampType capability queries → record top-10
  *   B-USER    builders: githubUsername → record returned
  *   R-SYM     repos: a codeVerified symbol → carrier repo in top-5
@@ -26,6 +29,12 @@
  * when a bucket falls below its floor, so the weekly workflow goes red on
  * regression without gating PRs. Engine C later files issues from this.
  */
+
+import {
+	ATTR_MAX_WINDOW,
+	gradeAttrProbe,
+	networkProbeQuery,
+} from "../../src/lib/recall-probes";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -309,19 +318,18 @@ async function main() {
 			});
 		if (c.seps?.[0])
 			attrProbes.push({ p, q: c.seps[0], area: "coverage.seps" });
-		if ((p.supportedNetworks ?? []).find((n: string) => n !== "stellar"))
-			attrProbes.push({
-				p,
-				q: `${(p.supportedNetworks ?? []).find((n: string) => n !== "stellar")} ${(p.types?.[0] ?? "").toLowerCase()}`.trim(),
-				area: "supportedNetworks",
-			});
+		// The network probe needs its discriminator, or it degenerates into a
+		// query about the CHAIN rather than about this record — see
+		// networkProbeQuery + the class it fixes (recall-probes.ts).
+		const netQ = networkProbeQuery(p);
+		if (netQ) attrProbes.push({ p, q: netQ, area: "supportedNetworks" });
 	}
-	// Crowded-bucket fairness: when MANY records imply the same query (10+ EVM
-	// bridges), a per-record top-10 expectation over-demands — grade those at
-	// set level (≥3 impliers present) and keep strict per-record grading for
-	// niche attributes only.
-	const attrCrowd = new Map<string, number>();
-	for (const a of attrProbes) attrCrowd.set(a.q, (attrCrowd.get(a.q) ?? 0) + 1);
+	// Crowded-bucket fairness: when MANY records imply the same query (16 EVM
+	// bridges), a per-record top-10 expectation over-demands — those are graded
+	// at set level (≥3 impliers present). Records with a niche attribute keep
+	// strict per-record grading, but against a window that grows with the
+	// population that actually matched: "top-10 of 12" is recall, "top-10 of
+	// 91" is a ranking preference, and this is the recall bucket.
 	const attrSlugs = new Map<string, Set<string>>();
 	for (const a of attrProbes) {
 		const set = attrSlugs.get(a.q) ?? new Set();
@@ -331,23 +339,27 @@ async function main() {
 	await pool(cap(attrProbes), 4, async ({ p, q, area }) => {
 		const eq = encodeURIComponent(q);
 		try {
-			const d = await j(`/api/projects/search?q=${eq}&limit=10`);
-			const crowd = attrCrowd.get(q) ?? 1;
+			// Fetch the widest window the grader could ask for in one request, so
+			// scaling costs no extra round-trips.
+			const d = await j(
+				`/api/projects/search?q=${eq}&limit=${ATTR_MAX_WINDOW}`,
+			);
+			const returned: string[] = (d.projects ?? []).map((r: any) => r.slug);
 			const impliers = attrSlugs.get(q) ?? new Set([p.slug]);
-			const ok =
-				crowd > 4
-					? (d.projects ?? []).filter((r: any) => impliers.has(r.slug))
-							.length >= 3
-					: (d.projects ?? []).some((r: any) => r.slug === p.slug);
+			const { ok, window, mode } = gradeAttrProbe({
+				slug: p.slug,
+				impliers,
+				returned,
+				totalMatches: d.meta?.counts?.total ?? returned.length,
+			});
 			tally("P-ATTR", ok, {
 				area,
-				probe: `${BASE}/api/projects/search?q=${eq}&limit=10`,
-				expected: `${p.slug} in top-10 (its own ${area} implies '${q}')`,
-				observed:
-					(d.projects ?? [])
-						.slice(0, 5)
-						.map((r: any) => r.slug)
-						.join(", ") || "empty",
+				probe: `${BASE}/api/projects/search?q=${eq}&limit=${window}`,
+				expected:
+					mode === "set"
+						? `≥3 of the ${impliers.size} records implying '${q}' in top-${window}`
+						: `${p.slug} in top-${window} of ${d.meta?.counts?.total ?? "?"} matches (its own ${area} implies '${q}')`,
+				observed: returned.slice(0, 5).join(", ") || "empty",
 			});
 		} catch (e) {
 			tally("P-ATTR", false, {
