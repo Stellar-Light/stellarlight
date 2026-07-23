@@ -26,6 +26,7 @@ import {
 	findingId,
 	isSyntheticQuery,
 	type Severity,
+	SURFACES,
 	type Surface,
 	summarizeLedger,
 	upsertFindings,
@@ -380,6 +381,42 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 			}
 		}
 		console.log(`  · ${spec.source}: ${n} finding(s)`);
+	}
+
+	// CURATED findings — things a human observed that no detector can see: a
+	// taxonomy that can't express a category, a detector's own blind spot, a
+	// structural limit. The ledger was detector-only, so these had nowhere to
+	// live and evaporated into conversation. Each row carries its OWN surface
+	// and severity (a hand-filed finding isn't uniform the way one detector's
+	// output is), and they age/close through the SAME lifecycle as the rest —
+	// no special status, no exemption from the closing rate.
+	const manual = readJson(
+		join(ROOT, "improvements/ledger/manual-findings.json"),
+	);
+	if (manual && Array.isArray(manual.findings)) {
+		sources.push("manual");
+		let n = 0;
+		for (const row of manual.findings) {
+			const probe = str(row?.probe);
+			const surface = str(row?.surface) as Surface | undefined;
+			if (!probe || !surface || !SURFACES.includes(surface)) continue;
+			const sev = str(row?.severity);
+			detected.push({
+				id: findingId("manual", probe),
+				source: "manual",
+				surface,
+				probe,
+				failureMode: str(row?.mode) ?? "observed",
+				severity:
+					sev === "high" || sev === "low" ? (sev as Severity) : "medium",
+				detail: str(row?.detail),
+				firstSeen: nowIso,
+				lastSeen: nowIso,
+				status: "open",
+			});
+			n++;
+		}
+		console.log(`  · manual: ${n} finding(s)`);
 	}
 
 	// raven-drift (consumer surface): only ops MISSING beyond grace are findings;

@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-07-23T04:05:01.227Z",
-	"total": 292,
-	"open": 280,
+	"generatedAt": "2026-07-23T16:05:02.177Z",
+	"total": 294,
+	"open": 282,
 	"closed": 12,
 	"verified": 7,
 	"cleared": 5,
 	"closingRate": 0.04,
-	"oldestOpenDays": 0,
+	"oldestOpenDays": 1,
 	"inWave": 0,
 	"highOpen": 24,
 	"staleHighOpen": 0,
@@ -17,17 +17,22 @@
 			"total": 255
 		},
 		{
+			"surface": "consumer",
+			"open": 15,
+			"total": 15
+		},
+		{
 			"surface": "scf",
 			"open": 14,
 			"total": 14
 		},
 		{
-			"surface": "consumer",
-			"open": 14,
-			"total": 14
+			"surface": "code",
+			"open": 1,
+			"total": 1
 		},
 		{
-			"surface": "code",
+			"surface": "directory",
 			"open": 1,
 			"total": 1
 		},
