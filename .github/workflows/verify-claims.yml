@@ -60,3 +60,14 @@ jobs:
 
       - name: Verify every advertised artifact
         run: pnpm exec tsx scripts/verify-claims.ts
+
+      # Skills are instructions an agent executes literally. verify-claims
+      # checks that the URLs we advertise resolve; this checks that the
+      # INSTRUCTIONS inside a published skill still work — every curl it hands
+      # an agent, and every field name it tells one to read. Added after
+      # scf-claim-verifier shipped saying `scf.awarded` (the API serves
+      # `scfAwarded`), which would have made an SCF reviewer read undefined on
+      # every applicant and conclude "no funding history" for all 393 awarded
+      # projects. Prose is uncompiled, so nothing else would have caught it.
+      - name: Verify published skill instructions
+        run: pnpm exec tsx scripts/eval/skill-instructions.ts
