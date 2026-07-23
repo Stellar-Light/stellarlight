@@ -363,6 +363,43 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					admin: { description: "Holder change since the previous snapshot" },
 				},
+				{
+					name: "assetTrustlines",
+					type: "number",
+					admin: {
+						description:
+							"Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active) — reach is always >= active, so never read this one as the active-address count",
+					},
+				},
+				{
+					name: "assetPayments",
+					type: "number",
+					admin: {
+						description:
+							"Lifetime count of payment operations in this asset — the transaction-volume metric. A count, not an amount",
+					},
+				},
+				{
+					name: "assetPaymentsAmount",
+					type: "number",
+					admin: {
+						description:
+							"Lifetime payment volume in whole asset units (NOT USD — a unit count in the asset's own denomination, so it is not comparable across assets without a price)",
+					},
+				},
+				{
+					name: "assetPaymentsDelta",
+					type: "number",
+					admin: {
+						description:
+							"Payment-count change since the previous snapshot — the 'is it still being used' signal a lifetime total can't give",
+					},
+				},
+				{
+					name: "assetTrades",
+					type: "number",
+					admin: { description: "Lifetime count of trades in this asset" },
+				},
 				{ name: "source", type: "text" },
 				{ name: "asOf", type: "date" },
 				{

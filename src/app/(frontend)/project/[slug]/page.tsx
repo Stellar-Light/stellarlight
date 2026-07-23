@@ -870,37 +870,209 @@ export default async function ProjectDetailPage({
 											</a>
 										</div>
 									)}
+									{/* Q2 deliverable (PG review 2026-07-17): transaction volumes
+									    and active address counts on project profiles. Both come
+									    from the same dated stellar.expert snapshot as the rest of
+									    this card. "Active holders" and "Ever held" are deliberately
+									    separate rows — trustlines-ever is always >= holders-today,
+									    and collapsing them would overstate the active number. */}
+									{(typeof project.onchain.assetPayments === "number" ||
+										typeof project.onchain.assetHolders === "number") && (
+										<div>
+											<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+												Activity
+											</div>
+											<div className="grid grid-cols-2 gap-3">
+												{[
+													{
+														label: "Payments",
+														hint: "lifetime transaction count",
+														value: project.onchain.assetPayments,
+														delta: project.onchain.assetPaymentsDelta,
+													},
+													{
+														label: "Trades",
+														hint: "lifetime",
+														value: project.onchain.assetTrades,
+														delta: null,
+													},
+													{
+														label: "Active holders",
+														hint: "accounts holding a balance today",
+														value: project.onchain.assetHolders,
+														delta: project.onchain.assetHoldersDelta,
+													},
+													{
+														label: "Ever held",
+														hint: "accounts that opened a trustline",
+														value: project.onchain.assetTrustlines,
+														delta: null,
+													},
+												]
+													.filter((s) => typeof s.value === "number")
+													.map((s) => (
+														<div
+															key={s.label}
+															className="p-4 rounded-xl bg-background/50 border border-border/50"
+														>
+															<div className="text-xs text-muted-foreground">
+																{s.label}
+															</div>
+															<div className="mt-1 font-mono text-sm text-foreground">
+																{(s.value as number).toLocaleString()}
+																{typeof s.delta === "number" &&
+																	s.delta !== 0 && (
+																		<span className="ml-2 text-xs text-muted-foreground">
+																			{s.delta > 0 ? "+" : ""}
+																			{s.delta.toLocaleString()}
+																		</span>
+																	)}
+															</div>
+															<div className="mt-1 text-[11px] text-muted-foreground/70">
+																{s.hint}
+															</div>
+														</div>
+													))}
+											</div>
+											{typeof project.onchain.assetPaymentsAmount ===
+												"number" && (
+												<div className="mt-3 text-xs text-muted-foreground">
+													Lifetime payment volume:{" "}
+													<span className="font-mono text-foreground">
+														{project.onchain.assetPaymentsAmount.toLocaleString()}
+													</span>{" "}
+													{project.onchain.assetCode ?? "units"} — denominated
+													in the asset, not USD.
+												</div>
+											)}
+										</div>
+									)}
 									{project.onchain.contracts &&
 										project.onchain.contracts.length > 0 &&
-										project.onchain.contracts.map(
-											(contract: { address?: string | null }, idx: number) => (
-												<div key={idx}>
-													<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
-														Contract
-														{(project.onchain?.contracts?.length ?? 0) > 1
-															? ` ${idx + 1}`
-															: ""}
-													</div>
-													{contract.address ? (
-														<a
-															href={`https://stellar.expert/explorer/public/contract/${contract.address}`}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
-														>
-															<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
-																{contract.address}
-															</code>
-															<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
-														</a>
-													) : (
-														<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 break-all">
-															Unknown
-														</code>
+										(() => {
+											// Contract-based protocols (lending, DEX, oracles) issue
+											// no asset, so the asset Activity block above never fires
+											// for them. Their transaction-volume signal is contract
+											// events + subinvocations — which we already store per
+											// contract but only ever showed the address for. Roll it
+											// up so a Blend or a Phoenix gets an activity headline
+											// too, not four bare addresses.
+											const contracts = project.onchain.contracts as Array<{
+												address?: string | null;
+												label?: string | null;
+												events?: number | null;
+												eventsDelta?: number | null;
+												subinvocations?: number | null;
+												verifiedRepo?: string | null;
+											}>;
+											const totalEvents = contracts.reduce(
+												(s, c) =>
+													s + (typeof c.events === "number" ? c.events : 0),
+												0,
+											);
+											const totalSubinv = contracts.reduce(
+												(s, c) =>
+													s +
+													(typeof c.subinvocations === "number"
+														? c.subinvocations
+														: 0),
+												0,
+											);
+											return (
+												<>
+													{totalEvents > 0 && (
+														<div>
+															<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+																Contract activity
+															</div>
+															<div className="grid grid-cols-2 gap-3">
+																<div className="p-4 rounded-xl bg-background/50 border border-border/50">
+																	<div className="text-xs text-muted-foreground">
+																		Events
+																	</div>
+																	<div className="mt-1 font-mono text-sm text-foreground">
+																		{totalEvents.toLocaleString()}
+																	</div>
+																	<div className="mt-1 text-[11px] text-muted-foreground/70">
+																		lifetime, across {contracts.length} contract
+																		{contracts.length > 1 ? "s" : ""}
+																	</div>
+																</div>
+																<div className="p-4 rounded-xl bg-background/50 border border-border/50">
+																	<div className="text-xs text-muted-foreground">
+																		Subinvocations
+																	</div>
+																	<div className="mt-1 font-mono text-sm text-foreground">
+																		{totalSubinv.toLocaleString()}
+																	</div>
+																	<div className="mt-1 text-[11px] text-muted-foreground/70">
+																		lifetime
+																	</div>
+																</div>
+															</div>
+														</div>
 													)}
-												</div>
-											),
-										)}
+													{contracts.map((contract, idx) => (
+														<div key={contract.address ?? `contract-${idx}`}>
+															<div className="text-sm font-semibold mb-2.5 text-muted-foreground">
+																{contract.label
+																	? contract.label
+																	: `Contract${contracts.length > 1 ? ` ${idx + 1}` : ""}`}
+															</div>
+															{contract.address ? (
+																<a
+																	href={`https://stellar.expert/explorer/public/contract/${contract.address}`}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+																>
+																	<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
+																		{contract.address}
+																	</code>
+																	<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
+																</a>
+															) : (
+																<code className="block p-4 rounded-xl bg-background/50 font-mono text-sm border border-border/50 break-all">
+																	Unknown
+																</code>
+															)}
+															{(typeof contract.events === "number" ||
+																contract.verifiedRepo) && (
+																<div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+																	{typeof contract.events === "number" && (
+																		<span>
+																			{contract.events.toLocaleString()} events
+																			{typeof contract.eventsDelta ===
+																				"number" &&
+																				contract.eventsDelta !== 0 &&
+																				` (${contract.eventsDelta > 0 ? "+" : ""}${contract.eventsDelta.toLocaleString()})`}
+																		</span>
+																	)}
+																	{typeof contract.subinvocations ===
+																		"number" && (
+																		<span>
+																			{contract.subinvocations.toLocaleString()}{" "}
+																			subinvocations
+																		</span>
+																	)}
+																	{contract.verifiedRepo && (
+																		<a
+																			href={contract.verifiedRepo}
+																			target="_blank"
+																			rel="noopener noreferrer"
+																			className="inline-flex items-center gap-1 text-primary hover:underline"
+																		>
+																			<Github className="h-3 w-3" /> verified
+																			source
+																		</a>
+																	)}
+																</div>
+															)}
+														</div>
+													))}
+												</>
+											);
+										})()}
 								</div>
 							</CardContent>
 						</Card>

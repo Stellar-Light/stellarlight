@@ -69,6 +69,20 @@ interface ExpertAsset {
 	 * 2026-07-20 on AQUA); older/partner-era responses used an array. */
 	trustlines?: { total?: number; funded?: number } | number[] | number;
 	decimals?: number;
+	/** Lifetime count of payment operations — an unambiguous integer, so it is
+	 * the honest "transaction volume" for an asset. */
+	payments?: number | null;
+	/** Lifetime payment volume in RAW 7-decimal asset units. The /1e7 convention
+	 * is verified against `supply` on AQUA (both divide to the same magnitude as
+	 * the published circulating figure), so this is safe to convert. */
+	payments_amount?: string | number | null;
+	/** Lifetime count of trades — unambiguous integer. */
+	trades?: number | null;
+	/** NOT captured: `volume7d` and `traded_amount`. volume7d's denomination is
+	 * ambiguous on inspection (2.26e12 raw divides to either ~226k AQUA or
+	 * ~$226k USD, and the API does not state which). Shipping a number whose
+	 * unit we can't prove is the "ambiguous metric" bug class we already guard
+	 * against — left out until the denomination is confirmed upstream. */
 }
 
 /** 7-decimal raw integer → whole units (floored; display metric, not money math). */
@@ -211,6 +225,16 @@ async function run() {
 
 		let assetHolders: number | null = null;
 		let assetSupply: number | null = null;
+		// Q2 deliverable gap (PG review 2026-07-17): "transaction volumes and
+		// active address counts on project profiles aren't evident." Both were
+		// already in the stellar.expert responses we fetch — we were discarding
+		// them. assetTrustlines = every account that ever opened a trustline;
+		// assetHolders (funded) = accounts actually holding a balance today.
+		// Keeping both is the honest pair: "reach" vs "active".
+		let assetPayments: number | null = null;
+		let assetPaymentsAmount: number | null = null;
+		let assetTrades: number | null = null;
+		let assetTrustlines: number | null = null;
 		if (!failed && keys.asset) {
 			const a = await fetchJson<ExpertAsset>(
 				`${EXPERT}/asset/${keys.asset.code}-${keys.asset.issuer}`,
@@ -232,6 +256,15 @@ async function run() {
 							: tl;
 				assetHolders = typeof rawHolders === "number" ? rawHolders : null;
 				assetSupply = toWholeUnits(a.supply);
+				assetTrustlines =
+					tl && typeof tl === "object" && !Array.isArray(tl)
+						? typeof tl.total === "number"
+							? tl.total
+							: null
+						: null;
+				assetPayments = typeof a.payments === "number" ? a.payments : null;
+				assetTrades = typeof a.trades === "number" ? a.trades : null;
+				assetPaymentsAmount = toWholeUnits(a.payments_amount ?? undefined);
 			}
 		}
 
@@ -274,10 +307,20 @@ async function run() {
 			typeof assetHolders === "number"
 				? assetHolders - prior.assetHolders
 				: null;
+		// Payments-over-the-window is the actual "transaction volume" signal; the
+		// lifetime count alone can't answer "is this still being used?"
+		const assetPaymentsDelta =
+			priorAsOf &&
+			typeof prior?.assetPayments === "number" &&
+			typeof assetPayments === "number"
+				? assetPayments - prior.assetPayments
+				: null;
 
 		const summary = [
 			contracts.length ? `${contracts.length} contracts` : null,
-			keys.asset ? `${keys.asset.code} holders=${assetHolders}` : null,
+			keys.asset
+				? `${keys.asset.code} holders=${assetHolders} trustlines=${assetTrustlines} payments=${assetPayments} trades=${assetTrades}`
+				: null,
 		]
 			.filter(Boolean)
 			.join(", ");
@@ -299,6 +342,11 @@ async function run() {
 						assetHolders,
 						assetSupply,
 						assetHoldersDelta,
+						assetTrustlines,
+						assetPayments,
+						assetPaymentsAmount,
+						assetPaymentsDelta,
+						assetTrades,
 						contracts,
 						source: "stellar.expert",
 						asOf,
