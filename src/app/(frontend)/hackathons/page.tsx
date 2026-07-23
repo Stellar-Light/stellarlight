@@ -58,6 +58,45 @@ const getCachedDoraHackathons = unstable_cache(
 	{ revalidate: 3600, tags: ["hackathons"] },
 );
 
+// Cold-cache guard. Caching fixed the steady state (0.3-0.8s), but the FIRST
+// request after a deploy still paid the full uncached assembly — measured 28s,
+// which is both a bad first impression and enough to trip the 15s liveness
+// check. So bound how long any single render will wait for DoraHacks: past the
+// deadline we render from curated data instead of blocking.
+//
+// The abandoned promise is deliberately NOT cancelled — it keeps running and
+// still populates unstable_cache, so the visitor who eats the timeout warms the
+// cache for everyone behind them. Only a genuinely cold render degrades, and it
+// degrades to real curated content rather than a spinner or an error.
+const DORA_DEADLINE_MS = 6000;
+
+async function getDoraWithDeadline(): Promise<{
+	hackathons: Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>;
+	recentWinners: RecentHackathonWinners;
+	degraded: boolean;
+}> {
+	const real = getCachedDoraHackathons().then((d) => ({
+		...d,
+		degraded: false,
+	}));
+	const fallback = new Promise<{
+		hackathons: Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>;
+		recentWinners: RecentHackathonWinners;
+		degraded: boolean;
+	}>((resolve) =>
+		setTimeout(
+			() =>
+				resolve({
+					hackathons: [],
+					recentWinners: LATEST_WINNERS,
+					degraded: true,
+				}),
+			DORA_DEADLINE_MS,
+		),
+	);
+	return Promise.race([real, fallback]);
+}
+
 /**
  * Normalize a hackathon name to a comparable key so we can match a DoraHacks
  * entry to a curated Payload Hackathon (which has its own slug + tracks
@@ -198,7 +237,7 @@ export default async function HackathonsPage({
 	// DoraHacks assembly comes from the hourly cache (see getCachedDoraHackathons);
 	// our own curated data stays a fresh Mongo read.
 	const [dora, curatedData] = await Promise.all([
-		getCachedDoraHackathons(),
+		getDoraWithDeadline(),
 		fetchCuratedHackathons(),
 	]);
 	const hackathons = dora.hackathons;
@@ -320,6 +359,17 @@ export default async function HackathonsPage({
 					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
+
+				{/* An empty list because we timed out reads as "no hackathons exist",
+				    which is a different and false claim. Say which one it is. */}
+				{dora.degraded && (
+					<div className="mb-8 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+						The live hackathon feed is still loading and took longer than
+						expected, so this view is incomplete rather than empty.{" "}
+						<strong className="text-foreground">Refresh in a moment</strong> for
+						the full list.
+					</div>
+				)}
 
 				<div className="mb-10">
 					<h1
