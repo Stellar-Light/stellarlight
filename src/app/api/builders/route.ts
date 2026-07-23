@@ -12,6 +12,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { applyBuilderNameOverride } from "@/data/builder-name-overrides";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	type BuilderProject,
@@ -233,22 +234,32 @@ export async function GET(req: NextRequest) {
 					is_featured?: boolean;
 					projects?: BuilderProject[];
 				}>
-			).map((b) => ({
-				githubUsername: b.github_username,
-				displayName: b.display_name ?? b.github_username,
-				bio: b.bio ?? null,
-				roleTitle: b.role_title ?? null,
-				location: b.location ?? null,
-				websiteUrl: b.website_url ?? null,
-				twitterHandle: b.twitter_handle ?? null,
-				avatarUrl: b.avatar_url ?? null,
-				isFeatured: !!b.is_featured,
-				projectCount: (b.projects ?? []).length,
-				projects: b.projects ?? [],
-				url: `https://stellarlight.xyz/builders/${b.github_username}`,
-				match: null,
-				codeEvidence: null,
-			}));
+			).map((b) => {
+				// Overlay a curated real name when the stored profile is thin (a
+				// GitHub-derived builder falls back to their bare handle), so the
+				// person is findable by the name humans use — not only their handle.
+				const named = applyBuilderNameOverride({
+					githubUsername: b.github_username,
+					displayName: b.display_name ?? b.github_username,
+					bio: b.bio ?? null,
+				});
+				return {
+					githubUsername: b.github_username,
+					displayName: named.displayName,
+					bio: named.bio,
+					roleTitle: b.role_title ?? null,
+					location: b.location ?? null,
+					websiteUrl: b.website_url ?? null,
+					twitterHandle: b.twitter_handle ?? null,
+					avatarUrl: b.avatar_url ?? null,
+					isFeatured: !!b.is_featured,
+					projectCount: (b.projects ?? []).length,
+					projects: b.projects ?? [],
+					url: `https://stellarlight.xyz/builders/${b.github_username}`,
+					match: null,
+					codeEvidence: null,
+				};
+			});
 
 			// Free-text filter across bio + role + projects — done in-memory so
 			// we don't need full-text indexes in the DB. sls-041: while filtering,
