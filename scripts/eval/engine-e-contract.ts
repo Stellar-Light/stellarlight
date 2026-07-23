@@ -167,6 +167,13 @@ async function main() {
 	const silentParams: Finding[] = [];
 	const invalidAccepted: Finding[] = [];
 	const missingFields: Finding[] = [];
+	// Optional/nullable fields absent from a sample are SPEC-COMPLIANT (OpenAPI
+	// lets an optional field be absent — a conditional field like meta.
+	// fallbackChannels or repos/explain `note` only appears in certain response
+	// states). They are NOT drift, so they don't belong in missingFields (which
+	// the improvement-ledger ingests as HIGH findings). Tracked here informational
+	// only. Only a REQUIRED-but-absent field is a real contract violation.
+	const optionalAbsent: Finding[] = [];
 	const undocumentedFields: Finding[] = [];
 	const ambiguous: Finding[] = [];
 	const skipped: string[] = [];
@@ -354,14 +361,15 @@ async function main() {
 			for (const key of Object.keys(docProps)) {
 				fieldsChecked++;
 				if (live && typeof live === "object" && !(key in live)) {
-					// A required-but-absent prop is hard drift; an optional one may
-					// legitimately be conditional on inputs — label honestly.
-					missingFields.push({
+					// Required-but-absent = hard drift (missingFields). Optional-but-
+					// absent = spec-compliant (a nullable field MAY be absent; it may
+					// be conditional on inputs) → informational only, not a finding.
+					(required.includes(key) ? missingFields : optionalAbsent).push({
 						op: opId,
 						field: `${prefix}${key}`,
 						evidence: required.includes(key)
 							? `documented as REQUIRED in the spec, absent from the live response (${bodyUrl})`
-							: `documented in the spec, absent from the live response (${bodyUrl}) — optional in spec, may be conditional on inputs`,
+							: `documented optional field absent from this sample (${bodyUrl}) — allowed by the schema (conditional/unreached), not drift`,
 					});
 				}
 			}
@@ -402,12 +410,12 @@ async function main() {
 				for (const ik of Object.keys(item.properties)) {
 					fieldsChecked++;
 					if (!liveKeys.has(ik)) {
-						missingFields.push({
+						(required.includes(ik) ? missingFields : optionalAbsent).push({
 							op: opId,
 							field: `${key}[].${ik}`,
 							evidence: required.includes(ik)
 								? `documented as REQUIRED on items, absent from all ${rows.length} sampled rows (${bodyUrl})`
-								: `documented item property absent from all ${rows.length} sampled rows (${bodyUrl}) — may be conditional`,
+								: `documented optional item property absent from all ${rows.length} sampled rows (${bodyUrl}) — allowed by the schema, not drift`,
 						});
 					}
 				}
@@ -462,6 +470,8 @@ async function main() {
 		silentParams,
 		invalidAccepted,
 		missingFields,
+		// Spec-compliant optional-absences — informational, NOT drift/findings.
+		optionalAbsent,
 		undocumentedFields,
 		ambiguous,
 	};
