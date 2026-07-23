@@ -37,6 +37,7 @@ loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
+import { isBotWall } from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -301,14 +302,9 @@ async function checkUrl(url: string): Promise<CheckResult> {
 		});
 
 		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
-		// Retry with GET if HEAD says it's broken.
-		if (
-			res.status >= 400 &&
-			res.status !== 401 &&
-			res.status !== 403 &&
-			res.status !== 429 &&
-			res.status < 500
-		) {
+		// Retry with GET if HEAD says it's broken — but not through a bot wall,
+		// where a second request just burns the target's rate limit.
+		if (res.status >= 400 && res.status < 500 && !isBotWall(res.status)) {
 			const getRes = await fetch(url, {
 				method: "GET",
 				redirect: "manual",
@@ -360,12 +356,16 @@ function summarize(res: Response, requestedUrl: string): CheckResult {
 	// Bot-protection walls (X/Twitter, LinkedIn, Cloudflare challenges): the
 	// link may be perfectly alive but unverifiable by a bot. Distinct status so
 	// it never pollutes the error count — "can't verify" is not "dead".
-	if (
-		res.status === 401 ||
-		res.status === 403 ||
-		res.status === 429 ||
-		res.status === 999
-	) {
+	// This file had the idea first; isBotWall now shares the set with every
+	// other detector (src/lib/probe-external, class 32).
+	//
+	// NOTE the deliberate difference from probeExternal: a 5xx stays in `error`
+	// here rather than becoming unverifiable. For a LINK checker, a URL that
+	// serves 500 every day IS a broken link a curator should fix — the right
+	// upgrade is persistence (N consecutive unverifiable runs → finding) using
+	// the LinkChecks history, not a per-probe reclassification. Tracked as
+	// follow-up; do not "fix" this by widening isBotWall.
+	if (isBotWall(res.status)) {
 		return {
 			url,
 			status: "blocked",
