@@ -274,6 +274,51 @@ server.registerTool(
 	},
 );
 
+// 2b. search_hackathon_builds — prior-art over hackathon prototypes
+server.registerTool(
+	"search_hackathon_builds",
+	{
+		title: "Search what was built at Stellar hackathons",
+		description:
+			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — most never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly` restricts to prize winners; `track` filters by track. An empty result is a real whitespace signal. For SHIPPED products in the directory → use search_projects.",
+		inputSchema: {
+			q: z
+				.string()
+				.optional()
+				.describe(
+					"Topic to search build names + descriptions (prior-art lookup).",
+				),
+			winnersOnly: z
+				.boolean()
+				.optional()
+				.describe("Only prize-winning builds."),
+			track: z
+				.string()
+				.optional()
+				.describe("Filter by hackathon track (substring match)."),
+			limit: z
+				.number()
+				.int()
+				.min(1)
+				.max(100)
+				.optional()
+				.describe("Max builds (default 20)."),
+		},
+	},
+	async ({ q, winnersOnly, track, limit }) => {
+		const params = new URLSearchParams();
+		if (q) params.set("q", q);
+		if (winnersOnly) params.set("winnersOnly", "1");
+		if (track) params.set("track", track);
+		if (limit !== undefined) params.set("limit", String(limit));
+		const qs = params.toString();
+		const result = await callScout(
+			`/api/hackathons/builds${qs ? `?${qs}` : ""}`,
+		);
+		return asToolResult(result);
+	},
+);
+
 // 3. get_hackathon — detail for one hackathon
 server.registerTool(
 	"get_hackathon",

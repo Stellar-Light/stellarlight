@@ -924,6 +924,87 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/hackathons/builds": {
+			get: {
+				operationId: "searchHackathonBuilds",
+				tags: ["Hackathons"],
+				summary:
+					"Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
+				description:
+					"Topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly=1` = prize winners; `track` filters by track. Absence is a real whitespace signal, not proof it was never tried. For SHIPPED products in the directory → use searchProjects.",
+				"x-routing": {
+					purpose:
+						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
+					keywords: [
+						"hackathon builds",
+						"buidls",
+						"hackathon projects",
+						"prototypes",
+						"was this built at a hackathon",
+						"has anyone built",
+						"prior art",
+						"already built",
+						"hackathon submissions",
+						"winning projects",
+						"winning builds",
+						"hackathon winners by topic",
+					],
+					useWhen: [
+						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
+						"what got built around <topic> at hackathons",
+						"which hackathon projects did <topic>",
+						"winning builds for <topic>",
+					],
+					notFor: [
+						"shipped/live products in the directory -> searchProjects",
+						"one event's full detail/winners -> getHackathon",
+						"listing/comparing the events -> getHackathons / compareHackathons",
+					],
+					exampleQuestions: [
+						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
+						"What prediction markets were built at Stellar hackathons?",
+						"Show me winning ZK privacy builds.",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: false,
+						description:
+							"Topic to search build names + descriptions (prior-art lookup).",
+						schema: { type: "string" },
+					},
+					{
+						name: "winnersOnly",
+						in: "query",
+						required: false,
+						description: "Set to 1 to return only prize-winning builds.",
+						schema: { type: "string", enum: ["1", "true"] },
+					},
+					{
+						name: "track",
+						in: "query",
+						required: false,
+						description: "Filter by hackathon track (substring match).",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						required: false,
+						description: "Max builds (default 20, max 100).",
+						schema: { type: "integer", default: 20, maximum: 100 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Matching hackathon builds",
+						content: { "application/json": { schema: { type: "object" } } },
+					},
+				},
+			},
+		},
 		"/api/builders": {
 			get: {
 				operationId: "getBuilders",

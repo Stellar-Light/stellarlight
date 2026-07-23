@@ -170,6 +170,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hackathons/builds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
+         * @description Topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly=1` = prize winners; `track` filters by track. Absence is a real whitespace signal, not proof it was never tried. For SHIPPED products in the directory → use searchProjects.
+         */
+        get: operations["searchHackathonBuilds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/builders": {
         parameters: {
             query?: never;
@@ -1661,6 +1681,35 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Comparison rollup */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    searchHackathonBuilds: {
+        parameters: {
+            query?: {
+                /** @description Topic to search build names + descriptions (prior-art lookup). */
+                q?: string;
+                /** @description Set to 1 to return only prize-winning builds. */
+                winnersOnly?: "1" | "true";
+                /** @description Filter by hackathon track (substring match). */
+                track?: string;
+                /** @description Max builds (default 20, max 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matching hackathon builds */
             200: {
                 headers: {
                     [name: string]: unknown;
