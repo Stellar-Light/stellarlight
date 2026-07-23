@@ -327,7 +327,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		repository:
 			"https://github.com/lumenloop/lumenloop-skills/tree/main/skills/stellar-content-auditor",
 		homepage: "https://github.com/lumenloop/lumenloop-skills",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["content", "audit", "citations", "lumenloop"],
 	},
@@ -351,18 +351,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"For SCF reviewers — Pilots, Navigators, anyone scoring a round. Turns the assertions in a submission into checks against live data: prior art and duplication, the applicant's own SCF funding history, whether a linked repo is real and recent Soroban code (from a source scan, not stars), whether a project is still alive, and whether a mainnet claim shows on-chain activity. Runs standalone or inside Raven, which calls the same data layer. Ships measured coverage and honesty rules, because absence of a record is never evidence of absence.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-claim-verifier",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["agent", "founder"],
 		tags: ["SCF", "review", "verification", "grants", "due-diligence"],
 	},
@@ -375,18 +375,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Round numbers, RFP categories, deadlines and award rules rotate every quarter, and a dated example read as current produces confidently wrong advice. This resolves them from the live handbook and RFP feed instead, so every other SCF skill works from what is true today rather than what was true when it was written.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-live-context",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["agent", "founder"],
 		tags: ["SCF", "funding", "grants", "freshness", "RFP"],
 	},
@@ -399,18 +399,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Walks you through a full Stellar Community Fund Build Award application one section at a time — problem, solution, integration, team, traction, budget, and ecosystem commitment — producing submission-ready copy grounded in what SCF reviewers actually score.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-submission-drafter",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "grants", "application", "drafting"],
 	},
@@ -422,18 +422,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Drafts a compelling Stellar Community Fund Interest Form — the gate to a Build Award invitation. Sharpens the one-liner, problem framing, and Stellar-fit so the SCF team invites you to the full application.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-interest-form-drafter",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "grants", "interest-form"],
 	},
@@ -446,18 +446,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Runs your draft through a simulation of the Stellar Community Fund's manual prescreen — the completeness and eligibility pass an application must clear before review — so you catch disqualifiers and gaps before you submit, not after.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-prescreen-checker",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "eligibility", "prescreen"],
 	},
@@ -470,18 +470,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Builds a defensible Stellar Community Fund budget from the bottom up — hourly/role rates, per-deliverable cost breakdowns, and mapping to the award's tranche structure — so the numbers hold up under reviewer scrutiny.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-budget-builder",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "budget", "tranches"],
 	},
@@ -494,18 +494,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Maps the competitive landscape for your Stellar Community Fund idea — who else is building this on Stellar and beyond — and helps you articulate crisp differentiation, the section SCF reviewers use to judge whether an award is additive.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-competitor-analyst",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "competitors", "differentiation"],
 	},
@@ -517,18 +517,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Prepares the materials an approved Stellar Community Fund Referrer (Ambassador, Navigator, Pilot, partner, or SDF personnel) needs to refer you — a tight brief that makes the referral easy to give and credible to the SCF team.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-referral-preparer",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "referral"],
 	},
@@ -541,18 +541,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"Writes the tranche submission reports a funded Stellar Community Fund project owes between payments — deliverable-by-deliverable evidence and completion documentation formatted the way the SCF team expects, so your next tranche clears cleanly.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-tranche-reporter",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "funding", "tranches", "reporting"],
 	},
@@ -565,18 +565,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"For reviewers: evaluates one Stellar Community Fund Build Award application with structured scoring across integration fit, architecture, team, traction, budget, and ecosystem commitment — the same axes SCF weighs — for consistent, defensible verdicts.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-reviewer",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "review", "scoring", "evaluation"],
 	},
@@ -589,18 +589,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"For reviewers running a whole Stellar Community Fund round: takes a CSV export and orchestrates parallel batch reviews, cross-application calibration, and a final ranking across Open, Integration, and RFP tracks with track-specific scoring. Pairs with the scf-review-boilerplate for a turnkey setup.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/scf-round-reviewer",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["founder", "agent"],
 		tags: ["SCF", "review", "ranking", "round", "calibration"],
 	},
@@ -613,18 +613,18 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 			"A utility for SCF reviewers and applicants: reliably fetches the external documents submissions link out to — Google Docs, Google Drive PDFs, GitHub, Notion, IPFS — using curl for the Google cases that normally fail, so review context is never missing.",
 		source: "stellarlight",
 		kind: "skill-md",
-		install:
-			"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund",
+		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
 		installAlt: [
 			{
-				label: "Install plugin",
-				command: "/plugin install awesome-stellar-community-fund@awesome-scf",
+				label: "Claude Code plugin",
+				command:
+					"/plugin marketplace add Stellar-Light/awesome-stellar-community-fund && /plugin install awesome-stellar-community-fund@awesome-scf",
 			},
 		],
 		repository:
 			"https://github.com/Stellar-Light/awesome-stellar-community-fund/tree/main/skills/fetch-external-doc",
 		homepage: "https://github.com/Stellar-Light/awesome-stellar-community-fund",
-		compatibility: ["Claude Code"],
+		compatibility: ["Claude Code", "Codex", "Cursor", "Amp", "Antigravity"],
 		targetUser: ["dev", "agent"],
 		tags: ["SCF", "review", "utility", "fetch"],
 	},
