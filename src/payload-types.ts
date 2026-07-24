@@ -76,6 +76,7 @@ export interface Config {
     'award-rounds': AwardRound;
     'award-nominees': AwardNominee;
     'award-voters': AwardVoter;
+    'award-ballots': AwardBallot;
     blog: Blog;
     builders: Builder;
     'rss-feeds': RssFeed;
@@ -116,6 +117,7 @@ export interface Config {
     'award-rounds': AwardRoundsSelect<false> | AwardRoundsSelect<true>;
     'award-nominees': AwardNomineesSelect<false> | AwardNomineesSelect<true>;
     'award-voters': AwardVotersSelect<false> | AwardVotersSelect<true>;
+    'award-ballots': AwardBallotsSelect<false> | AwardBallotsSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     builders: BuildersSelect<false> | BuildersSelect<true>;
     'rss-feeds': RssFeedsSelect<false> | RssFeedsSelect<true>;
@@ -957,6 +959,10 @@ export interface AwardRound {
    */
   status: 'draft' | 'open' | 'closed';
   /**
+   * Pilot/test round — stamps every ballot on-chain with an 'i3-test' memo so throwaway votes are obvious. Leave OFF for the real round.
+   */
+  testMode?: boolean | null;
+  /**
    * How many nominees a voter may pick per category. Only one-per-category exists today; the field leaves room for future modes without a schema change.
    */
   ballotMode: 'one-per-category';
@@ -1021,6 +1027,69 @@ export interface AwardVoter {
    * Human label, e.g. "Pilot — Decaf team" (never public).
    */
   label?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Recorded ballots (one per address per round, updated on revote). The on-chain testnet entries remain the source of truth; this is the queryable mirror.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-ballots".
+ */
+export interface AwardBallot {
+  id: string;
+  round: string | AwardRound;
+  /**
+   * Voter's Stellar public key (G...). TESTNET account.
+   */
+  address: string;
+  /**
+   * The validated ballot as { categoryKey: nomineeSlug }, mirroring the on-chain manageData entries.
+   */
+  selections:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Testnet transaction hash of the most recent submission.
+   */
+  txHash?: string | null;
+  /**
+   * How many times this address has cast/changed its ballot.
+   */
+  submissions?: number | null;
+  /**
+   * First recorded vote.
+   */
+  firstSubmittedAt?: string | null;
+  /**
+   * Most recent vote.
+   */
+  lastSubmittedAt?: string | null;
+  /**
+   * Every submission this address made, oldest first.
+   */
+  history?:
+    | {
+        txHash?: string | null;
+        selections?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2177,6 +2246,10 @@ export interface PayloadLockedDocument {
         value: string | AwardVoter;
       } | null)
     | ({
+        relationTo: 'award-ballots';
+        value: string | AwardBallot;
+      } | null)
+    | ({
         relationTo: 'blog';
         value: string | Blog;
       } | null)
@@ -2580,6 +2653,7 @@ export interface AwardRoundsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   status?: T;
+  testMode?: T;
   ballotMode?: T;
   categories?:
     | T
@@ -2614,6 +2688,29 @@ export interface AwardVotersSelect<T extends boolean = true> {
   round?: T;
   address?: T;
   label?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "award-ballots_select".
+ */
+export interface AwardBallotsSelect<T extends boolean = true> {
+  round?: T;
+  address?: T;
+  selections?: T;
+  txHash?: T;
+  submissions?: T;
+  firstSubmittedAt?: T;
+  lastSubmittedAt?: T;
+  history?:
+    | T
+    | {
+        txHash?: T;
+        selections?: T;
+        at?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

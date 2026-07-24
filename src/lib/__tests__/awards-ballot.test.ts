@@ -15,6 +15,7 @@ import {
 	Account,
 	Asset,
 	Keypair,
+	Memo,
 	Networks,
 	Operation,
 	TransactionBuilder,
@@ -27,6 +28,7 @@ import {
 	dataKey,
 	decodeAccountVotes,
 	roundOpenState,
+	TEST_BALLOT_MEMO,
 	tallyRound,
 	validateSelections,
 	validateSignedBallot,
@@ -530,6 +532,107 @@ describe("Horizon helpers", () => {
 		if (!res.ok) {
 			expect(res.resultCodes).toContain("tx_bad_seq");
 			expect(res.status).toBe(400);
+		}
+	});
+});
+
+// ── test-round memo marker ──────────────────────────────────────────────────
+
+describe("test-round memo", () => {
+	const testRound: BallotRound = { ...round, testMode: true };
+	const testCtx = { round: testRound, nominees, whitelist };
+
+	const memoText = (tx: { memo: { type: string; value?: unknown } }) => {
+		if (tx.memo.type !== "text") return null;
+		const v = tx.memo.value;
+		return Buffer.isBuffer(v) ? v.toString("utf8") : String(v ?? "");
+	};
+
+	it("buildBallotTx adds NO memo on a normal round", () => {
+		const tx = buildBallotTx({
+			round,
+			address: voter.publicKey(),
+			sequence: "7",
+			selections: { impact: "decaf" },
+		});
+		expect(tx.memo.type).toBe("none");
+	});
+
+	it("buildBallotTx stamps the test memo on a testMode round", () => {
+		const tx = buildBallotTx({
+			round: testRound,
+			address: voter.publicKey(),
+			sequence: "7",
+			selections: { impact: "decaf" },
+		});
+		expect(memoText(tx)).toBe(TEST_BALLOT_MEMO);
+	});
+
+	it("accepts a test-round ballot carrying the test memo", () => {
+		const tx = buildBallotTx({
+			round: testRound,
+			address: voter.publicKey(),
+			sequence: "1234567890",
+			selections: { impact: "decaf", innovation: "blend" },
+		});
+		tx.sign(voter);
+		const verdict = validateSignedBallot(tx.toXDR(), testCtx);
+		expect(verdict.ok).toBe(true);
+		if (verdict.ok) {
+			expect(verdict.selections).toEqual({
+				impact: "decaf",
+				innovation: "blend",
+			});
+		}
+	});
+
+	it("rejects a test-round ballot with NO memo", () => {
+		// Build by hand so no memo is attached, then validate against the test round.
+		const account = new Account(voter.publicKey(), "1234567890");
+		const tx = new TransactionBuilder(account, {
+			fee: "10000",
+			networkPassphrase: Networks.TESTNET,
+		})
+			.addOperation(
+				Operation.manageData({
+					name: dataKey(round.slug, "impact"),
+					value: "decaf",
+				}),
+			)
+			.setTimeout(300)
+			.build();
+		tx.sign(voter);
+		const verdict = validateSignedBallot(tx.toXDR(), testCtx);
+		expect(verdict.ok).toBe(false);
+		if (!verdict.ok) {
+			expect(verdict.errors.join(" ")).toContain(TEST_BALLOT_MEMO);
+		}
+	});
+
+	it("rejects a NORMAL-round ballot that smuggles a memo", () => {
+		const account = new Account(voter.publicKey(), "1234567890");
+		const tx = new TransactionBuilder(account, {
+			fee: "10000",
+			networkPassphrase: Networks.TESTNET,
+		})
+			.addOperation(
+				Operation.manageData({
+					name: dataKey(round.slug, "impact"),
+					value: "decaf",
+				}),
+			)
+			.addMemo(Memo.text("sneaky"))
+			.setTimeout(300)
+			.build();
+		tx.sign(voter);
+		const verdict = validateSignedBallot(tx.toXDR(), {
+			round,
+			nominees,
+			whitelist,
+		});
+		expect(verdict.ok).toBe(false);
+		if (!verdict.ok) {
+			expect(verdict.errors.join(" ")).toContain("must not carry a memo");
 		}
 	});
 });

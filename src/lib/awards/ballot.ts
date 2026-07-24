@@ -36,6 +36,7 @@
 import {
 	Account,
 	Keypair,
+	Memo,
 	Operation,
 	StrKey,
 	type Transaction,
@@ -45,6 +46,15 @@ import { AWARDS_NETWORK_PASSPHRASE } from "./stellar";
 
 /** manageData caps both key and value at 64 bytes. */
 const MANAGE_DATA_MAX_BYTES = 64;
+
+/**
+ * Memo stamped on ballots for a TEST round (round.testMode). It marks the
+ * transaction on-chain as a test cast — the whole thing already runs on
+ * testnet, but this makes a throwaway pilot-wallet vote obvious in the tx
+ * history and distinct from the real round's ballots, which carry NO memo.
+ * MEMO_TEXT caps at 28 bytes; this is 7.
+ */
+export const TEST_BALLOT_MEMO = "i3-test";
 
 /** Voter gets 5 minutes to review + sign before the tx expires. */
 const BALLOT_TIMEOUT_SECONDS = 300;
@@ -65,6 +75,11 @@ export interface BallotRound {
 	categories: RoundCategory[];
 	opensAt?: string | null;
 	closesAt?: string | null;
+	/**
+	 * Test round — ballots are stamped with the TEST_BALLOT_MEMO and the relay
+	 * requires it. Defaults false; the real round carries no memo.
+	 */
+	testMode?: boolean;
 }
 
 export interface BallotNominee {
@@ -196,6 +211,10 @@ export function buildBallotTx(params: {
 			}),
 		);
 	}
+	// Test round → stamp the ballot as a test cast (see TEST_BALLOT_MEMO).
+	if (round.testMode) {
+		builder.addMemo(Memo.text(TEST_BALLOT_MEMO));
+	}
 	return builder.setTimeout(BALLOT_TIMEOUT_SECONDS).build();
 }
 
@@ -291,9 +310,25 @@ export function validateSignedBallot(
 		return { ok: false, errors: ["could not verify transaction signatures"] };
 	}
 
-	// No memo smuggling: ballots carry no memo.
+	// Memo policy. Real round: NO memo (anti-smuggling). Test round: exactly the
+	// TEST_BALLOT_MEMO text, so a test cast self-identifies on-chain while an
+	// arbitrary smuggled memo is still refused.
 	// biome-ignore lint/suspicious/noExplicitAny: memo type narrows awkwardly
-	if ((tx.memo as any)?.type && (tx.memo as any).type !== "none") {
+	const memo = tx.memo as any;
+	const memoType = memo?.type as string | undefined;
+	if (round.testMode) {
+		const memoText =
+			memoType === "text"
+				? Buffer.isBuffer(memo.value)
+					? memo.value.toString("utf8")
+					: String(memo.value ?? "")
+				: null;
+		if (memoText !== TEST_BALLOT_MEMO) {
+			errors.push(
+				`test-round ballots must carry the "${TEST_BALLOT_MEMO}" memo`,
+			);
+		}
+	} else if (memoType && memoType !== "none") {
 		errors.push("ballots must not carry a memo");
 	}
 
