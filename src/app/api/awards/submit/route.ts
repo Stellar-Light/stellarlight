@@ -15,6 +15,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { validateSignedBallot } from "@/lib/awards/ballot";
+import { recordBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	submitToTestnetHorizon,
@@ -99,6 +100,15 @@ export async function POST(req: NextRequest) {
 			{ status: seqStale || underfunded ? 409 : 502 },
 		);
 	}
+
+	// Mirror the on-chain vote into Payload (best-effort — the vote already
+	// landed on testnet; recordBallot swallows its own errors and never throws).
+	await recordBallot({
+		roundSlug: loaded.round.slug,
+		address: verdict.source,
+		selections: verdict.selections,
+		txHash: result.hash,
+	});
 
 	return NextResponse.json(
 		{

@@ -45,6 +45,7 @@ function toBallotRound(doc: any): BallotRound & { title: string } {
 		),
 		opensAt: doc.opensAt ?? null,
 		closesAt: doc.closesAt ?? null,
+		testMode: !!doc.testMode,
 	};
 }
 

@@ -20,10 +20,13 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
 	ArrowUpRight,
 	Check,
+	ChevronDown,
 	ChevronRight,
+	Copy,
 	Eye,
 	Info,
 	Loader2,
+	LogOut,
 	Trophy,
 	Wallet,
 	X,
@@ -112,6 +115,13 @@ type Phase =
 const EASE = [0.25, 0.46, 0.45, 0.94] as const;
 const SPRING = { type: "spring", stiffness: 380, damping: 30 } as const;
 
+// Votes are TESTNET transactions; every proof link points at stellar.expert's
+// testnet explorer. Kept in one place so the tx and account links can't drift.
+const EXPLORER = "https://stellar.expert/explorer/testnet";
+const explorerTxUrl = (hash: string) => `${EXPLORER}/tx/${hash}`;
+const explorerAccountUrl = (address: string) =>
+	`${EXPLORER}/account/${address}`;
+
 function shortAddress(address: string): string {
 	return `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
@@ -184,6 +194,126 @@ function I3Mark({ className = "" }: { className?: string }) {
 
 // ── Top bar (persistent) ───────────────────────────────────────────────────
 
+/**
+ * Connected-wallet control: the address pill opens a small menu (full address,
+ * copy, verify-on-chain, disconnect). Previously a bare click on the pill
+ * disconnected instantly with no affordance — easy to trigger by accident and
+ * with no way to see or copy the full key. This is the RainbowKit pattern:
+ * the pill is a disclosure, the destructive action lives one step in.
+ */
+function ConnectedWallet({
+	address,
+	onDisconnect,
+}: {
+	address: string;
+	onDisconnect: () => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const [copied, setCopied] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		const onDown = (e: MouseEvent) => {
+			if (ref.current && !ref.current.contains(e.target as Node))
+				setOpen(false);
+		};
+		const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+		document.addEventListener("mousedown", onDown);
+		document.addEventListener("keydown", onKey);
+		return () => {
+			document.removeEventListener("mousedown", onDown);
+			document.removeEventListener("keydown", onKey);
+		};
+	}, [open]);
+
+	const copy = useCallback(async () => {
+		try {
+			await navigator.clipboard.writeText(address);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 1600);
+		} catch {
+			// clipboard blocked — the address is visible to select by hand.
+		}
+	}, [address]);
+
+	return (
+		<div ref={ref} className="relative">
+			<button
+				type="button"
+				onClick={() => setOpen((v) => !v)}
+				aria-haspopup="menu"
+				aria-expanded={open}
+				className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-2.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
+			>
+				<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+				{shortAddress(address)}
+				<ChevronDown
+					className={`h-3.5 w-3.5 text-neutral-400 transition-transform ${
+						open ? "rotate-180" : ""
+					}`}
+				/>
+			</button>
+			<AnimatePresence>
+				{open && (
+					<motion.div
+						initial={{ opacity: 0, y: -6, scale: 0.97 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: -6, scale: 0.97 }}
+						transition={{ duration: 0.16, ease: EASE }}
+						role="menu"
+						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
+					>
+						<div className="px-2.5 pt-1.5 pb-2">
+							<p className="text-[11px] text-neutral-500 mb-1">Connected</p>
+							<p className="text-xs font-mono text-neutral-300 break-all leading-relaxed">
+								{address}
+							</p>
+						</div>
+						<div className="h-px bg-[#2a2a2a] my-1" />
+						<button
+							type="button"
+							role="menuitem"
+							onClick={copy}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-200 hover:bg-[#242424] transition-colors"
+						>
+							{copied ? (
+								<Check className="h-4 w-4 text-emerald-400" />
+							) : (
+								<Copy className="h-4 w-4 text-neutral-400" />
+							)}
+							{copied ? "Copied" : "Copy address"}
+						</button>
+						<a
+							role="menuitem"
+							href={explorerAccountUrl(address)}
+							target="_blank"
+							rel="noopener noreferrer"
+							onClick={() => setOpen(false)}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-200 hover:bg-[#242424] transition-colors"
+						>
+							<ArrowUpRight className="h-4 w-4 text-neutral-400" />
+							View on explorer
+						</a>
+						<button
+							type="button"
+							role="menuitem"
+							onClick={() => {
+								setOpen(false);
+								onDisconnect();
+							}}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-300 hover:bg-[#242424] hover:text-neutral-100 transition-colors"
+						>
+							<LogOut className="h-4 w-4 text-neutral-400" />
+							Disconnect
+						</button>
+					</motion.div>
+				)}
+			</AnimatePresence>
+		</div>
+	);
+}
+
 function TopBar({
 	onHowItWorks,
 	wallet,
@@ -216,14 +346,10 @@ function TopBar({
 					</button>
 					{wallet &&
 						(wallet.address ? (
-							<button
-								type="button"
-								onClick={wallet.onDisconnect}
-								className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-3.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
-							>
-								<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-								{shortAddress(wallet.address)}
-							</button>
+							<ConnectedWallet
+								address={wallet.address}
+								onDisconnect={wallet.onDisconnect}
+							/>
 						) : (
 							<motion.button
 								type="button"
@@ -508,6 +634,14 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			if (!res.ok) throw new Error("could not check eligibility");
 			const body = (await res.json()) as Eligibility;
 			setEligibility(body);
+			// Not a Pilot address → the ballot goes read-only. Clear any picks
+			// they made while browsing disconnected: leaving them selected under
+			// a now-disabled "Sign & submit" reads as a castable vote that isn't.
+			if (!body.whitelisted) {
+				prefilled.current = false;
+				setSelections({});
+				return body;
+			}
 			// Returning voter: surface their current on-chain ballot, once, and
 			// only if they haven't started picking already.
 			if (body.votes && !prefilled.current) {
@@ -785,7 +919,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								)}
 							</p>
 							<a
-								href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+								href={explorerTxUrl(txHash)}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 hover:text-neutral-100 transition-colors"
@@ -797,6 +931,49 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{/* ── Already-voted notice (returning voter, this session hasn't
+			    resubmitted) — their ballot is on-chain; offer proof + the
+			    reminder that it's still editable. ── */}
+			{votedBefore && phase !== "submitted" && address && (
+				<motion.div
+					initial={{ opacity: 0, y: 12 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.4, ease: EASE }}
+					className="max-w-2xl mx-auto px-4 sm:px-6 mb-8"
+				>
+					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
+						<span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-100 flex-shrink-0">
+							<Check className="h-3.5 w-3.5 text-black" strokeWidth={3} />
+						</span>
+						<div className="min-w-0">
+							<p className="text-sm text-neutral-200 leading-relaxed">
+								<span className="text-neutral-50 font-medium">
+									You've already voted
+								</span>{" "}
+								in this round. Your picks are shown below.
+								{voting.open && closesLabel && (
+									<>
+										{" "}
+										Change them any time before{" "}
+										<span className="text-neutral-300">{closesLabel}</span> —
+										pick again and resubmit.
+									</>
+								)}
+							</p>
+							<a
+								href={explorerAccountUrl(address)}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-neutral-100 transition-colors"
+							>
+								Verify your ballot on-chain
+								<ArrowUpRight className="h-4 w-4" />
+							</a>
+						</div>
+					</div>
+				</motion.div>
+			)}
 
 			{/* ── Read-only notice ── */}
 			{readOnly && (

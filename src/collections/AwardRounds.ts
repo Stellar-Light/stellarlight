@@ -83,6 +83,16 @@ export const AwardRounds: CollectionConfig = {
 			},
 		},
 		{
+			name: "testMode",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				position: "sidebar",
+				description:
+					"Pilot/test round — stamps every ballot on-chain with an 'i3-test' memo so throwaway votes are obvious. Leave OFF for the real round.",
+			},
+		},
+		{
 			name: "ballotMode",
 			type: "select",
 			required: true,
