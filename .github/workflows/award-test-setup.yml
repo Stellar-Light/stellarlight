@@ -1,0 +1,59 @@
+name: i³ Awards — whitelist a pilot test wallet
+
+# Preps a round for PILOT TESTING (scripts/data/award-test-setup.ts):
+#   1. whitelists one address on the round (idempotent — safe to re-run),
+#   2. optionally flips the round to testMode (ballots carry the i3-test memo),
+#   3. optionally friendbot-funds the address on testnet.
+#
+# The address is a PUBLIC Stellar key — fine to pass here and appear in the log.
+# Idempotent and additive: never deletes or edits other voters/rounds.
+#
+# Run dry first (execute=false), read the log, then execute=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      address:
+        description: "Stellar public key (G...) to whitelist."
+        type: string
+        required: true
+      round:
+        description: "Round slug. Leave blank for the open round."
+        type: string
+        required: false
+      test_mode:
+        description: "Set the round to testMode (i3-test memo on ballots)."
+        type: boolean
+        default: false
+      fund:
+        description: "Friendbot-fund the address on testnet (only with execute)."
+        type: boolean
+        default: false
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: >-
+          pnpm exec tsx scripts/data/award-test-setup.ts
+          --address=${{ inputs.address }}
+          ${{ inputs.round && format('--round={0}', inputs.round) || '' }}
+          ${{ inputs.test_mode && '--test-mode' || '' }}
+          ${{ inputs.fund && '--fund' || '' }}
+          ${{ inputs.execute && '--execute' || '' }}
