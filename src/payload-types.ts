@@ -1423,7 +1423,7 @@ export interface LinkCheck {
    */
   statusCode?: number | null;
   /**
-   * Short reason when status=error and statusCode is null — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert'.
+   * Short reason the check did not return a clean 2xx — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert', 'bot-protection', 'server-error HTTP 503'. Shown for both error (proven broken) and blocked (unverifiable).
    */
   errorReason?: string | null;
   /**
@@ -1431,13 +1431,25 @@ export interface LinkCheck {
    */
   redirectTo?: string | null;
   /**
-   * How many consecutive check runs this URL has returned ERROR (redirect/blocked reset it — they are reachability, not death). 0 = currently healthy.
+   * How many consecutive check runs this URL has been PROVEN broken — 404/410, host does not resolve, connection refused. Anything else (redirect, bot wall, 5xx, timeout) resets it: those are reachability problems, not death. 0 = not proven broken.
    */
   consecutiveFailures?: number | null;
   /**
    * When the URL first started failing. Null = never failed since first observed.
    */
   firstFailedAt?: string | null;
+  /**
+   * How many consecutive runs the check could not reach a verdict — 5xx, bot wall, timeout, bad certificate. One such run proves nothing; a long streak means we have had no idea about this link for that many days.
+   */
+  consecutiveUnverifiable?: number | null;
+  /**
+   * Start of the current unverifiable streak. Cleared as soon as any run reaches a verdict.
+   */
+  firstUnverifiableAt?: string | null;
+  /**
+   * Set by the checker when consecutiveUnverifiable crosses its escalation threshold: no single probe proved this link broken, but we have been unable to verify it long enough that a human should look. Filter on this to find links hiding behind a permanently sick origin.
+   */
+  needsReview?: boolean | null;
   /**
    * Last time the URL returned 2xx. Null = never succeeded since first observed.
    */
@@ -2840,6 +2852,9 @@ export interface LinkChecksSelect<T extends boolean = true> {
   redirectTo?: T;
   consecutiveFailures?: T;
   firstFailedAt?: T;
+  consecutiveUnverifiable?: T;
+  firstUnverifiableAt?: T;
+  needsReview?: T;
   lastSuccessAt?: T;
   lastChecked?: T;
   targets?:
