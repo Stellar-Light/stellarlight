@@ -170,9 +170,41 @@ async function npmLatest(pkg: string): Promise<string | null> {
 	}
 }
 
-async function githubRepoExists(ownerRepo: string): Promise<boolean> {
-	const status = await fetchStatus(`https://api.github.com/repos/${ownerRepo}`);
-	return status === 200;
+/**
+ * Does this repo exist? `null` means "couldn't determine" — NOT "no".
+ *
+ * The old version asked unauthenticated api.github.com and returned
+ * `status === 200`, which quietly folded every non-200 into "doesn't exist".
+ * That API allows 60 requests/hour per IP, and this script checks dozens of
+ * install commands in one run; the SCF plugin alone contributes two per skill
+ * across twelve skills. Once the budget is spent GitHub answers 403 "API rate
+ * limit exceeded", and the run reported six BLOCKERS against
+ * Stellar-Light/awesome-stellar-community-fund — a repo that was public,
+ * unarchived, and serving 200 to anonymous HTTP the whole time.
+ *
+ * Being unable to check something is not evidence against it. So: use a token
+ * when the environment has one (CI does — 5000/hour), and on any inconclusive
+ * answer fall back to the plain HTML page, which has a far larger anonymous
+ * budget and is what a human would look at. Only a real 404 counts as absence.
+ */
+async function githubRepoExists(ownerRepo: string): Promise<boolean | null> {
+	const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+	try {
+		const res = await fetch(`https://api.github.com/repos/${ownerRepo}`, {
+			headers: token ? { authorization: `Bearer ${token}` } : {},
+			signal: AbortSignal.timeout(15_000),
+		});
+		await res.arrayBuffer().catch(() => {});
+		if (res.status === 200) return true;
+		if (res.status === 404) return false;
+		// 403/429/5xx — rate-limited or transient. Ask the HTML page instead.
+	} catch {
+		// network error — same fallback
+	}
+	const html = await fetchStatus(`https://github.com/${ownerRepo}`);
+	if (html === 200) return true;
+	if (html === 404) return false;
+	return null; // genuinely couldn't tell
 }
 
 /** Pull every owner/repo or package target out of an install command. */
@@ -182,7 +214,9 @@ async function checkInstallCommand(cmd: string, source: string) {
 	const skillsAdd = cmd.match(/skills add ([\w.-]+\/[\w.-]+)/);
 	if (skillsAdd) {
 		const repo = skillsAdd[1];
-		if (!(await githubRepoExists(repo))) {
+		const exists = await githubRepoExists(repo);
+		if (exists === null) return; // couldn't check — say nothing, don't accuse
+		if (!exists) {
 			blocker(cmd, `GitHub repo ${repo} not found [${source}]`);
 			return;
 		}
@@ -214,7 +248,7 @@ async function checkInstallCommand(cmd: string, source: string) {
 	// /plugin marketplace add owner/repo
 	const plugin = cmd.match(/marketplace add ([\w.-]+\/[\w.-]+)/);
 	if (plugin) {
-		if (!(await githubRepoExists(plugin[1])))
+		if ((await githubRepoExists(plugin[1])) === false)
 			blocker(cmd, `GitHub repo ${plugin[1]} not found [${source}]`);
 		return;
 	}
