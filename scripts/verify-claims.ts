@@ -184,14 +184,29 @@ async function checkInstallCommand(cmd: string, source: string) {
 			blocker(cmd, `GitHub repo ${repo} not found [${source}]`);
 			return;
 		}
-		const raw = await fetchStatus(
+		// The skills CLI installs from two layouts, and this check only knew
+		// the first: a SINGLE-skill repo with SKILL.md at the root
+		// (Stellar-Light/stellar-scout), or a MULTI-skill repo holding
+		// skills/<name>/SKILL.md (Stellar-Light/awesome-stellar-community-fund,
+		// twelve of them). Verified 2026-07-23 by running the install: the CLI
+		// resolved all twelve and reported them universal across Codex, Cursor,
+		// Amp and Antigravity. Assuming root-only made a working command look
+		// broken twelve times over — a checker that cries wolf on a verified
+		// command is how a checker gets ignored.
+		const rootSkill = await fetchStatus(
 			`https://raw.githubusercontent.com/${repo}/main/SKILL.md`,
 		);
-		if (raw !== 200)
-			blocker(
-				cmd,
-				`${repo} exists but has no SKILL.md at root (HTTP ${raw}) [${source}]`,
-			);
+		if (rootSkill === 200) return;
+		// Multi-skill layout: the marketplace manifest is the reliable marker,
+		// since skill directory names aren't knowable from the command alone.
+		const manifest = await fetchStatus(
+			`https://raw.githubusercontent.com/${repo}/main/.claude-plugin/marketplace.json`,
+		);
+		if (manifest === 200) return;
+		blocker(
+			cmd,
+			`${repo} exists but has neither a root SKILL.md (HTTP ${rootSkill}) nor a skills manifest (HTTP ${manifest}) [${source}]`,
+		);
 		return;
 	}
 	// /plugin marketplace add owner/repo
