@@ -24,6 +24,8 @@
  *   5. Distribution-repo drift: Stellar-Light/stellar-scout's SKILL.md
  *      matches public/skills/stellar-scout.md byte-for-byte (the
  *      auto-sync workflow's PAT is broken, so drift is a real risk)
+ *   6. Every tool our skill docs name as "the `x` MCP tool" exists in the
+ *      build npm actually serves — not merely in scout-mcp/src
  *
  * Design constraints: zero LLM calls, no DB, plain fetch — runs anywhere
  * Node 20+ runs. Bot-blocked URLs (403 with a browser UA) downgrade to
@@ -259,6 +261,82 @@ async function runBatch<T>(
 	}
 }
 
+/** Files that tell an agent "call the `x` MCP tool". */
+const MCP_CLAIM_SOURCES = [
+	"public/skills/stellar-scout.md",
+	"public/skills/references/api-reference.md",
+	"public/skills/references/examples.md",
+];
+
+/**
+ * A documented MCP tool that the PUBLISHED package doesn't have is a broken
+ * promise, and `scout-mcp/src` proves nothing about it: the tool exists in
+ * our source the moment we write it, but an agent only ever runs
+ * `npx @stellar-light/scout-mcp`, which resolves to the npm registry.
+ *
+ * Between them sits a publish step that can fail silently — and did: the
+ * auto-publish token died four days after it was minted, six consecutive runs
+ * failed unnoticed, and for those days our skill told every reader to call
+ * `get_people` while the build npm served had no such tool. Version drift
+ * (check 1) already warns, but "1.1.10 vs 1.1.12" doesn't read as urgent;
+ * naming the tool an agent will reach for and not find does.
+ *
+ * So resolve what npm actually serves. jsDelivr mirrors the registry tarball
+ * and lets us read one file without unpacking it; pin the version to the
+ * registry's `latest` so we check the exact artifact consumers get. Any fetch
+ * failure SKIPS the check rather than reporting drift — a CDN blip must never
+ * be indistinguishable from a real broken claim, or the signal gets ignored.
+ */
+async function checkMcpToolClaims() {
+	const claimed = new Set<string>();
+	for (const file of MCP_CLAIM_SOURCES) {
+		const md = readFileSync(path.join(ROOT, file), "utf8");
+		for (const m of md.matchAll(/`([a-z][a-z0-9_]+)`\s+MCP tool/g))
+			claimed.add(m[1]);
+	}
+	if (claimed.size === 0) {
+		console.log("  no MCP tool claims found in skill docs — nothing to check");
+		return;
+	}
+
+	const version = await npmLatest("@stellar-light/scout-mcp");
+	if (!version) {
+		console.log("  skip: registry did not resolve a published version");
+		return;
+	}
+	let published: string;
+	try {
+		const res = await fetch(
+			`https://cdn.jsdelivr.net/npm/@stellar-light/scout-mcp@${version}/dist/index.js`,
+			{ signal: AbortSignal.timeout(20_000) },
+		);
+		if (!res.ok) {
+			console.log(`  skip: published build unreadable (HTTP ${res.status})`);
+			return;
+		}
+		published = await res.text();
+	} catch {
+		console.log("  skip: published build fetch failed (network)");
+		return;
+	}
+
+	// Tool names appear as string literals in the registration table.
+	const shipped = new Set(
+		[...published.matchAll(/["']([a-z][a-z0-9_]+)["']/g)].map((m) => m[1]),
+	);
+	for (const tool of [...claimed].sort()) {
+		checked++;
+		if (shipped.has(tool)) {
+			console.log(`  ok ${tool} present in ${version}`);
+			continue;
+		}
+		warn(
+			`${tool} MCP tool`,
+			`documented in the skill, but @stellar-light/scout-mcp@${version} (what npx installs) has no such tool — an agent following our docs calls a tool that doesn't exist. Publish the pending version.`,
+		);
+	}
+}
+
 async function main() {
 	console.log("verify-claims — auditing every advertised artifact\n");
 
@@ -371,6 +449,10 @@ async function main() {
 			blocker(m.label, `mirror check error: ${(err as Error).message}`);
 		}
 	}
+
+	// 6. Documented MCP tools vs the build npm actually serves
+	console.log("── MCP tool claims vs published package ──");
+	await checkMcpToolClaims();
 
 	// Report
 	const blockers = findings.filter((f) => f.severity === "blocker");
