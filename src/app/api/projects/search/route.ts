@@ -2024,9 +2024,52 @@ export async function GET(req: NextRequest) {
 								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState) — NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
 						}
 					: {}),
+				// Semantic-only page: NOT a match, and it must not read like one.
+				//
+				// `matchMode: "semantic"` means zero keyword tiers matched and every
+				// row is an embedding neighbour. The mode + label already said so,
+				// but nothing structured did — and the empty-page advisory below
+				// can't fire here, because the page isn't empty. So an agent asking
+				// for `octoplace` got three confidently-named projects (Octarine,
+				// Ping, OrbitCDP) and no signal that none of them is the thing it
+				// asked for. Measured 2026-07-26 across the real-demand misses:
+				// named entities we don't hold land here at 0.43–0.58 confidence
+				// while genuine matches sit at 0.76–0.97.
+				//
+				// The rows still ship — vector neighbours occasionally ARE the
+				// answer for a conceptual query ("quantum resistant signatures" →
+				// Soundness, Blocknify), and deleting information to avoid
+				// misreading it is the wrong trade. What ships with them now is the
+				// truth about what they are.
+				...(matchMode === "semantic" && q
+					? {
+							advisory: {
+								summary: `No project matches '${q}' by name, description or category. The rows below are the closest entries by embedding similarity — NEIGHBOURS, not matches. Do not report them as '${q}' or as evidence that '${q}' exists on Stellar; if the question was whether we hold a project by that name, the answer is no.`,
+								suggestions: [
+									{
+										action: "repo-search",
+										url: `/api/repos/search?q=${encodeURIComponent(q)}&limit=5`,
+										why: "A named thing absent from the project directory may still exist as indexed code — repo search matches on GitHub org/repo names the directory doesn't carry.",
+									},
+									{
+										action: "research-corpus",
+										url: `/api/research?q=${encodeURIComponent(q)}&limit=5`,
+										why: "If the name appears in a SEP, audit, SCF record or blog post, the research corpus indexes prose the directory doesn't.",
+									},
+									{
+										action: "report-a-gap",
+										url: "https://stellarlight.xyz/submit",
+										why: "If it IS a live Stellar project, it's a genuine coverage gap — submitting it is what closes it.",
+									},
+								],
+							},
+						}
+					: {}),
 				// When BOTH keyword and semantic came back empty, point the agent
 				// at thesis-level retrieval. Project search can't answer "is x402
 				// possible on Stellar?" — /api/research can.
+				// (Mutually exclusive with the advisory above: that one requires
+				// semantic rows to exist, this one requires that none do.)
 				...(projects.length === 0 && semanticAdds.length === 0 && q
 					? {
 							advisory: {

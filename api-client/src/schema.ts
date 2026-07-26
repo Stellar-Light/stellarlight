@@ -951,6 +951,15 @@ export interface components {
                  */
                 matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "semantic" | "all";
                 matchModeLabel?: string;
+                /** @description Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions). */
+                advisory?: {
+                    summary?: string;
+                    suggestions?: {
+                        action?: string;
+                        url?: string;
+                        why?: string;
+                    }[];
+                };
                 /** @description Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
             };
