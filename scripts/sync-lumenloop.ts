@@ -19,6 +19,9 @@ import {
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
 import configPromise from "../src/payload.config";
+import { withoutCuratedFields } from "../src/lib/utils/curated-fields";
+import { curatedFieldsFor } from "./data/curation-maps";
+
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -27,7 +30,13 @@ const skipEntities = args.includes("--skip-entities");
 
 // --- Stats ---
 const stats = {
-	projects: { inserted: 0, updated: 0, skipped: 0, errors: 0 },
+	projects: {
+		inserted: 0,
+		updated: 0,
+		skipped: 0,
+		errors: 0,
+		curatedFieldsKept: 0,
+	},
 	entities: { created: 0, linked: 0, skipped: 0, errors: 0 },
 	total_files: 0,
 };
@@ -162,14 +171,30 @@ async function main() {
 					doc.provenance?.source === "LumenloopSeed" ||
 					doc.verificationLevel === "Unverified"
 				) {
+					// A curation registry OWNS the fields it names for this slug —
+					// the feed must not write them back (lessons class 32). Curating
+					// a record never made it ineligible for this branch, so every
+					// curated field was reverted within 24h of any curate run.
+					const owned = curatedFieldsFor(slug);
+					const { data: patch, protectedFields } = withoutCuratedFields(
+						mapped,
+						owned,
+					);
+
 					if (dryRun) {
-						console.log(`  UPDATE: ${mapped.name} (${slug})`);
+						console.log(
+							`  UPDATE: ${mapped.name} (${slug})${
+								protectedFields.length
+									? ` [curated, not overwritten: ${protectedFields.join(", ")}]`
+									: ""
+							}`,
+						);
 					} else {
 						await payload.update({
 							collection: "projects",
 							id: doc.id,
 							data: {
-								...mapped,
+								...patch,
 								slug,
 								provenance: {
 									...mapped.provenance,
@@ -179,8 +204,15 @@ async function main() {
 								},
 							},
 						});
-						console.log(`  UPDATED: ${mapped.name} → ${doc.id}`);
+						console.log(
+							`  UPDATED: ${mapped.name} → ${doc.id}${
+								protectedFields.length
+									? ` [curated, not overwritten: ${protectedFields.join(", ")}]`
+									: ""
+							}`,
+						);
 					}
+					if (protectedFields.length) stats.projects.curatedFieldsKept++;
 					stats.projects.updated++;
 
 					// Link entity
@@ -237,6 +269,9 @@ async function main() {
 	console.log(`  Updated: ${stats.projects.updated}`);
 	console.log(`  Skipped: ${stats.projects.skipped}`);
 	console.log(`  Errors:  ${stats.projects.errors}`);
+	console.log(
+		`  Curated records whose owned fields were left alone: ${stats.projects.curatedFieldsKept}`,
+	);
 	console.log("");
 	console.log("Entities:");
 	console.log(`  Created: ${stats.entities.created}`);

@@ -14,134 +14,18 @@
  */
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
-import { SEEDS, STATUS_FIX, WEBSITE_FIXES } from "./curation-maps";
+import {
+	DESCRIPTION_FIXES,
+	DOCS_LINKS,
+	GITHUB_REPOS_ADD,
+	SEEDS,
+	STATUS_FIX,
+	TYPES_ADD,
+	TYPES_SET,
+	WEBSITE_FIXES,
+} from "./curation-maps";
 
 const EXECUTE = process.argv.includes("--execute");
-
-const DESCRIPTION_FIXES: Record<string, string> = {
-	// gyen had NO description. The issuer's own stellar.toml
-	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
-	// issuance is wound down with a 1:1 redemption window through Nov 11
-	// 2026 — material lifecycle truth an agent must see on the row.
-	gyen: "GYEN is a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. Per the issuer's own stellar.toml (July 2026), new issuance is wound down; 1:1 redemption remains open through November 11, 2026.",
-	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
-	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
-	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-
-	// network-by-joining-as-tier-1-validators. The fact is recorded on each
-	// record (dated) since /press pages are not in the research corpus.
-	moneygram:
-		"MoneyGram Access (MoneyGram Ramps) is a fiat on- and off-ramp anchor on Stellar. Via the SEP-24 standard, users deposit and withdraw cash to and from USDC at ~500K retail locations across 170+ cash-out countries, with no bank account required. In June 2026 MoneyGram launched MGUSD, a self-custodial USD stablecoin issued by Bridge on Stellar. In July 2026 MoneyGram joined Stellar's Tier 1 validator set — the core organizations whose quorum secures network consensus.",
-	figure:
-		"Figure is America's #1 non-bank HELOC lender, building the future of capital markets on blockchain. Built on Provenance Blockchain, Figure also issues YLDS — a yield-bearing stablecoin deployed on Stellar — enabling compliance-first real-world asset access for a global audience. In July 2026 Figure (Figure Markets) joined Stellar's Tier 1 validator set, bringing a regulated capital-markets operator into network consensus.",
-	// range's old description was raw SCF-proposal prose ("This proposal seeks
-	// to build a Steller Bridge Explorer…", typo included) — rewritten to
-	// describe the product.
-	range:
-		"Range is a cross-chain security and intelligence platform: real-time transaction monitoring, forensic tracing (Range Trail), and a cross-chain explorer covering Stellar among other ecosystems, including Stellar bridge-explorer integration. In July 2026 Range joined Stellar's Tier 1 validator set as a blockchain-security validator organization.",
-	// sls-030: represent the funded-historical + embedded-implementation truth.
-	comet:
-		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",
-	// S1 prose⇄structure divergence (2026-07-11 engine run): these two
-	// descriptions asserted chains the records' CURATED supportedNetworks
-	// (verified from primary sources 2026-07-09) do not carry. The prose was
-	// the overclaiming side — fixed here rather than adding unverified
-	// networks (precision over recall).
-	helix:
-		"Institutional staking infrastructure by Helix Labs. The protocol is currently live only on Canton — Stellar integration is on the roadmap, not launched. Helix Labs separately operates validator infrastructure across major L1 ecosystems.",
-	"templar-protocol":
-		"Templar is a decentralized 'cypher lending' protocol that lets Stellar users borrow USDC against XLM collateral directly from their Stellar wallets, without bridges or wrapped tokens. It uses NEAR's multi-party-computation (MPC) network and Chain Signatures to custody deposits and settle cross-chain. On Stellar the collateral asset is XLM; Bitcoin-collateral and Ethereum/NEAR markets exist on its other deployments. The Stellar integration was announced November 2025.",
-	// boxy 2026-07-09: CCTP entry read like a bridge product; it's the RAIL.
-	// An agent answering "how do I bridge USDC to Stellar" should name CCTP
-	// as the mechanism and a bridge built on it as the actionable route.
-	"circle-cctp-cross-chain-transfer-protocol":
-		"Circle's Cross-Chain Transfer Protocol (CCTP), live on Stellar since May 2026. Moves native USDC between Stellar and 23+ chains (Ethereum, Solana, Base, Arbitrum, Optimism) via a 1:1 burn-and-mint model rather than wrapped or locked assets, settling in seconds. CCTP is bridging INFRASTRUCTURE, not a user-facing bridge: there is no Circle-hosted bridge app — builders integrate it (and pass execution metadata via Hooks), and end-users move USDC through bridges built on it, e.g. Rozo's Intent Bridge on Stellar.",
-	// sls-017: lobstr.co self-describes as a "Stellar & XRPL Wallet" (by Ultra
-	// Stellar); the record previously said "Stellar wallet" only.
-	lobstr:
-		"LOBSTR is a widely used non-custodial wallet for the Stellar and XRP Ledger (XRPL) networks, by Ultra Stellar, on iOS, Android, web and a browser extension. Users hold, send, receive, buy and swap XLM, USDC, XRP and network assets, make peer-to-peer payments, trade on the DEX/SDEX, use fiat on/off-ramps, and claim a federation address (username*lobstr.co). LOBSTR Vault adds multisig.",
-	// raven#8 / sls-018 (data half): the record described only the flagship
-	// Stablebonds product; Etherfuse FX — their Mexico USDC↔MXN on/off-ramp
-	// API (etherfuse/ramp-api-example; wholesale bps-level pricing per their
-	// public docs) — was invisible prose-wise. Multi-product companies get
-	// BOTH products named so neither is hidden behind the dominant one.
-	etherfuse:
-		"Etherfuse is a multi-product company on Stellar: it issues Stablebonds — tokenized government treasury bonds (Mexican CETES, US Treasuries and others) that give yield-bearing onchain exposure to sovereign debt and underpin treasury-management apps such as Bando — and operates Etherfuse FX, a Mexico fiat on/off-ramp API for programmatic USDC↔MXN conversion at wholesale bps-level pricing, built for wallets and apps to integrate.",
-	// raven#18 (mmazco, 2026-07-09): Alchemy's Stellar Data API is now LIVE
-	// but the record predated it (RPC-only prose). Grounded in Alchemy's own
-	// docs (alchemy.com/docs/reference/stellar-api-quickstart + stellar-data-
-	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
-	// Tier-1 validator: boxy-confirmed 2026-07-10 + Alchemy's own blog
-	// ("Alchemy expands support on Stellar with Data APIs and Tier-1
-	// validation … Alchemy is now a tier-1 validator on Stellar", announced
-	// x.com/Alchemy/status/2074907730129883195, 2026-07-08) + listed on the
-	// official tier-1-orgs docs page and the node explorer (boxy-verified —
-	// an earlier note here claimed the docs page lacked them; that was a
-	// false negative from a text-strip curl of a data-rendered page).
-	alchemy:
-		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
-	// sls-024 recurrence (#533 batch): the record claimed "iOS and Android
-	// mobile apps" while neither store lists the app — the Play listing for
-	// app.xbull.mobile (the applicationId in Creit-Tech/xBull-Wallet's own
-	// capacitor.config.ts / android build.gradle) returns 404 and an App
-	// Store bundleId lookup returns 0 results (both checked 2026-07-13).
-	// The product IS live: xbull.app (web wallet, HTTP 200) and the Chrome
-	// Web Store extension (HTTP 200), both verified 2026-07-13 — so the
-	// stale platform claim is removed instead of the status.
-	xbull:
-		"xBull is an open-source, non-custodial Stellar wallet by Creit Tech, available as a browser extension and web app. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps. Its formerly listed iOS and Android store apps are no longer available on either app store (store listings checked 2026-07-13).",
-};
-
-// Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
-// "should the data layer ingest partner docs?": NO — provider reference
-// docs are agent-readable at SOURCE (Alchemy ships llms.txt) and a corpus
-// copy would go stale (the class-19 hazard) while duplicating what the
-// provider already serves agents. Our differentiated role is the STRUCTURED
-// record (who provides what, freshness, confidence) + a first-class pointer
-// so consumers hop straight to the living source.
-const DOCS_LINKS: Record<string, string> = {
-	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
-};
-
-// sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
-// links.github points at a BIG org — enrich-repos keyword-gates large orgs
-// (only repo names matching "stellar" survive), so a Stellar-relevant repo
-// with a non-stellar name is invisible to discovery even though its org is
-// linked. Merges missing pairs, never removes; enrich-repos indexes them on
-// its next sweep. Each row is hand-verified against the repo's own README.
-const GITHUB_REPOS_ADD: Record<
-	string,
-	Array<{ owner: string; name: string }>
-> = {
-	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
-	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
-	// implemented as a Relayer plugin (Stellar support today)", networks
-	// stellar:testnet, type "stellar" (current support). The openzeppelin
-	// record links github.com/openzeppelin (org, >>20 repos → keyword gate),
-	// and the repo name lacks "stellar" — hence the recall zero.
-	openzeppelin: [
-		{ owner: "OpenZeppelin", name: "relayer-plugin-x402-facilitator" },
-	],
-	// Q2 cold-agent run (2026-07-20): aquarius had NO repo commit data, so it
-	// never entered activity leaderboards. Cause: the org renamed
-	// AquaToken→AquariusDeFi (old link is an empty shell; repo API 301s).
-	// These four are Aquarius-owned and active this month (dao web app,
-	// voting tracker, governance, bribes). The audited AMM contracts repo
-	// (AquaToken/soroban-amm) went private/deleted — cannot be linked.
-	aquarius: [
-		{ owner: "AquariusDeFi", name: "dao-aquarius-soroban" },
-		{ owner: "AquariusDeFi", name: "aqua-voting-tracker" },
-		{ owner: "AquariusDeFi", name: "aqua-governance" },
-		{ owner: "AquariusDeFi", name: "aqua-bribes" },
-	],
-	// PG recon 2026-07-20: the registry split out of theahaco/scaffold-stellar
-	// into its own org ~2026-05-19 (proof chain: proposal PR #65 →
-	// scaffold-stellar docs → cargo install --git stellar-registry/cli;
-	// oz-combined-wasms homepage = rgstry.xyz closes the loop).
-	"stellar-registry": [
-		{ owner: "stellar-registry", name: "contracts" },
-		{ owner: "stellar-registry", name: "cli" },
-	],
-};
 
 /** links.github corrections — equality-guarded overwrites for records whose
  * repo link points at the WRONG place (org renames, project splits). */
@@ -225,47 +109,6 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 		evidence:
 			"https://github.com/SCF-Public-Goods-Maintenance/pg-atlas-frontend/tree/main/data",
 	},
-};
-
-const TYPES_ADD: Record<string, string[]> = {
-	// Stablecoin appended per boxy triage 2026-07-20 (issued-asset + sectors
-	// axes both fired — domain-matched stellar.expert issuance).
-	etherfuse: ["Anchor", "Stablecoin"],
-	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
-	// USDT across Base, Stellar, Solana, Ethereum, BNB" — rozo.ai homepage,
-	// linked not coming-soon; Hacken audit of ROZO Intents in our corpus).
-	// Typed Payments-only, so every bridge/EVM query missed it — the same
-	// multi-product secondary-capability class as etherfuse (sls-018).
-	rozo: ["Bridge"],
-	// boxy 2026-07-09: CCTP is bridging INFRA (burn-and-mint rail bridge
-	// builders integrate), not a user-facing bridge app. Keep Bridge so
-	// corridor queries still learn it exists; add the taxonomy truth.
-	"circle-cctp-cross-chain-transfer-protocol": ["Infrastructure"],
-	// raven#18: the Stellar Data API is a portfolio/indexer product (SDF's own
-	// indexers page classifies it there) — RPC-only typing hid it from every
-	// indexer/portfolio-API query. Same multi-product class as etherfuse.
-	alchemy: ["Indexer"],
-	// boxy triage 2026-07-20 of the capability-mismatch sweep's first report
-	// (25 candidates): the anchor axis batch, approved "all except benji"
-	// (FT's benji is a tokenized fund; the anchor is FT-the-company — held).
-	// Each partner here is an operating anchor in the anchors directory whose
-	// project row never carried the type — the exact Etherfuse class.
-	gyen: ["Anchor"],
-	brl: ["Anchor"],
-	audd: ["Anchor"],
-	blox: ["Anchor"],
-	coca: ["Anchor"],
-	elroy: ["Anchor"],
-	ripe: ["Anchor"],
-	alfred: ["Anchor"],
-	trace: ["Anchor"],
-	// boxy triage 2026-07-20, issued-asset axis: domain-matched on-chain
-	// issuance (stellar.expert, issuer domain == partner domain). etherfuse
-	// fired on TWO independent axes (sectors + issuance); anclap issues
-	// ARS/PEN anchored tokens. Payments-on-wallets (hana/xbull/lobstr) was
-	// explicitly DECLINED — wallets stay wallets; the sweep keeps reporting.
-	// (etherfuse Anchor already added above; this appends Stablecoin.)
-	anclap: ["Stablecoin"],
 };
 
 /** EXACT-SYNC types for curated slugs — the corrective sibling of TYPES_ADD.
@@ -398,89 +241,6 @@ const IDENTITY_FIX: Record<
 		renameSourceUrl:
 			"https://vesseoapp.com/blog-ar/adi%C3%B3s-vibrant-hola-vesseo",
 	},
-};
-
-const TYPES_SET: Record<string, string[]> = {
-	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
-	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
-	// evidence per row). Bridge removed; remaining types verified.
-	orally: ["Infrastructure", "AI", "SDK", "Security"], // orally.network: oracle service (data feeds/automation), not an asset bridge
-	tezoro: ["Lending"], // tezoro.io: yield aggregator over Ethereum lending protocols
-	"soroban-optimistic-oracle": ["Infrastructure"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one
-	"unstoppable-wallet": ["Wallet"], // unstoppable.money: multichain wallet; swaps via DEXes, no own bridge
-	sorobanhooks: ["Infrastructure", "Analytics", "SDK"], // sorobanhooks.xyz: webhook/notification tooling; moves no assets
-	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
-	perun: ["Infrastructure", "SDK"], // polycry.pt: state-channel framework (go-perun + perun-stellar-backend)
-	"peridot-finance": ["Lending"], // peridot.finance: cross-chain lending platform — product is lending
-	// batch 2 (self-audit re-run surfaced 8 more, mostly 07-10 seeds):
-	"volta-circuit": ["Security", "Wallet"], // voltacircuit.com: multi-sig wallet security/controls product
-	upwealth: ["AI", "Analytics"], // upwealth.io: AI investment/advisory platform for wealth managers
-	swiftex: ["Wallet", "DEX"], // SwiftExWallet README: multichain wallet; bridging via third-party Allbridge
-	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
-	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
-	cobo: ["Infrastructure", "Wallet"], // cobo.com: institutional omni-custody / wallet-as-a-service platform — custody, not a bridge
-	// sls-035 DEX-taxonomy wave (2026-07-11): the types=DEX cluster mixed real
-	// trading venues with aggregators/routers/analytics platforms that run no
-	// venue of their own — polluting DEX browses and venue ground-truth checks
-	// (the amm→rango class). Each row below is re-typed from the project's OWN
-	// primary source (quoted); actual venues and SDEX trading clients were left
-	// untouched. Cross-chain swap aggregators keep/carry Bridge — the
-	// user-meaningful corridor capability (the rubic #414 precedent) —
-	// Stellar-only routers/services go Infrastructure.
-	stellarbroker: ["Infrastructure", "SDK"], // stellar.broker: Stellar-only multi-source liquidity swap ROUTER/aggregator — best routing across AMMs + Stellar DEX, runs no venue (so NOT a DEX venue; the verifier's DEX call was wrong), and it's integrable by other apps/wallets (boxy 2026-07-15) → +SDK.
-	wowmax: ["Bridge"], // wowmax.exchange: "combines a powerful DEX aggregator with an on-chain copy-trading protocol… trade crypto at the best possible prices across multiple decentralized exchanges" — aggregator, not a venue
-	rango: ["Bridge"], // rango.exchange: "a new layer on top of all Bridges and DEXs, working as a Bridge Aggregator and DEX Aggregator at the same time" — router, not a venue
-	houdiniswap: ["Bridge"], // houdiniswap.com: "non-custodial liquidity aggregator… sources swap routes from vetted, compliant exchange partners"; explicitly does not pool assets
-	rubic: ["Bridge"], // rubic.exchange: "an aggregator of Bridges, Dexs, Intent Protocols, & Private Solutions" (340+ integrations) — routing layer, no own pools
-	"dex-tools": ["Analytics"], // dextools.io + info.dextools.io: DeFi charting/pair-explorer/portfolio "data hub"; connects existing wallets, holds no liquidity
-	"mobula-labs": ["Analytics", "AI", "SDK"], // mobula.io: "Stream-based, modular & blazing fast APIs powering the best onchain products" — data/API provider, not a venue
-	spinach: ["Infrastructure"], // spinach.fi: "Liquidity Competitions — projects earn daily rewards for integrating and growing liquidity" — incentive-campaign platform, not a venue
-	// sls-033 (#519) wallet product-kind wave (2026-07-13): the record's own
-	// description already says WalletConnect "is not a wallet itself" but an
-	// "open connection protocol … a natively supported Stellar Wallets Kit
-	// module" — yet types was EMPTY, so the connectivity-protocol-vs-wallet
-	// distinction #519 demands existed only in prose (the prose-only-facts bug
-	// class) and the record was invisible to every type filter. Typed to the
-	// taxonomy truth we have today; the richer per-record productKind enum is
-	// a batch-D field.
-	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
-	// Bridge-cluster mistags (boxy 2026-07-15: "templar is a lending protocol, why
-	// is it a bridge"). #414 wave left non-bridge records Bridge-typed. Re-typed
-	// from each record's OWN primary source; deliberate aggregators (rubic/rango/
-	// houdiniswap/wowmax — routing layers whose corridor capability IS the point)
-	// stay Bridge. Frontend /directory reads the same projects.types as the API,
-	// so this fixes both surfaces at once.
-	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
-	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
-	nethermind: ["Infrastructure", "Security"], // nethermind.io: research/engineering firm + Nethermind Security (audits, formal verification, ZK); Stellar work = RISC Zero zkVM verifier + private-payments. Verifier-confirmed 2026-07-15.
-	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
-	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
-	// Directory-quality engine — verifier-confirmed re-tags (2026-07-15). Each
-	// agent-verified from the product's own live site (evidence in the
-	// directory-quality-verify run). Auto-apply tier (high confidence).
-	"cactus-link": ["Wallet"], // mycactus.com + Chrome Web Store: institutional browser-extension wallet (Cactus Custody). A wallet's security is a property, not its category.
-	"hito-wallet": ["Wallet"], // hito.xyz: NFC thin hardware crypto wallet (for sale). Hardware wallet = Wallet, not Security.
-	keystone: ["Wallet"], // keyst.one: hardware wallet.
-	mxlet: ["Wallet"], // xlet.io: open Stellar hardware wallet.
-	decaf: ["Wallet", "Payments"], // decaf.so: non-custodial wallet for cross-border money movement — Wallet + Payments, not Payments alone.
-	reclaim: ["Security", "SDK"], // reclaimprotocol.org: zkTLS credential/proof-of-personhood protocol + zkFetch SDK (Soroban example). Security + the developer SDK.
-	trustline: ["Security", "SDK", "Infrastructure"], // trustline.id: security SDK + smart-contract insurance. Adds the SDK it ships.
-	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
-	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
-	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
-	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
-	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
-	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
-	// Held-queue resolutions after a closer look (boxy 2026-07-15).
-	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
-	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.
-	indentura: ["Lending", "RWA"], // thawdigital.com: "on-chain CREDIT infrastructure — trade credit and receivables financing" — credit/lending against RWA receivables.
-	// sls-033 (2026-07-15): mis-typed as Wallet — web-verified NOT wallets, so an
-	// exact type=Wallet enumeration wrongly returned them (the StellarTerm-in-the-
-	// wallet-list class the finding names). Drop Wallet; keep their real types.
-	pakananet: ["Payments", "AI", "RWA", "Security"], // pakana.net: private ZK payments/compliance infrastructure, not a wallet (multisig-escrow is one feature)
-	stellarfolio: ["Analytics"], // stellarfolio.app: read-only portfolio viewer — enter ANY public address to view its assets; holds no keys
-	equilibre: ["Analytics"], // equilibre.io: portfolio rebalancer / DEX trading tool, wallet-independent (also already defunct — see STATUS_FIX)
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
