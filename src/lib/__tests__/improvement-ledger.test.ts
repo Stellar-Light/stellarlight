@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
 	applyWaves,
+	EVIDENCE_GRACE_DAYS,
 	type Finding,
 	findingId,
+	hasFreshEvidence,
 	isSyntheticQuery,
+	rankFindings,
 	STALE_DAYS,
 	summarizeLedger,
 	upsertFindings,
@@ -234,5 +237,107 @@ describe("applyWaves — waves close the loop (slice 3)", () => {
 		const prior = [f({ id: "a", source: "s", status: "open" })];
 		applyWaves(prior, [wave([{ id: "a", status: "fixed" }])], new Set(), now);
 		expect(prior[0].status).toBe("open"); // original untouched
+	});
+});
+
+describe("evidence freshness — 'not re-checked' is not 'still broken'", () => {
+	it("treats a missing stamp as NOT fresh — absence of proof is not proof", () => {
+		const now = Date.now();
+		expect(hasFreshEvidence(f({ id: "a", source: "s" }), now)).toBe(false);
+		expect(
+			hasFreshEvidence(f({ id: "b", source: "s", evidenceAt: "junk" }), now),
+		).toBe(false);
+		expect(
+			hasFreshEvidence(f({ id: "c", source: "s", evidenceAt: iso(1) }), now),
+		).toBe(true);
+		expect(
+			hasFreshEvidence(
+				f({ id: "d", source: "s", evidenceAt: iso(EVIDENCE_GRACE_DAYS + 1) }),
+				now,
+			),
+		).toBe(false);
+	});
+
+	it("ranks a confirmed finding above an unconfirmed one of equal severity", () => {
+		// The regression this guards: ranking was severity → oldest-first, so a
+		// dead detector's findings aged forever and floated to the top of the
+		// backlog — presented as most urgent precisely because nobody had looked.
+		const now = Date.now();
+		const stale = f({
+			id: "stale",
+			source: "quiet-detector",
+			severity: "high",
+			firstSeen: iso(40), // older — would have won under the old rule
+			evidenceAt: iso(30),
+		});
+		const confirmed = f({
+			id: "confirmed",
+			source: "live-detector",
+			severity: "high",
+			firstSeen: iso(2),
+			evidenceAt: iso(1),
+		});
+		const ranked = rankFindings([stale, confirmed], now);
+		expect(ranked[0].id).toBe("confirmed");
+		// but the unconfirmed one is DEMOTED, never dropped — only a detector clears
+		expect(ranked.map((r) => r.id)).toContain("stale");
+	});
+
+	it("still prefers the older finding when both are confirmed", () => {
+		const now = Date.now();
+		const older = f({
+			id: "older",
+			source: "s",
+			firstSeen: iso(20),
+			evidenceAt: iso(1),
+		});
+		const newer = f({
+			id: "newer",
+			source: "s",
+			firstSeen: iso(3),
+			evidenceAt: iso(1),
+		});
+		expect(rankFindings([newer, older], now)[0].id).toBe("older");
+	});
+
+	it("names quiet detectors and counts unconfirmed findings", () => {
+		const now = Date.now();
+		const s = summarizeLedger(
+			[
+				f({ id: "1", source: "live", evidenceAt: iso(1) }),
+				f({ id: "2", source: "quiet", evidenceAt: iso(30) }),
+				f({ id: "3", source: "quiet", evidenceAt: iso(30) }),
+				f({ id: "4", source: "unstamped" }),
+			],
+			now,
+		);
+		expect(s.unverifiedOpen).toBe(3);
+		const names = s.quietSources.map((q) => q.source);
+		expect(names).toContain("quiet");
+		expect(names).toContain("unstamped");
+		expect(names).not.toContain("live");
+		expect(s.quietSources.find((q) => q.source === "quiet")?.open).toBe(2);
+		// never stamped → unknown age, reported as null rather than guessed at
+		expect(s.quietSources.find((q) => q.source === "unstamped")?.days).toBe(
+			null,
+		);
+	});
+
+	it("does not accuse a detector that has nothing open to re-confirm", () => {
+		// Silence only means something when there's an outstanding claim to recheck.
+		const now = Date.now();
+		const s = summarizeLedger(
+			[f({ id: "1", source: "done", status: "verified", evidenceAt: iso(90) })],
+			now,
+		);
+		expect(s.quietSources).toHaveLength(0);
+		expect(s.unverifiedOpen).toBe(0);
+	});
+
+	it("advances evidenceAt when a detector genuinely re-runs", () => {
+		const prior = [f({ id: "s:x", source: "s", evidenceAt: iso(30) })];
+		const detected = [f({ id: "s:x", source: "s", evidenceAt: iso(0) })];
+		const out = upsertFindings(prior, detected, ["s"], iso(0));
+		expect(hasFreshEvidence(out[0], Date.now())).toBe(true);
 	});
 });

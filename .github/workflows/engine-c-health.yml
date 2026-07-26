@@ -166,11 +166,23 @@ jobs:
             [corpus]=corpus-health [scf]=scf-crosscheck [golden]=golden-eval
             [e]=engine-e-contract [coverage]=corpus-coverage
           )
+          # Stamp `generatedAt` on the way in. The ledger has to tell "this
+          # detector re-confirmed the finding today" from "nobody has looked
+          # since" — without a timestamp on the artifact those are the same
+          # bytes, and on 2026-07-26 that cost us: every open high-severity
+          # finding traced to an artifact 5 days past its weekly refresh and
+          # ranked top of the backlog, while a live re-probe showed 13 of them
+          # already fixed. Stamped here rather than in each eval because this is
+          # the one chokepoint all 8 pass through.
           copied=0
           for key in "${!MAP[@]}"; do
             src="/tmp/${key}.json"
             if [ -s "$src" ] && python3 -c "import json;json.load(open('$src'))" 2>/dev/null; then
-              cp "$src" "improvements/engine/weekly/${MAP[$key]}-latest.json"
+              dst="improvements/engine/weekly/${MAP[$key]}-latest.json"
+              # Only a JSON OBJECT can carry the stamp; a top-level array is
+              # copied through unchanged and its findings then read as
+              # unconfirmed — the honest default when we can't date the run.
+              STAMP_SRC="$src" STAMP_DST="$dst" STAMP_KEY="${MAP[$key]}" python3 -c 'import json,os,datetime; d=json.load(open(os.environ["STAMP_SRC"])); d.update({"generatedAt":datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),"evalKey":os.environ["STAMP_KEY"]}) if isinstance(d,dict) else None; json.dump(d,open(os.environ["STAMP_DST"],"w"),indent=2)'
               copied=$((copied+1))
             else
               echo "skip ${key}.json (missing or not valid JSON)"
@@ -181,10 +193,11 @@ jobs:
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
           git add improvements/engine/weekly/
-          if git diff --cached --quiet; then
-            echo "evidence unchanged — nothing to commit"
-            exit 0
-          fi
+          # No `git diff --quiet` short-circuit any more. It used to skip the
+          # commit when findings were byte-identical — suppressing the one
+          # record that proves the detector ran at all, which is exactly the
+          # signal the ledger needs. The stamp makes every run a real diff:
+          # a commit per run is the point, not noise.
           git commit -m "chore(engine): weekly evidence $(date -u +%Y-%m-%d) (${copied}/8 evals) [skip ci]"
           git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
           git push

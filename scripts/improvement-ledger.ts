@@ -344,6 +344,23 @@ function readJson(path: string): Row | null {
 	}
 }
 
+/**
+ * When did the run behind this artifact actually happen?
+ *
+ * NOT when we read the file. The orchestrator can run daily against an
+ * artifact whose detector last ran a week ago — and did: on 2026-07-26 every
+ * open high-severity finding traced to an engine-d artifact 5 days past its
+ * weekly refresh, ranked top of the backlog because ranking rewarded age.
+ * Only the artifact's own stamp can tell those apart, so an unstamped
+ * artifact returns undefined and its findings count as UNCONFIRMED rather
+ * than being credited with a run they can't evidence.
+ */
+function evidenceStamp(data: Row): string | undefined {
+	const raw = data?.generatedAt ?? data?.ranAt ?? data?.meta?.generatedAt;
+	const s = typeof raw === "string" ? raw.trim() : "";
+	return s && !Number.isNaN(Date.parse(s)) ? s : undefined;
+}
+
 function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const nowIso = new Date().toISOString();
 	const detected: Finding[] = [];
@@ -357,6 +374,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 			continue;
 		}
 		sources.push(spec.source);
+		const evidenceAt = evidenceStamp(data);
 		let n = 0;
 		for (const a of spec.arrays) {
 			const arr = data[a.key];
@@ -375,11 +393,15 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 					firstSeen: nowIso,
 					lastSeen: nowIso,
 					status: "open",
+					evidenceAt,
 				});
 				n++;
 			}
 		}
-		console.log(`  · ${spec.source}: ${n} finding(s)`);
+		const age = evidenceAt
+			? `evidence ${new Date(evidenceAt).toISOString().slice(0, 10)}`
+			: "UNSTAMPED — findings count as unconfirmed";
+		console.log(`  · ${spec.source}: ${n} finding(s) · ${age}`);
 	}
 
 	// raven-drift (consumer surface): only ops MISSING beyond grace are findings;

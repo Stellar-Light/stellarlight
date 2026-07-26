@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-07-23T04:05:01.227Z",
+	"generatedAt": "2026-07-26T00:49:43.892Z",
 	"total": 292,
 	"open": 280,
 	"closed": 12,
 	"verified": 7,
 	"cleared": 5,
 	"closingRate": 0.04,
-	"oldestOpenDays": 0,
+	"oldestOpenDays": 3,
 	"inWave": 0,
 	"highOpen": 24,
 	"staleHighOpen": 0,
@@ -35,6 +35,29 @@
 			"surface": "contract",
 			"open": 1,
 			"total": 8
+		}
+	],
+	"unverifiedOpen": 265,
+	"quietSources": [
+		{
+			"source": "engine-d-demand",
+			"open": 24,
+			"days": null
+		},
+		{
+			"source": "engine-a-recall",
+			"open": 226,
+			"days": null
+		},
+		{
+			"source": "scf-crosscheck",
+			"open": 14,
+			"days": null
+		},
+		{
+			"source": "engine-e-contract",
+			"open": 1,
+			"days": null
 		}
 	],
 	"topOpen": [
