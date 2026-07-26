@@ -199,6 +199,7 @@ async function run() {
 		chunksUpdated: 0,
 		embedTokens: 0,
 		errors: 0,
+		didNotPersist: 0,
 	};
 
 	console.log(execute ? "EXECUTE MODE — writing to Payload" : "DRY RUN MODE");
