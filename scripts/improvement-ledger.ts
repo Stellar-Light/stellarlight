@@ -45,14 +45,25 @@ type Row = any;
 
 interface ArraySpec {
 	key: string;
-	surface: Surface;
-	mode: string;
-	severity: Severity;
+	/**
+	 * Surface and severity may be a function of the row: one detector can raise
+	 * findings that belong to different kinds of work. Engine D is the case that
+	 * forced this — "we ranked badly" and "we don't hold this record" both arrive
+	 * in `misses`, but one is a retrieval bug and the other is curation, and
+	 * filing them identically means the backlog can never distinguish a fire
+	 * from a shopping list.
+	 */
+	surface: Surface | ((r: Row) => Surface);
+	mode: string | ((r: Row) => string);
+	severity: Severity | ((r: Row) => Severity);
 	/** keep only rows that are genuine findings (some arrays mix ok+fail) */
 	keep?: (r: Row) => boolean;
 	/** pull a stable, human probe string from a row */
 	probe: (r: Row) => string | undefined;
 }
+
+const resolve = <T>(v: T | ((r: Row) => T), r: Row): T =>
+	typeof v === "function" ? (v as (r: Row) => T)(r) : v;
 
 interface SourceSpec {
 	source: string;
@@ -95,9 +106,21 @@ const SPECS: SourceSpec[] = [
 		arrays: [
 			{
 				key: "misses",
-				surface: "retrieval",
-				mode: "demand-miss",
-				severity: "high",
+				// A demand miss is one of two different jobs and they were being
+				// filed as one. "We ranked badly for a thing we HOLD" is a
+				// retrieval bug — code. "We hold no record of the thing asked
+				// for" is a coverage gap — curation. Engine D emits GAP for the
+				// latter (a semantic page whose advisory states plainly that no
+				// project matches the name, since openapi@1.8.27), so route it to
+				// the directory surface at medium.
+				//
+				// This is not softening the number. It is refusing to let a
+				// shopping list sit at the top of the fire list where no
+				// retrieval fix can ever close it — the only way to "fix"
+				// `octoplace` as a retrieval finding is to invent a project.
+				surface: (r) => (str(r?.class) === "GAP" ? "directory" : "retrieval"),
+				mode: (r) => (str(r?.class) === "GAP" ? "coverage-gap" : "demand-miss"),
+				severity: (r) => (str(r?.class) === "GAP" ? "medium" : "high"),
 				// Drop synthetic/test noise — a `zzzznonexistent…` smoke query or a
 				// fat-finger `test` returning 0 is CORRECT, not a demand gap. Mining
 				// it as a HIGH fire manufactures a finding on our own probe traffic.
@@ -386,10 +409,10 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 				detected.push({
 					id: findingId(spec.source, probe),
 					source: spec.source,
-					surface: a.surface,
+					surface: resolve(a.surface, row),
 					probe,
-					failureMode: a.mode,
-					severity: a.severity,
+					failureMode: resolve(a.mode, row),
+					severity: resolve(a.severity, row),
 					firstSeen: nowIso,
 					lastSeen: nowIso,
 					status: "open",
