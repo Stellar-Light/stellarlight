@@ -18,6 +18,7 @@ import {
 	type OwnerRepo,
 } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
+import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -259,6 +260,17 @@ async function main() {
 		updated = 0,
 		failed = 0;
 	let writeFailed = 0;
+	/** Load-bearing fields this writer owns — what the read-back verifies. Not
+	 * the whole document: these are the values the ranking and attribution
+	 * actually depend on, so a silent drop here (#615) is what would hurt. */
+	const VERIFIED_FIELDS = [
+		"projectSlug",
+		"repoScore",
+		"repoScoreLabel",
+		"lastEnrichedAt",
+	] as const;
+	/** fullName → what was sent, so the read-back compares against the claim. */
+	const sentByRepo = new Map<string, Record<string, unknown>>();
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
@@ -355,17 +367,60 @@ async function main() {
 					await payload.create({ collection: "repos", data });
 					created++;
 				}
+				sentByRepo.set(full, data as unknown as Record<string, unknown>);
 			} catch (err) {
 				writeFailed++;
 				console.error(`  WRITE FAILED: ${full} — ${String(err)}`);
 			}
 		}
 	}
+	// ── read-back: prove the writes PERSISTED (lessons class 20/32, #615) ──
+	// "N created, N updated" counts resolved calls, not stored data.
+	// payload.update() drops keys with no schema field at that path without
+	// erroring, so a wave can report success having persisted nothing. Re-read
+	// every repo we claimed to write and compare against what we sent. Paged,
+	// because a full wave is many hundreds of rows.
+	let mismatchCount = 0;
+	if (EXECUTE && sentByRepo.size) {
+		console.log(`\n── Read-back (${sentByRepo.size} written repo(s)) ──`);
+		const mismatches = await verifyWrites(
+			sentByRepo,
+			async (names) => {
+				const back = await payload.find({
+					collection: "repos",
+					where: { fullName: { in: names } },
+					limit: names.length,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return new Map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+					(back.docs as any[]).map((r) => [String(r.fullName), r] as const),
+				);
+			},
+			VERIFIED_FIELDS,
+		);
+		mismatchCount = mismatches.length;
+		if (mismatchCount) {
+			console.error(
+				`  ✗ ${mismatchCount} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${sentByRepo.size} repo(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
+		}
+	}
+
 	console.log(
-		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
+		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed, ${mismatchCount} did-not-persist.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
 	);
 	if (writeFailed) process.exitCode = 1;
-	process.exit(0);
+	// Was `process.exit(0)` — which STOMPED the exitCode set above, so a wave
+	// with write failures reported GREEN. That is lessons class 20's archetype
+	// verbatim (the 2026-07-09 curate-projects incident), still live here.
+	process.exit(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);
