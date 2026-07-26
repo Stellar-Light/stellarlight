@@ -3769,6 +3769,25 @@ export const spec: OpenAPISpec = {
 											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.',
 									},
 									matchModeLabel: { type: "string" },
+									advisory: {
+										type: "object",
+										description:
+											"Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions).",
+										properties: {
+											summary: { type: "string" },
+											suggestions: {
+												type: "array",
+												items: {
+													type: "object",
+													properties: {
+														action: { type: "string" },
+														url: { type: "string" },
+														why: { type: "string" },
+													},
+												},
+											},
+										},
+									},
 									anchorProfileBasis: {
 										type: "string",
 										description:

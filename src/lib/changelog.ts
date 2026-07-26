@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-26",
+		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.27",
+		type: "added",
+		summary:
+			"projects/search: meta.advisory now also fires on a semantic-only page — the rows are neighbours, not matches, and say so.",
+		detail:
+			'When matchMode is "semantic", no keyword tier matched and every row came from vector similarity. Previously only a fully EMPTY page carried an advisory, so a query for a project we do not hold returned three confidently-named neighbours with no structured signal that none of them is the thing asked for (a search for a project name we lack returned unrelated directory entries). The rows still ship — a neighbour is occasionally the right answer for a conceptual query — but the advisory now states plainly that no project matches the name, and routes to repo search (code-only entities), the research corpus (prose mentions), and /submit (genuine coverage gap). Additive: the advisory object is optional and absent whenever a keyword tier matched.',
+	},
+	{
 		date: "2026-07-23",
 		surfaces: ["api", "mcp"],
 		version: "openapi@1.8.26",
