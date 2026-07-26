@@ -230,6 +230,111 @@ async function main() {
 		bad("hackathons served", `fetch failed: ${String(err)}`);
 	}
 
+	// 3b. Counts contract — every list endpoint must let a consumer tell a
+	//     COMPLETE read from a truncated one. The spec has documented
+	//     `meta.counts` with `returned` + `total`/`matched` for a long time
+	//     ("page until offset + returned >= total"), but five endpoints had
+	//     drifted off it: leaderboard served no counts at all (a limit=5 page was
+	//     indistinguishable from all 659 rows), changelog served them flat on
+	//     `meta` instead of nested, and clusters/skills/hackathons served
+	//     `returned` with no total. The contract gate cannot catch this — it
+	//     compares the spec to the committed snapshot, not to what the routes
+	//     actually serve, and `counts` is not a required property. This asserts
+	//     the LIVE shape.
+	console.log("\n── Counts contract (a truncated read must be detectable) ──");
+	{
+		// `totalKey` names which count carries the ROW-level pre-slice total. The
+		// spec says "`total`/`matched`" for exactly this reason — on some endpoints
+		// `total` is a different denominator than the rows served:
+		//   rfps   — serves 14 briefs + 1 synthetic scf-round row (the class-23
+		//            fix: answer-changing facts serve as ROWS, not meta). `total`
+		//            counts briefs (rowType==='rfp'), `matched` counts rows.
+		//            Asserting total>=returned would false-fail a correct endpoint.
+		//   audits — `total` is the whole corpus size, `matched` is post-filter.
+		const LIST_ENDPOINTS: Array<{
+			path: string;
+			listKey: string;
+			totalKey?: string;
+		}> = [
+			{ path: "/api/projects/search?q=stellar&limit=5", listKey: "projects" },
+			{ path: "/api/repos/search?q=soroban&limit=5", listKey: "repos" },
+			{ path: "/api/partners?all=1&limit=10", listKey: "partners" },
+			{ path: "/api/builders?limit=5", listKey: "builders" },
+			{ path: "/api/rfps", listKey: "rfps", totalKey: "matched" },
+			{ path: "/api/clusters?dimension=types", listKey: "clusters" },
+			{ path: "/api/hackathons?limit=3", listKey: "hackathons" },
+			{ path: "/api/skills", listKey: "skills" },
+			{ path: "/api/audits?limit=3", listKey: "audits", totalKey: "matched" },
+			{ path: "/api/people?limit=3", listKey: "people" },
+			{ path: "/api/stablecoins?limit=3", listKey: "stablecoins" },
+			{ path: "/api/research?q=soroban&limit=3", listKey: "results" },
+			{ path: "/api/changelog?limit=3", listKey: "entries" },
+			{ path: "/api/leaderboard?limit=5", listKey: "projects" },
+		];
+		const violations: string[] = [];
+		let clean = 0;
+
+		for (const { path, listKey, totalKey = "total" } of LIST_ENDPOINTS) {
+			try {
+				const d = await j(path);
+				const name = path.split("?")[0];
+				const c = d.meta?.counts;
+				const rows = Array.isArray(d[listKey]) ? d[listKey].length : null;
+
+				if (!c || typeof c !== "object") {
+					violations.push(`${name}: no meta.counts block`);
+					continue;
+				}
+				if (typeof c.returned !== "number") {
+					violations.push(`${name}: meta.counts.returned is not a number`);
+					continue;
+				}
+				// A count that disagrees with the rows is worse than no count — it is
+				// a confident wrong answer about the page in front of the consumer.
+				if (rows !== null && c.returned !== rows)
+					violations.push(
+						`${name}: counts.returned=${c.returned} but served ${rows} ${listKey}`,
+					);
+
+				// `total` may be null ONLY when the endpoint says why (searchResearch:
+				// similarity ranking has no crisp matching set to count). A bare null
+				// gets read as zero or as "not computed yet" (class 3).
+				const rowTotal = c[totalKey];
+				if (rowTotal === null) {
+					if (typeof c.totalBasis !== "string" || !c.totalBasis)
+						violations.push(
+							`${name}: counts.${totalKey} is null with no totalBasis — an undisambiguated null reads as zero`,
+						);
+					else clean++;
+					continue;
+				}
+				if (typeof rowTotal !== "number") {
+					violations.push(
+						`${name}: meta.counts.${totalKey} missing — a truncated page is indistinguishable from a complete one`,
+					);
+					continue;
+				}
+				if (rowTotal < c.returned)
+					violations.push(
+						`${name}: counts.${totalKey}=${rowTotal} < returned=${c.returned}`,
+					);
+				else clean++;
+			} catch (err) {
+				violations.push(`${path}: fetch failed: ${String(err)}`);
+			}
+		}
+
+		if (violations.length)
+			bad(
+				"counts contract",
+				`${violations.length} list endpoint(s) break the documented meta.counts contract:\n      ${violations.join("\n      ")}`,
+			);
+		else
+			ok(
+				`counts contract: all ${clean} list endpoints serve returned/total honestly`,
+			);
+	}
+
 	// 4. Ground truth — facts we KNOW are true (an answer key, not an opinion).
 	console.log("\n── Ground truth ──");
 	try {
