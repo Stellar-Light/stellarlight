@@ -951,6 +951,15 @@ export interface components {
                  */
                 matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "semantic" | "all";
                 matchModeLabel?: string;
+                /** @description Present when the query as typed matched NOTHING and a fuzzy name lookup recovered exactly one project within a typo's distance — the results are for `to`, not for what was asked. Only fires for short (≤2 token) queries against names of 5+ characters, and only when a single candidate wins outright, so it never guesses between similar names and never touches 3–4 character asset tickers. Relay the correction to the user rather than presenting the rows as a match for the original spelling. */
+                didYouMean?: {
+                    /** @description The query as the caller typed it. */
+                    from?: string;
+                    /** @description The project name actually searched. */
+                    to?: string;
+                    slug?: string;
+                    note?: string;
+                };
                 /** @description Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions). */
                 advisory?: {
                     summary?: string;

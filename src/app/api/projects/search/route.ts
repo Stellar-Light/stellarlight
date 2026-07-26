@@ -15,6 +15,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
+import { findNameMatch } from "@/lib/fuzzy-name";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -796,6 +797,13 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let totalMatching = 0;
 	let projects: ProjectRow[] = [];
+	/**
+	 * Set when the query as typed matched nothing and a fuzzy name lookup
+	 * recovered a single project (see the recovery rung below). Declared out
+	 * here because the response meta and the token-count used for confidence
+	 * both need to know the search actually ran on a corrected spelling.
+	 */
+	let didYouMean: { from: string; to: string; slug: string } | null = null;
 	let matchMode: "strict" | "loose-1" | "majority" | "semantic" | "all" = "all";
 	// Audit rollup (Raven cold-agent finding, 2026-07-20; hoisted 2026-07-21):
 	// populated ONCE before scoring (see the pre-scoring fetch) so the hay can
@@ -840,9 +848,11 @@ export async function GET(req: NextRequest) {
 				where.canonicalSlug = { equals: null };
 			}
 
-			const tokens = tokenize(q);
-			const intentTypes = intentTypesFor(tokens);
-			const rampIntent = isRampIntent(tokens);
+			// `let`, not `const`: the fuzzy-recovery rung below may re-point these
+			// at a corrected spelling when the query as typed matched nothing.
+			let tokens = tokenize(q);
+			let intentTypes = intentTypesFor(tokens);
+			let rampIntent = isRampIntent(tokens);
 			// TVL-superlative intent (2026-07-11 audit, F1 class): "highest tvl"
 			// returned five tvl=null records while Blend ($139M) sat unfetched —
 			// the structured field the query literally asks about played no part.
@@ -934,6 +944,64 @@ export async function GET(req: NextRequest) {
 				result = await findCandidates(
 					tokens.length ? { ...where, or: baseOr } : where,
 				);
+			}
+
+			// ── Fuzzy name recovery (#727) ──────────────────────────────────
+			//
+			// Zero candidate documents is the precise signal for "the words as
+			// typed appear nowhere". The keyword ladder below cannot rescue that
+			// — it only ever narrows this set — and neither can the vector rung,
+			// because the embedding of a MISSPELLED proper noun sits near
+			// arbitrary short tokens rather than near the project meant. Measured
+			// on prod: `blendd` returned TZS/BRZ, `soroswapp` returned Sorosan,
+			// `aquarious` returned gYEN. We hold all three and answer them
+			// perfectly when spelled right.
+			//
+			// So on an empty candidate set, ask the name registry whether one
+			// project is a typo's distance away. findNameMatch is deliberately
+			// refusal-heavy (no tickers, ≤2 tokens, unique winner required) and
+			// declines outright for entities we genuinely lack — `octoplace` and
+			// `kutana` must keep falling through to the semantic advisory rather
+			// than being silently rewritten into something unrelated.
+			//
+			// Cost is paid only on a miss: the registry fetch never touches the
+			// hot path, and the corrected re-fetch keeps every caller filter
+			// (?status, ?type, …) so a correction can't smuggle past them.
+			if (result.docs.length === 0 && tokens.length && offset === 0) {
+				try {
+					const registry = await payload.find({
+						collection: "projects",
+						limit: 1000,
+						depth: 0,
+						pagination: false,
+						select: { name: true, slug: true },
+					});
+					const match = findNameMatch(
+						q,
+						registry.docs as Array<{ name: string; slug: string }>,
+					);
+					if (match) {
+						const corrected = await findCandidates({
+							...where,
+							or: [{ slug: { equals: match.slug } }],
+						});
+						// Only adopt the correction if it actually resolves under the
+						// caller's filters. A ?status=Live search for a misspelled
+						// inactive project must stay empty, not quietly widen.
+						if (corrected.docs.length > 0) {
+							result = corrected;
+							didYouMean = { from: q, to: match.name, slug: match.slug };
+							// Re-derive everything downstream from the corrected name so
+							// the ladder scores against the words we actually searched.
+							tokens = tokenize(match.name);
+							intentTypes = intentTypesFor(tokens);
+							rampIntent = isRampIntent(tokens);
+						}
+					}
+				} catch {
+					// Recovery is best-effort: a registry hiccup leaves the empty
+					// result exactly as it was, never fails the search.
+				}
 			}
 
 			// Audit rollup fetched BEFORE scoring (2026-07-21, closing the Raven
@@ -1432,7 +1500,10 @@ export async function GET(req: NextRequest) {
 	// F3 (audit: keyword confidence uniform 0.97): normalize relevance against
 	// the QUERY size, not just the page max — a row matching 2 of 3 tokens now
 	// reads lower than a full match instead of both saturating at 1.0.
-	const qTokenCount = tokenize(q).length;
+	// Count the tokens actually searched: after a spelling recovery the rows
+	// were scored against the corrected name, so grading their confidence
+	// against the typo's token count would understate a perfect match.
+	const qTokenCount = tokenize(didYouMean?.to ?? q).length;
 	const projMax = Math.max(
 		projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0),
 		qTokenCount || 1,
@@ -1462,7 +1533,10 @@ export async function GET(req: NextRequest) {
 	// VOYAGE_API_KEY is unset, semanticProjectRows yields nothing / throws and
 	// we silently keep keyword-only.
 	let semanticAdds: Awaited<ReturnType<typeof semanticProjectRows>> = [];
-	if (q && offset === 0 && scored.length < limit && payload) {
+	// `!didYouMean`: a spelling recovery already resolved the query to ONE
+	// project the user actually meant. Padding that page with vector neighbours
+	// would bury the answer under the same noise the correction just escaped.
+	if (q && offset === 0 && !didYouMean && scored.length < limit && payload) {
 		try {
 			// F3: zero keyword hits = rescue mode (lower floor) — the audit's
 			// misspelling/slug-form probes died at total:0 with no fallback.
@@ -1961,6 +2035,19 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				matchMode,
+				// A correction is never applied silently. The caller asked about a
+				// spelling we don't have; they're entitled to know we searched for
+				// a different one, and an agent relaying this should say so too.
+				...(didYouMean
+					? {
+							didYouMean: {
+								from: didYouMean.from,
+								to: didYouMean.to,
+								slug: didYouMean.slug,
+								note: `No project is spelled '${didYouMean.from}'. These results are for '${didYouMean.to}', the only project within a typo's distance of it — say so rather than presenting them as a match for what was asked.`,
+							},
+						}
+					: {}),
 				...(superlativeNote(q) ? { superlativeNote: superlativeNote(q) } : {}),
 				...(laneHints("projects", {
 					empty: projects.length === 0,

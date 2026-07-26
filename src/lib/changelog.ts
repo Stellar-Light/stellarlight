@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-26",
 		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.28",
+		type: "fixed",
+		summary:
+			"projects/search: a one-character typo in a project name now finds the project instead of returning unrelated rows.",
+		detail:
+			"The keyword ladder is exact-token based, so a single wrong character dropped every tier at once, and the vector fallback could not rescue it either — the embedding of a misspelled proper noun sits near arbitrary short tokens rather than near the project meant. A search for a project whose name was mistyped returned unrelated directory entries even though we hold the project and answer it correctly when spelled right. On an empty candidate set the search now consults the project name registry and retries against the single project within a typo's distance, reporting the correction in the new optional meta.didYouMean {from, to, slug, note}. Deliberately refusal-heavy: short (≤2 token) queries only, names of 5+ characters only (never 3–4 character asset tickers, which sit one edit from each other), and a unique winner is required — a tie declines rather than guesses. Entities genuinely absent from the directory are NOT corrected; they keep falling through to the semantic advisory added in 1.8.27. The correction respects every caller filter, so a ?status-scoped search cannot widen through it.",
+	},
+	{
+		date: "2026-07-26",
+		surfaces: ["api", "api-client"],
 		version: "openapi@1.8.27",
 		type: "added",
 		summary:
