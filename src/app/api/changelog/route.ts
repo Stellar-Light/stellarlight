@@ -56,7 +56,17 @@ export async function GET(req: Request) {
 			version: SCOUT_SKILL_VERSION,
 			generatedAt: new Date().toISOString(),
 			meta: {
+				// Canonical list-endpoint shape (every other list endpoint nests
+				// counts here). Added 2026-07-26: this endpoint served returned/total
+				// FLAT on meta, so generic tooling that reads meta.counts silently
+				// saw no counts at all and could not tell a truncated feed from a
+				// complete one — on the very endpoint whose job is advertising
+				// artifacts. Do not remove the flat fields below: consumers read
+				// them today. They are deprecated, not gone.
+				counts: { returned: entries.length, total },
+				/** @deprecated read `meta.counts.returned` — kept for compatibility. */
 				returned: entries.length,
+				/** @deprecated read `meta.counts.total` — kept for compatibility. */
 				total,
 				latest: CHANGELOG[0]?.date ?? null,
 				filters: { since: since ?? null, limit: limit ?? null },

@@ -570,8 +570,10 @@ export interface components {
             counts?: {
                 /** @description Rows in this page (post limit/offset slice) */
                 returned?: number;
-                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. */
-                total?: number;
+                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred. */
+                total?: number | null;
+                /** @description Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field. */
+                totalBasis?: string;
                 /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses. */
                 semantic?: number;
             };

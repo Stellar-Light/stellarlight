@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-26",
 		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.29",
+		type: "added",
+		summary:
+			"Every list endpoint now serves meta.counts.{returned,total}, so a consumer can tell a complete read from a truncated one.",
+		detail:
+			"ADDITIVE — no field moved or changed meaning. The spec has long documented meta.counts.{returned,total} as the list-endpoint contract, but five endpoints drifted from it: /api/leaderboard served NO counts at all (a limit-truncated page was indistinguishable from a complete one), /api/changelog served returned/total FLAT on meta rather than nested under counts (so generic tooling reading meta.counts saw nothing — on the endpoint whose job is advertising artifacts), and /api/clusters, /api/skills and /api/hackathons served returned with no total. All five now carry meta.counts.total. /api/changelog ALSO keeps its flat meta.returned/meta.total for backward compatibility; those are DEPRECATED — read meta.counts. One deliberate exception: /api/research serves total: null plus totalBasis:'unbounded-similarity-ranking', because similarity ranking over a bounded candidate pool has no crisp matching set to count — a number there would falsely assert a complete read. Read a null total as 'unknowable by construction', never as zero or as 'no more rows'.",
+	},
+	{
+		date: "2026-07-26",
+		surfaces: ["api", "api-client"],
 		version: "openapi@1.8.28",
 		type: "fixed",
 		summary:

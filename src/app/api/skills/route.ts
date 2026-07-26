@@ -192,6 +192,11 @@ export async function GET(req: NextRequest) {
 				filters: { source: sourceFilter, kind: kindFilter },
 				counts: {
 					returned: filtered.length,
+					// No `limit` param: filtering is the only narrowing, so every
+					// matching skill is on this page and total == returned. `bySource`
+					// below counts the WHOLE catalog, pre-filter — a different
+					// denominator, which is exactly why total is stated explicitly.
+					total: filtered.length,
 					bySource: {
 						sdf: all.filter((s) => s.source === "sdf").length,
 						stellarlight: all.filter((s) => s.source === "stellarlight").length,
