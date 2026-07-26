@@ -75,6 +75,16 @@ export interface Finding {
 	clearedAt?: string;
 	/** memory/lesson slug that generalized this finding, if any. */
 	lessonRef?: string;
+	/**
+	 * When the detector RUN behind `lastSeen` actually executed (the artifact's
+	 * own `generatedAt`), as distinct from when the orchestrator read the file.
+	 *
+	 * Without this, `lastSeen` freezes the moment a detector stops running and
+	 * an unchecked finding is indistinguishable from a confirmed one. Absent =
+	 * the detector doesn't stamp its artifact yet; treated as NOT fresh, never
+	 * as fresh — an unknown age must never read as a recent confirmation.
+	 */
+	evidenceAt?: string;
 }
 
 /** Status values that mean "no longer counts as an open problem". */
@@ -133,20 +143,55 @@ const SEVERITY_WEIGHT: Record<Severity, number> = {
 /** A high-severity finding open longer than this reads as neglected, not backlog. */
 export const STALE_DAYS = 30;
 
+/**
+ * How long a detector's evidence stays trustworthy. The engine detectors run
+ * WEEKLY, so 10 days is one full cycle plus slack for a late or retried run —
+ * the same "lag is not drift" grace the Raven catalog check uses. Past this,
+ * a finding isn't refuted, it's simply UNCONFIRMED.
+ */
+export const EVIDENCE_GRACE_DAYS = 10;
+
 function ageDays(iso: string, now: number): number {
 	const t = Date.parse(iso);
 	return Number.isNaN(t) ? 0 : Math.max(0, (now - t) / 86_400_000);
 }
 
 /**
- * Rank open findings for the backlog: severity first, then age (an old open
- * finding is a worse smell than a fresh one), then surface for stable grouping.
- * `now` is passed in so callers control the clock (tests / reproducibility).
+ * Was this finding confirmed by a detector run recent enough to believe?
+ *
+ * Unknown `evidenceAt` returns false. Absence of a timestamp is absence of
+ * proof — a detector that never says when it ran cannot be credited with
+ * having run just now.
+ */
+export function hasFreshEvidence(f: Finding, now: number): boolean {
+	if (!f.evidenceAt) return false;
+	const t = Date.parse(f.evidenceAt);
+	if (Number.isNaN(t)) return false;
+	return ageDays(f.evidenceAt, now) <= EVIDENCE_GRACE_DAYS;
+}
+
+/**
+ * Rank open findings for the backlog: severity, then CONFIRMED-ness, then age.
+ *
+ * The middle term is the one that matters and it was missing. Ranking used to
+ * be severity → oldest-first, and `lastSeen` freezes the moment a detector
+ * stops running — so a dead detector's findings aged forever and floated to
+ * the TOP of the backlog, presented as the most urgent fires precisely because
+ * nobody had checked them. Measured 2026-07-26: 24 open highs all traced to one
+ * artifact 5 days past its weekly refresh; re-probing them live showed 13 were
+ * already fixed. The board was pointing at a fire that was mostly out.
+ *
+ * So a finding a detector confirmed THIS cycle outranks one nobody has looked
+ * at, at equal severity. Unconfirmed findings are demoted, never dropped —
+ * "not re-checked" is not "resolved", and only the detector may clear it.
  */
 export function rankFindings(findings: Finding[], now: number): Finding[] {
 	return [...findings].filter(isOpen).sort((a, b) => {
 		const s = SEVERITY_WEIGHT[b.severity] - SEVERITY_WEIGHT[a.severity];
 		if (s !== 0) return s;
+		const fresh =
+			Number(hasFreshEvidence(b, now)) - Number(hasFreshEvidence(a, now));
+		if (fresh !== 0) return fresh; // confirmed-this-cycle first
 		const age = ageDays(a.firstSeen, now) - ageDays(b.firstSeen, now);
 		if (age !== 0) return -age; // older first
 		return a.surface.localeCompare(b.surface);
@@ -173,6 +218,19 @@ export interface LedgerSummary {
 	staleHighOpen: number;
 	/** Open-finding counts per surface — "where are we weakest right now?". */
 	bySurface: Array<{ surface: Surface; open: number; total: number }>;
+	/**
+	 * Open findings resting on evidence older than the grace window (or with no
+	 * timestamp at all) — carried, but NOT claimable as current problems.
+	 */
+	unverifiedOpen: number;
+	/**
+	 * Detectors that have gone quiet: still hold open findings, but their last
+	 * run is past the grace window. A detector that stopped running is a
+	 * DIFFERENT failure from data that got worse, and the board must not render
+	 * them identically — one is a fire, the other is a blind spot.
+	 * `days: null` = the detector has never stamped its artifact.
+	 */
+	quietSources: Array<{ source: string; open: number; days: number | null }>;
 	/** The current top of the ranked backlog (probe + surface + source). */
 	topOpen: Array<{
 		id: string;
@@ -221,6 +279,35 @@ export function summarizeLedger(
 		.filter((s) => s.total > 0)
 		.sort((a, b) => b.open - a.open);
 
+	// Evidence freshness, per finding and rolled up per detector. A source is
+	// "quiet" only if it still holds OPEN findings — a detector with nothing
+	// outstanding has nothing to re-confirm, so its silence proves nothing and
+	// accusing it would be noise.
+	let unverifiedOpen = 0;
+	const perSource = new Map<string, { open: number; newest: number | null }>();
+	for (const f of findings) {
+		if (!isOpen(f)) continue;
+		if (!hasFreshEvidence(f, now)) unverifiedOpen++;
+		const row = perSource.get(f.source) ?? { open: 0, newest: null };
+		row.open++;
+		const t = f.evidenceAt ? Date.parse(f.evidenceAt) : Number.NaN;
+		if (!Number.isNaN(t)) row.newest = Math.max(row.newest ?? t, t);
+		perSource.set(f.source, row);
+	}
+	const quietSources = [...perSource.entries()]
+		.map(([source, r]) => ({
+			source,
+			open: r.open,
+			days:
+				r.newest === null ? null : Math.round((now - r.newest) / 86_400_000),
+		}))
+		.filter((s) => s.days === null || s.days > EVIDENCE_GRACE_DAYS)
+		.sort(
+			(a, b) =>
+				(b.days ?? Number.MAX_SAFE_INTEGER) -
+				(a.days ?? Number.MAX_SAFE_INTEGER),
+		);
+
 	const topOpen = rankFindings(findings, now)
 		.slice(0, topN)
 		.map((f) => ({
@@ -244,6 +331,8 @@ export function summarizeLedger(
 		highOpen,
 		staleHighOpen,
 		bySurface,
+		unverifiedOpen,
+		quietSources,
 		topOpen,
 	};
 }
@@ -280,7 +369,11 @@ export function upsertFindings(
 		seen.add(p.id);
 		const still = detectedById.get(p.id);
 		if (still) {
-			out.push({ ...p, lastSeen: nowIso });
+			// Re-raised: take THIS run's evidence stamp. `lastSeen` alone can't say
+			// whether the detector genuinely re-ran or the orchestrator just re-read
+			// a stale artifact — `evidenceAt` comes from the artifact itself, so it
+			// only advances when the detector actually did.
+			out.push({ ...p, lastSeen: nowIso, evidenceAt: still.evidenceAt });
 		} else if (runSources.has(p.source) && p.status === "open") {
 			// this run covered p's detector but didn't re-raise it → soft-fixed
 			out.push({ ...p, status: "cleared", clearedAt: nowIso });

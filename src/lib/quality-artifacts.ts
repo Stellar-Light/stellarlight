@@ -27,6 +27,7 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
+import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
 
@@ -341,10 +342,28 @@ export function getGuardRows(): GuardRow[] {
 				L.staleHighOpen > 0
 					? `${L.staleHighOpen} high-severity finding(s) stale >30d — work them down`
 					: "no high-severity finding neglected past 30 days",
+				// A quiet detector is a DIFFERENT failure from bad data, and the
+				// board must never render them alike. Open findings whose detector
+				// has gone silent aren't confirmed problems — they're unchecked
+				// ones, and counting them as fires points the next wave at a fire
+				// that may already be out (measured: 13 of 24 highs were).
+				L.quietSources.length > 0
+					? `⚠ ${L.quietSources
+							.map(
+								(q) =>
+									`${q.source} (${q.days === null ? "never stamped" : `${q.days}d`}, ${q.open} open)`,
+							)
+							.join(
+								", ",
+							)} — evidence past the ${EVIDENCE_GRACE_DAYS}d window; ${L.unverifiedOpen} open finding(s) unconfirmed`
+					: `all detectors reporting within ${EVIDENCE_GRACE_DAYS}d — every open finding is a confirmed one`,
 			],
 			asOf: L.generatedAt.slice(0, 10),
 			artifact: "improvements/ledger/findings.json",
-			ok: L.staleHighOpen === 0,
+			// Blind is not green. If a detector stopped reporting we cannot claim
+			// the surface it watches is healthy — we can only claim we stopped
+			// looking, and that belongs in the red the page is built to show.
+			ok: L.staleHighOpen === 0 && L.quietSources.length === 0,
 		});
 	}
 
