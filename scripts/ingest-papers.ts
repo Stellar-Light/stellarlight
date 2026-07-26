@@ -10,12 +10,9 @@
  *   npx tsx scripts/ingest-papers.ts             # dry run
  *   npx tsx scripts/ingest-papers.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 // pdf-parse 2.x ships a `PDFParse` class via CJS; pull it through createRequire
+import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import {

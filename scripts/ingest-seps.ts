@@ -16,12 +16,8 @@
  *
  * Env required: PAYLOAD_SECRET, MONGODB_URI/DATABASE_URI, VOYAGE_API_KEY.
  */
-import { config as loadEnv } from "dotenv";
 
-// .env.local first (Next.js convention), then .env as fallback
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";

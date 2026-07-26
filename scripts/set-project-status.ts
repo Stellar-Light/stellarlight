@@ -2,6 +2,7 @@
  * a defunct project (Draft is filtered out of every public API result). Also
  * sets provenance=AdminEdit + verif off Unverified so the lumenloop sync won't
  * revert/re-create it. SLUG + STATUS via env. --execute writes. */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

@@ -18,7 +18,7 @@
  *
  * House rules: no deletes; dry-run first; run against prod via GitHub Action.
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

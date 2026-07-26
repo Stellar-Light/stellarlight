@@ -17,11 +17,9 @@
  * appear in logs). No secret is ever handled here.
  */
 
+import "../load-env";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const { default: configPromise } = await import("../../src/payload.config");
 

@@ -12,7 +12,7 @@
  *   npx tsx scripts/enrich-entities.ts                  # Dry run
  *   npx tsx scripts/enrich-entities.ts --execute        # Write to DB
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

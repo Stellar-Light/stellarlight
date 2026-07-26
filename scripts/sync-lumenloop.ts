@@ -6,7 +6,7 @@
  *   npx tsx scripts/sync-lumenloop.ts --execute        # Actually write to DB
  *   npx tsx scripts/sync-lumenloop.ts --execute --skip-entities  # Skip entity creation
  */
-import "dotenv/config";
+import "./load-env";
 import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";

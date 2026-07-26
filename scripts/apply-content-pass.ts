@@ -2,6 +2,7 @@
  * 4 new flagship records (Rabet/QuickNode/Validation Cloud/Squid). Content is
  * the web-verified output in scripts/data/content-pass.json. Existing-record
  * edits are sync-protected (AdminEdit). Dry-run default; --execute writes. */
+import "./load-env";
 import { readFileSync } from "node:fs";
 import { getPayload } from "payload";
 import { generateSlug } from "../src/lib/utils/normalize";

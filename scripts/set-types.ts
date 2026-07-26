@@ -3,6 +3,7 @@
  * the big "is the queried category" boost when its type matches the query. Fixes
  * the cross-category bleed where a high-prominence custody/yield/DEX record (DFNS,
  * DeFindex, StellarTerm) led q=wallet. Sync-protected (AdminEdit). --execute writes. */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

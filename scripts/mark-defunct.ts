@@ -12,7 +12,7 @@
  *   pnpm exec tsx scripts/mark-defunct.ts            # dry run
  *   pnpm exec tsx scripts/mark-defunct.ts --execute  # write
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

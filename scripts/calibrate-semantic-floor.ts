@@ -3,6 +3,7 @@
  * SCORE_FLOOR in projects/search can be set on data, not a guess. Run via the
  * calibrate-semantic workflow (prod DB + VOYAGE key).
  */
+import "./load-env";
 import { getPayload } from "payload";
 import { embed } from "../src/lib/embed";
 import configPromise from "../src/payload.config";

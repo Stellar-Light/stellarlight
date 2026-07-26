@@ -13,6 +13,7 @@
  * Run:
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/embed-projects.ts [--execute] [--force]
  */
+import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import { embed, embedBatch } from "../src/lib/embed";

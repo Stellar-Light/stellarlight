@@ -11,11 +11,8 @@
  *   npx tsx scripts/backfill-lifecycle.ts            # dry run (report only)
  *   npx tsx scripts/backfill-lifecycle.ts --execute  # write lifecycle
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

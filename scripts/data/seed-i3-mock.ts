@@ -27,11 +27,9 @@
  * GitHub Action with repo secrets, dry-run first.
  */
 
+import "../load-env";
 import { Keypair } from "@stellar/stellar-sdk";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const { default: configPromise } = await import("../../src/payload.config");
 

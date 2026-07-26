@@ -1,6 +1,7 @@
 /** READ-ONLY by default. Applies a batch of project status changes (retire
  * defunct → Draft, dedupe → hide non-keeper, demote → lower status). Each is
  * sync-protected (AdminEdit + verif off Unverified). --execute writes. */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

@@ -12,6 +12,7 @@
  * Every value is grounded in the provider's own current site copy — no
  * fabrication.
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 import { SEEDS, STATUS_FIX, WEBSITE_FIXES } from "./curation-maps";

@@ -18,12 +18,9 @@
  * query, coarse country, result counts (see src/collections/ApiUsage.ts).
  */
 
+import "./load-env";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 

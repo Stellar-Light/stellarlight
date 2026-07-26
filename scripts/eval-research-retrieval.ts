@@ -7,6 +7,7 @@
  * non-audit queries failing to surface their source, (c) reassembled
  * audit text being unsearchable.
  */
+import "./load-env";
 import { getPayload } from "payload";
 import { embed } from "../src/lib/embed";
 import configPromise from "../src/payload.config";

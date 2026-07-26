@@ -17,6 +17,7 @@
  * Run:
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/detect-duplicate-projects.ts
  */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

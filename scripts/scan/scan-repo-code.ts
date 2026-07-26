@@ -22,11 +22,8 @@
  *   npx tsx scripts/scan/scan-repo-code.ts --lang all --limit 40 # any language
  *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --stale-first · --budget N (800)
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "../load-env";
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeFarmScore } from "../../src/lib/code-signals";

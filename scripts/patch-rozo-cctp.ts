@@ -11,6 +11,7 @@
  * Unverified records) SKIPS Rozo and this edit persists. Re-embeds with the new
  * text. DRY RUN by default; --execute writes. Run via Action (prod creds + key).
  */
+import "./load-env";
 import { getPayload } from "payload";
 import { embed } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
