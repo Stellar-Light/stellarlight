@@ -361,11 +361,17 @@ export async function GET(req: NextRequest) {
 				...(partners.length === 0 && totalMatching === 0
 					? {
 							advisory: {
-								summary: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.${
-									filteredOutCount > 0
-										? ` ${filteredOutCount} row(s) were held back by the directory quality bar — pass all=1 to include them before concluding none exist.`
-										: ""
-								}`,
+								// Deliberately NO claim about `filteredOut`. The first version
+								// of this advisory said "N rows were held back by the quality
+								// bar — pass all=1 to include them", and that is false: for
+								// q=custody the counter reads 3, but `&all=1` returns zero
+								// matches and filteredOut=0. The counter is not "rows this
+								// query would gain by dropping the bar", so the advice sent
+								// the caller somewhere empty. Shipping it was the same
+								// mistake this advisory exists to prevent — an unverified
+								// claim stated confidently. Verify what a field MEANS before
+								// telling anyone to act on it.
+								summary: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
 								scope:
 									"Stellar integration partners (anchors, ramps, custody, infrastructure); not a multi-chain directory and not a project directory",
 								tryInstead: [
