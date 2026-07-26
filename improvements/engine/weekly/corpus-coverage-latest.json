@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T17:31:15.203Z",
+  "generatedAt": "2026-07-26T10:55:24Z",
   "total": 11,
   "ok": 11,
   "failed": 0,
@@ -114,5 +114,6 @@
       "missingSignatures": [],
       "status": "OK"
     }
-  ]
+  ],
+  "evalKey": "corpus-coverage"
 }

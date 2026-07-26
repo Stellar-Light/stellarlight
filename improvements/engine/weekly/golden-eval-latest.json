@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8109979629516602,
+      "topScore": 0.8108398914337158,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -161,7 +161,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend Protocol — Certora (Blend Security Assessment Report)"
+      "sample": "Blend Protocol \u2014 Certora (Blend Security Assessment Report)"
     },
     {
       "id": "audit-reentrancy",
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core — Veridise (Soroban Stellar Soroban Cor"
+      "sample": "Stellar Soroban Core \u2014 Veridise (Soroban Stellar Soroban Cor"
     },
     {
       "id": "ecosystem-rwa-map",
@@ -233,7 +233,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Tezoro"
+      "sample": "Blend"
     },
     {
       "id": "consensus-scp",
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8241767883300781,
+      "topScore": 0.8248553276062012,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296041488647461,
+      "topScore": 0.8294558525085449,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.821096658706665,
+      "topScore": 0.8214676380157471,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7763291597366333,
+      "topScore": 0.7764574289321899,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8449501991271973,
+      "topScore": 0.8448684215545654,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -377,7 +377,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "StellarBroker — Runtime Verification (Security Audit Report "
+      "sample": "StellarBroker \u2014 Runtime Verification (Security Audit Report "
     },
     {
       "id": "ec-developer-count",
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
+      "sample": "rs-soroban-sdk v27.0.2 \u2014 27.0.2"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6796720623970032,
+      "topScore": 0.6774157285690308,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -719,7 +719,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -845,7 +845,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Enterprise Fund — venture-style fund (stellar.org/en"
+      "sample": "Stellar Enterprise Fund \u2014 venture-style fund (stellar.org/en"
     },
     {
       "id": "q-org-sdf-leadership-roles",
@@ -863,7 +863,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF Team — leadership and board of directors (stellar.org/fo"
+      "sample": "SDF Team \u2014 leadership and board of directors (stellar.org/fo"
     },
     {
       "id": "capability-custody-identity",
@@ -901,5 +901,7 @@
       "badTitle": 0,
       "sample": "Python Stellar SDK"
     }
-  ]
+  ],
+  "generatedAt": "2026-07-26T10:55:24Z",
+  "evalKey": "golden-eval"
 }
