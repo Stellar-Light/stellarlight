@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-07-26",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"builders: a no-match query now names where the answer actually lives instead of ending the conversation.",
+		detail:
+			'The last-resort empty state returned a flat "none match these filters" with nowhere to go — which reads as "we don\'t know this" even though for the real queries landing there we usually hold the answer on another surface: a surname is in the SDF people index, a one-word query is very often a project or a GitHub org. The empty state now always carries tryInstead naming /api/people, /api/projects/search and /api/repos/search with the reason each might hold it. Separately, a partial match against a curated builder name (a bare first name or surname) surfaces that person as a didYouMean CANDIDATE — named, not returned as a row, and explicitly not to be reported as the answer unless the caller confirms. Refusing to guess and refusing to help are different things; the resolver still refuses to resolve one token to one person.',
+	},
+	{
+		date: "2026-07-26",
 		surfaces: ["api", "api-client"],
 		version: "openapi@1.8.28",
 		type: "fixed",
