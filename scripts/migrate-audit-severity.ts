@@ -174,10 +174,12 @@ async function run() {
 		}
 	}
 	console.log(`Done. ${changes.length - errors} updated, ${errors} errors.`);
+	// A run that failed writes must not report success (lessons class 20).
+	if (errors) process.exitCode = 1;
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

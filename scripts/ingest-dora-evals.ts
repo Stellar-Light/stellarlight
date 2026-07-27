@@ -171,7 +171,9 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? "DONE" : "DRY RUN"}: ${created} created, ${lifted} lifted, ${unchanged} unchanged, ${failed} fetch-failed.`,
 	);
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (failed) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

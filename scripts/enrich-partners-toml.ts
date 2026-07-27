@@ -541,6 +541,7 @@ async function main() {
 					console.log(
 						`✗ seed ${slug} failed — ${err instanceof Error ? err.message : err}`,
 					);
+					writeFailed++;
 				}
 			} else {
 				console.log(`→ would seed ${slug} (${seed.partnerType})`);
@@ -567,6 +568,10 @@ async function main() {
 
 	let enriched = 0;
 	let skipped = 0;
+	// Write failures were logged and then folded into `skipped`, which also
+	// counts benign no-ops — so a run where every write failed was
+	// indistinguishable from a run with nothing to do (lessons class 20).
+	let writeFailed = 0;
 
 	for (const p of res.docs) {
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -726,7 +731,7 @@ async function main() {
 				console.log(
 					`✗ ${doc.slug}: update failed — ${err instanceof Error ? err.message : err}`,
 				);
-				skipped++;
+				writeFailed++;
 			}
 		} else {
 			console.log(`→ ${doc.slug} would set: ${report.join(" · ")}`);
@@ -735,9 +740,11 @@ async function main() {
 	}
 
 	console.log(
-		`\n${EXECUTE ? "seeded" : "would seed"}: ${seeded} · ${EXECUTE ? "enriched" : "would enrich"}: ${enriched} · skipped: ${skipped} · scanned: ${res.docs.length}`,
+		`\n${EXECUTE ? "seeded" : "would seed"}: ${seeded} · ${EXECUTE ? "enriched" : "would enrich"}: ${enriched} · skipped: ${skipped} · write-failed: ${writeFailed} · scanned: ${res.docs.length}`,
 	);
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (writeFailed) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

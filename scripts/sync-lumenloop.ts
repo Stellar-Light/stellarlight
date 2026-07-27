@@ -291,7 +291,9 @@ async function main() {
 		console.log("*** Run with --execute to apply changes. ***");
 	}
 
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.projects.errors || stats.entities.errors) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 async function linkEntity(

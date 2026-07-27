@@ -61,4 +61,33 @@ describe("scripts/ exit codes", () => {
 		}
 		expect(offenders).toEqual([]);
 	});
+
+	/** The broader shape, found by generalising the curate-projects finding:
+	 * the stomp (above) is "sets exitCode then throws it away", but 11 writers
+	 * had the quieter version — they COUNTED write failures and then exited 0
+	 * unconditionally, having never set exitCode at all. Same outcome: a run
+	 * that failed every write reports success to the Action that dispatched it.
+	 *
+	 * Scoped to `--execute` writers, because that is where a swallowed failure
+	 * means production silently disagrees with the run's own summary. */
+	it("an --execute writer that counts failures reflects them in its exit code", () => {
+		const offenders: string[] = [];
+		for (const p of files) {
+			const s = stripComments(readFileSync(p, "utf-8"));
+			if (!s.includes("--execute")) continue;
+			if (!/await payload\.(update|create)\(/.test(s)) continue;
+			// Does it tally write failures at all?
+			if (!/\b(failed|writeFailed|errors)\b\s*(\+\+|\+=)/.test(s)) continue;
+			// Then the exit must depend on something, not be a bare literal.
+			const exits = s.match(/process\.exit\([^)]*\)/g) ?? [];
+			const allLiteral = exits.every((e) =>
+				/process\.exit\(\s*[01]\s*\)/.test(e),
+			);
+			if (exits.length && allLiteral && !/process\.exitCode/.test(s))
+				offenders.push(
+					`${p.replace(`${SCRIPTS}/`, "")} — counts write failures but always exits a literal`,
+				);
+		}
+		expect(offenders).toEqual([]);
+	});
 });

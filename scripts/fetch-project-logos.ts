@@ -308,7 +308,9 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.failed) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((err) => {
