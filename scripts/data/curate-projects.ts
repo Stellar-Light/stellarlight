@@ -1935,7 +1935,7 @@ async function main() {
 		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {
