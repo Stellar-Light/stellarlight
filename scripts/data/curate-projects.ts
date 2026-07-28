@@ -166,6 +166,50 @@ const GITHUB_LINK_FIX: Record<string, string> = {
  * (the Soneso Flutter base SDK has no directory record; Hardware Wallet
  * Support is a multi-repo workstream with no dedicated record).
  */
+/**
+ * SCF award-linkage repairs (raven sls-058 / our #744) — legacy-era awards the
+ * automated pipeline structurally cannot see.
+ *
+ * Both projects are marked scfAwarded:false while their OFFICIAL submission
+ * records say Awarded. Root cause isn't a scrape bug: neither project appears
+ * on communityfund.stellar.org/projects AT ALL (verified 2026-07-28 — zero
+ * hits for either name in the listing HTML), and that listing is the entire
+ * comparison population for both the ingest and the scf-crosscheck detector.
+ * A legacy award attached to a project absent from the listing is invisible
+ * to every listing-derived check — the UNDERSTATED class exists and simply
+ * never gets to run on these rows.
+ *
+ * So these are asserted here, each backed by its official submission record
+ * (fetched and read 2026-07-28, award name + amount + round confirmed on the
+ * page). scf-crosscheck carries the same entries as CURATED_LEGACY_AWARDS and
+ * re-verifies BOTH sides on every run — the official page still says Awarded,
+ * and our API actually serves it — so a silent revert or a source change
+ * pages us instead of waiting for Raven's next eval round.
+ *
+ * DISCIPLINE for adding entries: only from a communityfund.stellar.org
+ * submission record you have OPENED and READ (award name, amount, round).
+ * Never from a project's own site, a tweet, or memory — this is money data,
+ * the single most-cited SCF fact.
+ */
+const SCF_LEGACY_AWARDS: Record<
+	string,
+	{ round: number; usd: number; award: string; evidence: string }
+> = {
+	sstream: {
+		round: 16,
+		usd: 36_000,
+		award: "Legacy v4.0 Award",
+		evidence: "https://communityfund.stellar.org/submissions/recnfJhEt3t2QogUI",
+	},
+	wagelink: {
+		round: 24,
+		usd: 50_000,
+		award: "Legacy v5.0 Activation Award",
+		evidence:
+			"https://communityfund.stellar.org/project/wagelink-sdp-integration-i2b",
+	},
+};
+
 const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 	"stellar-php-sdk": {
 		rounds: ["2025Q4", "2026Q1"],
@@ -1590,6 +1634,64 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { publicGoods: { awardRounds: next, evidenceUrl: pg.evidence } },
+		});
+	}
+
+	// PROMOTE-ONLY: this section can mark a project awarded and merge rounds in;
+	// it can never un-award, remove a round, or overwrite a nonzero total. An
+	// existing nonzero totalAwarded that disagrees with our figure is a
+	// reconciliation question for a human, not something a script should settle
+	// by overwriting — so it logs and leaves it.
+	console.log("\n── SCF legacy award linkage (promote-only, #744) ──");
+	for (const [slug, a] of Object.entries(SCF_LEGACY_AWARDS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const scf = d.scf ?? {};
+		const rounds: number[] = Array.isArray(scf.awardedRounds)
+			? scf.awardedRounds.map(Number)
+			: [];
+		const hasRound = rounds.includes(a.round);
+		if (scf.awarded && hasRound) {
+			console.log(`  ${slug}: already awarded w/ round ${a.round}, skip`);
+			continue;
+		}
+		const nextRounds = hasRound
+			? rounds
+			: [...rounds, a.round].sort((x, y) => x - y);
+		const existingTotal = Number(scf.totalAwarded) || 0;
+		if (existingTotal > 0 && existingTotal !== a.usd) {
+			console.log(
+				`  ${slug}: totalAwarded already ${existingTotal} ≠ ${a.usd} — merging round only, total left for human reconciliation`,
+			);
+		}
+		console.log(
+			`  ${slug}: scfAwarded ${!!scf.awarded} → true, rounds [${rounds.join(", ")}] → [${nextRounds.join(", ")}]${existingTotal === 0 ? `, totalAwarded → ${a.usd}` : ""} (${a.award}, ${a.evidence})`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					awarded: true,
+					awardedRounds: nextRounds,
+					lastAwardedRound: Math.max(
+						Number(scf.lastAwardedRound) || 0,
+						a.round,
+					),
+					...(existingTotal === 0 ? { totalAwarded: a.usd } : {}),
+				},
+			},
 		});
 	}
 
