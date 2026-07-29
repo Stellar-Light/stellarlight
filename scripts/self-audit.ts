@@ -103,6 +103,37 @@ async function allProjects(query: string): Promise<any[]> {
 	return rows;
 }
 
+/** Assert a response actually carried its whole population before a check
+ * reasons about absence (lessons class 18 + #701's unverifiable≠absence rule).
+ *
+ * Endpoints that report `counts.returned` and `counts.total` make truncation
+ * observable — but only if someone looks. A check that reads a window and then
+ * concludes "halborn is missing from type=audit-firm" or "this partner is not
+ * in live /api/partners" is reporting the window's edge as a data defect.
+ *
+ * Throws rather than returning a boolean so the caller's existing catch turns
+ * it into a visible check failure instead of a quiet pass. */
+function assertCompleteRead(
+	// biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
+	meta: any,
+	label: string,
+): void {
+	// Two live shapes: most endpoints nest under meta.counts, /api/changelog
+	// puts returned/total directly on meta. Reading only one shape makes this
+	// a silent no-op on the other — a guard that always passes looks identical
+	// to a guard that works.
+	const returned = meta?.counts?.returned ?? meta?.returned;
+	const total = meta?.counts?.total ?? meta?.total;
+	if (typeof returned !== "number" || typeof total !== "number")
+		throw new Error(
+			`${label}: response exposes no returned/total counts, so completeness cannot be checked — do not reason about absence from this read`,
+		);
+	if (returned < total)
+		throw new Error(
+			`${label}: read ${returned} of ${total} rows — this check reasons about absence, and a windowed read would report the window's edge as missing data. Raise the limit or page.`,
+		);
+}
+
 async function main() {
 	console.log(`Self-audit → ${BASE}\n`);
 
@@ -202,7 +233,8 @@ async function main() {
 	// 4. Ground truth — facts we KNOW are true (an answer key, not an opinion).
 	console.log("\n── Ground truth ──");
 	try {
-		const audit = await j("/api/partners?type=audit-firm&limit=20");
+		const audit = await j("/api/partners?type=audit-firm&limit=100");
+		assertCompleteRead(audit.meta, "partners type=audit-firm");
 		const names = (audit.partners ?? []).map((p: { name: string }) =>
 			p.name.toLowerCase(),
 		);
@@ -284,9 +316,12 @@ async function main() {
 		bad("stellarterm fixture (sls-033)", `fetch failed: ${String(err)}`);
 	}
 	try {
-		const d = await j("/api/projects/search?type=Wallet&limit=100");
+		// Reads the full Wallet population, not a limit=100 window: `limit`
+		// clamps at 100 server-side, so this claim about "the enumeration" was
+		// one wallet away from silently checking a truncated set (class 18).
+		const wallets = await allProjects("type=Wallet");
 		const byName = new Map<string, string[]>();
-		for (const p of d.projects ?? []) {
+		for (const p of wallets) {
 			const k = String(p.name ?? "").toLowerCase();
 			byName.set(k, [...(byName.get(k) ?? []), p.slug]);
 		}
@@ -298,7 +333,10 @@ async function main() {
 					.map(([n, slugs]) => `'${n}' served twice: ${slugs.join(", ")}`)
 					.join("; "),
 			);
-		else ok("type=Wallet enumeration has no duplicate-name rows (sls-033)");
+		else
+			ok(
+				`type=Wallet enumeration has no duplicate-name rows across all ${wallets.length} (sls-033)`,
+			);
 	} catch (err) {
 		bad("wallet-enum duplicates (sls-033)", `fetch failed: ${String(err)}`);
 	}
@@ -772,6 +810,10 @@ async function main() {
 	console.log("\n── Advertised versions exist on npm ──");
 	try {
 		const cl = await j("/api/changelog");
+		// A truncated feed silently narrows what verify-before-advertise checks:
+		// the versions that drop off are the OLD ones, which are exactly the
+		// ones whose npm artifacts are most likely to have been unpublished.
+		assertCompleteRead(cl.meta, "changelog");
 		const entries: Array<{ version?: string }> =
 			cl.changelog ?? cl.entries ?? [];
 		// Short names used by older entries → their scoped npm packages.
@@ -906,7 +948,11 @@ async function main() {
 			PARTNER_PROJECT_LINKS,
 			registrableDomain,
 		} = await import("../src/lib/partner-project-identity");
-		const pd = await j("/api/partners?all=1&limit=100");
+		// Completeness matters here: below, a partner missing from this map is
+		// reported as "not in live /api/partners". Off a windowed read that
+		// warning would be the window's edge, not a real gap.
+		const pd = await j("/api/partners?all=1&limit=200");
+		assertCompleteRead(pd.meta, "partners all=1");
 		const partnersBySlug = new Map<string, { websiteUrl?: string | null }>(
 			(pd.partners ?? []).map((p: { slug: string }) => [p.slug, p]),
 		);
