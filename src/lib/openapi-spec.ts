@@ -2218,7 +2218,7 @@ export const spec: OpenAPISpec = {
 						"install command",
 						"instructions",
 						"agentic payments",
-						"soroban skill",
+						"smart-contracts skill",
 						"stellar-scout",
 					],
 					useWhen: [
@@ -2230,7 +2230,7 @@ export const spec: OpenAPISpec = {
 					],
 					exampleQuestions: [
 						"Show me the SKILL.md for agentic-payments",
-						"How do I install the soroban skill?",
+						"How do I install the smart-contracts skill?",
 					],
 				},
 				parameters: [
@@ -2239,7 +2239,7 @@ export const spec: OpenAPISpec = {
 						in: "path",
 						required: true,
 						description:
-							"Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay')",
+							"Skill slug (e.g. 'smart-contracts', 'stellar-scout', 'rozo-intent-pay')",
 						schema: { type: "string" },
 					},
 				],
