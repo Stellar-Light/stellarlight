@@ -265,8 +265,10 @@ function ConnectedWallet({
 						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
 					>
 						<div className="px-2.5 pt-1.5 pb-2">
-							<p className="text-[11px] text-neutral-500 mb-1">Connected</p>
-							<p className="text-xs font-mono text-neutral-300 break-all leading-relaxed">
+							<p className="text-xs text-neutral-400 mb-1.5">
+								Connected wallet
+							</p>
+							<p className="text-xs font-mono text-neutral-200 break-all leading-relaxed">
 								{address}
 							</p>
 						</div>
@@ -770,9 +772,26 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		}
 	}, [address, selections, selectedCount, round.slug]);
 
-	const closesLabel = round.closesAt
-		? format(new Date(round.closesAt), "MMMM d, yyyy 'at' h:mm a")
-		: null;
+	// React #418 (text-content mismatch) on every load came from HERE, not the
+	// countdown: date-fns `format` uses the runtime's timezone, so the server
+	// pass rendered UTC and the browser rendered the visitor's local time. The
+	// two HTML strings disagreed and React threw on hydrate.
+	//
+	// Fixed by rendering the deadline only AFTER mount — server HTML and the
+	// first client render now both omit it, so there is nothing to mismatch, and
+	// the local-time string appears a tick later. Both labels derive from the
+	// same gate so they can never disagree with each other.
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => setMounted(true), []);
+	const closesLabel =
+		mounted && round.closesAt
+			? format(new Date(round.closesAt), "MMMM d, yyyy 'at' h:mm a")
+			: null;
+	/** Short form for helper lines — a full timestamp there is noise. */
+	const closesShort =
+		mounted && round.closesAt
+			? format(new Date(round.closesAt), "MMM d")
+			: null;
 
 	// ── primary action (shared by rail + mobile bar) ──
 	type Primary = {
@@ -918,14 +937,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-100 mb-2">
 								Your vote is on-chain
 							</h2>
-							<p className="text-sm text-neutral-400 leading-relaxed mb-4">
-								Recorded as a Stellar testnet transaction.
+							<p className="text-sm text-neutral-300 leading-relaxed mb-4">
+								Recorded on Stellar testnet.
 								{closesLabel && (
 									<>
 										{" "}
-										You can change it until{" "}
-										<span className="text-neutral-200">{closesLabel}</span> —
-										pick again and resubmit.
+										Changed your mind? Pick again and resubmit any time before{" "}
+										<span className="text-neutral-100">{closesLabel}</span>.
 									</>
 								)}
 							</p>
@@ -962,13 +980,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								<span className="text-neutral-50 font-medium">
 									You've already voted
 								</span>{" "}
-								in this round. Your picks are shown below.
+								— your picks are below.
 								{voting.open && closesLabel && (
 									<>
 										{" "}
-										Change them any time before{" "}
-										<span className="text-neutral-300">{closesLabel}</span> —
-										pick again and resubmit.
+										Pick again and resubmit to change them, up until{" "}
+										<span className="text-neutral-100">{closesLabel}</span>.
 									</>
 								)}
 							</p>
@@ -1093,9 +1110,10 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							})}
 						</ul>
 						{voting.open && !readOnly && <PrimaryButton full />}
-						{closesLabel && voting.open && (
-							<p className="mt-3 text-[11px] text-neutral-600 text-center leading-relaxed">
-								One signature. Change it anytime before {closesLabel}.
+						{closesShort && voting.open && (
+							<p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
+								One signature. Change your vote until{" "}
+								<span className="text-neutral-200">{closesShort}</span>.
 							</p>
 						)}
 					</div>
