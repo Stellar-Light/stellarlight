@@ -1347,6 +1347,8 @@ export interface components {
                 lastActivityAt?: string | null;
                 /** @description Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint. */
                 repoCount?: number;
+                /** @description The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
+                repos?: string[];
             };
         };
         /** @description One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'. */

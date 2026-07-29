@@ -4572,6 +4572,12 @@ export const spec: OpenAPISpec = {
 								description:
 									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
 							},
+							repos: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
+							},
 						},
 					},
 				},
