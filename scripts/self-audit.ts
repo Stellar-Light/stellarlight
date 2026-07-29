@@ -53,6 +53,56 @@ async function j(path: string): Promise<any> {
 	}
 }
 
+/** The projects candidate fetch is hard-capped server-side (`limit: 500` in
+ * src/app/api/projects/search/route.ts — a deliberate M0 perf fix). At or above
+ * it, `counts.total` reports the TRUNCATED size, so a filter matching 968
+ * records reports 500 and a reader that trusts it believes it saw everything. */
+const CANDIDATE_CAP = 500;
+
+/** Fetch an ENTIRE project population, not a result window (lessons class 18).
+ *
+ * A check that reads a window hides every failure behind the ones it names: the
+ * bridge guard read `q=bridge&limit=20` and reported 6 empty rows while 17 of
+ * the 40 Bridge-typed records were empty. Fixing all 6 would have left it red.
+ *
+ * `limit` clamps at 100, so this pages by offset until the rows cover
+ * `counts.total`. It never truncates silently — a short read that looks like a
+ * complete one is the entire bug being guarded against — so it THROWS both when
+ * the pages come up short AND when the population reaches CANDIDATE_CAP, where
+ * completeness is unprovable from the API alone. Callers get a real error
+ * instead of a confident wrong answer; narrow the filter to get under the cap.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
+async function allProjects(query: string): Promise<any[]> {
+	const PAGE = 100; // server-side clamp on `limit`
+	// biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
+	const rows: any[] = [];
+	let total: number | undefined;
+
+	for (let offset = 0; ; offset += PAGE) {
+		const r = await j(
+			`/api/projects/search?${query}&limit=${PAGE}&offset=${offset}`,
+		);
+		const page = r.projects ?? [];
+		total = r.meta?.counts?.total ?? total;
+		rows.push(...page);
+		if (!page.length) break;
+		if (total !== undefined && rows.length >= total) break;
+		if (offset > 5000)
+			throw new Error(`refusing to page past ${offset} for "${query}"`);
+	}
+
+	if (total !== undefined && total >= CANDIDATE_CAP)
+		throw new Error(
+			`population for "${query}" hit the ${CANDIDATE_CAP}-row candidate cap (counts.total=${total}) — completeness is unprovable, narrow the filter rather than asserting on a truncated set`,
+		);
+	if (total !== undefined && rows.length < total)
+		throw new Error(
+			`incomplete population for "${query}": read ${rows.length} of ${total}`,
+		);
+	return rows;
+}
+
 async function main() {
 	console.log(`Self-audit → ${BASE}\n`);
 
@@ -509,31 +559,32 @@ async function main() {
 		bad("curated fields reach production", `check failed: ${String(err)}`);
 	}
 
-	// Bridge corridor guard (2026-07-09): every Bridge-typed project must
-	// carry a non-empty supportedNetworks — an empty list is the
-	// omission-equals-negation trap that made Solana/EVM corridor queries
-	// miss real launched bridges (Rozo/Helix class). Chain lists themselves
-	// are curated in scripts/data/curate-projects.ts SUPPORTED_NETWORKS.
+	// Bridge corridor guard (2026-07-09; population-swept 2026-07-26): every
+	// Bridge-typed project must carry a non-empty supportedNetworks — an empty
+	// list is the omission-equals-negation trap that made Solana/EVM corridor
+	// queries miss real launched bridges (Rozo/Helix class). Chain lists
+	// themselves are curated in scripts/data/curation-maps.ts SUPPORTED_NETWORKS.
+	//
+	// Reads the FULL Bridge population via the structured `type` filter, not a
+	// `q=bridge` relevance window: the windowed form named 6 empty rows while
+	// 17 of the 40 Bridge-typed records were empty, so fixing everything it
+	// named would still have left the check red (lessons class 18).
 	try {
-		const br = await j("/api/projects/search?q=bridge&limit=20");
-		const bridges = (br.projects ?? []).filter(
-			(p: { types?: string[] }) =>
-				Array.isArray(p.types) && p.types.includes("Bridge"),
-		);
+		const bridges = await allProjects("type=Bridge");
 		const empty = bridges.filter(
 			(p: { supportedNetworks?: string[] }) =>
 				!Array.isArray(p.supportedNetworks) || !p.supportedNetworks.length,
 		);
 		if (!bridges.length)
-			bad("bridge corridors", "no Bridge-typed rows for q=bridge");
+			bad("bridge corridors", "no Bridge-typed rows for type=Bridge");
 		else if (empty.length)
 			bad(
 				"bridge corridors",
-				`${empty.length} Bridge-typed project(s) with EMPTY supportedNetworks: ${empty.map((p: { slug: string }) => p.slug).join(", ")} — add verified chains to SUPPORTED_NETWORKS`,
+				`${empty.length} of ${bridges.length} Bridge-typed project(s) with EMPTY supportedNetworks: ${empty.map((p: { slug: string }) => p.slug).join(", ")} — add verified chains to SUPPORTED_NETWORKS, or re-type the record if it is not a bridge (TYPES_SET)`,
 			);
 		else
 			ok(
-				`bridge corridors: ${bridges.length} Bridge-typed rows all carry supportedNetworks`,
+				`bridge corridors: all ${bridges.length} Bridge-typed rows carry supportedNetworks (full population)`,
 			);
 	} catch (err) {
 		bad("bridge corridors", `fetch failed: ${String(err)}`);
