@@ -793,7 +793,18 @@ export async function GET(req: NextRequest) {
 					severity: severityFilter,
 					limit: limitParam,
 				},
-				counts: { returned: results.length },
+				counts: {
+					returned: results.length,
+					// Deliberately null, never `results.length`. Retrieval here ranks a
+					// bounded candidate pool by similarity — there is no crisp set of
+					// "all matching rows" to count, so any number would falsely assert
+					// a complete read (the same trap as a capped total reported as if
+					// it were the population). `totalBasis` disambiguates the null:
+					// this is "unknowable by construction", not "zero" or "not
+					// computed yet" — do not conclude absence from this response.
+					total: null,
+					totalBasis: "unbounded-similarity-ranking",
+				},
 				// Per-result `confidence`: a 0–1 score + label (high/medium/low)
 				// blending relevance, source-aware freshness, and source
 				// authority. Deterministic + versioned so agents can rely on it.

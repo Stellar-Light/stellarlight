@@ -264,7 +264,12 @@ export async function GET(req: NextRequest) {
 					minSize,
 					...(valueFilter ? { valueFilter, matchedDimension } : {}),
 				},
-				counts: { returned: clusters.length },
+				// No `limit` param: every cluster matching the filters is returned, so
+				// total == returned. Stated rather than omitted so a consumer can
+				// verify the read is complete instead of inferring it (see
+				// `population.truncated` for whether the underlying rows were a
+				// sample — that is a separate claim from this page being complete).
+				counts: { returned: clusters.length, total: clusters.length },
 				// sls-042/048: the population this clustering aggregated. Compare
 				// `population.id` with other quantitative endpoints before merging
 				// numbers; `truncated: true` would mean the clusters are a sample,

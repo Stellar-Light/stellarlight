@@ -209,6 +209,10 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
+	// Rows matching the filters BEFORE `limit` is applied — the honest `total`
+	// for meta.counts. Stays 0 if the try block below throws, which matches the
+	// empty `rows` it falls through with.
+	let matchedBeforeLimit = 0;
 	// sls-036 residual: the repository-index rollup timestamp — when the repo
 	// rows this response aggregates were last refreshed (max updatedAt across
 	// the fetched index rows). Distinct from meta.generatedAt (serialization
@@ -441,6 +445,7 @@ export async function GET(req: NextRequest) {
 				});
 			}
 
+			matchedBeforeLimit = rows.length;
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
 		} catch {
 			// fall through with empty rows
@@ -479,6 +484,11 @@ export async function GET(req: NextRequest) {
 				// sls-036 residual: the real rollup timestamp of the repo index this
 				// response aggregated — the as-of for stars/issues/lastActivityAt.
 				dataAsOf,
+				// The documented list-endpoint contract (`returned` this page,
+				// `total` pre-slice). This endpoint served NO counts at all, so a
+				// consumer could not tell a complete read from a `limit`-truncated
+				// one — absence of counts reads as "you have everything".
+				counts: { returned: rows.length, total: matchedBeforeLimit },
 				// #524: echo the APPLIED project-type scope so a consumer can confirm
 				// the filter took (null = no type filter; an array = the exact types
 				// kept, EITHER-membership). Was silently absent while the filter was
