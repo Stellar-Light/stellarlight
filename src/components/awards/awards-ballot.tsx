@@ -681,6 +681,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		setTxHash(null);
 		setPhase("idle");
 		prefilled.current = false;
+		// Pilot feedback: disconnect must clear the BALLOT too, not just the
+		// session. Pilots vote from shared laptops at the venue — voter #2 was
+		// seeing voter #1's picks and success banner still on screen.
+		setSelections({});
+		setError(null);
+		setBallotPage(0);
 	}, []);
 
 	// ── friendbot (test mode only — the whole feature is testnet) ──
@@ -705,7 +711,10 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 	// ── sign & submit ──
 	const handleSubmit = useCallback(async () => {
-		if (!address || selectedCount === 0) return;
+		// Pilot feedback: the round is one pick in EACH category. Signing a
+		// partial ballot burns a wallet signature on an incomplete vote, so the
+		// submit path refuses until every category has a pick.
+		if (!address || selectedCount !== categories.length) return;
 		setError(null);
 		try {
 			setPhase("requesting");
@@ -794,11 +803,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								? "Waiting for wallet…"
 								: phase === "submitting"
 									? "Submitting…"
-									: votedBefore
-										? "Update vote"
-										: "Sign & submit",
+									: selectedCount < categories.length
+										? `Pick all ${categories.length} first`
+										: votedBefore
+											? "Update vote"
+											: "Sign & submit",
 					onClick: handleSubmit,
-					disabled: selectedCount === 0 || busy,
+					disabled: selectedCount < categories.length || busy,
 					loading: busy,
 				};
 
