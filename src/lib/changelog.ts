@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-28",
+		surfaces: ["api"],
+		version: "openapi@1.8.29",
+		type: "fixed",
+		summary:
+			"getSkill routing metadata no longer names the retired soroban slug — its own example question 404'd.",
+		detail:
+			'sls-059 (upstream #746): the get-one-skill operation\'s x-routing exampleQuestions, keywords, and path-parameter description all still said "soroban", a slug the operation itself rejects with 404 — the SDF roster renamed the topic\'s skill to "smart-contracts" (the endpoint gate tracked the rename in sls-053; the routing metadata did not). Routing metadata is load-bearing: consumers score these examples to decide when to call the operation, so the showcase question steered callers directly into a miss. All three spots now say "smart-contracts". Descriptions-only change, no response-shape change.',
+	},
+	{
 		date: "2026-07-26",
 		surfaces: ["api"],
 		type: "fixed",

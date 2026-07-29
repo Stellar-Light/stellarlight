@@ -2270,7 +2270,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay') */
+                /** @description Skill slug (e.g. 'smart-contracts', 'stellar-scout', 'rozo-intent-pay') */
                 name: string;
             };
             cookie?: never;
