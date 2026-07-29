@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-29",
+		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.30",
+		type: "added",
+		summary:
+			"leaderboard: each row's github object now names the exact repos its stats aggregate over.",
+		detail:
+			"raven #742 residual 3 (sls-036): rows exposed repoCount but never the repository identities, so 'activity' could not be reconciled against a known set — a count you cannot audit is a number you have to take on faith. Each row's github object now carries repos (sorted owner/name strings, repoCount === repos.length), and the CSV export gains a ';'-joined repos column. The members are our index's attribution: a repo absent from the list may still exist on GitHub — coverage, never a negative claim. Additive, no shape change to existing fields.",
+	},
+	{
 		date: "2026-07-28",
 		surfaces: ["api"],
 		version: "openapi@1.8.29",
