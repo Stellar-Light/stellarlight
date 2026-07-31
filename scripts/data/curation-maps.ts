@@ -1247,6 +1247,31 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://defillama.com/protocol/defa-by-invoicemate",
 		statusBasis: "onchain-activity",
 	},
+	// 2026-07-31 (boxy): Colibri — fazzatti's TypeScript toolkit for Stellar/
+	// Soroban apps. Verified same day: repo pushed 2026-07-30, published on JSR
+	// (@colibri/core), docs live at fifo-docs.gitbook.io/colibri, MIT, CI +
+	// coverage badges green. Personal-account SDK with no directory record —
+	// same precedent as passkey-kit above. fazzatti has 39 public repos (over
+	// the small-org sweep threshold), so the two Stellar repos are attached
+	// explicitly via GITHUB_REPOS_ADD rather than an org sweep.
+	{
+		slug: "colibri",
+		name: "Colibri",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"TypeScript-first toolkit for building Stellar and Soroban applications — deterministic error handling, composable workflows, and an extensible plugin architecture. Published on JSR as @colibri, with a companion examples repo. By fazzatti (Fabricius Zatti / Fifo).",
+		links: {
+			website: "https://fifo-docs.gitbook.io/colibri",
+			github: "https://github.com/fazzatti/colibri",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-07-31",
+		statusSourceUrl: "https://jsr.io/@colibri/core",
+		statusBasis: "site-liveness",
+	},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1351,6 +1376,13 @@ export const GITHUB_REPOS_ADD: Record<
 	string,
 	Array<{ owner: string; name: string }>
 > = {
+	// Colibri's two repos, attached explicitly (see the seed's rationale —
+	// fazzatti's 39-repo personal account is over the org-sweep threshold, and
+	// the examples repo carries no topics so relevance filters would miss it).
+	colibri: [
+		{ owner: "fazzatti", name: "colibri" },
+		{ owner: "fazzatti", name: "colibri-examples" },
+	],
 	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
 	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
 	// implemented as a Relayer plugin (Stellar support today)", networks
