@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-07-31",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"rfps: Q3 2026 quarter published — two new open briefs (LayerZero DVN, x402 Facilitator with Bazaar); Q2 briefs are now closed.",
+		detail:
+			"The active SCF quarter rolled to q3-2026. Two Delegate-selected briefs are open: a Stellar-compatible LayerZero DVN (for teams already operating production DVNs on LayerZero V2 — greenfield proposals out of scope) and an x402 facilitator for both Stellar networks with a Stellar-native Bazaar discovery layer (permissive OSI license required, discovery is the largest share of the budget). All q2-2026 briefs now report status closed. The quarter filter accepts q3-2026; the synthetic scf-round row follows the active quarter automatically.",
+	},
+	{
 		date: "2026-07-29",
 		surfaces: ["api", "api-client"],
 		version: "openapi@1.8.30",

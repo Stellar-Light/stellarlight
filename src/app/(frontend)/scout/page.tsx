@@ -14,6 +14,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { ScoutInstallPicker } from "@/components/scout-install-picker";
+import { IDEAS } from "@/data/ideas";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const revalidate = 300;
@@ -480,15 +481,19 @@ export default async function ScoutPage() {
 						</div>
 
 						<div className="rounded-xl border border-border bg-card p-5">
-							<div className="text-3xl font-bold text-foreground mb-1">14</div>
+							{/* Derived from the data module — this number sat hardcoded at 14
+							    and silently went stale the moment Q3's briefs landed. */}
+							<div className="text-3xl font-bold text-foreground mb-1">
+								{IDEAS.length}
+							</div>
 							<div className="text-sm font-semibold text-foreground mb-3">
 								Sponsor briefs (RFPs)
 							</div>
 							<div className="flex flex-wrap gap-1.5 mb-3">
 								{[
+									"LayerZero DVN",
+									"x402 Bazaar",
 									"Prices API",
-									"Passkey UI Kit",
-									"DeFi Positions",
 									"Trustline Onboarder",
 								].map((n) => (
 									<span
