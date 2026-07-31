@@ -1,6 +1,7 @@
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { spec } from "@/lib/openapi-spec";
 
 export const metadata: Metadata = {
 	title: "API Reference · Stellar Scout | Stellar Light",
@@ -8,219 +9,79 @@ export const metadata: Metadata = {
 		"Endpoint reference for the public read-only APIs that power Stellar Scout — hackathons (curated + DoraHacks), projects search, builders, SDF skills proxy, and ecosystem dev stats.",
 };
 
-interface Endpoint {
-	method: "GET";
-	path: string;
-	summary: string;
-	params?: Array<{ name: string; type: string; description: string }>;
-	returns: string[];
-	notes?: string;
+interface EndpointParam {
+	name: string;
+	type: string;
+	description: string;
 }
 
-const ENDPOINTS: Endpoint[] = [
-	{
-		method: "GET",
-		path: "/api/hackathons",
-		summary:
-			"Merged feed of curated Stellar hackathons (from the Payload directory) and live DoraHacks events (SDF + Tellus orgs). Each row tagged with `source: 'curated' | 'dorahacks'`.",
-		params: [
-			{
-				name: "status",
-				type: "string",
-				description: "upcoming | active | completed",
-			},
-			{
-				name: "organizer",
-				type: "string",
-				description: "Slug of organizer entity",
-			},
-			{
-				name: "source",
-				type: "string",
-				description: "curated | dorahacks (restrict to one feed)",
-			},
-			{
-				name: "limit",
-				type: "number",
-				description: "Max rows (default 100, max 300)",
-			},
-		],
-		returns: [
-			".hackathons[*] — id, name, slug, dates, status, externalUrl, organizer, source, prizePoolUSD (DoraHacks only), hackersCount (DoraHacks only), url",
-			".meta.counts.{curated, dorahacks, returned} — coverage stats",
-		],
-	},
-	{
-		method: "GET",
-		path: "/api/hackathons/{slug}",
-		summary:
-			"Single curated hackathon detail — submissions, winners, prize-track aggregation, post-hack outcome funnel.",
-		returns: [
-			".hackathon.stats — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown)",
-			".hackathon.tracks[*] — prize tracks derived from past submissions: { name, winnerCount, submissionCount, totalPrizeUSD }",
-			".winners[*] — projects that placed",
-			".submissions[*] — every submission with placement, prize, track",
-		],
-		notes:
-			"Only works for slugs in the curated Payload Hackathons collection. DoraHacks-sourced slugs return 404 — for those, see the externalUrl in the list endpoint.",
-	},
-	{
-		method: "GET",
-		path: "/api/builders",
-		summary:
-			"Stellar builder directory (synced from Stellar Passport). Small + growing dataset — opt-in profiles only.",
-		params: [
-			{
-				name: "q",
-				type: "string",
-				description: "Free-text match across bio + role + project names",
-			},
-			{
-				name: "location",
-				type: "string",
-				description: "Substring match against location field",
-			},
-			{
-				name: "limit",
-				type: "number",
-				description: "Max rows (default 50, max 200)",
-			},
-		],
-		returns: [
-			".builders[*] — githubUsername, displayName, bio, roleTitle, location, projects[], url (a scfTier field exists on rows but is unpopulated — empty for every profile; SCF award history lives on PROJECTS via /api/projects/search)",
-		],
-		notes:
-			"When fewer than 3 builders match, the SKILL.md instructs the agent to surface that explicitly and recommend Stellar Discord #builders + the Stellar GitHub org as fallback channels.",
-	},
-	{
-		method: "GET",
-		path: "/api/projects/search",
-		summary:
-			'Search existing Stellar projects. Keyword-scored matches across name + short description + category. The workhorse for Deep Dive step 2 ("has anyone built this?").',
-		params: [
-			{ name: "q", type: "string", description: "Keywords to score against" },
-			{
-				name: "category",
-				type: "string",
-				description: "Filter by project category",
-			},
-			{
-				name: "hackathon",
-				type: "string",
-				description: "Filter to one hackathon by slug",
-			},
-			{
-				name: "scfAwarded",
-				type: "1",
-				description: "Only SCF-funded projects",
-			},
-			{
-				name: "limit",
-				type: "number",
-				description: "Max rows (default 20, max 100)",
-			},
-		],
-		returns: [
-			".projects[*] — scored by keyword overlap, sorted by relevance; includes scfAwarded flag, scfTotalAwardedUSD, hackathon (if any), hackathonPlacement, hackathonPrize, hackathonPrizeTrack",
-		],
-	},
-	{
-		method: "GET",
-		path: "/api/rfps",
-		summary:
-			'Confirmed Stellar RFPs / sponsor briefs — problem statements that get funded by the Stellar Community Fund when winners are picked. Native source for "is there an open RFP matching my idea?" Backed by src/data/ideas.ts (curated). Mirrors what\'s on /ideas.',
-		params: [
-			{
-				name: "q",
-				type: "string",
-				description:
-					"Free-text match across title + description + technical requirements + category",
-			},
-			{
-				name: "category",
-				type: "string",
-				description:
-					"ai | consumer-dapps | defi | developer-tooling | gaming | infrastructure | nfts | payments | scf | web3-social",
-			},
-			{
-				name: "quarter",
-				type: "string",
-				description: "q1-2026 | q2-2026 (more added as new rounds open)",
-			},
-			{
-				name: "limit",
-				type: "number",
-				description: "Max rows (default 100, max 200)",
-			},
-		],
-		returns: [
-			".rfps[*] — id, title, description, technicalRequirements, category, categoryLabel, authorName, quarter, quarterLabel, url",
-			".meta.categories, .meta.quarters — full enums for client-side filtering",
-			".funding — clarifies that winners are SCF-funded",
-		],
-	},
-	{
-		method: "GET",
-		path: "/api/skills",
-		summary:
-			"Catalog of the 7 official Stellar Foundation skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards).",
-		returns: [
-			".skills[*] — name, description, userInvocable, argumentHint, url, rawUrl",
-		],
-		notes: "Server-cached for 24h via the upstream Next.js revalidate hint.",
-	},
-	{
-		method: "GET",
-		path: "/api/skills/{name}",
-		summary:
-			"Full content of one SDF skill. Use in Deep Dive step 5 (SDK recommendation) to quote/summarize inline before pointing the user at the upstream install URL.",
-		returns: [
-			".skill.content — full SKILL.md markdown (frontmatter included)",
-			".skill.{name, description, userInvocable, argumentHint, url, wordCount}",
-		],
-	},
-	{
-		method: "GET",
-		path: "/api/leaderboard",
-		summary:
-			"Stellar ecosystem developer-activity stats and ranked project leaderboard. Backed by the daily Electric Capital snapshot + GitHub Signals.",
-		params: [
-			{
-				name: "sort",
-				type: "string",
-				description: "activity | stars | issues",
-			},
-			{
-				name: "range",
-				type: "string",
-				description: "7d | 30d | 90d | 1y | all",
-			},
-			{
-				name: "category",
-				type: "string",
-				description: "Filter by project category",
-			},
-			{ name: "limit", type: "number", description: "Max rows (default 50)" },
-			{ name: "format", type: "string", description: "json (default) | csv" },
-		],
-		returns: [
-			".ecosystem.{activeDevs28d, commits28d, fullTimeDevs, ...}",
-			".projects[*] — ranked",
-		],
-	},
-	{
-		method: "GET",
-		path: "/api/status",
-		summary:
-			"Self-check + data freshness. Call this on first invocation so you can surface dataset age in answers.",
-		returns: [
-			".ok, .service, .version, .generatedAt",
-			".sources[*] — per-source { name, count, lastUpdatedAt, notes? }",
-			".endpoints[*] — full catalog",
-			".docs, .skill — canonical URLs",
-		],
-	},
-];
+interface Endpoint {
+	method: string;
+	path: string;
+	summary: string;
+	/** The op's full routing-grade description, when it says more than the summary. */
+	notes?: string;
+	params: EndpointParam[];
+	returns: string[];
+}
+
+/**
+ * The endpoint list is DERIVED from the same `spec` object /api/openapi.json
+ * serves — not hand-maintained. The previous version of this page was a
+ * hardcoded array that documented 9 endpoints while the contract had grown to
+ * 27 paths: every endpoint shipped after it was written was simply invisible
+ * here. Deriving from the spec means this page can only drift if the contract
+ * itself does, and the descriptions shown are the same routing-load-bearing
+ * text agents read — one source of truth, maintained in one place.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: OpenAPI nodes are heterogeneous JSON
+function resolveParam(raw: any): EndpointParam | null {
+	// biome-ignore lint/suspicious/noExplicitAny: $ref resolution against components
+	let node: any = raw;
+	if (typeof node?.$ref === "string") {
+		const name = node.$ref.split("/").pop() ?? "";
+		// biome-ignore lint/suspicious/noExplicitAny: components.parameters lookup
+		node = (spec.components as any)?.parameters?.[name];
+	}
+	if (!node?.name) return null;
+	const schema = node.schema ?? {};
+	const type = Array.isArray(schema.enum)
+		? schema.enum.join(" | ")
+		: (schema.type ?? "string");
+	return {
+		name: String(node.name),
+		type: String(type),
+		description: String(node.description ?? ""),
+	};
+}
+
+const ENDPOINTS: Endpoint[] = Object.entries(spec.paths).flatMap(
+	([path, ops]) =>
+		Object.entries(ops as Record<string, unknown>)
+			.filter(([method]) => method === "get" || method === "post")
+			.map(([method, rawOp]) => {
+				// biome-ignore lint/suspicious/noExplicitAny: OpenAPI operation node
+				const op = rawOp as any;
+				const summary = String(op.summary ?? op.description ?? "");
+				const description = String(op.description ?? "");
+				const resp = String(op.responses?.["200"]?.description ?? "");
+				return {
+					method: method.toUpperCase(),
+					path,
+					summary,
+					// The long description carries the Use-when/Not-for routing
+					// guidance; show it only when it adds to the summary.
+					notes:
+						description && description !== summary ? description : undefined,
+					params: (op.parameters ?? [])
+						.map(resolveParam)
+						.filter(
+							(x: EndpointParam | null): x is EndpointParam => x !== null,
+						),
+					returns: resp ? [resp] : [],
+				};
+			}),
+);
 
 function MethodBadge({ method }: { method: string }) {
 	return (
@@ -268,7 +129,7 @@ export default function ApiReferencePage() {
 				<div className="space-y-6">
 					{ENDPOINTS.map((e) => (
 						<div
-							key={e.path}
+							key={`${e.method} ${e.path}`}
 							className="rounded-xl border border-border/50 bg-card p-6"
 						>
 							<div className="flex items-center gap-3 mb-3 flex-wrap">
@@ -281,7 +142,7 @@ export default function ApiReferencePage() {
 								{e.summary}
 							</p>
 
-							{e.params && e.params.length > 0 && (
+							{e.params.length > 0 && (
 								<div className="mb-4">
 									<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
 										Query params
@@ -324,24 +185,26 @@ export default function ApiReferencePage() {
 								</div>
 							)}
 
-							<div className="mb-2">
-								<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
-									Returns
+							{e.returns.length > 0 && (
+								<div className="mb-2">
+									<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mb-2">
+										Returns
+									</div>
+									<ul className="space-y-1">
+										{e.returns.map((r) => (
+											<li
+												key={r}
+												className="text-xs text-foreground font-mono leading-relaxed pl-4 relative"
+											>
+												<span className="absolute left-0 text-muted-foreground/60">
+													·
+												</span>
+												{r}
+											</li>
+										))}
+									</ul>
 								</div>
-								<ul className="space-y-1">
-									{e.returns.map((r) => (
-										<li
-											key={r}
-											className="text-xs text-foreground font-mono leading-relaxed pl-4 relative"
-										>
-											<span className="absolute left-0 text-muted-foreground/60">
-												·
-											</span>
-											{r}
-										</li>
-									))}
-								</ul>
-							</div>
+							)}
 
 							{e.notes && (
 								<p className="text-xs text-muted-foreground/80 mt-3 pt-3 border-t border-border/30">
