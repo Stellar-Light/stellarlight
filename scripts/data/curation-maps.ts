@@ -1272,6 +1272,32 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://jsr.io/@colibri/core",
 		statusBasis: "site-liveness",
 	},
+	// 2026-08-01 (boxy): Stellar Indexer — earrietadev's (Creit-Tech / xBull)
+	// indexing service, raised in the SDF Discord (kalepail + Raph thread on
+	// making Raven discover its per-protocol extensions). Verified same day:
+	// SDK repo pushed 2026-07-31, published on JSR, protocol extensions live
+	// for Blend / Reflector / Axis Markets with more coming (Zenex). Service
+	// is token-gated beta → Pre-Release, not Live. Creit-Tech's 20 public
+	// repos are already swept in (small-org rule); the explicit attach below
+	// links the SDK repo to THIS project rather than the org-sweep path.
+	{
+		slug: "stellar-indexer",
+		name: "Stellar Indexer",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Indexer"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Indexing service for Stellar smart-contract data — live contract state through a single endpoint, with per-protocol extensions (Blend, Reflector, Axis Markets; more in progress). TypeScript SDK for Node, Deno and Bun published on JSR as @stellar-indexer/stellar-indexer-sdk. In token-gated beta. By earrietadev (Creit-Tech, the xBull team).",
+		links: {
+			website: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
+			github: "https://github.com/Creit-Tech/Stellar-Indexer-SDK",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-01",
+		statusSourceUrl: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
+		statusBasis: "site-liveness",
+	},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1383,6 +1409,7 @@ export const GITHUB_REPOS_ADD: Record<
 		{ owner: "fazzatti", name: "colibri" },
 		{ owner: "fazzatti", name: "colibri-examples" },
 	],
+	"stellar-indexer": [{ owner: "Creit-Tech", name: "Stellar-Indexer-SDK" }],
 	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
 	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
 	// implemented as a Relayer plugin (Stellar support today)", networks
