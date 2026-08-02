@@ -1,9 +1,9 @@
 {
   "frame": {
-    "scf": 570,
-    "directory": 896,
-    "matched": 319,
-    "roundsChecked": 271
+    "scf": 495,
+    "directory": 918,
+    "matched": 310,
+    "roundsChecked": 270
   },
   "overstated": [],
   "understated": [],
@@ -61,16 +61,6 @@
         "25"
       ],
       "reason": "no submission verdict found for round(s) #31"
-    },
-    {
-      "slug": "surgepay",
-      "name": "SurgePay",
-      "ourRounds": [
-        "41"
-      ],
-      "url": "https://communityfund.stellar.org/project/surge-pay-jze",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "autoaction",
@@ -157,6 +147,6 @@
       "reason": "no submission verdict found for round(s) #30"
     }
   ],
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "scf-crosscheck"
 }

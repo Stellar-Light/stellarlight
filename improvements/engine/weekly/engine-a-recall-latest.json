@@ -3,8 +3,8 @@
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 896,
-      "total": 896,
+      "ok": 918,
+      "total": 918,
       "rate": 100,
       "floor": 90,
       "status": "OK "
@@ -27,17 +27,17 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 684,
-      "total": 896,
-      "rate": 76.3,
+      "ok": 693,
+      "total": 918,
+      "rate": 75.5,
       "floor": 60,
       "status": "OK "
     },
     {
       "bucket": "P-ATTR",
-      "ok": 43,
+      "ok": 45,
       "total": 46,
-      "rate": 93.5,
+      "rate": 97.8,
       "floor": 70,
       "status": "OK "
     },
@@ -77,15 +77,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Gateway.fm%20live&limit=3",
-      "expected": "gatewayfm in top-3 for 'is Gateway.fm live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20NOWNodes%20live&limit=3",
+      "expected": "nownodes in top-3 for 'is NOWNodes live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20NOWNodes%20live&limit=3",
-      "expected": "nownodes in top-3 for 'is NOWNodes live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Gateway.fm%20live&limit=3",
+      "expected": "gatewayfm in top-3 for 'is Gateway.fm live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -105,15 +105,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20OnFinality%20live&limit=3",
-      "expected": "onfinality in top-3 for 'is OnFinality live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Liquify%20live&limit=3",
+      "expected": "liquify in top-3 for 'is Liquify live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Liquify%20live&limit=3",
-      "expected": "liquify in top-3 for 'is Liquify live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20OnFinality%20live&limit=3",
+      "expected": "onfinality in top-3 for 'is OnFinality live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -126,16 +126,16 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Orally%20live&limit=3",
-      "expected": "orally in top-3 for 'is Orally live'",
-      "observed": "dia, band, beamable"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Bridge&limit=3",
+      "expected": "bridge in top-3 for 'tell me about Bridge'",
+      "observed": "allbridge, axelar, spacewalk"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Bridge&limit=3",
-      "expected": "bridge in top-3 for 'tell me about Bridge'",
-      "observed": "allbridge, axelar, spacewalk"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Orally%20live&limit=3",
+      "expected": "orally in top-3 for 'is Orally live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -182,15 +182,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Boundless%20live&limit=3",
-      "expected": "boundless in top-3 for 'is Boundless live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20BAF%20live&limit=3",
+      "expected": "baf in top-3 for 'is BAF live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Apay%20live&limit=3",
-      "expected": "apay in top-3 for 'is Apay live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Boundless%20live&limit=3",
+      "expected": "boundless in top-3 for 'is Boundless live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -203,23 +203,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20BAF%20live&limit=3",
-      "expected": "baf in top-3 for 'is BAF live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Infrastructure",
       "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Rise%20In&limit=3",
       "expected": "rise-in in top-3 for 'tell me about Rise In'",
       "observed": "scorechain, alchemy, joona-pay"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20EasyA%20live&limit=3",
-      "expected": "easya in top-3 for 'is EasyA live'",
-      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -231,8 +217,8 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellar%20Global%20live&limit=3",
-      "expected": "stellar-global in top-3 for 'is Stellar Global live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20EasyA%20live&limit=3",
+      "expected": "easya in top-3 for 'is EasyA live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -240,21 +226,14 @@
       "area": "Infrastructure",
       "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20DeRisk&limit=3",
       "expected": "derisk in top-3 for 'what is DeRisk'",
-      "observed": "webacy-inc, dd, block-time-financial"
+      "observed": "webacy-inc, merkle-science, dd"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=.NET%20SDK%20on%20stellar&limit=3",
-      "expected": "net-sdk in top-3 for '.NET SDK on stellar'",
-      "observed": "lightsail-network-quasar, net-stellar-sdk, expand-network"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20DD&limit=3",
-      "expected": "dd in top-3 for 'what is DD'",
-      "observed": "lobstr, beamable, phoenix"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellar%20Global%20live&limit=3",
+      "expected": "stellar-global in top-3 for 'is Stellar Global live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -266,6 +245,20 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20DD&limit=3",
+      "expected": "dd in top-3 for 'what is DD'",
+      "observed": "lobstr, beamable, phoenix"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=.NET%20SDK%20on%20stellar&limit=3",
+      "expected": "net-sdk in top-3 for '.NET SDK on stellar'",
+      "observed": "lightsail-network-quasar, net-stellar-sdk, expand-network"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
       "probe": "https://stellarlight.xyz/api/projects/search?q=StellarX%20PH%20on%20stellar&limit=3",
       "expected": "stellarx-ph in top-3 for 'StellarX PH on stellar'",
       "observed": "soroswap, stellar-php-sdk, phoenix"
@@ -273,15 +266,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rehive%20live&limit=3",
-      "expected": "rehive in top-3 for 'is Rehive live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Securrency%20live&limit=3",
+      "expected": "securrency in top-3 for 'is Securrency live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Securrency%20live&limit=3",
-      "expected": "securrency in top-3 for 'is Securrency live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rehive%20live&limit=3",
+      "expected": "rehive in top-3 for 'is Rehive live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -301,16 +294,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Forge%20live&limit=3",
-      "expected": "forge in top-3 for 'is Forge live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Infrastructure",
       "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Dex%20Tools&limit=3",
       "expected": "dex-tools in top-3 for 'tell me about Dex Tools'",
-      "observed": "mobula-labs, earnbit, starloom"
+      "observed": "earnbit, starloom, trustswap"
     },
     {
       "bucket": "P-PHRASE",
@@ -350,6 +336,13 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Quasar%20live&limit=3",
+      "expected": "quasar in top-3 for 'is Quasar live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Constellation%20live&limit=3",
       "expected": "constellation in top-3 for 'is Constellation live'",
       "observed": "dia, band, beamable"
@@ -378,16 +371,44 @@
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Quasar%20live&limit=3",
-      "expected": "quasar in top-3 for 'is Quasar live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20MyDataCoin%20live&limit=3",
+      "expected": "mydatacoin in top-3 for 'is MyDataCoin live'",
+      "observed": "reflector, dia, band"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Apay%20live&limit=3",
+      "expected": "apay in top-3 for 'is Apay live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20MyDataCoin%20live&limit=3",
-      "expected": "mydatacoin in top-3 for 'is MyDataCoin live'",
-      "observed": "reflector, dia, band"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Soroban%20Learn&limit=3",
+      "expected": "soroban-learn in top-3 for 'tell me about Soroban Learn'",
+      "observed": "untangled, edunode, stellar-quest"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Update&limit=3",
+      "expected": "stellar-update in top-3 for 'tell me about Stellar Update'",
+      "observed": "nectar-network, galactictalk, astrograph"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Forge%20live&limit=3",
+      "expected": "forge in top-3 for 'is Forge live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Blue%20Orion%20on%20stellar&limit=3",
+      "expected": "blue-orion in top-3 for 'Blue Orion on stellar'",
+      "observed": "orion, reblue, bluechip"
     },
     {
       "bucket": "P-PHRASE",
@@ -434,9 +455,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Soroban%20SDK%20Tools&limit=3",
-      "expected": "soroban-sdk-tools in top-3 for 'tell me about Soroban SDK Tools'",
-      "observed": "python-stellar-sdk, soroban-rust-sdk, javascript-stellar-sdk"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20SStream%20live&limit=3",
+      "expected": "sstream in top-3 for 'is SStream live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -448,22 +469,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Soroban%20SDK%20Tools&limit=3",
+      "expected": "soroban-sdk-tools in top-3 for 'tell me about Soroban SDK Tools'",
+      "observed": "python-stellar-sdk, soroban-rust-sdk, javascript-stellar-sdk"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Hypernative%20live&limit=3",
       "expected": "hypernative in top-3 for 'is Hypernative live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Flutter%20Wallet%20SDK%20live&limit=3",
-      "expected": "flutter-wallet-sdk in top-3 for 'is Flutter Wallet SDK live'",
-      "observed": "beamable, hot-wallet, latch"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20CTX%20live&limit=3",
-      "expected": "ctx in top-3 for 'is CTX live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -472,6 +486,13 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Decentrio%20live&limit=3",
       "expected": "decentrio in top-3 for 'is Decentrio live'",
       "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Flutter%20Wallet%20SDK%20live&limit=3",
+      "expected": "flutter-wallet-sdk in top-3 for 'is Flutter Wallet SDK live'",
+      "observed": "beamable, hot-wallet, latch"
     },
     {
       "bucket": "P-PHRASE",
@@ -534,21 +555,7 @@
       "area": "Tooling",
       "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20StellarAuth&limit=3",
       "expected": "stellarauth in top-3 for 'tell me about StellarAuth'",
-      "observed": "0xauth, reapp, stellarguard"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20sTeX&limit=3",
-      "expected": "stex in top-3 for 'what is sTeX'",
-      "observed": "idos, python-stellar-sdk, soroban-rust-sdk"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20SStream%20live&limit=3",
-      "expected": "sstream in top-3 for 'is SStream live'",
-      "observed": "dia, band, beamable"
+      "observed": "0xauth, authline, reapp"
     },
     {
       "bucket": "P-PHRASE",
@@ -560,23 +567,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Sorscan%20live&limit=3",
-      "expected": "sorscan in top-3 for 'is Sorscan live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Sorosan%20live&limit=3",
       "expected": "sorosan in top-3 for 'is Sorosan live'",
       "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=SoroBuilder%20on%20stellar&limit=3",
-      "expected": "sorobuilder in top-3 for 'SoroBuilder on stellar'",
-      "observed": "dia, goldsky, sorosorcerer"
     },
     {
       "bucket": "P-PHRASE",
@@ -595,9 +588,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Soroban%20Assistant%20live&limit=3",
-      "expected": "soroban-assistant in top-3 for 'is Soroban Assistant live'",
-      "observed": "soroswap, dia, band"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Planet%20Pay%20live&limit=3",
+      "expected": "planet-pay in top-3 for 'is Planet Pay live'",
+      "observed": "rozo, tender, automated-finance"
     },
     {
       "bucket": "P-PHRASE",
@@ -609,36 +602,8 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Pactta%20live&limit=3",
-      "expected": "pactta in top-3 for 'is Pactta live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Planet%20Pay%20live&limit=3",
-      "expected": "planet-pay in top-3 for 'is Planet Pay live'",
-      "observed": "rozo, tender, automated-finance"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Canfy%20live&limit=3",
-      "expected": "canfy in top-3 for 'is Canfy live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Cede%20live&limit=3",
       "expected": "cede in top-3 for 'is Cede live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Nebula%20live&limit=3",
-      "expected": "nebula in top-3 for 'is Nebula live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -658,9 +623,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20SorobanIDE&limit=3",
-      "expected": "sorobanide in top-3 for 'what is SorobanIDE'",
-      "observed": "aquarius, dia, obsrvr"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Pulse&limit=3",
+      "expected": "stellar-pulse in top-3 for 'tell me about Stellar Pulse'",
+      "observed": "soroban-pulse, pathpulse-ai"
     },
     {
       "bucket": "P-PHRASE",
@@ -668,6 +633,62 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Soroban%20Decompiler%20live&limit=3",
       "expected": "soroban-decompiler in top-3 for 'is Soroban Decompiler live'",
       "observed": "soroswap, dia, band"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Sorscan%20live&limit=3",
+      "expected": "sorscan in top-3 for 'is Sorscan live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Pactta%20live&limit=3",
+      "expected": "pactta in top-3 for 'is Pactta live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20sTeX&limit=3",
+      "expected": "stex in top-3 for 'what is sTeX'",
+      "observed": "idos, python-stellar-sdk, soroban-rust-sdk"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=SoroBuilder%20on%20stellar&limit=3",
+      "expected": "sorobuilder in top-3 for 'SoroBuilder on stellar'",
+      "observed": "dia, goldsky, obsrvr"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Canfy%20live&limit=3",
+      "expected": "canfy in top-3 for 'is Canfy live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Soroban%20Assistant%20live&limit=3",
+      "expected": "soroban-assistant in top-3 for 'is Soroban Assistant live'",
+      "observed": "soroswap, dia, band"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Nebula%20live&limit=3",
+      "expected": "nebula in top-3 for 'is Nebula live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20SorobanIDE&limit=3",
+      "expected": "sorobanide in top-3 for 'what is SorobanIDE'",
+      "observed": "aquarius, dia, obsrvr"
     },
     {
       "bucket": "P-PHRASE",
@@ -784,9 +805,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Neovestor%20live&limit=3",
-      "expected": "neovestor in top-3 for 'is Neovestor live'",
-      "observed": "dia, band, beamable"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20OneKey&limit=3",
+      "expected": "onekey in top-3 for 'tell me about OneKey'",
+      "observed": "sava, stellar-razor-and-blazor-suite, sfx"
     },
     {
       "bucket": "P-PHRASE",
@@ -798,9 +819,9 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20OneKey&limit=3",
-      "expected": "onekey in top-3 for 'tell me about OneKey'",
-      "observed": "sava, stellar-razor-and-blazor-suite, sfx"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Neovestor%20live&limit=3",
+      "expected": "neovestor in top-3 for 'is Neovestor live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -861,6 +882,13 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20CTX%20live&limit=3",
+      "expected": "ctx in top-3 for 'is CTX live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Cartwey%20live&limit=3",
       "expected": "cartwey in top-3 for 'is Cartwey live'",
       "observed": "dia, band, beamable"
@@ -910,6 +938,13 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=LINK%20on%20stellar&limit=3",
+      "expected": "link in top-3 for 'LINK on stellar'",
+      "observed": "cactus-link, interlinked, wagelink"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Kotani%20Pay%20live&limit=3",
       "expected": "kotani-pay in top-3 for 'is Kotani Pay live'",
       "observed": "rozo, tender, automated-finance"
@@ -931,8 +966,8 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Wellspring%20live&limit=3",
-      "expected": "wellspring in top-3 for 'is Wellspring live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Jumpa%20live&limit=3",
+      "expected": "jumpa in top-3 for 'is Jumpa live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -940,6 +975,20 @@
       "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Forestio%20live&limit=3",
       "expected": "forestio in top-3 for 'is Forestio live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Wellspring%20live&limit=3",
+      "expected": "wellspring in top-3 for 'is Wellspring live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Figo%20live&limit=3",
+      "expected": "figo in top-3 for 'is Figo live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -955,13 +1004,6 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=Dig%20on%20stellar&limit=3",
       "expected": "dig in top-3 for 'Dig on stellar'",
       "observed": "redswan, digitpay-finance, digibank"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Figo%20live&limit=3",
-      "expected": "figo in top-3 for 'is Figo live'",
-      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -1001,13 +1043,6 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellar%20Tip%20live&limit=3",
-      "expected": "stellar-tip in top-3 for 'is Stellar Tip live'",
-      "observed": "pyth, teachmedefi, dia"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Task.io%20live&limit=3",
       "expected": "taskio in top-3 for 'is Task.io live'",
       "observed": "dia, band, beamable"
@@ -1015,22 +1050,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellar%20Tip%20live&limit=3",
+      "expected": "stellar-tip in top-3 for 'is Stellar Tip live'",
+      "observed": "pyth, teachmedefi, dia"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Sendit%20live&limit=3",
       "expected": "sendit in top-3 for 'is Sendit live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rigel%20live&limit=3",
-      "expected": "rigel in top-3 for 'is Rigel live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Quidroo%20live&limit=3",
-      "expected": "quidroo in top-3 for 'is Quidroo live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1057,20 +1085,6 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20OpenSolar%20live&limit=3",
-      "expected": "opensolar in top-3 for 'is OpenSolar live'",
-      "observed": "solar-wallet, latch, the-aha-company"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Lumenaut%20live&limit=3",
-      "expected": "lumenaut in top-3 for 'is Lumenaut live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Dropzey%20live&limit=3",
       "expected": "dropzey in top-3 for 'is Dropzey live'",
       "observed": "dia, band, beamable"
@@ -1092,13 +1106,6 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20ChainCred%20live&limit=3",
-      "expected": "chaincred in top-3 for 'is ChainCred live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Blox%20live&limit=3",
       "expected": "blox in top-3 for 'is Blox live'",
       "observed": "dia, band, beamable"
@@ -1115,13 +1122,6 @@
       "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Answerly%20live&limit=3",
       "expected": "answerly in top-3 for 'is Answerly live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Whalestack%20live&limit=3",
-      "expected": "whalestack in top-3 for 'is Whalestack live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1169,6 +1169,20 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%205x%20Crypto%20live&limit=3",
+      "expected": "5x-crypto in top-3 for 'is 5x Crypto live'",
+      "observed": "beamable, noether, tender"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rigel%20live&limit=3",
+      "expected": "rigel in top-3 for 'is Rigel live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Afriex%20live&limit=3",
       "expected": "afriex in top-3 for 'is Afriex live'",
       "observed": "dia, band, beamable"
@@ -1176,23 +1190,65 @@
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20StellarFolio&limit=3",
-      "expected": "stellarfolio in top-3 for 'what is StellarFolio'",
-      "observed": "tokenpad, renesis, equilibre"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Quidroo%20live&limit=3",
+      "expected": "quidroo in top-3 for 'is Quidroo live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%205x%20Crypto%20live&limit=3",
-      "expected": "5x-crypto in top-3 for 'is 5x Crypto live'",
-      "observed": "beamable, noether, tender"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20OpenSolar%20live&limit=3",
+      "expected": "opensolar in top-3 for 'is OpenSolar live'",
+      "observed": "solar-wallet, latch, the-aha-company"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Lumens%20for%20Charity&limit=3",
+      "expected": "lumens-for-charity in top-3 for 'tell me about Lumens for Charity'",
+      "observed": "lumenshade, lumen-later, lumenswap"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Lumenaut%20live&limit=3",
+      "expected": "lumenaut in top-3 for 'is Lumenaut live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20LocalCoin&limit=3",
+      "expected": "localcoin in top-3 for 'what is LocalCoin'",
+      "observed": "troqpay, flux, yellow-card"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20ChainCred%20live&limit=3",
+      "expected": "chaincred in top-3 for 'is ChainCred live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20BorderDollar&limit=3",
+      "expected": "borderdollar in top-3 for 'what is BorderDollar'",
+      "observed": "glo-dollar, felix-pago, cash-abroad"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Whalestack%20live&limit=3",
+      "expected": "whalestack in top-3 for 'is Whalestack live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Asset",
       "probe": "https://stellarlight.xyz/api/projects/search?q=ARS%20on%20stellar&limit=3",
       "expected": "ars in top-3 for 'ARS on stellar'",
-      "observed": "bitso, the-starship-soroban, stellarstrides"
+      "observed": "bitso, the-starship-soroban, stellars-finance"
     },
     {
       "bucket": "P-PHRASE",
@@ -1225,15 +1281,15 @@
     {
       "bucket": "P-PHRASE",
       "area": "Asset",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20MBRL%20live&limit=3",
-      "expected": "mbrl in top-3 for 'is MBRL live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20VCHF%20live&limit=3",
+      "expected": "vchf in top-3 for 'is VCHF live'",
       "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Asset",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20VCHF%20live&limit=3",
-      "expected": "vchf in top-3 for 'is VCHF live'",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20MBRL%20live&limit=3",
+      "expected": "mbrl in top-3 for 'is MBRL live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1266,6 +1322,13 @@
     },
     {
       "bucket": "P-PHRASE",
+      "area": "Asset",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=xUSD%20on%20stellar&limit=3",
+      "expected": "xusd in top-3 for 'xUSD on stellar'",
+      "observed": "circle, ondo, bitso"
+    },
+    {
+      "bucket": "P-PHRASE",
       "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Phoenix%20live&limit=3",
       "expected": "phoenix in top-3 for 'is Phoenix live'",
@@ -1284,13 +1347,6 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Slender%20live&limit=3",
       "expected": "slender in top-3 for 'is Slender live'",
       "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Asset",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=xUSD%20on%20stellar&limit=3",
-      "expected": "xusd in top-3 for 'xUSD on stellar'",
-      "observed": "circle, ondo, bitso"
     },
     {
       "bucket": "P-PHRASE",
@@ -1344,6 +1400,13 @@
     {
       "bucket": "P-PHRASE",
       "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rango%20live&limit=3",
+      "expected": "rango in top-3 for 'is Rango live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Normal%20live&limit=3",
       "expected": "normal in top-3 for 'is Normal live'",
       "observed": "dia, band, beamable"
@@ -1353,13 +1416,6 @@
       "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Laina%20live&limit=3",
       "expected": "laina in top-3 for 'is Laina live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Protocol/Contract",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Rango%20live&limit=3",
-      "expected": "rango in top-3 for 'is Rango live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1382,6 +1438,48 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20zkCross%20live&limit=3",
       "expected": "zkcross in top-3 for 'is zkCross live'",
       "observed": "circle-cctp-cross-chain-transfer-protocol, dia, band"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Smart%20Treasury%20live&limit=3",
+      "expected": "smart-treasury in top-3 for 'is Smart Treasury live'",
+      "observed": "dia, band, redstone-finance"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Remi%20live&limit=3",
+      "expected": "remi in top-3 for 'is Remi live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Lusty%20live&limit=3",
+      "expected": "lusty in top-3 for 'is Lusty live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20For%20Yield&limit=3",
+      "expected": "for-yield in top-3 for 'tell me about For Yield'",
+      "observed": "defindex, ondo, vaquita"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Sodax%20live&limit=3",
+      "expected": "sodax in top-3 for 'is Sodax live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Octarine%20live&limit=3",
+      "expected": "octarine in top-3 for 'is Octarine live'",
+      "observed": "dia, band, beamable"
     },
     {
       "bucket": "P-PHRASE",
@@ -1463,6 +1561,13 @@
     {
       "bucket": "P-PHRASE",
       "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Mystic%20live&limit=3",
+      "expected": "mystic in top-3 for 'is Mystic live'",
+      "observed": "dia, band, beamable"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Soroban%20%20Polygon%20-%20Interop%20live&limit=3",
       "expected": "soroban-polygon-interop in top-3 for 'is Soroban  Polygon - Interop live'",
       "observed": "axelar, band, trustswap"
@@ -1472,13 +1577,6 @@
       "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Ichi%20live&limit=3",
       "expected": "ichi in top-3 for 'is Ichi live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Protocol/Contract",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Mystic%20live&limit=3",
-      "expected": "mystic in top-3 for 'is Mystic live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1507,13 +1605,6 @@
       "area": "Protocol/Contract",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20The%20Strategists%20live&limit=3",
       "expected": "the-strategists in top-3 for 'is The Strategists live'",
-      "observed": "dia, band, beamable"
-    },
-    {
-      "bucket": "P-PHRASE",
-      "area": "Protocol/Contract",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Octarine%20live&limit=3",
-      "expected": "octarine in top-3 for 'is Octarine live'",
       "observed": "dia, band, beamable"
     },
     {
@@ -1559,20 +1650,6 @@
       "observed": "allbridge, axelar, circle-cctp-cross-chain-transfer-protocol, stronghold, rozo"
     },
     {
-      "bucket": "P-ATTR",
-      "area": "supportedNetworks",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=evm%20dex&limit=10",
-      "expected": "prism in top-10 (its own supportedNetworks implies 'evm dex')",
-      "observed": "allbridge, bim-exchange, usdc-swap, transfuse, rubic"
-    },
-    {
-      "bucket": "P-ATTR",
-      "area": "supportedNetworks",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=evm%20security&limit=10",
-      "expected": "safu-protocol in top-10 (its own supportedNetworks implies 'evm security')",
-      "observed": "allbridge, axelar, trustswap, rozo, warpdrive"
-    },
-    {
       "bucket": "R-SYM",
       "area": "repos-symbols",
       "probe": "https://stellarlight.xyz/api/repos/search?q=initialize&limit=5",
@@ -1580,6 +1657,6 @@
       "observed": "ashfrancis/chickenz, Andy00L/x402-autopilot, fundable-protocol/Fundable-Soroban-Contracts, cushyon/Stellar_migration, trustless-work/trustlesswork-smart-contract-stellar"
     }
   ],
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "engine-a-recall"
 }

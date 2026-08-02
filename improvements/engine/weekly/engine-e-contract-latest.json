@@ -1,12 +1,14 @@
 {
   "base": "https://stellarlight.xyz",
-  "specVersion": "1.8.27",
+  "specVersion": "1.8.30",
   "frame": {
     "ops": 28,
     "paramsProbed": 21,
-    "fieldsChecked": 427,
+    "fieldsChecked": 401,
     "postChecked": 5,
     "skipped": [
+      "GET /api/hackathons/{slug} (no sample for path params)",
+      "GET /api/hackathons/compare (no sample for path params)",
       "GET /api/hackathons/compare (no documented response properties)",
       "GET /api/hackathons/builds (no documented response properties)",
       "GET /api/partners/{slug} (no documented response properties)",
@@ -14,7 +16,23 @@
       "GET /api/feedback (no documented response properties)"
     ]
   },
-  "silentParams": [],
+  "silentParams": [
+    {
+      "op": "GET /api/hackathons",
+      "param": "source",
+      "evidence": "all 2 valid value(s) [curated, dorahacks] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons?limit=200)"
+    },
+    {
+      "op": "GET /api/hackathons",
+      "param": "status",
+      "evidence": "all 3 valid value(s) [upcoming, active, completed] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons?limit=200)"
+    },
+    {
+      "op": "GET /api/hackathons/builds",
+      "param": "winnersOnly",
+      "evidence": "all 2 valid value(s) [1, true] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/builds?limit=200)"
+    }
+  ],
   "invalidAccepted": [
     {
       "op": "GET /api/hackathons/builds",
@@ -26,13 +44,18 @@
   "optionalAbsent": [
     {
       "op": "GET /api/projects/search",
+      "field": "meta.didYouMean",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
       "field": "meta.advisory",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/projects/search",
       "field": "projects[].placementRank",
-      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 99 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/explain",
@@ -48,21 +71,6 @@
       "op": "GET /api/hackathons",
       "field": "meta.fallbackChannels",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "meta.filters",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "meta.counts",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].hackathonPrize",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema, not drift"
     }
   ],
   "undocumentedFields": [
@@ -80,66 +88,6 @@
       "op": "GET /api/repos/explain",
       "field": "answerSource",
       "evidence": "served live (https://stellarlight.xyz/api/repos/explain?q=soroban), missing from the spec"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "meta.note",
-      "evidence": "served live (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].id",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].description",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].githubUrl",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].demoUrl",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].videoUrl",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].track",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].award",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].isWinner",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].voteCount",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].url",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].source",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk), missing from the spec's item schema"
     },
     {
       "op": "GET /api/builders",
@@ -388,6 +336,11 @@
     },
     {
       "op": "GET /api/leaderboard",
+      "field": "meta.counts",
+      "evidence": "served live (https://stellarlight.xyz/api/leaderboard?limit=200), missing from the spec"
+    },
+    {
+      "op": "GET /api/leaderboard",
       "field": "meta.filters",
       "evidence": "served live (https://stellarlight.xyz/api/leaderboard?limit=200), missing from the spec"
     },
@@ -419,6 +372,6 @@
       "evidence": "all 1 valid value(s) [1] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/partners?limit=200) \u2014 single-value enum: its only value may restate the server default, so inert vs explicit-default is undecidable from outside"
     }
   ],
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "engine-e-contract"
 }
