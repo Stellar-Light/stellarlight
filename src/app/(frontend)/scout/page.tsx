@@ -14,7 +14,39 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { ScoutInstallPicker } from "@/components/scout-install-picker";
+import { IDEAS } from "@/data/ideas";
+import { spec } from "@/lib/openapi-spec";
 import { getPayloadSafe } from "@/lib/payload-client";
+
+/**
+ * Stats derived from their sources of truth instead of hand-typed literals.
+ * The hero claimed "14 endpoints" while the contract served 27 paths, and
+ * "4,541 research chunks" while the corpus held ~9,400 — both numbers were
+ * true the day they were typed and silently wrong ever since. ENDPOINT_COUNT
+ * comes from the same spec object /api/openapi.json serves, so it can only
+ * change when the contract does.
+ */
+const ENDPOINT_COUNT = Object.keys(spec.paths).length;
+/** Endpoints shown in the terminal listing below — the "…and N more" remainder. */
+const LISTED_ENDPOINTS = 8;
+
+/**
+ * Research-corpus size, counted live (the page revalidates every 5 minutes).
+ * Null when the DB is unreachable — render the dated floor then, never a
+ * precise number nobody counted.
+ */
+async function getResearchChunkCount(): Promise<number | null> {
+	const payload = await getPayloadSafe();
+	if (!payload) return null;
+	try {
+		const { totalDocs } = await payload.count({ collection: "research-docs" });
+		return totalDocs;
+	} catch {
+		return null;
+	}
+}
+/** Fallback floor when the count is unavailable — true as of 2026-07-31 (9,445 docs). */
+const RESEARCH_CHUNK_FLOOR = "9,000+";
 
 export const revalidate = 300;
 
@@ -329,6 +361,7 @@ function Section({
 
 export default async function ScoutPage() {
 	const showcaseProjects = await getShowcaseProjects();
+	const researchChunkCount = await getResearchChunkCount();
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -363,7 +396,7 @@ export default async function ScoutPage() {
 					<div className="grid grid-cols-3 gap-px mt-4 rounded-xl border border-border/40 bg-border/40 overflow-hidden">
 						<div className="bg-card px-4 py-3">
 							<div className="text-xl md:text-2xl font-bold text-foreground tabular-nums">
-								14
+								{ENDPOINT_COUNT}
 							</div>
 							<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mt-0.5">
 								Endpoints
@@ -371,7 +404,9 @@ export default async function ScoutPage() {
 						</div>
 						<div className="bg-card px-4 py-3">
 							<div className="text-xl md:text-2xl font-bold text-foreground tabular-nums">
-								4,541
+								{researchChunkCount
+									? researchChunkCount.toLocaleString("en-US")
+									: RESEARCH_CHUNK_FLOOR}
 							</div>
 							<div className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mt-0.5">
 								Research chunks
@@ -480,15 +515,19 @@ export default async function ScoutPage() {
 						</div>
 
 						<div className="rounded-xl border border-border bg-card p-5">
-							<div className="text-3xl font-bold text-foreground mb-1">14</div>
+							{/* Derived from the data module — this number sat hardcoded at 14
+							    and silently went stale the moment Q3's briefs landed. */}
+							<div className="text-3xl font-bold text-foreground mb-1">
+								{IDEAS.length}
+							</div>
 							<div className="text-sm font-semibold text-foreground mb-3">
 								Sponsor briefs (RFPs)
 							</div>
 							<div className="flex flex-wrap gap-1.5 mb-3">
 								{[
+									"LayerZero DVN",
+									"x402 Bazaar",
 									"Prices API",
-									"Passkey UI Kit",
-									"DeFi Positions",
 									"Trustline Onboarder",
 								].map((n) => (
 									<span
@@ -802,7 +841,7 @@ export default async function ScoutPage() {
 				<Section eyebrow="Under the hood" title="Public APIs the skill calls">
 					<div className="rounded-xl border border-border/40 bg-black/30 p-6 font-mono text-xs space-y-1.5 mb-3">
 						{[
-							["GET", "/api/research", "vector search over 4.5k chunks"],
+							["GET", "/api/research", "vector search over the corpus"],
 							["GET", "/api/hackathons", "curated + DoraHacks live"],
 							["GET", "/api/projects/search", "prior-art + competitor lookup"],
 							["GET", "/api/rfps", "SCF-funded sponsor briefs"],
@@ -819,13 +858,16 @@ export default async function ScoutPage() {
 								<span className="text-muted-foreground">— {blurb}</span>
 							</div>
 						))}
-						<div className="text-muted-foreground/60 pt-1">…and 6 more</div>
+						<div className="text-muted-foreground/60 pt-1">
+							…and {ENDPOINT_COUNT - LISTED_ENDPOINTS} more
+						</div>
 					</div>
 					<Link
 						href="/scout/api-reference"
 						className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
-						Full API reference (14 endpoints, params, response shapes) →
+						Full API reference ({ENDPOINT_COUNT} endpoints, params, response
+						shapes) →
 					</Link>
 				</Section>
 

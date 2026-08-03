@@ -23,6 +23,11 @@
 
 import "./load-env";
 import { getPayload } from "payload";
+import {
+	formatMismatches,
+	type ReadBackMismatch,
+	verifyWrites,
+} from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -109,6 +114,23 @@ async function main() {
 	const asOf = new Date().toISOString();
 	let written = 0;
 	let failed = 0;
+	/** Fields this writer is responsible for — the read-back verifies exactly
+	 * these. `payload.update()` silently DROPS keys with no schema field at that
+	 * path (#615): it resolves, `written` increments, and nothing persisted. */
+	const VERIFIED_FIELDS = [
+		"tvlUSD",
+		"tvlAsOf",
+		"llamaSlugs",
+		"tvlSource",
+		"tvlMethod",
+	] as const;
+	/** slug → the exact payload sent, kept so the read-back compares against what
+	 * was claimed rather than recomputing it (a recompute would hide a bug in the
+	 * computation itself). */
+	const sentBySlug = new Map<
+		string,
+		{ id: string; data: Record<string, unknown> }
+	>();
 
 	console.log("── TVL writes (mapped protocols only) ──");
 	for (const [ourSlug, llamaSlugs] of Object.entries(LLAMA_MAP)) {
@@ -139,21 +161,23 @@ async function main() {
 			`  ${ourSlug}: tvlUSD ← $${tvl.toLocaleString()} (${llamaSlugs.length} row(s))`,
 		);
 		if (EXECUTE) {
+			const data = {
+				tvlUSD: tvl,
+				tvlAsOf: asOf,
+				llamaSlugs,
+				// sls-031: provenance rides every write (additive fields)
+				tvlSource: TVL_SOURCE,
+				tvlMethod: TVL_METHOD,
+			};
 			try {
 				await payload.update({
 					collection: "projects",
 					id: d.id,
-					data: {
-						tvlUSD: tvl,
-						tvlAsOf: asOf,
-						llamaSlugs,
-						// sls-031: provenance rides every write (additive fields)
-						tvlSource: TVL_SOURCE,
-						tvlMethod: TVL_METHOD,
-					},
+					data,
 					overrideAccess: true,
 				});
 				written++;
+				sentBySlug.set(ourSlug, { id: d.id, data });
 			} catch (err) {
 				failed++;
 				console.error(`  FAILED: ${ourSlug} — ${String(err)}`);
@@ -199,8 +223,57 @@ async function main() {
 				.padStart(14)}  (${p.category ?? "?"})`,
 		);
 
+	// ── read-back: prove the writes PERSISTED (lessons class 20/32, #615) ──
+	// "N written" is a statement about the update calls, not about the data.
+	// payload.update() resolves and drops keys with no schema field at that path,
+	// so a run can report success having persisted nothing. Re-read every row we
+	// claimed to write and compare it to what we sent.
+	let mismatches: ReadBackMismatch[] = [];
+	if (EXECUTE && sentBySlug.size) {
+		console.log(`\n── Read-back (${sentBySlug.size} written row(s)) ──`);
+		const idBySlug = new Map(
+			[...sentBySlug].map(([slug, v]) => [slug, v.id] as const),
+		);
+		const sentData = new Map(
+			[...sentBySlug].map(([slug, v]) => [slug, v.data] as const),
+		);
+		mismatches = await verifyWrites(
+			sentData,
+			async (slugs) => {
+				const ids = slugs.map((s) => idBySlug.get(s)).filter(Boolean);
+				const back = await payload.find({
+					collection: "projects",
+					where: { id: { in: ids } },
+					limit: ids.length,
+					depth: 0,
+					overrideAccess: true,
+				});
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+				const byId = new Map(back.docs.map((r: any) => [String(r.id), r]));
+				return new Map(
+					slugs
+						.map((s) => [s, byId.get(String(idBySlug.get(s)))] as const)
+						.filter((e): e is [string, Record<string, unknown>] =>
+							Boolean(e[1]),
+						),
+				);
+			},
+			VERIFIED_FIELDS,
+		);
+		if (mismatches.length) {
+			console.error(
+				`  ✗ ${mismatches.length} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${sentBySlug.size} row(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
+		}
+	}
+
 	console.log(
-		`\nDONE: ${EXECUTE ? `${written} written, ${failed} failed` : "dry run — no writes"}.`,
+		`\nDONE: ${EXECUTE ? `${written} written, ${failed} failed, ${mismatches.length} did-not-persist` : "dry run — no writes"}.`,
 	);
 	if (failed) process.exitCode = 1;
 	process.exit(process.exitCode ?? 0);

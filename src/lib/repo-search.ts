@@ -956,7 +956,19 @@ export async function searchRepos(
 		// name-identity over the F4 Stellar-evidence policy — the audit's tier-0
 		// name-hit class would come straight back.
 		const qIsIdentifier = /[-_/.0-9]/.test(q.trim());
-		const qNorm = qIsIdentifier ? normAlias(q) : "";
+		// Golden repos-soroswap: a PLAIN single-word query that IS an org's whole
+		// name ("soroswap") got no identity path — the org's own repos capped at
+		// owner-hay weight 3 while integrators with a topic hit scored 5, and
+		// authority ordering buried soroswap/core in 6th. Owner-exact alias fixes
+		// it. Guards: single token only (vocabulary queries like "nft marketplace"
+		// never qualify), ≥5 chars (3–4 char tickers sit one edit apart — same
+		// floor as didYouMean), and the plain-word form matches the OWNER only —
+		// never repoPart, so a repo merely NAMED "wallet" can't ride identity over
+		// the F4 evidence policy, and never substrings, so "oracle" still can't
+		// reach Blockchain-Oracle (the scoring rule above stands).
+		const qIsPlainName =
+			!qIsIdentifier && tokens.length === 1 && q.trim().length >= 5;
+		const qNorm = qIsIdentifier || qIsPlainName ? normAlias(q) : "";
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
@@ -1033,9 +1045,12 @@ export async function searchRepos(
 			// ≥3 chars so degenerate short queries can't ride it.
 			const alias =
 				qNorm.length >= 3 &&
-				(normAlias(repoPart) === qNorm ||
-					normAlias(ownerRaw) === qNorm ||
-					normAlias(r.fullName) === qNorm)
+				(qIsIdentifier
+					? normAlias(repoPart) === qNorm ||
+						normAlias(ownerRaw) === qNorm ||
+						normAlias(r.fullName) === qNorm
+					: // Plain-word queries: owner identity ONLY (see qIsPlainName).
+						normAlias(ownerRaw) === qNorm)
 					? 1
 					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose

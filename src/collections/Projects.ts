@@ -698,6 +698,31 @@ export const Projects: CollectionConfig = {
 							"Round numbers this project was funded in, e.g. 2, 17, 22",
 					},
 				},
+				{
+					// sls-058 defect 2: the official submission record per awarded
+					// round — the reconciling basis for totalAwarded (SCF's own page
+					// total, which can exceed the sum of round budgets via top-ups /
+					// undisclosed components). Written by enrich-from-scf from the
+					// same submission cards the round verdicts come from.
+					name: "roundAwards",
+					type: "array",
+					admin: {
+						description:
+							"Per-awarded-round official record: round number, published submission budget (USD), award type",
+					},
+					fields: [
+						{ name: "round", type: "number", required: true },
+						{
+							name: "amountUSD",
+							type: "number",
+							admin: {
+								description:
+									"Published submission budget for the round; empty = award confirmed, budget not published",
+							},
+						},
+						{ name: "awardType", type: "text" },
+					],
+				},
 			],
 		},
 		{

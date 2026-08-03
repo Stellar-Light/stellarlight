@@ -151,6 +151,82 @@ async function main() {
 	const understated = matched.filter(
 		(m) => m.scf.rounds.length > 0 && !m.dir.scfAwarded,
 	);
+
+	// CURATED LEGACY AWARDS (raven sls-058 / #744): awards the listing-based
+	// comparison above is STRUCTURALLY blind to. sstream and wagelink carry
+	// official Awarded submission records, yet neither appears on the /projects
+	// listing at all (verified 2026-07-28: zero hits for either name in the
+	// listing HTML) — and `matched` is built from that listing, so the
+	// UNDERSTATED class simply never runs on them. Both sat live as
+	// scfAwarded:false for months with this detector green.
+	//
+	// So the known legacy awards are pinned here and verified from BOTH ends
+	// each run: the official submission page must still say Awarded (fetch
+	// failure ⇒ skip — never accuse on a scrape failure), and our API must
+	// actually serve the award. Either side failing lands the row in
+	// `understated`, riding the existing artifact → ledger → /quality plumbing.
+	// Entries mirror SCF_LEGACY_AWARDS in scripts/data/curate-projects.ts (the
+	// map that APPLIES the fix); this side exists so a silent revert or source
+	// change pages us instead of waiting for Raven's next eval round.
+	const CURATED_LEGACY_AWARDS: Array<{
+		slug: string;
+		round: number;
+		evidence: string;
+	}> = [
+		{
+			slug: "sstream",
+			round: 16,
+			evidence:
+				"https://communityfund.stellar.org/submissions/recnfJhEt3t2QogUI",
+		},
+		{
+			slug: "wagelink",
+			round: 24,
+			evidence:
+				"https://communityfund.stellar.org/project/wagelink-sdp-integration-i2b",
+		},
+	];
+	console.error(
+		`  curated-legacy: verifying ${CURATED_LEGACY_AWARDS.length} listing-invisible awards from both ends…`,
+	);
+	for (const cur of CURATED_LEGACY_AWARDS) {
+		const ours = dir.find((r) => r.slug === cur.slug);
+		if (!ours) {
+			console.error(
+				`  curated-legacy: no directory row "${cur.slug}" — skipped (cannot accuse)`,
+			);
+			continue;
+		}
+		const html = await fetchDetailHtml(cur.evidence);
+		if (!html) {
+			console.error(
+				`  curated-legacy: ${cur.slug} submission page unreachable — skipped (never accuse on a scrape failure)`,
+			);
+			continue;
+		}
+		// Same affirmative test the detail-page check uses: "Awarded" present
+		// and not only as "Not Awarded".
+		const officialAwarded = /(?<!not\s)(?<!not-)awarded/i.test(html);
+		if (!officialAwarded) {
+			// The official record no longer corroborates the curated award — that
+			// is a problem with OUR curation map, not with the directory row.
+			console.error(
+				`  curated-legacy: ${cur.slug} official page no longer reads Awarded — review SCF_LEGACY_AWARDS before trusting this entry`,
+			);
+			continue;
+		}
+		const ourRounds = ours.scfAwardedRounds.map(Number);
+		if (!ours.scfAwarded || !ourRounds.includes(cur.round)) {
+			understated.push({
+				dir: ours,
+				scf: {
+					base: canon(cur.slug),
+					rounds: [String(cur.round)],
+					url: cur.evidence,
+				},
+			});
+		}
+	}
 	// OVERSTATED CANDIDATES: we say awarded, listing shows no badge. Confirm
 	// via detail page before reporting (listing badges are partial).
 	const overCandidates = matched.filter(

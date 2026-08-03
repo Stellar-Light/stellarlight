@@ -111,13 +111,34 @@ export function parseRoundVerdicts(html: string): {
 	submissions: number;
 	/** Submissions with status "Awarded" in ANY round, numeric or not. */
 	awardedAnyCount: number;
+	/** sls-058 defect 2: the official submission record per AWARDED numeric
+	 * round — published budget (USD) + award type, straight off the same
+	 * submission cards the verdicts come from. One entry per round (first
+	 * awarded submission wins; resubmissions within a round share the round).
+	 * budgetUSD null = award confirmed but no parseable budget on the card —
+	 * never guessed. This is the reconciling basis for the page's own
+	 * totalAwarded, which can legitimately exceed the sum of round budgets. */
+	awards: Array<{
+		round: number;
+		budgetUSD: number | null;
+		awardType: string | null;
+	}>;
 } {
 	const txt = html.replace(/\\"/g, '"');
 	const awarded = new Set<string>();
 	const negative = new Set<string>();
+	const awardByRound = new Map<
+		number,
+		{ round: number; budgetUSD: number | null; awardType: string | null }
+	>();
 	let submissions = 0;
 	let awardedAnyCount = 0;
-	const re = /"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"/g;
+	// Field order within one submission object: status … roundName … awardType
+	// … budget (verified on fluxity-mez 2026-08-03). The [^{}] guards keep every
+	// capture inside a single object — a missing awardType/budget fails to null,
+	// never bleeds into the next card.
+	const re =
+		/"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"(?:[^{}]*?"awardType":"([^"]*)")?(?:[^{}]*?"budget":(\d+(?:\.\d+)?))?/g;
 	for (const m of txt.matchAll(re)) {
 		const status = m[1];
 		const isAward = status === "Awarded";
@@ -128,11 +149,21 @@ export function parseRoundVerdicts(html: string): {
 		const num = m[2].match(/SCF\s*#\s*(\d+)/i)?.[1];
 		if (!num) continue;
 		const round = String(Number(num));
-		if (isAward) awarded.add(round);
-		else negative.add(round);
+		if (isAward) {
+			awarded.add(round);
+			const rn = Number(num);
+			if (!awardByRound.has(rn)) {
+				awardByRound.set(rn, {
+					round: rn,
+					budgetUSD: m[4] ? Number(m[4]) : null,
+					awardType: m[3] ? m[3] : null,
+				});
+			}
+		} else negative.add(round);
 	}
 	const notAwarded = new Set([...negative].filter((r) => !awarded.has(r)));
-	return { awarded, notAwarded, submissions, awardedAnyCount };
+	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
+	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
 }
 
 export async function fetchDetailHtml(url: string): Promise<string | null> {

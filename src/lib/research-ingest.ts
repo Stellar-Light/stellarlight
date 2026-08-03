@@ -287,6 +287,11 @@ export interface UpsertStats {
 	unchanged: number;
 	embedTokens: number;
 	errors: number;
+	/** Rows this run claimed to write whose stored values do NOT match what was
+	 * sent (lessons class 20/25/32). Non-zero means the run reported success
+	 * while the corpus does not hold the change — the ingest's counters describe
+	 * the CALLS, this describes the DATA. */
+	didNotPersist: number;
 }
 
 /**
@@ -322,6 +327,7 @@ export async function upsertChunks(opts: {
 		unchanged: 0,
 		embedTokens: 0,
 		errors: 0,
+		didNotPersist: 0,
 	};
 
 	// Blank chunks can never be written (Payload's required `content` rejects
@@ -346,6 +352,14 @@ export async function upsertChunks(opts: {
 	const toEmbed: ResearchChunk[] = [];
 	const metaOnly: ResearchChunk[] = []; // per-doc: title/date drift
 	const restampIds: (string | number)[] = []; // uniform observedAt re-stamp
+	/** id → what this run CLAIMED to store there, for the read-back below.
+	 * Deliberately excludes `content`/`embedding`: re-reading 1024-dim vectors
+	 * for a 3k-chunk corpus is the memory bomb the bulk re-stamp exists to
+	 * avoid. `contentHash` proves the body landed without fetching the body. */
+	const claimed = new Map<
+		string,
+		{ title: string; contentHash?: string; publishedAt?: string; ref: string }
+	>();
 	for (const chunk of chunks) {
 		const prev = existing.get(chunk.parentDocId)?.get(chunk.chunkIndex);
 		if (prev && prev.contentHash === chunk.contentHash) {
@@ -389,6 +403,17 @@ export async function upsertChunks(opts: {
 						observedAt: chunk.observedAt ?? runObservedAt,
 					},
 				});
+				// THE path class 25 exists for: an extraction fix reaching an existing
+				// row. If this silently fails the bad title survives every future
+				// refresh (the body hash never changes), so it is the one write here
+				// most worth proving.
+				claimed.set(String(prev.id), {
+					// No contentHash: this path deliberately does not write it. A
+					// read-back must only assert fields the writer actually sent.
+					title: chunk.title,
+					publishedAt: chunk.publishedAt,
+					ref: `${chunk.parentDocId}#${chunk.chunkIndex}`,
+				});
 			} catch (err) {
 				console.error(
 					`    ✗ ${chunk.parentDocId}#${chunk.chunkIndex}: ${(err as Error).message}`,
@@ -418,10 +443,28 @@ export async function upsertChunks(opts: {
 			// biome-ignore lint/suspicious/noExplicitAny: payload.db mongoose internals
 			const model = (payload.db as any)?.collections?.["research-docs"];
 			if (model?.updateMany) {
-				await model.updateMany(
+				const res = await model.updateMany(
 					{ _id: { $in: restampIds } },
 					{ $set: { observedAt: runObservedAt } },
 				);
+				// The bulk op reports what it touched — and until now nothing read it.
+				// A filter that matches nothing is indistinguishable from a successful
+				// re-stamp, and the corpus freshness lane is built on observedAt, so a
+				// silent no-op here makes the whole corpus look freshly observed.
+				const matched = res?.matchedCount ?? res?.n;
+				if (typeof matched === "number" && matched < restampIds.length) {
+					console.error(
+						`    ✗ observedAt re-stamp matched ${matched} of ${restampIds.length} chunk(s) — freshness for the rest is now overstated`,
+					);
+					stats.didNotPersist += restampIds.length - matched;
+				}
+			} else {
+				// Optional chaining above meant a missing handle did NOTHING, silently,
+				// while stats.unchanged still reported every row as re-stamped.
+				console.error(
+					`    ✗ observedAt bulk re-stamp SKIPPED: no mongoose model handle for research-docs (${restampIds.length} chunk(s) not re-stamped)`,
+				);
+				stats.didNotPersist += restampIds.length;
 			}
 		} catch (err) {
 			console.error(
@@ -431,7 +474,14 @@ export async function upsertChunks(opts: {
 		}
 	}
 
-	if (toEmbed.length === 0) return stats;
+	// Read back BEFORE this early return, not after it: a run with nothing to
+	// embed is the pure metadata-drift case — the class-25 path where a silently
+	// dropped title survives every future refresh, and so the one that most
+	// needs verifying. Returning here first would have skipped exactly it.
+	if (toEmbed.length === 0) {
+		await readBackClaimed(payload, claimed, stats);
+		return stats;
+	}
 
 	console.log(`  Embedding ${toEmbed.length} chunks via Voyage AI…`);
 	const embeddings = await embedBatch(toEmbed.map((c) => c.content));
@@ -466,15 +516,27 @@ export async function upsertChunks(opts: {
 			embedding,
 		};
 		try {
+			let id: string;
 			if (prev) {
 				await payload.update({
 					collection: "research-docs",
 					id: prev.id,
 					data,
 				});
+				id = String(prev.id);
 			} else {
-				await payload.create({ collection: "research-docs", data });
+				const created = await payload.create({
+					collection: "research-docs",
+					data,
+				});
+				id = String(created.id);
 			}
+			claimed.set(id, {
+				title: chunk.title,
+				contentHash: chunk.contentHash,
+				publishedAt: chunk.publishedAt,
+				ref: `${chunk.parentDocId}#${chunk.chunkIndex}`,
+			});
 		} catch (err) {
 			console.error(
 				`    ✗ ${chunk.parentDocId}#${chunk.chunkIndex}: ${(err as Error).message}`,
@@ -483,7 +545,101 @@ export async function upsertChunks(opts: {
 		}
 	}
 
+	await readBackClaimed(payload, claimed, stats);
 	return stats;
+}
+
+/** Re-read every chunk this run claimed to write and compare it to what was
+ * sent (lessons class 20/25/32).
+ *
+ * The ingest counters — new/updated/unchanged — describe the CALLS. They say
+ * nothing about the data: `payload.update()` resolves and silently drops keys
+ * with no schema field at that path (#615), so a run can report "updated: 40"
+ * having stored none of it. On this collection that failure is especially
+ * durable, because the skip-on-unchanged-hash path means a bad row is never
+ * revisited — it survives every future refresh (class 25).
+ *
+ * `select` is mandatory here, not an optimisation: hydrating these docs without
+ * it returns each 1024-dim embedding, which is the memory bomb the bulk
+ * re-stamp was written to avoid. `contentHash` proves the body landed without
+ * fetching the body.
+ */
+async function readBackClaimed(
+	payload: Payload,
+	claimed: Map<
+		string,
+		{ title: string; contentHash?: string; publishedAt?: string; ref: string }
+	>,
+	stats: UpsertStats,
+): Promise<void> {
+	if (claimed.size === 0) return;
+	const ids = [...claimed.keys()];
+	const PAGE = 200;
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	const stored = new Map<string, any>();
+
+	try {
+		for (let i = 0; i < ids.length; i += PAGE) {
+			const batch = ids.slice(i, i + PAGE);
+			const res = await payload.find({
+				collection: "research-docs",
+				where: { id: { in: batch } },
+				limit: batch.length,
+				depth: 0,
+				select: {
+					title: true,
+					contentHash: true,
+					publishedAt: true,
+				},
+			});
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			for (const d of res.docs as any[]) stored.set(String(d.id), d);
+		}
+	} catch (err) {
+		// A read-back that cannot run must SAY so — silence here would read as
+		// "verified" (the blind-guard trap).
+		console.error(`  ✗ read-back could not run: ${(err as Error).message}`);
+		stats.errors += 1;
+		return;
+	}
+
+	const bad: string[] = [];
+	for (const [id, want] of claimed) {
+		const got = stored.get(id);
+		if (!got) {
+			bad.push(`${want.ref}: row not found after write`);
+			continue;
+		}
+		if (want.contentHash !== undefined && got.contentHash !== want.contentHash)
+			bad.push(
+				`${want.ref}: contentHash sent ${want.contentHash.slice(0, 12)}…, stored ${String(got.contentHash).slice(0, 12)}…`,
+			);
+		else if ((got.title ?? "") !== want.title)
+			bad.push(
+				`${want.ref}: title sent ${JSON.stringify(want.title)}, stored ${JSON.stringify(got.title)}`,
+			);
+		else if (
+			want.publishedAt !== undefined &&
+			normalizeDate(got.publishedAt) !== normalizeDate(want.publishedAt)
+		)
+			bad.push(
+				`${want.ref}: publishedAt sent ${want.publishedAt}, stored ${got.publishedAt}`,
+			);
+	}
+
+	if (bad.length) {
+		stats.didNotPersist += bad.length;
+		console.error(
+			`  ✗ read-back: ${bad.length} of ${claimed.size} written chunk(s) do NOT hold what was sent:\n${bad
+				.slice(0, 10)
+				.map((b) => `      ${b}`)
+				.join(
+					"\n",
+				)}${bad.length > 10 ? `\n      …and ${bad.length - 10} more` : ""}`,
+		);
+	} else {
+		console.log(`  ✓ read-back: all ${claimed.size} written chunk(s) verified`);
+	}
 }
 
 /**

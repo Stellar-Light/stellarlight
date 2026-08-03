@@ -49,7 +49,7 @@ export const spec: OpenAPISpec = {
 			"None enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.",
 			"",
 			"## Ordering & relevance",
 			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.',
@@ -2218,7 +2218,7 @@ export const spec: OpenAPISpec = {
 						"install command",
 						"instructions",
 						"agentic payments",
-						"soroban skill",
+						"smart-contracts skill",
 						"stellar-scout",
 					],
 					useWhen: [
@@ -2230,7 +2230,7 @@ export const spec: OpenAPISpec = {
 					],
 					exampleQuestions: [
 						"Show me the SKILL.md for agentic-payments",
-						"How do I install the soroban skill?",
+						"How do I install the smart-contracts skill?",
 					],
 				},
 				parameters: [
@@ -2239,7 +2239,7 @@ export const spec: OpenAPISpec = {
 						in: "path",
 						required: true,
 						description:
-							"Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay')",
+							"Skill slug (e.g. 'smart-contracts', 'stellar-scout', 'rozo-intent-pay')",
 						schema: { type: "string" },
 					},
 				],
@@ -3009,8 +3009,14 @@ export const spec: OpenAPISpec = {
 							total: {
 								type: "integer",
 								minimum: 0,
+								nullable: true,
 								description:
-									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total.",
+									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred.",
+							},
+							totalBasis: {
+								type: "string",
+								description:
+									"Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field.",
 							},
 							semantic: {
 								type: "integer",
@@ -3422,7 +3428,20 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "integer" },
 						description:
-							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
+							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
+					},
+					scfRoundAwards: {
+						type: "array",
+						description:
+							"The official submission record per awarded round — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). The page-level total can legitimately exceed the sum of these budgets; treat rounds+budgets as the per-round truth and the total as SCF's own aggregate.",
+						items: {
+							type: "object",
+							properties: {
+								round: { type: "integer" },
+								amountUSD: { type: "number", nullable: true },
+								awardType: { type: "string", nullable: true },
+							},
+						},
 					},
 					coverage: {
 						type: "object",
@@ -3809,6 +3828,11 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+									},
+									scfCountBasis: {
+										type: "string",
+										description:
+											"Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups).",
 									},
 								},
 							},
@@ -4565,6 +4589,12 @@ export const spec: OpenAPISpec = {
 								type: "integer",
 								description:
 									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
+							},
+							repos: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
 							},
 						},
 					},

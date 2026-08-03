@@ -150,7 +150,7 @@ async function replay(endpoint: string, q: string): Promise<Replay | null> {
 	}
 }
 
-type MissClass = "EMPTY" | "FALLBACK" | "WEAK" | "OK";
+type MissClass = "EMPTY" | "FALLBACK" | "GAP" | "WEAK" | "OK";
 
 /**
  * Grade the ANSWER, not the row count.
@@ -168,8 +168,25 @@ type MissClass = "EMPTY" | "FALLBACK" | "WEAK" | "OK";
  */
 function classify(endpoint: string, r: Replay): MissClass {
 	if (r.returned === 0) return r.routed ? "OK" : "EMPTY";
-	if (endpoint === "/api/projects/search" && r.matchMode === "semantic")
-		return "FALLBACK";
+	if (endpoint === "/api/projects/search" && r.matchMode === "semantic") {
+		// Same principle as the routed-empty case above, one rung along.
+		//
+		// Since openapi@1.8.27 a semantic-only page carries an advisory that
+		// says outright: no project matches this name, these rows are
+		// NEIGHBOURS, and here is where the answer might actually live. When
+		// that advisory is present the endpoint did not fail to retrieve — it
+		// correctly reported that we hold no such record. The gap is real and
+		// still worth tracking, but it is a COVERAGE gap (curation: add the
+		// project) rather than a RETRIEVAL gap (code: fix the ranking), and
+		// filing it as the latter creates a finding no retrieval work can ever
+		// close. The only way to "fix" a missing project by ranking is to
+		// invent one.
+		//
+		// A semantic page with NO advisory is still FALLBACK: those rows are
+		// being presented as answers with nothing marking them as guesses,
+		// which is the failure the advisory was introduced to end.
+		return r.routed ? "GAP" : "FALLBACK";
+	}
 	if (typeof r.topConfidence === "number" && r.topConfidence < WEAK_CONFIDENCE)
 		return "WEAK";
 	return "OK";
@@ -262,10 +279,12 @@ async function main() {
 				cls === "EMPTY"
 					? "0 results"
 					: cls === "FALLBACK"
-						? `matchMode=semantic (${r.semanticRows} fallback rows)`
-						: cls === "WEAK"
-							? `top confidence ${r.topConfidence}`
-							: `${r.returned} rows, top confidence ${r.topConfidence ?? "n/a"}`;
+						? `matchMode=semantic (${r.semanticRows} fallback rows, NO advisory — neighbours served as answers)`
+						: cls === "GAP"
+							? "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+							: cls === "WEAK"
+								? `top confidence ${r.topConfidence}`
+								: `${r.returned} rows, top confidence ${r.topConfidence ?? "n/a"}`;
 			results.push({
 				endpoint: d.endpoint,
 				query: d.query,

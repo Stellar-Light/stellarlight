@@ -160,6 +160,7 @@ async function semanticProjectRows(
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
+			scfRoundAwards: pickScfRoundAwards(p.scf),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
 			supportedNetworks: Array.isArray(p.supportedNetworks)
@@ -217,6 +218,24 @@ function scfAmountStatus(
 ): "disclosed" | "undisclosed" | null {
 	if (!awarded) return null;
 	return typeof totalAwarded === "number" ? "disclosed" : "undisclosed";
+}
+
+// sls-058 defect 2: per-awarded-round official submission record — the
+// reconciling basis for scfTotalAwardedUSD. Strips Payload array-row ids.
+function pickScfRoundAwards(
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	scf: any,
+): Array<{ round: number; amountUSD: number | null; awardType: string | null }> {
+	const rows = Array.isArray(scf?.roundAwards) ? scf.roundAwards : [];
+	return rows
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		.filter((r: any) => typeof r?.round === "number")
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		.map((r: any) => ({
+			round: r.round,
+			amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
+			awardType: typeof r.awardType === "string" ? r.awardType : null,
+		}));
 }
 
 interface ProjectRow {
@@ -280,6 +299,11 @@ interface ProjectRow {
 	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
 	// cross-source totals mechanically instead of guessing at counting bases.
 	scfAwardedRounds: number[];
+	scfRoundAwards: Array<{
+		round: number;
+		amountUSD: number | null;
+		awardType: string | null;
+	}>;
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
@@ -1182,6 +1206,7 @@ export async function GET(req: NextRequest) {
 						p.scf?.totalAwarded,
 					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
+					scfRoundAwards: pickScfRoundAwards(p.scf),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -1691,6 +1716,7 @@ export async function GET(req: NextRequest) {
 						c.scf?.totalAwarded,
 					),
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
+					scfRoundAwards: pickScfRoundAwards(c.scf),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],
@@ -2094,15 +2120,16 @@ export async function GET(req: NextRequest) {
 				// the page with vector-search matches the literal filter missed
 				// (each such row is tagged `via: "semantic"`).
 				semantic: usedSemantic,
-				// sls-011: the SCF fields on rows (scfTotalAwardedUSD, scfAwardedRounds,
-				// scfAmountStatus) carry their counting basis HERE, where the numbers
-				// appear — not only on /api/analyze. Totals are in-house reconstructions
-				// (SCF doesn't publish all per-award amounts; some are XLM/undisclosed —
-				// see scfAmountStatus), so they can legitimately disagree with SDF's own
-				// submission-based counters. scfAwardedRounds lists the rounds a project
-				// won; per-round amounts are unpublished. Full breakdown at /api/analyze?dimension=funding.
+				// sls-011 + sls-058: the SCF fields on rows carry their counting basis
+				// HERE, where the numbers appear — not only on /api/analyze. Corrected
+				// 2026-08-03 (sls-058 defect 2): scfTotalAwardedUSD is scraped from the
+				// project's own SCF page (SDF's figure), NOT an in-house sum, and
+				// per-round submission budgets ARE published — scfRoundAwards now
+				// carries them, so the total finally has a visible reconciling basis
+				// (it can exceed the sum of round budgets: top-ups / components SCF
+				// doesn't itemize per round).
 				scfCountBasis:
-					"scfTotalAwardedUSD is an in-house reconstruction (SCF doesn't publish all per-award amounts — some XLM-denominated/undisclosed, see scfAmountStatus); it can legitimately differ from SDF's submission-based counters. scfAwardedRounds = rounds this project won (per-round amounts unpublished). Full per-round breakdown: /api/analyze?dimension=funding.",
+					"scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure). scfRoundAwards is its reconciling basis: each awarded round's official submission record (published budget in USD + award type). The total can exceed the sum of round budgets — SCF applies top-ups/components it doesn't itemize per round; see scfAmountStatus for undisclosed cases. Full per-round breakdown: /api/analyze?dimension=funding.",
 				// sls-049: empty-field semantics for the anchorProfile join — only
 				// emitted when the page actually carries anchor rows.
 				...(projectsWithOrg.some((p) => p.anchorProfile)

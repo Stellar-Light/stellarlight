@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 9445,
-    "docs": 1788
+    "chunks": 9496,
+    "docs": 1795
   },
   "s5_junk_urls": {
     "count": 1,
@@ -111,39 +111,39 @@
     ]
   },
   "s7_coverage": {
-    "lumenloop-research": {
-      "chunks": 222,
+    "release": {
+      "chunks": 171,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
-    "cap": {
-      "chunks": 924,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
-      "stalled": false
-    },
-    "release": {
-      "chunks": 157,
+    "lumenloop-research": {
+      "chunks": 232,
       "datedPct": 100,
-      "newestAgeDays": 3,
+      "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
-      "chunks": 3887,
+      "chunks": 3908,
       "datedPct": 75,
-      "newestAgeDays": 2,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
     "sdf-blog": {
-      "chunks": 2163,
+      "chunks": 2168,
       "datedPct": 100,
-      "newestAgeDays": 6,
+      "newestAgeDays": 5,
       "undated": false,
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 925,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
       "stalled": false
     },
     "sep": {
@@ -156,21 +156,21 @@
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 86,
+      "newestAgeDays": 93,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 77,
       "datedPct": 30,
-      "newestAgeDays": 125,
+      "newestAgeDays": 132,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 80,
+      "newestAgeDays": 87,
       "undated": false,
       "stalled": false
     },
@@ -184,21 +184,21 @@
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 67,
+      "newestAgeDays": 74,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 42,
+      "newestAgeDays": 49,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1302,
+      "newestAgeDays": 1309,
       "undated": false,
       "stalled": false
     },
@@ -212,7 +212,7 @@
   },
   "s7_stalled": [],
   "s8_mirrors": {
-    "count": 130,
+    "count": 120,
     "sample": [
       {
         "hash": "8da44a4799f8",
@@ -326,6 +326,6 @@
       }
     ]
   },
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "corpus-health"
 }

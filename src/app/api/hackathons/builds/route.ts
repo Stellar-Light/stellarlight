@@ -70,7 +70,7 @@ async function buildIndex(): Promise<IndexedBuild[]> {
 		.sort((a, b) => (b.end_time ?? 0) - (a.end_time ?? 0))
 		.slice(0, 40);
 	const perHack = await pool(ended, 6, async (h) => {
-		const subs = await fetchHackathonSubmissions(h.uname);
+		const subs = await fetchHackathonSubmissions(h);
 		const endedAt = h.end_time
 			? new Date(h.end_time * 1000).toISOString().slice(0, 10)
 			: null;
