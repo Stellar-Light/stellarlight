@@ -26,6 +26,7 @@ import {
 	parseFields,
 	pickFields,
 	strictBoolParam,
+	unknownParamWarning,
 } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -187,6 +188,39 @@ function toPublic(
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		[
+			"q",
+			"sector",
+			"ramps",
+			"region",
+			"type",
+			"accepting",
+			"all",
+			"limit",
+			"offset",
+			"fields",
+		],
+		{
+			advertise: [
+				"q",
+				"sector",
+				"ramps",
+				"region",
+				"type",
+				"accepting",
+				"all",
+				"limit",
+				"offset",
+				"fields",
+			],
+			hint: "Partner rows are matched from q over name/description/offerings — put a capability or corridor term in q if no dedicated filter covers it.",
+		},
+	);
 	const type = sp.get("type");
 	const sector = sp.get("sector");
 	const region = sp.get("region");
@@ -330,6 +364,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/partners",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: {
 					type,
 					sector,

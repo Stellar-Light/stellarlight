@@ -104,3 +104,35 @@ export function pickFields<T extends object>(
 	}
 	return out as Partial<T>;
 }
+
+/**
+ * Unknown query params, disclosed rather than silently dropped.
+ *
+ * A param a route never reads is dropped without a trace: the caller filtered,
+ * the server didn't, and the plausible unfiltered list reads as filtered
+ * (`?country=NG`, `?sep=24`, `?slug=boss-pay`). /api/projects/search hit this
+ * in the 2026-07-11 audit and answered it with `meta.warnings` rather than a
+ * 400, because the contract is ADDITIVE-ONLY — turning a request that has
+ * always returned 200 into a 400 breaks live consumers. (Endpoints that ship
+ * strict from day one, like /api/builders, /api/people and /api/audits, DO
+ * 400: there was no 200 behaviour to break.)
+ *
+ * This is that projects/search treatment extracted, so the endpoints that
+ * still say nothing at all can adopt it identically instead of each author
+ * re-deciding (lesson class 30: the step that isn't mechanized gets skipped
+ * by everyone). Adding a meta field is additive; no request changes status.
+ *
+ * `known` is what the route READS — including undocumented aliases, which are
+ * real behaviour. `advertise` is what the message lists, when the full read
+ * set would be noisy (aliases, internal flags). Returns null when clean.
+ */
+export function unknownParamWarning(
+	sp: URLSearchParams,
+	known: readonly string[],
+	opts: { advertise?: readonly string[]; hint?: string } = {},
+): string | null {
+	const unknown = [...new Set(sp.keys())].filter((k) => !known.includes(k));
+	if (!unknown.length) return null;
+	const supported = (opts.advertise ?? known).join(", ");
+	return `Unknown parameter(s) ignored: ${unknown.join(", ")}. Results are NOT filtered by them. Supported: ${supported}.${opts.hint ? ` ${opts.hint}` : ""}`;
+}
