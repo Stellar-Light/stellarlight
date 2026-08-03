@@ -564,9 +564,14 @@ export interface components {
             source?: string;
             /** Format: date-time */
             generatedAt?: string;
+            /** @description Echo of the filter values this response was computed under (null = filter not applied). Read it to confirm the server saw the filters you sent. */
             filters?: {
                 [key: string]: unknown;
             };
+            /** @description Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
+            note?: string;
+            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure — the request still succeeds; endpoints that shipped strict from day one return 400 instead. */
+            warnings?: string[];
             counts?: {
                 /** @description Rows in this page (post limit/offset slice) */
                 returned?: number;
@@ -700,7 +705,12 @@ export interface components {
             url?: string;
         };
         PartnersResponse: {
-            meta?: components["schemas"]["Meta"];
+            meta?: components["schemas"]["Meta"] & {
+                /** @description Every value the type filter accepts (unknown values 400 with this list). */
+                validTypes?: string[];
+                /** @description Every value the ramps filter accepts (unknown values 400 with this list). */
+                validRamps?: string[];
+            };
             partners?: components["schemas"]["Partner"][];
         };
         /** @description sls-048: the population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed. */
@@ -981,6 +991,8 @@ export interface components {
                 anchorProfileBasis?: string;
                 /** @description Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;
+                /** @description True when the keyword pass was thin and vector-similarity rows filled the page (each such row tagged via:'semantic'). Distinct from matchMode='semantic', which means NO keyword tier matched at all. */
+                semantic?: boolean;
             };
             projects: components["schemas"]["Project"][];
             /** @description Top graded repos matching the same query, surfaced inline (max 5, first page only; same shape as /api/repos/search). Cite as existing code references for prior-art questions. */
@@ -1006,10 +1018,27 @@ export interface components {
             hackathon?: Record<string, never>;
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
+                /** @description Stable row id (dorahacks-buidl-{id} for live rows). */
+                id?: string;
                 name?: string;
                 hackathonPlacement?: string | null;
                 placementRank?: number | null;
                 hackathonPrize?: number | null;
+                /** @description Project blurb from the submission (markdown stripped). */
+                description?: string | null;
+                track?: string | null;
+                /** @description Official award title (e.g. '$10,000 XLM Prize'). */
+                award?: string | null;
+                isWinner?: boolean;
+                githubUrl?: string | null;
+                demoUrl?: string | null;
+                videoUrl?: string | null;
+                /** @description The submission's DoraHacks buidl page. */
+                url?: string;
+                /** @description Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'. */
+                voteCount?: number;
+                /** @description 'dorahacks' for live rows. */
+                source?: string;
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
@@ -1611,6 +1640,8 @@ export interface operations {
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
+                        /** @description Where the answer text came from (e.g. 'deepwiki'); null when no answer was produced — cite it alongside the answer. */
+                        answerSource?: string | null;
                         /** @description Always present, including when routedVia is null (then false). */
                         answered?: boolean;
                         /** @description Other authoritative repos for this concept. Always present ([] when none). */
@@ -1726,8 +1757,8 @@ export interface operations {
             query?: {
                 /** @description Topic to search build names + descriptions (prior-art lookup). */
                 q?: string;
-                /** @description Set to 1 to return only prize-winning builds. */
-                winnersOnly?: "1" | "true";
+                /** @description Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored. */
+                winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
                 /** @description Max builds (default 20, max 100). */
@@ -1779,7 +1810,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: {
+                        meta?: components["schemas"]["Meta"] & {
                             /** @description What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
                             matchBasis?: string;
                         };
@@ -1814,7 +1845,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: {
+                        meta?: components["schemas"]["Meta"] & {
                             /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
                             source?: string;
                             /** @description Date the roster was last observed from the source (YYYY-MM-DD). */
@@ -2126,6 +2157,25 @@ export interface operations {
                     "application/json": {
                         meta?: {
                             activeQuarter?: string;
+                            /** @description Human label for activeQuarter (e.g. 'Q3 2026'). */
+                            activeQuarterLabel?: string;
+                            /** @description Every quarter key the quarter filter accepts, newest first. */
+                            quarters?: string[];
+                            /** @description Every category value present in the current brief set — the category filter's live vocabulary. */
+                            categories?: string[];
+                            /**
+                             * Format: uri
+                             * @description Where a team submits a NEW brief/idea (the SCF ideas board) — hand off here when asked how to propose one.
+                             */
+                            submitNewBriefAt?: string;
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description Echo of the filter values this response was computed under (null = not applied). */
+                            filters?: {
+                                [key: string]: unknown;
+                            };
                             /** @description total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy (sls-045). See countBasis. */
                             counts?: {
                                 total?: number;
@@ -2242,7 +2292,19 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: components["schemas"]["Meta"];
+                        meta?: components["schemas"]["Meta"] & {
+                            /** @description The query as the server parsed it. */
+                            query?: string;
+                            /**
+                             * @description How this page was retrieved: 'vector' = semantic similarity over embeddings (the normal path); 'keyword' = literal-match fallback when embeddings are unavailable. Scores are not comparable across modes.
+                             * @enum {string}
+                             */
+                            mode?: "vector" | "keyword";
+                            /** @description Embedding model used for vector retrieval (e.g. voyage-3); null in keyword mode. */
+                            model?: string | null;
+                            /** @description What `score` measures in this response (e.g. cosine similarity 0-1) — read it before comparing scores across sources. */
+                            scoreModel?: string;
+                        };
                         results?: components["schemas"]["ResearchResult"][];
                     };
                 };
@@ -2270,7 +2332,12 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: components["schemas"]["Meta"];
+                        meta?: components["schemas"]["Meta"] & {
+                            /** @description Every value the kind filter accepts (unknown values 400 with this list). */
+                            validKinds?: string[];
+                            /** @description Every value the source filter accepts (unknown values 400 with this list). */
+                            validSources?: string[];
+                        };
                         skills?: components["schemas"]["Skill"][];
                     };
                 };
@@ -2330,8 +2397,12 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: {
+                        meta?: components["schemas"]["Meta"] & {
                             population?: components["schemas"]["PopulationScope"];
+                            /** @description Every value the dimension param accepts — the live vocabulary for cluster views. */
+                            dimensions?: string[];
+                            /** @description Reading notes for the active dimension (counting caveats, taxonomy conventions). May be empty. */
+                            notes?: string[];
                         };
                         clusters?: components["schemas"]["Cluster"][];
                     };
@@ -2360,9 +2431,58 @@ export interface operations {
                     "application/json": {
                         meta?: {
                             population?: components["schemas"]["PopulationScope"];
+                            /** @description The dimension this response was computed for. */
+                            dimension?: string;
+                            /** @description Every value the dimension param accepts (unknown values 400 with this list). */
+                            validDimensions?: string[];
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                        };
+                        /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
+                        categories?: {
+                            [key: string]: unknown;
+                        };
+                        /** @description Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt. */
+                        developers?: {
+                            [key: string]: unknown;
+                        };
+                        /** @description Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof. */
+                        gaps?: {
+                            [key: string]: unknown;
+                        };
+                        /** @description Present for dimension=all|hackathons: cross-event rollup (events, submissions, winners) from the live DoraHacks feed. */
+                        hackathons?: {
+                            [key: string]: unknown;
+                        };
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'. */
+                        tvl?: {
+                            [key: string]: unknown;
                         };
                         /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
                         funding?: {
+                            /**
+                             * Format: date-time
+                             * @description When THIS response's funding rollup was computed.
+                             */
+                            computedAt?: string;
+                            methodologyVersion?: string;
+                            /** @description Plain-language statement of what the funding numbers count (in-house rollup basis vs SDF's own counters). */
+                            countBasis?: string;
+                            /** @description Projects in the awarded set this rollup sums over. */
+                            scfAwardedProjects?: number;
+                            /** @description Sum of scfTotalAwardedUSD over the awarded set — an in-house rollup; reconcile per-project via scfRoundAwards. */
+                            scfTotalDistributedUSD?: number;
+                            meanAwardUSD?: number | null;
+                            /** @description Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at. */
+                            byRound?: {
+                                [key: string]: unknown;
+                            }[];
+                            /** @description Outcome funnel for hackathon-origin awarded projects (still-building / live / inactive). */
+                            postHackathonStatusFunnel?: {
+                                [key: string]: unknown;
+                            };
                             projectSetHash?: string;
                             /**
                              * Format: date-time
@@ -2436,6 +2556,20 @@ export interface operations {
                     "application/json": {
                         /** @description Carries filters, metricDefinitions (what each served metric IS), generatedAt, and dataAsOf. */
                         meta?: {
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description Echo of the applied sort/range/category/type scope (null = not applied). */
+                            filters?: {
+                                [key: string]: unknown;
+                            };
+                            /** @description Row counts for this response (returned rows; population size where stated). */
+                            counts?: {
+                                [key: string]: unknown;
+                            };
+                            /** @description Pointer to the metric documentation for this endpoint (what each column means and how it is computed). */
+                            docs?: string;
                             /**
                              * Format: date-time
                              * @description sls-036: the repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
@@ -2559,7 +2693,20 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: components["schemas"]["Meta"];
+                        meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * Format: date-time
+                             * @description When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.
+                             */
+                            dataAsOf?: string;
+                            /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. */
+                            methodology?: string;
+                            /**
+                             * Format: uri
+                             * @description The upstream data service this snapshot proxies (stablecoin.stellarlight.xyz).
+                             */
+                            upstream?: string;
+                        };
                         stablecoins?: components["schemas"]["Stablecoin"][];
                     };
                 };

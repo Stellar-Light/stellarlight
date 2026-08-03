@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-03",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"spec: every served meta field is now documented — 69 previously-undocumented fields across 13 endpoints, plus the `warnings` unknown-param disclosure; bogus `winnersOnly` values now 400 (openapi@1.8.32).",
+		detail:
+			"Closes the served-but-unspecced class the contract-honesty sweep isolated: every meta field the API serves is now declared in the OpenAPI spec with honest semantics — including the shared `note`/`warnings` on the standard meta block, per-endpoint vocabularies (`validTypes`, `validRamps`, `validKinds`, `validSources`, `dimensions`, `quarters`, `categories`), retrieval provenance on research (`mode`, `model`, `scoreModel`), stablecoins snapshot provenance (`dataAsOf`, `methodology`, `upstream`), the analyze dimension payloads and funding rollup fields, the full hackathon winners row shape (with `voteCount` honestly documented as always 0 since the DoraHacks v1 hub migration), and `answerSource` on explainRepo. One behavior fix rides along: `winnersOnly` on hackathon builds now returns 400 with the accepted forms on a garbage value instead of silently ignoring it (the invalid-accepted class; same treatment as partners' `accepting`). Response data is unchanged — this release makes the contract say what the API already does.",
+	},
+	{
+		date: "2026-08-03",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"projects: `scfRoundAwards` — each awarded round's official submission record (published budget + award type), the reconciling basis sls-058 asked for (openapi@1.8.31).",

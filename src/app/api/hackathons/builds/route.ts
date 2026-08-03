@@ -17,7 +17,12 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import {
+	BOOL_FALSE_VALUES,
+	BOOL_TRUE_VALUES,
+	clampLimit,
+	strictBoolParam,
+} from "@/lib/http-params";
 import {
 	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
@@ -134,8 +139,21 @@ export async function GET(req: NextRequest) {
 
 	const q = sp.get("q")?.toLowerCase().trim();
 	const limit = clampLimit(sp.get("limit"), 20, 100);
-	const winnersOnly =
-		sp.get("winnersOnly") === "1" || sp.get("winnersOnly") === "true";
+	// Engine E invalid-accepted class: a garbage value silently coerced to
+	// false returned the UNFILTERED list while the caller believed the filter
+	// applied. 400 with the accepted forms, same treatment as partners'
+	// accepting param.
+	const winnersOnlyRaw = strictBoolParam(sp.get("winnersOnly"));
+	if (winnersOnlyRaw === "invalid") {
+		return NextResponse.json(
+			{
+				error: `Invalid winnersOnly value '${sp.get("winnersOnly")}'.`,
+				validValues: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
+			},
+			{ status: 400 },
+		);
+	}
+	const winnersOnly = winnersOnlyRaw;
 	const track = sp.get("track")?.toLowerCase().trim();
 
 	let indexed: IndexedBuild[];
