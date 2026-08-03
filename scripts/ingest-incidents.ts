@@ -18,11 +18,8 @@
  *   pnpm exec tsx scripts/ingest-incidents.ts             # dry run (no DB, no embed)
  *   pnpm exec tsx scripts/ingest-incidents.ts --execute   # embed + write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	type AuditSeverity,

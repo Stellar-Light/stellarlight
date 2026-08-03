@@ -27,11 +27,9 @@
  *   - No deletes. A missing/unreachable toml = "skipped", never a wipe.
  */
 
+import "./load-env";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const EXECUTE = process.argv.includes("--execute");
 const FETCH_TIMEOUT_MS = 10_000;

@@ -9,11 +9,8 @@
  *   npx tsx scripts/ingest-scf-handbook.ts             # dry run
  *   npx tsx scripts/ingest-scf-handbook.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,

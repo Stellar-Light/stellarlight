@@ -67,6 +67,7 @@
  *   pnpm exec tsx scripts/data/backfill-status-provenance.ts --execute      # writes
  *   pnpm exec tsx scripts/data/backfill-status-provenance.ts --out=plan.json
  */
+import "../load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";

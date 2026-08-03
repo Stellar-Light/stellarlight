@@ -16,11 +16,8 @@
  *   pnpm exec tsx scripts/ingest-ec-developer-report.ts            # dry
  *   pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute  # write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import {

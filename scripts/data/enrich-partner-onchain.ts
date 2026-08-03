@@ -14,6 +14,7 @@
  * Writes partner.onchain (curator-maintained; overwritten each run). Hook-safe:
  * doesn't touch status/email, so the invite afterChange hook never fires.
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 

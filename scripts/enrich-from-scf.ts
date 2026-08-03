@@ -11,7 +11,7 @@
  *   npx tsx scripts/enrich-from-scf.ts                  # Dry run
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { parseRoundVerdicts } from "./eval/scf-official";

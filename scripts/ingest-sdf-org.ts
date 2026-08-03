@@ -39,11 +39,8 @@
  *   pnpm exec tsx scripts/ingest-sdf-org.ts             # dry run (fetch + chunk, no write)
  *   pnpm exec tsx scripts/ingest-sdf-org.ts --execute   # embed + write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	CANONICAL_PAGES,

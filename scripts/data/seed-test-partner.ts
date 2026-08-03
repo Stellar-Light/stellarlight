@@ -18,6 +18,7 @@
  * The magic-link (passwordless) path is separate — it needs RESEND_API_KEY set
  * in Vercel to actually deliver the email; verify that once the key is in.
  */
+import "../load-env";
 import { randomBytes } from "node:crypto";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";

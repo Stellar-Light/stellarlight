@@ -23,11 +23,8 @@
  * a query that failed last week and was fixed shouldn't page anyone.
  * Report-only, no writes, no floors (first runs establish the baseline).
  */
+import "../load-env";
 import { writeFileSync } from "node:fs";
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";

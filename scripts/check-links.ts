@@ -30,11 +30,7 @@
  * notification when new failures appear.
  */
 
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
 import configPromise from "../src/payload.config";

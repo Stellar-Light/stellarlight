@@ -11,11 +11,8 @@
  *   npx tsx scripts/ingest-sdf-blog.ts --execute   # write to Payload
  *   npx tsx scripts/ingest-sdf-blog.ts --limit=10  # only first 10 posts
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { decodeHtmlEntities } from "../src/lib/decode-entities";
 import {

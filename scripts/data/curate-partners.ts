@@ -17,6 +17,7 @@
  *   pnpm exec tsx scripts/data/curate-partners.ts            # dry run
  *   pnpm exec tsx scripts/data/curate-partners.ts --execute  # writes
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 

@@ -18,15 +18,14 @@
  * re-run this — same pattern used to unblock the partner seed.
  */
 
+import "./load-env";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
 
 // Local dev reads .env.local; CI injects DATABASE_URI + PAYLOAD_SECRET via env.
-loadEnv({ path: ".env.local" });
 
 const EXECUTE = process.argv.includes("--execute");
 const REPORTS_DIR = join(process.cwd(), "content", "reports");

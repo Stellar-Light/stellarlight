@@ -21,11 +21,8 @@
  *   npx tsx scripts/ingest-lumenloop.ts             # dry run
  *   npx tsx scripts/ingest-lumenloop.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
