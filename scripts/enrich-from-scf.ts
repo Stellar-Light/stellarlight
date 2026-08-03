@@ -11,7 +11,7 @@
  *   npx tsx scripts/enrich-from-scf.ts                  # Dry run
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { parseRoundVerdicts } from "./eval/scf-official";
@@ -93,6 +93,11 @@ async function scrapeDetailPage(slug: string): Promise<{
 	github?: string;
 	totalAwarded?: number;
 	awardedRounds?: number[];
+	roundAwards?: Array<{
+		round: number;
+		amountUSD: number | null;
+		awardType: string | null;
+	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
 } | null> {
@@ -168,6 +173,16 @@ async function scrapeDetailPage(slug: string): Promise<{
 			result.awardedRounds = [...verdicts.awarded]
 				.map(Number)
 				.sort((a, b) => a - b);
+		}
+		// sls-058 defect 2: per-awarded-round official record (published budget
+		// + award type) from the same submission cards — the reconciling basis
+		// for the page's own totalAwarded.
+		if (verdicts.awards.length > 0) {
+			result.roundAwards = verdicts.awards.map((a) => ({
+				round: a.round,
+				amountUSD: a.budgetUSD,
+				awardType: a.awardType,
+			}));
 		}
 		// Surfaced for the no-resurrect guard below (main loop): a page that
 		// parses ≥1 submission with ZERO awarded is affirmative evidence of
@@ -312,7 +327,26 @@ async function main() {
 				currentScf.totalAwarded !== detail.totalAwarded) ||
 			(detail?.awardedRounds &&
 				JSON.stringify(currentScf.awardedRounds) !==
-					JSON.stringify(detail.awardedRounds));
+					JSON.stringify(detail.awardedRounds)) ||
+			// roundAwards drift: compare on the value triple only — the stored
+			// rows carry Payload array-row ids the scrape doesn't have.
+			(detail?.roundAwards &&
+				JSON.stringify(
+					(currentScf.roundAwards ?? []).map(
+						(r: {
+							round: number;
+							amountUSD?: number | null;
+							awardType?: string | null;
+						}) => [r.round, r.amountUSD ?? null, r.awardType ?? null],
+					),
+				) !==
+					JSON.stringify(
+						detail.roundAwards.map((r) => [
+							r.round,
+							r.amountUSD,
+							r.awardType,
+						]),
+					));
 
 		// No-resurrect guard (2026-07-11): if this record is already
 		// awarded=false and the official page affirmatively shows ZERO awarded
@@ -339,9 +373,12 @@ async function main() {
 				...(detail?.awardedRounds
 					? { awardedRounds: detail.awardedRounds }
 					: {}),
+				...(detail?.roundAwards?.length
+					? { roundAwards: detail.roundAwards }
+					: {}),
 			};
 			console.log(
-				`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}, totalAwarded=${detail?.totalAwarded ?? "N/A"}`,
+				`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}, totalAwarded=${detail?.totalAwarded ?? "N/A"}, roundAwards=${detail?.roundAwards?.map((r) => `#${r.round}:$${r.amountUSD ?? "?"}`).join(" ") ?? "N/A"}`,
 			);
 			stats.scfDataUpdated++;
 		}
@@ -465,7 +502,9 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.errors) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((err) => {

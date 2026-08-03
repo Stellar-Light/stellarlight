@@ -1,0 +1,474 @@
+{
+	"consumer": "raven",
+	"label": "Raven (agents.stellar.buzz)",
+	"buckets": [
+		"other"
+	],
+	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
+	"generatedAt": "2026-08-01T09:22:56.097Z",
+	"window": {
+		"since": "2026-07-11T00:00:00.000Z",
+		"days": 30
+	},
+	"totals": {
+		"calls": 6283,
+		"activeDays": 20,
+		"endpoints": 20,
+		"distinctReplayableQueries": 2958
+	},
+	"byEndpoint": [
+		{
+			"endpoint": "/api/projects/search",
+			"calls": 2219,
+			"zeroResultCalls": 22,
+			"avgResultCount": 11.3
+		},
+		{
+			"endpoint": "/api/research",
+			"calls": 1583,
+			"zeroResultCalls": 6,
+			"avgResultCount": 7.1
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"calls": 682,
+			"zeroResultCalls": 51,
+			"avgResultCount": 8.7
+		},
+		{
+			"endpoint": "/api/builders",
+			"calls": 310,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/rfps",
+			"calls": 175,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/leaderboard",
+			"calls": 170,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons",
+			"calls": 165,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners",
+			"calls": 163,
+			"zeroResultCalls": 8,
+			"avgResultCount": 10.8
+		},
+		{
+			"endpoint": "/api/hackathons/builds",
+			"calls": 161,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/analyze",
+			"calls": 154,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/clusters",
+			"calls": 139,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/explain",
+			"calls": 138,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/skills",
+			"calls": 106,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/[slug]",
+			"calls": 47,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/match",
+			"calls": 37,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/compare",
+			"calls": 18,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/[slug]",
+			"calls": 9,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/stablecoins",
+			"calls": 3,
+			"zeroResultCalls": 0,
+			"avgResultCount": 16
+		},
+		{
+			"endpoint": "/api/audits",
+			"calls": 3,
+			"zeroResultCalls": 1,
+			"avgResultCount": 21
+		},
+		{
+			"endpoint": "/api/people",
+			"calls": 1,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		}
+	],
+	"topQueriesReplayed": [
+		{
+			"endpoint": "/api/projects/search",
+			"query": "test",
+			"hits": 81,
+			"lastSeen": "2026-07-29T14:52:58.409Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "test",
+			"hits": 80,
+			"lastSeen": "2026-07-29T14:52:59.857Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.79,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "wallet",
+			"hits": 58,
+			"lastSeen": "2026-07-31T15:29:18.053Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "stellar",
+			"hits": 46,
+			"lastSeen": "2026-07-31T15:29:15.717Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.51,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "blend",
+			"hits": 29,
+			"lastSeen": "2026-07-29T14:53:07.480Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "oracle",
+			"hits": 28,
+			"lastSeen": "2026-07-31T15:29:18.198Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "lending",
+			"hits": 25,
+			"lastSeen": "2026-07-29T14:53:03.485Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "oracle",
+			"hits": 23,
+			"lastSeen": "2026-07-29T14:33:26.283Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "strupey",
+			"hits": 20,
+			"lastSeen": "2026-07-26T00:49:04.521Z",
+			"today": {
+				"status": "advisory",
+				"returned": 0,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": "scoped out + redirected (/api/people?q=strupey)"
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "infrastructure",
+			"hits": 18,
+			"lastSeen": "2026-07-29T14:53:02.769Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "soroswap",
+			"hits": 18,
+			"lastSeen": "2026-07-26T04:50:52.304Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "neural quorum governance",
+			"hits": 16,
+			"lastSeen": "2026-07-29T14:53:05.878Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.85,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "freighter",
+			"hits": 16,
+			"lastSeen": "2026-07-20T17:57:28.986Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": "strict",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "growth program",
+			"hits": 15,
+			"lastSeen": "2026-07-29T14:53:05.547Z",
+			"today": {
+				"status": "ok",
+				"returned": 9,
+				"matchMode": null,
+				"topConfidence": 0.84,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "liquidity award",
+			"hits": 15,
+			"lastSeen": "2026-07-29T14:53:05.265Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.65,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "build award budget cap",
+			"hits": 15,
+			"lastSeen": "2026-07-29T14:53:04.853Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.64,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "rust",
+			"hits": 15,
+			"lastSeen": "2026-07-29T14:33:05.501Z",
+			"today": {
+				"status": "ok",
+				"returned": 5,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "tyler van der hoeven",
+			"hits": 15,
+			"lastSeen": "2026-07-26T00:49:04.117Z",
+			"today": {
+				"status": "ok",
+				"returned": 1,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "stablecoin",
+			"hits": 15,
+			"lastSeen": "2026-07-24T00:12:41.670Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "payments",
+			"hits": 14,
+			"lastSeen": "2026-07-24T00:13:22.590Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "streaming payments",
+			"hits": 14,
+			"lastSeen": "2026-07-23T04:03:45.136Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "fluxity",
+			"hits": 12,
+			"lastSeen": "2026-07-29T14:33:27.346Z",
+			"today": {
+				"status": "ok",
+				"returned": 2,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "reflector",
+			"hits": 12,
+			"lastSeen": "2026-07-26T04:50:52.581Z",
+			"today": {
+				"status": "ok",
+				"returned": 3,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/builders",
+			"query": "justin rice",
+			"hits": 12,
+			"lastSeen": "2026-07-26T00:49:04.632Z",
+			"today": {
+				"status": "advisory",
+				"returned": 0,
+				"matchMode": null,
+				"topConfidence": null,
+				"advisoryNote": "answered via advisory (Justin Rice)"
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "justin rice",
+			"hits": 12,
+			"lastSeen": "2026-07-16T18:57:33.854Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": null,
+				"topConfidence": 0.75,
+				"advisoryNote": null
+			}
+		}
+	],
+	"replaySummary": {
+		"graded": 25,
+		"ok": 25,
+		"okRate": 100
+	},
+	"contractChangesInWindow": 55
+}

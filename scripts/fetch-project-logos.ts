@@ -13,7 +13,7 @@
  *   npx tsx scripts/fetch-project-logos.ts --execute        # Actually write to DB
  *   npx tsx scripts/fetch-project-logos.ts --execute --force # Re-fetch even if logo exists
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 
@@ -308,7 +308,9 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.failed) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((err) => {

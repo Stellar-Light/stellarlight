@@ -13,11 +13,8 @@
  *   npx tsx scripts/ingest-lumenloop-research.ts             # dry run
  *   npx tsx scripts/ingest-lumenloop-research.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,

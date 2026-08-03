@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 7,
+    "count": 2,
     "sample": [
       {
         "slug": "wowmax",
@@ -13,56 +13,26 @@
         "field": "supportedNetworks",
         "prose": "bitcoin",
         "missing": "bitcoin"
-      },
-      {
-        "slug": "helix",
-        "field": "supportedNetworks",
-        "prose": "ethereum",
-        "missing": "evm"
-      },
-      {
-        "slug": "helix",
-        "field": "supportedNetworks",
-        "prose": "bnb",
-        "missing": "evm"
-      },
-      {
-        "slug": "helix",
-        "field": "supportedNetworks",
-        "prose": "solana",
-        "missing": "solana"
-      },
-      {
-        "slug": "helix",
-        "field": "supportedNetworks",
-        "prose": "sui",
-        "missing": "sui"
-      },
-      {
-        "slug": "helix",
-        "field": "supportedNetworks",
-        "prose": "aptos",
-        "missing": "aptos"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (189/191)",
-      "types": "93% (177/191)",
-      "supportedNetworks": "6% (12/191)",
-      "logoUrl": "80% (152/191)"
+      "shortDescription": "99% (188/190)",
+      "types": "92% (175/190)",
+      "supportedNetworks": "6% (12/190)",
+      "logoUrl": "79% (151/190)"
     },
     "Tooling": {
-      "shortDescription": "97% (161/166)",
-      "types": "93% (155/166)",
-      "logoUrl": "80% (133/166)"
+      "shortDescription": "95% (160/169)",
+      "types": "92% (156/169)",
+      "logoUrl": "78% (132/169)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (351/356)",
-      "types": "95% (338/356)",
-      "supportedNetworks": "7% (25/356)",
-      "logoUrl": "82% (293/356)"
+      "shortDescription": "97% (357/368)",
+      "types": "92% (340/368)",
+      "supportedNetworks": "7% (25/368)",
+      "logoUrl": "80% (295/368)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
@@ -71,11 +41,11 @@
       "logoUrl": "80% (28/35)"
     },
     "Protocol/Contract": {
-      "shortDescription": "100% (132/132)",
-      "types": "89% (118/132)",
-      "supportedNetworks": "15% (20/132)",
-      "logoUrl": "73% (96/132)",
-      "tvlUSD": "10% (13/132)"
+      "shortDescription": "94% (132/140)",
+      "types": "86% (120/140)",
+      "supportedNetworks": "15% (21/140)",
+      "logoUrl": "69% (96/140)",
+      "tvlUSD": "9% (13/140)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -95,8 +65,38 @@
     "groups": []
   },
   "s3b_domain_duplicates": {
-    "count": 1,
+    "count": 4,
     "groups": [
+      {
+        "apex": "jsr.io",
+        "records": [
+          {
+            "slug": "stellar-router-sdk",
+            "name": "Stellar Router SDK",
+            "scfAwarded": false
+          },
+          {
+            "slug": "stellar-indexer",
+            "name": "Stellar Indexer",
+            "scfAwarded": false
+          }
+        ]
+      },
+      {
+        "apex": "lusty.finance",
+        "records": [
+          {
+            "slug": "lusty-finance",
+            "name": "Lusty Finance",
+            "scfAwarded": false
+          },
+          {
+            "slug": "lusty",
+            "name": "Lusty",
+            "scfAwarded": false
+          }
+        ]
+      },
       {
         "apex": "bossmoney.com",
         "records": [
@@ -111,24 +111,39 @@
             "scfAwarded": false
           }
         ]
+      },
+      {
+        "apex": "safustaking.com",
+        "records": [
+          {
+            "slug": "safu",
+            "name": "SAFU",
+            "scfAwarded": false
+          },
+          {
+            "slug": "safu-protocol",
+            "name": "SAFU Protocol",
+            "scfAwarded": false
+          }
+        ]
       }
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 415,
-    "liveStale365": 162,
+    "liveNoDatedSignal": 389,
+    "liveStale365": 146,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 510,
+        "ageDays": 517,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 878,
+        "ageDays": 885,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -149,7 +164,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2278,
+        "ageDays": 2285,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -260,6 +275,6 @@
       }
     ]
   },
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "engine-b-sweeps"
 }

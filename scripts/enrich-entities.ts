@@ -12,7 +12,7 @@
  *   npx tsx scripts/enrich-entities.ts                  # Dry run
  *   npx tsx scripts/enrich-entities.ts --execute        # Write to DB
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 
@@ -322,7 +322,9 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.failed) process.exitCode = 1;
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((err) => {

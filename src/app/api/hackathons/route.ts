@@ -229,6 +229,10 @@ export async function GET(req: NextRequest) {
 		return bt - at;
 	});
 
+	// Pre-slice count is the honest `total` for meta.counts — `curated` and
+	// `dorahacks` below are per-SOURCE totals of the merged set, which is a
+	// different denominator and cannot stand in for it.
+	const matchedBeforeLimit = hackathons.length;
 	hackathons = hackathons.slice(0, limit);
 
 	logApiHit({
@@ -284,6 +288,7 @@ export async function GET(req: NextRequest) {
 					curated: curated.length,
 					dorahacks: dora.length,
 					returned: hackathons.length,
+					total: matchedBeforeLimit,
 				},
 				...(fallbackChannels ? { fallbackChannels } : {}),
 			},

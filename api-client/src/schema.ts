@@ -570,8 +570,10 @@ export interface components {
             counts?: {
                 /** @description Rows in this page (post limit/offset slice) */
                 returned?: number;
-                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. */
-                total?: number;
+                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred. */
+                total?: number | null;
+                /** @description Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field. */
+                totalBasis?: string;
                 /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses. */
                 semantic?: number;
             };
@@ -785,8 +787,14 @@ export interface components {
              * @enum {string|null}
              */
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
-            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals. */
+            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
+            /** @description The official submission record per awarded round — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). The page-level total can legitimately exceed the sum of these budgets; treat rounds+budgets as the per-round truth and the total as SCF's own aggregate. */
+            scfRoundAwards?: {
+                round?: number;
+                amountUSD?: number | null;
+                awardType?: string | null;
+            }[];
             /** @description Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
                 /** @description Primary market/jurisdiction country names. */
@@ -971,6 +979,8 @@ export interface components {
                 };
                 /** @description Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
+                /** @description Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
+                scfCountBasis?: string;
             };
             projects: components["schemas"]["Project"][];
             /** @description Top graded repos matching the same query, surfaced inline (max 5, first page only; same shape as /api/repos/search). Cite as existing code references for prior-art questions. */
@@ -1345,6 +1355,8 @@ export interface components {
                 lastActivityAt?: string | null;
                 /** @description Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint. */
                 repoCount?: number;
+                /** @description The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
+                repos?: string[];
             };
         };
         /** @description One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'. */
@@ -2270,7 +2282,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay') */
+                /** @description Skill slug (e.g. 'smart-contracts', 'stellar-scout', 'rozo-intent-pay') */
                 name: string;
             };
             cookie?: never;

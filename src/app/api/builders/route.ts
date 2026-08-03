@@ -15,6 +15,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
 	applyBuilderNameOverride,
 	handleForName,
+	nameCandidatesFor,
 } from "@/data/builder-name-overrides";
 import { logApiHit } from "@/lib/api-usage";
 import {
@@ -494,6 +495,9 @@ export async function GET(req: NextRequest) {
 	// identify them concretely (name/role/section) instead of just saying "not a
 	// builder" — this is the honest, positive answer to "who is <person>".
 	const sdfMatches = personLookup && q ? findPeopleByName(q) : [];
+	// Curated builders whose name partially matches — offered as candidates in
+	// the empty-state advisory, never auto-resolved into a row.
+	const nameSuggestions = q ? nameCandidatesFor(q) : [];
 
 	const builderAdvisory =
 		totalMatching > 0
@@ -540,7 +544,42 @@ export async function GET(req: NextRequest) {
 								channels: builderChannels,
 							}
 						: {
-								summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
+								// The last-resort branch used to end the conversation: a flat
+								// "none match these filters" with nowhere to go. That reads as
+								// "we don't know this", when for the real queries that land
+								// here we usually DO hold the answer somewhere else — `rice`
+								// is Justin Rice in /api/people, `reflector` and `strupey` are
+								// projects, `tyler` is a curated builder under @kalepail. An
+								// index answering only for itself turns its own scope
+								// boundary into a claim about the ecosystem.
+								summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
+									nameSuggestions.length
+										? `. The directory does hold ${nameSuggestions
+												.map((c) => `${c.name} (@${c.handle})`)
+												.join(
+													", ",
+												)} — if that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
+										: ""
+								}`,
+								...(nameSuggestions.length
+									? { didYouMean: nameSuggestions }
+									: {}),
+								// Named surfaces, not a shrug: whatever this is, one of these
+								// indexes is the one that would hold it.
+								tryInstead: [
+									{
+										endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+										why: "if the query is a person's name — the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
+									},
+									{
+										endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
+										why: "if the query is a PROJECT or product name rather than a person — single-word queries here are very often a project",
+									},
+									{
+										endpoint: `/api/repos/search?q=${encodeURIComponent(q ?? "")}`,
+										why: "if the query is a GitHub org/repo name — indexed code the builder directory doesn't mirror",
+									},
+								],
 								channels: builderChannels,
 							};
 

@@ -17,6 +17,7 @@
  *   pnpm exec tsx scripts/data/curate-partners.ts            # dry run
  *   pnpm exec tsx scripts/data/curate-partners.ts --execute  # writes
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 
@@ -715,7 +716,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);
-		process.exit(0);
+		process.exit(process.exitCode ?? 0);
 	}
 	// Per-write isolation (2026-07-09 curate-projects incident: one
 	// ValidationError aborted a 13-write batch). A bad row fails loudly;
@@ -740,7 +741,7 @@ async function main() {
 		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

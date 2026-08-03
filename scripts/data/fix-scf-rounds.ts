@@ -46,7 +46,7 @@
  * are per-record isolated (one failure doesn't abort the wave) and
  * equality-guarded (reruns no-op cleanly).
  */
-import "dotenv/config";
+import "../load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";

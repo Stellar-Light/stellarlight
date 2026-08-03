@@ -19,13 +19,12 @@
  * partner's to fill via the portal. We don't put words in their mouth.
  */
 
+import "./load-env";
 import { randomBytes } from "node:crypto";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
 
 // Local dev reads .env.local; in CI the workflow injects DATABASE_URI via env.
-loadEnv({ path: ".env.local" });
 
 const EXECUTE = process.argv.includes("--execute");
 const SITE = process.env.SCOUT_BASE ?? "https://stellarlight.xyz";

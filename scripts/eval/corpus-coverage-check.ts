@@ -22,11 +22,8 @@
  *
  * Exit codes: 0 all rows covered, 1 any row failed, 2 no DB credentials.
  */
+import "../load-env";
 import { writeFileSync } from "node:fs";
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
 import { CANONICAL_PAGES } from "../../src/lib/canonical-pages";

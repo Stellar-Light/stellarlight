@@ -10,6 +10,7 @@
  * the weekly `partner-digest` cron and needs RESEND_API_KEY in Vercel — this
  * report shows WHAT would be nudged regardless of whether email is wired.
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 

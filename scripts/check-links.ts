@@ -30,11 +30,7 @@
  * notification when new failures appear.
  */
 
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
 import configPromise from "../src/payload.config";
@@ -564,7 +560,11 @@ async function main() {
 		console.log(
 			`Persisted: ${created} created, ${updated} updated, ${writeFailed} write-failed, 0 cleaned up (skipped).`,
 		);
-		process.exit(0);
+		// The FINAL exit below already honours writeFailed; this early return
+		// bypassed it and reported success — the same one-path-fixed asymmetry as
+		// curate-projects' dry-run/execute split. Collector failures are the
+		// reason we are here at all, so they count too.
+		process.exit(writeFailed || collectorErrors ? 1 : 0);
 	}
 
 	// Cleanup — delete LinkCheck records whose URL no longer appears anywhere

@@ -53,6 +53,8 @@ interface ProjectRow {
 		openIssuesTotal: number;
 		lastActivityAt: string | null;
 		repoCount: number;
+		/** The exact repos the stats aggregate over — repoCount === repos.length. */
+		repos: string[];
 	};
 }
 
@@ -74,6 +76,7 @@ function toCsv(rows: ProjectRow[]): string {
 		"stars",
 		"open_issues",
 		"repo_count",
+		"repos",
 		"last_activity_at",
 		"tvl_usd",
 		"asset_code",
@@ -92,6 +95,7 @@ function toCsv(rows: ProjectRow[]): string {
 			r.github.totalStars,
 			r.github.openIssuesTotal,
 			r.github.repoCount,
+			r.github.repos.join(";"),
 			r.github.lastActivityAt ?? "",
 			r.tvlUSD ?? "",
 			r.assetCode ?? "",
@@ -209,6 +213,10 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
+	// Rows matching the filters BEFORE `limit` is applied — the honest `total`
+	// for meta.counts. Stays 0 if the try block below throws, which matches the
+	// empty `rows` it falls through with.
+	let matchedBeforeLimit = 0;
 	// sls-036 residual: the repository-index rollup timestamp — when the repo
 	// rows this response aggregates were last refreshed (max updatedAt across
 	// the fetched index rows). Distinct from meta.generatedAt (serialization
@@ -271,6 +279,7 @@ export async function GET(req: NextRequest) {
 			const reposByProjectSlug = new Map<
 				string,
 				Array<{
+					fullName?: string;
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
@@ -287,6 +296,11 @@ export async function GET(req: NextRequest) {
 					// collection grew past 2,000 docs.
 					select: {
 						projectSlug: true,
+						// sls-036 residual (#742): the repo IDENTITIES, not just their
+						// count — without them "activity" can't be reconciled against
+						// a known set. fullName is ~30 bytes; the README excerpt was
+						// the field that bloated this fetch, and it stays excluded.
+						fullName: true,
 						stars: true,
 						openIssues: true,
 						lastCommitAt: true,
@@ -296,6 +310,7 @@ export async function GET(req: NextRequest) {
 				});
 				for (const r of reposResult.docs as Array<{
 					projectSlug?: string;
+					fullName?: string;
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
@@ -374,6 +389,14 @@ export async function GET(req: NextRequest) {
 						openIssuesTotal,
 						lastActivityAt,
 						repoCount: repos.length,
+						// The exact universe the numbers above are computed over —
+						// sorted so the list is stable across runs. A consumer can now
+						// reconcile "activity" against a known set instead of trusting
+						// an opaque count (raven #742 residual 3 / sls-036).
+						repos: repos
+							.map((r) => r.fullName)
+							.filter((x): x is string => !!x)
+							.sort(),
 					},
 				};
 			});
@@ -441,6 +464,7 @@ export async function GET(req: NextRequest) {
 				});
 			}
 
+			matchedBeforeLimit = rows.length;
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
 		} catch {
 			// fall through with empty rows
@@ -479,6 +503,11 @@ export async function GET(req: NextRequest) {
 				// sls-036 residual: the real rollup timestamp of the repo index this
 				// response aggregated — the as-of for stars/issues/lastActivityAt.
 				dataAsOf,
+				// The documented list-endpoint contract (`returned` this page,
+				// `total` pre-slice). This endpoint served NO counts at all, so a
+				// consumer could not tell a complete read from a `limit`-truncated
+				// one — absence of counts reads as "you have everything".
+				counts: { returned: rows.length, total: matchedBeforeLimit },
 				// #524: echo the APPLIED project-type scope so a consumer can confirm
 				// the filter took (null = no type filter; an array = the exact types
 				// kept, EITHER-membership). Was silently absent while the filter was

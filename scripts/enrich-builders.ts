@@ -11,7 +11,7 @@
  *   pnpm exec tsx scripts/enrich-builders.ts            # dry run
  *   pnpm exec tsx scripts/enrich-builders.ts --execute  # write
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

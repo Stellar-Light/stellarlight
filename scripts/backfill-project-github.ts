@@ -17,7 +17,7 @@
  *   pnpm exec tsx scripts/backfill-project-github.ts            # dry run / audit
  *   pnpm exec tsx scripts/backfill-project-github.ts --execute  # write
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

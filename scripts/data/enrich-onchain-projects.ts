@@ -23,11 +23,8 @@
  *   pnpm exec tsx scripts/data/enrich-onchain-projects.ts             # dry run
  *   pnpm exec tsx scripts/data/enrich-onchain-projects.ts --execute   # write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import configPromise from "../../src/payload.config";

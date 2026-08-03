@@ -6,11 +6,8 @@
  *   - /tmp/audit-stats.md        per-report stats + severity histogram
  *   - /tmp/audit-suspicious.md   reports with low recovery or weird patterns
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { writeFileSync } from "node:fs";
 import { type AuditSeverity, chunkMarkdown } from "../src/lib/research-ingest";
 import { reassembleSpacedText } from "./ingest-soroban-security";

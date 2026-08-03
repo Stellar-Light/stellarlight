@@ -352,6 +352,41 @@ export async function GET(req: NextRequest) {
 					// profile", NOT "none exist".
 					filteredOut: filteredOutCount,
 				},
+				// A zero-result partners page had NOTHING on it — no advisory, no
+				// route, not even a note that this directory is Stellar-scoped. The
+				// demand log shows real queries landing here ("tell me about
+				// solana"), and a bare empty answers a question about OUR coverage
+				// as though it were a question about the ecosystem. Say which
+				// directory this is, and name the index that would hold the answer.
+				...(partners.length === 0 && totalMatching === 0
+					? {
+							advisory: {
+								// Deliberately NO claim about `filteredOut`. The first version
+								// of this advisory said "N rows were held back by the quality
+								// bar — pass all=1 to include them", and that is false: for
+								// q=custody the counter reads 3, but `&all=1` returns zero
+								// matches and filteredOut=0. The counter is not "rows this
+								// query would gain by dropping the bar", so the advice sent
+								// the caller somewhere empty. Shipping it was the same
+								// mistake this advisory exists to prevent — an unverified
+								// claim stated confidently. Verify what a field MEANS before
+								// telling anyone to act on it.
+								summary: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
+								scope:
+									"Stellar integration partners (anchors, ramps, custody, infrastructure); not a multi-chain directory and not a project directory",
+								tryInstead: [
+									{
+										endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
+										why: "if the subject is a product or protocol rather than a commercial partner — the project directory is much broader",
+									},
+									{
+										endpoint: `/api/research?q=${encodeURIComponent(q ?? "")}`,
+										why: "if the question is conceptual or comparative (including about other chains) — the research corpus indexes SEPs, docs and posts that discuss them",
+									},
+								],
+							},
+						}
+					: {}),
 				validTypes: PARTNER_TYPES,
 				validRamps: RAMP_TYPES,
 				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",

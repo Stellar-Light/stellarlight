@@ -14,11 +14,8 @@
  *   pnpm exec tsx scripts/migrate-audit-severity.ts          # dry run
  *   pnpm exec tsx scripts/migrate-audit-severity.ts --execute
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import type { AuditSeverity } from "../src/lib/research-ingest";
 import configPromise from "../src/payload.config";
@@ -177,10 +174,12 @@ async function run() {
 		}
 	}
 	console.log(`Done. ${changes.length - errors} updated, ${errors} errors.`);
+	// A run that failed writes must not report success (lessons class 20).
+	if (errors) process.exitCode = 1;
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

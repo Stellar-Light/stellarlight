@@ -31,6 +31,81 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-03",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"projects: `scfRoundAwards` — each awarded round's official submission record (published budget + award type), the reconciling basis sls-058 asked for (openapi@1.8.31).",
+		detail:
+			"Project rows now carry `scfRoundAwards`: one entry per awarded SCF round with the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type. This closes sls-058 defect 2: `scfTotalAwardedUSD` is the project's own SCF-page total and can exceed the sum of round budgets (top-ups SCF doesn't itemize per round) — previously nothing exposed reconciled the two, so an agent reading the aggregate next to `scfAwardedRounds` could misattribute it to a single round. The `scfCountBasis` meta note was also corrected: totals are scraped from SCF's own pages (SDF's figure), not in-house sums, and per-round amounts ARE published — the old text claimed otherwise.",
+	},
+	{
+		date: "2026-08-03",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"repos: a plain org-name query now floats that org's own repos first (searchRepos q=soroswap previously buried soroswap/core in 6th).",
+		detail:
+			"Single-word queries that exactly equal a repo owner's whole name gain the same exact-identity ranking as identifier-form lookups: the org's own repos outrank higher-authority repos that merely mention or tag the term. Guarded to single-token queries of 5+ characters matching the owner segment only, so vocabulary queries (wallet, oracle) and substring org names (Blockchain-Oracle) cannot ride it, and Stellar-evidence ordering still applies within everything else. Found by the golden retrieval eval (repos-soroswap was its only failing case, 47/48 → 48/48 expected).",
+	},
+	{
+		date: "2026-08-03",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"hackathons: live DoraHacks feed restored after an upstream API migration — getHackathons had served 0 rows since 2026-07-31.",
+		detail:
+			"DoraHacks retired its legacy endpoints (hard 404) in favor of a new v1 hub API with renamed paths, parameters, and response fields, which silently emptied every DoraHacks-backed surface: getHackathons, getHackathon, searchHackathonBuilds, compareHackathons, and the analyze hackathon dimensions. The integration now targets the new API and maps it back to the served shapes, so response contracts are unchanged. Winners are joined from the new winner-assignments endpoint (the per-submission winner_prizes field no longer exists upstream). One data-level regression to note: the upstream API no longer exposes vote counts, so the votes field on hackathon builds now reports 0; winner/placement data is unaffected. Detected by the daily grounded self-audit (issue #752).",
+	},
+	{
+		date: "2026-07-31",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"rfps: Q3 2026 quarter published — two new open briefs (LayerZero DVN, x402 Facilitator with Bazaar); Q2 briefs are now closed.",
+		detail:
+			"The active SCF quarter rolled to q3-2026. Two Delegate-selected briefs are open: a Stellar-compatible LayerZero DVN (for teams already operating production DVNs on LayerZero V2 — greenfield proposals out of scope) and an x402 facilitator for both Stellar networks with a Stellar-native Bazaar discovery layer (permissive OSI license required, discovery is the largest share of the budget). All q2-2026 briefs now report status closed. The quarter filter accepts q3-2026; the synthetic scf-round row follows the active quarter automatically.",
+	},
+	{
+		date: "2026-07-29",
+		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.30",
+		type: "added",
+		summary:
+			"leaderboard: each row's github object now names the exact repos its stats aggregate over.",
+		detail:
+			"raven #742 residual 3 (sls-036): rows exposed repoCount but never the repository identities, so 'activity' could not be reconciled against a known set — a count you cannot audit is a number you have to take on faith. Each row's github object now carries repos (sorted owner/name strings, repoCount === repos.length), and the CSV export gains a ';'-joined repos column. The members are our index's attribution: a repo absent from the list may still exist on GitHub — coverage, never a negative claim. Additive, no shape change to existing fields.",
+	},
+	{
+		date: "2026-07-28",
+		surfaces: ["api"],
+		version: "openapi@1.8.29",
+		type: "fixed",
+		summary:
+			"getSkill routing metadata no longer names the retired soroban slug — its own example question 404'd.",
+		detail:
+			'sls-059 (upstream #746): the get-one-skill operation\'s x-routing exampleQuestions, keywords, and path-parameter description all still said "soroban", a slug the operation itself rejects with 404 — the SDF roster renamed the topic\'s skill to "smart-contracts" (the endpoint gate tracked the rename in sls-053; the routing metadata did not). Routing metadata is load-bearing: consumers score these examples to decide when to call the operation, so the showcase question steered callers directly into a miss. All three spots now say "smart-contracts". Descriptions-only change, no response-shape change.',
+	},
+	{
+		date: "2026-07-26",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"builders: a no-match query now names where the answer actually lives instead of ending the conversation.",
+		detail:
+			'The last-resort empty state returned a flat "none match these filters" with nowhere to go — which reads as "we don\'t know this" even though for the real queries landing there we usually hold the answer on another surface: a surname is in the SDF people index, a one-word query is very often a project or a GitHub org. The empty state now always carries tryInstead naming /api/people, /api/projects/search and /api/repos/search with the reason each might hold it. Separately, a partial match against a curated builder name (a bare first name or surname) surfaces that person as a didYouMean CANDIDATE — named, not returned as a row, and explicitly not to be reported as the answer unless the caller confirms. Refusing to guess and refusing to help are different things; the resolver still refuses to resolve one token to one person.',
+	},
+	{
+		date: "2026-07-26",
+		surfaces: ["api", "api-client"],
+		version: "openapi@1.8.29",
+		type: "added",
+		summary:
+			"Every list endpoint now serves meta.counts.{returned,total}, so a consumer can tell a complete read from a truncated one.",
+		detail:
+			"ADDITIVE — no field moved or changed meaning. The spec has long documented meta.counts.{returned,total} as the list-endpoint contract, but five endpoints drifted from it: /api/leaderboard served NO counts at all (a limit-truncated page was indistinguishable from a complete one), /api/changelog served returned/total FLAT on meta rather than nested under counts (so generic tooling reading meta.counts saw nothing — on the endpoint whose job is advertising artifacts), and /api/clusters, /api/skills and /api/hackathons served returned with no total. All five now carry meta.counts.total. /api/changelog ALSO keeps its flat meta.returned/meta.total for backward compatibility; those are DEPRECATED — read meta.counts. One deliberate exception: /api/research serves total: null plus totalBasis:'unbounded-similarity-ranking', because similarity ranking over a bounded candidate pool has no crisp matching set to count — a number there would falsely assert a complete read. Read a null total as 'unknowable by construction', never as zero or as 'no more rows'.",
+	},
+	{
 		date: "2026-07-26",
 		surfaces: ["api", "api-client"],
 		version: "openapi@1.8.28",

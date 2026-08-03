@@ -15,11 +15,8 @@
  *   npx tsx scripts/prune-research-junk.ts             # dry run (list only)
  *   npx tsx scripts/prune-research-junk.ts --execute   # delete
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { JUNK_URL_RE } from "../src/lib/research-rank";
 import configPromise from "../src/payload.config";

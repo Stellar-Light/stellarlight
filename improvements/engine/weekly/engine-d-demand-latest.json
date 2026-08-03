@@ -1,218 +1,168 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 27154,
-    "realHits": 2925,
-    "distinctQueries": 1689,
+    "loggedHits": 22477,
+    "realHits": 2503,
+    "distinctQueries": 1597,
     "replayed": 250
   },
-  "okRate": 91,
+  "okRate": 90,
   "misses": [
-    {
-      "endpoint": "/api/research",
-      "query": "test",
-      "hits": 72,
-      "lastSeen": "2026-07-26T04:43:05.883Z",
-      "days": 9,
-      "buckets": [
-        "other"
-      ],
-      "class": "WEAK",
-      "evidence": "top confidence 0.4"
-    },
-    {
-      "endpoint": "/api/builders",
-      "query": "strupey",
-      "hits": 20,
-      "lastSeen": "2026-07-26T00:49:04.521Z",
-      "days": 4,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/builders",
-      "query": "tyler",
-      "hits": 18,
-      "lastSeen": "2026-07-26T03:55:20.957Z",
-      "days": 5,
-      "buckets": [
-        "browser",
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "sorted",
-      "hits": 8,
-      "lastSeen": "2026-07-26T04:50:51.169Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "kutana",
-      "hits": 8,
-      "lastSeen": "2026-07-26T04:50:49.145Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "saleem",
-      "hits": 8,
-      "lastSeen": "2026-07-26T04:50:48.181Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
     {
       "endpoint": "/api/projects/search",
       "query": "8004",
-      "hits": 7,
+      "hits": 5,
       "lastSeen": "2026-07-26T04:50:51.509Z",
-      "days": 2,
+      "days": 1,
       "buckets": [
         "other"
       ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "hypertron",
-      "hits": 7,
-      "lastSeen": "2026-07-26T04:50:50.104Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "bastian",
-      "hits": 7,
-      "lastSeen": "2026-07-26T04:50:48.730Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/projects/search",
       "query": "stxlm",
-      "hits": 6,
+      "hits": 5,
       "lastSeen": "2026-07-26T04:50:50.390Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "sorted",
+      "hits": 5,
+      "lastSeen": "2026-07-26T04:50:51.169Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "hypertron",
+      "hits": 5,
+      "lastSeen": "2026-07-26T04:50:50.104Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "kutana",
+      "hits": 5,
+      "lastSeen": "2026-07-26T04:50:49.145Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "saleem",
+      "hits": 5,
+      "lastSeen": "2026-07-26T04:50:48.181Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "bastian",
+      "hits": 5,
+      "lastSeen": "2026-07-26T04:50:48.730Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "octoplace",
+      "hits": 3,
+      "lastSeen": "2026-07-29T14:32:59.181Z",
       "days": 2,
       "buckets": [
         "other"
       ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/projects/search",
       "query": "jobs hiring bounty freelance contributor platform talent marketplace",
-      "hits": 5,
-      "lastSeen": "2026-07-26T00:49:08.210Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/builders",
-      "query": "rice",
-      "hits": 4,
-      "lastSeen": "2026-07-26T00:49:09.272Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/builders",
-      "query": "reflector",
-      "hits": 4,
-      "lastSeen": "2026-07-26T00:49:09.471Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/partners",
-      "query": "tell me about solana",
-      "hits": 4,
-      "lastSeen": "2026-07-26T00:49:06.929Z",
-      "days": 2,
-      "buckets": [
-        "other",
-        "browser"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/builders",
-      "query": "zzzznonexistentquery12345",
       "hits": 3,
-      "lastSeen": "2026-07-26T00:49:09.817Z",
-      "days": 2,
+      "lastSeen": "2026-07-26T00:49:08.210Z",
+      "days": 1,
       "buckets": [
         "other"
       ],
-      "class": "EMPTY",
-      "evidence": "0 results"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/projects/search",
-      "query": "steldot",
-      "hits": 3,
-      "lastSeen": "2026-07-24T12:54:48.798Z",
+      "query": "revoke approval allowance",
+      "hits": 2,
+      "lastSeen": "2026-07-31T06:22:05.383Z",
       "days": 1,
       "buckets": [
         "other"
       ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (4 fallback rows)"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
-      "endpoint": "/api/builders",
-      "query": "zzzzznonexistentxyz123",
+      "endpoint": "/api/projects/search",
+      "query": "sorosentinel",
       "hits": 2,
-      "lastSeen": "2026-07-26T00:49:10.202Z",
+      "lastSeen": "2026-07-30T16:21:07.125Z",
+      "days": 2,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "contract upgrade migration storage layout compatibility diff safety",
+      "hits": 2,
+      "lastSeen": "2026-07-30T10:41:42.024Z",
       "days": 1,
       "buckets": [
         "other"
       ],
-      "class": "EMPTY",
-      "evidence": "0 results"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "execute action on arrival post mint callback receiver contract cross chain message",
+      "hits": 2,
+      "lastSeen": "2026-07-30T04:34:53.727Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/projects/search",
@@ -223,32 +173,8 @@
       "buckets": [
         "other"
       ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "octoplace",
-      "hits": 2,
-      "lastSeen": "2026-07-26T00:41:18.288Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "tyfi",
-      "hits": 2,
-      "lastSeen": "2026-07-24T07:48:24.960Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/projects/search",
@@ -259,22 +185,118 @@
       "buckets": [
         "other"
       ],
-      "class": "FALLBACK",
-      "evidence": "matchMode=semantic (10 fallback rows)"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "tyfi",
+      "hits": 2,
+      "lastSeen": "2026-07-24T07:48:24.960Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "zklogin",
+      "hits": 1,
+      "lastSeen": "2026-08-02T08:25:00.371Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "authorization middleware delegated authorization session key",
+      "hits": 1,
+      "lastSeen": "2026-08-02T04:12:40.358Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     },
     {
       "endpoint": "/api/repos/search",
-      "query": "wildanniam/paygate-stellar",
+      "query": "wildanniam paygate stellar",
       "hits": 1,
-      "lastSeen": "2026-07-26T04:14:16.736Z",
+      "lastSeen": "2026-08-01T23:20:44.566Z",
       "days": 1,
       "buckets": [
         "other"
       ],
       "class": "EMPTY",
       "evidence": "0 results"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "anonymous credential wallet login domain pseudonym selective disclosure without revealing account ad",
+      "hits": 1,
+      "lastSeen": "2026-08-01T21:05:58.257Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "eunomia",
+      "hits": 1,
+      "lastSeen": "2026-08-01T15:58:59.727Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "sponsored transaction policy engine fee bump sponsorship",
+      "hits": 1,
+      "lastSeen": "2026-08-01T13:54:41.936Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "buyer protection refund reserve inheritance beneficiary",
+      "hits": 1,
+      "lastSeen": "2026-08-01T11:27:17.061Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "kryon",
+      "hits": 1,
+      "lastSeen": "2026-08-01T09:53:26.148Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     }
   ],
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "engine-d-demand"
 }

@@ -66,6 +66,48 @@ export function applyBuilderNameOverride(row: {
  * "tyler van der hoeven" and "hoeven, tyler van der" resolve); requires ≥2 name
  * tokens so a bare first name ("tyler") never over-resolves.
  */
+/**
+ * Curated people whose name PARTIALLY matches the query — suggestions only.
+ *
+ * `handleForName` deliberately refuses to resolve a bare first name: "tyler"
+ * could be any Tyler, and silently answering with one is a guess dressed as an
+ * answer. But the demand log shows people really do type just "tyler", and the
+ * old behaviour was to hand them a flat "no builders matched" — a stonewall
+ * that hides the fact that we DO hold Tyler van der Hoeven under @kalepail.
+ *
+ * Refusing to guess and refusing to help are not the same thing. This returns
+ * the candidates for an advisory to NAME, leaving the choice with the caller;
+ * the row itself is still not returned, because we still don't know that's who
+ * they meant.
+ */
+export function nameCandidatesFor(
+	query: string,
+): Array<{ handle: string; name: string }> {
+	const q = query.toLowerCase().trim();
+	if (q.length < 3) return [];
+	// 4+ characters on BOTH sides. At 3 the particles inside real names —
+	// "van", "der", "de", "bin" — become matchable tokens, and a bare "van"
+	// would then suggest Tyler van der Hoeven to anyone who typed it. A
+	// suggestion nobody asked for is noise, and noise is how an advisory gets
+	// ignored.
+	const qTokens = q.split(/\s+/).filter((t) => t.length >= 4);
+	if (qTokens.length === 0) return [];
+	const out: Array<{ handle: string; name: string }> = [];
+	for (const [handle, ov] of Object.entries(BUILDER_NAME_OVERRIDES)) {
+		const nameTokens = ov.name
+			.toLowerCase()
+			.split(/\s+/)
+			.filter((t) => t.length >= 4);
+		// Any meaningful token of the query matching any of the name — or the
+		// handle itself — is enough to SUGGEST (never enough to answer).
+		const hit =
+			qTokens.some((t) => nameTokens.includes(t)) ||
+			qTokens.some((t) => handle.toLowerCase() === t);
+		if (hit) out.push({ handle, name: ov.name });
+	}
+	return out;
+}
+
 export function handleForName(query: string): string | null {
 	const q = query.toLowerCase().trim();
 	if (!q) return null;

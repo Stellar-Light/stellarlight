@@ -10,7 +10,7 @@
  *
  *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute]
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	fetchRepoInfo,

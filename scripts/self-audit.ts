@@ -15,6 +15,8 @@
  * Wired into CI (.github/workflows/self-audit.yml, daily + manual).
  */
 
+import { STATUS_FIX, TYPES_ADD, TYPES_SET } from "./data/curation-maps";
+
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
 let fails = 0;
@@ -413,6 +415,98 @@ async function main() {
 		else ok("zero-knowledge top-1 is Stellar-evidenced (or none available)");
 	} catch (err) {
 		bad("repo ranking evidence (sls-047)", `fetch failed: ${String(err)}`);
+	}
+
+	// Curated-field read-back (lessons class 32, 2026-07-26): a curation
+	// registry row is a CLAIM about what the live API serves. Until now nothing
+	// checked it, so when the daily lumenloop sync began overwriting curated
+	// fields the whole curation layer silently stopped reaching production —
+	// curate logged "125 write(s) applied", every job exited 0, and 13 verified
+	// TYPES_SET rows from #414 sat reverted for two weeks. This reads the rows
+	// back off the LIVE API and fails when the registry and production disagree.
+	// Full population, never a sample (class 18).
+	try {
+		const targets = new Map<
+			string,
+			{ types?: string[]; typesInclude?: string[]; status?: string }
+		>();
+		for (const [slug, want] of Object.entries(TYPES_SET))
+			targets.set(slug, { ...targets.get(slug), types: want });
+		for (const [slug, add] of Object.entries(TYPES_ADD))
+			targets.set(slug, { ...targets.get(slug), typesInclude: add });
+		for (const [slug, fix] of Object.entries(STATUS_FIX))
+			targets.set(slug, { ...targets.get(slug), status: fix.to });
+
+		const slugs = [...targets.keys()].sort();
+		const drift: string[] = [];
+		let checked = 0;
+		let absent = 0;
+
+		for (let i = 0; i < slugs.length; i += 8) {
+			const batch = slugs.slice(i, i + 8);
+			const rows = await Promise.all(
+				batch.map(async (slug) => {
+					try {
+						const r = await j(
+							`/api/projects/search?q=${encodeURIComponent(slug)}&limit=5`,
+						);
+						return {
+							slug,
+							// biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
+							doc: (r.projects ?? []).find((p: any) => p.slug === slug),
+						};
+					} catch {
+						return { slug, doc: undefined };
+					}
+				}),
+			);
+			for (const { slug, doc } of rows) {
+				// Not found is UNVERIFIABLE, not drift (#701): the record may be
+				// unpublished or below the search bar. Never accuse on absence.
+				if (!doc) {
+					absent++;
+					continue;
+				}
+				checked++;
+				const want = targets.get(slug);
+				if (!want) continue;
+				const live: string[] = Array.isArray(doc.types) ? doc.types : [];
+				if (want.types && live.join(",") !== want.types.join(","))
+					drift.push(
+						`${slug}.types: registry [${want.types.join(", ")}] ≠ live [${live.join(", ")}]`,
+					);
+				else if (want.typesInclude) {
+					const missing = want.typesInclude.filter((t) => !live.includes(t));
+					if (missing.length)
+						drift.push(
+							`${slug}.types: registry adds [${missing.join(", ")}] ≠ live [${live.join(", ")}]`,
+						);
+				}
+				if (want.status && doc.status && doc.status !== want.status)
+					drift.push(
+						`${slug}.status: registry "${want.status}" ≠ live "${doc.status}"`,
+					);
+			}
+		}
+
+		if (!checked)
+			warn(
+				"curated fields reach production",
+				`no curated slug was resolvable on the live API (${absent} absent) — unverifiable, not asserted`,
+			);
+		else if (drift.length)
+			bad(
+				"curated fields reach production",
+				`${drift.length} curated field(s) do NOT match the live API — the curation layer is not reaching production (lessons class 32; check whether a sibling writer overwrote them):\n      ${drift.slice(0, 15).join("\n      ")}${
+					drift.length > 15 ? `\n      …and ${drift.length - 15} more` : ""
+				}`,
+			);
+		else
+			ok(
+				`curated fields reach production: ${checked} curated record(s) match their registry rows${absent ? ` (${absent} unresolvable, not asserted)` : ""}`,
+			);
+	} catch (err) {
+		bad("curated fields reach production", `check failed: ${String(err)}`);
 	}
 
 	// Bridge corridor guard (2026-07-09): every Bridge-typed project must

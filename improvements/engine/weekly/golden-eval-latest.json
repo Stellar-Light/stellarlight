@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8108398914337158,
+      "topScore": 0.8109576106071472,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8034660220146179,
+      "topScore": 0.803370475769043,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -233,7 +233,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend"
+      "sample": "Tezoro"
     },
     {
       "id": "consensus-scp",
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8248553276062012,
+      "topScore": 0.8243282437324524,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8294558525085449,
+      "topScore": 0.8296413421630859,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8214676380157471,
+      "topScore": 0.821096658706665,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7764574289321899,
+      "topScore": 0.7771342992782593,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8056342005729675,
+      "topScore": 0.805162787437439,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -503,7 +503,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "OFFER-HUB/X402"
+      "sample": "offer-hub/X402"
     },
     {
       "id": "repos-oracle",
@@ -563,11 +563,13 @@
       "id": "repos-soroswap",
       "category": "code-references",
       "mode": "repos",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "soroswap/"
+      ],
       "forbiddenHits": [],
-      "topScore": 61,
+      "topScore": 70,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -575,7 +577,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "everyfinance/onchain-manager-dapp"
+      "sample": "foryield/soroban-yield-vault"
     },
     {
       "id": "bridge-evm-to-stellar",
@@ -657,7 +659,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7200591564178467,
+      "topScore": 0.7258444428443909,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -665,7 +667,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.2 \u2014 27.0.2"
+      "sample": "rs-soroban-sdk v27.0.4 \u2014 27.0.4"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -711,7 +713,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7407970428466797,
+      "topScore": 0.7412241697311401,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -729,7 +731,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038456201553345,
+      "topScore": 0.7056500911712646,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -851,19 +853,22 @@
       "id": "q-org-sdf-leadership-roles",
       "category": "org-sdf",
       "mode": "research",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "Chief Scientist",
+        "VP of Ecosystem"
+      ],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
-      "urlOk": true,
+      "topScore": null,
+      "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF Team \u2014 leadership and board of directors (stellar.org/fo"
+      "sample": "ERROR: 500 https://stellarlight.xyz/api/research?q=Who%20is%20the%20Stellar%20Development%20Foundation's%20Chief%20Scientist%2C%20and%20who%20leads%20its%20Ecosystem%20team%3F&limit=3"
     },
     {
       "id": "capability-custody-identity",
@@ -902,6 +907,6 @@
       "sample": "Python Stellar SDK"
     }
   ],
-  "generatedAt": "2026-07-26T10:55:24Z",
+  "generatedAt": "2026-08-02T10:46:41Z",
   "evalKey": "golden-eval"
 }

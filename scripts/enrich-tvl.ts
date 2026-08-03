@@ -20,11 +20,8 @@
  *   - DISCOVERY candidates: Stellar-chain llama protocols not in LLAMA_MAP —
  *     things the directory may be missing entirely.
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	formatMismatches,

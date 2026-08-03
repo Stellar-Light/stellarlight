@@ -16,12 +16,8 @@
  *
  * Env required: PAYLOAD_SECRET, MONGODB_URI/DATABASE_URI, VOYAGE_API_KEY.
  */
-import { config as loadEnv } from "dotenv";
 
-// .env.local first (Next.js convention), then .env as fallback
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
@@ -371,10 +367,12 @@ async function run() {
 	console.log("");
 	console.log(`Done in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
 	console.log(`  errors: ${stats.errors}`);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.errors) process.exitCode = 1;
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((err) => {
 		console.error("FATAL:", err);
 		process.exit(1);

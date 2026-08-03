@@ -21,11 +21,8 @@
  *   npx tsx scripts/ingest-lumenloop.ts             # dry run
  *   npx tsx scripts/ingest-lumenloop.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
@@ -389,10 +386,12 @@ async function run() {
 	console.log("");
 	console.log(`Done in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
 	console.log(`  errors: ${stats.errors}`);
+	// A run that failed writes must not report success (lessons class 20).
+	if (stats.errors) process.exitCode = 1;
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((err) => {
 		console.error("FATAL:", err);
 		process.exit(1);
