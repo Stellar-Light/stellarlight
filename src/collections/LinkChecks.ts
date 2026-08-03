@@ -22,6 +22,18 @@ import type { CollectionConfig } from "payload";
  * broken for 7 consecutive days"* in the UI (firstFailedAt /
  * consecutiveFailures). Cleanup of URLs that no longer appear anywhere
  * happens in the script too.
+ *
+ * TWO independent histories, because a link fails in two different ways
+ * (lessons class 32):
+ *   - `consecutiveFailures` — the URL is PROVEN broken (404/410, host does
+ *     not resolve, connection refused). A finding on the first run.
+ *   - `consecutiveUnverifiable` — the URL could not be checked (5xx, bot
+ *     wall, timeout, bad cert). Proves nothing on any single run, so it is
+ *     NOT a failure — but a URL we have been unable to verify for
+ *     UNVERIFIABLE_RUNS_TO_ESCALATE consecutive runs is worth a human's
+ *     time, and `needsReview` flips on to say so. That escalation is what
+ *     lets the per-probe verdict stay honest without persistently broken
+ *     origins quietly falling off the dashboard forever.
  */
 export const LinkChecks: CollectionConfig = {
 	slug: "link-checks",
@@ -36,6 +48,8 @@ export const LinkChecks: CollectionConfig = {
 			"statusCode",
 			"url",
 			"consecutiveFailures",
+			"needsReview",
+			"consecutiveUnverifiable",
 			"lastChecked",
 		],
 		description:
@@ -91,8 +105,9 @@ export const LinkChecks: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Short reason when status=error and statusCode is null — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert'.",
-				condition: (data) => data?.status === "error",
+					"Short reason the check did not return a clean 2xx — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert', 'bot-protection', 'server-error HTTP 503'. Shown for both error (proven broken) and blocked (unverifiable).",
+				condition: (data) =>
+					data?.status === "error" || data?.status === "blocked",
 			},
 		},
 		{
@@ -110,7 +125,7 @@ export const LinkChecks: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"How many consecutive check runs this URL has returned ERROR (redirect/blocked reset it — they are reachability, not death). 0 = currently healthy.",
+					"How many consecutive check runs this URL has been PROVEN broken — 404/410, host does not resolve, connection refused. Anything else (redirect, bot wall, 5xx, timeout) resets it: those are reachability problems, not death. 0 = not proven broken.",
 			},
 		},
 		{
@@ -120,6 +135,35 @@ export const LinkChecks: CollectionConfig = {
 				description:
 					"When the URL first started failing. Null = never failed since first observed.",
 				condition: (data) => Boolean(data?.firstFailedAt),
+			},
+		},
+		{
+			name: "consecutiveUnverifiable",
+			type: "number",
+			defaultValue: 0,
+			index: true,
+			admin: {
+				description:
+					"How many consecutive runs the check could not reach a verdict — 5xx, bot wall, timeout, bad certificate. One such run proves nothing; a long streak means we have had no idea about this link for that many days.",
+			},
+		},
+		{
+			name: "firstUnverifiableAt",
+			type: "date",
+			admin: {
+				description:
+					"Start of the current unverifiable streak. Cleared as soon as any run reaches a verdict.",
+				condition: (data) => Boolean(data?.firstUnverifiableAt),
+			},
+		},
+		{
+			name: "needsReview",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				description:
+					"Set by the checker when consecutiveUnverifiable crosses its escalation threshold: no single probe proved this link broken, but we have been unable to verify it long enough that a human should look. Filter on this to find links hiding behind a permanently sick origin.",
 			},
 		},
 		{
