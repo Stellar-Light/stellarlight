@@ -32,24 +32,28 @@ export interface DoraHacksResponse {
 	results: DoraHacksHackathon[];
 }
 
-const DORAHACKS_API_BASE = "https://dorahacks.io/api";
+// 2026-08: DoraHacks retired the legacy /api/hackathon/ + /api/hackathon-buidls/
+// endpoints (404) in favor of /api/v1/hub/*, renaming organization_id→owner_id,
+// start_time/end_time→timeline_start/timeline_end, field→tags, organization→
+// owner, and dropping the status + vote_count fields entirely. Everything below
+// maps the v1 hub shapes back onto the legacy interfaces so downstream
+// consumers keep working unchanged.
+const DORAHACKS_API_BASE = "https://dorahacks.io/api/v1/hub";
 const STELLAR_ORG_IDS = [3096, 3853]; // SDF and Tellus
 
 /**
- * Fetches hackathons from a specific DoraHacks organization
+ * Fetches hackathons from a specific DoraHacks organization, mapped to the
+ * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
+ * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
 	try {
-		const url = `${DORAHACKS_API_BASE}/hackathon/?organization_id=${orgId}&page=1&page_size=50&sort_by=-end_time`;
+		const url = `${DORAHACKS_API_BASE}/hackathons?page=1&page_size=50&sort_by=-timeline_end&owner_id=${orgId}`;
 
 		const response = await fetch(url, {
-			headers: {
-				Accept: "application/json",
-				Referer: "https://dorahacks.io/org/stellar",
-				"User-Agent": "Mozilla/5.0 (compatible; StellarLight/1.0)",
-			},
+			headers: DORA_BROWSER_HEADERS,
 			next: { revalidate: 3600 }, // Cache for 1 hour
 		});
 
@@ -60,8 +64,33 @@ async function fetchOrgHackathons(
 			return [];
 		}
 
-		const data: DoraHacksResponse = await response.json();
-		return data.results || [];
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const data: any = await response.json();
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const rows: any[] = Array.isArray(data?.results) ? data.results : [];
+		const now = Date.now() / 1000;
+		return rows
+			.filter((r) => typeof r?.id === "number")
+			.map((r) => ({
+				id: r.id,
+				title: typeof r.title === "string" ? r.title : "Untitled",
+				uname: typeof r.uname === "string" ? r.uname : String(r.id),
+				image_url: typeof r.image_url === "string" ? r.image_url : undefined,
+				start_time: typeof r.timeline_start === "number" ? r.timeline_start : 0,
+				end_time: typeof r.timeline_end === "number" ? r.timeline_end : 0,
+				bonus_price: typeof r.bonus_price === "number" ? r.bonus_price : 0,
+				hackers_count:
+					typeof r.hackers_count === "number" ? r.hackers_count : 0,
+				winner_announced: !!r.winner_announced,
+				status:
+					typeof r.timeline_end === "number" && r.timeline_end <= now ? 2 : 1,
+				field: typeof r.tags === "string" ? r.tags : undefined,
+				ecosystem: typeof r.ecosystem === "string" ? r.ecosystem : undefined,
+				organization:
+					r.owner && typeof r.owner === "object"
+						? { id: r.owner.id, name: r.owner.name, logo: r.owner.logo }
+						: undefined,
+			}));
 	} catch (error) {
 		console.error(`Error fetching hackathons for org ${orgId}:`, error);
 		return [];
@@ -101,8 +130,8 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 	});
 }
 
-// Browser-like headers — the /hackathon-buidls/ submissions endpoint rejects the
-// short StellarLight UA with 405 (the /hackathon/ list endpoint accepts it).
+// Browser-like headers — the whole /api/v1/hub surface rejects short bot-style
+// UAs with a 405 "Human Verification" page, so every DoraHacks call uses these.
 const DORA_BROWSER_HEADERS = {
 	Accept: "application/json",
 	"Accept-Language": "en-US,en;q=0.9",
@@ -141,21 +170,61 @@ function cleanDescription(raw: unknown): string | null {
 }
 
 /**
- * Fetches the live submission ("buidl") roster for one DoraHacks hackathon by
- * uname. Read-through: returns [] on any error (feed down / WAF / unknown slug)
- * so callers degrade gracefully. Winners are derived from `winner_prizes`.
+ * Winner lookup for one hackathon: buidl id → prize name + award title, from
+ * the /hackathon-winner-assignments announcement. The v1 hub API no longer puts
+ * `winner_prizes` on buidl rows — this endpoint's `award_list[].prizes[]`
+ * ("1st Place - $5,000 in XLM" → buidl ids) is where winners live now. Empty
+ * map on any error or before winners are announced.
+ */
+async function fetchWinnerPrizeMap(
+	uname: string,
+): Promise<Map<number, { placement: string; award: string | null }>> {
+	const map = new Map<number, { placement: string; award: string | null }>();
+	try {
+		const res = await fetch(
+			`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
+			{ headers: DORA_BROWSER_HEADERS, next: { revalidate: 3600 } },
+		);
+		if (!res.ok) return map;
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const data: any = await res.json();
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const awards: any[] = Array.isArray(data?.award_list) ? data.award_list : [];
+		for (const a of awards) {
+			for (const p of Array.isArray(a?.prizes) ? a.prizes : []) {
+				for (const bid of Array.isArray(p?.buidls) ? p.buidls : []) {
+					if (typeof bid === "number" && !map.has(bid)) {
+						map.set(bid, {
+							placement: typeof p?.name === "string" ? p.name : "Winner",
+							award: typeof a?.title === "string" ? a.title : null,
+						});
+					}
+				}
+			}
+		}
+	} catch (err) {
+		console.error(`Error fetching DoraHacks winners for ${uname}:`, err);
+	}
+	return map;
+}
+
+/**
+ * Fetches the live submission ("buidl") roster for one DoraHacks hackathon.
+ * The v1 hub buidls endpoint is keyed by numeric hackathon id (uname is still
+ * needed for the winner-assignments join), and each row nests the project
+ * under `buidl`. Read-through: returns [] on any error (feed down / WAF /
+ * unknown id) so callers degrade gracefully.
  */
 export async function fetchHackathonSubmissions(
-	uname: string,
+	hackathon: Pick<DoraHacksHackathon, "id" | "uname">,
 ): Promise<DoraHacksSubmission[]> {
 	const out: DoraHacksSubmission[] = [];
 	try {
+		const winners = await fetchWinnerPrizeMap(hackathon.uname);
 		let page = 1;
 		// Hard page cap — DoraHacks events are at most a few hundred submissions.
 		for (let i = 0; i < 6; i++) {
-			const url = `${DORAHACKS_API_BASE}/hackathon-buidls/${encodeURIComponent(
-				uname,
-			)}/?page=${page}&page_size=100`;
+			const url = `${DORAHACKS_API_BASE}/hackathons/${hackathon.id}/buidls?page=${page}&page_size=100`;
 			const res = await fetch(url, {
 				headers: DORA_BROWSER_HEADERS,
 				next: { revalidate: 3600 },
@@ -166,33 +235,37 @@ export async function fetchHackathonSubmissions(
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const results: any[] = Array.isArray(data?.results) ? data.results : [];
 			for (const s of results) {
-				const prizes = Array.isArray(s?.winner_prizes) ? s.winner_prizes : [];
-				const isWinner = prizes.length > 0;
+				const b = s?.buidl;
+				if (!b || typeof b.id !== "number") continue;
+				const prize = winners.get(b.id) ?? null;
+				const trackName = Array.isArray(s?.tracks)
+					? (s.tracks.find(
+							// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+							(t: any) =>
+								typeof t?.name === "string" && t.name !== "[DEFAULT_TRACK]",
+						)?.name ?? null)
+					: null;
 				out.push({
-					id: `dorahacks-buidl-${s?.id}`,
-					name: typeof s?.name === "string" ? s.name : "Untitled",
-					description: cleanDescription(s?.project_description),
+					id: `dorahacks-buidl-${b.id}`,
+					name: typeof b.name === "string" ? b.name : "Untitled",
+					description: cleanDescription(b.vision),
 					githubUrl:
-						typeof s?.github_page === "string" && s.github_page
-							? s.github_page
+						typeof b.github_url === "string" && b.github_url
+							? b.github_url
 							: null,
 					demoUrl:
-						typeof s?.demo_link === "string" && s.demo_link
-							? s.demo_link
-							: null,
+						typeof b.demo_url === "string" && b.demo_url ? b.demo_url : null,
 					videoUrl:
-						typeof s?.demo_video === "string" && s.demo_video
-							? s.demo_video
+						typeof b.demo_video_url === "string" && b.demo_video_url
+							? b.demo_video_url
 							: null,
-					track:
-						s?.track_obj?.name ??
-						(typeof s?.track === "string" ? s.track : null) ??
-						null,
-					hackathonPlacement: isWinner ? (prizes[0]?.name ?? "Winner") : null,
-					award: isWinner ? (prizes[0]?.award?.title ?? null) : null,
-					isWinner,
-					voteCount: typeof s?.vote_count === "number" ? s.vote_count : 0,
-					url: `https://dorahacks.io/buidl/${s?.id}`,
+					track: trackName,
+					hackathonPlacement: prize ? prize.placement : null,
+					award: prize?.award ?? null,
+					isWinner: !!prize,
+					// vote counts are no longer exposed by the v1 hub API
+					voteCount: 0,
+					url: `https://dorahacks.io/buidl/${b.id}`,
 					source: "dorahacks",
 				});
 			}
@@ -200,7 +273,10 @@ export async function fetchHackathonSubmissions(
 			page += 1;
 		}
 	} catch (err) {
-		console.error(`Error fetching DoraHacks submissions for ${uname}:`, err);
+		console.error(
+			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
+			err,
+		);
 	}
 	return out;
 }
@@ -242,7 +318,7 @@ export interface LiveRecentWinners {
 /**
  * Build the "Recent Winners" highlight LIVE from DoraHacks: the most-recent
  * ended hackathon whose winners are announced, with its ranked winners derived
- * from each buidl's `winner_prizes`. This is what makes the highlight
+ * from the winner-assignments prizes. This is what makes the highlight
  * auto-update the moment DoraHacks marks winners — no manual data edit. Returns
  * null if none resolve (the caller falls back to the curated constant), and
  * tries the two most-recent ended events in case the very newest hasn't
@@ -255,7 +331,7 @@ export async function fetchLatestHackathonWinners(
 		.filter((h) => h.status === 2 && h.winner_announced)
 		.sort((a, b) => b.end_time - a.end_time);
 	for (const h of ended.slice(0, 2)) {
-		const subs = await fetchHackathonSubmissions(h.uname);
+		const subs = await fetchHackathonSubmissions(h);
 		const winners = subs
 			.filter((s) => s.isWinner)
 			.map((s) => {

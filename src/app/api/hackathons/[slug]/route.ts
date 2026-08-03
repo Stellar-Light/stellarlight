@@ -266,7 +266,7 @@ export async function GET(
 			// Pull the live submission roster from DoraHacks (read-through; degrades
 			// to [] if the feed is unavailable). Populates submissions/winners/tracks
 			// for events that aren't curated in our DB.
-			const liveSubmissions = await fetchHackathonSubmissions(dora.uname);
+			const liveSubmissions = await fetchHackathonSubmissions(dora);
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 			const winners = liveWinners.length
 				? rankAndSort(liveWinners)
