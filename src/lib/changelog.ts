@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-03",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"projects: `scfRoundAwards` — each awarded round's official submission record (published budget + award type), the reconciling basis sls-058 asked for (openapi@1.8.31).",
+		detail:
+			"Project rows now carry `scfRoundAwards`: one entry per awarded SCF round with the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type. This closes sls-058 defect 2: `scfTotalAwardedUSD` is the project's own SCF-page total and can exceed the sum of round budgets (top-ups SCF doesn't itemize per round) — previously nothing exposed reconciled the two, so an agent reading the aggregate next to `scfAwardedRounds` could misattribute it to a single round. The `scfCountBasis` meta note was also corrected: totals are scraped from SCF's own pages (SDF's figure), not in-house sums, and per-round amounts ARE published — the old text claimed otherwise.",
+	},
+	{
+		date: "2026-08-03",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"repos: a plain org-name query now floats that org's own repos first (searchRepos q=soroswap previously buried soroswap/core in 6th).",

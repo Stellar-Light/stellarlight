@@ -562,6 +562,20 @@ export interface Project {
      * Round numbers this project was funded in, e.g. 2, 17, 22
      */
     awardedRounds?: number[] | null;
+    /**
+     * Per-awarded-round official record: round number, published submission budget (USD), award type
+     */
+    roundAwards?:
+      | {
+          round: number;
+          /**
+           * Published submission budget for the round; empty = award confirmed, budget not published
+           */
+          amountUSD?: number | null;
+          awardType?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
   embedding?:
@@ -2535,6 +2549,14 @@ export interface ProjectsSelect<T extends boolean = true> {
         slug?: T;
         totalAwarded?: T;
         awardedRounds?: T;
+        roundAwards?:
+          | T
+          | {
+              round?: T;
+              amountUSD?: T;
+              awardType?: T;
+              id?: T;
+            };
       };
   verificationLevel?: T;
   embedding?: T;
