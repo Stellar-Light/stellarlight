@@ -1,7 +1,19 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 2,
+    "count": 4,
     "sample": [
+      {
+        "slug": "trustline",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "trustline",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
+      },
       {
         "slug": "wowmax",
         "field": "supportedNetworks",
@@ -21,18 +33,18 @@
       "shortDescription": "99% (188/190)",
       "types": "92% (175/190)",
       "supportedNetworks": "6% (12/190)",
-      "logoUrl": "79% (151/190)"
+      "logoUrl": "81% (154/190)"
     },
     "Tooling": {
-      "shortDescription": "95% (160/169)",
-      "types": "92% (156/169)",
-      "logoUrl": "78% (132/169)"
+      "shortDescription": "96% (164/170)",
+      "types": "92% (157/170)",
+      "logoUrl": "82% (140/170)"
     },
     "User-Facing App": {
-      "shortDescription": "97% (357/368)",
-      "types": "92% (340/368)",
-      "supportedNetworks": "7% (25/368)",
-      "logoUrl": "80% (295/368)"
+      "shortDescription": "98% (360/367)",
+      "types": "92% (339/367)",
+      "supportedNetworks": "7% (25/367)",
+      "logoUrl": "89% (327/367)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
@@ -41,17 +53,17 @@
       "logoUrl": "80% (28/35)"
     },
     "Protocol/Contract": {
-      "shortDescription": "94% (132/140)",
+      "shortDescription": "97% (136/140)",
       "types": "86% (120/140)",
       "supportedNetworks": "15% (21/140)",
-      "logoUrl": "69% (96/140)",
+      "logoUrl": "86% (121/140)",
       "tvlUSD": "9% (13/140)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
       "types": "100% (15/15)",
       "supportedNetworks": "13% (2/15)",
-      "logoUrl": "80% (12/15)"
+      "logoUrl": "87% (13/15)"
     },
     "Partner Integration": {
       "shortDescription": "100% (1/1)",
@@ -88,7 +100,7 @@
           {
             "slug": "lusty-finance",
             "name": "Lusty Finance",
-            "scfAwarded": false
+            "scfAwarded": true
           },
           {
             "slug": "lusty",
@@ -116,13 +128,13 @@
         "apex": "safustaking.com",
         "records": [
           {
-            "slug": "safu",
-            "name": "SAFU",
-            "scfAwarded": false
-          },
-          {
             "slug": "safu-protocol",
             "name": "SAFU Protocol",
+            "scfAwarded": true
+          },
+          {
+            "slug": "safu",
+            "name": "SAFU",
             "scfAwarded": false
           }
         ]
@@ -130,20 +142,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 389,
-    "liveStale365": 146,
+    "liveNoDatedSignal": 390,
+    "liveStale365": 144,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 517,
+        "ageDays": 518,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 885,
+        "ageDays": 887,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -164,7 +176,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2285,
+        "ageDays": 2286,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -246,6 +258,13 @@
         "tvlUSD": null
       },
       {
+        "slug": "ankr",
+        "name": "Ankr",
+        "ageDays": null,
+        "hasDated": false,
+        "tvlUSD": null
+      },
+      {
         "slug": "circle-cctp-cross-chain-transfer-protocol",
         "name": "Circle CCTP (Cross-Chain Transfer Protocol)",
         "ageDays": null,
@@ -265,16 +284,9 @@
         "ageDays": null,
         "hasDated": false,
         "tvlUSD": null
-      },
-      {
-        "slug": "fordefi",
-        "name": "Fordefi",
-        "ageDays": null,
-        "hasDated": false,
-        "tvlUSD": null
       }
     ]
   },
-  "generatedAt": "2026-08-02T10:46:41Z",
+  "generatedAt": "2026-08-03T22:35:26Z",
   "evalKey": "engine-b-sweeps"
 }

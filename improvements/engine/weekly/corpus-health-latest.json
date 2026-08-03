@@ -1,7 +1,7 @@
 {
   "frame": {
     "chunks": 9496,
-    "docs": 1795
+    "docs": 1794
   },
   "s5_junk_urls": {
     "count": 1,
@@ -114,28 +114,28 @@
     "release": {
       "chunks": 171,
       "datedPct": 100,
-      "newestAgeDays": 2,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
     "lumenloop-research": {
       "chunks": 232,
       "datedPct": 100,
-      "newestAgeDays": 2,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
       "chunks": 3908,
       "datedPct": 75,
-      "newestAgeDays": 3,
+      "newestAgeDays": 5,
       "undated": false,
       "stalled": false
     },
     "sdf-blog": {
       "chunks": 2168,
       "datedPct": 100,
-      "newestAgeDays": 5,
+      "newestAgeDays": 7,
       "undated": false,
       "stalled": false
     },
@@ -156,21 +156,21 @@
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 93,
+      "newestAgeDays": 95,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 77,
       "datedPct": 30,
-      "newestAgeDays": 132,
+      "newestAgeDays": 134,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 87,
+      "newestAgeDays": 89,
       "undated": false,
       "stalled": false
     },
@@ -184,21 +184,21 @@
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 74,
+      "newestAgeDays": 76,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 49,
+      "newestAgeDays": 51,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1309,
+      "newestAgeDays": 1311,
       "undated": false,
       "stalled": false
     },
@@ -326,6 +326,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-02T10:46:41Z",
+  "generatedAt": "2026-08-03T22:35:26Z",
   "evalKey": "corpus-health"
 }
