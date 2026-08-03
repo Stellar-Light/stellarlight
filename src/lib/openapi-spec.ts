@@ -3428,7 +3428,20 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "integer" },
 						description:
-							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
+							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
+					},
+					scfRoundAwards: {
+						type: "array",
+						description:
+							"The official submission record per awarded round — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). The page-level total can legitimately exceed the sum of these budgets; treat rounds+budgets as the per-round truth and the total as SCF's own aggregate.",
+						items: {
+							type: "object",
+							properties: {
+								round: { type: "integer" },
+								amountUSD: { type: "number", nullable: true },
+								awardType: { type: "string", nullable: true },
+							},
+						},
 					},
 					coverage: {
 						type: "object",
@@ -3815,6 +3828,11 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+									},
+									scfCountBasis: {
+										type: "string",
+										description:
+											"Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups).",
 									},
 								},
 							},

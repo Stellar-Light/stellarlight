@@ -787,8 +787,14 @@ export interface components {
              * @enum {string|null}
              */
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
-            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals. */
+            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
+            /** @description The official submission record per awarded round — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). The page-level total can legitimately exceed the sum of these budgets; treat rounds+budgets as the per-round truth and the total as SCF's own aggregate. */
+            scfRoundAwards?: {
+                round?: number;
+                amountUSD?: number | null;
+                awardType?: string | null;
+            }[];
             /** @description Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
                 /** @description Primary market/jurisdiction country names. */
@@ -973,6 +979,8 @@ export interface components {
                 };
                 /** @description Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
+                /** @description Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
+                scfCountBasis?: string;
             };
             projects: components["schemas"]["Project"][];
             /** @description Top graded repos matching the same query, surfaced inline (max 5, first page only; same shape as /api/repos/search). Cite as existing code references for prior-art questions. */

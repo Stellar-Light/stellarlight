@@ -114,3 +114,42 @@ describe("parseRoundVerdicts", () => {
 		expect(v.submissions).toBe(1);
 	});
 });
+
+/** sls-058 defect 2: per-awarded-round official record (budget + award type)
+ * off the same submission cards. Object shape verbatim from fluxity-mez
+ * (2026-08-03): status … roundName … awardType … budget, one object per card. */
+describe("parseRoundVerdicts awards (sls-058)", () => {
+	const fluxityish =
+		'{"id":"recDXtqYuR8g9FMXt","status":"Awarded","project":"recM61","projectName":"$22","round":"recig1","roundName":"SCF #21","awardType":"Legacy v5.0 Community Award","title":"Fluxity","budget":68000,"entityType":"SUBMISSION"}\n' +
+		'{"id":"recKUE","status":"Not Awarded","project":"recM61","projectName":"$26","round":"recVMT","roundName":"SCF #18","awardType":"Legacy v4.0 Award","title":"Fluxity","budget":52000,"entityType":"SUBMISSION"}';
+
+	it("captures budget + awardType for awarded rounds only", () => {
+		const v = parseRoundVerdicts(fluxityish);
+		expect(v.awards).toEqual([
+			{ round: 21, budgetUSD: 68000, awardType: "Legacy v5.0 Community Award" },
+		]);
+		// the Not-Awarded card's budget must NOT leak in
+		expect([...v.notAwarded]).toEqual(["18"]);
+	});
+
+	it("a card without budget/awardType yields nulls, never a bleed from the next card", () => {
+		const v = parseRoundVerdicts(
+			'{"status":"Awarded","roundName":"SCF #16"}\n' +
+				'{"status":"Awarded","roundName":"SCF #24","awardType":"Legacy v5.0 Activation Award","budget":50000}',
+		);
+		expect(v.awards).toEqual([
+			{ round: 16, budgetUSD: null, awardType: null },
+			{ round: 24, budgetUSD: 50000, awardType: "Legacy v5.0 Activation Award" },
+		]);
+	});
+
+	it("resubmission within a round keeps the first awarded card's record", () => {
+		const v = parseRoundVerdicts(
+			'{"status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":90000}\n' +
+				'{"status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":15000}',
+		);
+		expect(v.awards).toEqual([
+			{ round: 31, budgetUSD: 90000, awardType: "Build Award" },
+		]);
+	});
+});
