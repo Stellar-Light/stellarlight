@@ -71,6 +71,53 @@ describe("searchRepos F4 ranking", () => {
 		expect(repos[0].fullName).toBe("team/chain-indexer");
 	});
 
+	// Golden repos-soroswap: the org's OWN repos must lead a plain org-name
+	// query, above higher-authority repos that merely mention/tag the term.
+	it("a plain org-name query floats the org's own repos (q=soroswap)", async () => {
+		const own = doc({
+			fullName: "soroswap/core",
+			description: "Core AMM contracts",
+			repoScore: 61,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const mentioner = doc({
+			fullName: "stellarcarbon/hackmeridian",
+			description: "Hackathon project integrating soroswap for swaps on Soroban",
+			topics: ["soroswap", "stellar"],
+			repoScore: 70,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(mockPayload([mentioner, own]), "soroswap", {
+			limit: 5,
+		});
+		expect(repos[0]?.fullName).toBe("soroswap/core");
+	});
+
+	it("a generic word does NOT ride owner identity past Stellar evidence", async () => {
+		// Org literally named "wallet" would exact-match q=wallet — but a repo
+		// NAMED wallet under a normal org must not gain alias (owner-only rule),
+		// and evidence ordering still leads.
+		const namedWallet = doc({
+			fullName: "evmcorp/wallet",
+			description: "an EVM wallet",
+			repoScore: 90,
+		});
+		const proven = doc({
+			fullName: "stellarteam/keys",
+			description: "wallet toolkit for Stellar",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([namedWallet, proven]),
+			"wallet",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("stellarteam/keys");
+	});
+
 	it("owner is searchable (q=allbridge reaches allbridge-io/*)", async () => {
 		const target = doc({
 			fullName: "allbridge-io/core-contracts",

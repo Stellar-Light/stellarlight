@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"repos: a plain org-name query now floats that org's own repos first (searchRepos q=soroswap previously buried soroswap/core in 6th).",
+		detail:
+			"Single-word queries that exactly equal a repo owner's whole name gain the same exact-identity ranking as identifier-form lookups: the org's own repos outrank higher-authority repos that merely mention or tag the term. Guarded to single-token queries of 5+ characters matching the owner segment only, so vocabulary queries (wallet, oracle) and substring org names (Blockchain-Oracle) cannot ride it, and Stellar-evidence ordering still applies within everything else. Found by the golden retrieval eval (repos-soroswap was its only failing case, 47/48 → 48/48 expected).",
+	},
+	{
+		date: "2026-08-03",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"hackathons: live DoraHacks feed restored after an upstream API migration — getHackathons had served 0 rows since 2026-07-31.",
 		detail:
 			"DoraHacks retired its legacy endpoints (hard 404) in favor of a new v1 hub API with renamed paths, parameters, and response fields, which silently emptied every DoraHacks-backed surface: getHackathons, getHackathon, searchHackathonBuilds, compareHackathons, and the analyze hackathon dimensions. The integration now targets the new API and maps it back to the served shapes, so response contracts are unchanged. Winners are joined from the new winner-assignments endpoint (the per-submission winner_prizes field no longer exists upstream). One data-level regression to note: the upstream API no longer exposes vote counts, so the votes field on hackathon builds now reports 0; winner/placement data is unaffected. Detected by the daily grounded self-audit (issue #752).",
