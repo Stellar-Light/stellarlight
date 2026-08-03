@@ -661,6 +661,12 @@ export const spec: OpenAPISpec = {
 											description:
 												"DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned).",
 										},
+										answerSource: {
+											type: "string",
+											nullable: true,
+											description:
+												"Where the answer text came from (e.g. 'deepwiki'); null when no answer was produced — cite it alongside the answer.",
+										},
 										answered: {
 											type: "boolean",
 											description:
@@ -979,8 +985,12 @@ export const spec: OpenAPISpec = {
 						name: "winnersOnly",
 						in: "query",
 						required: false,
-						description: "Set to 1 to return only prize-winning builds.",
-						schema: { type: "string", enum: ["1", "true"] },
+						description:
+							"Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored.",
+						schema: {
+							type: "string",
+							enum: ["1", "true", "yes", "on", "0", "false", "no", "off"],
+						},
 					},
 					{
 						name: "track",
@@ -1109,14 +1119,19 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												matchBasis: {
-													type: "string",
-													description:
-														"What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts.",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchBasis: {
+															type: "string",
+															description:
+																"What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts.",
+														},
+													},
 												},
-											},
+											],
 										},
 										builders: {
 											type: "array",
@@ -1208,30 +1223,35 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												source: {
-													type: "string",
-													description:
-														"The roster page each row is quoted from (stellar.org/foundation/team).",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														source: {
+															type: "string",
+															description:
+																"The roster page each row is quoted from (stellar.org/foundation/team).",
+														},
+														observedAt: {
+															type: "string",
+															description:
+																"Date the roster was last observed from the source (YYYY-MM-DD).",
+														},
+														sections: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Distinct roster sections present (Leadership, Board of directors, Advisors).",
+														},
+														matchBasis: {
+															type: "string",
+															description:
+																"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
+														},
+													},
 												},
-												observedAt: {
-													type: "string",
-													description:
-														"Date the roster was last observed from the source (YYYY-MM-DD).",
-												},
-												sections: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Distinct roster sections present (Leadership, Board of directors, Advisors).",
-												},
-												matchBasis: {
-													type: "string",
-													description:
-														"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
-												},
-											},
+											],
 										},
 										people: {
 											type: "array",
@@ -1690,6 +1710,37 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											properties: {
 												activeQuarter: { type: "string" },
+												activeQuarterLabel: {
+													type: "string",
+													description:
+														"Human label for activeQuarter (e.g. 'Q3 2026').",
+												},
+												quarters: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every quarter key the quarter filter accepts, newest first.",
+												},
+												categories: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every category value present in the current brief set — the category filter's live vocabulary.",
+												},
+												submitNewBriefAt: {
+													type: "string",
+													format: "uri",
+													description:
+														"Where a team submits a NEW brief/idea (the SCF ideas board) — hand off here when asked how to propose one.",
+												},
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													additionalProperties: true,
+													description:
+														"Echo of the filter values this response was computed under (null = not applied).",
+												},
 												counts: {
 													type: "object",
 													description:
@@ -2092,7 +2143,37 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														query: {
+															type: "string",
+															description: "The query as the server parsed it.",
+														},
+														mode: {
+															type: "string",
+															enum: ["vector", "keyword"],
+															description:
+																"How this page was retrieved: 'vector' = semantic similarity over embeddings (the normal path); 'keyword' = literal-match fallback when embeddings are unavailable. Scores are not comparable across modes.",
+														},
+														model: {
+															type: "string",
+															nullable: true,
+															description:
+																"Embedding model used for vector retrieval (e.g. voyage-3); null in keyword mode.",
+														},
+														scoreModel: {
+															type: "string",
+															description:
+																"What `score` measures in this response (e.g. cosine similarity 0-1) — read it before comparing scores across sources.",
+														},
+													},
+												},
+											],
+										},
 										results: {
 											type: "array",
 											items: { $ref: "#/components/schemas/ResearchResult" },
@@ -2189,7 +2270,28 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														validKinds: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the kind filter accepts (unknown values 400 with this list).",
+														},
+														validSources: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the source filter accepts (unknown values 400 with this list).",
+														},
+													},
+												},
+											],
+										},
 										skills: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Skill" },
@@ -2335,12 +2437,29 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												population: {
-													$ref: "#/components/schemas/PopulationScope",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														population: {
+															$ref: "#/components/schemas/PopulationScope",
+														},
+														dimensions: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the dimension param accepts — the live vocabulary for cluster views.",
+														},
+														notes: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Reading notes for the active dimension (counting caveats, taxonomy conventions). May be empty.",
+														},
+													},
 												},
-											},
+											],
 										},
 										clusters: {
 											type: "array",
@@ -2466,13 +2585,88 @@ export const spec: OpenAPISpec = {
 												population: {
 													$ref: "#/components/schemas/PopulationScope",
 												},
+												dimension: {
+													type: "string",
+													description: "The dimension this response was computed for.",
+												},
+												validDimensions: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every value the dimension param accepts (unknown values 400 with this list).",
+												},
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
 											},
+										},
+										categories: {
+											type: "object",
+											additionalProperties: true,
+											description:
+												"Present for dimension=all|categories: project counts by category over the active population (see meta.population).",
+										},
+										developers: {
+											type: "object",
+											additionalProperties: true,
+											description:
+												"Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt.",
+										},
+										gaps: {
+											type: "object",
+											additionalProperties: true,
+											description:
+												"Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
+										},
+										hackathons: {
+											type: "object",
+											additionalProperties: true,
+											description:
+												"Present for dimension=all|hackathons: cross-event rollup (events, submissions, winners) from the live DoraHacks feed.",
+										},
+										tvl: {
+											type: "object",
+											additionalProperties: true,
+											description:
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'.",
 										},
 										funding: {
 											type: "object",
 											description:
 												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
 											properties: {
+												computedAt: {
+													type: "string",
+													format: "date-time",
+													description: "When THIS response's funding rollup was computed.",
+												},
+												methodologyVersion: { type: "string" },
+												countBasis: {
+													type: "string",
+													description:
+														"Plain-language statement of what the funding numbers count (in-house rollup basis vs SDF's own counters).",
+												},
+												scfAwardedProjects: {
+													type: "integer",
+													description: "Projects in the awarded set this rollup sums over.",
+												},
+												scfTotalDistributedUSD: {
+													type: "number",
+													description:
+														"Sum of scfTotalAwardedUSD over the awarded set — an in-house rollup; reconcile per-project via scfRoundAwards.",
+												},
+												meanAwardUSD: { type: "number", nullable: true },
+												byRound: {
+													type: "array",
+													description:
+														"Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at.",
+													items: { type: "object", additionalProperties: true },
+												},
+												postHackathonStatusFunnel: {
+													type: "object",
+													additionalProperties: true,
+													description:
+														"Outcome funnel for hackathon-origin awarded projects (still-building / live / inactive).",
+												},
 												projectSetHash: { type: "string" },
 												snapshotAsOf: {
 													type: "string",
@@ -2732,6 +2926,25 @@ export const spec: OpenAPISpec = {
 											description:
 												"Carries filters, metricDefinitions (what each served metric IS), generatedAt, and dataAsOf.",
 											properties: {
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													additionalProperties: true,
+													description:
+														"Echo of the applied sort/range/category/type scope (null = not applied).",
+												},
+												counts: {
+													type: "object",
+													additionalProperties: true,
+													description:
+														"Row counts for this response (returned rows; population size where stated).",
+												},
+												docs: {
+													type: "string",
+													description:
+														"Pointer to the metric documentation for this endpoint (what each column means and how it is computed).",
+												},
 												dataAsOf: {
 													type: "string",
 													format: "date-time",
@@ -2938,7 +3151,33 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														dataAsOf: {
+															type: "string",
+															format: "date-time",
+															description:
+																"When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.",
+														},
+														methodology: {
+															type: "string",
+															description:
+																"How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars.",
+														},
+														upstream: {
+															type: "string",
+															format: "uri",
+															description:
+																"The upstream data service this snapshot proxies (stablecoin.stellarlight.xyz).",
+														},
+													},
+												},
+											],
+										},
 										stablecoins: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Stablecoin" },
@@ -2997,7 +3236,23 @@ export const spec: OpenAPISpec = {
 				properties: {
 					source: { type: "string", format: "uri" },
 					generatedAt: { type: "string", format: "date-time" },
-					filters: { type: "object", additionalProperties: true },
+					filters: {
+						type: "object",
+						additionalProperties: true,
+						description:
+							"Echo of the filter values this response was computed under (null = filter not applied). Read it to confirm the server saw the filters you sent.",
+					},
+					note: {
+						type: "string",
+						description:
+							"Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say.",
+					},
+					warnings: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure — the request still succeeds; endpoints that shipped strict from day one return 400 instead.",
+					},
 					counts: {
 						type: "object",
 						properties: {
@@ -3246,7 +3501,28 @@ export const spec: OpenAPISpec = {
 			PartnersResponse: {
 				type: "object",
 				properties: {
-					meta: { $ref: "#/components/schemas/Meta" },
+					meta: {
+						allOf: [
+							{ $ref: "#/components/schemas/Meta" },
+							{
+								type: "object",
+								properties: {
+									validTypes: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the type filter accepts (unknown values 400 with this list).",
+									},
+									validRamps: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the ramps filter accepts (unknown values 400 with this list).",
+									},
+								},
+							},
+						],
+					},
 					partners: {
 						type: "array",
 						items: { $ref: "#/components/schemas/Partner" },
@@ -3834,6 +4110,11 @@ export const spec: OpenAPISpec = {
 										description:
 											"Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups).",
 									},
+									semantic: {
+										type: "boolean",
+										description:
+											"True when the keyword pass was thin and vector-similarity rows filled the page (each such row tagged via:'semantic'). Distinct from matchMode='semantic', which means NO keyword tier matched at all.",
+									},
 								},
 							},
 						],
@@ -3900,10 +4181,39 @@ export const spec: OpenAPISpec = {
 						items: {
 							type: "object",
 							properties: {
+								id: {
+									type: "string",
+									description: "Stable row id (dorahacks-buidl-{id} for live rows).",
+								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
 								placementRank: { type: "integer", nullable: true },
 								hackathonPrize: { type: "number", nullable: true },
+								description: {
+									type: "string",
+									nullable: true,
+									description: "Project blurb from the submission (markdown stripped).",
+								},
+								track: { type: "string", nullable: true },
+								award: {
+									type: "string",
+									nullable: true,
+									description: "Official award title (e.g. '$10,000 XLM Prize').",
+								},
+								isWinner: { type: "boolean" },
+								githubUrl: { type: "string", nullable: true },
+								demoUrl: { type: "string", nullable: true },
+								videoUrl: { type: "string", nullable: true },
+								url: {
+									type: "string",
+									description: "The submission's DoraHacks buidl page.",
+								},
+								voteCount: {
+									type: "integer",
+									description:
+										"Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'.",
+								},
+								source: { type: "string", description: "'dorahacks' for live rows." },
 							},
 						},
 					},
