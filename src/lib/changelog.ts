@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"research: CAP crosswalk facts — `capStatus` + `capProtocolVersion` on every source=cap result, parsed from each CAP's own preamble (openapi@1.8.35).",
+		detail:
+			"CAP prose has been searchable for a while; the structured preamble facts were not. Every source=cap research result now carries `capStatus` (Final/Implemented/Accepted/Draft/Rejected — the CAP's own declaration; cite it before treating a CAP as protocol truth) and `capProtocolVersion` (which protocol shipped it; null = not declared upstream, never guessed). This is the first leg of the code-truth crosswalk: protocol history ⇄ CAPs today, joining to soroban-sdk version status next. Existing rows backfill on the next corpus refresh; a committed cap-registry (86 CAPs as of 2026-08-04: 45 Final, 9 Implemented, 17 Draft) is the internal join table behind it.",
+	},
+	{
+		date: "2026-08-04",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"repos: `activitySignals` — commits-in-90d velocity, latest release, and open-PR count on every searchRepos row (openapi@1.8.34).",
 		detail:
 			"Repo rows now carry an `activitySignals` snapshot from the enrich pass: `commits90d` (default-branch commits in the 90 days before `asOf` — the velocity discriminator within an activityState: two 'active' repos can differ 50x here), `lastReleaseAt` + `releaseTag`, `openPRs`, and `asOf` dating the snapshot. Null means not-yet-captured (rows backfill on the weekly refresh), never zero activity. Ranking is deliberately unchanged in this release — repoScore does not yet consume these signals; that blend lands separately, gated by the answer-key eval, so ordering cannot silently regress while the data ships.",

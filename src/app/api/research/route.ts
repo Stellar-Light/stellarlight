@@ -297,6 +297,8 @@ export async function GET(req: NextRequest) {
 				auditor?: string;
 				protocol?: string;
 				severity?: string;
+				capStatus?: string;
+				capProtocolVersion?: number;
 				score?: number;
 			}) => ({
 				id: String(d._id),
@@ -311,6 +313,8 @@ export async function GET(req: NextRequest) {
 				auditor: d.auditor ?? null,
 				protocol: d.protocol ?? null,
 				severity: d.severity ?? null,
+				capStatus: d.capStatus ?? null,
+				capProtocolVersion: d.capProtocolVersion ?? null,
 				score: d.score,
 			}),
 		);
@@ -391,6 +395,8 @@ export async function GET(req: NextRequest) {
 				auditor?: string;
 				protocol?: string;
 				severity?: string;
+				capStatus?: string;
+				capProtocolVersion?: number;
 			}>;
 
 			// Compute mean content length for length-normalization
@@ -455,6 +461,8 @@ export async function GET(req: NextRequest) {
 					auditor: d.auditor ?? null,
 					protocol: d.protocol ?? null,
 					severity: d.severity ?? null,
+					capStatus: d.capStatus ?? null,
+					capProtocolVersion: d.capProtocolVersion ?? null,
 					score: score(d),
 				}))
 				.filter((d) => (d.score ?? 0) > 0)

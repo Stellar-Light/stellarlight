@@ -3392,6 +3392,18 @@ export const spec: OpenAPISpec = {
 						description:
 							"Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks",
 					},
+				capStatus: {
+						type: "string",
+						nullable: true,
+						description:
+							"source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth — a Draft describes an intention, not the network.",
+					},
+					capProtocolVersion: {
+						type: "integer",
+						nullable: true,
+						description:
+							"source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD) — never guessed. The join key between protocol history and soroban-sdk versions.",
+					},
 					score: { type: ["number", "null"] },
 					confidence: {
 						type: "object",

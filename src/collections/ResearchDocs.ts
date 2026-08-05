@@ -145,6 +145,14 @@ export const ResearchDocs: CollectionConfig = {
 			},
 		},
 		{
+			// CAP crosswalk facts (source=cap only), parsed from the CAP's own
+			// preamble at ingest: whether the CAP is real (Status) and which
+			// protocol shipped it (Protocol version). Null = absent/TBD upstream.
+			name: "capStatus",
+			type: "text",
+		},
+		{ name: "capProtocolVersion", type: "number" },
+		{
 			name: "title",
 			type: "text",
 			required: true,

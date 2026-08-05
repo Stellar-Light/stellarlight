@@ -1663,6 +1663,8 @@ export interface ResearchDoc {
    * Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.
    */
   severity?: ('critical' | 'high' | 'medium' | 'low' | 'informational' | 'unknown') | null;
+  capStatus?: string | null;
+  capProtocolVersion?: number | null;
   /**
    * Parent doc title (e.g. SEP name, blog post title, paper title)
    */
@@ -3043,6 +3045,8 @@ export interface ResearchDocsSelect<T extends boolean = true> {
   auditor?: T;
   protocol?: T;
   severity?: T;
+  capStatus?: T;
+  capProtocolVersion?: T;
   title?: T;
   section?: T;
   url?: T;
