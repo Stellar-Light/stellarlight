@@ -4291,6 +4291,19 @@ export const spec: OpenAPISpec = {
 							asOf: { type: "string", format: "date-time", nullable: true },
 						},
 					},
+					knowledgeNotes: {
+						type: "array",
+						description:
+							"Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record.",
+						items: {
+							type: "object",
+							properties: {
+								note: { type: "string" },
+								source: { type: "string" },
+								asOf: { type: "string", nullable: true },
+							},
+						},
+					},
 					project: {
 						type: "object",
 						nullable: true,

@@ -759,6 +759,14 @@ export interface Repo {
     openPRs?: number | null;
     asOf?: string | null;
   };
+  knowledgeNotes?:
+    | {
+        note: string;
+        source: string;
+        asOf?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   homepageUrl?: string | null;
   isFork?: boolean | null;
   isArchived?: boolean | null;
@@ -2630,6 +2638,14 @@ export interface ReposSelect<T extends boolean = true> {
         releaseTag?: T;
         openPRs?: T;
         asOf?: T;
+      };
+  knowledgeNotes?:
+    | T
+    | {
+        note?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
       };
   homepageUrl?: T;
   isFork?: T;

@@ -59,6 +59,18 @@ export const Repos: CollectionConfig = {
 				{ name: "asOf", type: "date" },
 			],
 		},
+		{
+			// Repo-intel slice 3: dated facts with sources (curated map +
+			// derived audit crosslink), rebuilt wholesale by enrich each pass —
+			// see src/lib/repo-knowledge.ts for the discipline.
+			name: "knowledgeNotes",
+			type: "array",
+			fields: [
+				{ name: "note", type: "textarea", required: true },
+				{ name: "source", type: "text", required: true },
+				{ name: "asOf", type: "text" },
+			],
+		},
 		{ name: "homepageUrl", type: "text" },
 		{ name: "isFork", type: "checkbox", defaultValue: false },
 		{ name: "isArchived", type: "checkbox", defaultValue: false },
