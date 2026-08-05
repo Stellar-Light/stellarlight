@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-05",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"repos: `knowledgeNotes` — dated facts with named sources on searchRepos rows (curated + derived audit crosslinks) (openapi@1.8.36).",
+		detail:
+			"Repo rows now carry `knowledgeNotes`: an array of dated FACTS, each naming its source. Two sources at launch: curated (hand-verified packaging/doc-map/companion-repo facts, e.g. an SDK's per-protocol extension docs living in subdirectory READMEs) and derived:audit (the repo's owning project has verified security-audit reports in our registry — exact projectSlug join, never fuzzy matching). Notes are rebuilt wholesale on every enrich pass, so curation is self-healing and stale notes cannot linger. Facts, never summaries; empty array = nothing on record, never an unknown.",
+	},
+	{
 		date: "2026-08-04",
 		surfaces: ["api"],
 		type: "added",

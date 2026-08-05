@@ -18,6 +18,10 @@ import {
 	type OwnerRepo,
 } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
+import {
+	type AuditRecord,
+	buildKnowledgeNotes,
+} from "../src/lib/repo-knowledge";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
@@ -163,6 +167,31 @@ async function main() {
 	console.log(
 		`Loaded ${builders.length} builders (${repByGithub.size} github + ${repByRepo.size} repo reputation keys).`,
 	);
+
+	// Audit crosslink for knowledgeNotes: EXACT projectSlug join (never fuzzy).
+	const auditsByProject = new Map<string, AuditRecord[]>();
+	try {
+		const auditRes = await payload.find({
+			collection: "audits",
+			limit: 1000,
+			depth: 0,
+			// biome-ignore lint/suspicious/noExplicitAny: Payload find options shape
+		} as any);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const a of auditRes.docs as any[]) {
+			const slug = a.projectSlug ? String(a.projectSlug) : null;
+			if (!slug) continue;
+			if (!auditsByProject.has(slug)) auditsByProject.set(slug, []);
+			auditsByProject.get(slug)?.push({
+				projectSlug: slug,
+				auditor: a.auditor ?? null,
+				publishedAt: a.publishedAt ?? null,
+			});
+		}
+		console.log(`Loaded audit crosslinks for ${auditsByProject.size} projects.`);
+	} catch (e) {
+		console.log(`Audit crosslink load failed (notes degrade): ${String(e)}`);
+	}
 
 	// Dedupe repos across projects; keep the highest-prominence owning project.
 	const byFull = new Map<
@@ -350,6 +379,7 @@ async function main() {
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
+			knowledgeNotes: buildKnowledgeNotes(full, project.slug, auditsByProject),
 			hackathonWinner: !!project.hackathonPlacement,
 			scfAwarded: !!project.scf?.awarded,
 			builderReputation,

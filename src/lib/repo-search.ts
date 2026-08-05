@@ -69,6 +69,11 @@ interface RepoDoc {
 		openPRs?: number | null;
 		asOf?: string | null;
 	} | null;
+	knowledgeNotes?: Array<{
+		note?: string | null;
+		source?: string | null;
+		asOf?: string | null;
+	}> | null;
 }
 
 export interface RepoResult {
@@ -100,6 +105,9 @@ export interface RepoResult {
 		openPRs: number | null;
 		asOf: string | null;
 	} | null;
+	/** Dated facts with sources (curated + derived:audit) — see the repo-intel
+	 * knowledge discipline; [] when none. Facts, never summaries. */
+	knowledgeNotes: Array<{ note: string; source: string; asOf: string | null }>;
 	project: { slug: string; name: string | null } | null;
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
@@ -1218,6 +1226,15 @@ export async function searchRepos(
 								asOf: r.activitySignals.asOf ?? null,
 							}
 						: null,
+				knowledgeNotes: Array.isArray(r.knowledgeNotes)
+					? r.knowledgeNotes
+							.filter((n) => typeof n?.note === "string" && n.note)
+							.map((n) => ({
+								note: String(n.note),
+								source: typeof n.source === "string" ? n.source : "curated",
+								asOf: n.asOf ?? null,
+							}))
+					: [],
 				project: r.projectSlug
 					? { slug: r.projectSlug, name: r.projectName ?? null }
 					: null,

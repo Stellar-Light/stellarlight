@@ -1082,6 +1082,12 @@ export interface components {
                 /** Format: date-time */
                 asOf?: string | null;
             } | null;
+            /** @description Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
+            knowledgeNotes?: {
+                note?: string;
+                source?: string;
+                asOf?: string | null;
+            }[];
             /** @description The curated project this repo is linked to, if any. */
             project?: {
                 slug?: string;
