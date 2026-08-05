@@ -1063,6 +1063,11 @@ export interface components {
             homepageUrl?: string | null;
             isFork?: boolean;
             isArchived?: boolean;
+            /**
+             * @description Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.
+             * @enum {string}
+             */
+            activityState?: "active" | "maintained" | "dormant" | "archived" | "unknown";
             /** @description The curated project this repo is linked to, if any. */
             project?: {
                 slug?: string;
@@ -1559,6 +1564,8 @@ export interface operations {
                 language?: string;
                 /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
                 minScore?: number;
+                /** @description Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days — an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list. */
+                activity?: "active" | "maintained" | "dormant" | "archived" | "unknown";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */

@@ -48,6 +48,44 @@ export interface RepoGrade {
 
 const DAY_MS = 86_400_000;
 
+/**
+ * Observable per-repo activity state, derived at serve time — never stored, so
+ * it can't go stale, and never guessed (the repo-stale ≠ defunct lesson):
+ *   archived   — the OWNER's own declaration; the only death verdict we make
+ *   active     — a known commit within 45 days
+ *   maintained — within 180 days
+ *   dormant    — older than 180 days (a KNOWN date; an observation, not a verdict)
+ *   unknown    — no commit date held; absence of evidence, never evidence of death
+ */
+export type RepoActivityState =
+	| "active"
+	| "maintained"
+	| "dormant"
+	| "archived"
+	| "unknown";
+
+export const REPO_ACTIVITY_STATES: readonly RepoActivityState[] = [
+	"active",
+	"maintained",
+	"dormant",
+	"archived",
+	"unknown",
+];
+
+export function activityStateOf(
+	lastCommitAt: string | Date | null | undefined,
+	isArchived: boolean | null | undefined,
+): RepoActivityState {
+	if (isArchived) return "archived";
+	if (!lastCommitAt) return "unknown";
+	const t = new Date(lastCommitAt).getTime();
+	if (!Number.isFinite(t)) return "unknown";
+	const ageDays = (Date.now() - t) / DAY_MS;
+	if (ageDays <= 45) return "active";
+	if (ageDays <= 180) return "maintained";
+	return "dormant";
+}
+
 // 1.0 within ~90 days, linearly decaying to 0 by ~2 years stale.
 function freshnessOf(lastCommitAt?: string | Date | null): number {
 	if (!lastCommitAt) return 0;

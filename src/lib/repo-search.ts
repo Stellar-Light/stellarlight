@@ -10,6 +10,10 @@
  */
 
 import { symbolsHaystack } from "./code-symbols";
+import {
+	activityStateOf,
+	type RepoActivityState,
+} from "./repo-grade";
 import { isKnownInfraNotDeployable } from "./known-infra";
 import {
 	anchorTokens,
@@ -74,6 +78,11 @@ export interface RepoResult {
 	homepageUrl: string | null;
 	isFork: boolean;
 	isArchived: boolean;
+	/** Observable activity state, derived at serve time from lastCommitAt +
+	 * isArchived. `archived` is the owner's own verdict; `dormant` is an
+	 * observation about a KNOWN commit date; `unknown` means we hold no date —
+	 * never read it as dead (repo-stale ≠ defunct). */
+	activityState: RepoActivityState;
 	project: { slug: string; name: string | null } | null;
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
@@ -835,6 +844,8 @@ export async function searchRepos(
 		offset?: number;
 		language?: string;
 		minScore?: number;
+		/** Filter to one activity state (validated by the route). */
+		activity?: RepoActivityState | "";
 	} = {},
 ): Promise<{
 	repos: RepoResult[];
@@ -842,7 +853,13 @@ export async function searchRepos(
 	canonical: string[];
 	searched: RepoSearchSearched;
 }> {
-	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
+	const {
+		limit = 20,
+		offset = 0,
+		language = "",
+		minScore = 0,
+		activity = "",
+	} = opts;
 	const tokens = contentTokens(q);
 	const searched: RepoSearchSearched = {
 		tokens,
@@ -1117,6 +1134,10 @@ export async function searchRepos(
 			: docs;
 		if (minScore > 0)
 			filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
+		if (activity)
+			filtered = filtered.filter(
+				(d) => activityStateOf(d.r.lastCommitAt, d.r.isArchived) === activity,
+			);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
 		// the authority grade and stars. Putting these signals ABOVE repoScore
@@ -1169,6 +1190,7 @@ export async function searchRepos(
 				homepageUrl: r.homepageUrl ?? null,
 				isFork: !!r.isFork,
 				isArchived: !!r.isArchived,
+				activityState: activityStateOf(r.lastCommitAt, r.isArchived),
 				project: r.projectSlug
 					? { slug: r.projectSlug, name: r.projectName ?? null }
 					: null,
