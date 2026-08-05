@@ -75,4 +75,28 @@ describe("searchRepos activity filter + row field", () => {
 		);
 		expect(onlyActive.repos.map((r) => r.fullName)).toEqual(["live/wallet"]);
 	});
+
+	it("activitySignals pass through when captured, null when absent (never zero)", async () => {
+		const withSignals = doc({
+			fullName: "busy/wallet",
+			lastCommitAt: daysAgo(2),
+			activitySignals: {
+				commits90d: 41,
+				lastReleaseAt: daysAgo(10),
+				releaseTag: "v2.1.0",
+				openPRs: 3,
+				asOf: daysAgo(1),
+			},
+		});
+		const without = doc({ fullName: "plain/wallet", lastCommitAt: daysAgo(2) });
+		const { repos } = await searchRepos(
+			mockPayload([withSignals, without]),
+			"wallet",
+			{ limit: 10 },
+		);
+		const by = Object.fromEntries(repos.map((r) => [r.fullName, r]));
+		expect(by["busy/wallet"].activitySignals?.commits90d).toBe(41);
+		expect(by["busy/wallet"].activitySignals?.releaseTag).toBe("v2.1.0");
+		expect(by["plain/wallet"].activitySignals).toBeNull();
+	});
 });
