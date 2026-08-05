@@ -20,6 +20,7 @@
 import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
+import { parseCapPreamble } from "../src/lib/cap-preamble";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
@@ -44,6 +45,8 @@ interface SepChunk {
 	content: string; // chunk markdown
 	contentHash: string;
 	tags: string[]; // ["cap", "sep-24", ...]
+	capStatus: string | null;
+	capProtocolVersion: number | null;
 }
 
 const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
@@ -214,7 +217,16 @@ async function run() {
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
 	const existingBySep = new Map<
 		string,
-		Map<number, { id: string; contentHash: string; title: string | null }>
+		Map<
+			number,
+			{
+				id: string;
+				contentHash: string;
+				title: string | null;
+				capStatus: string | null;
+				capProtocolVersion: number | null;
+			}
+		>
 	>();
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
@@ -230,6 +242,8 @@ async function run() {
 			chunkIndex: number;
 			contentHash: string;
 			title?: string | null;
+			capStatus?: string | null;
+			capProtocolVersion?: number | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
@@ -237,6 +251,8 @@ async function run() {
 				id: d.id,
 				contentHash: d.contentHash,
 				title: d.title ?? null,
+				capStatus: d.capStatus ?? null,
+				capProtocolVersion: d.capProtocolVersion ?? null,
 			});
 		}
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
@@ -251,7 +267,12 @@ async function run() {
 		try {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
-			const chunks = chunkMarkdown(md, parentDocId, title, url);
+			const preamble = parseCapPreamble(md);
+			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
+				...c,
+				capStatus: preamble.status,
+				capProtocolVersion: preamble.protocolVersion,
+			}));
 			stats.chunksTotal += chunks.length;
 
 			const existing = existingBySep.get(parentDocId);
@@ -263,13 +284,21 @@ async function run() {
 					// rows through the embed path. Content-identical + drifted
 					// title → update in place, no re-embed. (This script has its
 					// own upsert loop — the shared upsertChunks fix doesn't apply.)
-					if (payload && (prev.title ?? "") !== chunk.title) {
+					const factsDrifted =
+						(prev.capStatus ?? null) !== (chunk.capStatus ?? null) ||
+						(prev.capProtocolVersion ?? null) !==
+							(chunk.capProtocolVersion ?? null);
+					if (payload && ((prev.title ?? "") !== chunk.title || factsDrifted)) {
 						stats.chunksUpdated++;
 						try {
 							await payload.update({
 								collection: "research-docs",
 								id: prev.id,
-								data: { title: chunk.title },
+								data: {
+									title: chunk.title,
+									capStatus: chunk.capStatus ?? undefined,
+									capProtocolVersion: chunk.capProtocolVersion ?? undefined,
+								},
 							});
 							console.log(
 								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
@@ -344,6 +373,8 @@ async function run() {
 			content: chunk.content,
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
+			capStatus: chunk.capStatus ?? undefined,
+			capProtocolVersion: chunk.capProtocolVersion ?? undefined,
 			embedding,
 		};
 		try {
