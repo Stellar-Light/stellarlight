@@ -503,6 +503,16 @@ export const spec: OpenAPISpec = {
 							"Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references.",
 						schema: { type: "integer", minimum: 0, maximum: 100, default: 0 },
 					},
+					{
+						name: "activity",
+						in: "query",
+						description:
+							"Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days — an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list.",
+						schema: {
+							type: "string",
+							enum: ["active", "maintained", "dormant", "archived", "unknown"],
+						},
+					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
@@ -4246,6 +4256,12 @@ export const spec: OpenAPISpec = {
 					homepageUrl: { type: "string", nullable: true },
 					isFork: { type: "boolean" },
 					isArchived: { type: "boolean" },
+					activityState: {
+						type: "string",
+						enum: ["active", "maintained", "dormant", "archived", "unknown"],
+						description:
+							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.",
+					},
 					project: {
 						type: "object",
 						nullable: true,

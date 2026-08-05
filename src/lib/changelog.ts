@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-04",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"repos: `activityState` on every searchRepos row + an `activity` filter — observable maintenance state (active/maintained/dormant/archived/unknown) with honest semantics (openapi@1.8.33).",
+		detail:
+			"Every repo row now carries `activityState`, derived at serve time from lastCommitAt + isArchived so it can never go stale: active = commit within 45 days; maintained = within 180; dormant = a KNOWN commit older than 180 days; archived = the owner's own declaration; unknown = no commit date held. The semantics are deliberately conservative: dormant is an observation (complete libraries go quiet), archived is the only death verdict, and unknown is absence of evidence — never read either as defunct. A strict `activity` query filter accompanies it (unknown values 400 with the valid list). Ranking is unchanged — the existing staleness demotion already handles ordering; this makes the state a first-class, filterable fact instead of something consumers reverse-engineer from timestamps.",
+	},
+	{
 		date: "2026-08-03",
 		surfaces: ["api"],
 		type: "changed",

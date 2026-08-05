@@ -23,6 +23,10 @@ import {
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	REPO_ACTIVITY_STATES,
+	type RepoActivityState,
+} from "@/lib/repo-grade";
 import { searchRepos } from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
@@ -42,12 +46,21 @@ export async function GET(req: NextRequest) {
 			"search",
 			"language",
 			"minScore",
+			"activity",
 			"limit",
 			"offset",
 			"fields",
 		],
 		{
-			advertise: ["q", "language", "minScore", "limit", "offset", "fields"],
+			advertise: [
+				"q",
+				"language",
+				"minScore",
+				"activity",
+				"limit",
+				"offset",
+				"fields",
+			],
 			hint: "Repo search matches name/description/topics/symbols from q — put language or framework terms in q if the dedicated filter doesn't cover them.",
 		},
 	);
@@ -62,6 +75,22 @@ export async function GET(req: NextRequest) {
 		)?.trim() ?? "";
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
+	// Observable activity filter (slice 1 of the repo-intel work). Strict:
+	// an unknown state 400s with the valid values, never silently ignores.
+	const activityRaw = sp.get("activity")?.trim().toLowerCase() ?? "";
+	if (
+		activityRaw &&
+		!(REPO_ACTIVITY_STATES as readonly string[]).includes(activityRaw)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid activity value '${activityRaw}'.`,
+				validValues: REPO_ACTIVITY_STATES,
+			},
+			{ status: 400 },
+		);
+	}
+	const activity = activityRaw as RepoActivityState | "";
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
@@ -72,13 +101,14 @@ export async function GET(req: NextRequest) {
 		offset,
 		language,
 		minScore,
+		activity,
 	});
 
 	logApiHit({
 		req,
 		endpoint: "/api/repos/search",
 		query: q,
-		filters: { language, minScore, limit },
+		filters: { language, minScore, activity: activity || null, limit },
 		resultCount: repos.length,
 	});
 
@@ -91,7 +121,7 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
-				filters: { q, language: language || null, minScore, limit, offset },
+				filters: { q, language: language || null, minScore, activity: activity || null, limit, offset },
 				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0
