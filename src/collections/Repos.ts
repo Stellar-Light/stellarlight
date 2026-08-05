@@ -45,6 +45,20 @@ export const Repos: CollectionConfig = {
 		{ name: "stars", type: "number", defaultValue: 0 },
 		{ name: "openIssues", type: "number", defaultValue: 0 },
 		{ name: "lastCommitAt", type: "date" },
+		{
+			// Repo-intel slice 2: velocity + release signals from the same enrich
+			// GraphQL call. asOf dates the snapshot; null fields = unavailable at
+			// fetch time, never zero.
+			name: "activitySignals",
+			type: "group",
+			fields: [
+				{ name: "commits90d", type: "number" },
+				{ name: "lastReleaseAt", type: "date" },
+				{ name: "releaseTag", type: "text" },
+				{ name: "openPRs", type: "number" },
+				{ name: "asOf", type: "date" },
+			],
+		},
 		{ name: "homepageUrl", type: "text" },
 		{ name: "isFork", type: "checkbox", defaultValue: false },
 		{ name: "isArchived", type: "checkbox", defaultValue: false },

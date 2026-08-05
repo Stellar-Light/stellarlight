@@ -339,6 +339,13 @@ async function main() {
 						isFork: !!info.isFork,
 						isArchived: !!info.isArchived,
 						readmeExcerpt: info.readme ?? null,
+						activitySignals: {
+							commits90d: info.commits90d ?? null,
+							lastReleaseAt: info.lastReleaseAt ?? null,
+							releaseTag: info.releaseTag ?? null,
+							openPRs: info.openPRs ?? null,
+							asOf: new Date().toISOString(),
+						},
 					}
 				: {}),
 			projectSlug: project.slug,

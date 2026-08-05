@@ -1068,6 +1068,16 @@ export interface components {
              * @enum {string}
              */
             activityState?: "active" | "maintained" | "dormant" | "archived" | "unknown";
+            /** @description Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here). */
+            activitySignals?: {
+                commits90d?: number | null;
+                /** Format: date-time */
+                lastReleaseAt?: string | null;
+                releaseTag?: string | null;
+                openPRs?: number | null;
+                /** Format: date-time */
+                asOf?: string | null;
+            } | null;
             /** @description The curated project this repo is linked to, if any. */
             project?: {
                 slug?: string;

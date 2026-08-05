@@ -4262,6 +4262,23 @@ export const spec: OpenAPISpec = {
 						description:
 							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.",
 					},
+					activitySignals: {
+						type: "object",
+						nullable: true,
+						description:
+							"Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here).",
+						properties: {
+							commits90d: { type: "integer", nullable: true },
+							lastReleaseAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+							releaseTag: { type: "string", nullable: true },
+							openPRs: { type: "integer", nullable: true },
+							asOf: { type: "string", format: "date-time", nullable: true },
+						},
+					},
 					project: {
 						type: "object",
 						nullable: true,

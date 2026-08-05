@@ -1,7 +1,7 @@
 const GQL = "https://api.github.com/graphql";
 
 const Q_REPO = `
-  query RepoInfo($owner: String!, $name: String!) {
+  query RepoInfo($owner: String!, $name: String!, $since: GitTimestamp!) {
     repository(owner: $owner, name: $name) {
       url
       nameWithOwner
@@ -18,7 +18,16 @@ const Q_REPO = `
       readmeLower: object(expression: "HEAD:readme.md") { ... on Blob { text } }
       readmeRst: object(expression: "HEAD:README.rst") { ... on Blob { text } }
       readmeTxt: object(expression: "HEAD:README") { ... on Blob { text } }
-      defaultBranchRef { target { ... on Commit { committedDate } } }
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            committedDate
+            recent: history(since: $since) { totalCount }
+          }
+        }
+      }
+      latestRelease { publishedAt tagName }
+      pullRequests(states: OPEN) { totalCount }
     }
   }
 `;
@@ -108,9 +117,12 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		headers.Authorization = `Bearer ${token.trim()}`;
 	}
 
+	// Velocity window for activitySignals.commits90d — commits on the default
+	// branch in the 90 days before this fetch.
+	const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
 	const requestBody = JSON.stringify({
 		query: Q_REPO,
-		variables: { owner, name },
+		variables: { owner, name, since },
 	});
 
 	const res = await fetch(GQL, {
@@ -276,5 +288,11 @@ export async function fetchRepoInfo(owner: string, name: string) {
 			r.pushedAt) as string,
 		openIssues,
 		stargazerCount,
+		commits90d: (r.defaultBranchRef?.target?.recent?.totalCount ?? null) as
+			| number
+			| null,
+		lastReleaseAt: (r.latestRelease?.publishedAt ?? null) as string | null,
+		releaseTag: (r.latestRelease?.tagName ?? null) as string | null,
+		openPRs: (r.pullRequests?.totalCount ?? null) as number | null,
 	};
 }

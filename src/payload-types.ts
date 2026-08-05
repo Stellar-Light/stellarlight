@@ -752,6 +752,13 @@ export interface Repo {
   stars?: number | null;
   openIssues?: number | null;
   lastCommitAt?: string | null;
+  activitySignals?: {
+    commits90d?: number | null;
+    lastReleaseAt?: string | null;
+    releaseTag?: string | null;
+    openPRs?: number | null;
+    asOf?: string | null;
+  };
   homepageUrl?: string | null;
   isFork?: boolean | null;
   isArchived?: boolean | null;
@@ -2613,6 +2620,15 @@ export interface ReposSelect<T extends boolean = true> {
   stars?: T;
   openIssues?: T;
   lastCommitAt?: T;
+  activitySignals?:
+    | T
+    | {
+        commits90d?: T;
+        lastReleaseAt?: T;
+        releaseTag?: T;
+        openPRs?: T;
+        asOf?: T;
+      };
   homepageUrl?: T;
   isFork?: T;
   isArchived?: T;

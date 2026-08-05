@@ -62,6 +62,13 @@ interface RepoDoc {
 	codeSymbols?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
+	activitySignals?: {
+		commits90d?: number | null;
+		lastReleaseAt?: string | null;
+		releaseTag?: string | null;
+		openPRs?: number | null;
+		asOf?: string | null;
+	} | null;
 }
 
 export interface RepoResult {
@@ -83,6 +90,16 @@ export interface RepoResult {
 	 * observation about a KNOWN commit date; `unknown` means we hold no date —
 	 * never read it as dead (repo-stale ≠ defunct). */
 	activityState: RepoActivityState;
+	/** Velocity + release snapshot from the last enrich pass (asOf dates it):
+	 * commits90d = default-branch commits in the 90 days before asOf; null =
+	 * not yet captured for this repo, never zero. */
+	activitySignals: {
+		commits90d: number | null;
+		lastReleaseAt: string | null;
+		releaseTag: string | null;
+		openPRs: number | null;
+		asOf: string | null;
+	} | null;
 	project: { slug: string; name: string | null } | null;
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
@@ -1191,6 +1208,16 @@ export async function searchRepos(
 				isFork: !!r.isFork,
 				isArchived: !!r.isArchived,
 				activityState: activityStateOf(r.lastCommitAt, r.isArchived),
+				activitySignals:
+					r.activitySignals && r.activitySignals.asOf
+						? {
+								commits90d: r.activitySignals.commits90d ?? null,
+								lastReleaseAt: r.activitySignals.lastReleaseAt ?? null,
+								releaseTag: r.activitySignals.releaseTag ?? null,
+								openPRs: r.activitySignals.openPRs ?? null,
+								asOf: r.activitySignals.asOf ?? null,
+							}
+						: null,
 				project: r.projectSlug
 					? { slug: r.projectSlug, name: r.projectName ?? null }
 					: null,
