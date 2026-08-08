@@ -84,12 +84,12 @@ const PROBES: Probe[] = [
 		field: "knowledgeNotes",
 	},
 	{
-		name: "repos.knowledgeNotes (curated creit — wiped, issue #777)",
+		name: "repos.knowledgeNotes (creit — case-variant dupe doc outranks the stamped one, #783)",
 		path: "/api/repos/search?q=stellar-indexer-sdk&limit=6",
 		rowsKey: "repos",
 		pin: ["fullName", "creit-tech/stellar-indexer-sdk"],
 		field: "knowledgeNotes",
-		knownFailing: "#777",
+		knownFailing: "#783",
 	},
 	{
 		name: "repos.activityState (derived tag)",
@@ -115,12 +115,19 @@ const PROBES: Probe[] = [
 	},
 	// ── research: CAP crosswalk fields ─────────────────────────────────────
 	{
-		name: "research.capStatus (cap-registry crosswalk)",
+		name: "research.capStatus (cap-registry crosswalk, CAP-65 Final)",
+		path: "/api/research?q=CAP-65+module+cache&limit=8",
+		rowsKey: "results",
+		pin: ["source", "cap"],
+		field: "capStatus",
+	},
+	{
+		name: "research.capStatus (legacy CAP-46 overview doc, #785)",
 		path: "/api/research?q=CAP-46&limit=8",
 		rowsKey: "results",
 		pin: ["source", "cap"],
 		field: "capStatus",
-		knownFailing: "#778",
+		knownFailing: "#785",
 	},
 ];
 
