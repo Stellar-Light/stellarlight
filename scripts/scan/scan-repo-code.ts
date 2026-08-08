@@ -435,6 +435,16 @@ async function main() {
 				`   ${l.full.padEnd(44)} ${String(l.cur).padStart(3)} → ~${l.predicted}  (proof=${l.proof} depth=${l.depth.toFixed(2)})`,
 			);
 	}
+	// Zero-work waves are FAILURES, not successes (2026-08-08: a rate-limit
+	// stop 0.8s in exited green — the run looked healthy on every dashboard
+	// while writing nothing; the quiet-detector class). A wave that selected
+	// repos but scanned none must go red so it's visible.
+	if (docs.length > 0 && scanned === 0 && errored === 0 && incomplete === 0) {
+		console.log(
+			"\n✗ zero-work wave: repos were selected but none were scanned (rate limit or early stop) — exiting 1 so the run shows red.",
+		);
+		process.exit(1);
+	}
 	process.exit(0);
 }
 
