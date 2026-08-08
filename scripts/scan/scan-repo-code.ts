@@ -117,8 +117,9 @@ async function main() {
 		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
 	);
 
-	// Wave selection: freshest first (most relevant to consumers), skip repos
-	// already scanned unless --rescan (error/incomplete always retry).
+	// Wave selection: never-scanned AND pushed-since-scan repos compete on the
+	// same -repoScore,-lastCommitAt key (re-scan policy 2026-08-08); --rescan
+	// widens to everything (error/incomplete always retry).
 	const where = {
 		and: [
 			...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
@@ -177,32 +178,84 @@ async function main() {
 		eligible = stale.length;
 		docs = stale.slice(0, LIMIT);
 	} else {
-		const res = await payload.find({
-			collection: "repos",
-			where,
-			// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
-			// alone let stellar/js-stellar-sdk (repoScore 74, THE symbol-lookup
-			// target) sit behind hundreds of recently-pushed small repos — real
-			// symbol queries failed while R-SYM read 100% on the 5 repos that
-			// happened to be scanned. Canonical/high-score repos are what
-			// consumers actually look up; scan them first. (Comma-separated STRING —
-			// the array form is silently ignored by the Payload find; verified live
-			// 2026-07-11 when a rescan wave picked hackathon repos over score-74
-			// js-stellar-sdk.)
-			sort: "-repoScore,-lastCommitAt",
-			limit: LIMIT,
-			depth: 0,
-			select: {
-				fullName: true,
-				repoScore: true,
-				isFork: true,
-				isArchived: true,
-				codeScanState: true,
-			},
-		});
+		// Re-scan policy (2026-08-08): a stale scan is as missing as no scan.
+		// Eligible = never-scanned OR pushed-since-scan, ALL ranked by the same
+		// key, so a changed js-stellar-sdk (74) re-scans before a never-scanned
+		// hackathon repo — code truth stays fresh on the repos consumers actually
+		// query. (The old weekly --stale-first wave ranked by recency, which put
+		// hot small repos ahead of changed canonical SDKs — the 34/48 stale gap.)
+		// Payload `where` can't compare two fields → fetch the scanned pool small
+		// and filter in memory, same as the --stale-first branch.
+		const [unscanned, scannedPool] = await Promise.all([
+			payload.find({
+				collection: "repos",
+				where,
+				// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
+				// alone let stellar/js-stellar-sdk (repoScore 74, THE symbol-lookup
+				// target) sit behind hundreds of recently-pushed small repos.
+				// (Comma-separated STRING — the array form is silently ignored by
+				// the Payload find; verified live 2026-07-11.)
+				sort: "-repoScore,-lastCommitAt",
+				limit: LIMIT,
+				depth: 0,
+				select: {
+					fullName: true,
+					repoScore: true,
+					isFork: true,
+					isArchived: true,
+					codeScanState: true,
+					lastCommitAt: true,
+				},
+			}),
+			// --rescan makes `where` include scanned repos already — skip the
+			// second pool so nothing double-counts.
+			RESCAN
+				? Promise.resolve({ docs: [] })
+				: payload.find({
+						collection: "repos",
+						where: {
+							and: [
+								...(LANG !== "all"
+									? [{ primaryLanguage: { equals: LANG } }]
+									: []),
+								{ codeScanState: { equals: "scanned" } },
+							],
+						},
+						limit: 3000,
+						depth: 0,
+						select: {
+							fullName: true,
+							repoScore: true,
+							isFork: true,
+							isArchived: true,
+							codeScanState: true,
+							lastCommitAt: true,
+							codeScannedAt: true,
+						},
+					}),
+		]);
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-		docs = res.docs as any[];
-		eligible = res.totalDocs;
+		const stale = (scannedPool.docs as any[]).filter(
+			(d) =>
+				d.lastCommitAt &&
+				d.codeScannedAt &&
+				new Date(d.lastCommitAt).getTime() >
+					new Date(d.codeScannedAt).getTime(),
+		);
+		docs = [...(unscanned.docs as any[]), ...stale]
+			.sort(
+				(a, b) =>
+					(b.repoScore ?? 0) - (a.repoScore ?? 0) ||
+					String(b.lastCommitAt ?? "").localeCompare(
+						String(a.lastCommitAt ?? ""),
+					),
+			)
+			.slice(0, LIMIT);
+		eligible = unscanned.totalDocs + stale.length;
+		if (stale.length)
+			console.log(
+				`re-scan pool: ${stale.length} scanned repos pushed since their scan`,
+			);
 	}
 	console.log(
 		`eligible: ${eligible} · this wave: ${docs.length}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
