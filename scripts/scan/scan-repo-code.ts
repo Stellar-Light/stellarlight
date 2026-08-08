@@ -30,6 +30,7 @@ import { computeFarmScore } from "../../src/lib/code-signals";
 import {
 	detectSdkCapabilities,
 	extractCodeSymbols,
+	extractContractInterface,
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
 import { computeJsDepth } from "../../src/lib/js-depth";
@@ -273,6 +274,10 @@ async function main() {
 						: extractJsSymbols(r.depthInput.blobs);
 				const sdkCapabilities =
 					r.outcome === "ok" ? detectSdkCapabilities(r.depthInput.blobs) : [];
+				const contractInterface =
+					r.outcome === "ok"
+						? extractContractInterface(r.depthInput.blobs)
+						: [];
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -295,6 +300,7 @@ async function main() {
 						farmScore: farm.score,
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
+						contractInterface,
 						sdkCapabilities,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 					},

@@ -18,6 +18,8 @@
  *    sources biggest-first, so the cap keeps symbols from the real logic).
  */
 
+import { stripCommentsAndStrings } from "./code-depth";
+
 export interface SymbolBlob {
 	path: string;
 	text: string | null;
@@ -114,6 +116,70 @@ export function symbolsHaystack(symbols: unknown): string {
 	// even when the split form breaks it apart (ScVal → "sc val" + "scval").
 	const raw = list.map((s) => s.replace(/_/g, "").toLowerCase()).join(" ");
 	return `${split} ${raw}`;
+}
+
+// ── Contract interface truth (repo-intel slice 4) ──────────────────────────
+// Symbols say WHAT a contract implements; the interface says HOW TO CALL IT.
+// For each `#[contractimpl]` impl block we capture the full pub fn SIGNATURES
+// (name, args, return type) — the deployed contract's actual ABI, prefixed
+// with the impl's contract name so multi-contract repos (soroban-examples)
+// stay legible. The leading host-injected `env: Env` param is stripped, same
+// as the SDK's own contractspec — what remains is what a CALLER passes.
+
+const MAX_IFACE_FNS = 48;
+const MAX_SIG_LEN = 200;
+
+const IMPL_RE =
+	/#\s*\[\s*contractimpl\s*\]\s*(?:pub\s+)?impl(?:\s*<[^>\n]{0,80}>)?\s+(?:[A-Za-z_][A-Za-z0-9_]*\s+for\s+)?([A-Za-z_][A-Za-z0-9_]*)/g;
+const SIG_RE =
+	/\bpub\s+fn\s+([a-z_][a-z0-9_]*)\s*(?:<[^>\n]{0,80}>)?\s*(\([^)]{0,600}\))\s*(->\s*[^;{]{1,160})?\{/g;
+
+/** Signature surface of every #[contractimpl] block across a repo's fetched
+ * Rust sources. Entries look like `Swap.swap(a: Address, amount: i128) -> i128`.
+ * Fns whose args the bounded regex can't capture (nested-paren tuple args) are
+ * SKIPPED, never truncated mid-type — missing beats lying. */
+export function extractContractInterface(blobs: SymbolBlob[]): string[] {
+	const out: string[] = [];
+	const seen = new Set<string>();
+	for (const b of blobs) {
+		if (out.length >= MAX_IFACE_FNS) break;
+		if (!b.text || !b.path.toLowerCase().endsWith(".rs") || isTestPath(b.path))
+			continue;
+		if (!/#\s*\[\s*contractimpl\s*\]/.test(b.text)) continue;
+		const clean = stripCommentsAndStrings(b.text);
+		for (const im of clean.matchAll(IMPL_RE)) {
+			const contract = im[1];
+			// Brace-match the impl block so signatures never leak in from a
+			// neighbouring non-contract impl in the same file.
+			const open = clean.indexOf("{", im.index + im[0].length);
+			if (open < 0) continue;
+			let depth = 1;
+			let i = open + 1;
+			while (i < clean.length && depth > 0) {
+				if (clean[i] === "{") depth++;
+				else if (clean[i] === "}") depth--;
+				i++;
+			}
+			const block = clean.slice(open + 1, i - 1);
+			for (const m of block.matchAll(SIG_RE)) {
+				const name = m[1];
+				const key = `${contract}.${name}`.toLowerCase();
+				if (seen.has(key)) continue;
+				seen.add(key);
+				const args = m[2]
+					.replace(/\s+/g, " ")
+					.replace(/^\(\s*_?e(?:nv)?\s*:\s*&?\s*Env\s*(?:,\s*|(?=\)))/, "(")
+					.replace(/,?\s*\)$/, ")");
+				const ret = m[3] ? ` ${m[3].replace(/\s+/g, " ").trim()}` : "";
+				let sig = `${contract}.${name}${args}${ret === " -> ()" ? "" : ret}`;
+				if (sig.length > MAX_SIG_LEN) sig = `${sig.slice(0, MAX_SIG_LEN)}…`;
+				out.push(sig);
+				if (out.length >= MAX_IFACE_FNS) break;
+			}
+			if (out.length >= MAX_IFACE_FNS) break;
+		}
+	}
+	return out;
 }
 
 // ── JS/TS (gist gap 1, phase 1: facts, not scores) ─────────────────────────

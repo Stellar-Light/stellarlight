@@ -241,6 +241,15 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "contractInterface",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Soroban contract ABI (array of strings): pub fn signatures per #[contractimpl] block, Contract.fn(args) -> ret",
+			},
+		},
+		{
 			name: "mainnetContractId",
 			type: "text",
 			admin: {

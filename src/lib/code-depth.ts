@@ -155,7 +155,7 @@ const crateDirOf = (path: string) => {
 };
 
 /** Strip Rust comments + string/char literals so bodies compare on structure. */
-function stripCommentsAndStrings(src: string): string {
+export function stripCommentsAndStrings(src: string): string {
 	let out = "";
 	let i = 0;
 	const n = src.length;

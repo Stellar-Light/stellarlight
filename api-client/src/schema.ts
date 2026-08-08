@@ -1137,6 +1137,8 @@ export interface components {
                 scannedAt?: string | null;
                 /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
                 symbols?: string[];
+                /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
+                contractInterface?: string[];
                 /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
@@ -1662,6 +1664,7 @@ export interface operations {
                             /** Format: date-time */
                             scannedAt?: string | null;
                             symbols?: string[];
+                            contractInterface?: string[];
                             mainnetContractId?: string | null;
                             sdkCapabilities?: string[];
                         } | null;
