@@ -243,6 +243,20 @@ async function main() {
 	}
 
 	// 4. Match and enrich
+	// sls-061 (#767): SCF titles that no normalization reaches — the API title
+	// names the PRODUCT/SUBMISSION, our record names the project. Keyed by the
+	// SCF slug (stable), mapped to OUR slug. Each pair verified 2026-08-07
+	// against the SCF page + our record before adding; never guessed.
+	const SCF_SLUG_OVERRIDES: Record<string, string> = {
+		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
+		"coinsph-stellar-remittances-qwo": "coins-ph",
+		"identity-operating-system-idos-nqg": "idos",
+		"peer-by-honeycoin-inz": "honey-coin",
+		"pelago-airswift-nkm": "airswift",
+		// Soroban → Stellar rename class (product renamed, SCF page didn't).
+		"soroban-security-portal-7ea": "stellar-security-portal",
+	};
+
 	const matched: { scf: any; ours: any }[] = [];
 	const unmatched: string[] = [];
 
@@ -257,6 +271,7 @@ async function main() {
 		const scfSlugStem = String(scf.slug || "").replace(/-[a-z0-9]{2,5}$/i, "");
 
 		let ours =
+			bySlug.get(SCF_SLUG_OVERRIDES[String(scf.slug)] ?? "") ||
 			byNormName.get(normTitle) ||
 			bySlug.get(scfSlug) ||
 			bySlug.get(scf.slug) ||
