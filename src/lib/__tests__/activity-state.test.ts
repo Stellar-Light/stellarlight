@@ -4,7 +4,7 @@
  * KNOWN old date; unknown is absence of evidence, never a death verdict.
  */
 import { describe, expect, it } from "vitest";
-import { activityStateOf } from "../repo-grade";
+import { activityStateOf, repoGrade } from "../repo-grade";
 import { searchRepos } from "../repo-search";
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
@@ -98,5 +98,29 @@ describe("searchRepos activity filter + row field", () => {
 		expect(by["busy/wallet"].activitySignals?.commits90d).toBe(41);
 		expect(by["busy/wallet"].activitySignals?.releaseTag).toBe("v2.1.0");
 		expect(by["plain/wallet"].activitySignals).toBeNull();
+	});
+});
+
+describe("repoGrade velocity blend", () => {
+	const base = {
+		lastCommitAt: daysAgo(5),
+		stargazerCount: 50,
+		hasDescription: true,
+		topicCount: 3,
+		openIssues: 2,
+	};
+
+	it("higher commits90d outscores lower at equal everything else", () => {
+		const busy = repoGrade({ ...base, commits90d: 60 });
+		const quiet = repoGrade({ ...base, commits90d: 1 });
+		expect(busy.score).toBeGreaterThan(quiet.score);
+		// deliberately a tie-breaker, never a rank-upheaver
+		expect(busy.score - quiet.score).toBeLessThanOrEqual(3);
+	});
+
+	it("null commits90d = no penalty (missing data is never punished)", () => {
+		const unknown = repoGrade({ ...base, commits90d: null });
+		const busy = repoGrade({ ...base, commits90d: 60 });
+		expect(unknown.score).toBe(busy.score);
 	});
 });

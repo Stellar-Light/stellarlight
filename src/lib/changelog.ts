@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-08",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"repos: repoScore now blends commit velocity — commits90d refines freshness within the fresh band (a tie-breaker of ≤ ~2 points, calibrated against the ranking fixture suite).",
+		detail:
+			"Two repos that both committed last week can differ 50x in how alive they are; date-based freshness alone could not tell them apart. repoScore's freshness component is now scaled by activitySignals.commits90d (1 commit ≈ 0.85x, 30+ per 90d = 1.0x). The swing is deliberately capped at roughly two score points — a tie-breaker among equally-fresh repos, never a rank-upheaver — and null commits90d applies no penalty (missing data is never punished). Every existing ranking invariant in the fixture suite holds unchanged; scores propagate with the next weekly enrich pass. No schema change.",
+	},
+	{
 		date: "2026-08-05",
 		surfaces: ["api"],
 		type: "added",

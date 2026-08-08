@@ -35,6 +35,11 @@ export interface RepoGradeInput {
 	// code-verified 0-star contract earns a strong reference on its own merit.
 	// Ungated by own-merit on purpose (the code IS the merit).
 	codeDepth?: number | null;
+	/** Default-branch commits in the last 90 days (activitySignals.commits90d).
+	 * Refines freshness WITHIN the fresh band: two repos committed last week can
+	 * differ 50x in velocity. Null = not captured — no penalty, never punish
+	 * missing data. */
+	commits90d?: number | null;
 }
 
 export interface RepoGrade {
@@ -106,7 +111,16 @@ function tractionOf(stars?: number | null): number {
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 export function repoGrade(input: RepoGradeInput): RepoGrade {
-	const freshness = freshnessOf(input.lastCommitAt);
+	// Velocity-adjusted freshness (repo-intel blend, answer-key calibrated):
+	// date freshness says WHEN the last commit was; commits90d says how alive
+	// the repo is within that band. 1 commit → 0.85x, 30+/90d → 1.0x. The
+	// swing is deliberately small (≤ ~2 score points) — a tie-breaker among
+	// active repos, never a rank-upheaver; null = 1.0x (no data, no penalty).
+	const velocityAdj =
+		typeof input.commits90d === "number" && Number.isFinite(input.commits90d)
+			? 0.85 + 0.15 * Math.min(Math.max(input.commits90d, 0) / 30, 1)
+			: 1;
+	const freshness = freshnessOf(input.lastCommitAt) * velocityAdj;
 	const traction = tractionOf(input.stargazerCount);
 	const hasDesc = input.hasDescription ? 1 : 0;
 	const hasTopics = (input.topicCount ?? 0) > 0 ? 1 : 0;

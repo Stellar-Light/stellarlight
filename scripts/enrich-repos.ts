@@ -346,6 +346,7 @@ async function main() {
 					hasDescription: !!(info.description && info.description.trim()),
 					topicCount: Array.isArray(info.topics) ? info.topics.length : 0,
 					openIssues: info.openIssues ?? 0,
+					commits90d: info.commits90d ?? null,
 					codeDepth:
 						typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
 				})
