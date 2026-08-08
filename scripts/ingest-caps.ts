@@ -343,6 +343,17 @@ async function run() {
 				console.log(
 					`  ghost ${String(g._id)} pid=${g.parentDocId ?? "?"} idx=${g.chunkIndex ?? "?"} capStatus=${g.capStatus ?? "null"} title=${String(g.title ?? "").slice(0, 50)}`,
 				);
+			// #785 targeted dump: chunk …549 of cap-0046 serves null while its
+			// sibling …53f serves Final, yet every stamping pass reports nothing
+			// to stamp. Print the STORED truth for every cap-0046 row so the
+			// contradiction resolves on evidence.
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			for (const r of rawDocs.filter((d: any) =>
+				String(d.parentDocId ?? "").includes("0046"),
+			) as any[])
+				console.log(
+					`  cap-0046 row ${String(r._id)} pid=${r.parentDocId} idx=${r.chunkIndex} capStatus=${JSON.stringify(r.capStatus ?? null)} title=${String(r.title ?? "").slice(0, 40)}`,
+				);
 		}
 	}
 
