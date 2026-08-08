@@ -93,6 +93,12 @@ export function buildResearchVectorPipeline(opts: {
 				auditor: 1,
 				protocol: 1,
 				severity: 1,
+				// #778 final root cause: the DB rows carried capStatus all along —
+				// this $project silently dropped them before the route mapper ran
+				// (the mapper's `?? null` then read as "never stamped"). Keyword
+				// path was never affected (no select).
+				capStatus: 1,
+				capProtocolVersion: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},
