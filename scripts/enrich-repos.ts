@@ -334,7 +334,7 @@ async function main() {
 		// Fetch the existing doc BEFORE grading so the persisted Code-Truth
 		// signals (codeDepth, written by scripts/scan/scan-repo-code.ts) feed the
 		// grade — a code-verified deep contract lifts repoScore even at 0 stars.
-		const existing = (
+		let existing = (
 			await payload.find({
 				collection: "repos",
 				where: { fullName: { equals: full } },
@@ -342,6 +342,24 @@ async function main() {
 				depth: 0,
 			})
 		).docs[0] as Doc | undefined;
+		// #783: GitHub fullNames are case-insensitive but Mongo equals is not —
+		// case-variant source lists (org-sweep hybrids vs project-list exact)
+		// used to CREATE twin docs. Fall back to a case-insensitive match so
+		// every writer converges on ONE doc. (`like` is substring-insensitive —
+		// the JS filter makes it exact; see the contains-substring trap.)
+		if (!existing) {
+			const near = await payload.find({
+				collection: "repos",
+				where: { fullName: { like: full } },
+				limit: 5,
+				depth: 0,
+			});
+			existing = (near.docs as Doc[]).find(
+				(d) =>
+					String((d as { fullName?: string }).fullName ?? "").toLowerCase() ===
+					full.toLowerCase(),
+			);
+		}
 		const grade = info
 			? repoGrade({
 					lastCommitAt: info.lastCommitAt,
@@ -362,7 +380,12 @@ async function main() {
 			: { score: 0, label: "low" as const };
 
 		const data: Doc = {
-			fullName: full,
+			// #783: converge on GitHub's canonical casing when we fetched it;
+			// otherwise keep the existing doc's form (no churn between passes).
+			fullName:
+				info?.nameWithOwner ??
+				(existing as { fullName?: string } | undefined)?.fullName ??
+				full,
 			owner,
 			name,
 			url: info?.url ?? `https://github.com/${full}`,
