@@ -1,0 +1,91 @@
+name: Nightly health (detectors → issue)
+
+# The crawl phase of the self-sustaining loop (improvements/ideas/
+# idea-self-sustaining-agents.md): run the deterministic detector suite
+# nightly and file/update ONE triaged issue when something goes red — the
+# maintainer wakes up to findings with probes, not to sweeps to run.
+# Deterministic only: no LLM, no DB writes, public live API + repo files.
+
+on:
+  schedule:
+    - cron: "45 5 * * *" # daily 05:45 UTC, after the 03:00 scan wave
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      # Each detector runs regardless of the others; exit codes collected.
+      - name: API drift (live ⇄ spec ⇄ docs)
+        id: drift
+        continue-on-error: true
+        run: pnpm exec tsx scripts/check-api-drift.ts 2>&1 | tee /tmp/drift.log
+      - name: Field population (values arrive, not just shape)
+        id: fields
+        continue-on-error: true
+        run: pnpm exec tsx scripts/check-field-population.ts 2>&1 | tee /tmp/fields.log
+      - name: Golden retrieval eval
+        id: golden
+        continue-on-error: true
+        run: pnpm exec tsx scripts/eval/run-golden.ts 2>&1 | tee /tmp/golden.log
+      - name: Verify advertised claims
+        id: claims
+        continue-on-error: true
+        run: pnpm exec tsx scripts/verify-claims.ts 2>&1 | tee /tmp/claims.log
+
+      - name: File or update the health issue on reds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRIFT: ${{ steps.drift.outcome }}
+          FIELDS: ${{ steps.fields.outcome }}
+          GOLDEN: ${{ steps.golden.outcome }}
+          CLAIMS: ${{ steps.claims.outcome }}
+        run: |
+          set -e
+          REDS=""
+          [ "$DRIFT" = "failure" ] && REDS="$REDS drift"
+          [ "$FIELDS" = "failure" ] && REDS="$REDS field-population"
+          [ "$GOLDEN" = "failure" ] && REDS="$REDS golden-eval"
+          [ "$CLAIMS" = "failure" ] && REDS="$REDS verify-claims"
+          if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
+          TITLE="Nightly health: red findings"
+          BODY_FILE=/tmp/body.md
+          {
+            echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
+            echo
+            for d in drift fields golden claims; do
+              LOG=/tmp/$d.log
+              case $d in
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;;
+              esac
+              [ "$OUT" = "failure" ] || continue
+              echo "<details><summary>$d — failing output (tail)</summary>"
+              echo
+              echo '```'
+              tail -40 "$LOG" 2>/dev/null || echo "(no log)"
+              echo '```'
+              echo "</details>"
+              echo
+            done
+            echo "_Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}_"
+          } > "$BODY_FILE"
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" --body-file "$BODY_FILE"
+            echo "commented on existing issue #$EXISTING"
+          else
+            gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body-file "$BODY_FILE"
+            echo "created health issue"
+          fi
