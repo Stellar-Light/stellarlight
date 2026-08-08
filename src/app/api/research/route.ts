@@ -73,6 +73,9 @@ interface ResearchRow {
 	auditor?: string | null;
 	protocol?: string | null;
 	severity?: string | null;
+	// CAP crosswalk (source === "cap"; #785 — every serving path must carry these)
+	capStatus?: string | null;
+	capProtocolVersion?: number | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -614,6 +617,8 @@ export async function GET(req: NextRequest) {
 		auditor?: string;
 		protocol?: string;
 		severity?: string;
+		capStatus?: string;
+		capProtocolVersion?: number;
 		embedding?: number[];
 	}
 	const toRow = (d: RawResearchDoc, score?: number): ResearchRow => ({
@@ -629,6 +634,12 @@ export async function GET(req: NextRequest) {
 		auditor: d.auditor ?? null,
 		protocol: d.protocol ?? null,
 		severity: d.severity ?? null,
+		// #785 true root cause: this shared supplement mapper (recency + lexical
+		// pool paths) omitted the cap fields — stored values were fine all along;
+		// rows entering via a supplement served null. Third serving path missed
+		// by both #764 (main mappers) and #784 (vector $project).
+		capStatus: d.capStatus ?? null,
+		capProtocolVersion: d.capProtocolVersion ?? null,
 		...(score != null ? { score } : {}),
 	});
 
