@@ -252,6 +252,13 @@ async function run() {
 			limit: 10_000,
 			depth: 0,
 		});
+		// #785 (final layer): legacy duplicate rows share (parentDocId,
+		// chunkIndex) with a maintained row — the map's last-write-wins used to
+		// SHADOW one of them (invisible to the backfill) while the serving-side
+		// per-doc collapse could still SERVE it. On collision keep the
+		// maintained row (non-null capStatus, tiebreak newest id) and DELETE
+		// the shadowed duplicate (execute mode; dry run reports).
+		let shadowDupes = 0;
 		for (const d of existing.docs as unknown as Array<{
 			id: string;
 			parentDocId: string;
@@ -263,14 +270,44 @@ async function run() {
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
-			existingBySep.get(d.parentDocId)!.set(d.chunkIndex, {
+			const slot = existingBySep.get(d.parentDocId)!;
+			const cur = {
 				id: d.id,
 				contentHash: d.contentHash,
 				title: d.title ?? null,
 				capStatus: d.capStatus ?? null,
 				capProtocolVersion: d.capProtocolVersion ?? null,
-			});
+			};
+			const prev = slot.get(d.chunkIndex);
+			if (!prev) {
+				slot.set(d.chunkIndex, cur);
+				continue;
+			}
+			const keep =
+				(prev.capStatus !== null) !== (cur.capStatus !== null)
+					? prev.capStatus !== null
+						? prev
+						: cur
+					: prev.id > cur.id
+						? prev
+						: cur;
+			const drop = keep === prev ? cur : prev;
+			slot.set(d.chunkIndex, keep);
+			shadowDupes++;
+			console.log(
+				`  shadow dupe ${d.parentDocId}#${d.chunkIndex}: ${payload ? "deleting" : "would delete"} ${drop.id} (keeping ${keep.id})`,
+			);
+			if (payload) {
+				try {
+					await payload.delete({ collection: "research-docs", id: drop.id });
+				} catch (err) {
+					console.error(`  ✗ shadow delete: ${(err as Error).message}`);
+					stats.errors++;
+				}
+			}
 		}
+		if (shadowDupes)
+			console.log(`  ${shadowDupes} shadowed duplicate chunk row(s) resolved`);
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing SEP chunks already in collection`);
 	}
