@@ -21,8 +21,8 @@ import {
 const page = (cards: Array<{ status: string; round: string }>) =>
 	cards
 		.map(
-			(c) =>
-				`{"id":"x","status":"${c.status}","amount":1,"roundName":"${c.round}"}`,
+			(c, i) =>
+				`{"id":"card-${i}","status":"${c.status}","amount":1,"roundName":"${c.round}"}`,
 		)
 		.join("\n");
 
@@ -134,8 +134,8 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 
 	it("a card without budget/awardType yields nulls, never a bleed from the next card", () => {
 		const v = parseRoundVerdicts(
-			'{"status":"Awarded","roundName":"SCF #16"}\n' +
-				'{"status":"Awarded","roundName":"SCF #24","awardType":"Legacy v5.0 Activation Award","budget":50000}',
+			'{"id":"a1","status":"Awarded","roundName":"SCF #16"}\n' +
+				'{"id":"a2","status":"Awarded","roundName":"SCF #24","awardType":"Legacy v5.0 Activation Award","budget":50000}',
 		);
 		expect(v.awards).toEqual([
 			{ round: 16, budgetUSD: null, awardType: null },
@@ -143,13 +143,50 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 		]);
 	});
 
-	it("resubmission within a round keeps the first awarded card's record", () => {
+	it("multiple awarded submissions in one round SUM their budgets (bondhive #29)", () => {
 		const v = parseRoundVerdicts(
-			'{"status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":90000}\n' +
-				'{"status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":15000}',
+			'{"id":"b1","status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":90000}\n' +
+				'{"id":"b2","status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":15000}',
 		);
 		expect(v.awards).toEqual([
-			{ round: 31, budgetUSD: 90000, awardType: "Build Award" },
+			{ round: 31, budgetUSD: 105000, awardType: "Build Award" },
+		]);
+	});
+
+	it("the page's double-embed of the SAME card never double-counts", () => {
+		const card =
+			'{"id":"dup1","status":"Awarded","roundName":"SCF #29","awardType":"Legacy v5.0 Community Award","budget":100000}';
+		const v = parseRoundVerdicts(`${card}\n${card}`);
+		expect(v.awards).toEqual([
+			{
+				round: 29,
+				budgetUSD: 100000,
+				awardType: "Legacy v5.0 Community Award",
+			},
+		]);
+	});
+
+	it("disagreeing embeds of ONE card keep the MAX budget (bondhive #29: reference form truncates)", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"e1","status":"Awarded","projectName":"$26","roundName":"SCF #29","awardType":"Legacy v5.0 Community Award","budget":100}\n' +
+				'{"id":"e1","status":"Awarded","projectName":["BondHive"],"roundName":"SCF #29","awardType":"Legacy v5.0 Community Award","budget":100000}',
+		);
+		expect(v.awards).toEqual([
+			{
+				round: 29,
+				budgetUSD: 100000,
+				awardType: "Legacy v5.0 Community Award",
+			},
+		]);
+	});
+
+	it("one budget-less awarded card nulls the round's sum (partial sums lie)", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"c1","status":"Awarded","roundName":"SCF #29","budget":100000}\n' +
+				'{"id":"c2","status":"Awarded","roundName":"SCF #29"}',
+		);
+		expect(v.awards).toEqual([
+			{ round: 29, budgetUSD: null, awardType: null },
 		]);
 	});
 });

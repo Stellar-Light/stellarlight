@@ -112,12 +112,12 @@ export function parseRoundVerdicts(html: string): {
 	/** Submissions with status "Awarded" in ANY round, numeric or not. */
 	awardedAnyCount: number;
 	/** sls-058 defect 2: the official submission record per AWARDED numeric
-	 * round — published budget (USD) + award type, straight off the same
-	 * submission cards the verdicts come from. One entry per round (first
-	 * awarded submission wins; resubmissions within a round share the round).
-	 * budgetUSD null = award confirmed but no parseable budget on the card —
-	 * never guessed. This is the reconciling basis for the page's own
-	 * totalAwarded, which can legitimately exceed the sum of round budgets. */
+	 * round — published budget (USD) + award type off the same submission cards
+	 * the verdicts come from. A round with MULTIPLE awarded submissions sums
+	 * their budgets (deduped by card id — the page embeds each card twice);
+	 * one missing budget nulls the round, a partial sum lies. budgetUSD null =
+	 * award confirmed but no parseable budget — never guessed. Reconciling
+	 * basis for the page's own totalAwarded, which can still exceed it. */
 	awards: Array<{
 		round: number;
 		budgetUSD: number | null;
@@ -138,30 +138,66 @@ export function parseRoundVerdicts(html: string): {
 	// capture inside a single object — a missing awardType/budget fails to null,
 	// never bleeds into the next card.
 	const re =
-		/"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"(?:[^{}]*?"awardType":"([^"]*)")?(?:[^{}]*?"budget":(\d+(?:\.\d+)?))?/g;
+		/"id":"([^"]+)"[^{}]*?"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"(?:[^{}]*?"awardType":"([^"]*)")?(?:[^{}]*?"budget":(\d+(?:\.\d+)?))?/g;
+	// Per-CARD collection first: the page embeds each card twice (flight
+	// reference form + resolved props form) and the reference form can carry a
+	// TRUNCATED budget (bondhive #29: 100 vs the resolved 100000). Keep the MAX
+	// budget per card id across embeds — resolved ≥ reference always, and
+	// agreeing embeds are a no-op. Rounds are folded from cards afterwards.
+	const cardById = new Map<
+		string,
+		{ round: number; budgetUSD: number | null; awardType: string | null }
+	>();
 	for (const m of txt.matchAll(re)) {
-		const status = m[1];
+		const cardId = m[1];
+		const status = m[2];
 		const isAward = status === "Awarded";
 		const isNegative = isNegativeVerdict(status);
 		if (!isAward && !isNegative) continue; // neutral — verdicts nothing
 		submissions++;
 		if (isAward) awardedAnyCount++;
-		const num = m[2].match(/SCF\s*#\s*(\d+)/i)?.[1];
+		const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
 		if (!num) continue;
 		const round = String(Number(num));
 		if (isAward) {
 			awarded.add(round);
 			const rn = Number(num);
-			if (!awardByRound.has(rn)) {
-				awardByRound.set(rn, {
+			const budget = m[5] ? Number(m[5]) : null;
+			const type = m[4] ? m[4] : null;
+			const prev = cardById.get(cardId);
+			if (!prev) {
+				cardById.set(cardId, { round: rn, budgetUSD: budget, awardType: type });
+			} else {
+				cardById.set(cardId, {
 					round: rn,
-					budgetUSD: m[4] ? Number(m[4]) : null,
-					awardType: m[3] ? m[3] : null,
+					budgetUSD:
+						prev.budgetUSD !== null && budget !== null
+							? Math.max(prev.budgetUSD, budget)
+							: (prev.budgetUSD ?? budget),
+					awardType: prev.awardType ?? type,
 				});
 			}
 		} else negative.add(round);
 	}
 	const notAwarded = new Set([...negative].filter((r) => !awarded.has(r)));
+	// Fold per-card records into per-round records: a round with multiple
+	// awarded CARDS sums their budgets; one budget-less card nulls the round
+	// (a partial sum lies).
+	for (const c of cardById.values()) {
+		const prev = awardByRound.get(c.round);
+		if (!prev) {
+			awardByRound.set(c.round, { ...c });
+		} else {
+			awardByRound.set(c.round, {
+				round: c.round,
+				budgetUSD:
+					prev.budgetUSD !== null && c.budgetUSD !== null
+						? prev.budgetUSD + c.budgetUSD
+						: null,
+				awardType: prev.awardType ?? c.awardType,
+			});
+		}
+	}
 	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
 }
