@@ -1,23 +1,23 @@
 {
-	"generatedAt": "2026-07-26T00:49:43.892Z",
-	"total": 292,
-	"open": 280,
-	"closed": 12,
+	"generatedAt": "2026-08-08T15:58:05.477Z",
+	"total": 321,
+	"open": 270,
+	"closed": 51,
 	"verified": 7,
-	"cleared": 5,
-	"closingRate": 0.04,
-	"oldestOpenDays": 3,
+	"cleared": 44,
+	"closingRate": 0.16,
+	"oldestOpenDays": 17,
 	"inWave": 0,
-	"highOpen": 24,
+	"highOpen": 10,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 250,
-			"total": 255
+			"open": 240,
+			"total": 270
 		},
 		{
-			"surface": "scf",
+			"surface": "directory",
 			"open": 14,
 			"total": 14
 		},
@@ -35,67 +35,27 @@
 			"surface": "contract",
 			"open": 1,
 			"total": 8
+		},
+		{
+			"surface": "scf",
+			"open": 0,
+			"total": 14
 		}
 	],
-	"unverifiedOpen": 265,
+	"unverifiedOpen": 15,
 	"quietSources": [
 		{
-			"source": "engine-d-demand",
-			"open": 24,
-			"days": null
-		},
-		{
-			"source": "engine-a-recall",
-			"open": 226,
-			"days": null
-		},
-		{
-			"source": "scf-crosscheck",
+			"source": "raven-routing",
 			"open": 14,
-			"days": null
+			"days": 16
 		},
 		{
-			"source": "engine-e-contract",
+			"source": "raven-loop",
 			"open": 1,
-			"days": null
+			"days": 16
 		}
 	],
 	"topOpen": [
-		{
-			"id": "engine-d-demand:tyler-van-der-hoeven",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "tyler van der hoeven",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:zk-snark",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "zk-snark",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:strupey",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "strupey",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:justin-rice",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "justin rice",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:tyler",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "tyler",
-			"severity": "high"
-		},
 		{
 			"id": "engine-d-demand:saleem",
 			"surface": "retrieval",
@@ -115,6 +75,41 @@
 			"surface": "retrieval",
 			"source": "engine-d-demand",
 			"probe": "kutana",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:8004",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "8004",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:bastian",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "bastian",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:hypertron",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "hypertron",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:jobs-hiring-bounty-freelance-contributor-platfor",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "jobs hiring bounty freelance contributor platform talent marketplace",
+			"severity": "high"
+		},
+		{
+			"id": "engine-d-demand:stxlm",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "stxlm",
 			"severity": "high"
 		}
 	]
