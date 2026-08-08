@@ -6,6 +6,10 @@ on:
         description: "Write? Leave false for a dry run."
         type: boolean
         default: false
+      only:
+        description: "Pin to one repo (owner/repo) — targeted re-enrich"
+        type: string
+        default: ""
   schedule:
     - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
   # Chase DISPATCHED scan waves automatically: repoGrade only ingests
@@ -38,4 +42,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Scheduled runs ALWAYS execute (the whole point of the weekly refresh);
       # manual dispatch stays dry-run unless the execute box is ticked.
-      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }}

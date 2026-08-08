@@ -20,12 +20,22 @@
 import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
+import { CAP_REGISTRY } from "../src/data/cap-registry";
 import { parseCapPreamble } from "../src/lib/cap-preamble";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+
+// #778: the committed cap-registry (generated via shallow clone, immune to
+// API rate limits) is the status/protocolVersion source of truth. Live-fetch
+// preamble parsing stays as fallback for CAPs the registry doesn't know yet.
+const REGISTRY_BY_CAP = new Map(CAP_REGISTRY.map((r) => [r.cap, r]));
+const capNumOf = (parentDocId: string): number | null => {
+	const m = parentDocId.match(/^cap-0*(\d+)$/);
+	return m ? Number(m[1]) : null;
+};
 
 const GITHUB_API = "https://api.github.com/repos/stellar/stellar-protocol";
 const RAW_BASE =
@@ -259,6 +269,38 @@ async function run() {
 		console.log(`  ${total} existing SEP chunks already in collection`);
 	}
 
+	// #778 backfill: existing rows with NULL capStatus never got stamped —
+	// stamping used to require a successful per-file GitHub fetch, and starved
+	// fetches skipped the file silently. Registry-only pass: pure DB + the
+	// committed registry, no GitHub calls, idempotent.
+	let registryStamped = 0;
+	for (const [pid, chunks] of existingBySep) {
+		const reg = REGISTRY_BY_CAP.get(capNumOf(pid) ?? -1);
+		if (!reg || reg.status === null) continue;
+		for (const c of chunks.values()) {
+			if (c.capStatus !== null) continue;
+			registryStamped++;
+			if (payload) {
+				try {
+					await payload.update({
+						collection: "research-docs",
+						id: c.id,
+						data: {
+							capStatus: reg.status,
+							capProtocolVersion: reg.protocolVersion ?? undefined,
+						},
+					});
+				} catch (err) {
+					console.error(`  ✗ registry stamp ${pid}: ${(err as Error).message}`);
+					stats.errors++;
+				}
+			}
+		}
+	}
+	console.log(
+		`  registry backfill: ${registryStamped} null-capStatus chunk(s) ${payload ? "stamped" : "would be stamped (dry)"}`,
+	);
+
 	const toEmbed: SepChunk[] = [];
 
 	for (const file of files) {
@@ -268,10 +310,11 @@ async function run() {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
 			const preamble = parseCapPreamble(md);
+			const reg = REGISTRY_BY_CAP.get(capNumOf(parentDocId) ?? -1);
 			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
 				...c,
-				capStatus: preamble.status,
-				capProtocolVersion: preamble.protocolVersion,
+				capStatus: reg?.status ?? preamble.status,
+				capProtocolVersion: reg?.protocolVersion ?? preamble.protocolVersion,
 			}));
 			stats.chunksTotal += chunks.length;
 
