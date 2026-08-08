@@ -1,0 +1,32 @@
+name: Dedupe repo docs (manual)
+
+# #783: merge case-variant twin repo docs (promote-only merge onto the keeper,
+# then delete orphans). Dry-run by default — inspect the printed groups before
+# dispatching with execute. The writers are fixed (case-insensitive lookup in
+# enrich-repos); this wave clears the existing debt and is safe to re-run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Apply merges + deletions? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  dedupe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/dedupe-repo-docs.ts ${{ inputs.execute && '--execute' || '' }}
