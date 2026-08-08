@@ -32,6 +32,12 @@ const execute = args.includes("--execute");
 // API rate limits) is the status/protocolVersion source of truth. Live-fetch
 // preamble parsing stays as fallback for CAPs the registry doesn't know yet.
 const REGISTRY_BY_CAP = new Map(CAP_REGISTRY.map((r) => [r.cap, r]));
+// #785: legacy docs from older ingests carry non-standard parentDocIds the
+// cap-N pattern can't parse — fall back to an EXACT normalized-title match
+// against the registry (never fuzzy; ambiguity never stamps).
+const REGISTRY_BY_TITLE = new Map(
+	CAP_REGISTRY.map((r) => [r.title.trim().toLowerCase(), r]),
+);
 const capNumOf = (parentDocId: string): number | null => {
 	const m = parentDocId.match(/^cap-0*(\d+)$/);
 	return m ? Number(m[1]) : null;
@@ -275,10 +281,13 @@ async function run() {
 	// committed registry, no GitHub calls, idempotent.
 	let registryStamped = 0;
 	for (const [pid, chunks] of existingBySep) {
-		const reg = REGISTRY_BY_CAP.get(capNumOf(pid) ?? -1);
-		if (!reg || reg.status === null) continue;
+		const byPid = REGISTRY_BY_CAP.get(capNumOf(pid) ?? -1);
 		for (const c of chunks.values()) {
 			if (c.capStatus !== null) continue;
+			const reg =
+				byPid ??
+				REGISTRY_BY_TITLE.get((c.title ?? "").trim().toLowerCase());
+			if (!reg || reg.status === null) continue;
 			registryStamped++;
 			if (payload) {
 				try {
