@@ -15,7 +15,7 @@
 import { NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
-import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { API_VERSION, SCOUT_SERVICE_VERSION } from "@/lib/version";
@@ -133,12 +133,17 @@ export async function GET() {
 		notes: `Electric Capital snapshot, as of ${ecData.asOf}`,
 	};
 
+	// sls-062: derive from the SAME live catalog /api/skills serves (llms.txt
+	// names filtered to resolvable SKILL.mds, 24h-cached) — the static fallback
+	// list's length drifted to 9 while the directory served 7. One population,
+	// one count; [] fetch failure degrades to null, never a stale number.
+	const sdfSkillCatalog = await fetchSdfSkillCatalog().catch(() => null);
 	const sdfSkills: SourceStatus = {
 		name: "sdfSkills",
-		count: SDF_SKILL_NAMES.length,
+		count: sdfSkillCatalog ? sdfSkillCatalog.length : null,
 		lastUpdatedAt: null,
 		notes:
-			"Proxied from skills.stellar.org (server-cached 24h). Live freshness shown on the upstream site.",
+			"Proxied from skills.stellar.org (server-cached 24h); count = the same catalog /api/skills?source=sdf serves. Live freshness shown on the upstream site.",
 	};
 
 	const usage = await getUsageStats();

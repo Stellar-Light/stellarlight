@@ -11,7 +11,7 @@
 
 import type { MetadataRoute } from "next";
 import { CURATED_SKILLS } from "@/lib/integrations/curated-skills";
-import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { fetchSdfSkillNames } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 const SITE_URL = "https://stellarlight.xyz";
@@ -58,7 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		},
 	];
 
-	const sdfSkillUrls: MetadataRoute.Sitemap = SDF_SKILL_NAMES.map((slug) => ({
+	// sls-062 class: live-derive (24h cache) so removed upstream skills drop
+	// out of the sitemap instead of 404-lingering from the static fallback.
+	const sdfSkillNames = await fetchSdfSkillNames();
+	const sdfSkillUrls: MetadataRoute.Sitemap = sdfSkillNames.map((slug) => ({
 		url: `${SITE_URL}/skills/${slug}`,
 		lastModified: now,
 		changeFrequency: "monthly",
