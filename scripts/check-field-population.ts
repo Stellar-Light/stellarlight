@@ -84,12 +84,11 @@ const PROBES: Probe[] = [
 		field: "knowledgeNotes",
 	},
 	{
-		name: "repos.knowledgeNotes (creit — case-variant dupe doc outranks the stamped one, #783)",
+		name: "repos.knowledgeNotes (curated creit — dupe class fixed in #783/#788)",
 		path: "/api/repos/search?q=stellar-indexer-sdk&limit=6",
 		rowsKey: "repos",
 		pin: ["fullName", "creit-tech/stellar-indexer-sdk"],
 		field: "knowledgeNotes",
-		knownFailing: "#783",
 	},
 	{
 		name: "repos.activityState (derived tag)",
