@@ -27,6 +27,11 @@ import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
+// Targeted re-enrich (#777): --only owner/repo pins the pass to ONE repo —
+// re-stamps knowledgeNotes/activitySignals without burning the PAT budget on
+// a full corpus pass (which is what keeps starving mid-day).
+const onlyIdx = process.argv.indexOf("--only");
+const ONLY = onlyIdx >= 0 ? (process.argv[onlyIdx + 1] ?? "") : "";
 // Cap repos pulled per org so a giant or mis-linked org can't flood the index.
 // listOwnerRepos returns most-recently-pushed first, so this keeps the liveliest.
 const ORG_REPO_CAP = Number(process.env.ORG_REPO_CAP || "40") || 40;
@@ -280,6 +285,10 @@ async function main() {
 		);
 
 	let entries = [...byFull.values()];
+	if (ONLY)
+		entries = entries.filter(
+			(e) => e.full.toLowerCase() === ONLY.toLowerCase(),
+		);
 	if (LIMIT > 0) entries = entries.slice(0, LIMIT);
 	console.log(
 		`${entries.length} unique repos from ${projects.length} projects.\n`,
