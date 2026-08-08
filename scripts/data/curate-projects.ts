@@ -166,7 +166,20 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
  * group for listed slugs — the official page is the source of truth. */
 const SCF_FIX: Record<
 	string,
-	{ awarded: boolean; totalAwarded: number; awardedRounds: number[] }
+	{
+		awarded: boolean;
+		totalAwarded: number;
+		awardedRounds: number[];
+		/** sls-061: per-round official amounts for projects the SCF API cannot
+		 * match (no API entry → the enricher can never populate roundAwards).
+		 * Only with hand-verified per-round sources; amountUSD null = award
+		 * confirmed, amount not verifiable — never guessed. */
+		roundAwards?: Array<{
+			round: number;
+			amountUSD: number | null;
+			awardType: string | null;
+		}>;
+	}
 > = {
 	// sls-027: official page shows 7 submissions, 4 AWARDED (#16 $150K, #20
 	// $100K, #25 $94.5K + Q1-2024 Liquidity $50K); #18/#24 explicitly NOT
@@ -180,7 +193,19 @@ const SCF_FIX: Record<
 		awardedRounds: [17, 23, 27],
 	},
 	// sls-030: official pages show $150K (r13) + $141K (r18); record said false.
-	comet: { awarded: true, totalAwarded: 291000, awardedRounds: [13, 18] },
+	// sls-061: comet has NO entry in the SCF projects API (only the unrelated
+	// "Komet"), so the enricher can never populate roundAwards — curated here
+	// from the same sls-030 hand-verified official pages. awardType wasn't
+	// captured in that verification → null, never guessed.
+	comet: {
+		awarded: true,
+		totalAwarded: 291000,
+		awardedRounds: [13, 18],
+		roundAwards: [
+			{ round: 13, amountUSD: 150000, awardType: null },
+			{ round: 18, amountUSD: 141000, awardType: null },
+		],
+	},
 	// sls-043: the canonical band row claimed SCF #41 / $100K while the alias
 	// row (band-protocol, merged 2026-07-10 S3b wave) carried the OFFICIAL
 	// facts. communityfund.stellar.org/project/band-protocol-2ob (read
@@ -1608,10 +1633,23 @@ async function main() {
 			continue;
 		}
 		const cur = d.scf ?? {};
+		const wantRA = fix.roundAwards ?? null;
+		const raInSync =
+			!wantRA ||
+			JSON.stringify(
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+				(cur.roundAwards ?? []).map((r: any) => [
+					r.round,
+					r.amountUSD ?? null,
+					r.awardType ?? null,
+				]),
+			) ===
+				JSON.stringify(wantRA.map((r) => [r.round, r.amountUSD, r.awardType]));
 		if (
 			cur.awarded === fix.awarded &&
 			cur.totalAwarded === fix.totalAwarded &&
-			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",")
+			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",") &&
+			raInSync
 		) {
 			console.log(`  ${slug}: scf already in sync, skip`);
 			continue;
