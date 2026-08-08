@@ -511,6 +511,8 @@ export async function GET(req: NextRequest) {
 					auditor?: string;
 					protocol?: string;
 					severity?: string;
+					capStatus?: string;
+					capProtocolVersion?: number;
 				}>) {
 					chunks.push({
 						id: String(d.id),
@@ -525,6 +527,10 @@ export async function GET(req: NextRequest) {
 						auditor: d.auditor ?? null,
 						protocol: d.protocol ?? null,
 						severity: d.severity ?? null,
+						// #785: the identifier-pin path is how "CAP-46" queries serve
+						// their row — it must carry the cap fields like every other path.
+						capStatus: d.capStatus ?? null,
+						capProtocolVersion: d.capProtocolVersion ?? null,
 						// No retrieval score: confidence floors relevance for
 						// exact-ID matches, and the pin sets the rank.
 					});
@@ -594,6 +600,8 @@ export async function GET(req: NextRequest) {
 					auditor: (d.auditor as string) ?? null,
 					protocol: (d.protocol as string) ?? null,
 					severity: (d.severity as string) ?? null,
+					capStatus: (d.capStatus as string) ?? null,
+					capProtocolVersion: (d.capProtocolVersion as number) ?? null,
 					// No score: the chunk literally contains the figure asked
 					// about, which beats any cosine estimate of whether it might.
 				});
