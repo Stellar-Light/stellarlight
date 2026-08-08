@@ -310,6 +310,40 @@ async function run() {
 			console.log(`  ${shadowDupes} shadowed duplicate chunk row(s) resolved`);
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing SEP chunks already in collection`);
+		// #785 (diagnosis only — no writes): the vector serving path aggregates
+		// the Mongo collection directly, but payload.find can silently skip rows
+		// it can't hydrate (legacy pre-Payload seeds). Such ghosts serve null
+		// facts forever and no Payload-side pass can reach them. This block only
+		// REPORTS the divergence — ids logged for a human-reviewed cleanup.
+		// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+		const rawCol = (payload as any)?.db?.connection?.db?.collection(
+			"research-docs",
+		);
+		if (rawCol) {
+			const rawDocs = await rawCol
+				.find({ source: "cap" })
+				.project({
+					_id: 1,
+					parentDocId: 1,
+					chunkIndex: 1,
+					title: 1,
+					capStatus: 1,
+				})
+				.toArray();
+			const payloadIds = new Set(
+				(existing.docs as Array<{ id: string }>).map((d) => String(d.id)),
+			);
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			const ghosts = rawDocs.filter((r: any) => !payloadIds.has(String(r._id)));
+			console.log(
+				`  raw mongo source=cap: ${rawDocs.length} vs payload.find: ${existing.docs.length} → ${ghosts.length} payload-invisible ghost(s)`,
+			);
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			for (const g of ghosts as any[])
+				console.log(
+					`  ghost ${String(g._id)} pid=${g.parentDocId ?? "?"} idx=${g.chunkIndex ?? "?"} capStatus=${g.capStatus ?? "null"} title=${String(g.title ?? "").slice(0, 50)}`,
+				);
+		}
 	}
 
 	// #778 backfill: existing rows with NULL capStatus never got stamped —
