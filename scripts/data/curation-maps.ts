@@ -1298,6 +1298,270 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
 		statusBasis: "site-liveness",
 	},
+	// 2026-08-08 (boxy): agent-economy batch from trionlabs/awesome-stellar-ai
+	// (community-curated list; we're on it ourselves). 15 projects verified
+	// MISSING against all 918 directory rows by GitHub-URL + normalized-name
+	// diff. Statuses follow the list's own evidence standard: 🟢 mainnet proof
+	// → Live (statusBasis onchain-activity, statusSourceUrl = the proof),
+	// 🟢 testnet → Pre-Release, unmarked/no deployment claim → Development.
+	// Skipped: RouteDock (exists), Prism (name-collides with our metadata-less
+	// `prism` row — needs human disambiguation before seeding).
+	{
+		slug: "stellar-mpp-sdk",
+		name: "Stellar MPP SDK",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Official SDK implementing the Stellar payment method for MPP (Machine Payments Protocol) charge payments and off-chain payment channels with on-chain settlement. The reference building block for agent payment flows on Stellar.",
+		links: {
+			website: "https://developers.stellar.org/docs/build/agentic-payments",
+			github: "https://github.com/stellar/stellar-mpp-sdk",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://github.com/stellar/stellar-mpp-sdk",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "stellar-8004",
+		name: "Stellar 8004",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Mainnet Soroban implementation of ERC-8004 identity, reputation, and validation registries for AI agents, with a TypeScript SDK, an indexer, and an explorer. By Trion Labs (maintainers of the awesome-stellar-ai list).",
+		links: {
+			website: "https://github.com/trionlabs/stellar-8004",
+			github: "https://github.com/trionlabs/stellar-8004",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/contract/CBGPDCJIHQ32G42BE7F2CIT3YW6XRN5ED6GQJHCRZSNAYH6TGMCL6X35",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "x402",
+		name: "x402",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Open HTTP payment protocol (402 Payment Required) with native Stellar support through the @x402/stellar package — the standard used by most Stellar agent-payment projects for per-call USDC payments.",
+		links: {
+			website: "https://www.x402.org",
+			github: "https://github.com/x402-foundation/x402",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://www.npmjs.com/package/@x402/stellar",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "stellar-agent-search",
+		name: "Stellar Agent Search",
+		category: "Tooling",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Read-only MCP server and CLI for discovering, ranking, and vetting AI agents registered with Stellar 8004. Local package released on npm; hosted transport pending.",
+		links: {
+			website: "https://www.npmjs.com/package/stellar-agent-search",
+			github: "https://github.com/berkingurcan/stellar-agent-search",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://registry.npmjs.org/stellar-agent-search/latest",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "mpp-router",
+		name: "MPP Router",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Open-source router by Rozo for reaching paid MPP services from Stellar-funded clients through a stable API, live on mainnet.",
+		links: {
+			website: "https://apiserver.mpprouter.dev/health",
+			github: "https://github.com/mpprouter/rozo-mpprouter",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/account/GDK3AVW3YE6UL3J4WLNKBMP65KSY32YPUKIOC6PXW65XJ3LEG3YIDXXB",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "tollpay",
+		name: "TollPay",
+		category: "Tooling",
+		status: "Live",
+		types: ["Payments", "SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Middleware and SDKs for monetizing MCP tools with per-call USDC payments on Stellar mainnet. Winner at the Stellar Hacks: Agents hackathon (x402/MPP).",
+		links: {
+			github: "https://github.com/rajkaria/toll",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/tx/015ef6bacf0520d567fa3cac44a7135ff4152fda79ee72d2e49a1f8670081099",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "x402-mcp-stellar-template",
+		name: "x402 MCP Stellar Template",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Node.js, Python, and Go templates for building paid MCP servers with x402 on Stellar — wallet provisioning, spending limits, mainnet-proven. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/ffarinas/x402-mcp-stellar-template",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/tx/af4d17dd8a5c33004365ae4d5c66c82d25cadbabe6af5a63c2450c0fd64fe58a",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "stellar-agent-wallet-skill",
+		name: "Stellar Agent Wallet Skill",
+		category: "Tooling",
+		status: "Development",
+		types: ["Wallet", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Agent skill for Stellar USDC balances, transfers, swaps, trustlines, and payments to x402 or MPP-gated services. By the MPP Router (Rozo) team.",
+		links: {
+			github: "https://github.com/mpprouter/stellar-agent-wallet-skill",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "pulsar-mcp",
+		name: "Pulsar",
+		category: "Tooling",
+		status: "Development",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MCP server for Stellar and Soroban development: account queries, transaction simulation, contract deployment, and transaction submission from agent workflows.",
+		links: {
+			github: "https://github.com/benelabs/pulsar",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "ai-net",
+		name: "AI-Net",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Experimental coordination network where specialized AI agents discover one another, delegate work, and settle payments on Stellar.",
+		links: {
+			github: "https://github.com/Epta-Node/ai-net",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "clevercon",
+		name: "CleverCon",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Service marketplace and orchestrator that decomposes tasks, hires specialist agents, and pays them through x402 or MPP — on Stellar testnet. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/clevercon-protocol/clevercon",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/testnet/contract/CDFLEJ2HFPK3WKFTWB4CKP2JHEYNAUWKXGEJRYW4YMMGDSQSQ7D4LRTE",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "talos",
+		name: "Talos",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Framework for autonomous agent corporations that register services and earn USDC through x402 payments on Stellar.",
+		links: {
+			github: "https://github.com/enliven17/talos-stellar",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "asgcard",
+		name: "ASGCard",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Virtual Mastercard integration for AI agents funded with USDC through x402 on Stellar.",
+		links: {
+			github: "https://github.com/ASGCompute/asgcard-public",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "cards402",
+		name: "Cards402",
+		category: "Tooling",
+		status: "Development",
+		types: ["Payments", "SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"SDK, CLI, and MCP server for issuing virtual Visa cards to AI agents after payment in USDC or XLM. Winner at the Stellar Hacks: Agents hackathon (x402/MPP).",
+		links: {
+			github: "https://github.com/CTX-com/Cards402",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "nulucre-agents",
+		name: "Nulucre Agents",
+		category: "User-Facing App",
+		status: "Pre-Release",
+		types: ["Analytics", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Wallet reputation and DeFi fact-verification agents that accept x402 micropayments on Stellar and Base.",
+		links: {
+			github: "https://github.com/vjshaw/nulucre-agents",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/account/GCRUBFDANV52JP3URUJ7EZGPZKFEESBTW7T3FV2SJXZZGB6HDNRBWV24",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "rendergate",
+		name: "RenderGate",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Infrastructure", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Pay-per-render browser service for AI agents with a live endpoint and x402 payments on Stellar testnet. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/tantk/rendergate",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/testnet/tx/5c898eb489265c142baee086d502e25b87a5536e4386e5ccdf69edc2515c0ef6",
+		statusBasis: "onchain-activity",
+	},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
