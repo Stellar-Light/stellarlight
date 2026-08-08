@@ -60,6 +60,7 @@ interface RepoDoc {
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
 	codeSymbols?: unknown;
+	contractInterface?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
 	activitySignals?: {
@@ -160,6 +161,8 @@ export interface CodeVerified {
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
+	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
+	contractInterface: string[];
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
@@ -203,6 +206,9 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 			? d.codeSymbols
 					.filter((s): s is string => typeof s === "string")
 					.slice(0, 20)
+			: [],
+		contractInterface: Array.isArray(d.contractInterface)
+			? d.contractInterface.filter((s): s is string => typeof s === "string")
 			: [],
 		mainnetContractId: d.mainnetContractId ?? null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)

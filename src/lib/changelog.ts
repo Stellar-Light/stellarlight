@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-08",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"repos: `contractInterface` — Soroban contract ABI (full pub fn signatures per #[contractimpl] block) on searchRepos codeSignals (openapi@1.8.37).",
+		detail:
+			"Symbols say WHAT a contract implements; the interface says HOW TO CALL IT. Each entry is `Contract.fn(arg: Type, …) -> Ret`, extracted from the scanned Rust sources' #[contractimpl] impl blocks (brace-matched, so neighbouring non-contract impls never leak in). The host-injected env: Env parameter is stripped, matching the SDK's own contractspec — what remains is what a caller passes. Multi-contract repos (soroban-examples) prefix each fn with its contract name. Empty for non-contract repos or repos scanned before 2026-08-08; populates as scan waves re-reach repos.",
+	},
+	{
+		date: "2026-08-08",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"repos: repoScore now blends commit velocity — commits90d refines freshness within the fresh band (a tie-breaker of ≤ ~2 points, calibrated against the ranking fixture suite).",

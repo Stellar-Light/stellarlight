@@ -31,6 +31,7 @@ const okInput: SignalsInput = {
 	farmScore: 0,
 	farmFlags: [],
 	codeSymbols: ["initialize_escrow", "EscrowContract"],
+	contractInterface: ["EscrowContract.initialize_escrow(seller: Address, amount: i128)"],
 	mainnetContractId: "CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 };
 
@@ -44,6 +45,9 @@ describe("write-shape — the signals-only write gate", () => {
 		expect(w.codeScanState).toBe("scanned");
 		expect(w.codeScannedAt).toBe("2026-07-05T00:00:00.000Z");
 		expect(w.codeSymbols).toEqual(["initialize_escrow", "EscrowContract"]);
+		expect(w.contractInterface).toEqual([
+			"EscrowContract.initialize_escrow(seller: Address, amount: i128)",
+		]);
 		expect(w.mainnetContractId).toBe(
 			"CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 		);

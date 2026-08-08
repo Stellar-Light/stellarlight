@@ -655,6 +655,10 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 												},
+												contractInterface: {
+													type: "array",
+													items: { type: "string" },
+												},
 												mainnetContractId: {
 													type: "string",
 													nullable: true,
@@ -4401,6 +4405,12 @@ export const spec: OpenAPISpec = {
 								items: { type: "string" },
 								description:
 									"Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs.",
+							},
+							contractInterface: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
 							},
 							mainnetContractId: {
 								type: "string",
