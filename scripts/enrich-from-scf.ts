@@ -213,6 +213,12 @@ async function main() {
 	const scfProjects: any[] = await scfRes.json();
 	stats.scfProjects = scfProjects.length;
 	console.log(`Fetched ${scfProjects.length} SCF projects\n`);
+	// An EMPTY listing is an outage, not a clean sweep (the silent-params /
+	// empty-vs-empty class): 200-with-zero-rows must not exit green.
+	if (scfProjects.length === 0) {
+		console.error("✗ SCF listing returned 0 projects — outage or contract change; exiting 1.");
+		process.exit(1);
+	}
 
 	// 2. Connect to Payload
 	console.log("Connecting to database...");
@@ -517,6 +523,11 @@ async function main() {
 		);
 	}
 
+	// Failed writes must not exit green (2026-08-08 sweep).
+	if (stats.errors > 0) {
+		console.error(`\n✗ ${stats.errors} write error(s) — exiting 1 so the run shows red.`);
+		process.exit(1);
+	}
 	process.exit(0);
 }
 

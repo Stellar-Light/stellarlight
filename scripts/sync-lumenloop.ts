@@ -291,6 +291,17 @@ async function main() {
 		console.log("*** Run with --execute to apply changes. ***");
 	}
 
+	// Zero-work/failed-work runs are FAILURES (2026-08-08 sweep, the
+	// green-run-that-did-nothing class): an empty upstream sweep or swallowed
+	// per-item errors must not exit green on the nightly cron.
+	if (stats.total_files === 0) {
+		console.error("\n✗ zero files scanned — upstream empty or unreachable; exiting 1.");
+		process.exit(1);
+	}
+	if (stats.projects.errors > 0 || stats.entities.errors > 0) {
+		console.error(`\n✗ ${stats.projects.errors + stats.entities.errors} item error(s) — exiting 1 so the run shows red.`);
+		process.exit(1);
+	}
 	process.exit(0);
 }
 

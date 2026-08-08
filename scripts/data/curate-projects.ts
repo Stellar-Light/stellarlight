@@ -1973,7 +1973,9 @@ async function main() {
 		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(0);
+	// exit(0) STOMPED the exitCode set above (same bug enrich-repos fixed):
+	// failed writes exited green. Honor the failure code.
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {
