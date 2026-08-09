@@ -52,3 +52,21 @@ Three failure modes, one family — **evidence decays and nothing re-reads it**:
 - **Verify with the served field name** — from RepoResult / the OpenAPI
   spec, not from memory. A wrong-key probe invents an outage; the guard's
   probes are the canonical names now.
+
+## Postscript — the #785 five-paths epilogue (same day)
+
+The one field-population probe that stayed red went five investigative
+layers deep, and the stored data was correct the ENTIRE time. Each layer
+was a different serving path dropping the same fields: the vector map and
+keyword map (#764), the vector `$project` (#784), the shared `toRow`
+supplement mapper (#792), and finally the exact-identifier pin + literal-
+figure lookup (#794) — the pin being precisely how a "CAP-46" query serves
+its row. Ruled out along the way with committed diagnostics: payload-
+invisible ghosts (925=925), shadowed duplicate chunks (0), null stores
+(all Final).
+
+**The durable rule:** a field is only served when EVERY row-construction
+site carries it. `/api/research` has FIVE — that is the disease; the cure
+is consolidating them into one shared mapper (queued). Until then, the
+field-population guard is the regression net: any sixth path that forgets
+a field goes red the next morning.

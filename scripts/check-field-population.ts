@@ -121,12 +121,11 @@ const PROBES: Probe[] = [
 		field: "capStatus",
 	},
 	{
-		name: "research.capStatus (legacy CAP-46 overview doc, #785)",
+		name: "research.capStatus (identifier-pin path, fixed across 5 serving paths — #785)",
 		path: "/api/research?q=CAP-46&limit=8",
 		rowsKey: "results",
 		pin: ["source", "cap"],
 		field: "capStatus",
-		knownFailing: "#785",
 	},
 ];
 
