@@ -1,9 +1,9 @@
 {
   "frame": {
     "scf": 495,
-    "directory": 918,
+    "directory": 935,
     "matched": 310,
-    "roundsChecked": 304
+    "roundsChecked": 309
   },
   "overstated": [],
   "understated": [],
@@ -75,18 +75,8 @@
         "41"
       ],
       "reason": "no submission verdict found for round(s) #30"
-    },
-    {
-      "slug": "remi",
-      "name": "Remi",
-      "ourRounds": [
-        "22"
-      ],
-      "url": "https://communityfund.stellar.org/project/remi-w0j",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
     }
   ],
-  "generatedAt": "2026-08-03T22:35:26Z",
+  "generatedAt": "2026-08-09T09:43:39Z",
   "evalKey": "scf-crosscheck"
 }

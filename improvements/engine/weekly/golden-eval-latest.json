@@ -63,7 +63,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8848370313644409,
+      "topScore": 0.8850061893463135,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core \u2014 Veridise (Soroban Stellar Soroban Cor"
+      "sample": "Stellar Soroban Core \u2014 Veridise"
     },
     {
       "id": "ecosystem-rwa-map",
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8245053887367249,
+      "topScore": 0.8233330845832825,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7771342992782593,
+      "topScore": 0.7773129940032959,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8056342005729675,
+      "topScore": 0.8091200590133667,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -395,7 +395,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Q1 2026: Execution at network scale"
+      "sample": "Q2 2026: What Stellar was built for has arrived"
     },
     {
       "id": "ecosystem-stablecoin-anchor",
@@ -549,7 +549,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 73,
+      "topScore": 75,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.4 \u2014 27.0.4"
+      "sample": "rs-soroban-sdk v27.0.5 \u2014 27.0.5"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -675,12 +675,12 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6774157285690308,
+      "topScore": 0.6663071207180973,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
       "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
@@ -693,7 +693,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6918411254882812,
+      "topScore": 0.6923035979270935,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -747,7 +747,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.73382568359375,
+      "topScore": 0.7343152761459351,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535136580467224,
+      "topScore": 0.8536801338195801,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -902,6 +902,6 @@
       "sample": "Python Stellar SDK"
     }
   ],
-  "generatedAt": "2026-08-03T22:35:26Z",
+  "generatedAt": "2026-08-09T09:43:40Z",
   "evalKey": "golden-eval"
 }

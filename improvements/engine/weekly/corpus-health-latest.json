@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 9496,
-    "docs": 1794
+    "chunks": 9529,
+    "docs": 1799
   },
   "s5_junk_urls": {
     "count": 1,
@@ -10,10 +10,10 @@
     ]
   },
   "s6_bad_titles": {
-    "count": 73,
+    "count": 69,
     "byIssue": {
       "sentence-like (body fragment?)": 56,
-      "overlong (sentence, not a title)": 8,
+      "overlong (sentence, not a title)": 4,
       "html-entities": 8,
       "bare-date": 1
     },
@@ -111,31 +111,38 @@
     ]
   },
   "s7_coverage": {
-    "release": {
-      "chunks": 171,
+    "sdf-blog": {
+      "chunks": 2187,
       "datedPct": 100,
-      "newestAgeDays": 3,
+      "newestAgeDays": 6,
       "undated": false,
       "stalled": false
     },
+    "scf-handbook": {
+      "chunks": 116,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
     "lumenloop-research": {
-      "chunks": 232,
+      "chunks": 241,
       "datedPct": 100,
-      "newestAgeDays": 3,
+      "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
-      "chunks": 3908,
+      "chunks": 3909,
       "datedPct": 75,
       "newestAgeDays": 5,
       "undated": false,
       "stalled": false
     },
-    "sdf-blog": {
-      "chunks": 2168,
+    "release": {
+      "chunks": 174,
       "datedPct": 100,
-      "newestAgeDays": 7,
+      "newestAgeDays": 6,
       "undated": false,
       "stalled": false
     },
@@ -156,49 +163,42 @@
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 95,
+      "newestAgeDays": 100,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 77,
       "datedPct": 30,
-      "newestAgeDays": 134,
+      "newestAgeDays": 139,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 89,
+      "newestAgeDays": 94,
       "undated": false,
-      "stalled": false
-    },
-    "scf-handbook": {
-      "chunks": 115,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 76,
+      "newestAgeDays": 81,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 51,
+      "newestAgeDays": 56,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1311,
+      "newestAgeDays": 1316,
       "undated": false,
       "stalled": false
     },
@@ -212,8 +212,43 @@
   },
   "s7_stalled": [],
   "s8_mirrors": {
-    "count": 120,
+    "count": 125,
     "sample": [
+      {
+        "hash": "204a107f0c9f",
+        "urls": [
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
+        ]
+      },
+      {
+        "hash": "8c714b07acfe",
+        "urls": [
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
+        ]
+      },
+      {
+        "hash": "b1ac13f0df8f",
+        "urls": [
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
+        ]
+      },
+      {
+        "hash": "9425858bfb2c",
+        "urls": [
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
+        ]
+      },
+      {
+        "hash": "e16d74dfa459",
+        "urls": [
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
+        ]
+      },
       {
         "hash": "8da44a4799f8",
         "urls": [
@@ -255,77 +290,9 @@
           "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/request_trust",
           "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_on_hold"
         ]
-      },
-      {
-        "hash": "4ecf7b552312",
-        "urls": [
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_expired",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_error",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/do_stellar_payment"
-        ]
-      },
-      {
-        "hash": "3a15bfb2650b",
-        "urls": [
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_refund_sent",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_refund_pending"
-        ]
-      },
-      {
-        "hash": "76a28a9e6063",
-        "urls": [
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_offchain_funds_pending",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_offchain_funds_available"
-        ]
-      },
-      {
-        "hash": "8d3676097351",
-        "urls": [
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0086.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0085.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0079.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0078.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0076.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0073.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0072.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0071.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0066.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0064.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0063.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0062.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0057.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0043.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0042.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0005.md"
-        ]
-      },
-      {
-        "hash": "45a4c0b65c6b",
-        "urls": [
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0086.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0085.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0079.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0078.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0073.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0072.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0066.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0064.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0063.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0062.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0056.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0055.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0054.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0043.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0042.md",
-          "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0005.md"
-        ]
       }
     ]
   },
-  "generatedAt": "2026-08-03T22:35:26Z",
+  "generatedAt": "2026-08-09T09:43:40Z",
   "evalKey": "corpus-health"
 }

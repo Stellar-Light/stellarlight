@@ -1,10 +1,10 @@
 {
   "base": "https://stellarlight.xyz",
-  "specVersion": "1.8.32",
+  "specVersion": "1.8.37",
   "frame": {
     "ops": 28,
-    "paramsProbed": 21,
-    "fieldsChecked": 528,
+    "paramsProbed": 22,
+    "fieldsChecked": 537,
     "postChecked": 5,
     "skipped": [
       "GET /api/hackathons/compare (no documented response properties)",
@@ -56,6 +56,11 @@
     {
       "op": "GET /api/repos/explain",
       "field": "note2",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/explain?q=soroban) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/repos/explain",
+      "field": "codeVerified.contractInterface",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/explain?q=soroban) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -172,6 +177,6 @@
       "evidence": "all 1 valid value(s) [1] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/partners?limit=200) \u2014 single-value enum: its only value may restate the server default, so inert vs explicit-default is undecidable from outside"
     }
   ],
-  "generatedAt": "2026-08-03T22:35:26Z",
+  "generatedAt": "2026-08-09T09:43:39Z",
   "evalKey": "engine-e-contract"
 }

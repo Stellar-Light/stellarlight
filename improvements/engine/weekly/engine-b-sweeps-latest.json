@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 4,
+    "count": 5,
     "sample": [
       {
         "slug": "trustline",
@@ -21,6 +21,12 @@
         "missing": "near"
       },
       {
+        "slug": "nulucre-agents",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
+      {
         "slug": "pyusd",
         "field": "supportedNetworks",
         "prose": "bitcoin",
@@ -30,21 +36,21 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (188/190)",
-      "types": "92% (175/190)",
-      "supportedNetworks": "6% (12/190)",
-      "logoUrl": "81% (154/190)"
+      "shortDescription": "98% (193/196)",
+      "types": "92% (180/196)",
+      "supportedNetworks": "9% (17/196)",
+      "logoUrl": "79% (154/196)"
     },
     "Tooling": {
-      "shortDescription": "96% (164/170)",
-      "types": "92% (157/170)",
-      "logoUrl": "82% (140/170)"
+      "shortDescription": "98% (173/177)",
+      "types": "94% (167/177)",
+      "logoUrl": "80% (141/177)"
     },
     "User-Facing App": {
-      "shortDescription": "98% (360/367)",
-      "types": "92% (339/367)",
-      "supportedNetworks": "7% (25/367)",
-      "logoUrl": "89% (327/367)"
+      "shortDescription": "99% (364/369)",
+      "types": "93% (342/369)",
+      "supportedNetworks": "7% (27/369)",
+      "logoUrl": "89% (327/369)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
@@ -53,11 +59,11 @@
       "logoUrl": "80% (28/35)"
     },
     "Protocol/Contract": {
-      "shortDescription": "97% (136/140)",
-      "types": "86% (120/140)",
-      "supportedNetworks": "15% (21/140)",
-      "logoUrl": "86% (121/140)",
-      "tvlUSD": "9% (13/140)"
+      "shortDescription": "100% (142/142)",
+      "types": "87% (124/142)",
+      "supportedNetworks": "16% (23/142)",
+      "logoUrl": "85% (121/142)",
+      "tvlUSD": "9% (13/142)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -142,20 +148,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 390,
-    "liveStale365": 144,
+    "liveNoDatedSignal": 400,
+    "liveStale365": 142,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 518,
+        "ageDays": 524,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 887,
+        "ageDays": 892,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -176,7 +182,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2286,
+        "ageDays": 2292,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -287,6 +293,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-03T22:35:26Z",
+  "generatedAt": "2026-08-09T09:43:40Z",
   "evalKey": "engine-b-sweeps"
 }
