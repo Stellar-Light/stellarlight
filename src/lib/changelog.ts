@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-10",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"repos: `targetProtocol` + `protocolCaps` on searchRepos codeVerified — the sdk⇄protocol⇄CAP join (openapi@1.8.38).",
+		detail:
+			"Answers 'which protocol does this repo's SDK pin target, and which CAPs define that protocol' directly on the repo row: targetProtocol is derived from the pinned soroban-sdk MAJOR via the maintained sdk→protocol table (advisory by doctrine — the mapping has documented irregularities like 23.x spanning P24→P25; null = unknown, never guessed), and protocolCaps joins the committed cap-registry rows declaring that protocolVersion ({cap, title, status, url}, ≤10). Pure serve-time derivation from already-scanned facts — no new scanning, populates immediately for every repo with a stored sorobanSdkVersion.",
+	},
+	{
 		date: "2026-08-08",
 		surfaces: ["api"],
 		type: "added",

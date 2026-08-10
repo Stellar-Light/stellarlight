@@ -10,6 +10,11 @@
  */
 
 import { symbolsHaystack } from "./code-symbols";
+import { CAP_REGISTRY } from "../data/cap-registry";
+import {
+	parseSdkMajor,
+	protocolForSdkMajor,
+} from "./soroban-versions";
 import {
 	activityStateOf,
 	type RepoActivityState,
@@ -163,6 +168,10 @@ export interface CodeVerified {
 	scannedAt: string | null;
 	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
 	contractInterface: string[];
+	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
+	targetProtocol: number | null;
+	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
+	protocolCaps: Array<{ cap: number; title: string; status: string | null; url: string }>;
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
@@ -210,6 +219,17 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		contractInterface: Array.isArray(d.contractInterface)
 			? d.contractInterface.filter((s): s is string => typeof s === "string")
 			: [],
+		targetProtocol: protocolForSdkMajor(
+			parseSdkMajor(d.sorobanSdkVersion ?? null),
+		),
+		protocolCaps: (() => {
+			const tp = protocolForSdkMajor(parseSdkMajor(d.sorobanSdkVersion ?? null));
+			if (tp === null) return [];
+			return CAP_REGISTRY.filter((r) => r.protocolVersion === tp)
+				.sort((a, b) => a.cap - b.cap)
+				.slice(0, 10)
+				.map((r) => ({ cap: r.cap, title: r.title, status: r.status, url: r.url }));
+		})(),
 		mainnetContractId: d.mainnetContractId ?? null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)
 			? d.sdkCapabilities.filter((s): s is string => typeof s === "string")

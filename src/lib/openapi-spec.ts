@@ -659,6 +659,14 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 												},
+												targetProtocol: {
+													type: "integer",
+													nullable: true,
+												},
+												protocolCaps: {
+													type: "array",
+													items: { type: "object" },
+												},
 												mainnetContractId: {
 													type: "string",
 													nullable: true,
@@ -4411,6 +4419,26 @@ export const spec: OpenAPISpec = {
 								items: { type: "string" },
 								description:
 									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
+							},
+							targetProtocol: {
+								type: "integer",
+								nullable: true,
+								description:
+									"Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities — 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed.",
+							},
+							protocolCaps: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										cap: { type: "integer" },
+										title: { type: "string" },
+										status: { type: "string", nullable: true },
+										url: { type: "string" },
+									},
+								},
+								description:
+									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
 							},
 							mainnetContractId: {
 								type: "string",

@@ -97,6 +97,13 @@ const PROBES: Probe[] = [
 		pin: ["fullName", "cometdex/comet-contracts-v1"],
 		field: "activityState",
 	},
+	{
+		name: "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
+		path: "/api/repos/search?q=blend&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "blend-capital/blend-contracts-v2"],
+		field: "codeVerified.protocolCaps",
+	},
 	// ── projects: SCF official-record fields ───────────────────────────────
 	{
 		name: "projects.scfRoundAwards (bondhive #767/#772 backfill)",
