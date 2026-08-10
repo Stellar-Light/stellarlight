@@ -28,6 +28,7 @@ export interface SignalsInput {
 	/** Extracted pub fn/type names (src/lib/code-symbols.ts). */
 	codeSymbols: string[];
 	contractInterface: string[];
+	stellarDeps: string[];
 	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
 	mainnetContractId: string | null;
 }
@@ -75,6 +76,7 @@ export function signalsToWrite(
 		farmFlags: s.farmFlags,
 		codeSymbols: s.codeSymbols,
 		contractInterface: s.contractInterface,
+		stellarDeps: s.stellarDeps,
 		mainnetContractId: s.mainnetContractId,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,

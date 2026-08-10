@@ -35,6 +35,7 @@ import {
 } from "../../src/lib/code-symbols";
 import { computeJsDepth } from "../../src/lib/js-depth";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
+import { extractStellarDeps } from "../../src/lib/stellar-deps";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
@@ -336,6 +337,8 @@ async function main() {
 					r.outcome === "ok"
 						? extractContractInterface(r.depthInput.blobs)
 						: [];
+				const stellarDeps =
+					r.outcome === "ok" ? extractStellarDeps(r.scan.blobs) : [];
 				if (r.outcome === "ok" && (r.facts?.contractMacroCount ?? 0) > 0) {
 					contractRepos++;
 					if (contractInterface.length > 0) contractReposWithIface++;
@@ -363,6 +366,7 @@ async function main() {
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
 						contractInterface,
+						stellarDeps,
 						sdkCapabilities,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 					},

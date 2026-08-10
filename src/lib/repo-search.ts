@@ -66,6 +66,7 @@ interface RepoDoc {
 	codeScannedAt?: string | null;
 	codeSymbols?: unknown;
 	contractInterface?: unknown;
+	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
 	activitySignals?: {
@@ -172,6 +173,8 @@ export interface CodeVerified {
 	targetProtocol: number | null;
 	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
 	protocolCaps: Array<{ cap: number; title: string; status: string | null; url: string }>;
+	/** Stellar-ecosystem dependencies from the repo's manifests (allowlist-matched package names) — the dependency graph: forward = the repo's stack, reverse = query a package name to find its dependents. */
+	stellarDeps: string[];
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
@@ -218,6 +221,9 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 			: [],
 		contractInterface: Array.isArray(d.contractInterface)
 			? d.contractInterface.filter((s): s is string => typeof s === "string")
+			: [],
+		stellarDeps: Array.isArray(d.stellarDeps)
+			? d.stellarDeps.filter((s): s is string => typeof s === "string")
 			: [],
 		targetProtocol: protocolForSdkMajor(
 			parseSdkMajor(d.sorobanSdkVersion ?? null),
@@ -944,6 +950,8 @@ export async function searchRepos(
 					// name ("escrow" ⇢ release_escrow) must still be a candidate.
 					// codeSymbols is json like topics — same per-element regex match.
 					{ codeSymbols: { like: v } },
+					// dependency-graph reverse read: "passkey-kit" surfaces dependents.
+					{ stellarDeps: { like: v } },
 				]),
 			);
 		}
