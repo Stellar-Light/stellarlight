@@ -264,6 +264,11 @@ async function main() {
 
 	let callsUsed = 0;
 	let scanned = 0;
+	// Interface-coverage accounting (no silent caps): a contract repo that
+	// extracts ZERO signatures is an extraction gap (the FxDAO trait-impl
+	// class), not a benign absence — count them so waves surface the gap.
+	let contractRepos = 0;
+	let contractReposWithIface = 0;
 	let errored = 0;
 	let incomplete = 0;
 	let budgetStopped = false;
@@ -331,6 +336,10 @@ async function main() {
 					r.outcome === "ok"
 						? extractContractInterface(r.depthInput.blobs)
 						: [];
+				if (r.outcome === "ok" && (r.facts?.contractMacroCount ?? 0) > 0) {
+					contractRepos++;
+					if (contractInterface.length > 0) contractReposWithIface++;
+				}
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -381,7 +390,7 @@ async function main() {
 							: cur;
 					if (predicted > cur)
 						lifts.push({ full, proof: r.proof, depth, cur, predicted });
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score} syms=${symbols.length}`;
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;
@@ -426,6 +435,10 @@ async function main() {
 	console.log(
 		"tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)",
 	);
+	if (contractRepos)
+		console.log(
+			`interface coverage: ${contractReposWithIface}/${contractRepos} contract repos in this wave extracted ≥1 signature${contractReposWithIface < contractRepos ? " — the gap rows are extraction misses worth a look" : ""}`,
+		);
 	if (lifts.length) {
 		console.log(
 			`\npredicted repoScore lifts after next enrich run (top ${Math.min(12, lifts.length)}):`,
