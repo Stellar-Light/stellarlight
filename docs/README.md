@@ -11,6 +11,7 @@ This folder is for **running and administering the deployment** — nothing else
 Everything else lives where it belongs:
 
 - **[/ARCHITECTURE.md](../ARCHITECTURE.md)** — how the data layer works, code-verified.
+- **[code-index.md](./code-index.md)** — what the code index serves per repo (symbols, contract ABI, protocol/CAP join, dependency graph, in-repo docs) and the rules that keep it honest.
 - **[/SHIPPING.md](../SHIPPING.md)** — the ship-gate discipline (verify before advertising, the surface map).
 - **[/improvements/](../improvements/)** — the live-services improvement backlog + self-improvement loop.
 - **[/ideas/](../ideas/)** — proposals not yet committed.
