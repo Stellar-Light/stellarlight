@@ -1069,6 +1069,14 @@ export async function searchRepos(
 			// Snake/camel split so \b matching works on symbol names (regex \b
 			// treats _ as a word char — "escrow" never hits "release_escrow" raw).
 			const syms = symbolsHaystack(r.codeSymbols);
+			// Dependency-graph reverse read: deps must be SCORABLE, not just
+			// candidate-eligible — a dependent that only matches via stellarDeps
+			// scored 0 and was dropped before ranking (sep-40-oracle → blend
+			// missing). Hyphens/@/slashes are natural \b boundaries, so the raw
+			// join suffices.
+			const deps = Array.isArray(r.stellarDeps)
+				? r.stellarDeps.join(" ").toLowerCase()
+				: "";
 			// F4 (audit root #4): owner is searchable — q=allbridge must reach
 			// allbridge-io/* even when the repo name doesn't repeat the org.
 			// Same stopword-filtered tokens as everything else, so generic words
@@ -1103,6 +1111,11 @@ export async function searchRepos(
 					// name/topic hit stays highest (it's the repo's own claimed identity).
 					else if (hit(syms)) best = 4;
 					else if (hit(desc) || hit(ownerHay)) best = 3;
+					// A manifest dependency on the queried package is real usage
+					// evidence (the reverse dependency-graph read) — above a README
+					// mention, below identity: reflector outranks its consumers on
+					// "sep-40-oracle", but dependents surface instead of scoring 0.
+					else if (hit(deps)) best = 2;
 					else if (hit(readme)) best = 1;
 					if (best > 0) {
 						score += best;
