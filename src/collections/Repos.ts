@@ -250,6 +250,15 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "stellarDeps",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal",
+			},
+		},
+		{
 			name: "mainnetContractId",
 			type: "text",
 			admin: {

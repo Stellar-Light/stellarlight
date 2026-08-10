@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"repos: `stellarDeps` — the dependency graph on searchRepos codeVerified; package-name queries surface dependents (openapi@1.8.39).",
+		detail:
+			"Stellar-ecosystem dependencies extracted from each repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched and stored verbatim. Forward read: a repo row lists the stack it builds on. Reverse read: searching a package name (passkey-kit, @stellar/stellar-sdk, blend-contract-sdk) surfaces its DEPENDENTS — adoption evidence from manifests, which no README mention can fake. Populates as scan waves reach repos (the daily unified wave + re-scan policy).",
+	},
+	{
+		date: "2026-08-10",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"repos: `targetProtocol` + `protocolCaps` on searchRepos codeVerified — the sdk⇄protocol⇄CAP join (openapi@1.8.38).",
 		detail:
 			"Answers 'which protocol does this repo's SDK pin target, and which CAPs define that protocol' directly on the repo row: targetProtocol is derived from the pinned soroban-sdk MAJOR via the maintained sdk→protocol table (advisory by doctrine — the mapping has documented irregularities like 23.x spanning P24→P25; null = unknown, never guessed), and protocolCaps joins the committed cap-registry rows declaring that protocolVersion ({cap, title, status, url}, ≤10). Pure serve-time derivation from already-scanned facts — no new scanning, populates immediately for every repo with a stored sorobanSdkVersion.",

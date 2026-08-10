@@ -1148,6 +1148,8 @@ export interface components {
                     status?: string | null;
                     url?: string;
                 }[];
+                /** @description Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim — the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan. */
+                stellarDeps?: string[];
                 /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
@@ -1676,6 +1678,7 @@ export interface operations {
                             contractInterface?: string[];
                             targetProtocol?: number | null;
                             protocolCaps?: Record<string, never>[];
+                            stellarDeps?: string[];
                             mainnetContractId?: string | null;
                             sdkCapabilities?: string[];
                         } | null;

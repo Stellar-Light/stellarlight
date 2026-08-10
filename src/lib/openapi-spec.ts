@@ -667,6 +667,10 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "object" },
 												},
+												stellarDeps: {
+													type: "array",
+													items: { type: "string" },
+												},
 												mainnetContractId: {
 													type: "string",
 													nullable: true,
@@ -4439,6 +4443,12 @@ export const spec: OpenAPISpec = {
 								},
 								description:
 									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
+							},
+							stellarDeps: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim — the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan.",
 							},
 							mainnetContractId: {
 								type: "string",
