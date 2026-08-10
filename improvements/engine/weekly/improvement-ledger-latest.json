@@ -1,25 +1,25 @@
 {
-	"generatedAt": "2026-08-08T15:58:05.477Z",
-	"total": 321,
-	"open": 270,
-	"closed": 51,
+	"generatedAt": "2026-08-10T22:46:05.685Z",
+	"total": 347,
+	"open": 282,
+	"closed": 65,
 	"verified": 7,
-	"cleared": 44,
-	"closingRate": 0.16,
-	"oldestOpenDays": 17,
+	"cleared": 58,
+	"closingRate": 0.19,
+	"oldestOpenDays": 19,
 	"inWave": 0,
-	"highOpen": 10,
+	"highOpen": 4,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 240,
-			"total": 270
+			"open": 241,
+			"total": 280
 		},
 		{
 			"surface": "directory",
-			"open": 14,
-			"total": 14
+			"open": 25,
+			"total": 30
 		},
 		{
 			"surface": "consumer",
@@ -47,70 +47,70 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 16
+			"days": 19
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 16
+			"days": 19
 		}
 	],
 	"topOpen": [
 		{
-			"id": "engine-d-demand:saleem",
+			"id": "engine-d-demand:octoplace",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "saleem",
+			"probe": "octoplace",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:sorted",
+			"id": "engine-d-demand:pacto",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "sorted",
+			"probe": "pacto",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:kutana",
+			"id": "engine-d-demand:hummingbot",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "kutana",
+			"probe": "hummingbot",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:8004",
+			"id": "engine-d-demand:sidereal",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "8004",
+			"probe": "sidereal",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:bastian",
+			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
 			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "bastian",
-			"severity": "high"
+			"source": "engine-a-recall",
+			"probe": "idos in top-3 for 'is idOS live'",
+			"severity": "medium"
 		},
 		{
-			"id": "engine-d-demand:hypertron",
+			"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
 			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "hypertron",
-			"severity": "high"
+			"source": "engine-a-recall",
+			"probe": "nownodes in top-3 for 'is NOWNodes live'",
+			"severity": "medium"
 		},
 		{
-			"id": "engine-d-demand:jobs-hiring-bounty-freelance-contributor-platfor",
+			"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
 			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "jobs hiring bounty freelance contributor platform talent marketplace",
-			"severity": "high"
+			"source": "engine-a-recall",
+			"probe": "lightecho in top-3 for 'is Lightecho live'",
+			"severity": "medium"
 		},
 		{
-			"id": "engine-d-demand:stxlm",
+			"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
 			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "stxlm",
-			"severity": "high"
+			"source": "engine-a-recall",
+			"probe": "infstones in top-3 for 'is InfStones live'",
+			"severity": "medium"
 		}
 	]
 }
