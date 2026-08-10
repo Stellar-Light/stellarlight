@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"research: `repo-docs` source — canonical in-repo documentation (per-protocol guides, kit docs) joins the research corpus (openapi@1.8.40).",
+		detail:
+			"Curated ingest of documentation that lives INSIDE canonical ecosystem repos and was invisible to retrieval — the motivating case: Stellar-Indexer-SDK ships per-protocol extension guides under src/protocols/*/README.md, so 'how do I index Blend state' had nothing to surface. Initial sources: Stellar-Indexer-SDK, Stellar-Wallets-Kit, colibri (+examples), passkey-kit. Chunked, hashed, embedded like SEPs/CAPs; filter with ?source=repo-docs. Curated allowlist, not a corpus-wide README sweep — extended as consumers ask.",
+	},
+	{
+		date: "2026-08-10",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"repos: `stellarDeps` — the dependency graph on searchRepos codeVerified; package-name queries surface dependents (openapi@1.8.39).",
 		detail:
 			"Stellar-ecosystem dependencies extracted from each repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched and stored verbatim. Forward read: a repo row lists the stack it builds on. Reverse read: searching a package name (passkey-kit, @stellar/stellar-sdk, blend-contract-sdk) surfaces its DEPENDENTS — adoption evidence from manifests, which no README mention can fake. Populates as scan waves reach repos (the daily unified wave + re-scan policy).",

@@ -164,6 +164,7 @@ export async function GET(req: NextRequest) {
 		"scf-proposal",
 		"lumenloop",
 		"lumenloop-research",
+		"repo-docs",
 		"audit",
 		"incident",
 		"security-program",

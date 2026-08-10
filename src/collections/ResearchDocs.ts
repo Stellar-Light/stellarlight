@@ -84,6 +84,10 @@ export const ResearchDocs: CollectionConfig = {
 					value: "lumenloop-research",
 				},
 				{
+					label: "Repo docs (canonical in-repo documentation)",
+					value: "repo-docs",
+				},
+				{
 					label: "Audit (sorobansecurity.com)",
 					value: "audit",
 				},

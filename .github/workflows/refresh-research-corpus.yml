@@ -84,6 +84,8 @@ jobs:
           # the unauthenticated core/ listing intermittently 4xx'd.
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-caps.ts --execute
+      - name: Ingest in-repo docs (canonical repos)
+        run: pnpm exec tsx scripts/ingest-repo-docs.ts --execute
 
       - name: Ingest lumenloop (awesome-stellar-community-fund)
         if: inputs.source == '' || inputs.source == 'lumenloop'
