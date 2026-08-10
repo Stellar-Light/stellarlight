@@ -119,6 +119,13 @@ const PROBES: Probe[] = [
 		pin: ["slug", "comet"],
 		field: "scfRoundAwards",
 	},
+	{
+		name: "research.repo-docs (in-repo docs — indexer Blend extension guide)",
+		path: "/api/research?q=stellar+indexer+blend+extension&source=repo-docs&limit=6",
+		rowsKey: "results",
+		pin: ["source", "repo-docs"],
+		field: "url",
+	},
 	// ── research: CAP crosswalk fields ─────────────────────────────────────
 	{
 		name: "research.capStatus (cap-registry crosswalk, CAP-65 Final)",

@@ -2113,6 +2113,7 @@ export const spec: OpenAPISpec = {
 								"scf-proposal",
 								"lumenloop",
 								"lumenloop-research",
+							"repo-docs",
 								"audit",
 								"incident",
 								"security-program",
