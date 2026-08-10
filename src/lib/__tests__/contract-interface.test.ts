@@ -90,6 +90,51 @@ describe("extractContractInterface", () => {
 		);
 	});
 
+	it("trait impls export BARE fns (FxDAO idiom — pub is illegal there)", () => {
+		const traitSrc = `
+use soroban_sdk::{contract, contractimpl, Address, Env};
+#[contract]
+pub struct VaultsContract;
+#[contractimpl]
+impl VaultsContractTrait for VaultsContract {
+    fn init(e: Env, admin: Address) {
+        admin.require_auth();
+    }
+    fn get_admin(e: Env) -> Address {
+        e.storage().instance().get(&0).unwrap()
+    }
+}
+`;
+		const iface = extractContractInterface([
+			{ path: "contracts/vaults/src/contract.rs", text: traitSrc },
+		]);
+		expect(iface).toEqual([
+			"VaultsContract.init(admin: Address)",
+			"VaultsContract.get_admin() -> Address",
+		]);
+	});
+
+	it("inherent impls export ONLY pub fns — private helpers never enter the ABI", () => {
+		const inherentSrc = `
+use soroban_sdk::{contract, contractimpl, Env};
+#[contract]
+pub struct C;
+#[contractimpl]
+impl C {
+    pub fn public_op(env: Env) -> u32 {
+        Self::helper()
+    }
+    fn helper() -> u32 {
+        7
+    }
+}
+`;
+		const iface = extractContractInterface([
+			{ path: "src/lib.rs", text: inherentSrc },
+		]);
+		expect(iface).toEqual(["C.public_op() -> u32"]);
+	});
+
 	it("skips test paths and files without #[contractimpl]", () => {
 		const iface = extractContractInterface([
 			{ path: "tests/swap_test.rs", text: swapSrc },

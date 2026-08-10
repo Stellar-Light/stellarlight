@@ -129,10 +129,14 @@ export function symbolsHaystack(symbols: unknown): string {
 const MAX_IFACE_FNS = 48;
 const MAX_SIG_LEN = 200;
 
+// Group 1 = trait name when the impl is `impl Trait for Struct` (FxDAO
+// idiom), group 2 = the contract type. Trait-impl methods CANNOT be `pub`
+// in Rust — the macro exports all of them; inherent impls export only
+// `pub fn`. The signature matcher mirrors exactly that rule.
 const IMPL_RE =
-	/#\s*\[\s*contractimpl\s*\]\s*(?:pub\s+)?impl(?:\s*<[^>\n]{0,80}>)?\s+(?:[A-Za-z_][A-Za-z0-9_]*\s+for\s+)?([A-Za-z_][A-Za-z0-9_]*)/g;
+	/#\s*\[\s*contractimpl\s*\]\s*(?:pub\s+)?impl(?:\s*<[^>\n]{0,80}>)?\s+(?:([A-Za-z_][A-Za-z0-9_]*)\s+for\s+)?([A-Za-z_][A-Za-z0-9_]*)/g;
 const SIG_RE =
-	/\bpub\s+fn\s+([a-z_][a-z0-9_]*)\s*(?:<[^>\n]{0,80}>)?\s*(\([^)]{0,600}\))\s*(->\s*[^;{]{1,160})?\{/g;
+	/\b(pub\s+)?fn\s+([a-z_][a-z0-9_]*)\s*(?:<[^>\n]{0,80}>)?\s*(\([^)]{0,600}\))\s*(->\s*[^;{]{1,160})?\{/g;
 
 /** Signature surface of every #[contractimpl] block across a repo's fetched
  * Rust sources. Entries look like `Swap.swap(a: Address, amount: i128) -> i128`.
@@ -148,7 +152,8 @@ export function extractContractInterface(blobs: SymbolBlob[]): string[] {
 		if (!/#\s*\[\s*contractimpl\s*\]/.test(b.text)) continue;
 		const clean = stripCommentsAndStrings(b.text);
 		for (const im of clean.matchAll(IMPL_RE)) {
-			const contract = im[1];
+			const isTraitImpl = !!im[1];
+			const contract = im[2];
 			// Brace-match the impl block so signatures never leak in from a
 			// neighbouring non-contract impl in the same file.
 			const open = clean.indexOf("{", im.index + im[0].length);
@@ -162,15 +167,19 @@ export function extractContractInterface(blobs: SymbolBlob[]): string[] {
 			}
 			const block = clean.slice(open + 1, i - 1);
 			for (const m of block.matchAll(SIG_RE)) {
-				const name = m[1];
+				// bare fn is the exported surface ONLY in trait impls; in
+				// inherent impls the macro exports pub fns alone — a bare fn
+				// there is a private helper and must not enter the ABI.
+				if (!m[1] && !isTraitImpl) continue;
+				const name = m[2];
 				const key = `${contract}.${name}`.toLowerCase();
 				if (seen.has(key)) continue;
 				seen.add(key);
-				const args = m[2]
+				const args = m[3]
 					.replace(/\s+/g, " ")
 					.replace(/^\(\s*_?e(?:nv)?\s*:\s*&?\s*Env\s*(?:,\s*|(?=\)))/, "(")
 					.replace(/,?\s*\)$/, ")");
-				const ret = m[3] ? ` ${m[3].replace(/\s+/g, " ").trim()}` : "";
+				const ret = m[4] ? ` ${m[4].replace(/\s+/g, " ").trim()}` : "";
 				let sig = `${contract}.${name}${args}${ret === " -> ()" ? "" : ret}`;
 				if (sig.length > MAX_SIG_LEN) sig = `${sig.slice(0, MAX_SIG_LEN)}…`;
 				out.push(sig);
