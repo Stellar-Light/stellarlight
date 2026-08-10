@@ -54,6 +54,16 @@ export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{
 /** Oldest sdk major still "supported" (>= this → supported/current, < this → deprecated). */
 export const SUPPORTED_FLOOR_MAJOR = 21;
 
+/** Protocol a given sdk MAJOR targets per the maintained table, or null when
+ * the major isn't in the table — never guessed. ADVISORY by the same doctrine
+ * as versionStatus: the mapping has documented irregularities (23.x spans
+ * P24→P25), so consumers get "derived from the sdk major as of TABLE_ASOF",
+ * not an attestation. */
+export function protocolForSdkMajor(major: number | null): number | null {
+	if (major === null) return null;
+	return SDK_MAJOR_PROTOCOL.find((r) => r.major === major)?.protocol ?? null;
+}
+
 export type VersionStatus = "current" | "supported" | "deprecated" | "unknown";
 
 /**

@@ -1139,6 +1139,15 @@ export interface components {
                 symbols?: string[];
                 /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
                 contractInterface?: string[];
+                /** @description Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities — 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed. */
+                targetProtocol?: number | null;
+                /** @description CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null. */
+                protocolCaps?: {
+                    cap?: number;
+                    title?: string;
+                    status?: string | null;
+                    url?: string;
+                }[];
                 /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
@@ -1665,6 +1674,8 @@ export interface operations {
                             scannedAt?: string | null;
                             symbols?: string[];
                             contractInterface?: string[];
+                            targetProtocol?: number | null;
+                            protocolCaps?: Record<string, never>[];
                             mainnetContractId?: string | null;
                             sdkCapabilities?: string[];
                         } | null;
