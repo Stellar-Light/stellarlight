@@ -19,6 +19,14 @@ on:
   workflow_run:
     workflows: ["Scan repo code (signals-only)"]
     types: [completed]
+# 2026-08-11: four rapid --only scans auto-fired four CONCURRENT full-corpus
+# chase enriches — PAT starvation + same-row write races (read-back caught 230
+# fields not persisting as sent). One group serializes runs AND collapses
+# queued duplicates: GitHub keeps at most one running + one pending per group,
+# so N chases debounce to 2 — the last full pass covers all prior scans.
+concurrency:
+  group: enrich-repos
+  cancel-in-progress: false
 permissions: { contents: read }
 jobs:
   enrich:
