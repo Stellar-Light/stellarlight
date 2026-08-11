@@ -190,11 +190,27 @@ async function main() {
 							}`,
 						);
 					} else {
+						// sls-024: the inherited label's citable source IS the lumenloop
+						// file this row syncs from. Stamp it (plus a dated basis) when
+						// the row has no stronger basis — never stomp human-verified/
+						// site-liveness/onchain evidence.
+						const weakBasis =
+							!doc.statusBasis ||
+							doc.statusBasis === "source-inherited" ||
+							doc.statusBasis === "unverified";
+						const provenanceStamp = weakBasis
+							? {
+									statusBasis: "source-inherited",
+									statusAsOf: new Date(),
+									statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
+								}
+							: {};
 						await payload.update({
 							collection: "projects",
 							id: doc.id,
 							data: {
 								...patch,
+								...provenanceStamp,
 								slug,
 								provenance: {
 									...mapped.provenance,
@@ -234,7 +250,14 @@ async function main() {
 				} else {
 					const created = await payload.create({
 						collection: "projects",
-						data: { ...mapped, slug } as any,
+						data: {
+							...mapped,
+							statusBasis: "source-inherited",
+							statusAsOf: new Date(),
+							statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
+							slug,
+							// biome-ignore lint/suspicious/noExplicitAny: payload create shape
+						} as any,
 					});
 					console.log(`  CREATED: ${mapped.name} → ${created.id}`);
 					stats.projects.inserted++;
