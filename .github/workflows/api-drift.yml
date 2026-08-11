@@ -34,6 +34,9 @@ jobs:
       - name: Field-population guard (values arrive, not just shape)
         if: always()
         run: npx -y tsx scripts/check-field-population.ts
+      - name: Skill-reference coverage (sk-009 — served skill must not lag the contract)
+        if: always()
+        run: npx -y tsx scripts/check-skill-reference.ts
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:
