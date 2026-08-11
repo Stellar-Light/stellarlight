@@ -542,6 +542,41 @@ async function main() {
 		`  scanned ${scanned} active records; ${ruleHits["R8-source-inherited-bulk"] ?? 0} bulk write(s) planned`,
 	);
 
+	// R9 (sls-024 2026-08-11 recurrence): NON-active rows fell through R8's
+	// active-only floor — orbitcdp served `Inactive` with a NULL basis, an
+	// accusation with no qualifier, the finding's worst case. Per the finding's
+	// own rule ("when the source is unknown, retain the record but mark that
+	// fact explicitly"), any remaining row with an empty basis — any status —
+	// gets the explicit `unverified` basis, dated. Evidence-based rules always
+	// win because they ran first.
+	{
+		let page = 1;
+		let r9 = 0;
+		for (;;) {
+			const r = await payload.find({
+				collection: "projects",
+				limit: 500,
+				page,
+				depth: 0,
+			});
+			// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+			for (const doc of r.docs as any[]) {
+				if (considered.has(doc.slug)) continue;
+				if (doc.statusBasis) continue;
+				if (doc.canonicalSlug) continue;
+				const firstSeen: string | undefined =
+					doc.provenance?.firstSeenAt ?? doc.createdAt;
+				const set: Record<string, unknown> = { statusBasis: "unverified" };
+				if (!doc.statusAsOf && firstSeen) set.statusAsOf = new Date(firstSeen);
+				r9++;
+				writes.push({ slug: doc.slug, rule: "R9-unverified-floor", set });
+			}
+			if (!r.hasNextPage) break;
+			page++;
+		}
+		console.log(`  R9 unverified floor: ${r9} non-active blank(s) planned`);
+	}
+
 	// ── plan summary ──
 	console.log("\n── Plan ──");
 	for (const [rule, n] of Object.entries(ruleHits).sort())

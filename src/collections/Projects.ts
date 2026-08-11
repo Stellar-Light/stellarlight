@@ -147,6 +147,7 @@ export const Projects: CollectionConfig = {
 				"onchain-activity",
 				"human-verified",
 				"source-inherited",
+				"unverified",
 			],
 			admin: {
 				description:

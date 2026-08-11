@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-11",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"projects: lifecycle provenance populated corpus-wide — `statusSourceUrl` on inherited rows, explicit `unverified` basis, never bare nulls (openapi@1.8.42).",
+		detail:
+			"Closes the sls-024 population gap: the nightly lumenloop sync now stamps statusSourceUrl (the canonical lumenloop source file), statusBasis and statusAsOf on every row it maintains (stronger evidence bases are never overwritten); a backfill floor gives every remaining blank — including Inactive rows, previously un-qualified accusations — the explicit `unverified` basis with a date. New statusBasis enum value: `unverified` = the label is retained but its source is unknown; per the never-accuse discipline a Live or Inactive label with basis unverified must not be read as verified lifecycle truth. Regression fixtures pin slender, laina, k2-lend and orbitcdp in the daily field-population guard.",
+	},
+	{
+		date: "2026-08-11",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"hackathons: free-text `q` lookup — named-event resolution without paging the catalog; plus Protocol 27 in the versions table (openapi@1.8.41).",

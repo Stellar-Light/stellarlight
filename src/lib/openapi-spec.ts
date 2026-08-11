@@ -3719,6 +3719,7 @@ export const spec: OpenAPISpec = {
 							"onchain-activity",
 							"human-verified",
 							"source-inherited",
+							"unverified",
 						],
 						description:
 							"What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.",

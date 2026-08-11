@@ -104,6 +104,34 @@ const PROBES: Probe[] = [
 		pin: ["fullName", "blend-capital/blend-contracts-v2"],
 		field: "codeVerified.protocolCaps",
 	},
+	{
+		name: "projects.statusBasis (sls-024 fixture — slender)",
+		path: "/api/projects/search?q=slender&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "slender"],
+		field: "statusBasis",
+	},
+	{
+		name: "projects.statusBasis (sls-024 fixture — laina)",
+		path: "/api/projects/search?q=laina&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "laina"],
+		field: "statusBasis",
+	},
+	{
+		name: "projects.statusBasis (sls-024 fixture — k2-lend)",
+		path: "/api/projects/search?q=k2+lend&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "k2-lend"],
+		field: "statusBasis",
+	},
+	{
+		name: "projects.statusBasis (sls-024 fixture — orbitcdp)",
+		path: "/api/projects/search?q=orbitcdp&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "orbitcdp"],
+		field: "statusBasis",
+	},
 	// ── projects: SCF official-record fields ───────────────────────────────
 	{
 		name: "projects.scfRoundAwards (bondhive #767/#772 backfill)",
