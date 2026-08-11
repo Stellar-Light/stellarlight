@@ -40,7 +40,10 @@ const LIB_RS = `#![no_std]\nuse soroban_sdk::{contract, contractimpl, Env, Addre
 
 describe("versionStatusOf — the constant that must never be wrong", () => {
 	it("maps a current major to current", () => {
-		expect(versionStatusOf("26.0.0")).toBe("current");
+		expect(versionStatusOf("27.0.5")).toBe("current");
+	});
+	it("last protocol's major is supported, not current (P27 live 2026-08-11)", () => {
+		expect(versionStatusOf("26.0.0")).toBe("supported");
 	});
 	it("maps a recent supported major to supported", () => {
 		expect(versionStatusOf("22.0.3")).toBe("supported");

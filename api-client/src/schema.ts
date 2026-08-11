@@ -1719,6 +1719,8 @@ export interface operations {
                 status?: "upcoming" | "active" | "completed";
                 /** @description Filter by organizer slug */
                 organizer?: string;
+                /** @description Free-text name lookup — matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents). */
+                q?: string;
                 /** @description Restrict to one feed (curated vs DoraHacks) */
                 source?: "curated" | "dorahacks";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */

@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-11",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"hackathons: free-text `q` lookup — named-event resolution without paging the catalog; plus Protocol 27 in the versions table (openapi@1.8.41).",
+		detail:
+			"Raven's prior-art review flagged 'scout_hackathons ignores free-text q' as the capability gap blocking named-event eval questions — ?q= now matches event name/title/organizer (case-insensitive substring). Also: LATEST_PROTOCOL 26→27 (verified: Horizon current_protocol_version 27, sdk v27.0.x since 2026-07-21) — versionStatus judgments recalibrate (sdk 26 → supported), targetProtocol maps sdk 27 → P27, and the committed cap-registry re-verified (2 status movements). While probing: category/scfAwarded project filters and /api/hackathons/compare?slugs= were confirmed fully functional — earlier external notes calling them unwired/dormant are stale.",
+	},
+	{
 		date: "2026-08-10",
 		surfaces: ["api"],
 		type: "added",
