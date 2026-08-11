@@ -93,13 +93,17 @@ export async function GET(req: NextRequest) {
 	// reads as filtered. Warned, not 400'd — the contract is additive-only.
 	const paramWarning = unknownParamWarning(
 		sp,
-		["status", "organizer", "source", "limit"],
+		["status", "organizer", "source", "limit", "q"],
 		{
-			advertise: ["status", "organizer", "source", "limit"],
+			advertise: ["status", "organizer", "source", "limit", "q"],
 			hint: "Per-event detail (tracks, prizes, winners) lives on /api/hackathons/{slug}.",
 		},
 	);
 	const statusFilter = sp.get("status");
+	// Free-text name lookup (Raven prior-art review 2026-06-25: "scout_hackathons
+	// ignores free-text q" blocked named-event questions — resolve an event by
+	// name/organizer substring instead of forcing clients to page the catalog).
+	const q = sp.get("q")?.trim().toLowerCase() || null;
 	const organizerFilter = sp.get("organizer");
 	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
 	const limit = clampLimit(sp.get("limit"), 100, 300);
@@ -225,6 +229,13 @@ export async function GET(req: NextRequest) {
 	if (organizerFilter) {
 		hackathons = hackathons.filter(
 			(h) => h.organizer?.slug === organizerFilter,
+		);
+	}
+	if (q) {
+		hackathons = hackathons.filter((h) =>
+			`${h.name ?? ""} ${h.organizer?.name ?? ""} ${h.organizer?.slug ?? ""}`
+				.toLowerCase()
+				.includes(q),
 		);
 	}
 

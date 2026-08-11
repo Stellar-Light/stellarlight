@@ -792,6 +792,13 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
+						name: "q",
+						in: "query",
+						description:
+							"Free-text name lookup — matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents).",
+						schema: { type: "string" },
+					},
+					{
 						name: "source",
 						in: "query",
 						description: "Restrict to one feed (curated vs DoraHacks)",

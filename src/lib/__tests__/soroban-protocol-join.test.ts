@@ -11,6 +11,7 @@ describe("protocolForSdkMajor", () => {
 		expect(protocolForSdkMajor(20)).toBe(20);
 		expect(protocolForSdkMajor(22)).toBe(22);
 		expect(protocolForSdkMajor(26)).toBe(26);
+		expect(protocolForSdkMajor(27)).toBe(27);
 	});
 
 	it("pins the Whisk irregularity: sdk 23.x targets protocol 24", () => {

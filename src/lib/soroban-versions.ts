@@ -20,10 +20,10 @@
  * scanner's CB6 sanity check exists for exactly this.
  */
 
-export const TABLE_ASOF = "2026-07-04";
+export const TABLE_ASOF = "2026-08-11";
 
 /** The latest GA protocol version as of TABLE_ASOF. Drives current/supported. */
-export const LATEST_PROTOCOL = 26;
+export const LATEST_PROTOCOL = 27;
 
 /**
  * soroban-sdk MAJOR version → the Stellar protocol it targets. Keyed by the sdk
@@ -49,6 +49,9 @@ export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{
 	{ major: 24, protocol: 25 },
 	{ major: 25, protocol: 25 },
 	{ major: 26, protocol: 26 },
+	// P27 live (verified 2026-08-11: Horizon root current_protocol_version: 27,
+	// sdk v27.0.x released since 2026-07-21).
+	{ major: 27, protocol: 27 },
 ];
 
 /** Oldest sdk major still "supported" (>= this → supported/current, < this → deprecated). */
