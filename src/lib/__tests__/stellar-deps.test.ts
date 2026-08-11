@@ -53,3 +53,25 @@ soroban-sdk = { features = ["testutils"] }
 		).toEqual([]);
 	});
 });
+
+// Agent-payments capability tags live beside the deps extractor's era.
+import { detectSdkCapabilities } from "../code-symbols";
+
+describe("detectSdkCapabilities — agent-payments era", () => {
+	it("x402 fires on the resource-server idiom, not prose mentions", () => {
+		const server = `
+import { handleX402Supported } from './routes/x402-supported'
+export function classify(req: Request) {
+  if (req.headers.get('X-PAYMENT')) return 'paid'
+}
+`;
+		expect(detectSdkCapabilities([{ path: "src/index.ts", text: server }])).toContain("x402");
+		const prose = `// our roadmap mentions x402 someday\nexport const a = 1;`;
+		expect(detectSdkCapabilities([{ path: "src/a.ts", text: prose }])).toEqual([]);
+	});
+
+	it("mpp fires on @stellar/mpp charge-client imports", () => {
+		const client = `import { stellar } from '@stellar/mpp/charge/client'\nexport const pay = stellar;`;
+		expect(detectSdkCapabilities([{ path: "src/pay.ts", text: client }])).toContain("mpp");
+	});
+});
