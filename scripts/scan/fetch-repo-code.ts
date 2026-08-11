@@ -172,7 +172,12 @@ export function selectDepthPaths(
 	// smaller Stellar ones — 19k SLOC sampled, zero capability hits. STRONG
 	// markers are unambiguous Stellar paths; WEAK are generic fintech words.
 	const JS_STRONG =
-		/(stellar|soroban|srb|freighter|passkey|lobstr|albedo|xbull|sep[-_]?\d|horizon)/i;
+		// x402/mpp added 2026-08-11: agent-payment repos keep their Stellar
+		// integration under x402/mpp paths (rozo's src/routes/x402-supported.ts,
+		// mpp-services/) with no "stellar" in any filename — the old markers
+		// fetched admin scripts while the actual payment server went unsampled
+		// (caps stayed [] even after the x402/mpp patterns shipped).
+		/(stellar|soroban|srb|freighter|passkey|lobstr|albedo|xbull|sep[-_]?\d|horizon|x402|mpp)/i;
 	const JS_WEAK =
 		/(wallet|sign|payment|anchor|contract|bridge|tx|transaction|rpc)/i;
 	const jsCandidates = tree
