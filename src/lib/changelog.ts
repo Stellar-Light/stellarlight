@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-11",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"repos: sdkCapabilities gains `x402` and `mpp` tags — the agent-payments era becomes filterable (openapi@1.8.43).",
+		detail:
+			"The capability tag set predated the agent-payments stack: rozo-mpprouter (a full x402 resource server + facilitator on Stellar mainnet) served sdkCapabilities []. Two new closed-set tags fire on concrete import/identifier patterns only (never prose mentions): x402 (@x402/* imports, X-PAYMENT header handling, x402 handler/route identifiers) and mpp (@stellar/mpp imports, mpp/charge + mpp/session paths, Mpp client identifiers). 'Which repos actually implement x402 payments' is now answerable from code truth. Populates as scan waves re-reach repos.",
+	},
+	{
+		date: "2026-08-11",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"projects: lifecycle provenance populated corpus-wide — `statusSourceUrl` on inherited rows, explicit `unverified` basis, never bare nulls (openapi@1.8.42).",

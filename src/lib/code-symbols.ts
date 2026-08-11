@@ -269,6 +269,18 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 		/\bexport\s+(?:const|async\s+function|function)\s+(?:getPublicKey|signTransaction|signMessage|signAuthEntry|requestAccess)\b/,
 	],
 	["passkey", /passkey-kit|\bPasskeyKit\b|webauthn/i],
+	// Agent-payments era (2026-08-11, from real idioms: rozo-mpprouter's x402
+	// resource-server + the @stellar/mpp charge client). Import paths and
+	// concrete identifiers only — a prose mention of "x402" in a comment is
+	// not an implementation.
+	[
+		"x402",
+		/@x402\/|\bX-PAYMENT\b|X402[A-Z][a-z]|[a-z]X402\b|x402[-_][a-z]/,
+	],
+	[
+		"mpp",
+		/@stellar\/mpp|\bmpp\/(?:charge|session)\b|\bMpp(?:Charge|Session|Client)\b/,
+	],
 	["fee-bump", /\bfeeBump\b|\bTransactionBuilder\.buildFeeBumpTransaction\b/i],
 ];
 
