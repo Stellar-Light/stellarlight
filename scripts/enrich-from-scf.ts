@@ -261,6 +261,21 @@ async function main() {
 		"pelago-airswift-nkm": "airswift",
 		// Soroban → Stellar rename class (product renamed, SCF page didn't).
 		"soroban-security-portal-7ea": "stellar-security-portal",
+	// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
+	// slugs, each page-verified locally — parseRoundVerdicts on the official
+	// page reproduces the finding's exact round + budget before mapping.
+	// vottun disambiguated by evidence: the developer-platform page carries
+	// the r27 award; the wirex-vottun page does not.
+	"allbridge-core-3lc": "allbridge",
+	"obsrvr-prism-fvl": "obsrvr",
+	"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
+	"digibank-non-custodial-n1t": "digibank",
+	"vottun-developer-platform-c2v": "vottun",
+	"upesa-formerly-utoken-pbs": "utoken",
+	"usdc-swap-stellar-cctp-bridge-yv8": "usdc-swap",
+	"transfuse-multichain-asset-bridge-iyi": "transfuse",
+	"catalyst-blockchain-manager-woe": "catalyst",
+	"blade-tradfi-to-defi-bridge-zgq": "blade",
 	};
 
 	const matched: { scf: any; ours: any }[] = [];

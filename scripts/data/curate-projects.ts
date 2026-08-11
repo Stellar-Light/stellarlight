@@ -168,7 +168,8 @@ const SCF_FIX: Record<
 	string,
 	{
 		awarded: boolean;
-		totalAwarded: number;
+		/** null = the project's SCF-page total is undisclosed — preserve, never derive from round sums. */
+		totalAwarded: number | null;
 		awardedRounds: number[];
 		/** sls-061: per-round official amounts for projects the SCF API cannot
 		 * match (no API entry → the enricher can never populate roundAwards).
@@ -197,6 +198,20 @@ const SCF_FIX: Record<
 	// "Komet"), so the enricher can never populate roundAwards — curated here
 	// from the same sls-030 hand-verified official pages. awardType wasn't
 	// captured in that verification → null, never guessed.
+	// sls-063 (2026-08-11): 7 rows whose official pages are either absent from
+	// the SCF listing (sstream/wagelink/unalivio/tucambio) or don't parse the
+	// award under any candidate slug (stride/palremit/autoaction — stride-4uu
+	// etc. exist but carry no parseable award verdict). Round + budget from the
+	// finding's official-submission recheck, spot-verified; totals preserved
+	// verbatim (null = undisclosed, never derived). awardType null — never
+	// guessed. Digibank r44 deliberately NOT inferred, per the finding.
+	sstream: { awarded: true, totalAwarded: 36000, awardedRounds: [16], roundAwards: [{ round: 16, amountUSD: 36000, awardType: null }] },
+	wagelink: { awarded: true, totalAwarded: 50000, awardedRounds: [24], roundAwards: [{ round: 24, amountUSD: 50000, awardType: null }] },
+	unalivio: { awarded: true, totalAwarded: null, awardedRounds: [32], roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }] },
+	tucambio: { awarded: true, totalAwarded: null, awardedRounds: [37], roundAwards: [{ round: 37, amountUSD: 75000, awardType: null }] },
+	stride: { awarded: true, totalAwarded: 120000, awardedRounds: [33], roundAwards: [{ round: 33, amountUSD: 120000, awardType: null }] },
+	palremit: { awarded: true, totalAwarded: 60000, awardedRounds: [32], roundAwards: [{ round: 32, amountUSD: 60000, awardType: null }] },
+	autoaction: { awarded: true, totalAwarded: 50000, awardedRounds: [29], roundAwards: [{ round: 29, amountUSD: 50000, awardType: null }] },
 	comet: {
 		awarded: true,
 		totalAwarded: 291000,
