@@ -107,6 +107,13 @@ const PROBES: Probe[] = [
 		field: "scfSourceUrl",
 	},
 	{
+		name: "repos.codeVerified.scannedRef (provenance pin, rozo)",
+		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "mpprouter/rozo-mpprouter"],
+		field: "codeVerified.scannedRef",
+	},
+	{
 		name: "repos.codeVerified.sdkCapabilities (write-path fix 2026-08-12, rozo x402)",
 		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
 		rowsKey: "repos",

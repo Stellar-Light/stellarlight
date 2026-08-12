@@ -64,6 +64,7 @@ interface RepoDoc {
 	versionStatus?: string | null;
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
+	scannedRef?: unknown;
 	codeSymbols?: unknown;
 	contractInterface?: unknown;
 	stellarDeps?: unknown;
@@ -167,6 +168,8 @@ export interface CodeVerified {
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
+	/** Commit SHA the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. */
+	scannedRef: string | null;
 	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
 	contractInterface: string[];
 	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
@@ -214,6 +217,7 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
+		scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
 		symbols: Array.isArray(d.codeSymbols)
 			? d.codeSymbols
 					.filter((s): s is string => typeof s === "string")

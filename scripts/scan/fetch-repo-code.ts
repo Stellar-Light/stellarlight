@@ -232,6 +232,9 @@ export function selectDepthPaths(
 }
 
 export interface RepoCodeResult {
+	/** Commit SHA of the default branch the tree was fetched at — pins every
+	 * code fact to github.com/<full>/tree/<scannedRef>. Null if unresolvable. */
+	scannedRef: string | null;
 	scan: ScanInput; // → detectStellarProof
 	proof: StellarProof;
 	facts: CodeFacts;
@@ -307,6 +310,14 @@ export async function fetchRepoCode(
 	const treeRes = await (
 		await gh(`/repos/${owner}/${name}/git/trees/${branch}?recursive=1`)
 	).json();
+	// Commit SHA (not the tree sha — GitHub URLs resolve commits): one light
+	// branches call so every fact this scan writes is citable at a commit.
+	const scannedRef: string | null = await gh(
+		`/repos/${owner}/${name}/branches/${encodeURIComponent(branch)}`,
+	)
+		.then((r) => r.json())
+		.then((b) => (typeof b?.commit?.sha === "string" ? b.commit.sha : null))
+		.catch(() => null);
 	const tree: TreeEntry[] = (treeRes.tree ?? []).map(
 		(t: { path: string; type: string; size?: number; sha: string }) => ({
 			path: t.path,
@@ -386,6 +397,7 @@ export async function fetchRepoCode(
 	};
 
 	return {
+		scannedRef,
 		scan,
 		proof,
 		facts,
