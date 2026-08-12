@@ -441,6 +441,24 @@ export const Partners: CollectionConfig = {
 				},
 			],
 		},
+		{
+			name: "tomlSourceUrl",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"SYSTEM-STAMPED: the stellar.toml URL the anchor-capability fields were last enriched from",
+			},
+		},
+		{
+			name: "tomlFetchedAt",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"SYSTEM-STAMPED: ISO date of the last successful stellar.toml fetch+parse",
+			},
+		},
 
 		// ── On-chain proof (SYSTEM-OWNED — enrichment run owns it) ─────────
 		// The git-free "live on Stellar" trust signal for closed-source anchors:

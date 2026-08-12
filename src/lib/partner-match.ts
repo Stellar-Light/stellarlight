@@ -50,6 +50,8 @@ export interface PublicPartner {
 	assets: string[];
 	/** SEP standards implemented (sep-6, sep-24, sep-31). */
 	seps: string[];
+	tomlSourceUrl: string | null;
+	tomlFetchedAt: string | null;
 	/** Real fiat-ramp capability (on-ramp / off-ramp) from the transfer server. */
 	rampTypes: string[];
 	country: string | null;
@@ -85,6 +87,8 @@ function toPublic(p: any): PublicPartner {
 			.map((a: { code: string }) => a.code)
 			.filter(Boolean),
 		seps: p.seps ?? [],
+		tomlSourceUrl: p.tomlSourceUrl ?? null,
+		tomlFetchedAt: p.tomlFetchedAt ?? null,
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,
 		contactable: Boolean(p.contactEmail || p.contactChannel),

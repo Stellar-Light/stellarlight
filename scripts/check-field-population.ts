@@ -107,6 +107,13 @@ const PROBES: Probe[] = [
 		field: "scfSourceUrl",
 	},
 	{
+		name: "partners.tomlFetchedAt (toml provenance, clpx)",
+		path: "/api/partners?limit=60",
+		rowsKey: "partners",
+		pin: ["slug", "clpx"],
+		field: "tomlFetchedAt",
+	},
+	{
 		name: "repos.codeVerified.scannedRef (provenance pin, rozo)",
 		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
 		rowsKey: "repos",
