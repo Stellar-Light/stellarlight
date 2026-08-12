@@ -179,6 +179,7 @@ export async function GET() {
 				"/api/status",
 				"/api/audits",
 				"/api/changelog",
+				"/api/changes",
 				"/api/leaderboard",
 				"/api/hackathons",
 				"/api/hackathons/{slug}",

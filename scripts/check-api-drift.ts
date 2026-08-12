@@ -391,6 +391,7 @@ async function main() {
 		"/api/builders?limit=5",
 		"/api/hackathons",
 		"/api/leaderboard?limit=5",
+		"/api/changes?since=2026-08-01&limit=5",
 	];
 	const SEP = [0x85, 0x2028, 0x2029];
 	for (const ep of jsonEndpoints) {

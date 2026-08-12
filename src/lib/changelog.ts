@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"GET /api/changes — the change feed: what moved since T, for memory-carrying consumers (openapi@1.8.48).",
+		detail:
+			"A consumer holding cached or remembered claims (an agent memory, an institutional cache) reconciles against /api/changes?since=<ISO> instead of re-reading the corpus. Rows come from stored per-row timestamps (no new write path), newest-first per surface (projects/repos/partners, filterable via surfaces=), each carrying changedAt plus facets naming which DATED fact families moved (status, scf-awards, code-facts, toml; [\"row\"] = undated change, re-read the row). Absence means nothing changed since T \u2014 not an existence claim; deletions surface as 404 on re-read. meta.truncated signals paging via a later since. Pairs with the provenance trios shipped today: the asOf timestamps this feed exposes are the ones award/code/toml facts now carry.",
+	},
+	{
+		date: "2026-08-12",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"partners: tomlSourceUrl + tomlFetchedAt — anchor-capability fields carry their stellar.toml provenance (openapi@1.8.47).",
 		detail:
 			"Provenance slice 3: getPartners, getPartner and the matchmaker rows now carry the exact stellar.toml URL the anchor-capability fields (assets, seps, rampTypes, jurisdiction) were last system-enriched from, and the date of that fetch — so a consumer can re-verify an anchor's SEP claims at the source instead of trusting the directory. Stamped on every successful toml parse (not delta-gated); null = never toml-enriched. Completes the citation trio across the three fact families: SCF awards (1.8.45), repo code facts (1.8.46), anchor capabilities (1.8.47).",
