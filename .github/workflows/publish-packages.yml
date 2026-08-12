@@ -9,10 +9,13 @@
 # api-client smoke test (all read methods against the LIVE API) gates every
 # publish — verify before we advertise.
 #
-# ONE-TIME SETUP: add an `NPM_TOKEN` repo secret — an npm *automation* token with
-# publish rights to the @stellar-light scope (Settings → Secrets and variables →
-# Actions). Until it is set the job SKIPS with a warning instead of failing, so
-# merging a version bump never shows red.
+# AUTH: npm Trusted Publishing (OIDC) — no token secret. npm's post-2025
+# hardening OTP-walls ALL token publishes on 2FA accounts (classic automation
+# tokens are sunset), so CI auth is the workflow identity itself: npm ≥ 11.5.1
+# exchanges the Actions OIDC token automatically when `id-token: write` is
+# granted. ONE-TIME SETUP per package on npmjs.com → package → Settings →
+# Trusted Publisher → GitHub Actions: org `Stellar-Light`, repo `stellarlight`,
+# workflow `publish-packages.yml` (environment blank). Provenance comes free.
 #
 # TO PUBLISH: bump the version in api-client/package.json (or scout-mcp) in your
 # PR; on merge this workflow publishes it. Or run it by hand from the Actions tab.
@@ -38,6 +41,7 @@ concurrency:
 
 permissions:
   contents: read
+  id-token: write # npm Trusted Publishing (OIDC)
 
 jobs:
   publish:
@@ -67,7 +71,6 @@ jobs:
         if: steps.sel.outputs.go == 'true'
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
 
       - name: Resolve name/version + npm state
         id: state
@@ -100,15 +103,10 @@ jobs:
           pnpm build
           pnpm test
 
-      - name: Publish to npm
+      - name: Publish to npm (OIDC)
         if: steps.sel.outputs.go == 'true' && steps.state.outputs.published == 'false'
         working-directory: ${{ matrix.pkg }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::warning::NPM_TOKEN secret is not set — skipping publish of ${{ steps.state.outputs.name }}@${{ steps.state.outputs.ver }}. Add it in Settings → Secrets → Actions, then re-run this workflow from the Actions tab."
-            exit 0
-          fi
+          npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
           npm publish --access public
           echo "::notice::✅ published ${{ steps.state.outputs.name }}@${{ steps.state.outputs.ver }}"
