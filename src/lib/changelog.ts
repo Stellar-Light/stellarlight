@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-12",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.2.0",
+		type: "changed",
+		summary:
+			"scout-mcp 1.2.0 — tool schemas catch up to the 1.8.x API arc (activity filter, hackathons q, leaderboard type, repo-docs source, code-truth fields in descriptions).",
+		detail:
+			"The MCP layer had lagged the live contract since 1.1.12 (July 22): search_repos gains the `activity` filter and its description now names the code-truth layers (contractInterface ABI, targetProtocol+protocolCaps, stellarDeps dependents reverse-read, x402/mpp capability tags, activityState/activitySignals/knowledgeNotes); get_hackathons gains free-text `q` (named-event resolution); get_leaderboard gains the exact `type` filter + dataAsOf/metricDefinitions citation guidance; search_research's source enum adds `repo-docs`.",
+	},
+	{
 		date: "2026-08-11",
 		surfaces: ["api"],
 		type: "added",
