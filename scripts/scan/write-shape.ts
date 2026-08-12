@@ -29,6 +29,8 @@ export interface SignalsInput {
 	codeSymbols: string[];
 	contractInterface: string[];
 	stellarDeps: string[];
+	/** JS/TS SDK capability tags (src/lib/code-symbols.ts detectSdkCapabilities). */
+	sdkCapabilities: string[];
 	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
 	mainnetContractId: string | null;
 }
@@ -77,6 +79,7 @@ export function signalsToWrite(
 		codeSymbols: s.codeSymbols,
 		contractInterface: s.contractInterface,
 		stellarDeps: s.stellarDeps,
+		sdkCapabilities: s.sdkCapabilities,
 		mainnetContractId: s.mainnetContractId,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,

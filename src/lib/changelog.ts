@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-12",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"repos: sdkCapabilities now actually persists — the write path had silently dropped it since the field shipped (openapi@1.8.44).",
+		detail:
+			"detectSdkCapabilities ran on every scan since 2026-07-09, but signalsToWrite (the scanner's write-path safety gate) never carried the key and the Repos collection never declared the field, so every wave computed capabilities and threw them away \u2014 the entire corpus served []. Found by the rozo-mpprouter x402 verification: symbols and stellarDeps from the same pass persisted while capabilities vanished. Fixed across write-shape + schema, guarded by a scan-write-shape test case and a pinned field-population probe (rozo x402). Existing rows populate as scan waves re-reach them; agent-stack repos re-scanned immediately.",
+	},
+	{
+		date: "2026-08-12",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.2.0",
 		type: "changed",

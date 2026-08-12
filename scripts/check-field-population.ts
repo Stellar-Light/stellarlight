@@ -98,6 +98,13 @@ const PROBES: Probe[] = [
 		field: "activityState",
 	},
 	{
+		name: "repos.codeVerified.sdkCapabilities (write-path fix 2026-08-12, rozo x402)",
+		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "mpprouter/rozo-mpprouter"],
+		field: "codeVerified.sdkCapabilities",
+	},
+	{
 		name: "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
 		path: "/api/repos/search?q=blend&limit=6",
 		rowsKey: "repos",

@@ -259,6 +259,15 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "sdkCapabilities",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, \u2026) detected in actual sources \u2014 computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)",
+			},
+		},
+		{
 			name: "mainnetContractId",
 			type: "text",
 			admin: {
