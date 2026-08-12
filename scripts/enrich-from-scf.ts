@@ -276,6 +276,12 @@ async function main() {
 	"transfuse-multichain-asset-bridge-iyi": "transfuse",
 	"catalyst-blockchain-manager-woe": "catalyst",
 	"blade-tradfi-to-defi-bridge-zgq": "blade",
+	// title-prefix rule casualties, same-entity page-verified (2026-08-12):
+	// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
+	// Treasury = Cash Abroad's second submission.
+	"greep-pos-greep-pay-hfe": "greeppay",
+	"zkcrossdex-ipb": "zkcross",
+	"cashabroad-smart-treasury-wla": "cash-abroad",
 	};
 
 	const matched: { scf: any; ours: any }[] = [];
@@ -299,14 +305,40 @@ async function main() {
 			bySlug.get(scfSlugStem) ||
 			byNormName.get(normalize(scfSlugStem));
 
-		// Try partial matching for common patterns (last resort; guard tiny stems
-		// to avoid e.g. "velo" swallowing "velocity").
+		// Partial matching, last resort — TITLE-PREFIX ONLY (sls-043 regression,
+		// 2026-08-12): normalize() strips spaces, so plain substring containment
+		// matched across word seams ("Soroban Disassembler" → soro**band**issa…
+		// wrote another project's r41/$100k onto Band Protocol; "ars" absorbed
+		// FOUR different projects via stell**ars**/…). Even word-boundary
+		// containment fails for generic one-word names ("Basilic — Stablecoin
+		// Rails…" is not the project "Rails"). The rule the data supports: the
+		// official TITLE must START with our project's name at a token boundary
+		// (or vice versa) — "Band Protocol" ↔ "Band" ✓, "DIA Oracles" ↔ "DIA" ✓,
+		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
+		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
+		const spacedNorm = (v: string) =>
+			v
+				.toLowerCase()
+				.replace(/[^a-z0-9]+/g, " ")
+				.trim();
 		if (!ours && normTitle.length >= 4) {
+			const titleSpaced = spacedNorm(cleanTitle);
 			for (const [key, proj] of byNormName) {
-				if (key.includes(normTitle) || normTitle.includes(key)) {
+				if (!key || (!key.includes(normTitle) && !normTitle.includes(key)))
+					continue;
+				const keySpaced = spacedNorm(String(proj.name ?? ""));
+				const [short, long] =
+					keySpaced.length <= titleSpaced.length
+						? [keySpaced, titleSpaced]
+						: [titleSpaced, keySpaced];
+				if (short && (long === short || long.startsWith(`${short} `))) {
 					ours = proj;
-					break;
+				} else {
+					console.log(
+						`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
+					);
 				}
+				break;
 			}
 		}
 

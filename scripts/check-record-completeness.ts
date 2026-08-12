@@ -37,15 +37,13 @@ const KNOWN_EMPTY_ROUND_AWARDS: Record<string, string> = {
 	// submission record with a published budget is verifiable for their
 	// awarded round(s). Our independent sweep reproduced exactly this set.
 	// Never inferred; re-verify if the official pages gain records.
+	// 2026-08-12: merkl/trak/trace/deb/usdc REMOVED — their awarded flags were
+	// matcher poison (another project's page), cleared by fix-scf-rounds
+	// POISON_CLEARS; they are no longer awarded rows, so no allowlist needed.
 	trustswap: "no verifiable official submission record for r36 (sls-063 recheck 2026-08-11)",
-	merkl: "no verifiable official submission record for r40/r41 (sls-063 recheck 2026-08-11)",
-	trak: "no verifiable official submission record for r25 (sls-063 recheck 2026-08-11)",
-	trace: "no verifiable official submission record for r38 (sls-063 recheck 2026-08-11)",
 	liqvidxyz: "no verifiable official submission record for r37 (sls-063 recheck 2026-08-11)",
 	fastbuka: "no verifiable official submission record for r9 (sls-063 recheck 2026-08-11)",
-	deb: "no verifiable official submission record for r41 (sls-063 recheck 2026-08-11)",
 	pen: "no verifiable official submission record for r43 (sls-063 recheck 2026-08-11)",
-	usdc: "no verifiable official submission record for r43 (sls-063 recheck 2026-08-11)",
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: API rows
