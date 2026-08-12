@@ -37,11 +37,17 @@ jobs:
         id: drift
         continue-on-error: true
         env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/check-api-drift.ts 2>&1 | tee /tmp/drift.log
       - name: Field population (values arrive, not just shape)
         id: fields
         continue-on-error: true
         env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/check-field-population.ts 2>&1 | tee /tmp/fields.log
       - name: Golden retrieval eval
         id: golden
@@ -61,11 +67,17 @@ jobs:
         id: claims
         continue-on-error: true
         env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/verify-claims.ts 2>&1 | tee /tmp/claims.log
       - name: Record completeness (full-corpus sweeps)
         id: completeness
         continue-on-error: true
         env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/check-record-completeness.ts 2>&1 | tee /tmp/completeness.log
 
       - name: Feed the improvement ledger + commit the evidence

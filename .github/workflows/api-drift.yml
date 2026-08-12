@@ -30,6 +30,9 @@ jobs:
         continue-on-error: true
         env:
           SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: npx -y tsx scripts/check-api-drift.ts 2>&1 | tee drift.log
       - name: Field-population guard (values arrive, not just shape)
         if: always()

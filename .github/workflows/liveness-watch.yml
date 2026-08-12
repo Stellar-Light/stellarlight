@@ -41,6 +41,9 @@ jobs:
             gh run download "$PREV" --repo "$GITHUB_REPOSITORY" -n liveness-evidence -D /tmp/prev || true
           fi
       - name: Build delta report
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           python3 - <<'EOF' > /tmp/watch.md
           import json, os

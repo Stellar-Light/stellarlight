@@ -91,6 +91,49 @@ Operational truths that cost round-trips to learn:
   to first+last; the middle ones are silently cancelled. Serialize dispatches
   into a group — dispatch, wait for completion, dispatch next.
 
+## The tee/pipefail hole (found by the ledger feed, hours later)
+
+nightly-health's first fed run produced a contradiction: the committed drift
+artifact said `failures: 4` while the drift STEP said success. Cause: the
+detector steps pipe through `tee`, and GitHub's **default** shell for `run:`
+is `bash -e` — **no pipefail**. The pipeline's exit is tee's 0, so every
+detector step has exited green since the workflow shipped and the red-issue
+path never fired once. (`shell: bash` is the fix — GitHub expands it to
+`bash --noprofile --norc -eo pipefail`; the two shells differ exactly there.)
+
+The sweep found the same unguarded `| tee` in **14 workflows** — every
+watcher (liveness, tag-watch, coverage, self-audit, engine-c, …) had a
+mute alarm. Zero-work-green again, this time in the watchers themselves:
+the exit code is a log line; the committed artifact is the evidence. Only
+making the evidence a FILE exposed the contradiction the log-only design
+could never see.
+
+Process note, recorded on purpose: the first "fix" PR (#821) *claimed* the
+pipefail change in its commit message, but the patch script had aborted on
+an earlier assertion before reaching the workflow edit — and the
+verification grep output (`0` matches) was misread in passing. The commit
+message describes the intent; only the DIFF describes the change. Verify
+the diff.
+
+## The read-back that cried wolf (772 "not found", zero data lost)
+
+The chase-enrich reds behind the failure emails: the write-verification
+guard reported `772 field(s) did NOT persist` — but every row had persisted
+fine. The guard keyed `sentByRepo` by the iteration name (`full`, spelled as
+the project URL spells it, usually lowercase) while rows store GitHub-
+canonical `nameWithOwner`; the read-back's `$in` is case-sensitive, so every
+repo with an uppercase letter (772/2093, 37%) read back "not found".
+
+This is the asymmetric half-fix class: the #788 convergence made the
+LOOKUP case-insensitive (`equals` → `like` fallback) but left the read-back
+key on the old spelling. When a mechanism is made case-insensitive at one
+end, sweep every other place the same identity is compared — lookup, write,
+verify, dedupe. Fix: key the guard by the fullName actually WRITTEN.
+
+Also worth keeping: a guard that goes red for a month teaches people to
+ignore it. False alarms in verification layers are near-P1 — the guard's
+credibility is the mechanism.
+
 ## Projections (class → where else it lives)
 
 - Any served-from-scan field added before the probe rule: swept this time for
