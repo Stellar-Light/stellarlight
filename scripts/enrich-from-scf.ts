@@ -282,6 +282,10 @@ async function main() {
 	"greep-pos-greep-pay-hfe": "greeppay",
 	"zkcrossdex-ipb": "zkcross",
 	"cashabroad-smart-treasury-wla": "cash-abroad",
+	// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
+	// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
+	// `band`, which otherwise matches nothing and would keep stale data.
+	"band-protocol-2ob": "band",
 	};
 
 	const matched: { scf: any; ours: any }[] = [];
