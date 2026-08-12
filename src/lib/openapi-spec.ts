@@ -738,6 +738,17 @@ export const spec: OpenAPISpec = {
 												},
 												sorobanSdkVersion: { type: "string", nullable: true },
 												versionStatus: { type: "string", nullable: true },
+												codeConfidence: {
+													type: "object",
+													nullable: true,
+													description:
+														"Deterministic trust score for the code facts (basis code-scan \u00d7 freshness of scannedAt). Null when never scanned.",
+													properties: {
+														score: { type: "number" },
+														label: { type: "string", enum: ["high", "medium", "low"] },
+														ageDays: { type: "integer", nullable: true },
+													},
+												},
 												scannedAt: {
 													type: "string",
 													format: "date-time",
@@ -3587,6 +3598,17 @@ export const spec: OpenAPISpec = {
 						description:
 							"The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only).",
 					},
+					tomlConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no toml was ever fetched.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
 					tomlFetchedAt: {
 						type: "string",
 						nullable: true,
@@ -3818,6 +3840,17 @@ export const spec: OpenAPISpec = {
 						description:
 							"Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows.",
 					},
+					statusConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for the lifecycle status fact: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
 					statusBasis: {
 						type: "string",
 						nullable: true,
@@ -3833,6 +3866,17 @@ export const spec: OpenAPISpec = {
 						],
 						description:
 							"What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.",
+					},
+					scfConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for the SCF award facts: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
 					},
 					scfBasis: {
 						type: "string",
@@ -4543,6 +4587,17 @@ export const spec: OpenAPISpec = {
 								nullable: true,
 								description:
 									"soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
+							},
+							codeConfidence: {
+								type: "object",
+								nullable: true,
+								description:
+									"Deterministic trust score for the code facts (basis code-scan \u00d7 freshness of scannedAt). Null when never scanned.",
+								properties: {
+									score: { type: "number" },
+									label: { type: "string", enum: ["high", "medium", "low"] },
+									ageDays: { type: "integer", nullable: true },
+								},
 							},
 							scannedAt: {
 								type: "string",

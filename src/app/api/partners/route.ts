@@ -16,6 +16,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { factConfidence } from "@/lib/fact-confidence";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
@@ -136,6 +137,10 @@ function toPublic(
 		seps: p.seps ?? [],
 		tomlSourceUrl: p.tomlSourceUrl ?? null,
 		tomlFetchedAt: p.tomlFetchedAt ?? null,
+		tomlConfidence: factConfidence(
+			p.tomlFetchedAt ? "stellar-toml" : null,
+			p.tomlFetchedAt,
+		),
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,

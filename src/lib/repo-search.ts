@@ -10,6 +10,7 @@
  */
 
 import { symbolsHaystack } from "./code-symbols";
+import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import {
 	parseSdkMajor,
@@ -168,6 +169,7 @@ export interface CodeVerified {
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
+	codeConfidence: FactConfidence | null;
 	/** Commit SHA the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. */
 	scannedRef: string | null;
 	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
@@ -217,6 +219,10 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
+		codeConfidence: factConfidence(
+			d.codeScannedAt ? "code-scan" : null,
+			d.codeScannedAt,
+		),
 		scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
 		symbols: Array.isArray(d.codeSymbols)
 			? d.codeSymbols

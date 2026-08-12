@@ -689,6 +689,13 @@ export interface components {
             seps?: string[];
             /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only). */
             tomlSourceUrl?: string | null;
+            /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no toml was ever fetched. */
+            tomlConfidence?: {
+                score?: number;
+                /** @enum {string} */
+                label?: "high" | "medium" | "low";
+                ageDays?: number | null;
+            } | null;
             /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
             tomlFetchedAt?: string | null;
             /** @description Fiat ramps offered. */
@@ -807,11 +814,25 @@ export interface components {
             statusAsOf?: string | null;
             /** @description Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows. */
             statusSourceUrl?: string | null;
+            /** @description Deterministic trust score for the lifecycle status fact: basis-class weight × stepwise freshness decay. score 0–1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score — cacheable. */
+            statusConfidence?: {
+                score?: number;
+                /** @enum {string} */
+                label?: "high" | "medium" | "low";
+                ageDays?: number | null;
+            } | null;
             /**
              * @description What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.
              * @enum {string|null}
              */
             statusBasis?: "operator-announcement" | "site-liveness" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
+            /** @description Deterministic trust score for the SCF award facts: basis-class weight × stepwise freshness decay. score 0–1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score — cacheable. */
+            scfConfidence?: {
+                score?: number;
+                /** @enum {string} */
+                label?: "high" | "medium" | "low";
+                ageDays?: number | null;
+            } | null;
             /**
              * @description Evidence class behind the SCF award facts: 'official-record' = parsed from the communityfund.stellar.org submission cards; 'human-verified' = curated correction where the official page is ambiguous. Null = provenance not yet stamped (legacy rows; populates as enrichment re-reaches them).
              * @enum {string|null}
@@ -1163,6 +1184,13 @@ export interface components {
                  * @enum {string|null}
                  */
                 versionStatus?: "current" | "supported" | "deprecated" | "unknown" | null;
+                /** @description Deterministic trust score for the code facts (basis code-scan × freshness of scannedAt). Null when never scanned. */
+                codeConfidence?: {
+                    score?: number;
+                    /** @enum {string} */
+                    label?: "high" | "medium" | "low";
+                    ageDays?: number | null;
+                } | null;
                 /**
                  * Format: date-time
                  * @description When the code was last scanned.
@@ -1768,6 +1796,13 @@ export interface operations {
                             isDeployableContract?: boolean;
                             sorobanSdkVersion?: string | null;
                             versionStatus?: string | null;
+                            /** @description Deterministic trust score for the code facts (basis code-scan × freshness of scannedAt). Null when never scanned. */
+                            codeConfidence?: {
+                                score?: number;
+                                /** @enum {string} */
+                                label?: "high" | "medium" | "low";
+                                ageDays?: number | null;
+                            } | null;
                             /** Format: date-time */
                             scannedAt?: string | null;
                             /** @description Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */

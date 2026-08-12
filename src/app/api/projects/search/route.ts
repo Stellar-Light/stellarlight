@@ -12,6 +12,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
@@ -152,12 +153,14 @@ async function semanticProjectRows(
 			statusAsOf: p.statusAsOf ?? null,
 			statusSourceUrl: p.statusSourceUrl ?? null,
 			statusBasis: p.statusBasis ?? null,
+			statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
 			canonicalSlug: p.canonicalSlug ?? null,
 			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
 			scfBasis: p.scf?.basis ?? null,
+			scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
 			scfAsOf: p.scf?.asOf ?? null,
 			scfSourceUrl: p.scf?.sourceUrl ?? null,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
@@ -263,6 +266,7 @@ interface ProjectRow {
 	statusAsOf?: string | null;
 	statusSourceUrl?: string | null;
 	statusBasis?: string | null;
+	statusConfidence?: FactConfidence | null;
 	tvlUSD?: number | null;
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
@@ -298,6 +302,7 @@ interface ProjectRow {
 	logoUrl: string | null;
 	scfAwarded: boolean;
 	scfBasis: string | null;
+	scfConfidence: FactConfidence | null;
 	scfAsOf: string | null;
 	scfSourceUrl: string | null;
 	scfTotalAwardedUSD: number | null;
@@ -1189,6 +1194,7 @@ export async function GET(req: NextRequest) {
 					statusAsOf: p.statusAsOf ?? null,
 					statusSourceUrl: p.statusSourceUrl ?? null,
 					statusBasis: p.statusBasis ?? null,
+					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
@@ -1213,6 +1219,7 @@ export async function GET(req: NextRequest) {
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
 					scfBasis: p.scf?.basis ?? null,
+					scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
 					scfAsOf: p.scf?.asOf ?? null,
 					scfSourceUrl: p.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
@@ -1726,6 +1733,7 @@ export async function GET(req: NextRequest) {
 					statusAsOf: c.statusAsOf ?? null,
 					statusSourceUrl: c.statusSourceUrl ?? null,
 					statusBasis: c.statusBasis ?? null,
+					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
@@ -1745,6 +1753,7 @@ export async function GET(req: NextRequest) {
 					logoUrl,
 					scfAwarded: !!c.scf?.awarded,
 					scfBasis: c.scf?.basis ?? null,
+					scfConfidence: factConfidence(c.scf?.basis, c.scf?.asOf),
 					scfAsOf: c.scf?.asOf ?? null,
 					scfSourceUrl: c.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
