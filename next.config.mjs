@@ -77,6 +77,7 @@ const nextConfig = {
 			"/api/openapi.json",
 			"/api/status",
 			"/api/changelog",
+			"/api/changes",
 			"/api/audits",
 			"/api/projects/search",
 			"/api/repos/search",

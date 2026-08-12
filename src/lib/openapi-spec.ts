@@ -161,6 +161,98 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/changes": {
+			get: {
+				operationId: "getChanges",
+				tags: ["Discovery"],
+				summary: "Change feed: which rows moved since a given time",
+				description:
+					"Reconciliation feed for consumers holding cached or remembered claims (agent memory, institutional cache): every project/repo/partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (status, scf-awards, code-facts, toml; [\"row\"] = undated change, re-read the row). **Use when:** you stored our answers earlier and want to refresh only what moved. **Not for:** what the change WAS (re-read the row via its search endpoint) or contract/API changes (\u2192 /api/changelog). Absence = unchanged since `since`, never an existence claim.",
+				parameters: [
+					{
+						name: "since",
+						in: "query",
+						required: true,
+						description:
+							"ISO date (YYYY-MM-DD) or datetime; rows with changes strictly after this instant are returned. 400 on malformed, pre-2020, or future values.",
+						schema: { type: "string" },
+					},
+					{
+						name: "surfaces",
+						in: "query",
+						required: false,
+						description:
+							"CSV subset of projects,repos,partners (default all three).",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						required: false,
+						description: "Max rows PER SURFACE, newest-first (1\u2013500, default 100). meta.truncated.<surface> signals more.",
+						schema: { type: "integer", minimum: 1, maximum: 500 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Changed rows, newest-first per surface",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["changes", "meta"],
+									properties: {
+										changes: {
+											type: "array",
+											items: {
+												type: "object",
+												required: ["surface", "changedAt", "facets"],
+												properties: {
+													surface: {
+														type: "string",
+														enum: ["projects", "repos", "partners"],
+													},
+													slug: {
+														type: "string",
+														description: "projects/partners identity (absent on repos rows)",
+													},
+													fullName: {
+														type: "string",
+														description: "repos identity owner/name (absent on other rows)",
+													},
+													changedAt: { type: "string", format: "date-time" },
+													facets: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Dated fact families that moved past `since`: status, scf-awards, code-facts, toml. [\"row\"] = the row changed but no dated facet localizes it.",
+													},
+												},
+											},
+										},
+										meta: {
+											type: "object",
+											properties: {
+												since: { type: "string", format: "date-time" },
+												asOf: { type: "string", format: "date-time" },
+												surfaces: { type: "array", items: { type: "string" } },
+												limitPerSurface: { type: "integer" },
+												counts: { type: "object", additionalProperties: { type: "integer" } },
+												truncated: { type: "object", additionalProperties: { type: "boolean" } },
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Missing/invalid since, unknown param, or invalid surface \u2014 never silently ignored",
+					},
+				},
+			},
+		},
 		"/api/changelog": {
 			get: {
 				operationId: "getChangelog",

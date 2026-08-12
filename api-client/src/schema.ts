@@ -30,6 +30,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Change feed: which rows moved since a given time
+         * @description Reconciliation feed for consumers holding cached or remembered claims (agent memory, institutional cache): every project/repo/partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (status, scf-awards, code-facts, toml; ["row"] = undated change, re-read the row). **Use when:** you stored our answers earlier and want to refresh only what moved. **Not for:** what the change WAS (re-read the row via its search endpoint) or contract/API changes (→ /api/changelog). Absence = unchanged since `since`, never an existence claim.
+         */
+        get: operations["getChanges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/changelog": {
         parameters: {
             query?: never;
@@ -1521,6 +1541,67 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["StatusResponse"];
                 };
+            };
+        };
+    };
+    getChanges: {
+        parameters: {
+            query: {
+                /** @description ISO date (YYYY-MM-DD) or datetime; rows with changes strictly after this instant are returned. 400 on malformed, pre-2020, or future values. */
+                since: string;
+                /** @description CSV subset of projects,repos,partners (default all three). */
+                surfaces?: string;
+                /** @description Max rows PER SURFACE, newest-first (1–500, default 100). meta.truncated.<surface> signals more. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Changed rows, newest-first per surface */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        changes: {
+                            /** @enum {string} */
+                            surface: "projects" | "repos" | "partners";
+                            /** @description projects/partners identity (absent on repos rows) */
+                            slug?: string;
+                            /** @description repos identity owner/name (absent on other rows) */
+                            fullName?: string;
+                            /** Format: date-time */
+                            changedAt: string;
+                            /** @description Dated fact families that moved past `since`: status, scf-awards, code-facts, toml. ["row"] = the row changed but no dated facet localizes it. */
+                            facets: string[];
+                        }[];
+                        meta: {
+                            /** Format: date-time */
+                            since?: string;
+                            /** Format: date-time */
+                            asOf?: string;
+                            surfaces?: string[];
+                            limitPerSurface?: number;
+                            counts?: {
+                                [key: string]: number;
+                            };
+                            truncated?: {
+                                [key: string]: boolean;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description Missing/invalid since, unknown param, or invalid surface — never silently ignored */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
