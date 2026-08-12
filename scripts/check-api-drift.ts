@@ -14,14 +14,18 @@
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
+import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
+
 let failures = 0;
 let passes = 0;
+const failRows: NightlyFailure[] = [];
 function ok(name: string) {
 	passes++;
 	console.log(`  ✓ ${name}`);
 }
 function bad(name: string, detail: string) {
 	failures++;
+	failRows.push({ probe: name, note: detail });
 	console.log(`  ✗ ${name}\n      ${detail}`);
 }
 function check(name: string, cond: boolean, detail = "") {
@@ -493,6 +497,7 @@ async function main() {
 	}
 
 	// ── summary ─────────────────────────────────────────────────────────────
+	writeNightlyFindings("api-drift", failRows);
 	console.log(`\n${passes} passed · ${failures} failed`);
 	if (failures > 0) process.exit(1);
 }

@@ -12,7 +12,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # write: nightly findings artifacts + the re-fed ledger are committed so
+  # the improvement ledger (committed-artifacts-only) sees this layer at all.
+  contents: write
   issues: write
 
 jobs:
@@ -27,27 +29,59 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
 
+      # Every detector also writes improvements/engine/nightly/<name>-latest.json
+      # (scripts/nightly-findings.ts) — empty failures = the auto-clear signal.
+
       # Each detector runs regardless of the others; exit codes collected.
       - name: API drift (live ⇄ spec ⇄ docs)
         id: drift
         continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
         run: pnpm exec tsx scripts/check-api-drift.ts 2>&1 | tee /tmp/drift.log
       - name: Field population (values arrive, not just shape)
         id: fields
         continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
         run: pnpm exec tsx scripts/check-field-population.ts 2>&1 | tee /tmp/fields.log
       - name: Golden retrieval eval
         id: golden
         continue-on-error: true
-        run: pnpm exec tsx scripts/eval/run-golden.ts 2>&1 | tee /tmp/golden.log
+        # --json refreshes the SAME weekly artifact the ledger already reads
+        # (same finding ids, fresher lastSeen); human log goes to stderr for the
+        # issue tail. generatedAt stamped below (stale-evidence rule).
+        run: |
+          RC=0
+          pnpm exec tsx scripts/eval/run-golden.ts --json > /tmp/golden.json 2> /tmp/golden.log || RC=$?
+          if jq -e .graded /tmp/golden.json > /dev/null 2>&1; then
+            jq --arg t "$(date -u +%FT%TZ)" '. + {generatedAt: $t}' /tmp/golden.json \
+              > improvements/engine/weekly/golden-eval-latest.json
+          fi
+          exit $RC
       - name: Verify advertised claims
         id: claims
         continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
         run: pnpm exec tsx scripts/verify-claims.ts 2>&1 | tee /tmp/claims.log
       - name: Record completeness (full-corpus sweeps)
         id: completeness
         continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
         run: pnpm exec tsx scripts/check-record-completeness.ts 2>&1 | tee /tmp/completeness.log
+
+      - name: Feed the improvement ledger + commit the evidence
+        # continue-on-error: the red-issue step below must file even if the
+        # feed/commit hiccups (its own step shows red in the run UI).
+        continue-on-error: true
+        run: |
+          pnpm exec tsx scripts/improvement-ledger.ts
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add -A improvements/
+          # generatedAt makes every run a real diff — a commit per run IS the
+          # "detector ran at all" record (same rule as the weekly evidence).
+          git commit -m "chore(nightly): detector findings $(date -u +%Y-%m-%d) [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git push
 
       - name: File or update the health issue on reds
         env:

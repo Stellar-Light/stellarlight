@@ -33,6 +33,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { writeNightlyFindings } from "./nightly-findings";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
@@ -499,6 +500,10 @@ async function main() {
 	for (const f of warnings)
 		console.log(`  ⚠ warn     ${f.claim}\n             ${f.detail}`);
 
+	writeNightlyFindings(
+		"verify-claims",
+		blockers.map((f) => ({ probe: f.claim, note: f.detail })),
+	);
 	if (blockers.length > 0 || (STRICT && warnings.length > 0)) process.exit(1);
 	console.log("all advertised artifacts verified ✓");
 }

@@ -26,6 +26,7 @@ import {
 	findingId,
 	isSyntheticQuery,
 	type Severity,
+	SURFACES,
 	type Surface,
 	summarizeLedger,
 	upsertFindings,
@@ -39,6 +40,7 @@ const LEDGER_FILE = join(ROOT, "improvements/ledger/findings.json");
 const SUMMARY_FILE = join(WEEKLY, "improvement-ledger-latest.json");
 // Wave manifests — the deliberate detect→verified transitions (slice 3).
 const WAVES_DIR = join(ROOT, "improvements/waves/ledger");
+const NIGHTLY = join(ROOT, "improvements/engine/nightly");
 
 // biome-ignore lint/suspicious/noExplicitAny: detector artifacts are heterogeneous JSON
 type Row = any;
@@ -276,6 +278,84 @@ const SPECS: SourceSpec[] = [
 	},
 ];
 
+// ── Nightly detectors (lessons/2026-08-12: this layer used to file an issue
+// and vanish — the sdkCapabilities hole had no ledger row because nothing
+// nightly fed the spine). nightly-health.yml writes these via
+// scripts/nightly-findings.ts and commits them; an artifact with an empty
+// failures array is the auto-clear signal, so specs read committed files
+// exactly like the weeklies. All share the artifact shape
+// { generatedAt, detector, failures: [{probe, note?, surface?, known?}] }.
+const NIGHTLY_SPECS: SourceSpec[] = [
+	{
+		source: "nightly-drift",
+		file: "api-drift-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "contract",
+				mode: "api-drift",
+				// High: drift means the spec/docs LIE about live behaviour.
+				severity: "high",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-field-population",
+		file: "field-population-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				// The detector stamps the surface from the probed path
+				// (repos→code, research→corpus, partners→anchors, else directory);
+				// validate against the closed set so a typo can't mint a surface.
+				surface: (r) =>
+					SURFACES.includes(str(r?.surface) as Surface)
+						? (str(r?.surface) as Surface)
+						: "directory",
+				mode: "population-miss",
+				// knownFailing-marked probes are acknowledged open work (low);
+				// an unmarked pinned probe going empty is a fire (high).
+				severity: (r) => (r?.known ? "low" : "high"),
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-claims",
+		file: "verify-claims-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "contract",
+				mode: "claim-blocker",
+				severity: "high",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-completeness",
+		file: "record-completeness-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "directory",
+				mode: "completeness-residual",
+				// Medium: residual lists are work-down inventory, not fires —
+				// same reasoning as engine-a's long tail. Outage rows ride along;
+				// the workflow's red issue is the fire path for those.
+				severity: "medium",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+];
+
 // The through-Raven feeder (scripts/raven-loop.ts) — golden questions graded via
 // the REAL gateway. Its misses are consumer-path failures our direct-API evals
 // can't see. Lives in improvements/engine/ (local-run, committed as evidence).
@@ -389,7 +469,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const detected: Finding[] = [];
 	const sources: string[] = [];
 
-	for (const spec of [...SPECS, RAVEN_LOOP_SPEC, RAVEN_ROUTING_SPEC]) {
+	for (const spec of [...SPECS, ...NIGHTLY_SPECS, RAVEN_LOOP_SPEC, RAVEN_ROUTING_SPEC]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
 		if (!data) {
