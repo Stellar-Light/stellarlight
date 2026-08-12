@@ -108,5 +108,5 @@ jobs:
         working-directory: ${{ matrix.pkg }}
         run: |
           npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
-          npm publish --access public
+          npm publish --access public --loglevel http
           echo "::notice::✅ published ${{ steps.state.outputs.name }}@${{ steps.state.outputs.ver }}"
