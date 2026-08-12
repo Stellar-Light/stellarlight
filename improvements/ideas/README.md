@@ -1,5 +1,22 @@
 # ideas/
 
+> **Single home** (consolidated 2026-08-12): ALL ideas live here — the loop's
+> lessons (../lessons/) project classes forward into this directory, and
+> detectors/audits file here too. The old root `ideas/` is gone; if a doc
+> links there, fix the link. Shipped ideas stay (marked below or in-file)
+> as the record of idea → feature.
+
+**Shipped from the original backlog** (verify via git log / the task list):
+audit-coverage-watch, audit-findings-extraction (registry + /api/audits),
+capability-mismatch-sweep, field-coverage-all-endpoints,
+js-symbol-extraction, mention-vs-identity-repo-search, onchain-metrics,
+rescan-on-push (the re-scan policy), shared-synonym-registry,
+status-recency-detector, status-source-rows (the provenance trios),
+skill-mirror-freshness-guard (sk-009 arc). Open: feedback-quality-loop,
+research-doc-freshness.
+
+
+
 Proposals that aren't committed work yet — captured before they're scheduled. An idea graduates by moving into [../improvements/](../improvements/) (with a concrete plan + a way to measure it) and then into an experiment or a PR. Add one as `ideas/<slug>.md`, or extend the list below.
 
 Two provenance streams feed this folder:
