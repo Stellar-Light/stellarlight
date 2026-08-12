@@ -38,6 +38,9 @@ jobs:
         continue-on-error: true
         run: pnpm exec tsx scripts/scan/deepwiki-calibrate.ts --json > /tmp/calib.json 2> /tmp/calib.log
       - name: Build + upsert report
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           python3 - <<'EOF' > /tmp/calib.md
           import json

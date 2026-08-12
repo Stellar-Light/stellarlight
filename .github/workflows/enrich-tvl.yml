@@ -26,4 +26,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Refresh TVL (execute)
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/enrich-tvl.ts --execute | tee $GITHUB_STEP_SUMMARY

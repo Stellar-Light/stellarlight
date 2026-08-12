@@ -437,7 +437,15 @@ async function main() {
 					await payload.create({ collection: "repos", data });
 					created++;
 				}
-				sentByRepo.set(full, data as unknown as Record<string, unknown>);
+				// Key by the fullName actually WRITTEN (canonical nameWithOwner) —
+				// `full` carries the project URL's casing, and the read-back $in is
+				// case-sensitive: 772/2093 rows read "not found" while persisted fine
+				// (2026-08-12 chase reds; the #788 lookup fallback got this, the
+				// read-back key didn't).
+				sentByRepo.set(
+					String((data as { fullName?: string }).fullName ?? full),
+					data as unknown as Record<string, unknown>,
+				);
 			} catch (err) {
 				writeFailed++;
 				console.error(`  WRITE FAILED: ${full} — ${String(err)}`);

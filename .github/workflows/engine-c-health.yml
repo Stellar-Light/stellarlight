@@ -63,6 +63,9 @@ jobs:
         # /tmp/scf.json from the step above — no extra scrape, no extra Actions
         # minutes. A missing report never accuses (scrape-failure safe).
         continue-on-error: true
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           set -o pipefail
           if [ ! -s /tmp/scf.json ]; then
@@ -114,6 +117,9 @@ jobs:
           fi
       - name: Engine C report
         id: report
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           PREV_FLAG=""
           [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
