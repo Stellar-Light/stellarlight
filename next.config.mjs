@@ -87,6 +87,7 @@ const nextConfig = {
 			"/api/builders",
 			"/api/people",
 			"/api/partners",
+			"/api/stablecoins",
 			"/api/partners/:slug",
 			"/api/rfps",
 			"/api/research",
