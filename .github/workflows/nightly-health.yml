@@ -44,6 +44,10 @@ jobs:
         id: claims
         continue-on-error: true
         run: pnpm exec tsx scripts/verify-claims.ts 2>&1 | tee /tmp/claims.log
+      - name: Record completeness (full-corpus sweeps)
+        id: completeness
+        continue-on-error: true
+        run: pnpm exec tsx scripts/check-record-completeness.ts 2>&1 | tee /tmp/completeness.log
 
       - name: File or update the health issue on reds
         env:
@@ -52,6 +56,7 @@ jobs:
           FIELDS: ${{ steps.fields.outcome }}
           GOLDEN: ${{ steps.golden.outcome }}
           CLAIMS: ${{ steps.claims.outcome }}
+          COMPLETENESS: ${{ steps.completeness.outcome }}
         run: |
           set -e
           REDS=""
@@ -59,16 +64,17 @@ jobs:
           [ "$FIELDS" = "failure" ] && REDS="$REDS field-population"
           [ "$GOLDEN" = "failure" ] && REDS="$REDS golden-eval"
           [ "$CLAIMS" = "failure" ] && REDS="$REDS verify-claims"
+          [ "$COMPLETENESS" = "failure" ] && REDS="$REDS record-completeness"
           if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
           TITLE="Nightly health: red findings"
           BODY_FILE=/tmp/body.md
           {
             echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
             echo
-            for d in drift fields golden claims; do
+            for d in drift fields golden claims completeness; do
               LOG=/tmp/$d.log
               case $d in
-                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;;
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;;
               esac
               [ "$OUT" = "failure" ] || continue
               echo "<details><summary>$d — failing output (tail)</summary>"
