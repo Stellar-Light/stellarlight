@@ -1,22 +1,5 @@
 {
-	"generatedAt": "2026-08-12T14:27:47.607Z",
+	"generatedAt": "2026-08-12T14:38:49.061Z",
 	"detector": "api-drift",
-	"failures": [
-		{
-			"probe": "status.endpoints lists /api/hackathons/builds",
-			"note": "OpenAPI documents /api/hackathons/builds but /api/status.endpoints[] omits it"
-		},
-		{
-			"probe": "status.endpoints lists /api/stablecoins",
-			"note": "OpenAPI documents /api/stablecoins but /api/status.endpoints[] omits it"
-		},
-		{
-			"probe": "/api/stablecoins emits X-API-Version",
-			"note": "got \"none\" — add \"/api/stablecoins\" to next.config.mjs publicApi[]"
-		},
-		{
-			"probe": "/api/leaderboard?limit=5 is strict-parseable JSON",
-			"note": "contains a raw U+2028/U+2029/U+0085 separator"
-		}
-	]
+	"failures": []
 }

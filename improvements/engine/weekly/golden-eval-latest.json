@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.759850263595581,
+      "topScore": 0.7598240971565247,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -585,7 +585,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7966394424438477,
+      "topScore": 0.79648756980896,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -902,5 +902,5 @@
       "sample": "Python Stellar SDK"
     }
   ],
-  "generatedAt": "2026-08-12T14:28:05Z"
+  "generatedAt": "2026-08-12T14:39:06Z"
 }

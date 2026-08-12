@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-08-12T14:28:26.656Z",
+	"generatedAt": "2026-08-12T14:39:30.851Z",
 	"total": 351,
-	"open": 286,
-	"closed": 65,
+	"open": 282,
+	"closed": 69,
 	"verified": 7,
-	"cleared": 58,
-	"closingRate": 0.19,
+	"cleared": 62,
+	"closingRate": 0.2,
 	"oldestOpenDays": 21,
 	"inWave": 0,
-	"highOpen": 8,
+	"highOpen": 4,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -27,14 +27,14 @@
 			"total": 14
 		},
 		{
-			"surface": "contract",
-			"open": 5,
-			"total": 12
-		},
-		{
 			"surface": "code",
 			"open": 1,
 			"total": 1
+		},
+		{
+			"surface": "contract",
+			"open": 1,
+			"total": 12
 		},
 		{
 			"surface": "scf",
@@ -85,32 +85,32 @@
 			"severity": "high"
 		},
 		{
-			"id": "nightly-drift:status-endpoints-lists-api-hackathons-builds",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "status.endpoints lists /api/hackathons/builds",
-			"severity": "high"
+			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "idos in top-3 for 'is idOS live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-drift:status-endpoints-lists-api-stablecoins",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "status.endpoints lists /api/stablecoins",
-			"severity": "high"
+			"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "nownodes in top-3 for 'is NOWNodes live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-drift:api-stablecoins-emits-x-api-version",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "/api/stablecoins emits X-API-Version",
-			"severity": "high"
+			"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "lightecho in top-3 for 'is Lightecho live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-drift:api-leaderboard-limit-5-is-strict-parseable-json",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "/api/leaderboard?limit=5 is strict-parseable JSON",
-			"severity": "high"
+			"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "infstones in top-3 for 'is InfStones live'",
+			"severity": "medium"
 		}
 	]
 }
