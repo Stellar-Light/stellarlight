@@ -121,6 +121,27 @@ const PROBES: Probe[] = [
 		field: "codeVerified.scannedRef",
 	},
 	{
+		name: "repos.codeVerified.symbols (conformance C4, rozo)",
+		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "mpprouter/rozo-mpprouter"],
+		field: "codeVerified.symbols",
+	},
+	{
+		name: "repos.codeVerified.stellarDeps (conformance C4, rozo)",
+		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "mpprouter/rozo-mpprouter"],
+		field: "codeVerified.stellarDeps",
+	},
+	{
+		name: "repos.codeVerified.isDeployableContract (conformance C4, blend)",
+		path: "/api/repos/search?q=blend&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "blend-capital/blend-contracts-v2"],
+		field: "codeVerified.isDeployableContract",
+	},
+	{
 		name: "projects.scfConfidence (fact-confidence slice, band)",
 		path: "/api/projects/search?q=band&limit=6",
 		rowsKey: "projects",

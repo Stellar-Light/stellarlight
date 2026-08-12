@@ -36,6 +36,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Contract artifacts fresh (snapshot + generated client types)
         run: pnpm contract:check
+
+      - name: Writer conformance (read-back, pipefail, exit-stomps, probe coverage)
+        run: pnpm exec tsx scripts/check-writer-conformance.ts
       - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
         run: pnpm exec tsx scripts/eval/routing-surface-check.ts
       - name: Route files export only handlers + config (2026-07-21 — non-handler exports break next build, tsc/vitest miss it)
