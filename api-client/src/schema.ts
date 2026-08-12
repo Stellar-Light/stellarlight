@@ -1144,6 +1144,8 @@ export interface components {
                  * @description When the code was last scanned.
                  */
                 scannedAt?: string | null;
+                /** @description Commit SHA the facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
+                scannedRef?: string | null;
                 /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
                 symbols?: string[];
                 /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
@@ -1683,6 +1685,8 @@ export interface operations {
                             versionStatus?: string | null;
                             /** Format: date-time */
                             scannedAt?: string | null;
+                            /** @description Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
+                            scannedRef?: string | null;
                             symbols?: string[];
                             contractInterface?: string[];
                             targetProtocol?: number | null;

@@ -127,6 +127,7 @@ export async function GET(req: NextRequest) {
 		sorobanSdkVersion: string | null;
 		versionStatus: string | null;
 		scannedAt: string | null;
+		scannedRef: string | null;
 		symbols: string[];
 		mainnetContractId: string | null;
 		sdkCapabilities: string[];
@@ -154,6 +155,7 @@ export async function GET(req: NextRequest) {
 					codeSymbols: true,
 					mainnetContractId: true,
 					sdkCapabilities: true,
+					scannedRef: true,
 				},
 			});
 			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
@@ -180,6 +182,7 @@ export async function GET(req: NextRequest) {
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,
+						scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
 						symbols: Array.isArray(d.codeSymbols)
 							? (d.codeSymbols as unknown[])
 									.filter((s): s is string => typeof s === "string")

@@ -651,6 +651,12 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 												},
+												scannedRef: {
+													type: "string",
+													nullable: true,
+													description:
+														"Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
+												},
 												symbols: {
 													type: "array",
 													items: { type: "string" },
@@ -4439,6 +4445,12 @@ export const spec: OpenAPISpec = {
 								format: "date-time",
 								nullable: true,
 								description: "When the code was last scanned.",
+							},
+							scannedRef: {
+								type: "string",
+								nullable: true,
+								description:
+									"Commit SHA the facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
 							},
 							symbols: {
 								type: "array",

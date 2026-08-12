@@ -268,6 +268,15 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "scannedRef",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"Commit SHA of the default branch the code facts were computed at — provenance pin (github.com/<fullName>/tree/<scannedRef>)",
+			},
+		},
+		{
 			name: "mainnetContractId",
 			type: "text",
 			admin: {

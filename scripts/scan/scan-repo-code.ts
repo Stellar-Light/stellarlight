@@ -368,6 +368,7 @@ async function main() {
 						contractInterface,
 						stellarDeps,
 						sdkCapabilities,
+						scannedRef: r.scannedRef,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 					},
 					nowIso,
