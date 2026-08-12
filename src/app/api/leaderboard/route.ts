@@ -11,6 +11,7 @@
  * data without scraping.
  */
 
+import { jsonSafe } from "@/lib/json-safe";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
@@ -507,7 +508,7 @@ export async function GET(req: NextRequest) {
 	};
 
 	return NextResponse.json(
-		{
+		jsonSafe({
 			meta: {
 				source: "https://stellarlight.xyz/leaderboard",
 				generatedAt: new Date().toISOString(),
@@ -569,7 +570,7 @@ export async function GET(req: NextRequest) {
 				oneTimeDevs: ec.tenure.oneTime,
 			},
 			projects: rows,
-		},
+		}),
 		{
 			headers: {
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
