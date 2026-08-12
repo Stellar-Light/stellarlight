@@ -1664,7 +1664,11 @@ async function main() {
 			cur.awarded === fix.awarded &&
 			cur.totalAwarded === fix.totalAwarded &&
 			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",") &&
-			raInSync
+			raInSync &&
+			// provenance first-stamp (same gap enrich had, #828): a curated row
+			// whose values are in sync but whose basis is missing still needs
+			// the human-verified stamp — in-sync is not stamped.
+			cur.basis === "human-verified"
 		) {
 			console.log(`  ${slug}: scf already in sync, skip`);
 			continue;
