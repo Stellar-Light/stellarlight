@@ -3489,6 +3489,18 @@ export const spec: OpenAPISpec = {
 						description:
 							"SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based.",
 					},
+					tomlSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only).",
+					},
+					tomlFetchedAt: {
+						type: "string",
+						nullable: true,
+						description:
+							"ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot.",
+					},
 					rampTypes: {
 						type: "array",
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },

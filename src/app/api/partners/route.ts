@@ -134,6 +134,8 @@ function toPublic(
 			.map((a: { code: string }) => a.code)
 			.filter(Boolean),
 		seps: p.seps ?? [],
+		tomlSourceUrl: p.tomlSourceUrl ?? null,
+		tomlFetchedAt: p.tomlFetchedAt ?? null,
 		rampTypes: p.rampTypes ?? [],
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,

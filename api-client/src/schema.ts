@@ -667,6 +667,10 @@ export interface components {
             assets?: string[];
             /** @description SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based. */
             seps?: string[];
+            /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only). */
+            tomlSourceUrl?: string | null;
+            /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
+            tomlFetchedAt?: string | null;
             /** @description Fiat ramps offered. */
             rampTypes?: ("on-ramp" | "off-ramp")[];
             country?: string | null;

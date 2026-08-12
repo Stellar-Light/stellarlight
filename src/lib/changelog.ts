@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"partners: tomlSourceUrl + tomlFetchedAt — anchor-capability fields carry their stellar.toml provenance (openapi@1.8.47).",
+		detail:
+			"Provenance slice 3: getPartners, getPartner and the matchmaker rows now carry the exact stellar.toml URL the anchor-capability fields (assets, seps, rampTypes, jurisdiction) were last system-enriched from, and the date of that fetch — so a consumer can re-verify an anchor's SEP claims at the source instead of trusting the directory. Stamped on every successful toml parse (not delta-gated); null = never toml-enriched. Completes the citation trio across the three fact families: SCF awards (1.8.45), repo code facts (1.8.46), anchor capabilities (1.8.47).",
+	},
+	{
+		date: "2026-08-12",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"repos: codeVerified.scannedRef — every code fact pinned to the commit it was computed at (openapi@1.8.46).",
 		detail:
 			"Provenance slice 2 (after the SCF award trio): searchRepos and explainRepo codeVerified gains scannedRef, the default-branch commit SHA the scan fetched — so symbols, contractInterface, sdkCapabilities, stellarDeps and codeDepth are citable at github.com/<fullName>/tree/<scannedRef> instead of floating against a moving repo. Null on rows scanned before 2026-08-12; populates as waves re-reach repos.",
