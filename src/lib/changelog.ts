@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Fact confidence: statusConfidence, scfConfidence, codeVerified.codeConfidence, tomlConfidence \u2014 deterministic trust scores from provenance (openapi@1.8.49).",
+		detail:
+			"Every provenance-carrying fact family now serves a confidence object {score, label, ageDays}: the basis-class weight (human-verified > official-record/stellar-toml > onchain/code-scan > site-liveness > operator-announcement > source-inherited > unverified) \u00d7 a stepwise freshness decay (full \u226430d, floor 0.5 past a year; unknown age dampens to 0.6). Pure function of the basis/asOf the provenance trios ship \u2014 no model, no randomness; the same row serves the same score until its provenance changes, so consumers can cache and re-derive. Null = no recorded provenance: absence of evidence is never served as a low score. Computed at serve time \u2014 corpus-wide from day one. Distinct from retrieval `confidence` (does this row answer your query); this scores the FACT."
+	},
+	{
+		date: "2026-08-12",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"GET /api/changes — the change feed: what moved since T, for memory-carrying consumers (openapi@1.8.48).",
 		detail:
 			"A consumer holding cached or remembered claims (an agent memory, an institutional cache) reconciles against /api/changes?since=<ISO> instead of re-reading the corpus. Rows come from stored per-row timestamps (no new write path), newest-first per surface (projects/repos/partners, filterable via surfaces=), each carrying changedAt plus facets naming which DATED fact families moved (status, scf-awards, code-facts, toml; [\"row\"] = undated change, re-read the row). Absence means nothing changed since T \u2014 not an existence claim; deletions surface as 404 on re-read. meta.truncated signals paging via a later since. Pairs with the provenance trios shipped today: the asOf timestamps this feed exposes are the ones award/code/toml facts now carry.",

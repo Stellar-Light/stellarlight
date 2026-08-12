@@ -121,6 +121,20 @@ const PROBES: Probe[] = [
 		field: "codeVerified.scannedRef",
 	},
 	{
+		name: "projects.scfConfidence (fact-confidence slice, band)",
+		path: "/api/projects/search?q=band&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "band"],
+		field: "scfConfidence.label",
+	},
+	{
+		name: "repos.codeVerified.codeConfidence (fact-confidence slice, rozo)",
+		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "mpprouter/rozo-mpprouter"],
+		field: "codeVerified.codeConfidence.label",
+	},
+	{
 		name: "repos.codeVerified.sdkCapabilities (write-path fix 2026-08-12, rozo x402)",
 		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
 		rowsKey: "repos",
