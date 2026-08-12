@@ -21,6 +21,8 @@
  * No DB / auth / LLM — plain fetch against the public API.
  */
 
+import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
+
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 const UA = { "User-Agent": "stellarlight-field-guard" };
 
@@ -182,6 +184,15 @@ async function main() {
 	console.log(`Field-population guard — ${BASE}\n`);
 	let failures = 0;
 	let known = 0;
+	const failRows: NightlyFailure[] = [];
+	const surfaceOf = (path: string): string =>
+		path.startsWith("/api/repos")
+			? "code"
+			: path.startsWith("/api/research")
+				? "corpus"
+				: path.startsWith("/api/partners")
+					? "anchors"
+					: "directory";
 	for (const p of PROBES) {
 		let detail = "";
 		try {
@@ -210,9 +221,11 @@ async function main() {
 		}
 		if (detail && p.knownFailing) {
 			known++;
+			failRows.push({ probe: p.name, note: detail, surface: surfaceOf(p.path), known: true });
 			console.log(`  ⚠ ${p.name} (known, ${p.knownFailing})\n      ${detail}`);
 		} else if (detail) {
 			failures++;
+			failRows.push({ probe: p.name, note: detail, surface: surfaceOf(p.path) });
 			console.log(`  ✗ ${p.name}\n      ${detail}`);
 		} else if (p.knownFailing) {
 			console.log(`  ✓ ${p.name} — RECOVERED; close ${p.knownFailing} and drop the knownFailing marker`);
@@ -220,6 +233,7 @@ async function main() {
 			console.log(`  ✓ ${p.name}`);
 		}
 	}
+	writeNightlyFindings("field-population", failRows);
 	console.log(
 		`\n${PROBES.length - failures - known}/${PROBES.length} populated · ${known} known-failing${failures ? " — FAILING" : ""}`,
 	);

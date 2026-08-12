@@ -24,6 +24,8 @@
  * into nightly-health.yml.
  */
 
+import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
+
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 const UA = { "User-Agent": "stellarlight-completeness-guard" };
 
@@ -70,11 +72,15 @@ async function sweep(path: string): Promise<Row[]> {
 async function main() {
 	console.log(`Record-completeness sweeps — ${BASE}\n`);
 	let failures = 0;
+	const failRows: NightlyFailure[] = [];
 
 	// ── S1: scfRoundAwards on every awarded row with rounds ──
 	const awarded = await sweep("/api/projects/search?scfAwarded=true");
 	if (awarded.length === 0) {
 		console.error("✗ S1 swept 0 awarded rows — outage, not a clean pass");
+		writeNightlyFindings("record-completeness", [
+			{ probe: "S1 sweep outage", note: "0 awarded rows returned" },
+		]);
 		process.exit(1);
 	}
 	const withRounds = awarded.filter(
@@ -89,8 +95,13 @@ async function main() {
 	console.log(
 		`S1 scfRoundAwards: ${awarded.length} awarded · ${withRounds.length} with rounds · ${withRounds.length - residuals.length - excused.length} populated · ${excused.length} documented-empty · ${residuals.length} RESIDUAL`,
 	);
-	for (const p of residuals)
+	for (const p of residuals) {
 		console.log(`  ✗ ${p.slug} rounds=[${p.scfAwardedRounds.join(",")}] roundAwards empty`);
+		failRows.push({
+			probe: `scfRoundAwards empty: ${p.slug}`,
+			note: `rounds=[${p.scfAwardedRounds.join(",")}]`,
+		});
+	}
 	if (residuals.length) failures++;
 
 	// ── S2: statusBasis on every project row (sls-024 corpus invariant) ──
@@ -115,13 +126,25 @@ async function main() {
 	}
 	if (scanned === 0) {
 		console.error("✗ S2 swept 0 rows — outage, not a clean pass");
+		writeNightlyFindings("record-completeness", [
+			{ probe: "S2 sweep outage", note: "0 project rows returned" },
+		]);
 		process.exit(1);
 	}
 	console.log(
 		`S2 statusBasis: ${scanned} rows swept · ${blank} blank${blank ? ` (${blanks.join(", ")}${blank > 12 ? ", …" : ""})` : ""}`,
 	);
-	if (blank) failures++;
+	if (blank) {
+		failures++;
+		for (const slug of blanks) failRows.push({ probe: `statusBasis blank: ${slug}` });
+		if (blank > blanks.length)
+			failRows.push({
+				probe: "statusBasis blanks beyond sample",
+				note: `${blank - blanks.length} more rows blank beyond the ${blanks.length} listed`,
+			});
+	}
 
+	writeNightlyFindings("record-completeness", failRows);
 	console.log(failures ? "\nFAILING" : "\nall sweeps clean");
 	process.exit(failures ? 1 : 0);
 }

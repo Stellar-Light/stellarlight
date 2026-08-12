@@ -1,5 +1,9 @@
 # Idea: nightly detectors feed the improvement ledger
 
+**Shipped 2026-08-12** — scripts/nightly-findings.ts + four detector hooks +
+four feeder specs + nightly-health commit step. First feed carried 4 real
+api-drift findings.
+
 Projects from: *advertised-but-never-persisted* (lessons/2026-08-12).
 
 The improvement ledger ingests only the **weekly engine artifacts**
