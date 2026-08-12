@@ -392,6 +392,14 @@ async function main() {
 			(detail?.awardedRounds?.length ?? 0) > 0;
 
 		const hasNewData =
+			// provenance first-stamp: a row missing the citation trio IS new data
+			// (the trio ships 2026-08-12; without this the stamp only rides award
+			// deltas and an already-converged corpus never gets it — the
+			// advertised-but-never-persisted class, on the provenance feature
+			// itself)
+			!currentScf.basis ||
+			currentScf.sourceUrl !==
+				`https://communityfund.stellar.org/project/${scf.slug}` ||
 			currentScf.awarded !== isAwarded ||
 			currentScf.lastAwardedRound !== scf.lastAwardedRound ||
 			currentScf.slug !== scf.slug ||
@@ -441,8 +449,13 @@ async function main() {
 				awarded: isAwarded,
 				lastAwardedRound: scf.lastAwardedRound,
 				slug: scf.slug,
-				// provenance trio: parsed from the official page, dated, citable
-				basis: "official-record",
+				// provenance trio: parsed from the official page, dated, citable.
+				// human-verified (curate SCF_FIX) outranks the page and must survive
+				// enrich passes — the curation-reverted-by-sync class.
+				basis:
+					currentScf.basis === "human-verified"
+						? "human-verified"
+						: "official-record",
 				asOf: new Date().toISOString().slice(0, 10),
 				sourceUrl: `https://communityfund.stellar.org/project/${scf.slug}`,
 				...(detail?.totalAwarded ? { totalAwarded: detail.totalAwarded } : {}),
