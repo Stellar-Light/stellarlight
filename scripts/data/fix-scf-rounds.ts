@@ -81,6 +81,38 @@ const OUT_FILE =
  * changed evidence. */
 const BOOLEAN_FIXES = ["coopstable-v2-yield-sharing-stablecoin"];
 
+/** 2026-08-12 matcher-poison clears (allowlist-only, like BOOLEAN_FIXES).
+ * enrich-from-scf's partial matcher compared SPACELESS normalized names by
+ * plain substring, so official titles matched across word seams and wrote
+ * OTHER projects' award data onto these rows ("Soroban Disassembler" →
+ * soro**band**issassembler wrote r41/$100k onto Band Protocol; "ars"
+ * absorbed four different pages via stell**ars**…). The matcher is fixed
+ * (title-prefix rule, same day); these rows match NO official page under
+ * high-precision rules, so the exact-sync path can never repair them —
+ * each entry names the page whose data landed here (live row cross-checked
+ * against that page's cards 2026-08-12). Cleared: awarded, awardedRounds,
+ * roundAwards, totalAwarded, lastAwardedRound. */
+const POISON_CLEARS: Record<string, string> = {
+	remi: "InveStar- Remit to Invest on Stellar (r43 $141,325 — exact match to live row)",
+	velo: "Wirex - Vottun Stellar SDK (r41 $129,600 — de·velo·pment; earlier also Rumble Fish / DevTrak)",
+	ars: "Stellar Surge r24 listing (stell·ars·urge; also matched Stellars Finance / Wirex-Vottun / @stellar-sdk study)",
+	dd: "Choppaddi (r38 $70k + r44 $80k — choppa·dd·i; earlier also Advanced Debugging / Embedded Collective)",
+	merkl: "Merkle Science Plattform for Soroban (r41 — merkl ≠ Merkle Science)",
+	rails: "AgTrail: Stellar Food Traceability (r38 $60k — agt·rails·tellar)",
+	trace: "AgTrail: Stellar Food Traceability (r38 — food-·trace·ability)",
+	deb: "Advanced Debugging for Soroban Contracts (r41 — ·deb·ugging)",
+	trak: "DevTrak - Developer Onboarding (r25 — dev·trak·)",
+	lemon: "Unstoppable Money (r42 $97k — unstoppab·lemon·ey)",
+	brl: "Regulated BRL Settlement for FX (r42 $96k — tagline currency mention)",
+	usdc: "Bexo Wallet / VANK Anchor USDC taglines (r43 — asset row, never an SCF awardee)",
+	agnostic: "Paywit Wallet-Agnostic tagline class (r38 $121k)",
+	mojoflower: "Flow (r35 $120k — mojo·flow·er)",
+	apay: "Coala Pay Billy Wallet / JoonaPay (r35 $60k — coal·apay·)",
+	huma: "Convexity CHATS (r30 $89,500 — ·huma·nitarian)",
+	ripe: "MugglePay: Stripe for Stellar (r30 $28,000 — st·ripe·)",
+	mesh: "BPV StellarMesh Anchor (r10 $125k + r40 $25k — stellar·mesh·)",
+};
+
 /** Refuse to EXECUTE a plan larger than this (dry runs always allowed). The
  * expected wave is ~60-75 rounds writes; hundreds would mean the source page
  * layout changed under the parser — a human must re-verify before raising. */
@@ -215,6 +247,53 @@ async function main() {
 		slug: string;
 		data: Record<string, unknown>;
 	}> = [];
+
+	// ── Matcher-poison clears (allowlisted; see POISON_CLEARS above) ──
+	const poisonClears: Array<{
+		slug: string;
+		name: string;
+		evidence: string;
+		from: { awardedRounds: number[]; totalAwarded: number | null };
+	}> = [];
+	for (const [slug, evidence] of Object.entries(POISON_CLEARS)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			log(`  poison-clear ${slug}: slug not in directory — skipped`);
+			continue;
+		}
+		const dirty =
+			d.scf?.awarded === true ||
+			(d.scf?.awardedRounds?.length ?? 0) > 0 ||
+			(d.scf?.roundAwards?.length ?? 0) > 0;
+		if (!dirty) {
+			noops.push(`${slug} (poison-clear: already clean)`);
+			continue;
+		}
+		poisonClears.push({
+			slug,
+			name: d.name,
+			evidence,
+			from: {
+				awardedRounds: (d.scf?.awardedRounds ?? []).map(Number),
+				totalAwarded: d.scf?.totalAwarded ?? null,
+			},
+		});
+		updates.push({
+			id: d.id,
+			slug: d.slug,
+			data: {
+				scf: {
+					...(d.scf ?? {}),
+					awarded: false,
+					awardedRounds: [],
+					roundAwards: [],
+					totalAwarded: null,
+					lastAwardedRound: null,
+				},
+			},
+		});
+	}
+	log(`  poison-clears planned: ${poisonClears.length}/${Object.keys(POISON_CLEARS).length}`);
 
 	let idx = 0;
 	async function worker() {
@@ -389,6 +468,7 @@ async function main() {
 	unmatchedAwarded.sort();
 
 	const plan = {
+		poisonClears,
 		mode: EXECUTE ? "execute" : "dry-run",
 		dropProvenNegatives: DROP_PROVEN_NEGATIVES,
 		generatedAt: new Date().toISOString(),
