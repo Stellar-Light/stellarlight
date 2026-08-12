@@ -345,7 +345,7 @@ async function main() {
 		console.log(
 			`| ${m.class} | ${m.endpoint.replace("/api/", "")} | ${m.query} | ${m.hits} | ${m.days} | ${m.buckets.join(",")} | ${m.evidence} |`,
 		);
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 
 main()

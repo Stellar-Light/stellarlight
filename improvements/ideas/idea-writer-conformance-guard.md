@@ -1,5 +1,7 @@
 # Idea: writer-conformance guard (kill the grandfather problem)
 
+**Shipped 2026-08-12** — scripts/check-writer-conformance.ts (C1 read-back/exemptions, C2 tee/pipefail lint, C3 exit-stomp lint, C4 write-shape probe coverage), wired into contract-gate. First run found 2 REAL exit-stomps (curate-partners, enrich-partner-onchain) + 1 in engine-d + 3 unprobed served fields — all fixed in the same PR.
+
 Projects from: SYNTHESIS-2026-08-12 S3 (advertised ≠ persisted) + S1
 (watchers that can't scream).
 
