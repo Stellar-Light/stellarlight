@@ -54,6 +54,7 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 - [2026-07-19 — the improvement day: retrieval scope, extraction affixes, count rot, paired omissions](./2026-07-19-improvement-day.md)
 - [2026-08-08 — zero-work green runs, and shape ≠ population](./2026-08-08-zero-work-green-and-population-truth.md)
 - [2026-08-12 — advertised but never persisted (sdkCapabilities) + npm OIDC + dispatch truths + tee/pipefail + the read-back that cried wolf](./2026-08-12-advertised-but-never-persisted.md)
+- [SYNTHESIS 2026-08-12 — the month since: watcher integrity, identity discipline, and the institutional trajectory](./SYNTHESIS-2026-08-12.md)
 
 ## The loop
 

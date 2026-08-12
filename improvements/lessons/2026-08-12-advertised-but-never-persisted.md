@@ -134,6 +134,37 @@ Also worth keeping: a guard that goes red for a month teaches people to
 ignore it. False alarms in verification layers are near-P1 — the guard's
 credibility is the mechanism.
 
+## The matcher that poisoned 18 rows (same day, the email thread)
+
+The failure-email investigation ended at the deepest bug of the day: the
+SCF partial matcher compares SPACELESS normalized names by substring, so
+official titles matched across word seams — "Soroban Disassembler"
+(soro·band·issassembler) wrote r41/$100k onto **Band Protocol** (the
+sls-043 self-audit red), "ars" absorbed FOUR projects (stell·ars·urge,
+stell·ars· finance, …), "lemon" got "Unstoppab·lemon·ey". Full-corpus
+audit: 125 partial matches → 100 legitimate, **18 poisoned rows** — some
+feeding sls-063's "awarded but no record" residuals (deb, merkl, trace,
+trak, usdc were poison, not missing records).
+
+Rules that came out of it:
+
+- **Word-boundary is not enough for generic names.** "Basilic — Stablecoin
+  Rails…" boundary-matches the project "Rails" and is still wrong. The
+  rule the data supports is TITLE-PREFIX at a token boundary; legit tail
+  matches ("…by Gateway.fm") become explicit overrides.
+- **Repair is allowlist + evidence, never inference** (POISON_CLEARS: each
+  slug carries the page whose data landed on it, live row cross-checked
+  against that page's cards). Ambiguous same-entity pairs (muwp/MUWPAY,
+  attest/Attestation Service) were left untouched for human judgment.
+- **A fixed matcher heals as well as protects**: with Convexity rejected,
+  huma immediately matched its REAL page (r27/$50k) — recall loss from
+  precision rules is smaller than it looks, because exact layers and
+  overrides carry the legitimate volume.
+- **Canonical-vs-dupe routing is part of matching**: official "Band
+  Protocol" exact-matched the dupe row by name while the canonical `band`
+  matched nothing and kept its poison; identity work isn't done until the
+  write lands on the row the directory actually serves.
+
 ## Projections (class → where else it lives)
 
 - Any served-from-scan field added before the probe rule: swept this time for
