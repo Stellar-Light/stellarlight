@@ -52,6 +52,8 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 - [2026-07-09 — stale-but-close outranks current (Starbridge / research-rank)](./2026-07-09-research-rank-starbridge.md)
 - [2026-07-09 — the corridor-matrix day: batch writes, identity, instance-calibration](./2026-07-09-curation-writes-and-identity.md)
 - [2026-07-19 — the improvement day: retrieval scope, extraction affixes, count rot, paired omissions](./2026-07-19-improvement-day.md)
+- [2026-08-08 — zero-work green runs, and shape ≠ population](./2026-08-08-zero-work-green-and-population-truth.md)
+- [2026-08-12 — advertised but never persisted (sdkCapabilities) + npm OIDC + dispatch truths](./2026-08-12-advertised-but-never-persisted.md)
 
 ## The loop
 
