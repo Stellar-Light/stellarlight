@@ -788,6 +788,15 @@ export interface components {
              * @enum {string|null}
              */
             statusBasis?: "operator-announcement" | "site-liveness" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
+            /**
+             * @description Evidence class behind the SCF award facts: 'official-record' = parsed from the communityfund.stellar.org submission cards; 'human-verified' = curated correction where the official page is ambiguous. Null = provenance not yet stamped (legacy rows; populates as enrichment re-reaches them).
+             * @enum {string|null}
+             */
+            scfBasis?: "official-record" | "human-verified" | null;
+            /** @description ISO date the SCF award facts were last verified against the source. Pair with scfSourceUrl to re-verify a stored claim. */
+            scfAsOf?: string | null;
+            /** @description Official SCF project page the award facts were read from — the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD. */
+            scfSourceUrl?: string | null;
             /** @description The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}. */
             builtBy?: {
                 name?: string;

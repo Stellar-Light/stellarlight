@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-12",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"projects: SCF award provenance trio — scfBasis / scfAsOf / scfSourceUrl on every award-bearing row (openapi@1.8.45).",
+		detail:
+			"The sls-024 provenance pattern (basis / as-of / source URL), extended from lifecycle status to SCF award facts. Every award claim now says how we know (official-record = parsed from the communityfund.stellar.org submission cards; human-verified = curated correction), when it was last verified, and the exact official page to re-verify against \u2014 built for memory-carrying consumers that store claims and must later defend them. Same-day context: an 18-row award-poisoning incident (matcher substring bug, fixed + repaired) is the argument made flesh \u2014 a consumer holding an award claim with its sourceUrl can catch a lie without us. Populates as enrichment re-reaches rows; the full pass runs at ship time.",
+	},
+	{
+		date: "2026-08-12",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"repos: sdkCapabilities now actually persists — the write path had silently dropped it since the field shipped (openapi@1.8.44).",

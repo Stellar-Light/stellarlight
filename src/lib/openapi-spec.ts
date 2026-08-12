@@ -3724,6 +3724,25 @@ export const spec: OpenAPISpec = {
 						description:
 							"What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.",
 					},
+					scfBasis: {
+						type: "string",
+						nullable: true,
+						enum: ["official-record", "human-verified"],
+						description:
+							"Evidence class behind the SCF award facts: 'official-record' = parsed from the communityfund.stellar.org submission cards; 'human-verified' = curated correction where the official page is ambiguous. Null = provenance not yet stamped (legacy rows; populates as enrichment re-reaches them).",
+					},
+					scfAsOf: {
+						type: "string",
+						nullable: true,
+						description:
+							"ISO date the SCF award facts were last verified against the source. Pair with scfSourceUrl to re-verify a stored claim.",
+					},
+					scfSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"Official SCF project page the award facts were read from — the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD.",
+					},
 					builtBy: {
 						type: "object",
 						nullable: true,

@@ -289,6 +289,9 @@ async function main() {
 					roundAwards: [],
 					totalAwarded: null,
 					lastAwardedRound: null,
+					basis: null,
+					asOf: new Date().toISOString().slice(0, 10),
+					sourceUrl: null,
 				},
 			},
 		});

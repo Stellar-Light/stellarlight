@@ -441,6 +441,10 @@ async function main() {
 				awarded: isAwarded,
 				lastAwardedRound: scf.lastAwardedRound,
 				slug: scf.slug,
+				// provenance trio: parsed from the official page, dated, citable
+				basis: "official-record",
+				asOf: new Date().toISOString().slice(0, 10),
+				sourceUrl: `https://communityfund.stellar.org/project/${scf.slug}`,
 				...(detail?.totalAwarded ? { totalAwarded: detail.totalAwarded } : {}),
 				...(detail?.awardedRounds
 					? { awardedRounds: detail.awardedRounds }
