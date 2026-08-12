@@ -1672,7 +1672,20 @@ async function main() {
 		console.log(
 			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]`,
 		);
-		writes.push({ id: d.id, slug, data: { scf: { ...cur, ...fix } } });
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					...cur,
+					...fix,
+					// curated corrections are page-verified by a human where the
+					// official record is ambiguous — the strongest basis we serve
+					basis: "human-verified",
+					asOf: new Date().toISOString().slice(0, 10),
+				},
+			},
+		});
 	}
 
 	for (const [slug, want] of Object.entries(TYPES_SET)) {

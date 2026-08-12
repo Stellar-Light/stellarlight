@@ -157,6 +157,9 @@ async function semanticProjectRows(
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
+			scfBasis: p.scf?.basis ?? null,
+			scfAsOf: p.scf?.asOf ?? null,
+			scfSourceUrl: p.scf?.sourceUrl ?? null,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
@@ -294,6 +297,9 @@ interface ProjectRow {
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
+	scfBasis: string | null;
+	scfAsOf: string | null;
+	scfSourceUrl: string | null;
 	scfTotalAwardedUSD: number | null;
 	scfAmountStatus: "disclosed" | "undisclosed" | null;
 	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
@@ -1099,6 +1105,9 @@ export async function GET(req: NextRequest) {
 						awarded?: boolean;
 						totalAwarded?: number;
 						awardedRounds?: number[];
+						basis?: string;
+						asOf?: string;
+						sourceUrl?: string;
 					};
 					hackathon?:
 						| { id: string; name: string; slug: string }
@@ -1203,6 +1212,9 @@ export async function GET(req: NextRequest) {
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
+					scfBasis: p.scf?.basis ?? null,
+					scfAsOf: p.scf?.asOf ?? null,
+					scfSourceUrl: p.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 					scfAmountStatus: scfAmountStatus(
 						!!p.scf?.awarded,
@@ -1732,6 +1744,9 @@ export async function GET(req: NextRequest) {
 					lifecycle: pickLifecycle(c.lifecycle),
 					logoUrl,
 					scfAwarded: !!c.scf?.awarded,
+					scfBasis: c.scf?.basis ?? null,
+					scfAsOf: c.scf?.asOf ?? null,
+					scfSourceUrl: c.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
 					scfAmountStatus: scfAmountStatus(
 						!!c.scf?.awarded,

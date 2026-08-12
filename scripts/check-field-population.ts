@@ -100,6 +100,13 @@ const PROBES: Probe[] = [
 		field: "activityState",
 	},
 	{
+		name: "projects.scfSourceUrl (provenance trio slice 1 — band, official page)",
+		path: "/api/projects/search?q=band&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "band"],
+		field: "scfSourceUrl",
+	},
+	{
 		name: "repos.codeVerified.sdkCapabilities (write-path fix 2026-08-12, rozo x402)",
 		path: "/api/repos/search?q=rozo-mpprouter&limit=6",
 		rowsKey: "repos",

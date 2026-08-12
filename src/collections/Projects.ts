@@ -724,6 +724,28 @@ export const Projects: CollectionConfig = {
 						{ name: "awardType", type: "text" },
 					],
 				},
+				// Citation-grade provenance trio (SYNTHESIS-2026-08-12): every award
+				// claim carries how we know, when it was last true, and where to
+				// re-verify — the sls-024 pattern extended to SCF facts.
+				{
+					name: "basis",
+					type: "select",
+					options: ["official-record", "human-verified"],
+					admin: {
+						description:
+							"Evidence class behind the award facts: official-record = parsed from the communityfund.stellar.org submission cards; human-verified = curated correction where the page is ambiguous",
+					},
+				},
+				{
+					name: "asOf",
+					type: "text",
+					admin: { description: "ISO date the award facts were last verified against the source" },
+				},
+				{
+					name: "sourceUrl",
+					type: "text",
+					admin: { description: "Official SCF project page the award facts were read from" },
+				},
 			],
 		},
 		{
