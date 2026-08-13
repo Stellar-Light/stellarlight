@@ -4546,6 +4546,19 @@ export const spec: OpenAPISpec = {
 							asOf: { type: "string", format: "date-time", nullable: true },
 						},
 					},
+					codeInUse: {
+						type: ["object", "null"],
+						description:
+							"Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists — NOT zero activity). null object = no verified mainnet contract joined to this repo — absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE.",
+						properties: {
+							contracts: { type: "integer" },
+							events: { type: ["integer", "null"] },
+							eventsDelta: { type: ["integer", "null"] },
+							subinvocations: { type: ["integer", "null"] },
+							subinvocationsDelta: { type: ["integer", "null"] },
+							asOf: { type: "string" },
+						},
+					},
 					knowledgeNotes: {
 						type: "array",
 						description:

@@ -320,6 +320,27 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{ name: "codeScannedAt", type: "date", admin: { position: "sidebar" } },
+		{
+			// Code-in-use (code-truth track): rollup of LIVE mainnet activity for
+			// contracts attributed to this repo (scanner-verified contract ids +
+			// stellar.expert wasm validation). Written ONLY by
+			// scripts/data/enrich-onchain-projects.ts (weekly). Deltas null until
+			// a second snapshot exists — never zero.
+			name: "codeInUse",
+			type: "group",
+			admin: {
+				description:
+					"Mainnet usage rollup for contracts attributed to this repo. Populated by enrich-onchain-projects only; absent = no verified contract joined, NOT 'unused'.",
+			},
+			fields: [
+				{ name: "contracts", type: "number" },
+				{ name: "events", type: "number" },
+				{ name: "eventsDelta", type: "number" },
+				{ name: "subinvocations", type: "number" },
+				{ name: "subinvocationsDelta", type: "number" },
+				{ name: "asOf", type: "text" },
+			],
+		},
 		// ── Audit trail — every code-signal change is explainable + rollbackable.
 		{
 			name: "priorTier",

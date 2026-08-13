@@ -83,6 +83,14 @@ interface RepoDoc {
 		source?: string | null;
 		asOf?: string | null;
 	}> | null;
+	codeInUse?: {
+		contracts?: number | null;
+		events?: number | null;
+		eventsDelta?: number | null;
+		subinvocations?: number | null;
+		subinvocationsDelta?: number | null;
+		asOf?: string | null;
+	} | null;
 }
 
 export interface RepoResult {
@@ -117,6 +125,18 @@ export interface RepoResult {
 	/** Dated facts with sources (curated + derived:audit) — see the repo-intel
 	 * knowledge discipline; [] when none. Facts, never summaries. */
 	knowledgeNotes: Array<{ note: string; source: string; asOf: string | null }>;
+	/** Mainnet usage rollup for contracts attributed to this repo (weekly,
+	 * stellar.expert). Lifetime events/subinvocations + deltas since the prior
+	 * snapshot (null until one exists). null = no verified contract joined —
+	 * NOT a claim the code is unused. */
+	codeInUse: {
+		contracts: number;
+		events: number | null;
+		eventsDelta: number | null;
+		subinvocations: number | null;
+		subinvocationsDelta: number | null;
+		asOf: string;
+	} | null;
 	project: { slug: string; name: string | null } | null;
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
@@ -1281,6 +1301,17 @@ export async function searchRepos(
 								releaseTag: r.activitySignals.releaseTag ?? null,
 								openPRs: r.activitySignals.openPRs ?? null,
 								asOf: r.activitySignals.asOf ?? null,
+							}
+						: null,
+				codeInUse:
+					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
+						? {
+								contracts: r.codeInUse.contracts,
+								events: r.codeInUse.events ?? null,
+								eventsDelta: r.codeInUse.eventsDelta ?? null,
+								subinvocations: r.codeInUse.subinvocations ?? null,
+								subinvocationsDelta: r.codeInUse.subinvocationsDelta ?? null,
+								asOf: r.codeInUse.asOf,
 							}
 						: null,
 				knowledgeNotes: Array.isArray(r.knowledgeNotes)
