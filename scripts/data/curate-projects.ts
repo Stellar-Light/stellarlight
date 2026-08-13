@@ -652,6 +652,49 @@ const REBRANDS: Record<
  * `regions` carries it; a wrong single country is worse than honest absence).
  * bitso's corridors are proven by its own CNBV/GFSC compliance currencies
  * (MXN/BRL/ARS/COP). Rows retire (no-op) once applied — equality-checked. */
+/** #742 products model (sls-023/029 root): per-product deployment records.
+ * EVERY row cites its evidence — a product without a verifiable evidenceUrl
+ * does not ship (Band/RedStone/DIA/WisdomTree/Figure rows await verified
+ * mappings; deferred is honest, fabricated is not). Exact-sync on the value
+ * tuple; asOf = the date the evidence was last verified. */
+const PRODUCTS_FIX: Record<
+	string,
+	Array<{
+		name: string;
+		kind: string;
+		network: string;
+		status: string;
+		contractId?: string | null;
+		evidenceUrl: string;
+		asOf: string;
+		note?: string;
+	}>
+> = {
+	dtcc: [
+		{
+			name: "DTCC tokenized-collateral platform (Stellar availability)",
+			kind: "rwa-asset",
+			network: "mainnet",
+			status: "announced",
+			evidenceUrl: "https://stellar.org/case-studies/dtcc",
+			asOf: "2026-08-13",
+			note: "operator states Stellar availability expected H1 2027; provider row status Development covers the org, this row covers the product claim",
+		},
+	],
+	lightecho: [
+		{
+			name: "Lightecho Stellar Oracle",
+			kind: "oracle-feed",
+			network: "mainnet",
+			status: "live",
+			contractId: null,
+			evidenceUrl: "https://github.com/bp-ventures/lightecho-stellar-oracle",
+			asOf: "2026-08-13",
+			note: "contract IDs published in the operator repo; per-network ID labels pending verification, so none is asserted here. Consumer caution: price state observed stale in upstream checks",
+		},
+	],
+};
+
 const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 	"boss-pay": [], // HQ=US; corridors = Africa/LatAm remittance (regions field)
 	"ripe-money": [], // HQ=Singapore; "off-ramp for Asia"
@@ -1696,6 +1739,37 @@ async function main() {
 				},
 			},
 		});
+	}
+
+	for (const [slug, want] of Object.entries(PRODUCTS_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// exact-sync on the value tuple (ignore Payload array-row ids)
+		const tup = (rows: unknown) =>
+			JSON.stringify(
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+				((rows as any[]) ?? []).map((x) => [
+					x.name, x.kind, x.network, x.status,
+					x.contractId ?? null, x.evidenceUrl, x.asOf, x.note ?? null,
+				]),
+			);
+		if (tup(d.products) === tup(want)) {
+			console.log(`  ${slug}: products already in sync, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: products → ${want.length} record(s)`);
+		writes.push({ id: d.id, slug, data: { products: want } });
 	}
 
 	for (const [slug, want] of Object.entries(TYPES_SET)) {

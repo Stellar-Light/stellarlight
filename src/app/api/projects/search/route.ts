@@ -167,6 +167,7 @@ async function semanticProjectRows(
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			scfRoundAwards: pickScfRoundAwards(p.scf),
+			products: pickProducts(p.products),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
 			supportedNetworks: Array.isArray(p.supportedNetworks)
@@ -228,6 +229,23 @@ function scfAmountStatus(
 
 // sls-058 defect 2: per-awarded-round official submission record — the
 // reconciling basis for scfTotalAwardedUSD. Strips Payload array-row ids.
+// #742: per-product deployment records — id-stripped, provenance intact.
+// biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
+function pickProducts(rows: any): ProjectRow["products"] {
+	if (!Array.isArray(rows)) return [];
+	// biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
+	return rows.map((r: any) => ({
+		name: String(r.name ?? ""),
+		kind: String(r.kind ?? ""),
+		network: String(r.network ?? ""),
+		status: String(r.status ?? ""),
+		contractId: r.contractId ?? null,
+		evidenceUrl: String(r.evidenceUrl ?? ""),
+		asOf: String(r.asOf ?? ""),
+		note: r.note ?? null,
+	}));
+}
+
 function pickScfRoundAwards(
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 	scf: any,
@@ -310,6 +328,16 @@ interface ProjectRow {
 	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
 	// cross-source totals mechanically instead of guessing at counting bases.
 	scfAwardedRounds: number[];
+	products: Array<{
+		name: string;
+		kind: string;
+		network: string;
+		status: string;
+		contractId: string | null;
+		evidenceUrl: string;
+		asOf: string;
+		note: string | null;
+	}>;
 	scfRoundAwards: Array<{
 		round: number;
 		amountUSD: number | null;
@@ -1106,6 +1134,8 @@ export async function GET(req: NextRequest) {
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+					products?: any[];
 					scf?: {
 						awarded?: boolean;
 						totalAwarded?: number;
@@ -1229,6 +1259,7 @@ export async function GET(req: NextRequest) {
 					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(p.scf),
+					products: pickProducts(p.products),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -1763,6 +1794,7 @@ export async function GET(req: NextRequest) {
 					),
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(c.scf),
+					products: pickProducts(c.products),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],

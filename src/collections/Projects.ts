@@ -548,6 +548,39 @@ export const Projects: CollectionConfig = {
 			// scripts/data/curate-projects.ts), each assignment grounded in the
 			// operator's own product description. Follows the venueRole precedent
 			// (#517).
+			name: "products",
+			type: "array",
+			admin: {
+				description:
+					"#742 (sls-023/029): per-PRODUCT deployment records — provider Live and product-live-on-network are DIFFERENT statements. Curated only (PRODUCTS_FIX); evidenceUrl + asOf are REQUIRED so every product claim is citable by construction. Empty = no product-level records yet (never 'no products').",
+			},
+			fields: [
+				{ name: "name", type: "text", required: true },
+				{
+					name: "kind",
+					type: "select",
+					options: ["oracle-feed", "rwa-asset", "stablecoin", "wallet-app", "bridge", "ramp", "other"],
+					required: true,
+				},
+				{
+					name: "network",
+					type: "select",
+					options: ["mainnet", "testnet", "futurenet"],
+					required: true,
+				},
+				{
+					name: "status",
+					type: "select",
+					options: ["live", "development", "announced", "retired"],
+					required: true,
+				},
+				{ name: "contractId", type: "text" },
+				{ name: "evidenceUrl", type: "text", required: true },
+				{ name: "asOf", type: "text", required: true },
+				{ name: "note", type: "text" },
+			],
+		},
+		{
 			name: "productKind",
 			type: "select",
 			options: [
