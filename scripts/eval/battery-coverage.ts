@@ -70,6 +70,10 @@ function routeOf(surfaces: string[]): Route {
 	if (s.includes("scout.searchRepos")) return { kind: "repos", basis: "lexical-anchor@top3" };
 	if (s.includes("scout.getHackathons")) return { kind: "hackathons", basis: "presence" };
 	if (/scout\./.test(s)) return { kind: "skip-other" }; // other scout ops: no comparable q-probe yet
+	// skills.lumenloop.* is THEIR skill namespace (e.g. stellar-ecosystem-digest)
+	// — grading our corpus on another service's skill conduct is a category
+	// error, not a coverage gap (two digest cases mis-graded until 2026-08-13).
+	if (s.includes("skills.lumenloop.")) return { kind: "skip-lumenloop" };
 	if (s.includes("stellarDocs.") || s.includes("skills."))
 		return { kind: "research", basis: "confidence" };
 	if (s.includes("lumenloop.")) return { kind: "skip-lumenloop" };
