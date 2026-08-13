@@ -782,6 +782,25 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			// Feedback→quality loop: nightly aggregate of consumer votes
+			// (scout-feedback kinds worked/did-not-work) for THIS project.
+			// Written ONLY by scripts/aggregate-feedback.ts; score stays null
+			// until the target passes the distinct-voter floor — sub-floor
+			// counts are visible but carry no ranking influence.
+			name: "feedbackSignal",
+			type: "group",
+			admin: {
+				description:
+					"Aggregated consumer votes (distinct voters). Populated by scripts/aggregate-feedback.ts only.",
+			},
+			fields: [
+				{ name: "votes", type: "number" },
+				{ name: "worked", type: "number" },
+				{ name: "score", type: "number" },
+				{ name: "asOf", type: "text" },
+			],
+		},
+		{
 			name: "verificationLevel",
 			type: "select",
 			required: true,

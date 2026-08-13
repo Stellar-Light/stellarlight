@@ -310,7 +310,14 @@ export interface Project {
    * What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).
    */
   statusBasis?:
-    | ('operator-announcement' | 'site-liveness' | 'onchain-activity' | 'human-verified' | 'source-inherited')
+    | (
+        | 'operator-announcement'
+        | 'site-liveness'
+        | 'onchain-activity'
+        | 'human-verified'
+        | 'source-inherited'
+        | 'unverified'
+      )
     | null;
   /**
    * Former/alternate names this project is known by (e.g. Vibrant for Vesseo). Alias lookups resolve to this record and rows disclose the continuity.
@@ -488,6 +495,22 @@ export interface Project {
    */
   venueRole?: ('amm' | 'native-orderbook' | 'aggregator-router' | 'trading-ui' | 'wallet-integrated') | null;
   /**
+   * #742 (sls-023/029): per-PRODUCT deployment records — provider Live and product-live-on-network are DIFFERENT statements. Curated only (PRODUCTS_FIX); evidenceUrl + asOf are REQUIRED so every product claim is citable by construction. Empty = no product-level records yet (never 'no products').
+   */
+  products?:
+    | {
+        name: string;
+        kind: 'oracle-feed' | 'rwa-asset' | 'stablecoin' | 'wallet-app' | 'bridge' | 'ramp' | 'other';
+        network: 'mainnet' | 'testnet' | 'futurenet';
+        status: 'live' | 'development' | 'announced' | 'retired';
+        contractId?: string | null;
+        evidenceUrl: string;
+        asOf: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * What KIND of wallet-landscape product this is (sls-033): end-user-wallet = a consumer app users hold funds in; hardware-wallet = a physical signing device product; connectivity-protocol = a wallet↔dApp connection protocol (not a wallet); wallet-sdk = a library for BUILDING wallets; integration-kit = a library for integrating existing wallets into dApps; smart-account-tooling = passkey/smart-account infrastructure. Null = not yet classified (unknown, NOT 'not a wallet').
    */
   productKind?:
@@ -576,6 +599,27 @@ export interface Project {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Evidence class behind the award facts: official-record = parsed from the communityfund.stellar.org submission cards; human-verified = curated correction where the page is ambiguous
+     */
+    basis?: ('official-record' | 'human-verified') | null;
+    /**
+     * ISO date the award facts were last verified against the source
+     */
+    asOf?: string | null;
+    /**
+     * Official SCF project page the award facts were read from
+     */
+    sourceUrl?: string | null;
+  };
+  /**
+   * Aggregated consumer votes (distinct voters). Populated by scripts/aggregate-feedback.ts only.
+   */
+  feedbackSignal?: {
+    votes?: number | null;
+    worked?: number | null;
+    score?: number | null;
+    asOf?: string | null;
   };
   verificationLevel: 'Unverified' | 'Verified (SDF)' | 'Verified (Community)';
   embedding?:
@@ -856,6 +900,46 @@ export interface Repo {
     | number
     | boolean
     | null;
+  /**
+   * Soroban contract ABI (array of strings): pub fn signatures per #[contractimpl] block, Contract.fn(args) -> ret
+   */
+  contractInterface?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal
+   */
+  stellarDeps?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, …) detected in actual sources — computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)
+   */
+  sdkCapabilities?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Commit SHA of the default branch the code facts were computed at — provenance pin (github.com/<fullName>/tree/<scannedRef>)
+   */
+  scannedRef?: string | null;
   /**
    * README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)
    */
@@ -1653,6 +1737,7 @@ export interface ResearchDoc {
     | 'scf-proposal'
     | 'lumenloop'
     | 'lumenloop-research'
+    | 'repo-docs'
     | 'audit'
     | 'incident'
     | 'security-program'
@@ -1715,6 +1800,14 @@ export interface ResearchDoc {
    */
   publishedAt?: string | null;
   /**
+   * spec | guide | article | data — separates staleness-sensitive docs (guides) from canonical ones (specs: old AND authoritative). Deterministic, stamped at ingest.
+   */
+  docKind?: string | null;
+  /**
+   * current | supported | deprecated — SDK-version verdict for version-bearing content (wasm32-unknown-unknown => deprecated), via the same dated table repos use. Null = names no version signal.
+   */
+  docVersionStatus?: string | null;
+  /**
    * Crawl-observation time: when the ingester last observed this content live at the source (stamped every run, even when content is unchanged). Distinct from publishedAt (the page's own stated date) and updatedAt (advances only on a content change). Set by live-fetch ingesters; null for sources that don't stamp it.
    */
   observedAt?: string | null;
@@ -1741,11 +1834,19 @@ export interface ResearchDoc {
  */
 export interface ScoutFeedback {
   id: string;
-  kind: 'bug' | 'missing-data' | 'wrong-answer' | 'suggestion' | 'other';
+  kind: 'bug' | 'missing-data' | 'wrong-answer' | 'suggestion' | 'other' | 'worked' | 'did-not-work';
   /**
-   * The freeform feedback text from the agent.
+   * The freeform feedback text from the agent. Required for report kinds (route-enforced); optional on votes.
    */
-  message: string;
+  message?: string | null;
+  /**
+   * Vote target surface. Required for vote kinds (route-enforced); optional context on reports.
+   */
+  targetSurface?: ('projects' | 'repos') | null;
+  /**
+   * Vote target identity: project slug, or repo fullName (owner/name).
+   */
+  targetSlug?: string | null;
   /**
    * The user query the agent was answering, if it was forwarded.
    */
@@ -1964,6 +2065,14 @@ export interface PartnerAccount {
      */
     notableCustomers?: string | null;
   };
+  /**
+   * SYSTEM-STAMPED: the stellar.toml URL the anchor-capability fields were last enriched from
+   */
+  tomlSourceUrl?: string | null;
+  /**
+   * SYSTEM-STAMPED: ISO date of the last successful stellar.toml fetch+parse
+   */
+  tomlFetchedAt?: string | null;
   /**
    * Domain-matched live on-chain assets (holders, payments, rating) from stellar.expert. Enrichment-owned.
    */
@@ -2553,6 +2662,19 @@ export interface ProjectsSelect<T extends boolean = true> {
         id?: T;
       };
   venueRole?: T;
+  products?:
+    | T
+    | {
+        name?: T;
+        kind?: T;
+        network?: T;
+        status?: T;
+        contractId?: T;
+        evidenceUrl?: T;
+        asOf?: T;
+        note?: T;
+        id?: T;
+      };
   productKind?: T;
   availability?:
     | T
@@ -2586,6 +2708,17 @@ export interface ProjectsSelect<T extends boolean = true> {
               awardType?: T;
               id?: T;
             };
+        basis?: T;
+        asOf?: T;
+        sourceUrl?: T;
+      };
+  feedbackSignal?:
+    | T
+    | {
+        votes?: T;
+        worked?: T;
+        score?: T;
+        asOf?: T;
       };
   verificationLevel?: T;
   embedding?: T;
@@ -2676,6 +2809,10 @@ export interface ReposSelect<T extends boolean = true> {
   farmScore?: T;
   farmFlags?: T;
   codeSymbols?: T;
+  contractInterface?: T;
+  stellarDeps?: T;
+  sdkCapabilities?: T;
+  scannedRef?: T;
   mainnetContractId?: T;
   unverifiedStellar?: T;
   codeScanState?: T;
@@ -3077,6 +3214,8 @@ export interface ResearchDocsSelect<T extends boolean = true> {
         id?: T;
       };
   publishedAt?: T;
+  docKind?: T;
+  docVersionStatus?: T;
   observedAt?: T;
   embedding?: T;
   updatedAt?: T;
@@ -3089,6 +3228,8 @@ export interface ResearchDocsSelect<T extends boolean = true> {
 export interface ScoutFeedbackSelect<T extends boolean = true> {
   kind?: T;
   message?: T;
+  targetSurface?: T;
+  targetSlug?: T;
   query?: T;
   endpoint?: T;
   skillVersion?: T;
@@ -3187,6 +3328,8 @@ export interface PartnerAccountsSelect<T extends boolean = true> {
         settlementTime?: T;
         notableCustomers?: T;
       };
+  tomlSourceUrl?: T;
+  tomlFetchedAt?: T;
   onchain?:
     | T
     | {

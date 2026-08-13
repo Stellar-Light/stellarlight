@@ -1,6 +1,6 @@
 # Feedback → quality loop (`success_rate`)
 
-**Projects from:** lessons class 8 (undated/unverified metrics) + boxy's metadata proposal (2026-07-08). **Status: proposed.**
+**Projects from:** lessons class 8 (undated/unverified metrics) + boxy's metadata proposal (2026-07-08). **Status: plumbing shipped 2026-08-13** (openapi@1.8.53) — vote kinds (worked/did-not-work + required target) on POST /api/feedback, nightly aggregate-feedback workflow (distinct-voter dedupe, ≥5-voter floor), feedbackSignal served on project rows. Deliberately deferred until signal exists: the capped fold into `confidence` (lands once any target passes the floor — folding an empty signal is dead code plus spec churn), repo-row serving (votes stored already), research-doc targets, and the /ask thumbs UI (an /ask answer cites many rows; agents via REST can target precisely today).
 
 **What:** wire the existing `POST /api/feedback` intake into a per-slug quality signal. Aggregate "did this work?" votes per project/repo/research-doc; expose as a `usage` sub-signal inside the existing `confidence` decomposition (relevance/freshness/authority — pure math, no AI, same philosophy).
 
