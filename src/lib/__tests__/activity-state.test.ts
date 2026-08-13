@@ -12,9 +12,12 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString
 describe("activityStateOf", () => {
 	it("classifies by known commit age", () => {
 		expect(activityStateOf(daysAgo(3), false)).toBe("active");
-		expect(activityStateOf(daysAgo(45), false)).toBe("active");
+		// stay a hair inside the <=45 / <=180 boundaries: the fixture's Date.now()
+		// and the classifier's run a few ms apart, so an exact-boundary fixture
+		// only passes when both land in the same millisecond
+		expect(activityStateOf(daysAgo(44.9), false)).toBe("active");
 		expect(activityStateOf(daysAgo(46), false)).toBe("maintained");
-		expect(activityStateOf(daysAgo(180), false)).toBe("maintained");
+		expect(activityStateOf(daysAgo(179.9), false)).toBe("maintained");
 		expect(activityStateOf(daysAgo(181), false)).toBe("dormant");
 		expect(activityStateOf(daysAgo(1500), false)).toBe("dormant");
 	});
