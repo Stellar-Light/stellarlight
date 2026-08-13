@@ -10,6 +10,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { docKindOf, docVersionStatus } from "./doc-freshness";
 import type { Payload } from "payload";
 import { embedBatch } from "./embed";
 
@@ -463,6 +464,9 @@ export async function upsertChunks(opts: {
 			auditor: chunk.auditor,
 			protocol: chunk.protocol,
 			severity: chunk.severity,
+			// doc-freshness signals (deterministic, idea:research-doc-freshness):
+			docKind: docKindOf({ source, url: chunk.url, title: chunk.title }),
+			docVersionStatus: docVersionStatus(chunk.content),
 			embedding,
 		};
 		try {

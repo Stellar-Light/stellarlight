@@ -235,6 +235,22 @@ export const ResearchDocs: CollectionConfig = {
 			},
 		},
 		{
+			name: "docKind",
+			type: "text",
+			admin: {
+				description:
+					"spec | guide | article | data — separates staleness-sensitive docs (guides) from canonical ones (specs: old AND authoritative). Deterministic, stamped at ingest.",
+			},
+		},
+		{
+			name: "docVersionStatus",
+			type: "text",
+			admin: {
+				description:
+					"current | supported | deprecated — SDK-version verdict for version-bearing content (wasm32-unknown-unknown => deprecated), via the same dated table repos use. Null = names no version signal.",
+			},
+		},
+		{
 			name: "observedAt",
 			type: "date",
 			admin: {
