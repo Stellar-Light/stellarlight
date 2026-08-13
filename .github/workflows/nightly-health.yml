@@ -86,6 +86,12 @@ jobs:
         shell: bash
         run: pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
 
+      - name: Scan coverage (never-scanned + stale prominent repos)
+        id: scancov
+        continue-on-error: true
+        shell: bash
+        run: pnpm exec tsx scripts/check-scan-coverage.ts 2>&1 | tee /tmp/scan-coverage.log
+
       - name: Feed the improvement ledger + commit the evidence
         # continue-on-error: the red-issue step below must file even if the
         # feed/commit hiccups (its own step shows red in the run UI).
@@ -110,6 +116,7 @@ jobs:
           CLAIMS: ${{ steps.claims.outcome }}
           COMPLETENESS: ${{ steps.completeness.outcome }}
           BATTERY: ${{ steps.battery.outcome }}
+          SCANCOV: ${{ steps.scancov.outcome }}
         run: |
           set -e
           REDS=""
@@ -119,16 +126,17 @@ jobs:
           [ "$CLAIMS" = "failure" ] && REDS="$REDS verify-claims"
           [ "$COMPLETENESS" = "failure" ] && REDS="$REDS record-completeness"
           [ "$BATTERY" = "failure" ] && REDS="$REDS battery-coverage"
+          [ "$SCANCOV" = "failure" ] && REDS="$REDS scan-coverage"
           if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
           TITLE="Nightly health: red findings"
           BODY_FILE=/tmp/body.md
           {
             echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
             echo
-            for d in drift fields golden claims completeness battery; do
+            for d in drift fields golden claims completeness battery scan-coverage; do
               LOG=/tmp/$d.log
               case $d in
-                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;;
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;; scan-coverage) OUT=$SCANCOV;;
               esac
               [ "$OUT" = "failure" ] || continue
               echo "<details><summary>$d — failing output (tail)</summary>"
