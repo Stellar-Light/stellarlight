@@ -833,6 +833,13 @@ export interface components {
                 label?: "high" | "medium" | "low";
                 ageDays?: number | null;
             } | null;
+            /** @description Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds. */
+            feedbackSignal?: {
+                votes?: number;
+                worked?: number;
+                score?: number | null;
+                asOf?: string;
+            } | null;
             /**
              * @description Evidence class behind the SCF award facts: 'official-record' = parsed from the communityfund.stellar.org submission cards; 'human-verified' = curated correction where the official page is ambiguous. Null = provenance not yet stamped (legacy rows; populates as enrichment re-reaches them).
              * @enum {string|null}
@@ -1532,11 +1539,17 @@ export interface components {
              */
             updatedAt?: string | null;
         };
-        /** @description Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). */
+        /** @description Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). Per-kind requiredness: report kinds (bug/missing-data/wrong-answer/suggestion/other) require `message` (≥10 chars); vote kinds (worked/did-not-work) require `target` and may omit `message`. Votes aggregate nightly into per-target feedbackSignal (distinct voters, floor-gated). */
         FeedbackRequest: {
             /** @enum {string} */
-            kind: "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other";
-            message: string;
+            kind: "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other" | "worked" | "did-not-work";
+            message?: string;
+            /** @description Required on vote kinds: what the vote is about. surface 'projects' targets a directory slug; 'repos' targets a repo fullName (owner/name). */
+            target?: {
+                /** @enum {string} */
+                surface?: "projects" | "repos";
+                slug?: string;
+            };
             /** @description Optional context about what triggered the feedback. */
             context?: {
                 query?: string;
