@@ -77,8 +77,12 @@ function routeOf(surfaces: string[]): Route {
 }
 
 const STOP = new Set(["what", "which", "does", "how", "the", "this", "that", "with", "from", "have", "stellar", "soroban", "contract", "network"]);
+/** Load-bearing short tech tokens the 4-char floor would drop. */
+const SHORT_TECH = new Set(["sdk", "zk", "cli", "rpc", "sep", "cap", "amm", "dex", "nft", "kyc", "tvl"]);
 function anchorScore(question: string, rows: Array<{ fullName?: string; name?: string; description?: string | null }>): number {
-	const toks = question.toLowerCase().match(/[a-z0-9-]{4,}/g) ?? [];
+	const toks = (question.toLowerCase().match(/[a-z0-9-]{2,}/g) ?? []).filter(
+		(t) => t.length >= 4 || SHORT_TECH.has(t),
+	);
 	const hay = rows
 		.slice(0, 3)
 		.map((r) => `${r.fullName ?? ""} ${r.name ?? ""} ${r.description ?? ""}`)
@@ -175,12 +179,29 @@ async function main() {
 				score = anchorScore(question, body.repos ?? []);
 				best = body.repos?.[0]?.fullName ?? "none";
 			} else {
-				const body = (await probeJson(`${BASE}/api/hackathons?q=${qq}`)) as {
-					hackathons?: unknown[];
+				// A natural-language question never matches an event NAME via ?q=
+				// (the first sweep scored every hackathon case 0.00 while the
+				// roster held the events). Fetch the roster and anchor event
+				// names/organizers against the question instead.
+				const body = (await probeJson(`${BASE}/api/hackathons`)) as {
+					hackathons?: Array<{ name?: string; organizer?: string }>;
 				} | null;
 				if (!body) throw new Error("rate-limited after retry");
-				score = (body.hackathons?.length ?? 0) > 0 ? 0.7 : 0;
-				best = `${body.hackathons?.length ?? 0} row(s)`;
+				const rows = body.hackathons ?? [];
+				score = anchorScore(
+					question,
+					rows.map((h) => ({ name: `${h.name ?? ""} ${h.organizer ?? ""}` })),
+				);
+				// roster-wide, not top-3: presence of ANY named event in the roster
+				if (score < 0.75 && rows.length) {
+					const ql = question.toLowerCase();
+					const named = rows.some((h) =>
+						(h.name ?? "").toLowerCase().split(/[:\s]+/).filter((w) => w.length >= 4 && !STOP.has(w))
+							.some((w) => ql.includes(w)),
+					);
+					if (named) score = 0.75;
+				}
+				best = `${rows.length} roster row(s)`;
 			}
 			const basis = "basis" in route ? route.basis : "";
 			if (score >= WEAK_FLOOR) {
