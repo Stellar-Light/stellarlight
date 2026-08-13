@@ -1154,6 +1154,30 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
+						name: "capability",
+						in: "query",
+						description:
+							"Filter to repos whose SCANNED sdkCapabilities include this tag (closed set; unknown values 400). Scan-derived: an unscanned repo can never match — absence of a scan is NOT absence of the capability. Answers 'which repos actually implement X' structurally (e.g. capability=sep24-ramp, capability=x402, capability=wallet-provider).",
+						schema: {
+							type: "string",
+							enum: [
+								"contract-invoke",
+								"fee-bump",
+								"horizon",
+								"mpp",
+								"passkey",
+								"sep10-auth",
+								"sep24-ramp",
+								"signing",
+								"soroban-rpc",
+								"tx-building",
+								"wallet-kit",
+								"wallet-provider",
+								"x402",
+							],
+						},
+					},
+					{
 						name: "limit",
 						in: "query",
 						required: false,

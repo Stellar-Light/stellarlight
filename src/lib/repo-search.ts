@@ -942,6 +942,11 @@ export async function searchRepos(
 		minScore?: number;
 		/** Filter to one activity state (validated by the route). */
 		activity?: RepoActivityState | "";
+		/** Filter to repos whose scanned sdkCapabilities include this tag
+		 * (validated by the route against the closed set). Scan-derived: an
+		 * unscanned repo can never match — absence of a scan is not absence
+		 * of the capability. */
+		capability?: string;
 	} = {},
 ): Promise<{
 	repos: RepoResult[];
@@ -955,6 +960,7 @@ export async function searchRepos(
 		language = "",
 		minScore = 0,
 		activity = "",
+		capability = "",
 	} = opts;
 	const tokens = contentTokens(q);
 	const searched: RepoSearchSearched = {
@@ -1248,6 +1254,11 @@ export async function searchRepos(
 		if (activity)
 			filtered = filtered.filter(
 				(d) => activityStateOf(d.r.lastCommitAt, d.r.isArchived) === activity,
+			);
+		if (capability)
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).sdkCapabilities ?? []).includes(capability),
 			);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN

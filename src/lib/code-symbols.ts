@@ -284,6 +284,11 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	["fee-bump", /\bfeeBump\b|\bTransactionBuilder\.buildFeeBumpTransaction\b/i],
 ];
 
+/** The closed capability tag set, for filter validation + spec enums. */
+export const SDK_CAPABILITY_TAGS: readonly string[] = SDK_CAPABILITY_PATTERNS.map(
+	([tag]) => tag,
+).sort();
+
 export function detectSdkCapabilities(blobs: SymbolBlob[]): string[] {
 	const tags = new Set<string>();
 	for (const b of blobs) {

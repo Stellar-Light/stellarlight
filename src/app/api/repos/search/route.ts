@@ -27,6 +27,7 @@ import {
 	REPO_ACTIVITY_STATES,
 	type RepoActivityState,
 } from "@/lib/repo-grade";
+import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
 import { searchRepos } from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
 			"language",
 			"minScore",
 			"activity",
+			"capability",
 			"limit",
 			"offset",
 			"fields",
@@ -57,6 +59,7 @@ export async function GET(req: NextRequest) {
 				"language",
 				"minScore",
 				"activity",
+				"capability",
 				"limit",
 				"offset",
 				"fields",
@@ -91,6 +94,19 @@ export async function GET(req: NextRequest) {
 		);
 	}
 	const activity = activityRaw as RepoActivityState | "";
+	// Capability filter (closed scan-derived tag set). Strict like activity:
+	// unknown tags 400 with the valid values. Scan-derived semantics — an
+	// unscanned repo can never match; absence ≠ lacks-the-capability.
+	const capability = sp.get("capability")?.trim().toLowerCase() ?? "";
+	if (capability && !SDK_CAPABILITY_TAGS.includes(capability)) {
+		return NextResponse.json(
+			{
+				error: `Invalid capability value '${capability}'.`,
+				validValues: SDK_CAPABILITY_TAGS,
+			},
+			{ status: 400 },
+		);
+	}
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
@@ -102,13 +118,20 @@ export async function GET(req: NextRequest) {
 		language,
 		minScore,
 		activity,
+		capability,
 	});
 
 	logApiHit({
 		req,
 		endpoint: "/api/repos/search",
 		query: q,
-		filters: { language, minScore, activity: activity || null, limit },
+		filters: {
+			language,
+			minScore,
+			activity: activity || null,
+			capability: capability || null,
+			limit,
+		},
 		resultCount: repos.length,
 	});
 
