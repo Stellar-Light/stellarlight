@@ -12,6 +12,12 @@
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
  */
 import "./load-env";
+import {
+	cleanTitle as cleanScfTitle,
+	normSpaceless,
+	stemSlugHash,
+	titlePrefixMatch,
+} from "../src/lib/identity";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { parseRoundVerdicts } from "./eval/scf-official";
@@ -34,13 +40,9 @@ const stats = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Normalize a name for fuzzy matching */
-function normalize(name: string): string {
-	return name
-		.toLowerCase()
-		.replace(/[^a-z0-9]/g, "")
-		.trim();
-}
+/** EQUALITY-ONLY normalization — see src/lib/identity.ts for why
+ * containment on this form is banned (the 18-row poisoning). */
+const normalize = normSpaceless;
 
 /** Generate slug from name */
 function toSlug(name: string): string {
@@ -294,12 +296,12 @@ async function main() {
 	for (const scf of scfProjects) {
 		// Trim parenthetical/whitespace noise from SCF titles before normalizing
 		// (e.g. "Soroban Optimistic Oracle  (SOO) " → "soroban optimistic oracle").
-		const cleanTitle = scf.title.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+		const cleanTitle = cleanScfTitle(scf.title);
 		const normTitle = normalize(cleanTitle);
 		const scfSlug = toSlug(cleanTitle);
 		// SCF slugs carry a trailing hash (e.g. "warp-drive-7tk") — stem it so it
 		// joins our "warp-drive" / "warpdrive" records.
-		const scfSlugStem = String(scf.slug || "").replace(/-[a-z0-9]{2,5}$/i, "");
+		const scfSlugStem = stemSlugHash(String(scf.slug || ""));
 
 		let ours =
 			bySlug.get(SCF_SLUG_OVERRIDES[String(scf.slug)] ?? "") ||
@@ -320,22 +322,11 @@ async function main() {
 		// (or vice versa) — "Band Protocol" ↔ "Band" ✓, "DIA Oracles" ↔ "DIA" ✓,
 		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
 		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
-		const spacedNorm = (v: string) =>
-			v
-				.toLowerCase()
-				.replace(/[^a-z0-9]+/g, " ")
-				.trim();
 		if (!ours && normTitle.length >= 4) {
-			const titleSpaced = spacedNorm(cleanTitle);
 			for (const [key, proj] of byNormName) {
 				if (!key || (!key.includes(normTitle) && !normTitle.includes(key)))
 					continue;
-				const keySpaced = spacedNorm(String(proj.name ?? ""));
-				const [short, long] =
-					keySpaced.length <= titleSpaced.length
-						? [keySpaced, titleSpaced]
-						: [titleSpaced, keySpaced];
-				if (short && (long === short || long.startsWith(`${short} `))) {
+				if (titlePrefixMatch(cleanTitle, String(proj.name ?? ""))) {
 					ours = proj;
 				} else {
 					console.log(
