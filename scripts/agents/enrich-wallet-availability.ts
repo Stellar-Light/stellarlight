@@ -21,6 +21,7 @@
  *     pnpm exec tsx scripts/agents/enrich-wallet-availability.ts --limit 10
  */
 
+import "../load-env";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

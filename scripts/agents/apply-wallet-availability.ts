@@ -15,6 +15,7 @@
  *     --file improvements/drafts/wallet-availability-2026-08-14.json [--execute]
  */
 
+import "../load-env";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
