@@ -1625,6 +1625,13 @@ export interface operations {
                             asOf?: string;
                             surfaces?: string[];
                             limitPerSurface?: number;
+                            /** @description Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty — it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest 'category is thin for this query' signal and consider dropping the filter. */
+                            sourceAdvisory?: {
+                                note?: string;
+                                inSourceTopScore?: number;
+                                corpusWideTopScore?: number;
+                                corpusWideTopSource?: string | null;
+                            } | null;
                             counts?: {
                                 [key: string]: number;
                             };
