@@ -255,6 +255,47 @@ export async function GET(req: NextRequest) {
 	// direct-fetched chunks with the same cosine scale as the vector pool.
 	let queryEmbedding: number[] | null = null;
 
+	// Shared doc→row mapper: the sourceAdvisory ranks the corpus-wide pool
+	// through the EXACT same shape+regime as the served results.
+	const rowOfDoc = (d: {
+			_id: string;
+			source: string;
+			title: string;
+			section?: string;
+			url: string;
+			content: string;
+			chunkIndex: number;
+			publishedAt?: string;
+			observedAt?: string;
+		docKind?: string;
+		docVersionStatus?: string;
+			auditor?: string;
+			protocol?: string;
+			severity?: string;
+			capStatus?: string;
+			capProtocolVersion?: number;
+			score?: number;
+		}) => ({
+			id: String(d._id),
+			source: d.source,
+			title: d.title,
+			section: d.section ?? null,
+			url: d.url,
+			content: d.content,
+			chunkIndex: d.chunkIndex,
+			publishedAt: d.publishedAt ?? null,
+			observedAt: d.observedAt ?? null,
+			docKind: d.docKind ?? null,
+			docVersionStatus: d.docVersionStatus ?? null,
+			auditor: d.auditor ?? null,
+			protocol: d.protocol ?? null,
+			severity: d.severity ?? null,
+			capStatus: d.capStatus ?? null,
+			capProtocolVersion: d.capProtocolVersion ?? null,
+			score: d.score,
+		});
+
+
 	// Try vector search first. If Atlas vector search isn't configured
 	// or the corpus is empty, fall back to keyword.
 	try {
@@ -289,45 +330,7 @@ export async function GET(req: NextRequest) {
 		if (docs.length === 0) {
 			throw new Error("vector search returned 0 results — falling back");
 		}
-		chunks = docs.map(
-			(d: {
-				_id: string;
-				source: string;
-				title: string;
-				section?: string;
-				url: string;
-				content: string;
-				chunkIndex: number;
-				publishedAt?: string;
-				observedAt?: string;
-			docKind?: string;
-			docVersionStatus?: string;
-				auditor?: string;
-				protocol?: string;
-				severity?: string;
-				capStatus?: string;
-				capProtocolVersion?: number;
-				score?: number;
-			}) => ({
-				id: String(d._id),
-				source: d.source,
-				title: d.title,
-				section: d.section ?? null,
-				url: d.url,
-				content: d.content,
-				chunkIndex: d.chunkIndex,
-				publishedAt: d.publishedAt ?? null,
-				observedAt: d.observedAt ?? null,
-				docKind: d.docKind ?? null,
-				docVersionStatus: d.docVersionStatus ?? null,
-				auditor: d.auditor ?? null,
-				protocol: d.protocol ?? null,
-				severity: d.severity ?? null,
-				capStatus: d.capStatus ?? null,
-				capProtocolVersion: d.capProtocolVersion ?? null,
-				score: d.score,
-			}),
-		);
+		chunks = docs.map(rowOfDoc);
 	} catch {
 		// Fall back to keyword search using Payload's standard find.
 		// Ranking is BM25-lite: term frequency × field-position weight,
@@ -869,28 +872,31 @@ export async function GET(req: NextRequest) {
 					.aggregate(
 						buildResearchVectorPipeline({
 							queryEmbedding,
-							limit: 1,
+							limit: limitParam,
 							sourceFilter: null,
 						}),
 					)
 					.toArray();
-				const w = wide[0] as { score?: number; source?: string } | undefined;
-				const inSourceRaw = results[0]?.score ?? 0;
-				// BOTH conjuncts required: the raw gap alone over-fires — a perfect
-				// in-category match (asset clawback → CAP-35, relevance-floored) can
-				// still be out-cosined by a near neighbor elsewhere without the
-				// category being thin. Weak in-source RELEVANCE is what "thin" means.
-				const inSourceRelevance = results[0]?.confidence?.relevance ?? 0;
-				if (
-					inSourceRelevance < 0.7 &&
-					w?.score !== undefined &&
-					w.score > inSourceRaw + 0.05
-				) {
+				// SAME regime both sides: rank the wide pool exactly like the
+				// served results, then compare served-confidence to served-
+				// confidence. Raw-pipeline tops include chunks the real ranking
+				// demotes (dupes, low-value) — comparing them to a served top
+				// over-fired on perfect in-category matches twice.
+				// biome-ignore lint/suspicious/noExplicitAny: same doc shape as the main path
+				const wideRanked = rankResearchChunks((wide as any[]).map(rowOfDoc), {
+					limit: 1,
+					mode,
+					query: q,
+				});
+				const wideTop = wideRanked[0];
+				const inConf = results[0]?.confidence?.score ?? 0;
+				const wideConf = wideTop?.confidence?.score ?? 0;
+				if (wideTop && wideConf > inConf + 0.1) {
 					sourceAdvisory = {
 						note: `stronger matches exist OUTSIDE source=${sourceFilter} — the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
-						inSourceTopScore: Math.round(inSourceRaw * 100) / 100,
-						corpusWideTopScore: Math.round(w.score * 100) / 100,
-						corpusWideTopSource: w.source ?? null,
+						inSourceTopScore: Math.round(inConf * 100) / 100,
+						corpusWideTopScore: Math.round(wideConf * 100) / 100,
+						corpusWideTopSource: wideTop.source ?? null,
 					};
 				}
 			}
