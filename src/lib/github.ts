@@ -318,7 +318,9 @@ export type RepoInfo = ReturnType<typeof normalizeRepoNode>;
 // byte-identical through normalizeRepoNode.
 
 const GH_NAME_RE = /^[A-Za-z0-9_.-]+$/;
-export const BATCH_SIZE = 40;
+// 40-alias queries (x4 README blob objects each) drew 502s from GitHub —
+// smaller chunks keep the response inside what the API will serve.
+export const BATCH_SIZE = 15;
 
 /** Pure query builder (unit-tested): throws on names that could break out
  * of the string literal — GitHub logins/repos are [A-Za-z0-9_.-] only. */
@@ -368,31 +370,42 @@ export async function fetchRepoInfoBatch(
 			else out[start + i] = { error: "Repository not found" };
 		});
 		if (!valid.length) continue;
-		const res = await fetch(GQL, {
-			method: "POST",
-			headers,
-			body: JSON.stringify({
-				query: buildBatchQuery(valid.map((v) => v.pair)),
-				variables: { since },
-			}),
-		});
+		// Per-chunk degradation: one failed chunk (502, transient) leaves ONLY
+		// its own slots unfilled — the caller's per-repo fallback covers them.
+		// The first live run abandoned the whole 2,900-repo prefetch on one 502.
 		// biome-ignore lint/suspicious/noExplicitAny: GraphQL envelope
-		let data: any;
-		try {
-			data = JSON.parse(await res.text());
-		} catch {
-			throw new Error(`GitHub API error: ${res.status}`);
+		let data: any = null;
+		for (let attempt = 0; attempt < 2 && !data; attempt++) {
+			try {
+				const res = await fetch(GQL, {
+					method: "POST",
+					headers,
+					body: JSON.stringify({
+						query: buildBatchQuery(valid.map((v) => v.pair)),
+						variables: { since },
+					}),
+				});
+				const parsed = JSON.parse(await res.text());
+				const topErr = Array.isArray(parsed.errors)
+					? // biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
+						parsed.errors.find((e: any) => !e.path)
+					: null;
+				if (
+					topErr?.type === "RATE_LIMITED" ||
+					/rate limit/i.test(topErr?.message ?? "")
+				)
+					throw new Error("GitHub API rate limit exceeded");
+				if (!res.ok || (!parsed.data && parsed.errors))
+					throw new Error(
+						`GitHub API error: ${parsed.errors?.[0]?.message ?? res.status}`,
+					);
+				data = parsed;
+			} catch (e) {
+				if (attempt === 0) await new Promise((r) => setTimeout(r, 2000));
+				else console.error(`  batch chunk failed (${e instanceof Error ? e.message : e}) — ${valid.length} repo(s) fall back to per-repo`);
+			}
 		}
-		const topErr = Array.isArray(data.errors)
-			? // biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
-				data.errors.find((e: any) => !e.path)
-			: null;
-		if (topErr?.type === "RATE_LIMITED" || /rate limit/i.test(topErr?.message ?? ""))
-			throw new Error("GitHub API rate limit exceeded");
-		if (!res.ok || (!data.data && data.errors))
-			throw new Error(
-				`GitHub API error: ${data.errors?.[0]?.message ?? res.status}`,
-			);
+		if (!data) continue;
 		gqlBatchQueries++;
 		gqlBatchRepos += valid.length;
 		// biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape

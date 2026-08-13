@@ -126,6 +126,12 @@ export async function verifyWrites(
 	) => Promise<Map<string, Record<string, unknown>>>,
 	fields: readonly string[],
 	pageSize = 200,
+	/** Individual re-fetch used to CONFIRM a row-not-found before reporting
+	 * it. A guard must not accuse from a bulk read alone: the 2026-08-13 run
+	 * reported 310 rows "not found" that were live and correct — a bulk $in
+	 * artifact. One single-key lookup per suspect converts artifact to truth
+	 * (and costs nothing when the bulk pass is clean). */
+	refetchOne?: (key: string) => Promise<Record<string, unknown> | null>,
 ): Promise<ReadBackMismatch[]> {
 	const keys = [...sent.keys()];
 	const stored = new Map<string, Record<string, unknown>>();
@@ -134,8 +140,14 @@ export async function verifyWrites(
 		for (const [k, v] of batch) stored.set(k, v);
 	}
 	const out: ReadBackMismatch[] = [];
-	for (const [key, data] of sent)
-		out.push(...diffWritten(key, data, stored.get(key), fields));
+	for (const [key, data] of sent) {
+		let row = stored.get(key);
+		if (!row && refetchOne) {
+			const confirmed = await refetchOne(key);
+			if (confirmed) row = confirmed;
+		}
+		out.push(...diffWritten(key, data, row, fields));
+	}
 	return out;
 }
 
