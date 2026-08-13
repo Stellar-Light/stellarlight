@@ -33,28 +33,6 @@
 			"agentNote": "Text repeatedly says 'Download the app' consistent with mobile apps. No evidence of web/extension/desktop/hardware wallet."
 		},
 		{
-			"slug": "volta-circuit",
-			"name": "Volta Circuit",
-			"website": "https://voltacircuit.com/",
-			"entries": [
-				{
-					"platform": "ios",
-					"state": "available",
-					"storeUrl": "https://apps.apple.com/us/app/threshold-v/id6744829082",
-					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link for 'threshold-v'; page: 'Mobile App Download ThresholdV Turn your phone into a secure signing device'"
-				},
-				{
-					"platform": "android",
-					"state": "available",
-					"storeUrl": "https://play.google.com/store/apps/details?id=com.voltacircuit.threshold",
-					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Play Store link (com.voltacircuit.threshold) for ThresholdV mobile signing app"
-				}
-			],
-			"agentNote": "The mobile app 'ThresholdV' is a companion signing device app, not the full wallet platform (which is web/enterprise). Dashboard appears to be a marketing mockup, not clear in-browser wallet evidence, so 'web' omitted."
-		},
-		{
 			"slug": "stellarport",
 			"name": "Stellarport",
 			"website": "https://stellarport.io/",
@@ -90,21 +68,6 @@
 				}
 			],
 			"agentNote": "Page also mentions APK download but no concrete URL provided. Web platform not claimed as it's a marketing site, not an in-browser wallet."
-		},
-		{
-			"slug": "simple-signer",
-			"name": "Simple Signer",
-			"website": "https://github.com/fsodano/simple-stellar-signer",
-			"entries": [
-				{
-					"platform": "web",
-					"state": "available",
-					"storeUrl": "https://sign.bigger.systems",
-					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Simple Signer runs in-browser; embedded via window.open to https://sign.bigger.systems /connect, /sign, /payment endpoints"
-				}
-			],
-			"agentNote": "Source is a GitHub repo README, not a marketing site. It describes an in-browser transaction signer hosted at sign.bigger.systems (also sign-testnet/sign-futurenet). Ledger (hardware-device) is listed as 'In progress', so omitted. No app-store/extension links present."
 		},
 		{
 			"slug": "onekey",
@@ -143,14 +106,14 @@
 				{
 					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://apps.apple.com/gb/app/freedom-pay-wallet/id6448116005",
+					"storeUrl": "https://apps.apple.com/app/id6448116005",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link for Freedom Pay Wallet"
+					"note": "curator-agent draft: App Store link for Freedom Pay Wallet [review: site's GB-storefront link 404s; canonicalized to region-free URL, same app id, verified live]"
 				},
 				{
 					"platform": "android",
 					"state": "available",
-					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios&#038;pli=1",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios",
 					"checkedAt": "2026-08-13",
 					"note": "curator-agent draft: Google Play Store listing for the app"
 				}
@@ -290,14 +253,14 @@
 				{
 					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://apps.apple.com/gb/app/freedom-pay-wallet/id6448116005",
+					"storeUrl": "https://apps.apple.com/app/id6448116005",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link to 'Freedom Pay Wallet'"
+					"note": "curator-agent draft: App Store link to 'Freedom Pay Wallet' [review: site's GB-storefront link 404s; canonicalized to region-free URL, same app id, verified live]"
 				},
 				{
 					"platform": "android",
 					"state": "available",
-					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios&#038;pli=1",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios",
 					"checkedAt": "2026-08-13",
 					"note": "curator-agent draft: Google Play Store link found in page markup"
 				}
