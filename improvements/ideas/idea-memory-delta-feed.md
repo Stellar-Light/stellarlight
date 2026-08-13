@@ -1,5 +1,7 @@
 # Idea: memory-delta feed — /api/changes?since= for memory-carrying agents
 
+**Shipped 2026-08-12** — GET /api/changes (openapi@1.8.48, PR #832): updatedAt row-level changes + dated facets (status, scf-awards, code-facts, toml; ["row"] = undated), per-surface truncated paging. Live-verified 2026-08-13 serving the curator availability writes as they landed.
+
 Projects from: SYNTHESIS-2026-08-12 (Raven trajectory: per-user memory,
 institutional hardening).
 

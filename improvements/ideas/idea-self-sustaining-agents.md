@@ -1,6 +1,6 @@
 # Idea — self-sustaining quality loop (crawl → walk → run)
 
-**Status:** crawl phase shipping (2026-08-08). **Goal:** the maintainer sets
+**Status:** crawl shipped; **walk phase shipped 2026-08-13** — first curator loop ran end-to-end (wallet-availability agent → reviewed drafts PRs → gated apply with read-back; 19 wallets landed + live-verified). **Goal:** the maintainer sets
 policy; agents run the cycle. Most operational toil today is plumbing a
 machine can own: dispatch-and-watch of Actions, post-deploy verification,
 detector sweeps, triage.

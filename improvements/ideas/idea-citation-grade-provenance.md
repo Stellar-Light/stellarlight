@@ -1,5 +1,7 @@
 # Idea: citation-grade provenance on every served fact
 
+**Shipped** (verified in code 2026-08-13): all three slices exist — scf.{basis,asOf,sourceUrl} written by enrich-from-scf and served as scfBasis/scfAsOf/scfSourceUrl; repos codeVerified.scannedRef (write-shape → /api/repos/explain, field-population-guarded); partners tomlSourceUrl/tomlFetchedAt. The confidence scores (openapi@1.8.49) consume exactly these trios.
+
 Projects from: SYNTHESIS-2026-08-12 (institutional trajectory) + the
 sls-024 pattern that already works.
 

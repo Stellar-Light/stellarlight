@@ -10,6 +10,8 @@
 audit-coverage-watch, audit-findings-extraction (registry + /api/audits),
 capability-mismatch-sweep, field-coverage-all-endpoints,
 js-symbol-extraction, mention-vs-identity-repo-search, onchain-metrics,
+idea-writer-conformance-guard, idea-citation-grade-provenance,
+idea-memory-delta-feed (/api/changes), idea-self-sustaining-agents (walk),
 rescan-on-push (the re-scan policy), shared-synonym-registry,
 status-recency-detector, status-source-rows (the provenance trios),
 skill-mirror-freshness-guard (sk-009 arc). Open: feedback-quality-loop,
@@ -34,8 +36,8 @@ Two provenance streams feed this folder:
 ### Retrieval quality
 - ~~[Shared synonym registry](./shared-synonym-registry.md)~~ — **shipped 2026-07-20**: guard phase (#601) + phase 2 value merge (#618) — one core vocabulary in `search-vocabulary.ts`, consumed by all three search surfaces.
 - **Hybrid lexical+vector research retrieval** — "fastest cheapest way to move assets from Ethereum to Stellar" retrieves payments dev-docs, not bridge routes: the answer exists but embeddings never fetch it (class 19 residual). Union lexical matches into the vector pool before ranking. Aligns with raven#12's atlas+lexical+semantic direction — coordinate, don't pre-build. *(Projects from: class 19)*
-- **Research ingest title/dedupe hygiene** — meeting-notes chunks surface under nav/date titles ("11 posts tagged with …", "2024-08-23") and the same content appears under multiple URLs (tag page + canonical page), which per-URL dedupe can't collapse. Fix at ingest: title from page h1, skip tag-aggregation URLs, content-hash dedupe. Golden eval counts BAD-TITLE 11 today. *(Projects from: classes 10/19)*
-- **[Capability-mismatch sweep](./capability-mismatch-sweep.md)** — generalize the dual-identity sweep beyond ramps (class 14; `audd` is the open candidate).
+- ~~Research ingest title/dedupe hygiene~~ — **shipped** (title-from-h1, tag-aggregation URL skip, content-hash dedupe at ingest). Was: meeting-notes chunks surface under nav/date titles ("11 posts tagged with …", "2024-08-23") and the same content appears under multiple URLs (tag page + canonical page), which per-URL dedupe can't collapse. Fix at ingest: title from page h1, skip tag-aggregation URLs, content-hash dedupe. Golden eval counts BAD-TITLE 11 today. *(Projects from: classes 10/19)*
+- ~~[Capability-mismatch sweep](./capability-mismatch-sweep.md)~~ — **shipped**: generalized dual-identity sweep beyond ramps (class 14).
 - ~~[Mention-vs-identity for repo search](./mention-vs-identity-repo-search.md)~~ — **shipped 2026-07-20 (#621)**: identityZone + identity-over-mention sort key + candidate-pool admission ported to repo search, so a repo that IS the thing outranks one that merely mentions it. *(Projects from: the custody re-measure)*
 - **Fee-transparency axis** — structured `feeBps` + `asOf` on ramp corridors so "ranked by fee" is answerable (raven#8 / Raph; class 1). Needs grounded doc-crawling per provider.
 
@@ -56,4 +58,4 @@ Two provenance streams feed this folder:
 - **A public `code-truth` surface** — open the scoring modules (`code-depth`, `code-signals`, `soroban-versions`, the eval/labels) as their own readable repo, if we want the grading logic fully in the open.
 
 ### Ecosystem
-- **Golden-question eval mirroring cf-flue** — expand the Guard's ground-truth set to track the exact questions Raven is graded on.
+- ~~Golden-question eval mirroring cf-flue~~ — **shipped 2026-08-13**: the nightly battery-coverage detector walks stellar-raven's public eval battery (~492 cases) and grades our routed surface per case.
