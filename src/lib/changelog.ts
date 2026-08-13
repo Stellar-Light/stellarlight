@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"searchRepos capability filter — 'which repos actually implement X' becomes structural (openapi@1.8.57).",
+		detail:
+			"The Raven-lens gap hunt found agents could only free-text toward capability questions ('sep-24 anchor implementation' surfaced protocol/docs repos, not implementers). searchRepos now takes capability=<tag> over the closed scan-derived sdkCapabilities set (contract-invoke, fee-bump, horizon, mpp, passkey, sep10-auth, sep24-ramp, signing, soroban-rpc, tx-building, wallet-kit, wallet-provider, x402); unknown tags 400 with the valid list. Scan-derived semantics: an unscanned repo can never match — absence of a scan is NOT absence of the capability (the nightly scan-coverage detector + waves close that gap).",
+	},
+	{
+		date: "2026-08-13",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Toolchain dimension on analyzeEcosystem + ciPresent/testsPresent on repo rows (openapi@1.8.56, code-truth track).",
 		detail:
 			"dimension=toolchain returns the Soroban-SDK version-status distribution across scanned repos (current/supported/deprecated/unknown, from the dated soroban-versions table), the deprecated-toolchain roster (capped 50, full count alongside), and engineering-practice counts. Repo rows gain ciPresent/testsPresent — tree-level presence facts from the code scan (a CI config exists / test files exist), presence only, never a claim CI passes or coverage is good; null until the repo's next scan records them. Population accrues via the weekly stale-first re-scan.",
