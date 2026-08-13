@@ -1,0 +1,70 @@
+# Curator agent (phase 3, first instance): wallet-availability DRAFTS.
+#
+# The LLM proposes, the deterministic layer disposes: this workflow runs the
+# agent (reads wallets with empty availability, extracts evidenced platform
+# claims from operator sites via Claude), commits the drafts file to a branch,
+# and opens a PR — the human gate is the diff review. Landing happens later
+# via apply-wallet-availability.ts (dry-run default) once the PR is merged.
+#
+# Needs the ANTHROPIC_API_KEY secret; until it exists the agent step SKIPS
+# with a clear warning instead of failing, so this workflow is safe to merge
+# ahead of the key decision.
+name: curator-wallet-availability
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Max wallets to draft this run
+        type: string
+        default: "10"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: curator-wallet-availability
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run the curator agent (drafts only, no DB writes)
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: pnpm exec tsx scripts/agents/enrich-wallet-availability.ts --limit "${{ inputs.limit }}" 2>&1 | tee /tmp/agent.log
+
+      - name: Open the drafts PR (the human gate)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! git status --porcelain improvements/drafts/ | grep -q .; then
+            echo "no drafts produced (key unset, or no evidenced claims) — nothing to PR"
+            exit 0
+          fi
+          BRANCH="curator/wallet-availability-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "stellarlight-curator"
+          git config user.email "bot@stellarlight.xyz"
+          git checkout -b "$BRANCH"
+          git add improvements/drafts/
+          git commit -m "curator: wallet-availability drafts $(date -u +%Y-%m-%d) [skip ci]"
+          git push origin "$BRANCH"
+          FILE="$(git diff --name-only HEAD~1 | head -1)"
+          gh pr create --base main --head "$BRANCH" \
+            --title "curator: wallet-availability drafts $(date -u +%Y-%m-%d)" \
+            --body "$(printf 'Agent-proposed availability entries — every claim carries a store/product URL verified to appear in the fetched page. REVIEW THE DIFF (this PR is the human gate), merge, then land via the apply-wallet-availability workflow:\n\n    gh workflow run apply-wallet-availability.yml -f file=%s        # dry run\n    gh workflow run apply-wallet-availability.yml -f file=%s -f execute=true\n\nAgent log tail:\n```\n%s\n```' "$FILE" "$FILE" "$(tail -20 /tmp/agent.log)")" \
+            || echo "::warning::PR creation blocked — open manually: https://github.com/$GITHUB_REPOSITORY/compare/$BRANCH"

@@ -1,0 +1,27 @@
+name: Apply wallet-availability drafts (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Drafts file (repo-relative), e.g. improvements/drafts/wallet-availability-2026-08-14.json"
+        type: string
+        required: true
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Lands REVIEWED drafts only (the file must be merged to main via the
+      # curator PR first). Only-empty writes, read-back verified, zero-work red.
+      - run: pnpm exec tsx scripts/agents/apply-wallet-availability.ts --file "${{ inputs.file }}" ${{ inputs.execute && '--execute' || '' }}
