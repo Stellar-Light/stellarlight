@@ -338,6 +338,22 @@ const NIGHTLY_SPECS: SourceSpec[] = [
 		],
 	},
 	{
+		source: "nightly-battery",
+		file: "battery-coverage-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "corpus",
+				mode: "battery-coverage-weak",
+				// Low: the external referee's question set is a backlog COMPASS,
+				// not a fire — weak cases rank the ingest/curation queue.
+				severity: "low",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
 		source: "nightly-completeness",
 		file: "record-completeness-latest.json",
 		dir: NIGHTLY,

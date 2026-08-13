@@ -79,6 +79,12 @@ jobs:
         # masked this step's exit code (2026-08-12 lesson).
         shell: bash
         run: pnpm exec tsx scripts/check-record-completeness.ts 2>&1 | tee /tmp/completeness.log
+      - name: Battery coverage (raven's eval questions vs our corpus)
+        id: battery
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        shell: bash
+        run: pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
 
       - name: Feed the improvement ledger + commit the evidence
         # continue-on-error: the red-issue step below must file even if the
@@ -103,6 +109,7 @@ jobs:
           GOLDEN: ${{ steps.golden.outcome }}
           CLAIMS: ${{ steps.claims.outcome }}
           COMPLETENESS: ${{ steps.completeness.outcome }}
+          BATTERY: ${{ steps.battery.outcome }}
         run: |
           set -e
           REDS=""
@@ -111,16 +118,17 @@ jobs:
           [ "$GOLDEN" = "failure" ] && REDS="$REDS golden-eval"
           [ "$CLAIMS" = "failure" ] && REDS="$REDS verify-claims"
           [ "$COMPLETENESS" = "failure" ] && REDS="$REDS record-completeness"
+          [ "$BATTERY" = "failure" ] && REDS="$REDS battery-coverage"
           if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
           TITLE="Nightly health: red findings"
           BODY_FILE=/tmp/body.md
           {
             echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
             echo
-            for d in drift fields golden claims completeness; do
+            for d in drift fields golden claims completeness battery; do
               LOG=/tmp/$d.log
               case $d in
-                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;;
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;;
               esac
               [ "$OUT" = "failure" ] || continue
               echo "<details><summary>$d — failing output (tail)</summary>"
