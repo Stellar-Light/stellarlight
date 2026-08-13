@@ -441,7 +441,14 @@ async function main() {
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
-			knowledgeNotes: buildKnowledgeNotes(full, project.slug, auditsByProject),
+			knowledgeNotes: buildKnowledgeNotes(full, project.slug, auditsByProject, {
+				lastCommitAt:
+					info?.lastCommitAt ??
+					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+					((existing as any)?.lastCommitAt ?? null),
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				codeInUse: (existing as any)?.codeInUse ?? null,
+			}),
 			hackathonWinner: !!project.hackathonPlacement,
 			scfAwarded: !!project.scf?.awarded,
 			builderReputation,
