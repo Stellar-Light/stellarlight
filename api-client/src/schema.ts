@@ -499,7 +499,7 @@ export interface paths {
         };
         /**
          * Cross-event Stellar ecosystem analytics rollup
-         * @description The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals (per-round + Built/Abandoned funnel), per-category distribution, DeFi TVL (DefiLlama, dated), `gaps` (per-vertical whitespace — under-built/unproven/absent, for 'what should I build?'), `developers` (current Electric Capital monthly-active-dev count + month/year trend, tenure, geography, peer scale), and `toolchain` (Soroban-SDK version-status distribution across scanned repos + the deprecated-toolchain roster + CI/test presence counts). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated — never demand or a headcount.
+         * @description The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace — what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated — never demand or a headcount.
          */
         get: operations["analyzeEcosystem"];
         put?: never;
