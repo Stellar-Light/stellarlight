@@ -1,8 +1,8 @@
 const GQL = "https://api.github.com/graphql";
 
-const Q_REPO = `
-  query RepoInfo($owner: String!, $name: String!, $since: GitTimestamp!) {
-    repository(owner: $owner, name: $name) {
+// Shared field set so the single and BATCHED fetch stay byte-identical.
+const REPO_FRAGMENT = `
+  fragment RepoFields on Repository {
       url
       nameWithOwner
       description
@@ -28,9 +28,14 @@ const Q_REPO = `
       }
       latestRelease { publishedAt tagName }
       pullRequests(states: OPEN) { totalCount }
-    }
   }
 `;
+
+const Q_REPO = `
+  query RepoInfo($owner: String!, $name: String!, $since: GitTimestamp!) {
+    repository(owner: $owner, name: $name) { ...RepoFields }
+  }
+${REPO_FRAGMENT}`;
 
 // List an owner's (org OR user) public, non-archived repo names, most-recently
 // pushed first. Used to expand a bare-org github link (github.com/soroswap) into
@@ -248,6 +253,11 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		throw new Error("Repository not found");
 	}
 
+	return normalizeRepoNode(r);
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: GraphQL node shape
+export function normalizeRepoNode(r: any) {
 	const stargazerCount =
 		typeof r.stargazerCount === "number"
 			? r.stargazerCount
@@ -295,4 +305,116 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		releaseTag: (r.latestRelease?.tagName ?? null) as string | null,
 		openPRs: (r.pullRequests?.totalCount ?? null) as number | null,
 	};
+
+}
+
+export type RepoInfo = ReturnType<typeof normalizeRepoNode>;
+
+// ── Batched repo info (GraphQL aliases) ─────────────────────────────────
+// The enrich full pass called fetchRepoInfo once per repo (~2,900
+// point-costing queries/pass on ONE shared PAT budget) — the starvation
+// class behind the failed waves. Aliases put up to 40 repositories in one
+// query against the same REPO_FRAGMENT, so single and batched results stay
+// byte-identical through normalizeRepoNode.
+
+const GH_NAME_RE = /^[A-Za-z0-9_.-]+$/;
+export const BATCH_SIZE = 40;
+
+/** Pure query builder (unit-tested): throws on names that could break out
+ * of the string literal — GitHub logins/repos are [A-Za-z0-9_.-] only. */
+export function buildBatchQuery(pairs: { owner: string; name: string }[]): string {
+	const aliases = pairs
+		.map((p, i) => {
+			if (!GH_NAME_RE.test(p.owner) || !GH_NAME_RE.test(p.name))
+				throw new Error(`invalid owner/name: ${p.owner}/${p.name}`);
+			return `    r${i}: repository(owner: "${p.owner}", name: "${p.name}") { ...RepoFields }`;
+		})
+		.join("\n");
+	return `\n  query RepoBatch($since: GitTimestamp!) {\n${aliases}\n  }\n${REPO_FRAGMENT}`;
+}
+
+let gqlBatchQueries = 0;
+let gqlBatchRepos = 0;
+export const gqlBatchStats = () => ({ queries: gqlBatchQueries, repos: gqlBatchRepos });
+
+export type BatchRepoResult = { info: RepoInfo } | { error: string };
+
+/** Fetch many repos in aliased chunks. Per-alias isolation: one missing/
+ * private repo yields {error} for THAT pair with the same message strings
+ * fetchRepoInfo throws, so call sites keep identical per-repo semantics.
+ * Batch-level failures (auth, rate limit, HTTP) throw — callers fall back
+ * to per-repo fetches. */
+export async function fetchRepoInfoBatch(
+	pairs: { owner: string; name: string }[],
+): Promise<BatchRepoResult[]> {
+	const token =
+		process.env.GITHUB_TOKEN?.trim() ||
+		process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+		"User-Agent": "stellar-ecosystem-directory",
+	};
+	if (token) headers.Authorization = `Bearer ${token}`;
+	const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
+
+	const out: BatchRepoResult[] = new Array(pairs.length);
+	for (let start = 0; start < pairs.length; start += BATCH_SIZE) {
+		const chunk = pairs.slice(start, start + BATCH_SIZE);
+		// pre-filter invalid names so one garbage entry can't sink its chunk
+		const valid: { pair: (typeof chunk)[number]; idx: number }[] = [];
+		chunk.forEach((pair, i) => {
+			if (GH_NAME_RE.test(pair.owner) && GH_NAME_RE.test(pair.name))
+				valid.push({ pair, idx: start + i });
+			else out[start + i] = { error: "Repository not found" };
+		});
+		if (!valid.length) continue;
+		const res = await fetch(GQL, {
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				query: buildBatchQuery(valid.map((v) => v.pair)),
+				variables: { since },
+			}),
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: GraphQL envelope
+		let data: any;
+		try {
+			data = JSON.parse(await res.text());
+		} catch {
+			throw new Error(`GitHub API error: ${res.status}`);
+		}
+		const topErr = Array.isArray(data.errors)
+			? // biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
+				data.errors.find((e: any) => !e.path)
+			: null;
+		if (topErr?.type === "RATE_LIMITED" || /rate limit/i.test(topErr?.message ?? ""))
+			throw new Error("GitHub API rate limit exceeded");
+		if (!res.ok || (!data.data && data.errors))
+			throw new Error(
+				`GitHub API error: ${data.errors?.[0]?.message ?? res.status}`,
+			);
+		gqlBatchQueries++;
+		gqlBatchRepos += valid.length;
+		// biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
+		const errByAlias = new Map<string, any>();
+		for (const e of data.errors ?? [])
+			if (typeof e.path?.[0] === "string") errByAlias.set(e.path[0], e);
+		valid.forEach(({ idx }, i) => {
+			const node = data.data?.[`r${i}`];
+			if (node) {
+				out[idx] = { info: normalizeRepoNode(node) };
+				return;
+			}
+			const e = errByAlias.get(`r${i}`);
+			out[idx] = {
+				error:
+					e?.type === "NOT_FOUND"
+						? "Repository not found"
+						: e?.type === "FORBIDDEN"
+							? "Private repository - access denied"
+							: (e?.message ?? "Repository not found"),
+			};
+		});
+	}
+	return out;
 }

@@ -13,7 +13,10 @@
 import "./load-env";
 import { getPayload } from "payload";
 import {
+	type BatchRepoResult,
 	fetchRepoInfo,
+	fetchRepoInfoBatch,
+	gqlBatchStats,
 	listOwnerRepos,
 	type OwnerRepo,
 } from "../src/lib/github";
@@ -294,6 +297,28 @@ async function main() {
 		`${entries.length} unique repos from ${projects.length} projects.\n`,
 	);
 
+	// Batched prefetch (GraphQL aliases): ~2,900 per-repo queries collapse to
+	// ~N/40 — the shared-PAT starvation fix. Per-alias isolation keeps the
+	// per-repo error semantics; a batch-level failure falls back to the old
+	// per-repo fetch path inside the loop.
+	const prefetched = new Map<string, BatchRepoResult>();
+	try {
+		const batched = await fetchRepoInfoBatch(
+			entries.map((e) => ({ owner: e.owner, name: e.name })),
+		);
+		batched.forEach((r, i) => {
+			if (r) prefetched.set(entries[i].full, r);
+		});
+		const st = gqlBatchStats();
+		console.log(
+			`GraphQL batched: ${st.queries} queries for ${st.repos} repos (was ${st.repos} queries unbatched)\n`,
+		);
+	} catch (e) {
+		console.log(
+			`  batch prefetch unavailable (${e instanceof Error ? e.message : e}) — per-repo fallback\n`,
+		);
+	}
+
 	let created = 0,
 		updated = 0,
 		failed = 0;
@@ -313,7 +338,9 @@ async function main() {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
 		try {
-			info = await fetchRepoInfo(owner, name);
+			const pre = prefetched.get(full);
+			if (pre && "error" in pre) throw new Error(pre.error);
+			info = pre ? pre.info : await fetchRepoInfo(owner, name);
 		} catch (e) {
 			enrichError = e instanceof Error ? e.message : String(e);
 			failed++;
