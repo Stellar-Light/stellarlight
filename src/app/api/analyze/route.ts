@@ -45,6 +45,7 @@ const VALID_DIMENSIONS = [
 	"tvl",
 	"gaps",
 	"developers",
+	"toolchain",
 ] as const;
 
 // Buildable product verticals — the universe the `gaps` dimension measures
@@ -154,6 +155,8 @@ export async function GET(req: NextRequest) {
 	const includeGaps = dimensionParam === "all" || dimensionParam === "gaps";
 	const includeDevelopers =
 		dimensionParam === "all" || dimensionParam === "developers";
+	const includeToolchain =
+		dimensionParam === "all" || dimensionParam === "toolchain";
 
 	const payload = await getPayloadSafe();
 
@@ -639,6 +642,71 @@ export async function GET(req: NextRequest) {
 			basis:
 				"Electric Capital Open Dev Data: monthly-active developers = distinct authors of code commits to Stellar-ecosystem open-source repos in the trailing 28 days (NOT a headcount or payroll figure; closed-source and non-committing contributors are uncounted). `exclusive` builds only on Stellar; `multichain` also commits to other ecosystems. Dated by asOf; deltas are point-in-time vs the snapshot. Peer MAD is the same methodology per chain for scale, not a quality ranking.",
 		};
+	}
+
+	// ── Toolchain rollup (code-truth track): which SDK generations the
+	// scanned Soroban corpus actually sits on, plus the deprecated roster —
+	// the "who is on an unsupported toolchain" report internal platform/devrel
+	// teams ask for. Presence facts (ciPresent/testsPresent) ride along as an
+	// engineering-practice snapshot. Commit-side, as-of the last scans.
+	if (includeToolchain && payload) {
+		try {
+			const scanned = await payload.find({
+				collection: "repos",
+				where: { sorobanSdkVersion: { exists: true } },
+				limit: 2000,
+				depth: 0,
+				overrideAccess: true,
+				select: {
+					fullName: true,
+					projectSlug: true,
+					sorobanSdkVersion: true,
+					versionStatus: true,
+					ciPresent: true,
+					testsPresent: true,
+				},
+			});
+			const byStatus: Record<string, number> = {};
+			let ciCount = 0;
+			let testsCount = 0;
+			let practiceKnown = 0;
+			const deprecated: Array<{
+				fullName: string;
+				projectSlug: string | null;
+				sorobanSdkVersion: string | null;
+			}> = [];
+			// biome-ignore lint/suspicious/noExplicitAny: select-narrowed docs
+			for (const r of scanned.docs as any[]) {
+				const st = typeof r.versionStatus === "string" ? r.versionStatus : "unknown";
+				byStatus[st] = (byStatus[st] ?? 0) + 1;
+				if (typeof r.ciPresent === "boolean") {
+					practiceKnown += 1;
+					if (r.ciPresent) ciCount += 1;
+					if (r.testsPresent) testsCount += 1;
+				}
+				if (st === "deprecated" && deprecated.length < 50)
+					deprecated.push({
+						fullName: String(r.fullName),
+						projectSlug: r.projectSlug ?? null,
+						sorobanSdkVersion: r.sorobanSdkVersion ?? null,
+					});
+			}
+			result.toolchain = {
+				scannedRepos: scanned.totalDocs,
+				byVersionStatus: byStatus,
+				deprecatedRepos: deprecated,
+				deprecatedTotal: byStatus.deprecated ?? 0,
+				engineeringPractice: {
+					reposWithPracticeFacts: practiceKnown,
+					ciPresent: ciCount,
+					testsPresent: testsCount,
+				},
+				basis:
+					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence — presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
+			};
+		} catch {
+			// best-effort — rollup absent on error, never fabricated
+		}
 	}
 
 	logApiHit({

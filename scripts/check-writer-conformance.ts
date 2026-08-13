@@ -129,6 +129,10 @@ const C4_ALLOW: Record<string, string> = {
 	hasStoragePatterns: "internal boolean fact (2026-08-12)",
 	hasEvents: "internal boolean fact (2026-08-12)",
 	usesNoStd: "internal boolean fact (2026-08-12)",
+	ciPresent:
+		"presence fact served on repo rows; probe once weekly re-scans populate the corpus (2026-08-13)",
+	testsPresent:
+		"presence fact served on repo rows; probe once weekly re-scans populate the corpus (2026-08-13)",
 	stellarJsDep: "internal fact feeding proof/jsDepth (2026-08-12)",
 	farmFlags: "diagnostic list; farmScore is the served judgment (2026-08-12)",
 	farmScore: "score component of repoGrade, probed via repoScore surfaces (2026-08-12)",

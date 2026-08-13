@@ -179,6 +179,14 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			// Engineering-practice presence facts from the code scan (tree-level):
+			// "has a CI config" / "has test files" — presence only, never a claim
+			// CI passes or coverage is good. Written by scan-repo-code.
+			name: "ciPresent",
+			type: "checkbox",
+		},
+		{ name: "testsPresent", type: "checkbox" },
+		{
 			name: "contractMacroCount",
 			type: "number",
 			admin: { position: "sidebar" },

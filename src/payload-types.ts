@@ -859,6 +859,8 @@ export interface Repo {
    * soroban-sdk status vs latest protocol (unknown never lowers tier)
    */
   versionStatus?: ('current' | 'supported' | 'deprecated' | 'unknown') | null;
+  ciPresent?: boolean | null;
+  testsPresent?: boolean | null;
   contractMacroCount?: number | null;
   /**
    * Cargo cdylib — real deployable contract
@@ -2810,6 +2812,8 @@ export interface ReposSelect<T extends boolean = true> {
   codeDepth?: T;
   sorobanSdkVersion?: T;
   versionStatus?: T;
+  ciPresent?: T;
+  testsPresent?: T;
   contractMacroCount?: T;
   isDeployableContract?: T;
   hasAuthPatterns?: T;

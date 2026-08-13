@@ -68,6 +68,8 @@ export interface CodeFacts {
 	isDeployableContract: boolean; // Cargo [lib] crate-type includes cdylib
 	usesNoStd: boolean; // #![no_std]
 	stellarJsDep: string | null; // matched @stellar/* dep name@version
+	ciPresent: boolean; // CI config in-tree (.github/workflows, circleci, gitlab)
+	testsPresent: boolean; // test dirs/files in-tree (tree-level heuristic)
 }
 
 export interface CodeSignals {
@@ -212,6 +214,8 @@ const EMPTY_FACTS: CodeFacts = {
 	isDeployableContract: false,
 	usesNoStd: false,
 	stellarJsDep: null,
+	ciPresent: false,
+	testsPresent: false,
 };
 
 /**
@@ -228,6 +232,27 @@ const EMPTY_FACTS: CodeFacts = {
  */
 export function detectStellarProof(input: ScanInput): ProofResult {
 	const facts: CodeFacts = { ...EMPTY_FACTS };
+	// Tree-level engineering-practice facts (cheap, no extra fetches). These
+	// are presence facts only — "has a CI config", "has test files" — never a
+	// claim the CI passes or the tests are good.
+	for (const e of input.tree) {
+		if (e.type !== "blob") continue;
+		const path = e.path;
+		if (
+			/^\.github\/workflows\/[^/]+\.ya?ml$/i.test(path) ||
+			/^\.circleci\/config\.ya?ml$/i.test(path) ||
+			/^\.gitlab-ci\.ya?ml$/i.test(path)
+		)
+			facts.ciPresent = true;
+		if (
+			/(^|\/)(tests?|__tests__|spec|e2e|cypress)\//i.test(path) ||
+			/\.(test|spec)\.[cm]?[jt]sx?$/i.test(path) ||
+			/_test\.(go|rs|py|ts|js)$/i.test(path) ||
+			/(^|\/)conftest\.py$/.test(path)
+		)
+			facts.testsPresent = true;
+		if (facts.ciPresent && facts.testsPresent) break;
+	}
 
 	// Guard P1: unreadable proof file ⇒ do not conclude. Retry later.
 	const proofPaths = (p: string) => {

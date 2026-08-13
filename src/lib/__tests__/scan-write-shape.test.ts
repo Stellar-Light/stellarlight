@@ -20,6 +20,8 @@ const FACTS: CodeFacts = {
 	isDeployableContract: true,
 	usesNoStd: true,
 	stellarJsDep: null,
+	ciPresent: true,
+	testsPresent: false,
 };
 
 const okInput: SignalsInput = {
