@@ -1,5 +1,10 @@
 {
-	"generatedAt": "2026-08-12T14:38:49.061Z",
+	"generatedAt": "2026-08-13T07:03:45.303Z",
 	"detector": "api-drift",
-	"failures": []
+	"failures": [
+		{
+			"probe": "research row: every live field documented in ResearchResult",
+			"note": "live-but-undocumented: docKind, docVersionStatus"
+		}
+	]
 }

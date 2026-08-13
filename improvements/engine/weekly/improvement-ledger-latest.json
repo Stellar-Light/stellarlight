@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-08-12T14:39:30.851Z",
-	"total": 351,
-	"open": 282,
+	"generatedAt": "2026-08-13T07:14:54.915Z",
+	"total": 366,
+	"open": 297,
 	"closed": 69,
 	"verified": 7,
 	"cleared": 62,
-	"closingRate": 0.2,
+	"closingRate": 0.19,
 	"oldestOpenDays": 21,
 	"inWave": 0,
-	"highOpen": 4,
+	"highOpen": 5,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -27,14 +27,19 @@
 			"total": 14
 		},
 		{
-			"surface": "code",
-			"open": 1,
-			"total": 1
+			"surface": "corpus",
+			"open": 14,
+			"total": 14
 		},
 		{
 			"surface": "contract",
+			"open": 2,
+			"total": 13
+		},
+		{
+			"surface": "code",
 			"open": 1,
-			"total": 12
+			"total": 1
 		},
 		{
 			"surface": "scf",
@@ -47,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 20
+			"days": 21
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 20
+			"days": 21
 		}
 	],
 	"topOpen": [
@@ -85,6 +90,13 @@
 			"severity": "high"
 		},
 		{
+			"id": "nightly-drift:research-row-every-live-field-documented-in-rese",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "research row: every live field documented in ResearchResult",
+			"severity": "high"
+		},
+		{
 			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
 			"surface": "retrieval",
 			"source": "engine-a-recall",
@@ -103,13 +115,6 @@
 			"surface": "retrieval",
 			"source": "engine-a-recall",
 			"probe": "lightecho in top-3 for 'is Lightecho live'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "infstones in top-3 for 'is InfStones live'",
 			"severity": "medium"
 		}
 	]
