@@ -876,7 +876,16 @@ export async function GET(req: NextRequest) {
 					.toArray();
 				const w = wide[0] as { score?: number; source?: string } | undefined;
 				const inSourceRaw = results[0]?.score ?? 0;
-				if (w?.score !== undefined && w.score > inSourceRaw + 0.05) {
+				// BOTH conjuncts required: the raw gap alone over-fires — a perfect
+				// in-category match (asset clawback → CAP-35, relevance-floored) can
+				// still be out-cosined by a near neighbor elsewhere without the
+				// category being thin. Weak in-source RELEVANCE is what "thin" means.
+				const inSourceRelevance = results[0]?.confidence?.relevance ?? 0;
+				if (
+					inSourceRelevance < 0.7 &&
+					w?.score !== undefined &&
+					w.score > inSourceRaw + 0.05
+				) {
 					sourceAdvisory = {
 						note: `stronger matches exist OUTSIDE source=${sourceFilter} — the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
 						inSourceTopScore: Math.round(inSourceRaw * 100) / 100,
