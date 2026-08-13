@@ -959,6 +959,17 @@ export interface Repo {
   codeScanNote?: string | null;
   codeScannedAt?: string | null;
   /**
+   * Mainnet usage rollup for contracts attributed to this repo. Populated by enrich-onchain-projects only; absent = no verified contract joined, NOT 'unused'.
+   */
+  codeInUse?: {
+    contracts?: number | null;
+    events?: number | null;
+    eventsDelta?: number | null;
+    subinvocations?: number | null;
+    subinvocationsDelta?: number | null;
+    asOf?: string | null;
+  };
+  /**
    * Tier before the last CTL change (for rollback)
    */
   priorTier?: string | null;
@@ -2819,6 +2830,16 @@ export interface ReposSelect<T extends boolean = true> {
   codeScanError?: T;
   codeScanNote?: T;
   codeScannedAt?: T;
+  codeInUse?:
+    | T
+    | {
+        contracts?: T;
+        events?: T;
+        eventsDelta?: T;
+        subinvocations?: T;
+        subinvocationsDelta?: T;
+        asOf?: T;
+      };
   priorTier?: T;
   tierReason?: T;
   tierChangedAt?: T;

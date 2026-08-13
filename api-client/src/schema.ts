@@ -1156,6 +1156,15 @@ export interface components {
                 /** Format: date-time */
                 asOf?: string | null;
             } | null;
+            /** @description Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists — NOT zero activity). null object = no verified mainnet contract joined to this repo — absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE. */
+            codeInUse?: {
+                contracts?: number;
+                events?: number | null;
+                eventsDelta?: number | null;
+                subinvocations?: number | null;
+                subinvocationsDelta?: number | null;
+                asOf?: string;
+            } | null;
             /** @description Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
             knowledgeNotes?: {
                 note?: string;

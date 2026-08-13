@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"codeInUse on repo rows — live mainnet usage joined to the code (openapi@1.8.55, code-truth track).",
+		detail:
+			"searchRepos rows gain codeInUse {contracts, events, eventsDelta, subinvocations, subinvocationsDelta, asOf}: the weekly stellar.expert pass now rolls per-contract activity up to the repo it is attributed to (scanner-verified mainnet contract ids + stellar.expert wasm validation). codeDepth is the static half (the code is serious); codeInUse is the dynamic half (the deployed contract is live, with activity deltas week over week). Deltas null until a second snapshot — never zero. null = no verified contract joined, never 'unused'.",
+	},
+	{
+		date: "2026-08-13",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Audit-drift on project rows: audits.driftDays + audits.codeChangedSinceAudit (openapi@1.8.54, code-truth track).",
 		detail:
 			"'Audited' and 'audited 14 months and hundreds of commits ago' are different claims — the audits rollup on searchProjects rows now carries driftDays (whole days since the latest report) and codeChangedSinceAudit (whether any joined repo committed on a later day than that report; day-granular). Null when either side lacks a date — absence of evidence, never a freshness claim. Derived at serve time from the audits registry and the repos join the rows already carry; no new write path.",

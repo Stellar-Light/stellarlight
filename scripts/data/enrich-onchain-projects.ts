@@ -26,6 +26,7 @@
 
 import "../load-env";
 import { getPayload } from "payload";
+import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import configPromise from "../../src/payload.config";
 
@@ -101,7 +102,7 @@ async function run() {
 	const bySlug = new Map<
 		string,
 		{
-			contracts: Array<{ address: string; label: string }>;
+			contracts: Array<{ address: string; label: string; sourceRepo?: string }>;
 			asset?: { code: string; issuer: string };
 		}
 	>();
@@ -116,8 +117,39 @@ async function run() {
 		collection: "repos",
 		limit: 3000,
 		depth: 0,
-		select: { fullName: true, projectSlug: true, codeVerified: true },
+		select: { fullName: true, projectSlug: true, codeVerified: true, codeInUse: true },
 	});
+	// Case-insensitive repo index for the codeInUse write-back (identity
+	// lesson: never trust iteration-spelling equality on fullName).
+	const repoIndex = new Map<
+		string,
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		{ id: string | number; fullName: string; codeInUse?: any }
+	>();
+	for (const r of repos.docs as unknown as Array<{
+		id: string | number;
+		fullName: string;
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		codeInUse?: any;
+	}>) {
+		if (r.fullName)
+			repoIndex.set(r.fullName.toLowerCase(), {
+				id: r.id,
+				fullName: r.fullName,
+				codeInUse: r.codeInUse,
+			});
+	}
+	// Per-repo usage rollup accumulated across ALL projects this run.
+	const byRepo = new Map<
+		string,
+		{
+			contracts: number;
+			events: number;
+			eventsDelta: number | null;
+			subinvocations: number;
+			subinvocationsDelta: number | null;
+		}
+	>();
 	let repoDerived = 0;
 	for (const r of repos.docs as unknown as Array<{
 		fullName: string;
@@ -128,7 +160,11 @@ async function run() {
 		if (!id || !r.projectSlug) continue;
 		const entry = bySlug.get(r.projectSlug) ?? { contracts: [] };
 		if (!entry.contracts.some((c) => c.address === id)) {
-			entry.contracts.push({ address: id, label: `from ${r.fullName} README` });
+			entry.contracts.push({
+				address: id,
+				label: `from ${r.fullName} README`,
+				sourceRepo: r.fullName,
+			});
 			repoDerived += 1;
 		}
 		bySlug.set(r.projectSlug, entry);
@@ -313,6 +349,41 @@ async function run() {
 				? assetPayments - prior.assetPayments
 				: null;
 
+		// codeInUse attribution: a contract rolls up to its repo when we know
+		// the repo either from the scanner join (sourceRepo) or stellar.expert
+		// wasm validation (verifiedRepo). Unattributed contracts roll to none.
+		const addrRepo = new Map(
+			keys.contracts.map((c) => [c.address, c.sourceRepo ?? null]),
+		);
+		for (const c of contracts) {
+			const viaValidation =
+				typeof c.verifiedRepo === "string"
+					? (c.verifiedRepo.match(
+							/github\.com\/([^/]+\/[^/.][^/]*?)(?:\.git)?(?:\/|$)/,
+						)?.[1] ?? null)
+					: null;
+			const full = addrRepo.get(c.address as string) ?? viaValidation;
+			if (!full) continue;
+			const k = full.toLowerCase();
+			const cur = byRepo.get(k) ?? {
+				contracts: 0,
+				events: 0,
+				eventsDelta: null,
+				subinvocations: 0,
+				subinvocationsDelta: null,
+			};
+			cur.contracts += 1;
+			if (typeof c.events === "number") cur.events += c.events;
+			if (typeof c.subinvocations === "number")
+				cur.subinvocations += c.subinvocations;
+			if (typeof c.eventsDelta === "number")
+				cur.eventsDelta = (cur.eventsDelta ?? 0) + c.eventsDelta;
+			if (typeof c.subinvocationsDelta === "number")
+				cur.subinvocationsDelta =
+					(cur.subinvocationsDelta ?? 0) + c.subinvocationsDelta;
+			byRepo.set(k, cur);
+		}
+
 		const summary = [
 			contracts.length ? `${contracts.length} contracts` : null,
 			keys.asset
@@ -356,6 +427,73 @@ async function run() {
 		}
 	}
 
+	// codeInUse write-back: static depth says "serious code"; this says the
+	// deployed contract is LIVE with real activity. Only-changed, read-back
+	// verified; unmatched repos reported, never guessed.
+	let repoWrites = 0;
+	let repoUnchanged = 0;
+	let repoUnknown = 0;
+	let repoFailed = 0;
+	for (const [k, agg] of byRepo) {
+		const hit = repoIndex.get(k);
+		if (!hit) {
+			console.log(`  ? codeInUse: no indexed repo matches ${k}`);
+			repoUnknown += 1;
+			continue;
+		}
+		const sent = {
+			contracts: agg.contracts,
+			events: agg.events,
+			eventsDelta: agg.eventsDelta,
+			subinvocations: agg.subinvocations,
+			subinvocationsDelta: agg.subinvocationsDelta,
+			asOf,
+		};
+		const cur = hit.codeInUse ?? {};
+		if (
+			cur.contracts === sent.contracts &&
+			cur.events === sent.events &&
+			(cur.eventsDelta ?? null) === sent.eventsDelta &&
+			cur.subinvocations === sent.subinvocations &&
+			(cur.subinvocationsDelta ?? null) === sent.subinvocationsDelta
+		) {
+			repoUnchanged += 1;
+			continue;
+		}
+		console.log(
+			`${execute ? "WRITE" : "would write"} codeInUse ${hit.fullName}: contracts=${sent.contracts} events=${sent.events} (Δ${sent.eventsDelta ?? "–"}) subinv=${sent.subinvocations} (Δ${sent.subinvocationsDelta ?? "–"})`,
+		);
+		if (execute) {
+			await payload.update({
+				collection: "repos",
+				id: hit.id,
+				data: { codeInUse: sent },
+			});
+			const back = await payload.findByID({
+				collection: "repos",
+				id: hit.id,
+				depth: 0,
+			});
+			const mm = diffWritten(
+				hit.fullName,
+				sent as unknown as Record<string, unknown>,
+				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+				(back as any).codeInUse,
+				["contracts", "events", "eventsDelta", "subinvocations", "subinvocationsDelta", "asOf"],
+			);
+			if (mm.length) {
+				console.error(formatMismatches(mm));
+				repoFailed += 1;
+				continue;
+			}
+		}
+		repoWrites += 1;
+	}
+	console.log(
+		`codeInUse: ${repoWrites} ${execute ? "written" : "would write"} · ${repoUnchanged} unchanged · ${repoUnknown} unmatched-repo · ${repoFailed} read-back failures`,
+	);
+	if (repoFailed) process.exitCode = 1;
+
 	console.log(
 		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped}`,
 	);
@@ -363,7 +501,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);
