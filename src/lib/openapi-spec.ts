@@ -1375,6 +1375,19 @@ export const spec: OpenAPISpec = {
 															description:
 																"The roster page each row is quoted from (stellar.org/foundation/team).",
 														},
+														docKind: {
+															type: "string",
+															nullable: true,
+															enum: ["spec", "guide", "article", "data"],
+															description:
+																"Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits \u2014 old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.",
+														},
+														docVersionStatus: {
+															type: "string",
+															nullable: true,
+															description:
+																"SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal \u2014 honest absence, never unknown.",
+														},
 														observedAt: {
 															type: "string",
 															description:
