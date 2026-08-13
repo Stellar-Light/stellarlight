@@ -2038,6 +2038,13 @@ export interface operations {
                         meta?: components["schemas"]["Meta"] & {
                             /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
                             source?: string;
+                            /**
+                             * @description Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits — old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.
+                             * @enum {string|null}
+                             */
+                            docKind?: "spec" | "guide" | "article" | "data" | null;
+                            /** @description SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal — honest absence, never unknown. */
+                            docVersionStatus?: string | null;
                             /** @description Date the roster was last observed from the source (YYYY-MM-DD). */
                             observedAt?: string;
                             /** @description Distinct roster sections present (Leadership, Board of directors, Advisors). */
