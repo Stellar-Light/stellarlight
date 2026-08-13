@@ -412,6 +412,12 @@ const PRODUCT_KIND: Record<string, string> = {
 	"hito-wallet": "hardware-wallet", // Hito HOLD — physical $150 NFC hardware wallet device
 	arculus: "hardware-wallet", // Arculus Key Card — physical signing device + companion app
 	keystone: "hardware-wallet", // Keystone 3 Pro — air-gapped cold hardware wallet
+	// sls-033 recheck (2026-08-13): the agent-stack seed row — a library that
+	// CREATES and operates Stellar wallets programmatically for AI agents
+	// (signing, tx-building, x402/mpp caps verified by code scan). A wallet
+	// built BY software from a library = wallet-sdk; mxlet stays null by the
+	// documented dead-domain precision decision (cannot evidence-classify).
+	"stellar-agent-wallet-skill": "wallet-sdk",
 };
 
 /** sls-033 (#519): per-platform app availability — DATED, store-checked facts,
