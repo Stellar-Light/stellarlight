@@ -504,6 +504,25 @@ async function main() {
 				);
 			},
 			VERIFIED_FIELDS,
+			200,
+			async (key) => {
+				const one = await payload.find({
+					collection: "repos",
+					where: { fullName: { equals: key } },
+					limit: 1,
+					depth: 0,
+					overrideAccess: true,
+				});
+				if (one.docs[0]) return one.docs[0] as Record<string, unknown>;
+				const ci = await payload.find({
+					collection: "repos",
+					where: { fullName: { like: key } },
+					limit: 1,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return (ci.docs[0] as Record<string, unknown>) ?? null;
+			},
 		);
 		mismatchCount = mismatches.length;
 		if (mismatchCount) {
