@@ -86,15 +86,15 @@ async function main() {
 
 	const wallets = await payload.find({
 		collection: "projects",
-		where: {
-			and: [{ type: { equals: "Wallet" } }],
-		},
+		// hasMany select: `in` is membership; post-filter guards the substring trap
+		where: { types: { in: ["Wallet"] } },
 		limit: 200,
 		depth: 0,
 		overrideAccess: true,
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 	const rows = (wallets.docs as any[])
+		.filter((d) => Array.isArray(d.types) && d.types.includes("Wallet"))
 		.filter((d) => !(Array.isArray(d.availability) && d.availability.length))
 		.filter((d) => d.links?.website)
 		.slice(0, LIMIT);
