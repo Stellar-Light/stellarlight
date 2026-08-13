@@ -237,6 +237,18 @@ export const spec: OpenAPISpec = {
 												asOf: { type: "string", format: "date-time" },
 												surfaces: { type: "array", items: { type: "string" } },
 												limitPerSurface: { type: "integer" },
+												sourceAdvisory: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty \u2014 it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest \u0027category is thin for this query\u0027 signal and consider dropping the filter.",
+													properties: {
+														note: { type: "string" },
+														inSourceTopScore: { type: "number" },
+														corpusWideTopScore: { type: "number" },
+														corpusWideTopSource: { type: "string", nullable: true },
+													},
+												},
 												counts: { type: "object", additionalProperties: { type: "integer" } },
 												truncated: { type: "object", additionalProperties: { type: "boolean" } },
 											},

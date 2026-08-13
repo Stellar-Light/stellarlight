@@ -842,6 +842,51 @@ export async function GET(req: NextRequest) {
 		query: q,
 	});
 
+	// Category-conduct advisory (the docs-search edge-behavior class + our
+	// semantic-honesty doctrine): a source-scoped vector search NEVER goes
+	// empty — it returns the nearest in-source neighbors however weak, so an
+	// agent cannot distinguish "this category is thin for the query" from
+	// "the query is bad" unless we SAY stronger corpus-wide matches exist.
+	// One extra aggregate on the already-computed embedding, only on the
+	// weak-filtered path — the advisory is the answer, not a re-rank.
+	let sourceAdvisory: {
+		note: string;
+		inSourceTopScore: number;
+		corpusWideTopScore: number;
+		corpusWideTopSource: string | null;
+	} | null = null;
+	const filteredTopConfidence = results[0]?.confidence?.score ?? 0;
+	if (sourceFilter && queryEmbedding && filteredTopConfidence < 0.6) {
+		try {
+			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+			const db = (payload.db as any)?.connection?.db;
+			const collection = db?.collection("research-docs");
+			if (collection) {
+				const wide = await collection
+					.aggregate(
+						buildResearchVectorPipeline({
+							queryEmbedding,
+							limit: 1,
+							sourceFilter: null,
+						}),
+					)
+					.toArray();
+				const w = wide[0] as { score?: number; source?: string } | undefined;
+				const inSourceRaw = results[0]?.score ?? 0;
+				if (w?.score !== undefined && w.score > inSourceRaw + 0.05) {
+					sourceAdvisory = {
+						note: `stronger matches exist OUTSIDE source=${sourceFilter} — the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
+						inSourceTopScore: Math.round(inSourceRaw * 100) / 100,
+						corpusWideTopScore: Math.round(w.score * 100) / 100,
+						corpusWideTopSource: w.source ?? null,
+					};
+				}
+			}
+		} catch {
+			// advisory is best-effort; never fail the request for it
+		}
+	}
+
 	logApiHit({
 		req,
 		endpoint: "/api/research",
@@ -867,6 +912,7 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(sourceAdvisory ? { sourceAdvisory } : {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
