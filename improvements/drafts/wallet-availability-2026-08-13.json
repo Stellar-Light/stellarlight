@@ -1,0 +1,102 @@
+{
+	"generatedAt": "2026-08-13T20:03:57.519Z",
+	"model": "claude-opus-4-8",
+	"drafts": [
+		{
+			"slug": "bexo",
+			"name": "Bexo",
+			"website": "https://bexo.app/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/ar/app/beexo-wallet/id1533311061",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link present; text: 'Disponible para iOS y Android' and 'Descargar para iOS'"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.beexo",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link present; text: 'Disponible para iOS y Android' and 'Descargar para Android'"
+				}
+			],
+			"agentNote": "Only iOS and Android have concrete store links. Bexo Connect (EIP-1193 provider) is a developer SDK, not evidence of a web/browser-extension wallet."
+		},
+		{
+			"slug": "hot-wallet",
+			"name": "HOT Wallet",
+			"website": "https://hot-labs.org/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/us/app/hot-wallet/id6740916148",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for HOT Wallet in page markup/footer"
+				},
+				{
+					"platform": "browser-extension",
+					"state": "available",
+					"storeUrl": "https://chromewebstore.google.com/detail/hot-wallet/mpeengabcnhhjjgleiodimegnkpcenbk",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Chrome Web Store link; text lists 'Extenstion 100%' as released"
+				}
+			],
+			"agentNote": "Wallet is described as a Telegram Mini App MPC wallet; no clear standalone in-browser web app evidence, so 'web' omitted. Hardware/desktop not evidenced with store links."
+		},
+		{
+			"slug": "klever",
+			"name": "Klever",
+			"website": "https://klever.io/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/br/app/klever-wallet-bitcoin-cripto/id1615064243",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for Klever Wallet; 'APPLE 4.8 out of 5 979 reviews'"
+				},
+				{
+					"platform": "browser-extension",
+					"state": "available",
+					"storeUrl": "https://chromewebstore.google.com/detail/klever-wallet/ifclboecfhkjbpmhgehodcjpciihhmif",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Chrome Web Store link for Klever Wallet extension"
+				}
+			],
+			"agentNote": "Desktop and Hardware Wallet (KleverSafe) are mentioned in marketing text but no concrete store/download links, so omitted."
+		},
+		{
+			"slug": "solar-wallet",
+			"name": "Solar Wallet",
+			"website": "https://solarwallet.io/",
+			"entries": [
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=io.solarwallet",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link in markup; page text 'Install on Android'"
+				}
+			],
+			"agentNote": "Page text mentions iOS install and macOS/Windows/Linux downloads, but no concrete evidence URLs were provided for those platforms, so only Android is claimed."
+		},
+		{
+			"slug": "rabet",
+			"name": "Rabet",
+			"website": "https://rabet.io/",
+			"entries": [
+				{
+					"platform": "browser-extension",
+					"state": "available",
+					"storeUrl": "https://chrome.google.com/webstore/detail/rabet/hgmoaheomcjnaheggkfafnjilfcefbmo",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: \"This product is available for Chrome, Firefox, Edge, and Brave\" — Chrome Web Store link present"
+				}
+			],
+			"agentNote": "Also has Firefox (https://addons.mozilla.org/en-US/firefox/addon/rabet/) and Edge (https://microsoftedge.microsoft.com/addons/detail/rabet/aanjhgiamnacdfnlfnmgehjikagdbafd) extension links — all browser-extension. Desktop and Mobile ('Phone') are mentioned in text but no concrete store/download URLs provided, so omitted."
+		}
+	]
+}
