@@ -289,14 +289,75 @@ export const SDK_CAPABILITY_TAGS: readonly string[] = SDK_CAPABILITY_PATTERNS.ma
 	([tag]) => tag,
 ).sort();
 
+/**
+ * Language-frontier capability idioms (2026-08-13 Raven-lens gap: official
+ * Python/Go SDKs and the Kotlin anchor-platform served zero capabilities —
+ * the detector was JS-only). Same CLOSED tag set; per-language patterns
+ * fire only in files that pass a stellar-context gate, so a generic
+ * `TransactionBuilder` in some other chain's Java SDK can never cross-fire.
+ */
+const PY_EXT = /\.py$/i;
+const PY_CONTEXT = /stellar_sdk|from stellar_sdk|import stellar_sdk/;
+const PY_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\bTransactionBuilder\b|\.append_[a-z_]*op\(/],
+	["signing", /\bKeypair\.from_secret\b|\.sign\(/],
+	["soroban-rpc", /\bSorobanServer\b|\bsimulate_transaction\b|\bsend_transaction\b/],
+	["horizon", /\bServer\(|\bsubmit_transaction\b|horizon\.stellar\.org/],
+	["contract-invoke", /\binvoke_contract_function\b|\bContractClient\b|\bscval\b|\bInvokeHostFunction\b/],
+	["sep10-auth", /\bbuild_challenge_transaction\b|\bread_challenge_transaction\b|sep-?10|\bWebAuth\b/i],
+	["sep24-ramp", /sep-?24|\binteractive\s*deposit|TransferServer/i],
+	["fee-bump", /fee_bump|FeeBumpTransaction/i],
+];
+const GO_EXT = /\.go$/i;
+const GO_CONTEXT = /github\.com\/stellar\/go|stellar\/go\/(txnbuild|clients|keypair)/;
+const GO_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\btxnbuild\./],
+	["signing", /\bkeypair\.(Parse|MustParse|Random)\b|\.Sign\(/],
+	["horizon", /\bhorizonclient\.|\bSubmitTransaction\b/],
+	["soroban-rpc", /soroban[a-z]*rpc|\bSimulateTransaction\b/i],
+	["contract-invoke", /\bInvokeHostFunction\b/],
+	["sep10-auth", /sep-?10|\bChallengeTransaction\b|\bReadChallengeTx\b|\bwebauth\b/i],
+	["sep24-ramp", /sep-?24|interactive\s*deposit/i],
+	["fee-bump", /\bFeeBumpTransaction\b/],
+];
+const JVM_EXT = /\.(kt|java)$/i;
+const JVM_CONTEXT = /org\.stellar\.(sdk|anchor)|stellar\.sdk/;
+const JVM_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\bTransactionBuilder\b/],
+	["signing", /\bKeyPair\.fromSecretSeed\b|\.sign\(/],
+	["soroban-rpc", /\bSorobanServer\b|\bsimulateTransaction\b/],
+	["horizon", /\bServer\(|horizon\.stellar\.org|\bsubmitTransaction\b/],
+	["contract-invoke", /\bInvokeHostFunctionOperation\b|\bContractClient\b/],
+	["sep10-auth", /\bSep10Challenge\b|\bSep10\b|sep-?10/i],
+	["sep24-ramp", /\bSep24\b|sep-?24|interactive\s*(deposit|withdraw)/i],
+	["fee-bump", /\bFeeBumpTransaction\b/],
+];
+const LANG_FAMILIES: Array<
+	[ext: RegExp, context: RegExp, patterns: Array<[string, RegExp]>]
+> = [
+	[PY_EXT, PY_CONTEXT, PY_CAPABILITY_PATTERNS],
+	[GO_EXT, GO_CONTEXT, GO_CAPABILITY_PATTERNS],
+	[JVM_EXT, JVM_CONTEXT, JVM_CAPABILITY_PATTERNS],
+];
+
 export function detectSdkCapabilities(blobs: SymbolBlob[]): string[] {
 	const tags = new Set<string>();
 	for (const b of blobs) {
-		if (!b.text || !JS_EXT.test(b.path)) continue;
-		for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
-			if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+		if (!b.text) continue;
+		if (JS_EXT.test(b.path)) {
+			for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
+				if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+			}
+			continue;
 		}
-		if (tags.size === SDK_CAPABILITY_PATTERNS.length) break;
+		for (const [ext, context, patterns] of LANG_FAMILIES) {
+			if (!ext.test(b.path)) continue;
+			if (!context.test(b.text)) break; // right language, no stellar context
+			for (const [tag, re] of patterns) {
+				if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+			}
+			break;
+		}
 	}
 	return [...tags].sort();
 }

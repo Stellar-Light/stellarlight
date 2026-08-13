@@ -102,6 +102,7 @@ export function selectDepthPaths(
 	sources: string[];
 	tests: string[];
 	jsSources: string[];
+	langSources: string[];
 } {
 	const rs = tree.filter(
 		(e) => e.type === "blob" && e.path.toLowerCase().endsWith(".rs"),
@@ -223,11 +224,38 @@ export function selectDepthPaths(
 		.sort((a, b) => a.path.split("/").length - b.path.split("/").length) // prefer root manifests
 		.slice(0, 8)
 		.map((e) => e.path);
+	// Language-frontier capability sources (py/go/kotlin/java): the capability
+	// detector can only see text we fetch. Strong-path preference (sdk-ish
+	// filenames), test-excluded, size-favored, capped — same philosophy as
+	// jsSources.
+	const LANG_EXT = /\.(py|go|kt|java)$/i;
+	const LANG_TEST =
+		/(^|\/)(tests?|testing|examples?|docs?)\/|_test\.(go|py)$|(^|\/)test_[^/]*\.py$|Tests?\.(kt|java)$/i;
+	const LANG_STRONG =
+		/(sep[-_]?\d+|auth|challenge|transaction|payment|soroban|rpc|client|wallet|sdk|horizon|keypair|sign|invoke|contract)/i;
+	const langCandidates = tree
+		.filter(
+			(e) =>
+				e.type === "blob" && LANG_EXT.test(e.path) && !LANG_TEST.test(e.path),
+		)
+		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0));
+	const langStrong = langCandidates
+		.filter((e) => LANG_STRONG.test(e.path))
+		.slice(0, 8)
+		.map((e) => e.path);
+	const langSources = [
+		...langStrong,
+		...langCandidates
+			.map((e) => e.path)
+			.filter((p) => !langStrong.includes(p))
+			.slice(0, Math.max(0, 10 - langStrong.length)),
+	];
 	return {
 		cargos: cargoPaths,
 		sources,
 		tests: [...tests, ...others],
 		jsSources,
+		langSources,
 	};
 }
 
@@ -346,7 +374,7 @@ export async function fetchRepoCode(
 	const blobs: DepthBlob[] = [];
 	for (const p of sel.cargos)
 		blobs.push({ path: p, text: cargoText.get(p) ?? null });
-	for (const p of [...sel.sources, ...sel.tests, ...sel.jsSources]) {
+	for (const p of [...sel.sources, ...sel.tests, ...sel.jsSources, ...sel.langSources]) {
 		const sha = shaByPath.get(p);
 		const txt = sha ? await fetchBlob(gh, owner, name, sha) : null;
 		blobs.push({ path: p, text: txt });
