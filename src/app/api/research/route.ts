@@ -68,6 +68,8 @@ interface ResearchRow {
 	 * the source (null for sources that don't stamp it). Distinct from
 	 * publishedAt (the page's own stated date). */
 	observedAt: string | null;
+	docKind: string | null;
+	docVersionStatus: string | null;
 	score?: number;
 	// Audit-specific (only present when source === "audit")
 	auditor?: string | null;
@@ -298,6 +300,8 @@ export async function GET(req: NextRequest) {
 				chunkIndex: number;
 				publishedAt?: string;
 				observedAt?: string;
+			docKind?: string;
+			docVersionStatus?: string;
 				auditor?: string;
 				protocol?: string;
 				severity?: string;
@@ -314,6 +318,8 @@ export async function GET(req: NextRequest) {
 				chunkIndex: d.chunkIndex,
 				publishedAt: d.publishedAt ?? null,
 				observedAt: d.observedAt ?? null,
+				docKind: d.docKind ?? null,
+				docVersionStatus: d.docVersionStatus ?? null,
 				auditor: d.auditor ?? null,
 				protocol: d.protocol ?? null,
 				severity: d.severity ?? null,
@@ -396,6 +402,8 @@ export async function GET(req: NextRequest) {
 				chunkIndex: number;
 				publishedAt?: string;
 				observedAt?: string;
+			docKind?: string;
+			docVersionStatus?: string;
 				auditor?: string;
 				protocol?: string;
 				severity?: string;
@@ -462,6 +470,8 @@ export async function GET(req: NextRequest) {
 					chunkIndex: d.chunkIndex,
 					publishedAt: d.publishedAt ?? null,
 					observedAt: d.observedAt ?? null,
+					docKind: d.docKind ?? null,
+					docVersionStatus: d.docVersionStatus ?? null,
 					auditor: d.auditor ?? null,
 					protocol: d.protocol ?? null,
 					severity: d.severity ?? null,
@@ -509,6 +519,8 @@ export async function GET(req: NextRequest) {
 					chunkIndex: number;
 					publishedAt?: string;
 					observedAt?: string;
+			docKind?: string;
+			docVersionStatus?: string;
 					auditor?: string;
 					protocol?: string;
 					severity?: string;
@@ -525,6 +537,8 @@ export async function GET(req: NextRequest) {
 						chunkIndex: d.chunkIndex,
 						publishedAt: d.publishedAt ?? null,
 						observedAt: d.observedAt ?? null,
+						docKind: d.docKind ?? null,
+						docVersionStatus: d.docVersionStatus ?? null,
 						auditor: d.auditor ?? null,
 						protocol: d.protocol ?? null,
 						severity: d.severity ?? null,
@@ -598,6 +612,8 @@ export async function GET(req: NextRequest) {
 					chunkIndex: Number(d.chunkIndex ?? 0),
 					publishedAt: (d.publishedAt as string) ?? null,
 					observedAt: (d.observedAt as string) ?? null,
+					docKind: (d.docKind as string) ?? null,
+					docVersionStatus: (d.docVersionStatus as string) ?? null,
 					auditor: (d.auditor as string) ?? null,
 					protocol: (d.protocol as string) ?? null,
 					severity: (d.severity as string) ?? null,
@@ -623,6 +639,8 @@ export async function GET(req: NextRequest) {
 		chunkIndex: number;
 		publishedAt?: string;
 		observedAt?: string;
+		docKind?: string;
+		docVersionStatus?: string;
 		auditor?: string;
 		protocol?: string;
 		severity?: string;
@@ -640,6 +658,8 @@ export async function GET(req: NextRequest) {
 		chunkIndex: d.chunkIndex,
 		publishedAt: d.publishedAt ?? null,
 		observedAt: d.observedAt ?? null,
+		docKind: d.docKind ?? null,
+		docVersionStatus: d.docVersionStatus ?? null,
 		auditor: d.auditor ?? null,
 		protocol: d.protocol ?? null,
 		severity: d.severity ?? null,
