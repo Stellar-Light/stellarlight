@@ -855,8 +855,11 @@ export async function GET(req: NextRequest) {
 		corpusWideTopScore: number;
 		corpusWideTopSource: string | null;
 	} | null = null;
-	const filteredTopConfidence = results[0]?.confidence?.score ?? 0;
-	if (sourceFilter && queryEmbedding && filteredTopConfidence < 0.6) {
+	// Trigger on the RAW-score gap, not composite confidence: authority+
+	// freshness floor most in-source tops above 0.6 confidence even when
+	// relevance is weak (the first calibration never fired). One extra
+	// aggregate per source-filtered vector query; embedding reused.
+	if (sourceFilter && queryEmbedding) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
 			const db = (payload.db as any)?.connection?.db;
