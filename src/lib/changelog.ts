@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Feedback→quality loop plumbing: vote kinds on POST /api/feedback + nightly-aggregated feedbackSignal on project rows (openapi@1.8.53).",
+		detail:
+			"POST /api/feedback now accepts kind 'worked' / 'did-not-work' with a required target {surface: projects|repos, slug} (message optional on votes; report kinds unchanged). Votes aggregate nightly per target — distinct voters only (one per hashed IP, latest vote wins) — into feedbackSignal {votes, worked, score, asOf} served on searchProjects rows. score stays null until ≥5 distinct voters (anti-gaming floor): sub-floor counts are visible but carry NO ranking influence, and nothing folds into confidence scores until real signal crosses the floor. Repos votes are accepted and stored; repo-row serving lands when any repo target accrues votes.",
+	},
+	{
+		date: "2026-08-13",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"projects: per-product deployment records — products[] with mandatory evidenceUrl + asOf (openapi@1.8.50, closes the #742 model; sls-023/029 root).",
 		detail:
 			"Provider-level status and product-on-network status are different statements: DTCC the org is Development while its tokenized-collateral product on Stellar is ANNOUNCED (H1 2027, per its own case study); an oracle provider being Live says nothing about which feed is live on which network. products[] records name/kind/network/status/contractId with a REQUIRED evidence URL and as-of date \u2014 citation-grade by construction, curated only (a record without verifiable evidence does not ship; Band/RedStone/DIA/WisdomTree/Figure rows are deferred pending verified mappings, which is honest where fabrication is not). Seeded with DTCC and Lightecho; rows accrue via curation."

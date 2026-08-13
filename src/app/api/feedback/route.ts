@@ -35,11 +35,18 @@ const VALID_KINDS = [
 	"wrong-answer",
 	"suggestion",
 	"other",
+	// Vote kinds (feedback→quality loop): polarity is the kind; a vote
+	// REQUIRES a target and may omit message.
+	"worked",
+	"did-not-work",
 ] as const;
+const VOTE_KINDS = ["worked", "did-not-work"] as const;
+const TARGET_SURFACES = ["projects", "repos"] as const;
 
 interface FeedbackBody {
 	kind?: string;
 	message?: string;
+	target?: { surface?: string; slug?: string };
 	context?: {
 		query?: string;
 		endpoint?: string;
@@ -109,7 +116,29 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	if (!body.message || body.message.trim().length < 10) {
+	const isVote = VOTE_KINDS.includes(body.kind as never);
+
+	// Votes: target is the whole point (an untargeted vote aggregates to
+	// nothing); message optional. Reports: message required as before.
+	if (isVote) {
+		const surface = body.target?.surface;
+		const slug = body.target?.slug?.trim();
+		if (
+			!surface ||
+			!TARGET_SURFACES.includes(surface as never) ||
+			!slug ||
+			slug.length > 200
+		) {
+			return NextResponse.json(
+				{
+					error:
+						"vote kinds require `target`: { surface: 'projects' | 'repos', slug }",
+					hint: "surface 'projects' targets a directory slug; 'repos' targets a fullName (owner/name). Votes without a real target cannot aggregate.",
+				},
+				{ status: 400, headers: rateLimitHeaders(limit) },
+			);
+		}
+	} else if (!body.message || body.message.trim().length < 10) {
 		return NextResponse.json(
 			{
 				error: "'message' is required and must be at least 10 chars",
@@ -119,7 +148,7 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	if (body.message.length > 4000) {
+	if (body.message && body.message.length > 4000) {
 		return NextResponse.json(
 			{
 				error: "'message' is capped at 4000 chars",
@@ -146,7 +175,11 @@ export async function POST(req: NextRequest) {
 			overrideAccess: true,
 			data: {
 				kind: body.kind as (typeof VALID_KINDS)[number],
-				message: body.message.trim(),
+				message: body.message?.trim() || undefined,
+				targetSurface: body.target?.surface as
+					| (typeof TARGET_SURFACES)[number]
+					| undefined,
+				targetSlug: body.target?.slug?.trim() || undefined,
 				query: body.context?.query,
 				endpoint: body.context?.endpoint,
 				skillVersion: body.context?.skillVersion,
@@ -160,8 +193,9 @@ export async function POST(req: NextRequest) {
 			{
 				ok: true,
 				id: doc.id,
-				message:
-					"Feedback received. Curators review the queue weekly; high-signal reports tend to land as a corpus or endpoint update within a few weeks. Thank you.",
+				message: isVote
+					? "Vote recorded. Votes aggregate nightly into a per-target feedbackSignal once a target passes the volume floor (distinct voters, not raw submissions)."
+					: "Feedback received. Curators review the queue weekly; high-signal reports tend to land as a corpus or endpoint update within a few weeks. Thank you.",
 			},
 			{ status: 201, headers: rateLimitHeaders(limit) },
 		);
@@ -189,7 +223,12 @@ export async function GET() {
 			contentType: "application/json",
 			body: {
 				kind: VALID_KINDS,
-				message: "10–4000 chars, required",
+				message:
+					"10–4000 chars, required for report kinds; optional on vote kinds (worked / did-not-work)",
+				target: {
+					surface: "required on votes: 'projects' | 'repos'",
+					slug: "required on votes: project slug, or repo fullName (owner/name)",
+				},
 				context: {
 					query: "optional — the user query that triggered the issue",
 					endpoint: "optional — the /api/* endpoint that misbehaved",
@@ -207,6 +246,11 @@ export async function GET() {
 					skillVersion: "1.0.0",
 					agentName: "claude-code",
 				},
+			},
+			voteExample: {
+				kind: "worked",
+				target: { surface: "projects", slug: "blend" },
+				context: { query: "lending protocol on stellar", agentName: "raven" },
 			},
 			rateLimit: "6 requests / minute / IP",
 		},

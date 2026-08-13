@@ -159,6 +159,7 @@ async function semanticProjectRows(
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
+			feedbackSignal: pickFeedbackSignal(p.feedbackSignal),
 			scfBasis: p.scf?.basis ?? null,
 			scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
 			scfAsOf: p.scf?.asOf ?? null,
@@ -319,6 +320,12 @@ interface ProjectRow {
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
+	feedbackSignal: {
+		votes: number;
+		worked: number;
+		score: number | null;
+		asOf: string;
+	} | null;
 	scfBasis: string | null;
 	scfConfidence: FactConfidence | null;
 	scfAsOf: string | null;
@@ -560,6 +567,18 @@ interface PlatformAvailability {
 
 // Only surfaced when curated availability rows exist — null means "not yet
 // curated" (unknown), never "not available". Strips Payload's internal row ids.
+/** Normalize a stored feedbackSignal group to the served shape (or null). */
+// biome-ignore lint/suspicious/noExplicitAny: Payload group shape
+function pickFeedbackSignal(v: any): ProjectRow["feedbackSignal"] {
+	if (!v?.asOf) return null;
+	return {
+		votes: typeof v.votes === "number" ? v.votes : 0,
+		worked: typeof v.worked === "number" ? v.worked : 0,
+		score: typeof v.score === "number" ? v.score : null,
+		asOf: String(v.asOf),
+	};
+}
+
 function pickAvailability(
 	// biome-ignore lint/suspicious/noExplicitAny: payload array field shape
 	rows: any,
@@ -1136,6 +1155,12 @@ export async function GET(req: NextRequest) {
 					logo?: { url?: string; filename?: string } | string | null;
 					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
 					products?: any[];
+					feedbackSignal?: {
+						votes?: number;
+						worked?: number;
+						score?: number | null;
+						asOf?: string;
+					} | null;
 					scf?: {
 						awarded?: boolean;
 						totalAwarded?: number;
@@ -1248,6 +1273,7 @@ export async function GET(req: NextRequest) {
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
+					feedbackSignal: pickFeedbackSignal(p.feedbackSignal),
 					scfBasis: p.scf?.basis ?? null,
 					scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
 					scfAsOf: p.scf?.asOf ?? null,

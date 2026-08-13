@@ -3903,6 +3903,18 @@ export const spec: OpenAPISpec = {
 							ageDays: { type: "integer", nullable: true },
 						},
 					},
+					feedbackSignal: {
+						type: "object",
+						nullable: true,
+						description:
+							"Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds.",
+						properties: {
+							votes: { type: "integer" },
+							worked: { type: "integer" },
+							score: { type: "number", nullable: true },
+							asOf: { type: "string" },
+						},
+					},
 					scfBasis: {
 						type: "string",
 						nullable: true,
@@ -5328,9 +5340,9 @@ export const spec: OpenAPISpec = {
 			},
 			FeedbackRequest: {
 				type: "object",
-				required: ["kind", "message"],
+				required: ["kind"],
 				description:
-					"Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema).",
+					"Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). Per-kind requiredness: report kinds (bug/missing-data/wrong-answer/suggestion/other) require `message` (≥10 chars); vote kinds (worked/did-not-work) require `target` and may omit `message`. Votes aggregate nightly into per-target feedbackSignal (distinct voters, floor-gated).",
 				properties: {
 					kind: {
 						type: "string",
@@ -5340,9 +5352,20 @@ export const spec: OpenAPISpec = {
 							"wrong-answer",
 							"suggestion",
 							"other",
+							"worked",
+							"did-not-work",
 						],
 					},
 					message: { type: "string", minLength: 10, maxLength: 4000 },
+					target: {
+						type: "object",
+						description:
+							"Required on vote kinds: what the vote is about. surface 'projects' targets a directory slug; 'repos' targets a repo fullName (owner/name).",
+						properties: {
+							surface: { type: "string", enum: ["projects", "repos"] },
+							slug: { type: "string", maxLength: 200 },
+						},
+					},
 					context: {
 						type: "object",
 						description: "Optional context about what triggered the feedback.",
