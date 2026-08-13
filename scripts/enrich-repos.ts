@@ -334,6 +334,8 @@ async function main() {
 	] as const;
 	/** fullName → what was sent, so the read-back compares against the claim. */
 	const sentByRepo = new Map<string, Record<string, unknown>>();
+	/** doc id → human fullName, so mismatch output stays readable. */
+	const labelById = new Map<string, string>();
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
@@ -457,11 +459,14 @@ async function main() {
 			// Per-write isolation (2026-07-09 curate-projects incident): one bad
 			// doc must not kill the rest of a multi-hundred-repo wave.
 			try {
+				let writtenId: string;
 				if (existing) {
 					await payload.update({ collection: "repos", id: existing.id, data });
+					writtenId = String(existing.id);
 					updated++;
 				} else {
-					await payload.create({ collection: "repos", data });
+					const madeDoc = await payload.create({ collection: "repos", data });
+					writtenId = String(madeDoc.id);
 					created++;
 				}
 				// Key by the fullName actually WRITTEN (canonical nameWithOwner) —
@@ -469,9 +474,14 @@ async function main() {
 				// case-sensitive: 772/2093 rows read "not found" while persisted fine
 				// (2026-08-12 chase reds; the #788 lookup fallback got this, the
 				// read-back key didn't).
-				sentByRepo.set(
+				// #843: key by the DOCUMENT ID actually written — name-keyed
+				// read-back re-litigates identity and finds rename-twin rows
+				// (24 stale-duplicate artifacts on the first batched pass).
+				// The writer knows exactly which row it wrote; verify THAT row.
+				sentByRepo.set(writtenId, data as unknown as Record<string, unknown>);
+				labelById.set(
+					writtenId,
 					String((data as { fullName?: string }).fullName ?? full),
-					data as unknown as Record<string, unknown>,
 				);
 			} catch (err) {
 				writeFailed++;
@@ -490,40 +500,36 @@ async function main() {
 		console.log(`\n── Read-back (${sentByRepo.size} written repo(s)) ──`);
 		const mismatches = await verifyWrites(
 			sentByRepo,
-			async (names) => {
+			async (ids) => {
 				const back = await payload.find({
 					collection: "repos",
-					where: { fullName: { in: names } },
-					limit: names.length,
+					where: { id: { in: ids } },
+					limit: ids.length,
 					depth: 0,
 					overrideAccess: true,
 				});
 				return new Map(
 					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-					(back.docs as any[]).map((r) => [String(r.fullName), r] as const),
+					(back.docs as any[]).map((r) => [String(r.id), r] as const),
 				);
 			},
 			VERIFIED_FIELDS,
 			200,
 			async (key) => {
-				const one = await payload.find({
-					collection: "repos",
-					where: { fullName: { equals: key } },
-					limit: 1,
-					depth: 0,
-					overrideAccess: true,
-				});
-				if (one.docs[0]) return one.docs[0] as Record<string, unknown>;
-				const ci = await payload.find({
-					collection: "repos",
-					where: { fullName: { like: key } },
-					limit: 1,
-					depth: 0,
-					overrideAccess: true,
-				});
-				return (ci.docs[0] as Record<string, unknown>) ?? null;
+				try {
+					const one = await payload.findByID({
+						collection: "repos",
+						id: key,
+						depth: 0,
+						overrideAccess: true,
+					});
+					return (one as Record<string, unknown>) ?? null;
+				} catch {
+					return null;
+				}
 			},
 		);
+		for (const m of mismatches) m.key = labelById.get(m.key) ?? m.key;
 		mismatchCount = mismatches.length;
 		if (mismatchCount) {
 			console.error(
