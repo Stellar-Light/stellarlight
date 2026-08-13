@@ -142,6 +142,13 @@ const PROBES: Probe[] = [
 		field: "codeVerified.isDeployableContract",
 	},
 	{
+		name: "projects.products (#742 model — dtcc announced-product record)",
+		path: "/api/projects/search?q=dtcc&limit=6",
+		rowsKey: "projects",
+		pin: ["slug", "dtcc"],
+		field: "products",
+	},
+	{
 		name: "projects.scfConfidence (fact-confidence slice, band)",
 		path: "/api/projects/search?q=band&limit=6",
 		rowsKey: "projects",

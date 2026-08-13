@@ -3926,6 +3926,24 @@ export const spec: OpenAPISpec = {
 						description:
 							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
 					},
+					products: {
+						type: "array",
+						description:
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. Empty = no product-level records yet (never 'no products'). kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+						items: {
+							type: "object",
+							properties: {
+								name: { type: "string" },
+								kind: { type: "string" },
+								network: { type: "string" },
+								status: { type: "string" },
+								contractId: { type: "string", nullable: true },
+								evidenceUrl: { type: "string" },
+								asOf: { type: "string" },
+								note: { type: "string", nullable: true },
+							},
+						},
+					},
 					scfRoundAwards: {
 						type: "array",
 						description:
