@@ -46,3 +46,36 @@ describe("buildKnowledgeNotes", () => {
 		expect(notes.map((n) => n.source)).toEqual(["curated", "derived:audit"]);
 	});
 });
+
+describe("code-truth signals in notes", () => {
+	const audits = new Map([
+		["blend", [{ projectSlug: "blend", auditor: "Certora", publishedAt: "2025-08-13" }]],
+	]);
+	it("audit note carries drift days + committed-since when both dates exist", () => {
+		const notes = buildKnowledgeNotes("x/y", "blend", audits, {
+			lastCommitAt: "2026-08-01T00:00:00Z",
+		});
+		const audit = notes.find((n) => n.source === "derived:audit");
+		expect(audit?.note).toMatch(/Latest report is \d+ days old; the repo has committed since\./);
+	});
+	it("audit note says no-commits-since when the repo is older than the audit", () => {
+		const notes = buildKnowledgeNotes("x/y", "blend", audits, {
+			lastCommitAt: "2025-01-01T00:00:00Z",
+		});
+		expect(notes.find((n) => n.source === "derived:audit")?.note).toContain("no commits since");
+	});
+	it("usage note appears only with a dated codeInUse and formats deltas", () => {
+		const notes = buildKnowledgeNotes("x/y", null, new Map(), {
+			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+		});
+		const use = notes.find((n) => n.source === "derived:usage");
+		expect(use?.note).toBe(
+			"Live on mainnet: 1 attributed contract, 44,447 lifetime events (+743 since the prior weekly snapshot) per stellar.expert.",
+		);
+		expect(use?.asOf).toBe("2026-08-13");
+	});
+	it("no usage note without codeInUse", () => {
+		const notes = buildKnowledgeNotes("x/y", null, new Map(), {});
+		expect(notes.find((n) => n.source === "derived:usage")).toBeUndefined();
+	});
+});
