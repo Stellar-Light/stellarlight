@@ -1,102 +1,330 @@
 {
-	"generatedAt": "2026-08-13T20:03:57.519Z",
+	"generatedAt": "2026-08-13T20:22:38.659Z",
 	"model": "claude-opus-4-8",
 	"drafts": [
 		{
-			"slug": "bexo",
-			"name": "Bexo",
-			"website": "https://bexo.app/",
+			"slug": "vesseo",
+			"name": "Vesseo",
+			"website": "https://vesseoapp.com/",
 			"entries": [
 				{
 					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://apps.apple.com/ar/app/beexo-wallet/id1533311061",
+					"storeUrl": "https://apps.apple.com/ar/app/vesseo-tu-billetera-de-usdc/id1514223107",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link present; text: 'Disponible para iOS y Android' and 'Descargar para iOS'"
+					"note": "curator-agent draft: App Store link in page markup; '4,6 ★ en App Store'"
+				}
+			],
+			"agentNote": null
+		},
+		{
+			"slug": "akuna",
+			"name": "Akuna",
+			"website": "https://akunawallet.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/gh/app/akuna-wallet/id6748705575",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for 'Akuna Wallet' found in page markup"
+				}
+			],
+			"agentNote": "Text repeatedly says 'Download the app' consistent with mobile apps. No evidence of web/extension/desktop/hardware wallet."
+		},
+		{
+			"slug": "volta-circuit",
+			"name": "Volta Circuit",
+			"website": "https://voltacircuit.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/us/app/threshold-v/id6744829082",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for 'threshold-v'; page: 'Mobile App Download ThresholdV Turn your phone into a secure signing device'"
 				},
 				{
 					"platform": "android",
 					"state": "available",
-					"storeUrl": "https://play.google.com/store/apps/details?id=com.beexo",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.voltacircuit.threshold",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Play Store link present; text: 'Disponible para iOS y Android' and 'Descargar para Android'"
+					"note": "curator-agent draft: Play Store link (com.voltacircuit.threshold) for ThresholdV mobile signing app"
 				}
 			],
-			"agentNote": "Only iOS and Android have concrete store links. Bexo Connect (EIP-1193 provider) is a developer SDK, not evidence of a web/browser-extension wallet."
+			"agentNote": "The mobile app 'ThresholdV' is a companion signing device app, not the full wallet platform (which is web/enterprise). Dashboard appears to be a marketing mockup, not clear in-browser wallet evidence, so 'web' omitted."
 		},
 		{
-			"slug": "hot-wallet",
-			"name": "HOT Wallet",
-			"website": "https://hot-labs.org/",
+			"slug": "stellarport",
+			"name": "Stellarport",
+			"website": "https://stellarport.io/",
+			"entries": [
+				{
+					"platform": "web",
+					"state": "available",
+					"storeUrl": "https://stellarport.io",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Noncustodial wallet runs in-browser: 'Every transaction is done directly on your machine. Your secret key is only stored in memory' at stell"
+				}
+			],
+			"agentNote": "Text shows Ledger/Trezor hardware wallet login support, but no store link is available and hardware-device cannot be evidenced by the site URL per rules, so it is omitted."
+		},
+		{
+			"slug": "sollpay",
+			"name": "Sollpay",
+			"website": "https://sollpay.com/",
 			"entries": [
 				{
 					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://apps.apple.com/us/app/hot-wallet/id6740916148",
+					"storeUrl": "https://apps.apple.com/fr/app/sollpay/id6746510838",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link for HOT Wallet in page markup/footer"
+					"note": "curator-agent draft: \"Download on Apple App Store\" with direct App Store link"
 				},
 				{
-					"platform": "browser-extension",
+					"platform": "android",
 					"state": "available",
-					"storeUrl": "https://chromewebstore.google.com/detail/hot-wallet/mpeengabcnhhjjgleiodimegnkpcenbk",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.mercurylabs.sollpayhq",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Chrome Web Store link; text lists 'Extenstion 100%' as released"
+					"note": "curator-agent draft: \"Download on Google Play\" with direct Play Store link"
 				}
 			],
-			"agentNote": "Wallet is described as a Telegram Mini App MPC wallet; no clear standalone in-browser web app evidence, so 'web' omitted. Hardware/desktop not evidenced with store links."
+			"agentNote": "Page also mentions APK download but no concrete URL provided. Web platform not claimed as it's a marketing site, not an in-browser wallet."
 		},
 		{
-			"slug": "klever",
-			"name": "Klever",
-			"website": "https://klever.io/",
+			"slug": "simple-signer",
+			"name": "Simple Signer",
+			"website": "https://github.com/fsodano/simple-stellar-signer",
+			"entries": [
+				{
+					"platform": "web",
+					"state": "available",
+					"storeUrl": "https://sign.bigger.systems",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Simple Signer runs in-browser; embedded via window.open to https://sign.bigger.systems /connect, /sign, /payment endpoints"
+				}
+			],
+			"agentNote": "Source is a GitHub repo README, not a marketing site. It describes an in-browser transaction signer hosted at sign.bigger.systems (also sign-testnet/sign-futurenet). Ledger (hardware-device) is listed as 'In progress', so omitted. No app-store/extension links present."
+		},
+		{
+			"slug": "onekey",
+			"name": "OneKey",
+			"website": "https://onekey.so/",
 			"entries": [
 				{
 					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://apps.apple.com/br/app/klever-wallet-bitcoin-cripto/id1615064243",
+					"storeUrl": "https://apps.apple.com/app/id1609559473",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: App Store link for Klever Wallet; 'APPLE 4.8 out of 5 979 reviews'"
+					"note": "curator-agent draft: App Store link for OneKey app; footer lists iOS"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=so.onekey.app.wallet",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link for so.onekey.app.wallet; footer lists Android"
 				},
 				{
 					"platform": "browser-extension",
 					"state": "available",
-					"storeUrl": "https://chromewebstore.google.com/detail/klever-wallet/ifclboecfhkjbpmhgehodcjpciihhmif",
+					"storeUrl": "https://chromewebstore.google.com/detail/onekey/jnmbobjmhlngoefaiojfljckilhhlhcj",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Chrome Web Store link for Klever Wallet extension"
+					"note": "curator-agent draft: Chrome Web Store link; 'Download browser extension - Connect OneKey to any dApp'"
 				}
 			],
-			"agentNote": "Desktop and Hardware Wallet (KleverSafe) are mentioned in marketing text but no concrete store/download links, so omitted."
+			"agentNote": "Web app is mentioned ('Launch web app, plug and play, no downloads') and desktop/hardware products exist, but no concrete store/in-browser evidence URLs were provided for those, so they are omitted."
 		},
 		{
-			"slug": "solar-wallet",
-			"name": "Solar Wallet",
-			"website": "https://solarwallet.io/",
+			"slug": "freedom-pay-wallet",
+			"name": "Freedom Pay Wallet",
+			"website": "https://freedompaywallet.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/gb/app/freedom-pay-wallet/id6448116005",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for Freedom Pay Wallet"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios&#038;pli=1",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Google Play Store listing for the app"
+				}
+			],
+			"agentNote": "Play Store package id contains '.ios' but the URL is a valid Play (Android) listing. Text references 'Download the Freedom Pay Wallet app' consistent with mobile apps."
+		},
+		{
+			"slug": "bousol",
+			"name": "Bousol",
+			"website": "https://bousolapp.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/ch/app/bousol-paon-bleu-inc/id6503965498?l=en-GB",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for Bousol app present in page markup"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.bousol.wallet",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Google Play link for com.bousol.wallet present in page markup"
+				}
+			],
+			"agentNote": "Page is a marketing site describing a mobile app ('Get the free app', 'download'); only iOS and Android store links found. No evidence for web/extension/desktop/hardware."
+		},
+		{
+			"slug": "airgap",
+			"name": "AirGap",
+			"website": "https://airgap.it/",
 			"entries": [
 				{
 					"platform": "android",
 					"state": "available",
-					"storeUrl": "https://play.google.com/store/apps/details?id=io.solarwallet",
+					"storeUrl": "https://play.google.com/store/apps/details?id=it.airgap.vault",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: Play Store link in markup; page text 'Install on Android'"
+					"note": "curator-agent draft: Play Store link for AirGap Vault (it.airgap.vault)"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=it.airgap.wallet",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link for AirGap Wallet (it.airgap.wallet)"
 				}
 			],
-			"agentNote": "Page text mentions iOS install and macOS/Windows/Linux downloads, but no concrete evidence URLs were provided for those platforms, so only Android is claimed."
+			"agentNote": "Text says 'available for iOS, Android and desktop' but only Play Store (Android) links are present in markup; no concrete App Store or desktop download URLs provided, so iOS and desktop omitted."
 		},
 		{
-			"slug": "rabet",
-			"name": "Rabet",
-			"website": "https://rabet.io/",
+			"slug": "beans",
+			"name": "Beans",
+			"website": "https://beansapp.com/",
 			"entries": [
 				{
-					"platform": "browser-extension",
+					"platform": "ios",
 					"state": "available",
-					"storeUrl": "https://chrome.google.com/webstore/detail/rabet/hgmoaheomcjnaheggkfafnjilfcefbmo",
+					"storeUrl": "https://apps.apple.com/us/app/beans-app/id1616633340",
 					"checkedAt": "2026-08-13",
-					"note": "curator-agent draft: \"This product is available for Chrome, Firefox, Edge, and Brave\" — Chrome Web Store link present"
+					"note": "curator-agent draft: App Store link present; 'View in the Apple Store' and iOS store URL in markup"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.beansapp.app",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link present; 'View in the Play Store' and Play store URL in markup"
 				}
 			],
-			"agentNote": "Also has Firefox (https://addons.mozilla.org/en-US/firefox/addon/rabet/) and Edge (https://microsoftedge.microsoft.com/addons/detail/rabet/aanjhgiamnacdfnlfnmgehjikagdbafd) extension links — all browser-extension. Desktop and Mobile ('Phone') are mentioned in text but no concrete store/download URLs provided, so omitted."
+			"agentNote": "Beans is described as a mobile app ('2-Factor Authentication process is designed specifically for mobile devices'). Only iOS and Android store links found. No evidence of web/browser-extension/desktop/hardware versions."
+		},
+		{
+			"slug": "ripio",
+			"name": "Ripio",
+			"website": "https://ripio.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/ar/app/ripio-app-crypto-wallet/id1221006761",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for 'Ripio App Crypto Wallet' (AR); page mentions '4.3 en App Store'"
+				}
+			],
+			"agentNote": "A second App Store link (Brazil) points to the same app id (id1221006761). No evidence for web/browser-extension/desktop/hardware-device; site is mainly marketing."
+		},
+		{
+			"slug": "peer",
+			"name": "Peer",
+			"website": "https://usepeer.co/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/us/app/peer-the-everything-app/id1531810971",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link for 'Peer - The Everything App' present in page markup"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.dn.honeycoin&hl=en",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Play Store link (com.dn.honeycoin, HoneyCoin) present in page markup"
+				}
+			],
+			"agentNote": "This is HoneyCoin's 'Peer' fintech super-app for Africa, not evidently a Stellar wallet; store links present but nothing confirms Stellar-specific wallet functionality. Play Store package id 'com.dn.honeycoin' should be reviewer-verified."
+		},
+		{
+			"slug": "meru",
+			"name": "Meru",
+			"website": "https://getmeru.com/",
+			"entries": [
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.getmeru.app",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Google Play store link found in page markup for com.getmeru.app"
+				},
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/us/app/meru-ahorra-en-d%C3%B3lares/id1636697895",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link found in page markup for Meru app"
+				}
+			],
+			"agentNote": "Page is a Spanish marketing site emphasizing mobile app ('desde tu teléfono celular', 'una sola aplicación'). Only iOS and Android store links present; no evidence for web/extension/desktop/hardware."
+		},
+		{
+			"slug": "freedom-pay",
+			"name": "Freedom Pay",
+			"website": "https://freedompaywallet.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/gb/app/freedom-pay-wallet/id6448116005",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: App Store link to 'Freedom Pay Wallet'"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.freedomdevelopmentfoundation.ios&#038;pli=1",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: Google Play Store link found in page markup"
+				}
+			],
+			"agentNote": "Note: the Play Store package id ends in '.ios' but it is a Google Play (Android) link. Text repeatedly says 'Download the Freedom Pay Wallet app' but only these two store links provide concrete evidence."
+		},
+		{
+			"slug": "emigro",
+			"name": "Emigro",
+			"website": "https://emigro.co/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/app/emigro-pay-without-borders/id6475793514",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: 'Download on the App Store' with Apple App Store link"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=co.emigro.app",
+					"checkedAt": "2026-08-13",
+					"note": "curator-agent draft: 'Get it on Google Play' with Play Store link"
+				}
+			],
+			"agentNote": null
 		}
 	]
 }
