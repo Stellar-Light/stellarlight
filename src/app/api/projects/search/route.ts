@@ -2113,13 +2113,39 @@ export async function GET(req: NextRequest) {
 	// (hoisted 2026-07-21 so the hay carries audit vocabulary); attachment
 	// below just reads it.
 
+	// Audit-drift (code-truth): "audited" and "audited 14 months / 400 commits
+	// of churn ago" are different claims. driftDays = whole days since the
+	// latest report; codeChangedSinceAudit = any joined repo committed on a
+	// LATER day than the audit (day-granular; null when either side lacks a
+	// date — absence of evidence, not a freshness claim).
+	const withAuditDrift = (
+		roll: { count: number; auditors: string[]; latestAt: string | null } | null,
+		repos: Array<{ lastCommitAt?: string | null }> | undefined,
+	) => {
+		if (!roll) return null;
+		if (!roll.latestAt)
+			return { ...roll, driftDays: null, codeChangedSinceAudit: null };
+		const driftDays = Math.max(
+			0,
+			Math.floor((Date.now() - Date.parse(roll.latestAt)) / 86_400_000),
+		);
+		const commitDays = (repos ?? [])
+			.map((r) => (typeof r.lastCommitAt === "string" ? r.lastCommitAt.slice(0, 10) : null))
+			.filter((d): d is string => !!d);
+		const latest = roll.latestAt;
+		const codeChangedSinceAudit = commitDays.length
+			? commitDays.some((d) => d > latest)
+			: null;
+		return { ...roll, driftDays, codeChangedSinceAudit };
+	};
+
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
 		builtBy: builtByMap.get(p.id) ?? null,
 		anchorProfile: isAnchorRow(p)
 			? (anchorProfiles.get(norm(p.name)) ?? null)
 			: null,
-		audits: auditsBySlug.get(p.slug as string) ?? null,
+		audits: withAuditDrift(auditsBySlug.get(p.slug as string) ?? null, p.repos),
 	}));
 
 	// sls-056: report counts from the FINAL served array. The page

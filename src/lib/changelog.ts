@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Audit-drift on project rows: audits.driftDays + audits.codeChangedSinceAudit (openapi@1.8.54, code-truth track).",
+		detail:
+			"'Audited' and 'audited 14 months and hundreds of commits ago' are different claims — the audits rollup on searchProjects rows now carries driftDays (whole days since the latest report) and codeChangedSinceAudit (whether any joined repo committed on a later day than that report; day-granular). Null when either side lacks a date — absence of evidence, never a freshness claim. Derived at serve time from the audits registry and the repos join the rows already carry; no new write path.",
+	},
+	{
+		date: "2026-08-13",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Feedback→quality loop plumbing: vote kinds on POST /api/feedback + nightly-aggregated feedbackSignal on project rows (openapi@1.8.53).",
 		detail:
 			"POST /api/feedback now accepts kind 'worked' / 'did-not-work' with a required target {surface: projects|repos, slug} (message optional on votes; report kinds unchanged). Votes aggregate nightly per target — distinct voters only (one per hashed IP, latest vote wins) — into feedbackSignal {votes, worked, score, asOf} served on searchProjects rows. score stays null until ≥5 distinct voters (anti-gaming floor): sub-floor counts are visible but carry NO ranking influence, and nothing folds into confidence scores until real signal crosses the floor. Repos votes are accepted and stored; repo-row serving lands when any repo target accrues votes.",

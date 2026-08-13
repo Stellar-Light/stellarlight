@@ -4141,11 +4141,13 @@ export const spec: OpenAPISpec = {
 					audits: {
 						type: ["object", "null"],
 						description:
-							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. null = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
+							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim — read both. null rollup = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
 						properties: {
 							count: { type: "integer" },
 							auditors: { type: "array", items: { type: "string" } },
 							latestAt: { type: ["string", "null"] },
+							driftDays: { type: ["integer", "null"] },
+							codeChangedSinceAudit: { type: ["boolean", "null"] },
 						},
 					},
 					tvlUSD: {
