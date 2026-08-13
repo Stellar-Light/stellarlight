@@ -63,3 +63,7 @@ test.env
 
 # Editor config is personal — Biome handles lint/format (biome.json)
 .vscode/
+
+# local credential files (never committed; see session security notes)
+repowiki.env
+raven.env
