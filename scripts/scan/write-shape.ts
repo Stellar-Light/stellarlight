@@ -76,6 +76,8 @@ export function signalsToWrite(
 		hasEvents: s.facts.hasEvents,
 		usesNoStd: s.facts.usesNoStd,
 		stellarJsDep: s.facts.stellarJsDep,
+		ciPresent: s.facts.ciPresent,
+		testsPresent: s.facts.testsPresent,
 		farmScore: s.farmScore,
 		farmFlags: s.farmFlags,
 		codeSymbols: s.codeSymbols,

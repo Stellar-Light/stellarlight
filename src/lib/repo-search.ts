@@ -63,6 +63,8 @@ interface RepoDoc {
 	isDeployableContract?: boolean | null;
 	sorobanSdkVersion?: string | null;
 	versionStatus?: string | null;
+	ciPresent?: boolean | null;
+	testsPresent?: boolean | null;
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
 	scannedRef?: unknown;
@@ -184,7 +186,12 @@ export interface CodeVerified {
 	/** Cargo cdylib — a real deployable Soroban contract (vs tooling/SDK/frontend that merely uses Stellar). */
 	isDeployableContract: boolean;
 	/** Raw soroban-sdk version requirement (sourced fact, never a bare protocol int). */
-	sorobanSdkVersion: string | null;
+/** Engineering-practice presence facts from the code scan (tree-level):
+	 * a CI config exists / test files exist. Presence only — never a claim CI
+	 * passes or coverage is good. null = not yet scanned. */
+	ciPresent: boolean | null;
+	testsPresent: boolean | null;
+		sorobanSdkVersion: string | null;
 	/** current | supported | deprecated | unknown — vs the latest protocol at scan time. */
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
@@ -237,6 +244,8 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 			? false
 			: !!d.isDeployableContract,
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
+		ciPresent: typeof d.ciPresent === "boolean" ? d.ciPresent : null,
+		testsPresent: typeof d.testsPresent === "boolean" ? d.testsPresent : null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
 		codeConfidence: factConfidence(

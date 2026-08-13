@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Toolchain dimension on analyzeEcosystem + ciPresent/testsPresent on repo rows (openapi@1.8.56, code-truth track).",
+		detail:
+			"dimension=toolchain returns the Soroban-SDK version-status distribution across scanned repos (current/supported/deprecated/unknown, from the dated soroban-versions table), the deprecated-toolchain roster (capped 50, full count alongside), and engineering-practice counts. Repo rows gain ciPresent/testsPresent — tree-level presence facts from the code scan (a CI config exists / test files exist), presence only, never a claim CI passes or coverage is good; null until the repo's next scan records them. Population accrues via the weekly stale-first re-scan.",
+	},
+	{
+		date: "2026-08-13",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"codeInUse on repo rows — live mainnet usage joined to the code (openapi@1.8.55, code-truth track).",
 		detail:
 			"searchRepos rows gain codeInUse {contracts, events, eventsDelta, subinvocations, subinvocationsDelta, asOf}: the weekly stellar.expert pass now rolls per-contract activity up to the repo it is attributed to (scanner-verified mainnet contract ids + stellar.expert wasm validation). codeDepth is the static half (the code is serious); codeInUse is the dynamic half (the deployed contract is live, with activity deltas week over week). Deltas null until a second snapshot — never zero. null = no verified contract joined, never 'unused'.",
