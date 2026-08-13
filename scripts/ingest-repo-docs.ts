@@ -34,6 +34,13 @@ const execute = process.argv.includes("--execute");
  * matches repo-relative paths; boilerplate is excluded globally. */
 const SOURCES: Array<{ repo: string; ref: string; include: RegExp }> = [
 	{
+		// battery gap (q-tool-java-sdk-maven): the Java SDK's install
+		// coordinates (Maven/Gradle snippets) live only in its README.
+		repo: "lightsail-network/java-stellar-sdk",
+		ref: "master",
+		include: /^README\.md$/i,
+	},
+	{
 		// The motivating case: per-protocol indexer extension guides under src/.
 		repo: "Creit-Tech/Stellar-Indexer-SDK",
 		ref: "main",
