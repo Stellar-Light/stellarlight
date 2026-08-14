@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Repo quality tiers + Electric Capital taxonomy coverage (staged): every `/api/repos/search` row now carries `tier` (quality | community | archive — tag-and-demote: archive sinks in ranking and never rides as inline codeReferences, but stays name-findable) and `source` (project-link | ec-taxonomy). The index expands from ~2.4k project-linked repos toward ~10.5k via Electric Capital's public crypto-ecosystems Stellar list, metadata-only, each repo scored on own-merit at ingest (openapi@1.8.60).",
+		detail:
+			"Lead with quality-tier repos; treat archive-tier as historical reference only. EC-sourced repos carry no inherited authority — their score is pure freshness/traction own-merit until they earn anchors (SCF, judge scores, project links, code scans). Ingest is staged over dispatched waves with read-back verification, rename-twin guards, GraphQL budget pacing, and a post-ingest live answer-key gate (10 canonical queries must keep their top-3 answers); allowlisted canonical repos can never tier to archive.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Relation-class sweep (sls-064 analogs): repos.successorRepo + superseded ranking demotion, builtBy reference fix + nightly referential-integrity lane, SEP rows dated (openapi@1.8.59).",
 		detail:
 			"Round-6 Raven probes generalized sls-064: (A) repo generations — blend-contracts now carries successorRepo=blend-capital/blend-contracts-v2 (curated REPO_SUCCESSIONS, verified against the repos' own statements) and superseded generations rank below successors at equal relevance; (B) peer's builtBy pointed at a non-existent slug — fixed via ownership-registered curation, and a nightly S0 referential-integrity lane now asserts every served builtBy/canonicalSlug/supersededByReportId target resolves, so no stored cross-reference can dangle silently again; (C) SEP research rows gain observedAt + publishedAt from each SEP's own preamble dates (Updated preferred over Created) — the provenance-trio gap on stellar-protocol-sourced chunks closes as the corpus refresh re-reaches them.",

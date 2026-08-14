@@ -138,6 +138,31 @@ export const Repos: CollectionConfig = {
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },
 		{ name: "lastEnrichedAt", type: "date", admin: { position: "sidebar" } },
 		{ name: "enrichError", type: "text", admin: { position: "sidebar" } },
+		{
+			// Discovery provenance: how this repo entered the index. Project-linked
+			// repos come from the curated directory's github links (enrich-repos);
+			// ec-taxonomy repos come from Electric Capital's public crypto-ecosystems
+			// list (ingest-ec-taxonomy). Forever distinguishable for trust/filtering.
+			name: "source",
+			type: "select",
+			options: ["project-link", "ec-taxonomy"],
+			defaultValue: "project-link",
+			index: true,
+			admin: { position: "sidebar", description: "How this repo entered the index" },
+		},
+		{
+			// Quality tier (tag-and-demote, never delete — the Inactive-projects
+			// pattern): archive = archived/dead-and-unstarred (name-searchable but
+			// sinks in ranking, excluded from inline codeReferences); community =
+			// alive but unproven; quality = repoScoreLabel high. Computed at
+			// ingest/enrich time.
+			name: "tier",
+			type: "select",
+			options: ["quality", "community", "archive"],
+			defaultValue: "community",
+			index: true,
+			admin: { position: "sidebar", description: "Quality tier — archive is demoted, never deleted" },
+		},
 
 		// ── Code-Truth Ledger (CTL) — code-signal + audit fields.
 		// DECLARED here so the scanner (scripts/scan/*) can write them and

@@ -1205,6 +1205,16 @@ export interface components {
             /** @description Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos. */
             repoScore: number;
             repoScoreLabel?: string | null;
+            /**
+             * @description Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.
+             * @enum {string}
+             */
+            tier?: "quality" | "community" | "archive";
+            /**
+             * @description Discovery provenance: project-link = from the curated directory's github links; ec-taxonomy = from Electric Capital's public crypto-ecosystems list.
+             * @enum {string}
+             */
+            source?: "project-link" | "ec-taxonomy";
             /** @description Keyword-relevance score for the current query (higher = better match). */
             score?: number;
             /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery. */

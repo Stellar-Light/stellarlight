@@ -148,6 +148,10 @@ export interface RepoResult {
 	judgedHackathon: string | null;
 	repoScore: number;
 	repoScoreLabel: string | null;
+	/** Quality tier: quality | community | archive. Archive is demoted, never deleted. */
+	tier: string;
+	/** How the repo entered the index: project-link (curated directory) | ec-taxonomy (Electric Capital's public list). */
+	source: string;
 	score: number;
 	/** DeepWiki AI-generated wiki of this repo's internals — hand off here for deep "where/how" code questions. */
 	deepWikiUrl: string;
@@ -1235,6 +1239,12 @@ export async function searchRepos(
 			// demotion is mechanical.
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 			const superseded = (r as any).successorRepo ? 1 : 0;
+			// Tier demotion (tag-and-demote, never delete): archive-tier repos
+			// (GitHub-archived, or dead-and-unstarred — most of the EC-taxonomy
+			// long tail) sink below every same-relevance competitor while staying
+			// name-findable. Mirrors the Inactive-projects pattern.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const arch = (r as any).tier === "archive" ? 1 : 0;
 			return {
 				r,
 				topics,
@@ -1245,6 +1255,7 @@ export async function searchRepos(
 				alive,
 				stale2y,
 				superseded,
+				arch,
 				mention,
 				stellarness,
 				anchorIdentity,
@@ -1304,6 +1315,10 @@ export async function searchRepos(
 				// to each other.
 				b.inUse - a.inUse ||
 				b.score - a.score ||
+				// Archive-tier demotion binds tightest of the demotions: an
+				// archived/dead-and-unstarred repo sinks below every live
+				// same-relevance competitor (EC long-tail guard, task #115).
+				a.arch - b.arch ||
 				// Hard-stale demotion, then liveness, BEFORE org authority: a
 				// dead SDF MVP must not outrank a live flagship at equal
 				// relevance (2026-07-19 answer-key eval — `sdf` deciding before
@@ -1375,6 +1390,8 @@ export async function searchRepos(
 				judgedHackathon: r.judgedHackathon ?? null,
 				repoScore: r.repoScore ?? 0,
 				repoScoreLabel: r.repoScoreLabel ?? null,
+				tier: (r as { tier?: string }).tier ?? "community",
+				source: (r as { source?: string }).source ?? "project-link",
 				score,
 				deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
 				canonical: crank < 9999,
