@@ -53,7 +53,7 @@ permissions: { contents: read }
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 55
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
@@ -77,7 +77,12 @@ jobs:
         # --lang all (2026-07-11): the default is Rust-only, which structurally
         # excluded every JS/TS repo from the daily wave — js-stellar-sdk never
         # got real symbols, so symbol lookups failed for the main SDK.
-        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --limit 60 --lang all
+        # --limit 500 (2026-08-14): 60 was sized for the pre-PAT 1,000/hr
+        # Actions token and never raised after the 5,000/hr PAT landed. The
+        # limit is deliberately ABOVE one hour's budget — the in-script
+        # budget guard (BUDGET-STOPPED, resume next wave) is the governor;
+        # every wave simply drinks the pool dry and the next wave resumes.
+        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --limit 500 --lang all
       - name: Manual wave (dispatch)
         if: github.event_name == 'workflow_dispatch'
         run: pnpm exec tsx scripts/scan/scan-repo-code.ts --limit ${{ inputs.limit }} --lang ${{ inputs.lang }} ${{ inputs.execute && '--execute' || '' }} ${{ inputs.verify && '--verify' || '' }} ${{ inputs.extra }}
