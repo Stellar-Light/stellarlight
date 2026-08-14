@@ -1,61 +1,188 @@
-# Architecture
+# Architecture — how StellarLight actually works
 
-Code-verified mechanics of the Stellar Light data layer — what feeds it, how records are scored, where the data is served, and what keeps it honest. Paths are real; start from any of them.
+StellarLight is the Stellar ecosystem's data layer: a continuously
+re-verified index of projects, repos, partners, audits, builders, and
+research that agents (Stellar Raven first) and humans query for ground
+truth. Every claim aims to be **evidenced, dated, and re-checkable** —
+the system below is organized around producing and defending that.
 
-```
-  sources                    store                      serving
-┌──────────────────┐   ┌───────────────────┐   ┌─────────────────────────────┐
-│ GitHub GraphQL   │   │ Payload CMS        │   │ web app  src/app/(frontend) │
-│ EC taxonomy      │ → │ on MongoDB Atlas   │ → │ REST API src/app/api/**     │
-│ stellar.toml     │   │ src/collections/*  │   │ MCP      scout-mcp/  (npm)  │
-│ DoraHacks feed   │   └───────────────────┘   │ client   api-client/ (npm)  │
-│ SCF awards page  │        ▲                   │ skill    public/skills/     │
-│ RSS / Airtable   │        │ scripts/ + GH     └─────────────────────────────┘
-│ Stellar Passport │        │ Actions (dry-run
-└──────────────────┘        │ → review → execute)
-```
+Consumers: the REST API (`/api/*`, OpenAPI at `/api/openapi.json`),
+the Scout MCP server (`@stellar-light/scout-mcp`), the Scout skill
+(`Stellar-Light/stellar-scout`), Raven's unified catalog (which ingests
+our spec text as its discovery index), and the site itself.
 
-## Store — the collections (`src/collections/`)
+## 1. A repo search, end to end
 
-- **Projects** — the canonical directory (~900 records): status (`Live`/`Inactive`…), category + `types[]`, SCF funding (`scf.awardedRounds`), links, `coverage` (anchor corridors), `supportedNetworks`, `canonicalSlug` (dupe lineage), `prominence` (curated rank weight).
-- **Repos** (~2,400) — indexed GitHub repos carrying the `codeVerified` block written by the scanner (below).
-- **Partners** — auth-enabled (partners log in): stellar.toml-derived capabilities (`assets`/`seps`/`rampTypes`), curator-verified `compliance`, system-owned `verified` signals, the freshness state machine (`fresh → aging → stale → archived`).
-- **Entities, Blog/RSS, Builders** (Passport-synced), transparency logs.
+`GET /api/repos/search?q=…` (src/lib/repo-search.ts):
 
-## Scoring — how a record earns rank
+1. **Candidate pool** — Payload query over `repos` (metadata + README
+   excerpt + extracted code symbols + dependency lists), plus curated
+   canonical answers and vertical flagships admitted even without a
+   keyword hit.
+2. **Per-doc signals** — field-weighted relevance (name/topics 5 >
+   symbols 4 > description/owner 3 > deps 2 > README 1, multi-term
+   coverage bonus), then the evidence signals: code-verified stellarness,
+   anchor identity (mention-vs-identity), verified mainnet usage
+   (`codeInUse`), exact alias identity (separator-insensitive owner/
+   name/path — including spaced product names, ≥3 words), liveness,
+   staleness, supersession, quality tier.
+3. **The comparator** — most → least decisive:
+   `canonical correction → exact alias identity → curated flagship float
+   → stellarness tier → anchor identity → mainnet usage → keyword score
+   → archive-tier demotion → superseded demotion → 2y-stale demotion →
+   alive → SDF org → stellar mention → repoScore → stars`.
+   The standing contract (F4): **Stellar evidence ranks above raw
+   keyword luck, and identity never lets a no-evidence repo beat a
+   code-verified one.**
+4. **Serve** — rows carry the grade, tier/source, activity signals,
+   code-truth block, knowledge notes, relations (successor, project),
+   and a `deepWikiUrl` handoff for internals questions. Explanations of
+   WHY something ranked (`rankedBecause`) ride along for transparency.
 
-**Repos (code-truth):** `scripts/scan/scan-repo-code.ts` fetches a repo's actual source (shared fetch unit `scripts/scan/fetch-repo-code.ts`) →
-- `src/lib/code-signals.ts` — `stellarProof` relevance gate (`cargo-sdk → … → none`; keep-when-uncertain, false negatives are the dangerous error) + anti-farm caps.
-- `src/lib/code-depth.ts` — 0–1 substance score separating a real contract from a hello-world scaffold (per-crate multi-file union, clone-hardened, fork-capped).
-- `src/lib/soroban-versions.ts` — dated SDK version → `current/supported/deprecated`.
-- Composite `repoScore` in `src/lib/repo-search.ts` (topic match + freshness + traction + authority; exact-name lookups dominate authority — sls-009).
-- Regression gate: `scripts/scan/depth-eval.ts` over the ground-truth key `depth-labels.ts`, CI-enforced (`.github/workflows/depth-eval.yml`).
+Project search (`/api/projects/search`) follows the same philosophy over
+the curated directory (prominence, verification, funding, lifecycle) and
+joins inline code references and on-chain metrics; `builtBy` derives at
+query time from the entities collection (org ↔ project links).
 
-Manual data triggers live in `scripts/` too (e.g. `scripts/refresh-github.ts` — the local GitHub-stats refresh behind `pnpm cron:github`).
+## 2. The Code-Truth Ledger — scanning real source
 
-**Projects:** keyword+synonym search with tiered AND→relaxed matching, semantic (`$vectorSearch`, voyage-3 embeddings) fallback, exact-name boost, Inactive down-rank — `src/app/api/projects/search/route.ts`.
+The scanner (scripts/scan/, nightly + dispatchable per-repo) turns
+"repo exists" into **code-verified facts**:
 
-**Partners:** deterministic matcher `src/lib/partner-match.ts` (`scorePartners` — structured-capability weighted, region-gated, word-boundary safe). The list endpoint, matchmaker, and concierge all reuse it — one engine, no drift.
+- **Fetch & selection** (fetch-repo-code.ts) — tree walk with per-crate
+  entry-file guarantees (contract impls can't be starved by
+  bigger files), language-aware source selection (Rust + JS/TS + Python/
+  Go/JVM behind Stellar-context gates).
+- **Extraction** — `stellarProof` (cargo-sdk strongest → none),
+  `codeDepth` (0–1, per-crate, calibrated against DeepWiki-graded
+  answer keys; language lanes mirror the Rust lane), contract
+  interfaces (public contract fn signatures), public symbols, SDK
+  capabilities, toolchain (CI/tests/artifacts), soroban-sdk version →
+  dated `versionStatus`, anti-farm signals, README contract ids
+  verified live on mainnet.
+- **Write-shape** (write-shape.ts) — signals-only writes: a scan can
+  never demote tier/score by construction; scores move when enrich
+  next runs. `pending`/`error`/`incomplete` states are never demoted.
+- **Joins** — enrich-onchain attributes mainnet contract activity to
+  repos (`codeInUse`: invocations, events, weekly deltas); audits gain
+  `codeChangedSinceAudit`/`driftDays` (audit currency vs the code as it
+  is TODAY); successions (`successorRepo`) demote superseded
+  generations behind their successors.
+- **Budget discipline** — waves ride a shared PAT with hard budget
+  guards: a starved run exits RED (`BUDGET-STOPPED`), never silently
+  green; targeted re-scans serialize through a concurrency group.
 
-## Serving — the contract
+The eval gate: scripts/scan/depth-eval.ts holds labeled repos
+(deep/shallow, per-language) and fails CI when calibration drifts.
 
-- REST under `src/app/api/**`; spec source `src/lib/openapi-spec.ts` → served at `/api/openapi.json`, snapshotted to `specs/openapi.json` (committed — PR diffs SHOW contract changes) and codegen'd into `api-client/src/schema.ts` via `pnpm contract:write`. Changelog `src/lib/changelog.ts` → `/api/changelog` (agent-readable; downstream automation ingests it).
-- `scout-mcp/` and `api-client/` are thin wrappers over the REST API, published to npm; the agent skill in `public/skills/` mirrors to the public `Stellar-Light/stellar-scout` repo.
-- Contract rules encoded from hard-won findings: structured fields over prose, status enums over ambiguous nulls, self-describing arrays (`placementRank`/`winnersRanked`), `asOf`/`computedAt` stamps, and tool descriptions treated as routing contracts.
+## 3. Knowledge & relations
 
-## Data ops — how data changes
+- **knowledgeNotes** (src/lib/repo-knowledge.ts) — dated, sourced facts
+  on repo rows: a curated map plus derived notes (audit crosslinks),
+  rebuilt wholesale each enrich pass so notes can't rot silently.
+- **Relations** — audit engagements (engagement id, report version,
+  supersession — never guessed), repo generations (curated
+  `REPO_SUCCESSIONS`), org attribution (entities → `builtBy`, resolved
+  in the entity namespace), canonical identity (dupe/alias links).
+- **Research corpus** — ingested sources (SDF org pages, SEPs with
+  their own preamble dates, blogs, papers, audit registry) with the
+  provenance trio (source URL, published/updated, observedAt) on every
+  chunk; semantic fallback is labeled as such — a vector neighbour is
+  never served as a fact.
 
-Bulk writes only via scripts in `scripts/` (mostly `scripts/data/`) run through GitHub Actions with **dry-run → owner review → `--execute`**; scanner writes go through `scripts/scan/write-shape.ts` (zero-demotion by construction). Vercel crons (`vercel.json`) handle scheduled refreshes (GitHub stats, RSS, builders, partner freshness/digest).
+## 4. The truth engine — detectors → ledger → fixes → proof
 
-## Kept honest — the guards (`.github/workflows/`)
+The engine's job is to find where the index is thin or wrong BEFORE a
+consumer does:
 
-- `self-audit.yml` — daily grounded checks against the **live** API (liveness, freshness thresholds, served-count sanity, ground-truth spot checks).
-- `contract-gate.yml` — PR-time contract-as-code: the committed spec snapshot and generated client types must match the route's spec, and a spec change without a changelog entry fails. Silent contract drift is unmergeable.
-- `api-drift.yml` — live API ⇄ OpenAPI ⇄ docs agreement, incl. response FIELD coverage (every field a live row serves must be documented).
-- `depth-eval.yml` — codeDepth separation on the labeled answer key.
-- `content-freshness` + `verify-claims` — no stale CLI commands in authored content; no advertised-but-unshipped claims.
-- Experiments Lab (`src/lib/experiments.ts`, `/experiments`) — variants ship behind per-request flags (default off), graduate only after beating baseline on a ground-truth eval.
+- **Detectors** (nightly): record completeness (S0 referential
+  integrity — every served cross-reference must resolve in its own
+  namespace; S1 field completeness with documented-empty allowlists),
+  api-drift (live API ⇄ OpenAPI ⇄ docs agreement), content freshness,
+  link checks, coverage-watch (scan coverage holes), battery-coverage
+  (walks Raven's own eval battery against our surfaces), consumer
+  report, db-space.
+- **Engine lanes** (scripts/eval/engine-{b..e}*.ts) — corpus sweeps,
+  health, demand, contract conformance.
+- **The improvement ledger** (src/lib/improvement-ledger.ts) — every
+  detector finding lands in one status-tracked ledger; open items
+  become GitHub issues; fixes must live-verify to close.
+- **Golden evals** (scripts/eval/run-golden.ts + golden-questions.json)
+  — ground-truth answer keys, graded against the live service; plus
+  live answer-key probes (repo-search-live-probes.ts) that gate bulk
+  ingests: canonical answers must keep their top-3.
+- **Feedback loop** — `/api/feedback` (agents report answer quality)
+  feeds `success_rate` into per-surface confidence scores.
 
-## Runtime
+Zero-work discipline everywhere: an empty sweep or a starved wave exits
+red — a quiet detector must be distinguishable from a green one.
 
-Next.js 16 App Router + Payload 3 on Vercel (`stellarlight-landing`), MongoDB Atlas, Cloudflare R2 media, Resend email (partner sign-in/reminders). Deployment detail: [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md). Shipping discipline: [SHIPPING.md](./SHIPPING.md).
+## 5. Curation — never-guess, gated, read-back
+
+Curated truth lives in versioned maps (scripts/data/curation-maps.ts):
+SCF award corrections vs official pages, type/status fixes, canonical
+dedupes, successions, protected-repo allowlists. Discipline:
+
+- **Never guessed** — every entry cites what was verified and when;
+  unverifiable stays null ("amount confirmed, not verifiable → null").
+- **Ownership-registered** — curated fields are registered so sync
+  passes can't clobber them.
+- **Gated application** — prod mutations run via GitHub Actions with
+  dry-run default; execute only after the dry-run report is inspected;
+  writes are read back (`findByID`) and a mismatch fails the run —
+  Payload reports success even when it drops an unknown key, so
+  read-back is the only proof a write happened.
+- **Agent curators** — the curator loop proposes (draft JSON via PR),
+  the deterministic layer disposes (apply script with only-empty
+  writes + read-back + zero-work red). Agents propose; gates decide.
+
+## 6. The refresh chain — keeping the index honest
+
+~72 workflows, the load-bearing cadence:
+
+| When | What |
+|---|---|
+| nightly | repo scan wave (re-scan policy: changed + never-scanned compete on score), enrich-repos (grades, notes, successions), detectors (S0/S1, drift, freshness, coverage), self-audit |
+| weekly | on-chain metrics (enrich-onchain → codeInUse), TVL, EC snapshot, partner enrich/toml, research corpus refresh |
+| on merge | contract gate (spec snapshot + generated client freshness + routing-surface limits), tests, spectral lint, Vercel deploy |
+| on dispatch | targeted scans (`--only owner/repo`), curation passes, EC taxonomy waves (staged, budget-guarded), seeds/backfills |
+| continuous | sync chains: SKILL.md → stellar-scout repo, scout-mcp → npm, catalog text → Raven's re-baseline handshake |
+
+`/api/changes?since=` is the public delta feed of all of it.
+
+## 7. The contract
+
+One spec module (src/lib/openapi-spec.ts) is the single source of truth,
+served at `/api/openapi.json`, snapshotted in `specs/`, and codegen'd
+into the typed client (`api-client/`). The contract gate fails any PR
+whose spec, snapshot, generated client, version, and changelog don't
+move together. `API_VERSION` bumps on ANY externally visible change —
+consumers (Raven's catalog) treat an unbumped change as invisible.
+Changelog entries (src/lib/changelog.ts) are written for agent readers:
+what changed, how to use it, what to stop doing.
+
+## 8. Operating limits
+
+- GitHub API: shared PAT pool across scan/enrich/ingest; GraphQL runs
+  carry the rateLimit meter and stop at a reserve with a resume offset.
+- Repos CDN cache ~5min (`s-maxage`) — verification probes cache-bust.
+- Payload/Mongo: select-projection on heavy fields (README excerpts
+  excluded from search reads); bulk ingests are metadata-only for the
+  long tail.
+- Concurrency groups serialize scan waves and debounce chase enriches
+  (at most one running + one pending).
+
+## 9. Evals
+
+Three layers, all against the LIVE service:
+
+1. **Golden questions** — ground-truth answer keys, scored.
+2. **Answer-key probes** — canonical query → expected top-3, run
+   post-deploy and as the gate after bulk ingests.
+3. **Depth calibration** — labeled deep/shallow repos per language,
+   CI-gated.
+
+Plus the external loop: Raven's own eval battery and improvements
+channel (`improvements/stellar-light-scout` in stellar-raven) file
+findings against us; our battery-coverage detector walks his battery
+nightly so we see what he sees before he does.
