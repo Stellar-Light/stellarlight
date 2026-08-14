@@ -73,6 +73,7 @@ interface RepoDoc {
 	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
+	codeDomains?: unknown;
 	activitySignals?: {
 		commits90d?: number | null;
 		lastReleaseAt?: string | null;
@@ -223,6 +224,11 @@ export interface CodeVerified {
 	 * signing, soroban-rpc, sep10-auth, wallet-kit, …) — what a dapp actually
 	 * DOES with the SDK; [] until scanned post-2026-07-09 or no JS sources. */
 	sdkCapabilities: string[];
+	/** Evidence-only domain labels (defi-lending, defi-amm, oracle,
+	 * payments-x402, wallet-infra, anchor-ramp, indexer, …) — what the CODE
+	 * proves the repo does, derived at scan time from deps + capability tags
+	 * + interface traits, never from topics/README self-description. */
+	codeDomains: string[];
 }
 
 // A scan finished AND produced actual Stellar code evidence. stellarProof
@@ -283,6 +289,9 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		mainnetContractId: d.mainnetContractId ?? null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)
 			? d.sdkCapabilities.filter((s): s is string => typeof s === "string")
+			: [],
+		codeDomains: Array.isArray(d.codeDomains)
+			? d.codeDomains.filter((s): s is string => typeof s === "string")
 			: [],
 	};
 }
@@ -957,6 +966,10 @@ export async function searchRepos(
 		 * unscanned repo can never match — absence of a scan is not absence
 		 * of the capability. */
 		capability?: string;
+		/** Filter to repos whose scanned codeDomains include this label
+		 * (validated by the route against CODE_DOMAINS). Same scan-derived
+		 * caveat as capability. */
+		domain?: string;
 	} = {},
 ): Promise<{
 	repos: RepoResult[];
@@ -971,6 +984,7 @@ export async function searchRepos(
 		minScore = 0,
 		activity = "",
 		capability = "",
+		domain = "",
 	} = opts;
 	const tokens = contentTokens(q);
 	const searched: RepoSearchSearched = {
@@ -1307,6 +1321,11 @@ export async function searchRepos(
 			filtered = filtered.filter((d) =>
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 				((d.r as any).sdkCapabilities ?? []).includes(capability),
+			);
+		if (domain)
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).codeDomains ?? []).includes(domain),
 			);
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN

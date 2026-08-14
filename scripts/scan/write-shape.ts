@@ -31,6 +31,8 @@ export interface SignalsInput {
 	stellarDeps: string[];
 	/** JS/TS SDK capability tags (src/lib/code-symbols.ts detectSdkCapabilities). */
 	sdkCapabilities: string[];
+	/** Evidence-only domain labels (src/lib/code-domains.ts deriveCodeDomains). */
+	codeDomains: string[];
 	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
 	mainnetContractId: string | null;
 	/** Commit SHA the facts were computed at (provenance pin). */
@@ -84,6 +86,7 @@ export function signalsToWrite(
 		contractInterface: s.contractInterface,
 		stellarDeps: s.stellarDeps,
 		sdkCapabilities: s.sdkCapabilities,
+		codeDomains: s.codeDomains,
 		scannedRef: s.scannedRef,
 		mainnetContractId: s.mainnetContractId,
 		codeScanState: "scanned",

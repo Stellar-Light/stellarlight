@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Code-domain classification: every scanned repo now carries `codeDomains` (defi-lending | defi-amm | defi-yield | oracle | payments-x402 | wallet-infra | anchor-ramp | indexer) inside `codeVerified`, derived ONLY from code evidence — ecosystem dependencies, SDK capability tags, and contract-interface traits — never from topics or README self-description. New `domain` filter on /api/repos/search (closed set, unknown values 400) answers 'show me the real DeFi / x402 / oracle code' structurally (openapi@1.8.61).",
+		detail:
+			"Scan-derived semantics: an unscanned repo can never match, and [] means the code proved nothing domain-specific — an honest null, not a negative. Populates as scan waves reach repos (the EC-taxonomy corpus is being scanned prominence-first). Evidence mapping: @blend-capital/blend-* → defi-lending; @soroswap/@phoenix-protocol → defi-amm; @defindex → defi-yield; @reflector-network + the SEP-40 lastprice interface trait → oracle; @x402/x402-* → payments-x402; passkey-kit/stellar-wallets-kit/@creit.tech → wallet-infra; the sep24-ramp capability → anchor-ramp; @stellar-indexer/mercury-sdk → indexer.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Repo quality tiers + Electric Capital taxonomy coverage (staged): every `/api/repos/search` row now carries `tier` (quality | community | archive — tag-and-demote: archive sinks in ranking and never rides as inline codeReferences, but stays name-findable) and `source` (project-link | ec-taxonomy). The index expands from ~2.4k project-linked repos toward ~10.5k via Electric Capital's public crypto-ecosystems Stellar list, metadata-only, each repo scored on own-merit at ingest (openapi@1.8.60).",
 		detail:
 			"Lead with quality-tier repos; treat archive-tier as historical reference only. EC-sourced repos carry no inherited authority — their score is pure freshness/traction own-merit until they earn anchors (SCF, judge scores, project links, code scans). Ingest is staged over dispatched waves with read-back verification, rename-twin guards, GraphQL budget pacing, and a post-ingest live answer-key gate (10 canonical queries must keep their top-3 answers); allowlisted canonical repos can never tier to archive.",

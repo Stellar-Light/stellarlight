@@ -363,6 +363,20 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			// Evidence-only domain labels (src/lib/code-domains.ts): what the
+			// CODE proves the repo does (defi-lending, defi-amm, oracle,
+			// payments-x402, wallet-infra, anchor-ramp, indexer, \u2026) \u2014 derived
+			// from deps + capability tags + interface traits at scan time,
+			// never from topics/README self-description.
+			name: "codeDomains",
+			type: "json",
+			index: true,
+			admin: {
+				position: "sidebar",
+				description: "Code-evidence domain labels (scanner-derived)",
+			},
+		},
+		{
 			name: "scannedRef",
 			type: "text",
 			admin: {

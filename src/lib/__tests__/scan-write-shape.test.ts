@@ -36,6 +36,7 @@ const okInput: SignalsInput = {
 	contractInterface: ["EscrowContract.initialize_escrow(seller: Address, amount: i128)"],
 	stellarDeps: ["soroban-sdk", "sep-41-token"],
 	sdkCapabilities: ["tx-building", "x402"],
+	codeDomains: ["payments-x402"],
 	scannedRef: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
 	mainnetContractId: "CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 };
@@ -55,6 +56,9 @@ describe("write-shape — the signals-only write gate", () => {
 		]);
 		expect(w.stellarDeps).toEqual(["soroban-sdk", "sep-41-token"]);
 		expect(w.sdkCapabilities).toEqual(["tx-building", "x402"]);
+		// The sdkCapabilities war story (computed-but-unpersisted for a month):
+		// every new scan signal asserts its write-through here.
+		expect(w.codeDomains).toEqual(["payments-x402"]);
 		expect(w.scannedRef).toBe("a1b2c3d4e5f60718293a4b5c6d7e8f9012345678");
 		expect(w.mainnetContractId).toBe(
 			"CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",

@@ -170,6 +170,13 @@ const PROBES: Probe[] = [
 		field: "codeVerified.sdkCapabilities",
 	},
 	{
+		name: "repos.codeVerified.codeDomains (evidence-only domains 2026-08-14, reflector oracle)",
+		path: "/api/repos/search?q=reflector&limit=6",
+		rowsKey: "repos",
+		pin: ["fullName", "reflector-network/reflector-contract"],
+		field: "codeVerified.codeDomains",
+	},
+	{
 		name: "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
 		path: "/api/repos/search?q=blend&limit=6",
 		rowsKey: "repos",
