@@ -28,6 +28,12 @@ import { getPayload } from "payload";
 // Local dev reads .env.local; CI injects DATABASE_URI + PAYLOAD_SECRET via env.
 
 const EXECUTE = process.argv.includes("--execute");
+/** --remove=<slug>: delete ONE post by slug instead of seeding. The seed
+ * path stays create/update-only; removal is a deliberate, named act (used
+ * to retract a published report — a retracted file must ALSO be deleted
+ * from content/reports/ or the next seed resurrects it). */
+const REMOVE_SLUG =
+	process.argv.find((a) => a.startsWith("--remove="))?.split("=")[1] ?? "";
 const REPORTS_DIR = join(process.cwd(), "content", "reports");
 
 // Valid Blog category select options (see src/collections/Blog.ts).
@@ -79,6 +85,38 @@ function normalizeCategory(c?: string): string {
 }
 
 async function main() {
+	if (REMOVE_SLUG) {
+		console.log(
+			`${EXECUTE ? "REMOVING" : "DRY RUN — would remove"} blog post slug="${REMOVE_SLUG}"`,
+		);
+		if (!EXECUTE) return;
+		const payload = await getPayload({ config });
+		const found = await payload.find({
+			collection: "blog",
+			where: { slug: { equals: REMOVE_SLUG } },
+			limit: 1,
+			depth: 0,
+		});
+		const doc = found.docs[0];
+		if (!doc) {
+			console.log("  no such post — nothing to remove");
+			return;
+		}
+		await payload.delete({ collection: "blog", id: String(doc.id) });
+		// Read-back: the delete must actually have removed the row.
+		const check = await payload.find({
+			collection: "blog",
+			where: { slug: { equals: REMOVE_SLUG } },
+			limit: 1,
+			depth: 0,
+		});
+		if (check.docs[0]) {
+			console.error("  ✗ read-back: post still present after delete");
+			process.exit(1);
+		}
+		console.log(`  removed "${doc.title ?? REMOVE_SLUG}" (verified by read-back)`);
+		return;
+	}
 	let files: string[];
 	try {
 		files = readdirSync(REPORTS_DIR).filter((f) => f.endsWith(".md"));
