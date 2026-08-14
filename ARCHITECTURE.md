@@ -80,6 +80,14 @@ The eval gate: scripts/scan/depth-eval.ts holds labeled repos
 - **knowledgeNotes** (src/lib/repo-knowledge.ts) — dated, sourced facts
   on repo rows: a curated map plus derived notes (audit crosslinks),
   rebuilt wholesale each enrich pass so notes can't rot silently.
+  Notes carry a **visibility**: `public` (default) serves everywhere;
+  `internal` is triage memory — most of the EC long tail doesn't merit
+  surfacing or deep indexing, and an internal note records that
+  judgment (junk/farm/irrelevant/dupe-of) for curators and
+  wave-prioritization without publishing verdicts about someone's
+  repo. Internal notes are filtered at the collection layer
+  (afterRead, covers the raw Payload REST too) AND at serve — they
+  never leave the DB for unauthenticated readers.
 - **Relations** — audit engagements (engagement id, report version,
   supersession — never guessed), repo generations (curated
   `REPO_SUCCESSIONS`), org attribution (entities → `builtBy`, resolved

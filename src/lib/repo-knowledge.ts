@@ -17,6 +17,15 @@ export interface KnowledgeNote {
 	source: string;
 	/** When the fact was verified/derived (YYYY-MM-DD). */
 	asOf: string;
+	/**
+	 * "public" (default when absent) serves on every surface. "internal"
+	 * NEVER leaves the DB — it's triage memory for the long tail (most of
+	 * the ~12k EC-taxonomy repos don't merit deep indexing; an internal
+	 * note records the judgment — junk/farm/irrelevant/dupe-of — so
+	 * curators and wave-prioritization remember WHY without publishing
+	 * verdicts about someone's repo). Serve-side filters enforce this.
+	 */
+	visibility?: "public" | "internal";
 }
 
 /**

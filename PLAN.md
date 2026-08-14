@@ -61,6 +61,13 @@ Phases are sequenced by dependency, not by calendar.
   does, from doc comments), and architecture summaries for flagship
   repos — every note dated and sourced, rebuilt wholesale so nothing
   rots silently.
+- **Triage notes for the long tail**: internal-visibility notes are the
+  memory of "not worth it" — as the ~12k EC corpus lands, most repos
+  get a cheap triage verdict instead of a deep index, recorded
+  internally so the judgment isn't re-litigated every wave and never
+  published. Scan-wave prioritization learns to skip internally-triaged
+  repos; a curator lane proposes triage notes from farm/fork/dead
+  signals for human confirmation.
 - **Research corpus**: canonical non-blog page families (org pages,
   research-grant pages) complete; SEP/protocol coverage carries the
   documents' own dates; the agentic-payments landscape gets a

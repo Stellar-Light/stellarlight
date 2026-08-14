@@ -21,6 +21,25 @@ export const Repos: CollectionConfig = {
 		],
 	},
 	access: { read: () => true },
+	hooks: {
+		// Internal knowledge notes are triage memory (why a long-tail repo
+		// isn't worth surfacing/deep-indexing) and must never leave the DB
+		// through ANY read path — including Payload's auto-exposed
+		// /api/repos REST (public read). Filtered here at the collection
+		// layer for unauthenticated reads; admin sessions still see them.
+		// Serve-side filters in repo-search are a second, redundant layer.
+		afterRead: [
+			({ doc, req }) => {
+				if (!req?.user && Array.isArray(doc?.knowledgeNotes)) {
+					doc.knowledgeNotes = doc.knowledgeNotes.filter(
+						(n: { visibility?: string | null }) =>
+							n?.visibility !== "internal",
+					);
+				}
+				return doc;
+			},
+		],
+	},
 	fields: [
 		{
 			name: "fullName",
@@ -79,6 +98,14 @@ export const Repos: CollectionConfig = {
 				{ name: "note", type: "textarea", required: true },
 				{ name: "source", type: "text", required: true },
 				{ name: "asOf", type: "text" },
+				{
+					// public (default) serves everywhere; internal is triage
+					// memory that never leaves the DB (serve-side filtered).
+					name: "visibility",
+					type: "select",
+					options: ["public", "internal"],
+					defaultValue: "public",
+				},
 			],
 		},
 		{ name: "homepageUrl", type: "text" },
