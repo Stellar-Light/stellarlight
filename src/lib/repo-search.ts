@@ -1224,6 +1224,11 @@ export async function searchRepos(
 					: mention === 1
 						? 1
 						: 0;
+			// Verified mainnet usage (code-truth 5): the repo's attributed
+			// contract has real lifetime events per stellar.expert. Coarse
+			// binary tier — the fact that it IS used, not how much.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const inUse = ((r as any).codeInUse?.events ?? 0) > 0 ? 1 : 0;
 			return {
 				r,
 				topics,
@@ -1236,6 +1241,7 @@ export async function searchRepos(
 				mention,
 				stellarness,
 				anchorIdentity,
+				inUse,
 				crank,
 				frank,
 			};
@@ -1283,6 +1289,13 @@ export async function searchRepos(
 				// mid-prose plus a secondary token — but identity never lets a
 				// no-evidence repo beat a code-verified one (the F4 contract).
 				b.anchorIdentity - a.anchorIdentity ||
+				// Verified mainnet usage BEFORE raw keyword coverage (code-truth 5,
+				// the round-5 oracle case: keyword-luckier feeders outranked the
+				// one oracle demonstrably live on mainnet). Identity still beats
+				// usage (alias/anchorIdentity above); coarse binary so relevance
+				// dominates within the tier; no-usage rows are untouched relative
+				// to each other.
+				b.inUse - a.inUse ||
 				b.score - a.score ||
 				// Hard-stale demotion, then liveness, BEFORE org authority: a
 				// dead SDF MVP must not outrank a live flagship at equal

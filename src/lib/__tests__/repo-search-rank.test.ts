@@ -608,3 +608,69 @@ describe("contentTokens hyphen split (real-demand 2026-07-21: zk-snark 22 asks)"
 		expect(repos.map((r) => r.fullName)).toContain("zkorg/zk-proofs");
 	});
 });
+
+describe("usage-aware ranking (code-truth 5)", () => {
+	it("a mainnet-used repo outranks a keyword-luckier repo without usage (the oracle case)", async () => {
+		const feeders = doc({
+			fullName: "datacorp/oracle-price-feeders",
+			description: "oracle price feed feeders",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 23,
+		});
+		const used = doc({
+			fullName: "reflector/contract",
+			description: "decentralized oracle for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 62,
+			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+		});
+		const { repos } = await searchRepos(
+			mockPayload([feeders, used]),
+			"oracle price feed",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("reflector/contract");
+	});
+	it("exact identity still beats usage — searching the unused repo by name finds it first", async () => {
+		const named = doc({
+			fullName: "datacorp/oracle-price-feeders",
+			description: "oracle price feed feeders",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+		});
+		const used = doc({
+			fullName: "reflector/contract",
+			description: "decentralized oracle for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+		});
+		const { repos } = await searchRepos(
+			mockPayload([named, used]),
+			"datacorp/oracle-price-feeders",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("datacorp/oracle-price-feeders");
+	});
+	it("usage never lets a no-evidence repo beat a code-verified one (F4 contract holds)", async () => {
+		const usedNoEvidence = doc({
+			fullName: "evmcorp/amm",
+			description: "amm contracts",
+			codeInUse: { contracts: 1, events: 999, asOf: "2026-08-13" },
+		});
+		const verified = doc({
+			fullName: "stellarteam/amm",
+			description: "amm on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([usedNoEvidence, verified]),
+			"amm",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellarteam/amm");
+	});
+});

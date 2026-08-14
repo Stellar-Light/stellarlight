@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"searchRepos ranking: verified mainnet usage now ranks above raw keyword coverage (code-truth 5).",
+		detail:
+			"Within a stellarness tier, a repo whose attributed contract has real lifetime events (codeInUse, stellar.expert-verified) outranks a keyword-luckier row without usage evidence — the round-5 probe case where unused oracle feeders outranked the one oracle live on mainnet. Exact identity (alias/anchor) still beats usage; usage never lifts a no-evidence repo above a code-verified one (the F4 contract holds); rows without usage are unaffected relative to each other. Coarse binary tier, fixture-gated in the ranking harness.",
+	},
+	{
 		date: "2026-08-13",
 		surfaces: ["api"],
 		type: "added",
