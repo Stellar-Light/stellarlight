@@ -1277,6 +1277,8 @@ export interface components {
                 mainnetContractId?: string | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
                 sdkCapabilities?: string[];
+                /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits — what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
+                codeDomains?: string[];
             } | null;
         };
         RepoSearchResponse: {
@@ -2015,6 +2017,8 @@ export interface operations {
                 track?: string;
                 /** @description Filter to repos whose SCANNED sdkCapabilities include this tag (closed set; unknown values 400). Scan-derived: an unscanned repo can never match — absence of a scan is NOT absence of the capability. Answers 'which repos actually implement X' structurally (e.g. capability=sep24-ramp, capability=x402, capability=wallet-provider). */
                 capability?: "contract-invoke" | "fee-bump" | "horizon" | "mpp" | "passkey" | "sep10-auth" | "sep24-ramp" | "signing" | "soroban-rpc" | "tx-building" | "wallet-kit" | "wallet-provider" | "x402";
+                /** @description Filter to repos whose SCANNED codeDomains include this label (closed set; unknown values 400). Evidence-only: derived from deps + capability tags + interface traits, never self-description. Answers 'show me the real DeFi / x402 / oracle code' (e.g. domain=defi-lending, domain=payments-x402). */
+                domain?: "anchor-ramp" | "defi-amm" | "defi-lending" | "defi-yield" | "indexer" | "oracle" | "payments-x402" | "wallet-infra";
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
             };

@@ -27,6 +27,7 @@ import {
 	REPO_ACTIVITY_STATES,
 	type RepoActivityState,
 } from "@/lib/repo-grade";
+import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
 import { searchRepos } from "@/lib/repo-search";
 
@@ -49,6 +50,7 @@ export async function GET(req: NextRequest) {
 			"minScore",
 			"activity",
 			"capability",
+			"domain",
 			"limit",
 			"offset",
 			"fields",
@@ -60,6 +62,7 @@ export async function GET(req: NextRequest) {
 				"minScore",
 				"activity",
 				"capability",
+				"domain",
 				"limit",
 				"offset",
 				"fields",
@@ -107,6 +110,18 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// Code-domain filter (closed scan-derived label set) — same strictness
+	// and scan-derived semantics as capability.
+	const domain = sp.get("domain")?.trim().toLowerCase() ?? "";
+	if (domain && !(CODE_DOMAINS as readonly string[]).includes(domain)) {
+		return NextResponse.json(
+			{
+				error: `Invalid domain value '${domain}'.`,
+				validValues: CODE_DOMAINS,
+			},
+			{ status: 400 },
+		);
+	}
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
@@ -119,6 +134,7 @@ export async function GET(req: NextRequest) {
 		minScore,
 		activity,
 		capability,
+		domain,
 	});
 
 	logApiHit({
