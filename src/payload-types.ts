@@ -1057,6 +1057,12 @@ export interface Audit {
     | number
     | boolean
     | null;
+  engagementId?: string | null;
+  reportVersion?: string | null;
+  supersededByReportId?: number | null;
+  engagementStart?: string | null;
+  engagementEnd?: string | null;
+  findingsExtraction?: ('extracted' | 'not-extracted' | 'partial') | null;
   /**
    * How many full-text research chunks serve this report via /api/research
    */
@@ -2871,6 +2877,12 @@ export interface AuditsSelect<T extends boolean = true> {
   observedAt?: T;
   findingsTotal?: T;
   severityCounts?: T;
+  engagementId?: T;
+  reportVersion?: T;
+  supersededByReportId?: T;
+  engagementStart?: T;
+  engagementEnd?: T;
+  findingsExtraction?: T;
   chunksIndexed?: T;
   updatedAt?: T;
   createdAt?: T;

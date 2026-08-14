@@ -108,6 +108,28 @@ export const Audits: CollectionConfig = {
 			},
 		},
 		{
+			// sls-064: relation metadata so multiple reports for one
+			// (protocol, auditor) can be classified — revision vs re-audit vs
+			// separate engagement. Curated via AUDIT_RELATIONS (audit-identity.ts);
+			// null = unclassified, never asserted independent.
+			name: "engagementId",
+			type: "text",
+			index: true,
+		},
+		{ name: "reportVersion", type: "text" },
+		{ name: "supersededByReportId", type: "number" },
+		{ name: "engagementStart", type: "text" },
+		{ name: "engagementEnd", type: "text" },
+		{
+			// sls-064: completeness of findings extraction — lets a consumer read
+			// findingsTotal 7 vs null as different states of KNOWLEDGE, not
+			// conflicting counts. Derived at ingest: extracted when the
+			// deterministic parser produced a count, not-extracted otherwise.
+			name: "findingsExtraction",
+			type: "select",
+			options: ["extracted", "not-extracted", "partial"],
+		},
+		{
 			name: "chunksIndexed",
 			type: "number",
 			defaultValue: 0,

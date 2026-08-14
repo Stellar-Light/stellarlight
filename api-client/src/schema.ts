@@ -611,6 +611,21 @@ export interface components {
         };
         /** @description One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero. */
         Audit: {
+            /** @description sls-064 relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent. */
+            engagementId?: string | null;
+            /** @description Version the report states about itself (e.g. 'V2'); null when the source states none. */
+            reportVersion?: string | null;
+            /** @description reportId of the report that supersedes this one; null = no supersession stated by the documents (never guessed). */
+            supersededByReportId?: number | null;
+            /** @description Engagement window start as stated IN the report (YYYY-MM-DD). */
+            engagementStart?: string | null;
+            /** @description Engagement window end as stated IN the report (YYYY-MM-DD). */
+            engagementEnd?: string | null;
+            /**
+             * @description Completeness of the deterministic findings extraction — read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.
+             * @enum {string|null}
+             */
+            findingsExtraction?: "extracted" | "not-extracted" | "partial" | null;
             /** @description stellarsecurityportal.com report id (natural key) */
             reportId?: number;
             title?: string;

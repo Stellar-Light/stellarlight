@@ -29,6 +29,7 @@ import {
 	composeAuditTitle,
 	normalizeIdentityText,
 	resolveAuditProjectSlug,
+	AUDIT_RELATIONS,
 } from "../src/lib/audit-identity";
 import {
 	type AuditSeverity,
@@ -438,6 +439,23 @@ async function run() {
 				linkMapped: link.mapped,
 				findingsTotal: findings?.findingsTotal ?? null,
 				severityCounts: findings?.severityCounts ?? null,
+				// sls-064: extraction completeness — 7 vs null must read as
+				// different states of knowledge, never conflicting counts.
+				findingsExtraction:
+					findings?.findingsTotal != null
+						? ("extracted" as const)
+						: ("not-extracted" as const),
+				// sls-064: curated engagement relations (audit-identity.ts).
+				...(AUDIT_RELATIONS[meta.id]
+					? {
+							engagementId: AUDIT_RELATIONS[meta.id].engagementId,
+							reportVersion: AUDIT_RELATIONS[meta.id].reportVersion,
+							supersededByReportId:
+								AUDIT_RELATIONS[meta.id].supersededByReportId,
+							engagementStart: AUDIT_RELATIONS[meta.id].engagementStart,
+							engagementEnd: AUDIT_RELATIONS[meta.id].engagementEnd,
+						}
+					: {}),
 				publishedAt: meta.date,
 				// A human-published report date is a date-stamp; wall-clock
 				// minutes/seconds betray a portal upload timestamp masquerading as
