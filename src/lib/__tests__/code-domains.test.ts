@@ -14,10 +14,25 @@ describe("deriveCodeDomains", () => {
 			"anchor-ramp",
 		]);
 	});
-	it("SEP-40 lastprice interface trait marks oracle", () => {
+	it("SEP-40 lastprice interface trait marks oracle (real stored shape)", () => {
+		// Stored entries are "ContractType.fn(args) -> Ret" strings — verified
+		// against reflector-network/reflector-contract's live row 2026-08-14.
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"BeamOracleContract.decimals() -> u32",
+					"BeamOracleContract.lastprice(asset: Asset) -> Option<PriceData>",
+				],
+			}),
+		).toEqual(["oracle"]);
+		// Bare-fn shape still matches.
 		expect(
 			deriveCodeDomains({ contractInterface: ["lastprice(asset: Asset) -> Option<PriceData>"] }),
 		).toEqual(["oracle"]);
+		// A fn merely CONTAINING the word does not.
+		expect(
+			deriveCodeDomains({ contractInterface: ["Oracle.get_lastprice_history() -> Vec<u64>"] }),
+		).toEqual([]);
 	});
 	it("no evidence = honest empty, never a guess", () => {
 		expect(

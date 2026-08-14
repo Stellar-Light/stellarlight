@@ -68,11 +68,15 @@ export function deriveCodeDomains(s: DomainSignals): CodeDomain[] {
 	// sep24-ramp capability = real interactive-deposit/withdraw code paths.
 	if ((s.sdkCapabilities ?? []).includes("sep24-ramp")) out.add("anchor-ramp");
 	for (const entry of s.contractInterface ?? []) {
-		const name = (
+		const raw = (
 			typeof entry === "string" ? entry : (entry?.name ?? "")
 		).toLowerCase();
+		// Stored entries are "ContractType.fn_name(args) -> Ret" strings —
+		// extract the fn segment (after the last dot, before the paren) so
+		// "beamoraclecontract.lastprice(...)" matches "lastprice".
+		const fnName = (raw.split("(")[0] ?? "").split(".").pop() ?? "";
 		for (const [fn, domain] of IFACE_DOMAINS)
-			if (name === fn || name.startsWith(`${fn}(`)) out.add(domain);
+			if (fnName === fn) out.add(domain);
 	}
 	return [...out].sort();
 }
