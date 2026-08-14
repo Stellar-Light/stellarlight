@@ -72,6 +72,47 @@ async function main() {
 	let failures = 0;
 	const failRows: NightlyFailure[] = [];
 
+	// ── S0 (sls-064 class-killer): stored cross-references must RESOLVE ──
+	// A relation that dangles serves confidently and lies quietly (the
+	// peer→"honeycoin"-vs-"honey-coin" case). Sweep the directory once,
+	// build the slug set, and assert every builtBy/canonicalSlug target
+	// exists; assert every audits supersededByReportId targets a real
+	// reportId. New relation fields join this lane as they ship.
+	{
+		const all = await sweep("/api/projects/search?limit=100");
+		const slugSet = new Set(all.map((p) => String(p.slug)));
+		const dangling: string[] = [];
+		for (const p of all) {
+			const bb = (p as { builtBy?: { slug?: string } }).builtBy;
+			if (bb?.slug && !slugSet.has(bb.slug))
+				dangling.push(`${p.slug}: builtBy → "${bb.slug}" (no such slug)`);
+			const cs = (p as { canonicalSlug?: string | null }).canonicalSlug;
+			if (cs && !slugSet.has(cs))
+				dangling.push(`${p.slug}: canonicalSlug → "${cs}" (no such slug)`);
+		}
+		const audits = await sweep("/api/audits?limit=100");
+		const reportIds = new Set(
+			audits.map((a) => Number((a as { reportId?: number }).reportId)),
+		);
+		for (const a of audits) {
+			const sup = (a as { supersededByReportId?: number | null })
+				.supersededByReportId;
+			if (sup != null && !reportIds.has(Number(sup)))
+				dangling.push(
+					`audit ${(a as { reportId?: number }).reportId}: supersededByReportId → ${sup} (no such report)`,
+				);
+		}
+		if (dangling.length) {
+			failures += dangling.length;
+			for (const d of dangling) console.error(`✗ S0 dangling reference: ${d}`);
+			failRows.push(
+				...dangling.map((d) => ({ probe: "S0 referential integrity", note: d })),
+			);
+		} else {
+			console.log(`✓ S0 referential integrity: ${all.length} projects + ${audits.length} audits, 0 dangling references`);
+		}
+	}
+
 	// ── S1: scfRoundAwards on every awarded row with rounds ──
 	const awarded = await sweep("/api/projects/search?scfAwarded=true");
 	if (awarded.length === 0) {

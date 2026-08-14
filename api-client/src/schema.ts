@@ -1140,6 +1140,8 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
+            /** @description sls-064 analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance. */
+            successorRepo?: string | null;
             /** @description owner/name */
             fullName: string;
             owner?: string | null;

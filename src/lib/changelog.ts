@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Relation-class sweep (sls-064 analogs): repos.successorRepo + superseded ranking demotion, builtBy reference fix + nightly referential-integrity lane, SEP rows dated (openapi@1.8.59).",
+		detail:
+			"Round-6 Raven probes generalized sls-064: (A) repo generations — blend-contracts now carries successorRepo=blend-capital/blend-contracts-v2 (curated REPO_SUCCESSIONS, verified against the repos' own statements) and superseded generations rank below successors at equal relevance; (B) peer's builtBy pointed at a non-existent slug — fixed via ownership-registered curation, and a nightly S0 referential-integrity lane now asserts every served builtBy/canonicalSlug/supersededByReportId target resolves, so no stored cross-reference can dangle silently again; (C) SEP research rows gain observedAt + publishedAt from each SEP's own preamble dates (Updated preferred over Created) — the provenance-trio gap on stellar-protocol-sourced chunks closes as the corpus refresh re-reaches them.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"audits: relation metadata + extraction completeness (sls-064) — engagementId/reportVersion/supersededByReportId/engagementStart/engagementEnd/findingsExtraction (openapi@1.8.58).",
 		detail:
 			"Raven's eval loop found 4 (protocol, auditor) pairs holding 2 rows each with no way to classify a revision vs a separate engagement (stellar-raven sls-064). New per-row fields: engagementId links every report of ONE engagement (curated in AUDIT_RELATIONS, verified against the reports' own text — the confirmed Veridise Soroban Core pair 28/42 now shares veridise-soroban-core-2023q4 with its stated Oct 30–Dec 22 2023 window; reportVersion 'V2' on 28 as its title states); supersededByReportId stays null unless a document states supersession — never guessed; findingsExtraction makes findingsTotal 7 vs null read as different states of knowledge, not conflicting counts. Unclassified pairs stay null — never asserted independent. Finding-identifier indexing (the item's 4th recommendation) is a follow-up phase.",

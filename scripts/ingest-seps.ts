@@ -316,14 +316,33 @@ async function run() {
 
 	console.log("");
 	console.log("Upserting to Payload…");
+	// sls-064 analog C: SEP rows served publishedAt/observedAt null. The
+	// SEP's own preamble states its dates — one per file, carried by the
+	// preamble chunk; Updated preferred over Created. First match wins.
+	const sepDateOf = new Map<string, string>();
+	for (const c of allChunks) {
+		if (sepDateOf.has(c.parentDocId)) continue;
+		const m =
+			c.content.match(/Updated:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/) ??
+			c.content.match(/Created:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+		if (m) sepDateOf.set(c.parentDocId, m[1]);
+	}
 	for (let i = 0; i < toEmbed.length; i++) {
 		const chunk = toEmbed[i];
 		const embedding = embeddings[i];
 		const existing = existingBySep
 			.get(chunk.parentDocId)
 			?.get(chunk.chunkIndex);
+		// sls-064 analog C: SEP rows served publishedAt/observedAt null — the
+		// provenance-trio gap. observedAt = this crawl; publishedAt = the date
+		// the SEP's own preamble states (Updated preferred over Created).
+		const preamble = chunk.content.match(
+			/(?:Updated|Created):\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/,
+		);
 		const data = {
 			source: "sep" as const,
+			observedAt: new Date().toISOString(),
+			...(chunk.publishedAt ? { publishedAt: chunk.publishedAt } : preamble ? { publishedAt: `${preamble[1]}T00:00:00.000Z` } : {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,

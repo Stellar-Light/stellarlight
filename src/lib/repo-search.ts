@@ -131,6 +131,7 @@ export interface RepoResult {
 	 * stellar.expert). Lifetime events/subinvocations + deltas since the prior
 	 * snapshot (null until one exists). null = no verified contract joined —
 	 * NOT a claim the code is unused. */
+	successorRepo: string | null;
 	codeInUse: {
 		contracts: number;
 		events: number | null;
@@ -1229,6 +1230,11 @@ export async function searchRepos(
 			// binary tier — the fact that it IS used, not how much.
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 			const inUse = ((r as any).codeInUse?.events ?? 0) > 0 ? 1 : 0;
+			// sls-064 analog: superseded generations rank below their successors
+			// and live peers at equal relevance — the relation is curated, the
+			// demotion is mechanical.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const superseded = (r as any).successorRepo ? 1 : 0;
 			return {
 				r,
 				topics,
@@ -1238,6 +1244,7 @@ export async function searchRepos(
 				sdf,
 				alive,
 				stale2y,
+				superseded,
 				mention,
 				stellarness,
 				anchorIdentity,
@@ -1301,6 +1308,7 @@ export async function searchRepos(
 				// dead SDF MVP must not outrank a live flagship at equal
 				// relevance (2026-07-19 answer-key eval — `sdf` deciding before
 				// `alive` let 49-month-dead repos ride org ownership).
+				a.superseded - b.superseded ||
 				a.stale2y - b.stale2y ||
 				b.alive - a.alive ||
 				b.sdf - a.sdf ||
@@ -1336,6 +1344,7 @@ export async function searchRepos(
 								asOf: r.activitySignals.asOf ?? null,
 							}
 						: null,
+				successorRepo: (r as { successorRepo?: string | null }).successorRepo ?? null,
 				codeInUse:
 					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
 						? {

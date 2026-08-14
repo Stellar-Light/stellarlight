@@ -803,6 +803,7 @@ export interface Repo {
     openPRs?: number | null;
     asOf?: string | null;
   };
+  successorRepo?: string | null;
   knowledgeNotes?:
     | {
         note: string;
@@ -2791,6 +2792,7 @@ export interface ReposSelect<T extends boolean = true> {
         openPRs?: T;
         asOf?: T;
       };
+  successorRepo?: T;
   knowledgeNotes?:
     | T
     | {

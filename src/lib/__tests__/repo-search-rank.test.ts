@@ -674,3 +674,30 @@ describe("usage-aware ranking (code-truth 5)", () => {
 		expect(repos[0].fullName).toBe("stellarteam/amm");
 	});
 });
+
+describe("superseded-generation demotion (sls-064 analog A)", () => {
+	it("a superseded repo ranks below its live peer at equal relevance", async () => {
+		const v1 = doc({
+			fullName: "proto/contracts",
+			description: "lending protocol contracts on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 70,
+			successorRepo: "proto/contracts-v2",
+		});
+		const v2 = doc({
+			fullName: "proto/contracts-v2",
+			description: "lending protocol contracts on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 55,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([v1, v2]),
+			"lending protocol contracts",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("proto/contracts-v2");
+		expect(repos[1].successorRepo).toBe("proto/contracts-v2");
+	});
+});
