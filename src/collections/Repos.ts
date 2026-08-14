@@ -30,11 +30,17 @@ export const Repos: CollectionConfig = {
 		// Serve-side filters in repo-search are a second, redundant layer.
 		afterRead: [
 			({ doc, req }) => {
-				if (!req?.user && Array.isArray(doc?.knowledgeNotes)) {
-					doc.knowledgeNotes = doc.knowledgeNotes.filter(
-						(n: { visibility?: string | null }) =>
-							n?.visibility !== "internal",
-					);
+				if (!req?.user) {
+					if (Array.isArray(doc?.knowledgeNotes)) {
+						doc.knowledgeNotes = doc.knowledgeNotes.filter(
+							(n: { visibility?: string | null }) =>
+								n?.visibility !== "internal",
+						);
+					}
+					// Triage tags are internal verdicts (see repo-triage.ts) —
+					// public surfaces express the same reality via tier +
+					// activityState in neutral language.
+					if (doc && "triageTags" in doc) doc.triageTags = undefined;
 				}
 				return doc;
 			},
@@ -165,6 +171,25 @@ export const Repos: CollectionConfig = {
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },
 		{ name: "lastEnrichedAt", type: "date", admin: { position: "sidebar" } },
 		{ name: "enrichError", type: "text", admin: { position: "sidebar" } },
+		{
+			// INTERNAL structured triage labels (src/lib/repo-triage.ts) —
+			// derived from stored signals each enrich pass, stripped for
+			// unauthenticated reads by the afterRead hook. Drives scan-wave
+			// skip decisions; never drives public copy.
+			name: "triageTags",
+			type: "select",
+			hasMany: true,
+			options: [
+				"dead-hackathon-project",
+				"farm-signals",
+				"inert-fork",
+				"archived-upstream",
+				"dead-long-tail",
+				"tutorial-or-template",
+			],
+			index: true,
+			admin: { position: "sidebar", description: "Internal triage labels — never served" },
+		},
 		{
 			// Discovery provenance: how this repo entered the index. Project-linked
 			// repos come from the curated directory's github links (enrich-repos);

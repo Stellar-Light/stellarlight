@@ -457,6 +457,32 @@ async function main() {
 			builderReputation,
 			repoScore: grade.score,
 			repoScoreLabel: grade.label,
+			// Internal triage labels — derived wholesale each pass (self-healing:
+			// a repo that comes back to life untags). See src/lib/repo-triage.ts.
+			triageTags: deriveTriageTags({
+				fullName: full,
+				lastCommitAt:
+					info?.lastCommitAt ??
+					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+					((existing as any)?.lastCommitAt ?? null),
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				stars: info?.stars ?? ((existing as any)?.stars ?? null),
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				isFork: info?.isFork ?? ((existing as any)?.isFork ?? null),
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				isArchived: info?.isArchived ?? ((existing as any)?.isArchived ?? null),
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				farmScore: (existing as any)?.farmScore ?? null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				judgedHackathon: (existing as any)?.judgedHackathon ?? null,
+				hackathonWinner: !!project.hackathonPlacement,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				source: (existing as any)?.source ?? null,
+				projectSlug: project.slug,
+				description: info?.description ?? null,
+				name: full.split("/")[1] ?? null,
+				commits90d: info?.commits90d ?? null,
+			}),
 			lastEnrichedAt: new Date().toISOString(),
 			enrichError,
 		};
