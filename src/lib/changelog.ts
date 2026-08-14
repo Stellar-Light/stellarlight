@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Contracts as first-class entities: GET /api/contracts — the evidence-gated mainnet contract registry. One row per contract the scanner verified live on-chain (or on-chain enrichment attributed real activity to), joining code truth (proof, depth, interface, domains), live usage stats, per-project audit records, and succession (openapi@1.8.63).",
+		detail:
+			"Membership is evidence-gated by construction — no self-declared registries: a README-claimed contract id must echo-check live on mainnet at scan time, or weekly on-chain enrichment must attribute activity. Absence is NOT a claim a contract doesn't exist; coverage grows exactly as fast as scans reach repos (the EC corpus is being scanned prominence-first now). Filters: q (repo/project/contract-id substring), domain (code-evidenced, closed set). Most-evidenced first: live usage > verified id > depth. This is the Soroban 'verified contract set' in registry form — the spine's contract-entity extension, v1.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Dependency-graph reverse read: `dependsOn` filter on /api/repos/search — 'who builds on passkey-kit / @blend-capital/blend-sdk / soroban-sdk' as a structural query over scanned manifest dependencies (openapi@1.8.62).",
 		detail:
 			"stellarDeps has been extracted from Cargo.toml/package.json manifests on every scan since 2026-08; this makes the reverse edge first-class: exact case-insensitive package name, open set (unknown packages return 0 rows honestly), scan-derived (unscanned repos never match — absence of a scan is not absence of the dependency). Adoption evidence no README can fake. Pair with q for keyword+dependency precision; meta.counts.total is the dependents count.",

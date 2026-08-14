@@ -2037,6 +2037,129 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/contracts": {
+			get: {
+				operationId: "listContracts",
+				tags: ["Code"],
+				summary: "Evidence-gated registry of verified mainnet Soroban contracts",
+				description:
+					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Enumerate/filter VERIFIED mainnet contracts as entities — which contracts exist with code+usage+audit evidence, per domain or project.",
+					keywords: [
+						"contracts",
+						"mainnet contracts",
+						"deployed contracts",
+						"verified contracts",
+						"soroban contracts",
+						"contract registry",
+						"which contracts are live",
+						"contract address",
+					],
+					useWhen: [
+						"'which verified contracts are live on mainnet' / 'show deployed DeFi contracts' (domain=defi-lending etc.)",
+						"'what contract does project X run' — q=<project>",
+						"joining a contract to its code, usage, and audit evidence in one call",
+					],
+					notFor: [
+						"repo-level discovery (searchRepos) or full audit rows (listAudits)",
+						"any claim about contracts we have NOT verified — absence is not nonexistence",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						description: "Substring over repo fullName, project slug/name, or contract id.",
+						schema: { type: "string" },
+					},
+					{
+						name: "domain",
+						in: "query",
+						description: "Filter by code-evidenced domain (closed set; unknown values 400).",
+						schema: {
+							type: "string",
+							enum: [
+								"anchor-ramp",
+								"defi-amm",
+								"defi-lending",
+								"defi-yield",
+								"indexer",
+								"oracle",
+								"payments-x402",
+								"wallet-infra",
+							],
+						},
+					},
+					{ name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
+					{ name: "offset", in: "query", schema: { type: "integer", default: 0 } },
+				],
+				responses: {
+					"200": {
+						description: "Verified contract rows, most-evidenced first.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { type: "object" },
+										contracts: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													contractId: {
+														type: "string",
+														nullable: true,
+														description:
+															"Verified mainnet contract id (C…); null when membership came via usage attribution without a specific id.",
+													},
+													repo: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															url: { type: "string", nullable: true },
+														},
+													},
+													project: {
+														type: "object",
+														nullable: true,
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string", nullable: true },
+														},
+													},
+													stellarProof: { type: "string", nullable: true },
+													codeDepth: { type: "number", nullable: true },
+													codeDomains: { type: "array", items: { type: "string" } },
+													interfaceSize: { type: "integer" },
+													interfacePreview: { type: "array", items: { type: "string" } },
+													codeInUse: {
+														type: "object",
+														nullable: true,
+														description:
+															"Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier.",
+													},
+													audits: {
+														type: "object",
+														nullable: true,
+														description:
+															"Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'.",
+													},
+													successorRepo: { type: "string", nullable: true },
+													scannedAt: { type: "string", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/audits": {
 			get: {
 				operationId: "listAudits",
