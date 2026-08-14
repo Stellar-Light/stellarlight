@@ -1,75 +1,20 @@
 {
-	"generatedAt": "2026-08-13T07:14:54.272Z",
+	"generatedAt": "2026-08-14T07:10:13.066Z",
 	"detector": "battery-coverage",
 	"failures": [
-		{
-			"probe": "battery:q-gap-digest-defi-adjacent",
-			"note": "top 0.54 < 0.6 via research/confidence for \"How should I handle a quiet recent DeFi digest window?\" (defi-ecosystem); best: https://lumenloop.com/research/stellar-weekly-roundup-week-jul-31-2026",
-			"surface": "corpus"
-		},
 		{
 			"probe": "battery:q-edge-doc-category-filter-empty",
 			"note": "top 0.58 < 0.6 via research/confidence for \"How should category-scoped docs search report a query that has corpus-wide match\" (edge-behavior); best: https://developers.stellar.org/docs/data/apis/horizon/api-reference/errors",
 			"surface": "corpus"
 		},
 		{
-			"probe": "battery:q-gap-compare-hackathons",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"How do I compare two Stellar hackathons without mixing their fields or inventing\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-gap-upcoming-hackathon-fallback",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"What should I do when Scout reports no upcoming Stellar hackathons?\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-blend-winners-live",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"Who does the current event record list as winners of Stellar Hacks: Blend, and w\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-current-hackathons-compare-live",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"Using current event data, compare the latest Stellar ZK hackathon with the recen\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-hackathon-compare-live",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"Using current event data, compare Stellar Hacks: KALE x Reflector and Stellar Ha\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-hackathons-active",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"What Stellar hackathons are currently active or upcoming that I could join?\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-kale-winner-live",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"Which project does the current event record list as first place at Stellar Hacks\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-scf-rfps-hackathons-live",
-			"note": "top 0.00 < 0.6 via hackathons/presence for \"What SCF RFPs and Stellar hackathons are open, active, or upcoming right now?\" (scf-grants-builders); best: 0 row(s)",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-gap-digest-soroban-adjacent",
-			"note": "top 0.50 < 0.6 via research/confidence for \"How should a recent Soroban roundup use the runnable Lumenloop digest skill?\" (soroban); best: https://lumenloop.com/research/stellar-weekly-roundup-week-jul-31-2026",
+			"probe": "battery:q-soroban-sdk-cve",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Are there known security advisories in the soroban-sdk I should make sure I've p\" (soroban); best: reflector-network/reflector-contract",
 			"surface": "corpus"
 		},
 		{
 			"probe": "battery:q-ti-java-sdk-wallet-feebump",
-			"note": "top 0.51 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-jul-31-2026",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-tool-sdk-repos-discovery",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"What are the top-rated Stellar/Soroban SDK and client-library repos on GitHub?\" (tooling-infra); best: stellar/rs-soroban-sdk",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-tool-zk-repo-live",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"What are the strongest current Stellar ZK reference repositories, and which retu\" (tooling-infra); best: NethermindEth/stellar-private-payments",
+			"note": "top 0.57 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://stellar.org/blog/developers/adapter-protocol-28-upgrade-guide",
 			"surface": "corpus"
 		}
 	]
