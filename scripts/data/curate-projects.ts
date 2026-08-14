@@ -1079,7 +1079,7 @@ async function main() {
 		console.log(
 			`  ${EXECUTE ? "fix" : "would fix"} ${slug}: builtBy ${JSON.stringify(d.builtBy ?? null)} → ${JSON.stringify(fix)}`,
 		);
-		planned.push({ slug, data: { builtBy: fix } });
+		writes.push({ id: String(d.id), slug, data: { builtBy: fix } });
 	}
 
 	console.log("── Description fixes (overwrite shortDescription) ──");
