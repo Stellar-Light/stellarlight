@@ -78,17 +78,31 @@ async function main() {
 	// build the slug set, and assert every builtBy/canonicalSlug target
 	// exists; assert every audits supersededByReportId targets a real
 	// reportId. New relation fields join this lane as they ship.
+	// NAMESPACES MATTER: builtBy.slug resolves in the ENTITY namespace
+	// (the spec says "browse at /entities/{slug}" — org slugs like
+	// "honeycoin" are NOT project slugs like "honey-coin"), so it is
+	// checked against the live /entities/{slug} pages. canonicalSlug is a
+	// project-namespace field and stays checked against the project set.
 	{
 		const all = await sweep("/api/projects/search?limit=100");
 		const slugSet = new Set(all.map((p) => String(p.slug)));
 		const dangling: string[] = [];
+		const builtBySlugs = new Set<string>();
 		for (const p of all) {
 			const bb = (p as { builtBy?: { slug?: string } }).builtBy;
-			if (bb?.slug && !slugSet.has(bb.slug))
-				dangling.push(`${p.slug}: builtBy → "${bb.slug}" (no such slug)`);
+			if (bb?.slug) builtBySlugs.add(bb.slug);
 			const cs = (p as { canonicalSlug?: string | null }).canonicalSlug;
 			if (cs && !slugSet.has(cs))
 				dangling.push(`${p.slug}: canonicalSlug → "${cs}" (no such slug)`);
+		}
+		for (const slug of builtBySlugs) {
+			const res = await fetch(`${BASE}/entities/${encodeURIComponent(slug)}`, {
+				method: "HEAD",
+			});
+			if (!res.ok)
+				dangling.push(
+					`builtBy → "${slug}" (/entities/${slug} returned ${res.status})`,
+				);
 		}
 		const audits = await sweep("/api/audits?limit=100");
 		const reportIds = new Set(
