@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
 			"activity",
 			"capability",
 			"domain",
+			"dependsOn",
 			"limit",
 			"offset",
 			"fields",
@@ -63,6 +64,7 @@ export async function GET(req: NextRequest) {
 				"activity",
 				"capability",
 				"domain",
+				"dependsOn",
 				"limit",
 				"offset",
 				"fields",
@@ -122,6 +124,9 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// Dependency-graph reverse read — open set (any ecosystem package name),
+	// so no enum validation; unknown packages honestly return 0 rows.
+	const dependsOn = (sp.get("dependsOn")?.trim() ?? "").slice(0, 80);
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
@@ -135,6 +140,7 @@ export async function GET(req: NextRequest) {
 		activity,
 		capability,
 		domain,
+		dependsOn,
 	});
 
 	logApiHit({
