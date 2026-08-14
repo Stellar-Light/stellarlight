@@ -851,12 +851,17 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// swept the page. All three verified in-index 2026-07-19: stellar/freighter
 	// (the canonical extension wallet, alive), creit-tech/xbull-wallet, and
 	// kalepail/passkey-kit (the actively-maintained smart-wallet kit).
+	// 2026-08-14: + creit-tech/stellar-wallets-kit — THE canonical multi-wallet
+	// connect kit (the library dapps embed to support every wallet at once) was
+	// missing from its own family's float, so it ranked 7th for "wallet kit".
+	// Verified in-index same day.
 	{
 		test: /\bwallets?\b|\bsmart[\s-]?wallets?\b/,
 		repos: [
 			"stellar/freighter",
 			"creit-tech/xbull-wallet",
 			"kalepail/passkey-kit",
+			"creit-tech/stellar-wallets-kit",
 		],
 	},
 	// anchors / ramps (2026-07-19 eval): flagship anchor OPERATORS are closed-
@@ -1094,7 +1099,20 @@ export async function searchRepos(
 		// reach Blockchain-Oracle (the scoring rule above stands).
 		const qIsPlainName =
 			!qIsIdentifier && tokens.length === 1 && q.trim().length >= 5;
-		const qNorm = qIsIdentifier || qIsPlainName ? normAlias(q) : "";
+		// Spaced product names ("stellar wallets kit" IS Creit-Tech/
+		// Stellar-Wallets-Kit): a multi-word query with no separators can still
+		// be a repo's exact name with hyphens spoken as spaces — normAlias
+		// already equates the two forms; only this gate blocked it. Guards:
+		// ≥3 RAW words (raw, not contentTokens — "stellar" is a stopword, so
+		// token count undercounts the very queries this serves) so two-word
+		// vocabulary ("nft marketplace") can never ride name-identity over the
+		// F4 evidence policy, plus a ≥8-char normalized floor.
+		const qIsSpacedName =
+			!qIsIdentifier &&
+			q.trim().split(/\s+/).length >= 3 &&
+			normAlias(q).length >= 8;
+		const qNorm =
+			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
@@ -1184,7 +1202,7 @@ export async function searchRepos(
 			// ≥3 chars so degenerate short queries can't ride it.
 			const alias =
 				qNorm.length >= 3 &&
-				(qIsIdentifier
+				(qIsIdentifier || qIsSpacedName
 					? normAlias(repoPart) === qNorm ||
 						normAlias(ownerRaw) === qNorm ||
 						normAlias(r.fullName) === qNorm
@@ -1293,11 +1311,13 @@ export async function searchRepos(
 		filtered.sort(
 			(a, b) =>
 				a.crank - b.crank ||
-				a.frank - b.frank ||
-				// Exact alias identity (sls-025) beats everything below the curated
-				// floats: when the query IS a repo's owner/name/path, that repo must
-				// outrank keyword and semantic neighbors.
+				// Exact alias identity (sls-025) ABOVE the flagship family float:
+				// when the query IS a repo's owner/name/path, that repo must outrank
+				// even curated family flagships (q="stellar-wallets-kit" was losing
+				// to the wallet float's other three seeds). Canonical corrections
+				// (crank) still rank higher — they fix wrong-repo identities.
 				b.alias - a.alias ||
+				a.frank - b.frank ||
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
 				// relevance still dominates within a tier.
 				b.stellarness - a.stellarness ||
