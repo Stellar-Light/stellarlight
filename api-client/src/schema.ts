@@ -390,6 +390,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evidence-gated registry of verified mainnet Soroban contracts
+         * @description Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.
+         */
+        get: operations["listContracts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/audits": {
         parameters: {
             query?: never;
@@ -2476,6 +2496,58 @@ export interface operations {
                         rfps?: components["schemas"]["Rfp"][];
                         /** @description Funding-context sentence for the whole list: winners of OPEN RFPs are eligible for SCF grant funding in the current round; closed RFPs are past rounds, surfaced for context but no longer fundable. */
                         funding?: string;
+                    };
+                };
+            };
+        };
+    };
+    listContracts: {
+        parameters: {
+            query?: {
+                /** @description Substring over repo fullName, project slug/name, or contract id. */
+                q?: string;
+                /** @description Filter by code-evidenced domain (closed set; unknown values 400). */
+                domain?: "anchor-ramp" | "defi-amm" | "defi-lending" | "defi-yield" | "indexer" | "oracle" | "payments-x402" | "wallet-infra";
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Verified contract rows, most-evidenced first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: Record<string, never>;
+                        contracts?: {
+                            /** @description Verified mainnet contract id (C…); null when membership came via usage attribution without a specific id. */
+                            contractId?: string | null;
+                            repo?: {
+                                fullName?: string;
+                                url?: string | null;
+                            };
+                            project?: {
+                                slug?: string;
+                                name?: string | null;
+                            } | null;
+                            stellarProof?: string | null;
+                            codeDepth?: number | null;
+                            codeDomains?: string[];
+                            interfaceSize?: number;
+                            interfacePreview?: string[];
+                            /** @description Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier. */
+                            codeInUse?: Record<string, never> | null;
+                            /** @description Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'. */
+                            audits?: Record<string, never> | null;
+                            successorRepo?: string | null;
+                            scannedAt?: string | null;
+                        }[];
                     };
                 };
             };
