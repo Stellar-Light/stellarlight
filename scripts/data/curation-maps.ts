@@ -1853,7 +1853,6 @@ export const TYPES_SET: Record<string, string[]> = {
 export function curatedFieldsFor(slug: string): Set<string> {
 	const owned = new Set<string>();
 	if (slug in DESCRIPTION_FIXES) owned.add("shortDescription");
-	if (slug in BUILT_BY_FIXES) owned.add("builtBy");
 	if (slug in TYPES_SET || slug in TYPES_ADD) owned.add("types");
 	if (slug in STATUS_FIX) owned.add("status");
 	if (slug in WEBSITE_FIXES) owned.add("links.website");
@@ -1879,22 +1878,13 @@ export function curatedSlugs(): string[] {
 	].sort();
 }
 
-// ── sls-064 analog B: builtBy reference fixes ──────────────────────────────
-// Keys are the PRODUCT project's slug; values are the corrected builtBy.
-// Applied by curate-projects; ownership-registered so sync passes never
-// clobber it. NAMESPACE (corrected 2026-08-14 evening): builtBy.slug is an
-// ENTITY slug per the OpenAPI contract ("browse at /entities/{slug}") — NOT
-// a project or partner slug. The first version of this fix stored the
-// project slug "honey-coin", which 404s at /entities/honey-coin; the real
-// entity is /entities/honeycoin (verified 200 live). Search serves builtBy
-// from the entities collection directly, so the stored field must mirror
-// the entity record exactly or it lies to any surface that reads it.
-export const BUILT_BY_FIXES: Record<
-	string,
-	{ name: string; slug: string }
-> = {
-	// Verified 2026-08-14: /entities/honeycoin → 200 (the org record); peer
-	// is its consumer super-app product and appears in that entity's
-	// portfolio (the served builtBy map derives from exactly that link).
-	peer: { name: "honeycoin", slug: "honeycoin" },
-};
+// ── sls-064 analog B: builtBy — RESOLVED WITHOUT A CURATED MAP ─────────────
+// A BUILT_BY_FIXES lane briefly lived here (2026-08-14). Post-execute
+// read-back exposed it as a write-to-nowhere: `builtBy` is NOT a field on
+// the Projects collection, so payload.update() silently dropped it while
+// reporting success (the #615/C1 class), and every curate run re-"fixed"
+// it forever. The truth: served builtBy derives from the ENTITIES
+// collection at query time (entity name/slug per linked project) and is
+// contract-correct — builtBy.slug resolves at /entities/{slug}. Fix
+// builtBy data by fixing the entity record/links; the nightly S0 lane
+// asserts every served builtBy slug resolves in the entity namespace.
