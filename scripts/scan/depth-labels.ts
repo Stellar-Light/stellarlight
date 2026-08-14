@@ -470,3 +470,30 @@ export const JS_GATE = {
 	marginMin: 0.05,
 	minCoverage: 0.75,
 };
+
+// ── Language frontier (code-truth 4B, 2026-08-14) ──────────────────────
+// Deep side: the four flagships verified live on 2026-08-13/14 — official
+// SDKs + THE sep-24 implementer, each re-scanned with the slice-A language
+// idioms and serving real capabilities. Shallow side: intentionally EMPTY
+// until real corpus repos are verified shallow by hand — answer-key
+// discipline says never label from a name pattern alone. The eval runs a
+// deep-floor gate (min ≥ 0.5) until separation labels exist.
+export const LANG_DEEP: LabeledRepo[] = [
+	{
+		fullName: "StellarCN/py-stellar-base",
+		why: "official Python SDK — 6 capabilities incl. soroban-rpc + contract-invoke (verified 2026-08-13)",
+	},
+	{
+		fullName: "stellar/go-stellar-sdk",
+		why: "official Go SDK monorepo — 6 capabilities incl. tx-building + sep10-auth (verified 2026-08-14)",
+	},
+	{
+		fullName: "lightsail-network/java-stellar-sdk",
+		why: "official Java SDK — 7 capabilities (verified 2026-08-13)",
+	},
+	{
+		fullName: "stellar/anchor-platform",
+		why: "THE sep-24/sep-10 anchor implementation (Kotlin service) — sep24-ramp + sep10-auth + signing (verified 2026-08-14)",
+	},
+];
+export const LANG_SHALLOW: LabeledRepo[] = [];
