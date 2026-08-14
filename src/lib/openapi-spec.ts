@@ -4660,6 +4660,18 @@ export const spec: OpenAPISpec = {
 							"Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
 					},
 					repoScoreLabel: { type: "string", nullable: true },
+					tier: {
+						type: "string",
+						enum: ["quality", "community", "archive"],
+						description:
+							"Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.",
+					},
+					source: {
+						type: "string",
+						enum: ["project-link", "ec-taxonomy"],
+						description:
+							"Discovery provenance: project-link = from the curated directory's github links; ec-taxonomy = from Electric Capital's public crypto-ecosystems list.",
+					},
 					score: {
 						type: "number",
 						description:

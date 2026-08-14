@@ -1713,7 +1713,11 @@ export async function GET(req: NextRequest) {
 		});
 		try {
 			codeReferences = await Promise.race([
-				searchRepos(payload, q, { limit: 5 }).then((r) => r.repos),
+				// Quality surface: archive-tier repos never ride as inline code
+				// references (still reachable via /api/repos/search name lookups).
+				searchRepos(payload, q, { limit: 5 }).then((r) =>
+					r.repos.filter((repo) => repo.tier !== "archive"),
+				),
 				timeout,
 			]);
 		} finally {
@@ -1918,7 +1922,9 @@ export async function GET(req: NextRequest) {
 		try {
 			const repoRes = await payload.find({
 				collection: "repos",
-				where: { projectSlug: { in: slugs } },
+				// Quality surface: archive-tier repos never ride inline on project
+				// rows (they stay reachable via /api/repos/search name lookups).
+				where: { projectSlug: { in: slugs }, tier: { not_equals: "archive" } },
 				sort: "-repoScore",
 				limit: Math.min(slugs.length * 8, 500),
 				depth: 0,
