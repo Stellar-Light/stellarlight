@@ -329,7 +329,12 @@ async function main() {
 				// slice A gave their capabilities eyes. Deep-side anchored on the
 				// four verified flagships (depth-labels LANG_DEEP); the eval gate
 				// enforces the floor.
-				if (r.outcome === "ok" && r.proof === "lang-sdk") {
+				if (
+					r.outcome === "ok" &&
+					(r.proof === "lang-sdk" ||
+						r.proof === "cargo-sdk" ||
+						r.proof === "contract-macros")
+				) {
 					const ld = computeLangDepth({
 						fullName: full,
 						blobs: r.depthInput.blobs,
@@ -341,7 +346,32 @@ async function main() {
 							nameLooksTemplate: r.meta.nameLooksTemplate,
 						},
 					});
-					if (!ld.reasons.includes("no-lang-sources")) depth = ld.langDepth;
+					if (!ld.reasons.includes("no-lang-sources")) {
+						if (r.proof === "lang-sdk") {
+							depth = ld.langDepth;
+						} else {
+							// Hybrid-repo routing (anchor-platform class): a vendored
+							// soroban crate makes the proof cargo-flavored while the
+							// repo's real mass is Kotlin/Java/Go/Python — the Rust model
+							// then scores the vendored sliver, not the product. When the
+							// language sources outweigh the Rust sources, the repo's
+							// depth is its DEEPEST calibrated integration, never the
+							// smaller sliver. Pure-Rust repos with incidental deploy
+							// scripts are untouched (rust sloc dominates).
+							const rsSloc = r.depthInput.blobs
+								.filter((b) => b.path.toLowerCase().endsWith(".rs"))
+								.reduce(
+									(n, b) =>
+										n +
+										(b.text ?? "")
+											.split("\n")
+											.filter((l) => l.trim().length > 0).length,
+									0,
+								);
+							if (ld.langSloc > rsSloc)
+								depth = Math.max(depth, ld.langDepth);
+						}
+					}
 				}
 				// Rust pub-surface first; JS/TS exported surface when there is none
 				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
