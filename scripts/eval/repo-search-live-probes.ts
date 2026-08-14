@@ -22,9 +22,11 @@ const PROBES: Array<{ q: string; anyOf: string[] }> = [
 	{ q: "javascript sdk", anyOf: ["stellar/js-stellar-sdk"] },
 	{ q: "oracle", anyOf: ["reflector-network/reflector-contract"] },
 	{ q: "anchor platform", anyOf: ["stellar/anchor-platform"] },
-	// Canonical wallet-tooling set (Stellar-Wallets-Kit itself has a known
-	// exact-name ranking gap — tracked separately; add it here once fixed).
-	{ q: "wallet kit", anyOf: ["kalepail/passkey-kit", "stellar/freighter", "creit-tech/xbull-wallet"] },
+	// Canonical wallet-tooling set.
+	{ q: "wallet kit", anyOf: ["kalepail/passkey-kit", "stellar/freighter", "creit-tech/xbull-wallet", "creit-tech/stellar-wallets-kit"] },
+	// Spaced product-name identity (fixed 2026-08-14): the exact name spoken
+	// with spaces must surface the repo itself.
+	{ q: "stellar wallets kit", anyOf: ["creit-tech/stellar-wallets-kit"] },
 	{ q: "soroswap", anyOf: ["soroswap/core", "soroswap/aggregator"] },
 	{ q: "blend lending protocol", anyOf: ["blend-capital/blend-contracts"] },
 	{ q: "passkey smart wallet", anyOf: ["kalepail/passkey-kit"] },

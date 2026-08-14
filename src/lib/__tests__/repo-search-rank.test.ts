@@ -701,3 +701,82 @@ describe("superseded-generation demotion (sls-064 analog A)", () => {
 		expect(repos[1].successorRepo).toBe("proto/contracts-v2");
 	});
 });
+
+describe("spaced product-name identity (Stellar-Wallets-Kit class)", () => {
+	// The real corpus shape: the wallet vertical float fires for these queries
+	// and would otherwise pin its other seeds above the exact-name repo.
+	const kit = () =>
+		doc({
+			fullName: "Creit-Tech/Stellar-Wallets-Kit",
+			description: "A kit to handle all Stellar Wallets at once",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 55,
+		});
+	const floats = () => [
+		doc({
+			fullName: "stellar/freighter",
+			description: "browser extension",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 70,
+			stars: 900,
+		}),
+		doc({
+			fullName: "Creit-Tech/xBull-Wallet",
+			description: "wallet app",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 65,
+		}),
+		doc({
+			fullName: "kalepail/passkey-kit",
+			description: "smart wallet kit",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 68,
+			stars: 400,
+		}),
+	];
+
+	it("a 3-word spaced form of a hyphenated repo name is exact identity (beats the family float)", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([...floats(), kit()]),
+			"stellar wallets kit",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Creit-Tech/Stellar-Wallets-Kit");
+	});
+
+	it("the exact hyphenated identifier beats the family float too", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([...floats(), kit()]),
+			"stellar-wallets-kit",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Creit-Tech/Stellar-Wallets-Kit");
+	});
+
+	it("two-word vocabulary can never ride spaced-name identity over F4 evidence", async () => {
+		// Mirror of the F4 fixture with the sharpest possible setup: the alien's
+		// repo name EXACTLY equals the two-word query — identity must stay off.
+		const alien = doc({
+			fullName: "evmcorp/nft-marketplace",
+			description: "NFT marketplace contracts for EVM chains",
+			repoScore: 85,
+			stars: 4000,
+		});
+		const stellar = doc({
+			fullName: "smallteam/market",
+			description: "An nft marketplace on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([alien, stellar]),
+			"nft marketplace",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("smallteam/market");
+	});
+});
