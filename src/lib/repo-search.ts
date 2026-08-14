@@ -970,6 +970,11 @@ export async function searchRepos(
 		 * (validated by the route against CODE_DOMAINS). Same scan-derived
 		 * caveat as capability. */
 		domain?: string;
+		/** Filter to repos whose scanned stellarDeps include this package —
+		 * the dependency graph's reverse read ("who builds on passkey-kit").
+		 * Open set (any allowlisted ecosystem package name), matched exact
+		 * case-insensitive; scan-derived caveat applies. */
+		dependsOn?: string;
 	} = {},
 ): Promise<{
 	repos: RepoResult[];
@@ -985,6 +990,7 @@ export async function searchRepos(
 		activity = "",
 		capability = "",
 		domain = "",
+		dependsOn = "",
 	} = opts;
 	const tokens = contentTokens(q);
 	const searched: RepoSearchSearched = {
@@ -1327,6 +1333,16 @@ export async function searchRepos(
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 				((d.r as any).codeDomains ?? []).includes(domain),
 			);
+		if (dependsOn) {
+			const want = dependsOn.toLowerCase();
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).stellarDeps ?? []).some(
+					(dep: unknown) =>
+						typeof dep === "string" && dep.toLowerCase() === want,
+				),
+			);
+		}
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
 		// the authority grade and stars. Putting these signals ABOVE repoScore

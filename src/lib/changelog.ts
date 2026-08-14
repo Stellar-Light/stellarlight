@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Dependency-graph reverse read: `dependsOn` filter on /api/repos/search — 'who builds on passkey-kit / @blend-capital/blend-sdk / soroban-sdk' as a structural query over scanned manifest dependencies (openapi@1.8.62).",
+		detail:
+			"stellarDeps has been extracted from Cargo.toml/package.json manifests on every scan since 2026-08; this makes the reverse edge first-class: exact case-insensitive package name, open set (unknown packages return 0 rows honestly), scan-derived (unscanned repos never match — absence of a scan is not absence of the dependency). Adoption evidence no README can fake. Pair with q for keyword+dependency precision; meta.counts.total is the dependents count.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Code-domain classification: every scanned repo now carries `codeDomains` (defi-lending | defi-amm | defi-yield | oracle | payments-x402 | wallet-infra | anchor-ramp | indexer) inside `codeVerified`, derived ONLY from code evidence — ecosystem dependencies, SDK capability tags, and contract-interface traits — never from topics or README self-description. New `domain` filter on /api/repos/search (closed set, unknown values 400) answers 'show me the real DeFi / x402 / oracle code' structurally (openapi@1.8.61).",
 		detail:
 			"Scan-derived semantics: an unscanned repo can never match, and [] means the code proved nothing domain-specific — an honest null, not a negative. Populates as scan waves reach repos (the EC-taxonomy corpus is being scanned prominence-first). Evidence mapping: @blend-capital/blend-* → defi-lending; @soroswap/@phoenix-protocol → defi-amm; @defindex → defi-yield; @reflector-network + the SEP-40 lastprice interface trait → oracle; @x402/x402-* → payments-x402; passkey-kit/stellar-wallets-kit/@creit.tech → wallet-infra; the sep24-ramp capability → anchor-ramp; @stellar-indexer/mercury-sdk → indexer.",

@@ -1197,6 +1197,13 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					{
+						name: "dependsOn",
+						in: "query",
+						description:
+							"Dependency-graph reverse read: filter to repos whose SCANNED manifest dependencies (stellarDeps) include this ecosystem package — 'who builds on passkey-kit / @blend-capital/blend-sdk / soroban-sdk'. Exact case-insensitive package name (open set — unknown packages return 0 rows). Adoption evidence no README mention can fake; pair with q for keyword+dependency precision. Scan-derived: unscanned repos never match.",
+						schema: { type: "string" },
+					},
+					{
 						name: "limit",
 						in: "query",
 						required: false,

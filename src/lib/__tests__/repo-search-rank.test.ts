@@ -857,3 +857,25 @@ describe("camelCase exact-name identity (round-9 TiwalaPay class)", () => {
 		expect(repos[0].fullName).toBe("smallteam/market");
 	});
 });
+
+describe("dependsOn filter (dependency-graph reverse read)", () => {
+	it("filters to repos whose stellarDeps include the package, case-insensitive", async () => {
+		const dependent = doc({
+			fullName: "team/dapp",
+			description: "a wallet dapp",
+			stellarDeps: ["passkey-kit", "@stellar/stellar-sdk"],
+		});
+		const bystander = doc({
+			fullName: "team/other",
+			description: "a wallet dapp",
+			stellarDeps: ["@stellar/stellar-sdk"],
+		});
+		const { repos, total } = await searchRepos(
+			mockPayload([dependent, bystander]),
+			"wallet dapp",
+			{ limit: 5, dependsOn: "Passkey-Kit" },
+		);
+		expect(total).toBe(1);
+		expect(repos[0].fullName).toBe("team/dapp");
+	});
+});
