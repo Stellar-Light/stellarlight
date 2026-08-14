@@ -134,7 +134,7 @@ export function selectDepthPaths(
 	const isGenerated = (p: string) =>
 		/(generated|codegen|autogen)/i.test(p) || /\.pb\.rs$/i.test(p);
 
-	const sources = rs
+	const sizeRanked = rs
 		.filter(
 			(e) =>
 				inSorobanCrate(e.path) &&
@@ -145,6 +145,25 @@ export function selectDepthPaths(
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
 		.slice(0, 18)
 		.map((e) => e.path);
+	// Entry-file guarantee (2026-08-14, blend-contracts class): #[contractimpl]
+	// blocks often live in THIN <crate>/src/contract.rs / lib.rs wrappers that
+	// delegate to big logic modules — size-ranking alone never fetches them, so
+	// interface extraction saw zero impl blocks on exactly the architectures
+	// that separate entry from logic (blend: contract.rs 14.6KB vs 18 logic
+	// files ≥15.8KB). ADDITIVE to the ranked picks (never displaces depth's
+	// chosen files), ≤2 per crate, ≤12 total.
+	const entryFiles = rs
+		.filter(
+			(e) =>
+				inSorobanCrate(e.path) &&
+				!isTest(e.path) &&
+				/\/src\/(contract|lib)\.rs$/i.test(e.path) &&
+				(e.size ?? 0) <= 400_000,
+		)
+		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
+		.slice(0, 12)
+		.map((e) => e.path);
+	const sources = [...new Set([...sizeRanked, ...entryFiles])];
 	const tests = rs
 		.filter((e) => isTest(e.path))
 		.sort((a, b) => (b.size ?? 0) - (a.size ?? 0))
