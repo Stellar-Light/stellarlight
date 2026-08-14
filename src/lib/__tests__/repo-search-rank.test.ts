@@ -811,3 +811,49 @@ describe("knowledgeNotes visibility", () => {
 		expect(notes.join(" ")).not.toContain("fork-farm");
 	});
 });
+
+describe("camelCase exact-name identity (round-9 TiwalaPay class)", () => {
+	it("a camelCase query IS identifier-form — exact name beats F4-evidenced pay-neighbors", async () => {
+		const evidenced = doc({
+			fullName: "davidmaronio/StellarPay402",
+			description: "payment rails on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 85,
+			stars: 200,
+		});
+		const exact = doc({
+			// Unscanned EC long-tail row whose NAME is exactly the query.
+			fullName: "Zooeyymama/TiwalaPay",
+			description: "remittance app for the Philippines",
+			repoScore: 40,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([evidenced, exact]),
+			"TiwalaPay",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Zooeyymama/TiwalaPay");
+	});
+
+	it("a merely-capitalized vocabulary word is NOT identifier-form (F4 stands)", async () => {
+		const evidenced = doc({
+			fullName: "smallteam/market",
+			description: "An nft marketplace on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const nameHit = doc({
+			fullName: "evmcorp/Marketplace",
+			description: "NFT marketplace for EVM chains",
+			repoScore: 85,
+			stars: 4000,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([evidenced, nameHit]),
+			"Marketplace",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("smallteam/market");
+	});
+});

@@ -1086,7 +1086,13 @@ export async function searchRepos(
 		// A broad vocabulary query ("wallet", "nft marketplace") must never ride
 		// name-identity over the F4 Stellar-evidence policy — the audit's tier-0
 		// name-hit class would come straight back.
-		const qIsIdentifier = /[-_/.0-9]/.test(q.trim());
+		// camelCase counts as identifier-form (round-9 battery: q="TiwalaPay"
+		// split to tiwala+pay, 173 pay-repos flooded in, and F4 correctly
+		// ranked code-verified rows above the unscanned exact-name match —
+		// right for vocabulary, wrong for identity. Nobody types camelCase
+		// for a vocabulary query, so an internal lower→upper transition is
+		// as strong an identity signal as a hyphen or digit.
+		const qIsIdentifier = /[-_/.0-9]/.test(q.trim()) || /[a-z][A-Z]/.test(q.trim());
 		// Golden repos-soroswap: a PLAIN single-word query that IS an org's whole
 		// name ("soroswap") got no identity path — the org's own repos capped at
 		// owner-hay weight 3 while integrators with a topic hit scored 5, and
