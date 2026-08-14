@@ -38,7 +38,7 @@ the relationship, stated plainly: **these are not rivals so much as two settleme
 | you need server-sponsored fees so clients pay zero network cost | **mpp charge (pull, sponsored)** | the sponsored path is a first-class credential mode |
 | you're choosing for the long term and the standards race worries you | **either, behind an abstraction** | both camps aim at becoming "the" http payment standard (x402 via its foundation; mpp via the mppx framework and a reported standards push) — genuinely undecided, and the dominant third-party pattern below already hedges it |
 
-the honest caveats: x402's volume numbers are ecosystem-wide, not stellar-specific — stellar-lane volume is not separately published, and the machine-payments race the industry press describes (x402 on base, soroban on stellar, solana) is a race whose stellar leg is early. mpp's hundred-service launch roster is a launch roster; which services carry sustained volume is not yet public. anyone selling you certainty here is selling narrative.
+the honest caveats: x402's volume numbers are ecosystem-wide, not stellar-specific — stellar-lane volume is not separately published, and the machine-payments race the industry press describes (x402 on base, soroban on stellar, solana) is a race whose stellar leg is early. mpp's stellar-side adoption is measured in single-digit code-verified implementations today (see below). anyone selling you certainty here is selling narrative.
 
 ## who's actually building — code evidence, not readmes
 
