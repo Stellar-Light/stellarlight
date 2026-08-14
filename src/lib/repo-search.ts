@@ -1108,7 +1108,9 @@ export async function searchRepos(
 		// vocabulary ("nft marketplace") can never ride name-identity over the
 		// F4 evidence policy, plus a ≥8-char normalized floor.
 		const qIsSpacedName =
-			!qIsIdentifier && q.trim().split(/\s+/).length >= 3;
+			!qIsIdentifier &&
+			q.trim().split(/\s+/).length >= 3 &&
+			normAlias(q).length >= 8;
 		const qNorm =
 			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
 		const docs = rawDocs.map((r) => {
