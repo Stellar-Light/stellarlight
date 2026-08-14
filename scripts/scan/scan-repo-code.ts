@@ -34,6 +34,7 @@ import {
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
 import { computeJsDepth } from "../../src/lib/js-depth";
+import { computeLangDepth } from "../../src/lib/lang-depth";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
 import { extractStellarDeps } from "../../src/lib/stellar-deps";
 import configPromise from "../../src/payload.config";
@@ -322,6 +323,25 @@ async function main() {
 						},
 					});
 					if (!jd.reasons.includes("no-js-sources")) depth = jd.jsDepth;
+				}
+				// code-truth 4B: same replacement for the other-language frontier —
+				// py/go/kotlin/java repos rose out of the flat lang-sdk 0.3 once
+				// slice A gave their capabilities eyes. Deep-side anchored on the
+				// four verified flagships (depth-labels LANG_DEEP); the eval gate
+				// enforces the floor.
+				if (r.outcome === "ok" && r.proof === "lang-sdk") {
+					const ld = computeLangDepth({
+						fullName: full,
+						blobs: r.depthInput.blobs,
+						scalars: {
+							isFork: r.meta.isFork,
+							tagCount: r.meta.tagCount,
+							readmeText: r.depthInput.scalars.readmeText,
+							topics: r.depthInput.scalars.topics ?? [],
+							nameLooksTemplate: r.meta.nameLooksTemplate,
+						},
+					});
+					if (!ld.reasons.includes("no-lang-sources")) depth = ld.langDepth;
 				}
 				// Rust pub-surface first; JS/TS exported surface when there is none
 				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
