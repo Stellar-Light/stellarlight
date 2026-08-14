@@ -1,0 +1,43 @@
+{
+	"generatedAt": "2026-08-14T22:16:14.225Z",
+	"model": "claude-opus-4-8",
+	"drafts": [
+		{
+			"slug": "volta-circuit",
+			"name": "Volta Circuit",
+			"website": "https://voltacircuit.com/",
+			"entries": [
+				{
+					"platform": "ios",
+					"state": "available",
+					"storeUrl": "https://apps.apple.com/us/app/threshold-v/id6744829082",
+					"checkedAt": "2026-08-14",
+					"note": "curator-agent draft: 'Mobile App Download ThresholdV - Turn your phone into a secure signing device'; App Store link present"
+				},
+				{
+					"platform": "android",
+					"state": "available",
+					"storeUrl": "https://play.google.com/store/apps/details?id=com.voltacircuit.threshold",
+					"checkedAt": "2026-08-14",
+					"note": "curator-agent draft: 'Mobile App Download ThresholdV'; Play Store link id com.voltacircuit.threshold"
+				}
+			],
+			"agentNote": "Mobile app is a signing companion ('secure signing device') rather than the full multi-sig platform. Dashboard/web app is referenced but text doesn't clearly show a wallet running in-browser, so web omitted. Hardware wallets/HSM/MPC are mentioned as compatible integrations, not a first-party hardware-device product."
+		},
+		{
+			"slug": "simple-signer",
+			"name": "Simple Signer",
+			"website": "https://github.com/fsodano/simple-stellar-signer",
+			"entries": [
+				{
+					"platform": "web",
+					"state": "available",
+					"storeUrl": "https://sign.bigger.systems",
+					"checkedAt": "2026-08-14",
+					"note": "curator-agent draft: Runs in-browser; opens windows at https://sign.bigger.systems/connect, /sign, /payment and can be embedded on any website"
+				}
+			],
+			"agentNote": "Source is a GitHub repo README for simple-stellar-signer. No app-store/extension links present. It's a web-based wallet aggregator/transaction signer for Stellar accessed via browser at sign.bigger.systems (Public/Testnet/Futurenet). Ledger listed as 'in progress', not confirmed available. No ios/android/desktop/browser-extension evidence."
+		}
+	]
+}
