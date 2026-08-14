@@ -780,3 +780,34 @@ describe("spaced product-name identity (Stellar-Wallets-Kit class)", () => {
 		expect(repos[0].fullName).toBe("smallteam/market");
 	});
 });
+
+describe("knowledgeNotes visibility", () => {
+	it("internal notes never serve; public notes do", async () => {
+		const repo = doc({
+			fullName: "team/thing",
+			description: "a soroban tool",
+			knowledgeNotes: [
+				{ note: "Published on JSR.", source: "curated", asOf: "2026-08-14" },
+				{
+					note: "Triage: fork-farm cluster, do not surface.",
+					source: "curated",
+					asOf: "2026-08-14",
+					visibility: "internal",
+				},
+				{
+					note: "Docs live in /docs.",
+					source: "curated",
+					asOf: "2026-08-14",
+					visibility: "public",
+				},
+			],
+		});
+		const { repos } = await searchRepos(mockPayload([repo]), "soroban tool", {
+			limit: 5,
+		});
+		const notes = repos[0].knowledgeNotes.map((n) => n.note);
+		expect(notes).toContain("Published on JSR.");
+		expect(notes).toContain("Docs live in /docs.");
+		expect(notes.join(" ")).not.toContain("fork-farm");
+	});
+});

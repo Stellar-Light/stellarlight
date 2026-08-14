@@ -1394,6 +1394,12 @@ export async function searchRepos(
 				knowledgeNotes: Array.isArray(r.knowledgeNotes)
 					? r.knowledgeNotes
 							.filter((n) => typeof n?.note === "string" && n.note)
+							// Internal notes are triage memory (why a long-tail repo
+							// isn't worth surfacing/deep-indexing) — they NEVER serve.
+							.filter(
+								(n) =>
+									(n as { visibility?: string }).visibility !== "internal",
+							)
 							.map((n) => ({
 								note: String(n.note),
 								source: typeof n.source === "string" ? n.source : "curated",
