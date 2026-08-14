@@ -132,6 +132,7 @@ export async function GET(req: NextRequest) {
 		symbols: string[];
 		mainnetContractId: string | null;
 		sdkCapabilities: string[];
+		codeDomains: string[];
 	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
@@ -156,6 +157,7 @@ export async function GET(req: NextRequest) {
 					codeSymbols: true,
 					mainnetContractId: true,
 					sdkCapabilities: true,
+					codeDomains: true,
 					scannedRef: true,
 					successorRepo: true,
 				},
@@ -194,6 +196,11 @@ export async function GET(req: NextRequest) {
 						mainnetContractId: (d.mainnetContractId as string) ?? null,
 						sdkCapabilities: Array.isArray(d.sdkCapabilities)
 							? (d.sdkCapabilities as unknown[]).filter(
+									(s): s is string => typeof s === "string",
+								)
+							: [],
+						codeDomains: Array.isArray(d.codeDomains)
+							? (d.codeDomains as unknown[]).filter(
 									(s): s is string => typeof s === "string",
 								)
 							: [],
@@ -238,6 +245,8 @@ export async function GET(req: NextRequest) {
 			);
 		if (cv.sdkCapabilities.length)
 			bits.push(`SDK capabilities: ${cv.sdkCapabilities.join(", ")}.`);
+		if (cv.codeDomains.length)
+			bits.push(`Code-evidenced domains: ${cv.codeDomains.join(", ")}.`);
 		if (cv.mainnetContractId)
 			bits.push(`Deployed on mainnet as \`${cv.mainnetContractId}\`.`);
 		bits.push(
