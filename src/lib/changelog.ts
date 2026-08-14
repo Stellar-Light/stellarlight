@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-14",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"audits: relation metadata + extraction completeness (sls-064) — engagementId/reportVersion/supersededByReportId/engagementStart/engagementEnd/findingsExtraction (openapi@1.8.58).",
+		detail:
+			"Raven's eval loop found 4 (protocol, auditor) pairs holding 2 rows each with no way to classify a revision vs a separate engagement (stellar-raven sls-064). New per-row fields: engagementId links every report of ONE engagement (curated in AUDIT_RELATIONS, verified against the reports' own text — the confirmed Veridise Soroban Core pair 28/42 now shares veridise-soroban-core-2023q4 with its stated Oct 30–Dec 22 2023 window; reportVersion 'V2' on 28 as its title states); supersededByReportId stays null unless a document states supersession — never guessed; findingsExtraction makes findingsTotal 7 vs null read as different states of knowledge, not conflicting counts. Unclassified pairs stay null — never asserted independent. Finding-identifier indexing (the item's 4th recommendation) is a follow-up phase.",
+	},
+	{
+		date: "2026-08-14",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"searchRepos ranking: verified mainnet usage now ranks above raw keyword coverage (code-truth 5).",

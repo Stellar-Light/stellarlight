@@ -46,6 +46,12 @@ interface AuditRow {
 	observedAt: string | null;
 	findingsTotal: number | null;
 	severityCounts: Record<string, number> | null;
+	engagementId: string | null;
+	reportVersion: string | null;
+	supersededByReportId: number | null;
+	engagementStart: string | null;
+	engagementEnd: string | null;
+	findingsExtraction: string | null;
 	chunksIndexed: number;
 }
 
@@ -143,6 +149,12 @@ export async function GET(req: NextRequest) {
 		observedAt: d.observedAt ?? null,
 		findingsTotal: d.findingsTotal ?? null,
 		severityCounts: d.severityCounts ?? null,
+		engagementId: d.engagementId ?? null,
+		reportVersion: d.reportVersion ?? null,
+		supersededByReportId: d.supersededByReportId ?? null,
+		engagementStart: d.engagementStart ?? null,
+		engagementEnd: d.engagementEnd ?? null,
+		findingsExtraction: d.findingsExtraction ?? null,
 		chunksIndexed: d.chunksIndexed ?? 0,
 	}));
 	const total = rows.length;

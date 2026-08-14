@@ -218,3 +218,44 @@ export function composeAuditTitle(
 	if (!addsSomething || withName.length > MAX_TITLE_LEN) return base;
 	return withName;
 }
+
+// ── sls-064: curated audit-report relations ────────────────────────────────
+// Multiple reports for one (protocol, auditor) are legitimate — a revision,
+// a re-audit, and a separate yearly engagement are all normal. What a
+// consumer cannot do is CLASSIFY them from the rows alone. These curated
+// relations link reports of one engagement; a pair absent here is
+// unclassified, never asserted independent. DISCIPLINE: only add what the
+// reports themselves state, date the verification, never guess a
+// supersession verdict the documents don't state.
+export interface AuditRelation {
+	/** Shared by every report of one engagement; distinct across engagements. */
+	engagementId: string;
+	/** Version the report states about itself (e.g. "V2"); null = unstated. */
+	reportVersion: string | null;
+	/** reportId of the report that supersedes this one; null = none stated. */
+	supersededByReportId: number | null;
+	/** Engagement window as stated IN the report text (YYYY-MM-DD), else null. */
+	engagementStart: string | null;
+	engagementEnd: string | null;
+}
+
+/** Keyed by portal reportId. Verified 2026-08-14 (sls-064 evidence: both
+ * reports state the same window "From Oct. 30, 2023 to Dec. 22, 2023" and
+ * carry the same critical finding at commit 2674d86; report 28's own title
+ * states "V2"; neither document states a supersession — so none is claimed). */
+export const AUDIT_RELATIONS: Record<number, AuditRelation> = {
+	28: {
+		engagementId: "veridise-soroban-core-2023q4",
+		reportVersion: "V2",
+		supersededByReportId: null,
+		engagementStart: "2023-10-30",
+		engagementEnd: "2023-12-22",
+	},
+	42: {
+		engagementId: "veridise-soroban-core-2023q4",
+		reportVersion: null,
+		supersededByReportId: null,
+		engagementStart: "2023-10-30",
+		engagementEnd: "2023-12-22",
+	},
+};

@@ -3489,6 +3489,31 @@ export const spec: OpenAPISpec = {
 				description:
 					"One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero.",
 				properties: {
+					engagementId: {
+						type: "string",
+						nullable: true,
+						description:
+							"sls-064 relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent.",
+					},
+					reportVersion: {
+						type: "string",
+						nullable: true,
+						description: "Version the report states about itself (e.g. 'V2'); null when the source states none.",
+					},
+					supersededByReportId: {
+						type: "integer",
+						nullable: true,
+						description: "reportId of the report that supersedes this one; null = no supersession stated by the documents (never guessed).",
+					},
+					engagementStart: { type: "string", nullable: true, description: "Engagement window start as stated IN the report (YYYY-MM-DD)." },
+					engagementEnd: { type: "string", nullable: true, description: "Engagement window end as stated IN the report (YYYY-MM-DD)." },
+					findingsExtraction: {
+						type: "string",
+						nullable: true,
+						enum: ["extracted", "not-extracted", "partial"],
+						description:
+							"Completeness of the deterministic findings extraction — read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.",
+					},
 					reportId: {
 						type: "integer",
 						description: "stellarsecurityportal.com report id (natural key)",
