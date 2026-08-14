@@ -48,7 +48,8 @@ export type CanonicalFamily =
 	| "enterprise-fund"
 	| "terms"
 	| "quarterly-reports"
-	| "security-program";
+	| "security-program"
+	| "research-grants";
 
 export interface CanonicalPage {
 	/** Stable registry key. sdf-org rows chunk under parentDocId `sdf-org-<id>`. */
@@ -198,6 +199,27 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		quotable: true,
 		dateStrategy: "undated",
 		tags: ["enterprise-fund", "investments"],
+	},
+	{
+		id: "research-grants",
+		url: "https://research.stellar.org/research-grants",
+		family: "research-grants",
+		title:
+			"Stellar Academic Research Grants — eligibility, deadlines, budget cap (research.stellar.org)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		// sls-055 recurrence (2026-08-04 evals): q-scf-academic-research-grant
+		// searched exact research-grant vocabulary and retrieved nothing — the
+		// research.stellar.org family was never ingested. Signatures verbatim
+		// from the live page 2026-08-14.
+		signatures: [
+			"Budget not to exceed $150,000",
+			"We review grant proposals quarterly",
+			"paid to academic institutions only",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["research-grants", "academic", "funding"],
 	},
 	{
 		id: "terms-of-service",
