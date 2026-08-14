@@ -11,6 +11,7 @@
  *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute]
  */
 import "./load-env";
+import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
 import { getPayload } from "payload";
 import {
 	type BatchRepoResult,
@@ -441,6 +442,8 @@ async function main() {
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
+			// sls-064 analog: curated generation relation — wholesale each pass.
+			successorRepo: REPO_SUCCESSIONS[full.toLowerCase()] ?? null,
 			knowledgeNotes: buildKnowledgeNotes(full, project.slug, auditsByProject, {
 				lastCommitAt:
 					info?.lastCommitAt ??

@@ -16,6 +16,7 @@ import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 import {
+	BUILT_BY_FIXES,
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
 	GITHUB_REPOS_ADD,
@@ -1055,6 +1056,31 @@ async function main() {
 		slug: string;
 		data: Record<string, unknown>;
 	}> = [];
+
+	console.log("── builtBy reference fixes (sls-064 analog B) ──");
+	for (const [slug, fix] of Object.entries(BUILT_BY_FIXES)) {
+		const res = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = res.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project with slug "${slug}" — skipped`);
+			continue;
+		}
+		if (d.builtBy?.slug === fix.slug && d.builtBy?.name === fix.name) {
+			console.log(`  ${slug}: builtBy already correct, skip`);
+			continue;
+		}
+		console.log(
+			`  ${EXECUTE ? "fix" : "would fix"} ${slug}: builtBy ${JSON.stringify(d.builtBy ?? null)} → ${JSON.stringify(fix)}`,
+		);
+		planned.push({ slug, data: { builtBy: fix } });
+	}
 
 	console.log("── Description fixes (overwrite shortDescription) ──");
 	for (const [slug, desc] of Object.entries(DESCRIPTION_FIXES)) {

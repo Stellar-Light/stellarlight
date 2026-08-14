@@ -1853,6 +1853,7 @@ export const TYPES_SET: Record<string, string[]> = {
 export function curatedFieldsFor(slug: string): Set<string> {
 	const owned = new Set<string>();
 	if (slug in DESCRIPTION_FIXES) owned.add("shortDescription");
+	if (slug in BUILT_BY_FIXES) owned.add("builtBy");
 	if (slug in TYPES_SET || slug in TYPES_ADD) owned.add("types");
 	if (slug in STATUS_FIX) owned.add("status");
 	if (slug in WEBSITE_FIXES) owned.add("links.website");
@@ -1867,6 +1868,7 @@ export function curatedSlugs(): string[] {
 	return [
 		...new Set([
 			...Object.keys(DESCRIPTION_FIXES),
+			...Object.keys(BUILT_BY_FIXES),
 			...Object.keys(TYPES_SET),
 			...Object.keys(TYPES_ADD),
 			...Object.keys(STATUS_FIX),
@@ -1876,3 +1878,17 @@ export function curatedSlugs(): string[] {
 		]),
 	].sort();
 }
+
+// ── sls-064 analog B: builtBy reference fixes ──────────────────────────────
+// peer's builtBy pointed at slug "honeycoin" while the directory row is
+// "honey-coin" — a dangling reference (identity/slug family). Keys are the
+// PRODUCT project's slug; values are the corrected builtBy. Applied by
+// curate-projects; ownership-registered so sync passes never clobber it.
+export const BUILT_BY_FIXES: Record<
+	string,
+	{ name: string; slug: string }
+> = {
+	// Verified 2026-08-14 (round-6 Raven probe): HoneyCoin's directory row
+	// slug is honey-coin; peer is its consumer super-app product.
+	peer: { name: "HoneyCoin", slug: "honey-coin" },
+};

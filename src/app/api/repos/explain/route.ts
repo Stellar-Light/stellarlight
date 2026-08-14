@@ -128,6 +128,7 @@ export async function GET(req: NextRequest) {
 		versionStatus: string | null;
 		scannedAt: string | null;
 		scannedRef: string | null;
+		successorRepo: string | null;
 		symbols: string[];
 		mainnetContractId: string | null;
 		sdkCapabilities: string[];
@@ -156,6 +157,7 @@ export async function GET(req: NextRequest) {
 					mainnetContractId: true,
 					sdkCapabilities: true,
 					scannedRef: true,
+					successorRepo: true,
 				},
 			});
 			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
@@ -183,6 +185,7 @@ export async function GET(req: NextRequest) {
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,
 						scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
+						successorRepo: typeof d.successorRepo === "string" ? d.successorRepo : null,
 						symbols: Array.isArray(d.codeSymbols)
 							? (d.codeSymbols as unknown[])
 									.filter((s): s is string => typeof s === "string")

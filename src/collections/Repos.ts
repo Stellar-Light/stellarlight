@@ -60,6 +60,16 @@ export const Repos: CollectionConfig = {
 			],
 		},
 		{
+			// sls-064 analog: this repo is a SUPERSEDED generation; the named
+			// repo is its successor. Curated via REPO_SUCCESSIONS
+			// (src/lib/repo-relations.ts) — verified against the repos' own
+			// statements, never inferred from names. Null = not superseded
+			// (or not yet classified). Stamped wholesale by enrich each pass.
+			name: "successorRepo",
+			type: "text",
+			index: true,
+		},
+		{
 			// Repo-intel slice 3: dated facts with sources (curated map +
 			// derived audit crosslink), rebuilt wholesale by enrich each pass —
 			// see src/lib/repo-knowledge.ts for the discipline.

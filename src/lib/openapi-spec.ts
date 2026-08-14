@@ -4560,6 +4560,12 @@ export const spec: OpenAPISpec = {
 					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
 				required: ["fullName", "repoScore"],
 				properties: {
+					successorRepo: {
+						type: "string",
+						nullable: true,
+						description:
+							"sls-064 analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance.",
+					},
 					fullName: { type: "string", description: "owner/name" },
 					owner: { type: "string", nullable: true },
 					name: { type: "string", nullable: true },
