@@ -32,6 +32,7 @@ async function main(): Promise<number> {
 	let written = 0;
 	let cleared = 0;
 	let mismatches = 0;
+	let alreadyTagged = 0;
 	const tagCounts = new Map<string, number>();
 
 	for (;;) {
@@ -81,6 +82,7 @@ async function main(): Promise<number> {
 				commits90d: d.activitySignals?.commits90d ?? null,
 			});
 			const existing: string[] = Array.isArray(d.triageTags) ? d.triageTags : [];
+			if (existing.length) alreadyTagged += 1;
 			const same =
 				tags.length === existing.length && tags.every((t) => existing.includes(t));
 			if (same) continue;
@@ -119,6 +121,7 @@ async function main(): Promise<number> {
 					collection: "repos",
 					id: String(d.id),
 					depth: 0,
+					context: { internal: true },
 					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 				})) as any;
 				const got: string[] = Array.isArray(check?.triageTags)
@@ -142,8 +145,11 @@ async function main(): Promise<number> {
 	for (const [t, n] of [...tagCounts.entries()].sort((a, b) => b[1] - a[1]))
 		console.log(`  ${t}: ${n}`);
 
+	console.log(`already tagged in DB: ${alreadyTagged}`);
 	if (mismatches > 0) return 1;
-	if (seen > 5000 && wouldTag === 0 && cleared === 0) {
+	// An all-skip sweep over an already-tagged corpus is the idempotent GOOD
+	// case; red only when the DB holds zero tags AND we derived zero.
+	if (seen > 5000 && wouldTag === 0 && cleared === 0 && alreadyTagged === 0) {
 		// A corpus this size with ZERO triage changes means derivation broke,
 		// not that 12k repos are all pristine.
 		console.error("RED: zero-work sweep over a corpus known to contain dead tail");

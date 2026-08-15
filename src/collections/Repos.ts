@@ -30,7 +30,11 @@ export const Repos: CollectionConfig = {
 		// Serve-side filters in repo-search are a second, redundant layer.
 		afterRead: [
 			({ doc, req }) => {
-				if (!req?.user) {
+				// Internal maintenance scripts read through the local API with no
+				// req.user; they pass context.internal so their read-backs can see
+				// the fields they just wrote. No external path can set local-API
+				// context, so the privacy boundary holds.
+				if (!req?.user && req?.context?.internal !== true) {
 					if (Array.isArray(doc?.knowledgeNotes)) {
 						doc.knowledgeNotes = doc.knowledgeNotes.filter(
 							(n: { visibility?: string | null }) =>
