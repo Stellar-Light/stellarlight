@@ -77,6 +77,15 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-08-15",
 		},
 	],
+	// Verified 2026-08-15 (stored scan signals + owner confirmation): the EVM
+	// giant's Stellar integration is real code in this monorepo.
+	"sushi-labs/sushiswap": [
+		{
+			note: "SushiSwap is live on Stellar: this monorepo carries real Stellar integration code (deps @creit.tech/stellar-wallets-kit + @stellar/stellar-sdk, scanned capabilities contract-invoke + signing) — swap execution against Soroban with wallet-kit signing. Its codeDomains stay interface-derived (the Stellar side is TS integration, not contracts), so it deliberately does NOT carry defi-amm; cite this note for 'is Sushi on Stellar' questions.",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+	],
 	"fazzatti/colibri-examples": [
 		{
 			note: "Companion worked-examples repo for @colibri (Deno runtime): getting-started/ carries the newcomer walkthroughs, examples/ the per-feature recipes, each with its own README — the practical entry point before reading colibri core.",

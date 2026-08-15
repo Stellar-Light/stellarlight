@@ -54,6 +54,12 @@ const IFACE_DOMAINS: Array<[fnName: string, domain: CodeDomain]> = [
 	// Verified against blend-capital/blend-contracts' stored interface.
 	["queue_set_reserve", "defi-lending"],
 	["get_positions", "defi-lending"],
+	// CAP-58 custom-account interface — THE on-chain wallet-infrastructure
+	// marker: every smart-wallet/account-abstraction contract implements
+	// __check_auth (verified 2026-08-15 against passkey-kit's stored
+	// interface; 18 corpus carriers, all genuinely account contracts).
+	// Replaces the deleted dep-based wallet-infra rule with identity.
+	["__check_auth", "wallet-infra"],
 ];
 
 export interface DomainSignals {

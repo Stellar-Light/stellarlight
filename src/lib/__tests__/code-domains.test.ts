@@ -75,6 +75,16 @@ describe("AMM + lending trait markers (2026-08-15, real stored strings)", () => 
 		).toEqual(["defi-lending"]);
 	});
 
+	it("CAP-58 __check_auth marks wallet-infra (real passkey-kit string)", () => {
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"Contract.__check_auth(signature_payload: Hash<32>, signatures: Signatures, auth_contexts: Vec<Context>) -> Result<(), Error>",
+				],
+			}),
+		).toEqual(["wallet-infra"]);
+	});
+
 	it("negative: swap-adjacent but non-marker fns stay unlabeled", () => {
 		expect(
 			deriveCodeDomains({
