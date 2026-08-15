@@ -390,6 +390,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/repos/trust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Trust report — the code-truth composite for one repo
+         * @description One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.
+         */
+        get: operations["getRepoTrust"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/contracts": {
         parameters: {
             query?: never;
@@ -2498,6 +2518,86 @@ export interface operations {
                         funding?: string;
                     };
                 };
+            };
+        };
+    };
+    getRepoTrust: {
+        parameters: {
+            query: {
+                /** @description owner/name, e.g. reflector-network/reflector-contract */
+                repo: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The trust report. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: Record<string, never>;
+                        report?: {
+                            repo?: {
+                                fullName?: string;
+                                url?: string | null;
+                                stars?: number | null;
+                                lastCommitAt?: string | null;
+                                isArchived?: boolean;
+                                tier?: string | null;
+                                activityState?: string;
+                            };
+                            project?: {
+                                slug?: string;
+                                name?: string | null;
+                            } | null;
+                            codeTruth?: {
+                                scanState?: string | null;
+                                scannedAt?: string | null;
+                                stellarProof?: string | null;
+                                codeDepth?: number | null;
+                                codeDomains?: string[];
+                                sdkCapabilities?: string[];
+                                interfaceSize?: number;
+                                /** @description Scanned public fn signatures (up to 60) — verify generated calls against these. */
+                                contractInterface?: string[];
+                                mainnetContractId?: string | null;
+                            };
+                            usage?: Record<string, never> | null;
+                            audits?: Record<string, never> | null;
+                            /** @description Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today. */
+                            auditDrift?: {
+                                latestAuditAt?: string;
+                                lastCommitAt?: string;
+                                daysOfDrift?: number;
+                            } | null;
+                            succession?: {
+                                successorRepo?: string | null;
+                                predecessors?: string[];
+                            };
+                            /** @description Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven. */
+                            signals?: ("scanned" | "deep-code" | "live-on-mainnet" | "verified-contract-id" | "audited" | "multi-audited" | "code-changed-since-audit" | "actively-maintained" | "archived" | "superseded")[];
+                        };
+                    };
+                };
+            };
+            /** @description Missing/invalid repo param or unknown params. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Repo not in the index (absence of evidence, not a verdict). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

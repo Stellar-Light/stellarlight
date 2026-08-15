@@ -121,6 +121,23 @@ const PROBES: Probe[] = [
 				: "reflector absent from domain=oracle",
 	},
 	{
+		name: "trust composite: reflector fully joined with drift + signals",
+		path: `/api/repos/trust?repo=${REFLECTOR}`,
+		strict: true,
+		test: (b) => {
+			const r = b.report;
+			if (!r) return "report absent";
+			if (r.codeTruth?.interfaceSize < 40)
+				return `interfaceSize ${r.codeTruth?.interfaceSize}`;
+			if ((r.audits?.count ?? 0) < 3) return `audits ${r.audits?.count}`;
+			for (const want of ["live-on-mainnet", "multi-audited", "scanned"])
+				if (!(r.signals ?? []).includes(want)) return `signal ${want} missing`;
+			if (!(r.usage?.subinvocations > 100_000))
+				return `usage.subinvocations ${r.usage?.subinvocations}`;
+			return null;
+		},
+	},
+	{
 		name: "row plumbing floor: reflector scan state + usage persisted",
 		path: `/api/repos?where%5BfullName%5D%5Bequals%5D=${encodeURIComponent(REFLECTOR)}&limit=1&depth=0`,
 		test: (b) => {

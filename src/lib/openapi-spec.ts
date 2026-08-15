@@ -2037,6 +2037,151 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/repos/trust": {
+			get: {
+				operationId: "getRepoTrust",
+				tags: ["Code"],
+				summary: "Trust report — the code-truth composite for one repo",
+				description:
+					"One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Assess ONE repo's trustworthiness/maintenance/audit state from verified evidence in a single call.",
+					keywords: [
+						"trust",
+						"trustworthy",
+						"is it maintained",
+						"actively maintained",
+						"is it audited",
+						"audit drift",
+						"should i depend on",
+						"dependency safety",
+						"abandoned",
+						"production ready",
+						"contract interface",
+					],
+					useWhen: [
+						"'is <repo> still maintained / audited / used on mainnet' — one call instead of five",
+						"'has the code changed since its last audit' (auditDrift)",
+						"verifying generated contract calls against the real scanned interface",
+					],
+					notFor: [
+						"discovering which repos exist (searchRepos) or contract enumeration (listContracts)",
+						"repos we have not indexed — 404 is absence of evidence, not a verdict",
+					],
+				},
+				parameters: [
+					{
+						name: "repo",
+						in: "query",
+						required: true,
+						description: "owner/name, e.g. reflector-network/reflector-contract",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The trust report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { type: "object" },
+										report: {
+											type: "object",
+											properties: {
+												repo: {
+													type: "object",
+													properties: {
+														fullName: { type: "string" },
+														url: { type: "string", nullable: true },
+														stars: { type: "integer", nullable: true },
+														lastCommitAt: { type: "string", nullable: true },
+														isArchived: { type: "boolean" },
+														tier: { type: "string", nullable: true },
+														activityState: { type: "string" },
+													},
+												},
+												project: {
+													type: "object",
+													nullable: true,
+													properties: {
+														slug: { type: "string" },
+														name: { type: "string", nullable: true },
+													},
+												},
+												codeTruth: {
+													type: "object",
+													properties: {
+														scanState: { type: "string", nullable: true },
+														scannedAt: { type: "string", nullable: true },
+														stellarProof: { type: "string", nullable: true },
+														codeDepth: { type: "number", nullable: true },
+														codeDomains: { type: "array", items: { type: "string" } },
+														sdkCapabilities: { type: "array", items: { type: "string" } },
+														interfaceSize: { type: "integer" },
+														contractInterface: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Scanned public fn signatures (up to 60) — verify generated calls against these.",
+														},
+														mainnetContractId: { type: "string", nullable: true },
+													},
+												},
+												usage: { type: "object", nullable: true },
+												audits: { type: "object", nullable: true },
+												auditDrift: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today.",
+													properties: {
+														latestAuditAt: { type: "string" },
+														lastCommitAt: { type: "string" },
+														daysOfDrift: { type: "integer" },
+													},
+												},
+												succession: {
+													type: "object",
+													properties: {
+														successorRepo: { type: "string", nullable: true },
+														predecessors: { type: "array", items: { type: "string" } },
+													},
+												},
+												signals: {
+													type: "array",
+													items: {
+														type: "string",
+														enum: [
+															"scanned",
+															"deep-code",
+															"live-on-mainnet",
+															"verified-contract-id",
+															"audited",
+															"multi-audited",
+															"code-changed-since-audit",
+															"actively-maintained",
+															"archived",
+															"superseded",
+														],
+													},
+													description:
+														"Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing/invalid repo param or unknown params." },
+					"404": { description: "Repo not in the index (absence of evidence, not a verdict)." },
+				},
+			},
+		},
 		"/api/contracts": {
 			get: {
 				operationId: "listContracts",

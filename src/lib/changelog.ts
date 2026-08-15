@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-15",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"Trust report composite: GET /api/repos/trust?repo=owner/name — one evidence-grounded answer to 'should I depend on this repo?' joining code truth, live usage, audits with drift, succession, and activity, with a closed deterministic signals vocabulary (openapi@1.8.65).",
+		detail:
+			"First spine composite: the join a consumer previously made across five calls (search + explain + audits + contracts + changes), served as one shape. No synthetic scores — `signals` names facts that hold (scanned, deep-code, live-on-mainnet, verified-contract-id, audited, multi-audited, code-changed-since-audit, actively-maintained, archived, superseded); absence of a signal means the evidence doesn't hold, not that the opposite is proven. codeTruth.contractInterface carries the full scanned fn signatures (≤60) as a codegen guard: verify generated calls against the real interface before invoking. auditDrift is present when commits landed after the latest audit report. 404 for unindexed repos — absence of evidence, not a verdict.",
+	},
+	{
+		date: "2026-08-15",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"Structured filters (domain/dependsOn/capability) on /api/repos/search now drive candidate inclusion DB-side, so filter-only browsing sees the whole corpus; /api/repos/explain codeVerified now serves contractInterface, stellarDeps, and codeInUse (openapi@1.8.64).",
