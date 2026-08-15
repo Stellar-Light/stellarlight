@@ -1030,10 +1030,21 @@ export async function searchRepos(
 				]),
 			);
 		}
+		// Structured filters drive candidate INCLUSION, not just the in-memory
+		// post-filter (the sls-018 class): with no q the browse pool is the
+		// top-200 by repoScore, and domain/dependsOn/capability carriers are
+		// mostly apps below that cut — domain=oracle served [] while the corpus
+		// held 590 tagged rows; dependsOn=soroban-sdk served 9 of 299
+		// (2026-08-15). `like` on array fields matches per-element (same as
+		// topics above); the exact in-memory filters below stay the precise pass.
+		if (domain) where.codeDomains = { like: domain };
+		if (dependsOn) where.stellarDeps = { like: dependsOn };
+		if (capability) where.sdkCapabilities = { like: capability };
+		const hasStructuredFilter = Boolean(domain || dependsOn || capability);
 		const res = await payload.find({
 			collection: "repos",
 			where,
-			limit: tokens.length ? 600 : 200,
+			limit: tokens.length || hasStructuredFilter ? 600 : 200,
 			sort: "-repoScore",
 			depth: 0,
 			// Drop the README excerpt — it's the largest per-doc field and the
