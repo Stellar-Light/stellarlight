@@ -112,6 +112,4 @@ export async function GET(req: NextRequest) {
 	);
 }
 
-export function POST() {
-	return methodNotAllowed(["GET"]);
-}
+export const POST = methodNotAllowed(["GET"]);
