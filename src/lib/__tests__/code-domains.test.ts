@@ -53,6 +53,17 @@ describe("AMM + lending trait markers (2026-08-15, real stored strings)", () => 
 		).toEqual(["defi-amm"]);
 	});
 
+	it("phoenix pool surface (CosmWasm dialect) → defi-amm", () => {
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"LiquidityPool.provide_liquidity(sender: Address, desired_a: Option<i128>, min_a: Option<i128>) -> Result<(), ContractError>",
+					"LiquidityPool.simulate_reverse_swap(ask_asset: Address, ask_amount: i128) -> SimulateReverseSwapResponse",
+				],
+			}),
+		).toEqual(["defi-amm"]);
+	});
+
 	it("blend pool surface → defi-lending", () => {
 		expect(
 			deriveCodeDomains({
