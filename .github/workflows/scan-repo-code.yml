@@ -10,13 +10,15 @@ name: Scan repo code (signals-only)
 
 on:
   schedule:
-    # daily 03:00 UTC — unified wave (re-scan policy 2026-08-08): never-scanned
-    # AND pushed-since-scan repos compete on the same -repoScore key, so a
-    # changed canonical SDK re-scans before a never-scanned hackathon repo.
-    # Subsumes the old weekly Mon stale-first run (which ranked by recency and
-    # let hot small repos starve changed SDKs — the 34/48 stale gap). Writes
-    # are signals-only (write-shape.ts, zero-demotion by construction).
-    - cron: "0 3 * * *"
+    # every 2h — backlog-convergence cadence (2026-08-15): the EC census left
+    # ~10.7k eligible repos; one daily wave puts convergence months out. Each
+    # wave drinks the PAT pool to the in-script budget floor and the next wave
+    # resumes (BUDGET-STOPPED + resume offsets), so a 2h cadence self-throttles
+    # against the shared 5,000/hr PAT. Triage-skip (#897) keeps waves off dead
+    # repos. Unified re-scan policy 2026-08-08: never-scanned AND pushed-since-
+    # scan compete on the same -repoScore key. Revert to daily 03:00 once the
+    # backlog converges (scanned ≈ eligible).
+    - cron: "0 */2 * * *"
   workflow_dispatch:
     inputs:
       execute:
@@ -72,8 +74,8 @@ jobs:
       # inputs.* are EMPTY on schedule events (2026-07-08 review, finding 18 —
       # the "weekly stale-first" run was a write-nothing dry run of the wrong
       # wave). Scheduled runs get their own hardcoded step.
-      - name: Daily backlog wave (schedule)
-        if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * *'
+      - name: Backlog wave (schedule)
+        if: github.event_name == 'schedule'
         # --lang all (2026-07-11): the default is Rust-only, which structurally
         # excluded every JS/TS repo from the daily wave — js-stellar-sdk never
         # got real symbols, so symbol lookups failed for the main SDK.
