@@ -40,3 +40,38 @@ describe("deriveCodeDomains", () => {
 		).toEqual([]);
 	});
 });
+
+describe("AMM + lending trait markers (2026-08-15, real stored strings)", () => {
+	it("soroswap router surface → defi-amm", () => {
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"SoroswapRouter.add_liquidity(token_a: Address, token_b: Address, amount_a_desired: i128, amount_b_desired: i128, amount_a_min: i128, amount_b_min: i128, to: Address, deadline: u64) -> Result<(i128, i128, i128), CombinedRouterError>",
+					"SoroswapRouter.swap_exact_tokens_for_tokens(amount_in: i128, amount_out_min: i128, path: Vec<Address>, to: Address, deadline: u64) -> Result<Vec<i128>, CombinedRouterError>",
+				],
+			}),
+		).toEqual(["defi-amm"]);
+	});
+
+	it("blend pool surface → defi-lending", () => {
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"PoolContract.queue_set_reserve(asset: Address, metadata: ReserveConfig)",
+					"PoolContract.get_positions(address: Address) -> Positions",
+				],
+			}),
+		).toEqual(["defi-lending"]);
+	});
+
+	it("negative: swap-adjacent but non-marker fns stay unlabeled", () => {
+		expect(
+			deriveCodeDomains({
+				contractInterface: [
+					"SoroswapRouter.router_quote(amount_a: i128, reserve_a: i128, reserve_b: i128) -> Result<i128, CombinedRouterError>",
+					"PoolContract.set_admin(new_admin: Address)",
+				],
+			}),
+		).toEqual([]);
+	});
+});
