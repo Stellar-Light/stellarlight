@@ -55,6 +55,12 @@ const IFACE_DOMAINS: Array<[fnName: string, domain: CodeDomain]> = [
 	// domain=defi-amm served 0 while soroswap sat scanned with 48 fns).
 	["add_liquidity", "defi-amm"],
 	["swap_exact_tokens_for_tokens", "defi-amm"],
+	// Phoenix-style pool surface (CosmWasm heritage) — verified against
+	// Phoenix-Protocol-Group/phoenix-contracts' stored interface (2026-08-15:
+	// scanned at depth 0.75 with 48 fns, zero matched the UniswapV2 markers).
+	["provide_liquidity", "defi-amm"],
+	["withdraw_liquidity", "defi-amm"],
+	["simulate_reverse_swap", "defi-amm"],
 	// Blend-style pool surface — the de-facto lending standard on Soroban.
 	// Verified against blend-capital/blend-contracts' stored interface.
 	["queue_set_reserve", "defi-lending"],
