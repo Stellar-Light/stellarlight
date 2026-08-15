@@ -42,12 +42,46 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-08-01",
 		},
 	],
-	// Verified 2026-07-31 (indexing pass): JSR packaging + companion repo.
+	// Deep-read 2026-08-15 (full tree + package READMEs): architecture,
+	// package map, SEP coverage, and the in-repo contract fleet — every fact
+	// below verified against source, not README prose alone.
 	"fazzatti/colibri": [
 		{
 			note: "Published on JSR as @colibri/core; fazzatti/colibri-examples is the companion worked-examples repo — cite both together for how-to questions.",
 			source: "curated",
 			asOf: "2026-07-31",
+		},
+		{
+			note: "TypeScript-first Stellar/Soroban toolkit built on a pipeline/process/step architecture with a plugin system and deterministic error handling — including decoding contract errors out of failed simulation responses (core/common/helpers/contract-error-from-failed-simulation-response).",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+		{
+			note: "Monorepo of six JSR packages: @colibri/core (pipelines + Stellar/Soroban utilities), @colibri/webauth (unified SEP-10 + SEP-45 web auth), @colibri/plugin-fee-bump (fee sponsorship via fee-bump wrapping), @colibri/plugin-channel-accounts (sponsored channel-account reuse), @colibri/rpc-streamer (live Soroban event streaming), @colibri/test-tooling.",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+		{
+			note: "@colibri/webauth implements unified SEP-10 AND SEP-45 web authentication with deterministic account routing, strict challenge verification, and enforced Soroban simulation — one of the few SEP-45 (contract-account auth) implementations in the ecosystem.",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+		{
+			note: "Ships a working smart-account reference fleet as in-repo Soroban contracts (_internal/contracts): passkey-account, delegated-asset-account, recursive-delegate-account, signatureless-account, web-auth — built to compiled wasm with sha256-pinned fixtures and tested against; the code-symbols layer (PasskeyAccount, DelegatedAssetAccount) comes from here.",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+		{
+			note: "Engineering rigor above ecosystem norm for its size: Deno-first, co-located unit + integration tests across core modules, codecov coverage gate, custom lint rules, and an AGENTS.md carrying agent-facing contribution instructions.",
+			source: "curated",
+			asOf: "2026-08-15",
+		},
+	],
+	"fazzatti/colibri-examples": [
+		{
+			note: "Companion worked-examples repo for @colibri (Deno runtime): getting-started/ carries the newcomer walkthroughs, examples/ the per-feature recipes, each with its own README — the practical entry point before reading colibri core.",
+			source: "curated",
+			asOf: "2026-08-15",
 		},
 	],
 };
