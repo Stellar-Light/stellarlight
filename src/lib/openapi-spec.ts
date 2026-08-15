@@ -2037,6 +2037,106 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/vet-idea": {
+			get: {
+				operationId: "vetIdea",
+				tags: ["Composite"],
+				summary: "Vet a build idea — competitors, maturity, prior art, gap, funding in one call",
+				description:
+					"The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Assess a BUILD IDEA against the ecosystem: what exists, how mature, was it tried, is the vertical funded.",
+					keywords: [
+						"vet idea",
+						"validate idea",
+						"should i build",
+						"what already exists",
+						"competitors",
+						"competitive landscape",
+						"market gap",
+						"prior art",
+						"has anyone built",
+						"scf fundable",
+					],
+					useWhen: [
+						"'i want to build a lending protocol — what exists already' (one call instead of five)",
+						"'is the wallet space crowded on stellar' — gap + competitors + maturity",
+						"'has anyone tried this at a hackathon' — priorArt with alive/dead state",
+					],
+					notFor: [
+						"single-repo assessment (getRepoTrust) or plain discovery (searchRepos/searchProjects)",
+						"demand claims — gap is SUPPLY-side coverage only",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description: "Short idea description, 3-200 chars (e.g. 'lending protocol for RWAs').",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The vet-idea report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { type: "object" },
+										report: {
+											type: "object",
+											properties: {
+												idea: { type: "string" },
+												vertical: {
+													type: "string",
+													nullable: true,
+													description:
+														"Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless.",
+												},
+												competitors: {
+													type: "object",
+													properties: {
+														repos: { type: "array", items: { type: "object" } },
+														projects: { type: "array", items: { type: "object" } },
+													},
+												},
+												maturity: {
+													type: "object",
+													properties: {
+														auditedProjects: { type: "integer" },
+														liveOnMainnetRepos: { type: "integer" },
+														basis: { type: "string" },
+													},
+												},
+												priorArt: {
+													type: "object",
+													properties: {
+														repos: { type: "array", items: { type: "object" } },
+														note: { type: "string" },
+													},
+												},
+												gap: {
+													type: "object",
+													nullable: true,
+													description:
+														"Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps).",
+												},
+												funding: { type: "object", nullable: true },
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing/too-short q or unknown params." },
+				},
+			},
+		},
 		"/api/repos/trust": {
 			get: {
 				operationId: "getRepoTrust",
