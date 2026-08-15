@@ -43,7 +43,12 @@ describe("buildKnowledgeNotes", () => {
 			["colibri", [{ projectSlug: "colibri", auditor: null, publishedAt: null }]],
 		]);
 		const notes = buildKnowledgeNotes("fazzatti/colibri", "colibri", withAudit);
-		expect(notes.map((n) => n.source)).toEqual(["curated", "derived:audit"]);
+		// colibri carries the 2026-08-15 deep-read set (6 curated notes); the
+		// stacking contract is curated-first then derived, whatever the count.
+		const sources = notes.map((n) => n.source);
+		expect(sources.filter((x) => x === "curated").length).toBeGreaterThanOrEqual(6);
+		expect(sources.at(-1)).toBe("derived:audit");
+		expect(sources.slice(0, -1).every((x) => x === "curated")).toBe(true);
 	});
 });
 
