@@ -50,6 +50,15 @@ const DEP_DOMAINS: Array<[test: (dep: string) => boolean, domain: CodeDomain]> =
 const IFACE_DOMAINS: Array<[fnName: string, domain: CodeDomain]> = [
 	// SEP-40 price feed trait — the canonical oracle surface.
 	["lastprice", "oracle"],
+	// UniswapV2-style router surface — the de-facto AMM standard on Soroban.
+	// Markers verified against soroswap/core's stored interface (2026-08-15:
+	// domain=defi-amm served 0 while soroswap sat scanned with 48 fns).
+	["add_liquidity", "defi-amm"],
+	["swap_exact_tokens_for_tokens", "defi-amm"],
+	// Blend-style pool surface — the de-facto lending standard on Soroban.
+	// Verified against blend-capital/blend-contracts' stored interface.
+	["queue_set_reserve", "defi-lending"],
+	["get_positions", "defi-lending"],
 ];
 
 export interface DomainSignals {
