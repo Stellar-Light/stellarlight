@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "added",
 		summary:
+			"Vet-idea composite: GET /api/vet-idea?q=<idea> — competitors (repos + active projects), maturity from verified evidence, hackathon prior art with alive/dead state, the vertical's supply-side gap verdict, and SCF funding presence, in one call (openapi@1.8.66).",
+		detail:
+			"Second spine composite. Vertical detection is a closed deterministic token map onto the gaps axis (real types enum values only; EVM porter vocabulary included — erc-3643 maps to RWA). Every block carries its basis: gap is SUPPLY-side coverage (not demand); maturity absence means no evidence on record; priorArt covers judged-hackathon repos in our index and says so. No verdict synthesis.",
+	},
+	{
+		date: "2026-08-15",
+		surfaces: ["api"],
+		type: "added",
+		summary:
 			"Trust report composite: GET /api/repos/trust?repo=owner/name — one evidence-grounded answer to 'should I depend on this repo?' joining code truth, live usage, audits with drift, succession, and activity, with a closed deterministic signals vocabulary (openapi@1.8.65).",
 		detail:
 			"First spine composite: the join a consumer previously made across five calls (search + explain + audits + contracts + changes), served as one shape. No synthetic scores — `signals` names facts that hold (scanned, deep-code, live-on-mainnet, verified-contract-id, audited, multi-audited, code-changed-since-audit, actively-maintained, archived, superseded); absence of a signal means the evidence doesn't hold, not that the opposite is proven. codeTruth.contractInterface carries the full scanned fn signatures (≤60) as a codegen guard: verify generated calls against the real interface before invoking. auditDrift is present when commits landed after the latest audit report. 404 for unindexed repos — absence of evidence, not a verdict.",
