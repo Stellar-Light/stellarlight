@@ -390,6 +390,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vet-idea": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Vet a build idea — competitors, maturity, prior art, gap, funding in one call
+         * @description The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.
+         */
+        get: operations["vetIdea"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/repos/trust": {
         parameters: {
             query?: never;
@@ -2518,6 +2538,59 @@ export interface operations {
                         funding?: string;
                     };
                 };
+            };
+        };
+    };
+    vetIdea: {
+        parameters: {
+            query: {
+                /** @description Short idea description, 3-200 chars (e.g. 'lending protocol for RWAs'). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The vet-idea report. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: Record<string, never>;
+                        report?: {
+                            idea?: string;
+                            /** @description Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless. */
+                            vertical?: string | null;
+                            competitors?: {
+                                repos?: Record<string, never>[];
+                                projects?: Record<string, never>[];
+                            };
+                            maturity?: {
+                                auditedProjects?: number;
+                                liveOnMainnetRepos?: number;
+                                basis?: string;
+                            };
+                            priorArt?: {
+                                repos?: Record<string, never>[];
+                                note?: string;
+                            };
+                            /** @description Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps). */
+                            gap?: Record<string, never> | null;
+                            funding?: Record<string, never> | null;
+                        };
+                    };
+                };
+            };
+            /** @description Missing/too-short q or unknown params. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
