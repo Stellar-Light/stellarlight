@@ -75,6 +75,14 @@ describe("surface-specific vocabulary preserved", () => {
 		expect(PROJECT_SYNONYMS.vibrant).toContain("vesseo");
 		expect(PROJECT_SYNONYMS.vesseo).toContain("vibrant");
 	});
+
+	it("EVM porter vocabulary reaches Stellar-native terms (2026-08-15 lesson)", () => {
+		expect(PROJECT_SYNONYMS["erc-3643"]).toContain("rwa");
+		expect(REPO_SYNONYMS["erc-3643"]).toContain("sep-57");
+		expect(REPO_SYNONYMS["msg.sender"]).toContain("require_auth");
+		expect(PROJECT_SYNONYMS.erc20).toContain("sep-41");
+		expect(REPO_SYNONYMS.solidity).toContain("soroban");
+	});
 	it("builders keeps regional payment rails", () => {
 		for (const v of ["boleto", "pix", "pagamento"])
 			expect(BUILDER_SYNONYMS.payments).toContain(v);
