@@ -1,0 +1,41 @@
+name: Backfill code domains
+
+# Full-corpus triage tagging from STORED signals (zero GitHub API calls —
+# safe to run any time without touching the scan budget). Covers the
+# EC-taxonomy rows the project-scoped enrich loop never reaches. Dry-run
+# default; inspect the tag distribution, then execute.
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-code-domains
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # inputs.* are EMPTY on schedule events (scan-repo-code finding 18) —
+      # the nightly gets its own hardcoded execute step.
+
+      - name: Manual backfill (dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: pnpm exec tsx scripts/backfill-code-domains.ts ${{ inputs.execute && '--execute' || '' }}
