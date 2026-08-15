@@ -24,7 +24,7 @@ import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
-import { computeEcosystemGaps } from "@/lib/ecosystem-gaps";
+import { computeEcosystemGaps, GAP_VERTICALS } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -48,37 +48,6 @@ const VALID_DIMENSIONS = [
 	"toolchain",
 ] as const;
 
-// Buildable product verticals — the universe the `gaps` dimension measures
-// coverage against, so a canonical vertical with ZERO active projects surfaces
-// as whitespace rather than being invisible. EVERY entry MUST be a real value
-// of the projects `types` select (this list is a subset of it); a label that
-// isn't a `types` value can never appear in any project's types[] and would
-// report a permanent FALSE `absent`. That is why "Oracle" is NOT here: oracles
-// are typed by convention as category=Infrastructure with types=[] (Reflector/
-// Band/RedStone all carry types=[]), and "Oracle" isn't a `types` option at all
-// — its coverage isn't measurable on this axis (use searchProjects/category).
-// The broad catch-alls (Infrastructure / SDK / Analytics) are excluded because
-// they're not verticals; a caveat in the response says so.
-const GAP_VERTICALS = [
-	"Wallet",
-	"DEX",
-	"Lending",
-	"Bridge",
-	"Payments",
-	"Anchor",
-	"Indexer",
-	"Explorer",
-	"AI",
-	"Gaming",
-	"Education",
-	"Security",
-	"NFT",
-	"RWA",
-	"Stablecoin",
-	"Social Impact",
-	"RPC",
-	"Faucet",
-] as const;
 
 // One place for the funding methodology label — it is served in the response
 // AND stamped on every persisted snapshot (sls-044), so the two can't drift.

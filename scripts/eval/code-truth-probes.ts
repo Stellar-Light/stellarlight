@@ -138,6 +138,22 @@ const PROBES: Probe[] = [
 		},
 	},
 	{
+		name: "vet-idea composite: lending idea joins all blocks",
+		path: "/api/vet-idea?q=lending%20protocol%20for%20rwas",
+		strict: true,
+		test: (b) => {
+			const r = b.report;
+			if (!r) return "report absent";
+			if (r.vertical !== "Lending" && r.vertical !== "RWA")
+				return `vertical ${r.vertical}`;
+			if (!(r.competitors?.repos?.length >= 1)) return "no competitor repos";
+			if (!r.gap) return "gap block absent";
+			if (typeof r.maturity?.auditedProjects !== "number")
+				return "maturity block malformed";
+			return null;
+		},
+	},
+	{
 		name: "row plumbing floor: reflector scan state + usage persisted",
 		path: `/api/repos?where%5BfullName%5D%5Bequals%5D=${encodeURIComponent(REFLECTOR)}&limit=1&depth=0`,
 		test: (b) => {
