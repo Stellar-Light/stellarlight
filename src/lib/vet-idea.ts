@@ -167,30 +167,38 @@ export async function buildVetIdea(
 			return tokens.some((t) => hay.includes(t));
 		});
 	}
+	// Maturity from verified evidence: audits joined over the FULL matched
+	// project set (an arbitrary 8-slice hid blend and reported audited: 0 —
+	// found live 2026-08-15), live usage over the competitor repos.
+	const auditedSlugs = new Set<string>();
+	const allSlugs = projDocs.map((p) => String(p.slug)).filter(Boolean);
+	if (allSlugs.length) {
+		const ares = await payload.find({
+			collection: "audits",
+			where: { projectSlug: { in: allSlugs } },
+			limit: 500,
+			depth: 0,
+			select: { projectSlug: true },
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		for (const a of ares.docs as any[]) auditedSlugs.add(String(a.projectSlug));
+	}
+	const auditedProjects = auditedSlugs.size;
+	// Audited projects lead the displayed slice; the rest alphabetical.
+	projDocs.sort((a, b) => {
+		const aa = auditedSlugs.has(String(a.slug)) ? 0 : 1;
+		const bb = auditedSlugs.has(String(b.slug)) ? 0 : 1;
+		return (
+			aa - bb ||
+			String(a.name ?? a.slug).localeCompare(String(b.name ?? b.slug))
+		);
+	});
 	const competitorProjects = projDocs.slice(0, 8).map((p) => ({
 		slug: String(p.slug),
 		name: p.name ? String(p.name) : null,
 		status: p.status ? String(p.status) : null,
 		types: Array.isArray(p.types) ? p.types.map(String) : [],
 	}));
-
-	// Maturity from verified evidence: audits over the competitor projects'
-	// slugs (exact join), live usage over the competitor repos.
-	let auditedProjects = 0;
-	const slugs = competitorProjects.map((p) => p.slug);
-	if (slugs.length) {
-		const ares = await payload.find({
-			collection: "audits",
-			where: { projectSlug: { in: slugs } },
-			limit: 200,
-			depth: 0,
-			select: { projectSlug: true },
-		});
-		auditedProjects = new Set(
-			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-			(ares.docs as any[]).map((a) => String(a.projectSlug)),
-		).size;
-	}
 	let liveOnMainnetRepos = 0;
 	if (competitorRepos.length) {
 		const rres = await payload.find({
@@ -214,7 +222,10 @@ export async function buildVetIdea(
 		collection: "repos",
 		where: {
 			and: [
-				{ judgedHackathon: { equals: true } },
+				// judgedHackathon is TEXT (the hackathon the judge score came
+				// from) — 365 populated rows; `equals: true` matched zero (found
+				// live 2026-08-15, the wrong-predicate false-negative class).
+				{ judgedHackathon: { exists: true } },
 				...(tokens.length
 					? [
 							{
@@ -287,7 +298,7 @@ export async function buildVetIdea(
 			auditedProjects,
 			liveOnMainnetRepos,
 			basis:
-				"auditedProjects = competitor projects with ≥1 report in the audits registry (absence ≠ unaudited); liveOnMainnetRepos = competitor repos with verified on-chain usage.",
+				"auditedProjects = ALL matched projects (vertical-wide, not just the displayed slice) with ≥1 report in the audits registry (absence ≠ unaudited); liveOnMainnetRepos = displayed competitor repos with verified on-chain usage.",
 		},
 		priorArt: {
 			repos: priorArtRepos,
