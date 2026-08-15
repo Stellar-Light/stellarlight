@@ -26,6 +26,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
+import { isAllowlisted } from "../../src/lib/repo-allowlist";
 import { computeFarmScore } from "../../src/lib/code-signals";
 import {
 	detectSdkCapabilities,
@@ -337,6 +338,27 @@ async function main() {
 		try {
 			const r = await fetchRepoCode(gh, full);
 			callsUsed += (r?.pathsFetched ?? 2) + 5; // tree+meta+tags+readme overhead
+			// Canonical platform repos never need to PROVE they're Stellar —
+			// they ARE Stellar. The dep-based proof detector is self-
+			// referentially blind to them (js-stellar-sdk depends on
+			// stellar-base, not on an SDK → proof=none, depth=0; found
+			// 2026-08-15), and the unreadable-blob guard held rs-soroban-sdk
+			// in error since 2026-07-11. Pin proof by language and let depth
+			// compute from whatever WAS readable.
+			if (r && isAllowlisted(full) && (r.proof === "none" || r.outcome !== "ok")) {
+				const lang = String(doc.primaryLanguage ?? "").toLowerCase();
+				r.proof =
+					lang === "rust"
+						? "cargo-sdk"
+						: lang === "typescript" || lang === "javascript"
+							? "js-sdk"
+							: "lang-sdk";
+				r.outcome = "ok";
+				r.depthInput.proof = r.proof;
+				console.log(
+					`  pin    ${full.padEnd(44)} allowlisted-canonical proof=${r.proof}`,
+				);
+			}
 			if (!r) {
 				data = errorToWrite("no-tree/unfetchable", nowIso);
 				errored++;
