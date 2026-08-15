@@ -1,7 +1,43 @@
 {
-	"generatedAt": "2026-08-14T06:59:46.542Z",
+	"generatedAt": "2026-08-15T06:01:30.250Z",
 	"detector": "api-drift",
 	"failures": [
+		{
+			"probe": "status.endpoints lists /api/vet-idea",
+			"note": "OpenAPI documents /api/vet-idea but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "status.endpoints lists /api/repos/trust",
+			"note": "OpenAPI documents /api/repos/trust but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "status.endpoints lists /api/contracts",
+			"note": "OpenAPI documents /api/contracts but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "/api/vet-idea emits X-API-Version",
+			"note": "got \"none\" — add \"/api/vet-idea\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/vet-idea emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/vet-idea\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/repos/trust emits X-API-Version",
+			"note": "got \"none\" — add \"/api/repos/trust\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/repos/trust emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/repos/trust\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/contracts emits X-API-Version",
+			"note": "got \"none\" — add \"/api/contracts\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/contracts emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/contracts\" to next.config.mjs publicApi[]"
+		},
 		{
 			"probe": "research row: every live field documented in ResearchResult",
 			"note": "live-but-undocumented: docKind, docVersionStatus"

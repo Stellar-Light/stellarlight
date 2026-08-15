@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-08-14T07:10:16.230Z",
-	"total": 367,
-	"open": 286,
+	"generatedAt": "2026-08-15T06:02:19.040Z",
+	"total": 379,
+	"open": 298,
 	"closed": 81,
 	"verified": 7,
 	"cleared": 74,
-	"closingRate": 0.22,
-	"oldestOpenDays": 22,
+	"closingRate": 0.21,
+	"oldestOpenDays": 23,
 	"inWave": 0,
-	"highOpen": 5,
+	"highOpen": 17,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -27,19 +27,19 @@
 			"total": 14
 		},
 		{
-			"surface": "corpus",
-			"open": 3,
-			"total": 15
-		},
-		{
 			"surface": "contract",
-			"open": 2,
-			"total": 13
+			"open": 11,
+			"total": 22
 		},
 		{
 			"surface": "code",
-			"open": 1,
-			"total": 1
+			"open": 4,
+			"total": 4
+		},
+		{
+			"surface": "corpus",
+			"open": 3,
+			"total": 15
 		},
 		{
 			"surface": "scf",
@@ -52,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 22
+			"days": 23
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 22
+			"days": 23
 		}
 	],
 	"topOpen": [
@@ -97,25 +97,25 @@
 			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "idos in top-3 for 'is idOS live'",
-			"severity": "medium"
+			"id": "nightly-field-population:repos-knowledgenotes-curated-creit-dupe-class-fi",
+			"surface": "code",
+			"source": "nightly-field-population",
+			"probe": "repos.knowledgeNotes (curated creit — dupe class fixed in #783/#788)",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "nownodes in top-3 for 'is NOWNodes live'",
-			"severity": "medium"
+			"id": "nightly-field-population:repos-codeverified-isdeployablecontract-conforma",
+			"surface": "code",
+			"source": "nightly-field-population",
+			"probe": "repos.codeVerified.isDeployableContract (conformance C4, blend)",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "lightecho in top-3 for 'is Lightecho live'",
-			"severity": "medium"
+			"id": "nightly-field-population:repos-codeverified-protocolcaps-sdk-protocol-cap",
+			"surface": "code",
+			"source": "nightly-field-population",
+			"probe": "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
+			"severity": "high"
 		}
 	]
 }
