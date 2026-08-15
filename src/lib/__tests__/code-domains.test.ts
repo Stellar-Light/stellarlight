@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { deriveCodeDomains } from "../code-domains";
 
 describe("deriveCodeDomains", () => {
-	it("maps dependency evidence to domains", () => {
+	it("dependencies are NOT identity — a consumer never inherits the protocol's domain (2026-08-15 stratum lesson)", () => {
 		expect(
 			deriveCodeDomains({
-				stellarDeps: ["@blend-capital/blend-sdk", "@x402/core", "passkey-kit"],
+				stellarDeps: ["@soroswap/sdk", "@defindex/sdk", "@creit-tech/stellar-wallets-kit"],
 			}),
-		).toEqual(["defi-lending", "payments-x402", "wallet-infra"]);
+		).toEqual([]);
 	});
 	it("sep24-ramp capability marks anchor-ramp", () => {
 		expect(deriveCodeDomains({ sdkCapabilities: ["sep24-ramp", "signing"] })).toEqual([
