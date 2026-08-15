@@ -133,6 +133,9 @@ export async function GET(req: NextRequest) {
 		mainnetContractId: string | null;
 		sdkCapabilities: string[];
 		codeDomains: string[];
+		contractInterface: string[];
+		stellarDeps: string[];
+		codeInUse: Record<string, unknown> | null;
 	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
@@ -158,6 +161,9 @@ export async function GET(req: NextRequest) {
 					mainnetContractId: true,
 					sdkCapabilities: true,
 					codeDomains: true,
+					contractInterface: true,
+					stellarDeps: true,
+					codeInUse: true,
 					scannedRef: true,
 					successorRepo: true,
 				},
@@ -204,6 +210,20 @@ export async function GET(req: NextRequest) {
 									(s): s is string => typeof s === "string",
 								)
 							: [],
+						contractInterface: Array.isArray(d.contractInterface)
+							? (d.contractInterface as unknown[])
+									.filter((s): s is string => typeof s === "string")
+									.slice(0, 60)
+							: [],
+						stellarDeps: Array.isArray(d.stellarDeps)
+							? (d.stellarDeps as unknown[]).filter(
+									(s): s is string => typeof s === "string",
+								)
+							: [],
+						codeInUse:
+							d.codeInUse && typeof d.codeInUse === "object"
+								? (d.codeInUse as Record<string, unknown>)
+								: null,
 					};
 				}
 			}
