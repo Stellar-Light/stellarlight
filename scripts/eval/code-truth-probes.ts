@@ -148,8 +148,8 @@ const PROBES: Probe[] = [
 				return `vertical ${r.vertical}`;
 			if (!(r.competitors?.repos?.length >= 1)) return "no competitor repos";
 			if (!r.gap) return "gap block absent";
-			if (typeof r.maturity?.auditedProjects !== "number")
-				return "maturity block malformed";
+			if (!(r.maturity?.auditedProjects >= 1))
+				return `auditedProjects ${r.maturity?.auditedProjects} (blend should count)`;
 			return null;
 		},
 	},
