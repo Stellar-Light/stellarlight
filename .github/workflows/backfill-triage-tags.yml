@@ -6,6 +6,12 @@ name: Backfill triage tags
 # default; inspect the tag distribution, then execute.
 
 on:
+  schedule:
+    # nightly 04:00 UTC — AFTER the 03:00 scan wave and enrich, so derivation
+    # reads the freshest stored signals. This is the STANDING corpus-wide
+    # tagging cadence: enrich-repos only walks project-linked rows, so the
+    # EC long tail re-derives (and self-heals: revived repos untag) here.
+    - cron: "0 4 * * *"
   workflow_dispatch:
     inputs:
       execute:
@@ -32,5 +38,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - name: Backfill
+      # inputs.* are EMPTY on schedule events (scan-repo-code finding 18) —
+      # the nightly gets its own hardcoded execute step.
+      - name: Nightly backfill (schedule)
+        if: github.event_name == 'schedule'
+        run: pnpm exec tsx scripts/backfill-triage-tags.ts --execute
+      - name: Manual backfill (dispatch)
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm exec tsx scripts/backfill-triage-tags.ts ${{ inputs.execute && '--execute' || '' }}
