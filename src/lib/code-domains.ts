@@ -3,11 +3,15 @@
  * actually do" layer, for every scanned repo.
  *
  * Metadata says what a repo claims; this says what its code proves. Domains
- * are derived ONLY from strong evidence the scanner already extracted:
- *   - ecosystem dependencies (stellar-deps allowlist — manifests, not prose)
- *   - SDK capability tags (real API usage in source, context-gated)
- *   - contract interface fn names for on-chain trait standards (e.g. the
- *     SEP-40 `lastprice` surface)
+ * are IDENTITY — what this repo's own code IS — derived only from:
+ *   - contract interface fn names for on-chain protocol surfaces (SEP-40
+ *     lastprice, the UniswapV2 + Phoenix AMM dialects, the Blend pool)
+ *   - SDK capability tags where the repo's OWN code implements the flow
+ *     (sep24-ramp = real interactive deposit/withdraw paths)
+ * Dependencies are deliberately NOT identity evidence (2026-08-15: a
+ * multisig signer depping @soroswap/sdk was served under domain=defi-amm —
+ * depending on a protocol's SDK makes you its CONSUMER, not the protocol).
+ * Integration truth lives in stellarDeps and the dependsOn filter.
  * Topics, READMEs, and descriptions are deliberately NOT evidence here —
  * self-description is the metadata weakness this layer exists to beat.
  *
@@ -29,21 +33,6 @@ export const CODE_DOMAINS = [
 
 export type CodeDomain = (typeof CODE_DOMAINS)[number];
 
-/** Dependency evidence → domain. Matched against stellarDeps entries
- * (verbatim allowlisted names from manifests). Prefix match on scopes. */
-const DEP_DOMAINS: Array<[test: (dep: string) => boolean, domain: CodeDomain]> =
-	[
-		[(d) => d.startsWith("@blend-capital/") || d.startsWith("blend-"), "defi-lending"],
-		[(d) => d === "xycloans" || d.startsWith("xycloans-"), "defi-lending"],
-		[(d) => d.startsWith("@soroswap/") || d.startsWith("soroswap-"), "defi-amm"],
-		[(d) => d.startsWith("@phoenix-protocol/") || d.startsWith("phoenix-"), "defi-amm"],
-		[(d) => d.startsWith("@defindex/"), "defi-yield"],
-		[(d) => d.startsWith("@reflector-network/") || d.startsWith("reflector-"), "oracle"],
-		[(d) => d.startsWith("@x402/") || d === "x402" || d.startsWith("x402-"), "payments-x402"],
-		[(d) => d === "passkey-kit" || d === "passkey-kit-sdk", "wallet-infra"],
-		[(d) => d === "stellar-wallets-kit" || d.startsWith("@creit.tech/") || d.startsWith("@creit-tech/"), "wallet-infra"],
-		[(d) => d.startsWith("@stellar-indexer/") || d === "mercury-sdk", "indexer"],
-	];
 
 /** Contract-interface trait evidence: fn names that identify an on-chain
  * standard's surface. Conservative — one canonical marker per standard. */
@@ -76,10 +65,6 @@ export interface DomainSignals {
 
 export function deriveCodeDomains(s: DomainSignals): CodeDomain[] {
 	const out = new Set<CodeDomain>();
-	for (const dep of s.stellarDeps ?? []) {
-		const d = dep.toLowerCase();
-		for (const [test, domain] of DEP_DOMAINS) if (test(d)) out.add(domain);
-	}
 	// sep24-ramp capability = real interactive-deposit/withdraw code paths.
 	if ((s.sdkCapabilities ?? []).includes("sep24-ramp")) out.add("anchor-ramp");
 	for (const entry of s.contractInterface ?? []) {
