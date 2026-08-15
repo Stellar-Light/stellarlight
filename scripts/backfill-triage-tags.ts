@@ -40,6 +40,10 @@ async function main(): Promise<number> {
 			limit: 500,
 			page,
 			depth: 0,
+			// context.internal: without it the afterRead privacy hook strips
+			// triageTags from THIS read too, so "existing" is always empty and
+			// every run re-tags the same rows (the 1,855-repeats symptom).
+			context: { internal: true },
 			select: {
 				fullName: true,
 				lastCommitAt: true,
@@ -89,6 +93,26 @@ async function main(): Promise<number> {
 				id: String(d.id),
 				data: { triageTags: tags },
 			});
+			// One-time ground-truth probe on the very first write: the hooked
+			// read (with context) vs the adapter-level read (no hooks — cannot
+			// lie). Disambiguates hook-bypass failure from true non-persistence.
+			if (written === 0) {
+				const hooked = (await payload.findByID({
+					collection: "repos",
+					id: String(d.id),
+					depth: 0,
+					context: { internal: true },
+					// biome-ignore lint/suspicious/noExplicitAny: probe
+				})) as any;
+				// biome-ignore lint/suspicious/noExplicitAny: adapter probe
+				const raw = (await (payload.db as any).findOne({
+					collection: "repos",
+					where: { id: { equals: String(d.id) } },
+				})) as any;
+				console.log(
+					`PROBE ${d.fullName}: sent=${JSON.stringify(tags)} hooked=${JSON.stringify(hooked?.triageTags)} rawdb=${JSON.stringify(raw?.triageTags)} tier-control=${JSON.stringify(hooked?.tier)}`,
+				);
+			}
 			// Read-back every 25th write (sampled proof against silent drops).
 			if (written % 25 === 0) {
 				const check = (await payload.findByID({
