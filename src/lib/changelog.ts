@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-15",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Structured filters (domain/dependsOn/capability) on /api/repos/search now drive candidate inclusion DB-side, so filter-only browsing sees the whole corpus; /api/repos/explain codeVerified now serves contractInterface, stellarDeps, and codeInUse (openapi@1.8.64).",
+		detail:
+			"Two serve-path defects found by the new code-truth probe pack: (1) filter-only browse (no q) drew candidates from the top-200-by-repoScore pool BEFORE filtering, so domain=oracle served [] while the corpus held 590 domain-tagged rows and dependsOn=soroban-sdk served 9 of 299 true dependents; filters now push per-element predicates into the candidate query. (2) The explain route's codeVerified assembly predated three scan-derived fields — contract interfaces, dependency crates, and live on-chain usage are now in the block. scripts/eval/code-truth-probes.ts freezes these answers as a standing gate.",
+	},
+	{
 		date: "2026-08-14",
 		surfaces: ["api"],
 		type: "added",
