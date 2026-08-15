@@ -127,7 +127,10 @@ async function main() {
 	const where = {
 		and: [
 			...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
-			...(RESCAN ? [] : [{ codeScanState: { not_equals: "scanned" } }]),
+			// error rows excluded from routine waves (2026-08-15): the same ~65
+			// blob-unreadable dead repos re-erred EVERY wave, burning budget at
+			// the front of each run. --rescan still retries them deliberately.
+			...(RESCAN ? [] : [{ codeScanState: { not_in: ["scanned", "error"] } }]),
 		],
 	};
 	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
@@ -186,7 +189,9 @@ async function main() {
 				d.lastCommitAt &&
 				d.codeScannedAt &&
 				new Date(d.lastCommitAt).getTime() >
-					new Date(d.codeScannedAt).getTime(),
+					new Date(d.codeScannedAt).getTime() &&
+				// Same 24h re-scan cooldown as the default branch (2026-08-15).
+				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
 		);
 		const stale = staleAll.filter(notTriaged);
 		skippedTriaged += staleAll.length - stale.length;
@@ -264,7 +269,12 @@ async function main() {
 				d.lastCommitAt &&
 				d.codeScannedAt &&
 				new Date(d.lastCommitAt).getTime() >
-					new Date(d.codeScannedAt).getTime(),
+					new Date(d.codeScannedAt).getTime() &&
+				// 24h re-scan cooldown (2026-08-15): at the 2h cron cadence the
+				// unified policy re-scanned every fresh-commit canonical repo
+				// EVERY wave (12x/day) — the tail starved (+47 scans in 11h).
+				// Freshness intent is DAILY; clamp re-scan frequency to it.
+				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
 		);
 		const stale = staleAll.filter(notTriaged);
 		const unscannedKept = (unscanned.docs as any[]).filter(notTriaged);
