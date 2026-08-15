@@ -64,6 +64,35 @@ export const BUILDER_CORE_VERTICALS = [
  */
 /** zk proof-system vocabulary, shared by every family entry point (see the
  * `zk`/`snark`/`zk-snark`/… keys below). One list so the members stay in sync. */
+// EVM-standard families — every entry point (bare + hyphenated) maps to the
+// same set, the zk-family pattern: a query FOR any member expands to all.
+const ERC20_FAMILY: string[] = [
+	"erc20",
+	"erc-20",
+	"sep-41",
+	"sep41",
+	"token",
+	"fungible",
+];
+const ERC_NFT_FAMILY: string[] = [
+	"erc721",
+	"erc-721",
+	"erc1155",
+	"erc-1155",
+	"nft",
+	"collectible",
+];
+const ERC3643_FAMILY: string[] = [
+	"erc3643",
+	"erc-3643",
+	"sep-57",
+	"sep57",
+	"rwa",
+	"real world asset",
+	"regulated",
+	"compliance",
+	"kyc",
+];
 const ZK_FAMILY: string[] = [
 	"zk",
 	"zero-knowledge",
@@ -140,6 +169,30 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	groth16: [...ZK_FAMILY],
 	zksnark: ["zksnark", ...ZK_FAMILY],
 	"zk-snark": ["zk-snark", "zksnark", ...ZK_FAMILY],
+	// ── EVM porter vocabulary (Raven codegen-correctness note, 2026-08-15) ──
+	// Porters phrase in EVM terms (the Ascend ERC-3643 port report; Raven
+	// measured same-concept-different-phrasing returning materially different
+	// results). Each EVM entry point expands to the Stellar-native vocabulary
+	// the corpus actually holds — ERC-3643 → SEP-57 comes from Raven's golden
+	// q-sor-evm-to-soroban-porting. Values stay substring-safe on the project
+	// surface (no bare "auth" — it substring-matches "author").
+	erc20: [...ERC20_FAMILY],
+	"erc-20": [...ERC20_FAMILY],
+	erc721: [...ERC_NFT_FAMILY],
+	"erc-721": [...ERC_NFT_FAMILY],
+	erc1155: [...ERC_NFT_FAMILY],
+	"erc-1155": [...ERC_NFT_FAMILY],
+	erc3643: [...ERC3643_FAMILY],
+	"erc-3643": [...ERC3643_FAMILY],
+	solidity: ["solidity", "soroban", "rust", "smart contract"],
+	"msg.sender": ["msg.sender", "require_auth", "authorization", "invoker"],
+	nonreentrant: ["nonreentrant", "reentrancy", "reentrant"],
+	reentrancy: ["reentrancy", "reentrant", "nonreentrant"],
+	// "indexed" (Solidity event modifier) → Soroban event topics; the
+	// "indexer" vertical is a different key and unaffected.
+	indexed: ["indexed", "topics", "events"],
+	hardhat: ["hardhat", "stellar-cli", "cli", "toolchain"],
+	foundry: ["foundry", "stellar-cli", "cli", "toolchain"],
 	// Privacy vertical (2026-07-21 privacy battery): street vocabulary
 	// ("anonymous", "mixer", "monero-style") never appears in privacy
 	// records — they say privacy/confidential ("privacy-preserving token
