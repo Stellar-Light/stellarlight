@@ -25,6 +25,8 @@ const REFLECTOR = "reflector-network/reflector-contract";
 type Probe = {
 	name: string;
 	path: string;
+	/** Endpoint 400s unknown params by design — no cache-buster. */
+	strict?: boolean;
 	// biome-ignore lint/suspicious/noExplicitAny: probe bodies are shape-checked inline
 	test: (body: any) => string | null; // null = pass, string = failure detail
 };
@@ -91,6 +93,7 @@ const PROBES: Probe[] = [
 	{
 		name: "contracts registry: reflector fully joined (id + audits + domain)",
 		path: "/api/contracts?limit=20",
+		strict: true,
 		test: (b) => {
 			const row = (b.contracts ?? []).find(
 				(c: { repo?: { fullName?: string } }) =>
@@ -108,6 +111,7 @@ const PROBES: Probe[] = [
 	{
 		name: "contracts registry: domain=oracle filter",
 		path: "/api/contracts?domain=oracle&limit=20",
+		strict: true,
 		test: (b) =>
 			(b.contracts ?? []).some(
 				(c: { repo?: { fullName?: string } }) =>
@@ -135,7 +139,9 @@ const PROBES: Probe[] = [
 async function main(): Promise<number> {
 	let failed = 0;
 	for (const p of PROBES) {
-		const url = `${BASE}${p.path}${p.path.includes("?") ? "&" : "?"}_probe=${Date.now()}`;
+		const url = p.strict
+			? `${BASE}${p.path}`
+			: `${BASE}${p.path}${p.path.includes("?") ? "&" : "?"}_probe=${Date.now()}`;
 		let detail: string | null;
 		try {
 			const res = await fetch(url);
