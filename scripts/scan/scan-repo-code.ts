@@ -63,7 +63,13 @@ const argOf = (name: string, dflt: string) => {
 const ONLY = argOf("--only", "");
 const LIMIT = Math.max(1, Number(argOf("--limit", "60")) || 60);
 const LANG = argOf("--lang", "Rust");
-const CALL_BUDGET = Math.max(100, Number(argOf("--budget", "650")) || 650);
+// Explicit --budget wins; with no flag the budget is POOL-AWARE, resolved in
+// main() from the live rate limit. The old constant default (650) was sized
+// for the 1,000/hr Actions token and silently starved every cron wave after
+// the 5,000/hr PAT landed — 12h of 2h-cadence waves yielded +47 scans
+// (found 2026-08-15). rate_limit is quota-exempt.
+const BUDGET_FLAG = argOf("--budget", "");
+let CALL_BUDGET = Math.max(100, Number(BUDGET_FLAG) || 650);
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
 if (!GH) {
@@ -118,6 +124,23 @@ async function verifyMain() {
 async function main() {
 	if (process.argv.includes("--verify")) return verifyMain();
 	const payload = await getPayload({ config: await configPromise });
+	if (!BUDGET_FLAG) {
+		try {
+			const rl = (await (
+				await fetch("https://api.github.com/rate_limit", {
+					headers: { Authorization: `Bearer ${GH}` },
+				})
+			).json()) as { resources?: { core?: { remaining?: number } } };
+			const remaining = rl?.resources?.core?.remaining;
+			if (typeof remaining === "number")
+				CALL_BUDGET = Math.max(100, remaining - 400);
+			console.log(
+				`pool-aware budget: core remaining=${remaining ?? "?"} → budget=${CALL_BUDGET} (reserve 400)`,
+			);
+		} catch {
+			console.log(`rate_limit probe failed — keeping fallback budget=${CALL_BUDGET}`);
+		}
+	}
 	console.log(
 		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
 	);
