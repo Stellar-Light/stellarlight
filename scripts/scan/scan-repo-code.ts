@@ -130,6 +130,16 @@ async function main() {
 			...(RESCAN ? [] : [{ codeScanState: { not_equals: "scanned" } }]),
 		],
 	};
+	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
+	// verdicts that scanning cannot change — skip them so wave budget goes to
+	// repos whose code truth matters. Allowlisted canon never carries tags
+	// (repo-triage.ts guard), so no canonical repo can ever be skipped.
+	// NOTE: reads need context.internal or the afterRead privacy hook strips
+	// triageTags and this filter silently never fires (the #896 class).
+	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+	const notTriaged = (d: any) =>
+		!(Array.isArray(d.triageTags) && d.triageTags.length > 0);
+	let skippedTriaged = 0;
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	let docs: any[];
 	let eligible: number;
@@ -158,6 +168,7 @@ async function main() {
 			},
 			limit: 3000,
 			depth: 0,
+			context: { internal: true },
 			select: {
 				fullName: true,
 				repoScore: true,
@@ -166,16 +177,19 @@ async function main() {
 				codeScanState: true,
 				lastCommitAt: true,
 				codeScannedAt: true,
+				triageTags: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-		const stale = (scanned.docs as any[]).filter(
+		const staleAll = (scanned.docs as any[]).filter(
 			(d) =>
 				d.lastCommitAt &&
 				d.codeScannedAt &&
 				new Date(d.lastCommitAt).getTime() >
 					new Date(d.codeScannedAt).getTime(),
 		);
+		const stale = staleAll.filter(notTriaged);
+		skippedTriaged += staleAll.length - stale.length;
 		stale.sort((a, b) =>
 			String(b.lastCommitAt).localeCompare(String(a.lastCommitAt)),
 		);
@@ -200,8 +214,11 @@ async function main() {
 				// (Comma-separated STRING — the array form is silently ignored by
 				// the Payload find; verified live 2026-07-11.)
 				sort: "-repoScore,-lastCommitAt",
-				limit: LIMIT,
+				// Over-fetch so triage skips can't shrink the wave (tail waves
+				// hit pockets where a large share of the pool is triaged-dead).
+				limit: LIMIT * 2,
 				depth: 0,
+				context: { internal: true },
 				select: {
 					fullName: true,
 					repoScore: true,
@@ -209,6 +226,7 @@ async function main() {
 					isArchived: true,
 					codeScanState: true,
 					lastCommitAt: true,
+					triageTags: true,
 				},
 			}),
 			// --rescan makes `where` include scanned repos already — skip the
@@ -227,6 +245,7 @@ async function main() {
 						},
 						limit: 3000,
 						depth: 0,
+						context: { internal: true },
 						select: {
 							fullName: true,
 							repoScore: true,
@@ -235,18 +254,25 @@ async function main() {
 							codeScanState: true,
 							lastCommitAt: true,
 							codeScannedAt: true,
+							triageTags: true,
 						},
 					}),
 		]);
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-		const stale = (scannedPool.docs as any[]).filter(
+		const staleAll = (scannedPool.docs as any[]).filter(
 			(d) =>
 				d.lastCommitAt &&
 				d.codeScannedAt &&
 				new Date(d.lastCommitAt).getTime() >
 					new Date(d.codeScannedAt).getTime(),
 		);
-		docs = [...(unscanned.docs as any[]), ...stale]
+		const stale = staleAll.filter(notTriaged);
+		const unscannedKept = (unscanned.docs as any[]).filter(notTriaged);
+		skippedTriaged +=
+			staleAll.length -
+			stale.length +
+			((unscanned.docs as any[]).length - unscannedKept.length);
+		docs = [...unscannedKept, ...stale]
 			.sort(
 				(a, b) =>
 					(b.repoScore ?? 0) - (a.repoScore ?? 0) ||
@@ -256,13 +282,15 @@ async function main() {
 			)
 			.slice(0, LIMIT);
 		eligible = unscanned.totalDocs + stale.length;
+		// totalDocs counts triaged rows the filter drops — the log line below
+		// reports the skip so a shrinking pool is visible, not silent.
 		if (stale.length)
 			console.log(
 				`re-scan pool: ${stale.length} scanned repos pushed since their scan`,
 			);
 	}
 	console.log(
-		`eligible: ${eligible} · this wave: ${docs.length}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
+		`eligible: ${eligible} · this wave: ${docs.length}${skippedTriaged ? ` · skipped ${skippedTriaged} triaged` : ""}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
 	);
 
 	let callsUsed = 0;
