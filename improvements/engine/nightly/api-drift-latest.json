@@ -1,7 +1,11 @@
 {
-	"generatedAt": "2026-08-15T06:01:30.250Z",
+	"generatedAt": "2026-08-16T06:03:02.854Z",
 	"detector": "api-drift",
 	"failures": [
+		{
+			"probe": "status.endpoints lists /api/scf-pitch",
+			"note": "OpenAPI documents /api/scf-pitch but /api/status.endpoints[] omits it"
+		},
 		{
 			"probe": "status.endpoints lists /api/vet-idea",
 			"note": "OpenAPI documents /api/vet-idea but /api/status.endpoints[] omits it"
@@ -13,6 +17,14 @@
 		{
 			"probe": "status.endpoints lists /api/contracts",
 			"note": "OpenAPI documents /api/contracts but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "/api/scf-pitch emits X-API-Version",
+			"note": "got \"none\" — add \"/api/scf-pitch\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/scf-pitch emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/scf-pitch\" to next.config.mjs publicApi[]"
 		},
 		{
 			"probe": "/api/vet-idea emits X-API-Version",

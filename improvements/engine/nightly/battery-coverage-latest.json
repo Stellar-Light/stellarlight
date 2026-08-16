@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-14T07:10:13.066Z",
+	"generatedAt": "2026-08-16T06:14:39.741Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
@@ -15,6 +15,26 @@
 		{
 			"probe": "battery:q-ti-java-sdk-wallet-feebump",
 			"note": "top 0.57 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://stellar.org/blog/developers/adapter-protocol-28-upgrade-guide",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-tool-indexer-repos-discovery",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-tool-leaderboard-open-issues",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Which Stellar projects have the most open issues right now — rank them so I can \" (tooling-infra); best: stellar-registry/contracts",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-tool-soroban-auth-audit-live",
+			"note": "top 0.51 < 0.6 via research/confidence for \"What do the currently indexed primary audits say about Soroban authorization rec\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-aug-7-2026",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-tool-zk-repo-live",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"What are the strongest current Stellar ZK reference repositories, and which retu\" (tooling-infra); best: StelTade/swaptrade-contract",
 			"surface": "corpus"
 		}
 	]
