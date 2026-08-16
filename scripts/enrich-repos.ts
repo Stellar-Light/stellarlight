@@ -22,6 +22,7 @@ import {
 	type OwnerRepo,
 } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
+import { deriveTriageTags } from "../src/lib/repo-triage";
 import {
 	type AuditRecord,
 	buildKnowledgeNotes,
