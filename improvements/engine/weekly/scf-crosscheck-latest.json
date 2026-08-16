@@ -1,6 +1,6 @@
 {
   "frame": {
-    "scf": 495,
+    "scf": 500,
     "directory": 935,
     "matched": 310,
     "roundsChecked": 309
@@ -31,6 +31,18 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
+      "slug": "wellspring",
+      "name": "Wellspring",
+      "ourRounds": [
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/wellspring-xuv",
+      "officialAwardedRounds": [
+        "30"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
+    },
+    {
       "slug": "autoaction",
       "name": "AutoAction",
       "ourRounds": [
@@ -39,44 +51,8 @@
       "url": "https://communityfund.stellar.org/project/autoaction-ybl",
       "officialAwardedRounds": [],
       "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
-      "slug": "prism",
-      "name": "Prism",
-      "ourRounds": [
-        "41"
-      ],
-      "url": "https://communityfund.stellar.org/project/prism-dxb",
-      "officialAwardedRounds": [
-        "44"
-      ],
-      "reason": "no submission verdict found for round(s) #41"
-    },
-    {
-      "slug": "dig",
-      "name": "Dig",
-      "ourRounds": [
-        "35"
-      ],
-      "url": "https://communityfund.stellar.org/project/dig-xgg",
-      "officialAwardedRounds": [
-        "43"
-      ],
-      "reason": "no submission verdict found for round(s) #35"
-    },
-    {
-      "slug": "wellspring",
-      "name": "Wellspring",
-      "ourRounds": [
-        "30"
-      ],
-      "url": "https://communityfund.stellar.org/project/wellspring-rdo",
-      "officialAwardedRounds": [
-        "41"
-      ],
-      "reason": "no submission verdict found for round(s) #30"
     }
   ],
-  "generatedAt": "2026-08-09T09:43:39Z",
+  "generatedAt": "2026-08-16T09:33:15Z",
   "evalKey": "scf-crosscheck"
 }

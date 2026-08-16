@@ -36,21 +36,21 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "98% (193/196)",
-      "types": "92% (180/196)",
+      "shortDescription": "99% (194/196)",
+      "types": "92% (181/196)",
       "supportedNetworks": "9% (17/196)",
       "logoUrl": "79% (154/196)"
     },
     "Tooling": {
-      "shortDescription": "98% (173/177)",
-      "types": "94% (167/177)",
-      "logoUrl": "80% (141/177)"
+      "shortDescription": "98% (172/176)",
+      "types": "94% (166/176)",
+      "logoUrl": "80% (140/176)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (364/369)",
-      "types": "93% (342/369)",
-      "supportedNetworks": "7% (27/369)",
-      "logoUrl": "89% (327/369)"
+      "shortDescription": "99% (365/370)",
+      "types": "93% (345/370)",
+      "supportedNetworks": "7% (27/370)",
+      "logoUrl": "89% (328/370)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
@@ -148,20 +148,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 400,
-    "liveStale365": 142,
+    "liveNoDatedSignal": 394,
+    "liveStale365": 146,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 524,
+        "ageDays": 531,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 892,
+        "ageDays": 899,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -182,7 +182,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2292,
+        "ageDays": 2299,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -293,6 +293,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-09T09:43:40Z",
+  "generatedAt": "2026-08-16T09:33:15Z",
   "evalKey": "engine-b-sweeps"
 }

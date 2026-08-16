@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-09T09:43:39Z",
-  "total": 11,
-  "ok": 11,
+  "generatedAt": "2026-08-16T09:33:15Z",
+  "total": 12,
+  "ok": 12,
   "failed": 0,
   "rows": [
     {
@@ -61,6 +61,16 @@
       "url": "https://stellar.org/enterprise-fund",
       "ingestedBy": "ingest-sdf-org.ts",
       "chunkCount": 7,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "research-grants",
+      "family": "research-grants",
+      "source": "sdf-org",
+      "url": "https://research.stellar.org/research-grants",
+      "ingestedBy": "ingest-sdf-org.ts",
+      "chunkCount": 3,
       "missingSignatures": [],
       "status": "OK"
     },

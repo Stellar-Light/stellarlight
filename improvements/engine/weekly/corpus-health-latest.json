@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 9529,
-    "docs": 1799
+    "chunks": 9808,
+    "docs": 1844
   },
   "s5_junk_urls": {
     "count": 1,
@@ -12,12 +12,18 @@
   "s6_bad_titles": {
     "count": 69,
     "byIssue": {
+      "html-entities": 8,
       "sentence-like (body fragment?)": 56,
       "overlong (sentence, not a title)": 4,
-      "html-entities": 8,
       "bare-date": 1
     },
     "sample": [
+      {
+        "url": "https://stellar.gitbook.io/scf-handbook/scf-awards/build-award/budget-and-deliverable-guidelines",
+        "source": "scf-handbook",
+        "title": "Budget &amp; Deliverable Guidelines",
+        "issue": "html-entities"
+      },
       {
         "url": "https://developers.stellar.org/docs/build/smart-contracts/example-contracts/complex-account",
         "source": "dev-docs",
@@ -101,48 +107,56 @@
         "source": "sdf-blog",
         "title": "Stellar | Representing Blockchain on the Commodity Futures Trading Commission\u2019s ",
         "issue": "overlong (sentence, not a title)"
-      },
-      {
-        "url": "https://stellar.org/blog/ecosystem/sdf-x-dfs-lab-blockchain-startup-camps-are-here",
-        "source": "sdf-blog",
-        "title": "SDF x DFS Lab: Blockchain Startup Camps are Here!",
-        "issue": "sentence-like (body fragment?)"
       }
     ]
   },
   "s7_coverage": {
-    "sdf-blog": {
-      "chunks": 2187,
-      "datedPct": 100,
-      "newestAgeDays": 6,
-      "undated": false,
-      "stalled": false
-    },
-    "scf-handbook": {
-      "chunks": 116,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
-      "stalled": false
-    },
     "lumenloop-research": {
-      "chunks": 241,
+      "chunks": 250,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
-    "dev-docs": {
-      "chunks": 3909,
-      "datedPct": 75,
-      "newestAgeDays": 5,
+    "sdf-org": {
+      "chunks": 80,
+      "datedPct": 29,
+      "newestAgeDays": 146,
       "undated": false,
       "stalled": false
     },
+    "scf-handbook": {
+      "chunks": 120,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
     "release": {
-      "chunks": 174,
+      "chunks": 179,
       "datedPct": 100,
-      "newestAgeDays": 6,
+      "newestAgeDays": 3,
+      "undated": false,
+      "stalled": false
+    },
+    "dev-docs": {
+      "chunks": 3911,
+      "datedPct": 75,
+      "newestAgeDays": 3,
+      "undated": false,
+      "stalled": false
+    },
+    "repo-docs": {
+      "chunks": 242,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
+    "sdf-blog": {
+      "chunks": 2201,
+      "datedPct": 100,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
@@ -163,42 +177,35 @@
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 100,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-org": {
-      "chunks": 77,
-      "datedPct": 30,
-      "newestAgeDays": 139,
+      "newestAgeDays": 107,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 94,
+      "newestAgeDays": 101,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 81,
+      "newestAgeDays": 88,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 56,
+      "newestAgeDays": 63,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1316,
+      "newestAgeDays": 1323,
       "undated": false,
       "stalled": false
     },
@@ -212,8 +219,22 @@
   },
   "s7_stalled": [],
   "s8_mirrors": {
-    "count": 125,
+    "count": 127,
     "sample": [
+      {
+        "hash": "8dbf979de515",
+        "urls": [
+          "https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/reflector/README.md",
+          "https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/axis-markets/README.md"
+        ]
+      },
+      {
+        "hash": "dfe6c5b246eb",
+        "urls": [
+          "https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/reflector/README.md",
+          "https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/blend/README.md"
+        ]
+      },
       {
         "hash": "204a107f0c9f",
         "urls": [
@@ -276,23 +297,9 @@
           "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep6/integration",
           "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep24/integration"
         ]
-      },
-      {
-        "hash": "88e687a9c79c",
-        "urls": [
-          "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep6/integration",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep24/integration"
-        ]
-      },
-      {
-        "hash": "f349e64c7baf",
-        "urls": [
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/request_trust",
-          "https://developers.stellar.org/docs/platforms/anchor-platform/api-reference/platform/rpc/methods/notify_transaction_on_hold"
-        ]
       }
     ]
   },
-  "generatedAt": "2026-08-09T09:43:40Z",
+  "generatedAt": "2026-08-16T09:33:15Z",
   "evalKey": "corpus-health"
 }
