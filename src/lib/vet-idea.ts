@@ -267,7 +267,14 @@ export async function buildVetIdea(
 			where: { status: { in: [...ACTIVE_PROJECT_STATUSES] } },
 			limit: 5000,
 			depth: 0,
-			select: { slug: true, name: true, types: true, status: true, scfAwarded: true },
+			select: {
+			slug: true,
+			name: true,
+			types: true,
+			status: true,
+			scfAwarded: true,
+			scf: true,
+		},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		const activeDocs = allActive.docs as any[];
@@ -281,7 +288,11 @@ export async function buildVetIdea(
 			};
 		const scfAwardedProjects = activeDocs.filter(
 			(p) =>
-				Array.isArray(p.types) && p.types.includes(vertical) && p.scfAwarded,
+				Array.isArray(p.types) &&
+				p.types.includes(vertical) &&
+				// scf.awarded is the structured truth; legacy scfAwarded checkbox
+				// is null on awarded projects like blend (found live 2026-08-16).
+				(p.scf?.awarded ?? p.scfAwarded),
 		).length;
 		funding = {
 			scfAwardedProjects,

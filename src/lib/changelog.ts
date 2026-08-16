@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-16",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"SCF-pitch composite: GET /api/scf-pitch?q=<idea> — live round state, the vertical's funded peers with recorded award totals, the vet-idea view, and deterministic evidence-named pitch angles in one call (openapi@1.8.67). find-partner intentionally NOT added: /api/partners/match already IS that composite (natural-language need in, toml-verified scored partners out) — its routing keywords gained the find-a-partner phrasing instead.",
+		detail:
+			"Third spine composite. round never asserts a negative on fetch failure (source: 'unavailable' says verify yourself). fundedPeers reads the structured scf.awarded truth (the legacy scfAwarded checkbox is null on awarded projects — also fixed in vet-idea's funding count). angles are deterministic derivations that each name the fact they stand on — an open round's deadline, a coverage gap's count, funded peers to differentiate against, dead prior art to explain, the working-code bar when competitors run live on mainnet.",
+	},
+	{
 		date: "2026-08-15",
 		surfaces: ["api"],
 		type: "added",

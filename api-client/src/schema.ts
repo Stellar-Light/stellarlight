@@ -390,6 +390,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/scf-pitch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SCF pitch prep — live round, funded peers, gap, prior art, angles in one call
+         * @description The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.
+         */
+        get: operations["scfPitch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vet-idea": {
         parameters: {
             query?: never;
@@ -2538,6 +2558,53 @@ export interface operations {
                         funding?: string;
                     };
                 };
+            };
+        };
+    };
+    scfPitch: {
+        parameters: {
+            query: {
+                /** @description Short idea description, 3-200 chars. */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The pitch-prep report. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: Record<string, never>;
+                        report?: {
+                            idea?: string;
+                            vertical?: string | null;
+                            round?: {
+                                /** @enum {string} */
+                                source?: "live" | "unavailable";
+                                open?: Record<string, never>[];
+                                note?: string;
+                            };
+                            fundedPeers?: Record<string, never>[];
+                            fundingBar?: Record<string, never>;
+                            vet?: Record<string, never>;
+                            /** @description Deterministic derivations from served facts — each names its evidence; not judgments. */
+                            angles?: string[];
+                        };
+                    };
+                };
+            };
+            /** @description Missing/too-short q or unknown params. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

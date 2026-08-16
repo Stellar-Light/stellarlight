@@ -154,6 +154,22 @@ const PROBES: Probe[] = [
 		},
 	},
 	{
+		name: "scf-pitch composite: lending idea joins round + peers + angles",
+		path: "/api/scf-pitch?q=lending%20protocol%20for%20rwas",
+		strict: true,
+		test: (b) => {
+			const r = b.report;
+			if (!r) return "report absent";
+			if (!r.round?.source) return "round block absent";
+			if (!Array.isArray(r.fundedPeers)) return "fundedPeers absent";
+			if (!(r.fundingBar?.fundedProjects >= 1))
+				return `fundedProjects ${r.fundingBar?.fundedProjects} (blend should count)`;
+			if (!(Array.isArray(r.angles) && r.angles.length >= 1))
+				return "no angles derived";
+			return null;
+		},
+	},
+	{
 		name: "row plumbing floor: reflector scan state + usage persisted",
 		path: `/api/repos?where%5BfullName%5D%5Bequals%5D=${encodeURIComponent(REFLECTOR)}&limit=1&depth=0`,
 		test: (b) => {
