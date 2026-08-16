@@ -1497,6 +1497,10 @@ export const spec: OpenAPISpec = {
 					purpose:
 						"Directory of hireable/integratable ecosystem partners with verified activity signals.",
 					keywords: [
+						"find a partner",
+						"find partner",
+						"who can i work with",
+						"integration partner",
 						"partner",
 						"partners",
 						"anchor",
@@ -2034,6 +2038,88 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+				},
+			},
+		},
+		"/api/scf-pitch": {
+			get: {
+				operationId: "scfPitch",
+				tags: ["Composite"],
+				summary: "SCF pitch prep — live round, funded peers, gap, prior art, angles in one call",
+				description:
+					"The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Prepare/ground an SCF grant application: round timing, funded competition, and evidence-based angles.",
+					keywords: [
+						"scf",
+						"scf pitch",
+						"community fund",
+						"grant application",
+						"apply for funding",
+						"is a round open",
+						"submission deadline",
+						"who got funded",
+						"pitch my idea",
+					],
+					useWhen: [
+						"'i want to apply to SCF with X — what should the pitch say' (one call)",
+						"'is an SCF round open right now and when does it close'",
+						"'who already got SCF money in this vertical and how much'",
+					],
+					notFor: [
+						"general idea vetting without the funding lens (vetIdea)",
+						"RFP browsing (listRfps) or award history research (searchResearch)",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description: "Short idea description, 3-200 chars.",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The pitch-prep report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { type: "object" },
+										report: {
+											type: "object",
+											properties: {
+												idea: { type: "string" },
+												vertical: { type: "string", nullable: true },
+												round: {
+													type: "object",
+													properties: {
+														source: { type: "string", enum: ["live", "unavailable"] },
+														open: { type: "array", items: { type: "object" } },
+														note: { type: "string" },
+													},
+												},
+												fundedPeers: { type: "array", items: { type: "object" } },
+												fundingBar: { type: "object" },
+												vet: { type: "object" },
+												angles: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Deterministic derivations from served facts — each names its evidence; not judgments.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing/too-short q or unknown params." },
 				},
 			},
 		},
