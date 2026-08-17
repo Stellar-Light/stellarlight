@@ -15,6 +15,7 @@ import Link from "next/link";
 import { ScoutCopyButton } from "@/components/scout-copy-button";
 import { ScoutInstallPicker } from "@/components/scout-install-picker";
 import { IDEAS } from "@/data/ideas";
+import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { spec } from "@/lib/openapi-spec";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -359,9 +360,33 @@ function Section({
 	);
 }
 
+/** Live counts for the hero cards; null when the DB is unreachable (render the dated floor then). */
+async function getLiveCounts(): Promise<{
+	projects: number | null;
+	hackathons: number | null;
+}> {
+	const payload = await getPayloadSafe();
+	let projects: number | null = null;
+	if (payload) {
+		try {
+			const r = await payload.count({
+				collection: "projects",
+				where: { status: { in: ["Development", "Pre-Release", "Live"] } },
+			});
+			projects = r.totalDocs;
+		} catch {}
+	}
+	let hackathons: number | null = null;
+	try {
+		hackathons = (await fetchAllDoraHacksHackathons()).length;
+	} catch {}
+	return { projects, hackathons };
+}
+
 export default async function ScoutPage() {
 	const showcaseProjects = await getShowcaseProjects();
 	const researchChunkCount = await getResearchChunkCount();
+	const live = await getLiveCounts();
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -474,8 +499,8 @@ export default async function ScoutPage() {
 					{/* Top row: count cards */}
 					<div className="grid md:grid-cols-3 gap-3 mb-3">
 						<div className="rounded-xl border border-border bg-card p-5">
-							<div className="text-3xl font-bold text-foreground mb-1">
-								670+
+							<div className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+								{live.projects ? `${live.projects.toLocaleString()}` : "670+"}
 							</div>
 							<div className="text-sm font-semibold text-foreground mb-3">
 								Stellar projects
@@ -546,7 +571,9 @@ export default async function ScoutPage() {
 						</div>
 
 						<div className="rounded-xl border border-border bg-card p-5">
-							<div className="text-3xl font-bold text-foreground mb-1">11</div>
+							<div className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+								{live.hackathons ?? 11}
+							</div>
 							<div className="text-sm font-semibold text-foreground mb-3">
 								Hackathons
 							</div>

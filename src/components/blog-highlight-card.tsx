@@ -20,8 +20,18 @@ interface BlogHighlightCardProps {
 			| undefined;
 		rssImageUrl?: string | null;
 		featured?: boolean | null | undefined;
+		isRSSExternal?: boolean | null;
+		externalUrl?: string | null;
 	};
 	isLarge?: boolean;
+}
+
+function externalHost(url: unknown): string | null {
+	try {
+		return new URL(String(url)).host.replace(/^www\./, "");
+	} catch {
+		return null;
+	}
 }
 
 export default function BlogHighlightCard({
@@ -85,12 +95,16 @@ export default function BlogHighlightCard({
 						{post.excerpt}
 					</p>
 
-					{/* Learn More with External Link Icon */}
+					{/* Where the click goes: our own post, or the original on its publisher's site */}
 					<div className="mt-auto flex items-center gap-2">
 						<span className="text-sm font-medium text-foreground group-hover:text-white transition-colors duration-150">
-							Learn more
+							{post.isRSSExternal
+								? `Read on ${externalHost(post.externalUrl) ?? "the source"}`
+								: "Read the post"}
 						</span>
-						<ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-150" />
+						{post.isRSSExternal && (
+							<ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-150" />
+						)}
 					</div>
 				</div>
 			</div>

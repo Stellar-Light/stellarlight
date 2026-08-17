@@ -226,10 +226,10 @@ export function SkillsMarketplace({
 							</div>
 							<ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5 text-xs leading-relaxed">
 								{[
-									"4,541-chunk research corpus across 9 primary sources",
+									"Research corpus of 9,000+ chunks across 9 primary sources",
 									"Severity-tagged Soroban audit findings (Certora · OtterSec · Halborn · Code4rena · 9 more)",
 									"Electric Capital macro data + SCF Handbook + Mazières SCP paper",
-									"14 open REST endpoints — anyone can build on stellarlight's data layer",
+									"Open REST API (see /api/openapi.json) — anyone can build on stellarlight's data layer",
 									"Both SKILL.md and MCP — install in Claude Code, Cursor, Claude.ai, ChatGPT, Gemini, Continue, Zed",
 									"8-step Deep Dive workflow with gap classification + evidence floor",
 								].map((line) => (
