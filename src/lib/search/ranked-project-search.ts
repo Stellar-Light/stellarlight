@@ -139,16 +139,18 @@ export async function rankedProjectSearch(
 	const lowerQuery = query.toLowerCase();
 	const tier = (p: any) => {
 		const name = String(p.name ?? "").toLowerCase();
-		if (name === lowerQuery || name.startsWith(lowerQuery)) return 4;
-		if (name.includes(lowerQuery)) return 3;
 		const types = Array.isArray(p.types)
 			? p.types.map((t: unknown) => String(t).toLowerCase())
 			: [];
+		const category = String(p.category ?? "").toLowerCase();
+		if (name === lowerQuery) return 6;
+		// "wallet" means the type before it means "WalletConnect"
+		if (types.includes(lowerQuery) || category === lowerQuery) return 5;
+		if (name.startsWith(lowerQuery)) return 4;
+		if (name.includes(lowerQuery)) return 3;
 		if (
 			types.some((t: string) => t.includes(lowerQuery)) ||
-			String(p.category ?? "")
-				.toLowerCase()
-				.includes(lowerQuery)
+			category.includes(lowerQuery)
 		)
 			return 2;
 		return 1;
