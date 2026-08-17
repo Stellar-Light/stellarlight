@@ -767,12 +767,16 @@ export default async function HackathonsPage({
 											<div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
 												<span className="inline-flex items-center gap-1 text-foreground/90 font-semibold">
 													<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
-													{formatPrize(hackathon.bonus_price)}
+													{hackathon.bonus_price > 0
+														? formatPrize(hackathon.bonus_price)
+														: "not stated"}
 												</span>
-												<span className="inline-flex items-center gap-1">
-													<Users className="w-3 h-3" />
-													{hackathon.hackers_count.toLocaleString()}
-												</span>
+												{hackathon.hackers_count > 0 && (
+													<span className="inline-flex items-center gap-1">
+														<Users className="w-3 h-3" />
+														{hackathon.hackers_count.toLocaleString()}
+													</span>
+												)}
 												<span className="inline-flex items-center gap-1">
 													<Calendar className="w-3 h-3" />
 													{formatShortDate(hackathon.end_time)}
