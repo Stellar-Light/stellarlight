@@ -49,6 +49,40 @@ function applyScfFilter(baseWhere: any, scfFilter?: string) {
  *
  * Ranking: name startsWith > name contains > org-only match
  */
+/** Option values of the projects.types / projects.category selects (see src/collections/Projects.ts). */
+const PROJECT_TYPES = [
+	"Wallet",
+	"DEX",
+	"Lending",
+	"Bridge",
+	"Infrastructure",
+	"Payments",
+	"Anchor",
+	"SDK",
+	"Indexer",
+	"Explorer",
+	"Analytics",
+	"AI",
+	"Gaming",
+	"Education",
+	"Security",
+	"NFT",
+	"RWA",
+	"Stablecoin",
+	"Social Impact",
+	"RPC",
+	"Faucet",
+];
+const PROJECT_CATEGORIES = [
+	"Infrastructure",
+	"Tooling",
+	"Partner Integration",
+	"User-Facing App",
+	"Asset",
+	"Protocol/Contract",
+	"Anchor",
+];
+
 export async function rankedProjectSearch(
 	payload: Payload,
 	options: RankedSearchOptions,
@@ -68,14 +102,24 @@ export async function rankedProjectSearch(
 	// Lobstr and Freighter (type Wallet, description "wallet") ahead of
 	// "walletban" and "wallet-guru" (name substrings). Before this the box
 	// searched name + GitHub org only and hid every flagship wallet.
+	// `types` and `category` are select fields: Payload rejects `contains` on
+	// them (the whole find threw and the box said "No projects found" for every
+	// query for ~40 minutes on 2026-08-17). Match them by option value instead.
+	const q = query.trim().toLowerCase();
+	const typeHits = PROJECT_TYPES.filter(
+		(t) => t.toLowerCase().includes(q) || q.includes(t.toLowerCase()),
+	);
+	const categoryHits = PROJECT_CATEGORIES.filter(
+		(c) => c.toLowerCase().includes(q) || q.includes(c.toLowerCase()),
+	);
 	const where = {
 		...baseWhere,
 		or: [
 			{ name: { contains: query } },
 			{ "github.orgLogin": { contains: query } },
-			{ types: { contains: query } },
-			{ category: { contains: query } },
 			{ description: { contains: query } },
+			...(typeHits.length ? [{ types: { in: typeHits } }] : []),
+			...(categoryHits.length ? [{ category: { in: categoryHits } }] : []),
 		],
 	};
 
