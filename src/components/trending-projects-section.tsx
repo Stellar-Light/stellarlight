@@ -16,6 +16,7 @@ export default async function TrendingProjectsSection() {
 		repoCount: number;
 		score: number;
 		commits90d: number;
+		proven: boolean;
 		category: string;
 		logoUrl: string | null;
 	}> = [];
@@ -47,6 +48,11 @@ export default async function TrendingProjectsSection() {
 				score: number;
 				commits90d: number;
 				lastCommitAt: string | null;
+				/** some repo scanned with Stellar code evidence */
+				proven: boolean;
+				scanned: number;
+				/** scanned repos whose stellarProof came back "none" */
+				none: number;
 			}
 		>();
 		if (projectSlugs.length > 0) {
@@ -67,6 +73,8 @@ export default async function TrendingProjectsSection() {
 					repoScore: true,
 					lastCommitAt: true,
 					activitySignals: true,
+					codeScanState: true,
+					stellarProof: true,
 				},
 			} as any);
 			for (const r of reposResult.docs as any[]) {
@@ -77,7 +85,15 @@ export default async function TrendingProjectsSection() {
 					score: 0,
 					commits90d: 0,
 					lastCommitAt: null,
+					proven: false,
+					scanned: 0,
+					none: 0,
 				};
+				if (r.codeScanState === "scanned") {
+					e.scanned += 1;
+					if (r.stellarProof && r.stellarProof !== "none") e.proven = true;
+					else e.none += 1;
+				}
 				e.stars += r.stars ?? 0;
 				e.count += 1;
 				e.score = Math.max(e.score, Number(r.repoScore ?? 0));
@@ -97,6 +113,10 @@ export default async function TrendingProjectsSection() {
 				const agg = bySlug.get(project.slug);
 				const totalStars = agg?.stars ?? 0;
 				if (!agg || agg.score <= 0) return null;
+				// scanned and found no Stellar code in any repo (keybase/client,
+				// noir-lang/noir, coinbase/x402): linked from a project, not Stellar (sls-047)
+				if (agg.scanned > 0 && !agg.proven && agg.none === agg.scanned)
+					return null;
 				// a "top" repo has moved in the last six months
 				if (!agg.lastCommitAt || Date.parse(agg.lastCommitAt) < staleCutoff)
 					return null;
@@ -117,6 +137,7 @@ export default async function TrendingProjectsSection() {
 					totalStars,
 					repoCount: agg.count,
 					score: agg.score,
+					proven: agg.proven,
 					commits90d: agg.commits90d,
 					category: project.category,
 					logoUrl,
@@ -135,7 +156,11 @@ export default async function TrendingProjectsSection() {
 			r.score +
 			12 * Math.log10(r.totalStars + 1) +
 			6 * Math.log10(r.commits90d + 1);
-		repos.sort((a, b) => showcase(b) - showcase(a));
+		// code-verified Stellar repos lead; unscanned ones follow on score
+		repos.sort(
+			(a, b) =>
+				Number(b.proven) - Number(a.proven) || showcase(b) - showcase(a),
+		);
 		repos = repos.slice(0, 8);
 	} catch {
 		return null;
