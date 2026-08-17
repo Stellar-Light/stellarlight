@@ -405,7 +405,10 @@ export default async function ProjectDetailPage({
 												: project.status}
 										</Badge>
 										{project.verificationLevel !== "Unverified" && (
-											<Badge className="bg-gradient-to-r from-[#FDDA24]/20 to-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 text-sm px-4 py-1.5 font-semibold shadow-sm">
+											<Badge
+												variant="outline"
+												className="text-neutral-200 text-sm px-4 py-1.5 font-semibold shadow-sm"
+											>
 												<CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
 												{project.verificationLevel}
 											</Badge>
@@ -706,8 +709,8 @@ export default async function ProjectDetailPage({
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
 									<div className="flex items-center gap-3">
-										<div className="p-2.5 rounded-lg bg-gradient-to-br from-[#FDDA24]/20 to-[#FDDA24]/10 border border-[#FDDA24]/20">
-											<Star className="w-5 h-5 text-[#FDDA24]" />
+										<div className="p-2.5 rounded-lg bg-white/[0.04] border border-border">
+											<Star className="w-5 h-5 text-neutral-300" />
 										</div>
 										<div>
 											<p className="text-sm font-medium text-muted-foreground">
@@ -838,7 +841,7 @@ export default async function ProjectDetailPage({
 													href={`https://stellar.expert/explorer/public/asset/${project.onchain.assetCode}-${project.onchain.issuer}`}
 													target="_blank"
 													rel="noopener noreferrer"
-													className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+													className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-white/25 transition-colors duration-150"
 												>
 													<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors">
 														{project.onchain.assetCode}
@@ -861,7 +864,7 @@ export default async function ProjectDetailPage({
 												href={`https://stellar.expert/explorer/public/account/${project.onchain.issuer}`}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+												className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-white/25 transition-colors duration-150"
 											>
 												<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
 													{project.onchain.issuer}
@@ -1024,7 +1027,7 @@ export default async function ProjectDetailPage({
 																	href={`https://stellar.expert/explorer/public/contract/${contract.address}`}
 																	target="_blank"
 																	rel="noopener noreferrer"
-																	className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-all duration-150 hover:shadow-sm"
+																	className="group flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50 hover:border-white/25 transition-colors duration-150"
 																>
 																	<code className="font-mono text-sm text-foreground group-hover:text-primary transition-colors break-all">
 																		{contract.address}
@@ -1103,7 +1106,7 @@ export default async function ProjectDetailPage({
 									{logsResult.docs.map((log, idx) => (
 										<div
 											key={log.id}
-											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-primary/30 transition-all duration-150 group"
+											className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background/50 hover:border-white/25 transition-all duration-150 group"
 										>
 											<div className="flex items-center gap-4">
 												<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 group-hover:border-primary/40 transition-colors">

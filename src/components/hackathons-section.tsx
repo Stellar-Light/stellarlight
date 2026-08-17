@@ -27,7 +27,7 @@ export default async function HackathonsSection() {
 		<section className="mb-16">
 			<div className="flex items-center justify-between mb-10">
 				<div>
-					<h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">
+					<h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-foreground">
 						Hackathons
 					</h2>
 					<p className="text-muted-foreground">
@@ -91,7 +91,7 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 			href={getHackathonUrl(h)}
 			target="_blank"
 			rel="noopener noreferrer"
-			className="group block rounded-xl border border-primary/30 bg-card overflow-hidden hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full"
+			className="group block rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200 h-full"
 		>
 			{h.image_url && (
 				<div className="relative w-full aspect-[3/1] overflow-hidden">
@@ -102,8 +102,8 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 						className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-					<Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
-						{upcoming ? "UPCOMING" : "OPEN"}
+					<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+						{upcoming ? "Upcoming" : "Open"}
 					</Badge>
 				</div>
 			)}
@@ -120,7 +120,7 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 				</div>
 				<div className="flex items-center gap-4 text-sm text-muted-foreground whitespace-nowrap flex-shrink-0">
 					<span className="flex items-center gap-1">
-						<DollarSign className="w-3.5 h-3.5 text-[#FDDA24]" />
+						<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
 						<span className="font-semibold text-foreground">
 							{h.bonus_price > 0 ? formatPrize(h.bonus_price) : "TBA"}
 						</span>

@@ -60,7 +60,7 @@ export default async function CommunityPicksSection() {
 	return (
 		<section className="mb-16">
 			<div className="mb-10">
-				<h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">
+				<h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-foreground">
 					Community Picks
 				</h2>
 				<p className="text-muted-foreground">

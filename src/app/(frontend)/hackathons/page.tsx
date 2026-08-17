@@ -443,11 +443,13 @@ export default async function HackathonsPage({
 				{activeHackathons.length > 0 && (
 					<section className="mb-16">
 						<div className="flex items-center gap-3 mb-6">
-							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-							<h2 className="text-2xl font-bold">
+							<h2 className="text-2xl font-semibold">
 								{liveCount > 0 ? "Open now and upcoming" : "Upcoming"}
 							</h2>
-							<Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+							<Badge
+								variant="outline"
+								className="tabular-nums text-neutral-300"
+							>
 								{liveCount > 0
 									? `${liveCount} live`
 									: `${activeHackathons.length} announced`}
@@ -468,7 +470,7 @@ export default async function HackathonsPage({
 										rel="noopener noreferrer"
 										className="block group"
 									>
-										<div className="rounded-xl border border-primary/30 bg-card overflow-hidden hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+										<div className="rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200">
 											{/* Banner — full width, aspect-ratio for consistency */}
 											{hackathon.image_url && (
 												<div className="relative w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden">
@@ -479,8 +481,8 @@ export default async function HackathonsPage({
 														className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
 													/>
 													<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-													<Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
-														{upcoming ? "UPCOMING" : "OPEN"}
+													<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+														{upcoming ? "Upcoming" : "Open"}
 													</Badge>
 												</div>
 											)}
@@ -510,7 +512,7 @@ export default async function HackathonsPage({
 												{/* Stats row — wraps naturally on mobile */}
 												<div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
 													<span className="flex items-center gap-1.5">
-														<DollarSign className="w-4 h-4 text-[#FDDA24]" />
+														<DollarSign className="w-4 h-4 text-neutral-400" />
 														<span className="font-semibold text-foreground">
 															{hackathon.bonus_price > 0
 																? formatPrize(hackathon.bonus_price)
@@ -764,7 +766,7 @@ export default async function HackathonsPage({
 											)}
 											<div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
 												<span className="inline-flex items-center gap-1 text-foreground/90 font-semibold">
-													<DollarSign className="w-3.5 h-3.5 text-[#FDDA24]" />
+													<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
 													{formatPrize(hackathon.bonus_price)}
 												</span>
 												<span className="inline-flex items-center gap-1">
