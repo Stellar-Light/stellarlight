@@ -31,7 +31,7 @@ export default async function TopBuildersSection() {
 		<section className="mb-16">
 			<div className="flex items-center justify-between mb-10">
 				<div>
-					<h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">
+					<h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-foreground">
 						Top Builders
 					</h2>
 					<p className="text-muted-foreground">
@@ -55,8 +55,12 @@ export default async function TopBuildersSection() {
 					return (
 						<Link
 							key={builder.github_username}
-							href="/builders"
-							className="group flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
+							href={
+								builder.github_username
+									? `/builders/${builder.github_username}`
+									: "/builders"
+							}
+							className="group flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card hover:border-white/25 hover:bg-white/[0.02] transition-colors duration-150"
 						>
 							<div className="flex-shrink-0">
 								{builder.avatar_url ? (

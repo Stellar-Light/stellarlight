@@ -52,7 +52,7 @@ export default async function BlogHighlights() {
 		<section className="mb-24">
 			<div className="flex items-center justify-between mb-8">
 				<div>
-					<h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+					<h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
 						Highlights
 					</h2>
 				</div>

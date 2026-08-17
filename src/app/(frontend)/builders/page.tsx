@@ -159,12 +159,12 @@ export default async function BuildersPage() {
 				</Link>
 
 				<div className="mb-10">
-					<div className="flex items-center gap-3 mb-2">
-						<Code2 className="w-8 h-8 text-[#FDDA24]" />
-						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-							Stellar Builders
-						</h1>
-					</div>
+					<p className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-2">
+						Directory
+					</p>
+					<h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-2">
+						Builders
+					</h1>
 					<p className="text-muted-foreground">
 						{builders.length} developers building on Stellar. Profiles from
 						Stellar Passport, code activity from the{" "}
@@ -235,15 +235,19 @@ export default async function BuildersPage() {
 						<Card className="border border-border/50 bg-card">
 							<CardContent className="py-16 text-center">
 								<Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-								<p className="text-muted-foreground">No builders found</p>
+								<p className="text-muted-foreground">
+									The builder directory is empty right now. Profiles come from
+									Stellar Passport; if you have one, it will appear after the
+									next sync.
+								</p>
 							</CardContent>
 						</Card>
 					) : null}
 				</section>
 
 				{/* CTA */}
-				<div className="mt-16 text-center py-12 px-8 rounded-xl bg-gradient-to-r from-primary/10 to-[#FDDA24]/10 border border-primary/20">
-					<h3 className="text-2xl font-bold mb-3">
+				<div className="mt-16 text-center py-12 px-8 rounded-2xl border border-border bg-card">
+					<h3 className="text-2xl font-semibold mb-3">
 						Are you building on Stellar?
 					</h3>
 					<p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -293,7 +297,7 @@ function BuilderRow({
 
 	return (
 		<Card
-			className={`relative border ${featured ? "border-primary/30 bg-card/50" : "border-border/50 bg-card"} hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:-translate-y-0.5`}
+			className={`relative border ${featured ? "border-white/20 bg-card" : "border-border/50 bg-card"} hover:border-white/25 hover:bg-white/[0.02] transition-colors duration-150`}
 		>
 			{/* whole card opens the profile; the social icons below stay their own targets */}
 			<Link
@@ -327,7 +331,7 @@ function BuilderRow({
 								{builder.display_name}
 							</h3>
 							{featured && (
-								<Badge className="bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/30 text-xs">
+								<Badge variant="outline" className="text-xs text-neutral-300">
 									Featured
 								</Badge>
 							)}

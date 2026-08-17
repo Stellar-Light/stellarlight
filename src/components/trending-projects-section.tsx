@@ -172,7 +172,7 @@ export default async function TrendingProjectsSection() {
 		<section className="mb-16">
 			<div className="flex items-center justify-between mb-10">
 				<div>
-					<h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">
+					<h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-foreground">
 						Top Repositories
 					</h2>
 					<p className="text-muted-foreground">
@@ -194,7 +194,7 @@ export default async function TrendingProjectsSection() {
 					<Link
 						key={repo.id}
 						href={`/project/${repo.slug}`}
-						className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-card hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:shadow-sm hover:-translate-y-0.5"
+						className="group flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-card hover:border-white/25 hover:bg-white/[0.02] transition-colors duration-150"
 					>
 						{/* Project logo or rank fallback */}
 						<div className="flex-shrink-0">
@@ -207,7 +207,7 @@ export default async function TrendingProjectsSection() {
 									className="rounded-lg object-cover w-10 h-10 border border-border/50"
 								/>
 							) : (
-								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#FDDA24]/20 to-[#FDDA24]/10 border border-[#FDDA24]/20 text-lg font-bold text-[#FDDA24]">
+								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/[0.04] border border-border text-base font-semibold text-neutral-300 tabular-nums">
 									{idx + 1}
 								</div>
 							)}
@@ -227,7 +227,7 @@ export default async function TrendingProjectsSection() {
 							</div>
 							<div className="flex items-center gap-3 text-sm text-muted-foreground">
 								<span className="flex items-center gap-1">
-									<Star className="w-3.5 h-3.5 text-[#FDDA24]" />
+									<Star className="w-3.5 h-3.5 text-neutral-400" />
 									{repo.totalStars.toLocaleString()}
 								</span>
 								<span>
