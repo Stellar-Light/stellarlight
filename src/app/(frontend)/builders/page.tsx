@@ -20,8 +20,13 @@ import {
 	fetchAllBuilders,
 	type PassportBuilder,
 } from "@/lib/integrations/stellar-passport";
+import { getPayloadSafe } from "@/lib/payload-client";
 
-export const dynamic = "force-dynamic";
+// One source of truth: the Payload `builders` mirror (synced from Stellar
+// Passport daily by /api/sync/builders). The list used to hit the live
+// Passport demo host while /builders/[username] read the mirror, so a name
+// on the list could 404 when clicked. Live Passport is only a fallback for
+// an empty mirror. ISR, not force-dynamic: the mirror moves once a day.
 export const revalidate = 300;
 
 export const metadata: Metadata = {
@@ -30,29 +35,117 @@ export const metadata: Metadata = {
 		"Discover talented builders and developers in the Stellar ecosystem",
 };
 
+/** Code activity we track ourselves, keyed by GitHub login (lowercase). */
+type CodeActivity = {
+	repos: number;
+	stars: number;
+	lastCommitAt: string | null;
+	commits90d: number;
+};
+
 export default async function BuildersPage() {
 	let builders: PassportBuilder[] = [];
+	const activity = new Map<string, CodeActivity>();
+	let syncedAt: string | null = null;
 
-	try {
-		builders = await fetchAllBuilders();
-	} catch (error) {
-		console.error("Failed to fetch builders:", error);
+	const payload = await getPayloadSafe();
+	if (payload) {
+		try {
+			const mirror = await payload.find({
+				collection: "builders",
+				where: { visibility: { not_equals: "hidden" } },
+				limit: 1000,
+				depth: 0,
+			});
+			builders = mirror.docs as unknown as PassportBuilder[];
+			for (const d of mirror.docs as any[])
+				if (d.last_synced && (!syncedAt || d.last_synced > syncedAt))
+					syncedAt = d.last_synced;
+		} catch (error) {
+			console.error("builders mirror read failed:", error);
+		}
+	}
+	if (builders.length === 0) {
+		try {
+			builders = await fetchAllBuilders();
+		} catch (error) {
+			console.error("Failed to fetch builders:", error);
+		}
 	}
 
 	// Filter out builders without a github username
 	builders = builders.filter((b) => b.github_username);
 
-	// Separate featured and regular builders
+	// What each builder has actually shipped in the Stellar repos we index:
+	// repo count, stars, most recent commit, 90-day commits. Passport profiles
+	// are thin for most people; the code is not.
+	if (payload && builders.length) {
+		try {
+			const logins = builders.map((b) => String(b.github_username));
+			const repos = await payload.find({
+				collection: "repos",
+				where: {
+					and: [{ owner: { in: logins } }, { tier: { not_equals: "archive" } }],
+				},
+				limit: 5000,
+				depth: 0,
+				select: {
+					owner: true,
+					stars: true,
+					lastCommitAt: true,
+					activitySignals: true,
+				},
+			} as any);
+			for (const r of repos.docs as any[]) {
+				const k = String(r.owner ?? "").toLowerCase();
+				if (!k) continue;
+				const e = activity.get(k) ?? {
+					repos: 0,
+					stars: 0,
+					lastCommitAt: null,
+					commits90d: 0,
+				};
+				e.repos += 1;
+				e.stars += Number(r.stars ?? 0);
+				e.commits90d += Number(r.activitySignals?.commits90d ?? 0);
+				if (
+					r.lastCommitAt &&
+					(!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt)
+				)
+					e.lastCommitAt = r.lastCommitAt;
+				activity.set(k, e);
+			}
+		} catch (error) {
+			console.error("builders repo activity failed:", error);
+		}
+	}
+	const act = (b: PassportBuilder) =>
+		activity.get(String(b.github_username).toLowerCase());
+
+	// Featured first; then everyone with recent activity (Passport 30d commits
+	// or a commit in our repo index in the last 90 days), most active first;
+	// then the rest, most recently active first.
+	const recentCut = Date.now() - 90 * 86_400_000;
+	const heat = (b: PassportBuilder) =>
+		(b.stats?.totalCommits30d ?? 0) * 3 + (act(b)?.commits90d ?? 0);
+	const isRecent = (b: PassportBuilder) =>
+		heat(b) > 0 || Date.parse(act(b)?.lastCommitAt ?? "") > recentCut;
 	const featuredBuilders = builders.filter((b) => b.is_featured);
 	const activeBuilders = builders
-		.filter((b) => !b.is_featured && (b.stats?.totalCommits30d ?? 0) > 0)
+		.filter((b) => !b.is_featured && isRecent(b))
 		.sort(
 			(a, b) =>
-				(b.stats?.totalCommits30d ?? 0) - (a.stats?.totalCommits30d ?? 0),
+				heat(b) - heat(a) ||
+				Date.parse(act(b)?.lastCommitAt ?? "0") -
+					Date.parse(act(a)?.lastCommitAt ?? "0"),
 		);
-	const otherBuilders = builders.filter(
-		(b) => !b.is_featured && (b.stats?.totalCommits30d ?? 0) === 0,
-	);
+	const otherBuilders = builders
+		.filter((b) => !b.is_featured && !isRecent(b))
+		.sort(
+			(a, b) =>
+				Date.parse(act(b)?.lastCommitAt ?? "0") -
+				Date.parse(act(a)?.lastCommitAt ?? "0"),
+		);
 
 	return (
 		<div className="min-h-screen relative">
@@ -73,7 +166,12 @@ export default async function BuildersPage() {
 						</h1>
 					</div>
 					<p className="text-muted-foreground">
-						{builders.length} developers building on Stellar
+						{builders.length} developers building on Stellar. Profiles from
+						Stellar Passport, code activity from the{" "}
+						{activity.size ? "repos we index" : "repos we index (loading)"}.
+						{syncedAt
+							? ` Profiles synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
+							: ""}
 					</p>
 				</div>
 
@@ -86,6 +184,7 @@ export default async function BuildersPage() {
 								<BuilderRow
 									key={builder.github_username}
 									builder={builder}
+									activity={act(builder)}
 									featured
 								/>
 							))}
@@ -97,15 +196,18 @@ export default async function BuildersPage() {
 				{activeBuilders.length > 0 && (
 					<section className="mb-12">
 						<div className="flex items-center gap-3 mb-6">
-							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-							<h2 className="text-2xl font-bold">Most Active</h2>
-							<Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+							<h2 className="text-2xl font-bold">Active in the last 90 days</h2>
+							<Badge variant="outline" className="tabular-nums">
 								{activeBuilders.length}
 							</Badge>
 						</div>
 						<div className="space-y-3">
 							{activeBuilders.map((builder) => (
-								<BuilderRow key={builder.github_username} builder={builder} />
+								<BuilderRow
+									key={builder.github_username}
+									builder={builder}
+									activity={act(builder)}
+								/>
 							))}
 						</div>
 					</section>
@@ -114,13 +216,19 @@ export default async function BuildersPage() {
 				{/* All Other Builders */}
 				<section>
 					<h2 className="text-2xl font-bold mb-6">
-						All Builders ({otherBuilders.length})
+						{activeBuilders.length
+							? `Everyone else (${otherBuilders.length})`
+							: `All Builders (${otherBuilders.length})`}
 					</h2>
 
 					{otherBuilders.length > 0 ? (
 						<div className="space-y-3">
 							{otherBuilders.map((builder) => (
-								<BuilderRow key={builder.github_username} builder={builder} />
+								<BuilderRow
+									key={builder.github_username}
+									builder={builder}
+									activity={act(builder)}
+								/>
 							))}
 						</div>
 					) : builders.length === 0 ? (
@@ -159,11 +267,24 @@ export default async function BuildersPage() {
 	);
 }
 
+function ago(iso: string | null | undefined) {
+	if (!iso) return null;
+	const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
+	if (!Number.isFinite(d)) return null;
+	if (d <= 0) return "today";
+	if (d === 1) return "yesterday";
+	if (d < 30) return `${d}d ago`;
+	if (d < 365) return `${Math.floor(d / 30)}mo ago`;
+	return `${Math.floor(d / 365)}y ago`;
+}
+
 function BuilderRow({
 	builder,
+	activity,
 	featured = false,
 }: {
 	builder: PassportBuilder;
+	activity?: CodeActivity;
 	featured?: boolean;
 }) {
 	const twitterUrl = builder.twitter_handle
@@ -172,8 +293,14 @@ function BuilderRow({
 
 	return (
 		<Card
-			className={`border ${featured ? "border-primary/30 bg-card/50" : "border-border/50 bg-card"} hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:-translate-y-0.5`}
+			className={`relative border ${featured ? "border-primary/30 bg-card/50" : "border-border/50 bg-card"} hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:-translate-y-0.5`}
 		>
+			{/* whole card opens the profile; the social icons below stay their own targets */}
+			<Link
+				href={`/builders/${builder.github_username}`}
+				className="absolute inset-0 rounded-xl"
+				aria-label={`${builder.display_name}'s profile`}
+			/>
 			<CardContent className="p-5">
 				<div className="flex items-center gap-4">
 					{/* Avatar */}
@@ -231,11 +358,24 @@ function BuilderRow({
 									{builder.projects.length !== 1 ? "s" : ""}
 								</span>
 							)}
+							{activity && activity.repos > 0 && (
+								<span className="flex items-center gap-1 tabular-nums">
+									<GitBranch className="w-3 h-3" />
+									{activity.repos} Stellar{" "}
+									{activity.repos === 1 ? "repo" : "repos"}
+									{activity.stars > 0
+										? `, ${activity.stars.toLocaleString()} stars`
+										: ""}
+									{activity.lastCommitAt
+										? `, last commit ${ago(activity.lastCommitAt)}`
+										: ""}
+								</span>
+							)}
 						</div>
 					</div>
 
 					{/* Social links */}
-					<div className="flex items-center gap-2 flex-shrink-0">
+					<div className="relative z-10 flex items-center gap-2 flex-shrink-0">
 						{builder.github_username && (
 							<a
 								href={`https://github.com/${builder.github_username}`}
