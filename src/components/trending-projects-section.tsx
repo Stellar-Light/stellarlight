@@ -14,6 +14,8 @@ export default async function TrendingProjectsSection() {
 		slug: string;
 		totalStars: number;
 		repoCount: number;
+		score: number;
+		commits90d: number;
 		category: string;
 		logoUrl: string | null;
 	}> = [];
@@ -32,29 +34,72 @@ export default async function TrendingProjectsSection() {
 		} as any);
 
 		const projectSlugs = projectsResult.docs.map((p: any) => p.slug);
-		const starsBySlug = new Map<string, { stars: number; count: number }>();
+		// Rank by the SAME score /api/repos/search ranks by (repoScore: traction,
+		// velocity-adjusted freshness, code depth, inherited authority), gated to
+		// repos that are verified Stellar and not archived. Raw stars alone put
+		// Keybase, the generic x402 repo and Aztec's Noir at the top of a
+		// "Stellar" list; that is not what a visitor came for.
+		const bySlug = new Map<
+			string,
+			{
+				stars: number;
+				count: number;
+				score: number;
+				commits90d: number;
+				lastCommitAt: string | null;
+			}
+		>();
 		if (projectSlugs.length > 0) {
 			const reposResult = await payload.find({
 				collection: "repos",
-				where: { projectSlug: { in: projectSlugs } },
+				where: {
+					and: [
+						{ projectSlug: { in: projectSlugs } },
+						{ tier: { not_equals: "archive" } },
+						{ unverifiedStellar: { not_equals: true } },
+					],
+				},
 				limit: 5000,
 				depth: 0,
-				select: { projectSlug: true, stars: true },
-			});
+				select: {
+					projectSlug: true,
+					stars: true,
+					repoScore: true,
+					lastCommitAt: true,
+					activitySignals: true,
+				},
+			} as any);
 			for (const r of reposResult.docs as any[]) {
 				if (!r.projectSlug) continue;
-				const e = starsBySlug.get(r.projectSlug) ?? { stars: 0, count: 0 };
+				const e = bySlug.get(r.projectSlug) ?? {
+					stars: 0,
+					count: 0,
+					score: 0,
+					commits90d: 0,
+					lastCommitAt: null,
+				};
 				e.stars += r.stars ?? 0;
 				e.count += 1;
-				starsBySlug.set(r.projectSlug, e);
+				e.score = Math.max(e.score, Number(r.repoScore ?? 0));
+				e.commits90d += Number(r.activitySignals?.commits90d ?? 0);
+				if (
+					r.lastCommitAt &&
+					(!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt)
+				)
+					e.lastCommitAt = r.lastCommitAt;
+				bySlug.set(r.projectSlug, e);
 			}
 		}
 
+		const staleCutoff = Date.now() - 180 * 86_400_000;
 		repos = projectsResult.docs
 			.map((project: any) => {
-				const agg = starsBySlug.get(project.slug);
+				const agg = bySlug.get(project.slug);
 				const totalStars = agg?.stars ?? 0;
-				if (totalStars === 0) return null;
+				if (!agg || agg.score <= 0) return null;
+				// a "top" repo has moved in the last six months
+				if (!agg.lastCommitAt || Date.parse(agg.lastCommitAt) < staleCutoff)
+					return null;
 
 				let logoUrl: string | null = null;
 				if (project.logo && typeof project.logo === "object") {
@@ -70,14 +115,27 @@ export default async function TrendingProjectsSection() {
 					name: project.name,
 					slug: project.slug,
 					totalStars,
-					repoCount: agg?.count ?? 0,
+					repoCount: agg.count,
+					score: agg.score,
+					commits90d: agg.commits90d,
 					category: project.category,
 					logoUrl,
 				};
 			})
 			.filter(Boolean) as typeof repos;
 
-		repos.sort((a, b) => b.totalStars - a.totalStars);
+		// showcase order: repoScore (which already carries inherited authority such as
+		// hackathon wins / SCF) plus log-scaled stars and recent commits, so a 1-star
+		// hackathon winner does not outrank the SDKs people actually build with
+		const showcase = (r: {
+			score: number;
+			totalStars: number;
+			commits90d: number;
+		}) =>
+			r.score +
+			12 * Math.log10(r.totalStars + 1) +
+			6 * Math.log10(r.commits90d + 1);
+		repos.sort((a, b) => showcase(b) - showcase(a));
 		repos = repos.slice(0, 8);
 	} catch {
 		return null;
@@ -93,7 +151,8 @@ export default async function TrendingProjectsSection() {
 						Top Repositories
 					</h2>
 					<p className="text-muted-foreground">
-						Most starred projects in the ecosystem
+						Ranked by activity, code depth and traction, not raw stars. Active
+						in the last six months.
 					</p>
 				</div>
 				<Link
@@ -149,6 +208,11 @@ export default async function TrendingProjectsSection() {
 								<span>
 									{repo.repoCount} {repo.repoCount === 1 ? "repo" : "repos"}
 								</span>
+								{repo.commits90d > 0 && (
+									<span className="tabular-nums">
+										{repo.commits90d.toLocaleString()} commits / 90d
+									</span>
+								)}
 							</div>
 						</div>
 
