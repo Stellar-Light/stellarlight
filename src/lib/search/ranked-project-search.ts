@@ -117,7 +117,9 @@ export async function rankedProjectSearch(
 		or: [
 			{ name: { contains: query } },
 			{ "github.orgLogin": { contains: query } },
-			{ description: { contains: query } },
+			// `description` is rich text and cannot be queried ("The following path
+			// cannot be queried: description"); shortDescription is the plain one
+			{ shortDescription: { contains: query } },
 			...(typeHits.length ? [{ types: { in: typeHits } }] : []),
 			...(categoryHits.length ? [{ category: { in: categoryHits } }] : []),
 		],
