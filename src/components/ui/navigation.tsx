@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Activity,
 	Building2,
 	ChevronDown,
 	Code2,
@@ -33,6 +34,34 @@ export function Navigation() {
 	const [isVisible, setIsVisible] = useState(true);
 	const [hasScrolled, setHasScrolled] = useState(false);
 	const lastScrollY = useRef(0);
+	const exploreRef = useRef<HTMLDivElement>(null);
+
+	// The Explore menu used to be hover-only: no click handler, so trackpads that
+	// send a tap without a hover, touch screens at desktop widths, and keyboard
+	// users could never open it, and it never closed on navigation. Now it is a
+	// real toggle (click / Enter / Space), still opens on hover, and closes on
+	// route change, Escape, and outside click.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: close on every navigation
+	useEffect(() => {
+		setIsExploreOpen(false);
+		setMobileMenuOpen(false);
+	}, [pathname]);
+	useEffect(() => {
+		if (!isExploreOpen) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setIsExploreOpen(false);
+		};
+		const onDown = (e: MouseEvent) => {
+			if (exploreRef.current && !exploreRef.current.contains(e.target as Node))
+				setIsExploreOpen(false);
+		};
+		document.addEventListener("keydown", onKey);
+		document.addEventListener("mousedown", onDown);
+		return () => {
+			document.removeEventListener("keydown", onKey);
+			document.removeEventListener("mousedown", onDown);
+		};
+	}, [isExploreOpen]);
 
 	// Auto-hide navbar on scroll
 	useEffect(() => {
@@ -184,13 +213,19 @@ export function Navigation() {
 					name: "Developer Activity",
 					href: "/leaderboard",
 					description: "Developer and ecosystem metrics",
-					icon: Trophy,
+					icon: Activity,
 				},
 				{
 					name: "Stablecoin",
 					href: "https://stablecoin.stellarlight.xyz/",
 					description: "Stellar stablecoin explorer",
 					icon: DollarSign,
+				},
+				{
+					name: "i³ Awards",
+					href: "/awards",
+					description: "SCF Pilots' picks for impact, innovation, interop",
+					icon: Trophy,
 				},
 			],
 		},
@@ -228,11 +263,16 @@ export function Navigation() {
 
 				<div className="hidden md:flex items-center space-x-1">
 					<div
+						ref={exploreRef}
 						className="relative"
 						onMouseEnter={() => setIsExploreOpen(true)}
 						onMouseLeave={() => setIsExploreOpen(false)}
 					>
 						<button
+							type="button"
+							aria-haspopup="menu"
+							aria-expanded={isExploreOpen}
+							onClick={() => setIsExploreOpen((v) => !v)}
 							className="flex items-center gap-1.5 px-4 py-2 text-sm text-[#E5E5E5] transition-all duration-150 rounded-lg hover:bg-white/5"
 							data-testid="nav-explore"
 						>
