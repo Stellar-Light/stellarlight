@@ -7,12 +7,21 @@ import { FlickeringGridBg } from "@/components/flickering-grid-bg";
 import { IdeaSubmissionModal } from "@/components/idea-submission-modal";
 import { PointerHighlight } from "@/components/pointer-highlight";
 import { Badge } from "@/components/ui/badge";
-import { CATEGORIES, CATEGORY_LABELS, IDEAS, type Quarter } from "@/data/ideas";
+import {
+	ACTIVE_QUARTER,
+	CATEGORIES,
+	CATEGORY_LABELS,
+	IDEAS,
+	QUARTER_LABELS,
+	QUARTERS,
+	rfpStatus,
+	type Quarter,
+} from "@/data/ideas";
 
 export function IdeasListing() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
-	const [selectedQuarter, setSelectedQuarter] = useState<Quarter>("q2-2026");
+	const [selectedQuarter, setSelectedQuarter] = useState<Quarter>(ACTIVE_QUARTER);
 	const [displayCount, setDisplayCount] = useState(9);
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -110,46 +119,37 @@ export function IdeasListing() {
 				</span>
 			</a>
 
-			{/* Quarter Tabs */}
-			<div className="relative z-10 mb-6 flex items-center gap-2">
-				<button
-					type="button"
-					onClick={() => {
-						setSelectedQuarter("q2-2026");
-						setSelectedCategory("all");
-						setSearchQuery("");
-						setDisplayCount(9);
-					}}
-					className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors duration-150 ${
-						selectedQuarter === "q2-2026"
-							? "bg-card border-border/50 text-foreground"
-							: "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					Q2 2026
-					<Badge className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border-0">
-						Open
-					</Badge>
-				</button>
-				<button
-					type="button"
-					onClick={() => {
-						setSelectedQuarter("q1-2026");
-						setSelectedCategory("all");
-						setSearchQuery("");
-						setDisplayCount(9);
-					}}
-					className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors duration-150 ${
-						selectedQuarter === "q1-2026"
-							? "bg-card border-border/50 text-foreground"
-							: "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					Q1 2026
-					<Badge className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-white/10 text-muted-foreground border-0">
-						Closed
-					</Badge>
-				</button>
+			{/* Quarter Tabs: newest first, driven by src/data/ideas.ts (ACTIVE_QUARTER decides open vs closed) */}
+			<div className="relative z-10 mb-6 flex items-center gap-2 flex-wrap">
+				{[...QUARTERS].reverse().map((quarter) => {
+					const open = rfpStatus(quarter) === "open";
+					return (
+						<button
+							key={quarter}
+							type="button"
+							onClick={() => {
+								setSelectedQuarter(quarter);
+								setSelectedCategory("all");
+								setSearchQuery("");
+								setDisplayCount(9);
+							}}
+							className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors duration-150 ${
+								selectedQuarter === quarter
+									? "bg-card border-border/50 text-foreground"
+									: "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
+							}`}
+						>
+							{QUARTER_LABELS[quarter]}
+							<Badge
+								className={`px-1.5 py-0.5 text-xs font-semibold rounded-full border-0 ${
+									open ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-muted-foreground"
+								}`}
+							>
+								{open ? "Open" : "Closed"}
+							</Badge>
+						</button>
+					);
+				})}
 			</div>
 
 			{/* Search & Category Filter */}
