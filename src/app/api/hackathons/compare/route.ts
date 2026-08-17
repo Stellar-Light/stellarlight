@@ -23,8 +23,8 @@ import {
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { ACTIVE_PROJECT_STATUSES } from "@/lib/population";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { ACTIVE_PROJECT_STATUSES } from "@/lib/population";
 
 export const dynamic = "force-dynamic";
 
@@ -154,7 +154,7 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 				startDate: new Date(d.start_time * 1000).toISOString().slice(0, 10),
 				endDate: new Date(d.end_time * 1000).toISOString().slice(0, 10),
 				status,
-				externalUrl: getHackathonUrl(d.uname),
+				externalUrl: getHackathonUrl(d),
 				prizePoolUSD: d.bonus_price || undefined,
 				hackersCount: d.hackers_count || undefined,
 			};

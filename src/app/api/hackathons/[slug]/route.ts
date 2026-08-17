@@ -292,7 +292,7 @@ export async function GET(
 			return NextResponse.json(
 				{
 					meta: {
-						source: getHackathonUrl(dora.uname),
+						source: getHackathonUrl(dora),
 						generatedAt: new Date().toISOString(),
 						note: liveSubmissions.length
 							? "DoraHacks-sourced — submissions, winners, and tracks below are pulled live from DoraHacks."
@@ -310,7 +310,7 @@ export async function GET(
 							.slice(0, 10),
 						endDate: new Date(dora.end_time * 1000).toISOString().slice(0, 10),
 						status,
-						externalUrl: getHackathonUrl(dora.uname),
+						externalUrl: getHackathonUrl(dora),
 						organizer: dora.organization
 							? {
 									id: `dorahacks-org-${dora.organization.id}`,
