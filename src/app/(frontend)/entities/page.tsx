@@ -34,7 +34,7 @@ async function getEntities(): Promise<EntityItem[]> {
 			sort: "name",
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		return (res.docs as any[]).map((e) => ({
+		const items = (res.docs as any[]).map((e) => ({
 			id: String(e.id),
 			name: e.name,
 			slug: e.slug,
@@ -42,6 +42,50 @@ async function getEntities(): Promise<EntityItem[]> {
 			logo: e.logo ?? null,
 			stats: aggregateEntity(e),
 		}));
+		// Activity is a date, not a count: join the repos index once for every
+		// org's projects and keep the freshest commit + 90d commits per org.
+		try {
+			const slugs = [...new Set(items.flatMap((i) => i.stats.projectSlugs))];
+			if (slugs.length) {
+				const repos = await payload.find({
+					collection: "repos",
+					where: {
+						and: [
+							{ projectSlug: { in: slugs } },
+							{ tier: { not_equals: "archive" } },
+						],
+					},
+					limit: 5000,
+					depth: 0,
+					select: {
+						projectSlug: true,
+						lastCommitAt: true,
+						activitySignals: true,
+					},
+				} as any);
+				const bySlug = new Map<string, { last: string | null; c90: number }>();
+				for (const r of repos.docs as any[]) {
+					const e = bySlug.get(r.projectSlug) ?? { last: null, c90: 0 };
+					if (r.lastCommitAt && (!e.last || r.lastCommitAt > e.last))
+						e.last = r.lastCommitAt;
+					e.c90 += Number(r.activitySignals?.commits90d ?? 0);
+					bySlug.set(r.projectSlug, e);
+				}
+				for (const it of items) {
+					for (const sl of it.stats.projectSlugs) {
+						const a = bySlug.get(sl);
+						if (!a) continue;
+						if (
+							a.last &&
+							(!it.stats.lastCommitAt || a.last > it.stats.lastCommitAt)
+						)
+							it.stats.lastCommitAt = a.last;
+						it.stats.commits90d += a.c90;
+					}
+				}
+			}
+		} catch {}
+		return items;
 	} catch {
 		return [];
 	}

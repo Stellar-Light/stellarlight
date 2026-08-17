@@ -16,16 +16,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPayload } from "payload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import config from "@/payload.config";
+import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{ username: string }>;
 
 async function getBuilder(username: string) {
-	const payload = await getPayload({ config });
+	const payload = await getPayloadSafe();
+	if (!payload) return null;
 
 	const result = await payload.find({
 		collection: "builders",
