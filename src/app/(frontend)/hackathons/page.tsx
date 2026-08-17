@@ -54,7 +54,7 @@ const getCachedDoraHackathons = unstable_cache(
 			(await fetchLatestHackathonWinners(hackathons)) ?? LATEST_WINNERS;
 		return { hackathons, recentWinners };
 	},
-	["hackathons:dora-merge:v1"],
+	["hackathons:dora-merge:v2"],
 	{ revalidate: 3600, tags: ["hackathons"] },
 );
 
