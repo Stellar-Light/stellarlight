@@ -1,25 +1,25 @@
 {
-	"generatedAt": "2026-08-16T06:14:44.032Z",
-	"total": 385,
-	"open": 304,
-	"closed": 81,
+	"generatedAt": "2026-08-17T06:31:45.687Z",
+	"total": 404,
+	"open": 307,
+	"closed": 97,
 	"verified": 7,
-	"cleared": 74,
-	"closingRate": 0.21,
-	"oldestOpenDays": 24,
+	"cleared": 90,
+	"closingRate": 0.24,
+	"oldestOpenDays": 25,
 	"inWave": 0,
-	"highOpen": 20,
+	"highOpen": 18,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 241,
-			"total": 280
+			"open": 246,
+			"total": 287
 		},
 		{
 			"surface": "directory",
-			"open": 25,
-			"total": 30
+			"open": 23,
+			"total": 42
 		},
 		{
 			"surface": "contract",
@@ -52,29 +52,15 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 24
+			"days": 25
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 24
+			"days": 25
 		}
 	],
 	"topOpen": [
-		{
-			"id": "engine-d-demand:octoplace",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "octoplace",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:pacto",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "pacto",
-			"severity": "high"
-		},
 		{
 			"id": "engine-d-demand:hummingbot",
 			"surface": "retrieval",
@@ -115,6 +101,20 @@
 			"surface": "code",
 			"source": "nightly-field-population",
 			"probe": "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
+			"severity": "high"
+		},
+		{
+			"id": "nightly-drift:status-endpoints-lists-api-vet-idea",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "status.endpoints lists /api/vet-idea",
+			"severity": "high"
+		},
+		{
+			"id": "nightly-drift:status-endpoints-lists-api-repos-trust",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "status.endpoints lists /api/repos/trust",
 			"severity": "high"
 		}
 	]
