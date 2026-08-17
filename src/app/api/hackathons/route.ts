@@ -62,7 +62,7 @@ function doraStatus(
 function doraToRow(h: DoraHacksHackathon): HackathonRow {
 	const startDate = new Date(h.start_time * 1000).toISOString().slice(0, 10);
 	const endDate = new Date(h.end_time * 1000).toISOString().slice(0, 10);
-	const url = getHackathonUrl(h.uname);
+	const url = getHackathonUrl(h);
 	return {
 		id: `dorahacks-${h.id}`,
 		name: h.title,
@@ -80,7 +80,7 @@ function doraToRow(h: DoraHacksHackathon): HackathonRow {
 				}
 			: null,
 		url,
-		source: "dorahacks",
+		source: h.source ?? "dorahacks",
 		prizePoolUSD: h.bonus_price || undefined,
 		hackersCount: h.hackers_count || undefined,
 	};

@@ -31,7 +31,7 @@ export default async function HackathonsSection() {
 						Hackathons
 					</h2>
 					<p className="text-muted-foreground">
-						Build and compete in the Stellar ecosystem
+						Open now and announced: DoraHacks, Rise In, HackMeridian
 					</p>
 				</div>
 				<Link
@@ -80,10 +80,15 @@ export default async function HackathonsSection() {
 
 function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 	const days = getDaysRemaining(h.end_time);
+	const upcoming = h.start_time * 1000 > Date.now();
+	const starts = new Date(h.start_time * 1000).toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+	});
 
 	return (
 		<a
-			href={getHackathonUrl(h.uname)}
+			href={getHackathonUrl(h)}
 			target="_blank"
 			rel="noopener noreferrer"
 			className="group block rounded-xl border border-primary/30 bg-card overflow-hidden hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full"
@@ -98,7 +103,7 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 					<Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
-						OPEN
+						{upcoming ? "UPCOMING" : "OPEN"}
 					</Badge>
 				</div>
 			)}
@@ -117,16 +122,22 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 					<span className="flex items-center gap-1">
 						<DollarSign className="w-3.5 h-3.5 text-[#FDDA24]" />
 						<span className="font-semibold text-foreground">
-							{formatPrize(h.bonus_price)}
+							{h.bonus_price > 0 ? formatPrize(h.bonus_price) : "TBA"}
 						</span>
 					</span>
-					<span className="flex items-center gap-1">
-						<Users className="w-3.5 h-3.5" />
-						{h.hackers_count}
-					</span>
+					{h.hackers_count > 0 && (
+						<span className="flex items-center gap-1">
+							<Users className="w-3.5 h-3.5" />
+							{h.hackers_count}
+						</span>
+					)}
 					<span className="flex items-center gap-1">
 						<Clock className="w-3.5 h-3.5" />
-						{days > 0 ? `${days}d left` : "Ending soon"}
+						{upcoming
+							? `Starts ${starts}`
+							: days > 0
+								? `${days}d left`
+								: "Ending soon"}
 					</span>
 				</div>
 			</div>

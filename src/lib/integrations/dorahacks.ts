@@ -10,6 +10,8 @@ export interface DoraHacksOrganization {
 	logo?: string;
 }
 
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+
 export interface DoraHacksHackathon {
 	id: number;
 	title: string;
@@ -25,6 +27,9 @@ export interface DoraHacksHackathon {
 	field?: string; // Comma-separated tags
 	ecosystem?: string;
 	organization?: DoraHacksOrganization;
+	/** Curated (non-DoraHacks) events carry their own URL and source. */
+	external_url?: string;
+	source?: "dorahacks" | "curated";
 }
 
 export interface DoraHacksResponse {
@@ -39,7 +44,13 @@ export interface DoraHacksResponse {
 // maps the v1 hub shapes back onto the legacy interfaces so downstream
 // consumers keep working unchanged.
 const DORAHACKS_API_BASE = "https://dorahacks.io/api/v1/hub";
-const STELLAR_ORG_IDS = [3096, 3853]; // SDF and Tellus
+// Organizations that run Stellar hackathons on DoraHacks. SDF and Tellus were
+// the only two for a year; BAF (Hack+ Alebrije, GIVE, Hack+ Buenos Aires),
+// NearX (PULSO) and Mulheres Que Codam joined in 2025-26. The ecosystem
+// search below catches new organizers whose titles say "Stellar"; the org
+// list catches events whose titles do not (Alebrije, Código Raíz).
+const STELLAR_ORG_IDS = [3096, 3853, 3740, 15761, 14803];
+const STELLAR_RE = /stellar|soroban/i;
 
 /**
  * Fetches hackathons from a specific DoraHacks organization, mapped to the
@@ -49,8 +60,33 @@ const STELLAR_ORG_IDS = [3096, 3853]; // SDF and Tellus
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
+	return fetchHubHackathons(`owner_id=${orgId}`, `org ${orgId}`);
+}
+
+/** Title search across all of DoraHacks, then filtered to Stellar-relevant rows. */
+async function fetchSearchHackathons(
+	term: string,
+): Promise<DoraHacksHackathon[]> {
+	const rows = await fetchHubHackathons(
+		`search=${encodeURIComponent(term)}`,
+		`search ${term}`,
+	);
+	return rows.filter(
+		(h) =>
+			STELLAR_RE.test(h.title) ||
+			STELLAR_RE.test(h.ecosystem ?? "") ||
+			(h.organization?.id != null &&
+				STELLAR_ORG_IDS.includes(h.organization.id)),
+	);
+}
+
+async function fetchHubHackathons(
+	query: string,
+	label: string,
+): Promise<DoraHacksHackathon[]> {
+	const orgId = label;
 	try {
-		const url = `${DORAHACKS_API_BASE}/hackathons?page=1&page_size=50&sort_by=-timeline_end&owner_id=${orgId}`;
+		const url = `${DORAHACKS_API_BASE}/hackathons?page=1&page_size=50&sort_by=-timeline_end&${query}`;
 
 		const response = await fetch(url, {
 			headers: DORA_BROWSER_HEADERS,
@@ -103,10 +139,11 @@ async function fetchOrgHackathons(
 export async function fetchAllDoraHacksHackathons(): Promise<
 	DoraHacksHackathon[]
 > {
-	// Fetch from both organizations in parallel
-	const results = await Promise.allSettled(
-		STELLAR_ORG_IDS.map((orgId) => fetchOrgHackathons(orgId)),
-	);
+	// Fetch every known organizer plus an ecosystem-wide title search, in parallel
+	const results = await Promise.allSettled([
+		...STELLAR_ORG_IDS.map((orgId) => fetchOrgHackathons(orgId)),
+		fetchSearchHackathons("stellar"),
+	]);
 
 	// Combine results from successful fetches
 	const allHackathons = results
@@ -117,9 +154,20 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 		.flatMap((result) => result.value);
 
 	// Deduplicate by ID (in case same hackathon appears in both orgs)
-	const uniqueHackathons = Array.from(
-		new Map(allHackathons.map((h) => [h.id, h])).values(),
+	const uniqueHackathons: DoraHacksHackathon[] = Array.from(
+		new Map(
+			allHackathons.map((h) => [h.id, { ...h, source: "dorahacks" as const }]),
+		).values(),
 	);
+
+	// Events that never touch DoraHacks (HackMeridian, Rise In, Luma
+	// residencies) come from the curated file; status derives from dates now.
+	const now = Date.now() / 1000;
+	const curated = CURATED_HACKATHONS.map((h) => ({
+		...h,
+		status: h.end_time <= now ? 2 : 1,
+	}));
+	uniqueHackathons.push(...curated);
 
 	// Sort: active first (status === 1), then by end_time descending
 	return uniqueHackathons.sort((a, b) => {
@@ -189,7 +237,9 @@ async function fetchWinnerPrizeMap(
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 		const data: any = await res.json();
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
-		const awards: any[] = Array.isArray(data?.award_list) ? data.award_list : [];
+		const awards: any[] = Array.isArray(data?.award_list)
+			? data.award_list
+			: [];
 		for (const a of awards) {
 			for (const p of Array.isArray(a?.prizes) ? a.prizes : []) {
 				for (const bid of Array.isArray(p?.buidls) ? p.buidls : []) {
@@ -401,7 +451,11 @@ export function formatPrize(amount: number): string {
 /**
  * Gets the DoraHacks hackathon URL
  */
-export function getHackathonUrl(uname: string): string {
+export function getHackathonUrl(
+	h: string | Pick<DoraHacksHackathon, "uname" | "external_url">,
+): string {
+	if (typeof h !== "string" && h.external_url) return h.external_url;
+	const uname = typeof h === "string" ? h : h.uname;
 	return `https://dorahacks.io/hackathon/${uname}/detail`;
 }
 

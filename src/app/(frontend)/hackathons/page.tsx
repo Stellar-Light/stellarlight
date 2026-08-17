@@ -242,7 +242,22 @@ export default async function HackathonsPage({
 	]);
 	const hackathons = dora.hackathons;
 	const curatedMap = curatedData.byName;
-	const activeHackathons = hackathons.filter((h) => isHackathonActive(h));
+	// status 1 covers both "open now" and "announced, starts later"; show live
+	// ones first, then upcoming by start date, and label each honestly
+	const nowSec = Date.now() / 1000;
+	const activeHackathons = hackathons
+		.filter((h) => isHackathonActive(h))
+		.sort((a, b) => {
+			const al = a.start_time <= nowSec ? 0 : 1;
+			const bl = b.start_time <= nowSec ? 0 : 1;
+			return (
+				al - bl ||
+				(al === 0 ? a.end_time - b.end_time : a.start_time - b.start_time)
+			);
+		});
+	const liveCount = activeHackathons.filter(
+		(h) => h.start_time <= nowSec,
+	).length;
 	let pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
 
 	// "Recent Winners" highlight — LIVE from DoraHacks (most-recent ended event
@@ -429,9 +444,13 @@ export default async function HackathonsPage({
 					<section className="mb-16">
 						<div className="flex items-center gap-3 mb-6">
 							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-							<h2 className="text-2xl font-bold">Open for Submissions</h2>
+							<h2 className="text-2xl font-bold">
+								{liveCount > 0 ? "Open now and upcoming" : "Upcoming"}
+							</h2>
 							<Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-								{activeHackathons.length} Active
+								{liveCount > 0
+									? `${liveCount} live`
+									: `${activeHackathons.length} announced`}
 							</Badge>
 						</div>
 
@@ -439,11 +458,12 @@ export default async function HackathonsPage({
 							{activeHackathons.map((hackathon) => {
 								const daysRemaining = getDaysRemaining(hackathon.end_time);
 								const tags = parseThemes(hackathon.field);
+								const upcoming = hackathon.start_time > nowSec;
 
 								return (
 									<a
 										key={hackathon.id}
-										href={getHackathonUrl(hackathon.uname)}
+										href={getHackathonUrl(hackathon)}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="block group"
@@ -460,7 +480,7 @@ export default async function HackathonsPage({
 													/>
 													<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 													<Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
-														OPEN
+														{upcoming ? "UPCOMING" : "OPEN"}
 													</Badge>
 												</div>
 											)}
@@ -492,23 +512,44 @@ export default async function HackathonsPage({
 													<span className="flex items-center gap-1.5">
 														<DollarSign className="w-4 h-4 text-[#FDDA24]" />
 														<span className="font-semibold text-foreground">
-															{formatPrize(hackathon.bonus_price)}
+															{hackathon.bonus_price > 0
+																? formatPrize(hackathon.bonus_price)
+																: "Prizes TBA"}
 														</span>
 													</span>
 													<span className="flex items-center gap-1.5 text-muted-foreground">
 														<Clock className="w-4 h-4" />
-														{daysRemaining > 0
-															? `${daysRemaining} days left`
-															: "Ending soon"}
+														{upcoming
+															? `Starts ${formatShortDate(hackathon.start_time)}`
+															: daysRemaining > 0
+																? `${daysRemaining} days left`
+																: "Ending soon"}
 													</span>
-													<span className="flex items-center gap-1.5 text-muted-foreground">
-														<Users className="w-4 h-4" />
-														{hackathon.hackers_count} participants
-													</span>
+													{hackathon.hackers_count > 0 && (
+														<span className="flex items-center gap-1.5 text-muted-foreground">
+															<Users className="w-4 h-4" />
+															{hackathon.hackers_count} participants
+														</span>
+													)}
 													<span className="flex items-center gap-1.5 text-muted-foreground">
 														<Calendar className="w-4 h-4" />
-														Ends {formatShortDate(hackathon.end_time)}
+														{upcoming
+															? `${formatShortDate(hackathon.start_time)} to ${formatShortDate(hackathon.end_time)}`
+															: `Ends ${formatShortDate(hackathon.end_time)}`}
 													</span>
+													{hackathon.source === "curated" && (
+														<span
+															className="flex items-center gap-1.5 text-muted-foreground"
+															title="Not on DoraHacks; hand-tracked from the organizer's page"
+														>
+															{hackathon.external_url
+																? new URL(hackathon.external_url).host.replace(
+																		/^www\./,
+																		"",
+																	)
+																: "organizer page"}
+														</span>
+													)}
 												</div>
 
 												{/* Tags */}
@@ -538,7 +579,9 @@ export default async function HackathonsPage({
 					<div className="mb-16 py-16 text-center rounded-xl border border-border/50 bg-card">
 						<Code2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
 						<p className="text-muted-foreground">
-							No active hackathons right now — check back soon
+							Nothing open or announced right now. We track DoraHacks, Rise In,
+							HackMeridian and Luma residencies; when something is announced it
+							shows here.
 						</p>
 					</div>
 				)}
@@ -751,7 +794,7 @@ export default async function HackathonsPage({
 								) : (
 									<a
 										key={hackathon.id}
-										href={getHackathonUrl(hackathon.uname)}
+										href={getHackathonUrl(hackathon)}
 										target="_blank"
 										rel="noopener noreferrer"
 										className={cardClass}
