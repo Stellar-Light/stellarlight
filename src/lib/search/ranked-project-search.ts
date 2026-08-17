@@ -64,11 +64,18 @@ export async function rankedProjectSearch(
 	applyTypeFilter(baseWhere, typeFilter);
 	applyScfFilter(baseWhere, scfFilter);
 
+	// Match on what a visitor means, not only the name: "wallet" must find
+	// Lobstr and Freighter (type Wallet, description "wallet") ahead of
+	// "walletban" and "wallet-guru" (name substrings). Before this the box
+	// searched name + GitHub org only and hid every flagship wallet.
 	const where = {
 		...baseWhere,
 		or: [
 			{ name: { contains: query } },
 			{ "github.orgLogin": { contains: query } },
+			{ types: { contains: query } },
+			{ category: { contains: query } },
+			{ description: { contains: query } },
 		],
 	};
 
@@ -80,24 +87,30 @@ export async function rankedProjectSearch(
 		sort,
 	});
 
-	// Rank: name startsWith > name contains > org-only
+	// Rank: exact/leading name > name contains > type or category match >
+	// description mention; within a tier, curated prominence (the same boost
+	// /api/projects/search uses) so canonical projects lead incidental ones.
 	const lowerQuery = query.toLowerCase();
-	const sorted = [...results.docs].sort((a, b) => {
-		const aName = a.name?.toLowerCase() || "";
-		const bName = b.name?.toLowerCase() || "";
-
-		const aScore = aName.startsWith(lowerQuery)
-			? 2
-			: aName.includes(lowerQuery)
-				? 1
-				: 0;
-		const bScore = bName.startsWith(lowerQuery)
-			? 2
-			: bName.includes(lowerQuery)
-				? 1
-				: 0;
-
-		return bScore - aScore;
+	const tier = (p: any) => {
+		const name = String(p.name ?? "").toLowerCase();
+		if (name === lowerQuery || name.startsWith(lowerQuery)) return 4;
+		if (name.includes(lowerQuery)) return 3;
+		const types = Array.isArray(p.types)
+			? p.types.map((t: unknown) => String(t).toLowerCase())
+			: [];
+		if (
+			types.some((t: string) => t.includes(lowerQuery)) ||
+			String(p.category ?? "")
+				.toLowerCase()
+				.includes(lowerQuery)
+		)
+			return 2;
+		return 1;
+	};
+	const sorted = [...results.docs].sort((a: any, b: any) => {
+		const dt = tier(b) - tier(a);
+		if (dt !== 0) return dt;
+		return Number(b.prominence ?? 0) - Number(a.prominence ?? 0);
 	});
 
 	const totalDocs = sorted.length;

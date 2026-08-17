@@ -14,6 +14,8 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { CODE_DOMAINS } from "@/lib/code-domains";
+import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
 import {
 	clampLimit,
 	parseFields,
@@ -23,12 +25,7 @@ import {
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import {
-	REPO_ACTIVITY_STATES,
-	type RepoActivityState,
-} from "@/lib/repo-grade";
-import { CODE_DOMAINS } from "@/lib/code-domains";
-import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
+import { REPO_ACTIVITY_STATES, type RepoActivityState } from "@/lib/repo-grade";
 import { searchRepos } from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
@@ -166,7 +163,14 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
-				filters: { q, language: language || null, minScore, activity: activity || null, limit, offset },
+				filters: {
+					q,
+					language: language || null,
+					minScore,
+					activity: activity || null,
+					limit,
+					offset,
+				},
 				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0
@@ -199,7 +203,11 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				// empty pages are never pinned in the edge cache (see projects/search)
+				"Cache-Control":
+					repos.length === 0
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);
