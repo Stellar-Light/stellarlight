@@ -56,6 +56,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: "weekly",
 			priority: 0.7,
 		},
+		// The rest of the public site. Until 2026-08 the sitemap carried 65 URLs,
+		// 60 of them /skills/*, and none of the directory, partners, builders,
+		// entities, blog, ask, analytics, submit, awards or any detail page.
+		...(
+			[
+				["/directory", "daily", 0.9],
+				["/partners", "daily", 0.8],
+				["/builders", "daily", 0.7],
+				["/entities", "weekly", 0.7],
+				["/blog", "daily", 0.7],
+				["/ask", "weekly", 0.6],
+				["/analytics", "daily", 0.4],
+				["/submit", "monthly", 0.4],
+				["/awards", "weekly", 0.5],
+				["/experiments", "monthly", 0.3],
+				["/quality", "weekly", 0.3],
+			] as const
+		).map(([path, changeFrequency, priority]) => ({
+			url: `${SITE_URL}${path}`,
+			lastModified: now,
+			changeFrequency,
+			priority,
+		})),
 	];
 
 	// sls-062 class: live-derive (24h cache) so removed upstream skills drop
@@ -77,13 +100,77 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	}));
 
 	const communitySkillUrls = await loadCommunitySkillUrls(now);
+	const detailUrls = await loadDetailUrls(now);
 
 	return [
 		...staticRoutes,
 		...sdfSkillUrls,
 		...curatedSkillUrls,
 		...communitySkillUrls,
+		...detailUrls,
 	];
+}
+
+/** Every project, entity, published partner and blog post; one query each. */
+async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
+	const payload = await getPayloadSafe();
+	if (!payload) return [];
+	const out: MetadataRoute.Sitemap = [];
+	const pull = async (
+		collection: "projects" | "entities" | "partner-accounts" | "blog",
+		prefix: string,
+		where: Record<string, unknown>,
+		priority: number,
+	) => {
+		try {
+			const res = await payload.find({
+				collection,
+				where,
+				limit: 5000,
+				depth: 0,
+				select: { slug: true, updatedAt: true },
+			} as any);
+			for (const d of res.docs as Array<{
+				slug?: string;
+				updatedAt?: string;
+			}>) {
+				if (!d.slug) continue;
+				out.push({
+					url: `${SITE_URL}${prefix}/${d.slug}`,
+					lastModified: d.updatedAt ? new Date(d.updatedAt) : now,
+					changeFrequency: "weekly",
+					priority,
+				});
+			}
+		} catch {
+			// a failed collection read drops that group, never the whole sitemap
+		}
+	};
+	await pull(
+		"projects",
+		"/project",
+		{ status: { in: ["Development", "Pre-Release", "Live"] } },
+		0.6,
+	);
+	await pull("entities", "/entities", {}, 0.5);
+	await pull(
+		"partner-accounts",
+		"/partners",
+		{ status: { equals: "published" } },
+		0.6,
+	);
+	await pull(
+		"blog",
+		"/blog",
+		{
+			and: [
+				{ status: { equals: "published" } },
+				{ isRSSExternal: { not_equals: true } },
+			],
+		},
+		0.6,
+	);
+	return out;
 }
 
 async function loadCommunitySkillUrls(
