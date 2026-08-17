@@ -14,14 +14,15 @@ import {
 	IDEAS,
 	QUARTER_LABELS,
 	QUARTERS,
-	rfpStatus,
 	type Quarter,
+	rfpStatus,
 } from "@/data/ideas";
 
 export function IdeasListing() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
-	const [selectedQuarter, setSelectedQuarter] = useState<Quarter>(ACTIVE_QUARTER);
+	const [selectedQuarter, setSelectedQuarter] =
+		useState<Quarter>(ACTIVE_QUARTER);
 	const [displayCount, setDisplayCount] = useState(9);
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -142,7 +143,9 @@ export function IdeasListing() {
 							{QUARTER_LABELS[quarter]}
 							<Badge
 								className={`px-1.5 py-0.5 text-xs font-semibold rounded-full border-0 ${
-									open ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-muted-foreground"
+									open
+										? "bg-emerald-500/20 text-emerald-400"
+										: "bg-white/10 text-muted-foreground"
 								}`}
 							>
 								{open ? "Open" : "Closed"}
