@@ -12,10 +12,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
+import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { findNameMatch } from "@/lib/fuzzy-name";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
@@ -250,17 +250,23 @@ function pickProducts(rows: any): ProjectRow["products"] {
 function pickScfRoundAwards(
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 	scf: any,
-): Array<{ round: number; amountUSD: number | null; awardType: string | null }> {
+): Array<{
+	round: number;
+	amountUSD: number | null;
+	awardType: string | null;
+}> {
 	const rows = Array.isArray(scf?.roundAwards) ? scf.roundAwards : [];
-	return rows
-		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		.filter((r: any) => typeof r?.round === "number")
-		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		.map((r: any) => ({
-			round: r.round,
-			amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
-			awardType: typeof r.awardType === "string" ? r.awardType : null,
-		}));
+	return (
+		rows
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			.filter((r: any) => typeof r?.round === "number")
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			.map((r: any) => ({
+				round: r.round,
+				amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
+				awardType: typeof r.awardType === "string" ? r.awardType : null,
+			}))
+	);
 }
 
 interface ProjectRow {
@@ -870,7 +876,7 @@ export async function GET(req: NextRequest) {
 			},
 			{
 				headers: {
-					"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+					"Cache-Control": "no-store",
 				},
 			},
 		);
@@ -2136,7 +2142,9 @@ export async function GET(req: NextRequest) {
 			Math.floor((Date.now() - Date.parse(roll.latestAt)) / 86_400_000),
 		);
 		const commitDays = (repos ?? [])
-			.map((r) => (typeof r.lastCommitAt === "string" ? r.lastCommitAt.slice(0, 10) : null))
+			.map((r) =>
+				typeof r.lastCommitAt === "string" ? r.lastCommitAt.slice(0, 10) : null,
+			)
 			.filter((d): d is string => !!d);
 		const latest = roll.latestAt;
 		const codeChangedSinceAudit = commitDays.length
@@ -2352,7 +2360,16 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				// Never pin an EMPTY page in the edge cache. A transient find error or
+				// a cold index can produce zero rows for a query that normally has
+				// dozens; with s-maxage + stale-while-revalidate that zero was served
+				// to every caller for up to 5 minutes (observed 2026-08-17: q=lending
+				// -> total 0, x-vercel-cache STALE, while the origin had 78). Empty
+				// answers are cheap to recompute and expensive to be wrong about.
+				"Cache-Control":
+					projectsWithOrg.length === 0
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);

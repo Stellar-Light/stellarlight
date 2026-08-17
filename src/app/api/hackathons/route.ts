@@ -319,7 +319,11 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				// a DoraHacks hiccup must not pin an empty hour into every consumer's cache
+				"Cache-Control":
+					hackathons.length === 0
+						? "no-store"
+						: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);
