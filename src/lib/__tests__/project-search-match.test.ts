@@ -236,6 +236,25 @@ describe("review finding 2 — identifier-form queries", () => {
 		// A bare ecosystem query is degenerate but unchanged (joined === token).
 		expect(tokenize("Stellar")).toEqual(["stellar"]);
 	});
+	it("multi-word queries wrapping a camelCase NAME rebuild the joined identity (recall audit 2026-08-18)", () => {
+		// Live bug: q="is idOS live" → dia/band/alchemy (idOS gone) because
+		// contentTokens split idOS → [id, os] and the 2-char fragments flood
+		// strict while the joined "idos" was never rebuilt. The camelCase phrase
+		// must now resolve to the SAME tokens as the working lowercase phrase.
+		expect(tokenize("is idOS live")).toEqual(["live", "idos"]);
+		expect(tokenize("is idos live")).toEqual(["idos", "live"]); // already worked; both now carry "idos"
+		expect(tokenize("what is NearX")).toContain("nearx");
+		// A compound name keeps its discriminating ≥3-char fragments AND the join.
+		expect(tokenize("what is WalletConnect")).toEqual([
+			"wallet",
+			"connect",
+			"walletconnect",
+		]);
+		// Ecosystem-stopword fragment is dropped, mirroring the single-word path.
+		expect(tokenize("tell me about StellarX")).toEqual(["stellarx"]);
+		// No camelCase, no name → untouched (the release-escrow guardrail).
+		expect(tokenize("release escrow")).toEqual(["release", "escrow"]);
+	});
 	it("hyphenated vocabulary stays intact", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
 	});

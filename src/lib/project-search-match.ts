@@ -235,6 +235,33 @@ export function tokenize(q: string): string[] {
 			tokens.push(...kept, joined);
 		}
 	}
+	// Multi-word queries wrapping a camelCase NAME (2026-08-18 recall audit):
+	// natural phrasing dead-ends because contentTokens splits the name into
+	// fragments — "is idOS live" → [id, os, live]; the 2-char fragments flood
+	// strict-AND while the joined identity is never rebuilt (that rebuild above
+	// is single-word only). So idOS's own record can't match all tokens and the
+	// page fills with prominence defaults (dia/band). Live proof: q="is idOS
+	// live" → dia/band/alchemy, but q="is idos live" → idos #1. Rebuild the
+	// joined form per camelCase word and drop the sub-3-char/stopword split
+	// noise, exactly like the single-word path. Only fires when the query both
+	// has spaces AND contains an internal-caps word, so all-lowercase and
+	// no-name multi-word queries (e.g. "release escrow") are untouched.
+	if (/\s/.test(q.trim())) {
+		const joinedForms = q
+			.trim()
+			.split(/\s+/)
+			.filter((w) => /[a-z][A-Z]/.test(w))
+			.map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ""))
+			.filter((j) => j.length > 2);
+		if (joinedForms.length) {
+			const kept = tokens.filter(
+				(t) =>
+					t.length >= 3 && !isContentStopword(t) && !joinedForms.includes(t),
+			);
+			tokens.length = 0;
+			tokens.push(...kept, ...joinedForms);
+		}
+	}
 	return tokens;
 }
 
