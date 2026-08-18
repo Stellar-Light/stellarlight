@@ -1,0 +1,51 @@
+name: Enrich repo activity (unenriched lane)
+# Stamps activitySignals (commits90d, lastCommitAt, stars) on repos that have
+# none — the ~10k `source: ec-taxonomy` rows enrich-repos.ts never reaches
+# because it walks repos FROM projects and these have no projectSlug.
+# scripts/enrich-repo-activity.ts has the full rationale and the budget math:
+# 1,500 rows/run ≈ 100 GraphQL queries on the shared PAT pool, oldest-stamped
+# first, so a daily run walks the whole lane in about a week and then keeps
+# it fresh via --stale-days.
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+      limit:
+        description: "Rows per run (default 1500)"
+        type: string
+        default: "1500"
+      only:
+        description: "Pin to one repo (owner/repo)"
+        type: string
+        default: ""
+  schedule:
+    - cron: "20 4 * * *" # daily 04:20 UTC — off the scanner's and enrich's hours
+# Same shared PAT pool + same-row write risk as enrich-repos: serialize with
+# it, never overlap it.
+concurrency:
+  group: enrich-repos
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  activity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACTIVITY_LIMIT: ${{ inputs.limit || '1500' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Scheduled runs ALWAYS execute (the point of the daily walk); manual
+      # dispatch stays dry-run unless the execute box is ticked. Once the
+      # never-stamped lane is empty the schedule keeps rows ≤14 days old.
+      - run: pnpm exec tsx scripts/enrich-repo-activity.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'schedule' && '--stale-days 14' || '' }}
