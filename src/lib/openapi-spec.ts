@@ -2149,6 +2149,150 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/hackathon-brief": {
+			get: {
+				operationId: "hackathonBrief",
+				tags: ["Composite"],
+				summary:
+					"Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
+				description:
+					"One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"ONE call for a hackathon team: is it built, what to fork (with trust), what is live to build against, is there money after, and what the demo must not claim.",
+					keywords: [
+						"hackathon",
+						"hackathon brief",
+						"we're at a hackathon",
+						"48 hours",
+						"what should we build",
+						"what should we fork",
+						"starting point",
+						"starter repo",
+						"is this already built",
+						"hackmeridian",
+						"build brief",
+						"what not to claim",
+					],
+					useWhen: [
+						"'we're at HackMeridian and want to build X — where do we start' (one call instead of five)",
+						"'give us a brief for a confidential-token payroll idea'",
+						"'is this idea taken and what's safe to fork'",
+					],
+					notFor: [
+						"a single question that one lower-level call answers (vetIdea / getRepoTrust / listContracts / scfPitch)",
+						"rails — stablecoins and partners are separate calls; open RFPs → getRfps",
+						"non-Stellar ideas — vertical will not resolve; say so",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"Short idea description, 3-200 chars (e.g. 'confidential token payroll').",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The hackathon brief.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: { type: "object" },
+										report: {
+											type: "object",
+											properties: {
+												idea: { type: "string" },
+												vertical: {
+													type: "string",
+													nullable: true,
+													description:
+														"Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless.",
+												},
+												vet: {
+													type: "object",
+													description:
+														"Same computation as /api/vet-idea: competitors, maturity, priorArt, gap.",
+												},
+												builds: {
+													type: "array",
+													description:
+														"Prototype-layer prior art — DoraHacks submissions matching the idea, winners ranked first, ≤5.",
+													items: {
+														type: "object",
+														properties: {
+															name: { type: "string" },
+															hackathon: { type: "string" },
+															endedAt: { type: "string", nullable: true },
+															isWinner: { type: "boolean" },
+															placement: { type: "string", nullable: true },
+															githubUrl: { type: "string", nullable: true },
+															url: { type: "string", nullable: true },
+														},
+													},
+												},
+												startFrom: {
+													type: "array",
+													description:
+														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
+													items: { type: "object" },
+												},
+												liveContracts: {
+													type: "object",
+													properties: {
+														domain: {
+															type: "string",
+															nullable: true,
+															description:
+																"Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis.",
+														},
+														basis: { type: "string" },
+														contracts: {
+															type: "array",
+															items: { type: "object" },
+														},
+														note: { type: "string" },
+													},
+												},
+												funding: {
+													type: "object",
+													properties: {
+														round: {
+															type: "object",
+															description:
+																"Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable').",
+														},
+														fundedPeers: {
+															type: "array",
+															items: { type: "object" },
+														},
+														fundingBar: { type: "object" },
+													},
+												},
+												whatNotToClaim: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Bad or unknown query param." },
+					"429": { description: "Rate limited (30/min/IP)." },
+					"503": { description: "Index unavailable." },
+				},
+			},
+		},
 		"/api/vet-idea": {
 			get: {
 				operationId: "vetIdea",

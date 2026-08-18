@@ -410,6 +410,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hackathon-brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call
+         * @description One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
+         */
+        get: operations["hackathonBrief"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vet-idea": {
         parameters: {
             query?: never;
@@ -2637,6 +2657,86 @@ export interface operations {
             };
             /** @description Missing/too-short q or unknown params. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hackathonBrief: {
+        parameters: {
+            query: {
+                /** @description Short idea description, 3-200 chars (e.g. 'confidential token payroll'). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The hackathon brief. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: Record<string, never>;
+                        report?: {
+                            idea?: string;
+                            /** @description Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless. */
+                            vertical?: string | null;
+                            /** @description Same computation as /api/vet-idea: competitors, maturity, priorArt, gap. */
+                            vet?: Record<string, never>;
+                            /** @description Prototype-layer prior art — DoraHacks submissions matching the idea, winners ranked first, ≤5. */
+                            builds?: {
+                                name?: string;
+                                hackathon?: string;
+                                endedAt?: string | null;
+                                isWinner?: boolean;
+                                placement?: string | null;
+                                githubUrl?: string | null;
+                                url?: string | null;
+                            }[];
+                            /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
+                            startFrom?: Record<string, never>[];
+                            liveContracts?: {
+                                /** @description Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis. */
+                                domain?: string | null;
+                                basis?: string;
+                                contracts?: Record<string, never>[];
+                                note?: string;
+                            };
+                            funding?: {
+                                /** @description Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable'). */
+                                round?: Record<string, never>;
+                                fundedPeers?: Record<string, never>[];
+                                fundingBar?: Record<string, never>;
+                            };
+                            /** @description Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one. */
+                            whatNotToClaim?: string[];
+                        };
+                    };
+                };
+            };
+            /** @description Bad or unknown query param. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited (30/min/IP). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Index unavailable. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
