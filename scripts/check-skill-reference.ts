@@ -29,15 +29,18 @@ async function main() {
 		await fetch(`${BASE}/api/openapi.json`, {
 			headers: { "User-Agent": "stellarlight-skill-ref-guard" },
 		})
+	)
 	// biome-ignore lint/suspicious/noExplicitAny: spec walking
-	).json()) as any;
+		.json()) as any;
 
 	let failures = 0;
 	const check = (label: string, name: string) => {
 		if (ref.includes(name)) console.log(`  ✓ ${label}`);
 		else {
 			failures++;
-			console.log(`  ✗ ${label} — "${name}" absent from api-reference.md (sk-009 class)`);
+			console.log(
+				`  ✗ ${label} — "${name}" absent from api-reference.md (sk-009 class)`,
+			);
 		}
 	};
 
@@ -70,11 +73,43 @@ async function main() {
 		failures++;
 		console.log("  ✗ codeVerified properties unreadable from live spec");
 	}
-	for (const name of Object.keys(cvProps))
-		check(`codeVerified.${name}`, name);
+	for (const name of Object.keys(cvProps)) check(`codeVerified.${name}`, name);
 
 	for (const name of ["activity", "semantic", "tvlUSD", "repo-docs"])
 		check(`historic-drift name "${name}"`, name);
+
+	// 4. OPERATION coverage — sk-018. Checks 1–3 catch new fields and enum
+	//    values but never asked whether a whole new endpoint has an entry, so
+	//    four composites (vetIdea, listContracts, getRepoTrust, scfPitch)
+	//    shipped and sat undocumented in the skill Raven pins. Every read-only
+	//    operation in the live spec must have a `## \`METHOD /path\`` heading.
+	//    Side-effecting ops (partner onboarding, listing submission) are portal
+	//    flows, not agent research calls, and are out of the reference's scope.
+	console.log("\nOperation coverage (sk-018 class):");
+	// biome-ignore lint/suspicious/noExplicitAny: spec walking
+	const paths: Record<string, any> = spec?.paths ?? {};
+	let opCount = 0;
+	for (const [path, methods] of Object.entries(paths)) {
+		for (const [method, op] of Object.entries(methods ?? {})) {
+			// biome-ignore lint/suspicious/noExplicitAny: spec walking
+			const o = op as any;
+			if (!o || typeof o !== "object" || !o.operationId) continue;
+			if (o["x-side-effecting"]) continue;
+			opCount++;
+			const heading = `## \`${method.toUpperCase()} ${path}\``;
+			if (ref.includes(heading)) console.log(`  ✓ ${o.operationId}`);
+			else {
+				failures++;
+				console.log(
+					`  ✗ ${o.operationId} — no "${heading}" section in api-reference.md (sk-018 class)`,
+				);
+			}
+		}
+	}
+	if (opCount === 0) {
+		failures++;
+		console.log("  ✗ no operations readable from live spec");
+	}
 
 	console.log(
 		`\n${failures ? `${failures} missing — FAILING` : "reference covers the live surface"}`,
