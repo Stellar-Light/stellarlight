@@ -221,12 +221,6 @@ export function Navigation() {
 					description: "Stellar stablecoin explorer",
 					icon: DollarSign,
 				},
-				{
-					name: "i³ Awards",
-					href: "/awards",
-					description: "SCF Pilots' picks for impact, innovation, interop",
-					icon: Trophy,
-				},
 			],
 		},
 	];

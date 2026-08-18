@@ -69,7 +69,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				["/ask", "weekly", 0.6],
 				["/analytics", "daily", 0.4],
 				["/submit", "monthly", 0.4],
-				["/awards", "weekly", 0.5],
 				["/experiments", "monthly", 0.3],
 				["/quality", "weekly", 0.3],
 			] as const
