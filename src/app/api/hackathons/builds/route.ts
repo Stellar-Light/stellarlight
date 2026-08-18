@@ -18,6 +18,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
+import {
 	BOOL_FALSE_VALUES,
 	BOOL_TRUE_VALUES,
 	clampLimit,
@@ -30,86 +34,16 @@ import {
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { CORE_SYNONYMS, GENERIC_QUERY_TOKENS } from "@/lib/search-vocabulary";
-import { generateSlug } from "@/lib/utils/normalize";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 const SUPPORTED_PARAMS = ["q", "limit", "winnersOnly", "track"] as const;
 
-interface IndexedBuild extends DoraHacksSubmission {
-	hackathon: { title: string; slug: string; endedAt: string | null };
-	haystack: string; // lowercased name + description + track + award, for matching
-}
-
-// Flattened cross-hackathon buidl index, held per warm instance (the underlying
-// DoraHacks fetches are already Next-data-cached 1h, so a cold rebuild is cheap).
-let INDEX: { at: number; builds: IndexedBuild[] } | null = null;
-const INDEX_TTL_MS = 3_600_000;
-
-/** Concurrency-limited map so a cold rebuild doesn't fan out to hundreds of
- *  simultaneous DoraHacks calls. */
-async function pool<T, R>(
-	items: T[],
-	n: number,
-	fn: (t: T) => Promise<R>,
-): Promise<R[]> {
-	const out: R[] = [];
-	let i = 0;
-	async function worker() {
-		while (i < items.length) {
-			const idx = i++;
-			out[idx] = await fn(items[idx]);
-		}
-	}
-	await Promise.all(Array.from({ length: Math.min(n, items.length) }, worker));
-	return out;
-}
-
-async function buildIndex(): Promise<IndexedBuild[]> {
-	const hacks = await fetchAllDoraHacksHackathons();
-	// Only ENDED events have a meaningful build roster (active/upcoming have few
-	// or no submissions); cap to the most recent to bound cold-rebuild cost.
-	const ended = hacks
-		.filter((h) => h.status === 2 || h.winner_announced)
-		.sort((a, b) => (b.end_time ?? 0) - (a.end_time ?? 0))
-		.slice(0, 40);
-	const perHack = await pool(ended, 6, async (h) => {
-		const subs = await fetchHackathonSubmissions(h);
-		const endedAt = h.end_time
-			? new Date(h.end_time * 1000).toISOString().slice(0, 10)
-			: null;
-		const hackathon = { title: h.title, slug: generateSlug(h.title), endedAt };
-		return subs.map((s) => ({
-			...s,
-			hackathon,
-			haystack:
-				`${s.name} ${s.description ?? ""} ${s.track ?? ""} ${s.award ?? ""}`.toLowerCase(),
-		}));
-	});
-	// Dedupe by buidl id AND by event+name — DoraHacks repeats a submission across
-	// pages (same id), and a resubmission gets a NEW id with the same name in the
-	// same event (id-dedup misses that); collapse both, keeping the first.
-	const seenId = new Set<string>();
-	const seenKey = new Set<string>();
-	const flat: IndexedBuild[] = [];
-	for (const arr of perHack) {
-		for (const b of arr) {
-			const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
-			if (seenId.has(b.id) || seenKey.has(key)) continue;
-			seenId.add(b.id);
-			seenKey.add(key);
-			flat.push(b);
-		}
-	}
-	return flat;
-}
-
+// Index shape + builder live in src/lib/hackathon-builds.ts (shared with the
+// builder profile pages); the hour-long cache is unstable_cache, not per instance.
 async function getIndex(): Promise<IndexedBuild[]> {
-	if (INDEX && Date.now() - INDEX.at < INDEX_TTL_MS) return INDEX.builds;
-	const builds = await buildIndex();
-	INDEX = { at: Date.now(), builds };
-	return builds;
+	return getHackathonBuildsIndex();
 }
 
 /** Expand a query token with a plural/singular stem + shared vocabulary synonyms
