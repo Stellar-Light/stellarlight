@@ -60,6 +60,123 @@ export interface BuilderRow {
 	/** Indexed repos owned by this GitHub account that match the query; [] = no
 	 * direct code evidence; null when the request had no q/skill filter. */
 	codeEvidence: BuilderCodeEvidence[] | null;
+	/**
+	 * What this person has actually shipped on Stellar, from the repos we
+	 * index — QUERY-INDEPENDENT, present on every row (the profile page's
+	 * "On Stellar" card, as data). `projects` above stays Passport-declared
+	 * and `codeEvidence` stays query-scoped, exactly as documented; this is
+	 * the block that was missing: every row used to read projectCount 0 and
+	 * codeEvidence null on the unfiltered listing, so an agent enumerating
+	 * builders saw an empty ecosystem. null only when the join could not run.
+	 */
+	onStellar: BuilderOnStellar | null;
+}
+
+/** Attribution rule (the same one the profile page enforces): `builds` =
+ * projects reached through repos this person OWNS or an org that IS them;
+ * `contributesTo` = projects reached only through repos they committed to.
+ * `commits90d` counts own repos only; `contributedCommits12m` is their own
+ * share of others' repos. A repo's total is never credited to a contributor. */
+export interface BuilderOnStellar {
+	repoCount: number;
+	stars: number;
+	commits90d: number;
+	contributedCommits12m: number;
+	lastCommitAt: string | null;
+	languages: string[];
+	builds: Array<{ slug: string; name: string }>;
+	contributesTo: Array<{ slug: string; name: string }>;
+	/** Up to 5: owned repos first, then by their own commits, then 90d activity. */
+	topRepos: Array<{
+		fullName: string;
+		url: string;
+		stars: number;
+		lastCommitAt: string | null;
+		commits90d: number;
+		projectSlug: string | null;
+		via: "owner" | "declared" | "contributor";
+		myCommits12m: number | null;
+	}>;
+}
+
+/** Shape a CodeActivity (src/lib/builder-code.ts) into the API block. Pure. */
+export function onStellarBlock(a: {
+	repos: Array<{
+		fullName: string;
+		url: string;
+		stars: number;
+		lastCommitAt: string | null;
+		commits90d: number;
+		projectSlug: string | null;
+		via: "owner" | "declared" | "contributor";
+		myCommits12m?: number;
+	}>;
+	stars: number;
+	commits90d: number;
+	contributedCommits12m: number;
+	lastCommitAt: string | null;
+	languages: string[];
+	projects: Map<string, string>;
+	contributesTo: Map<string, string>;
+}): BuilderOnStellar {
+	// Lexicographic, on purpose: ownership > their OWN commits > the repo's 90d
+	// activity. An additive weight let a repo's total (everyone's work) outrank
+	// a repo the person actually committed to — the org's number leaking into a
+	// person's ordering, the same class as the headline bug the profile page had.
+	const key = (r: (typeof a.repos)[number]): [number, number, number] => [
+		r.via === "owner" ? 1 : 0,
+		r.myCommits12m ?? 0,
+		r.commits90d,
+	];
+	const cmp = (x: (typeof a.repos)[number], y: (typeof a.repos)[number]) => {
+		const kx = key(x);
+		const ky = key(y);
+		for (let i = 0; i < kx.length; i++)
+			if (ky[i] !== kx[i]) return ky[i] - kx[i];
+		return 0;
+	};
+	const topRepos = [...a.repos]
+		.sort(cmp)
+		.slice(0, 5)
+		.map((r) => ({
+			fullName: r.fullName,
+			url: r.url,
+			stars: r.stars,
+			lastCommitAt: r.lastCommitAt,
+			commits90d: r.commits90d,
+			projectSlug: r.projectSlug,
+			via: r.via,
+			myCommits12m: r.myCommits12m ?? null,
+		}));
+	const toList = (m: Map<string, string>) =>
+		[...m.entries()].map(([slug, name]) => ({ slug, name: name || slug }));
+	return {
+		repoCount: a.repos.length,
+		stars: a.stars,
+		commits90d: a.commits90d,
+		contributedCommits12m: a.contributedCommits12m,
+		lastCommitAt: a.lastCommitAt,
+		languages: a.languages,
+		builds: toList(a.projects),
+		contributesTo: toList(a.contributesTo),
+		topRepos,
+	};
+}
+
+/** The honest zero: the join RAN and found nothing indexed for this login.
+ * Distinct from `onStellar: null`, which means the join could not run. */
+export function emptyOnStellar(): BuilderOnStellar {
+	return {
+		repoCount: 0,
+		stars: 0,
+		commits90d: 0,
+		contributedCommits12m: 0,
+		lastCommitAt: null,
+		languages: [],
+		builds: [],
+		contributesTo: [],
+		topRepos: [],
+	};
 }
 
 // Common tech/role vocabulary that marks a query as skill-search, not a person
@@ -161,5 +278,7 @@ export function codeDerivedBuilderRow(
 			basis: "repo-owner",
 		},
 		codeEvidence,
+		// filled by the route's page-level join, same as Passport rows
+		onStellar: null,
 	};
 }

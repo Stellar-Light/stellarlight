@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-18",
+		surfaces: ["api", "skill"],
+		type: "added",
+		summary:
+			"/api/builders: every row now carries `onStellar` — what the person has actually shipped from the repos we index (`repoCount`, `stars`, `commits90d` on OWN repos only, `contributedCommits12m` their own share of others' repos, `lastCommitAt`, `languages`, `builds`, `contributesTo`, `topRepos`), query-independent, on the unfiltered listing too. Before this the unfiltered call — the one agents make hundreds of times a week — read projectCount 0 / codeEvidence null on every row: an empty ecosystem. `projects` stays Passport-declared and `codeEvidence` stays query-scoped, unchanged (openapi@1.8.69, additive).",
+		detail:
+			"Same join the /builders/[username] page renders (owned repos + Passport-declared repos + the contributor pass + a project whose GitHub org IS the person), so the API says what the page says. Attribution rule enforced in the block and its ordering: `builds` ≠ `contributesTo`; a repo's total is never credited to a contributor; `topRepos` ranks ownership > the person's own commits > the repo's 90d activity, lexicographically — an additive weight let a repo's total outrank a repo the person actually committed to, caught by the unit test. `null` = the join could not run; an all-zero block = it ran and found no indexed code.",
+	},
+	{
+		date: "2026-08-18",
 		surfaces: ["skill"],
 		type: "added",
 		summary:

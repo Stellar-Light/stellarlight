@@ -1430,6 +1430,42 @@ export interface components {
                 lastCommitAt?: string | null;
                 repoScore?: number;
             }[] | null;
+            /** @description What this person has actually shipped on Stellar, from the repos we index — QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos — a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged. */
+            onStellar?: {
+                repoCount?: number;
+                stars?: number;
+                /** @description Commits in the last 90 days across repos this person OWNS. */
+                commits90d?: number;
+                /** @description This person's own commits into repos they don't own, last 12 months (contributor pass). */
+                contributedCommits12m?: number;
+                /** Format: date-time */
+                lastCommitAt?: string | null;
+                /** @description Primary languages across their indexed repos, most common first. */
+                languages?: string[];
+                builds?: {
+                    slug?: string;
+                    name?: string;
+                }[];
+                contributesTo?: {
+                    slug?: string;
+                    name?: string;
+                }[];
+                /** @description Up to 5 — owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone. */
+                topRepos?: {
+                    fullName?: string;
+                    url?: string;
+                    stars?: number;
+                    /** Format: date-time */
+                    lastCommitAt?: string | null;
+                    /** @description The REPO's 90-day commits (everyone's work) — context, not this person's count. */
+                    commits90d?: number;
+                    projectSlug?: string | null;
+                    /** @enum {string} */
+                    via?: "owner" | "declared" | "contributor";
+                    /** @description This person's own commits into this repo, last 12 months; null for owned repos (their own repo — the whole history is theirs). */
+                    myCommits12m?: number | null;
+                }[];
+            } | null;
         };
         /** @description One SDF roster entry from /api/people: person, current role, section, and affiliation — quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability. */
         Person: {

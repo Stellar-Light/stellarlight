@@ -111,6 +111,8 @@ Stellar builder directory (synced from Stellar Passport). **Populated but small 
 
 ---
 
+
+**`onStellar` (every row, query-independent):** what the person has actually shipped from the repos we index — `repoCount`, `stars`, `commits90d` (**own repos only**), `contributedCommits12m` (their own share of others' repos), `lastCommitAt`, `languages`, `builds[]` (projects via repos they own or an org that IS them), `contributesTo[]` (projects via repos they only committed to), `topRepos[]` (≤5: owned first, then their own commits, then repo activity). A repo's total is never credited to a contributor — say "contributes to Blend", not "builds Blend", when a name appears only under `contributesTo`. `null` = the join could not run; an all-zero block = no indexed code for this login. This is the block to read for "who has actually shipped X" — `projects` is Passport-declared and `codeEvidence` is scoped to your `q`.
 ## `GET /api/people`
 The SDF team/people index — **leadership, board of directors, and advisors** (name → role → org), quoted from `stellar.org/foundation/team` with provenance (`.meta.source`, `.meta.observedAt`). Deliberately distinct from `/api/builders`: a VP of Ecosystem or a board member is **not** a GitHub-contributor "builder". Use for *"who is {person}"*, *"what's {person}'s role at SDF"*, *"who leads {area}"*, *"who's on the board"*.
 
