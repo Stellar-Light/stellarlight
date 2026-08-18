@@ -379,7 +379,7 @@ export interface paths {
         };
         /**
          * List Stellar RFPs (SCF-funded sponsor briefs)
-         * @description Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.
+         * @description Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.
          */
         get: operations["getRfps"];
         put?: never;
@@ -1519,7 +1519,7 @@ export interface components {
             /** @description Display label ('Q1 2026'); 'Live round' on synthetic rows. */
             quarterLabel?: string;
             /**
-             * @description 'open' = fundable in the current SCF quarter; 'closed' = a prior round, surfaced for context.
+             * @description 'open' = the brief is still soliciting; not a claim that SCF submissions are open today (see meta.scfRound). 'closed' = a prior round, surfaced for context.
              * @enum {string}
              */
             status?: "open" | "closed";
@@ -2526,7 +2526,7 @@ export interface operations {
     getRfps: {
         parameters: {
             query?: {
-                /** @description Open RFPs are fundable for the current SCF quarter; closed are prior rounds */
+                /** @description `open` = the brief is still soliciting build proposals. It is NOT a fundability claim: whether SCF accepts a submission today depends on meta.scfRound.submissionWindow and currentPhase. `closed` = a prior round, surfaced for context. */
                 status?: "open" | "closed";
                 /** @description Filter by quarter slug (e.g. 'q1-2026') */
                 quarter?: string;
@@ -2587,8 +2587,17 @@ export interface operations {
                             countBasis?: string;
                             /** @description SCF round identity + submission window (curated — SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this. */
                             scfRound?: {
-                                /** @description Round currently open for submissions; null when no round is confirmed open as of asOf. */
+                                /** @description Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit. */
                                 currentRound?: number | null;
+                                /** @description Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). Served since the round feed was added; specced 2026-08-18 (sls-067). A non-submission phase means an open brief is NOT submittable today. */
+                                currentPhase?: string | null;
+                                /** @description Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens. Served since the round feed was added; specced 2026-08-18 (sls-067). */
+                                roundsInProgress?: {
+                                    round?: number;
+                                    phase?: string | null;
+                                    /** @description ISO date the round stops accepting submissions; a date in the past means closed, not open. */
+                                    submissionDeadline?: string | null;
+                                }[] | null;
                                 lastConfirmedRound?: number | null;
                                 lastConfirmedRoundNote?: string | null;
                                 submissionWindow?: {
@@ -2604,7 +2613,7 @@ export interface operations {
                             };
                         };
                         rfps?: components["schemas"]["Rfp"][];
-                        /** @description Funding-context sentence for the whole list: winners of OPEN RFPs are eligible for SCF grant funding in the current round; closed RFPs are past rounds, surfaced for context but no longer fundable. */
+                        /** @description Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window — that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf. */
                         funding?: string;
                     };
                 };
@@ -3408,6 +3417,21 @@ export interface operations {
                              * @description When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.
                              */
                             dataAsOf?: string;
+                            /** @description sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole inventory at the upstream snapshot regardless of filter. */
+                            counts?: {
+                                /** @description Assets the upstream snapshot tracks, before any filter. */
+                                tracked?: number;
+                                /** @description Rows matching the filters, before the limit slice. */
+                                total?: number;
+                                /** @description Rows in this response. */
+                                returned?: number;
+                            };
+                            /** @description What this inventory IS and IS NOT (sls-066). It is one upstream snapshot service's tracked set, not a census of every Stellar stablecoin — Circle USDC was absent for hours on 2026-08-18 while live on-chain. Absence here is a coverage gap at the source, never proof an asset is not issued. */
+                            coverage?: {
+                                /** @enum {string} */
+                                basis?: "single-upstream-snapshot";
+                                note?: string;
+                            };
                             /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. */
                             methodology?: string;
                             /**

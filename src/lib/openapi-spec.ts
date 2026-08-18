@@ -1822,7 +1822,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Funding"],
 				summary: "List Stellar RFPs (SCF-funded sponsor briefs)",
 				description:
-					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
+					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Open/closed Stellar RFPs, sponsor briefs, and the live SCF round submission window.",
@@ -1868,7 +1868,7 @@ export const spec: OpenAPISpec = {
 						name: "status",
 						in: "query",
 						description:
-							"Open RFPs are fundable for the current SCF quarter; closed are prior rounds",
+							"`open` = the brief is still soliciting build proposals. It is NOT a fundability claim: whether SCF accepts a submission today depends on meta.scfRound.submissionWindow and currentPhase. `closed` = a prior round, surfaced for context.",
 						schema: { type: "string", enum: ["open", "closed"] },
 					},
 					{
@@ -1962,7 +1962,32 @@ export const spec: OpenAPISpec = {
 															type: "integer",
 															nullable: true,
 															description:
-																"Round currently open for submissions; null when no round is confirmed open as of asOf.",
+																"Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit.",
+														},
+														currentPhase: {
+															type: "string",
+															nullable: true,
+															description:
+																"Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). Served since the round feed was added; specced 2026-08-18 (sls-067). A non-submission phase means an open brief is NOT submittable today.",
+														},
+														roundsInProgress: {
+															type: "array",
+															nullable: true,
+															description:
+																"Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens. Served since the round feed was added; specced 2026-08-18 (sls-067).",
+															items: {
+																type: "object",
+																properties: {
+																	round: { type: "integer" },
+																	phase: { type: "string", nullable: true },
+																	submissionDeadline: {
+																		type: "string",
+																		nullable: true,
+																		description:
+																			"ISO date the round stops accepting submissions; a date in the past means closed, not open.",
+																	},
+																},
+															},
 														},
 														lastConfirmedRound: {
 															type: "integer",
@@ -2000,7 +2025,7 @@ export const spec: OpenAPISpec = {
 										funding: {
 											type: "string",
 											description:
-												"Funding-context sentence for the whole list: winners of OPEN RFPs are eligible for SCF grant funding in the current round; closed RFPs are past rounds, surfaced for context but no longer fundable.",
+												"Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window — that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf.",
 										},
 									},
 								},
@@ -3999,6 +4024,42 @@ export const spec: OpenAPISpec = {
 															description:
 																"When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.",
 														},
+														counts: {
+															type: "object",
+															description:
+																"sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole inventory at the upstream snapshot regardless of filter.",
+															properties: {
+																tracked: {
+																	type: "integer",
+																	minimum: 0,
+																	description:
+																		"Assets the upstream snapshot tracks, before any filter.",
+																},
+																total: {
+																	type: "integer",
+																	minimum: 0,
+																	description:
+																		"Rows matching the filters, before the limit slice.",
+																},
+																returned: {
+																	type: "integer",
+																	minimum: 0,
+																	description: "Rows in this response.",
+																},
+															},
+														},
+														coverage: {
+															type: "object",
+															description:
+																"What this inventory IS and IS NOT (sls-066). It is one upstream snapshot service's tracked set, not a census of every Stellar stablecoin — Circle USDC was absent for hours on 2026-08-18 while live on-chain. Absence here is a coverage gap at the source, never proof an asset is not issued.",
+															properties: {
+																basis: {
+																	type: "string",
+																	enum: ["single-upstream-snapshot"],
+																},
+																note: { type: "string" },
+															},
+														},
 														methodology: {
 															type: "string",
 															description:
@@ -5789,7 +5850,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["open", "closed"],
 						description:
-							"'open' = fundable in the current SCF quarter; 'closed' = a prior round, surfaced for context.",
+							"'open' = the brief is still soliciting; not a claim that SCF submissions are open today (see meta.scfRound). 'closed' = a prior round, surfaced for context.",
 					},
 					url: {
 						type: "string",
