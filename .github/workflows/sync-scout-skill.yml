@@ -13,7 +13,7 @@ name: Sync Stellar Scout skill to distribution repo
 #        Permissions:     Contents (Read and write), Metadata (Read)
 #        Expiration:      1 year (mark a renewal calendar entry)
 #   2. Add it as a repo secret:
-#        gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R theboycoder/stellarlight \
+#        gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R Stellar-Light/stellarlight \
 #          -b 'github_pat_...'
 #   3. Push this workflow. It runs automatically next time the SKILL.md
 #      changes; trigger manually via `gh workflow run sync-scout-skill.yml`
@@ -33,6 +33,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   sync:
@@ -43,10 +44,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Push SKILL.md to Stellar-Light/stellar-scout
+        id: sync
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_TOKEN }}
+        shell: bash
         run: |
           set -euo pipefail
+          # Whole body runs in a subshell piped to tee so the rolling issue
+          # gets the log whether we fail on the token check or the push.
+          (
           if [ -z "${GH_TOKEN:-}" ]; then
             echo "::error::STELLAR_LIGHT_SCOUT_TOKEN secret is missing."
             echo "Set it via: gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R ${{ github.repository }} -b '<PAT>'"
@@ -69,10 +76,28 @@ jobs:
             exit 0
           fi
 
-          git add SKILL.md
+          # Stage BOTH targets. This used to be `git add SKILL.md` alone, so
+          # references/api-reference.md — the file Raven pins for sk-018 —
+          # could never have synced even with a token.
+          git add SKILL.md references
           # Commit message kept to one line — multi-line strings inside a
           # YAML literal block are fragile (a blank line at lower indent
           # ends the block). The commit SHA + workflow trigger live in the
           # auto-generated GitHub Actions log, so we don't lose context.
           git commit -m "sync: SKILL.md from stellarlight@${{ github.sha }} (${{ github.event_name }})"
           git push
+          ) 2>&1 | tee sync.log
+
+      # A silent red here means the skill Raven pins goes stale for weeks
+      # (it did: every run from 2026-07-20 to 2026-08-18 failed on the
+      # missing token and nobody saw it). Same rolling issue every guard uses.
+      - name: Track the signal (rolling issue)
+        if: always()
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "Scout skill sync red"
+          outcome: ${{ steps.sync.outcome }}
+          body-file: sync.log
+      - name: Propagate the red
+        if: steps.sync.outcome == 'failure'
+        run: exit 1
