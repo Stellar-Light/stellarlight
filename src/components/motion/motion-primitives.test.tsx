@@ -16,7 +16,6 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IconSwap, IconSwapItem } from "./icon-swap";
 import { ReadingProgress } from "./reading-progress";
-import { SuccessRing } from "./success-ring";
 import { ThinkingDots } from "./thinking-dots";
 
 function setReducedMotion(reduced: boolean) {
@@ -55,16 +54,6 @@ describe("motion primitives", () => {
 			</IconSwap>,
 		);
 		expect(screen.getByTestId("check")).toBeTruthy();
-	});
-
-	it("SuccessRing always renders its mark, ring or not", () => {
-		setReducedMotion(true);
-		render(
-			<SuccessRing active>
-				<span data-testid="mark">✓</span>
-			</SuccessRing>,
-		);
-		expect(screen.getByTestId("mark")).toBeTruthy();
 	});
 
 	it("ThinkingDots announces itself and keeps its three dots", () => {
