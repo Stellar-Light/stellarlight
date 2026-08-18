@@ -132,13 +132,7 @@ export function AwardsBallot({ data }: { data: AwardsRoundData | null }) {
 	if (!data || data.round.status === "draft") {
 		return <EmptyState />;
 	}
-	// A round whose closesAt has passed is closed whether or not the record was
-	// flipped: the tally endpoint reads votes from chain regardless, and an
-	// "open" ballot that says "voting has closed" while every card still reads
-	// "Tap to select" is the worst of both.
-	const pastClose =
-		!!data.round.closesAt && Date.parse(data.round.closesAt) < Date.now();
-	if (data.round.status === "closed" || pastClose) {
+	if (data.round.status === "closed") {
 		return <ClosedRound data={data} />;
 	}
 	return <OpenBallot data={data} />;
