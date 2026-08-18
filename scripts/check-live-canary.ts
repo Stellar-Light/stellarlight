@@ -260,10 +260,91 @@ async function renderReachability() {
 	}
 }
 
+// ── 3. known-asset coverage ───────────────────────────────────────────────
+
+// sls-066: the stablecoin inventory is one upstream snapshot's tracked set,
+// and on 2026-08-18 it dropped Circle USDC for hours while the asset was
+// live on-chain. An agent reading the list as a census would have concluded
+// "no USDC on Stellar". Assert the canonical issuers are present; report an
+// absence as an UPSTREAM COVERAGE GAP, never as proof the asset is gone.
+const CANONICAL_STABLECOINS: Array<{
+	ticker: string;
+	issuer: string;
+	who: string;
+}> = [
+	{
+		ticker: "USDC",
+		issuer: "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+		who: "Circle (official contract table)",
+	},
+	{
+		ticker: "EURC",
+		issuer: "GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
+		who: "Circle (official contract table)",
+	},
+];
+
+async function knownAssetCoverage() {
+	console.log(
+		"\n3. known-asset coverage — canonical stablecoins must be in the inventory",
+	);
+	try {
+		const { status, body } = await getJson("/api/stablecoins?limit=100");
+		if (status !== 200) {
+			bad("stablecoins inventory", `HTTP ${status}`);
+			return;
+		}
+		const rows: any[] = Array.isArray(body?.stablecoins)
+			? body.stablecoins
+			: [];
+		if (rows.length === 0 && body?.meta?.advisory) {
+			// Upstream outage is already an honest advisory in the response;
+			// don't double-report it as a coverage gap.
+			ok(
+				`stablecoins upstream unavailable (advisory present) — coverage not judged`,
+			);
+			return;
+		}
+		for (const c of CANONICAL_STABLECOINS) {
+			const hit = rows.find((r) => r.issuer === c.issuer);
+			if (hit)
+				ok(
+					`${c.ticker} by ${c.who} present (${hit.marketCapUSD == null ? "metrics null = untracked, not zero" : `cap $${Math.round(hit.marketCapUSD).toLocaleString()}`})`,
+				);
+			else
+				bad(
+					`${c.ticker} ${c.issuer.slice(0, 8)}… absent from inventory`,
+					`UPSTREAM COVERAGE GAP at the snapshot service — the asset is issued on Stellar (${c.who}); this is a missing row, NOT proof of absence. Do not let a consumer read the list as a census.`,
+				);
+		}
+		// counts contract (sls-066): total must be the FILTERED count.
+		const usd = await getJson("/api/stablecoins?peg=USD&limit=100");
+		const c = usd.body?.meta?.counts ?? {};
+		const returned = Array.isArray(usd.body?.stablecoins)
+			? usd.body.stablecoins.length
+			: -1;
+		if (typeof c.total === "number" && c.total === returned)
+			ok(
+				`peg=USD counts.total (${c.total}) equals rows returned — filtered semantics hold`,
+			);
+		else
+			bad(
+				"stablecoins counts.total under peg filter",
+				`total=${c.total} but returned=${returned}; total must be the filtered count (sls-066)`,
+			);
+	} catch (e) {
+		bad(
+			"stablecoins coverage",
+			`probe failed: ${String((e as Error).message).slice(0, 80)}`,
+		);
+	}
+}
+
 (async () => {
 	console.log(`Live canary against ${BASE}`);
 	await silentEmpty();
 	await renderReachability();
+	await knownAssetCoverage();
 	console.log(`\n${passes} passed, ${failures} failed`);
 	writeNightlyFindings("live-canary", failRows);
 	process.exit(failures > 0 ? 1 : 0);

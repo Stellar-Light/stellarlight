@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-18",
 		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Two stellar-raven findings closed (openapi@1.8.72). sls-067: /api/rfps no longer claims an open brief is 'fundable in the current round' — `status=open` means the sponsor brief is still soliciting; whether SCF accepts a submission TODAY is answered only by meta.scfRound (submissionWindow, currentPhase, roundsInProgress), dated by asOf. Five model-visible descriptions rewritten; `currentPhase` and `roundsInProgress` (served since the round feed shipped) are now in the response schema. sls-066: /api/stablecoins meta.counts.total is now the FILTERED count (peg=USD returned 7 rows under total 22 — it was the whole-set count); `counts.tracked` keeps the whole inventory; new `meta.coverage` names the inventory as one upstream snapshot's tracked set, never a census — Circle USDC was absent for hours on 2026-08-18 while live on-chain.",
+		detail:
+			"No breaking shape changes: `total` changes MEANING to match every other endpoint (a consumer summing filtered rows against total now gets a true statement); `tracked` and `coverage` are additive. The hourly live canary gains a known-asset check: Circle's official USDC and EURC issuers must be present, and an absence is reported as an UPSTREAM COVERAGE GAP, never as proof of absence; it also asserts counts.total == returned under peg=USD. The phase-vs-official-page disagreement in sls-067 was the 6-hour revalidate window catching a transition (both read 'Panel Review' at 22:30 UTC); the contract overclaim was the durable defect.",
+	},
+	{
+		date: "2026-08-18",
+		surfaces: ["api"],
 		type: "removed",
 		summary:
 			"`searchHackathonBuilds` (GET /api/hackathons/builds): removed three advertised-but-unimplemented filter parameters — capability, domain and dependsOn. The handler accepted only `q`, `winnersOnly`, `track` and `limit`, rejecting the other three with 400, so an agent that trusted the spec wrote a valid-looking call and burned a recovery turn (stellar-raven sls-065). The scanned repo signals those filters describe still power the same filtering on searchRepos and listContracts; they were simply never wired into the builds route (openapi@1.8.71).",

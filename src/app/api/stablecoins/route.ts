@@ -88,11 +88,17 @@ export async function GET(req: NextRequest) {
 	}
 
 	let rows = snapshot.map(normalizeSnapshotRow).filter((r) => r.ticker);
-	const total = rows.length;
+	// sls-066: `total` used to be taken BEFORE the peg filter, so peg=USD
+	// returned 7 rows under counts.total 22 — while every other endpoint's
+	// contract defines counts.total as the filtered count before slicing.
+	// `tracked` keeps the whole-inventory number, `total` means what the
+	// contract says.
+	const tracked = rows.length;
 	if (pegFilter) {
 		const want = pegFilter.toUpperCase();
 		rows = rows.filter((r) => (r.peg ?? "").toUpperCase() === want);
 	}
+	const total = rows.length;
 	rows = rankStablecoins(rows, sort as StablecoinSort).slice(0, limit);
 
 	// dataAsOf = the freshest snapshot row timestamp we served.
@@ -123,7 +129,16 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				dataAsOf,
 				filters: { peg: pegFilter ?? null, sort, limit },
-				counts: { total, returned: rows.length },
+				counts: { tracked, total, returned: rows.length },
+				// sls-066: say what this inventory IS. It is one upstream snapshot
+				// service's tracked set — not a census of every Stellar stablecoin.
+				// A ticker absent here is "not tracked at our source", never
+				// "does not exist on Stellar" (Circle USDC was absent for hours on
+				// 2026-08-18 while live on-chain).
+				coverage: {
+					basis: "single-upstream-snapshot",
+					note: "Rows are the assets the sibling snapshot service tracks. Absence from this list is a coverage gap at the source, not proof an asset is not issued on Stellar; verify against the issuer's own contract table before asserting non-existence.",
+				},
 				methodology:
 					"marketCapUSD = circulating supply × USD price (the sibling snapshot's computed value). It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not tracked at our source, never 'zero'. dataAsOf dates the served rows.",
 				...(advisory ? { advisory } : {}),

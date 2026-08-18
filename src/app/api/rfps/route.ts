@@ -266,7 +266,7 @@ export async function GET(req: NextRequest) {
 				submitNewBriefAt: "https://stellarlight.xyz/ideas",
 			},
 			funding:
-				"Stellar Community Fund (SCF) — winners of open RFPs (status: open) are eligible for SCF grant funding in the current round. Closed RFPs are past rounds, surfaced for context but no longer fundable.",
+				"Stellar Community Fund (SCF) — these briefs say what the ecosystem wants built. `open` means the brief is still soliciting; whether SCF accepts a proposal TODAY depends on the round state in meta.scfRound (submissionWindow, currentPhase, roundsInProgress), dated by asOf. Closed briefs are past rounds, surfaced for context.",
 			rfps,
 		}),
 		{
