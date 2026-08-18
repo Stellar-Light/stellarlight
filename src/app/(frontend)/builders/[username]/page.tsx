@@ -264,10 +264,17 @@ export default async function BuilderProfilePage({
 								v: String(code.repos.length),
 								l: code.repos.length === 1 ? "Stellar repo" : "Stellar repos",
 							});
+							// Two honest numbers, never mixed: activity on repos they own,
+							// and their own commits into repos they don't.
 							if (code.commits90d > 0)
 								tiles.push({
 									v: code.commits90d.toLocaleString(),
-									l: "commits, 90d",
+									l: "commits on own repos, 90d",
+								});
+							if (code.contributedCommits12m > 0)
+								tiles.push({
+									v: code.contributedCommits12m.toLocaleString(),
+									l: "commits to others' repos, 12mo",
 								});
 							if (code.lastCommitAt)
 								tiles.push({
@@ -335,7 +342,7 @@ export default async function BuilderProfilePage({
 								{code.repos.length === 1 ? "repo" : "repos"}
 								{code.stars > 0 ? `, ${code.stars.toLocaleString()} stars` : ""}
 								{code.commits90d > 0
-									? `, ${code.commits90d.toLocaleString()} commits in the last 90 days`
+									? `, ${code.commits90d.toLocaleString()} commits on their own repos in the last 90 days`
 									: ""}
 								{code.lastCommitAt
 									? `, last commit ${ago(code.lastCommitAt)}`

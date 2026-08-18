@@ -17,6 +17,7 @@
  * Rows are REPLACED per builder on each run (the source is authoritative for
  * "last 12 months"); a GitHub error leaves the previous rows untouched.
  */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "@/payload.config";
 
