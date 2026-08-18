@@ -19,6 +19,11 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	ago,
+	builderCodeActivity,
+	type CodeActivity,
+} from "@/lib/builder-code";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{ username: string }>;
@@ -27,17 +32,20 @@ async function getBuilder(username: string) {
 	const payload = await getPayloadSafe();
 	if (!payload) return null;
 
+	// GitHub logins are case-insensitive; URLs get typed in lowercase
 	const result = await payload.find({
 		collection: "builders",
-		where: {
-			github_username: {
-				equals: username,
-			},
-		},
-		limit: 1,
+		where: { github_username: { like: username } },
+		limit: 5,
 	});
-
-	return result.docs[0] || null;
+	const docs = result.docs;
+	return (
+		docs.find(
+			(d) => String(d.github_username).toLowerCase() === username.toLowerCase(),
+		) ??
+		docs[0] ??
+		null
+	);
 }
 
 export async function generateMetadata({
@@ -73,6 +81,17 @@ export default async function BuilderProfilePage({
 	if (!builder) {
 		notFound();
 	}
+
+	// what this person has shipped in the Stellar repos we index (owned,
+	// Passport-declared, contributor pass); the Passport profile alone is thin
+	let code: CodeActivity | undefined;
+	try {
+		const payload = await getPayloadSafe();
+		if (payload)
+			code = (await builderCodeActivity(payload, [builder as any])).get(
+				String(builder.github_username).toLowerCase(),
+			);
+	} catch {}
 
 	return (
 		<div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -209,7 +228,121 @@ export default async function BuilderProfilePage({
 				</Card>
 			)}
 
-			{/* Projects Section */}
+			{/* On Stellar: projects + repos from OUR index (this is what was missing) */}
+			{code && (code.repos.length > 0 || code.projects.size > 0) && (
+				<Card className="mb-8">
+					<CardHeader>
+						<CardTitle>On Stellar</CardTitle>
+						<p className="text-sm text-muted-foreground">
+							From the Stellar repos we index: {code.repos.length}{" "}
+							{code.repos.length === 1 ? "repo" : "repos"}
+							{code.stars > 0 ? `, ${code.stars.toLocaleString()} stars` : ""}
+							{code.commits90d > 0
+								? `, ${code.commits90d.toLocaleString()} commits in the last 90 days`
+								: ""}
+							{code.lastCommitAt
+								? `, last commit ${ago(code.lastCommitAt)}`
+								: ""}
+							.
+						</p>
+					</CardHeader>
+					<CardContent className="space-y-5">
+						{code.projects.size > 0 && (
+							<div className="flex flex-wrap items-center gap-2">
+								<span className="text-sm text-muted-foreground">Builds</span>
+								{[...code.projects.entries()].map(([slug, name]) => (
+									<Link
+										key={slug}
+										href={`/project/${slug}`}
+										className="rounded-md border border-border bg-white/[0.03] px-2 py-1 text-sm text-foreground/90 hover:border-white/25 transition-colors"
+									>
+										{name}
+									</Link>
+								))}
+							</div>
+						)}
+						{code.repos.length > 0 && (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+											<th className="py-2 pr-4 font-medium">Repository</th>
+											<th className="py-2 pr-4 font-medium">Project</th>
+											<th className="py-2 pr-4 font-medium text-right">
+												Stars
+											</th>
+											<th className="py-2 pr-4 font-medium text-right">
+												90d commits
+											</th>
+											<th className="py-2 font-medium text-right">
+												Last commit
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{code.repos.slice(0, 40).map((r) => (
+											<tr
+												key={r.fullName}
+												className="border-b border-border/50 last:border-0"
+											>
+												<td className="py-2 pr-4">
+													<a
+														href={r.url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-foreground hover:underline underline-offset-2"
+													>
+														{r.fullName}
+													</a>
+													{r.via !== "owner" && (
+														<span className="ml-2 text-xs text-muted-foreground">
+															{r.via === "contributor"
+																? `contributor${r.myCommits12m ? `, ${r.myCommits12m} commits/12mo` : ""}`
+																: "declared on Passport"}
+														</span>
+													)}
+												</td>
+												<td className="py-2 pr-4">
+													{r.projectSlug && r.projectName ? (
+														<Link
+															href={`/project/${r.projectSlug}`}
+															className="text-foreground/90 hover:underline underline-offset-2"
+														>
+															{r.projectName}
+														</Link>
+													) : (
+														<span className="text-muted-foreground">-</span>
+													)}
+												</td>
+												<td className="py-2 pr-4 text-right tabular-nums">
+													{r.stars.toLocaleString()}
+												</td>
+												<td className="py-2 pr-4 text-right tabular-nums">
+													{r.commits90d ? (
+														r.commits90d.toLocaleString()
+													) : (
+														<span className="text-muted-foreground">-</span>
+													)}
+												</td>
+												<td className="py-2 text-right tabular-nums text-muted-foreground">
+													{ago(r.lastCommitAt) ?? "-"}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+								{code.repos.length > 40 && (
+									<p className="mt-2 text-xs text-muted-foreground">
+										Showing 40 of {code.repos.length}.
+									</p>
+								)}
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Projects Section (declared on Stellar Passport) */}
 			{builder.projects && builder.projects.length > 0 && (
 				<Card className="mb-8">
 					<CardHeader>
