@@ -186,31 +186,57 @@ export default async function BuilderProfilePage({
 						</div>
 					</div>
 
-					{/* Stats Card */}
-					{builder.stats && (
-						<Card className="w-full md:w-auto">
-							<CardContent className="p-4">
-								<div className="grid grid-cols-2 gap-4 text-center">
-									<div>
-										<div className="text-2xl font-bold text-primary">
-											{builder.stats.totalCommits30d || 0}
-										</div>
-										<div className="text-xs text-muted-foreground">
-											Commits (30d)
-										</div>
+					{/* Activity: real numbers from the repos we index; Passport's own 30d
+					    figures only when Passport actually has them. Nothing = no card,
+					    never a row of zeros. */}
+					{(() => {
+						const tiles: Array<{ v: string; l: string }> = [];
+						if (code && code.repos.length > 0) {
+							tiles.push({
+								v: String(code.repos.length),
+								l: code.repos.length === 1 ? "Stellar repo" : "Stellar repos",
+							});
+							if (code.commits90d > 0)
+								tiles.push({
+									v: code.commits90d.toLocaleString(),
+									l: "commits, 90d",
+								});
+							if (code.lastCommitAt)
+								tiles.push({
+									v: ago(code.lastCommitAt) ?? "",
+									l: "last commit",
+								});
+						}
+						if (builder.stats?.totalCommits30d)
+							tiles.push({
+								v: String(builder.stats.totalCommits30d),
+								l: "commits, 30d (Passport)",
+							});
+						if (builder.stats?.activeDays30d)
+							tiles.push({
+								v: String(builder.stats.activeDays30d),
+								l: "active days, 30d (Passport)",
+							});
+						if (!tiles.length) return null;
+						return (
+							<Card className="w-full md:w-auto">
+								<CardContent className="p-4">
+									<div className="flex flex-wrap gap-6 text-center">
+										{tiles.map((t) => (
+											<div key={t.l} className="min-w-[72px]">
+												<div className="text-2xl font-semibold text-foreground tabular-nums">
+													{t.v}
+												</div>
+												<div className="text-xs text-muted-foreground">
+													{t.l}
+												</div>
+											</div>
+										))}
 									</div>
-									<div>
-										<div className="text-2xl font-bold text-primary">
-											{builder.stats.activeDays30d || 0}
-										</div>
-										<div className="text-xs text-muted-foreground">
-											Active Days
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
+								</CardContent>
+							</Card>
+						);
+					})()}
 				</div>
 			</div>
 
