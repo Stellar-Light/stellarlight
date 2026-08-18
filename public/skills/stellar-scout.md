@@ -152,7 +152,9 @@ Triggered by *"which RFP should I go for"*, *"compare the open RFPs"*, *"rank th
 
 ### Hackathon Build Brief
 
-Triggered by *"we're at a hackathon and want to build X"*, *"is X already built on Stellar"*, *"what should our team start from"*, *"48 hours, Stellar, help"*. Time-boxed teams need one grounded brief, not twelve tabs. Five calls, in this order — the composites do the joining server-side, so you rarely need the lower-level searches at all.
+Triggered by *"we're at a hackathon and want to build X"*, *"is X already built on Stellar"*, *"what should our team start from"*, *"48 hours, Stellar, help"*. Time-boxed teams need one grounded brief, not twelve tabs.
+
+**Shortest path:** `/api/hackathon-brief?q={idea}` returns steps 1, 2, 3 and 5 below in one call (`vet`, `builds`, `startFrom` with trust summaries, `liveContracts`, `funding`) plus a `whatNotToClaim` list derived from the brief's own facts. Use it first; fall through to the individual calls only when you need the full `contractInterface` (`fullReport`) or the rails in step 4. The five calls, in this order — the composites do the joining server-side, so you rarely need the lower-level searches at all.
 
 1. **Vet the idea first.** `/api/vet-idea?q={one-line idea, 3–200 chars}` → `report.competitors` (repos + live directory projects in the detected vertical), `maturity` (verified evidence only: audits + on-chain usage), `priorArt` (hackathon builds — dead prior art is a signal, not a stop sign), `gap`, `funding`. Read `gap` as **supply-side coverage, not demand**: a gap means few things exist, never that anyone wants one. If `vertical` didn't resolve to a Stellar vertical, the idea probably isn't a Stellar idea — say that plainly.
 2. **Pick a starting point, then check it before forking.** `/api/repos/search?q={stack or capability}` for candidates (passkey, x402, sep24-ramp, wallet-kit…), then `/api/repos/trust?repo={owner/name}` for the one you'd fork → `report.codeTruth` (proof, depth, the FULL `contractInterface` — generate calls against *this*, not the README), `usage`, `audits` + `auditDrift`, `succession`, `signals`. `signals` is a closed vocabulary of facts that hold; it is not a safety score and must not be presented as one. A repo absent from the index is "not indexed", not "untrustworthy".
@@ -243,6 +245,7 @@ Full docs in `references/api-reference.md`. Quick lookup table:
 | `/api/repos/trust` | GET | **Composite:** the code-truth report for one repo (`?repo=owner/name`) — full `contractInterface`, live usage, audits + drift, succession, `signals` (facts, not a score) |
 | `/api/contracts` | GET | Evidence-gated registry of verified mainnet contracts, joined to code truth + usage + audits (`?domain=` closed set). Absence ≠ nonexistence |
 | `/api/scf-pitch` | GET | **Composite:** live round state + funded peers with award totals + vet-idea view + deterministic pitch angles (`?q=`). Round never asserted closed on fetch failure |
+| `/api/hackathon-brief` | GET | **Composite:** the Hackathon Build Brief in one call — vet + prototype prior art + starter repos with trust summaries + live contracts + funding + `whatNotToClaim` (`?q=`). Rails and RFPs not bundled |
 | `/api/hackathons/builds` | GET | Prior art over prototypes — every DoraHacks submission, `?q=` topic, `winnersOnly=1`, `track=` |
 | `/api/stablecoins` | GET | Tracked stablecoins ranked by USD market cap; `?peg=` filter. Never compare raw `supply` across pegs |
 | `/api/changes` | GET | Reconciliation feed: rows that changed since `?since=` (projects/repos/partners) with `facets`. For refreshing remembered claims, not discovery |

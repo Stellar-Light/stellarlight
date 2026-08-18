@@ -20,6 +20,7 @@ import { logApiHit } from "@/lib/api-usage";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
+	searchHackathonBuilds,
 } from "@/lib/hackathon-builds";
 import {
 	BOOL_FALSE_VALUES,
@@ -33,7 +34,6 @@ import {
 	fetchHackathonSubmissions,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { CORE_SYNONYMS, GENERIC_QUERY_TOKENS } from "@/lib/search-vocabulary";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
@@ -44,16 +44,6 @@ const SUPPORTED_PARAMS = ["q", "limit", "winnersOnly", "track"] as const;
 // builder profile pages); the hour-long cache is unstable_cache, not per instance.
 async function getIndex(): Promise<IndexedBuild[]> {
 	return getHackathonBuildsIndex();
-}
-
-/** Expand a query token with a plural/singular stem + shared vocabulary synonyms
- *  so niche phrasing matches (nft↔non-fungible, lending↔loan/credit, …). */
-function expand(token: string): string[] {
-	const out = new Set<string>([token]);
-	if (token.length > 3 && token.endsWith("s")) out.add(token.slice(0, -1));
-	else if (token.length > 2) out.add(`${token}s`);
-	for (const syn of CORE_SYNONYMS[token] ?? []) out.add(syn);
-	return [...out];
 }
 
 export async function GET(req: NextRequest) {
@@ -98,57 +88,13 @@ export async function GET(req: NextRequest) {
 	}
 	const indexedTotal = indexed.length;
 
-	let pool_ = indexed;
-	if (winnersOnly) pool_ = pool_.filter((b) => b.isWinner);
-	if (track)
-		pool_ = pool_.filter((b) => (b.track ?? "").toLowerCase().includes(track));
-
-	let scored: Array<{ b: IndexedBuild; score: number; matched: string[] }>;
-	if (q) {
-		const tokens = q
-			.split(/\s+/)
-			.filter((t) => t && !GENERIC_QUERY_TOKENS.has(t));
-		scored = [];
-		for (const b of pool_) {
-			let score = 0;
-			let nameMatched = false;
-			const matched = new Set<string>();
-			for (const t of tokens) {
-				for (const v of expand(t)) {
-					if (b.name.toLowerCase().includes(v)) {
-						score += 3;
-						matched.add(t);
-						nameMatched = true;
-					} else if (b.haystack.includes(v)) {
-						score += 1;
-						matched.add(t);
-					}
-				}
-			}
-			// Prior-art favors RECALL (a missed existing build is the costly error):
-			// a NAME match is strong enough to always surface; otherwise require at
-			// least half the concepts so a common token alone ("payments") doesn't
-			// flood. Ranking (not filtering) handles precision from there.
-			if (
-				score > 0 &&
-				(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
-			) {
-				score += b.isWinner ? 2 : 0; // a winning build is stronger prior art
-				score += Math.min(b.voteCount, 20) * 0.05;
-				scored.push({ b, score, matched: [...matched] });
-			}
-		}
-		scored.sort((a, b) => b.score - a.score);
-	} else {
-		// browse mode — winners first, then most-voted, across all events
-		scored = pool_
-			.map((b) => ({
-				b,
-				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount, 100),
-				matched: [] as string[],
-			}))
-			.sort((a, b) => b.score - a.score);
-	}
+	// Scoring lives in src/lib/hackathon-builds.ts (searchHackathonBuilds) so
+	// the hackathon-brief composite can call it in-process — this route and
+	// the composite share one implementation and cannot drift.
+	const scored = searchHackathonBuilds(indexed, q ?? "", {
+		winnersOnly,
+		track,
+	});
 
 	const builds = scored.slice(0, limit).map(({ b, matched }) => ({
 		name: b.name,

@@ -10,6 +10,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 } from "@/lib/integrations/dorahacks";
+import { CORE_SYNONYMS, GENERIC_QUERY_TOKENS } from "@/lib/search-vocabulary";
 import { generateSlug } from "@/lib/utils/normalize";
 
 export interface IndexedBuild extends DoraHacksSubmission {
@@ -99,4 +100,87 @@ export function buildsForRepos(
 			: null;
 		return (full && repos.has(full)) || own.has(owner);
 	});
+}
+
+// ── Prior-art search over the index ───────────────────────────────────────
+// Lifted verbatim from /api/hackathons/builds so the hackathon-brief composite
+// can call it in-process (a server route must never HTTP-fetch its own API —
+// self-referential SSR fetches fail on Vercel). The route calls this too, so
+// the two can never drift.
+
+/** Expand a query token with a plural/singular stem + shared vocabulary synonyms
+ *  so niche phrasing matches (nft↔non-fungible, lending↔loan/credit, …). */
+export function expandBuildTerm(token: string): string[] {
+	const out = new Set<string>([token]);
+	if (token.length > 3 && token.endsWith("s")) out.add(token.slice(0, -1));
+	else if (token.length > 2) out.add(`${token}s`);
+	for (const syn of CORE_SYNONYMS[token] ?? []) out.add(syn);
+	return [...out];
+}
+
+export interface ScoredBuild {
+	b: IndexedBuild;
+	score: number;
+	matched: string[];
+}
+
+/**
+ * Score + rank builds for a topic query. Prior-art favors RECALL (a missed
+ * existing build is the costly error): a NAME match always surfaces;
+ * otherwise at least half the concepts must hit so a common token alone
+ * ("payments") doesn't flood. Ranking handles precision from there. With no
+ * query: browse mode — winners first, then most-voted.
+ */
+export function searchHackathonBuilds(
+	indexed: IndexedBuild[],
+	q: string,
+	opts: { winnersOnly?: boolean; track?: string } = {},
+): ScoredBuild[] {
+	let pool = indexed;
+	if (opts.winnersOnly) pool = pool.filter((b) => b.isWinner);
+	if (opts.track) {
+		const t = opts.track.toLowerCase();
+		pool = pool.filter((b) => (b.track ?? "").toLowerCase().includes(t));
+	}
+	const query = q.trim().toLowerCase();
+	if (!query) {
+		return pool
+			.map((b) => ({
+				b,
+				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount, 100),
+				matched: [] as string[],
+			}))
+			.sort((a, b) => b.score - a.score);
+	}
+	const tokens = query
+		.split(/\s+/)
+		.filter((t) => t && !GENERIC_QUERY_TOKENS.has(t));
+	const scored: ScoredBuild[] = [];
+	for (const b of pool) {
+		let score = 0;
+		let nameMatched = false;
+		const matched = new Set<string>();
+		for (const t of tokens) {
+			for (const v of expandBuildTerm(t)) {
+				if (b.name.toLowerCase().includes(v)) {
+					score += 3;
+					matched.add(t);
+					nameMatched = true;
+				} else if (b.haystack.includes(v)) {
+					score += 1;
+					matched.add(t);
+				}
+			}
+		}
+		if (
+			score > 0 &&
+			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
+		) {
+			score += b.isWinner ? 2 : 0;
+			score += Math.min(b.voteCount, 20) * 0.05;
+			scored.push({ b, score, matched: [...matched] });
+		}
+	}
+	scored.sort((a, b) => b.score - a.score);
+	return scored;
 }
