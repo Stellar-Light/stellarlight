@@ -30,7 +30,7 @@ async function main() {
 			headers: { "User-Agent": "stellarlight-skill-ref-guard" },
 		})
 	)
-	// biome-ignore lint/suspicious/noExplicitAny: spec walking
+		// biome-ignore lint/suspicious/noExplicitAny: spec walking
 		.json()) as any;
 
 	let failures = 0;
@@ -110,6 +110,50 @@ async function main() {
 		failures++;
 		console.log("  ✗ no operations readable from live spec");
 	}
+
+	// 5. PARAM drift, the other direction (sls-065 class). Checks 1–4 all ask
+	//    "does the reference cover the spec?" — none asked whether the
+	//    reference documents a param the spec does NOT have. When three
+	//    phantom filters were dropped from searchHackathonBuilds (#953), this
+	//    file kept advertising them, so the skill Raven pins was telling agents
+	//    to send params the API answers with 400. Documentation ahead of the
+	//    API is the same lie as documentation behind it.
+	console.log("\nParam drift (sls-065 class):");
+	const NOT_PARAMS = new Set(["e.g", "i.e", "https", "http"]);
+	let paramsChecked = 0;
+	for (const section of ref.split(/^## /m).slice(1)) {
+		const head = section.split("\n")[0].trim();
+		const m = head.match(/^`(GET|POST) ([^`]+)`/);
+		if (!m) continue;
+		const [, method, path] = m;
+		// biome-ignore lint/suspicious/noExplicitAny: spec walking
+		const op = (spec?.paths?.[path] as any)?.[method.toLowerCase()];
+		if (!op) continue;
+		const specParams = new Set<string>(
+			// biome-ignore lint/suspicious/noExplicitAny: spec walking
+			(op.parameters ?? []).map((p: any) =>
+				p.name
+					? p.name
+					: String(p.$ref ?? "")
+							.split("/")
+							.pop(),
+			),
+		);
+		// Only the Params sentence: elsewhere `name=` shows up inside example
+		// URLs for OTHER endpoints, which is not this operation's contract.
+		const paramsLine = section.match(/\*\*Params[^:]*:\*\*(.*)/)?.[1] ?? "";
+		for (const name of new Set(
+			[...paramsLine.matchAll(/`([a-zA-Z][a-zA-Z0-9_]*)=/g)].map((x) => x[1]),
+		)) {
+			paramsChecked++;
+			if (NOT_PARAMS.has(name) || specParams.has(name)) continue;
+			failures++;
+			console.log(
+				`  ✗ ${method} ${path} — documents \`${name}=\` but the live spec has no such param (sls-065 class)`,
+			);
+		}
+	}
+	console.log(`  checked ${paramsChecked} documented params against the spec`);
 
 	console.log(
 		`\n${failures ? `${failures} missing — FAILING` : "reference covers the live surface"}`,
