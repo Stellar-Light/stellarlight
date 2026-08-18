@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-18",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Audit relation metadata for the three remaining duplicate (protocol, auditor) pairs (stellar-raven sls-064 recurrence): Blend V2 / Certora reports 40+51 share engagementId certora-blend-v2-2025q1 (each document cites the other as its 'separate report'; both state work from February 03, 2025); OpenZeppelin Stellar Contracts Library reports 2 (0.1.0, Feb 3–7 2025) and 35 (v0.3.0-rc.2, Jun 4–18 2025) get distinct engagementIds; Allbridge Estrela / Quarkslab reports 15 (2024) and 16 (2025) get distinct engagementIds — report 16 itself states Quarkslab 'had already performed an audit of an earlier version'. reportVersion is what each title/document states; engagementStart/End only where the report states a window (Quarkslab states none — stays null). No supersession claimed anywhere: no document states one.",
+		detail:
+			"Values are read from the report texts (stellarsecurityportal.com/api/v1/reports/{id} mdFile), not inferred from titles or portal dates. Rows land on the next audit ingest; the API shape is unchanged (fields existed since the Veridise fix), only nulls become values.",
+	},
+	{
+		date: "2026-08-18",
 		surfaces: ["skill", "api"],
 		type: "fixed",
 		summary:
