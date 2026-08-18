@@ -41,6 +41,8 @@ type CodeActivity = {
 	stars: number;
 	lastCommitAt: string | null;
 	commits90d: number;
+	/** projects this person is connected to on GitHub: slug -> name */
+	projects: Map<string, string>;
 };
 
 export default async function BuildersPage() {
@@ -82,29 +84,63 @@ export default async function BuildersPage() {
 	if (payload && builders.length) {
 		try {
 			const logins = builders.map((b) => String(b.github_username));
+			const lower = new Set(logins.map((l) => l.toLowerCase()));
+			const fresh = (k: string): CodeActivity =>
+				activity.get(k) ?? {
+					repos: 0,
+					stars: 0,
+					lastCommitAt: null,
+					commits90d: 0,
+					projects: new Map<string, string>(),
+				};
+			// Passport-declared repos, so a contributor to an org repo still connects
+			// to the project through the repo they named on their profile
+			const declared = new Map<string, string>(); // fullName (lower) -> login (lower)
+			for (const b of builders) {
+				for (const pr of b.projects ?? []) {
+					for (const rp of pr.repos ?? []) {
+						if (rp?.full_name)
+							declared.set(
+								String(rp.full_name).toLowerCase(),
+								String(b.github_username).toLowerCase(),
+							);
+					}
+				}
+			}
 			const repos = await payload.find({
 				collection: "repos",
 				where: {
-					and: [{ owner: { in: logins } }, { tier: { not_equals: "archive" } }],
+					and: [
+						{
+							or: [
+								{ owner: { in: logins } },
+								...(declared.size
+									? [{ fullName: { in: [...declared.keys()] } }]
+									: []),
+							],
+						},
+						{ tier: { not_equals: "archive" } },
+					],
 				},
 				limit: 5000,
 				depth: 0,
 				select: {
 					owner: true,
+					fullName: true,
+					projectSlug: true,
 					stars: true,
 					lastCommitAt: true,
 					activitySignals: true,
 				},
 			} as any);
+			const projectSlugs = new Set<string>();
 			for (const r of repos.docs as any[]) {
-				const k = String(r.owner ?? "").toLowerCase();
+				const byOwner = String(r.owner ?? "").toLowerCase();
+				const k = lower.has(byOwner)
+					? byOwner
+					: declared.get(String(r.fullName ?? "").toLowerCase());
 				if (!k) continue;
-				const e = activity.get(k) ?? {
-					repos: 0,
-					stars: 0,
-					lastCommitAt: null,
-					commits90d: 0,
-				};
+				const e = fresh(k);
 				e.repos += 1;
 				e.stars += Number(r.stars ?? 0);
 				e.commits90d += Number(r.activitySignals?.commits90d ?? 0);
@@ -113,7 +149,49 @@ export default async function BuildersPage() {
 					(!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt)
 				)
 					e.lastCommitAt = r.lastCommitAt;
+				if (r.projectSlug) {
+					e.projects.set(String(r.projectSlug), "");
+					projectSlugs.add(String(r.projectSlug));
+				}
 				activity.set(k, e);
+			}
+			// projects whose GitHub org IS the builder, plus names for the slugs above
+			const projs = await payload.find({
+				collection: "projects",
+				where: {
+					and: [
+						{ status: { in: ["Development", "Pre-Release", "Live"] } },
+						{
+							or: [
+								{ "github.orgLogin": { in: logins } },
+								...(projectSlugs.size
+									? [{ slug: { in: [...projectSlugs] } }]
+									: []),
+							],
+						},
+					],
+				},
+				limit: 2000,
+				depth: 0,
+				select: { name: true, slug: true, github: true },
+			} as any);
+			const nameOf = new Map<string, string>();
+			for (const pj of projs.docs as any[]) {
+				nameOf.set(String(pj.slug), String(pj.name));
+				const org = String(pj.github?.orgLogin ?? "").toLowerCase();
+				if (org && lower.has(org)) {
+					const e = fresh(org);
+					e.projects.set(String(pj.slug), String(pj.name));
+					activity.set(org, e);
+				}
+			}
+			for (const e of activity.values()) {
+				for (const [slug, name] of e.projects) {
+					if (name) continue;
+					const n = nameOf.get(slug);
+					if (n) e.projects.set(slug, n);
+					else e.projects.delete(slug); // inactive/unknown project: don't advertise it
+				}
 			}
 		} catch (error) {
 			console.error("builders repo activity failed:", error);
@@ -318,7 +396,7 @@ function BuilderRow({
 								className="rounded-full"
 							/>
 						) : (
-							<div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
+							<div className="w-12 h-12 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-neutral-300 text-lg font-semibold">
 								{builder.display_name.charAt(0).toUpperCase()}
 							</div>
 						)}
@@ -376,6 +454,27 @@ function BuilderRow({
 								</span>
 							)}
 						</div>
+						{activity && activity.projects.size > 0 && (
+							<div className="relative z-10 mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+								<span className="text-muted-foreground">builds</span>
+								{[...activity.projects.entries()]
+									.slice(0, 4)
+									.map(([slug, name]) => (
+										<Link
+											key={slug}
+											href={`/project/${slug}`}
+											className="rounded-md border border-border bg-white/[0.03] px-1.5 py-0.5 text-foreground/90 hover:border-white/25 transition-colors"
+										>
+											{name}
+										</Link>
+									))}
+								{activity.projects.size > 4 && (
+									<span className="text-muted-foreground">
+										+{activity.projects.size - 4} more
+									</span>
+								)}
+							</div>
+						)}
 					</div>
 
 					{/* Social links */}

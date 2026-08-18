@@ -77,7 +77,7 @@ export default async function BuilderProfilePage({
 	return (
 		<div className="container mx-auto px-4 py-8 max-w-6xl">
 			{/* Profile Header */}
-			<div className="bg-gradient-to-r from-indigo-500/10 to-purple-600/10 rounded-lg p-8 mb-8">
+			<div className="rounded-2xl border border-border bg-card p-8 mb-8">
 				<div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
 					{/* Avatar */}
 					<div className="flex-shrink-0">
@@ -90,7 +90,7 @@ export default async function BuilderProfilePage({
 								className="rounded-full border-4 border-background"
 							/>
 						) : (
-							<div className="w-30 h-30 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+							<div className="w-30 h-30 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-neutral-300 text-4xl font-semibold">
 								{builder.display_name.charAt(0).toUpperCase()}
 							</div>
 						)}
