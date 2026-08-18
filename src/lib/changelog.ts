@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-18",
+		surfaces: ["skill", "api"],
+		type: "fixed",
+		summary:
+			"Scout skill api-reference now documents every read-only operation (stellar-raven sk-018): the four composites (vetIdea, scfPitch, getRepoTrust, listContracts) plus getChanges, searchHackathonBuilds, getStablecoins, getPartner, matchPartners and getFeedbackSchema were live in the spec and Raven's catalog but absent from the skill agents actually read. Two codeVerified names (codeConfidence, scannedRef) added to the repos/search entry (sk-009 class). partnerOnboard is now flagged x-side-effecting like its siblings (openapi@1.8.68 — metadata only, no shape change).",
+		detail:
+			"check-skill-reference.ts gains an operation-coverage check: every non-side-effecting operation in the live spec must have a `## `METHOD /path`` heading in the reference, so a new endpoint goes red the day it ships instead of sitting undocumented for a release. Side-effecting ops (partner onboarding, listing submission, feedback POST, concierge) are portal flows outside the read-only reference's scope.",
+	},
+	{
 		date: "2026-08-16",
 		surfaces: ["api"],
 		type: "added",
@@ -181,7 +190,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"projects: per-product deployment records — products[] with mandatory evidenceUrl + asOf (openapi@1.8.50, closes the #742 model; sls-023/029 root).",
 		detail:
-			"Provider-level status and product-on-network status are different statements: DTCC the org is Development while its tokenized-collateral product on Stellar is ANNOUNCED (H1 2027, per its own case study); an oracle provider being Live says nothing about which feed is live on which network. products[] records name/kind/network/status/contractId with a REQUIRED evidence URL and as-of date \u2014 citation-grade by construction, curated only (a record without verifiable evidence does not ship; Band/RedStone/DIA/WisdomTree/Figure rows are deferred pending verified mappings, which is honest where fabrication is not). Seeded with DTCC and Lightecho; rows accrue via curation."
+			"Provider-level status and product-on-network status are different statements: DTCC the org is Development while its tokenized-collateral product on Stellar is ANNOUNCED (H1 2027, per its own case study); an oracle provider being Live says nothing about which feed is live on which network. products[] records name/kind/network/status/contractId with a REQUIRED evidence URL and as-of date \u2014 citation-grade by construction, curated only (a record without verifiable evidence does not ship; Band/RedStone/DIA/WisdomTree/Figure rows are deferred pending verified mappings, which is honest where fabrication is not). Seeded with DTCC and Lightecho; rows accrue via curation.",
 	},
 	{
 		date: "2026-08-12",
@@ -190,7 +199,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"Fact confidence: statusConfidence, scfConfidence, codeVerified.codeConfidence, tomlConfidence \u2014 deterministic trust scores from provenance (openapi@1.8.49).",
 		detail:
-			"Every provenance-carrying fact family now serves a confidence object {score, label, ageDays}: the basis-class weight (human-verified > official-record/stellar-toml > onchain/code-scan > site-liveness > operator-announcement > source-inherited > unverified) \u00d7 a stepwise freshness decay (full \u226430d, floor 0.5 past a year; unknown age dampens to 0.6). Pure function of the basis/asOf the provenance trios ship \u2014 no model, no randomness; the same row serves the same score until its provenance changes, so consumers can cache and re-derive. Null = no recorded provenance: absence of evidence is never served as a low score. Computed at serve time \u2014 corpus-wide from day one. Distinct from retrieval `confidence` (does this row answer your query); this scores the FACT."
+			"Every provenance-carrying fact family now serves a confidence object {score, label, ageDays}: the basis-class weight (human-verified > official-record/stellar-toml > onchain/code-scan > site-liveness > operator-announcement > source-inherited > unverified) \u00d7 a stepwise freshness decay (full \u226430d, floor 0.5 past a year; unknown age dampens to 0.6). Pure function of the basis/asOf the provenance trios ship \u2014 no model, no randomness; the same row serves the same score until its provenance changes, so consumers can cache and re-derive. Null = no recorded provenance: absence of evidence is never served as a low score. Computed at serve time \u2014 corpus-wide from day one. Distinct from retrieval `confidence` (does this row answer your query); this scores the FACT.",
 	},
 	{
 		date: "2026-08-12",
@@ -199,7 +208,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"GET /api/changes — the change feed: what moved since T, for memory-carrying consumers (openapi@1.8.48).",
 		detail:
-			"A consumer holding cached or remembered claims (an agent memory, an institutional cache) reconciles against /api/changes?since=<ISO> instead of re-reading the corpus. Rows come from stored per-row timestamps (no new write path), newest-first per surface (projects/repos/partners, filterable via surfaces=), each carrying changedAt plus facets naming which DATED fact families moved (status, scf-awards, code-facts, toml; [\"row\"] = undated change, re-read the row). Absence means nothing changed since T \u2014 not an existence claim; deletions surface as 404 on re-read. meta.truncated signals paging via a later since. Pairs with the provenance trios shipped today: the asOf timestamps this feed exposes are the ones award/code/toml facts now carry.",
+			'A consumer holding cached or remembered claims (an agent memory, an institutional cache) reconciles against /api/changes?since=<ISO> instead of re-reading the corpus. Rows come from stored per-row timestamps (no new write path), newest-first per surface (projects/repos/partners, filterable via surfaces=), each carrying changedAt plus facets naming which DATED fact families moved (status, scf-awards, code-facts, toml; ["row"] = undated change, re-read the row). Absence means nothing changed since T \u2014 not an existence claim; deletions surface as 404 on re-read. meta.truncated signals paging via a later since. Pairs with the provenance trios shipped today: the asOf timestamps this feed exposes are the ones award/code/toml facts now carry.',
 	},
 	{
 		date: "2026-08-12",

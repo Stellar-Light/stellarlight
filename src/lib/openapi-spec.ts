@@ -167,7 +167,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Discovery"],
 				summary: "Change feed: which rows moved since a given time",
 				description:
-					"Reconciliation feed for consumers holding cached or remembered claims (agent memory, institutional cache): every project/repo/partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (status, scf-awards, code-facts, toml; [\"row\"] = undated change, re-read the row). **Use when:** you stored our answers earlier and want to refresh only what moved. **Not for:** what the change WAS (re-read the row via its search endpoint) or contract/API changes (\u2192 /api/changelog). Absence = unchanged since `since`, never an existence claim.",
+					'Reconciliation feed for consumers holding cached or remembered claims (agent memory, institutional cache): every project/repo/partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (status, scf-awards, code-facts, toml; ["row"] = undated change, re-read the row). **Use when:** you stored our answers earlier and want to refresh only what moved. **Not for:** what the change WAS (re-read the row via its search endpoint) or contract/API changes (\u2192 /api/changelog). Absence = unchanged since `since`, never an existence claim.',
 				parameters: [
 					{
 						name: "since",
@@ -189,7 +189,8 @@ export const spec: OpenAPISpec = {
 						name: "limit",
 						in: "query",
 						required: false,
-						description: "Max rows PER SURFACE, newest-first (1\u2013500, default 100). meta.truncated.<surface> signals more.",
+						description:
+							"Max rows PER SURFACE, newest-first (1\u2013500, default 100). meta.truncated.<surface> signals more.",
 						schema: { type: "integer", minimum: 1, maximum: 500 },
 					},
 				],
@@ -214,18 +215,20 @@ export const spec: OpenAPISpec = {
 													},
 													slug: {
 														type: "string",
-														description: "projects/partners identity (absent on repos rows)",
+														description:
+															"projects/partners identity (absent on repos rows)",
 													},
 													fullName: {
 														type: "string",
-														description: "repos identity owner/name (absent on other rows)",
+														description:
+															"repos identity owner/name (absent on other rows)",
 													},
 													changedAt: { type: "string", format: "date-time" },
 													facets: {
 														type: "array",
 														items: { type: "string" },
 														description:
-															"Dated fact families that moved past `since`: status, scf-awards, code-facts, toml. [\"row\"] = the row changed but no dated facet localizes it.",
+															'Dated fact families that moved past `since`: status, scf-awards, code-facts, toml. ["row"] = the row changed but no dated facet localizes it.',
 													},
 												},
 											},
@@ -246,11 +249,20 @@ export const spec: OpenAPISpec = {
 														note: { type: "string" },
 														inSourceTopScore: { type: "number" },
 														corpusWideTopScore: { type: "number" },
-														corpusWideTopSource: { type: "string", nullable: true },
+														corpusWideTopSource: {
+															type: "string",
+															nullable: true,
+														},
 													},
 												},
-												counts: { type: "object", additionalProperties: { type: "integer" } },
-												truncated: { type: "object", additionalProperties: { type: "boolean" } },
+												counts: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												truncated: {
+													type: "object",
+													additionalProperties: { type: "boolean" },
+												},
 											},
 										},
 									},
@@ -757,7 +769,10 @@ export const spec: OpenAPISpec = {
 														"Deterministic trust score for the code facts (basis code-scan \u00d7 freshness of scannedAt). Null when never scanned.",
 													properties: {
 														score: { type: "number" },
-														label: { type: "string", enum: ["high", "medium", "low"] },
+														label: {
+															type: "string",
+															enum: ["high", "medium", "low"],
+														},
 														ageDays: { type: "integer", nullable: true },
 													},
 												},
@@ -1756,6 +1771,10 @@ export const spec: OpenAPISpec = {
 		"/api/partners/onboard": {
 			post: {
 				operationId: "partnerOnboard",
+				// Part of the get-listed flow (feeds submit-listing), not an agent
+				// research call — same class as assistant/submit-listing, and the
+				// skill reference guard skips side-effecting ops on purpose.
+				"x-side-effecting": true,
 				tags: ["Partners"],
 				summary: "AI onboarding helpers: interview chat + profile extraction",
 				description:
@@ -2045,7 +2064,8 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "scfPitch",
 				tags: ["Composite"],
-				summary: "SCF pitch prep — live round, funded peers, gap, prior art, angles in one call",
+				summary:
+					"SCF pitch prep — live round, funded peers, gap, prior art, angles in one call",
 				description:
 					"The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.",
 				"x-routing": {
@@ -2098,12 +2118,18 @@ export const spec: OpenAPISpec = {
 												round: {
 													type: "object",
 													properties: {
-														source: { type: "string", enum: ["live", "unavailable"] },
+														source: {
+															type: "string",
+															enum: ["live", "unavailable"],
+														},
 														open: { type: "array", items: { type: "object" } },
 														note: { type: "string" },
 													},
 												},
-												fundedPeers: { type: "array", items: { type: "object" } },
+												fundedPeers: {
+													type: "array",
+													items: { type: "object" },
+												},
 												fundingBar: { type: "object" },
 												vet: { type: "object" },
 												angles: {
@@ -2127,7 +2153,8 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "vetIdea",
 				tags: ["Composite"],
-				summary: "Vet a build idea — competitors, maturity, prior art, gap, funding in one call",
+				summary:
+					"Vet a build idea — competitors, maturity, prior art, gap, funding in one call",
 				description:
 					"The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.",
 				"x-routing": {
@@ -2160,7 +2187,8 @@ export const spec: OpenAPISpec = {
 						name: "q",
 						in: "query",
 						required: true,
-						description: "Short idea description, 3-200 chars (e.g. 'lending protocol for RWAs').",
+						description:
+							"Short idea description, 3-200 chars (e.g. 'lending protocol for RWAs').",
 						schema: { type: "string", minLength: 3, maxLength: 200 },
 					},
 				],
@@ -2187,7 +2215,10 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														repos: { type: "array", items: { type: "object" } },
-														projects: { type: "array", items: { type: "object" } },
+														projects: {
+															type: "array",
+															items: { type: "object" },
+														},
 													},
 												},
 												maturity: {
@@ -2261,7 +2292,8 @@ export const spec: OpenAPISpec = {
 						name: "repo",
 						in: "query",
 						required: true,
-						description: "owner/name, e.g. reflector-network/reflector-contract",
+						description:
+							"owner/name, e.g. reflector-network/reflector-contract",
 						schema: { type: "string" },
 					},
 				],
@@ -2304,8 +2336,14 @@ export const spec: OpenAPISpec = {
 														scannedAt: { type: "string", nullable: true },
 														stellarProof: { type: "string", nullable: true },
 														codeDepth: { type: "number", nullable: true },
-														codeDomains: { type: "array", items: { type: "string" } },
-														sdkCapabilities: { type: "array", items: { type: "string" } },
+														codeDomains: {
+															type: "array",
+															items: { type: "string" },
+														},
+														sdkCapabilities: {
+															type: "array",
+															items: { type: "string" },
+														},
 														interfaceSize: { type: "integer" },
 														contractInterface: {
 															type: "array",
@@ -2313,7 +2351,10 @@ export const spec: OpenAPISpec = {
 															description:
 																"Scanned public fn signatures (up to 60) — verify generated calls against these.",
 														},
-														mainnetContractId: { type: "string", nullable: true },
+														mainnetContractId: {
+															type: "string",
+															nullable: true,
+														},
 													},
 												},
 												usage: { type: "object", nullable: true },
@@ -2333,7 +2374,10 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														successorRepo: { type: "string", nullable: true },
-														predecessors: { type: "array", items: { type: "string" } },
+														predecessors: {
+															type: "array",
+															items: { type: "string" },
+														},
 													},
 												},
 												signals: {
@@ -2363,8 +2407,13 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"400": { description: "Missing/invalid repo param or unknown params." },
-					"404": { description: "Repo not in the index (absence of evidence, not a verdict)." },
+					"400": {
+						description: "Missing/invalid repo param or unknown params.",
+					},
+					"404": {
+						description:
+							"Repo not in the index (absence of evidence, not a verdict).",
+					},
 				},
 			},
 		},
@@ -2372,7 +2421,8 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "listContracts",
 				tags: ["Code"],
-				summary: "Evidence-gated registry of verified mainnet Soroban contracts",
+				summary:
+					"Evidence-gated registry of verified mainnet Soroban contracts",
 				description:
 					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
 				"x-routing": {
@@ -2402,13 +2452,15 @@ export const spec: OpenAPISpec = {
 					{
 						name: "q",
 						in: "query",
-						description: "Substring over repo fullName, project slug/name, or contract id.",
+						description:
+							"Substring over repo fullName, project slug/name, or contract id.",
 						schema: { type: "string" },
 					},
 					{
 						name: "domain",
 						in: "query",
-						description: "Filter by code-evidenced domain (closed set; unknown values 400).",
+						description:
+							"Filter by code-evidenced domain (closed set; unknown values 400).",
 						schema: {
 							type: "string",
 							enum: [
@@ -2423,8 +2475,16 @@ export const spec: OpenAPISpec = {
 							],
 						},
 					},
-					{ name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
-					{ name: "offset", in: "query", schema: { type: "integer", default: 0 } },
+					{
+						name: "limit",
+						in: "query",
+						schema: { type: "integer", default: 20, maximum: 100 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						schema: { type: "integer", default: 0 },
+					},
 				],
 				responses: {
 					"200": {
@@ -2463,9 +2523,15 @@ export const spec: OpenAPISpec = {
 													},
 													stellarProof: { type: "string", nullable: true },
 													codeDepth: { type: "number", nullable: true },
-													codeDomains: { type: "array", items: { type: "string" } },
+													codeDomains: {
+														type: "array",
+														items: { type: "string" },
+													},
 													interfaceSize: { type: "integer" },
-													interfacePreview: { type: "array", items: { type: "string" } },
+													interfacePreview: {
+														type: "array",
+														items: { type: "string" },
+													},
 													codeInUse: {
 														type: "object",
 														nullable: true,
@@ -2758,7 +2824,7 @@ export const spec: OpenAPISpec = {
 								"scf-proposal",
 								"lumenloop",
 								"lumenloop-research",
-							"repo-docs",
+								"repo-docs",
 								"audit",
 								"incident",
 								"security-program",
@@ -3260,7 +3326,8 @@ export const spec: OpenAPISpec = {
 												},
 												dimension: {
 													type: "string",
-													description: "The dimension this response was computed for.",
+													description:
+														"The dimension this response was computed for.",
 												},
 												validDimensions: {
 													type: "array",
@@ -3310,7 +3377,8 @@ export const spec: OpenAPISpec = {
 												computedAt: {
 													type: "string",
 													format: "date-time",
-													description: "When THIS response's funding rollup was computed.",
+													description:
+														"When THIS response's funding rollup was computed.",
 												},
 												methodologyVersion: { type: "string" },
 												countBasis: {
@@ -3320,7 +3388,8 @@ export const spec: OpenAPISpec = {
 												},
 												scfAwardedProjects: {
 													type: "integer",
-													description: "Projects in the awarded set this rollup sums over.",
+													description:
+														"Projects in the awarded set this rollup sums over.",
 												},
 												scfTotalDistributedUSD: {
 													type: "number",
@@ -3978,15 +4047,27 @@ export const spec: OpenAPISpec = {
 					reportVersion: {
 						type: "string",
 						nullable: true,
-						description: "Version the report states about itself (e.g. 'V2'); null when the source states none.",
+						description:
+							"Version the report states about itself (e.g. 'V2'); null when the source states none.",
 					},
 					supersededByReportId: {
 						type: "integer",
 						nullable: true,
-						description: "reportId of the report that supersedes this one; null = no supersession stated by the documents (never guessed).",
+						description:
+							"reportId of the report that supersedes this one; null = no supersession stated by the documents (never guessed).",
 					},
-					engagementStart: { type: "string", nullable: true, description: "Engagement window start as stated IN the report (YYYY-MM-DD)." },
-					engagementEnd: { type: "string", nullable: true, description: "Engagement window end as stated IN the report (YYYY-MM-DD)." },
+					engagementStart: {
+						type: "string",
+						nullable: true,
+						description:
+							"Engagement window start as stated IN the report (YYYY-MM-DD).",
+					},
+					engagementEnd: {
+						type: "string",
+						nullable: true,
+						description:
+							"Engagement window end as stated IN the report (YYYY-MM-DD).",
+					},
 					findingsExtraction: {
 						type: "string",
 						nullable: true,
@@ -4080,7 +4161,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks",
 					},
-				capStatus: {
+					capStatus: {
 						type: "string",
 						nullable: true,
 						description:
@@ -4990,7 +5071,8 @@ export const spec: OpenAPISpec = {
 							properties: {
 								id: {
 									type: "string",
-									description: "Stable row id (dorahacks-buidl-{id} for live rows).",
+									description:
+										"Stable row id (dorahacks-buidl-{id} for live rows).",
 								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
@@ -4999,13 +5081,15 @@ export const spec: OpenAPISpec = {
 								description: {
 									type: "string",
 									nullable: true,
-									description: "Project blurb from the submission (markdown stripped).",
+									description:
+										"Project blurb from the submission (markdown stripped).",
 								},
 								track: { type: "string", nullable: true },
 								award: {
 									type: "string",
 									nullable: true,
-									description: "Official award title (e.g. '$10,000 XLM Prize').",
+									description:
+										"Official award title (e.g. '$10,000 XLM Prize').",
 								},
 								isWinner: { type: "boolean" },
 								githubUrl: { type: "string", nullable: true },
@@ -5020,7 +5104,10 @@ export const spec: OpenAPISpec = {
 									description:
 										"Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'.",
 								},
-								source: { type: "string", description: "'dorahacks' for live rows." },
+								source: {
+									type: "string",
+									description: "'dorahacks' for live rows.",
+								},
 							},
 						},
 					},
