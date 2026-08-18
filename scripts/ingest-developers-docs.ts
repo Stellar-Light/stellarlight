@@ -53,11 +53,14 @@ interface PageData {
  */
 function isJunkyDocTitle(t: string): boolean {
 	const s = t.trim();
+	// Keep in lockstep with the golden eval's JUNK_TITLE net (run-golden.ts):
+	// `posts tagged` needs no leading count, and `on this page` is junk too.
 	return (
 		s.length < 3 ||
 		/^\d{4}-\d{2}-\d{2}$/.test(s) ||
-		/^\d+\s+posts?\s+tagged/i.test(s) ||
-		/^meeting notes$/i.test(s)
+		/posts?\s+tagged/i.test(s) ||
+		/^meeting notes$/i.test(s) ||
+		/^on this page$/i.test(s)
 	);
 }
 
