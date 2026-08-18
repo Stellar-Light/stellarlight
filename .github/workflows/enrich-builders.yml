@@ -6,6 +6,11 @@ on:
         description: "Write? Leave false for a dry run."
         type: boolean
         default: false
+  schedule:
+    # daily, after the 06:00 Passport mirror sync; the contributor pass keeps
+    # builders.contributions (repos they committed to in the last 12 months)
+    # current so /builders connects people to org repos they never declared
+    - cron: "30 6 * * *"
 permissions: { contents: read }
 jobs:
   enrich:
@@ -22,4 +27,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/enrich-builders.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/enrich-builders.ts ${{ (inputs.execute || github.event_name == 'schedule') && '--execute' || '' }}
+      - name: GitHub contributor pass (repos in our index this person committed to, 12 months)
+        run: pnpm exec tsx scripts/enrich-builder-contributions.ts ${{ (inputs.execute || github.event_name == 'schedule') && '--execute' || '' }}
