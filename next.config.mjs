@@ -23,6 +23,20 @@ const nextConfig = {
 				protocol: "https",
 				hostname: "demo.stellarpassport.xyz",
 			},
+			// Cover art for hand-tracked events, each served by its own
+			// organizer: Meridian (Stellar's Sanity CDN), Rise In, Luma.
+			{
+				protocol: "https",
+				hostname: "cdn.sanity.io",
+			},
+			{
+				protocol: "https",
+				hostname: "files.risein.com",
+			},
+			{
+				protocol: "https",
+				hostname: "images.lumacdn.com",
+			},
 		],
 	},
 	// Exclude problematic packages from server-side bundling

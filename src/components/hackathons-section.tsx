@@ -1,6 +1,6 @@
 import { ArrowRight, Clock, DollarSign, Users } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { HackathonCover } from "@/components/hackathon-cover";
 import { Badge } from "@/components/ui/badge";
 import {
 	type DoraHacksHackathon,
@@ -93,20 +93,17 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 			rel="noopener noreferrer"
 			className="group block rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200 h-full"
 		>
-			{h.image_url && (
-				<div className="relative w-full aspect-[3/1] overflow-hidden">
-					<Image
-						src={h.image_url}
-						alt={h.title}
-						fill
-						className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-					<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
-						{upcoming ? "Upcoming" : "Open"}
-					</Badge>
-				</div>
-			)}
+			<HackathonCover
+				src={h.image_url}
+				title={h.title}
+				organization={h.organization?.name}
+				aspect="aspect-[3/1]"
+				sizes="(max-width: 768px) 100vw, 50vw"
+			>
+				<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+					{upcoming ? "Upcoming" : "Open"}
+				</Badge>
+			</HackathonCover>
 			<div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
 				<div className="flex-1 min-w-0">
 					<h3 className="font-bold text-foreground group-hover:text-primary transition-colors truncate">

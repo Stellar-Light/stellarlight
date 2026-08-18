@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
+import { HackathonCover } from "@/components/hackathon-cover";
 import { HackathonsFilterDropdown } from "@/components/hackathons-filter-dropdown";
 import { HackathonsSearchInput } from "@/components/hackathons-search-input";
 import { RecentWinnersCarousel } from "@/components/recent-winners-carousel";
@@ -22,6 +23,7 @@ import {
 	type RecentHackathonWinners,
 } from "@/data/recent-hackathon-winners";
 import {
+	EVENT_KIND_LABEL,
 	fetchAllDoraHacksHackathons,
 	fetchLatestHackathonWinners,
 	formatPrize,
@@ -472,20 +474,17 @@ export default async function HackathonsPage({
 									>
 										<div className="rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200">
 											{/* Banner — full width, aspect-ratio for consistency */}
-											{hackathon.image_url && (
-												<div className="relative w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden">
-													<Image
-														src={hackathon.image_url}
-														alt={hackathon.title}
-														fill
-														className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-													/>
-													<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-													<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
-														{upcoming ? "Upcoming" : "Open"}
-													</Badge>
-												</div>
-											)}
+											<HackathonCover
+												src={hackathon.image_url}
+												title={hackathon.title}
+												organization={hackathon.organization?.name}
+												aspect="aspect-[3/1] sm:aspect-[4/1]"
+												sizes="100vw"
+											>
+												<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+													{upcoming ? "Upcoming" : "Open"}
+												</Badge>
+											</HackathonCover>
 
 											<div className="p-5 sm:p-6">
 												{/* Title + Org */}
@@ -493,6 +492,11 @@ export default async function HackathonsPage({
 													<h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
 														{hackathon.title}
 													</h3>
+													{hackathon.kind && hackathon.kind !== "hackathon" && (
+														<span className="inline-flex flex-shrink-0 self-start rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+															{EVENT_KIND_LABEL[hackathon.kind]}
+														</span>
+													)}
 													{hackathon.organization && (
 														<div className="flex items-center gap-1.5 text-sm text-muted-foreground flex-shrink-0">
 															{hackathon.organization.logo && (
@@ -591,9 +595,7 @@ export default async function HackathonsPage({
 				{/* Past Hackathons */}
 				<section>
 					<div className="flex items-baseline gap-3 mb-4">
-						<h2 className="text-2xl font-bold text-foreground">
-							Past Hackathons
-						</h2>
+						<h2 className="text-2xl font-bold text-foreground">Past events</h2>
 						<span className="text-sm text-muted-foreground">
 							{pastHackathons.length}{" "}
 							{pastHackathons.length === 1 ? "result" : "results"}
@@ -703,7 +705,7 @@ export default async function HackathonsPage({
 
 					{pastHackathons.length === 0 ? (
 						<div className="rounded-xl border border-border/50 bg-card p-8 text-center text-muted-foreground">
-							No past hackathons match these filters.
+							No past events match these filters.
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -712,36 +714,32 @@ export default async function HackathonsPage({
 								const tagsForCard = parseThemes(hackathon.field).slice(0, 3);
 								const cardInner = (
 									<>
-										{hackathon.image_url && (
-											<div className="relative w-full aspect-[16/9] overflow-hidden bg-white/[0.02]">
-												<Image
-													src={hackathon.image_url}
-													alt={hackathon.title}
-													fill
-													sizes="(max-width: 768px) 100vw, 33vw"
-													className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
-												/>
-												<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-												<div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-2">
-													<div className="flex flex-wrap items-center gap-1.5">
-														{hackathon.winner_announced && (
-															<Badge className="bg-[#FDDA24]/90 text-[#171717] border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
-																<Trophy className="w-3 h-3 mr-0.5" />
-																Winners
-															</Badge>
-														)}
-														{curated && curated.trackedProjectCount > 0 && (
-															<Badge className="bg-emerald-500/90 text-white border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
-																{curated.trackedProjectCount} tracked
-															</Badge>
-														)}
-													</div>
-													{!curated && (
-														<ExternalLink className="w-3.5 h-3.5 text-white/70 flex-shrink-0" />
+										<HackathonCover
+											src={hackathon.image_url}
+											title={hackathon.title}
+											organization={hackathon.organization?.name}
+											aspect="aspect-[16/9]"
+											sizes="(max-width: 768px) 100vw, 33vw"
+										>
+											<div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-2">
+												<div className="flex flex-wrap items-center gap-1.5">
+													{hackathon.winner_announced && (
+														<Badge className="bg-[#FDDA24]/90 text-[#171717] border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
+															<Trophy className="w-3 h-3 mr-0.5" />
+															Winners
+														</Badge>
+													)}
+													{curated && curated.trackedProjectCount > 0 && (
+														<Badge className="bg-emerald-500/90 text-white border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
+															{curated.trackedProjectCount} tracked
+														</Badge>
 													)}
 												</div>
+												{!curated && (
+													<ExternalLink className="w-3.5 h-3.5 text-white/70 flex-shrink-0" />
+												)}
 											</div>
-										)}
+										</HackathonCover>
 										<div className="p-4 sm:p-5 flex flex-col flex-1">
 											<h3 className="text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors leading-tight mb-2 line-clamp-2">
 												{hackathon.title}
@@ -751,6 +749,11 @@ export default async function HackathonsPage({
 												<span className="truncate">
 													{hackathon.organization?.name ?? "—"}
 												</span>
+												{hackathon.kind && hackathon.kind !== "hackathon" && (
+													<span className="flex-shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] font-medium">
+														{EVENT_KIND_LABEL[hackathon.kind]}
+													</span>
+												)}
 											</div>
 											{tagsForCard.length > 0 && (
 												<div className="flex flex-wrap gap-1.5 mb-4">

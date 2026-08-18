@@ -30,7 +30,10 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		ecosystem: "Stellar",
 		organization: { id: 3096, name: "Stellar Development Foundation" },
 		external_url: "https://meridian.stellar.org/hackmeridian",
+		image_url:
+			"https://cdn.sanity.io/images/e2r40yh6/production-i18n/4771a62228f9c6e297d71d2a006fa401416257d8-1200x630.jpg",
 		source: "curated",
+		kind: "hackathon",
 	},
 	{
 		id: -1002,
@@ -49,7 +52,10 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		organization: { id: -20, name: "Rise In" },
 		external_url:
 			"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
+		image_url:
+			"https://files.risein.com/programs/_3zmz-cohort-1780031137050png",
 		source: "curated",
+		kind: "program",
 	},
 	{
 		id: -1003,
@@ -67,7 +73,10 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
 		external_url: "https://www.risein.com/programs/apac-stellar-hackathon",
+		image_url:
+			"https://files.risein.com/programs/co8um-cohort-1778746738617png",
 		source: "curated",
+		kind: "hackathon",
 	},
 	{
 		id: -1004,
@@ -85,7 +94,10 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
 		external_url: "https://luma.com/ajcns4mc",
+		image_url:
+			"https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=1,anim=false,background=white,quality=75,width=800,height=420/event-social/uf/71ddf351-c388-4ea1-82ca-fb4fc120dded.png",
 		source: "curated",
+		kind: "program",
 	},
 	{
 		id: -1005,
@@ -104,7 +116,10 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		organization: { id: -20, name: "Rise In" },
 		external_url:
 			"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+		image_url:
+			"https://files.risein.com/programs/ef4de-cohort-1778249785601png",
 		source: "curated",
+		kind: "hackathon",
 	},
 	{
 		id: -1006,
@@ -123,6 +138,9 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		organization: { id: 15761, name: "NearX" },
 		external_url:
 			"https://cointelegraph.com.br/news/brazil-hosts-global-stellar",
+		// No official event page and no organizer artwork we can point at — the
+		// only public record is press coverage, so this row runs coverless.
 		source: "curated",
+		kind: "summit",
 	},
 ];
