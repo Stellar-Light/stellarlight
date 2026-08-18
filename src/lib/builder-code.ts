@@ -30,8 +30,10 @@ export type CodeActivity = {
 	stars: number;
 	lastCommitAt: string | null;
 	commits90d: number;
-	/** slug -> name of the projects this person is connected to */
+	/** slug -> name of the projects this person BUILDS: their own repos, or the project's GitHub org is them */
 	projects: Map<string, string>;
+	/** slug -> name of projects they only CONTRIBUTE to (org repos they committed to or declared) */
+	contributesTo: Map<string, string>;
 	/** primary languages across their indexed repos, most common first */
 	languages: string[];
 };
@@ -53,6 +55,7 @@ const empty = (): CodeActivity => ({
 	lastCommitAt: null,
 	commits90d: 0,
 	projects: new Map(),
+	contributesTo: new Map(),
 	languages: [],
 });
 
@@ -181,7 +184,11 @@ export async function builderCodeActivity(
 		if (r.lastCommitAt && (!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt))
 			e.lastCommitAt = r.lastCommitAt;
 		if (r.projectSlug) {
-			e.projects.set(String(r.projectSlug), "");
+			// contributing to (or naming) a project's repo is not building that project
+			(lower.has(owner) ? e.projects : e.contributesTo).set(
+				String(r.projectSlug),
+				"",
+			);
 			projectSlugs.add(String(r.projectSlug));
 		}
 	}
@@ -215,12 +222,16 @@ export async function builderCodeActivity(
 		e.languages = [...(langCount.get(login) ?? new Map()).entries()]
 			.sort((a, b) => b[1] - a[1])
 			.map(([l]) => l);
-		for (const [slug, name] of e.projects) {
-			if (name) continue;
-			const n = nameOf.get(slug);
-			if (n) e.projects.set(slug, n);
-			else e.projects.delete(slug); // inactive/unknown project: don't advertise it
+		for (const m of [e.projects, e.contributesTo]) {
+			for (const [slug, name] of m) {
+				if (name) continue;
+				const n = nameOf.get(slug);
+				if (n) m.set(slug, n);
+				else m.delete(slug); // inactive/unknown project: don't advertise it
+			}
 		}
+		// a project they build is not also one they merely contribute to
+		for (const slug of e.projects.keys()) e.contributesTo.delete(slug);
 		for (const r of e.repos)
 			r.projectName = r.projectSlug
 				? (nameOf.get(r.projectSlug) ?? null)

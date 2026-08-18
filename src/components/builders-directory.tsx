@@ -34,6 +34,8 @@ export type BuilderRowData = {
 	commits90d: number;
 	lastCommitAt: string | null;
 	projects: Array<{ slug: string; name: string }>;
+	/** projects they only contribute to (org repos they committed to) */
+	contributesTo: Array<{ slug: string; name: string }>;
 	languages: string[];
 	ambassador: { tier: string; region?: string } | null;
 	/** ISO-3166 alpha-2 from the free-text location, when we can tell */
@@ -95,13 +97,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 		const needle = q.trim().toLowerCase();
 		let list = rows.filter((r) => {
 			if (onlyActive && !isRecent(r)) return false;
-			if (onlyProjects && r.projects.length === 0 && r.passportProjects === 0)
+			if (
+				onlyProjects &&
+				r.projects.length === 0 &&
+				r.contributesTo.length === 0 &&
+				r.passportProjects === 0
+			)
 				return false;
 			if (onlyAmbassadors && !r.ambassador) return false;
 			if (country && r.country?.code !== country) return false;
 			if (needle) {
 				const hay =
-					`${r.name} ${r.handle} ${r.role ?? ""} ${r.location ?? ""} ${r.bio ?? ""} ${r.projects.map((p) => p.name).join(" ")} ${r.languages.join(" ")}`.toLowerCase();
+					`${r.name} ${r.handle} ${r.role ?? ""} ${r.location ?? ""} ${r.bio ?? ""} ${r.projects.map((p) => p.name).join(" ")} ${r.contributesTo.map((p) => p.name).join(" ")} ${r.languages.join(" ")}`.toLowerCase();
 				if (!hay.includes(needle)) return false;
 			}
 			return true;
@@ -326,6 +333,25 @@ function BuilderCard({ r }: { r: BuilderRowData }) {
 							</div>
 						)}
 					</div>
+					{r.contributesTo.length > 0 && (
+						<div className="relative z-10 mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+							<span className="text-muted-foreground">contributes to</span>
+							{r.contributesTo.slice(0, 3).map((p) => (
+								<Link
+									key={p.slug}
+									href={`/project/${p.slug}`}
+									className="rounded-md border border-border/60 px-1.5 py-0.5 text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+								>
+									{p.name}
+								</Link>
+							))}
+							{r.contributesTo.length > 3 && (
+								<span className="text-muted-foreground">
+									+{r.contributesTo.length - 3} more
+								</span>
+							)}
+						</div>
+					)}
 					<div className="relative z-10 flex items-center gap-2 flex-shrink-0">
 						<a
 							href={`https://github.com/${r.handle}`}
