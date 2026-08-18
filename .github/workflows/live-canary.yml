@@ -1,0 +1,51 @@
+name: Live canary
+
+# The two ways the site has silently gone dark on visitors, re-checked against
+# production every hour: known-good searches must return their known row
+# (the 40-minute "no projects found" outage after #912), and every project
+# status we can write must have a page that renders (the Keybase/#936 404s).
+# scripts/check-live-canary.ts has the full rationale.
+#
+# Hourly on purpose: the failure class here is "quiet and looks like a
+# legitimate empty result", so a daily check means a working day of dark.
+
+on:
+  schedule:
+    - cron: "41 * * * *" # hourly at :41 UTC
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Base URL to probe"
+        required: false
+        default: "https://stellarlight.xyz"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Live canary
+        id: canary
+        continue-on-error: true
+        env:
+          SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
+        # bash = pipefail, so `| tee` cannot mask the exit code
+        shell: bash
+        run: npx -y tsx scripts/check-live-canary.ts 2>&1 | tee canary.log
+      - name: Track the signal (rolling issue)
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "Live canary red"
+          outcome: ${{ steps.canary.outcome }}
+          body-file: canary.log
+      - name: Propagate the red
+        if: steps.canary.outcome == 'failure'
+        run: exit 1

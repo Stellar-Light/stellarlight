@@ -10,6 +10,7 @@
  * and are merged in here when present.
  */
 import type { Payload } from "payload";
+import { ACTIVE_PROJECT_STATUSES } from "./project-status";
 
 export type CodeRepo = {
 	fullName: string;
@@ -29,7 +30,16 @@ export type CodeActivity = {
 	repos: CodeRepo[];
 	stars: number;
 	lastCommitAt: string | null;
+	/**
+	 * 90-day commits across repos this person OWNS. Contributor repos are
+	 * excluded on purpose: a repo's commits90d is everyone's work, and adding
+	 * it here credited one contributor with the whole org's output
+	 * (0xdevcollins read "318 commits, 90d" against 35 real). See
+	 * `contributedCommits12m` for their share of others' repos.
+	 */
 	commits90d: number;
+	/** commits by this person into repos they don't own, last 12 months (contributor pass) */
+	contributedCommits12m: number;
 	/** slug -> name of the projects this person BUILDS: their own repos, or the project's GitHub org is them */
 	projects: Map<string, string>;
 	/** slug -> name of projects they only CONTRIBUTE to (org repos they committed to or declared) */
@@ -54,6 +64,7 @@ const empty = (): CodeActivity => ({
 	stars: 0,
 	lastCommitAt: null,
 	commits90d: 0,
+	contributedCommits12m: 0,
 	projects: new Map(),
 	contributesTo: new Map(),
 	languages: [],
@@ -160,6 +171,7 @@ export async function builderCodeActivity(
 		if (!login) continue;
 		const e = get(login);
 		const commits90d = Number(r.activitySignals?.commits90d ?? 0);
+		const owns = lower.has(owner);
 		e.repos.push({
 			fullName: full,
 			url: r.url || `https://github.com/${full}`,
@@ -168,11 +180,15 @@ export async function builderCodeActivity(
 			commits90d,
 			projectSlug: r.projectSlug ?? null,
 			projectName: null,
-			via: lower.has(owner) ? "owner" : (d?.via ?? "declared"),
-			myCommits12m: lower.has(owner) ? undefined : d?.myCommits12m,
+			via: owns ? "owner" : (d?.via ?? "declared"),
+			myCommits12m: owns ? undefined : d?.myCommits12m,
 		});
 		e.stars += Number(r.stars ?? 0);
-		e.commits90d += commits90d;
+		// Only their own repos' activity goes under their name. A repo they
+		// merely committed to counts through myCommits12m — their share, not
+		// the org's total.
+		if (owns) e.commits90d += commits90d;
+		else e.contributedCommits12m += Number(d?.myCommits12m ?? 0);
 		if (r.primaryLanguage) {
 			const m = langCount.get(login) ?? new Map<string, number>();
 			m.set(
@@ -198,7 +214,7 @@ export async function builderCodeActivity(
 		collection: "projects",
 		where: {
 			and: [
-				{ status: { in: ["Development", "Pre-Release", "Live"] } },
+				{ status: { in: [...ACTIVE_PROJECT_STATUSES] } },
 				{
 					or: [
 						{ "github.orgLogin": { in: logins } },

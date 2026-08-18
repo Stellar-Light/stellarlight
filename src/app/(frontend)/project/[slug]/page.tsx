@@ -30,6 +30,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 type Params = Promise<{
@@ -68,7 +69,7 @@ export async function generateMetadata({
 					},
 					{
 						status: {
-							in: ["Development", "Pre-Release", "Live", "Inactive"],
+							in: [...RESOLVABLE_PROJECT_STATUSES],
 						},
 					},
 				],
@@ -168,7 +169,7 @@ export default async function ProjectDetailPage({
 						// page already renders an "Inactive / archived" badge that could
 						// never fire. An honest archive record beats a dead link.
 						status: {
-							in: ["Development", "Pre-Release", "Live", "Inactive"],
+							in: [...RESOLVABLE_PROJECT_STATUSES],
 						},
 					},
 				],
