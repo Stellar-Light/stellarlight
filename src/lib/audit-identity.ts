@@ -258,4 +258,75 @@ export const AUDIT_RELATIONS: Record<number, AuditRelation> = {
 		engagementStart: "2023-10-30",
 		engagementEnd: "2023-12-22",
 	},
+
+	// ── sls-064 recurrence (2026-08-18): the three remaining pairs, read from
+	// the report texts on stellarsecurityportal.com/api/v1/reports/{id}.
+
+	// Blend V2 / Certora — ONE engagement, TWO deliverables. Report 40 (manual
+	// assessment): "The work was undertaken from February 03, 2025, to March 27,
+	// 2025" and "wrote a set of formal rules ... We share those findings in a
+	// separate report." Report 51 (formal verification): "undertaken from
+	// February 03, 2025, to March 13, 2025" and "the team performed a manual
+	// audit ... We share those findings in a separate report." Each cites the
+	// other; same start date, same repo. Not a revision, so no supersession.
+	// Version is what each title states about itself.
+	40: {
+		engagementId: "certora-blend-v2-2025q1",
+		reportVersion: "DRAFT v3",
+		supersededByReportId: null,
+		engagementStart: "2025-02-03",
+		engagementEnd: "2025-03-27",
+	},
+	51: {
+		engagementId: "certora-blend-v2-2025q1",
+		reportVersion: "Draft v2",
+		supersededByReportId: null,
+		engagementStart: "2025-02-03",
+		engagementEnd: "2025-03-13",
+	},
+
+	// OpenZeppelin Stellar Contracts Library — TWO engagements. Report 2:
+	// "Timeline From 20250203 To 20250207", commit 01dbcb5, library 0.1.0.
+	// Report 35: "Timeline From 20250604 To 20250618", "a differential audit
+	// ... at commit cf05a5d against commit d3741c3", library v0.3.0-rc.2. Four
+	// months apart, different versions; 35 is differential against a later
+	// baseline, not against report 2's commit — neither states supersession.
+	2: {
+		engagementId: "openzeppelin-stellar-contracts-0.1.0-2025q1",
+		reportVersion: "0.1.0",
+		supersededByReportId: null,
+		engagementStart: "2025-02-03",
+		engagementEnd: "2025-02-07",
+	},
+	35: {
+		engagementId: "openzeppelin-stellar-contracts-0.3.0-rc.2-2025q2",
+		reportVersion: "v0.3.0-rc.2",
+		supersededByReportId: null,
+		engagementStart: "2025-06-04",
+		engagementEnd: "2025-06-18",
+	},
+
+	// Allbridge Estrela / Quarkslab — TWO engagements, and report 16 says so:
+	// "Quarkslab had already performed an audit of an earlier version of these
+	// smart contracts, with support for only 2 tokens per pool." Report 15:
+	// proposal 24-03-1559-PRO, commit 56be1f0, document version 1.1
+	// (2024/04/23). Report 16: reference 25-01-1969-REP, commit dd8d678,
+	// document version 1.1 (2025-02-05). Neither report states an engagement
+	// window — only report/revision dates — so start/end stay null rather than
+	// borrowing the portal date. Not a revision of the same document, so no
+	// supersession is claimed.
+	15: {
+		engagementId: "quarkslab-allbridge-estrela-2024",
+		reportVersion: "1.1",
+		supersededByReportId: null,
+		engagementStart: null,
+		engagementEnd: null,
+	},
+	16: {
+		engagementId: "quarkslab-allbridge-estrela-2025",
+		reportVersion: "1.1",
+		supersededByReportId: null,
+		engagementStart: null,
+		engagementEnd: null,
+	},
 };
