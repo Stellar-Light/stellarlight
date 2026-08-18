@@ -17,28 +17,45 @@ export default async function BlogHighlights() {
 
 	if (payload) {
 		try {
-			const blogResult = await payload.find({
-				collection: "blog",
-				where: {
-					and: [
-						{
-							featured: {
-								equals: true,
-							},
-						},
-						{
-							status: {
-								equals: "published",
-							},
-						},
-					],
-				},
-				limit: 10,
-				sort: "-publishedAt",
-				depth: 2,
-			});
-
-			featuredPosts = blogResult.docs;
+			// SDF's own posts first (the newest from stellar.org via the RSS sync),
+			// then our featured research to fill the grid. Our pieces used to lead
+			// simply because they were newer than the last featured SDF post.
+			const [sdf, ours] = await Promise.all([
+				payload.find({
+					collection: "blog",
+					where: {
+						and: [
+							{ status: { equals: "published" } },
+							{ isRSSExternal: { equals: true } },
+							{ externalUrl: { contains: "stellar.org" } },
+						],
+					},
+					limit: 6,
+					sort: "-publishedAt",
+					depth: 2,
+				}),
+				payload.find({
+					collection: "blog",
+					where: {
+						and: [
+							{ featured: { equals: true } },
+							{ status: { equals: "published" } },
+							{ isRSSExternal: { not_equals: true } },
+						],
+					},
+					limit: 6,
+					sort: "-publishedAt",
+					depth: 2,
+				}),
+			]);
+			const seen = new Set<string>();
+			featuredPosts = [...sdf.docs, ...ours.docs]
+				.filter((d: any) => {
+					if (seen.has(String(d.id))) return false;
+					seen.add(String(d.id));
+					return true;
+				})
+				.slice(0, 9);
 		} catch (error) {
 			// Silently handle fetch errors
 		}
