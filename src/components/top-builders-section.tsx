@@ -72,7 +72,7 @@ export default async function TopBuildersSection() {
 										className="rounded-full"
 									/>
 								) : (
-									<div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+									<div className="w-9 h-9 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-white text-sm font-bold">
 										{builder.display_name.charAt(0).toUpperCase()}
 									</div>
 								)}
