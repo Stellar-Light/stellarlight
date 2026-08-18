@@ -451,14 +451,19 @@ export default async function BuilderProfilePage({
 				</Card>
 			)}
 
-			{/* Contact Section */}
+			{/* Passport wallet: a passkey smart account Stellar Passport creates for the
+			    profile, NOT the person's own wallet, so say exactly that and keep it quiet. */}
 			{builder.stellar_address && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Stellar Address</CardTitle>
+						<CardTitle className="text-base">Stellar Passport wallet</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Passkey smart account created by Stellar Passport for this
+							profile; not a personal wallet, not for payments.
+						</p>
 					</CardHeader>
 					<CardContent>
-						<code className="bg-muted px-2 py-1 rounded text-sm break-all">
+						<code className="bg-muted px-2 py-1 rounded text-xs break-all text-muted-foreground">
 							{builder.stellar_address}
 						</code>
 					</CardContent>
