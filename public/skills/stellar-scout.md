@@ -38,6 +38,7 @@ Their answer determines which endpoints you lead with — see the user-type rout
 - *"who should audit my contract"* / *"find me an auditor"* / *"which audit firm"* → run the **Find Audit Firm** workflow
 - *"find me an anchor / on-ramp / off-ramp in {region}"* / *"who provides {service} on Stellar"* / *"which infra / tooling / wallet provider"* → `/api/partners?type={anchor|on-off-ramp|infrastructure|tooling|wallet}&region={region}&q={need}` — the curated **partner directory** of real, vetted providers to hire or integrate (capabilities from stellar.toml, compliance & corridors, accepting-clients, freshness). Recommend only partners the API returns — never invent one; link each `stellarlight.xyz/partners/{slug}`.
 - *"which RFP should I go for"* / *"compare the open RFPs"* / *"rank the RFPs for my team"* → run the **Compare RFPs** workflow
+- *"we're at a hackathon and want to build X"* / *"is X already built on Stellar"* / *"what should our team start from"* → run the **Hackathon Build Brief** workflow
 - *"who's built X on Stellar"* / *"has anyone tried X"* → competitor lookup
 - *"show me the repos / code for X"* / *"what repos exist for X"* / *"prior-art code on Stellar"* → `/api/projects/search?q={topic}` returns each project **plus its GitHub repos and a graded `codeReferences` list**; or `/api/repos/search?q={topic}` to hit the repo index directly (2,000+ Stellar repos, ranked by `repoScore`)
 - *"what should I build"* / *"what RFPs are open"* / *"what's currently fundable"* → list open RFPs (`/api/rfps?status=open`)
@@ -96,7 +97,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
 ## Specialized workflows
 
-Three structured workflows for high-stakes moments. Like Deep Dive, run every step in order and skip only when data is unavailable — and say so.
+Four structured workflows for high-stakes moments. Like Deep Dive, run every step in order and skip only when data is unavailable — and say so.
 
 ### Draft SCF Pitch
 
@@ -148,6 +149,25 @@ Triggered by *"which RFP should I go for"*, *"compare the open RFPs"*, *"rank th
 - Per top pick: what the winning submission likely needs to include
 - **The skip** — one RFP this team shouldn't chase, with the reason
 - Next step: offer to run Draft SCF Pitch on the top pick
+
+### Hackathon Build Brief
+
+Triggered by *"we're at a hackathon and want to build X"*, *"is X already built on Stellar"*, *"what should our team start from"*, *"48 hours, Stellar, help"*. Time-boxed teams need one grounded brief, not twelve tabs. Five calls, in this order — the composites do the joining server-side, so you rarely need the lower-level searches at all.
+
+1. **Vet the idea first.** `/api/vet-idea?q={one-line idea, 3–200 chars}` → `report.competitors` (repos + live directory projects in the detected vertical), `maturity` (verified evidence only: audits + on-chain usage), `priorArt` (hackathon builds — dead prior art is a signal, not a stop sign), `gap`, `funding`. Read `gap` as **supply-side coverage, not demand**: a gap means few things exist, never that anyone wants one. If `vertical` didn't resolve to a Stellar vertical, the idea probably isn't a Stellar idea — say that plainly.
+2. **Pick a starting point, then check it before forking.** `/api/repos/search?q={stack or capability}` for candidates (passkey, x402, sep24-ramp, wallet-kit…), then `/api/repos/trust?repo={owner/name}` for the one you'd fork → `report.codeTruth` (proof, depth, the FULL `contractInterface` — generate calls against *this*, not the README), `usage`, `audits` + `auditDrift`, `succession`, `signals`. `signals` is a closed vocabulary of facts that hold; it is not a safety score and must not be presented as one. A repo absent from the index is "not indexed", not "untrustworthy".
+3. **What's actually live to build against.** `/api/contracts?domain={anchor-ramp|defi-amm|defi-lending|defi-yield|indexer|oracle|payments-x402|wallet-infra}` → verified mainnet contracts with `codeInUse`, `interfacePreview`, per-project `audits`. The registry is evidence-gated and small on purpose; an empty result means *no verified evidence on record*, never *nothing exists on mainnet* — say "no verified contract on record".
+4. **Rails and partners the demo needs.** `/api/stablecoins?peg={USD|EUR|BRL…}` (compare `marketCapUSD`, never raw `supply` across pegs) and `/api/partners?type={anchor|on-off-ramp|audit-firm}&q={country}` — or `POST /api/partners/match` with the need in plain language. Empty partner results in a region are common and must be reported as "none listed at our source", pointing at the anchor directory, never by inventing one.
+5. **Money after the weekend.** `/api/rfps?status=open&q={keywords}` for a matching brief, then `/api/scf-pitch?q={idea}` → live `round` state (never asserts closed on fetch failure — `source: 'unavailable'` means verify yourself), `fundedPeers` with recorded award totals, deterministic `angles`. Only if the team wants to keep going; don't push funding on a weekend project.
+
+**Output skeleton (every section mandatory):**
+- **The idea in one line** and the vertical it resolved to (or "did not resolve to a Stellar vertical")
+- **Prior art** — 2–4 competitors/prototypes with status; call out any *dead* prior art and what it suggests
+- **Start from** — the one repo, with its `codeTruth` summary, audit state, last commit; the fork risk in one honest sentence
+- **Live on mainnet** — verified contracts in the domain, or "no verified contract on record"
+- **Rails** — the stablecoin(s) and partner(s) that fit the demo, or the honest empty
+- **After the hackathon** — matching RFP if any + round state; else "general round / not now"
+- **What not to claim in the demo** — the 2–3 overreaches this brief would tempt (unaudited ≠ absent-from-registry; gap ≠ demand; `signals` ≠ safety score)
 
 ## Evidence floor
 
@@ -219,6 +239,13 @@ Full docs in `references/api-reference.md`. Quick lookup table:
 | `/api/skills/{name}` | GET | Full content of one SDF skill |
 | `/api/research` | GET | Vector search over ~4,700-chunk research corpus (14 sources incl. audits, incidents, core/SDK release notes) |
 | `/api/audits` | GET | Enumerable audit registry — one row per published report, hand-verified project links, findings counts where deterministically extracted |
+| `/api/vet-idea` | GET | **Composite:** competitors + verified maturity + hackathon prior art + supply-side gap + SCF presence for one idea (`?q=`, 3–200 chars). `gap` = coverage, not demand |
+| `/api/repos/trust` | GET | **Composite:** the code-truth report for one repo (`?repo=owner/name`) — full `contractInterface`, live usage, audits + drift, succession, `signals` (facts, not a score) |
+| `/api/contracts` | GET | Evidence-gated registry of verified mainnet contracts, joined to code truth + usage + audits (`?domain=` closed set). Absence ≠ nonexistence |
+| `/api/scf-pitch` | GET | **Composite:** live round state + funded peers with award totals + vet-idea view + deterministic pitch angles (`?q=`). Round never asserted closed on fetch failure |
+| `/api/hackathons/builds` | GET | Prior art over prototypes — every DoraHacks submission, `?q=` topic, `winnersOnly=1`, `track=` |
+| `/api/stablecoins` | GET | Tracked stablecoins ranked by USD market cap; `?peg=` filter. Never compare raw `supply` across pegs |
+| `/api/changes` | GET | Reconciliation feed: rows that changed since `?since=` (projects/repos/partners) with `facets`. For refreshing remembered claims, not discovery |
 | — | — | Project rows carry `onchain` metrics (contract events/subinvocations + asset holders/supply, weekly deltas) for verified join keys — null = not tracked, never 'inactive' |
 | `/api/feedback` | POST | In-skill feedback channel (bug/missing-data/wrong-answer/suggestion) |
 
