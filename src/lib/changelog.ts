@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-18",
+		surfaces: ["api"],
+		type: "removed",
+		summary:
+			"`searchHackathonBuilds` (GET /api/hackathons/builds): removed three advertised-but-unimplemented filter parameters — capability, domain and dependsOn. The handler accepted only `q`, `winnersOnly`, `track` and `limit`, rejecting the other three with 400, so an agent that trusted the spec wrote a valid-looking call and burned a recovery turn (stellar-raven sls-065). The scanned repo signals those filters describe still power the same filtering on searchRepos and listContracts; they were simply never wired into the builds route (openapi@1.8.71).",
+		detail:
+			"Contract-honesty fix, not a capability loss: the params named real scanned repo data (SDK-capability tags, code domains, manifest dependencies) but the builds handler only ever whitelisted q/winnersOnly/track/limit and 400-ed anything else as an unsupported parameter — the spec had run ahead of the implementation. Dropped from the spec rather than left as a lie; wiring the build→repo join to actually serve them is a separate additive change if demand warrants. A guard shipped in the same commit closes the whole class: `engine-e-contract` now flags any advertised param whose every valid value returns non-200 against a 200 baseline (a REJECTED PARAMS finding that fails the run), so 'spec advertises, handler rejects' can never ship silently again.",
+	},
+	{
+		date: "2026-08-18",
 		surfaces: ["api", "skill"],
 		type: "added",
 		summary:
