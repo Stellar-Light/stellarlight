@@ -19,7 +19,7 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		title: "HackMeridian 2026",
 		uname: "hackmeridian-2026",
 		description:
-			"The two-day hackathon before Meridian 2026 in Lisbon: developers, founders, designers and technical teams building on Stellar. Applications opened Aug 17, 2026; prize pool to be announced.",
+			"The two-day hackathon before Meridian 2026 in Lisbon, open to developers of all experience levels building on Stellar. Venue, tracks and prize pool are still to be announced; the 2025 edition in Rio drew 500+ builders for $50,000 in XLM.",
 		start_time: ts("2026-10-25T09:00:00+01:00"),
 		end_time: ts("2026-10-26T17:00:00+01:00"),
 		bonus_price: 0,
