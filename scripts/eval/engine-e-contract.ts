@@ -166,6 +166,9 @@ async function main() {
 
 	const silentParams: Finding[] = [];
 	const invalidAccepted: Finding[] = [];
+	// sls-065 class: an advertised param whose EVERY valid value the handler
+	// rejects (all non-200 vs a 200 baseline) — promised in the spec, unserved.
+	const rejectedParams: Finding[] = [];
 	const missingFields: Finding[] = [];
 	// Optional/nullable fields absent from a sample are SPEC-COMPLIANT (OpenAPI
 	// lets an optional field be absent — a conditional field like meta.
@@ -313,6 +316,18 @@ async function main() {
 			} else {
 				silentParams.push(finding);
 			}
+		}
+		// sls-065: an advertised param whose EVERY valid value 400s (against a
+		// 200 baseline) is a contract lie — the handler doesn't accept the param
+		// the spec promises, so agents write a spec-valid call and burn a
+		// recovery turn. Distinct from inert (200 but no effect); a hard reject,
+		// so it fails the run like silentParams.
+		if (obs.length > 0 && obs.every((o) => o.status !== 200)) {
+			rejectedParams.push({
+				op: job.opId,
+				param: job.name,
+				evidence: `all ${obs.length} VALID value(s) [${job.values.join(", ")}] returned non-200 [${[...new Set(obs.map((o) => o.status))].join(", ")}] against a 200 baseline (${base.url}) — advertised but the handler rejects the param`,
+			});
 		}
 		// INVALID value must 400 (the API's own validX convention).
 		const bad = await call(withParam(base.url, `${job.name}=__bogus__`));
@@ -469,6 +484,7 @@ async function main() {
 		},
 		silentParams,
 		invalidAccepted,
+		rejectedParams,
 		missingFields,
 		// Spec-compliant optional-absences — informational, NOT drift/findings.
 		optionalAbsent,
@@ -499,6 +515,10 @@ async function main() {
 			"INVALID ACCEPTED — bogus value 200s instead of 400",
 			invalidAccepted,
 		);
+		section(
+			"REJECTED PARAMS — advertised, handler 400s every valid value",
+			rejectedParams,
+		);
 		section("MISSING FIELDS — documented, absent live", missingFields);
 		section(
 			"UNDOCUMENTED FIELDS — served live, absent from spec",
@@ -506,8 +526,8 @@ async function main() {
 		);
 		section("AMBIGUOUS — cannot probe honestly, review by hand", ambiguous);
 	}
-	// silentParams are the regression signal; everything else is fix-queue.
-	process.exit(silentParams.length > 0 ? 1 : 0);
+	// silentParams + rejectedParams are hard regression signals; the rest is fix-queue.
+	process.exit(silentParams.length > 0 || rejectedParams.length > 0 ? 1 : 0);
 }
 
 main().catch((e) => {

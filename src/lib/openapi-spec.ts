@@ -1169,56 +1169,6 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
-						name: "capability",
-						in: "query",
-						description:
-							"Filter to repos whose SCANNED sdkCapabilities include this tag (closed set; unknown values 400). Scan-derived: an unscanned repo can never match — absence of a scan is NOT absence of the capability. Answers 'which repos actually implement X' structurally (e.g. capability=sep24-ramp, capability=x402, capability=wallet-provider).",
-						schema: {
-							type: "string",
-							enum: [
-								"contract-invoke",
-								"fee-bump",
-								"horizon",
-								"mpp",
-								"passkey",
-								"sep10-auth",
-								"sep24-ramp",
-								"signing",
-								"soroban-rpc",
-								"tx-building",
-								"wallet-kit",
-								"wallet-provider",
-								"x402",
-							],
-						},
-					},
-					{
-						name: "domain",
-						in: "query",
-						description:
-							"Filter to repos whose SCANNED codeDomains include this label (closed set; unknown values 400). Evidence-only: derived from deps + capability tags + interface traits, never self-description. Answers 'show me the real DeFi / x402 / oracle code' (e.g. domain=defi-lending, domain=payments-x402).",
-						schema: {
-							type: "string",
-							enum: [
-								"anchor-ramp",
-								"defi-amm",
-								"defi-lending",
-								"defi-yield",
-								"indexer",
-								"oracle",
-								"payments-x402",
-								"wallet-infra",
-							],
-						},
-					},
-					{
-						name: "dependsOn",
-						in: "query",
-						description:
-							"Dependency-graph reverse read: filter to repos whose SCANNED manifest dependencies (stellarDeps) include this ecosystem package — 'who builds on passkey-kit / @blend-capital/blend-sdk / soroban-sdk'. Exact case-insensitive package name (open set — unknown packages return 0 rows). Adoption evidence no README mention can fake; pair with q for keyword+dependency precision. Scan-derived: unscanned repos never match.",
-						schema: { type: "string" },
-					},
-					{
 						name: "limit",
 						in: "query",
 						required: false,
