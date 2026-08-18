@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.759850263595581,
+      "topScore": 0.7598240971565247,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8029358386993408,
+      "topScore": 0.8034660220146179,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -477,7 +477,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 74,
+      "topScore": 70,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -485,7 +485,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "NethermindEth/stellar-private-payments"
+      "sample": "Shreshtthh/Zk-Seep"
     },
     {
       "id": "repos-x402",
@@ -585,15 +585,15 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.79648756980896,
+      "topScore": 0.7972167134284973,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Cross-Chain USDC Transfers with CCTP"
+      "sample": "Smart Contract Asset Interoperability with Wrapper"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -693,7 +693,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6918035745620728,
+      "topScore": 0.6918411254882812,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7407970428466797,
+      "topScore": 0.7407729625701904,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract."
     }
   ],
-  "generatedAt": "2026-08-17T06:21:37Z"
+  "generatedAt": "2026-08-18T06:04:19Z"
 }
