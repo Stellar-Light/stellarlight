@@ -36,7 +36,14 @@ export type BuilderRowData = {
 	projects: Array<{ slug: string; name: string }>;
 	languages: string[];
 	ambassador: { tier: string; region?: string } | null;
+	/** ISO-3166 alpha-2 from the free-text location, when we can tell */
+	country: { code: string; name: string } | null;
 };
+
+const flag = (code: string) =>
+	String.fromCodePoint(
+		...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+	);
 
 type SortKey = "active" | "repos" | "stars" | "recent" | "name";
 const SORTS: Array<{ key: SortKey; label: string }> = [
@@ -69,17 +76,19 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 	const [onlyActive, setOnlyActive] = useState(false);
 	const [onlyProjects, setOnlyProjects] = useState(false);
 	const [onlyAmbassadors, setOnlyAmbassadors] = useState(false);
-	const [lang, setLang] = useState<string | null>(null);
+	const [country, setCountry] = useState<string | null>(null);
 
 	const hasAmbassadors = rows.some((r) => r.ambassador);
-	const languages = useMemo(() => {
-		const c = new Map<string, number>();
-		for (const r of rows)
-			for (const l of r.languages.slice(0, 2)) c.set(l, (c.get(l) ?? 0) + 1);
-		return [...c.entries()]
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 8)
-			.map(([l]) => l);
+	// the regions people are in, most common first (round flag toggles)
+	const countries = useMemo(() => {
+		const c = new Map<string, { code: string; name: string; n: number }>();
+		for (const r of rows) {
+			if (!r.country) continue;
+			const e = c.get(r.country.code) ?? { ...r.country, n: 0 };
+			e.n += 1;
+			c.set(r.country.code, e);
+		}
+		return [...c.values()].sort((a, b) => b.n - a.n).slice(0, 8);
 	}, [rows]);
 
 	const shown = useMemo(() => {
@@ -89,7 +98,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 			if (onlyProjects && r.projects.length === 0 && r.passportProjects === 0)
 				return false;
 			if (onlyAmbassadors && !r.ambassador) return false;
-			if (lang && !r.languages.slice(0, 3).includes(lang)) return false;
+			if (country && r.country?.code !== country) return false;
 			if (needle) {
 				const hay =
 					`${r.name} ${r.handle} ${r.role ?? ""} ${r.location ?? ""} ${r.bio ?? ""} ${r.projects.map((p) => p.name).join(" ")} ${r.languages.join(" ")}`.toLowerCase();
@@ -116,7 +125,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 			(a, b) => Number(b.featured) - Number(a.featured) || cmp[sort](a, b),
 		);
 		return list;
-	}, [rows, q, sort, onlyActive, onlyProjects, onlyAmbassadors, lang]);
+	}, [rows, q, sort, onlyActive, onlyProjects, onlyAmbassadors, country]);
 
 	const chip = (on: boolean, onClick: () => void, label: string) => (
 		<button
@@ -139,7 +148,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						<input
 							value={q}
 							onChange={(e) => setQ(e.target.value)}
-							placeholder="Search by name, handle, role, place, project or language"
+							placeholder="Search builders"
 							aria-label="Search builders"
 							className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-white/30"
 						/>
@@ -151,8 +160,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						)}
 					</div>
 				</div>
-				<div className="flex flex-wrap items-center gap-1.5">
-					<span className="text-xs text-muted-foreground mr-1">Show</span>
+				<div className="flex flex-wrap items-center gap-2">
 					{chip(
 						onlyActive,
 						() => setOnlyActive((v) => !v),
@@ -165,10 +173,20 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 							() => setOnlyAmbassadors((v) => !v),
 							"Ambassadors",
 						)}
-					{languages.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
-					{languages.map((l) =>
-						chip(lang === l, () => setLang(lang === l ? null : l), l),
-					)}
+					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
+					{countries.map((c) => (
+						<button
+							key={c.code}
+							type="button"
+							onClick={() => setCountry(country === c.code ? null : c.code)}
+							aria-pressed={country === c.code}
+							title={`${c.name} (${c.n})`}
+							aria-label={`Only ${c.name}`}
+							className={`h-8 w-8 rounded-full border text-base leading-none flex items-center justify-center transition-colors ${country === c.code ? "border-white/50 bg-white/[0.08]" : "border-border hover:border-white/25"}`}
+						>
+							{flag(c.code)}
+						</button>
+					))}
 				</div>
 				<p className="text-xs text-muted-foreground tabular-nums">
 					{shown.length === rows.length

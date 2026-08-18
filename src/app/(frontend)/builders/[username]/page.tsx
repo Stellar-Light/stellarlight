@@ -105,7 +105,28 @@ export default async function BuilderProfilePage({
 			code = (await builderCodeActivity(payload, [builder as any])).get(
 				String(builder.github_username).toLowerCase(),
 			);
-			const slugs = code ? [...code.projects.keys()] : [];
+			// Only projects the person OWNS: repos they own that belong to the
+			// project, or the project's GitHub org is them. Contributing to a
+			// project's repo (or naming it on Passport) is not receiving its grant.
+			const login = String(builder.github_username).toLowerCase();
+			const owned = new Set<string>();
+			for (const r of code?.repos ?? [])
+				if (r.via === "owner" && r.projectSlug) owned.add(r.projectSlug);
+			if (code) {
+				const org = await payload.find({
+					collection: "projects",
+					where: {
+						"github.orgLogin": { equals: String(builder.github_username) },
+					},
+					limit: 100,
+					depth: 0,
+					select: { slug: true },
+				} as any);
+				for (const d of org.docs as any[])
+					if (d.slug) owned.add(String(d.slug));
+			}
+			void login;
+			const slugs = [...owned];
 			if (slugs.length) {
 				const pr = await payload.find({
 					collection: "projects",
@@ -415,6 +436,22 @@ export default async function BuilderProfilePage({
 				</Card>
 			)}
 
+			{/* Nothing indexed for this person: say so plainly rather than render a blank page */}
+			{(!code || (code.repos.length === 0 && code.projects.size === 0)) &&
+				hackBuilds.length === 0 && (
+					<Card className="mb-8">
+						<CardContent className="py-6 text-sm text-muted-foreground">
+							No public code from{" "}
+							{builder.display_name || builder.github_username} in the Stellar
+							repos we index yet, and no hackathon submissions matched their
+							GitHub.
+							{builder.role_title || builder.bio
+								? " Not everyone here ships code: this profile comes from Stellar Passport."
+								: " This profile comes from Stellar Passport."}
+						</CardContent>
+					</Card>
+				)}
+
 			{/* Funding + hackathons: from data we already hold about their projects and repos */}
 			{(scf.length > 0 || hackBuilds.length > 0) && (
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -425,7 +462,8 @@ export default async function BuilderProfilePage({
 									Stellar Community Fund
 								</CardTitle>
 								<p className="text-xs text-muted-foreground">
-									Awards to projects this person builds, per our SCF records.
+									Awards to projects this person owns on GitHub, per our SCF
+									records. Contributing to a funded project is not counted.
 								</p>
 							</CardHeader>
 							<CardContent className="space-y-2">

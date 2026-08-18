@@ -73,6 +73,58 @@ export default async function BuildersPage() {
 	}
 	const act = (b: PassportBuilder) =>
 		activity.get(String(b.github_username).toLowerCase());
+	// free-text locations ("São Paulo, Brazil", "Lagos, Nigeria") -> a country we can flag
+	const COUNTRIES: Array<[RegExp, string, string]> = [
+		[/brazil|brasil|são paulo|sao paulo|rio de janeiro/i, "BR", "Brazil"],
+		[/nigeria|lagos|abuja/i, "NG", "Nigeria"],
+		[/chile|santiago/i, "CL", "Chile"],
+		[/costa rica/i, "CR", "Costa Rica"],
+		[/argentina|buenos aires/i, "AR", "Argentina"],
+		[/mexico|méxico|cdmx/i, "MX", "Mexico"],
+		[/colombia|bogot/i, "CO", "Colombia"],
+		[/peru|lima/i, "PE", "Peru"],
+		[/india|bengaluru|bangalore|mumbai|delhi|hyderabad|jaipur/i, "IN", "India"],
+		[/indonesia|jakarta/i, "ID", "Indonesia"],
+		[/vietnam|hanoi|ho chi minh/i, "VN", "Vietnam"],
+		[/philippines|manila/i, "PH", "Philippines"],
+		[/t[üu]rkiye|turkey|istanbul|ankara/i, "TR", "Türkiye"],
+		[/kenya|nairobi/i, "KE", "Kenya"],
+		[/ghana|accra/i, "GH", "Ghana"],
+		[/south africa|cape town|johannesburg/i, "ZA", "South Africa"],
+		[/portugal|lisbon|lisboa|porto/i, "PT", "Portugal"],
+		[/spain|españa|madrid|barcelona/i, "ES", "Spain"],
+		[/germany|deutschland|berlin|munich/i, "DE", "Germany"],
+		[/france|paris/i, "FR", "France"],
+		[/united kingdom|\buk\b|england|london/i, "GB", "United Kingdom"],
+		[/canada|toronto|vancouver|montreal/i, "CA", "Canada"],
+		[
+			/united states|\busa?\b|new york|san francisco|california|texas|austin|miami|seattle|boston|chicago/i,
+			"US",
+			"United States",
+		],
+		[/uruguay|montevideo/i, "UY", "Uruguay"],
+		[/venezuela|caracas/i, "VE", "Venezuela"],
+		[/ecuador|quito/i, "EC", "Ecuador"],
+		[/bolivia/i, "BO", "Bolivia"],
+		[/pakistan|karachi|lahore/i, "PK", "Pakistan"],
+		[/bangladesh|dhaka/i, "BD", "Bangladesh"],
+		[/singapore/i, "SG", "Singapore"],
+		[/australia|sydney|melbourne/i, "AU", "Australia"],
+		[/italy|italia|milan|rome/i, "IT", "Italy"],
+		[/netherlands|amsterdam/i, "NL", "Netherlands"],
+		[/poland|warsaw/i, "PL", "Poland"],
+		[/ukraine|kyiv/i, "UA", "Ukraine"],
+		[/japan|tokyo/i, "JP", "Japan"],
+		[/korea|seoul/i, "KR", "South Korea"],
+		[/uae|dubai|emirates/i, "AE", "United Arab Emirates"],
+		[/egypt|cairo/i, "EG", "Egypt"],
+	];
+	const countryOf = (loc: string | null | undefined) => {
+		if (!loc) return null;
+		for (const [re, code, name] of COUNTRIES)
+			if (re.test(loc)) return { code, name };
+		return null;
+	};
 	const rows: BuilderRowData[] = builders.map((b) => {
 		const a = act(b);
 		const handle = String(b.github_username);
@@ -96,6 +148,7 @@ export default async function BuildersPage() {
 				? [...a.projects.entries()].map(([slug, name]) => ({ slug, name }))
 				: [],
 			languages: a?.languages ?? [],
+			country: countryOf(b.location),
 			ambassador: AMBASSADORS[handle.toLowerCase()]
 				? {
 						tier: AMBASSADORS[handle.toLowerCase()].tier,
