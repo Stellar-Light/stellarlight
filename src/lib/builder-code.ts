@@ -70,9 +70,17 @@ export async function builderCodeActivity(
 	};
 
 	// repos this person named on Passport, or that the contributor pass found
+	// keyed by lowercase name for matching; the QUERY uses names as stored, because
+	// Payload's `in` is exact-match and "moonlight-protocol/provider-platform"
+	// never matched Moonlight-Protocol/provider-platform
 	const declared = new Map<
 		string,
-		{ login: string; via: "declared" | "contributor"; myCommits12m?: number }
+		{
+			login: string;
+			via: "declared" | "contributor";
+			myCommits12m?: number;
+			asStored: string;
+		}
 	>();
 	for (const b of builders) {
 		const login = String(b.github_username ?? "").toLowerCase();
@@ -83,6 +91,7 @@ export async function builderCodeActivity(
 					declared.set(String(rp.full_name).toLowerCase(), {
 						login,
 						via: "declared",
+						asStored: String(rp.full_name),
 					});
 			}
 		}
@@ -94,6 +103,7 @@ export async function builderCodeActivity(
 						login,
 						via: "contributor",
 						myCommits12m: c.commits12m ?? undefined,
+						asStored: String(c.fullName),
 					});
 			}
 		}
@@ -107,7 +117,13 @@ export async function builderCodeActivity(
 					or: [
 						{ owner: { in: logins } },
 						...(declared.size
-							? [{ fullName: { in: [...declared.keys()] } }]
+							? [
+									{
+										fullName: {
+											in: [...declared.values()].map((d) => d.asStored),
+										},
+									},
+								]
 							: []),
 					],
 				},
