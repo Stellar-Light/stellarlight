@@ -32,6 +32,8 @@ export type CodeActivity = {
 	commits90d: number;
 	/** slug -> name of the projects this person is connected to */
 	projects: Map<string, string>;
+	/** primary languages across their indexed repos, most common first */
+	languages: string[];
 };
 
 export type BuilderLike = {
@@ -51,6 +53,7 @@ const empty = (): CodeActivity => ({
 	lastCommitAt: null,
 	commits90d: 0,
 	projects: new Map(),
+	languages: [],
 });
 
 export async function builderCodeActivity(
@@ -140,8 +143,10 @@ export async function builderCodeActivity(
 			stars: true,
 			lastCommitAt: true,
 			activitySignals: true,
+			primaryLanguage: true,
 		},
 	} as any);
+	const langCount = new Map<string, Map<string, number>>();
 
 	const projectSlugs = new Set<string>();
 	for (const r of repos.docs as any[]) {
@@ -165,6 +170,14 @@ export async function builderCodeActivity(
 		});
 		e.stars += Number(r.stars ?? 0);
 		e.commits90d += commits90d;
+		if (r.primaryLanguage) {
+			const m = langCount.get(login) ?? new Map<string, number>();
+			m.set(
+				String(r.primaryLanguage),
+				(m.get(String(r.primaryLanguage)) ?? 0) + 1,
+			);
+			langCount.set(login, m);
+		}
 		if (r.lastCommitAt && (!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt))
 			e.lastCommitAt = r.lastCommitAt;
 		if (r.projectSlug) {
@@ -198,7 +211,10 @@ export async function builderCodeActivity(
 		if (org && lower.has(org))
 			get(org).projects.set(String(pj.slug), String(pj.name));
 	}
-	for (const e of out.values()) {
+	for (const [login, e] of out) {
+		e.languages = [...(langCount.get(login) ?? new Map()).entries()]
+			.sort((a, b) => b[1] - a[1])
+			.map(([l]) => l);
 		for (const [slug, name] of e.projects) {
 			if (name) continue;
 			const n = nameOf.get(slug);
