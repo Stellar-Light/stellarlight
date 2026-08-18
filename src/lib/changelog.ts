@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-18",
+		surfaces: ["skill"],
+		type: "added",
+		summary:
+			"Scout skill: a fourth specialized workflow, Hackathon Build Brief — five calls in order (vet-idea → repos/search + repos/trust → contracts → stablecoins + partners → rfps + scf-pitch) with the honesty rules inline (gap = supply-side coverage; signals ≠ safety score; registry absence ≠ nonexistence; round never asserted closed on fetch failure) and a mandatory 'what not to claim in the demo' section. The four composites also gain trigger phrases and quick-reference rows — they had appeared nowhere in SKILL.md itself, only in references/api-reference.md (sk-018 one level up). No API change.",
+		detail:
+			"Written for the HackMeridian 2026 cohort (Lisbon, Oct 25–26): a two-day team's first-hour questions are 'is this built', 'is this repo safe to fork', 'what is live to build against', 'which rails', 'is there money after' — each now a single composite call instead of 4–6 lower-level searches, which on a ~6k-token result cap is also the difference between an answer and a truncation.",
+	},
+	{
+		date: "2026-08-18",
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
