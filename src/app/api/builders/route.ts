@@ -18,11 +18,14 @@ import {
 	nameCandidatesFor,
 } from "@/data/builder-name-overrides";
 import { logApiHit } from "@/lib/api-usage";
+import { type BuilderLike, builderCodeActivity } from "@/lib/builder-code";
 import {
 	type BuilderProject,
 	type BuilderRow,
 	codeDerivedBuilderRow,
+	emptyOnStellar,
 	isHandleQuery,
+	onStellarBlock,
 	SKILL_HINT,
 } from "@/lib/builder-code-derived";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
@@ -184,6 +187,7 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let builders: BuilderRow[] = [];
 	let totalMatching = 0;
+	const rawByLogin = new Map<string, Record<string, unknown>>();
 
 	if (payload) {
 		try {
@@ -225,6 +229,15 @@ export async function GET(req: NextRequest) {
 				sort: "-is_featured",
 			});
 
+			// Raw docs by login: the page-level onStellar join needs the Passport
+			// repo declarations + the contributor pass (builders.contributions),
+			// which the mapped BuilderRow deliberately does not carry.
+			for (const d of result.docs as unknown as Array<
+				Record<string, unknown>
+			>) {
+				const login = String(d.github_username ?? "");
+				if (login) rawByLogin.set(login.toLowerCase(), d);
+			}
 			builders = (
 				result.docs as Array<{
 					github_username: string;
@@ -262,6 +275,7 @@ export async function GET(req: NextRequest) {
 					url: `https://stellarlight.xyz/builders/${b.github_username}`,
 					match: null,
 					codeEvidence: null,
+					onStellar: null,
 				};
 			});
 
@@ -443,6 +457,38 @@ export async function GET(req: NextRequest) {
 			}
 		} catch {
 			// fall through
+		}
+
+		// onStellar — what each RETURNED builder has actually shipped, from the
+		// repos we index: the same join the /builders/[username] page renders
+		// (owned repos + Passport-declared repos + the contributor pass + a
+		// project whose GitHub org IS the person). Query-independent and on
+		// every row, unlike `codeEvidence` (query-scoped) and `projects`
+		// (Passport-declared). Before this, the unfiltered listing — the call
+		// Raven makes 450+ times a week — read projectCount 0 / codeEvidence
+		// null on every row: an empty ecosystem. Page-scoped (≤ limit rows),
+		// best-effort: null on failure, never a block of zeros.
+		if (builders.length) {
+			try {
+				const activity = await builderCodeActivity(
+					payload,
+					builders.map((b) => {
+						const raw = rawByLogin.get(b.githubUsername.toLowerCase());
+						return {
+							github_username: b.githubUsername,
+							projects: (raw?.projects as BuilderLike["projects"]) ?? null,
+							contributions:
+								(raw?.contributions as BuilderLike["contributions"]) ?? null,
+						};
+					}),
+				);
+				for (const b of builders) {
+					const a = activity.get(b.githubUsername.toLowerCase());
+					b.onStellar = a ? onStellarBlock(a) : emptyOnStellar();
+				}
+			} catch {
+				// leave onStellar null — "could not compute", not "nothing"
+			}
 		}
 	}
 

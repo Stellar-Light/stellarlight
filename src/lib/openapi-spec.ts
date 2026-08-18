@@ -5533,6 +5533,91 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					onStellar: {
+						type: "object",
+						nullable: true,
+						description:
+							"What this person has actually shipped on Stellar, from the repos we index — QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos — a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged.",
+						properties: {
+							repoCount: { type: "integer" },
+							stars: { type: "integer" },
+							commits90d: {
+								type: "integer",
+								description:
+									"Commits in the last 90 days across repos this person OWNS.",
+							},
+							contributedCommits12m: {
+								type: "integer",
+								description:
+									"This person's own commits into repos they don't own, last 12 months (contributor pass).",
+							},
+							lastCommitAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+							languages: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Primary languages across their indexed repos, most common first.",
+							},
+							builds: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										slug: { type: "string" },
+										name: { type: "string" },
+									},
+								},
+							},
+							contributesTo: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										slug: { type: "string" },
+										name: { type: "string" },
+									},
+								},
+							},
+							topRepos: {
+								type: "array",
+								description:
+									"Up to 5 — owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone.",
+								items: {
+									type: "object",
+									properties: {
+										fullName: { type: "string" },
+										url: { type: "string" },
+										stars: { type: "integer" },
+										lastCommitAt: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+										},
+										commits90d: {
+											type: "integer",
+											description:
+												"The REPO's 90-day commits (everyone's work) — context, not this person's count.",
+										},
+										projectSlug: { type: "string", nullable: true },
+										via: {
+											type: "string",
+											enum: ["owner", "declared", "contributor"],
+										},
+										myCommits12m: {
+											type: "integer",
+											nullable: true,
+											description:
+												"This person's own commits into this repo, last 12 months; null for owned repos (their own repo — the whole history is theirs).",
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			Person: {
