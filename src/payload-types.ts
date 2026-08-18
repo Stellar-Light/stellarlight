@@ -809,6 +809,7 @@ export interface Repo {
         note: string;
         source: string;
         asOf?: string | null;
+        visibility?: ('public' | 'internal') | null;
         id?: string | null;
       }[]
     | null;
@@ -842,6 +843,27 @@ export interface Repo {
   repoScoreLabel?: string | null;
   lastEnrichedAt?: string | null;
   enrichError?: string | null;
+  /**
+   * Internal triage labels — never served
+   */
+  triageTags?:
+    | (
+        | 'dead-hackathon-project'
+        | 'farm-signals'
+        | 'inert-fork'
+        | 'archived-upstream'
+        | 'dead-long-tail'
+        | 'tutorial-or-template'
+      )[]
+    | null;
+  /**
+   * How this repo entered the index
+   */
+  source?: ('project-link' | 'ec-taxonomy') | null;
+  /**
+   * Quality tier — archive is demoted, never deleted
+   */
+  tier?: ('quality' | 'community' | 'archive') | null;
   /**
    * Code-verified Stellar relevance (cargo-sdk strongest)
    */
@@ -931,6 +953,18 @@ export interface Repo {
    * JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, …) detected in actual sources — computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)
    */
   sdkCapabilities?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Code-evidence domain labels (scanner-derived)
+   */
+  codeDomains?:
     | {
         [k: string]: unknown;
       }
@@ -1524,6 +1558,21 @@ export interface Builder {
    * Last sync from Stellar Passport API
    */
   last_synced?: string | null;
+  /**
+   * Indexed Stellar repos this person committed to in the last 12 months (GitHub contributor pass)
+   */
+  contributions?:
+    | {
+        fullName: string;
+        commits12m?: number | null;
+        projectSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * When the GitHub contributor pass last ran for this profile
+   */
+  contributions_synced_at?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2799,6 +2848,7 @@ export interface ReposSelect<T extends boolean = true> {
         note?: T;
         source?: T;
         asOf?: T;
+        visibility?: T;
         id?: T;
       };
   homepageUrl?: T;
@@ -2816,6 +2866,9 @@ export interface ReposSelect<T extends boolean = true> {
   repoScoreLabel?: T;
   lastEnrichedAt?: T;
   enrichError?: T;
+  triageTags?: T;
+  source?: T;
+  tier?: T;
   stellarProof?: T;
   codeDepth?: T;
   sorobanSdkVersion?: T;
@@ -2835,6 +2888,7 @@ export interface ReposSelect<T extends boolean = true> {
   contractInterface?: T;
   stellarDeps?: T;
   sdkCapabilities?: T;
+  codeDomains?: T;
   scannedRef?: T;
   mainnetContractId?: T;
   unverifiedStellar?: T;
@@ -3047,6 +3101,15 @@ export interface BuildersSelect<T extends boolean = true> {
       };
   passport_created_at?: T;
   last_synced?: T;
+  contributions?:
+    | T
+    | {
+        fullName?: T;
+        commits12m?: T;
+        projectSlug?: T;
+        id?: T;
+      };
+  contributions_synced_at?: T;
   updatedAt?: T;
   createdAt?: T;
 }

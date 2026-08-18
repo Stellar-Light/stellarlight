@@ -17,6 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+	ago,
+	builderCodeActivity,
+	type CodeActivity,
+} from "@/lib/builder-code";
+import {
 	fetchAllBuilders,
 	type PassportBuilder,
 } from "@/lib/integrations/stellar-passport";
@@ -33,16 +38,6 @@ export const metadata: Metadata = {
 	title: "Builders | Stellar Light",
 	description:
 		"Discover talented builders and developers in the Stellar ecosystem",
-};
-
-/** Code activity we track ourselves, keyed by GitHub login (lowercase). */
-type CodeActivity = {
-	repos: number;
-	stars: number;
-	lastCommitAt: string | null;
-	commits90d: number;
-	/** projects this person is connected to on GitHub: slug -> name */
-	projects: Map<string, string>;
 };
 
 export default async function BuildersPage() {
@@ -78,121 +73,12 @@ export default async function BuildersPage() {
 	// Filter out builders without a github username
 	builders = builders.filter((b) => b.github_username);
 
-	// What each builder has actually shipped in the Stellar repos we index:
-	// repo count, stars, most recent commit, 90-day commits. Passport profiles
-	// are thin for most people; the code is not.
+	// What each builder has actually shipped in the Stellar repos we index
+	// (owned, Passport-declared, contributor pass); see src/lib/builder-code.ts
 	if (payload && builders.length) {
 		try {
-			const logins = builders.map((b) => String(b.github_username));
-			const lower = new Set(logins.map((l) => l.toLowerCase()));
-			const fresh = (k: string): CodeActivity =>
-				activity.get(k) ?? {
-					repos: 0,
-					stars: 0,
-					lastCommitAt: null,
-					commits90d: 0,
-					projects: new Map<string, string>(),
-				};
-			// Passport-declared repos, so a contributor to an org repo still connects
-			// to the project through the repo they named on their profile
-			const declared = new Map<string, string>(); // fullName (lower) -> login (lower)
-			for (const b of builders) {
-				for (const pr of b.projects ?? []) {
-					for (const rp of pr.repos ?? []) {
-						if (rp?.full_name)
-							declared.set(
-								String(rp.full_name).toLowerCase(),
-								String(b.github_username).toLowerCase(),
-							);
-					}
-				}
-			}
-			const repos = await payload.find({
-				collection: "repos",
-				where: {
-					and: [
-						{
-							or: [
-								{ owner: { in: logins } },
-								...(declared.size
-									? [{ fullName: { in: [...declared.keys()] } }]
-									: []),
-							],
-						},
-						{ tier: { not_equals: "archive" } },
-					],
-				},
-				limit: 5000,
-				depth: 0,
-				select: {
-					owner: true,
-					fullName: true,
-					projectSlug: true,
-					stars: true,
-					lastCommitAt: true,
-					activitySignals: true,
-				},
-			} as any);
-			const projectSlugs = new Set<string>();
-			for (const r of repos.docs as any[]) {
-				const byOwner = String(r.owner ?? "").toLowerCase();
-				const k = lower.has(byOwner)
-					? byOwner
-					: declared.get(String(r.fullName ?? "").toLowerCase());
-				if (!k) continue;
-				const e = fresh(k);
-				e.repos += 1;
-				e.stars += Number(r.stars ?? 0);
-				e.commits90d += Number(r.activitySignals?.commits90d ?? 0);
-				if (
-					r.lastCommitAt &&
-					(!e.lastCommitAt || r.lastCommitAt > e.lastCommitAt)
-				)
-					e.lastCommitAt = r.lastCommitAt;
-				if (r.projectSlug) {
-					e.projects.set(String(r.projectSlug), "");
-					projectSlugs.add(String(r.projectSlug));
-				}
-				activity.set(k, e);
-			}
-			// projects whose GitHub org IS the builder, plus names for the slugs above
-			const projs = await payload.find({
-				collection: "projects",
-				where: {
-					and: [
-						{ status: { in: ["Development", "Pre-Release", "Live"] } },
-						{
-							or: [
-								{ "github.orgLogin": { in: logins } },
-								...(projectSlugs.size
-									? [{ slug: { in: [...projectSlugs] } }]
-									: []),
-							],
-						},
-					],
-				},
-				limit: 2000,
-				depth: 0,
-				select: { name: true, slug: true, github: true },
-			} as any);
-			const nameOf = new Map<string, string>();
-			for (const pj of projs.docs as any[]) {
-				nameOf.set(String(pj.slug), String(pj.name));
-				const org = String(pj.github?.orgLogin ?? "").toLowerCase();
-				if (org && lower.has(org)) {
-					const e = fresh(org);
-					e.projects.set(String(pj.slug), String(pj.name));
-					activity.set(org, e);
-				}
-			}
-			for (const e of activity.values()) {
-				for (const [slug, name] of e.projects) {
-					if (name) continue;
-					const n = nameOf.get(slug);
-					if (n) e.projects.set(slug, n);
-					else e.projects.delete(slug); // inactive/unknown project: don't advertise it
-				}
-			}
+			for (const [k, v] of await builderCodeActivity(payload, builders as any))
+				activity.set(k, v);
 		} catch (error) {
 			console.error("builders repo activity failed:", error);
 		}
@@ -349,17 +235,6 @@ export default async function BuildersPage() {
 	);
 }
 
-function ago(iso: string | null | undefined) {
-	if (!iso) return null;
-	const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
-	if (!Number.isFinite(d)) return null;
-	if (d <= 0) return "today";
-	if (d === 1) return "yesterday";
-	if (d < 30) return `${d}d ago`;
-	if (d < 365) return `${Math.floor(d / 30)}mo ago`;
-	return `${Math.floor(d / 365)}y ago`;
-}
-
 function BuilderRow({
 	builder,
 	activity,
@@ -440,11 +315,11 @@ function BuilderRow({
 									{builder.projects.length !== 1 ? "s" : ""}
 								</span>
 							)}
-							{activity && activity.repos > 0 && (
+							{activity && activity.repos.length > 0 && (
 								<span className="flex items-center gap-1 tabular-nums">
 									<GitBranch className="w-3 h-3" />
-									{activity.repos} Stellar{" "}
-									{activity.repos === 1 ? "repo" : "repos"}
+									{activity.repos.length} Stellar{" "}
+									{activity.repos.length === 1 ? "repo" : "repos"}
 									{activity.stars > 0
 										? `, ${activity.stars.toLocaleString()} stars`
 										: ""}
