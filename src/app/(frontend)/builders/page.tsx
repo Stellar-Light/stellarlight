@@ -1,26 +1,14 @@
-import {
-	ArrowLeft,
-	Briefcase,
-	Code2,
-	ExternalLink,
-	GitBranch,
-	Github,
-	Globe,
-	MapPin,
-	Twitter,
-	Users,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Users } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import {
+	type BuilderRowData,
+	BuildersDirectory,
+} from "@/components/builders-directory";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-	ago,
-	builderCodeActivity,
-	type CodeActivity,
-} from "@/lib/builder-code";
+import { AMBASSADORS } from "@/data/stellar-ambassadors";
+import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
 import {
 	fetchAllBuilders,
 	type PassportBuilder,
@@ -85,31 +73,37 @@ export default async function BuildersPage() {
 	}
 	const act = (b: PassportBuilder) =>
 		activity.get(String(b.github_username).toLowerCase());
-
-	// Featured first; then everyone with recent activity (Passport 30d commits
-	// or a commit in our repo index in the last 90 days), most active first;
-	// then the rest, most recently active first.
-	const recentCut = Date.now() - 90 * 86_400_000;
-	const heat = (b: PassportBuilder) =>
-		(b.stats?.totalCommits30d ?? 0) * 3 + (act(b)?.commits90d ?? 0);
-	const isRecent = (b: PassportBuilder) =>
-		heat(b) > 0 || Date.parse(act(b)?.lastCommitAt ?? "") > recentCut;
-	const featuredBuilders = builders.filter((b) => b.is_featured);
-	const activeBuilders = builders
-		.filter((b) => !b.is_featured && isRecent(b))
-		.sort(
-			(a, b) =>
-				heat(b) - heat(a) ||
-				Date.parse(act(b)?.lastCommitAt ?? "0") -
-					Date.parse(act(a)?.lastCommitAt ?? "0"),
-		);
-	const otherBuilders = builders
-		.filter((b) => !b.is_featured && !isRecent(b))
-		.sort(
-			(a, b) =>
-				Date.parse(act(b)?.lastCommitAt ?? "0") -
-				Date.parse(act(a)?.lastCommitAt ?? "0"),
-		);
+	const rows: BuilderRowData[] = builders.map((b) => {
+		const a = act(b);
+		const handle = String(b.github_username);
+		return {
+			handle,
+			name: b.display_name || handle,
+			avatar: b.avatar_url ?? null,
+			role: b.role_title ?? null,
+			location: b.location ?? null,
+			bio: b.bio ?? null,
+			twitter: b.twitter_handle ?? null,
+			website: b.website_url ?? null,
+			featured: !!b.is_featured,
+			commits30d: b.stats?.totalCommits30d ?? 0,
+			passportProjects: b.projects?.length ?? 0,
+			repos: a?.repos.length ?? 0,
+			stars: a?.stars ?? 0,
+			commits90d: a?.commits90d ?? 0,
+			lastCommitAt: a?.lastCommitAt ?? null,
+			projects: a
+				? [...a.projects.entries()].map(([slug, name]) => ({ slug, name }))
+				: [],
+			languages: a?.languages ?? [],
+			ambassador: AMBASSADORS[handle.toLowerCase()]
+				? {
+						tier: AMBASSADORS[handle.toLowerCase()].tier,
+						region: AMBASSADORS[handle.toLowerCase()].region,
+					}
+				: null,
+		};
+	});
 
 	return (
 		<div className="min-h-screen relative">
@@ -122,7 +116,7 @@ export default async function BuildersPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				<div className="mb-10">
+				<div className="mb-8">
 					<p className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-2">
 						Directory
 					</p>
@@ -131,83 +125,27 @@ export default async function BuildersPage() {
 					</h1>
 					<p className="text-muted-foreground">
 						{builders.length} developers building on Stellar. Profiles from
-						Stellar Passport, code activity from the{" "}
-						{activity.size ? "repos we index" : "repos we index (loading)"}.
+						Stellar Passport, code activity from the repos we index.
 						{syncedAt
 							? ` Profiles synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
 							: ""}
 					</p>
 				</div>
 
-				{/* Featured Builders */}
-				{featuredBuilders.length > 0 && (
-					<section className="mb-12">
-						<h2 className="text-2xl font-bold mb-6">Featured</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							{featuredBuilders.map((builder) => (
-								<BuilderRow
-									key={builder.github_username}
-									builder={builder}
-									activity={act(builder)}
-									featured
-								/>
-							))}
-						</div>
-					</section>
+				{rows.length > 0 ? (
+					<BuildersDirectory rows={rows} />
+				) : (
+					<Card className="border border-border/50 bg-card">
+						<CardContent className="py-16 text-center">
+							<Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+							<p className="text-muted-foreground">
+								The builder directory is empty right now. Profiles come from
+								Stellar Passport; if you have one, it will appear after the next
+								sync.
+							</p>
+						</CardContent>
+					</Card>
 				)}
-
-				{/* Active Builders */}
-				{activeBuilders.length > 0 && (
-					<section className="mb-12">
-						<div className="flex items-center gap-3 mb-6">
-							<h2 className="text-2xl font-bold">Active in the last 90 days</h2>
-							<Badge variant="outline" className="tabular-nums">
-								{activeBuilders.length}
-							</Badge>
-						</div>
-						<div className="space-y-3">
-							{activeBuilders.map((builder) => (
-								<BuilderRow
-									key={builder.github_username}
-									builder={builder}
-									activity={act(builder)}
-								/>
-							))}
-						</div>
-					</section>
-				)}
-
-				{/* All Other Builders */}
-				<section>
-					<h2 className="text-2xl font-bold mb-6">
-						{activeBuilders.length
-							? `Everyone else (${otherBuilders.length})`
-							: `All Builders (${otherBuilders.length})`}
-					</h2>
-
-					{otherBuilders.length > 0 ? (
-						<div className="space-y-3">
-							{otherBuilders.map((builder) => (
-								<BuilderRow
-									key={builder.github_username}
-									builder={builder}
-									activity={act(builder)}
-								/>
-							))}
-						</div>
-					) : builders.length === 0 ? (
-						<Card className="border border-border/50 bg-card">
-							<CardContent className="py-16 text-center">
-								<Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-								<p className="text-muted-foreground">
-									The builder directory is empty right now. Profiles come from
-									Stellar Passport; if you have one, it will appear after the
-									next sync.
-								</p>
-							</CardContent>
-						</Card>
-					) : null}
-				</section>
 
 				{/* CTA */}
 				<div className="mt-16 text-center py-12 px-8 rounded-2xl border border-border bg-card">
@@ -232,161 +170,5 @@ export default async function BuildersPage() {
 				</div>
 			</main>
 		</div>
-	);
-}
-
-function BuilderRow({
-	builder,
-	activity,
-	featured = false,
-}: {
-	builder: PassportBuilder;
-	activity?: CodeActivity;
-	featured?: boolean;
-}) {
-	const twitterUrl = builder.twitter_handle
-		? `https://twitter.com/${builder.twitter_handle.replace("@", "").replace("https://x.com/", "").replace("https://twitter.com/", "")}`
-		: null;
-
-	return (
-		<Card
-			className={`relative border ${featured ? "border-white/20 bg-card" : "border-border/50 bg-card"} hover:border-white/25 hover:bg-white/[0.02] transition-colors duration-150`}
-		>
-			{/* whole card opens the profile; the social icons below stay their own targets */}
-			<Link
-				href={`/builders/${builder.github_username}`}
-				className="absolute inset-0 rounded-xl"
-				aria-label={`${builder.display_name}'s profile`}
-			/>
-			<CardContent className="p-5">
-				<div className="flex items-center gap-4">
-					{/* Avatar */}
-					<div className="flex-shrink-0">
-						{builder.avatar_url ? (
-							<Image
-								src={builder.avatar_url}
-								alt={builder.display_name}
-								width={48}
-								height={48}
-								className="rounded-full"
-							/>
-						) : (
-							<div className="w-12 h-12 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-neutral-300 text-lg font-semibold">
-								{builder.display_name.charAt(0).toUpperCase()}
-							</div>
-						)}
-					</div>
-
-					{/* Info */}
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 flex-wrap">
-							<h3 className="font-semibold text-foreground truncate">
-								{builder.display_name}
-							</h3>
-							{featured && (
-								<Badge variant="outline" className="text-xs text-neutral-300">
-									Featured
-								</Badge>
-							)}
-						</div>
-						<div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
-							{builder.role_title && (
-								<span className="flex items-center gap-1 truncate">
-									<Briefcase className="w-3 h-3" />
-									{builder.role_title}
-								</span>
-							)}
-							{builder.location && (
-								<span className="flex items-center gap-1">
-									<MapPin className="w-3 h-3" />
-									{builder.location}
-								</span>
-							)}
-							{(builder.stats?.totalCommits30d ?? 0) > 0 && (
-								<span className="flex items-center gap-1">
-									<GitBranch className="w-3 h-3" />
-									{builder.stats!.totalCommits30d} commits / 30d
-								</span>
-							)}
-							{builder.projects && builder.projects.length > 0 && (
-								<span className="flex items-center gap-1">
-									<Code2 className="w-3 h-3" />
-									{builder.projects.length} project
-									{builder.projects.length !== 1 ? "s" : ""}
-								</span>
-							)}
-							{activity && activity.repos.length > 0 && (
-								<span className="flex items-center gap-1 tabular-nums">
-									<GitBranch className="w-3 h-3" />
-									{activity.repos.length} Stellar{" "}
-									{activity.repos.length === 1 ? "repo" : "repos"}
-									{activity.stars > 0
-										? `, ${activity.stars.toLocaleString()} stars`
-										: ""}
-									{activity.lastCommitAt
-										? `, last commit ${ago(activity.lastCommitAt)}`
-										: ""}
-								</span>
-							)}
-						</div>
-						{activity && activity.projects.size > 0 && (
-							<div className="relative z-10 mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-								<span className="text-muted-foreground">builds</span>
-								{[...activity.projects.entries()]
-									.slice(0, 4)
-									.map(([slug, name]) => (
-										<Link
-											key={slug}
-											href={`/project/${slug}`}
-											className="rounded-md border border-border bg-white/[0.03] px-1.5 py-0.5 text-foreground/90 hover:border-white/25 transition-colors"
-										>
-											{name}
-										</Link>
-									))}
-								{activity.projects.size > 4 && (
-									<span className="text-muted-foreground">
-										+{activity.projects.size - 4} more
-									</span>
-								)}
-							</div>
-						)}
-					</div>
-
-					{/* Social links */}
-					<div className="relative z-10 flex items-center gap-2 flex-shrink-0">
-						{builder.github_username && (
-							<a
-								href={`https://github.com/${builder.github_username}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Github className="w-4 h-4" />
-							</a>
-						)}
-						{builder.website_url && (
-							<a
-								href={builder.website_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Globe className="w-4 h-4" />
-							</a>
-						)}
-						{twitterUrl && (
-							<a
-								href={twitterUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Twitter className="w-4 h-4" />
-							</a>
-						)}
-					</div>
-				</div>
-			</CardContent>
-		</Card>
 	);
 }
