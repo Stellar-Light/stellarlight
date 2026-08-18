@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import EntityCard from "@/components/entity-card";
 import { ProjectLogo } from "@/components/project-logo";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
@@ -68,7 +68,7 @@ export async function generateMetadata({
 					},
 					{
 						status: {
-							in: ["Development", "Pre-Release", "Live"],
+							in: ["Development", "Pre-Release", "Live", "Inactive"],
 						},
 					},
 				],
@@ -162,8 +162,13 @@ export default async function ProjectDetailPage({
 						},
 					},
 					{
+						// "Inactive" belongs here. Excluding it 404'd all 96 archived
+						// projects — including any we mark Inactive ourselves, which
+						// silently deleted Keybase's page the night we curated it. The
+						// page already renders an "Inactive / archived" badge that could
+						// never fire. An honest archive record beats a dead link.
 						status: {
-							in: ["Development", "Pre-Release", "Live"],
+							in: ["Development", "Pre-Release", "Live", "Inactive"],
 						},
 					},
 				],
@@ -181,6 +186,12 @@ export default async function ProjectDetailPage({
 
 	const project = result.docs[0];
 
+	// Deduped records point at the survivor; send the reader there rather than
+	// showing them a merged husk (41 projects carry one, e.g. meria → meria-defi).
+	if (project.canonicalSlug && project.canonicalSlug !== project.slug) {
+		redirect(`/project/${project.canonicalSlug}`);
+	}
+
 	// Fetch GitHub data directly (no HTTP call needed in server component)
 	let gh: {
 		lastActivityAt: string | null;
@@ -197,63 +208,59 @@ export default async function ProjectDetailPage({
 			skipped?: boolean;
 		}>;
 	} | null = null;
-
-	if (project.github?.repos && project.github.repos.length > 0) {
-		try {
-			// GitHub stats come from the enriched `repos` collection (keyed by
-			// projectSlug, populated by enrich-repos). The legacy per-project
-			// `signals` cache + live GitHub fetch this used is no longer viable
-			// (signals is not populated and DB writes are blocked), so stars read
-			// back as zero — read the authoritative repo stats directly.
-			const reposResult = await payload.find({
-				collection: "repos",
-				where: { projectSlug: { equals: project.slug } },
-				limit: 100,
-				depth: 0,
-				select: {
-					fullName: true,
-					url: true,
-					stars: true,
-					openIssues: true,
-					lastCommitAt: true,
-				},
-			});
-			if (reposResult.docs.length > 0) {
-				// biome-ignore lint/suspicious/noExplicitAny: Payload doc type is awkward
-				const enriched = (reposResult.docs as any[]).map((r) => {
-					const [owner, ...rest] = String(r.fullName ?? "").split("/");
-					return {
-						owner: owner ?? "",
-						name: rest.join("/") || (r.fullName ?? ""),
-						url:
-							r.url ?? (r.fullName ? `https://github.com/${r.fullName}` : ""),
-						lastCommitAt: r.lastCommitAt ?? null,
-						openIssues: r.openIssues ?? 0,
-						stargazerCount: r.stars ?? 0,
-					};
-				});
-				const lastTs = Math.max(
-					0,
-					...enriched.map((x) =>
-						x.lastCommitAt ? new Date(x.lastCommitAt).getTime() : 0,
-					),
-				);
-				gh = {
-					lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
-					openIssuesTotal: enriched.reduce(
-						(sum, x) => sum + (x.openIssues || 0),
-						0,
-					),
-					totalStars: enriched.reduce(
-						(sum, x) => sum + (x.stargazerCount || 0),
-						0,
-					),
-					repos: enriched,
+	try {
+		// GitHub stats come from the enriched `repos` collection (keyed by
+		// projectSlug, populated by enrich-repos). The legacy per-project
+		// `signals` cache + live GitHub fetch this used is no longer viable
+		// (signals is not populated and DB writes are blocked), so stars read
+		// back as zero — read the authoritative repo stats directly.
+		const reposResult = await payload.find({
+			collection: "repos",
+			where: { projectSlug: { equals: project.slug } },
+			limit: 100,
+			depth: 0,
+			select: {
+				fullName: true,
+				url: true,
+				stars: true,
+				openIssues: true,
+				lastCommitAt: true,
+			},
+		});
+		if (reposResult.docs.length > 0) {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc type is awkward
+			const enriched = (reposResult.docs as any[]).map((r) => {
+				const [owner, ...rest] = String(r.fullName ?? "").split("/");
+				return {
+					owner: owner ?? "",
+					name: rest.join("/") || (r.fullName ?? ""),
+					url: r.url ?? (r.fullName ? `https://github.com/${r.fullName}` : ""),
+					lastCommitAt: r.lastCommitAt ?? null,
+					openIssues: r.openIssues ?? 0,
+					stargazerCount: r.stars ?? 0,
 				};
-			}
-		} catch (error) {
-			// Silently handle GitHub fetch errors
+			});
+			const lastTs = Math.max(
+				0,
+				...enriched.map((x) =>
+					x.lastCommitAt ? new Date(x.lastCommitAt).getTime() : 0,
+				),
+			);
+			gh = {
+				lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
+				openIssuesTotal: enriched.reduce(
+					(sum, x) => sum + (x.openIssues || 0),
+					0,
+				),
+				totalStars: enriched.reduce(
+					(sum, x) => sum + (x.stargazerCount || 0),
+					0,
+				),
+				repos: enriched,
+			};
 		}
+	} catch (error) {
+		// Silently handle GitHub fetch errors
 	}
 
 	// Find entities that have this project
@@ -650,7 +657,7 @@ export default async function ProjectDetailPage({
 				)}
 
 				{/* Project Stats - GitHub Stats */}
-				{project.github?.repos && project.github.repos.length > 0 && (
+				{gh && gh.repos.length > 0 && (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 						<Card className="border border-border/50 bg-card shadow-sm hover:shadow-sm transition-all duration-150 hover:-translate-y-1">
 							<CardContent className="p-6">
@@ -695,12 +702,8 @@ export default async function ProjectDetailPage({
 									</div>
 								</div>
 								<p className="text-xs text-muted-foreground">
-									Across{" "}
-									{gh?.repos?.length || project.github?.repos?.length || 0}{" "}
-									{gh?.repos?.length === 1 ||
-									project.github?.repos?.length === 1
-										? "repository"
-										: "repositories"}
+									Across {gh?.repos?.length ?? 0}{" "}
+									{gh?.repos?.length === 1 ? "repository" : "repositories"}
 								</p>
 							</CardContent>
 						</Card>
@@ -733,82 +736,70 @@ export default async function ProjectDetailPage({
 				)}
 
 				{/* Repositories */}
-				{project.github?.repos && project.github.repos.length > 0 && (
+				{gh && gh.repos.length > 0 && (
 					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Repositories</CardTitle>
 							<CardDescription>
-								{project.github.repos.length}{" "}
-								{project.github.repos.length === 1
-									? "repository"
-									: "repositories"}{" "}
-								linked to this project
+								{gh.repos.length}{" "}
+								{gh.repos.length === 1 ? "repository" : "repositories"} linked
+								to this project
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-2">
-								{(
-									gh?.repos ||
-									project.github.repos.map((r: any) => ({
-										owner: r.owner,
-										name: r.name,
-										url: `https://github.com/${r.owner}/${r.name}`,
-										lastCommitAt: null,
-										openIssues: 0,
-										stargazerCount: 0,
-										error: undefined,
-										skipped: false,
-									}))
-								)
-									.slice(0, 10)
-									.map((r: any) => (
-										<a
-											key={`${r.owner}/${r.name}`}
-											href={r.url}
-											target="_blank"
-											rel="noreferrer"
-											className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
-										>
-											<div className="flex-1 min-w-0">
-												<div className="flex items-center gap-3 mb-2">
-													<Github className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-													<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-														{r.owner}/{r.name}
-													</span>
-												</div>
-												<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
-													{r.error ? (
-														<span className="text-orange-400 font-medium">
-															{r.error}
-														</span>
-													) : (
-														<>
-															{r.lastCommitAt && (
-																<span className="flex items-center gap-1.5">
-																	<Clock className="w-3.5 h-3.5" />
-																	{formatDate(r.lastCommitAt)}
-																</span>
-															)}
-															{r.stargazerCount > 0 && (
-																<span className="flex items-center gap-1.5">
-																	<Star className="w-3.5 h-3.5" />
-																	{r.stargazerCount.toLocaleString()}
-																</span>
-															)}
-															{r.openIssues > 0 && (
-																<span className="flex items-center gap-1.5">
-																	<AlertCircle className="w-3.5 h-3.5" />
-																	{r.openIssues} issue
-																	{r.openIssues !== 1 ? "s" : ""}
-																</span>
-															)}
-														</>
-													)}
-												</div>
+								{/* Names come from repos.fullName only. The legacy embedded
+								    array was also the fallback here, and 17 of its rows are
+								    malformed — anclap rendered a repository called
+								    "https: / github.com". */}
+								{gh.repos.slice(0, 10).map((r: any) => (
+									<a
+										key={`${r.owner}/${r.name}`}
+										href={r.url}
+										target="_blank"
+										rel="noreferrer"
+										className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-background/30 hover:bg-background hover:border-primary/50 transition-all duration-150 hover:shadow-sm overflow-hidden"
+									>
+										<div className="flex-1 min-w-0">
+											<div className="flex items-center gap-3 mb-2">
+												<Github className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+												<span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+													{r.owner}/{r.name}
+												</span>
 											</div>
-											<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors ml-4 flex-shrink-0" />
-										</a>
-									))}
+											<div className="flex items-center gap-4 text-sm text-muted-foreground pl-8 flex-wrap">
+												{r.error ? (
+													<span className="text-orange-400 font-medium">
+														{r.error}
+													</span>
+												) : (
+													<>
+														{r.lastCommitAt && (
+															<span className="flex items-center gap-1.5">
+																<Clock className="w-3.5 h-3.5" />
+																{formatDate(r.lastCommitAt)}
+															</span>
+														)}
+														{r.stargazerCount > 0 && (
+															<span className="flex items-center gap-1.5">
+																<Star className="w-3.5 h-3.5" />
+																{r.stargazerCount.toLocaleString()}
+															</span>
+														)}
+														{r.openIssues > 0 && (
+															<span className="flex items-center gap-1.5">
+																<AlertCircle className="w-3.5 h-3.5" />
+																{r.openIssues} issue
+																{r.openIssues !== 1 ? "s" : ""}
+															</span>
+														)}
+													</>
+												)}
+											</div>
+										</div>
+										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors ml-4 flex-shrink-0" />
+									</a>
+								))}
 							</div>
 						</CardContent>
 					</Card>
