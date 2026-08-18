@@ -32,6 +32,8 @@ const STALE_MS = 18 * 30 * 24 * 60 * 60 * 1000; // ~18 months (report threshold)
 const DEAD_MONTHS = 36; // ~3 years — the auto-mark threshold
 
 // Hand-verified. Extend only after confirming a project is genuinely defunct.
+// ALSO add a STATUS_FIX row in scripts/data/curation-maps.ts for each slug, or
+// the nightly lumenloop sync writes the seed's Live label straight back.
 const CURATED_INACTIVE: string[] = ["keybase"];
 
 // Watchlist from prior review (memory) — NOT auto-marked; we print their live
@@ -73,7 +75,15 @@ async function main() {
 			await payload.update({
 				collection: "projects",
 				id: p.id,
-				data: { status: "Inactive" },
+				// A bare status write is reverted by the nightly lumenloop sync unless
+				// the slug also owns `status` in scripts/data/curation-maps.ts STATUS_FIX
+				// (that is what curatedFieldsFor reads). Keybase sat on this list, was
+				// marked twice in July, and was Live again by morning both times.
+				data: {
+					status: "Inactive",
+					statusBasis: "human-verified",
+					statusAsOf: new Date().toISOString(),
+				},
 				overrideAccess: true,
 			});
 			marked++;

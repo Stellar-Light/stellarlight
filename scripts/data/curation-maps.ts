@@ -451,6 +451,22 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Confirmed inactive 2026-07-13 (sls-024 recheck): the centaurus-project repos have had no activity since January 2022 (centaurus last push 2022-01-05; centaurus-ban-extension 2020-05-18), the recorded website is the GitHub org itself (no product surface exists), and no current deployment evidence was located. The previous Live label was source-inherited, never verified.",
 	},
+	// Keybase: owner-confirmed 2026-08-17 ("shouldn't be there, not really
+	// active"). Acquired by Zoom in 2020; the Stellar wallet integration is
+	// legacy and unmaintained while keybase/client itself still gets chat-client
+	// commits and holds 9k+ stars, which is exactly how it rode to #1 on the
+	// homepage Top Repositories. It was on mark-inactive-projects.ts's curated
+	// list (marked Jul 2 + Jul 5) but that script writes status without
+	// registering ownership here, so the nightly lumenloop sync flipped it back
+	// to Live every time. This row makes `status` curated-owned for the slug.
+	keybase: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-08-17",
+		sourceUrl: "https://github.com/keybase/client",
+		basis: "human-verified",
+		note: "Keybase was a Stellar wallet integration (2018-2020). Zoom acquired Keybase in May 2020; the Stellar features are legacy and unmaintained. The keybase/client repo remains active for the chat client only. Marked Inactive on owner review 2026-08-17.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
