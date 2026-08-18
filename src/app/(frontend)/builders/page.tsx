@@ -147,6 +147,9 @@ export default async function BuildersPage() {
 			projects: a
 				? [...a.projects.entries()].map(([slug, name]) => ({ slug, name }))
 				: [],
+			contributesTo: a
+				? [...a.contributesTo.entries()].map(([slug, name]) => ({ slug, name }))
+				: [],
 			languages: a?.languages ?? [],
 			country: countryOf(b.location),
 			ambassador: AMBASSADORS[handle.toLowerCase()]

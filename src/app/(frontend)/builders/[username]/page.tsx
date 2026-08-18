@@ -323,121 +323,143 @@ export default async function BuilderProfilePage({
 			)}
 
 			{/* On Stellar: projects + repos from OUR index (this is what was missing) */}
-			{code && (code.repos.length > 0 || code.projects.size > 0) && (
-				<Card className="mb-8">
-					<CardHeader>
-						<CardTitle>On Stellar</CardTitle>
-						<p className="text-sm text-muted-foreground">
-							From the Stellar repos we index: {code.repos.length}{" "}
-							{code.repos.length === 1 ? "repo" : "repos"}
-							{code.stars > 0 ? `, ${code.stars.toLocaleString()} stars` : ""}
-							{code.commits90d > 0
-								? `, ${code.commits90d.toLocaleString()} commits in the last 90 days`
-								: ""}
-							{code.lastCommitAt
-								? `, last commit ${ago(code.lastCommitAt)}`
-								: ""}
-							.
-						</p>
-					</CardHeader>
-					<CardContent className="space-y-5">
-						{code.projects.size > 0 && (
-							<div className="flex flex-wrap items-center gap-2">
-								<span className="text-sm text-muted-foreground">Builds</span>
-								{[...code.projects.entries()].map(([slug, name]) => (
-									<Link
-										key={slug}
-										href={`/project/${slug}`}
-										className="rounded-md border border-border bg-white/[0.03] px-2 py-1 text-sm text-foreground/90 hover:border-white/25 transition-colors"
-									>
-										{name}
-									</Link>
-								))}
-							</div>
-						)}
-						{code.repos.length > 0 && (
-							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-											<th className="py-2 pr-4 font-medium">Repository</th>
-											<th className="py-2 pr-4 font-medium">Project</th>
-											<th className="py-2 pr-4 font-medium text-right">
-												Stars
-											</th>
-											<th className="py-2 pr-4 font-medium text-right">
-												90d commits
-											</th>
-											<th className="py-2 font-medium text-right">
-												Last commit
-											</th>
-										</tr>
-									</thead>
-									<tbody>
-										{code.repos.slice(0, 40).map((r) => (
-											<tr
-												key={r.fullName}
-												className="border-b border-border/50 last:border-0"
-											>
-												<td className="py-2 pr-4">
-													<a
-														href={r.url}
-														target="_blank"
-														rel="noopener noreferrer"
-														className="text-foreground hover:underline underline-offset-2"
-													>
-														{r.fullName}
-													</a>
-													{r.via !== "owner" && (
-														<span className="ml-2 text-xs text-muted-foreground">
-															{r.via === "contributor"
-																? `contributor${r.myCommits12m ? `, ${r.myCommits12m} commits/12mo` : ""}`
-																: "declared on Passport"}
-														</span>
-													)}
-												</td>
-												<td className="py-2 pr-4">
-													{r.projectSlug && r.projectName ? (
-														<Link
-															href={`/project/${r.projectSlug}`}
-															className="text-foreground/90 hover:underline underline-offset-2"
-														>
-															{r.projectName}
-														</Link>
-													) : (
-														<span className="text-muted-foreground">-</span>
-													)}
-												</td>
-												<td className="py-2 pr-4 text-right tabular-nums">
-													{r.stars.toLocaleString()}
-												</td>
-												<td className="py-2 pr-4 text-right tabular-nums">
-													{r.commits90d ? (
-														r.commits90d.toLocaleString()
-													) : (
-														<span className="text-muted-foreground">-</span>
-													)}
-												</td>
-												<td className="py-2 text-right tabular-nums text-muted-foreground">
-													{ago(r.lastCommitAt) ?? "-"}
-												</td>
+			{code &&
+				(code.repos.length > 0 ||
+					code.projects.size > 0 ||
+					code.contributesTo.size > 0) && (
+					<Card className="mb-8">
+						<CardHeader>
+							<CardTitle>On Stellar</CardTitle>
+							<p className="text-sm text-muted-foreground">
+								From the Stellar repos we index: {code.repos.length}{" "}
+								{code.repos.length === 1 ? "repo" : "repos"}
+								{code.stars > 0 ? `, ${code.stars.toLocaleString()} stars` : ""}
+								{code.commits90d > 0
+									? `, ${code.commits90d.toLocaleString()} commits in the last 90 days`
+									: ""}
+								{code.lastCommitAt
+									? `, last commit ${ago(code.lastCommitAt)}`
+									: ""}
+								.
+							</p>
+						</CardHeader>
+						<CardContent className="space-y-5">
+							{code.projects.size > 0 && (
+								<div className="flex flex-wrap items-center gap-2">
+									<span className="text-sm text-muted-foreground">Builds</span>
+									{[...code.projects.entries()].map(([slug, name]) => (
+										<Link
+											key={slug}
+											href={`/project/${slug}`}
+											className="rounded-md border border-border bg-white/[0.03] px-2 py-1 text-sm text-foreground/90 hover:border-white/25 transition-colors"
+										>
+											{name}
+										</Link>
+									))}
+								</div>
+							)}
+							{code.contributesTo.size > 0 && (
+								<div className="flex flex-wrap items-center gap-2">
+									<span className="text-sm text-muted-foreground">
+										Contributes to
+									</span>
+									{[...code.contributesTo.entries()].map(([slug, name]) => (
+										<Link
+											key={slug}
+											href={`/project/${slug}`}
+											className="rounded-md border border-border/60 px-2 py-1 text-sm text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
+										>
+											{name}
+										</Link>
+									))}
+								</div>
+							)}
+							{code.repos.length > 0 && (
+								<div className="overflow-x-auto">
+									<table className="w-full text-sm">
+										<thead>
+											<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+												<th className="py-2 pr-4 font-medium">Repository</th>
+												<th className="py-2 pr-4 font-medium">Project</th>
+												<th className="py-2 pr-4 font-medium text-right">
+													Stars
+												</th>
+												<th className="py-2 pr-4 font-medium text-right">
+													90d commits
+												</th>
+												<th className="py-2 font-medium text-right">
+													Last commit
+												</th>
 											</tr>
-										))}
-									</tbody>
-								</table>
-								{code.repos.length > 40 && (
-									<p className="mt-2 text-xs text-muted-foreground">
-										Showing 40 of {code.repos.length}.
-									</p>
-								)}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-			)}
+										</thead>
+										<tbody>
+											{code.repos.slice(0, 40).map((r) => (
+												<tr
+													key={r.fullName}
+													className="border-b border-border/50 last:border-0"
+												>
+													<td className="py-2 pr-4">
+														<a
+															href={r.url}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-foreground hover:underline underline-offset-2"
+														>
+															{r.fullName}
+														</a>
+														{r.via !== "owner" && (
+															<span className="ml-2 text-xs text-muted-foreground">
+																{r.via === "contributor"
+																	? `contributor${r.myCommits12m ? `, ${r.myCommits12m} commits/12mo` : ""}`
+																	: "declared on Passport"}
+															</span>
+														)}
+													</td>
+													<td className="py-2 pr-4">
+														{r.projectSlug && r.projectName ? (
+															<Link
+																href={`/project/${r.projectSlug}`}
+																className="text-foreground/90 hover:underline underline-offset-2"
+															>
+																{r.projectName}
+															</Link>
+														) : (
+															<span className="text-muted-foreground">-</span>
+														)}
+													</td>
+													<td className="py-2 pr-4 text-right tabular-nums">
+														{r.stars.toLocaleString()}
+													</td>
+													<td className="py-2 pr-4 text-right tabular-nums">
+														{r.commits90d ? (
+															r.commits90d.toLocaleString()
+														) : (
+															<span className="text-muted-foreground">-</span>
+														)}
+													</td>
+													<td className="py-2 text-right tabular-nums text-muted-foreground">
+														{ago(r.lastCommitAt) ?? "-"}
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+									{code.repos.length > 40 && (
+										<p className="mt-2 text-xs text-muted-foreground">
+											Showing 40 of {code.repos.length}.
+										</p>
+									)}
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				)}
 
 			{/* Nothing indexed for this person: say so plainly rather than render a blank page */}
-			{(!code || (code.repos.length === 0 && code.projects.size === 0)) &&
+			{(!code ||
+				(code.repos.length === 0 &&
+					code.projects.size === 0 &&
+					code.contributesTo.size === 0)) &&
 				hackBuilds.length === 0 && (
 					<Card className="mb-8">
 						<CardContent className="py-6 text-sm text-muted-foreground">
