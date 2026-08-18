@@ -25,6 +25,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { ThinkingDots } from "@/components/motion/thinking-dots";
 import { partnerQueryFor } from "@/lib/ask-intent";
 
 interface ResearchResult {
@@ -366,9 +367,13 @@ export function AskSearch() {
 										</p>
 									</div>
 								) : (
-									<div className="rounded-2xl bg-white/[0.02] border border-white/15 p-5 animate-pulse">
-										<div className="h-3.5 bg-white/[0.05] rounded w-full mb-2" />
-										<div className="h-3.5 bg-white/[0.05] rounded w-4/5" />
+									<div className="rounded-2xl bg-white/[0.02] border border-white/15 p-5">
+										{/* Not a loading box: an answer is being composed from the
+										    sources below. Say that, quietly. */}
+										<div className="flex items-center gap-3 text-sm text-muted-foreground">
+											<ThinkingDots className="text-foreground/70" />
+											<span>Reading the sources and composing an answer</span>
+										</div>
 									</div>
 								)}
 							</section>

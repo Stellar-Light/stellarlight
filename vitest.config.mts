@@ -7,6 +7,10 @@ export default defineConfig({
 	test: {
 		environment: "jsdom",
 		setupFiles: ["./vitest.setup.ts"],
-		include: ["tests/int/**/*.int.spec.ts", "src/**/*.test.ts"],
+		// .tsx included deliberately: component tests (the motion primitives'
+		// reduced-motion behaviour) live next to their components, and a
+		// .ts-only glob silently skipped them — a test that cannot run is
+		// worse than no test, because it reads as covered.
+		include: ["tests/int/**/*.int.spec.ts", "src/**/*.test.{ts,tsx}"],
 	},
 });

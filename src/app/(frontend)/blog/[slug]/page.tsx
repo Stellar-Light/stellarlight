@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LexicalContent } from "@/components/lexical-content";
 import { MarkdownContent } from "@/components/markdown-content";
+import { ReadingProgress } from "@/components/motion/reading-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -245,6 +246,7 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
 				</Link>
 
 				{/* Header */}
+				<ReadingProgress />
 				<article>
 					{/* Category Badge */}
 					{post.category && (

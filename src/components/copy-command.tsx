@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { IconSwap, IconSwapItem } from "@/components/motion/icon-swap";
 
 /** Legacy execCommand-based copy. Returns true on success. */
 function legacyCopy(text: string): boolean {
@@ -67,11 +68,17 @@ export function CopyCommand({ command, className }: Props) {
 					copied ? "Command copied to clipboard" : "Copy command to clipboard"
 				}
 			>
-				{copied ? (
-					<Check className="w-4 h-4 text-emerald-400" />
-				) : (
-					<Copy className="w-4 h-4" />
-				)}
+				<IconSwap>
+					{copied ? (
+						<IconSwapItem key="copied">
+							<Check className="w-4 h-4 text-emerald-400" />
+						</IconSwapItem>
+					) : (
+						<IconSwapItem key="copy">
+							<Copy className="w-4 h-4" />
+						</IconSwapItem>
+					)}
+				</IconSwap>
 			</button>
 		</div>
 	);

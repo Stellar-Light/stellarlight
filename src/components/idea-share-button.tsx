@@ -2,6 +2,7 @@
 
 import { Check, Link2 } from "lucide-react";
 import { useState } from "react";
+import { IconSwap, IconSwapItem } from "@/components/motion/icon-swap";
 
 export function IdeaShareButton() {
 	const [copied, setCopied] = useState(false);
@@ -29,11 +30,17 @@ export function IdeaShareButton() {
 			onClick={handleShare}
 			className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground border border-border/50 hover:border-border bg-card transition-all duration-150"
 		>
-			{copied ? (
-				<Check className="w-4 h-4 text-foreground" />
-			) : (
-				<Link2 className="w-4 h-4" />
-			)}
+			<IconSwap>
+				{copied ? (
+					<IconSwapItem key="copied">
+						<Check className="w-4 h-4 text-foreground" />
+					</IconSwapItem>
+				) : (
+					<IconSwapItem key="link">
+						<Link2 className="w-4 h-4" />
+					</IconSwapItem>
+				)}
+			</IconSwap>
 			<span>{copied ? "Copied!" : "Copy link"}</span>
 		</button>
 	);

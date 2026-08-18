@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SiDiscord, SiGithub, SiX } from "react-icons/si";
+import {
+	FocusBlurItem,
+	FocusBlurList,
+} from "@/components/motion/focus-blur-list";
 
 export default function Footer() {
 	return (
@@ -27,8 +31,11 @@ export default function Footer() {
 					</div>
 					<div>
 						<h4 className="font-semibold mb-4 text-foreground">Resources</h4>
-						<ul className="space-y-2 text-sm text-muted-foreground">
-							<li>
+						<FocusBlurList
+							as="ul"
+							className="space-y-2 text-sm text-muted-foreground"
+						>
+							<FocusBlurItem as="li">
 								<a
 									href="https://communityfund.stellar.org/"
 									target="_blank"
@@ -37,8 +44,8 @@ export default function Footer() {
 								>
 									Grants
 								</a>
-							</li>
-							<li>
+							</FocusBlurItem>
+							<FocusBlurItem as="li">
 								<a
 									href="https://developers.stellar.org/"
 									target="_blank"
@@ -47,32 +54,32 @@ export default function Footer() {
 								>
 									Documentation
 								</a>
-							</li>
-							<li>
+							</FocusBlurItem>
+							<FocusBlurItem as="li">
 								<Link
 									href="/partners"
 									className="hover:text-foreground transition-all duration-150"
 								>
 									Partner directory
 								</Link>
-							</li>
-							<li>
+							</FocusBlurItem>
+							<FocusBlurItem as="li">
 								<Link
 									href="/analytics"
 									className="hover:text-foreground transition-all duration-150"
 								>
 									Usage &amp; analytics
 								</Link>
-							</li>
-							<li>
+							</FocusBlurItem>
+							<FocusBlurItem as="li">
 								<Link
 									href="/partners/chat"
 									className="hover:text-foreground transition-all duration-150"
 								>
 									List your company
 								</Link>
-							</li>
-						</ul>
+							</FocusBlurItem>
+						</FocusBlurList>
 					</div>
 					<div>
 						<h4 className="font-semibold mb-4 text-foreground">Community</h4>
