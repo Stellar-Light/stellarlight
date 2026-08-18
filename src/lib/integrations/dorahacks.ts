@@ -30,7 +30,22 @@ export interface DoraHacksHackathon {
 	/** Curated (non-DoraHacks) events carry their own URL and source. */
 	external_url?: string;
 	source?: "dorahacks" | "curated";
+	/**
+	 * What the event actually is. Not everything we track is a hackathon with
+	 * submissions and a prize pool — some are multi-month builder programs or
+	 * IRL summits, and saying so on the card is the difference between a
+	 * directory and a pile. Absent means hackathon (every DoraHacks row).
+	 */
+	kind?: EventKind;
 }
+
+export type EventKind = "hackathon" | "program" | "summit";
+
+export const EVENT_KIND_LABEL: Record<EventKind, string> = {
+	hackathon: "Hackathon",
+	program: "Builder program",
+	summit: "Summit",
+};
 
 export interface DoraHacksResponse {
 	count: number;
