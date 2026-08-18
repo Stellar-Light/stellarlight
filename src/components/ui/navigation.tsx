@@ -23,6 +23,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+	FocusBlurItem,
+	FocusBlurList,
+} from "@/components/motion/focus-blur-list";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
@@ -281,7 +285,7 @@ export function Navigation() {
 
 						{isExploreOpen && (
 							<div className="absolute right-0 top-full pt-2 z-50">
-								<div className="w-[540px] bg-[#262626] border border-[#2F2F2F] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-3 grid grid-cols-2 gap-x-2 animate-in fade-in slide-in-from-top-1 duration-200">
+								<FocusBlurList className="w-[540px] bg-[#262626] border border-[#2F2F2F] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-3 grid grid-cols-2 gap-x-2 animate-in fade-in slide-in-from-top-1 duration-200">
 									{exploreGroups.map((group) => (
 										<div key={group.label}>
 											<div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-[#737373] font-medium">
@@ -306,32 +310,34 @@ export function Navigation() {
 														</div>
 													);
 
-													return isExternal ? (
-														<a
-															key={item.name}
-															href={item.href}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
-															data-testid={`nav-link-${item.name.toLowerCase()}`}
-														>
-															{content}
-														</a>
-													) : (
-														<Link
-															key={item.name}
-															href={item.href}
-															className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
-															data-testid={`nav-link-${item.name.toLowerCase()}`}
-														>
-															{content}
-														</Link>
+													return (
+														<FocusBlurItem key={item.name}>
+															{isExternal ? (
+																<a
+																	href={item.href}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+																	data-testid={`nav-link-${item.name.toLowerCase()}`}
+																>
+																	{content}
+																</a>
+															) : (
+																<Link
+																	href={item.href}
+																	className="block px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all duration-150 group"
+																	data-testid={`nav-link-${item.name.toLowerCase()}`}
+																>
+																	{content}
+																</Link>
+															)}
+														</FocusBlurItem>
 													);
 												})}
 											</div>
 										</div>
 									))}
-								</div>
+								</FocusBlurList>
 							</div>
 						)}
 					</div>

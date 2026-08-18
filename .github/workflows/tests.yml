@@ -23,4 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run src/lib/__tests__/
+      # src/lib/__tests__ plus component tests that live next to their
+      # component (src/components/**/*.test.tsx). The path-scoped command
+      # silently skipped the latter — a test CI never runs is not a test.
+      # tests/int/** stays out: it needs PAYLOAD_SECRET + a live DB.
+      - run: pnpm exec vitest run src/lib/__tests__/ src/components/
