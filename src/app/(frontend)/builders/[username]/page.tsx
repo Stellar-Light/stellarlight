@@ -24,6 +24,11 @@ import {
 	builderCodeActivity,
 	type CodeActivity,
 } from "@/lib/builder-code";
+import {
+	buildsForRepos,
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{ username: string }>;
@@ -85,12 +90,54 @@ export default async function BuilderProfilePage({
 	// what this person has shipped in the Stellar repos we index (owned,
 	// Passport-declared, contributor pass); the Passport profile alone is thin
 	let code: CodeActivity | undefined;
+	// SCF grants on the projects this person is connected to, and hackathon
+	// projects (DoraHacks buidls) whose GitHub link is one of their repos
+	let scf: Array<{
+		slug: string;
+		name: string;
+		totalAwarded: number;
+		rounds: number[];
+	}> = [];
+	let hackBuilds: IndexedBuild[] = [];
 	try {
 		const payload = await getPayloadSafe();
-		if (payload)
+		if (payload) {
 			code = (await builderCodeActivity(payload, [builder as any])).get(
 				String(builder.github_username).toLowerCase(),
 			);
+			const slugs = code ? [...code.projects.keys()] : [];
+			if (slugs.length) {
+				const pr = await payload.find({
+					collection: "projects",
+					where: {
+						and: [{ slug: { in: slugs } }, { "scf.awarded": { equals: true } }],
+					},
+					limit: 200,
+					depth: 0,
+					select: { name: true, slug: true, scf: true },
+				} as any);
+				scf = (pr.docs as any[])
+					.map((d) => ({
+						slug: String(d.slug),
+						name: String(d.name),
+						totalAwarded: Number(d.scf?.totalAwarded ?? 0),
+						rounds: ((d.scf?.awardedRounds ?? []) as unknown[])
+							.map(Number)
+							.filter((n) => Number.isFinite(n)),
+					}))
+					.sort((a, b) => b.totalAwarded - a.totalAwarded);
+			}
+			try {
+				const idx = await getHackathonBuildsIndex();
+				hackBuilds = buildsForRepos(
+					idx,
+					code?.repos.map((r) => r.fullName) ?? [],
+					[String(builder.github_username)],
+				).sort((a, b) =>
+					(b.hackathon.endedAt ?? "").localeCompare(a.hackathon.endedAt ?? ""),
+				);
+			} catch {}
+		}
 	} catch {}
 
 	return (
@@ -366,6 +413,86 @@ export default async function BuilderProfilePage({
 						)}
 					</CardContent>
 				</Card>
+			)}
+
+			{/* Funding + hackathons: from data we already hold about their projects and repos */}
+			{(scf.length > 0 || hackBuilds.length > 0) && (
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+					{scf.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="text-base">
+									Stellar Community Fund
+								</CardTitle>
+								<p className="text-xs text-muted-foreground">
+									Awards to projects this person builds, per our SCF records.
+								</p>
+							</CardHeader>
+							<CardContent className="space-y-2">
+								{scf.map((g) => (
+									<div
+										key={g.slug}
+										className="flex items-center justify-between gap-3 text-sm"
+									>
+										<Link
+											href={`/project/${g.slug}`}
+											className="text-foreground hover:underline underline-offset-2 truncate"
+										>
+											{g.name}
+										</Link>
+										<span className="text-muted-foreground tabular-nums whitespace-nowrap">
+											{g.totalAwarded > 0
+												? `$${g.totalAwarded.toLocaleString()}`
+												: "awarded"}
+											{g.rounds.length
+												? ` · round${g.rounds.length > 1 ? "s" : ""} ${g.rounds.join(", ")}`
+												: ""}
+										</span>
+									</div>
+								))}
+							</CardContent>
+						</Card>
+					)}
+					{hackBuilds.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="text-base">Hackathon projects</CardTitle>
+								<p className="text-xs text-muted-foreground">
+									DoraHacks submissions whose repository is one of theirs.
+								</p>
+							</CardHeader>
+							<CardContent className="space-y-2">
+								{hackBuilds.slice(0, 8).map((b) => (
+									<div key={b.id} className="text-sm">
+										<a
+											href={b.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="text-foreground hover:underline underline-offset-2"
+										>
+											{b.name}
+										</a>
+										<span className="text-muted-foreground">
+											{" "}
+											· {b.hackathon.title}
+											{b.hackathonPlacement
+												? ` · ${b.hackathonPlacement}`
+												: b.isWinner
+													? " · winner"
+													: ""}
+											{b.award ? ` · ${b.award}` : ""}
+										</span>
+									</div>
+								))}
+								{hackBuilds.length > 8 && (
+									<p className="text-xs text-muted-foreground">
+										+{hackBuilds.length - 8} more
+									</p>
+								)}
+							</CardContent>
+						</Card>
+					)}
+				</div>
 			)}
 
 			{/* Projects Section (declared on Stellar Passport) */}
