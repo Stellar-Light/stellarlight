@@ -6,18 +6,18 @@ name: Sync Stellar Scout skill to distribution repo
 # clones, so without this sync the published skill silently drifts from
 # the version this repo serves on stellarlight.xyz/scout.
 #
-# One-time setup:
-#   1. Create a fine-grained PAT at github.com/settings/tokens?type=beta:
-#        Resource owner:  Stellar-Light
-#        Repositories:    Only select repositories → stellar-scout
-#        Permissions:     Contents (Read and write), Metadata (Read)
-#        Expiration:      1 year (mark a renewal calendar entry)
-#   2. Add it as a repo secret:
-#        gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R Stellar-Light/stellarlight \
-#          -b 'github_pat_...'
-#   3. Push this workflow. It runs automatically next time the SKILL.md
-#      changes; trigger manually via `gh workflow run sync-scout-skill.yml`
-#      to test.
+# Auth: a repo-scoped DEPLOY KEY on Stellar-Light/stellar-scout (write),
+# private half in this repo's secret STELLAR_LIGHT_SCOUT_DEPLOY_KEY. Chosen
+# over a fine-grained PAT after two mints landed with the wrong resource owner
+# (a token owned by a person cannot write to an org repo, and the org PAT
+# policy adds an approval step). A deploy key is bound to exactly one repo,
+# has no expiry, involves no org policy, and no human ever holds it — it was
+# generated in CI-adjacent scratch and destroyed after registration.
+#
+# Rotate: `ssh-keygen -t ed25519 -N "" -f k`; add k.pub as a write deploy key
+# on stellar-scout (repo → Settings → Deploy keys); `gh secret set
+# STELLAR_LIGHT_SCOUT_DEPLOY_KEY -R Stellar-Light/stellarlight < k`; shred k.
+# Trigger manually via `gh workflow run sync-scout-skill.yml` to test.
 #
 # The workflow is a no-op when the SKILL.md content is byte-identical to
 # what's already in Stellar-Light/stellar-scout — `git diff --quiet` skips
@@ -47,22 +47,25 @@ jobs:
         id: sync
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_TOKEN }}
+          DEPLOY_KEY: ${{ secrets.STELLAR_LIGHT_SCOUT_DEPLOY_KEY }}
         shell: bash
         run: |
           set -euo pipefail
           # Whole body runs in a subshell piped to tee so the rolling issue
-          # gets the log whether we fail on the token check or the push.
+          # gets the log whether we fail on the key check or the push.
           (
-          if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::error::STELLAR_LIGHT_SCOUT_TOKEN secret is missing."
-            echo "Set it via: gh secret set STELLAR_LIGHT_SCOUT_TOKEN -R ${{ github.repository }} -b '<PAT>'"
+          if [ -z "${DEPLOY_KEY:-}" ]; then
+            echo "::error::STELLAR_LIGHT_SCOUT_DEPLOY_KEY secret is missing."
+            echo "See the rotate note at the top of this workflow."
             exit 1
           fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/scout_deploy_key
+          chmod 600 ~/.ssh/scout_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/scout_deploy_key -o IdentitiesOnly=yes"
 
-          git clone --depth 1 \
-            "https://x-access-token:${GH_TOKEN}@github.com/Stellar-Light/stellar-scout.git" \
-            out
+          git clone --depth 1 git@github.com:Stellar-Light/stellar-scout.git out
 
           cp public/skills/stellar-scout.md out/SKILL.md
           mkdir -p out/references && cp public/skills/references/*.md out/references/
