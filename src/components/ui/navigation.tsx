@@ -216,9 +216,9 @@ export function Navigation() {
 					icon: Activity,
 				},
 				{
-					name: "Stablecoin",
-					href: "https://stablecoin.stellarlight.xyz/",
-					description: "Stellar stablecoin explorer",
+					name: "Stablecoins",
+					href: "/stablecoins",
+					description: "Every issuer, ranked by USD market cap",
 					icon: DollarSign,
 				},
 			],

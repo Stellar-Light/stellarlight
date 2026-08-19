@@ -56,6 +56,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: "weekly",
 			priority: 0.7,
 		},
+		{
+			url: `${SITE_URL}/stablecoins`,
+			lastModified: now,
+			changeFrequency: "daily",
+			priority: 0.7,
+		},
 		// The rest of the public site. Until 2026-08 the sitemap carried 65 URLs,
 		// 60 of them /skills/*, and none of the directory, partners, builders,
 		// entities, blog, ask, analytics, submit, awards or any detail page.
