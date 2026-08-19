@@ -162,3 +162,20 @@ svg {
 		}
 	}
 }
+
+/* Top-Stablecoins rail on /stablecoins — the list is rendered twice and the
+   track slides up exactly half its height, so the loop is seamless. Carried
+   over from the explorer this page replaces. */
+@keyframes scroll-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+.animate-scroll-up {
+  animation: scroll-up 22s linear infinite;
+}
+.animate-scroll-up:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-up { animation: none; }
+}

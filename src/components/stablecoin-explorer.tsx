@@ -1,0 +1,1073 @@
+"use client";
+
+/**
+ * The Stellar Stablecoins explorer, ported from the Replit-hosted app it
+ * replaces — same layout, same interactions, same copy. What changed is where
+ * the numbers come from: our own `stablecoins` collection instead of that
+ * host's Postgres, so every row also carries `basis` (live | curated-static |
+ * unmeasured) and an estimate can be labelled rather than passed off as a
+ * live measurement.
+ *
+ * All state lives here (search, view mode, sort, filters, paging, selection)
+ * exactly as it did there; the server component just hands over the rows.
+ */
+
+import {
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	Check,
+	ChevronDown,
+	Copy,
+	ExternalLink,
+	Grid as GridIcon,
+	Search,
+	Table as TableIcon,
+	X,
+} from "lucide-react";
+import { useMotionValue, useSpring } from "motion/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Bar } from "@/components/charts/bar";
+import { BarChart } from "@/components/charts/bar-chart";
+import { ChartTooltip } from "@/components/charts/tooltip";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerDescription,
+	DrawerHeader,
+	DrawerTitle,
+} from "@/components/ui/drawer";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
+	COUNTRY_INFO,
+	countryInfo,
+	displayHolders,
+	displayHoldersCompact,
+	displayPrice,
+	displaySupply,
+	displayUSD,
+} from "@/lib/stablecoin-view";
+
+export interface CoinView {
+	id: string;
+	ticker: string;
+	name: string;
+	company: string;
+	issuerCode: string;
+	issuerDomain: string;
+	country: string | null;
+	peg: string | null;
+	assetType: string | null;
+	logoUrl: string | null;
+	useFlagIcon: boolean;
+	basis: string | null;
+	note: string | null;
+	measuredAt: string | null;
+	supplyRaw: number | null;
+	holdersRaw: number | null;
+	marketCapRaw: number | null;
+	volumeRaw: number | null;
+	priceRaw: number | null;
+}
+
+export interface DayPoint {
+	date: string;
+	value: number;
+}
+
+interface Props {
+	coins: CoinView[];
+	marketCapSeries: DayPoint[];
+	holdersSeries: DayPoint[];
+	totalMarketCap: number;
+	totalVolume24h: number;
+	totalHolders: number;
+}
+
+const COUNTRY_FALLBACK = COUNTRY_INFO.Global;
+const ITEMS_PER_PAGE = 10;
+const ACCENT = "hsl(45, 80%, 55%)";
+
+/** Spring-animated figure, as the overview tiles had. */
+function AnimatedNumber({
+	value,
+	format,
+}: {
+	value: number;
+	format: (v: number) => string;
+}) {
+	const mv = useMotionValue(value);
+	const spring = useSpring(mv, {
+		stiffness: 110,
+		damping: 22,
+		restDelta: 0.001,
+	});
+	const [display, setDisplay] = useState(() => format(value));
+	const formatRef = useRef(format);
+	formatRef.current = format;
+	useEffect(() => {
+		mv.set(value);
+	}, [value, mv]);
+	useEffect(
+		() => spring.on("change", (v) => setDisplay(formatRef.current(v))),
+		[spring],
+	);
+	return <>{display}</>;
+}
+
+const ICON_BG = [
+	"bg-blue-500",
+	"bg-emerald-500",
+	"bg-violet-500",
+	"bg-amber-500",
+	"bg-rose-500",
+	"bg-cyan-500",
+];
+function bgFor(letter: string) {
+	return ICON_BG[letter.charCodeAt(0) % ICON_BG.length];
+}
+
+const SIZES = {
+	sm: "w-8 h-8",
+	md: "w-10 h-10",
+	lg: "w-12 h-12",
+	xl: "w-16 h-16",
+} as const;
+const TEXT = {
+	sm: "text-sm",
+	md: "text-base",
+	lg: "text-lg",
+	xl: "text-2xl",
+} as const;
+
+function CoinIcon({
+	coin,
+	size = "md",
+	failed,
+	onFail,
+}: {
+	coin: CoinView;
+	size?: keyof typeof SIZES;
+	failed: Set<string>;
+	onFail: (id: string) => void;
+}) {
+	// Same order the explorer used: the issuer's own logo, then the peg's flag
+	// for the assets that never had one (BRLT, ARST, PEN, MXNe, mZAR), then a
+	// letter tile so a row is never iconless.
+	if (coin.logoUrl && !failed.has(coin.id))
+		return (
+			<div
+				className={`${SIZES[size]} rounded-full overflow-hidden bg-white/5 border border-white/10`}
+			>
+				{/* biome-ignore lint/performance/noImgElement: issuer-hosted logo from their stellar.toml */}
+				<img
+					src={coin.logoUrl}
+					alt={coin.ticker}
+					className="w-full h-full object-cover"
+					onError={() => onFail(coin.id)}
+				/>
+			</div>
+		);
+	const info = countryInfo(coin.country, coin.peg);
+	if (coin.useFlagIcon && info !== COUNTRY_FALLBACK)
+		return (
+			<div
+				className={`${SIZES[size]} rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center`}
+			>
+				{/* biome-ignore lint/performance/noImgElement: remote flag sprite, not a next/image domain */}
+				<img
+					src={info.flag}
+					alt={coin.ticker}
+					className="w-2/3 h-2/3 object-cover"
+				/>
+			</div>
+		);
+	const first = coin.ticker.charAt(0);
+	return (
+		<div
+			className={`${SIZES[size]} rounded-full ${bgFor(first)} flex items-center justify-center ${TEXT[size]} font-bold text-white`}
+		>
+			{first}
+		</div>
+	);
+}
+
+/** Only shown when a row is NOT a live measurement — the one thing the old explorer couldn't tell you. */
+function BasisTag({ basis }: { basis: string | null }) {
+	if (!basis || basis === "live") return null;
+	return (
+		<span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-[#A3A3A3] border border-[#2F2F2F] whitespace-nowrap">
+			{basis === "curated-static" ? "hand-checked" : "not measured"}
+		</span>
+	);
+}
+
+export function StablecoinExplorer({
+	coins,
+	marketCapSeries,
+	holdersSeries,
+	totalMarketCap,
+	totalVolume24h,
+	totalHolders,
+}: Props) {
+	const [searchQuery, setSearchQuery] = useState("");
+	const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+	const [selectedAsset, setSelectedAsset] = useState("all");
+	const [sortField, setSortField] = useState<"supply" | "holders" | null>(null);
+	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+	const [selectedCoin, setSelectedCoin] = useState<CoinView | null>(null);
+	const [copiedId, setCopiedId] = useState<string | null>(null);
+	const [failedIcons, setFailedIcons] = useState<Set<string>>(new Set());
+	const [currentPage, setCurrentPage] = useState(1);
+	const [hoveredMcap, setHoveredMcap] = useState<number | null>(null);
+	const [hoveredHolders, setHoveredHolders] = useState<number | null>(null);
+	const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
+
+	const currencies = useMemo(
+		() =>
+			[...new Set(coins.map((c) => c.peg).filter(Boolean))].sort() as string[],
+		[coins],
+	);
+
+	const filtered = useMemo(() => {
+		const q = searchQuery.trim().toLowerCase();
+		return coins.filter((c) => {
+			if (selectedAsset !== "all" && c.peg !== selectedAsset) return false;
+			if (!q) return true;
+			return [c.ticker, c.name, c.company, c.issuerDomain]
+				.filter(Boolean)
+				.some((v) => v.toLowerCase().includes(q));
+		});
+	}, [coins, searchQuery, selectedAsset]);
+
+	const sorted = useMemo(() => {
+		const rows = [...filtered];
+		if (!sortField)
+			// Default order is USD market cap — the only cross-currency comparable.
+			return rows.sort(
+				(a, b) => (b.marketCapRaw ?? -1) - (a.marketCapRaw ?? -1),
+			);
+		const key = sortField === "supply" ? "supplyRaw" : "holdersRaw";
+		return rows.sort((a, b) => {
+			const av = a[key];
+			const bv = b[key];
+			// Nulls last in both directions — "not measured" is not "smallest".
+			if (av == null && bv == null) return 0;
+			if (av == null) return 1;
+			if (bv == null) return -1;
+			return sortDirection === "asc" ? av - bv : bv - av;
+		});
+	}, [filtered, sortField, sortDirection]);
+
+	const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+	const paged = useMemo(
+		() =>
+			viewMode === "table"
+				? sorted.slice(
+						(currentPage - 1) * ITEMS_PER_PAGE,
+						currentPage * ITEMS_PER_PAGE,
+					)
+				: sorted,
+		[sorted, currentPage, viewMode],
+	);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: reset paging when the result set changes
+	useEffect(() => setCurrentPage(1), [searchQuery, selectedAsset, sortField]);
+
+	const handleSort = (field: "supply" | "holders") => {
+		if (sortField === field)
+			setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+		else {
+			setSortField(field);
+			setSortDirection("desc");
+		}
+	};
+
+	const copyIssuer = async (coin: CoinView, e: React.MouseEvent) => {
+		e.stopPropagation();
+		try {
+			await navigator.clipboard.writeText(coin.issuerCode);
+			setCopiedId(coin.id);
+			setTimeout(() => setCopiedId(null), 1500);
+		} catch {
+			/* clipboard blocked — the address is visible on the row regardless */
+		}
+	};
+
+	const onFail = (id: string) =>
+		setFailedIcons((prev) => new Set(prev).add(id));
+
+	const top10 = useMemo(
+		() =>
+			[...coins]
+				.sort((a, b) => (b.marketCapRaw ?? -1) - (a.marketCapRaw ?? -1))
+				.slice(0, 10),
+		[coins],
+	);
+
+	const fmtUSD = (v: number) =>
+		v >= 1e9
+			? `$${(v / 1e9).toFixed(2)}B`
+			: v >= 1e6
+				? `$${(v / 1e6).toFixed(2)}M`
+				: v >= 1e3
+					? `$${(v / 1e3).toFixed(2)}K`
+					: `$${v.toFixed(2)}`;
+	const fmtHolders = (v: number) =>
+		v >= 1e6
+			? `${(v / 1e6).toFixed(2)}M`
+			: v >= 1e3
+				? `${(v / 1e3).toFixed(1)}K`
+				: Math.round(v).toLocaleString();
+
+	return (
+		<div className="container mx-auto p-6 space-y-6 max-w-7xl">
+			{/* ── Hero + top-stablecoins rail ─────────────────────────────── */}
+			<div className="mb-12 mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+				<div>
+					<h1 className="text-5xl md:text-6xl font-semibold text-[#E5E5E5] leading-tight">
+						Stellar Stablecoins
+					</h1>
+					<p className="text-3xl md:text-4xl italic text-[#666666] font-light mt-1 mb-4">
+						transacting globally.
+					</p>
+					<p className="text-lg text-[#A3A3A3] max-w-xl mb-6">
+						Explore {coins.length} verified stablecoins. Every figure dated, and
+						labelled with how it was measured.
+					</p>
+					<a href="#explore">
+						<button
+							type="button"
+							className="px-5 py-2.5 bg-white text-[#171717] font-medium text-sm rounded-lg hover:bg-[#E5E5E5] transition-colors"
+						>
+							Explore Stablecoins
+						</button>
+					</a>
+				</div>
+
+				<div className="relative h-64 lg:h-80 overflow-hidden rounded-xl bg-[#1A1A1A] border border-[#2F2F2F]">
+					<div className="sticky top-0 z-10 bg-[#1A1A1A] border-b border-[#2F2F2F] px-4 py-2">
+						<span className="text-xs text-[#A3A3A3] uppercase tracking-wider font-medium">
+							Top Stablecoins
+						</span>
+					</div>
+					<div className="absolute inset-0 top-9 overflow-hidden">
+						<div className="animate-scroll-up motion-reduce:animate-none">
+							{[0, 1].map((loop) => (
+								<div key={`loop-${loop}`}>
+									{top10.map((coin) => (
+										<button
+											type="button"
+											key={`s-${loop}-${coin.id}`}
+											className="w-full flex items-center justify-between px-4 py-3 border-b border-[#252525] hover:bg-[#222222] transition-colors cursor-pointer text-left"
+											onClick={() => setSelectedCoin(coin)}
+										>
+											<div className="flex items-center gap-3">
+												<CoinIcon
+													coin={coin}
+													size="sm"
+													failed={failedIcons}
+													onFail={onFail}
+												/>
+												<span className="text-sm font-medium text-[#E5E5E5]">
+													{coin.ticker}
+												</span>
+											</div>
+											<span className="text-xs text-[#666666] truncate max-w-[120px]">
+												{coin.company || "—"}
+											</span>
+										</button>
+									))}
+								</div>
+							))}
+						</div>
+					</div>
+					<div className="absolute top-9 left-0 right-0 h-6 bg-gradient-to-b from-[#1A1A1A] to-transparent pointer-events-none z-[5]" />
+					<div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#1A1A1A] to-transparent pointer-events-none z-[5]" />
+				</div>
+			</div>
+
+			{/* ── Overview tiles ──────────────────────────────────────────── */}
+			<div className="mb-8">
+				<h2 className="text-lg font-semibold mb-4">Stablecoin Overview</h2>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+					<Card>
+						<CardContent className="p-6">
+							<div className="text-sm text-muted-foreground mb-2">
+								Total Market Cap
+							</div>
+							<div className="text-3xl font-semibold tabular-nums">
+								{displayUSD(totalMarketCap)}
+							</div>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<div className="text-sm text-muted-foreground mb-2">
+								24h Volume
+							</div>
+							<div className="text-3xl font-semibold tabular-nums">
+								{totalVolume24h > 0 ? displayUSD(totalVolume24h) : "N/A"}
+							</div>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<div className="text-sm text-muted-foreground mb-2">
+								Total Holders
+							</div>
+							<div className="text-3xl font-semibold tabular-nums">
+								{displayHoldersCompact(totalHolders)}
+							</div>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<div className="text-sm text-muted-foreground mb-2">
+								Tracked Stablecoins
+							</div>
+							<div className="text-3xl font-semibold tabular-nums">
+								{coins.length}
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+
+			{/* ── Activity bars ───────────────────────────────────────────── */}
+			<div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+				{(
+					[
+						{
+							title: "Total Market Cap",
+							data: marketCapSeries,
+							current: totalMarketCap,
+							hovered: hoveredMcap,
+							setHovered: setHoveredMcap,
+							format: fmtUSD,
+							label: "Market Cap",
+						},
+						{
+							title: "Total Holders",
+							data: holdersSeries,
+							current: totalHolders,
+							hovered: hoveredHolders,
+							setHovered: setHoveredHolders,
+							format: fmtHolders,
+							label: "Holders",
+						},
+					] as const
+				).map((c) => (
+					<div
+						key={c.title}
+						className="bg-card border border-border rounded-xl p-5"
+					>
+						<div className="flex items-center justify-between mb-1">
+							<h3 className="text-base font-semibold tracking-tight">
+								{c.title}
+							</h3>
+							<span className="text-xs text-muted-foreground">30 days</span>
+						</div>
+						<div className="flex items-baseline gap-2 mb-4">
+							<span className="text-2xl font-semibold text-[#E5E5E5] tabular-nums">
+								<AnimatedNumber
+									value={c.hovered ?? c.current}
+									format={c.format}
+								/>
+							</span>
+						</div>
+						{c.data.length === 0 ? (
+							<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">
+								Collecting data...
+							</div>
+						) : (
+							<BarChart
+								data={c.data as unknown as Record<string, unknown>[]}
+								xDataKey="date"
+								aspectRatio="unset"
+								className="h-20"
+								margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
+								animationDuration={800}
+								barGap={0.08}
+								onHover={(d) => c.setHovered(d ? (d.value as number) : null)}
+							>
+								<Bar
+									dataKey="value"
+									fill={ACCENT}
+									lineCap="round"
+									fadedOpacity={0.35}
+								/>
+								<ChartTooltip
+									showDatePill={false}
+									showDots={false}
+									rows={(p) => [
+										{
+											color: ACCENT,
+											label: c.label,
+											value: c.format(p.value as number),
+										},
+										{
+											color: "transparent",
+											label: "Date",
+											value: p.date as string,
+										},
+									]}
+								/>
+							</BarChart>
+						)}
+					</div>
+				))}
+			</div>
+
+			{/* ── Explore ─────────────────────────────────────────────────── */}
+			<div className="mb-6" id="explore">
+				<h2 className="text-2xl font-semibold mb-1">Explore Stablecoin</h2>
+				<p className="text-sm text-muted-foreground">
+					{sorted.length} stablecoins tracked
+				</p>
+			</div>
+
+			<div className="mb-8 flex flex-col sm:flex-row gap-3 sm:items-center">
+				<div className="relative flex-1">
+					<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+					<input
+						type="text"
+						placeholder="Search stablecoins..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="w-full h-11 pl-12 pr-10 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border transition-all duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
+					/>
+					{searchQuery && (
+						<button
+							type="button"
+							onClick={() => setSearchQuery("")}
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+							aria-label="Clear search"
+						>
+							<X className="w-4 h-4" />
+						</button>
+					)}
+				</div>
+
+				<div className="flex gap-3 items-center">
+					<div className="h-11 px-2 rounded-xl border border-border bg-card flex items-center gap-1">
+						<button
+							type="button"
+							onClick={() => setViewMode("table")}
+							className={`h-9 px-2.5 rounded-lg transition-all duration-150 flex items-center gap-1.5 ${
+								viewMode === "table"
+									? "bg-white/10 text-foreground"
+									: "text-muted-foreground hover:text-foreground"
+							}`}
+						>
+							<TableIcon className="h-4 w-4" />
+							<span className="text-xs">Table</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => setViewMode("grid")}
+							className={`h-9 px-2.5 rounded-lg transition-all duration-150 flex items-center gap-1.5 ${
+								viewMode === "grid"
+									? "bg-white/10 text-foreground"
+									: "text-muted-foreground hover:text-foreground"
+							}`}
+						>
+							<GridIcon className="h-4 w-4" />
+							<span className="text-xs">Grid</span>
+						</button>
+					</div>
+
+					{/* Desktop currency dropdown */}
+					<DropdownMenu>
+						<DropdownMenuTrigger className="hidden sm:flex h-11 px-4 min-w-[150px] bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 items-center gap-2">
+							<span className="flex-1 text-left text-sm truncate">
+								{selectedAsset === "all" ? "All Assets" : selectedAsset}
+							</span>
+							<ChevronDown className="w-4 h-4 flex-shrink-0" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-[180px] max-h-[400px] overflow-y-auto">
+							<DropdownMenuItem onClick={() => setSelectedAsset("all")}>
+								All Assets
+							</DropdownMenuItem>
+							{currencies.map((c) => (
+								<DropdownMenuItem key={c} onClick={() => setSelectedAsset(c)}>
+									{c}
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					{/* Mobile currency drawer */}
+					<button
+						type="button"
+						onClick={() => setAssetDrawerOpen(true)}
+						className="sm:hidden h-11 px-4 flex-1 bg-card text-foreground border border-border rounded-xl hover:bg-white/5 transition-all duration-150 flex items-center gap-2"
+					>
+						<span className="flex-1 text-left text-sm truncate">
+							{selectedAsset === "all" ? "All Assets" : selectedAsset}
+						</span>
+						<ChevronDown className="w-4 h-4 flex-shrink-0" />
+					</button>
+				</div>
+			</div>
+
+			<Drawer open={assetDrawerOpen} onOpenChange={setAssetDrawerOpen}>
+				<DrawerContent className="max-h-[85vh]">
+					<DrawerHeader className="pb-2">
+						<DrawerTitle>Select Asset</DrawerTitle>
+						<DrawerDescription>
+							Choose which currency to filter by
+						</DrawerDescription>
+					</DrawerHeader>
+					<div className="px-4 pb-6 space-y-1 overflow-y-auto max-h-[60vh]">
+						{["all", ...currencies].map((c) => (
+							<button
+								type="button"
+								key={c}
+								onClick={() => {
+									setSelectedAsset(c);
+									setAssetDrawerOpen(false);
+								}}
+								className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-150 ${
+									selectedAsset === c
+										? "bg-white/10 text-foreground"
+										: "text-foreground hover:bg-white/5"
+								}`}
+							>
+								{c === "all" ? "All Assets" : c}
+							</button>
+						))}
+					</div>
+				</DrawerContent>
+			</Drawer>
+
+			{/* ── Table / grid ────────────────────────────────────────────── */}
+			{sorted.length === 0 ? (
+				<Card>
+					<CardContent className="py-16 text-center text-muted-foreground">
+						No stablecoin matches “{searchQuery}”
+						{selectedAsset !== "all" ? ` in ${selectedAsset}` : ""}.
+					</CardContent>
+				</Card>
+			) : viewMode === "table" ? (
+				<div className="border rounded-xl overflow-hidden bg-card">
+					<div className="overflow-x-auto">
+						<Table>
+							<TableHeader>
+								<TableRow className="hover:bg-transparent">
+									<TableHead className="min-w-[250px]">ASSET</TableHead>
+									<TableHead className="min-w-[200px]">ISSUER</TableHead>
+									<TableHead className="min-w-[120px]">
+										<button
+											type="button"
+											onClick={() => handleSort("supply")}
+											className={`flex items-center gap-1 hover:text-foreground transition-colors ${
+												sortField === "supply"
+													? "text-foreground"
+													: "text-muted-foreground"
+											}`}
+										>
+											SUPPLY
+											{sortField === "supply" ? (
+												sortDirection === "asc" ? (
+													<ArrowUp className="h-3 w-3" />
+												) : (
+													<ArrowDown className="h-3 w-3" />
+												)
+											) : (
+												<ArrowUpDown className="h-3 w-3" />
+											)}
+										</button>
+									</TableHead>
+									<TableHead className="min-w-[120px]">
+										<button
+											type="button"
+											onClick={() => handleSort("holders")}
+											className={`flex items-center gap-1 hover:text-foreground transition-colors ${
+												sortField === "holders"
+													? "text-foreground"
+													: "text-muted-foreground"
+											}`}
+										>
+											HOLDERS
+											{sortField === "holders" ? (
+												sortDirection === "asc" ? (
+													<ArrowUp className="h-3 w-3" />
+												) : (
+													<ArrowDown className="h-3 w-3" />
+												)
+											) : (
+												<ArrowUpDown className="h-3 w-3" />
+											)}
+										</button>
+									</TableHead>
+									<TableHead className="min-w-[120px]">MARKET CAP</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{paged.map((coin) => (
+									<TableRow
+										key={coin.id}
+										onClick={() => setSelectedCoin(coin)}
+										className="cursor-pointer"
+									>
+										<TableCell>
+											<div className="flex items-center gap-3">
+												<div className="flex-shrink-0">
+													<CoinIcon
+														coin={coin}
+														failed={failedIcons}
+														onFail={onFail}
+													/>
+												</div>
+												<div>
+													<div className="font-medium flex items-center gap-2">
+														{coin.name}
+														<BasisTag basis={coin.basis} />
+													</div>
+													<div className="text-sm text-muted-foreground">
+														{coin.company}
+													</div>
+												</div>
+											</div>
+										</TableCell>
+										<TableCell>
+											<div>
+												<button
+													type="button"
+													className="font-medium flex items-center gap-2 cursor-pointer hover:text-foreground"
+													onClick={(e) => copyIssuer(coin, e)}
+												>
+													<span className="truncate font-mono text-xs">
+														{coin.issuerCode.slice(0, 4)}…
+														{coin.issuerCode.slice(-4)}
+													</span>
+													{copiedId === coin.id ? (
+														<Check className="h-3 w-3 text-green-500 flex-shrink-0" />
+													) : (
+														<Copy className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+													)}
+												</button>
+												<div className="text-sm text-muted-foreground">
+													{coin.issuerDomain}
+												</div>
+											</div>
+										</TableCell>
+										<TableCell className="font-medium tabular-nums">
+											{displaySupply(coin.supplyRaw)}
+										</TableCell>
+										<TableCell className="font-medium tabular-nums">
+											{displayHolders(coin.holdersRaw)}
+										</TableCell>
+										<TableCell className="font-medium tabular-nums">
+											{displayUSD(coin.marketCapRaw)}
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+
+						{totalPages > 1 && (
+							<div className="flex items-center justify-between px-4 py-3 border-t bg-card/50 flex-wrap gap-3">
+								<div className="text-sm text-muted-foreground">
+									Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
+									{Math.min(currentPage * ITEMS_PER_PAGE, sorted.length)} of{" "}
+									{sorted.length} results
+								</div>
+								<div className="flex items-center gap-1">
+									{Array.from({ length: totalPages }, (_, i) => i + 1).map(
+										(page) => (
+											<button
+												type="button"
+												key={page}
+												onClick={() => setCurrentPage(page)}
+												className={`min-w-[40px] h-9 px-3 rounded-lg text-sm transition-all duration-150 ${
+													currentPage === page
+														? "bg-white/10 text-foreground"
+														: "bg-muted text-foreground hover:bg-muted/80"
+												}`}
+											>
+												{page}
+											</button>
+										),
+									)}
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{paged.map((coin) => {
+						const info = countryInfo(coin.country, coin.peg);
+						return (
+							<Card
+								key={coin.id}
+								onClick={() => setSelectedCoin(coin)}
+								className="cursor-pointer hover:bg-muted/50 transition-colors"
+							>
+								<CardContent className="p-6 space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="flex-shrink-0">
+											<CoinIcon
+												coin={coin}
+												size="lg"
+												failed={failedIcons}
+												onFail={onFail}
+											/>
+										</div>
+										<div className="flex-1 min-w-0">
+											<div className="font-semibold text-lg flex items-center gap-2">
+												{coin.name}
+												<BasisTag basis={coin.basis} />
+											</div>
+											<div className="text-sm text-muted-foreground flex items-center gap-1">
+												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
+												<img
+													src={info.flag}
+													alt={info.label}
+													className="w-4 h-3"
+												/>
+												{coin.company}
+											</div>
+										</div>
+									</div>
+									<div className="space-y-2">
+										{(
+											[
+												["Supply", displaySupply(coin.supplyRaw)],
+												["Holders", displayHolders(coin.holdersRaw)],
+												["Market Cap", displayUSD(coin.marketCapRaw)],
+											] as const
+										).map(([k, v]) => (
+											<div
+												key={k}
+												className="flex justify-between items-center"
+											>
+												<span className="text-sm text-muted-foreground">
+													{k}
+												</span>
+												<span className="font-medium tabular-nums">{v}</span>
+											</div>
+										))}
+									</div>
+									<div className="pt-2 border-t">
+										<div className="text-xs text-muted-foreground">Issuer</div>
+										<button
+											type="button"
+											className="font-mono text-xs flex items-center gap-2 mt-1 cursor-pointer hover:text-foreground"
+											onClick={(e) => copyIssuer(coin, e)}
+										>
+											<span>
+												{coin.issuerCode.slice(0, 4)}…
+												{coin.issuerCode.slice(-4)}
+											</span>
+											{copiedId === coin.id ? (
+												<Check className="h-3 w-3 text-green-500" />
+											) : (
+												<Copy className="h-3 w-3" />
+											)}
+										</button>
+									</div>
+								</CardContent>
+							</Card>
+						);
+					})}
+				</div>
+			)}
+
+			{/* ── Detail ──────────────────────────────────────────────────── */}
+			<Drawer
+				open={!!selectedCoin}
+				onOpenChange={(o) => !o && setSelectedCoin(null)}
+			>
+				<DrawerContent className="max-h-[92vh]">
+					{selectedCoin && (
+						<>
+							<DrawerHeader>
+								<div className="flex items-center gap-3">
+									<CoinIcon
+										coin={selectedCoin}
+										size="lg"
+										failed={failedIcons}
+										onFail={onFail}
+									/>
+									<div className="min-w-0 text-left">
+										<DrawerTitle className="flex items-center gap-2">
+											{selectedCoin.name}
+											<BasisTag basis={selectedCoin.basis} />
+										</DrawerTitle>
+										<DrawerDescription>
+											{selectedCoin.company}
+											{selectedCoin.assetType
+												? ` · ${selectedCoin.assetType}`
+												: ""}
+										</DrawerDescription>
+									</div>
+								</div>
+							</DrawerHeader>
+
+							<div className="p-6 space-y-6 overflow-y-auto">
+								{selectedCoin.basis !== "live" && selectedCoin.note && (
+									<div className="rounded-lg border border-[#2F2F2F] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
+										{selectedCoin.note}
+									</div>
+								)}
+
+								<div>
+									<h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
+									<div className="grid grid-cols-2 gap-4">
+										{(
+											[
+												["Current Price", displayPrice(selectedCoin.priceRaw)],
+												[
+													"24h Volume",
+													selectedCoin.volumeRaw
+														? displayUSD(selectedCoin.volumeRaw)
+														: "N/A",
+												],
+												["Total Supply", displaySupply(selectedCoin.supplyRaw)],
+												["Holders", displayHolders(selectedCoin.holdersRaw)],
+												["Market Cap", displayUSD(selectedCoin.marketCapRaw)],
+												["Pegged To", selectedCoin.peg ?? "N/A"],
+											] as const
+										).map(([k, v]) => (
+											<div
+												key={k}
+												className="bg-muted rounded-lg p-4 space-y-1"
+											>
+												<div className="text-sm text-muted-foreground">{k}</div>
+												<div className="text-xl font-semibold tabular-nums">
+													{v}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+
+								<div>
+									<h3 className="text-lg font-semibold mb-4">
+										Issuer Information
+									</h3>
+									<div className="bg-muted rounded-lg p-4 space-y-3">
+										<div>
+											<div className="text-sm text-muted-foreground mb-1">
+												Issuer Address
+											</div>
+											<button
+												type="button"
+												className="font-mono text-sm flex items-start gap-2 cursor-pointer hover:text-foreground text-left"
+												onClick={(e) => copyIssuer(selectedCoin, e)}
+											>
+												<span className="break-all">
+													{selectedCoin.issuerCode}
+												</span>
+												{copiedId === selectedCoin.id ? (
+													<Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+												) : (
+													<Copy className="h-4 w-4 flex-shrink-0" />
+												)}
+											</button>
+										</div>
+										<div>
+											<div className="text-sm text-muted-foreground mb-1">
+												Home Domain
+											</div>
+											<div className="text-sm">
+												{selectedCoin.issuerDomain || "—"}
+											</div>
+										</div>
+										<div>
+											<div className="text-sm text-muted-foreground mb-1">
+												Country
+											</div>
+											<div className="text-sm flex items-center gap-2">
+												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
+												<img
+													src={
+														countryInfo(selectedCoin.country, selectedCoin.peg)
+															.flag
+													}
+													alt=""
+													className="w-5 h-4"
+												/>
+												{
+													countryInfo(selectedCoin.country, selectedCoin.peg)
+														.label
+												}
+											</div>
+										</div>
+										<div>
+											<div className="text-sm text-muted-foreground mb-1">
+												Measured
+											</div>
+											<div className="text-sm">
+												{selectedCoin.measuredAt
+													? `${new Date(selectedCoin.measuredAt).toLocaleString(
+															"en-US",
+															{
+																dateStyle: "medium",
+																timeStyle: "short",
+																timeZone: "UTC",
+															},
+														)} UTC · ${selectedCoin.basis}`
+													: "—"}
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div>
+									<h3 className="text-lg font-semibold mb-4">External Links</h3>
+									<div className="flex flex-wrap gap-2">
+										<a
+											href={`https://stellar.expert/explorer/public/asset/${selectedCoin.ticker}-${selectedCoin.issuerCode}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border hover:bg-white/[0.07] transition-colors"
+										>
+											Stellar Expert <ExternalLink className="w-3 h-3" />
+										</a>
+										<a
+											href={`https://horizon.stellar.org/accounts/${selectedCoin.issuerCode}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border hover:bg-white/[0.07] transition-colors"
+										>
+											Horizon <ExternalLink className="w-3 h-3" />
+										</a>
+										{selectedCoin.issuerDomain && (
+											<a
+												href={`https://${selectedCoin.issuerDomain}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border hover:bg-white/[0.07] transition-colors"
+											>
+												{selectedCoin.issuerDomain}{" "}
+												<ExternalLink className="w-3 h-3" />
+											</a>
+										)}
+									</div>
+								</div>
+							</div>
+						</>
+					)}
+				</DrawerContent>
+			</Drawer>
+		</div>
+	);
+}
