@@ -6258,7 +6258,10 @@ export const spec: OpenAPISpec = {
 					basis: {
 						type: "string",
 						nullable: true,
-						enum: ["live", "curated-static", "unmeasured", null],
+						// NOT `null` in the enum — a null enum member crashes spectral
+						// ("Cannot read properties of null (reading 'enum')");
+						// `nullable: true` already carries it.
+						enum: ["live", "curated-static", "unmeasured"],
 						description:
 							"How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting (sls-066); its metrics are the last known values, dated by updatedAt.",
 					},
