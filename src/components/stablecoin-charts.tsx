@@ -31,6 +31,7 @@ interface Props {
 	holdersByToken: SeriesRow[];
 	totalHolders: SeriesRow[];
 	issuers: IssuerLeader[];
+	onIssuerClick?: (issuer: IssuerLeader) => void;
 }
 
 const CHART_MARGIN = { top: 10, right: 16, bottom: 44, left: 56 };
@@ -91,6 +92,7 @@ export function StablecoinCharts({
 	holdersByToken,
 	totalHolders,
 	issuers,
+	onIssuerClick,
 }: Props) {
 	const [timeframe, setTimeframe] = useState<Timeframe>("14D");
 
@@ -270,9 +272,11 @@ export function StablecoinCharts({
 					<div className="h-[300px] overflow-auto">
 						<div className="space-y-2">
 							{issuers.slice(0, 8).map((issuer) => (
-								<div
+								<button
+									type="button"
 									key={issuer.company}
-									className="flex items-center gap-3 p-3 rounded-lg bg-[#1F1F1F] transition-colors hover:bg-[#2A2A2A]"
+									onClick={() => onIssuerClick?.(issuer)}
+									className="w-full text-left flex items-center gap-3 p-3 rounded-lg bg-[#1F1F1F] transition-colors hover:bg-[#2A2A2A] cursor-pointer"
 								>
 									<div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center">
 										<span className="text-[#999999] text-xs font-medium">
@@ -297,7 +301,7 @@ export function StablecoinCharts({
 											</div>
 										)}
 									</div>
-								</div>
+								</button>
 							))}
 						</div>
 					</div>
