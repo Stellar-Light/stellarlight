@@ -1,0 +1,68 @@
+name: Refresh stablecoins
+
+# Measures the stablecoin registry from public APIs (Horizon, Stellar Expert,
+# CoinGecko, issuer stellar.toml) and writes current state + one dated
+# snapshot per asset per UTC day.
+#
+# This is the job that replaces the Replit-hosted service /api/stablecoins
+# proxied. Every 6 hours: often enough that a figure is never a day stale,
+# and the snapshot upserts on `${assetId}:${day}` so four runs a day still
+# produce exactly one point per day.
+#
+# Manual runs default to DRY RUN — writing to prod data takes an explicit
+# execute:true, matching every other data-mutating workflow here.
+
+on:
+  schedule:
+    - cron: "25 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write. Unchecked = dry run (measures + prints, writes nothing)."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Refresh stablecoins
+        id: refresh
+        continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        shell: bash
+        run: |
+          # Scheduled runs always write; manual runs need the box ticked.
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
+            pnpm exec tsx scripts/refresh-stablecoins.ts --execute 2>&1 | tee refresh.log
+          else
+            pnpm exec tsx scripts/refresh-stablecoins.ts 2>&1 | tee refresh.log
+          fi
+
+      - name: Track the signal (rolling issue)
+        uses: ./.github/actions/rolling-issue
+        with:
+          title-prefix: "Stablecoin refresh red"
+          outcome: ${{ steps.refresh.outcome }}
+          body-file: refresh.log
+
+      - name: Propagate the red
+        if: steps.refresh.outcome == 'failure'
+        run: exit 1
