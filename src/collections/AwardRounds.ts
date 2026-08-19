@@ -93,6 +93,18 @@ export const AwardRounds: CollectionConfig = {
 			},
 		},
 		{
+			name: "picksPerCategory",
+			type: "number",
+			required: true,
+			defaultValue: 1,
+			min: 1,
+			max: 10,
+			admin: {
+				description:
+					"How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters — every pick is one vote for that nominee.",
+			},
+		},
+		{
 			name: "ballotMode",
 			type: "select",
 			required: true,

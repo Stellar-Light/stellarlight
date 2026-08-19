@@ -131,6 +131,9 @@ export async function POST(req: NextRequest) {
 		address,
 		sequence: account.account.sequence,
 		selections: validated.selections,
+		// Only keys that actually exist may be deleted — manageData refuses to
+		// clear a key that was never set, which would fail a first-time ballot.
+		existingKeys: new Set(Object.keys(account.account.data ?? {})),
 	});
 
 	return NextResponse.json(

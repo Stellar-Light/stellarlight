@@ -24,6 +24,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	type BallotNominee,
 	type BallotRound,
+	type BallotSelections,
 	buildBallotTx,
 	dataKey,
 	decodeAccountVotes,
@@ -64,7 +65,7 @@ const whitelist = new Set([voter.publicKey()]);
 
 /** Build + sign a well-formed ballot (the happy-path artifact). */
 function signedBallot(
-	selections: Record<string, string>,
+	selections: BallotSelections,
 	opts: { passphrase?: string; signer?: Keypair } = {},
 ) {
 	const tx = buildBallotTx({
@@ -80,13 +81,15 @@ function signedBallot(
 			fee: "10000",
 			networkPassphrase: opts.passphrase,
 		});
-		for (const [category, slug] of Object.entries(selections)) {
-			builder.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, category),
-					value: slug,
-				}),
-			);
+		for (const [category, slugs] of Object.entries(selections)) {
+			for (const slug of slugs) {
+				builder.addOperation(
+					Operation.manageData({
+						name: dataKey(round.slug, category),
+						value: slug,
+					}),
+				);
+			}
 		}
 		const other = builder.setTimeout(300).build();
 		other.sign(opts.signer ?? voter);
@@ -104,7 +107,7 @@ describe("buildBallotTx", () => {
 			round,
 			address: voter.publicKey(),
 			sequence: "7",
-			selections: { impact: "decaf", innovation: "blend" },
+			selections: { impact: ["decaf"], innovation: ["blend"] },
 		});
 		expect(tx.operations).toHaveLength(2);
 		const ops = tx.operations as Array<{
@@ -126,7 +129,7 @@ describe("buildBallotTx", () => {
 			round,
 			address: voter.publicKey(),
 			sequence: "41",
-			selections: { impact: "decaf" },
+			selections: { impact: ["decaf"] },
 		});
 		expect(tx.source).toBe(voter.publicKey());
 		expect(tx.sequence).toBe("42");
@@ -137,7 +140,7 @@ describe("buildBallotTx", () => {
 			round,
 			address: voter.publicKey(),
 			sequence: "1",
-			selections: { impact: "decaf" },
+			selections: { impact: ["decaf"] },
 		});
 		expect("innerTransaction" in tx).toBe(false);
 		const max = Number(tx.timeBounds?.maxTime ?? 0);
@@ -151,7 +154,7 @@ describe("buildBallotTx", () => {
 				round,
 				address: "not-an-address",
 				sequence: "1",
-				selections: { impact: "decaf" },
+				selections: { impact: ["decaf"] },
 			}),
 		).toThrow(/invalid voter address/);
 	});
@@ -162,14 +165,14 @@ describe("buildBallotTx", () => {
 describe("validateSelections", () => {
 	it("accepts one valid nominee per category", () => {
 		const res = validateSelections(round, nominees, {
-			impact: "decaf",
-			interoperability: "rubic",
+			impact: ["decaf"],
+			interoperability: ["rubic"],
 		});
 		expect(res.ok).toBe(true);
 		if (res.ok) {
 			expect(res.selections).toEqual({
-				impact: "decaf",
-				interoperability: "rubic",
+				impact: ["decaf"],
+				interoperability: ["rubic"],
 			});
 		}
 	});
@@ -188,7 +191,7 @@ describe("validateSelections", () => {
 
 		// blend is an innovation nominee — voting it under impact must fail.
 		const crossCategory = validateSelections(round, nominees, {
-			impact: "blend",
+			impact: ["blend"],
 		});
 		expect(crossCategory.ok).toBe(false);
 		if (!crossCategory.ok) {
@@ -232,15 +235,15 @@ describe("validateSignedBallot", () => {
 
 	it("accepts a well-formed testnet ballot signed by a whitelisted voter", () => {
 		const verdict = validateSignedBallot(
-			signedBallot({ impact: "decaf", innovation: "blend" }),
+			signedBallot({ impact: ["decaf"], innovation: ["blend"] }),
 			ctx,
 		);
 		expect(verdict.ok).toBe(true);
 		if (verdict.ok) {
 			expect(verdict.source).toBe(voter.publicKey());
 			expect(verdict.selections).toEqual({
-				impact: "decaf",
-				innovation: "blend",
+				impact: ["decaf"],
+				innovation: ["blend"],
 			});
 		}
 	});
@@ -266,7 +269,7 @@ describe("validateSignedBallot", () => {
 	});
 
 	it("rejects when the round is closed", () => {
-		const verdict = validateSignedBallot(signedBallot({ impact: "decaf" }), {
+		const verdict = validateSignedBallot(signedBallot({ impact: ["decaf"] }), {
 			...ctx,
 			round: { ...round, status: "closed" },
 		});
@@ -362,7 +365,7 @@ describe("validateSignedBallot", () => {
 
 	it("rejects a transaction signed for MAINNET (structural testnet-only)", () => {
 		const xdr = signedBallot(
-			{ impact: "decaf" },
+			{ impact: ["decaf"] },
 			{ passphrase: Networks.PUBLIC },
 		);
 		const verdict = validateSignedBallot(xdr, ctx);
@@ -373,7 +376,7 @@ describe("validateSignedBallot", () => {
 	});
 
 	it("rejects a ballot signed by someone other than the source", () => {
-		const xdr = signedBallot({ impact: "decaf" }, { signer: stranger });
+		const xdr = signedBallot({ impact: ["decaf"] }, { signer: stranger });
 		const verdict = validateSignedBallot(xdr, ctx);
 		expect(verdict.ok).toBe(false);
 	});
@@ -383,7 +386,7 @@ describe("validateSignedBallot", () => {
 			round,
 			address: voter.publicKey(),
 			sequence: "1",
-			selections: { impact: "decaf" },
+			selections: { impact: ["decaf"] },
 		});
 		expect(validateSignedBallot(tx.toXDR(), ctx).ok).toBe(false);
 		expect(validateSignedBallot("not-xdr-at-all", ctx).ok).toBe(false);
@@ -422,7 +425,7 @@ describe("decodeAccountVotes / tallyRound", () => {
 			"i3.other-round.impact": b64("beans"),
 			unrelated_key: b64("noise"),
 		});
-		expect(votes).toEqual({ impact: "decaf" });
+		expect(votes).toEqual({ impact: ["decaf"] });
 	});
 
 	it("aggregates votes per category with turnout, no address mapping", () => {
@@ -553,7 +556,7 @@ describe("test-round memo", () => {
 			round,
 			address: voter.publicKey(),
 			sequence: "7",
-			selections: { impact: "decaf" },
+			selections: { impact: ["decaf"] },
 		});
 		expect(tx.memo.type).toBe("none");
 	});
@@ -563,7 +566,7 @@ describe("test-round memo", () => {
 			round: testRound,
 			address: voter.publicKey(),
 			sequence: "7",
-			selections: { impact: "decaf" },
+			selections: { impact: ["decaf"] },
 		});
 		expect(memoText(tx)).toBe(TEST_BALLOT_MEMO);
 	});
@@ -573,15 +576,15 @@ describe("test-round memo", () => {
 			round: testRound,
 			address: voter.publicKey(),
 			sequence: "1234567890",
-			selections: { impact: "decaf", innovation: "blend" },
+			selections: { impact: ["decaf"], innovation: ["blend"] },
 		});
 		tx.sign(voter);
 		const verdict = validateSignedBallot(tx.toXDR(), testCtx);
 		expect(verdict.ok).toBe(true);
 		if (verdict.ok) {
 			expect(verdict.selections).toEqual({
-				impact: "decaf",
-				innovation: "blend",
+				impact: ["decaf"],
+				innovation: ["blend"],
 			});
 		}
 	});
@@ -634,5 +637,120 @@ describe("test-round memo", () => {
 		if (!verdict.ok) {
 			expect(verdict.errors.join(" ")).toContain("must not carry a memo");
 		}
+	});
+});
+
+// ── Shortlist round: pick N per category ───────────────────────────────────
+// Emir's phase 1: "vote for their four favorite projects in each category.
+// The order won't matter. The top four projects will then move forward."
+describe("multi-pick (shortlist) rounds", () => {
+	const shortlist: BallotRound = { ...round, picksPerCategory: 4 };
+	const pool: BallotNominee[] = [
+		{ category: "impact", slug: "decaf", name: "Decaf" },
+		{ category: "impact", slug: "beans", name: "Beans" },
+		{ category: "impact", slug: "blend", name: "Blend" },
+		{ category: "impact", slug: "rubic", name: "Rubic" },
+		{ category: "impact", slug: "allbridge", name: "Allbridge" },
+	];
+
+	it("accepts exactly four picks", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "beans", "blend", "rubic"],
+		});
+		expect(r.ok).toBe(true);
+		if (r.ok) expect(r.selections.impact).toHaveLength(4);
+	});
+
+	it("refuses a fifth pick rather than silently truncating it", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "beans", "blend", "rubic", "allbridge"],
+		});
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/at most 4 picks/);
+	});
+
+	it("refuses the same nominee twice — one voter, one voice", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "decaf"],
+		});
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/picked twice/);
+	});
+
+	it("accepts fewer than the maximum", () => {
+		const r = validateSelections(shortlist, pool, { impact: ["decaf"] });
+		expect(r.ok).toBe(true);
+	});
+
+	it("writes one slotted key per pick", () => {
+		const tx = buildBallotTx({
+			round: shortlist,
+			address: voter.publicKey(),
+			sequence: "1234567890",
+			selections: { impact: ["decaf", "beans"] },
+		});
+		const names = tx.operations.map((o) => (o as { name: string }).name);
+		expect(names).toEqual([
+			dataKey(shortlist.slug, "impact", 1),
+			dataKey(shortlist.slug, "impact", 2),
+		]);
+	});
+
+	it("clears a dropped slot ONLY when it already exists on-chain", () => {
+		// manageData refuses to delete a key that was never set — a blind
+		// delete would fail the whole ballot for a first-time voter.
+		const fresh = buildBallotTx({
+			round: shortlist,
+			address: voter.publicKey(),
+			sequence: "1234567890",
+			selections: { impact: ["decaf"] },
+		});
+		expect(fresh.operations).toHaveLength(1);
+
+		const revote = buildBallotTx({
+			round: shortlist,
+			address: voter.publicKey(),
+			sequence: "1234567890",
+			selections: { impact: ["decaf"] },
+			existingKeys: new Set([dataKey(shortlist.slug, "impact", 2)]),
+		});
+		const ops = revote.operations as Array<{ name: string; value?: unknown }>;
+		expect(ops).toHaveLength(2);
+		expect(ops[1].name).toBe(dataKey(shortlist.slug, "impact", 2));
+		expect(ops[1].value).toBeFalsy(); // a delete
+	});
+
+	it("counts every pick as ONE vote for that nominee", () => {
+		const b64 = (v: string) => Buffer.from(v, "utf8").toString("base64");
+		const tally = tallyRound(shortlist, pool, [
+			{
+				address: "GA",
+				data: {
+					[dataKey(shortlist.slug, "impact", 1)]: b64("decaf"),
+					[dataKey(shortlist.slug, "impact", 2)]: b64("beans"),
+				},
+			},
+			{
+				address: "GB",
+				data: { [dataKey(shortlist.slug, "impact", 1)]: b64("decaf") },
+			},
+		]);
+		const impact = tally.categories.find((c) => c.key === "impact");
+		const votes = Object.fromEntries(
+			(impact?.results ?? []).map((r) => [r.slug, r.votes]),
+		);
+		expect(votes.decaf).toBe(2);
+		expect(votes.beans).toBe(1);
+		// Two voters, three picks — turnout counts people, not picks.
+		expect(tally.turnout.voted).toBe(2);
+	});
+
+	it("ignores unslotted leftovers from a differently-configured round", () => {
+		const b64 = (v: string) => Buffer.from(v, "utf8").toString("base64");
+		const votes = decodeAccountVotes(shortlist, pool, {
+			[dataKey(shortlist.slug, "impact")]: b64("decaf"),
+			[dataKey(shortlist.slug, "impact", 1)]: b64("beans"),
+		});
+		expect(votes.impact).toEqual(["beans"]);
 	});
 });
