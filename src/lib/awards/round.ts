@@ -36,6 +36,7 @@ function toBallotRound(doc: any): BallotRound & { title: string } {
 		title: String(doc.title ?? doc.slug),
 		status: doc.status,
 		ballotMode: String(doc.ballotMode ?? "one-per-category"),
+		picksPerCategory: Number(doc.picksPerCategory ?? 1) || 1,
 		categories: (doc.categories ?? []).map(
 			(c: { key: string; name: string; tagline?: string | null }) => ({
 				key: c.key,
@@ -188,6 +189,7 @@ export function toPublicRound(loaded: LoadedRound) {
 			title: round.title,
 			status: round.status,
 			ballotMode: round.ballotMode,
+			picksPerCategory: round.picksPerCategory ?? 1,
 			categories: round.categories,
 			opensAt: round.opensAt ?? null,
 			closesAt: round.closesAt ?? null,

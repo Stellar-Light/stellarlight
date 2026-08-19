@@ -77,6 +77,8 @@ export interface AwardsRoundData {
 		title: string;
 		status: "draft" | "open" | "closed";
 		ballotMode: string;
+		/** Nominees a voter may pick per category. 1 = pick the winner. */
+		picksPerCategory?: number | null;
 		categories: Category[];
 		opensAt: string | null;
 		closesAt: string | null;
@@ -88,7 +90,7 @@ export interface AwardsRoundData {
 interface Eligibility {
 	whitelisted: boolean;
 	funded: boolean | null;
-	votes: Record<string, string> | null;
+	votes: Record<string, string[]> | null;
 	friendbot?: string;
 }
 
@@ -568,7 +570,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const { round, nominees, voting } = data;
 	const categories = round.categories;
 
-	const [selections, setSelections] = useState<Record<string, string>>({});
+	const [selections, setSelections] = useState<Record<string, string[]>>({});
+	// 1 = the radio ballot (final round). >1 = approval ballot (shortlist round).
+	const picksPerCategory = Math.max(1, Math.floor(round.picksPerCategory ?? 1));
 	const [address, setAddress] = useState<string | null>(null);
 	const [eligibility, setEligibility] = useState<Eligibility | null>(null);
 	const [phase, setPhase] = useState<Phase>("idle");
@@ -603,7 +607,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		[nomineesByCategory],
 	);
 
-	const selectedCount = Object.keys(selections).length;
+	const selectedCount = Object.values(selections).filter(
+		(v) => v.length > 0,
+	).length;
 	const readOnly = eligibility !== null && !eligibility.whitelisted;
 	const votedBefore = Boolean(eligibility?.votes);
 	const busy =
@@ -619,12 +625,27 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			setError(null);
 			setSelections((prev) => {
 				const next = { ...prev };
-				if (next[category] === slug) delete next[category];
-				else next[category] = slug;
+				const picked = next[category] ?? [];
+				if (picked.includes(slug)) {
+					// Tapping a pick again removes it.
+					const rest = picked.filter((s) => s !== slug);
+					if (rest.length === 0) delete next[category];
+					else next[category] = rest;
+					return next;
+				}
+				if (picksPerCategory === 1) {
+					// Radio behaviour: the new pick replaces the old one.
+					next[category] = [slug];
+					return next;
+				}
+				// Approval behaviour: fill up to the cap, then ignore extra taps
+				// (the card is rendered disabled at that point).
+				if (picked.length >= picksPerCategory) return prev;
+				next[category] = [...picked, slug];
 				return next;
 			});
 		},
-		[readOnly, busy],
+		[readOnly, busy, picksPerCategory],
 	);
 
 	// ── eligibility ──
@@ -1056,8 +1077,21 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									<NomineeCard
 										key={nominee.slug}
 										nominee={nominee}
-										selected={selections[category.key] === nominee.slug}
-										disabled={readOnly || !voting.open}
+										selected={(selections[category.key] ?? []).includes(
+											nominee.slug,
+										)}
+										disabled={
+											readOnly ||
+											!voting.open ||
+											// Cap reached: unpicked cards go inert so the limit is
+											// visible rather than a tap that silently does nothing.
+											(picksPerCategory > 1 &&
+												(selections[category.key] ?? []).length >=
+													picksPerCategory &&
+												!(selections[category.key] ?? []).includes(
+													nominee.slug,
+												))
+										}
 										onToggle={() => toggleNominee(category.key, nominee.slug)}
 										onHighlights={() => setHighlightNominee(nominee)}
 									/>
@@ -1080,7 +1114,10 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 						</div>
 						<ul className="space-y-3 mb-5">
 							{categories.map((c) => {
-								const picked = nomineeName(c.key, selections[c.key]);
+								const pickedSlugs = selections[c.key] ?? [];
+								const picked = pickedSlugs.length
+									? pickedSlugs.map((sl) => nomineeName(c.key, sl)).join(", ")
+									: "";
 								return (
 									<li
 										key={c.key}
@@ -1145,7 +1182,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								const depth =
 									(idx - ballotPage + categories.length) % categories.length;
 								const isTop = depth === 0;
-								const pickedSlug = selections[category.key];
+								const pickedSlug = (selections[category.key] ?? [])[0];
 								const pickedNominee = pickedSlug
 									? ((nomineesByCategory.get(category.key) ?? []).find(
 											(n) => n.slug === pickedSlug,
@@ -1259,7 +1296,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				nominee={highlightNominee}
 				isSelected={
 					highlightNominee
-						? selections[highlightNominee.category] === highlightNominee.slug
+						? (selections[highlightNominee.category] ?? []).includes(
+								highlightNominee.slug,
+							)
 						: false
 				}
 				onClose={() => setHighlightNominee(null)}
@@ -1267,7 +1306,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					if (highlightNominee && !readOnly && voting.open) {
 						const cat = highlightNominee.category;
 						setError(null);
-						setSelections((prev) => ({ ...prev, [cat]: slug }));
+						setSelections((prev) => {
+							const picked = prev[cat] ?? [];
+							if (picked.includes(slug)) return prev;
+							if (picksPerCategory === 1) return { ...prev, [cat]: [slug] };
+							if (picked.length >= picksPerCategory) return prev;
+							return { ...prev, [cat]: [...picked, slug] };
+						});
 					}
 					setHighlightNominee(null);
 				}}

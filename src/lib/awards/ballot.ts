@@ -72,6 +72,13 @@ export interface BallotRound {
 	slug: string;
 	status: "draft" | "open" | "closed";
 	ballotMode: string;
+	/**
+	 * How many nominees a voter may pick per category. 1 = the original radio
+	 * ballot (final round: 4 finalists, pick the winner). >1 = approval ballot
+	 * (shortlist round: pick your N favourites from the nominee pool, order
+	 * irrelevant). Absent/0 reads as 1 so every existing round is unchanged.
+	 */
+	picksPerCategory?: number | null;
 	categories: RoundCategory[];
 	opensAt?: string | null;
 	closesAt?: string | null;
@@ -90,11 +97,43 @@ export interface BallotNominee {
 	name: string;
 }
 
-/** category key → nominee slug. One entry per category (radio semantics). */
-export type BallotSelections = Record<string, string>;
+/** category key → the nominee slugs picked in it, in no meaningful order. */
+export type BallotSelections = Record<string, string[]>;
 
-export function dataKey(roundSlug: string, categoryKey: string): string {
-	return `i3.${roundSlug}.${categoryKey}`;
+/** How many picks this round allows per category. */
+export function picksPerCategory(round: BallotRound): number {
+	const n = round.picksPerCategory ?? 1;
+	return Number.isFinite(n) && n > 1 ? Math.floor(n) : 1;
+}
+
+/**
+ * The manageData key for one vote.
+ *
+ * A single-pick round keeps the ORIGINAL unslotted key — the encoding that is
+ * already signed on-chain and covered by the existing tests, so the final
+ * round runs on untouched code. Multi-pick rounds address a fixed slot per
+ * category, which keeps overwrite semantics (re-voting rewrites slot 1..N in
+ * place) instead of needing a delete-then-set dance for every change.
+ */
+export function dataKey(
+	roundSlug: string,
+	categoryKey: string,
+	slot?: number,
+): string {
+	const base = `i3.${roundSlug}.${categoryKey}`;
+	return slot === undefined ? base : `${base}.${slot}`;
+}
+
+/** Every key a category can occupy for a round, slot order. */
+export function categoryKeys(
+	round: BallotRound,
+	categoryKey: string,
+): string[] {
+	const picks = picksPerCategory(round);
+	if (picks === 1) return [dataKey(round.slug, categoryKey)];
+	return Array.from({ length: picks }, (_, i) =>
+		dataKey(round.slug, categoryKey, i + 1),
+	);
 }
 
 const byteLength = (s: string) => new TextEncoder().encode(s).length;
@@ -151,32 +190,61 @@ export function validateSelections(
 	if (entries.length === 0) {
 		errors.push("select at least one nominee");
 	}
+	const picks = picksPerCategory(round);
 	const normalized: BallotSelections = {};
 	for (const [category, value] of entries) {
 		if (!validCategories.has(category)) {
 			errors.push(`unknown category "${category}"`);
 			continue;
 		}
-		const slug = typeof value === "string" ? value.trim() : "";
-		if (!slug) {
-			errors.push(`no nominee selected for "${category}"`);
+		// Accept a bare slug or a list — the wire form of a one-pick round is
+		// still a plain string, so an older client keeps working unchanged.
+		const raw = Array.isArray(value) ? value : [value];
+		const slugs: string[] = [];
+		let bad = false;
+		for (const v of raw) {
+			const slug = typeof v === "string" ? v.trim() : "";
+			if (!slug) {
+				errors.push(`no nominee selected for "${category}"`);
+				bad = true;
+				break;
+			}
+			if (!nomineesByCategory.get(category)?.has(slug)) {
+				errors.push(`"${slug}" is not a nominee in "${category}"`);
+				bad = true;
+				break;
+			}
+			if (byteLength(slug) > MANAGE_DATA_MAX_BYTES) {
+				errors.push(`nominee slug "${slug}" exceeds 64 bytes`);
+				bad = true;
+				break;
+			}
+			// Picking the same nominee twice is a client bug, not a double vote:
+			// refuse it rather than silently collapsing it, so the voter's ballot
+			// never means something different from what they saw.
+			if (slugs.includes(slug)) {
+				errors.push(`"${slug}" picked twice in "${category}"`);
+				bad = true;
+				break;
+			}
+			slugs.push(slug);
+		}
+		if (bad) continue;
+		if (slugs.length > picks) {
+			errors.push(
+				`"${category}" allows at most ${picks} pick${picks === 1 ? "" : "s"}, got ${slugs.length}`,
+			);
 			continue;
 		}
-		if (!nomineesByCategory.get(category)?.has(slug)) {
-			errors.push(`"${slug}" is not a nominee in "${category}"`);
-			continue;
+		for (const key of categoryKeys(round, category)) {
+			if (byteLength(key) > MANAGE_DATA_MAX_BYTES) {
+				errors.push(`vote key for "${category}" exceeds 64 bytes`);
+				bad = true;
+				break;
+			}
 		}
-		if (byteLength(slug) > MANAGE_DATA_MAX_BYTES) {
-			errors.push(`nominee slug "${slug}" exceeds 64 bytes`);
-			continue;
-		}
-		if (byteLength(dataKey(round.slug, category)) > MANAGE_DATA_MAX_BYTES) {
-			errors.push(`vote key for "${category}" exceeds 64 bytes`);
-			continue;
-		}
-		// Object semantics already guarantee at most one value per category —
-		// the "one per category" rule of ballotMode one-per-category.
-		normalized[category] = slug;
+		if (bad) continue;
+		normalized[category] = slugs;
 	}
 	if (errors.length > 0) return { ok: false, errors };
 	return { ok: true, selections: normalized };
@@ -192,8 +260,13 @@ export function buildBallotTx(params: {
 	/** Current on-chain sequence (Horizon string form). */
 	sequence: string;
 	selections: BallotSelections;
+	/**
+	 * The manageData keys the voter's account already carries. Only used to
+	 * decide which now-unused slots are safe to delete (see below).
+	 */
+	existingKeys?: Set<string>;
 }): Transaction {
-	const { round, address, sequence, selections } = params;
+	const { round, address, sequence, selections, existingKeys } = params;
 	if (!StrKey.isValidEd25519PublicKey(address)) {
 		throw new Error("invalid voter address");
 	}
@@ -203,13 +276,32 @@ export function buildBallotTx(params: {
 		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
 	});
 	// Stable key order → deterministic XDR for the same selections.
+	const picks = picksPerCategory(round);
 	for (const category of Object.keys(selections).sort()) {
-		builder.addOperation(
-			Operation.manageData({
-				name: dataKey(round.slug, category),
-				value: selections[category],
-			}),
-		);
+		const chosen = selections[category];
+		if (picks === 1) {
+			builder.addOperation(
+				Operation.manageData({
+					name: dataKey(round.slug, category),
+					value: chosen[0],
+				}),
+			);
+			continue;
+		}
+		// Multi-pick: write slot 1..N. A slot the voter no longer uses is
+		// DELETED, but only when it actually exists on-chain — manageData
+		// refuses to delete a key that was never set, which would fail the
+		// whole ballot for anyone voting for the first time or picking fewer
+		// than last time.
+		for (let slot = 1; slot <= picks; slot++) {
+			const name = dataKey(round.slug, category, slot);
+			const slug = chosen[slot - 1];
+			if (slug !== undefined) {
+				builder.addOperation(Operation.manageData({ name, value: slug }));
+			} else if (existingKeys?.has(name)) {
+				builder.addOperation(Operation.manageData({ name, value: null }));
+			}
+		}
 	}
 	// Test round → stamp the ballot as a test cast (see TEST_BALLOT_MEMO).
 	if (round.testMode) {
@@ -369,17 +461,39 @@ export function validateSignedBallot(
 			errors.push(`data key "${op.name}" is outside this round's namespace`);
 			continue;
 		}
-		const category = op.name.slice(prefix.length);
+		// `<category>` on a one-pick round, `<category>.<slot>` on a multi-pick
+		// one. Anything else is outside the shape we build.
+		const rest = op.name.slice(prefix.length);
+		const picks = picksPerCategory(round);
+		let category = rest;
+		let slot: number | null = null;
+		if (picks > 1) {
+			const m = rest.match(/^(.+)\.(\d+)$/);
+			if (!m) {
+				errors.push(`data key "${op.name}" is not a slotted vote key`);
+				continue;
+			}
+			category = m[1];
+			slot = Number(m[2]);
+			if (slot < 1 || slot > picks) {
+				errors.push(`vote slot ${slot} is outside 1..${picks}`);
+				continue;
+			}
+		}
 		if (!validCategories.has(category)) {
 			errors.push(`"${category}" is not a category of this round`);
 			continue;
 		}
-		if (seenCategories.has(category)) {
-			errors.push(`duplicate vote for category "${category}"`);
+		const seenKey = slot === null ? category : `${category}.${slot}`;
+		if (seenCategories.has(seenKey)) {
+			errors.push(`duplicate vote for "${seenKey}"`);
 			continue;
 		}
-		seenCategories.add(category);
+		seenCategories.add(seenKey);
+		// A multi-pick ballot legitimately CLEARS a slot the voter dropped;
+		// a one-pick ballot has nothing to clear, so a delete there is bogus.
 		if (op.value === undefined || op.value === null) {
+			if (picks > 1) continue;
 			errors.push(
 				`vote for "${category}" deletes the entry — ballots must set a nominee`,
 			);
@@ -390,7 +504,22 @@ export function validateSignedBallot(
 			errors.push(`"${slug}" is not a nominee in "${category}"`);
 			continue;
 		}
-		selections[category] = slug;
+		const bucket = selections[category] ?? [];
+		if (bucket.includes(slug)) {
+			errors.push(`"${slug}" appears twice in "${category}"`);
+			continue;
+		}
+		bucket.push(slug);
+		selections[category] = bucket;
+	}
+
+	for (const [category, picked] of Object.entries(selections)) {
+		const max = picksPerCategory(round);
+		if (picked.length > max) {
+			errors.push(
+				`"${category}" allows at most ${max} pick${max === 1 ? "" : "s"}, got ${picked.length}`,
+			);
+		}
 	}
 
 	if (errors.length > 0) return { ok: false, errors };
@@ -432,10 +561,22 @@ export function decodeAccountVotes(
 		set.add(n.slug);
 		nomineesByCategory.set(n.category, set);
 	}
+	const picks = picksPerCategory(round);
 	const votes: BallotSelections = {};
 	for (const [key, b64] of Object.entries(data)) {
 		if (!key.startsWith(prefix)) continue;
-		const category = key.slice(prefix.length);
+		const rest = key.slice(prefix.length);
+		// One-pick rounds keep the unslotted key; multi-pick rounds append
+		// `.<slot>`. Read only the shape this round writes, so a leftover entry
+		// from a differently-configured round never leaks into the tally.
+		let category = rest;
+		if (picks > 1) {
+			const m = rest.match(/^(.+)\.(\d+)$/);
+			if (!m) continue;
+			const slot = Number(m[2]);
+			if (slot < 1 || slot > picks) continue;
+			category = m[1];
+		}
 		if (!validCategories.has(category)) continue;
 		let slug: string;
 		try {
@@ -445,7 +586,10 @@ export function decodeAccountVotes(
 		}
 		// A vote for a since-removed nominee simply stops counting.
 		if (!nomineesByCategory.get(category)?.has(slug)) continue;
-		votes[category] = slug;
+		const bucket = votes[category] ?? [];
+		// Two slots holding the same nominee count once — one voter, one voice.
+		if (!bucket.includes(slug)) bucket.push(slug);
+		votes[category] = bucket;
 	}
 	return votes;
 }
@@ -469,9 +613,14 @@ export function tallyRound(
 		const entries = Object.entries(votes);
 		if (entries.length === 0) continue;
 		voted++;
-		for (const [category, slug] of entries) {
+		// Approval tally: every pick is one vote for that nominee. A voter with
+		// four picks in a category adds one to each of four nominees — nobody
+		// gets four votes, and the top N by count are the finalists.
+		for (const [category, slugs] of entries) {
 			const perCat = counts.get(category) ?? new Map<string, number>();
-			perCat.set(slug, (perCat.get(slug) ?? 0) + 1);
+			for (const slug of slugs) {
+				perCat.set(slug, (perCat.get(slug) ?? 0) + 1);
+			}
 			counts.set(category, perCat);
 		}
 	}

@@ -1247,6 +1247,10 @@ export interface AwardRound {
    */
   testMode?: boolean | null;
   /**
+   * How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters — every pick is one vote for that nominee.
+   */
+  picksPerCategory: number;
+  /**
    * How many nominees a voter may pick per category. Only one-per-category exists today; the field leaves room for future modes without a schema change.
    */
   ballotMode: 'one-per-category';
@@ -3128,6 +3132,7 @@ export interface AwardRoundsSelect<T extends boolean = true> {
   slug?: T;
   status?: T;
   testMode?: T;
+  picksPerCategory?: T;
   ballotMode?: T;
   categories?:
     | T
