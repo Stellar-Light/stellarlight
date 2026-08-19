@@ -178,6 +178,42 @@ async function main() {
 		}
 	}
 
+	// ── retire rows the registry no longer lists ──
+	// Dropping an asset from src/data/stablecoin-registry.ts stops it being
+	// measured, but the row it already wrote would sit in the collection
+	// forever with a frozen `measuredAt`, still served. Stamp `retiredAt`
+	// instead of deleting: the series keeps its history, the API and the
+	// explorer both filter retired rows out, and — per the collection's own
+	// contract — retired means WE stopped tracking it, never that the issuer
+	// stopped issuing it.
+	const measuredIds = new Set(measured.map((m) => m.id));
+	const everything = await payload.find({
+		collection: "stablecoins",
+		limit: 500,
+		depth: 0,
+	});
+	const toRetire = (
+		everything.docs as Array<{
+			id: string;
+			assetId?: string;
+			retiredAt?: string;
+		}>
+	).filter((d) => d.assetId && !measuredIds.has(d.assetId) && !d.retiredAt);
+
+	if (toRetire.length) {
+		console.log(`\n${toRetire.length} row(s) no longer in the registry:`);
+		for (const d of toRetire) console.log(`  · ${d.assetId} → retiredAt`);
+		if (EXECUTE) {
+			const now = new Date().toISOString();
+			for (const d of toRetire)
+				await payload.update({
+					collection: "stablecoins",
+					id: d.id,
+					data: { retiredAt: now },
+				});
+		}
+	}
+
 	const live = measured.filter((m) => m.basis === "live").length;
 	console.log(
 		`\n${measured.length} assets — ${live} live, ${measured.length - live} static/unmeasured`,

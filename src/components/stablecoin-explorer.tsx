@@ -22,6 +22,7 @@ import {
 	ExternalLink,
 	Grid as GridIcon,
 	Search,
+	Share2,
 	Table as TableIcon,
 	X,
 } from "lucide-react";
@@ -30,6 +31,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
+import { StablecoinCharts } from "@/components/stablecoin-charts";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	Drawer,
@@ -52,6 +54,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { IssuerLeader, SeriesRow } from "@/lib/stablecoin-series";
 import {
 	COUNTRY_INFO,
 	countryInfo,
@@ -96,6 +99,11 @@ interface Props {
 	totalMarketCap: number;
 	totalVolume24h: number;
 	totalHolders: number;
+	/** Per-token daily series behind the four analytics panels. */
+	marketCapByToken: SeriesRow[];
+	holdersByToken: SeriesRow[];
+	totalHoldersSeries: SeriesRow[];
+	issuers: IssuerLeader[];
 }
 
 const COUNTRY_FALLBACK = COUNTRY_INFO.Global;
@@ -223,6 +231,10 @@ export function StablecoinExplorer({
 	totalMarketCap,
 	totalVolume24h,
 	totalHolders,
+	marketCapByToken,
+	holdersByToken,
+	totalHoldersSeries,
+	issuers,
 }: Props) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -236,6 +248,15 @@ export function StablecoinExplorer({
 	const [hoveredMcap, setHoveredMcap] = useState<number | null>(null);
 	const [hoveredHolders, setHoveredHolders] = useState<number | null>(null);
 	const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
+	const [toast, setToast] = useState<string | null>(null);
+	const [priceDisplay, setPriceDisplay] = useState<"usd" | "native">("usd");
+
+	// A toast is the only confirmation a copy gives — without it the click
+	// looks like it did nothing.
+	const say = (msg: string) => {
+		setToast(msg);
+		setTimeout(() => setToast(null), 2200);
+	};
 
 	const currencies = useMemo(
 		() =>
@@ -302,14 +323,54 @@ export function StablecoinExplorer({
 		try {
 			await navigator.clipboard.writeText(coin.issuerCode);
 			setCopiedId(coin.id);
+			say(`${coin.ticker} issuer address copied`);
 			setTimeout(() => setCopiedId(null), 1500);
 		} catch {
-			/* clipboard blocked — the address is visible on the row regardless */
+			say("Clipboard blocked — the address is shown in full on the row");
 		}
 	};
 
 	const onFail = (id: string) =>
 		setFailedIcons((prev) => new Set(prev).add(id));
+
+	// Selecting a coin puts it in the URL and closing takes it out, so a
+	// drawer can be linked to — the explorer's share behaviour.
+	const selectCoin = (coin: CoinView) => {
+		setSelectedCoin(coin);
+		setPriceDisplay("usd");
+		window.history.replaceState(
+			{},
+			"",
+			`${window.location.pathname}?coin=${coin.ticker}`,
+		);
+	};
+	const closeDrawer = () => {
+		setSelectedCoin(null);
+		window.history.replaceState({}, "", window.location.pathname);
+	};
+	const shareCoin = async (coin: CoinView) => {
+		const url = `${window.location.origin}${window.location.pathname}?coin=${coin.ticker}`;
+		try {
+			if (navigator.share) await navigator.share({ title: coin.ticker, url });
+			else {
+				await navigator.clipboard.writeText(url);
+				say("Link copied to clipboard");
+			}
+		} catch {
+			/* the user dismissed the share sheet */
+		}
+	};
+
+	// Open the drawer named by ?coin= on first paint.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: first-paint deep link only
+	useEffect(() => {
+		const want = new URLSearchParams(window.location.search).get("coin");
+		if (!want) return;
+		const hit = coins.find(
+			(c) => c.ticker.toLowerCase() === want.toLowerCase(),
+		);
+		if (hit) setSelectedCoin(hit);
+	}, [coins]);
 
 	const top10 = useMemo(
 		() =>
@@ -374,7 +435,7 @@ export function StablecoinExplorer({
 											type="button"
 											key={`s-${loop}-${coin.id}`}
 											className="w-full flex items-center justify-between px-4 py-3 border-b border-[#252525] hover:bg-[#222222] transition-colors cursor-pointer text-left"
-											onClick={() => setSelectedCoin(coin)}
+											onClick={() => selectCoin(coin)}
 										>
 											<div className="flex items-center gap-3">
 												<CoinIcon
@@ -531,6 +592,16 @@ export function StablecoinExplorer({
 						)}
 					</div>
 				))}
+			</div>
+
+			{/* ── Analytics ───────────────────────────────────────────────── */}
+			<div className="mb-8">
+				<StablecoinCharts
+					marketCapByToken={marketCapByToken}
+					holdersByToken={holdersByToken}
+					totalHolders={totalHoldersSeries}
+					issuers={issuers}
+				/>
 			</div>
 
 			{/* ── Explore ─────────────────────────────────────────────────── */}
@@ -722,7 +793,7 @@ export function StablecoinExplorer({
 								{paged.map((coin) => (
 									<TableRow
 										key={coin.id}
-										onClick={() => setSelectedCoin(coin)}
+										onClick={() => selectCoin(coin)}
 										className="cursor-pointer"
 									>
 										<TableCell>
@@ -817,7 +888,7 @@ export function StablecoinExplorer({
 						return (
 							<Card
 								key={coin.id}
-								onClick={() => setSelectedCoin(coin)}
+								onClick={() => selectCoin(coin)}
 								className="cursor-pointer hover:bg-muted/50 transition-colors"
 							>
 								<CardContent className="p-6 space-y-4">
@@ -890,38 +961,76 @@ export function StablecoinExplorer({
 				</div>
 			)}
 
+			{/* Copy/share confirmation. Fixed above the drawer so it is visible
+			    whether the click came from a row or from inside the detail. */}
+			{toast && (
+				<div
+					role="status"
+					aria-live="polite"
+					className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-lg bg-[#262626] border border-[#2F2F2F] text-sm text-[#E5E5E5] shadow-lg"
+				>
+					{toast}
+				</div>
+			)}
+
 			{/* ── Detail ──────────────────────────────────────────────────── */}
-			<Drawer
-				open={!!selectedCoin}
-				onOpenChange={(o) => !o && setSelectedCoin(null)}
-			>
+			<Drawer open={!!selectedCoin} onOpenChange={(o) => !o && closeDrawer()}>
 				<DrawerContent className="max-h-[92vh]">
 					{selectedCoin && (
 						<>
-							<DrawerHeader>
-								<div className="flex items-center gap-3">
-									<CoinIcon
-										coin={selectedCoin}
-										size="lg"
-										failed={failedIcons}
-										onFail={onFail}
-									/>
-									<div className="min-w-0 text-left">
-										<DrawerTitle className="flex items-center gap-2">
-											{selectedCoin.name}
-											<BasisTag basis={selectedCoin.basis} />
-										</DrawerTitle>
-										<DrawerDescription>
-											{selectedCoin.company}
-											{selectedCoin.assetType
-												? ` · ${selectedCoin.assetType}`
-												: ""}
-										</DrawerDescription>
+							<DrawerHeader className="w-full max-w-5xl mx-auto">
+								<div className="flex items-start justify-between gap-4 w-full">
+									<div className="flex items-center gap-4 min-w-0">
+										<CoinIcon
+											coin={selectedCoin}
+											size="xl"
+											failed={failedIcons}
+											onFail={onFail}
+										/>
+										<div className="min-w-0 text-left">
+											<DrawerTitle className="text-3xl flex items-center gap-3">
+												{selectedCoin.name}
+												<BasisTag basis={selectedCoin.basis} />
+											</DrawerTitle>
+											<DrawerDescription className="flex items-center gap-2 mt-1">
+												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
+												<img
+													src={
+														countryInfo(selectedCoin.country, selectedCoin.peg)
+															.flag
+													}
+													alt=""
+													className="w-4 h-3"
+												/>
+												{selectedCoin.company}
+												{selectedCoin.assetType
+													? ` · ${selectedCoin.assetType}`
+													: ""}
+											</DrawerDescription>
+										</div>
+									</div>
+									<div className="flex items-center gap-2 flex-shrink-0">
+										<button
+											type="button"
+											onClick={() => shareCoin(selectedCoin)}
+											className="p-2 rounded-lg text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/[0.06] transition-colors"
+											aria-label="Share this asset"
+										>
+											<Share2 className="w-5 h-5" />
+										</button>
+										<button
+											type="button"
+											onClick={closeDrawer}
+											className="p-2 rounded-lg text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/[0.06] transition-colors"
+											aria-label="Close"
+										>
+											<X className="w-5 h-5" />
+										</button>
 									</div>
 								</div>
 							</DrawerHeader>
 
-							<div className="p-6 space-y-6 overflow-y-auto">
+							<div className="w-full max-w-5xl mx-auto p-6 space-y-6 overflow-y-auto">
 								{selectedCoin.basis !== "live" && selectedCoin.note && (
 									<div className="rounded-lg border border-[#2F2F2F] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
 										{selectedCoin.note}
@@ -929,11 +1038,36 @@ export function StablecoinExplorer({
 								)}
 
 								<div>
-									<h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
-									<div className="grid grid-cols-2 gap-4">
+									<div className="flex items-center justify-between mb-4">
+										<h3 className="text-lg font-semibold">Key Metrics</h3>
+										{selectedCoin.peg && selectedCoin.peg !== "USD" && (
+											<div className="flex gap-1 bg-muted rounded-lg p-1">
+												{(["usd", "native"] as const).map((mode) => (
+													<button
+														key={mode}
+														type="button"
+														onClick={() => setPriceDisplay(mode)}
+														className={`px-3 py-1 text-xs rounded transition-all ${
+															priceDisplay === mode
+																? "bg-background text-foreground shadow-sm"
+																: "text-muted-foreground hover:text-foreground"
+														}`}
+													>
+														{mode === "usd" ? "USD" : selectedCoin.peg}
+													</button>
+												))}
+											</div>
+										)}
+									</div>
+									<div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
 										{(
 											[
-												["Current Price", displayPrice(selectedCoin.priceRaw)],
+												[
+													"Current Price",
+													priceDisplay === "usd"
+														? displayPrice(selectedCoin.priceRaw)
+														: `1.00 ${selectedCoin.peg}`,
+												],
 												[
 													"24h Volume",
 													selectedCoin.volumeRaw
