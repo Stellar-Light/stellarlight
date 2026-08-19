@@ -4,7 +4,13 @@ import {
 	StablecoinExplorer,
 } from "@/components/stablecoin-explorer";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { NEWS_SOURCES, type NewsItem, toNews } from "@/lib/stablecoin-news";
+import {
+	docToEntry,
+	fetchFeedEntries,
+	mergeNews,
+	NEWS_SOURCES,
+	type NewsItem,
+} from "@/lib/stablecoin-news";
 import {
 	issuerLeaderboard,
 	pivotByToken,
@@ -80,28 +86,33 @@ export default async function StablecoinsPage() {
 			})
 			.filter((c) => c.ticker);
 
-		// Dated editorial coverage for the Latest Updates rail. Filtered by
-		// SOURCE and then by whether the text actually says a stablecoin term —
-		// never by vector similarity, which returns the consensus-protocol paper
-		// for the query "stablecoin".
+		// Stablecoin coverage for the dock: the live RSS window for freshness,
+		// the ingested corpus for depth. Filtered by whether the piece is ABOUT
+		// stablecoins — never by vector similarity, which returns the
+		// consensus-protocol paper for the query "stablecoin".
 		try {
-			const found = await payload.find({
-				collection: "research-docs",
-				where: { source: { in: NEWS_SOURCES } },
-				limit: 400,
-				depth: 0,
-				sort: "-publishedAt",
-				select: {
-					title: true,
-					url: true,
-					content: true,
-					publishedAt: true,
-					source: true,
-				},
-			});
-			news = toNews(found.docs as Parameters<typeof toNews>[0]);
+			const [feed, found] = await Promise.all([
+				fetchFeedEntries(),
+				payload.find({
+					collection: "research-docs",
+					where: { source: { in: NEWS_SOURCES } },
+					limit: 400,
+					depth: 0,
+					sort: "-publishedAt",
+					select: {
+						title: true,
+						url: true,
+						content: true,
+						publishedAt: true,
+					},
+				}),
+			]);
+			const corpus = (found.docs as Parameters<typeof docToEntry>[0][])
+				.map(docToEntry)
+				.filter((e): e is NonNullable<typeof e> => e !== null);
+			news = mergeNews(feed, corpus);
 		} catch {
-			// The rail is supplementary — never take the page down for it.
+			// The dock is supplementary — never take the page down for it.
 		}
 
 		rawSnapshots = snaps.docs;
