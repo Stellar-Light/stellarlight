@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-08-18T06:14:47.451Z",
-	"total": 404,
-	"open": 307,
+	"generatedAt": "2026-08-19T06:05:12.965Z",
+	"total": 407,
+	"open": 310,
 	"closed": 97,
 	"verified": 7,
 	"cleared": 90,
 	"closingRate": 0.24,
-	"oldestOpenDays": 26,
+	"oldestOpenDays": 27,
 	"inWave": 0,
-	"highOpen": 18,
+	"highOpen": 21,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -23,8 +23,8 @@
 		},
 		{
 			"surface": "contract",
-			"open": 14,
-			"total": 25
+			"open": 17,
+			"total": 28
 		},
 		{
 			"surface": "consumer",
@@ -52,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 26
+			"days": 27
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 26
+			"days": 27
 		}
 	],
 	"topOpen": [

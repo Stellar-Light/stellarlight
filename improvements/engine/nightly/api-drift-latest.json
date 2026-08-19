@@ -1,10 +1,14 @@
 {
-	"generatedAt": "2026-08-18T06:03:49.889Z",
+	"generatedAt": "2026-08-19T06:04:16.271Z",
 	"detector": "api-drift",
 	"failures": [
 		{
 			"probe": "status.endpoints lists /api/scf-pitch",
 			"note": "OpenAPI documents /api/scf-pitch but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "status.endpoints lists /api/hackathon-brief",
+			"note": "OpenAPI documents /api/hackathon-brief but /api/status.endpoints[] omits it"
 		},
 		{
 			"probe": "status.endpoints lists /api/vet-idea",
@@ -25,6 +29,14 @@
 		{
 			"probe": "/api/scf-pitch emits CORS (Access-Control-Allow-Origin)",
 			"note": "got \"none\" — add \"/api/scf-pitch\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/hackathon-brief emits X-API-Version",
+			"note": "got \"none\" — add \"/api/hackathon-brief\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/hackathon-brief emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/hackathon-brief\" to next.config.mjs publicApi[]"
 		},
 		{
 			"probe": "/api/vet-idea emits X-API-Version",
