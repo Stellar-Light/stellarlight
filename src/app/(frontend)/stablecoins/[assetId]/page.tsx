@@ -200,7 +200,7 @@ export default async function StablecoinDetailPage({
 						headline={formatUSD(row.marketCapUSD)}
 						caption={`measured ${measuredLabel}`}
 						subject={`${row.ticker}'s market cap`}
-						format={formatUSD}
+						format="usd"
 						points={history}
 					/>
 				</div>

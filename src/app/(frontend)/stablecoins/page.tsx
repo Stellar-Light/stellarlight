@@ -147,7 +147,7 @@ export default async function StablecoinsPage({
 						headline={formatUSD(totalMcap)}
 						caption={`as of ${asOfLabel}`}
 						subject="market cap"
-						format={formatUSD}
+						format="usd"
 						points={series.points.map((p) => ({
 							date: p.date,
 							value: p.marketCapUSD,
@@ -159,7 +159,7 @@ export default async function StablecoinsPage({
 						headline={formatCount(totalHolders)}
 						caption="trustlines across all tracked assets"
 						subject="holders"
-						format={formatCount}
+						format="count"
 						points={series.points.map((p) => ({
 							date: p.date,
 							value: p.holders,
