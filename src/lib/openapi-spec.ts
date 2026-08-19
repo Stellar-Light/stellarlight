@@ -3939,7 +3939,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar stablecoins ranked by USD market cap",
 				description:
-					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.",
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					purpose:
 						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
@@ -4022,18 +4022,31 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															format: "date-time",
 															description:
-																"When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.",
+																"The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.",
 														},
 														counts: {
 															type: "object",
 															description:
-																"sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole inventory at the upstream snapshot regardless of filter.",
+																"sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement.",
 															properties: {
 																tracked: {
 																	type: "integer",
 																	minimum: 0,
 																	description:
-																		"Assets the upstream snapshot tracks, before any filter.",
+																		"Assets in the registry, before any filter.",
+																},
+																byBasis: {
+																	type: "object",
+																	description:
+																		"Counts of the RETURNED rows by how they were obtained.",
+																	properties: {
+																		live: { type: "integer", minimum: 0 },
+																		"curated-static": {
+																			type: "integer",
+																			minimum: 0,
+																		},
+																		unmeasured: { type: "integer", minimum: 0 },
+																	},
 																},
 																total: {
 																	type: "integer",
@@ -4051,11 +4064,11 @@ export const spec: OpenAPISpec = {
 														coverage: {
 															type: "object",
 															description:
-																"What this inventory IS and IS NOT (sls-066). It is one upstream snapshot service's tracked set, not a census of every Stellar stablecoin — Circle USDC was absent for hours on 2026-08-18 while live on-chain. Absence here is a coverage gap at the source, never proof an asset is not issued.",
+																"What this inventory IS and IS NOT (sls-066). It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin — Circle USDC was absent from the previous upstream for hours on 2026-08-18 while live on-chain. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar.",
 															properties: {
 																basis: {
 																	type: "string",
-																	enum: ["single-upstream-snapshot"],
+																	enum: ["curated-registry"],
 																},
 																note: { type: "string" },
 															},
@@ -4063,13 +4076,7 @@ export const spec: OpenAPISpec = {
 														methodology: {
 															type: "string",
 															description:
-																"How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars.",
-														},
-														upstream: {
-															type: "string",
-															format: "uri",
-															description:
-																"The upstream data service this snapshot proxies (stablecoin.stellarlight.xyz).",
+																"How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured.",
 														},
 													},
 												},
@@ -6179,18 +6186,25 @@ export const spec: OpenAPISpec = {
 			Stablecoin: {
 				type: "object",
 				description:
-					"One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
+					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
 				properties: {
+					assetId: {
+						type: "string",
+						nullable: true,
+						description:
+							"`CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous.",
+					},
 					ticker: {
 						type: "string",
-						description: "Asset code (USDC, USDY, GYEN, …).",
+						description:
+							"Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId.",
 					},
 					name: { type: "string", nullable: true },
 					issuer: {
 						type: "string",
 						nullable: true,
 						description:
-							"Stellar issuer account (G…) — the universal join key.",
+							"Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity.",
 					},
 					issuerDomain: { type: "string", nullable: true },
 					company: { type: "string", nullable: true },
@@ -6202,11 +6216,17 @@ export const spec: OpenAPISpec = {
 							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
 					},
 					country: { type: "string", nullable: true },
+					assetType: {
+						type: "string",
+						nullable: true,
+						description:
+							"Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
+					},
 					supply: {
 						type: "number",
 						nullable: true,
 						description:
-							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported.",
+							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured.",
 					},
 					marketCapUSD: {
 						type: "number",
@@ -6230,17 +6250,35 @@ export const spec: OpenAPISpec = {
 						description: "24h transfer volume in USD.",
 					},
 					supplyChange7d: {
+						type: "number",
+						nullable: true,
+						description:
+							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. BREAKING 2026-08-19: was a display string ('-5.80%') while this endpoint proxied the retired snapshot service; it is a number now.",
+					},
+					basis: {
 						type: "string",
 						nullable: true,
-						description: "7-day supply change (display string, e.g. '-5.80%').",
+						enum: ["live", "curated-static", "unmeasured", null],
+						description:
+							"How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting (sls-066); its metrics are the last known values, dated by updatedAt.",
 					},
-					verified: { type: "boolean" },
+					note: {
+						type: "string",
+						nullable: true,
+						description:
+							"Plain-words reason a row is curated-static or unmeasured. Null for live rows.",
+					},
+					verified: {
+						type: "boolean",
+						description:
+							"True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal; retained for response-shape compatibility.",
+					},
 					updatedAt: {
 						type: "string",
 						format: "date-time",
 						nullable: true,
 						description:
-							"When this snapshot row was refreshed (dated-metrics rule).",
+							"When these figures were measured (dated-metrics rule). Always cite it.",
 					},
 				},
 			},

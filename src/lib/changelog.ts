@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-19",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"/api/stablecoins now serves OUR OWN measurements instead of proxying a third-party-hosted snapshot service (openapi@1.8.73). Every row gains `basis` (live | curated-static | unmeasured) so an as-of estimate can never be read as a live measurement, plus `assetId` (`CODE-<issuer[0:8]>`, the safe join key when a ticker is ambiguous), `assetType`, `note`, and the FULL issuer account instead of a truncated display form. `meta.counts.byBasis` breaks the returned rows down by provenance. BREAKING: `supplyChange7d` is a number (percent) — it was a display string ('-5.80%'); it is null across the board until the series is seven days deep. `meta.upstream` is gone.",
+		detail:
+			"We now measure the registry ourselves every 6h (Horizon for existence, Stellar Expert for supply/holders/volume, live peg FX for USD conversion) into two collections: current state, plus one dated snapshot per asset per UTC day that the 7-day change is computed from. The motivation is sls-066: the previous upstream silently dropped Circle USDC for hours while the asset was live on-chain, and a missing row reads to an agent as 'this asset does not exist on Stellar'. The writer therefore emits an `unmeasured` row rather than no row, and a null metric never overwrites a good previous value in current state (the snapshot still records the null — current state answers 'what is it', the series answers 'what did we see when'). A datastore outage now returns 503 with an explicit advisory rather than an empty 200, because an empty 200 is exactly the shape that reads as 'Stellar has no stablecoins'. Coverage basis changes from `single-upstream-snapshot` to `curated-registry`: 23 hand-verified (code, issuer) pairs — absence still means 'not tracked here', never 'not issued on Stellar'.",
+	},
+	{
 		date: "2026-08-18",
 		surfaces: ["api"],
 		type: "fixed",
