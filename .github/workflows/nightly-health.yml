@@ -4,7 +4,8 @@ name: Nightly health (detectors → issue)
 # idea-self-sustaining-agents.md): run the deterministic detector suite
 # nightly and file/update ONE triaged issue when something goes red — the
 # maintainer wakes up to findings with probes, not to sweeps to run.
-# Deterministic only: no LLM, no DB writes, public live API + repo files.
+# Deterministic only: no LLM, no DB writes. Public live API + repo files,
+# except check-scan-coverage, which reads the repos collection directly.
 
 on:
   schedule:
@@ -86,9 +87,18 @@ jobs:
         shell: bash
         run: pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
 
+      # The one detector here that reads the DB rather than the public API:
+      # it needs overrideAccess to count the TRUE corpus, so a future access
+      # rule can never make it under-report coverage as "all scanned".
+      # Without these it died on "missing secret key" before its first query
+      # and reported `failure` into the issue below every night — a crash
+      # that read as "scan coverage is red" (2026-08-19).
       - name: Scan coverage (never-scanned + stale prominent repos)
         id: scancov
         continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
         shell: bash
         run: pnpm exec tsx scripts/check-scan-coverage.ts 2>&1 | tee /tmp/scan-coverage.log
 
