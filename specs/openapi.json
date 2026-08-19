@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.8.72",
+		"version": "1.8.73",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -4603,7 +4603,7 @@
 					"Ecosystem"
 				],
 				"summary": "Stellar stablecoins ranked by USD market cap",
-				"description": "Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.",
+				"description": "Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					"purpose": "Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
 					"keywords": [
@@ -4695,16 +4695,34 @@
 														"dataAsOf": {
 															"type": "string",
 															"format": "date-time",
-															"description": "When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer."
+															"description": "The freshest measurement among the served rows — cite this as the as-of date for every ranking answer."
 														},
 														"counts": {
 															"type": "object",
-															"description": "sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole inventory at the upstream snapshot regardless of filter.",
+															"description": "sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement.",
 															"properties": {
 																"tracked": {
 																	"type": "integer",
 																	"minimum": 0,
-																	"description": "Assets the upstream snapshot tracks, before any filter."
+																	"description": "Assets in the registry, before any filter."
+																},
+																"byBasis": {
+																	"type": "object",
+																	"description": "Counts of the RETURNED rows by how they were obtained.",
+																	"properties": {
+																		"live": {
+																			"type": "integer",
+																			"minimum": 0
+																		},
+																		"curated-static": {
+																			"type": "integer",
+																			"minimum": 0
+																		},
+																		"unmeasured": {
+																			"type": "integer",
+																			"minimum": 0
+																		}
+																	}
 																},
 																"total": {
 																	"type": "integer",
@@ -4720,12 +4738,12 @@
 														},
 														"coverage": {
 															"type": "object",
-															"description": "What this inventory IS and IS NOT (sls-066). It is one upstream snapshot service's tracked set, not a census of every Stellar stablecoin — Circle USDC was absent for hours on 2026-08-18 while live on-chain. Absence here is a coverage gap at the source, never proof an asset is not issued.",
+															"description": "What this inventory IS and IS NOT (sls-066). It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin — Circle USDC was absent from the previous upstream for hours on 2026-08-18 while live on-chain. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar.",
 															"properties": {
 																"basis": {
 																	"type": "string",
 																	"enum": [
-																		"single-upstream-snapshot"
+																		"curated-registry"
 																	]
 																},
 																"note": {
@@ -4735,12 +4753,7 @@
 														},
 														"methodology": {
 															"type": "string",
-															"description": "How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars."
-														},
-														"upstream": {
-															"type": "string",
-															"format": "uri",
-															"description": "The upstream data service this snapshot proxies (stablecoin.stellarlight.xyz)."
+															"description": "How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured."
 														}
 													}
 												}
@@ -7620,11 +7633,16 @@
 			},
 			"Stablecoin": {
 				"type": "object",
-				"description": "One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
+				"description": "One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
 				"properties": {
+					"assetId": {
+						"type": "string",
+						"nullable": true,
+						"description": "`CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous."
+					},
 					"ticker": {
 						"type": "string",
-						"description": "Asset code (USDC, USDY, GYEN, …)."
+						"description": "Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId."
 					},
 					"name": {
 						"type": "string",
@@ -7633,7 +7651,7 @@
 					"issuer": {
 						"type": "string",
 						"nullable": true,
-						"description": "Stellar issuer account (G…) — the universal join key."
+						"description": "Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity."
 					},
 					"issuerDomain": {
 						"type": "string",
@@ -7656,10 +7674,15 @@
 						"type": "string",
 						"nullable": true
 					},
+					"assetType": {
+						"type": "string",
+						"nullable": true,
+						"description": "Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg."
+					},
 					"supply": {
 						"type": "number",
 						"nullable": true,
-						"description": "Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported."
+						"description": "Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured."
 					},
 					"marketCapUSD": {
 						"type": "number",
@@ -7682,18 +7705,34 @@
 						"description": "24h transfer volume in USD."
 					},
 					"supplyChange7d": {
+						"type": "number",
+						"nullable": true,
+						"description": "Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. BREAKING 2026-08-19: was a display string ('-5.80%') while this endpoint proxied the retired snapshot service; it is a number now."
+					},
+					"basis": {
 						"type": "string",
 						"nullable": true,
-						"description": "7-day supply change (display string, e.g. '-5.80%')."
+						"enum": [
+							"live",
+							"curated-static",
+							"unmeasured"
+						],
+						"description": "How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting (sls-066); its metrics are the last known values, dated by updatedAt."
+					},
+					"note": {
+						"type": "string",
+						"nullable": true,
+						"description": "Plain-words reason a row is curated-static or unmeasured. Null for live rows."
 					},
 					"verified": {
-						"type": "boolean"
+						"type": "boolean",
+						"description": "True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal; retained for response-shape compatibility."
 					},
 					"updatedAt": {
 						"type": "string",
 						"format": "date-time",
 						"nullable": true,
-						"description": "When this snapshot row was refreshed (dated-metrics rule)."
+						"description": "When these figures were measured (dated-metrics rule). Always cite it."
 					}
 				}
 			},

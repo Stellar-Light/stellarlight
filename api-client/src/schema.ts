@@ -663,7 +663,7 @@ export interface paths {
         };
         /**
          * Stellar stablecoins ranked by USD market cap
-         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.
+         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
          */
         get: operations["getStablecoins"];
         put?: never;
@@ -1687,12 +1687,14 @@ export interface components {
                 repos?: string[];
             };
         };
-        /** @description One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'. */
+        /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
         Stablecoin: {
-            /** @description Asset code (USDC, USDY, GYEN, …). */
+            /** @description `CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous. */
+            assetId?: string | null;
+            /** @description Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId. */
             ticker?: string;
             name?: string | null;
-            /** @description Stellar issuer account (G…) — the universal join key. */
+            /** @description Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity. */
             issuer?: string | null;
             issuerDomain?: string | null;
             company?: string | null;
@@ -1700,7 +1702,9 @@ export interface components {
             /** @description Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD. */
             peg?: string | null;
             country?: string | null;
-            /** @description Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported. */
+            /** @description Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg. */
+            assetType?: string | null;
+            /** @description Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured. */
             supply?: number | null;
             /** @description Supply valued in USD (supply × USD price) — THE comparable ranking metric (default sort). Null = unpriced. */
             marketCapUSD?: number | null;
@@ -1710,12 +1714,20 @@ export interface components {
             holders?: number | null;
             /** @description 24h transfer volume in USD. */
             volume24hUSD?: number | null;
-            /** @description 7-day supply change (display string, e.g. '-5.80%'). */
-            supplyChange7d?: string | null;
+            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. BREAKING 2026-08-19: was a display string ('-5.80%') while this endpoint proxied the retired snapshot service; it is a number now. */
+            supplyChange7d?: number | null;
+            /**
+             * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting (sls-066); its metrics are the last known values, dated by updatedAt.
+             * @enum {string|null}
+             */
+            basis?: "live" | "curated-static" | "unmeasured" | null;
+            /** @description Plain-words reason a row is curated-static or unmeasured. Null for live rows. */
+            note?: string | null;
+            /** @description True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal; retained for response-shape compatibility. */
             verified?: boolean;
             /**
              * Format: date-time
-             * @description When this snapshot row was refreshed (dated-metrics rule).
+             * @description When these figures were measured (dated-metrics rule). Always cite it.
              */
             updatedAt?: string | null;
         };
@@ -3414,31 +3426,32 @@ export interface operations {
                         meta?: components["schemas"]["Meta"] & {
                             /**
                              * Format: date-time
-                             * @description When the upstream market-cap snapshot was taken — cite this as the as-of date for every ranking answer.
+                             * @description The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.
                              */
                             dataAsOf?: string;
-                            /** @description sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole inventory at the upstream snapshot regardless of filter. */
+                            /** @description sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement. */
                             counts?: {
-                                /** @description Assets the upstream snapshot tracks, before any filter. */
+                                /** @description Assets in the registry, before any filter. */
                                 tracked?: number;
+                                /** @description Counts of the RETURNED rows by how they were obtained. */
+                                byBasis?: {
+                                    live?: number;
+                                    "curated-static"?: number;
+                                    unmeasured?: number;
+                                };
                                 /** @description Rows matching the filters, before the limit slice. */
                                 total?: number;
                                 /** @description Rows in this response. */
                                 returned?: number;
                             };
-                            /** @description What this inventory IS and IS NOT (sls-066). It is one upstream snapshot service's tracked set, not a census of every Stellar stablecoin — Circle USDC was absent for hours on 2026-08-18 while live on-chain. Absence here is a coverage gap at the source, never proof an asset is not issued. */
+                            /** @description What this inventory IS and IS NOT (sls-066). It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin — Circle USDC was absent from the previous upstream for hours on 2026-08-18 while live on-chain. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar. */
                             coverage?: {
                                 /** @enum {string} */
-                                basis?: "single-upstream-snapshot";
+                                basis?: "curated-registry";
                                 note?: string;
                             };
-                            /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. */
+                            /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured. */
                             methodology?: string;
-                            /**
-                             * Format: uri
-                             * @description The upstream data service this snapshot proxies (stablecoin.stellarlight.xyz).
-                             */
-                            upstream?: string;
                         };
                         stablecoins?: components["schemas"]["Stablecoin"][];
                     };
