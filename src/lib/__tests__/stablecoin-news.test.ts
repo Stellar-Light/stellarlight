@@ -49,26 +49,36 @@ describe("selectStablecoinNews", () => {
 		expect(out).toHaveLength(1);
 	});
 
-	it("rejects a roundup that only mentions it in passing", () => {
-		// One strong term, no second signal — a mention, not the subject.
+	it("rejects a roundup even when its body is thick with the terms", () => {
+		// This is the case that broke the first two attempts: a digest body
+		// mentions stablecoin, USDC, Circle and mint, so any body-weighted
+		// rule ranks it above the actual coverage.
 		const out = selectStablecoinNews([
 			entry({
 				title: "Stellar Weekly Roundup: week of Aug 7, 2026",
-				description: "Grants, a hackathon, validator news, and a stablecoin.",
+				description:
+					"USDC supply grew, Circle expanded reserves, a new stablecoin mint went live, plus grants and validator news.",
 			}),
 		]);
 		expect(out).toEqual([]);
 	});
 
-	it("takes a body that carries the subject plus a second signal", () => {
+	it("rejects a digest even when the title names a coin", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "Weekly Roundup: USDC, grants and validators" }),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("ignores a body that names the subject the title does not", () => {
+		// A headline is what an editor decided the piece is about.
 		const out = selectStablecoinNews([
 			entry({
 				title: "A new dollar lands",
 				description: "The USDC issuer, Circle, expands its reserve reporting.",
 			}),
 		]);
-		expect(out).toHaveLength(1);
-		expect(out[0].matched).toContain("usdc");
+		expect(out).toEqual([]);
 	});
 
 	it("rejects the consensus paper — the vector-search false positive", () => {
@@ -79,6 +89,30 @@ describe("selectStablecoinNews", () => {
 			}),
 		]);
 		expect(out).toEqual([]);
+	});
+
+	it("decodes entities in a corpus title, which never sees the RSS parser", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "RedStone Brings Ondo&#x27;s USDY to Stellar DeFi" }),
+		]);
+		expect(out[0].title).toBe("RedStone Brings Ondo's USDY to Stellar DeFi");
+	});
+
+	it("keeps the real coverage the roundups were crowding out", () => {
+		const out = selectStablecoinNews([
+			entry({
+				title: "PYUSD deposits and withdrawals now available on Stellar!",
+			}),
+			entry({
+				title: "RedStone Brings Ondo's USDY to Stellar DeFi with SEP-40",
+				url: "https://lumenloop.com/news/redstone",
+			}),
+			entry({
+				title: "Sentora Expands Vaults on Stellar with Stablecoin Vaults",
+				url: "https://lumenloop.com/news/sentora",
+			}),
+		]);
+		expect(out).toHaveLength(3);
 	});
 
 	it("drops undated entries — a feed must not imply recency it cannot show", () => {

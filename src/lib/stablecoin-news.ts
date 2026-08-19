@@ -31,8 +31,8 @@ const STRONG = [
 	"yield-bearing",
 ];
 
-/** Terms that only count alongside another — too common to stand alone. */
-const WEAK = ["peg", "issuer", "anchor", "circle", "paxos", "reserve", "mint"];
+/** Titles that are digests, never coverage of one subject. */
+const DIGEST = /weekly roundup|week of|ama recap|newsletter/i;
 
 export interface NewsItem {
 	title: string;
@@ -56,7 +56,10 @@ function decode(s: string): string {
 		.replace(/&lt;/g, "<")
 		.replace(/&gt;/g, ">")
 		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
+		.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+		.replace(/&#x([0-9a-f]+);/gi, (_, h) =>
+			String.fromCodePoint(Number.parseInt(h, 16)),
+		)
 		.replace(/&amp;/g, "&")
 		.replace(/<[^>]+>/g, "")
 		.trim();
@@ -92,10 +95,15 @@ export function parseFeed(xml: string): FeedEntry[] {
 /**
  * Keep only entries genuinely ABOUT stablecoins.
  *
- * A strong term in the TITLE qualifies outright — that is what the piece is
- * called. Otherwise the body must carry a strong term plus a second distinct
- * signal, which is what separates "an article about USDC" from "a weekly
- * roundup that mentions USDC in passing".
+ * THE TITLE MUST NAME THE SUBJECT. Body matching was tried first and failed
+ * in the obvious way: a weekly roundup's body mentions stablecoin, USDC,
+ * Circle and mint, so every roundup outscored the actual coverage and the
+ * dock filled with digests. A headline is what an editor decided the piece is
+ * about; a body is just what it touched.
+ *
+ * Digest titles are refused outright even when they do name a coin, because
+ * "this week: USDC, grants, validators" is a summary of a week, not an
+ * article about USDC.
  *
  * Undated entries are dropped: a feed without dates invites the reader to
  * assume "recent", the one thing it cannot promise.
@@ -108,25 +116,21 @@ export function selectStablecoinNews(
 
 	for (const e of entries) {
 		if (!e.publishedAt) continue;
+		if (DIGEST.test(e.title)) continue;
 		const title = e.title.toLowerCase();
-		const body = `${title} ${e.description.toLowerCase()}`;
-
 		const titleHits = STRONG.filter((t) => title.includes(t));
-		const bodyStrong = STRONG.filter((t) => body.includes(t));
-		const bodyWeak = WEAK.filter((t) => body.includes(t));
-
-		const aboutIt =
-			titleHits.length > 0 ||
-			(bodyStrong.length > 0 && bodyStrong.length + bodyWeak.length >= 2);
-		if (!aboutIt) continue;
+		if (titleHits.length === 0) continue;
 
 		if (!byUrl.has(e.url))
 			byUrl.set(e.url, {
-				title: e.title,
+				// Decode HERE, not in the parser: corpus titles arrive straight
+				// from the DB and never pass through parseFeed, which is how
+				// "Ondo&#x27;s USDY" reached the dock.
+				title: decode(e.title),
 				url: e.url,
 				publishedAt: e.publishedAt,
 				source: "lumenloop",
-				matched: [...new Set([...bodyStrong, ...bodyWeak])],
+				matched: titleHits,
 			});
 	}
 
