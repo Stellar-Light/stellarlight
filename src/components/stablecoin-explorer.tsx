@@ -32,6 +32,7 @@ import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { StablecoinCharts } from "@/components/stablecoin-charts";
+import { StablecoinNewsDock } from "@/components/stablecoin-news-dock";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	Drawer,
@@ -656,7 +657,6 @@ export function StablecoinExplorer({
 			<div className="mb-8">
 				<StablecoinCharts
 					onIssuerClick={setSelectedIssuer}
-					news={news}
 					marketCapByToken={marketCapByToken}
 					holdersByToken={holdersByToken}
 					totalHolders={totalHoldersSeries}
@@ -1020,6 +1020,8 @@ export function StablecoinExplorer({
 					})}
 				</div>
 			)}
+
+			<StablecoinNewsDock news={news} />
 
 			{/* Copy/share confirmation. Fixed above the drawer so it is visible
 			    whether the click came from a row or from inside the detail. */}
