@@ -4,6 +4,7 @@ import {
 	StablecoinExplorer,
 } from "@/components/stablecoin-explorer";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { NEWS_SOURCES, type NewsItem, toNews } from "@/lib/stablecoin-news";
 import {
 	issuerLeaderboard,
 	pivotByToken,
@@ -25,6 +26,7 @@ export default async function StablecoinsPage() {
 	const payload = await getPayloadSafe();
 	let coins: CoinView[] = [];
 	let rawSnapshots: unknown[] = [];
+	let news: NewsItem[] = [];
 	let series = {
 		points: [] as ReturnType<typeof aggregateDaily>["points"],
 		droppedLowCoverage: 0,
@@ -78,6 +80,30 @@ export default async function StablecoinsPage() {
 			})
 			.filter((c) => c.ticker);
 
+		// Dated editorial coverage for the Latest Updates rail. Filtered by
+		// SOURCE and then by whether the text actually says a stablecoin term —
+		// never by vector similarity, which returns the consensus-protocol paper
+		// for the query "stablecoin".
+		try {
+			const found = await payload.find({
+				collection: "research-docs",
+				where: { source: { in: NEWS_SOURCES } },
+				limit: 400,
+				depth: 0,
+				sort: "-publishedAt",
+				select: {
+					title: true,
+					url: true,
+					content: true,
+					publishedAt: true,
+					source: true,
+				},
+			});
+			news = toNews(found.docs as Parameters<typeof toNews>[0]);
+		} catch {
+			// The rail is supplementary — never take the page down for it.
+		}
+
 		rawSnapshots = snaps.docs;
 		series = aggregateDaily(snaps.docs as SnapshotPoint[]);
 	}
@@ -116,6 +142,7 @@ export default async function StablecoinsPage() {
 				holdersByToken={holdersByToken}
 				totalHoldersSeries={totalHoldersSeries}
 				issuers={issuers}
+				news={news}
 			/>
 		</div>
 	);

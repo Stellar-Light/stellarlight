@@ -54,6 +54,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { NewsItem } from "@/lib/stablecoin-news";
 import type { IssuerLeader, SeriesRow } from "@/lib/stablecoin-series";
 import {
 	COUNTRY_INFO,
@@ -127,6 +128,7 @@ interface Props {
 	holdersByToken: SeriesRow[];
 	totalHoldersSeries: SeriesRow[];
 	issuers: IssuerLeader[];
+	news: NewsItem[];
 }
 
 const COUNTRY_FALLBACK = COUNTRY_INFO.Global;
@@ -258,6 +260,7 @@ export function StablecoinExplorer({
 	holdersByToken,
 	totalHoldersSeries,
 	issuers,
+	news,
 }: Props) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -653,6 +656,7 @@ export function StablecoinExplorer({
 			<div className="mb-8">
 				<StablecoinCharts
 					onIssuerClick={setSelectedIssuer}
+					news={news}
 					marketCapByToken={marketCapByToken}
 					holdersByToken={holdersByToken}
 					totalHolders={totalHoldersSeries}
