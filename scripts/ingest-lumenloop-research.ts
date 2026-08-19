@@ -32,6 +32,32 @@ const execute = args.includes("--execute");
 const BASE = "https://lumenloop.com";
 const SITEMAP = `${BASE}/sitemap.xml`;
 const RESEARCH_PREFIX = `${BASE}/research/`;
+const NEWS_PREFIX = `${BASE}/news/`;
+
+/**
+ * Lumen Loop's /news/ section is their AGGREGATION of ecosystem coverage —
+ * ~1,950 URLs against ~35 under /research/. Crawling all of it would be a
+ * large fetch-and-embed bill for a corpus that is mostly not about the things
+ * we serve, so we take the slice we actually surface: items whose SLUG names
+ * a stablecoin subject.
+ *
+ * Slug-matching (not body-matching) is deliberate. The slug is derived from
+ * the headline, so it says what the piece is ABOUT — a weekly roundup that
+ * mentions USDC in passing never has USDC in its slug. That is exactly the
+ * distinction the /stablecoins news dock needs and could not make while the
+ * only lumenloop source here was 35 research posts, 16 of them roundups.
+ */
+const NEWS_SLUG_TERMS = [
+	"stablecoin",
+	"usdc",
+	"eurc",
+	"pyusd",
+	"usdy",
+	"usdglo",
+	"usst",
+	"tokenized-dollar",
+	"anchor",
+];
 
 async function fetchHtml(url: string): Promise<string> {
 	const res = await fetch(url, {
@@ -97,26 +123,46 @@ async function run() {
 	);
 	console.log(`  ${researchUrls.length} research articles`);
 
+	const newsUrls = allUrls.filter(
+		(u) =>
+			u.startsWith(NEWS_PREFIX) &&
+			!JUNK_URL_RE.test(u) &&
+			NEWS_SLUG_TERMS.some((t) => u.slice(NEWS_PREFIX.length).includes(t)),
+	);
+	console.log(
+		`  ${newsUrls.length} stablecoin news items (of ${allUrls.filter((u) => u.startsWith(NEWS_PREFIX)).length} total news URLs)`,
+	);
+
 	const allChunks: ReturnType<typeof chunkMarkdown> = [];
 	let postErrors = 0;
 
-	for (const url of researchUrls) {
-		try {
-			const post = await fetchArticle(url);
-			if (post.body.length < 200) continue;
-			const slug = url.replace(RESEARCH_PREFIX, "").replace(/\/$/, "");
-			const chunks = chunkMarkdown({
-				md: `# ${post.title}\n\n${post.body}`,
-				parentDocId: `research/${slug}`,
-				title: post.title,
-				url,
-				tags: ["lumenloop-research", "lumenloop", "ecosystem-analysis"],
-				publishedAt: post.publishedAt,
-			});
-			allChunks.push(...chunks);
-		} catch (err) {
-			console.error(`  ✗ ${url}: ${(err as Error).message}`);
-			postErrors += 1;
+	const lanes: Array<{ urls: string[]; prefix: string; kind: string }> = [
+		{ urls: researchUrls, prefix: RESEARCH_PREFIX, kind: "research" },
+		{ urls: newsUrls, prefix: NEWS_PREFIX, kind: "news" },
+	];
+
+	for (const lane of lanes) {
+		for (const url of lane.urls) {
+			try {
+				const post = await fetchArticle(url);
+				if (post.body.length < 200) continue;
+				const slug = url.replace(lane.prefix, "").replace(/\/$/, "");
+				const chunks = chunkMarkdown({
+					md: `# ${post.title}\n\n${post.body}`,
+					parentDocId: `${lane.kind}/${slug}`,
+					title: post.title,
+					url,
+					tags:
+						lane.kind === "news"
+							? ["lumenloop-research", "lumenloop", "stablecoin-news"]
+							: ["lumenloop-research", "lumenloop", "ecosystem-analysis"],
+					publishedAt: post.publishedAt,
+				});
+				allChunks.push(...chunks);
+			} catch (err) {
+				console.error(`  ✗ ${url}: ${(err as Error).message}`);
+				postErrors += 1;
+			}
 		}
 	}
 
