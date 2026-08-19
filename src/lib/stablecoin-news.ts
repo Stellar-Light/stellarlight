@@ -1,82 +1,133 @@
 /**
- * Stablecoin coverage for the Latest Updates rail on /stablecoins.
+ * Stablecoin coverage for the Latest Updates dock on /stablecoins.
  *
- * DELIBERATELY NOT VECTOR SEARCH. Asked for "stablecoin" without a filter,
- * our own research endpoint returns the Stellar Consensus Protocol paper as
- * its top hit — a real semantic neighbour of the query and a completely
- * irrelevant answer. A news rail built on nearest-neighbour would quietly
- * fill with plausible-looking noise.
+ * Source is Lumen Loop's RSS feed — their whole aggregation, not just their
+ * own essays. Their site carries ~1,950 /news/ items against ~35 /research/
+ * ones, so reading only the research corpus (as this did first) showed weekly
+ * roundups instead of stablecoin news.
  *
- * So the rule here is deterministic and boring: the doc must come from a
- * dated editorial source AND its title or body must actually say one of the
- * stablecoin terms. A headline that never mentions the subject is not
- * coverage of it.
+ * DELIBERATELY NOT VECTOR SEARCH. Asked for "stablecoin" with no filter, our
+ * own research endpoint returns the Stellar Consensus Protocol paper as its
+ * top hit — a real semantic neighbour and a useless answer. A feed built on
+ * nearest-neighbour fills with plausible noise nobody notices.
+ *
+ * And not a bare keyword match either: a weekly roundup that says
+ * "stablecoin" once is not stablecoin news. The rule below wants the SUBJECT,
+ * not a mention.
  */
 
-/** Terms that make an article genuinely about stablecoins on Stellar. */
-const TERMS = [
+const FEED_URL = "https://lumenloop.com/rss.xml";
+
+/** Terms that name the subject itself. */
+const STRONG = [
 	"stablecoin",
 	"usdc",
 	"eurc",
 	"pyusd",
 	"usdy",
-	"peg",
-	"issuer",
-	"anchor",
-	"yield-bearing",
+	"usdglo",
 	"tokenized dollar",
 	"tokenised dollar",
+	"yield-bearing",
 ];
 
-/** Sources that carry dated, editorial coverage — not reference docs. */
-export const NEWS_SOURCES = ["lumenloop-research"];
+/** Terms that only count alongside another — too common to stand alone. */
+const WEAK = ["peg", "issuer", "anchor", "circle", "paxos", "reserve", "mint"];
 
 export interface NewsItem {
 	title: string;
 	url: string;
 	publishedAt: string | null;
 	source: string;
-	/** Which terms matched — kept so the rule stays inspectable. */
+	/** Terms that made it relevant — keeps the rule inspectable. */
 	matched: string[];
 }
 
-interface RawDoc {
-	title?: string | null;
-	url?: string | null;
-	content?: string | null;
-	publishedAt?: string | null;
-	source?: string | null;
+export interface FeedEntry {
+	title: string;
+	url: string;
+	publishedAt: string | null;
+	description: string;
+}
+
+function decode(s: string): string {
+	return s
+		.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, "&")
+		.replace(/<[^>]+>/g, "")
+		.trim();
+}
+
+function tag(block: string, name: string): string {
+	const m = block.match(
+		new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, "i"),
+	);
+	return m ? decode(m[1]) : "";
+}
+
+/** Parse an RSS 2.0 body into entries. Regex, not a parser dep — one feed, one shape. */
+export function parseFeed(xml: string): FeedEntry[] {
+	const out: FeedEntry[] = [];
+	for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+		const block = m[1];
+		const url = tag(block, "link") || tag(block, "guid");
+		const title = tag(block, "title");
+		if (!url || !title) continue;
+		const pub = tag(block, "pubDate");
+		const d = pub ? new Date(pub) : null;
+		out.push({
+			title,
+			url,
+			publishedAt: d && Number.isFinite(d.getTime()) ? d.toISOString() : null,
+			description: tag(block, "description"),
+		});
+	}
+	return out;
 }
 
 /**
- * Filter, dedupe and order editorial docs into a news list.
+ * Keep only entries genuinely ABOUT stablecoins.
  *
- * The corpus is chunked, so one article appears many times — dedupe on URL
- * and keep the chunk whose title is longest (chunk titles are sometimes
- * truncated). Undated docs are dropped: a news rail without a date invites
- * the reader to assume "recent", which is the one thing we can't promise.
+ * A strong term in the TITLE qualifies outright — that is what the piece is
+ * called. Otherwise the body must carry a strong term plus a second distinct
+ * signal, which is what separates "an article about USDC" from "a weekly
+ * roundup that mentions USDC in passing".
+ *
+ * Undated entries are dropped: a feed without dates invites the reader to
+ * assume "recent", the one thing it cannot promise.
  */
-export function toNews(docs: RawDoc[], limit = 6): NewsItem[] {
+export function selectStablecoinNews(
+	entries: FeedEntry[],
+	limit = 8,
+): NewsItem[] {
 	const byUrl = new Map<string, NewsItem>();
 
-	for (const d of docs) {
-		const url = (d.url ?? "").trim();
-		const title = (d.title ?? "").trim();
-		if (!url || !title || !d.publishedAt) continue;
+	for (const e of entries) {
+		if (!e.publishedAt) continue;
+		const title = e.title.toLowerCase();
+		const body = `${title} ${e.description.toLowerCase()}`;
 
-		const haystack = `${title} ${d.content ?? ""}`.toLowerCase();
-		const matched = TERMS.filter((t) => haystack.includes(t));
-		if (matched.length === 0) continue;
+		const titleHits = STRONG.filter((t) => title.includes(t));
+		const bodyStrong = STRONG.filter((t) => body.includes(t));
+		const bodyWeak = WEAK.filter((t) => body.includes(t));
 
-		const prev = byUrl.get(url);
-		if (prev && prev.title.length >= title.length) continue;
-		byUrl.set(url, {
-			title,
-			url,
-			publishedAt: d.publishedAt,
-			source: d.source ?? "",
-			matched,
-		});
+		const aboutIt =
+			titleHits.length > 0 ||
+			(bodyStrong.length > 0 && bodyStrong.length + bodyWeak.length >= 2);
+		if (!aboutIt) continue;
+
+		if (!byUrl.has(e.url))
+			byUrl.set(e.url, {
+				title: e.title,
+				url: e.url,
+				publishedAt: e.publishedAt,
+				source: "lumenloop",
+				matched: [...new Set([...bodyStrong, ...bodyWeak])],
+			});
 	}
 
 	return [...byUrl.values()]
@@ -84,7 +135,60 @@ export function toNews(docs: RawDoc[], limit = 6): NewsItem[] {
 		.slice(0, limit);
 }
 
-/** "3d ago", "5h ago", "just now" — the rail's timestamp form. */
+/** Fetch the RSS window. Returns [] on any failure — the dock is supplementary. */
+export async function fetchFeedEntries(): Promise<FeedEntry[]> {
+	try {
+		const res = await fetch(FEED_URL, {
+			headers: { accept: "application/rss+xml, application/xml, text/xml" },
+			signal: AbortSignal.timeout(10_000),
+			next: { revalidate: 1800 },
+		});
+		if (!res.ok) return [];
+		return parseFeed(await res.text());
+	} catch {
+		return [];
+	}
+}
+
+/** Corpus source ids that carry dated editorial writing. */
+export const NEWS_SOURCES = ["lumenloop-research"];
+
+/** Normalize an ingested research chunk into the same shape as a feed entry. */
+export function docToEntry(d: {
+	title?: string | null;
+	url?: string | null;
+	content?: string | null;
+	publishedAt?: string | null;
+}): FeedEntry | null {
+	if (!d.url || !d.title) return null;
+	return {
+		title: d.title,
+		url: d.url,
+		publishedAt: d.publishedAt ?? null,
+		description: d.content ?? "",
+	};
+}
+
+/**
+ * Merge the live RSS window with the ingested corpus.
+ *
+ * The feed carries only the ~10 newest items, so it supplies freshness; the
+ * corpus supplies depth. Dedupe on URL, RSS winning, since its title and date
+ * come straight from the publisher rather than from a chunked copy.
+ */
+export function mergeNews(
+	feed: FeedEntry[],
+	corpus: FeedEntry[],
+	limit = 8,
+): NewsItem[] {
+	const seen = new Set(feed.map((e) => e.url));
+	return selectStablecoinNews(
+		[...feed, ...corpus.filter((e) => !seen.has(e.url))],
+		limit,
+	);
+}
+
+/** "3d ago", "5h ago", "just now". */
 export function relativeTime(iso: string | null, now = Date.now()): string {
 	if (!iso) return "";
 	const then = new Date(iso).getTime();
@@ -101,7 +205,6 @@ export function relativeTime(iso: string | null, now = Date.now()): string {
 	return `${Math.floor(months / 12)}y ago`;
 }
 
-/** Human label for a corpus source id. */
 export function sourceLabel(source: string): string {
-	return source === "lumenloop-research" ? "Lumen Loop" : source;
+	return source === "lumenloop" ? "Lumen Loop" : source;
 }

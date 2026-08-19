@@ -1,89 +1,131 @@
 import { describe, expect, it } from "vitest";
-import { relativeTime, toNews } from "../stablecoin-news";
+import {
+	type FeedEntry,
+	mergeNews,
+	parseFeed,
+	relativeTime,
+	selectStablecoinNews,
+} from "../stablecoin-news";
 
 const day = (d: string) => `2026-08-${d}T12:00:00.000Z`;
+const entry = (o: Partial<FeedEntry>): FeedEntry => ({
+	title: "",
+	url: "https://lumenloop.com/news/x",
+	publishedAt: day("10"),
+	description: "",
+	...o,
+});
 
-describe("toNews", () => {
-	it("keeps only docs that actually mention the subject", () => {
-		const out = toNews([
-			{
-				title: "Stellar Is Now A Native Gateway For USDC",
-				url: "https://lumenloop.com/research/usdc",
-				publishedAt: day("05"),
-				source: "lumenloop-research",
-			},
-			{
-				// The exact false positive vector search produces for "stablecoin".
+describe("parseFeed", () => {
+	it("reads title, link, date and description out of RSS", () => {
+		const out = parseFeed(`<rss><channel>
+      <item>
+        <title>Stellar Is Now A Native Gateway For USDC</title>
+        <link>https://lumenloop.com/news/usdc-gateway</link>
+        <pubDate>Tue, 18 Aug 2026 11:00:00 GMT</pubDate>
+        <description><![CDATA[Circle's <b>USDC</b> lands natively.]]></description>
+      </item>
+    </channel></rss>`);
+		expect(out).toHaveLength(1);
+		expect(out[0].title).toBe("Stellar Is Now A Native Gateway For USDC");
+		expect(out[0].url).toBe("https://lumenloop.com/news/usdc-gateway");
+		expect(out[0].publishedAt).toBe("2026-08-18T11:00:00.000Z");
+		// CDATA unwrapped and inline tags stripped.
+		expect(out[0].description).toBe("Circle's USDC lands natively.");
+	});
+
+	it("skips items with no link or no title rather than emitting blanks", () => {
+		expect(
+			parseFeed("<rss><item><title>Orphan</title></item></rss>"),
+		).toHaveLength(0);
+	});
+});
+
+describe("selectStablecoinNews", () => {
+	it("takes a piece whose TITLE names the subject", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "Stellar Is Now A Native Gateway For USDC" }),
+		]);
+		expect(out).toHaveLength(1);
+	});
+
+	it("rejects a roundup that only mentions it in passing", () => {
+		// One strong term, no second signal — a mention, not the subject.
+		const out = selectStablecoinNews([
+			entry({
+				title: "Stellar Weekly Roundup: week of Aug 7, 2026",
+				description: "Grants, a hackathon, validator news, and a stablecoin.",
+			}),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("takes a body that carries the subject plus a second signal", () => {
+		const out = selectStablecoinNews([
+			entry({
+				title: "A new dollar lands",
+				description: "The USDC issuer, Circle, expands its reserve reporting.",
+			}),
+		]);
+		expect(out).toHaveLength(1);
+		expect(out[0].matched).toContain("usdc");
+	});
+
+	it("rejects the consensus paper — the vector-search false positive", () => {
+		const out = selectStablecoinNews([
+			entry({
 				title: "The Stellar Consensus Protocol",
-				content: "A federated model for internet-level consensus.",
-				url: "https://stellar.org/papers/scp.pdf",
-				publishedAt: day("04"),
-				source: "paper",
-			},
+				description: "A federated model for internet-level consensus.",
+			}),
 		]);
-		expect(out.map((n) => n.title)).toEqual([
-			"Stellar Is Now A Native Gateway For USDC",
-		]);
+		expect(out).toEqual([]);
 	});
 
-	it("matches on body text when the title alone does not", () => {
-		const out = toNews([
-			{
-				title: "Why Compliant Privacy Is a Business Requirement",
-				content: "…for fintechs moving stablecoin volume across borders.",
-				url: "https://lumenloop.com/research/privacy",
-				publishedAt: day("06"),
-				source: "lumenloop-research",
-			},
-		]);
-		expect(out).toHaveLength(1);
-		expect(out[0].matched).toContain("stablecoin");
-	});
-
-	it("dedupes the chunks of one article, keeping the fullest title", () => {
-		const out = toNews([
-			{
-				title: "Spend the Dollar, Keep the",
-				content: "stablecoin",
-				url: "https://lumenloop.com/research/usst",
-				publishedAt: day("07"),
-				source: "lumenloop-research",
-			},
-			{
-				title: "Spend the Dollar, Keep the Yield: USST Arrives on Stellar",
-				content: "stablecoin",
-				url: "https://lumenloop.com/research/usst",
-				publishedAt: day("07"),
-				source: "lumenloop-research",
-			},
-		]);
-		expect(out).toHaveLength(1);
-		expect(out[0].title).toBe(
-			"Spend the Dollar, Keep the Yield: USST Arrives on Stellar",
-		);
-	});
-
-	it("drops undated docs — a news rail must not imply recency it cannot show", () => {
-		const out = toNews([
-			{
-				title: "A stablecoin explainer",
-				url: "https://example.com/x",
-				publishedAt: null,
-				source: "lumenloop-research",
-			},
+	it("drops undated entries — a feed must not imply recency it cannot show", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "A stablecoin explainer", publishedAt: null }),
 		]);
 		expect(out).toEqual([]);
 	});
 
 	it("orders newest first and respects the limit", () => {
-		const mk = (n: string, d: string) => ({
-			title: `stablecoin ${n}`,
-			url: `https://lumenloop.com/${n}`,
-			publishedAt: day(d),
-			source: "lumenloop-research",
-		});
-		const out = toNews([mk("a", "01"), mk("c", "09"), mk("b", "05")], 2);
+		const mk = (n: string, d: string) =>
+			entry({
+				title: `stablecoin ${n}`,
+				url: `https://lumenloop.com/news/${n}`,
+				publishedAt: day(d),
+			});
+		const out = selectStablecoinNews(
+			[mk("a", "01"), mk("c", "09"), mk("b", "05")],
+			2,
+		);
 		expect(out.map((n) => n.title)).toEqual(["stablecoin c", "stablecoin b"]);
+	});
+});
+
+describe("mergeNews", () => {
+	it("prefers the RSS copy of an article the corpus also holds", () => {
+		const url = "https://lumenloop.com/news/usdc";
+		const out = mergeNews(
+			[entry({ url, title: "Stellar Is Now A Native Gateway For USDC" })],
+			[entry({ url, title: "Stellar Is Now A Native Gateway For" })],
+		);
+		expect(out).toHaveLength(1);
+		expect(out[0].title).toBe("Stellar Is Now A Native Gateway For USDC");
+	});
+
+	it("keeps corpus items the feed window has scrolled past", () => {
+		const out = mergeNews(
+			[entry({ url: "https://lumenloop.com/news/new", title: "USDC today" })],
+			[
+				entry({
+					url: "https://lumenloop.com/research/old",
+					title: "USDC last year",
+					publishedAt: day("01"),
+				}),
+			],
+		);
+		expect(out.map((n) => n.title)).toEqual(["USDC today", "USDC last year"]);
 	});
 });
 
