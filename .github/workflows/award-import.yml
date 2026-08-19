@@ -1,0 +1,67 @@
+name: i3 awards — import nominees / voters
+
+# Bulk-seed a round from CSV: the Airtable nomination export, or the Pilot +
+# Navigator public keys.
+#
+# The CSV is pasted into the workflow input, never committed. Stellar public
+# keys are not secrets, but the voter roster is not ours to publish, so it
+# stays out of git and out of the logs beyond counts and truncated ids.
+#
+# DRY-RUN by default: it resolves every row, prints what it would write, and
+# writes nothing. Tick `execute` only after reading the dry-run output — a
+# nominee that resolves to the wrong project puts another company's logo on
+# the ballot.
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "What the CSV holds"
+        type: choice
+        required: true
+        options: [nominees, voters]
+      csv:
+        description: "CSV including its header row. nominees: project,category,blurb — voters: address,label"
+        type: string
+        required: true
+      round:
+        description: "Round slug. Leave empty to target the OPEN round."
+        type: string
+        required: false
+        default: ""
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Import
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          # Through the environment, not argv — argv shows up in process lists
+          # and in the step's own echoed command line.
+          AWARD_IMPORT_CSV: ${{ inputs.csv }}
+        shell: bash
+        run: |
+          args="--kind=${{ inputs.kind }}"
+          if [ -n "${{ inputs.round }}" ]; then args="$args --round=${{ inputs.round }}"; fi
+          if [ "${{ inputs.execute }}" = "true" ]; then args="$args --execute"; fi
+          pnpm exec tsx scripts/data/award-import.ts $args
