@@ -62,6 +62,81 @@ export function pegFlag(peg: string | null | undefined): string {
 	);
 }
 
+// ── display forms carried over from the retired explorer ──────────────────
+// It served pre-formatted strings ("275.94M", "$467.50M", "2,284,095") and
+// the UI was built around them. We store raw numbers, so the shaping happens
+// here instead — same output, one place.
+
+/** Supply as the explorer showed it: "467.50M", "2.28B", "146.00". */
+export function displaySupply(n: number | null | undefined): string {
+	if (n == null || !Number.isFinite(n)) return "N/A";
+	const abs = Math.abs(n);
+	if (abs >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
+	if (abs >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+	if (abs >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+	if (abs >= 1e3) return `${(n / 1e3).toFixed(2)}K`;
+	return n.toFixed(2);
+}
+
+/** Market cap / volume as the explorer showed it: "$467.50M". */
+export function displayUSD(n: number | null | undefined): string {
+	if (n == null || !Number.isFinite(n)) return "N/A";
+	return `$${displaySupply(n)}`;
+}
+
+/** Holders with separators: "2,284,095". */
+export function displayHolders(n: number | null | undefined): string {
+	if (n == null || !Number.isFinite(n)) return "N/A";
+	return Math.round(n).toLocaleString("en-US");
+}
+
+/** Unit price: "$1.00", "$0.0067". */
+export function displayPrice(n: number | null | undefined): string {
+	if (n == null || !Number.isFinite(n)) return "N/A";
+	return `$${n < 0.01 ? n.toFixed(6) : n.toFixed(2)}`;
+}
+
+/** Compact holders for the overview tiles: "2.81M", "146K". */
+export function displayHoldersCompact(n: number | null | undefined): string {
+	if (n == null || !Number.isFinite(n)) return "N/A";
+	if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+	if (n >= 1e3) return `${(n / 1e3).toFixed(0)}K`;
+	return n.toLocaleString("en-US");
+}
+
+/** ISO-3166 alpha-2 (or "Global") → flag URL + human label, as the explorer had it. */
+export const COUNTRY_INFO: Record<string, { flag: string; label: string }> = {
+	US: { flag: flagUrl("us"), label: "United States" },
+	EU: { flag: flagUrl("eu"), label: "Europe" },
+	JP: { flag: flagUrl("jp"), label: "Japan" },
+	AU: { flag: flagUrl("au"), label: "Australia" },
+	CH: { flag: flagUrl("ch"), label: "Switzerland" },
+	GB: { flag: flagUrl("gb"), label: "United Kingdom" },
+	BR: { flag: flagUrl("br"), label: "Brazil" },
+	AR: { flag: flagUrl("ar"), label: "Argentina" },
+	PE: { flag: flagUrl("pe"), label: "Peru" },
+	MX: { flag: flagUrl("mx"), label: "Mexico" },
+	ZA: { flag: flagUrl("za"), label: "South Africa" },
+	NG: { flag: flagUrl("ng"), label: "Nigeria" },
+	Global: { flag: flagUrl("un"), label: "Global" },
+};
+
+function flagUrl(code: string) {
+	return `https://flagicons.lipis.dev/flags/4x3/${code}.svg`;
+}
+
+/** Country info for a row, falling back to the peg's home, then Global. */
+export function countryInfo(
+	country: string | null | undefined,
+	peg: string | null | undefined,
+) {
+	const code =
+		(country && COUNTRY_INFO[country] ? country : null) ??
+		(peg ? PEG_COUNTRY[peg.toUpperCase()] : null) ??
+		"Global";
+	return COUNTRY_INFO[code] ?? COUNTRY_INFO.Global;
+}
+
 export interface SnapshotPoint {
 	day: string;
 	assetId?: string | null;
