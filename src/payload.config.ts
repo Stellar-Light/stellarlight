@@ -31,6 +31,8 @@ import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
+import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
+import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
 import { Banner } from "./globals/Banner";
@@ -84,6 +86,8 @@ export default buildConfig({
 		Projects,
 		Repos,
 		Audits,
+		Stablecoins,
+		StablecoinSnapshots,
 		AwardRounds,
 		AwardNominees,
 		AwardVoters,
