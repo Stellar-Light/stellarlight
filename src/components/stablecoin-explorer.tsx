@@ -87,6 +87,29 @@ export interface CoinView {
 	priceRaw: number | null;
 }
 
+interface DefiContext {
+	contract: string | null;
+	blend: {
+		poolName: string;
+		poolUrl: string;
+		supplyAPY: number | null;
+		borrowAPY: number | null;
+	} | null;
+	liquidity: {
+		poolCount: number;
+		assetPooled: number;
+		assetPooledUSD: number | null;
+		topPools: Array<{
+			id: string;
+			counterAsset: string;
+			assetAmount: number;
+			trustlines: number;
+		}>;
+		capped: boolean;
+	} | null;
+	tradeLinks: Array<{ name: string; url: string }>;
+}
+
 export interface DayPoint {
 	date: string;
 	value: number;
@@ -250,6 +273,11 @@ export function StablecoinExplorer({
 	const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
 	const [priceDisplay, setPriceDisplay] = useState<"usd" | "native">("usd");
+	const [selectedIssuer, setSelectedIssuer] = useState<IssuerLeader | null>(
+		null,
+	);
+	const [defi, setDefi] = useState<DefiContext | null>(null);
+	const [defiLoading, setDefiLoading] = useState(false);
 
 	// A toast is the only confirmation a copy gives — without it the click
 	// looks like it did nothing.
@@ -360,6 +388,33 @@ export function StablecoinExplorer({
 			/* the user dismissed the share sheet */
 		}
 	};
+
+	// DeFi context is fetched per asset, not bundled into the page — it hits
+	// Horizon and would otherwise slow the first paint for everyone.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the asset only
+	useEffect(() => {
+		if (!selectedCoin) {
+			setDefi(null);
+			return;
+		}
+		let live = true;
+		setDefiLoading(true);
+		const q = new URLSearchParams({
+			code: selectedCoin.ticker,
+			issuer: selectedCoin.issuerCode,
+			...(selectedCoin.priceRaw != null
+				? { price: String(selectedCoin.priceRaw) }
+				: {}),
+		});
+		fetch(`/api/stablecoins/defi?${q}`)
+			.then((r) => (r.ok ? r.json() : null))
+			.then((d) => live && setDefi(d))
+			.catch(() => live && setDefi(null))
+			.finally(() => live && setDefiLoading(false));
+		return () => {
+			live = false;
+		};
+	}, [selectedCoin?.id]);
 
 	// Open the drawer named by ?coin= on first paint.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: first-paint deep link only
@@ -597,6 +652,7 @@ export function StablecoinExplorer({
 			{/* ── Analytics ───────────────────────────────────────────────── */}
 			<div className="mb-8">
 				<StablecoinCharts
+					onIssuerClick={setSelectedIssuer}
 					marketCapByToken={marketCapByToken}
 					holdersByToken={holdersByToken}
 					totalHolders={totalHoldersSeries}
@@ -973,6 +1029,101 @@ export function StablecoinExplorer({
 				</div>
 			)}
 
+			{/* ── Issuer detail ───────────────────────────────────────────── */}
+			<Drawer
+				open={!!selectedIssuer}
+				onOpenChange={(o) => !o && setSelectedIssuer(null)}
+			>
+				<DrawerContent className="max-h-[92vh]">
+					{selectedIssuer && (
+						<div className="w-full max-w-5xl mx-auto">
+							<DrawerHeader>
+								<div className="flex items-start justify-between gap-4 w-full">
+									<div className="text-left">
+										<DrawerTitle className="text-3xl">
+											{selectedIssuer.company}
+										</DrawerTitle>
+										<DrawerDescription className="mt-1">
+											{selectedIssuer.tokens.length} asset
+											{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
+											{displayUSD(selectedIssuer.totalMarketCapUSD)} combined
+											market cap
+										</DrawerDescription>
+									</div>
+									<button
+										type="button"
+										onClick={() => setSelectedIssuer(null)}
+										className="p-2 rounded-lg text-[#A3A3A3] hover:text-[#E5E5E5] hover:bg-white/[0.06] transition-colors flex-shrink-0"
+										aria-label="Close"
+									>
+										<X className="w-5 h-5" />
+									</button>
+								</div>
+							</DrawerHeader>
+
+							<div className="p-6 space-y-6 overflow-y-auto">
+								{selectedIssuer.hasEstimate && (
+									<div className="rounded-lg border border-[#2F2F2F] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
+										This total includes at least one asset whose figures are
+										hand-checked rather than measured this cycle. The per-asset
+										rows below say which.
+									</div>
+								)}
+
+								<div>
+									<h3 className="text-lg font-semibold mb-4">Assets</h3>
+									<div className="space-y-2">
+										{coins
+											.filter((c) => c.company === selectedIssuer.company)
+											.sort(
+												(a, b) =>
+													(b.marketCapRaw ?? -1) - (a.marketCapRaw ?? -1),
+											)
+											.map((c) => (
+												<button
+													type="button"
+													key={c.id}
+													onClick={() => {
+														setSelectedIssuer(null);
+														selectCoin(c);
+													}}
+													className="w-full text-left flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/70 transition-colors"
+												>
+													<CoinIcon
+														coin={c}
+														failed={failedIcons}
+														onFail={onFail}
+													/>
+													<div className="flex-1 min-w-0">
+														<div className="font-medium flex items-center gap-2">
+															{c.ticker}
+															<BasisTag basis={c.basis} />
+														</div>
+														<div className="text-xs text-muted-foreground">
+															{displaySupply(c.supplyRaw)} ·{" "}
+															{displayHolders(c.holdersRaw)} holders
+														</div>
+													</div>
+													<div className="text-right text-sm font-semibold tabular-nums">
+														{displayUSD(c.marketCapRaw)}
+													</div>
+												</button>
+											))}
+									</div>
+								</div>
+
+								<p className="text-xs text-muted-foreground leading-relaxed">
+									Totals sum USD market cap, the only figure comparable across
+									currencies — adding raw supply would treat pesos and dollars
+									as the same unit. Select an asset for its issuer account, DeFi
+									context and history.
+								</p>
+							</div>
+						</div>
+					)}
+				</DrawerContent>
+			</Drawer>
+
 			{/* ── Detail ──────────────────────────────────────────────────── */}
 			<Drawer open={!!selectedCoin} onOpenChange={(o) => !o && closeDrawer()}>
 				<DrawerContent className="max-h-[92vh]">
@@ -1163,6 +1314,142 @@ export function StablecoinExplorer({
 											</div>
 										</div>
 									</div>
+								</div>
+
+								<div>
+									<h3 className="text-lg font-semibold mb-4">DeFi</h3>
+									{defiLoading && !defi ? (
+										<div className="bg-muted rounded-lg p-4 text-sm text-muted-foreground">
+											Loading…
+										</div>
+									) : (
+										<div className="space-y-3">
+											{defi?.blend && (
+												<a
+													href={defi.blend.poolUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="flex items-center gap-3 p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+												>
+													<div className="flex-1">
+														<div className="text-sm font-medium">
+															Lend {selectedCoin.ticker} on Blend
+														</div>
+														<p className="text-xs text-muted-foreground mt-0.5">
+															{defi.blend.poolName} ·{" "}
+															{defi.blend.supplyAPY == null
+																? "live rates not wired yet"
+																: `${defi.blend.supplyAPY.toFixed(2)}% supply APY`}
+														</p>
+													</div>
+													<ExternalLink className="h-4 w-4" />
+												</a>
+											)}
+
+											<div className="bg-muted rounded-lg p-4">
+												<div className="text-sm font-medium mb-3">
+													Liquidity Pools
+												</div>
+												{defi?.liquidity == null ? (
+													<p className="text-xs text-muted-foreground">
+														Horizon&apos;s pool index was unreachable. That
+														means we could not look — not that{" "}
+														{selectedCoin.ticker} has no pools.
+													</p>
+												) : defi.liquidity.poolCount === 0 ? (
+													<p className="text-xs text-muted-foreground">
+														No Stellar AMM pool currently holds this asset.
+													</p>
+												) : (
+													<>
+														<div className="flex items-center gap-6 pb-3 mb-3 border-b border-border">
+															<div>
+																<div className="text-xs text-muted-foreground mb-1">
+																	Pooled
+																</div>
+																<div className="text-lg font-semibold tabular-nums">
+																	{displaySupply(defi.liquidity.assetPooled)}{" "}
+																	{selectedCoin.ticker}
+																</div>
+															</div>
+															<div>
+																<div className="text-xs text-muted-foreground mb-1">
+																	Value
+																</div>
+																<div className="text-lg font-semibold tabular-nums">
+																	{displayUSD(defi.liquidity.assetPooledUSD)}
+																</div>
+															</div>
+															<div>
+																<div className="text-xs text-muted-foreground mb-1">
+																	Pools
+																</div>
+																<div className="text-lg font-semibold tabular-nums">
+																	{defi.liquidity.poolCount}
+																	{defi.liquidity.capped ? "+" : ""}
+																</div>
+															</div>
+														</div>
+														<div className="space-y-1.5">
+															{defi.liquidity.topPools.map((pool) => (
+																<div
+																	key={pool.id}
+																	className="flex items-center justify-between text-xs"
+																>
+																	<span className="text-muted-foreground">
+																		{selectedCoin.ticker} / {pool.counterAsset}
+																	</span>
+																	<span className="tabular-nums">
+																		{displaySupply(pool.assetAmount)}
+																	</span>
+																</div>
+															))}
+														</div>
+														<p className="text-[11px] text-muted-foreground/70 mt-3 leading-relaxed">
+															This is the {selectedCoin.ticker} side of each
+															pool only — the other side is priced in tokens we
+															do not measure, so doubling it would be a guess,
+															not a measurement.
+														</p>
+													</>
+												)}
+											</div>
+
+											{defi?.contract && (
+												<div className="bg-muted rounded-lg p-4">
+													<div className="text-xs text-muted-foreground mb-1">
+														Asset Contract (SAC)
+													</div>
+													<div className="flex items-center gap-2">
+														<button
+															type="button"
+															onClick={async () => {
+																await navigator.clipboard.writeText(
+																	defi.contract as string,
+																);
+																say("Contract ID copied to clipboard");
+															}}
+															className="font-mono text-sm hover:text-foreground flex items-center gap-2"
+														>
+															<span className="break-all">
+																{defi.contract.slice(0, 8)}…
+																{defi.contract.slice(-6)}
+															</span>
+															<Copy className="h-4 w-4 flex-shrink-0" />
+														</button>
+														<a
+															href={`https://stellar.expert/explorer/public/contract/${defi.contract}`}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-muted-foreground hover:text-foreground"
+														>
+															<ExternalLink className="h-4 w-4" />
+														</a>
+													</div>
+												</div>
+											)}
+										</div>
+									)}
 								</div>
 
 								<div>
