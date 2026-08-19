@@ -340,11 +340,61 @@ async function knownAssetCoverage() {
 	}
 }
 
+// ── 4. every public page renders ──────────────────────────────────────────
+
+// 2026-08-19: /stablecoins shipped 500-ing on every request. tsc was clean,
+// 20 unit tests passed, `next build` passed, and CI was fully green — because
+// the pages are `force-dynamic`, so nothing ever rendered them until a real
+// request did. The defect was a server component passing a FUNCTION prop to a
+// client component, which React refuses at render time.
+//
+// The lesson generalizes past that one cause: for a force-dynamic page, the
+// only thing that proves it renders is rendering it. So sweep them all. A 5xx
+// here means a page is dead in production while every pre-merge gate is green.
+const PUBLIC_PAGES = [
+	"/",
+	"/directory",
+	"/entities",
+	"/builders",
+	"/partners",
+	"/hackathons",
+	"/leaderboard",
+	"/stablecoins",
+	"/analytics",
+	"/blog",
+	"/ideas",
+	"/skills",
+	"/scout",
+	"/ask",
+	"/submit",
+];
+
+async function everyPageRenders() {
+	console.log("\n4. page-render sweep — every public page must return 200");
+	for (const path of PUBLIC_PAGES) {
+		try {
+			const { status } = await getText(path);
+			if (status === 200) ok(`${path} renders`);
+			else
+				bad(
+					`${path} renders`,
+					`HTTP ${status} — the page is broken in production; force-dynamic pages never render pre-merge, so no CI gate sees this`,
+				);
+		} catch (e) {
+			bad(
+				`${path} renders`,
+				`probe failed: ${String((e as Error).message).slice(0, 80)}`,
+			);
+		}
+	}
+}
+
 (async () => {
 	console.log(`Live canary against ${BASE}`);
 	await silentEmpty();
 	await renderReachability();
 	await knownAssetCoverage();
+	await everyPageRenders();
 	console.log(`\n${passes} passed, ${failures} failed`);
 	writeNightlyFindings("live-canary", failRows);
 	process.exit(failures > 0 ? 1 : 0);

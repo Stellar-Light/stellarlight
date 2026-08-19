@@ -16,6 +16,7 @@ import { AreaChart } from "@/components/charts/area-chart";
 import { Grid } from "@/components/charts/grid";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { XAxis } from "@/components/charts/x-axis";
+import { formatCount, formatUSD } from "@/lib/stablecoin-view";
 
 export interface HistoryPoint {
 	date: string;
@@ -24,13 +25,26 @@ export interface HistoryPoint {
 	assetsCounted?: number;
 }
 
+/**
+ * WHICH formatter, not the formatter itself. A server component cannot pass a
+ * function across the client boundary — React throws at render, and because
+ * these pages are force-dynamic nothing prerenders, so neither tsc nor
+ * `next build` catches it. Only a live request does.
+ */
+export type ValueFormat = "usd" | "count";
+
+const FORMATTERS: Record<ValueFormat, (n: number) => string> = {
+	usd: formatUSD,
+	count: formatCount,
+};
+
 interface Props {
 	title: string;
 	/** Big current figure, already formatted. */
 	headline: string;
 	points: HistoryPoint[];
-	/** Formats a y value inside the tooltip. */
-	format: (n: number) => string;
+	/** How to format a y value inside the tooltip. */
+	format: ValueFormat;
 	/** Sub-line under the headline (e.g. the as-of date). */
 	caption?: string;
 	/** Noun for the empty state, e.g. "market cap". */
@@ -45,6 +59,7 @@ export function StablecoinHistoryChart({
 	caption,
 	subject,
 }: Props) {
+	const fmt = FORMATTERS[format] ?? formatUSD;
 	const enough = points.length >= 2;
 
 	return (
@@ -80,7 +95,7 @@ export function StablecoinHistoryChart({
 									{
 										color: "var(--chart-line-primary)",
 										label: title,
-										value: format(point.value as number),
+										value: fmt(point.value as number),
 									},
 									{
 										color: "transparent",
