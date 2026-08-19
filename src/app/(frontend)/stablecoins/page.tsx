@@ -4,6 +4,12 @@ import {
 	StablecoinExplorer,
 } from "@/components/stablecoin-explorer";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	issuerLeaderboard,
+	pivotByToken,
+	type TokenSnapshot,
+	totalPerDay,
+} from "@/lib/stablecoin-series";
 import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
 import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
 
@@ -18,6 +24,7 @@ export const metadata: Metadata = {
 export default async function StablecoinsPage() {
 	const payload = await getPayloadSafe();
 	let coins: CoinView[] = [];
+	let rawSnapshots: unknown[] = [];
 	let series = {
 		points: [] as ReturnType<typeof aggregateDaily>["points"],
 		droppedLowCoverage: 0,
@@ -34,6 +41,7 @@ export default async function StablecoinsPage() {
 				select: {
 					day: true,
 					assetId: true,
+					code: true,
 					marketCapUSD: true,
 					holders: true,
 				},
@@ -70,6 +78,7 @@ export default async function StablecoinsPage() {
 			})
 			.filter((c) => c.ticker);
 
+		rawSnapshots = snaps.docs;
 		series = aggregateDaily(snaps.docs as SnapshotPoint[]);
 	}
 
@@ -79,6 +88,14 @@ export default async function StablecoinsPage() {
 
 	// Last 30 days, oldest first — the window the two activity charts label.
 	const last30 = series.points.slice(-30);
+
+	// Per-token series for the four analytics panels, plus the leaderboard.
+	// The leaderboard needs no history, so it is useful from the first run.
+	const snapDocs = (rawSnapshots ?? []) as TokenSnapshot[];
+	const marketCapByToken = pivotByToken(snapDocs, "marketCapUSD");
+	const holdersByToken = pivotByToken(snapDocs, "holders");
+	const totalHoldersSeries = totalPerDay(snapDocs, "holders");
+	const issuers = issuerLeaderboard(coins);
 
 	return (
 		<div className="min-h-screen bg-background pt-16">
@@ -95,6 +112,10 @@ export default async function StablecoinsPage() {
 				totalMarketCap={totalMarketCap}
 				totalVolume24h={totalVolume24h}
 				totalHolders={totalHolders}
+				marketCapByToken={marketCapByToken}
+				holdersByToken={holdersByToken}
+				totalHoldersSeries={totalHoldersSeries}
+				issuers={issuers}
 			/>
 		</div>
 	);
