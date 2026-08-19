@@ -10,17 +10,11 @@
  * did there.
  */
 
-import { ExternalLink } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Grid } from "@/components/charts/grid";
 import { Line, LineChart } from "@/components/charts/line-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { XAxis } from "@/components/charts/x-axis";
-import {
-	type NewsItem,
-	relativeTime,
-	sourceLabel,
-} from "@/lib/stablecoin-news";
 import {
 	colorFor,
 	type IssuerLeader,
@@ -38,7 +32,6 @@ interface Props {
 	totalHolders: SeriesRow[];
 	issuers: IssuerLeader[];
 	onIssuerClick?: (issuer: IssuerLeader) => void;
-	news: NewsItem[];
 }
 
 const CHART_MARGIN = { top: 10, right: 16, bottom: 44, left: 56 };
@@ -100,7 +93,6 @@ export function StablecoinCharts({
 	totalHolders,
 	issuers,
 	onIssuerClick,
-	news,
 }: Props) {
 	const [timeframe, setTimeframe] = useState<Timeframe>("14D");
 
@@ -312,43 +304,6 @@ export function StablecoinCharts({
 								</button>
 							))}
 						</div>
-					</div>
-				</Panel>
-			</div>
-
-			<div className="col-span-full lg:col-span-6">
-				<Panel
-					title="Latest Updates"
-					description="Stellar stablecoin coverage, newest first"
-				>
-					<div className="h-[300px] overflow-auto">
-						{news.length === 0 ? (
-							<div className="h-full flex items-center justify-center text-xs text-[#999999]">
-								No dated stablecoin coverage in the corpus yet.
-							</div>
-						) : (
-							<div className="space-y-1">
-								{news.map((n) => (
-									<a
-										key={n.url}
-										href={n.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#2A2A2A] transition-colors group"
-									>
-										<div className="flex-1 min-w-0">
-											<div className="text-[#F5F5F5] text-sm leading-snug line-clamp-2">
-												{n.title}
-											</div>
-											<div className="text-[#999999] text-xs mt-1">
-												{sourceLabel(n.source)} · {relativeTime(n.publishedAt)}
-											</div>
-										</div>
-										<ExternalLink className="w-3.5 h-3.5 text-[#666666] group-hover:text-[#A3A3A3] flex-shrink-0 mt-0.5" />
-									</a>
-								))}
-							</div>
-						)}
 					</div>
 				</Panel>
 			</div>

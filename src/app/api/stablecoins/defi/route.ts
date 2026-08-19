@@ -48,8 +48,11 @@ export async function GET(req: NextRequest) {
 	const price = priceRaw ? Number.parseFloat(priceRaw) : null;
 	const priceUSD = price != null && Number.isFinite(price) ? price : null;
 
-	const liquidity = await fetchLiquidity(code, issuer, priceUSD);
-	const blend = blendListing(code);
+	// Independent sources — one being slow or down must not blank the other.
+	const [liquidity, blend] = await Promise.all([
+		fetchLiquidity(code, issuer, priceUSD),
+		blendListing(code),
+	]);
 
 	return NextResponse.json(
 		{
@@ -58,7 +61,7 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				asset: { code, issuer },
 				methodology:
-					"contract is the Stellar Asset Contract id derived deterministically from (code, issuer) on the public network — no lookup, correct even if nobody has wrapped the asset yet. blend is a committed pool registry: presence means a Blend pool lists the asset; supplyAPY/borrowAPY are null because live rates are not wired yet, never because they are zero. liquidity counts Stellar AMM pools holding this exact asset from Horizon's liquidity-pool index; `assetPooled` is units of THIS asset (its own peg) and `assetPooledUSD` values only that side — it is NOT whole-pool TVL, because the counter-asset of each pool has no price we measure. liquidity: null means Horizon was unreachable, NEVER that the asset has no pools.",
+					"contract is the Stellar Asset Contract id derived deterministically from (code, issuer) on the public network — no lookup, correct even if nobody has wrapped the asset yet. blend is a committed pool registry — presence means a Blend pool lists the asset — with supply/borrow APY read live from the pool's reserve over Soroban RPC, as a percent (4.31 = 4.31%). A null APY means the pool state could not be read, NEVER that the rate is zero; the listing itself still stands. liquidity counts Stellar AMM pools holding this exact asset from Horizon's liquidity-pool index; `assetPooled` is units of THIS asset (its own peg) and `assetPooledUSD` values only that side — it is NOT whole-pool TVL, because the counter-asset of each pool has no price we measure. liquidity: null means Horizon was unreachable, NEVER that the asset has no pools.",
 			},
 			contract: sacContractId(code, issuer),
 			blend,

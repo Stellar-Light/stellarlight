@@ -58,26 +58,87 @@ const BLEND_POOLS: BlendPool[] = [
 export interface BlendListing {
 	poolName: string;
 	poolUrl: string;
-	/** Null until the Blend SDK is wired — absent, not zero. */
+	/** Percent, e.g. 4.31. Null = the pool state could not be read, NOT 0%. */
 	supplyAPY: number | null;
 	borrowAPY: number | null;
 }
 
-/** Blend's listing for a ticker, or null when no pool lists it. */
-export function blendListing(ticker: string): BlendListing | null {
+/** The pool that lists a ticker, plus that ticker's reserve contract. */
+function poolFor(ticker: string) {
 	for (const pool of BLEND_POOLS) {
 		const assetId = pool.assets[ticker];
-		if (!assetId) continue;
-		return {
-			poolName: pool.name,
-			poolUrl: `https://blend.xlm.sh/supply/?poolId=${pool.poolId}&assetId=${assetId}`,
-			// Live rates need @blend-capital/blend-sdk + a Soroban RPC round
-			// trip. Not taken yet, so the field is null rather than a guess.
-			supplyAPY: null,
-			borrowAPY: null,
-		};
+		if (assetId) return { pool, assetId };
 	}
 	return null;
+}
+
+/** Daily compounding, the convention Blend's own UI quotes. */
+function aprToApy(apr: number): number {
+	return (1 + apr / 365) ** 365 - 1;
+}
+
+/**
+ * Blend's listing for a ticker, or null when no pool lists it.
+ *
+ * Reads live reserve state over Soroban RPC. The rates are the part that can
+ * fail — an RPC hiccup leaves them null while the pool name and link still
+ * render, because "Blend lists this asset" stays true regardless. A null rate
+ * is never rendered as 0%: "we could not read the pool" and "this pool pays
+ * nothing" are opposite claims.
+ */
+export async function blendListing(
+	ticker: string,
+): Promise<BlendListing | null> {
+	const match = poolFor(ticker);
+	if (!match) return null;
+	const { pool, assetId } = match;
+
+	const listing: BlendListing = {
+		poolName: pool.name,
+		poolUrl: `https://blend.xlm.sh/supply/?poolId=${pool.poolId}&assetId=${assetId}`,
+		supplyAPY: null,
+		borrowAPY: null,
+	};
+
+	try {
+		const { PoolV2 } = await import("@blend-capital/blend-sdk");
+		const loaded = await PoolV2.load(
+			{
+				rpc: "https://mainnet.sorobanrpc.com",
+				passphrase: "Public Global Stellar Network ; September 2015",
+				opts: undefined,
+			},
+			pool.poolId,
+		);
+		const reserve = loaded.reserves.get(assetId) as
+			| {
+					estSupplyApy?: number;
+					estBorrowApy?: number;
+					supplyApr?: number;
+					borrowApr?: number;
+			  }
+			| undefined;
+		if (!reserve) return listing;
+
+		// The SDK exposes an estimated APY directly on newer pools; older ones
+		// only carry an APR, which has to be compounded before it is an APY.
+		if (reserve.estSupplyApy !== undefined)
+			listing.supplyAPY = Number(reserve.estSupplyApy) * 100;
+		else if (reserve.supplyApr !== undefined)
+			listing.supplyAPY = aprToApy(Number(reserve.supplyApr)) * 100;
+
+		if (reserve.estBorrowApy !== undefined)
+			listing.borrowAPY = Number(reserve.estBorrowApy) * 100;
+		else if (reserve.borrowApr !== undefined)
+			listing.borrowAPY = aprToApy(Number(reserve.borrowApr)) * 100;
+
+		// A NaN out of the SDK must not reach the wire looking like a rate.
+		if (!Number.isFinite(listing.supplyAPY as number)) listing.supplyAPY = null;
+		if (!Number.isFinite(listing.borrowAPY as number)) listing.borrowAPY = null;
+	} catch {
+		// Pool unreadable — the listing still stands, the rates stay null.
+	}
+	return listing;
 }
 
 export interface LiquiditySummary {
