@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.759620189666748,
+      "topScore": 0.7598240971565247,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -99,7 +99,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7910811901092529,
+      "topScore": 0.7906394004821777,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7707698345184326,
+      "topScore": 0.7824482917785645,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -143,7 +143,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Five Years of Bitso and Stellar: From Remittance Corridor to"
+      "sample": "From Colombia to El Salvador and Beyond: How a Proven Model "
     },
     {
       "id": "dossier-blend-safety",
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8257007598876953,
+      "topScore": 0.8241016268730164,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7774108648300171,
+      "topScore": 0.7775769233703613,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.849909782409668,
+      "topScore": 0.8497692346572876,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -369,7 +369,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8104548454284668,
+      "topScore": 0.8105928897857666,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -783,7 +783,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.695712685585022,
+      "topScore": 0.6947882771492004,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535136580467224,
+      "topScore": 0.8537082672119141,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract."
     }
   ],
-  "generatedAt": "2026-08-19T06:04:42Z"
+  "generatedAt": "2026-08-19T16:42:14Z"
 }

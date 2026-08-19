@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-18T06:14:43.368Z",
+	"generatedAt": "2026-08-19T16:52:30.193Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
@@ -14,7 +14,7 @@
 		},
 		{
 			"probe": "battery:q-ti-java-sdk-wallet-feebump",
-			"note": "top 0.57 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://stellar.org/blog/developers/adapter-protocol-28-upgrade-guide",
+			"note": "top 0.59 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/news/sentora-expands-vaults-stellar-stablecoin-vaults",
 			"surface": "corpus"
 		},
 		{
