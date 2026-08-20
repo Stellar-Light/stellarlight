@@ -30,6 +30,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve a historical project name to what it is now
+         * @description Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (→ searchProjects). A miss means NOT TRACKED HERE — never that the name never existed, never that it is defunct.
+         */
+        get: operations["resolveProject"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/changes": {
         parameters: {
             query?: never;
@@ -1784,6 +1804,56 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatusResponse"];
+                };
+            };
+        };
+    };
+    resolveProject: {
+        parameters: {
+            query: {
+                /** @description The name, slug, or stellarlight project URL encountered. Matched against slugs, then aliases, then normalized names. */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resolution, including an explicit miss */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        query: string;
+                        /** @description false = the name is not tracked in this directory. NOT a claim it never existed or is defunct. */
+                        found: boolean;
+                        /**
+                         * @description How the query matched. An exact slug is a stronger identification than a normalized name.
+                         * @enum {string|null}
+                         */
+                        matchedOn?: "slug" | "canonical-slug" | "alias" | "name" | "repo" | null;
+                        /** @description The record the query names, which may itself be superseded. */
+                        subject?: Record<string, never> | null;
+                        /** @description Where to look now. Identical to subject when nothing moved. */
+                        current?: Record<string, never> | null;
+                        superseded?: boolean;
+                        /** @description Dated basis for the status. `unsourced: true` means we assert it with no citable source — our unverified record, not an established fact about a named company. */
+                        evidence?: Record<string, never> | null;
+                        /** @description Plain-words statement of what was resolved and what it does not claim. */
+                        note: string;
+                    };
+                };
+            };
+            /** @description Missing or unknown query param */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

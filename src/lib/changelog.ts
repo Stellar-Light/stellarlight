@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-20",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"resolveProject (GET /api/projects/resolve?q=) — turn a project name found in an old post, changelog or repo into what it is now: the record it names, where to look if that record was superseded, and the evidence behind any inactive status (openapi@1.8.77).",
+		detail:
+			"We already answered this for people — a dead slug 307s to its survivor in a browser — and not for machines, which is backwards for a question only agents ask. Matching runs strongest-first (slug, then alias, then normalized name) and reports which via `matchedOn`, so an exact slug can be weighted differently from a name collision; a name matching two projects returns a MISS naming both rather than picking one and attributing a history to the wrong company. Three refusals are load-bearing: `found: false` means NOT TRACKED HERE, never that a name never existed or is defunct; `superseded: false` on an inactive row means no successor is RECORDED, never that nothing succeeded it; and `evidence.unsourced: true` marks a status we assert with no citable source. That last one is honest rather than flattering — of ~80 inactive rows only 10 carry a source URL, so most resolutions say out loud that they are our unverified record. 14 unit tests, including a dangling successor pointer and a supersession cycle, both of which degrade to what we hold instead of throwing.",
+	},
+	{
+		date: "2026-08-20",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			'statusAsOf now dates the OBSERVATION instead of the last sync (openapi@1.8.76, stellar-raven sls-024). The nightly lumenloop sync re-stamped statusAsOf on every weak-basis row on every run, so 850 projects nobody had re-checked since import reported "Live, as of today" each morning. It advances only when the incoming status actually differs now; an unchanged label keeps the date we first observed it. statusBasis is also documented for what it is: source-inherited and unverified are ADMISSIONS that nobody checked, not evidence.',
