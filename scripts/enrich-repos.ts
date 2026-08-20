@@ -92,6 +92,35 @@ function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 // reposOf's two-segment regex skips it entirely — that's why flagship orgs
 // contributed ZERO code references. Detect the owner-only case so we can expand
 // it to the owner's repos via listOwnerRepos.
+/**
+ * The GitHub owner a project sits under, from a bare-org link OR a specific
+ * repo link OR the stored orgLogin. Distinct from orgLoginOf, which answers
+ * the narrower "does this project trigger an org fan-out".
+ *
+ * The distinction is the whole of sls-068: Fluxity links
+ * github.com/luanlabs/fluxity-v1-core, so orgLoginOf returns null for it and
+ * it was invisible as a sibling — Wagent's bare-org link then claimed every
+ * fluxity-* repo with nothing to argue against it.
+ */
+function ownerOf(p: Doc): string | null {
+	const gh = p.links?.github;
+	if (typeof gh === "string" && gh) {
+		const path = gh.replace(/^https?:\/\//, "").replace(/^www\./, "");
+		const m = path.match(/github\.com\/([^/?#\s]+)/i);
+		const login = m?.[1]?.trim();
+		if (
+			login &&
+			VALID_IDENT.test(login) &&
+			!NOT_A_USER.has(login.toLowerCase())
+		)
+			return login;
+	}
+	const stored = (p.github as { orgLogin?: string } | undefined)?.orgLogin;
+	if (typeof stored === "string" && stored && VALID_IDENT.test(stored))
+		return stored;
+	return null;
+}
+
 function orgLoginOf(p: Doc): string | null {
 	const gh = p.links?.github;
 	if (typeof gh !== "string" || !gh) return null;
@@ -239,10 +268,17 @@ async function main() {
 	// luanlabs/fluxity-* repos were served under project Wagent).
 	const orgSiblings = new Map<string, Doc[]>();
 	for (const p of projects) {
+		// Sibling set uses the BROAD owner: a project linking one repo in the
+		// org must still be able to claim its own repos by name.
+		const owner = ownerOf(p);
+		if (owner) {
+			const okey = owner.toLowerCase();
+			orgSiblings.set(okey, [...(orgSiblings.get(okey) ?? []), p]);
+		}
+		// Fan-out is still triggered only by a BARE-org link.
 		const login = orgLoginOf(p);
 		if (!login) continue;
 		const key = login.toLowerCase();
-		orgSiblings.set(key, [...(orgSiblings.get(key) ?? []), p]);
 		const prev = orgByLogin.get(key);
 		if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
 			orgByLogin.set(key, { login, project: p });
