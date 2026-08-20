@@ -11,7 +11,6 @@
  *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute]
  */
 import "./load-env";
-import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
 import { getPayload } from "payload";
 import {
 	type BatchRepoResult,
@@ -22,11 +21,13 @@ import {
 	type OwnerRepo,
 } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
-import { deriveTriageTags } from "../src/lib/repo-triage";
 import {
 	type AuditRecord,
 	buildKnowledgeNotes,
 } from "../src/lib/repo-knowledge";
+import { repoNameOwner } from "../src/lib/repo-org-attribution";
+import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
+import { deriveTriageTags } from "../src/lib/repo-triage";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
@@ -198,7 +199,9 @@ async function main() {
 				publishedAt: a.publishedAt ?? null,
 			});
 		}
-		console.log(`Loaded audit crosslinks for ${auditsByProject.size} projects.`);
+		console.log(
+			`Loaded audit crosslinks for ${auditsByProject.size} projects.`,
+		);
 	} catch (e) {
 		console.log(`Audit crosslink load failed (notes degrade): ${String(e)}`);
 	}
@@ -206,7 +209,14 @@ async function main() {
 	// Dedupe repos across projects; keep the highest-prominence owning project.
 	const byFull = new Map<
 		string,
-		{ owner: string; name: string; full: string; project: Doc }
+		{
+			owner: string;
+			name: string;
+			full: string;
+			project: Doc;
+			/** Named on the project record, not inferred from an org fan-out. */
+			explicit: boolean;
+		}
 	>();
 	for (const p of projects) {
 		for (const { owner, name } of reposOf(p)) {
@@ -214,7 +224,7 @@ async function main() {
 			const key = full.toLowerCase();
 			const prev = byFull.get(key);
 			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
-				byFull.set(key, { owner, name, full, project: p });
+				byFull.set(key, { owner, name, full, project: p, explicit: true });
 			}
 		}
 	}
@@ -223,10 +233,16 @@ async function main() {
 	// project's hackathon/SCF/prominence/builder grade. Existing explicit repos
 	// keep priority via the prominence guard.
 	const orgByLogin = new Map<string, { login: string; project: Doc }>();
+	// Every project linking the org, not only the winner: a studio org hosts
+	// several products, and a repo that NAMES one of them belongs to it rather
+	// than to whichever record happens to be most prominent (sls-068 — three
+	// luanlabs/fluxity-* repos were served under project Wagent).
+	const orgSiblings = new Map<string, Doc[]>();
 	for (const p of projects) {
 		const login = orgLoginOf(p);
 		if (!login) continue;
 		const key = login.toLowerCase();
+		orgSiblings.set(key, [...(orgSiblings.get(key) ?? []), p]);
 		const prev = orgByLogin.get(key);
 		if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
 			orgByLogin.set(key, { login, project: p });
@@ -267,21 +283,49 @@ async function main() {
 			ORG_REPO_CAP,
 		);
 		orgReposDropped += repos.length - keep.length;
+		const siblings = orgSiblings.get(login.toLowerCase()) ?? [p];
+		const siblingRefs = siblings.map((sp) => ({
+			slug: String(sp.slug ?? ""),
+			name: sp.name ? String(sp.name) : null,
+			prominence: (sp.prominence as number | undefined) ?? 0,
+		}));
+		const bySlug = new Map(siblings.map((sp) => [String(sp.slug ?? ""), sp]));
 		let taken = 0;
+		let reattributed = 0;
 		for (const r of keep) {
 			if (!VALID_IDENT.test(r.name)) continue;
 			const full = `${login}/${r.name}`;
 			const key = full.toLowerCase();
+			// The repo name is the strongest signal we have about which product
+			// in a shared org it belongs to. Fall back to the org winner when it
+			// names none of them.
+			const named = repoNameOwner(r.name, siblingRefs);
+			const owner = (named && bySlug.get(named.slug)) || p;
+			if (owner !== p) reattributed++;
 			const prev = byFull.get(key);
-			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
-				byFull.set(key, { owner: login, name: r.name, full, project: p });
+			// A name match beats the org's prominence winner — that ordering IS
+			// the fix. It never beats an EXPLICIT claim on a project record:
+			// curation outranks inference, both directions.
+			const beatsPrev =
+				!prev ||
+				(!prev.explicit &&
+					(owner !== p ||
+						(owner.prominence ?? 0) > (prev.project.prominence ?? 0)));
+			if (beatsPrev) {
+				byFull.set(key, {
+					owner: login,
+					name: r.name,
+					full,
+					project: owner,
+					explicit: false,
+				});
 			}
 			taken++;
 		}
 		orgRepoCount += taken;
 		if (taken > 0)
 			console.log(
-				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : smallOrg ? " (small-org kept)" : ""} → ${taken} indexed`,
+				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : smallOrg ? " (small-org kept)" : ""} → ${taken} indexed${reattributed ? `, ${reattributed} to a sibling by name` : ""}`,
 			);
 	}
 	if (orgByLogin.size)
@@ -449,7 +493,8 @@ async function main() {
 				lastCommitAt:
 					info?.lastCommitAt ??
 					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-					((existing as any)?.lastCommitAt ?? null),
+					(existing as any)?.lastCommitAt ??
+					null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 				codeInUse: (existing as any)?.codeInUse ?? null,
 			}),
@@ -465,13 +510,14 @@ async function main() {
 				lastCommitAt:
 					info?.lastCommitAt ??
 					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-					((existing as any)?.lastCommitAt ?? null),
+					(existing as any)?.lastCommitAt ??
+					null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-				stars: info?.stars ?? ((existing as any)?.stars ?? null),
+				stars: info?.stars ?? (existing as any)?.stars ?? null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-				isFork: info?.isFork ?? ((existing as any)?.isFork ?? null),
+				isFork: info?.isFork ?? (existing as any)?.isFork ?? null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-				isArchived: info?.isArchived ?? ((existing as any)?.isArchived ?? null),
+				isArchived: info?.isArchived ?? (existing as any)?.isArchived ?? null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 				farmScore: (existing as any)?.farmScore ?? null,
 				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
