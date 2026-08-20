@@ -1,0 +1,62 @@
+name: Index builder-owned repos
+
+# The repo index is project-driven: enrich-repos walks `projects` and indexes
+# what each one links to. A person shipping under their own account is
+# invisible to it, however much they build — which hid an SDF engineer's whole
+# output, including a ★30 installer that consumes our own data.
+#
+# Its own schedule on purpose. One shared PAT hourly budget feeds every
+# GitHub-touching job and the main enrich pass already starves mid-corpus;
+# 146 extra owner listings inside that pass would push it over. Here it fails
+# alone and harmlessly.
+#
+# Weekly is the right cadence: this only ADDS bare rows. enrich-repos fills
+# stars, language and scan signals on its own pass and owns those fields.
+
+on:
+  schedule:
+    # Tuesdays 05:00 UTC — clear of the Monday link sweep and basis upgrade.
+    - cron: "0 5 * * 2"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Optional: one builder login, for a cheap targeted run."
+        required: false
+        type: string
+        default: ""
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Index
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          args=""
+          if [ -n "${{ inputs.only }}" ]; then args="$args --only ${{ inputs.only }}"; fi
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
+            args="$args --execute"
+          fi
+          pnpm exec tsx scripts/enrich-builder-repos.ts $args
