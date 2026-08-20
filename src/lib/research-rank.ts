@@ -224,6 +224,40 @@ export function identifierTargets(query: string | undefined): string[] {
 	return out;
 }
 
+// ── sls-071: an exact FINDING identifier is a lookup key, not a hint ──
+// Audit findings are cited as V-SOR-VUL-002 — an identifier that lives INSIDE
+// a chunk rather than naming a document, so the CAP/SEP url-pin above cannot
+// see it. Vector search never goes empty, so a query for an identifier we do
+// NOT hold returns the report's section-classification boilerplate instead,
+// and on 2026-08-19 it did so at HIGHER confidence (0.85) than a real
+// identifier scored (0.73): asking about a finding that does not exist looked
+// more certain than asking about one that does. The identifier is either
+// present verbatim or it is a miss; there is no nearest-neighbour version of
+// a finding id.
+//
+// Two hyphen-separated groups minimum, so CAP-0038 / SEP-0010 (single group,
+// handled above) never match here.
+const FINDING_ID_RE = /\b[A-Z][A-Z0-9]{0,4}(?:-[A-Z]{2,6}){1,3}-\d{1,4}\b/g;
+
+/** Finding-style identifiers named by the query, deduped, upper-cased. */
+export function findingIdentifierTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.toUpperCase().matchAll(FINDING_ID_RE)) {
+		if (!out.includes(m[0])) out.push(m[0]);
+	}
+	return out;
+}
+
+/** Does any served text contain the identifier verbatim? */
+export function identifierIsPresent(
+	id: string,
+	texts: Array<string | null | undefined>,
+): boolean {
+	const needle = id.toUpperCase();
+	return texts.some((t) => (t ?? "").toUpperCase().includes(needle));
+}
+
 /** Does this chunk belong to one of the identifier-named documents? */
 function matchesTarget(url: string, targets: string[]): boolean {
 	return targets.some((id) =>
@@ -467,7 +501,8 @@ export const RESEARCH_ANCHORS: Array<{
 		// privacy actually exists) never entered the page. Anchor it for
 		// anonymity-vocabulary intent so the honest answer is guaranteed in.
 		id: "privacy-anonymity",
-		intent: /\banonym(?:ous|ity|ised|ized)?\b|\bmixer\b|\buntraceable\b|\bshielded\b/i,
+		intent:
+			/\banonym(?:ous|ity|ised|ized)?\b|\bmixer\b|\buntraceable\b|\bshielded\b/i,
 		context:
 			/\bstellar\b|\bledger\b|\btransactions?\b|\bpayments?\b|\btransfers?\b|\baccounts?\b|\btokens?\b/i,
 		urls: [

@@ -1837,6 +1837,12 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             } | null;
+                            /** @description Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report's section boilerplate — and on 2026-08-19 it scored HIGHER than a real identifier did. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match (sls-071). */
+                            exactMiss?: {
+                                /** @description The identifiers the query named that the corpus does not contain. */
+                                identifiers?: string[];
+                                note?: string;
+                            } | null;
                             counts?: {
                                 [key: string]: number;
                             };
@@ -2620,6 +2626,11 @@ export interface operations {
                                 };
                                 /** Format: date */
                                 asOf?: string;
+                                /**
+                                 * @description Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state. Served since the round feed shipped; specced 2026-08-19 (sls-072).
+                                 * @enum {string}
+                                 */
+                                source?: "live" | "unavailable";
                                 /** Format: uri */
                                 verifyAt?: string;
                             };

@@ -38,7 +38,9 @@ import {
 } from "@/lib/research-pipeline";
 import {
 	anchorDocUrls,
+	findingIdentifierTargets,
 	hasFullLexicalCoverage,
+	identifierIsPresent,
 	identifierTargets,
 	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
@@ -258,43 +260,42 @@ export async function GET(req: NextRequest) {
 	// Shared doc→row mapper: the sourceAdvisory ranks the corpus-wide pool
 	// through the EXACT same shape+regime as the served results.
 	const rowOfDoc = (d: {
-			_id: string;
-			source: string;
-			title: string;
-			section?: string;
-			url: string;
-			content: string;
-			chunkIndex: number;
-			publishedAt?: string;
-			observedAt?: string;
+		_id: string;
+		source: string;
+		title: string;
+		section?: string;
+		url: string;
+		content: string;
+		chunkIndex: number;
+		publishedAt?: string;
+		observedAt?: string;
 		docKind?: string;
 		docVersionStatus?: string;
-			auditor?: string;
-			protocol?: string;
-			severity?: string;
-			capStatus?: string;
-			capProtocolVersion?: number;
-			score?: number;
-		}) => ({
-			id: String(d._id),
-			source: d.source,
-			title: d.title,
-			section: d.section ?? null,
-			url: d.url,
-			content: d.content,
-			chunkIndex: d.chunkIndex,
-			publishedAt: d.publishedAt ?? null,
-			observedAt: d.observedAt ?? null,
-			docKind: d.docKind ?? null,
-			docVersionStatus: d.docVersionStatus ?? null,
-			auditor: d.auditor ?? null,
-			protocol: d.protocol ?? null,
-			severity: d.severity ?? null,
-			capStatus: d.capStatus ?? null,
-			capProtocolVersion: d.capProtocolVersion ?? null,
-			score: d.score,
-		});
-
+		auditor?: string;
+		protocol?: string;
+		severity?: string;
+		capStatus?: string;
+		capProtocolVersion?: number;
+		score?: number;
+	}) => ({
+		id: String(d._id),
+		source: d.source,
+		title: d.title,
+		section: d.section ?? null,
+		url: d.url,
+		content: d.content,
+		chunkIndex: d.chunkIndex,
+		publishedAt: d.publishedAt ?? null,
+		observedAt: d.observedAt ?? null,
+		docKind: d.docKind ?? null,
+		docVersionStatus: d.docVersionStatus ?? null,
+		auditor: d.auditor ?? null,
+		protocol: d.protocol ?? null,
+		severity: d.severity ?? null,
+		capStatus: d.capStatus ?? null,
+		capProtocolVersion: d.capProtocolVersion ?? null,
+		score: d.score,
+	});
 
 	// Try vector search first. If Atlas vector search isn't configured
 	// or the corpus is empty, fall back to keyword.
@@ -405,8 +406,8 @@ export async function GET(req: NextRequest) {
 				chunkIndex: number;
 				publishedAt?: string;
 				observedAt?: string;
-			docKind?: string;
-			docVersionStatus?: string;
+				docKind?: string;
+				docVersionStatus?: string;
 				auditor?: string;
 				protocol?: string;
 				severity?: string;
@@ -522,8 +523,8 @@ export async function GET(req: NextRequest) {
 					chunkIndex: number;
 					publishedAt?: string;
 					observedAt?: string;
-			docKind?: string;
-			docVersionStatus?: string;
+					docKind?: string;
+					docVersionStatus?: string;
 					auditor?: string;
 					protocol?: string;
 					severity?: string;
@@ -921,6 +922,29 @@ export async function GET(req: NextRequest) {
 		matchMode: mode,
 	});
 
+	// sls-071: a finding identifier is present verbatim or it is a miss. Vector
+	// search never goes empty, so without this an absent id returns the
+	// report's boilerplate — and scored HIGHER than a real id did. Say so
+	// rather than let a nearest neighbour read as the finding.
+	const findingIds = findingIdentifierTargets(q);
+	const missedIds = findingIds.filter(
+		(id) =>
+			!identifierIsPresent(
+				id,
+				results.flatMap((r) => [
+					(r as { content?: string }).content,
+					(r as { title?: string }).title,
+				]),
+			),
+	);
+	const exactMiss =
+		missedIds.length > 0
+			? {
+					identifiers: missedIds,
+					note: `The indexed corpus contains no chunk carrying ${missedIds.length === 1 ? "this identifier" : "these identifiers"} verbatim. The rows below are the nearest SEMANTIC neighbours of the query — they are not that finding, and their confidence scores rank similarity, not a match. Do not report ${missedIds.join(", ")} as found, and do not infer its content from these rows.`,
+				}
+			: null;
+
 	return NextResponse.json(
 		{
 			meta: {
@@ -931,6 +955,7 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				...(sourceAdvisory ? { sourceAdvisory } : {}),
+				...(exactMiss ? { exactMiss } : {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
