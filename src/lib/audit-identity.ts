@@ -244,16 +244,26 @@ export interface AuditRelation {
  * carry the same critical finding at commit 2674d86; report 28's own title
  * states "V2"; neither document states a supersession — so none is claimed). */
 export const AUDIT_RELATIONS: Record<number, AuditRelation> = {
+	// Veridise / Soroban Core. 42 SUPERSEDES 28 — read off the documents on
+	// 2026-08-19, not inferred from the dates (which mislead: the V2 report is
+	// the OLDER of the two, published 2024-01-02, while the unversioned-looking
+	// row is the 2025-09-26 revision).
+	//
+	// Report 42's own title is "Soroban Stellar Soroban Core V2.1 (Intended
+	// Behavior and Invalid Issues moved to the Appendix)" — our stored title had
+	// lost the version. Its finding list is report 28's eight minus "Possible
+	// Unmetered Clones", exactly the reclassification the title describes.
+	// Highest severity in either document is Medium; neither carries a critical.
 	28: {
 		engagementId: "veridise-soroban-core-2023q4",
 		reportVersion: "V2",
-		supersededByReportId: null,
+		supersededByReportId: 42,
 		engagementStart: "2023-10-30",
 		engagementEnd: "2023-12-22",
 	},
 	42: {
 		engagementId: "veridise-soroban-core-2023q4",
-		reportVersion: null,
+		reportVersion: "V2.1",
 		supersededByReportId: null,
 		engagementStart: "2023-10-30",
 		engagementEnd: "2023-12-22",
