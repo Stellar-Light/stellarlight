@@ -161,6 +161,110 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/projects/resolve": {
+			get: {
+				operationId: "resolveProject",
+				tags: ["Discovery"],
+				summary: "Resolve a historical project name to what it is now",
+				description:
+					"Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (\u2192 searchProjects). A miss means NOT TRACKED HERE \u2014 never that the name never existed, never that it is defunct.",
+				"x-routing": {
+					purpose:
+						"Turn a stale or unfamiliar project name into its current identity, successor, and status evidence.",
+					keywords: [
+						"renamed",
+						"superseded",
+						"what happened to",
+						"no longer exists",
+						"dead project",
+						"defunct",
+						"successor",
+						"former name",
+						"old name",
+					],
+					useWhen: [
+						"a name in an old article or repo matches nothing in the current directory",
+						"deciding whether a project was renamed or actually wound down",
+						"reconciling an outdated reference before citing it",
+					],
+					exampleQuestions: [
+						"What happened to Passport on Stellar?",
+						"Is this project still around or was it renamed?",
+						"This blog post mentions a project I cannot find \u2014 what is it now?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"The name, slug, or stellarlight project URL encountered. Matched against slugs, then aliases, then normalized names.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Resolution, including an explicit miss",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["found", "query", "note"],
+									properties: {
+										query: { type: "string" },
+										found: {
+											type: "boolean",
+											description:
+												"false = the name is not tracked in this directory. NOT a claim it never existed or is defunct.",
+										},
+										matchedOn: {
+											type: "string",
+											nullable: true,
+											enum: ["slug", "canonical-slug", "alias", "name", "repo"],
+											description:
+												"How the query matched. An exact slug is a stronger identification than a normalized name.",
+										},
+										subject: {
+											type: "object",
+											nullable: true,
+											description:
+												"The record the query names, which may itself be superseded.",
+										},
+										current: {
+											type: "object",
+											nullable: true,
+											description:
+												"Where to look now. Identical to subject when nothing moved.",
+										},
+										superseded: { type: "boolean" },
+										evidence: {
+											type: "object",
+											nullable: true,
+											description:
+												"Dated basis for the status. `unsourced: true` means we assert it with no citable source \u2014 our unverified record, not an established fact about a named company.",
+										},
+										note: {
+											type: "string",
+											description:
+												"Plain-words statement of what was resolved and what it does not claim.",
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Missing or unknown query param",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/changes": {
 			get: {
 				operationId: "getChanges",
