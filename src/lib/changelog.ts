@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-19",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"Two stellar-raven findings closed (openapi@1.8.74). sls-071: an exact audit-finding identifier the corpus does not hold now returns `meta.exactMiss` naming it, instead of the report's section boilerplate — which on 2026-08-19 came back at HIGHER confidence (0.85) for an identifier that does not exist than a real one scored (0.73). sls-072: `meta.scfRound.source` (live | unavailable) is declared in the response schema; it was served but undeclared, and it is the field that separates a failed round-feed fetch from a genuine 'no round open'.",
+		detail:
+			"An identifier is present verbatim or it is a miss — there is no nearest-neighbour version of a finding id, so vector fallback for one is never an answer. Detection requires two hyphen-separated groups (V-SOR-VUL-002, V-SOR-APP-VUL-003) so CAP-0038 and SEP-0010, which are pinned by document URL, never route through it. The rows are still returned, because the neighbours may be useful, but meta.exactMiss says in words that their scores rank similarity rather than a match and that the identifier must not be reported as found. On sls-072: `unavailable` means the fetch failed, so an empty roundsInProgress means we could not look, never that nothing is open — undeclared, a consumer could not tell an outage from a negative claim.",
+	},
+	{
+		date: "2026-08-19",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			"/api/stablecoins now serves OUR OWN measurements instead of proxying a third-party-hosted snapshot service (openapi@1.8.73). Every row gains `basis` (live | curated-static | unmeasured) so an as-of estimate can never be read as a live measurement, plus `assetId` (`CODE-<issuer[0:8]>`, the safe join key when a ticker is ambiguous), `assetType`, `note`, and the FULL issuer account instead of a truncated display form. `meta.counts.byBasis` breaks the returned rows down by provenance. BREAKING: `supplyChange7d` is a number (percent) — it was a display string ('-5.80%'); it is null across the board until the series is seven days deep. `meta.upstream` is gone.",

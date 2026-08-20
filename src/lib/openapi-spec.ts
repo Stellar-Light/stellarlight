@@ -255,6 +255,21 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
+												exactMiss: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report\u0027s section boilerplate \u2014 and on 2026-08-19 it scored HIGHER than a real identifier did. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match (sls-071).",
+													properties: {
+														identifiers: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"The identifiers the query named that the corpus does not contain.",
+														},
+														note: { type: "string" },
+													},
+												},
 												counts: {
 													type: "object",
 													additionalProperties: { type: "integer" },
@@ -2013,6 +2028,12 @@ export const spec: OpenAPISpec = {
 															},
 														},
 														asOf: { type: "string", format: "date" },
+														source: {
+															type: "string",
+															enum: ["live", "unavailable"],
+															description:
+																"Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state. Served since the round feed shipped; specced 2026-08-19 (sls-072).",
+														},
 														verifyAt: { type: "string", format: "uri" },
 													},
 												},
