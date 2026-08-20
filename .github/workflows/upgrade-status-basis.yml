@@ -1,0 +1,55 @@
+name: Upgrade status basis from link health
+
+# Joins the weekly link-health sweep to project lifecycle labels: a project
+# whose website actually answered on a known date gets statusBasis
+# site-liveness and statusAsOf set to WHEN IT ANSWERED — replacing the
+# non-discriminating "source-inherited" that ~84% of rows carried
+# (stellar-raven sls-024).
+#
+# Runs after check-links (Mondays 02:00 UTC) so it always joins fresh
+# evidence. Manual runs are DRY by default; writing needs the box ticked.
+#
+# It never changes `status` — a site that fails to answer is not proof a
+# project is dead, and inferring that is how we deleted Keybase's page once.
+
+on:
+  schedule:
+    # Mondays 04:00 UTC — two hours after the link sweep.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Upgrade
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        shell: bash
+        run: |
+          # Scheduled runs write; manual runs need the box ticked.
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
+            pnpm exec tsx scripts/data/upgrade-status-basis.ts --execute
+          else
+            pnpm exec tsx scripts/data/upgrade-status-basis.ts
+          fi
