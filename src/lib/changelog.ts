@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-20",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			'statusAsOf now dates the OBSERVATION instead of the last sync (openapi@1.8.76, stellar-raven sls-024). The nightly lumenloop sync re-stamped statusAsOf on every weak-basis row on every run, so 850 projects nobody had re-checked since import reported "Live, as of today" each morning. It advances only when the incoming status actually differs now; an unchanged label keeps the date we first observed it. statusBasis is also documented for what it is: source-inherited and unverified are ADMISSIONS that nobody checked, not evidence.',
+		detail:
+			"Measured before changing anything: of 1,010 projects, 850 (84%) carry statusBasis source-inherited, statusAsOf was 96% populated but meaningless on those rows, statusSourceUrl 68%, supportedNetworks 9%, statusConfidence 0%. The vocabulary already distinguishes operator-announcement / site-liveness / onchain-activity / human-verified — it is simply barely applied, and only 18 of the 850 inherited rows carry on-chain or TVL evidence that would let us upgrade them honestly. So this ships the two things that are true rather than inventing provenance we do not have: a date that means something, and a description that stops a Live label on an inherited basis from reading as verification. Populating a real basis for the remaining rows needs evidence collection (site probes, chain probes, curation), which is separate work and does not belong behind a schema edit.",
+	},
+	{
 		date: "2026-08-19",
 		surfaces: ["api"],
 		type: "changed",
