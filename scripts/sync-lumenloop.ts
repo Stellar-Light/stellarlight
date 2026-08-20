@@ -12,6 +12,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
+import { withoutCuratedFields } from "../src/lib/utils/curated-fields";
 import {
 	extractEntryId,
 	type LumenloopEntry,
@@ -19,9 +20,7 @@ import {
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
 import configPromise from "../src/payload.config";
-import { withoutCuratedFields } from "../src/lib/utils/curated-fields";
 import { curatedFieldsFor } from "./data/curation-maps";
-
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -198,10 +197,23 @@ async function main() {
 							!doc.statusBasis ||
 							doc.statusBasis === "source-inherited" ||
 							doc.statusBasis === "unverified";
+						// statusAsOf DATES THE OBSERVATION, not the sync. It moved to
+						// `now` on every run for every weak-basis row, so 850 projects
+						// nobody had re-checked since import reported "Live, as of
+						// today" each morning — a freshness claim the sync had not
+						// earned, and worse than leaving it null. It advances only when
+						// the incoming status actually differs from what we hold; an
+						// unchanged label keeps the date we first observed it.
+						const incomingStatus = (patch as { status?: string }).status;
+						const statusChanged =
+							typeof incomingStatus === "string" &&
+							incomingStatus !== doc.status;
 						const provenanceStamp = weakBasis
 							? {
 									statusBasis: "source-inherited",
-									statusAsOf: new Date(),
+									...(statusChanged || !doc.statusAsOf
+										? { statusAsOf: new Date() }
+										: {}),
 									statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
 								}
 							: {};
@@ -318,11 +330,15 @@ async function main() {
 	// green-run-that-did-nothing class): an empty upstream sweep or swallowed
 	// per-item errors must not exit green on the nightly cron.
 	if (stats.total_files === 0) {
-		console.error("\n✗ zero files scanned — upstream empty or unreachable; exiting 1.");
+		console.error(
+			"\n✗ zero files scanned — upstream empty or unreachable; exiting 1.",
+		);
 		process.exit(1);
 	}
 	if (stats.projects.errors > 0 || stats.entities.errors > 0) {
-		console.error(`\n✗ ${stats.projects.errors + stats.entities.errors} item error(s) — exiting 1 so the run shows red.`);
+		console.error(
+			`\n✗ ${stats.projects.errors + stats.entities.errors} item error(s) — exiting 1 so the run shows red.`,
+		);
 		process.exit(1);
 	}
 	process.exit(0);

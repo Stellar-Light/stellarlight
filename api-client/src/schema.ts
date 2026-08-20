@@ -937,7 +937,7 @@ export interface components {
                 ageDays?: number | null;
             } | null;
             /**
-             * @description What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.
+             * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
              * @enum {string|null}
              */
             statusBasis?: "operator-announcement" | "site-liveness" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
