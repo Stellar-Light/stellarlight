@@ -711,7 +711,7 @@ export interface components {
         };
         /** @description One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero. */
         Audit: {
-            /** @description sls-064 relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent. */
+            /** @description Relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent. */
             engagementId?: string | null;
             /** @description Version the report states about itself (e.g. 'V2'); null when the source states none. */
             reportVersion?: string | null;
@@ -863,7 +863,7 @@ export interface components {
             };
             partners?: components["schemas"]["Partner"][];
         };
-        /** @description sls-048: the population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed. */
+        /** @description The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed. */
         PopulationScope: {
             /** @description Stable digest of collection + filters (NOT count/time), e.g. 'projects|status:Development+Live+Pre-Release'. /api/status sources use 'projects|status:all' (full collection). */
             id?: string;
@@ -894,7 +894,7 @@ export interface components {
                 count?: number;
                 /** Format: date-time */
                 lastUpdatedAt?: string | null;
-                /** @description Scope digest of what `count` counts (sls-048) — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes. */
+                /** @description Scope digest of what `count` counts — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes. */
                 populationId?: string;
                 notes?: string;
             }[];
@@ -1009,7 +1009,7 @@ export interface components {
             } | null;
             /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown. */
             supportedNetworks?: string[];
-            /** @description sls-032: curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time. */
+            /** @description Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time. */
             routes?: {
                 /** @description Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella). */
                 fromChain: string;
@@ -1034,11 +1034,11 @@ export interface components {
                 asOf?: string | null;
             }[] | null;
             /**
-             * @description sls-035: role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').
+             * @description Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').
              * @enum {string|null}
              */
             venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated" | null;
-            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS (sls-049): capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
+            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
             anchorProfile?: {
                 slug?: string;
                 country?: string | null;
@@ -1077,16 +1077,16 @@ export interface components {
             tvlSource?: string | null;
             /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
             tvlMethod?: string | null;
-            /** @description sls-039: the curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
+            /** @description The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
             llamaSlugs?: string[] | null;
             /**
              * Format: uri
-             * @description sls-039: citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
+             * @description Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
              */
             tvlMethodUrl?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
             canonicalSlug?: string | null;
-            /** @description Rename continuity (sls-050). Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it. */
+            /** @description Rename continuity. Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it. */
             identity?: {
                 currentName?: string;
                 aliases?: string[];
@@ -1133,9 +1133,9 @@ export interface components {
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
             prominence?: number;
             verificationLevel?: string | null;
-            /** @description sls-033/#519: curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim). */
+            /** @description Curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim). */
             productKind?: string | null;
-            /** @description sls-033/#519: per-platform availability with as-of dates. null = not curated. */
+            /** @description Per-platform availability with as-of dates. null = not curated. */
             availability?: {
                 platform?: string;
                 state?: string;
@@ -1180,9 +1180,9 @@ export interface components {
                         why?: string;
                     }[];
                 };
-                /** @description Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
+                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
-                /** @description Counting basis for the SCF fields on rows (sls-011/sls-058): scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
+                /** @description Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;
                 /** @description True when the keyword pass was thin and vector-similarity rows filled the page (each such row tagged via:'semantic'). Distinct from matchMode='semantic', which means NO keyword tier matched at all. */
                 semantic?: boolean;
@@ -1240,7 +1240,7 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
-            /** @description sls-064 analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance. */
+            /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance. */
             successorRepo?: string | null;
             /** @description owner/name */
             fullName: string;
@@ -1322,7 +1322,7 @@ export interface components {
             /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
             canonical?: boolean;
             /**
-             * @description WHY this repo ranks as Stellar-relevant (sls-047) — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
+             * @description WHY this repo ranks as Stellar-relevant — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
              * @enum {string}
              */
             stellarEvidence?: "code-verified" | "sdf-org" | "curated" | "mentioned" | "none";
@@ -1335,7 +1335,7 @@ export interface components {
                 stellarProof?: "cargo-sdk" | "contract-macros" | "lang-sdk" | "js-sdk" | "stellar-toml" | "none";
                 /** @description 0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs. */
                 codeDepth?: number | null;
-                /** @description This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product (sls-046). */
+                /** @description This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product. */
                 isDeployableContract?: boolean;
                 /** @description Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer). */
                 sorobanSdkVersion?: string | null;
@@ -1390,7 +1390,7 @@ export interface components {
             };
             repos: components["schemas"]["Repo"][];
         };
-        /** @description A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance (sls-041). Nullable profile fields are null (or empty-string) when unset — never a negative claim. */
+        /** @description A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset — never a negative claim. */
         Builder: {
             /** @description Natural key; also the stellarlight.xyz/builders/{githubUsername} page slug. */
             githubUsername?: string;
@@ -1500,7 +1500,7 @@ export interface components {
             /** @description Date this entry was last observed from the source (YYYY-MM-DD). */
             observedAt?: string;
         };
-        /** @description An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row (sls-045) — count/render briefs by filtering rowType === 'rfp'. */
+        /** @description An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row — count/render briefs by filtering rowType === 'rfp'. */
         Rfp: {
             /** @description Brief slug (also the stellarlight.xyz/ideas/{id} page). Synthetic rows use 'scf-round-{n}'. */
             id?: string;
@@ -1615,7 +1615,7 @@ export interface components {
             /** @description SDF skills only — argument hint (e.g. '[payment task]'). Absent elsewhere. */
             argumentHint?: string;
         };
-        /** @description One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count (sls-035): the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues. */
+        /** @description One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues. */
         Cluster: {
             /** @description The cluster label — a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'. */
             key?: string;
@@ -1644,7 +1644,7 @@ export interface components {
                 url?: string;
             }[];
         };
-        /** @description One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS (sls-036). */
+        /** @description One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS. */
         LeaderboardProject: {
             /** @description 1-based position under THIS response's sort/range/category/type scope — recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters). */
             rank?: number;
@@ -1714,16 +1714,16 @@ export interface components {
             holders?: number | null;
             /** @description 24h transfer volume in USD. */
             volume24hUSD?: number | null;
-            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. BREAKING 2026-08-19: was a display string ('-5.80%') while this endpoint proxied the retired snapshot service; it is a number now. */
+            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. */
             supplyChange7d?: number | null;
             /**
-             * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting (sls-066); its metrics are the last known values, dated by updatedAt.
+             * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.
              * @enum {string|null}
              */
             basis?: "live" | "curated-static" | "unmeasured" | null;
             /** @description Plain-words reason a row is curated-static or unmeasured. Null for live rows. */
             note?: string | null;
-            /** @description True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal; retained for response-shape compatibility. */
+            /** @description True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal. */
             verified?: boolean;
             /**
              * Format: date-time
@@ -1837,7 +1837,7 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             } | null;
-                            /** @description Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report's section boilerplate — and on 2026-08-19 it scored HIGHER than a real identifier did. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match (sls-071). */
+                            /** @description Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report's section boilerplate, scored as though it were a match. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. */
                             exactMiss?: {
                                 /** @description The identifiers the query named that the corpus does not contain. */
                                 identifiers?: string[];
@@ -2021,7 +2021,7 @@ export interface operations {
                         codeVerified?: {
                             stellarProof?: string;
                             codeDepth?: number | null;
-                            /** @description The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable' (sls-046). */
+                            /** @description The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'. */
                             isDeployableContract?: boolean;
                             sorobanSdkVersion?: string | null;
                             versionStatus?: string | null;
@@ -2219,7 +2219,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
-                            /** @description What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
+                            /** @description What a skill match IS: free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
                             matchBasis?: string;
                         };
                         builders?: components["schemas"]["Builder"][];
@@ -2591,7 +2591,7 @@ export interface operations {
                             filters?: {
                                 [key: string]: unknown;
                             };
-                            /** @description total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy (sls-045). See countBasis. */
+                            /** @description total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy. See countBasis. */
                             counts?: {
                                 total?: number;
                                 open?: number;
@@ -2607,9 +2607,9 @@ export interface operations {
                             scfRound?: {
                                 /** @description Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit. */
                                 currentRound?: number | null;
-                                /** @description Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). Served since the round feed was added; specced 2026-08-18 (sls-067). A non-submission phase means an open brief is NOT submittable today. */
+                                /** @description Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). A non-submission phase means an open brief is NOT submittable today. */
                                 currentPhase?: string | null;
-                                /** @description Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens. Served since the round feed was added; specced 2026-08-18 (sls-067). */
+                                /** @description Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens. */
                                 roundsInProgress?: {
                                     round?: number;
                                     phase?: string | null;
@@ -2627,7 +2627,7 @@ export interface operations {
                                 /** Format: date */
                                 asOf?: string;
                                 /**
-                                 * @description Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state. Served since the round feed shipped; specced 2026-08-19 (sls-072).
+                                 * @description Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state.
                                  * @enum {string}
                                  */
                                 source?: "live" | "unavailable";
@@ -3201,7 +3201,7 @@ export interface operations {
                         tvl?: {
                             [key: string]: unknown;
                         };
-                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
+                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
                         funding?: {
                             /**
                              * Format: date-time
@@ -3313,7 +3313,7 @@ export interface operations {
                             docs?: string;
                             /**
                              * Format: date-time
-                             * @description sls-036: the repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
+                             * @description The repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
                              */
                             dataAsOf?: string | null;
                             metricDefinitions?: {
@@ -3440,7 +3440,7 @@ export interface operations {
                              * @description The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.
                              */
                             dataAsOf?: string;
-                            /** @description sls-066: `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint (it was the whole-set count until 2026-08-18). `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement. */
+                            /** @description `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement. */
                             counts?: {
                                 /** @description Assets in the registry, before any filter. */
                                 tracked?: number;
@@ -3455,7 +3455,7 @@ export interface operations {
                                 /** @description Rows in this response. */
                                 returned?: number;
                             };
-                            /** @description What this inventory IS and IS NOT (sls-066). It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin — Circle USDC was absent from the previous upstream for hours on 2026-08-18 while live on-chain. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar. */
+                            /** @description What this inventory IS and IS NOT. It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar. */
                             coverage?: {
                                 /** @enum {string} */
                                 basis?: "curated-registry";

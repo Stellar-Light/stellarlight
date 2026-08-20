@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-19",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Remediation history is out of the model-facing schema descriptions (openapi@1.8.75, stellar-raven sls-069). 33 served descriptions named an internal finding id a caller cannot resolve from the OpenAPI document; those ids are gone, along with specced-on dates, prior field shapes, and past-incident anecdotes. Every rule the descriptions carried is unchanged — only the release history moved out, to here.",
+		detail:
+			"A schema description is a contract for the caller: current meaning, scope, provenance rules. An internal finding id is none of those, it costs prompt budget on an endpoint already over the consumer truncation cap, and it created a second, staler owner of change records alongside this changelog. Removed: the ids themselves; `it was the whole-set count until 2026-08-18` from stablecoin counts.total; the Circle USDC incident from stablecoin coverage; the BREAKING date and prior string shape from supplyChange7d; `retained for response-shape compatibility` from verified; `served since / specced on` from the two RFP round fields and from scfRound.source. Code comments in openapi-spec.ts keep their finding ids — they are not served. Two of the offending descriptions were added by us the same day while closing sls-071 and sls-072, which is why the fix also had to cover new writing, not just old.",
+	},
+	{
+		date: "2026-08-19",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"Two stellar-raven findings closed (openapi@1.8.74). sls-071: an exact audit-finding identifier the corpus does not hold now returns `meta.exactMiss` naming it, instead of the report's section boilerplate — which on 2026-08-19 came back at HIGHER confidence (0.85) for an identifier that does not exist than a real one scored (0.73). sls-072: `meta.scfRound.source` (live | unavailable) is declared in the response schema; it was served but undeclared, and it is the field that separates a failed round-feed fetch from a genuine 'no round open'.",
