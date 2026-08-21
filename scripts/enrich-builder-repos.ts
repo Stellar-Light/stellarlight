@@ -72,17 +72,26 @@ const STELLAR_SIGNAL =
 	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 
 /**
- * The signal has to come from the DESCRIPTION or the TOPICS — a match in the
- * repo name alone is not enough.
+ * For the anonymous code-derived tail, the signal has to come from the
+ * DESCRIPTION or the TOPICS — a match in the repo name alone is not enough.
  *
- * Measured on a real slice: name-only matches are `mhaurinho/stellar`,
+ * Measured on a real slice: name-only matches there are `mhaurinho/stellar`,
  * `Wesley534/stellar-frontend`, `Hurt4do/stellar-arena` — no description, no
  * topics, nothing to rank or explain. Someone typed the word into a repo
  * name. A description or a topic is someone DESCRIBING a Stellar thing, and
  * every genuine project in that slice had one.
+ *
+ * ROSTER accounts keep the name-match. The rationale above was measured
+ * against 6,540 anonymous owners; the roster is ~150 hand-curated humans the
+ * directory already presents as builders, and dropping their undescribed
+ * repos re-creates the exact gap this pass exists to close (found live:
+ * a roster builder's `agent-pay-stellar` — no description, no topics —
+ * invisible while /builders showed them with zero repos).
  */
-const hasStellarSignal = (r: OwnerRepo) =>
-	STELLAR_SIGNAL.test(`${r.description ?? ""} ${r.topics.join(" ")}`);
+const hasStellarSignal = (r: OwnerRepo, nameCounts: boolean) =>
+	STELLAR_SIGNAL.test(
+		`${nameCounts ? r.name : ""} ${r.description ?? ""} ${r.topics.join(" ")}`,
+	);
 
 /**
  * Reuse the triage vocabulary rather than growing a second regex here. It
@@ -100,8 +109,8 @@ const isTutorialOrTemplate = (login: string, r: OwnerRepo) =>
 		stars: null,
 	}).includes("tutorial-or-template");
 
-const isStellarRepo = (login: string, r: OwnerRepo) =>
-	hasStellarSignal(r) && !isTutorialOrTemplate(login, r);
+const isStellarRepo = (login: string, r: OwnerRepo, roster: boolean) =>
+	hasStellarSignal(r, roster) && !isTutorialOrTemplate(login, r);
 
 const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
 
@@ -228,7 +237,9 @@ async function main() {
 			continue;
 		}
 		listed += repos.length;
-		const signal = repos.filter((r) => isStellarRepo(login, r));
+		const signal = repos.filter((r) =>
+			isStellarRepo(login, r, rosterKeys.has(login.toLowerCase())),
+		);
 		filteredOut += repos.length - signal.length;
 		const keep = signal.slice(0, PER_BUILDER_CAP);
 		const fresh = keep.filter(
