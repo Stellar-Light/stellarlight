@@ -19,6 +19,15 @@
  *              would: are Playbook providers in the top 10? is an Inactive
  *              row in the top 5? are untyped rows padding the list?
  *
+ * THE REFERENCE IS NOT GROUND TRUTH. The Playbook is what SDF reviewers grade
+ * answers against, which is why we grade against it too — but its directory
+ * data is hand-maintained in a Cloudflare bucket and its repo's last commit
+ * was 2026-02-06 (checked 2026-08-21); it still listed Kulipa three weeks
+ * after the shutdown. So: a Playbook provider MISSING from our top-10 is a
+ * recall question worth a look; a provider PRESENT in the Playbook is not
+ * proof it is alive. The battery prints the repo's last-commit date so a
+ * reader can weigh it. (Filed brunomlr/wallets-playbook#5 for Kulipa.)
+ *
  * Report-only by default; `--gate` exits 1 on a red (an Inactive row in the
  * top 5 of any category, or a Playbook provider that IS in the directory but
  * missing from the top 10 for its own category). Never mutates anything.
@@ -213,8 +222,22 @@ async function main() {
 		process.exit(2);
 	}
 	console.log(
-		`through-Raven category battery — ${CATEGORIES.length} categories · ${RAVEN_URL}\n`,
+		`through-Raven category battery — ${CATEGORIES.length} categories · ${RAVEN_URL}`,
 	);
+	try {
+		const c = (await (
+			await fetch(
+				"https://api.github.com/repos/brunomlr/wallets-playbook/commits/main",
+				{ headers: { "User-Agent": "stellar-light-battery" } },
+			)
+		).json()) as { commit?: { committer?: { date?: string } } };
+		const d = c.commit?.committer?.date?.slice(0, 10);
+		if (d)
+			console.log(
+				`reference: stellarplaybook.com — repo last updated ${d} (a stale reference is still a reference; weigh it)`,
+			);
+	} catch {}
+	console.log("");
 
 	// ROUTING layer
 	const routing: Record<string, string[]> = {};
