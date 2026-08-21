@@ -16,10 +16,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { factConfidence } from "@/lib/fact-confidence";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
+import { factConfidence } from "@/lib/fact-confidence";
 import {
 	BOOL_FALSE_VALUES,
 	BOOL_TRUE_VALUES,
@@ -130,18 +130,28 @@ function toPublic(
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
 		// Anchor capabilities from stellar.toml (SEP-1) — same source as
-		// anchors.stellar.org. Empty for non-anchors.
-		assets: (p.assets ?? [])
-			.map((a: { code: string }) => a.code)
-			.filter(Boolean),
-		seps: p.seps ?? [],
+		// anchors.stellar.org.
+		//
+		// These are NULL when we never fetched the partner's toml, and only []
+		// when we did fetch it and it published none. The distinction is the
+		// whole value of the field: [] is now the checkable claim "we read
+		// their SEP-1 file and it lists no SEPs", while null is "we have not
+		// looked". Collapsing both to [] told 31 of 44 partners' callers that
+		// the partner supports no SEPs and issues no assets, which for an
+		// anchor directory is the most damaging thing the row could say.
+		assets: p.tomlFetchedAt
+			? (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean)
+			: null,
+		seps: p.tomlFetchedAt ? (p.seps ?? []) : null,
 		tomlSourceUrl: p.tomlSourceUrl ?? null,
 		tomlFetchedAt: p.tomlFetchedAt ?? null,
 		tomlConfidence: factConfidence(
 			p.tomlFetchedAt ? "stellar-toml" : null,
 			p.tomlFetchedAt,
 		),
-		rampTypes: p.rampTypes ?? [],
+		// Curator-maintained, so empty means nobody has filled it in — not that
+		// the partner offers no ramp directions.
+		rampTypes: p.rampTypes?.length ? p.rampTypes : null,
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		typicalEngagement: p.typicalEngagement ?? null,
@@ -153,13 +163,18 @@ function toPublic(
 		contactEmail: p.contactEmail ?? null,
 		contactChannel: p.contactChannel ?? null,
 		responseSla: p.responseSla ?? null,
-		caseStudies: (p.caseStudies ?? []).map(
-			(c: { title: string; url?: string; projectSlug?: string }) => ({
-				title: c.title,
-				url: c.url ?? null,
-				projectSlug: c.projectSlug ?? null,
-			}),
-		),
+		// Empty on all 44 partners, i.e. never curated for anyone — so []
+		// asserted "this partner has no case studies" across the whole
+		// directory. Null until someone actually records one.
+		caseStudies: p.caseStudies?.length
+			? p.caseStudies.map(
+					(c: { title: string; url?: string; projectSlug?: string }) => ({
+						title: c.title,
+						url: c.url ?? null,
+						projectSlug: c.projectSlug ?? null,
+					}),
+				)
+			: null,
 		// System-verified signals — what an agent trusts over self-claims.
 		verified: {
 			githubLastCommitAt: verified.githubLastCommitAt ?? null,
