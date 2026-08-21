@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-21",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"supportedNetworks coverage 9.3% \u2192 52.7% by deriving Stellar membership from evidence already on the row, plus a new networksBasis saying which evidence and therefore whether the list is exhaustive (openapi@1.8.81, stellar-raven sls-017). Curation had reached 94 of 1,010 projects in a year; the honest null we started serving for the rest was still an answer nobody could use.",
+		detail:
+			"Four signals are PROOF that a project operates on Stellar rather than inference, and all four already sit on the row: onchain.contracts (contract records observed on Stellar), tvlUSD (DefiLlama tracks its Stellar TVL), coverage (SEP/corridor rails are Stellar rails), and scf.awarded \u2014 the Stellar Community Fund funds only Stellar work, which alone accounts for 409 of the 438 newly covered rows. networksBasis reports which one, strongest first, so a caller can weigh a deployed contract differently from a grant. The basis field is load-bearing, not decorative: a derived list is exactly ['stellar'] and is NOT exhaustive, because evidence of Stellar is not evidence about XRPL \u2014 without it this would have traded one false negative (null everywhere) for a worse one (every derived row implying Stellar-only). Only networksBasis 'curated' means the list is complete and a missing chain is informative. The DTCC case that motivated the caution is the proof the rule is safe: it sits at Development announcing Stellar availability for H1 2027 and derives to null, because announcing a future deployment leaves no evidence behind. Status is deliberately not a factor \u2014 an SCF award proves the project targets Stellar whether or not it runs today, and whether it runs is what status is for. 478 projects still derive to null, honestly.",
+	},
+	{
+		date: "2026-08-21",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"Partner rows stop claiming emptiness they never checked (openapi@1.8.80). assets and seps are now NULL until we have actually fetched the partner's stellar.toml, and [] only when we fetched it and it declared none \u2014 so [] becomes a checkable claim instead of a shrug. rampTypes and caseStudies go null when never curated. 31 of 44 partners were telling callers they support no SEPs and issue no assets.",

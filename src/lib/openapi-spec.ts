@@ -4938,7 +4938,20 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. NULL = we hold no curated network evidence for this project (UNKNOWN, never 'supports no networks' and never 'Stellar-only'). Populated on ~9% of projects, so null is the common case and must be treated as absence of evidence: to establish that a project does NOT support a chain you need a source, not this field. A non-null array is curator-maintained and grounded in the project's own docs. Previously this served [] when unknown, which asserted emptiness — a Stellar-directory project claiming to support no chains at all.",
+							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE — that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field.",
+					},
+					networksBasis: {
+						type: "string",
+						nullable: true,
+						enum: [
+							"curated",
+							"onchain-activity",
+							"defillama-tvl",
+							"anchor-coverage",
+							"scf-award",
+						],
+						description:
+							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive — other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
 					},
 					routes: {
 						type: "array",
