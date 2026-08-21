@@ -48,6 +48,22 @@ const ONLY =
 /** Per-person cap. listOwnerRepos returns most-recently-pushed first. */
 const PER_BUILDER_CAP = Number(process.env.BUILDER_REPO_CAP || "15") || 15;
 
+/**
+ * Accounts walked per run — one GitHub listing each, so this is the run's
+ * whole API cost. The unbounded set is 6,540 owners, which would eat an
+ * hourly allowance shared with the every-2h scan waves and starve them.
+ * 400 is ~9% of the hourly budget, once a week.
+ */
+const SWEEP_CAP = Number(process.env.BUILDER_SWEEP_CAP || "400") || 400;
+
+/**
+ * Indexed repos a code-derived owner needs before we walk their account.
+ * Owners with exactly one indexed repo are overwhelmingly forks and
+ * hackathon one-offs: across all 11,446 non-archive repos 6,540 owners
+ * appear, and only 1,508 of them have two or more. The curated roster bypasses this entirely.
+ */
+const MIN_INDEXED_REPOS = Number(process.env.BUILDER_MIN_REPOS || "2") || 2;
+
 /** Same gate the org pass uses for multi-chain orgs. */
 const STELLAR_SIGNAL =
 	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
@@ -86,7 +102,7 @@ async function main() {
 	// whoever told us about them. `tier` rather than a codeVerified subfield —
 	// Payload refuses to query into that group, and archive is exactly the
 	// demoted long tail we do not want to walk 12k accounts for.
-	const fromCode = new Set<string>();
+	const fromCode = new Map<string, number>();
 	for (let page = 1; ; page++) {
 		const r = await payload.find({
 			collection: "repos",
@@ -98,20 +114,45 @@ async function main() {
 		});
 		for (const d of r.docs as Array<{ owner?: string }>) {
 			const o = (d.owner ?? "").trim();
-			if (o) fromCode.add(o);
+			if (o) fromCode.set(o, (fromCode.get(o) ?? 0) + 1);
 		}
 		if (page >= r.totalPages) break;
 	}
+	const qualified = [...fromCode.entries()]
+		.filter(([, n]) => n >= MIN_INDEXED_REPOS)
+		.map(([o]) => o);
 	console.log(
-		`login sources — roster: ${fromRoster.length} · code-derived owners: ${fromCode.size}`,
+		`login sources — roster: ${fromRoster.length} · code-derived owners: ${fromCode.size} (${qualified.length} with >=${MIN_INDEXED_REPOS} indexed repos)`,
 	);
 
-	const byLower = new Map<string, string>();
-	for (const l of [...fromRoster, ...fromCode]) {
-		if (l && VALID_IDENT.test(l)) byLower.set(l.toLowerCase(), l);
+	// The curated roster is small and hand-picked, so it is walked EVERY run.
+	// The code-derived tail rotates: a deterministic slice per ISO week, so
+	// each run costs the same and the whole set is still covered on a fixed
+	// cycle. Stateless on purpose — a "last swept" column would be one more
+	// thing to migrate, backfill and get wrong.
+	const rosterKeys = new Map<string, string>();
+	for (const l of fromRoster) {
+		if (l && VALID_IDENT.test(l)) rosterKeys.set(l.toLowerCase(), l);
 	}
-	let logins = [...byLower.values()];
-	if (ONLY) logins = logins.filter((l) => l.toLowerCase() === ONLY);
+	const tail = qualified
+		.filter((l) => VALID_IDENT.test(l) && !rosterKeys.has(l.toLowerCase()))
+		.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+	const slots = Math.max(1, SWEEP_CAP - rosterKeys.size);
+	const slices = Math.max(1, Math.ceil(tail.length / slots));
+	const week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+	const slice = week % slices;
+	const rotated = tail.slice(slice * slots, slice * slots + slots);
+	console.log(
+		`rotation — slice ${slice + 1}/${slices} of the code-derived tail (${rotated.length} accounts); full coverage every ${slices} run(s)`,
+	);
+
+	let logins = [...rosterKeys.values(), ...rotated];
+	if (ONLY) {
+		// A targeted run must not be filtered out by rotation or the repo-count
+		// floor — those exist to bound a full sweep, not to refuse a request.
+		logins = [ONLY];
+	}
 	console.log(`${logins.length} builder login(s) to walk\n`);
 	if (logins.length === 0) {
 		console.error("✗ no builder logins — instrument failure, not an empty set");
