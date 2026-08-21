@@ -113,6 +113,14 @@ const nextConfig = {
 			"/api/analyze",
 			"/api/leaderboard",
 			"/api/feedback",
+			// Drift guard 2026-08-21: an endpoint missing here silently ships
+			// without CORS or X-API-Version (browser agents can't call it).
+			"/api/projects/resolve",
+			"/api/vet-idea",
+			"/api/scf-pitch",
+			"/api/hackathon-brief",
+			"/api/repos/trust",
+			"/api/contracts",
 		];
 		const corsHeaders = [
 			{ key: "Access-Control-Allow-Origin", value: "*" },

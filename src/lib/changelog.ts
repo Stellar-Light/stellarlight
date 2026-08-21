@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-21",
 		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Contract hygiene from a red guard nobody was reading (openapi@1.8.82): six composites (/api/projects/resolve, /api/vet-idea, /api/scf-pitch, /api/hackathon-brief, /api/repos/trust, /api/contracts) now emit CORS + X-API-Version and appear in /api/status.endpoints; resolveProject gets its api-reference section; ResearchResult documents the live docKind and docVersionStatus fields.",
+		detail:
+			"The daily API drift guard had been failing since 2026-08-13 \u2014 eight consecutive reds \u2014 and because the failure was chronic it had become background noise. Every item it flagged was real. The headers one is the most consequential: an endpoint not enumerated in next.config.mjs publicApi[] ships without Access-Control-Allow-Origin, so a browser-side agent calling /api/scf-pitch got a CORS failure while curl worked fine. docKind and docVersionStatus were being served on every research row with no schema entry, so a consumer reading the spec could not know that an old doc with docKind=spec is still authoritative while an old guide is not.",
+	},
+	{
+		date: "2026-08-21",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"supportedNetworks coverage 9.3% \u2192 52.7% by deriving Stellar membership from evidence already on the row, plus a new networksBasis saying which evidence and therefore whether the list is exhaustive (openapi@1.8.81, stellar-raven sls-017). Curation had reached 94 of 1,010 projects in a year; the honest null we started serving for the rest was still an answer nobody could use.",

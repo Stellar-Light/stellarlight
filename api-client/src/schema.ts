@@ -798,6 +798,16 @@ export interface components {
             capStatus?: string | null;
             /** @description source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD) — never guessed. The join key between protocol history and soroban-sdk versions. */
             capProtocolVersion?: number | null;
+            /**
+             * @description Deterministic document class stamped at ingest: spec (canonical — old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.
+             * @enum {string|null}
+             */
+            docKind?: "spec" | "guide" | "article" | "data" | null;
+            /**
+             * @description SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal — not a claim it is current.
+             * @enum {string|null}
+             */
+            docVersionStatus?: "current" | "supported" | "deprecated" | null;
             score?: number | null;
             /** @description 0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays */
             confidence?: Record<string, never>;
