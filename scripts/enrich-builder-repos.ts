@@ -30,13 +30,16 @@
  * curated project can be treated as dedicated and keep everything. A personal
  * account never can — people work on many chains and many hobbies, and
  * indexing all of it would flood the index with someone's dotfiles. Every
- * repo must carry a Stellar signal in its name, description or topics. The
- * same regex the org pass uses, with the small-org bypass deliberately absent.
+ * repo must carry a Stellar signal in its DESCRIPTION or TOPICS — the same
+ * regex the org pass uses, with the small-org bypass deliberately absent and
+ * the name deliberately excluded as a source of signal — and must not
+ * self-describe as a tutorial or template.
  */
 
 import "./load-env";
 import { getPayload } from "payload";
 import { listOwnerRepos, type OwnerRepo } from "../src/lib/github";
+import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -68,8 +71,37 @@ const MIN_INDEXED_REPOS = Number(process.env.BUILDER_MIN_REPOS || "2") || 2;
 const STELLAR_SIGNAL =
 	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 
-const isStellarRepo = (r: OwnerRepo) =>
-	STELLAR_SIGNAL.test(`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`);
+/**
+ * The signal has to come from the DESCRIPTION or the TOPICS — a match in the
+ * repo name alone is not enough.
+ *
+ * Measured on a real slice: name-only matches are `mhaurinho/stellar`,
+ * `Wesley534/stellar-frontend`, `Hurt4do/stellar-arena` — no description, no
+ * topics, nothing to rank or explain. Someone typed the word into a repo
+ * name. A description or a topic is someone DESCRIBING a Stellar thing, and
+ * every genuine project in that slice had one.
+ */
+const hasStellarSignal = (r: OwnerRepo) =>
+	STELLAR_SIGNAL.test(`${r.description ?? ""} ${r.topics.join(" ")}`);
+
+/**
+ * Reuse the triage vocabulary rather than growing a second regex here. It
+ * already encodes "self-describes as tutorial/example/starter/demo", and it
+ * already exempts allowlisted canon — soroban-examples is a template by name
+ * and canonical by fact. Passing stars as null lands it in the <5 branch,
+ * which is correct for a repo we have not scored yet.
+ */
+const isTutorialOrTemplate = (login: string, r: OwnerRepo) =>
+	deriveTriageTags({
+		fullName: `${login}/${r.name}`,
+		name: r.name,
+		description: r.description,
+		projectSlug: null,
+		stars: null,
+	}).includes("tutorial-or-template");
+
+const isStellarRepo = (login: string, r: OwnerRepo) =>
+	hasStellarSignal(r) && !isTutorialOrTemplate(login, r);
 
 const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
 
@@ -196,7 +228,7 @@ async function main() {
 			continue;
 		}
 		listed += repos.length;
-		const signal = repos.filter(isStellarRepo);
+		const signal = repos.filter((r) => isStellarRepo(login, r));
 		filteredOut += repos.length - signal.length;
 		const keep = signal.slice(0, PER_BUILDER_CAP);
 		const fresh = keep.filter(
