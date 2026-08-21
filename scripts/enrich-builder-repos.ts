@@ -4,17 +4,18 @@
  *   npx tsx scripts/enrich-builder-repos.ts            # DRY RUN
  *   npx tsx scripts/enrich-builder-repos.ts --execute
  *
- * THE GAP: the repo index is entirely project-driven — enrich-repos walks
- * `projects` and indexes what each one links to. A person shipping under their
- * own account is therefore invisible, no matter how much they build, because
- * no directory project points at them.
+ * THE GAP: we only learn about a person's own repos two ways, and both lag or
+ * miss. enrich-repos walks `projects` and indexes what each LINKS to, so an
+ * individual shipping under their own account is invisible to it. The EC
+ * taxonomy ingest catches some of them, but it is a periodic third-party
+ * snapshot — by the time a repo appears there it is months old.
  *
- * That is not a corner case. It hid an SDF engineer's entire output — 112
- * repos including a ★30 one-command Stellar dev installer that consumes OUR
- * data, an x402/MPP agent spend-control library, and a six-wallet-kit
- * comparison pushed the day we noticed. We had him in `builders`; we had none
- * of his work. Individual contributors are exactly who a "who is building on
- * Stellar" index must not miss.
+ * The case that found it: an SDF engineer with 112 repos. Ten were indexed,
+ * all via the EC snapshot. Missing were the newest and most relevant — a ★30
+ * one-command Stellar dev installer that consumes OUR ecosystem data, an
+ * x402/MPP agent spend-control library, and a six-wallet-kit comparison
+ * pushed the day we noticed. An index that learns about individuals only
+ * through a third party is always describing last quarter.
  *
  * enrich-builder-contributions already READS this index to attribute commits,
  * so a builder's own repos were invisible to their own contribution counts
@@ -62,15 +63,52 @@ async function main() {
 	);
 	const payload = await getPayload({ config: await configPromise });
 
+	// Two sources, because "a builder we track" has two meanings here. The
+	// `builders` collection is the curated roster. But most people reach the
+	// site as CODE-DERIVED builders — they exist because we indexed a repo
+	// they own, never as a curated row. The engineer this pass was written
+	// for is one of those (projectCount 0, no collection record), so sourcing
+	// logins from the roster alone would have skipped exactly the case that
+	// motivated it.
 	const builders = await payload.find({
 		collection: "builders",
 		limit: 1000,
 		depth: 0,
-		select: { github_username: true, display_name: true },
+		select: { github_username: true },
 	});
-	let logins = (builders.docs as Array<{ github_username?: string | null }>)
+	const fromRoster = (
+		builders.docs as Array<{ github_username?: string | null }>
+	)
 		.map((b) => (b.github_username ?? "").trim())
-		.filter((l) => l && VALID_IDENT.test(l));
+		.filter(Boolean);
+
+	// Owners of repos that already carry Stellar proof: people we can see
+	// building, whoever told us about them.
+	const fromCode = new Set<string>();
+	for (let page = 1; ; page++) {
+		const r = await payload.find({
+			collection: "repos",
+			where: { "codeVerified.stellarProof": { exists: true } },
+			limit: 2000,
+			page,
+			depth: 0,
+			select: { owner: true },
+		});
+		for (const d of r.docs as Array<{ owner?: string }>) {
+			const o = (d.owner ?? "").trim();
+			if (o) fromCode.add(o);
+		}
+		if (page >= r.totalPages) break;
+	}
+	console.log(
+		`login sources — roster: ${fromRoster.length} · code-derived owners: ${fromCode.size}`,
+	);
+
+	const byLower = new Map<string, string>();
+	for (const l of [...fromRoster, ...fromCode]) {
+		if (l && VALID_IDENT.test(l)) byLower.set(l.toLowerCase(), l);
+	}
+	let logins = [...byLower.values()];
 	if (ONLY) logins = logins.filter((l) => l.toLowerCase() === ONLY);
 	console.log(`${logins.length} builder login(s) to walk\n`);
 	if (logins.length === 0) {
