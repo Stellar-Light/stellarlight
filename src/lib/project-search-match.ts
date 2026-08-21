@@ -310,6 +310,9 @@ export const INTENT_TYPE: Record<string, string> = {
 	card: "Card Issuing",
 	cards: "Card Issuing",
 	debit: "Card Issuing",
+	// Playbook battery: "which centralized exchanges list XLM" is a category.
+	cex: "Exchange",
+	centralized: "Exchange",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",

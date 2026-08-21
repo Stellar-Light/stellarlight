@@ -874,6 +874,7 @@ export async function GET(req: NextRequest) {
 		"RPC",
 		"Faucet",
 		"Card Issuing",
+		"Exchange",
 	] as const;
 	if (typeParam && !(VALID_TYPES as readonly string[]).includes(typeParam)) {
 		return NextResponse.json(
