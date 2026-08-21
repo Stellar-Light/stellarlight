@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-21",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"Exchange is a project type, and 14 centralized exchanges that trade XLM today join the directory with CoinGecko market evidence (openapi@1.8.84). 'Which exchanges list XLM?' returned DEXes and a trading bot, because the directory held no Exchange type and 23 of the Stellar Playbook's 30 CEXes were absent.",
+		detail:
+			"Every imported row had to earn it with evidence dated 2026-08-21: a live XLM market on CoinGecko's stellar tickers (last trade under 24h) — Binance, Coinbase, Kraken, Upbit, Bithumb, Bybit, KuCoin, Gate, Bitstamp, HTX, WhiteBIT, Crypto.com, Coinone, CEX.IO. Eight Playbook CEXes show no XLM market (Liquid wound down in 2023; Coincheck, CoinMENA, PDAX, Newton, Bitmama, Busha, Buenbit) and were NOT imported — a directory row is a claim. The same gate was applied to the Playbook's 20 missing ramps: 19 publish no stellar.toml and mention Stellar on no docs or assets page, so only MoonPay (a dedicated moonpay.com/stellar page) was added. Listed-in-the-Playbook is a reason to check, never a reason to import; the Playbook repo's last commit is 2026-02-06.",
+	},
+	{
+		date: "2026-08-21",
 		surfaces: ["api", "skill"],
 		type: "added",
 		summary:

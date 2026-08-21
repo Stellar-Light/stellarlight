@@ -103,6 +103,9 @@ export const Projects: CollectionConfig = {
 				// integrate to issue cards to users (Bridge, Rain, Wirex). Distinct from
 				// a consumer app that merely HAS a card. The playbook's own category.
 				"Card Issuing",
+				// Centralized exchanges that list XLM (Playbook CEX directory); imported
+				// only with a live CoinGecko XLM market as evidence (2026-08-21).
+				"Exchange",
 			],
 		},
 		{

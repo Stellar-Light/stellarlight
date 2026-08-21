@@ -39,6 +39,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import { listOwnerRepos, type OwnerRepo } from "../src/lib/github";
+import { isDenied } from "../src/lib/repo-allowlist";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
 
@@ -254,6 +255,7 @@ async function main() {
 		const fresh = keep.filter(
 			(r) =>
 				VALID_IDENT.test(r.name) &&
+				!isDenied(`${login}/${r.name}`) &&
 				!known.has(`${login}/${r.name}`.toLowerCase()),
 		);
 		if (fresh.length) {

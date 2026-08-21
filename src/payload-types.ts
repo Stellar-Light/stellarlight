@@ -297,6 +297,7 @@ export interface Project {
         | 'RPC'
         | 'Faucet'
         | 'Card Issuing'
+        | 'Exchange'
       )[]
     | null;
   /**

@@ -590,6 +590,263 @@ export const SEEDS: Array<{
 		| "human-verified"
 		| "source-inherited";
 }> = [
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 8 live XLM market(s), last trade <24h, 24h volume ≈ $47,848,168.
+		slug: "binance",
+		name: "Binance",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Binance is a centralized exchange that lists XLM — 8 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $47,848,168). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.binance.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $32,904,928.
+		slug: "coinbase",
+		name: "Coinbase",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Coinbase is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $32,904,928). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.coinbase.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $8,339,968.
+		slug: "kraken",
+		name: "Kraken",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Kraken is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $8,339,968). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.kraken.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 3 live XLM market(s), last trade <24h, 24h volume ≈ $36,178,325.
+		slug: "upbit",
+		name: "Upbit",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Upbit is a centralized exchange that lists XLM — 3 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $36,178,325). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://upbit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $13,709,333.
+		slug: "bithumb",
+		name: "Bithumb",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bithumb is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $13,709,333). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bithumb.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 3 live XLM market(s), last trade <24h, 24h volume ≈ $8,020,043.
+		slug: "bybit",
+		name: "Bybit",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bybit is a centralized exchange that lists XLM — 3 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $8,020,043). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bybit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $7,089,229.
+		slug: "kucoin",
+		name: "KuCoin",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"KuCoin is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $7,089,229). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.kucoin.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $4,900,173.
+		slug: "gate-io",
+		name: "Gate",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Gate is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $4,900,173). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.gate.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $2,471,901.
+		slug: "bitstamp",
+		name: "Bitstamp",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bitstamp is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $2,471,901). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bitstamp.net/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $710,606.
+		slug: "htx",
+		name: "HTX (Huobi)",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"HTX (Huobi) is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $710,606). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.htx.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 7 live XLM market(s), last trade <24h, 24h volume ≈ $11,625,624.
+		slug: "whitebit",
+		name: "WhiteBIT",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"WhiteBIT is a centralized exchange that lists XLM — 7 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $11,625,624). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://whitebit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $614,865.
+		slug: "crypto-com",
+		name: "Crypto.com",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Crypto.com is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $614,865). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://crypto.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $1,600,934.
+		slug: "coinone",
+		name: "Coinone",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Coinone is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $1,600,934). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://coinone.co.kr/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $19,169.
+		slug: "cex-io",
+		name: "CEX.IO",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"CEX.IO is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $19,169). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://cex.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook ramps directory; the ONE of 20 missing ramps with first-party
+		// Stellar evidence on 2026-08-21: moonpay.com/stellar (dedicated XLM page).
+		// The other 19 showed no stellar.toml and no Stellar mention on any
+		// docs/assets page — not imported; listed-in-the-Playbook is not evidence.
+		slug: "moonpay",
+		name: "MoonPay",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MoonPay is a fiat on/off-ramp (card, bank transfer, Apple/Google Pay) with a dedicated Stellar page for buying XLM. Listed on the Stellar Playbook's ramps directory.",
+		links: { website: "https://www.moonpay.com/stellar" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.moonpay.com/stellar",
+		statusBasis: "human-verified",
+	},
 	// PG-award recon 2026-07-20: Soneso's BASE Flutter SDK is a CSV-confirmed
 	// Public Goods Award recipient (Q4'25+Q1'26) with NO directory record —
 	// only the sibling stellar_wallet_flutter_sdk was indexed

@@ -533,3 +533,12 @@ describe("plural category words keep their intent (Raven #39 battery)", () => {
 		expect(intentTypesFor(["gas", "fees"]).size).toBe(0);
 	});
 });
+
+describe("centralized exchanges are a category (Playbook battery)", () => {
+	it("cex / centralized resolve to Exchange", () => {
+		expect(intentTypesFor(["centralized", "exchanges"]).has("Exchange")).toBe(
+			true,
+		);
+		expect(intentTypesFor(["cex"]).has("Exchange")).toBe(true);
+	});
+});

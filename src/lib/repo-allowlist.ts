@@ -101,3 +101,18 @@ export function isProtected(sig: ProtectionSignals): boolean {
 	if ((sig.projectProminence ?? 0) > 0) return true;
 	return false;
 }
+
+/**
+ * Repos that must never be indexed, whatever pass finds them. Each entry
+ * names why — a denylist without reasons becomes folklore. Keys lowercase.
+ */
+export const DENIED_REPOS: ReadonlyMap<string, string> = new Map([
+	[
+		"brunomlr/stellar-docs",
+		"2023 personal copy of the Stellar docs, no description; admitted by name-match alone on 2026-08-21. The docs are a first-class Raven source (stellarDocs.*), not an ecosystem project.",
+	],
+]);
+
+export function isDenied(fullName: string | null | undefined): boolean {
+	return !!fullName && DENIED_REPOS.has(fullName.toLowerCase());
+}
