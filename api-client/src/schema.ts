@@ -1027,8 +1027,8 @@ export interface components {
                 /** @description Date (YYYY-MM-DD) the coverage was synced from the partner record — cite as the as-of date. */
                 asOf?: string | null;
             } | null;
-            /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown. */
-            supportedNetworks?: string[];
+            /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. NULL = we hold no curated network evidence for this project (UNKNOWN, never 'supports no networks' and never 'Stellar-only'). Populated on ~9% of projects, so null is the common case and must be treated as absence of evidence: to establish that a project does NOT support a chain you need a source, not this field. A non-null array is curator-maintained and grounded in the project's own docs. Previously this served [] when unknown, which asserted emptiness — a Stellar-directory project claiming to support no chains at all. */
+            supportedNetworks?: string[] | null;
             /** @description Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time. */
             routes?: {
                 /** @description Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella). */

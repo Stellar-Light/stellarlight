@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-21",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"supportedNetworks now serves NULL when we have no curated chain evidence, instead of [] (openapi@1.8.78, stellar-raven sls-017). An empty array is not the absence of a claim \u2014 it is a claim of emptiness, and 916 of 1,010 projects were telling every caller they support no blockchain at all, Stellar included. In a directory of Stellar projects that inverted the exact rule the field exists to enforce: omission must not read as negation.",
+		detail:
+			"The field was added so a multichain wallet's silence about a chain could not be mistaken for a denial (LOBSTR = [stellar, xrpl]). But the serializer mapped any missing value to [], and the spec text said \"Empty when unknown\" \u2014 so the contract itself documented the false negative. `routes` and `coverage`, added later for the same shape of problem, already got this right: null means UNKNOWN, never 'none exist'. supportedNetworks now matches them. Search behaviour is unchanged \u2014 it reads the stored document, and chainCorridorHit already treated an unenriched field as unknown and fell back to a prose match rather than using empty as proof of absence, so no ranking moves. Coverage itself is untouched at ~9%: only 23 further projects carry evidence we could derive from (on-chain contracts, curated routes, anchor SEP coverage), and asserting 'stellar' across the directory was rejected because a Development-status record is not a live deployment \u2014 the same error we corrected on DTCC. Raising coverage needs real evidence collection (stellar.toml probes, chain probes), which is separate work; what shipped here is that the absence is now honest, which is the half that was actively misleading.",
+	},
+	{
 		date: "2026-08-20",
 		surfaces: ["api"],
 		type: "added",
@@ -46,7 +55,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			'statusAsOf now dates the OBSERVATION instead of the last sync (openapi@1.8.76, stellar-raven sls-024). The nightly lumenloop sync re-stamped statusAsOf on every weak-basis row on every run, so 850 projects nobody had re-checked since import reported "Live, as of today" each morning. It advances only when the incoming status actually differs now; an unchanged label keeps the date we first observed it. statusBasis is also documented for what it is: source-inherited and unverified are ADMISSIONS that nobody checked, not evidence.',
 		detail:
-			"Measured before changing anything: of 1,010 projects, 850 (84%) carry statusBasis source-inherited, statusAsOf was 96% populated but meaningless on those rows, statusSourceUrl 68%, supportedNetworks 9%, statusConfidence 0%. The vocabulary already distinguishes operator-announcement / site-liveness / onchain-activity / human-verified — it is simply barely applied, and only 18 of the 850 inherited rows carry on-chain or TVL evidence that would let us upgrade them honestly. So this ships the two things that are true rather than inventing provenance we do not have: a date that means something, and a description that stops a Live label on an inherited basis from reading as verification. Populating a real basis for the remaining rows needs evidence collection (site probes, chain probes, curation), which is separate work and does not belong behind a schema edit.",
+			'Measured before changing anything: of 1,010 projects, 850 (84%) carry statusBasis source-inherited, statusAsOf was 96% populated but meaningless on those rows, statusSourceUrl 68%, supportedNetworks 9%. (An earlier version of this note also said "statusConfidence 0%" — that was a miscount: statusConfidence is not a stored column but a per-request computation from basis \u00d7 freshness, and it was already served on every row. Censusing the collection instead of the API produced the wrong number.) The vocabulary already distinguishes operator-announcement / site-liveness / onchain-activity / human-verified — it is simply barely applied, and only 18 of the 850 inherited rows carry on-chain or TVL evidence that would let us upgrade them honestly. So this ships the two things that are true rather than inventing provenance we do not have: a date that means something, and a description that stops a Live label on an inherited basis from reading as verification. Populating a real basis for the remaining rows needs evidence collection (site probes, chain probes, curation), which is separate work and does not belong behind a schema edit.',
 	},
 	{
 		date: "2026-08-19",

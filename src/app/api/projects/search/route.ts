@@ -171,9 +171,7 @@ async function semanticProjectRows(
 			products: pickProducts(p.products),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
-			supportedNetworks: Array.isArray(p.supportedNetworks)
-				? p.supportedNetworks
-				: [],
+			supportedNetworks: pickNetworks(p.supportedNetworks),
 			// F3 (audit): semantic rows serialized types=[] / prominence=null for
 			// records that HAVE both — the $project simply omitted the fields.
 			types: Array.isArray(p.types) ? p.types : [],
@@ -371,7 +369,8 @@ interface ProjectRow {
 		asOf: string | null;
 	} | null;
 	// sls-017 (durable): chains this project supports (e.g. ["stellar","xrpl"]).
-	supportedNetworks: string[];
+	// Null — never [] — when we hold no curation. See pickNetworks.
+	supportedNetworks: string[] | null;
 	links?: Record<string, string>;
 	score: number;
 	url: string;
@@ -512,6 +511,29 @@ function pickCoverage(
 	const asOf = typeof c.asOf === "string" && c.asOf ? c.asOf : null;
 	if (!countries.length && !currencies.length && !seps.length) return null;
 	return { countries, currencies, seps, asOf };
+}
+
+// sls-017: chains this project supports — and, just as importantly, an honest
+// admission when we do not know.
+//
+// This used to serialize a missing value as `[]`, which is not the absence of
+// a claim but a POSITIVE claim of emptiness: 916 of 1,010 projects were
+// telling every caller they support no blockchain at all, Stellar included.
+// For a directory of Stellar projects that is not merely unhelpful, it is the
+// exact failure the field was added to prevent — "omission must not read as
+// negation" — inverted into the API contract.
+//
+// Null is the honest encoding, and it is the one `routes` and `coverage`
+// already use for the same situation: we hold no curation, so we say nothing
+// rather than assert nothing-is-supported. Search is unaffected — it reads the
+// stored doc, and chainCorridorHit already falls back to prose when the field
+// is unenriched rather than treating empty as proof of absence.
+function pickNetworks(v: unknown): string[] | null {
+	if (!Array.isArray(v)) return null;
+	const nets = v.filter(
+		(x): x is string => typeof x === "string" && !!x.trim(),
+	);
+	return nets.length ? nets : null;
 }
 
 // sls-032 (#516): a served route-level bridge fact. A Bridge-typed project
@@ -1300,9 +1322,7 @@ export async function GET(req: NextRequest) {
 					verificationLevel: p.verificationLevel ?? null,
 					types: Array.isArray(p.types) ? p.types : [],
 					coverage: pickCoverage(p.coverage),
-					supportedNetworks: Array.isArray(p.supportedNetworks)
-						? p.supportedNetworks
-						: [],
+					supportedNetworks: pickNetworks(p.supportedNetworks),
 					links: pickLinks(p.links),
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
@@ -1835,9 +1855,7 @@ export async function GET(req: NextRequest) {
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],
 					coverage: pickCoverage(c.coverage),
-					supportedNetworks: Array.isArray(c.supportedNetworks)
-						? c.supportedNetworks
-						: [],
+					supportedNetworks: pickNetworks(c.supportedNetworks),
 					links: pickLinks(c.links),
 					url: `https://stellarlight.xyz/project/${c.slug}`,
 				};
