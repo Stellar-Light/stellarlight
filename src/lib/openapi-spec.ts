@@ -4505,15 +4505,17 @@ export const spec: OpenAPISpec = {
 					regions: { type: "array", items: { type: "string" } },
 					assets: {
 						type: "array",
+						nullable: true,
 						items: { type: "string" },
 						description:
-							"Asset codes this partner issues/supports (from stellar.toml or curated).",
+							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES.",
 					},
 					seps: {
 						type: "array",
+						nullable: true,
 						items: { type: "string" },
 						description:
-							"SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based.",
+							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none — so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
 					},
 					tomlSourceUrl: {
 						type: "string",
@@ -4540,8 +4542,10 @@ export const spec: OpenAPISpec = {
 					},
 					rampTypes: {
 						type: "array",
+						nullable: true,
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
-						description: "Fiat ramps offered.",
+						description:
+							"Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps').",
 					},
 					country: { type: "string", nullable: true },
 					acceptingClients: { type: "boolean" },
@@ -4554,7 +4558,13 @@ export const spec: OpenAPISpec = {
 					contactEmail: { type: "string", nullable: true },
 					contactChannel: { type: "string", nullable: true },
 					responseSla: { type: "string", nullable: true },
-					caseStudies: { type: "array", items: { type: "object" } },
+					caseStudies: {
+						type: "array",
+						nullable: true,
+						items: { type: "object" },
+						description:
+							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet.",
+					},
 					verified: {
 						type: "object",
 						description:

@@ -818,10 +818,10 @@ export interface components {
             services?: string[];
             sectors?: string[];
             regions?: string[];
-            /** @description Asset codes this partner issues/supports (from stellar.toml or curated). */
-            assets?: string[];
-            /** @description SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based. */
-            seps?: string[];
+            /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES. */
+            assets?: string[] | null;
+            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none — so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
+            seps?: string[] | null;
             /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only). */
             tomlSourceUrl?: string | null;
             /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no toml was ever fetched. */
@@ -833,8 +833,8 @@ export interface components {
             } | null;
             /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
             tomlFetchedAt?: string | null;
-            /** @description Fiat ramps offered. */
-            rampTypes?: ("on-ramp" | "off-ramp")[];
+            /** @description Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps'). */
+            rampTypes?: ("on-ramp" | "off-ramp")[] | null;
             country?: string | null;
             acceptingClients?: boolean;
             typicalEngagement?: string | null;
@@ -846,7 +846,8 @@ export interface components {
             contactEmail?: string | null;
             contactChannel?: string | null;
             responseSla?: string | null;
-            caseStudies?: Record<string, never>[];
+            /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet. */
+            caseStudies?: Record<string, never>[] | null;
             /** @description SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal. */
             verified?: {
                 githubLastCommitAt?: string | null;
