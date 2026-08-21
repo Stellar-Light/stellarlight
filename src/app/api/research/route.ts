@@ -42,6 +42,7 @@ import {
 	hasFullLexicalCoverage,
 	identifierIsPresent,
 	identifierTargets,
+	matchesVersionTarget,
 	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
 	RECENCY_SUPPLEMENT_WINDOW_DAYS,
@@ -49,6 +50,7 @@ import {
 	recencyContentTokens,
 	recencyIntent,
 	selectRecencySupplement,
+	versionTargets,
 } from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
@@ -777,6 +779,37 @@ export async function GET(req: NextRequest) {
 			} catch {
 				// supplement is best-effort — the pool result still serves
 			}
+		}
+	}
+
+	// Release-tag lookup (versionTargets in research-rank.ts): the pinned
+	// document must be IN the pool to be pinned. Fetch by title when the
+	// vector pool missed it — same fetch-not-rank root as the CAP/SEP path.
+	const vTargets = versionTargets(q);
+	if (
+		vTargets.length &&
+		!chunks.some((c) => matchesVersionTarget(c.title, vTargets))
+	) {
+		try {
+			const direct = await payload.find({
+				collection: "research-docs",
+				where: {
+					and: [
+						{ or: vTargets.map((t) => ({ title: { like: t } })) },
+						...(effectiveSource
+							? [{ source: { equals: effectiveSource } }]
+							: []),
+					],
+				},
+				limit: 10,
+				depth: 0,
+			});
+			const have = new Set(chunks.map((c) => c.id));
+			for (const d of direct.docs as unknown as RawResearchDoc[]) {
+				if (!have.has(String(d.id))) chunks.push(toRow(d));
+			}
+		} catch {
+			// best-effort — the pool result still serves
 		}
 	}
 

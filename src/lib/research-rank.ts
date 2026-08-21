@@ -249,6 +249,40 @@ export function findingIdentifierTargets(query: string | undefined): string[] {
 	return out;
 }
 
+// ── Release tags are lookup keys too ──
+// "stellar-core v28.0.0" is a request for THAT release. The tag tokenizes to
+// "v28" (".0.0" splits away), every older stellar-core release shares the
+// other two tokens, and the 0.15 title-match weight cannot beat their
+// cosine: on 2026-08-21 the v28.0.0 notes — 8 days old, in the pool at #8 —
+// sat under v27.1.0, v25.2.0 and v25.1.3 for their own tag, and the
+// self-audit read that as a stalled ingest. Same rule as CAP/SEP ids: the
+// named document is pinned above vector order. Matched on the TITLE (release
+// titles carry the tag verbatim), never on content, so a release that merely
+// mentions the next version is not the next version.
+const VERSION_TAG_RE = /\bv?(\d+\.\d+\.\d+(?:-[0-9a-z.]+)?)\b/gi;
+
+/** Semver-style tags named by the query, normalized to a leading "v". */
+export function versionTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.matchAll(VERSION_TAG_RE)) {
+		const tag = `v${m[1].toLowerCase()}`;
+		if (!out.includes(tag)) out.push(tag);
+	}
+	return out;
+}
+
+/** Does this chunk's title carry one of the named release tags? */
+export function matchesVersionTarget(
+	title: string | null | undefined,
+	targets: string[],
+): boolean {
+	const t = (title ?? "").toLowerCase();
+	return targets.some(
+		(tag) => t.includes(tag) || t.includes(` ${tag.slice(1)}`),
+	);
+}
+
 /** Does any served text contain the identifier verbatim? */
 export function identifierIsPresent(
 	id: string,
@@ -604,8 +638,10 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// Exact CAP/SEP identifier pin (sls-019): the named document must rank
 	// ahead of vector order — an exact-ID query is a lookup, not a search.
 	const targets = identifierTargets(opts.query);
+	const vTargets = versionTargets(opts.query);
 	const pinned = (c: RankableChunk) =>
-		targets.length > 0 && matchesTarget(c.url, targets);
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
 
 	// Curated vertical anchors (see RESEARCH_ANCHORS): relevance floor, not a
 	// hard pin — identifier lookups and genuinely-stronger matches stay ahead.
