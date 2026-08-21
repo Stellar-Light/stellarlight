@@ -136,7 +136,12 @@ const PROBES: Probe[] = [
 	},
 	{
 		name: "repos.codeVerified.isDeployableContract (conformance C4, blend)",
-		path: "/api/repos/search?q=blend&limit=6",
+		// 2026-08-21: identity query, not the broad "blend" page. blend-contracts-v2's
+		// last push is 2025-08-14 (GitHub-confirmed), so on 2026-08-14 it crossed
+		// the ranker's one-year "alive" line and correctly dropped to #8 for
+		// q=blend. This guard tests that a FIELD is populated on a known row —
+		// riding a broad ranking for that was a latent dependency that expired.
+		path: "/api/repos/search?q=blend-contracts-v2&limit=6",
 		rowsKey: "repos",
 		pin: ["fullName", "blend-capital/blend-contracts-v2"],
 		field: "codeVerified.isDeployableContract",
@@ -178,7 +183,12 @@ const PROBES: Probe[] = [
 	},
 	{
 		name: "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
-		path: "/api/repos/search?q=blend&limit=6",
+		// 2026-08-21: identity query, not the broad "blend" page. blend-contracts-v2's
+		// last push is 2025-08-14 (GitHub-confirmed), so on 2026-08-14 it crossed
+		// the ranker's one-year "alive" line and correctly dropped to #8 for
+		// q=blend. This guard tests that a FIELD is populated on a known row —
+		// riding a broad ranking for that was a latent dependency that expired.
+		path: "/api/repos/search?q=blend-contracts-v2&limit=6",
 		rowsKey: "repos",
 		pin: ["fullName", "blend-capital/blend-contracts-v2"],
 		field: "codeVerified.protocolCaps",
@@ -291,14 +301,25 @@ async function main() {
 		}
 		if (detail && p.knownFailing) {
 			known++;
-			failRows.push({ probe: p.name, note: detail, surface: surfaceOf(p.path), known: true });
+			failRows.push({
+				probe: p.name,
+				note: detail,
+				surface: surfaceOf(p.path),
+				known: true,
+			});
 			console.log(`  ⚠ ${p.name} (known, ${p.knownFailing})\n      ${detail}`);
 		} else if (detail) {
 			failures++;
-			failRows.push({ probe: p.name, note: detail, surface: surfaceOf(p.path) });
+			failRows.push({
+				probe: p.name,
+				note: detail,
+				surface: surfaceOf(p.path),
+			});
 			console.log(`  ✗ ${p.name}\n      ${detail}`);
 		} else if (p.knownFailing) {
-			console.log(`  ✓ ${p.name} — RECOVERED; close ${p.knownFailing} and drop the knownFailing marker`);
+			console.log(
+				`  ✓ ${p.name} — RECOVERED; close ${p.knownFailing} and drop the knownFailing marker`,
+			);
 		} else {
 			console.log(`  ✓ ${p.name}`);
 		}

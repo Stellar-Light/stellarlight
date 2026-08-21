@@ -204,6 +204,15 @@ export async function GET() {
 				"/api/partners/assistant",
 				"/api/partners/onboard",
 				"/api/partners/submit-listing",
+				// Drift guard 2026-08-21: every spec path must be listed here —
+				// six composites shipped without it and the guard ran red daily
+				// from 2026-08-13 with nobody reading it.
+				"/api/projects/resolve",
+				"/api/vet-idea",
+				"/api/scf-pitch",
+				"/api/hackathon-brief",
+				"/api/repos/trust",
+				"/api/contracts",
 			],
 			docs: "https://stellarlight.xyz/scout",
 			skill: "https://stellarlight.xyz/skills/stellar-scout.md",

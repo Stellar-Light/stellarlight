@@ -147,6 +147,10 @@ When `matchMode === "majority"` still returns 0, the response includes `.meta.ad
 
 **On-chain metrics (`.projects[*].onchain`):** projects with hand-verified contract/asset join keys carry per-contract lifetime `events`/`subinvocations`/`storageEntries` (+ `eventsDelta`/`subinvocationsDelta` once two snapshots exist) and per-asset `assetHolders`/`assetSupply`, from stellar.expert with `source` + `asOf`. Semantics: `onchain` null = not tracked in our registry, NEVER 'no on-chain activity'; null deltas = no prior snapshot yet. subinvocations undercounts contracts users call directly — read `events` alongside.
 
+## `GET /api/projects/resolve`
+**Historical-name resolution** — turn a project name found in an old post, changelog, README or repo into what it is now. Returns the record it names (`subject`), where to look NOW if that record was superseded (`current`, with `url`), `matchedOn` (`slug` | `canonical-slug` | `alias` | `name` — an exact slug is stronger evidence than a normalized-name collision), and the `evidence` behind any inactive status (`statusAsOf`, `statusBasis`, `statusSourceUrl`, `unsourced`). A name matching TWO projects is a miss naming both — resolve by slug. **Params:** `q={name, slug, or a pasted /project/{slug} URL}` (required).
+**Semantics an agent must not misread:** `found: false` means NOT TRACKED HERE — never that the name never existed or is defunct. `superseded: false` on an inactive row means no successor is RECORDED, never that nothing succeeded it. `evidence.unsourced: true` marks a status we assert with no citable source — treat it as our unverified record, not an established fact.
+
 ## `GET /api/rfps`
 Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed problem statements that get funded by SCF when winners are picked. The native source for *"what should I build that someone will pay for?"* and *"what's currently fundable?"*. Use in Deep Dive step 8 (next steps) AND lead with this when the user asks generally what to build.
 
