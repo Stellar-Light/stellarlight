@@ -4863,8 +4863,9 @@ export const spec: OpenAPISpec = {
 					},
 					products: {
 						type: "array",
+						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. Empty = no product-level records yet (never 'no products'). kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Curated on ~2 projects today, so null is overwhelmingly the common case. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
 						items: {
 							type: "object",
 							properties: {
