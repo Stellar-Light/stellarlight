@@ -302,6 +302,14 @@ export const INTENT_TYPE: Record<string, string> = {
 	x402: "Payments",
 	mpp: "Payments",
 	micropayment: "Payments",
+	// Raven #39: "what card services can I integrate" is a category question.
+	// Without a type behind it the word "card" matched Yellow Card (a name
+	// homonym), CyberBrawl (a card GAME) and gift-card shops, while Bridge —
+	// on the playbook's own debit-cards page — never entered the pool because
+	// its prose did not say "card". Structured truth drives inclusion.
+	card: "Card Issuing",
+	cards: "Card Issuing",
+	debit: "Card Issuing",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",
@@ -335,10 +343,23 @@ export const INTENT_TYPE: Record<string, string> = {
 
 export function intentTypesFor(tokens: string[]): Set<string> {
 	const s = new Set<string>();
-	for (const t of tokens) {
-		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
-		for (const syn of SYNONYMS[t] ?? [])
-			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+	for (const raw of tokens) {
+		// Raven #39 battery (2026-08-21): category questions come plural —
+		// "which DEXes / AMMs / bridges / oracles / wallets / indexers can I
+		// integrate" — and every plural missed the singular intent key, so the
+		// question lost its category and degraded to word-matching (DEXes →
+		// only 10 candidates corpus-wide). Try the singular forms too.
+		const forms = new Set<string>([raw]);
+		if (raw.length > 3) {
+			if (raw.endsWith("ies")) forms.add(`${raw.slice(0, -3)}y`);
+			if (raw.endsWith("es")) forms.add(raw.slice(0, -2));
+			if (raw.endsWith("s")) forms.add(raw.slice(0, -1));
+		}
+		for (const t of forms) {
+			if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
+			for (const syn of SYNONYMS[t] ?? [])
+				if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+		}
 	}
 	return s;
 }
@@ -579,7 +600,17 @@ const CHAIN_PROOF: Record<string, string[]> = {
 	optimism: ["optimism", "evm"],
 	avalanche: ["avalanche", "evm"],
 	bnb: ["bnb", "bsc", "evm"],
-	evm: ["evm", "ethereum", "polygon", "arbitrum", "optimism", "avalanche", "bnb", "bsc", "base"],
+	evm: [
+		"evm",
+		"ethereum",
+		"polygon",
+		"arbitrum",
+		"optimism",
+		"avalanche",
+		"bnb",
+		"bsc",
+		"base",
+	],
 	polkadot: ["polkadot"],
 	kusama: ["kusama"],
 	tron: ["tron"],

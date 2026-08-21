@@ -296,6 +296,7 @@ export interface Project {
         | 'Social Impact'
         | 'RPC'
         | 'Faucet'
+        | 'Card Issuing'
       )[]
     | null;
   /**
@@ -1802,6 +1803,18 @@ export interface LinkCheck {
    * Final URL after following redirects.
    */
   redirectTo?: string | null;
+  /**
+   * The <title> the site served on the last 2xx (first 120 chars).
+   */
+  pageTitle?: string | null;
+  /**
+   * What the URL served (src/lib/page-verdict.ts). Anything but product/unknown means the 2xx is NOT evidence the product is alive — the basis upgrader refuses it and downgrades an existing site-liveness basis to unverified. Never changes status.
+   */
+  pageVerdict?: ('product' | 'placeholder' | 'parked' | 'spam' | 'scaffold' | 'offsite-redirect' | 'unknown') | null;
+  /**
+   * Host that finally answered after redirects (to catch rebrands and hijacks).
+   */
+  finalHost?: string | null;
   /**
    * How many consecutive check runs this URL has been PROVEN broken — 404/410, host does not resolve, connection refused. Anything else (redirect, bot wall, 5xx, timeout) resets it: those are reachability problems, not death. 0 = not proven broken.
    */
@@ -3423,6 +3436,9 @@ export interface LinkChecksSelect<T extends boolean = true> {
   statusCode?: T;
   errorReason?: T;
   redirectTo?: T;
+  pageTitle?: T;
+  pageVerdict?: T;
+  finalHost?: T;
   consecutiveFailures?: T;
   firstFailedAt?: T;
   consecutiveUnverifiable?: T;

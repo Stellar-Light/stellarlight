@@ -119,6 +119,43 @@ export const LinkChecks: CollectionConfig = {
 			},
 		},
 		{
+			// Liveness hardening 2026-08-21 (stellar-raven #39): what the 2xx
+			// actually SERVED. A HEAD cannot tell a product from a parked page,
+			// and site-liveness was stamped on both.
+			name: "pageTitle",
+			type: "text",
+			admin: {
+				description:
+					"The <title> the site served on the last 2xx (first 120 chars).",
+			},
+		},
+		{
+			name: "pageVerdict",
+			type: "select",
+			index: true,
+			options: [
+				"product",
+				"placeholder",
+				"parked",
+				"spam",
+				"scaffold",
+				"offsite-redirect",
+				"unknown",
+			],
+			admin: {
+				description:
+					"What the URL served (src/lib/page-verdict.ts). Anything but product/unknown means the 2xx is NOT evidence the product is alive — the basis upgrader refuses it and downgrades an existing site-liveness basis to unverified. Never changes status.",
+			},
+		},
+		{
+			name: "finalHost",
+			type: "text",
+			admin: {
+				description:
+					"Host that finally answered after redirects (to catch rebrands and hijacks).",
+			},
+		},
+		{
 			name: "consecutiveFailures",
 			type: "number",
 			defaultValue: 0,

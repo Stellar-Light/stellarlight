@@ -125,7 +125,7 @@ The SDF team/people index — **leadership, board of directors, and advisors** (
 ## `GET /api/projects/search`
 Search existing Stellar projects (competitor / overlap lookup). The workhorse for Deep Dive step 2.
 
-**Params:** `q={keywords}`, `category={cat}`, `scfAwarded=1`, `limit=N`.
+**Params:** `q={keywords}`, `type={Wallet|DEX|Lending|Bridge|Payments|Anchor|Card Issuing|…}` (exact category — use it for \"what X services exist\" questions, e.g. `type=Card Issuing` for card-program infrastructure), `category={cat}`, `scfAwarded=1`, `limit=N`.
 
 **Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance.
 

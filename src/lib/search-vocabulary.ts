@@ -112,6 +112,10 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	pool: ["pool", "liquidity", "amm", "dex", "swap"],
 	liquidity: ["liquidity", "pool", "amm", "dex", "swap"],
 	lending: ["lending", "lend", "borrow", "loan", "money market"],
+	// Raven #39: card-issuance vocabulary; "card issuing" is the types value.
+	card: ["card", "cards", "card issuing"],
+	cards: ["card", "cards", "card issuing"],
+	debit: ["debit", "card", "cards", "card issuing"],
 	// Q5 cold-agent run (2026-07-20): "escrow" queries must reach milestone/
 	// conditional-payment vocabulary — the canonical audited escrow platform's
 	// repo name doesn't contain the word.

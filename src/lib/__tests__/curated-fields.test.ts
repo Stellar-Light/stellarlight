@@ -98,4 +98,16 @@ describe("withoutCuratedFields", () => {
 		expect(input.types).toEqual(["Bridge"]);
 		expect(input.links.website).toBe("https://feed.example");
 	});
+
+	// Raven #39 (2026-08-21): NAME_FIXES registers renames so the nightly
+	// feed cannot revert them. The mapper writes `name` at top level; the
+	// stripper must drop it when owned.
+	it("strips a registered name so the feed cannot undo a rename", () => {
+		const { data, protectedFields } = withoutCuratedFields(
+			feed(),
+			new Set(["name"]),
+		);
+		expect("name" in data).toBe(false);
+		expect(protectedFields).toEqual(["name"]);
+	});
 });

@@ -21,6 +21,19 @@ const EXECUTE = process.argv.includes("--execute");
 // slug → { wasLive, note }. Only add a project after confirming its history.
 // Keep notes factual and dated — agents quote them verbatim.
 const ENTRIES: Array<{ slug: string; wasLive: boolean; note: string }> = [
+	// stellar-raven #39 (2026-08-21): both were recommended to an SDF reviewer
+	// as live card services. The archive note is what lets an answering model
+	// SAY what happened instead of silently dropping the row.
+	{
+		slug: "kulipa",
+		wasLive: true,
+		note: "Stablecoin card-issuing infrastructure (settlement on Stellar; SCF-funded). Shut down on 2026-07-29 citing insolvency — ~20 wallet partners lost card service and ~120,000 cards were disabled. kulipa.xyz now serves a 'changing home' placeholder.",
+	},
+	{
+		slug: "getblockcard",
+		wasLive: true,
+		note: "Ternio's BlockCard crypto card platform, later rebranded Unbanked, which wound down in 2023 citing the US regulatory environment. The recorded domain getblockcard.com has since lapsed and serves unrelated content.",
+	},
 	{
 		slug: "orbitcdp",
 		wasLive: true,
