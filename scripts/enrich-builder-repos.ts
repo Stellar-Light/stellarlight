@@ -237,8 +237,17 @@ async function main() {
 			continue;
 		}
 		listed += repos.length;
+		// Name-match applies to roster accounts AND to an explicit --only run:
+		// a human naming one account is the strongest curation signal there
+		// is, and the tail's strict rule exists to bound an anonymous sweep,
+		// not to second-guess a request (brunomlr/blend-indexer — no
+		// description, no topics — was dropped by a targeted run, 2026-08-21).
 		const signal = repos.filter((r) =>
-			isStellarRepo(login, r, rosterKeys.has(login.toLowerCase())),
+			isStellarRepo(
+				login,
+				r,
+				rosterKeys.has(login.toLowerCase()) || Boolean(ONLY),
+			),
 		);
 		filteredOut += repos.length - signal.length;
 		const keep = signal.slice(0, PER_BUILDER_CAP);
