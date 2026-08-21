@@ -171,7 +171,7 @@ async function semanticProjectRows(
 			products: pickProducts(p.products),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
-			supportedNetworks: pickNetworks(p.supportedNetworks),
+			...deriveNetworks(p),
 			// F3 (audit): semantic rows serialized types=[] / prominence=null for
 			// records that HAVE both — the $project simply omitted the fields.
 			types: Array.isArray(p.types) ? p.types : [],
@@ -378,8 +378,10 @@ interface ProjectRow {
 		asOf: string | null;
 	} | null;
 	// sls-017 (durable): chains this project supports (e.g. ["stellar","xrpl"]).
-	// Null — never [] — when we hold no curation. See pickNetworks.
+	// Null — never [] — when we hold neither curation nor evidence.
+	// NOT exhaustive unless networksBasis === "curated"; see deriveNetworks.
 	supportedNetworks: string[] | null;
+	networksBasis: NetworksBasis | null;
 	links?: Record<string, string>;
 	score: number;
 	url: string;
@@ -543,6 +545,69 @@ function pickNetworks(v: unknown): string[] | null {
 		(x): x is string => typeof x === "string" && !!x.trim(),
 	);
 	return nets.length ? nets : null;
+}
+
+/** What kind of evidence stands behind supportedNetworks. Not exported —
+ * a route module may export only handlers and segment config. */
+type NetworksBasis =
+	| "curated"
+	| "onchain-activity"
+	| "defillama-tvl"
+	| "anchor-coverage"
+	| "scf-award";
+
+/**
+ * sls-017: derive Stellar membership from evidence we already hold, so the
+ * field stops being null for half the directory.
+ *
+ * Curation only ever reached 94 of 1,010 projects, and the honest null we now
+ * serve for the rest is still an answer nobody can use. But four signals on
+ * the row are PROOF that a project operates on Stellar, not inference:
+ *
+ *   - onchain.contracts — contract records observed on Stellar
+ *   - tvlUSD            — DefiLlama tracks its Stellar TVL
+ *   - coverage          — SEP/corridor rails, which are Stellar rails
+ *   - scf.awarded       — the Stellar Community Fund only funds Stellar work
+ *
+ * Ordered strongest-first, and each reported by name so a caller can weigh a
+ * deployed contract differently from a grant.
+ *
+ * WHY THIS CANNOT REPEAT THE DTCC ERROR: DTCC sits at Development and
+ * announces Stellar availability for H1 2027, and it carries none of these
+ * four — no award, no TVL, no contracts. Announcing a future deployment
+ * leaves no evidence behind, which is exactly the property that makes these
+ * signals safe. Status is deliberately NOT a factor: an SCF award proves the
+ * project targets Stellar whether or not it runs today, which is what this
+ * field asks. Whether it currently RUNS is `status`.
+ *
+ * THE DERIVED LIST IS NOT EXHAUSTIVE, and `networksBasis` is what says so.
+ * Evidence of Stellar is not evidence about XRPL, so a derived ["stellar"]
+ * must never be read the way a curated ["stellar","xrpl"] can be. Without the
+ * basis field this would trade one false negative (null everywhere) for a
+ * worse one (every derived row implying Stellar-only).
+ */
+function deriveNetworks(
+	// biome-ignore lint/suspicious/noExplicitAny: payload project doc shape
+	p: any,
+): { supportedNetworks: string[] | null; networksBasis: NetworksBasis | null } {
+	const curated = pickNetworks(p?.supportedNetworks);
+	if (curated) return { supportedNetworks: curated, networksBasis: "curated" };
+
+	const cov = p?.coverage;
+	const basis: NetworksBasis | null = p?.onchain?.contracts?.length
+		? "onchain-activity"
+		: typeof p?.tvlUSD === "number" && p.tvlUSD > 0
+			? "defillama-tvl"
+			: cov &&
+					(cov.countries?.length || cov.currencies?.length || cov.seps?.length)
+				? "anchor-coverage"
+				: p?.scf?.awarded
+					? "scf-award"
+					: null;
+
+	return basis
+		? { supportedNetworks: ["stellar"], networksBasis: basis }
+		: { supportedNetworks: null, networksBasis: null };
 }
 
 // sls-032 (#516): a served route-level bridge fact. A Bridge-typed project
@@ -1331,7 +1396,7 @@ export async function GET(req: NextRequest) {
 					verificationLevel: p.verificationLevel ?? null,
 					types: Array.isArray(p.types) ? p.types : [],
 					coverage: pickCoverage(p.coverage),
-					supportedNetworks: pickNetworks(p.supportedNetworks),
+					...deriveNetworks(p),
 					links: pickLinks(p.links),
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
@@ -1864,7 +1929,7 @@ export async function GET(req: NextRequest) {
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],
 					coverage: pickCoverage(c.coverage),
-					supportedNetworks: pickNetworks(c.supportedNetworks),
+					...deriveNetworks(c),
 					links: pickLinks(c.links),
 					url: `https://stellarlight.xyz/project/${c.slug}`,
 				};
