@@ -82,13 +82,15 @@ async function main() {
 		.map((b) => (b.github_username ?? "").trim())
 		.filter(Boolean);
 
-	// Owners of repos that already carry Stellar proof: people we can see
-	// building, whoever told us about them.
+	// Owners of repos we consider worth keeping: people we can see building,
+	// whoever told us about them. `tier` rather than a codeVerified subfield —
+	// Payload refuses to query into that group, and archive is exactly the
+	// demoted long tail we do not want to walk 12k accounts for.
 	const fromCode = new Set<string>();
 	for (let page = 1; ; page++) {
 		const r = await payload.find({
 			collection: "repos",
-			where: { "codeVerified.stellarProof": { exists: true } },
+			where: { tier: { not_equals: "archive" } },
 			limit: 2000,
 			page,
 			depth: 0,
