@@ -863,7 +863,7 @@ export interface Repo {
   /**
    * How this repo entered the index
    */
-  source?: ('project-link' | 'ec-taxonomy') | null;
+  source?: ('project-link' | 'ec-taxonomy' | 'builder-owned') | null;
   /**
    * Quality tier — archive is demoted, never deleted
    */

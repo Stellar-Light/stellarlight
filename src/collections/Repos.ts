@@ -192,7 +192,10 @@ export const Repos: CollectionConfig = {
 				"tutorial-or-template",
 			],
 			index: true,
-			admin: { position: "sidebar", description: "Internal triage labels — never served" },
+			admin: {
+				position: "sidebar",
+				description: "Internal triage labels — never served",
+			},
 		},
 		{
 			// Discovery provenance: how this repo entered the index. Project-linked
@@ -201,10 +204,16 @@ export const Repos: CollectionConfig = {
 			// list (ingest-ec-taxonomy). Forever distinguishable for trust/filtering.
 			name: "source",
 			type: "select",
-			options: ["project-link", "ec-taxonomy"],
+			// builder-owned: indexed because a tracked PERSON owns it, not
+			// because a directory project links it. Individual contributors
+			// were invisible to a project-driven index until this existed.
+			options: ["project-link", "ec-taxonomy", "builder-owned"],
 			defaultValue: "project-link",
 			index: true,
-			admin: { position: "sidebar", description: "How this repo entered the index" },
+			admin: {
+				position: "sidebar",
+				description: "How this repo entered the index",
+			},
 		},
 		{
 			// Quality tier (tag-and-demote, never delete — the Inactive-projects
@@ -217,7 +226,10 @@ export const Repos: CollectionConfig = {
 			options: ["quality", "community", "archive"],
 			defaultValue: "community",
 			index: true,
-			admin: { position: "sidebar", description: "Quality tier — archive is demoted, never deleted" },
+			admin: {
+				position: "sidebar",
+				description: "Quality tier — archive is demoted, never deleted",
+			},
 		},
 
 		// ── Code-Truth Ledger (CTL) — code-signal + audit fields.
