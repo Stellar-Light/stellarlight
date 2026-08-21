@@ -20,6 +20,7 @@ import {
 	DOCS_LINKS,
 	GITHUB_REPOS_ADD,
 	NAME_FIXES,
+	PROMINENCE_SET,
 	SEEDS,
 	STATUS_FIX,
 	TYPES_ADD,
@@ -1635,6 +1636,29 @@ async function main() {
 	}
 
 	console.log("\n── Website fixes (dead recorded URL → verified live URL) ──");
+	// ── PROMINENCE_SET: editorial rank boost, exact-sync ──
+	for (const [slug, prominence] of Object.entries(PROMINENCE_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if ((d.prominence ?? 0) === prominence) {
+			console.log(`  ${slug}: prominence already ${prominence}, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: prominence ${d.prominence ?? 0} → ${prominence}`);
+		writes.push({ id: d.id, slug, data: { prominence } });
+	}
+
 	// ── NAME_FIXES: registered renames (sync-protected via curatedFieldsFor) ──
 	for (const [slug, name] of Object.entries(NAME_FIXES)) {
 		const r = await payload.find({

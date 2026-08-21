@@ -518,6 +518,34 @@ export const NAME_FIXES: Record<string, string> = {
 	"wirex-pay": "Wirex",
 };
 
+/** Editorial search-ranking boost (Projects.prominence, 0–100; 90 = the
+ * canonical pick for its category, 70 = established, 50 = notable, 0 =
+ * default). Exact-sync per slug. Not mapped by the feed sync, so no
+ * ownership entry is needed. Each row names the fact behind the number. */
+export const PROMINENCE_SET: Record<string, number> = {
+	// Playbook battery 2026-08-21: 14 exchanges seeded the same day tied on
+	// score, so CEX.IO and Coinone led "which exchanges list XLM" while
+	// Binance and Coinbase came last. Tiered by CoinGecko 24h XLM volume
+	// read 2026-08-21 (Binance $47.8M, Upbit $36.2M, Coinbase $32.9M,
+	// Bithumb $13.7M, WhiteBIT $11.6M, Kraken $8.3M, Bybit $8.0M, KuCoin
+	// $7.1M, Gate $4.9M, Bitstamp $2.5M, Coinone $1.6M, HTX $0.7M,
+	// Crypto.com $0.6M, CEX.IO $19k).
+	binance: 70,
+	coinbase: 70,
+	upbit: 60,
+	kraken: 60,
+	bithumb: 50,
+	whitebit: 50,
+	bybit: 50,
+	kucoin: 50,
+	"gate-io": 40,
+	bitstamp: 40,
+	coinone: 30,
+	htx: 30,
+	"crypto-com": 30,
+	"cex-io": 20,
+};
+
 export const WEBSITE_FIXES: Record<string, string> = {
 	// Liveness sweep 2026-08-21: sorobansecurity.com 301s to
 	// stellarsecurityportal.com (the host move the research corpus was
