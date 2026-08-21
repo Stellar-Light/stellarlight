@@ -7,8 +7,15 @@ name: Index builder-owned repos
 #
 # Its own schedule on purpose. One shared PAT hourly budget feeds every
 # GitHub-touching job and the main enrich pass already starves mid-corpus;
-# 146 extra owner listings inside that pass would push it over. Here it fails
-# alone and harmlessly.
+# these extra owner listings inside that pass would push it over. Here it
+# fails alone and harmlessly.
+#
+# BOUNDED, because the candidate set is not small: 6,540 accounts own a
+# non-archive repo. The script walks at most BUILDER_SWEEP_CAP (400) of them
+# per run — the curated roster every time, plus a rotating slice of the
+# code-derived tail — so one run costs ~9% of the hourly budget and the whole
+# tail is still covered on a fixed cycle. Unbounded, this single job would
+# spend more than an hour's entire allowance and starve the scan waves.
 #
 # Weekly is the right cadence: this only ADDS bare rows. enrich-repos fills
 # stars, language and scan signals on its own pass and owns those fields.
@@ -16,6 +23,7 @@ name: Index builder-owned repos
 on:
   schedule:
     # Tuesdays 05:00 UTC — clear of the Monday link sweep and basis upgrade.
+    # A scheduled run WRITES (see the args below); dispatch defaults to dry.
     - cron: "0 5 * * 2"
   workflow_dispatch:
     inputs:

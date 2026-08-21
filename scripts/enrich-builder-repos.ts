@@ -30,13 +30,16 @@
  * curated project can be treated as dedicated and keep everything. A personal
  * account never can — people work on many chains and many hobbies, and
  * indexing all of it would flood the index with someone's dotfiles. Every
- * repo must carry a Stellar signal in its name, description or topics. The
- * same regex the org pass uses, with the small-org bypass deliberately absent.
+ * repo must carry a Stellar signal in its DESCRIPTION or TOPICS — the same
+ * regex the org pass uses, with the small-org bypass deliberately absent and
+ * the name deliberately excluded as a source of signal — and must not
+ * self-describe as a tutorial or template.
  */
 
 import "./load-env";
 import { getPayload } from "payload";
 import { listOwnerRepos, type OwnerRepo } from "../src/lib/github";
+import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -48,12 +51,57 @@ const ONLY =
 /** Per-person cap. listOwnerRepos returns most-recently-pushed first. */
 const PER_BUILDER_CAP = Number(process.env.BUILDER_REPO_CAP || "15") || 15;
 
+/**
+ * Accounts walked per run — one GitHub listing each, so this is the run's
+ * whole API cost. The unbounded set is 6,540 owners, which would eat an
+ * hourly allowance shared with the every-2h scan waves and starve them.
+ * 400 is ~9% of the hourly budget, once a week.
+ */
+const SWEEP_CAP = Number(process.env.BUILDER_SWEEP_CAP || "400") || 400;
+
+/**
+ * Indexed repos a code-derived owner needs before we walk their account.
+ * Owners with exactly one indexed repo are overwhelmingly forks and
+ * hackathon one-offs: across all 11,446 non-archive repos 6,540 owners
+ * appear, and only 1,508 of them have two or more. The curated roster bypasses this entirely.
+ */
+const MIN_INDEXED_REPOS = Number(process.env.BUILDER_MIN_REPOS || "2") || 2;
+
 /** Same gate the org pass uses for multi-chain orgs. */
 const STELLAR_SIGNAL =
 	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 
-const isStellarRepo = (r: OwnerRepo) =>
-	STELLAR_SIGNAL.test(`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`);
+/**
+ * The signal has to come from the DESCRIPTION or the TOPICS — a match in the
+ * repo name alone is not enough.
+ *
+ * Measured on a real slice: name-only matches are `mhaurinho/stellar`,
+ * `Wesley534/stellar-frontend`, `Hurt4do/stellar-arena` — no description, no
+ * topics, nothing to rank or explain. Someone typed the word into a repo
+ * name. A description or a topic is someone DESCRIBING a Stellar thing, and
+ * every genuine project in that slice had one.
+ */
+const hasStellarSignal = (r: OwnerRepo) =>
+	STELLAR_SIGNAL.test(`${r.description ?? ""} ${r.topics.join(" ")}`);
+
+/**
+ * Reuse the triage vocabulary rather than growing a second regex here. It
+ * already encodes "self-describes as tutorial/example/starter/demo", and it
+ * already exempts allowlisted canon — soroban-examples is a template by name
+ * and canonical by fact. Passing stars as null lands it in the <5 branch,
+ * which is correct for a repo we have not scored yet.
+ */
+const isTutorialOrTemplate = (login: string, r: OwnerRepo) =>
+	deriveTriageTags({
+		fullName: `${login}/${r.name}`,
+		name: r.name,
+		description: r.description,
+		projectSlug: null,
+		stars: null,
+	}).includes("tutorial-or-template");
+
+const isStellarRepo = (login: string, r: OwnerRepo) =>
+	hasStellarSignal(r) && !isTutorialOrTemplate(login, r);
 
 const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
 
@@ -86,7 +134,7 @@ async function main() {
 	// whoever told us about them. `tier` rather than a codeVerified subfield —
 	// Payload refuses to query into that group, and archive is exactly the
 	// demoted long tail we do not want to walk 12k accounts for.
-	const fromCode = new Set<string>();
+	const fromCode = new Map<string, number>();
 	for (let page = 1; ; page++) {
 		const r = await payload.find({
 			collection: "repos",
@@ -98,20 +146,45 @@ async function main() {
 		});
 		for (const d of r.docs as Array<{ owner?: string }>) {
 			const o = (d.owner ?? "").trim();
-			if (o) fromCode.add(o);
+			if (o) fromCode.set(o, (fromCode.get(o) ?? 0) + 1);
 		}
 		if (page >= r.totalPages) break;
 	}
+	const qualified = [...fromCode.entries()]
+		.filter(([, n]) => n >= MIN_INDEXED_REPOS)
+		.map(([o]) => o);
 	console.log(
-		`login sources — roster: ${fromRoster.length} · code-derived owners: ${fromCode.size}`,
+		`login sources — roster: ${fromRoster.length} · code-derived owners: ${fromCode.size} (${qualified.length} with >=${MIN_INDEXED_REPOS} indexed repos)`,
 	);
 
-	const byLower = new Map<string, string>();
-	for (const l of [...fromRoster, ...fromCode]) {
-		if (l && VALID_IDENT.test(l)) byLower.set(l.toLowerCase(), l);
+	// The curated roster is small and hand-picked, so it is walked EVERY run.
+	// The code-derived tail rotates: a deterministic slice per ISO week, so
+	// each run costs the same and the whole set is still covered on a fixed
+	// cycle. Stateless on purpose — a "last swept" column would be one more
+	// thing to migrate, backfill and get wrong.
+	const rosterKeys = new Map<string, string>();
+	for (const l of fromRoster) {
+		if (l && VALID_IDENT.test(l)) rosterKeys.set(l.toLowerCase(), l);
 	}
-	let logins = [...byLower.values()];
-	if (ONLY) logins = logins.filter((l) => l.toLowerCase() === ONLY);
+	const tail = qualified
+		.filter((l) => VALID_IDENT.test(l) && !rosterKeys.has(l.toLowerCase()))
+		.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+	const slots = Math.max(1, SWEEP_CAP - rosterKeys.size);
+	const slices = Math.max(1, Math.ceil(tail.length / slots));
+	const week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+	const slice = week % slices;
+	const rotated = tail.slice(slice * slots, slice * slots + slots);
+	console.log(
+		`rotation — slice ${slice + 1}/${slices} of the code-derived tail (${rotated.length} accounts); full coverage every ${slices} run(s)`,
+	);
+
+	let logins = [...rosterKeys.values(), ...rotated];
+	if (ONLY) {
+		// A targeted run must not be filtered out by rotation or the repo-count
+		// floor — those exist to bound a full sweep, not to refuse a request.
+		logins = [ONLY];
+	}
 	console.log(`${logins.length} builder login(s) to walk\n`);
 	if (logins.length === 0) {
 		console.error("✗ no builder logins — instrument failure, not an empty set");
@@ -155,7 +228,7 @@ async function main() {
 			continue;
 		}
 		listed += repos.length;
-		const signal = repos.filter(isStellarRepo);
+		const signal = repos.filter((r) => isStellarRepo(login, r));
 		filteredOut += repos.length - signal.length;
 		const keep = signal.slice(0, PER_BUILDER_CAP);
 		const fresh = keep.filter(
