@@ -519,6 +519,10 @@ export const NAME_FIXES: Record<string, string> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// Liveness sweep 2026-08-21: sorobansecurity.com 301s to
+	// stellarsecurityportal.com (the host move the research corpus was
+	// migrated to in sls-003); the project row still pointed at the old host.
+	"stellar-security-portal": "https://stellarsecurityportal.com/",
 	// Raven #39: the recorded rain.com is "Rain — a licensed crypto exchange in
 	// Bahrain" (its own <title>), a different company. The Stellar card-program
 	// provider is rain.xyz ("Stablecoin payments platform for enterprise |

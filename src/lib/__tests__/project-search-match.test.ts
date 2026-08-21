@@ -520,3 +520,16 @@ describe("card issuance is a category, not a word (stellar-raven #39)", () => {
 		expect(typeMatch(YELLOW_CARD, intentTypesFor(["card"]))).toBe(false);
 	});
 });
+
+describe("plural category words keep their intent (Raven #39 battery)", () => {
+	it("maps plural forms to the singular intent key", () => {
+		expect(intentTypesFor(["dexes"]).has("DEX")).toBe(true);
+		expect(intentTypesFor(["amms"]).has("DEX")).toBe(true);
+		expect(intentTypesFor(["bridges"]).has("Bridge")).toBe(true);
+		expect(intentTypesFor(["wallets"]).has("Wallet")).toBe(true);
+		expect(intentTypesFor(["cards"]).has("Card Issuing")).toBe(true);
+	});
+	it("does not invent an intent for unrelated short words", () => {
+		expect(intentTypesFor(["gas", "fees"]).size).toBe(0);
+	});
+});

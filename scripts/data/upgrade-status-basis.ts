@@ -36,6 +36,7 @@
 
 import "../load-env";
 import { getPayload } from "payload";
+import { NON_PRODUCT_VERDICTS } from "../../src/lib/page-verdict";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -93,6 +94,8 @@ async function main() {
 				statusCode: true,
 				lastSuccessAt: true,
 				lastChecked: true,
+				pageVerdict: true,
+				pageTitle: true,
 			},
 		}),
 	]);
@@ -101,6 +104,8 @@ async function main() {
 		url?: string;
 		status?: string;
 		lastSuccessAt?: string | null;
+		pageVerdict?: string | null;
+		pageTitle?: string | null;
 	};
 	const live: Check[] = (checks.docs as Check[]).filter(
 		(c) => c.url && c.lastSuccessAt,
@@ -115,6 +120,20 @@ async function main() {
 		process.exit(1);
 	}
 
+	// Every check keyed by target (incl. ones with no success) — the
+	// downgrade pass needs the latest verdict even when the site no longer
+	// answers at all.
+	const allByTarget = new Map<string, Check>();
+	for (const c of checks.docs as Check[]) {
+		if (!c.url) continue;
+		const key = c.url
+			.trim()
+			.toLowerCase()
+			.replace(/^https?:\/\//, "")
+			.replace(/^www\./, "")
+			.replace(/\/+$/, "");
+		allByTarget.set(key, c);
+	}
 	const byTarget = new Map<string, Check>();
 	for (const c of live) {
 		const key = (c.url as string)
@@ -139,6 +158,12 @@ async function main() {
 		slug: string;
 		url: string;
 		asOf: string;
+	}> = [];
+	const nonProduct: Array<{
+		slug: string;
+		url: string;
+		verdict: string;
+		title: string;
 	}> = [];
 	let noWebsite = 0;
 	let noCheck = 0;
@@ -175,6 +200,23 @@ async function main() {
 			staleEvidence++;
 			continue;
 		}
+		// stellar-raven #39: a 200 is not a business. Kulipa (shut down
+		// 2026-07-29, domain serving a "changing home" placeholder) and
+		// GetBlockCard (lapsed domain serving lottery spam) both held a
+		// site-liveness basis earned this way. The link check now records
+		// what the page served; a non-product verdict is not evidence.
+		if (
+			check.pageVerdict &&
+			NON_PRODUCT_VERDICTS.has(check.pageVerdict as never)
+		) {
+			nonProduct.push({
+				slug: p.slug,
+				url: site,
+				verdict: check.pageVerdict,
+				title: check.pageTitle ?? "",
+			});
+			continue;
+		}
 		upgrade.push({
 			id: p.id,
 			slug: p.slug,
@@ -195,9 +237,70 @@ async function main() {
 	}
 	if (upgrade.length > 8) console.log(`   …and ${upgrade.length - 8} more`);
 
+	// The reverse direction: rows that ALREADY carry site-liveness whose
+	// latest check now says the page is not a product lose that basis —
+	// down to `unverified`, status untouched, dated to the check. A parked
+	// page never was evidence; we stop saying it is. Humans decide death.
+	const downgrade: Array<{
+		id: string;
+		slug: string;
+		url: string;
+		verdict: string;
+		asOf: string;
+	}> = [];
+	for (const p of projects.docs as Array<{
+		id: string;
+		slug: string;
+		statusBasis?: string | null;
+		links?: { website?: string | null } | null;
+	}>) {
+		if (p.statusBasis !== "site-liveness") continue;
+		const site = p.links?.website?.trim();
+		if (!site) continue;
+		const key = site
+			.toLowerCase()
+			.replace(/^https?:\/\//, "")
+			.replace(/^www\./, "")
+			.replace(/\/+$/, "");
+		const check = byTarget.get(key) ?? allByTarget.get(key);
+		if (
+			!check?.pageVerdict ||
+			!NON_PRODUCT_VERDICTS.has(check.pageVerdict as never)
+		)
+			continue;
+		downgrade.push({
+			id: p.id,
+			slug: p.slug,
+			url: site,
+			verdict: check.pageVerdict,
+			asOf: check.lastSuccessAt ?? new Date().toISOString(),
+		});
+	}
+	if (nonProduct.length) {
+		console.log(
+			`\n✋ ${nonProduct.length} site(s) answered 2xx but are NOT products — basis NOT upgraded:`,
+		);
+		for (const n of nonProduct.slice(0, 12))
+			console.log(
+				`   ${n.slug.padEnd(24)} ${n.verdict.padEnd(16)} ${n.title.slice(0, 50)}`,
+			);
+	}
+	console.log(
+		`\n→ ${downgrade.length} site-liveness row(s) DOWNGRADED to unverified (page is not a product)`,
+	);
+	for (const d of downgrade.slice(0, 12))
+		console.log(`   ${d.slug.padEnd(24)} ${d.verdict.padEnd(16)} ${d.url}`);
+
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
 		process.exit(0);
+	}
+	for (const d of downgrade) {
+		await payload.update({
+			collection: "projects",
+			id: d.id,
+			data: { statusBasis: "unverified", statusAsOf: d.asOf },
+		});
 	}
 
 	let wrote = 0;

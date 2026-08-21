@@ -48,6 +48,7 @@ import {
 	nextLinkHistory,
 	UNVERIFIABLE_RUNS_TO_ESCALATE,
 } from "../src/lib/link-history";
+import { classifyPage, type PageVerdict } from "../src/lib/page-verdict";
 import {
 	classifyExternalError,
 	classifyExternalStatus,
@@ -76,6 +77,9 @@ interface CheckResult {
 	statusCode: number | null;
 	errorReason: string | null;
 	redirectTo: string | null;
+	pageTitle?: string | null;
+	pageVerdict?: PageVerdict | null;
+	finalHost?: string | null;
 }
 
 interface UrlEntry {
@@ -301,6 +305,63 @@ function cleanUrl(raw: string | undefined | null): string | null {
 
 /* ─── HTTP check ─────────────────────────────────────────────────────── */
 
+/* ─── Page read (what a 2xx actually served) ─────────────────────────── */
+
+const NO_PAGE_READ =
+	/(^|\.)(github\.com|x\.com|twitter\.com|linkedin\.com|discord\.(gg|com)|t\.me|medium\.com|youtube\.com|apps\.apple\.com|play\.google\.com|npmjs\.com|crates\.io|jsr\.io)$/i;
+
+/** Bounded GET of the first 64 KB so the verdict can see the title/meta.
+ * Skipped for hosts where a page title says nothing about a product. */
+async function readPage(
+	url: string,
+	signal: AbortSignal,
+): Promise<{
+	title: string | null;
+	meta: string | null;
+	body: string | null;
+	finalUrl: string | null;
+}> {
+	const host = new URL(url).hostname;
+	if (NO_PAGE_READ.test(host))
+		return { title: null, meta: null, body: null, finalUrl: null };
+	const res = await fetch(url, {
+		method: "GET",
+		redirect: "follow",
+		headers: { "User-Agent": USER_AGENT, Accept: "text/html,*/*;q=0.5" },
+		signal,
+	});
+	const reader = res.body?.getReader();
+	let html = "";
+	if (reader) {
+		const dec = new TextDecoder();
+		while (html.length < 65_536) {
+			const { value, done } = await reader.read();
+			if (done) break;
+			html += dec.decode(value, { stream: true });
+		}
+		try {
+			await reader.cancel();
+		} catch {}
+	}
+	const t = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+	const m = /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)/i.exec(
+		html,
+	);
+	const body = html
+		.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/\s+/g, " ")
+		.slice(0, 1500);
+	const clean = (x: string | undefined) =>
+		x ? x.replace(/\s+/g, " ").trim().slice(0, 200) : null;
+	return {
+		title: clean(t?.[1]),
+		meta: clean(m?.[1]),
+		body,
+		finalUrl: res.url || null,
+	};
+}
+
 async function checkUrl(url: string): Promise<CheckResult> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -329,7 +390,46 @@ async function checkUrl(url: string): Promise<CheckResult> {
 			return summarize(getRes, url);
 		}
 
-		return summarize(res, url);
+		const base = summarize(res, url);
+		if (base.status === "ok") {
+			// The 2xx is only the beginning of the evidence (class: a 200 is not
+			// a business). Read what it served; any failure here leaves the
+			// verdict unknown, never downgrades.
+			try {
+				const page = await readPage(url, controller.signal);
+				const finalHost = page.finalUrl
+					? new URL(page.finalUrl).hostname
+					: null;
+				const v = classifyPage({
+					title: page.title,
+					metaDescription: page.meta,
+					bodyStart: page.body,
+					requestedHost: new URL(url).hostname,
+					finalHost,
+				});
+				return {
+					...base,
+					pageTitle: page.title?.slice(0, 120) ?? null,
+					pageVerdict: v.verdict,
+					finalHost,
+				};
+			} catch {
+				return { ...base, pageVerdict: "unknown" };
+			}
+		}
+		if (base.status === "redirect" && base.redirectTo) {
+			const finalHost = new URL(base.redirectTo).hostname;
+			const v = classifyPage({
+				requestedHost: new URL(url).hostname,
+				finalHost,
+			});
+			return {
+				...base,
+				finalHost,
+				pageVerdict: v.verdict === "offsite-redirect" ? v.verdict : null,
+			};
+		}
+		return base;
 	} catch (err) {
 		const e = err as Error & { code?: string; cause?: unknown };
 		// Class 32: a thrown fetch splits two ways. ENOTFOUND / ECONNREFUSED
@@ -579,6 +679,15 @@ async function main() {
 		const data = {
 			url: r.url,
 			status: r.status,
+			// Liveness hardening: persist what the 2xx served. undefined =
+			// leave unchanged (Review finding 11) — only overwrite when read.
+			...(r.pageVerdict !== undefined
+				? {
+						pageTitle: r.pageTitle ?? null,
+						pageVerdict: r.pageVerdict,
+						finalHost: r.finalHost ?? null,
+					}
+				: {}),
 			// Review finding 11: undefined = "leave unchanged" in Payload updates —
 			// stale errorReason/redirectTo survived a URL recovering. null CLEARS.
 			statusCode: r.statusCode ?? null,
