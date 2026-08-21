@@ -9,23 +9,17 @@
  * the repoScore quality grade.
  */
 
-import { symbolsHaystack } from "./code-symbols";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { CAP_REGISTRY } from "../data/cap-registry";
-import {
-	parseSdkMajor,
-	protocolForSdkMajor,
-} from "./soroban-versions";
-import {
-	activityStateOf,
-	type RepoActivityState,
-} from "./repo-grade";
+import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
+import { activityStateOf, type RepoActivityState } from "./repo-grade";
 import {
 	anchorTokens,
 	CORE_SYNONYMS,
 	mergeVocabulary,
 } from "./search-vocabulary";
+import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -192,12 +186,12 @@ export interface CodeVerified {
 	/** Cargo cdylib — a real deployable Soroban contract (vs tooling/SDK/frontend that merely uses Stellar). */
 	isDeployableContract: boolean;
 	/** Raw soroban-sdk version requirement (sourced fact, never a bare protocol int). */
-/** Engineering-practice presence facts from the code scan (tree-level):
+	/** Engineering-practice presence facts from the code scan (tree-level):
 	 * a CI config exists / test files exist. Presence only — never a claim CI
 	 * passes or coverage is good. null = not yet scanned. */
 	ciPresent: boolean | null;
 	testsPresent: boolean | null;
-		sorobanSdkVersion: string | null;
+	sorobanSdkVersion: string | null;
 	/** current | supported | deprecated | unknown — vs the latest protocol at scan time. */
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
@@ -210,7 +204,12 @@ export interface CodeVerified {
 	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
 	targetProtocol: number | null;
 	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
-	protocolCaps: Array<{ cap: number; title: string; status: string | null; url: string }>;
+	protocolCaps: Array<{
+		cap: number;
+		title: string;
+		status: string | null;
+		url: string;
+	}>;
 	/** Stellar-ecosystem dependencies from the repo's manifests (allowlist-matched package names) — the dependency graph: forward = the repo's stack, reverse = query a package name to find its dependents. */
 	stellarDeps: string[];
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
@@ -279,12 +278,19 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 			parseSdkMajor(d.sorobanSdkVersion ?? null),
 		),
 		protocolCaps: (() => {
-			const tp = protocolForSdkMajor(parseSdkMajor(d.sorobanSdkVersion ?? null));
+			const tp = protocolForSdkMajor(
+				parseSdkMajor(d.sorobanSdkVersion ?? null),
+			);
 			if (tp === null) return [];
 			return CAP_REGISTRY.filter((r) => r.protocolVersion === tp)
 				.sort((a, b) => a.cap - b.cap)
 				.slice(0, 10)
-				.map((r) => ({ cap: r.cap, title: r.title, status: r.status, url: r.url }));
+				.map((r) => ({
+					cap: r.cap,
+					title: r.title,
+					status: r.status,
+					url: r.url,
+				}));
 		})(),
 		mainnetContractId: d.mainnetContractId ?? null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)
@@ -1111,6 +1117,48 @@ export async function searchRepos(
 				),
 			];
 		}
+		// Identity-form queries get an EXACT-NAME supplemental fetch. The anchor
+		// supplement above fetches `fullName like <anchor token>` sorted by
+		// score with a 100-row cap — and after the 2026-08-14 EC ingest (+~10k
+		// rows) a query like "stellar-indexer-sdk" has >100 higher-scored
+		// "indexer" repos, so the repo literally NAMED for the query
+		// (Creit-Tech/Stellar-Indexer-SDK, repoScore 29) was flooded out of the
+		// pool before the sls-025 alias rule below could rank it: absent at
+		// limit=50 for its own name from 2026-08-14 (field-population guard,
+		// daily). The alias rule can only pin what the pool holds. Fetch the
+		// literal query as a fullName/name substring — raw form plus
+		// hyphens-for-spaces ("stellar wallets kit" → "stellar-wallets-kit").
+		// Same gates as qIsIdentifier / qIsSpacedName below, plus ≥5 chars so a
+		// ticker can't match half the index; a vocabulary word never qualifies,
+		// so it cannot ride name-identity over the F4 evidence policy.
+		const qRaw = q.trim();
+		const qLooksLikeName =
+			/[-_/.0-9]/.test(qRaw) ||
+			/[a-z][A-Z]/.test(qRaw) ||
+			(qRaw.split(/\s+/).length >= 3 && normAlias(qRaw).length >= 8);
+		if (qLooksLikeName && qRaw.length >= 5) {
+			const forms = [...new Set([qRaw, qRaw.replace(/\s+/g, "-")])];
+			const nres = await payload.find({
+				collection: "repos",
+				where: {
+					or: forms.flatMap((f) => [
+						{ fullName: { like: f } },
+						{ name: { like: f } },
+					]),
+				},
+				limit: 20,
+				sort: "-repoScore",
+				depth: 0,
+				select: { readmeExcerpt: false },
+			});
+			const seenN = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
+			rawDocs = [
+				...rawDocs,
+				...(nres.docs as unknown as RepoDoc[]).filter(
+					(d) => !seenN.has(d.fullName.toLowerCase()),
+				),
+			];
+		}
 		// sls-025: separator-insensitive identity form of the query, computed once.
 		// Alias identity applies ONLY to identifier-form queries (containing a
 		// digit or -,_,/,. — "stellar8004", "passkey-kit", "subquery/stellar-subql-starter").
@@ -1123,7 +1171,8 @@ export async function searchRepos(
 		// right for vocabulary, wrong for identity. Nobody types camelCase
 		// for a vocabulary query, so an internal lower→upper transition is
 		// as strong an identity signal as a hyphen or digit.
-		const qIsIdentifier = /[-_/.0-9]/.test(q.trim()) || /[a-z][A-Z]/.test(q.trim());
+		const qIsIdentifier =
+			/[-_/.0-9]/.test(q.trim()) || /[a-z][A-Z]/.test(q.trim());
 		// Golden repos-soroswap: a PLAIN single-word query that IS an org's whole
 		// name ("soroswap") got no identity path — the org's own repos capped at
 		// owner-hay weight 3 while integrators with a topic hit scored 5, and
@@ -1431,7 +1480,8 @@ export async function searchRepos(
 								asOf: r.activitySignals.asOf ?? null,
 							}
 						: null,
-				successorRepo: (r as { successorRepo?: string | null }).successorRepo ?? null,
+				successorRepo:
+					(r as { successorRepo?: string | null }).successorRepo ?? null,
 				codeInUse:
 					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
 						? {
@@ -1449,8 +1499,7 @@ export async function searchRepos(
 							// Internal notes are triage memory (why a long-tail repo
 							// isn't worth surfacing/deep-indexing) — they NEVER serve.
 							.filter(
-								(n) =>
-									(n as { visibility?: string }).visibility !== "internal",
+								(n) => (n as { visibility?: string }).visibility !== "internal",
 							)
 							.map((n) => ({
 								note: String(n.note),
