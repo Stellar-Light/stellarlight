@@ -296,6 +296,7 @@ export interface Project {
         | 'Social Impact'
         | 'RPC'
         | 'Faucet'
+        | 'Card Issuing'
       )[]
     | null;
   /**

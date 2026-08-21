@@ -37,6 +37,40 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// Raven #39 (elizabethli-sdf, 2026-08-21): Raven recommended Kulipa FIRST
+	// for "what card services can I integrate on Stellar". Kulipa shut down on
+	// 2026-07-29 (insolvency) — ~20 wallet partners lost card service and
+	// ~120,000 cards were disabled overnight. Six independent reports
+	// (coinalertnews 07-31, btctiming 08-02, bydfi, guavy, startupfortune,
+	// bleap). kulipa.xyz still answers 200 with a "Kulipa is changing home /
+	// join our waitlist" placeholder, which is why site-liveness kept it Live:
+	// a 200 is not a business. SCF-funded; the record stays, the label moves.
+	kulipa: {
+		from: "Live",
+		to: "Inactive",
+		note: "Stablecoin card-issuing infrastructure (settlement on Stellar) that shut down on 2026-07-29 citing insolvency; ~20 wallet partners and ~120,000 cards went dark. The domain serves a 'changing home' placeholder.",
+		asOf: "2026-08-21",
+		sourceUrl:
+			"https://coinalertnews.com/news/2026/07/31/kulipa-shuts-down-after-funding",
+		basis: "human-verified",
+	},
+	// Raven #39: GetBlockCard was Ternio's BlockCard, which became Unbanked
+	// (ternio.io 301s → unbanked.com; Republic: "Unbanked, formerly Ternio
+	// BlockCard"). Unbanked wound down in 2023 (Cointelegraph: "exhausted all
+	// options", citing the US regulatory environment). The recorded domain
+	// getblockcard.com has since lapsed and now serves an Indonesian lottery-
+	// spam page — which answers HTTP 200, so site-liveness called it Live. The
+	// boss-pay class (lapsed apex re-registered by strangers), except here the
+	// product is gone too, so this is Inactive rather than a website fix.
+	getblockcard: {
+		from: "Live",
+		to: "Inactive",
+		note: "Ternio's BlockCard crypto card platform, rebranded Unbanked, which wound down in 2023. The recorded domain getblockcard.com has lapsed and now serves unrelated lottery-spam content.",
+		asOf: "2026-08-21",
+		sourceUrl:
+			"https://cointelegraph.com/news/unbanked-to-wind-down-citing-regulatory-enviroment",
+		basis: "human-verified",
+	},
 	// Provenance REFRESH (Live → Live), not a flip: the Raven cold-agent runs
 	// (2026-07-20) flagged blend serving statusAsOf 2025-12-17
 	// source-inherited while its TVL refreshed same-day — status freshness
@@ -473,7 +507,24 @@ export const STATUS_FIX: Record<
  * PRODUCT is verifiably alive but the recorded URL is dead (lapsed apex,
  * rebrand, or move). Overwrites links.website; equality no-ops keep reruns
  * clean. Status stays Live — these were false positives on the death list. */
+/** Name corrections. The lumenloop mapper writes `name`, so a rename that is
+ * not registered here is reverted by the next nightly sync — the class that
+ * silently undid curation for weeks (#730). Equality no-ops keep reruns clean.
+ * Pair with IDENTITY_FIX (curate-projects.ts) so the old name stays an alias. */
+export const NAME_FIXES: Record<string, string> = {
+	// Raven #39: the Stellar Playbook lists "Wirex" (wirexapp.com). Our row
+	// was named for the Wirex Pay product; wirexpaychain.com now 301s to
+	// wirexapp.com. The company is the entity; Wirex Pay stays as an alias.
+	"wirex-pay": "Wirex",
+};
+
 export const WEBSITE_FIXES: Record<string, string> = {
+	// Raven #39: the recorded rain.com is "Rain — a licensed crypto exchange in
+	// Bahrain" (its own <title>), a different company. The Stellar card-program
+	// provider is rain.xyz ("Stablecoin payments platform for enterprise |
+	// Rain"), which is the URL the Stellar Playbook debit-cards page links.
+	// NOT the lapsed-domain class: rain.com is alive, it is simply not Rain.
+	rain: "https://www.rain.xyz/",
 	// Afriex operates today at afriex.com (200; afriexapp.com www even redirects there) with active App Store/Google Play listings; only the recorded afriexapp.com…
 	afriex: "https://www.afriex.com/",
 	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
@@ -1589,6 +1640,20 @@ export const SEEDS: Array<{
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// Raven #39: Bridge is on the Stellar Playbook's debit-cards page, yet no
+	// card query ever fetched it — the row said stablecoin infra and MGUSD,
+	// never cards. bridge.xyz leads with "Stablecoin-backed cards are now
+	// integrated with Stripe Issuing" and lists Cards as a product line
+	// (read 2026-08-21). Kept the existing verified facts verbatim.
+	bridge:
+		"Bridge is a stablecoin infrastructure company (co-founded 2022 by Zach Abrams and Sean Yu), acquired by Stripe for ~$1.1B (announced October 2024, closed February 4, 2025). Its card-issuing product lets a platform issue stablecoin-backed Visa cards to users, integrated with Stripe Issuing — the card-program provider the Stellar Playbook lists for debit cards. On Stellar, Bridge issues MGUSD, MoneyGram's U.S.-dollar-backed stablecoin native to the Stellar blockchain, with tokens minted/burned via M0's smart-contract infrastructure.",
+	// Raven #39: the row still carried the 2023 SCF pitch ("the team would
+	// like to support Stellar too") eight months after Wirex and Stellar went
+	// LIVE with dual-stablecoin Visa settlement in USDC and EURC for 7M+
+	// users (PR Newswire, 2025-11-18, via lumenloop.com/news). wirexpaychain
+	// .com now 301s to wirexapp.com — the entity the Playbook lists.
+	"wirex-pay":
+		"Wirex is a crypto wallet and payments platform (7M+ users) whose Visa card programme settles in USDC and EURC on Stellar — live since November 2025, when Wirex and the Stellar Development Foundation announced dual-stablecoin Visa settlement. Wirex Pay, its self-custodial card and account product built on smart accounts, is the programme's on-chain layer. SCF-funded (Wirex–Vottun Stellar SDK).",
 	// gyen had NO description. The issuer's own stellar.toml
 	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
 	// issuance is wound down with a 1:1 redemption window through Nov 11
@@ -1722,6 +1787,18 @@ export const GITHUB_REPOS_ADD: Record<
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
+	// Raven #39 (2026-08-21): the Stellar Playbook's debit-cards page lists
+	// Bridge, Kulipa, Rain and Wirex as card ISSUERS a builder integrates.
+	// "Card Issuing" is that category — card-program infrastructure, not a
+	// consumer app that happens to have a card (Figo, COCA, Chipper, Peer are
+	// deliberately NOT typed). Inactive rows keep the type: what they WERE is
+	// still true; status carries whether they still are.
+	bridge: ["Card Issuing"], // bridge.xyz: stablecoin-backed cards via Stripe Issuing (read 2026-08-21)
+	rain: ["Card Issuing"], // rain.xyz + playbook; row description: "Enables companies on Stellar… to launch branded cards"
+	"wirex-pay": ["Card Issuing"], // PR Newswire 2025-11-18: Visa settlement in USDC/EURC on Stellar
+	kulipa: ["Card Issuing"], // was a stablecoin card issuer (settlement on Stellar); Inactive since 2026-07-29
+	getblockcard: ["Card Issuing"], // was Ternio BlockCard; Inactive (Unbanked wound down 2023)
+	cards402: ["Card Issuing"], // own description: SDK/CLI/MCP for issuing virtual Visa cards to AI agents; Development
 	// Stablecoin appended per boxy triage 2026-07-20 (issued-asset + sectors
 	// axes both fired — domain-matched stellar.expert issuance).
 	etherfuse: ["Anchor", "Stablecoin"],
@@ -1871,6 +1948,7 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	if (slug in DESCRIPTION_FIXES) owned.add("shortDescription");
 	if (slug in TYPES_SET || slug in TYPES_ADD) owned.add("types");
 	if (slug in STATUS_FIX) owned.add("status");
+	if (slug in NAME_FIXES) owned.add("name");
 	if (slug in WEBSITE_FIXES) owned.add("links.website");
 	if (slug in DOCS_LINKS) owned.add("links.docs");
 	if (slug in GITHUB_REPOS_ADD) owned.add("github");
@@ -1887,6 +1965,7 @@ export function curatedSlugs(): string[] {
 			...Object.keys(TYPES_SET),
 			...Object.keys(TYPES_ADD),
 			...Object.keys(STATUS_FIX),
+			...Object.keys(NAME_FIXES),
 			...Object.keys(WEBSITE_FIXES),
 			...Object.keys(DOCS_LINKS),
 			...Object.keys(GITHUB_REPOS_ADD),

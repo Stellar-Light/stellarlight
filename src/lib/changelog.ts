@@ -32,6 +32,15 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-21",
+		surfaces: ["api", "skill"],
+		type: "added",
+		summary:
+			"Card Issuing is a project type (openapi@1.8.83, stellar-raven #39). 'What card services can I integrate on Stellar?' returned a defunct issuer first, missed Bridge entirely, and padded the list with anchors, wallets and a card GAME \u2014 because 'card' was only ever a word to match, never a category to ask for. It is a category now: searchProjects?type=Card Issuing, and card/debit-card queries resolve to it.",
+		detail:
+			"The answer an SDF reviewer checked against the Stellar Playbook debit-cards page (Bridge, Kulipa, Rain, Wirex) failed on every axis, and each failure was ours. Kulipa led the list: it shut down on 2026-07-29 (insolvency; ~20 wallet partners, 120,000 cards disabled \u2014 six independent reports) while our row said Live on a site-liveness basis because its domain still serves a 'changing home' placeholder. Bridge was absent: its row never mentioned cards, so no card query fetched it, although bridge.xyz leads with stablecoin-backed cards integrated with Stripe Issuing. Rain's website pointed at rain.com \u2014 a Bahrain crypto exchange \u2014 instead of rain.xyz, the card company. Wirex's row still carried its 2023 SCF pitch ('would like to support Stellar too') eight months after Wirex and Stellar went live with dual-stablecoin Visa settlement in USDC and EURC (Nov 2025). GetBlockCard (Ternio's BlockCard, later Unbanked, wound down 2023) showed Live because its lapsed domain now serves a lottery-spam site that answers HTTP 200 \u2014 the lesson that a 200 is not liveness. And with no type to anchor on, 'card' ranked Yellow Card (name homonym) and CyberBrawl (a card game) above every issuer. The type plus intent mapping fix the retrieval class; the row corrections are curated with a citation each and a protected NAME_FIXES registry so the nightly feed sync cannot revert the Wirex rename.",
+	},
+	{
+		date: "2026-08-21",
 		surfaces: ["api"],
 		type: "fixed",
 		summary:

@@ -302,6 +302,14 @@ export const INTENT_TYPE: Record<string, string> = {
 	x402: "Payments",
 	mpp: "Payments",
 	micropayment: "Payments",
+	// Raven #39: "what card services can I integrate" is a category question.
+	// Without a type behind it the word "card" matched Yellow Card (a name
+	// homonym), CyberBrawl (a card GAME) and gift-card shops, while Bridge —
+	// on the playbook's own debit-cards page — never entered the pool because
+	// its prose did not say "card". Structured truth drives inclusion.
+	card: "Card Issuing",
+	cards: "Card Issuing",
+	debit: "Card Issuing",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",
@@ -579,7 +587,17 @@ const CHAIN_PROOF: Record<string, string[]> = {
 	optimism: ["optimism", "evm"],
 	avalanche: ["avalanche", "evm"],
 	bnb: ["bnb", "bsc", "evm"],
-	evm: ["evm", "ethereum", "polygon", "arbitrum", "optimism", "avalanche", "bnb", "bsc", "base"],
+	evm: [
+		"evm",
+		"ethereum",
+		"polygon",
+		"arbitrum",
+		"optimism",
+		"avalanche",
+		"bnb",
+		"bsc",
+		"base",
+	],
 	polkadot: ["polkadot"],
 	kusama: ["kusama"],
 	tron: ["tron"],

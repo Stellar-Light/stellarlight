@@ -19,6 +19,7 @@ import {
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
 	GITHUB_REPOS_ADD,
+	NAME_FIXES,
 	SEEDS,
 	STATUS_FIX,
 	TYPES_ADD,
@@ -205,13 +206,48 @@ const SCF_FIX: Record<
 	// finding's official-submission recheck, spot-verified; totals preserved
 	// verbatim (null = undisclosed, never derived). awardType null — never
 	// guessed. Digibank r44 deliberately NOT inferred, per the finding.
-	sstream: { awarded: true, totalAwarded: 36000, awardedRounds: [16], roundAwards: [{ round: 16, amountUSD: 36000, awardType: null }] },
-	wagelink: { awarded: true, totalAwarded: 50000, awardedRounds: [24], roundAwards: [{ round: 24, amountUSD: 50000, awardType: null }] },
-	unalivio: { awarded: true, totalAwarded: null, awardedRounds: [32], roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }] },
-	tucambio: { awarded: true, totalAwarded: null, awardedRounds: [37], roundAwards: [{ round: 37, amountUSD: 75000, awardType: null }] },
-	stride: { awarded: true, totalAwarded: 120000, awardedRounds: [33], roundAwards: [{ round: 33, amountUSD: 120000, awardType: null }] },
-	palremit: { awarded: true, totalAwarded: 60000, awardedRounds: [32], roundAwards: [{ round: 32, amountUSD: 60000, awardType: null }] },
-	autoaction: { awarded: true, totalAwarded: 50000, awardedRounds: [29], roundAwards: [{ round: 29, amountUSD: 50000, awardType: null }] },
+	sstream: {
+		awarded: true,
+		totalAwarded: 36000,
+		awardedRounds: [16],
+		roundAwards: [{ round: 16, amountUSD: 36000, awardType: null }],
+	},
+	wagelink: {
+		awarded: true,
+		totalAwarded: 50000,
+		awardedRounds: [24],
+		roundAwards: [{ round: 24, amountUSD: 50000, awardType: null }],
+	},
+	unalivio: {
+		awarded: true,
+		totalAwarded: null,
+		awardedRounds: [32],
+		roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }],
+	},
+	tucambio: {
+		awarded: true,
+		totalAwarded: null,
+		awardedRounds: [37],
+		roundAwards: [{ round: 37, amountUSD: 75000, awardType: null }],
+	},
+	stride: {
+		awarded: true,
+		totalAwarded: 120000,
+		awardedRounds: [33],
+		roundAwards: [{ round: 33, amountUSD: 120000, awardType: null }],
+	},
+	palremit: {
+		awarded: true,
+		totalAwarded: 60000,
+		awardedRounds: [32],
+		roundAwards: [{ round: 32, amountUSD: 60000, awardType: null }],
+	},
+	autoaction: {
+		awarded: true,
+		totalAwarded: 50000,
+		awardedRounds: [29],
+		roundAwards: [{ round: 29, amountUSD: 50000, awardType: null }],
+	},
 	comet: {
 		awarded: true,
 		totalAwarded: 291000,
@@ -313,6 +349,15 @@ const IDENTITY_FIX: Record<
 	string,
 	{ aliases: string[]; renamedAt?: string; renameSourceUrl?: string }
 > = {
+	// Raven #39: row renamed Wirex Pay → Wirex (NAME_FIXES); the product
+	// name stays searchable. Source: Wirex & Stellar dual-stablecoin Visa
+	// settlement announcement (PR Newswire, 2025-11-18).
+	"wirex-pay": {
+		aliases: ["Wirex Pay"],
+		renamedAt: "2025-11-18",
+		renameSourceUrl:
+			"https://lumenloop.com/news/wirex-stellar-go-live-dual-stablecoin-visa-settlement-usdc",
+	},
 	// Vesseo is SDF-subsidiary Sunship's consumer USDC wallet, formerly
 	// Vibrant (the record's own description + vesseoapp.com; Tyler's P4 H3
 	// primary-source extraction cites current material as "the Vesseo app").
@@ -918,6 +963,9 @@ const DUPE_MERGES: Array<{
 	fill?: { shortDescription?: string; github?: string };
 	copyScf?: boolean;
 }> = [
+	// Raven #39 sweep: coca-wallet is an empty Inactive shadow of coca
+	// (same coca.xyz site, no description, no basis).
+	{ dupe: "coca-wallet", canonical: "coca" },
 	{ dupe: "stellarexpert", canonical: "stellar-expert" },
 	{
 		dupe: "sorobanpulse",
@@ -1587,6 +1635,29 @@ async function main() {
 	}
 
 	console.log("\n── Website fixes (dead recorded URL → verified live URL) ──");
+	// ── NAME_FIXES: registered renames (sync-protected via curatedFieldsFor) ──
+	for (const [slug, name] of Object.entries(NAME_FIXES)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.name === name) {
+			console.log(`  ${slug}: name already "${name}", skip`);
+			continue;
+		}
+		console.log(`  ${slug}: name "${d.name}" → "${name}"`);
+		writes.push({ id: d.id, slug, data: { name } });
+	}
+
 	for (const [slug, website] of Object.entries(WEBSITE_FIXES)) {
 		const r = await payload.find({
 			collection: "projects",
@@ -1765,8 +1836,14 @@ async function main() {
 			JSON.stringify(
 				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 				((rows as any[]) ?? []).map((x) => [
-					x.name, x.kind, x.network, x.status,
-					x.contractId ?? null, x.evidenceUrl, x.asOf, x.note ?? null,
+					x.name,
+					x.kind,
+					x.network,
+					x.status,
+					x.contractId ?? null,
+					x.evidenceUrl,
+					x.asOf,
+					x.note ?? null,
 				]),
 			);
 		if (tup(d.products) === tup(want)) {

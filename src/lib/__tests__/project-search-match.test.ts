@@ -455,7 +455,9 @@ describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
 
 	it("EVM-family queries are proven by the generic evm tag", () => {
 		expect(chainCorridorHit(ALLBRIDGE, tokenize("ethereum bridge"))).toBe(true);
-		expect(chainCorridorHit(SPACEWALK, tokenize("ethereum bridge"))).toBe(false);
+		expect(chainCorridorHit(SPACEWALK, tokenize("ethereum bridge"))).toBe(
+			false,
+		);
 	});
 
 	it("unenriched bridges fall back to a prose mention", () => {
@@ -481,5 +483,40 @@ describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
 		expect(chainCorridorHit(SOLANA_WALLET, tokenize("solana wallet"))).toBe(
 			true,
 		);
+	});
+});
+
+// Raven #39 (2026-08-21): a card-issuance question is a CATEGORY question.
+const BRIDGE_XYZ = {
+	name: "Bridge",
+	shortDescription:
+		"Bridge is a stablecoin infrastructure company. On Stellar, Bridge issues MGUSD, MoneyGram's U.S.-dollar-backed stablecoin.",
+	category: "Infrastructure",
+	types: ["Payments", "Card Issuing"],
+	supportedNetworks: ["stellar"],
+	coverage: null,
+};
+const YELLOW_CARD = {
+	name: "Yellow Card",
+	shortDescription:
+		"Yellow Card is Africa's largest licensed stablecoin fiat on-ramp and off-ramp, operating across 20 countries.",
+	category: "Anchor",
+	types: ["Anchor", "Payments"],
+	supportedNetworks: ["stellar"],
+	coverage: null,
+};
+describe("card issuance is a category, not a word (stellar-raven #39)", () => {
+	it("card / cards / debit resolve to the Card Issuing type", () => {
+		for (const q of ["card", "cards", "debit"])
+			expect(intentTypesFor([q]).has("Card Issuing")).toBe(true);
+	});
+	it("a typed issuer whose prose never says 'card' is a structured hit", () => {
+		const tokens = ["card", "services"];
+		const it = intentTypesFor(tokens);
+		expect(typeMatch(BRIDGE_XYZ, it)).toBe(true);
+		expect(structuredHit(BRIDGE_XYZ, it, tokens, false)).toBe(true);
+	});
+	it("a name homonym is not a type match", () => {
+		expect(typeMatch(YELLOW_CARD, intentTypesFor(["card"]))).toBe(false);
 	});
 });

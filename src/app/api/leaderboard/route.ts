@@ -11,11 +11,11 @@
  * data without scraping.
  */
 
-import { jsonSafe } from "@/lib/json-safe";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
+import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -200,6 +200,7 @@ export async function GET(req: NextRequest) {
 		"Social Impact",
 		"RPC",
 		"Faucet",
+		"Card Issuing",
 	] as const;
 	const typeList = sp
 		.getAll("type")

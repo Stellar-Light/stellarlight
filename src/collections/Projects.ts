@@ -99,6 +99,10 @@ export const Projects: CollectionConfig = {
 				"Social Impact",
 				"RPC",
 				"Faucet",
+				// Raven #39 (2026-08-21): card-program infrastructure a builder can
+				// integrate to issue cards to users (Bridge, Rain, Wirex). Distinct from
+				// a consumer app that merely HAS a card. The playbook's own category.
+				"Card Issuing",
 			],
 		},
 		{
@@ -559,7 +563,15 @@ export const Projects: CollectionConfig = {
 				{
 					name: "kind",
 					type: "select",
-					options: ["oracle-feed", "rwa-asset", "stablecoin", "wallet-app", "bridge", "ramp", "other"],
+					options: [
+						"oracle-feed",
+						"rwa-asset",
+						"stablecoin",
+						"wallet-app",
+						"bridge",
+						"ramp",
+						"other",
+					],
 					required: true,
 				},
 				{
@@ -772,12 +784,18 @@ export const Projects: CollectionConfig = {
 				{
 					name: "asOf",
 					type: "text",
-					admin: { description: "ISO date the award facts were last verified against the source" },
+					admin: {
+						description:
+							"ISO date the award facts were last verified against the source",
+					},
 				},
 				{
 					name: "sourceUrl",
 					type: "text",
-					admin: { description: "Official SCF project page the award facts were read from" },
+					admin: {
+						description:
+							"Official SCF project page the award facts were read from",
+					},
 				},
 			],
 		},
