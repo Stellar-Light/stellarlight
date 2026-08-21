@@ -999,7 +999,7 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. Per-round official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. Empty = no product-level records yet (never 'no products'). kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Curated on ~2 projects today, so null is overwhelmingly the common case. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -1009,7 +1009,7 @@ export interface components {
                 evidenceUrl?: string;
                 asOf?: string;
                 note?: string | null;
-            }[];
+            }[] | null;
             /** @description The official submission record per awarded round — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number, the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). The page-level total can legitimately exceed the sum of these budgets; treat rounds+budgets as the per-round truth and the total as SCF's own aggregate. */
             scfRoundAwards?: {
                 round?: number;

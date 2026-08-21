@@ -231,7 +231,13 @@ function scfAmountStatus(
 // #742: per-product deployment records — id-stripped, provenance intact.
 // biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
 function pickProducts(rows: any): ProjectRow["products"] {
-	if (!Array.isArray(rows)) return [];
+	// Null, not [], when we hold no product records. [] is a POSITIVE claim
+	// that the project ships no products on Stellar — served on 1,008 of 1,010
+	// rows, including every wallet in the directory, which is plainly false.
+	// Same rule as supportedNetworks / routes / coverage / llamaSlugs: an
+	// unmodelled dimension is UNKNOWN, and the caller has to be able to see
+	// the difference between "nothing here" and "we never modelled it".
+	if (!Array.isArray(rows) || rows.length === 0) return null;
 	// biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
 	return rows.map((r: any) => ({
 		name: String(r.name ?? ""),
@@ -339,6 +345,9 @@ interface ProjectRow {
 	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
 	// cross-source totals mechanically instead of guessing at counting bases.
 	scfAwardedRounds: number[];
+	// #742 (sls-023/sls-029): per-product, per-network deployment records —
+	// the dimension a project-level status label cannot carry. Null when we
+	// hold none; NEVER [] (see pickProducts).
 	products: Array<{
 		name: string;
 		kind: string;
@@ -348,7 +357,7 @@ interface ProjectRow {
 		evidenceUrl: string;
 		asOf: string;
 		note: string | null;
-	}>;
+	}> | null;
 	scfRoundAwards: Array<{
 		round: number;
 		amountUSD: number | null;
