@@ -1,7 +1,11 @@
 {
-	"generatedAt": "2026-08-20T06:04:18.326Z",
+	"generatedAt": "2026-08-21T06:06:02.894Z",
 	"detector": "api-drift",
 	"failures": [
+		{
+			"probe": "status.endpoints lists /api/projects/resolve",
+			"note": "OpenAPI documents /api/projects/resolve but /api/status.endpoints[] omits it"
+		},
 		{
 			"probe": "status.endpoints lists /api/scf-pitch",
 			"note": "OpenAPI documents /api/scf-pitch but /api/status.endpoints[] omits it"
@@ -21,6 +25,10 @@
 		{
 			"probe": "status.endpoints lists /api/contracts",
 			"note": "OpenAPI documents /api/contracts but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "/api/projects/resolve emits X-API-Version",
+			"note": "got \"none\" — add \"/api/projects/resolve\" to next.config.mjs publicApi[]"
 		},
 		{
 			"probe": "/api/scf-pitch emits X-API-Version",
