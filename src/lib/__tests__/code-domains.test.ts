@@ -5,14 +5,18 @@ describe("deriveCodeDomains", () => {
 	it("dependencies are NOT identity — a consumer never inherits the protocol's domain (2026-08-15 stratum lesson)", () => {
 		expect(
 			deriveCodeDomains({
-				stellarDeps: ["@soroswap/sdk", "@defindex/sdk", "@creit-tech/stellar-wallets-kit"],
+				stellarDeps: [
+					"@soroswap/sdk",
+					"@defindex/sdk",
+					"@creit-tech/stellar-wallets-kit",
+				],
 			}),
 		).toEqual([]);
 	});
 	it("sep24-ramp capability marks anchor-ramp", () => {
-		expect(deriveCodeDomains({ sdkCapabilities: ["sep24-ramp", "signing"] })).toEqual([
-			"anchor-ramp",
-		]);
+		expect(
+			deriveCodeDomains({ sdkCapabilities: ["sep24-ramp", "signing"] }),
+		).toEqual(["anchor-ramp"]);
 	});
 	it("SEP-40 lastprice interface trait marks oracle (real stored shape)", () => {
 		// Stored entries are "ContractType.fn(args) -> Ret" strings — verified
@@ -27,16 +31,23 @@ describe("deriveCodeDomains", () => {
 		).toEqual(["oracle"]);
 		// Bare-fn shape still matches.
 		expect(
-			deriveCodeDomains({ contractInterface: ["lastprice(asset: Asset) -> Option<PriceData>"] }),
+			deriveCodeDomains({
+				contractInterface: ["lastprice(asset: Asset) -> Option<PriceData>"],
+			}),
 		).toEqual(["oracle"]);
 		// A fn merely CONTAINING the word does not.
 		expect(
-			deriveCodeDomains({ contractInterface: ["Oracle.get_lastprice_history() -> Vec<u64>"] }),
+			deriveCodeDomains({
+				contractInterface: ["Oracle.get_lastprice_history() -> Vec<u64>"],
+			}),
 		).toEqual([]);
 	});
 	it("no evidence = honest empty, never a guess", () => {
 		expect(
-			deriveCodeDomains({ stellarDeps: ["@stellar/stellar-sdk"], sdkCapabilities: ["signing"] }),
+			deriveCodeDomains({
+				stellarDeps: ["@stellar/stellar-sdk"],
+				sdkCapabilities: ["signing"],
+			}),
 		).toEqual([]);
 	});
 });

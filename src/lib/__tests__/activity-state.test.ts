@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
 import { activityStateOf, repoGrade } from "../repo-grade";
 import { searchRepos } from "../repo-search";
 
-const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+const daysAgo = (n: number) =>
+	new Date(Date.now() - n * 86_400_000).toISOString();
 
 describe("activityStateOf", () => {
 	it("classifies by known commit age", () => {

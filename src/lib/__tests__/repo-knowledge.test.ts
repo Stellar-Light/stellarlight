@@ -14,7 +14,11 @@ const audits = new Map<string, AuditRecord[]>([
 
 describe("buildKnowledgeNotes", () => {
 	it("derives an audit note from an EXACT projectSlug join, naming the latest", () => {
-		const notes = buildKnowledgeNotes("blend-capital/blend-contracts", "blend", audits);
+		const notes = buildKnowledgeNotes(
+			"blend-capital/blend-contracts",
+			"blend",
+			audits,
+		);
 		expect(notes).toHaveLength(1);
 		expect(notes[0].source).toBe("derived:audit");
 		expect(notes[0].note).toContain("2 security audit reports");
@@ -40,13 +44,18 @@ describe("buildKnowledgeNotes", () => {
 
 	it("curated + derived stack on the same repo", () => {
 		const withAudit = new Map<string, AuditRecord[]>([
-			["colibri", [{ projectSlug: "colibri", auditor: null, publishedAt: null }]],
+			[
+				"colibri",
+				[{ projectSlug: "colibri", auditor: null, publishedAt: null }],
+			],
 		]);
 		const notes = buildKnowledgeNotes("fazzatti/colibri", "colibri", withAudit);
 		// colibri carries the 2026-08-15 deep-read set (6 curated notes); the
 		// stacking contract is curated-first then derived, whatever the count.
 		const sources = notes.map((n) => n.source);
-		expect(sources.filter((x) => x === "curated").length).toBeGreaterThanOrEqual(6);
+		expect(
+			sources.filter((x) => x === "curated").length,
+		).toBeGreaterThanOrEqual(6);
 		expect(sources.at(-1)).toBe("derived:audit");
 		expect(sources.slice(0, -1).every((x) => x === "curated")).toBe(true);
 	});
@@ -54,24 +63,36 @@ describe("buildKnowledgeNotes", () => {
 
 describe("code-truth signals in notes", () => {
 	const audits = new Map([
-		["blend", [{ projectSlug: "blend", auditor: "Certora", publishedAt: "2025-08-13" }]],
+		[
+			"blend",
+			[{ projectSlug: "blend", auditor: "Certora", publishedAt: "2025-08-13" }],
+		],
 	]);
 	it("audit note carries drift days + committed-since when both dates exist", () => {
 		const notes = buildKnowledgeNotes("x/y", "blend", audits, {
 			lastCommitAt: "2026-08-01T00:00:00Z",
 		});
 		const audit = notes.find((n) => n.source === "derived:audit");
-		expect(audit?.note).toMatch(/Latest report is \d+ days old; the repo has committed since\./);
+		expect(audit?.note).toMatch(
+			/Latest report is \d+ days old; the repo has committed since\./,
+		);
 	});
 	it("audit note says no-commits-since when the repo is older than the audit", () => {
 		const notes = buildKnowledgeNotes("x/y", "blend", audits, {
 			lastCommitAt: "2025-01-01T00:00:00Z",
 		});
-		expect(notes.find((n) => n.source === "derived:audit")?.note).toContain("no commits since");
+		expect(notes.find((n) => n.source === "derived:audit")?.note).toContain(
+			"no commits since",
+		);
 	});
 	it("usage note appears only with a dated codeInUse and formats deltas", () => {
 		const notes = buildKnowledgeNotes("x/y", null, new Map(), {
-			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+			codeInUse: {
+				contracts: 1,
+				events: 44447,
+				eventsDelta: 743,
+				asOf: "2026-08-13",
+			},
 		});
 		const use = notes.find((n) => n.source === "derived:usage");
 		expect(use?.note).toBe(

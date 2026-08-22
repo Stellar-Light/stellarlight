@@ -28,7 +28,12 @@ describe("computeLangDepth", () => {
 	it("context-free lang repo caps at the old flat 0.3", () => {
 		const d = computeLangDepth({
 			fullName: "org/random-go-tool",
-			blobs: [{ path: "main.go", text: `package main\n${"// x\n".repeat(200)}func main() {}` }],
+			blobs: [
+				{
+					path: "main.go",
+					text: `package main\n${"// x\n".repeat(200)}func main() {}`,
+				},
+			],
 			scalars: SCALARS,
 		});
 		expect(d.reasons).toContain("no-sdk-calls");

@@ -83,15 +83,20 @@ describe("searchRepos F4 ranking", () => {
 		});
 		const mentioner = doc({
 			fullName: "stellarcarbon/hackmeridian",
-			description: "Hackathon project integrating soroswap for swaps on Soroban",
+			description:
+				"Hackathon project integrating soroswap for swaps on Soroban",
 			topics: ["soroswap", "stellar"],
 			repoScore: 70,
 			codeScanState: "scanned",
 			stellarProof: "soroban-sdk",
 		});
-		const { repos } = await searchRepos(mockPayload([mentioner, own]), "soroswap", {
-			limit: 5,
-		});
+		const { repos } = await searchRepos(
+			mockPayload([mentioner, own]),
+			"soroswap",
+			{
+				limit: 5,
+			},
+		);
 		expect(repos[0]?.fullName).toBe("soroswap/core");
 	});
 
@@ -624,7 +629,12 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			codeScanState: "scanned",
 			stellarProof: "cargo-sdk",
 			repoScore: 62,
-			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+			codeInUse: {
+				contracts: 1,
+				events: 44447,
+				eventsDelta: 743,
+				asOf: "2026-08-13",
+			},
 		});
 		const { repos } = await searchRepos(
 			mockPayload([feeders, used]),
@@ -645,7 +655,12 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			description: "decentralized oracle for Soroban",
 			codeScanState: "scanned",
 			stellarProof: "cargo-sdk",
-			codeInUse: { contracts: 1, events: 44447, eventsDelta: 743, asOf: "2026-08-13" },
+			codeInUse: {
+				contracts: 1,
+				events: 44447,
+				eventsDelta: 743,
+				asOf: "2026-08-13",
+			},
 		});
 		const { repos } = await searchRepos(
 			mockPayload([named, used]),

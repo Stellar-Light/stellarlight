@@ -20,7 +20,10 @@ const verified = {
 	stellarProof: "cargo-sdk",
 	codeDepth: 0.8,
 	codeDomains: ["defi-lending"],
-	contractInterface: ["Pool.borrow(a: Address) -> i128", "Pool.repay(a: Address) -> i128"],
+	contractInterface: [
+		"Pool.borrow(a: Address) -> i128",
+		"Pool.repay(a: Address) -> i128",
+	],
 	codeInUse: { contracts: 2, events: 500, eventsDelta: 40, asOf: "2026-08-10" },
 	successorRepo: null,
 	codeScannedAt: "2026-08-14",
@@ -28,22 +31,48 @@ const verified = {
 
 describe("buildContractsRegistry", () => {
 	it("joins repo truth + audits into contract rows, most-evidenced first", async () => {
-		const idOnly = { ...verified, fullName: "x/other", mainnetContractId: "CXYZ", codeInUse: null, projectSlug: null, codeDomains: [] };
+		const idOnly = {
+			...verified,
+			fullName: "x/other",
+			mainnetContractId: "CXYZ",
+			codeInUse: null,
+			projectSlug: null,
+			codeDomains: [],
+		};
 		const { contracts, total } = await buildContractsRegistry(
-			mockPayload([idOnly, verified], [
-				{ projectSlug: "proto", auditor: "OtterSec", publishedAt: "2026-05-01" },
-				{ projectSlug: "proto", auditor: "Veridise", publishedAt: "2026-07-01" },
-			]),
+			mockPayload(
+				[idOnly, verified],
+				[
+					{
+						projectSlug: "proto",
+						auditor: "OtterSec",
+						publishedAt: "2026-05-01",
+					},
+					{
+						projectSlug: "proto",
+						auditor: "Veridise",
+						publishedAt: "2026-07-01",
+					},
+				],
+			),
 		);
 		expect(total).toBe(2);
 		expect(contracts[0].repo.fullName).toBe("proto/contracts");
-		expect(contracts[0].audits).toEqual({ count: 2, latestAuditor: "Veridise", latestPublishedAt: "2026-07-01" });
+		expect(contracts[0].audits).toEqual({
+			count: 2,
+			latestAuditor: "Veridise",
+			latestPublishedAt: "2026-07-01",
+		});
 		expect(contracts[0].interfaceSize).toBe(2);
 	});
 	it("domain filter and q filter narrow honestly", async () => {
 		const p = mockPayload([verified]);
-		expect((await buildContractsRegistry(p, { domain: "oracle" })).total).toBe(0);
-		expect((await buildContractsRegistry(p, { domain: "defi-lending" })).total).toBe(1);
+		expect((await buildContractsRegistry(p, { domain: "oracle" })).total).toBe(
+			0,
+		);
+		expect(
+			(await buildContractsRegistry(p, { domain: "defi-lending" })).total,
+		).toBe(1);
 		expect((await buildContractsRegistry(p, { q: "cabc" })).total).toBe(1);
 		expect((await buildContractsRegistry(p, { q: "nope" })).total).toBe(0);
 	});

@@ -33,7 +33,9 @@ const okInput: SignalsInput = {
 	farmScore: 0,
 	farmFlags: [],
 	codeSymbols: ["initialize_escrow", "EscrowContract"],
-	contractInterface: ["EscrowContract.initialize_escrow(seller: Address, amount: i128)"],
+	contractInterface: [
+		"EscrowContract.initialize_escrow(seller: Address, amount: i128)",
+	],
 	stellarDeps: ["soroban-sdk", "sep-41-token"],
 	sdkCapabilities: ["tx-building", "x402"],
 	codeDomains: ["payments-x402"],
