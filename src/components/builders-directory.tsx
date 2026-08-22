@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ago, agoSentence } from "@/lib/builder-code";
 
 /** Serializable row the server builds from Passport + our repos index. */
 export type BuilderRowData = {
@@ -55,17 +56,6 @@ const SORTS: Array<{ key: SortKey; label: string }> = [
 	{ key: "stars", label: "Most stars" },
 	{ key: "name", label: "A to Z" },
 ];
-
-function ago(iso: string | null | undefined): string | null {
-	if (!iso) return null;
-	const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
-	if (!Number.isFinite(d)) return null;
-	if (d <= 0) return "today";
-	if (d === 1) return "yesterday";
-	if (d < 30) return `${d}d ago`;
-	if (d < 365) return `${Math.floor(d / 30)}mo ago`;
-	return `${Math.floor(d / 365)}y ago`;
-}
 
 const heat = (r: BuilderRowData) => r.commits30d * 3 + r.commits90d;
 const recentCut = () => Date.now() - 90 * 86_400_000;
