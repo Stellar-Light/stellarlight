@@ -16,6 +16,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -258,7 +259,7 @@ export default async function BuilderProfilePage({
 					    figures only when Passport actually has them. Nothing = no card,
 					    never a row of zeros. */}
 					{(() => {
-						const tiles: Array<{ v: string; l: string }> = [];
+						const tiles: Array<{ v: string; l: string; passport?: true }> = [];
 						if (code && code.repos.length > 0) {
 							tiles.push({
 								v: String(code.repos.length),
@@ -269,45 +270,59 @@ export default async function BuilderProfilePage({
 							if (code.commits90d > 0)
 								tiles.push({
 									v: code.commits90d.toLocaleString(),
-									l: "commits on own repos, 90d",
+									l: "Commits · own repos · 90d",
 								});
 							if (code.contributedCommits12m > 0)
 								tiles.push({
 									v: code.contributedCommits12m.toLocaleString(),
-									l: "commits to others' repos, 12mo",
+									l: "Commits · others' repos · 12mo",
 								});
 							if (code.lastCommitAt)
 								tiles.push({
 									v: ago(code.lastCommitAt) ?? "",
-									l: "last commit",
+									l: "Last commit",
 								});
 						}
 						if (builder.stats?.totalCommits30d)
 							tiles.push({
 								v: String(builder.stats.totalCommits30d),
-								l: "commits, 30d (Passport)",
+								l: "Commits · 30d",
+								passport: true,
 							});
 						if (builder.stats?.activeDays30d)
 							tiles.push({
 								v: String(builder.stats.activeDays30d),
-								l: "active days, 30d (Passport)",
+								l: "Active days · 30d",
+								passport: true,
 							});
 						if (!tiles.length) return null;
+						const hasPassport = tiles.some((t) => t.passport);
+						// One even row on desktop (never an orphan tile on a second
+						// line), two columns on small screens.
+						const cols = Math.min(tiles.length, 5);
 						return (
 							<Card className="w-full md:w-auto">
-								<CardContent className="p-4">
-									<div className="flex flex-wrap gap-6 text-center">
+								<CardContent className="p-4 md:px-6">
+									<div
+										className="grid grid-cols-2 gap-x-8 gap-y-5 text-center md:[grid-template-columns:repeat(var(--tiles),minmax(0,1fr))]"
+										style={{ "--tiles": String(cols) } as React.CSSProperties}
+									>
 										{tiles.map((t) => (
-											<div key={t.l} className="min-w-[72px]">
-												<div className="text-2xl font-semibold text-foreground tabular-nums">
+											<div key={t.l} className="min-w-0">
+												<div className="text-2xl font-semibold text-foreground tabular-nums whitespace-nowrap">
 													{t.v}
 												</div>
-												<div className="text-xs text-muted-foreground">
+												<div className="mt-0.5 text-xs leading-snug text-muted-foreground">
 													{t.l}
 												</div>
 											</div>
 										))}
 									</div>
+									{hasPassport && (
+										<p className="mt-3 text-[11px] text-muted-foreground/70 text-center md:text-right">
+											30-day figures from Stellar Passport
+										</p>
+									)}
 								</CardContent>
 							</Card>
 						);
