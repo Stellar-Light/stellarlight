@@ -57,7 +57,7 @@ export default async function HomePage() {
 				<div className="mb-20 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[600px] relative">
 					<div className="flex-1 text-left relative z-20 space-y-8">
 						<div className="space-y-6">
-							<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+							<h1 className="reveal-wipe text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
 								<div className="text-foreground mb-2">Explore</div>
 								<Typewriter
 									text={[
