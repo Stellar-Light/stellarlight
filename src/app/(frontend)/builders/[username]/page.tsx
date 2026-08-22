@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ago,
+	agoSentence,
 	builderCodeActivity,
 	type CodeActivity,
 } from "@/lib/builder-code";
@@ -254,80 +255,72 @@ export default async function BuilderProfilePage({
 							)}
 						</div>
 					</div>
-
-					{/* Activity: real numbers from the repos we index; Passport's own 30d
-					    figures only when Passport actually has them. Nothing = no card,
-					    never a row of zeros. */}
-					{(() => {
-						const tiles: Array<{ v: string; l: string; passport?: true }> = [];
-						if (code && code.repos.length > 0) {
-							tiles.push({
-								v: String(code.repos.length),
-								l: code.repos.length === 1 ? "Stellar repo" : "Stellar repos",
-							});
-							// Two honest numbers, never mixed: activity on repos they own,
-							// and their own commits into repos they don't.
-							if (code.commits90d > 0)
-								tiles.push({
-									v: code.commits90d.toLocaleString(),
-									l: "Commits · own repos · 90d",
-								});
-							if (code.contributedCommits12m > 0)
-								tiles.push({
-									v: code.contributedCommits12m.toLocaleString(),
-									l: "Commits · others' repos · 12mo",
-								});
-							if (code.lastCommitAt)
-								tiles.push({
-									v: ago(code.lastCommitAt) ?? "",
-									l: "Last commit",
-								});
-						}
-						if (builder.stats?.totalCommits30d)
-							tiles.push({
-								v: String(builder.stats.totalCommits30d),
-								l: "Commits · 30d",
-								passport: true,
-							});
-						if (builder.stats?.activeDays30d)
-							tiles.push({
-								v: String(builder.stats.activeDays30d),
-								l: "Active days · 30d",
-								passport: true,
-							});
-						if (!tiles.length) return null;
-						const hasPassport = tiles.some((t) => t.passport);
-						// One even row on desktop (never an orphan tile on a second
-						// line), two columns on small screens.
-						const cols = Math.min(tiles.length, 5);
-						return (
-							<Card className="w-full md:w-auto">
-								<CardContent className="p-4 md:px-6">
-									<div
-										className="grid grid-cols-2 gap-x-8 gap-y-5 text-center md:[grid-template-columns:repeat(var(--tiles),minmax(0,1fr))]"
-										style={{ "--tiles": String(cols) } as React.CSSProperties}
-									>
-										{tiles.map((t) => (
-											<div key={t.l} className="min-w-0">
-												<div className="text-2xl font-semibold text-foreground tabular-nums whitespace-nowrap">
-													{t.v}
-												</div>
-												<div className="mt-0.5 text-xs leading-snug text-muted-foreground">
-													{t.l}
-												</div>
-											</div>
-										))}
-									</div>
-									{hasPassport && (
-										<p className="mt-3 text-[11px] text-muted-foreground/70 text-center md:text-right">
-											30-day figures from Stellar Passport
-										</p>
-									)}
-								</CardContent>
-							</Card>
-						);
-					})()}
 				</div>
+
+				{/* Activity strip — OUTSIDE the profile row so it never competes with
+				    the name/role column (the old nested card squeezed and wrapped
+				    whenever a role title ran long). Equal-width cells, one baseline,
+				    short values. Real numbers from the repos we index; Passport's
+				    30d figures only when Passport has them. Nothing = no strip. */}
+				{(() => {
+					const tiles: Array<{ v: string; l: string; passport?: true }> = [];
+					if (code && code.repos.length > 0) {
+						tiles.push({
+							v: String(code.repos.length),
+							l: code.repos.length === 1 ? "Stellar repo" : "Stellar repos",
+						});
+						if (code.commits90d > 0)
+							tiles.push({
+								v: code.commits90d.toLocaleString(),
+								l: "Commits · own · 90d",
+							});
+						if (code.contributedCommits12m > 0)
+							tiles.push({
+								v: code.contributedCommits12m.toLocaleString(),
+								l: "Commits · others · 12mo",
+							});
+						if (code.lastCommitAt)
+							tiles.push({ v: ago(code.lastCommitAt) ?? "", l: "Last commit" });
+					}
+					if (builder.stats?.totalCommits30d)
+						tiles.push({
+							v: String(builder.stats.totalCommits30d),
+							l: "Commits · 30d",
+							passport: true,
+						});
+					if (builder.stats?.activeDays30d)
+						tiles.push({
+							v: String(builder.stats.activeDays30d),
+							l: "Active days · 30d",
+							passport: true,
+						});
+					if (!tiles.length) return null;
+					const hasPassport = tiles.some((t) => t.passport);
+					return (
+						<div className="mt-6 border-t border-border pt-5">
+							<div className="grid grid-cols-2 gap-y-5 sm:grid-cols-3 md:flex md:divide-x md:divide-border">
+								{tiles.map((t) => (
+									<div
+										key={t.l}
+										className="md:flex-1 md:px-5 first:md:pl-0 last:md:pr-0"
+									>
+										<div className="text-xl font-semibold tabular-nums leading-none text-foreground">
+											{t.v}
+										</div>
+										<div className="mt-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+											{t.l}
+										</div>
+									</div>
+								))}
+							</div>
+							{hasPassport && (
+								<p className="mt-3 text-[11px] text-muted-foreground/60">
+									30-day figures from Stellar Passport
+								</p>
+							)}
+						</div>
+					);
+				})()}
 			</div>
 
 			{/* Bio Section */}
@@ -360,7 +353,7 @@ export default async function BuilderProfilePage({
 									? `, ${code.commits90d.toLocaleString()} commits on their own repos in the last 90 days`
 									: ""}
 								{code.lastCommitAt
-									? `, last commit ${ago(code.lastCommitAt)}`
+									? `, last commit ${agoSentence(code.lastCommitAt)}`
 									: ""}
 								.
 							</p>
