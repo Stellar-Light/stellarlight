@@ -7,7 +7,9 @@ describe("buildBatchQuery", () => {
 			{ owner: "stellar", name: "stellar-core" },
 			{ owner: "blend-capital", name: "blend-contracts-v2" },
 		]);
-		expect(q).toContain('r0: repository(owner: "stellar", name: "stellar-core")');
+		expect(q).toContain(
+			'r0: repository(owner: "stellar", name: "stellar-core")',
+		);
 		expect(q).toContain(
 			'r1: repository(owner: "blend-capital", name: "blend-contracts-v2")',
 		);
@@ -16,16 +18,18 @@ describe("buildBatchQuery", () => {
 	});
 
 	it("throws on names outside GitHub's charset — literal-injection proof", () => {
-		expect(() =>
-			buildBatchQuery([{ owner: 'a"){x}', name: "b" }]),
-		).toThrow(/invalid owner\/name/);
-		expect(() =>
-			buildBatchQuery([{ owner: "ok", name: "bad name" }]),
-		).toThrow(/invalid owner\/name/);
+		expect(() => buildBatchQuery([{ owner: 'a"){x}', name: "b" }])).toThrow(
+			/invalid owner\/name/,
+		);
+		expect(() => buildBatchQuery([{ owner: "ok", name: "bad name" }])).toThrow(
+			/invalid owner\/name/,
+		);
 	});
 
 	it("dots, dashes, underscores are legal (real-world names)", () => {
-		const q = buildBatchQuery([{ owner: "Creit-Tech", name: "Stellar-Wallets-Kit" }]);
+		const q = buildBatchQuery([
+			{ owner: "Creit-Tech", name: "Stellar-Wallets-Kit" },
+		]);
 		expect(q).toContain('owner: "Creit-Tech"');
 	});
 

@@ -28,7 +28,12 @@ describe("computeEcosystemGaps", () => {
 
 	it("tallies per-type coverage, multi-valued (a project counts under each type)", () => {
 		const dex = gaps.byType.find((c) => c.type === "DEX");
-		expect(dex).toMatchObject({ total: 4, live: 3, inProgress: 1, scfFunded: 1 });
+		expect(dex).toMatchObject({
+			total: 4,
+			live: 3,
+			inProgress: 1,
+			scfFunded: 1,
+		});
 		const wallet = gaps.byType.find((c) => c.type === "Wallet");
 		// one Wallet comes from the DEX+Wallet project → 3 total
 		expect(wallet?.total).toBe(3);

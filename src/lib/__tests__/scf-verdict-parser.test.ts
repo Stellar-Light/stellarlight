@@ -139,7 +139,11 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 		);
 		expect(v.awards).toEqual([
 			{ round: 16, budgetUSD: null, awardType: null },
-			{ round: 24, budgetUSD: 50000, awardType: "Legacy v5.0 Activation Award" },
+			{
+				round: 24,
+				budgetUSD: 50000,
+				awardType: "Legacy v5.0 Activation Award",
+			},
 		]);
 	});
 
@@ -185,8 +189,6 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 			'{"id":"c1","status":"Awarded","roundName":"SCF #29","budget":100000}\n' +
 				'{"id":"c2","status":"Awarded","roundName":"SCF #29"}',
 		);
-		expect(v.awards).toEqual([
-			{ round: 29, budgetUSD: null, awardType: null },
-		]);
+		expect(v.awards).toEqual([{ round: 29, budgetUSD: null, awardType: null }]);
 	});
 });

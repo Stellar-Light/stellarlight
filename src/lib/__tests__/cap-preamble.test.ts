@@ -41,6 +41,9 @@ describe("parseCapPreamble", () => {
 
 	it("a 'Status:' deep in prose does not match (head-only)", () => {
 		const md = `${"x".repeat(3000)}\nStatus: Fake\nProtocol version: 99`;
-		expect(parseCapPreamble(md)).toEqual({ status: null, protocolVersion: null });
+		expect(parseCapPreamble(md)).toEqual({
+			status: null,
+			protocolVersion: null,
+		});
 	});
 });

@@ -21,11 +21,20 @@ describe("deriveTriageTags", () => {
 		).toEqual([]);
 	});
 	it("tags farm signals, inert forks, archived, dead long tail", () => {
-		expect(deriveTriageTags({ fullName: "x/f", farmScore: 2 })).toContain("farm-signals");
+		expect(deriveTriageTags({ fullName: "x/f", farmScore: 2 })).toContain(
+			"farm-signals",
+		);
 		expect(
-			deriveTriageTags({ fullName: "x/fork", isFork: true, stars: 0, commits90d: 0 }),
+			deriveTriageTags({
+				fullName: "x/fork",
+				isFork: true,
+				stars: 0,
+				commits90d: 0,
+			}),
 		).toContain("inert-fork");
-		expect(deriveTriageTags({ fullName: "x/a", isArchived: true })).toContain("archived-upstream");
+		expect(deriveTriageTags({ fullName: "x/a", isArchived: true })).toContain(
+			"archived-upstream",
+		);
 		expect(
 			deriveTriageTags({
 				fullName: "x/old",
@@ -37,7 +46,11 @@ describe("deriveTriageTags", () => {
 	});
 	it("tutorial-or-template needs no project link and low traction", () => {
 		expect(
-			deriveTriageTags({ fullName: "x/soroban-starter", name: "soroban-starter", stars: 0 }),
+			deriveTriageTags({
+				fullName: "x/soroban-starter",
+				name: "soroban-starter",
+				stars: 0,
+			}),
 		).toContain("tutorial-or-template");
 		expect(
 			deriveTriageTags({

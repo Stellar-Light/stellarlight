@@ -11,8 +11,7 @@ describe("factConfidence", () => {
 	});
 
 	it("evidence ladder orders as documented (fresh facts)", () => {
-		const s = (b: string) =>
-			factConfidence(b, "2026-08-10", NOW)?.score ?? -1;
+		const s = (b: string) => factConfidence(b, "2026-08-10", NOW)?.score ?? -1;
 		expect(s("human-verified")).toBeGreaterThan(s("official-record"));
 		expect(s("official-record")).toBeGreaterThan(s("site-liveness"));
 		expect(s("site-liveness")).toBeGreaterThan(s("source-inherited"));

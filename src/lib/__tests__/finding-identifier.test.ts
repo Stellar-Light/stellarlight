@@ -29,9 +29,9 @@ describe("findingIdentifierTargets", () => {
 	});
 
 	it("ignores ordinary prose", () => {
-		expect(findingIdentifierTargets("how do soroban auth patterns work")).toEqual(
-			[],
-		);
+		expect(
+			findingIdentifierTargets("how do soroban auth patterns work"),
+		).toEqual([]);
 		expect(findingIdentifierTargets(undefined)).toEqual([]);
 	});
 });

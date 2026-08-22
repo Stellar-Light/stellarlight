@@ -7,13 +7,20 @@ describe("doc-freshness", () => {
 		expect(docKindOf({ source: "sep" })).toBe("spec");
 	});
 	it("guides are staleness-sensitive", () => {
-		expect(docKindOf({ source: "developers-docs", title: "Getting started with Soroban" })).toBe("guide");
+		expect(
+			docKindOf({
+				source: "developers-docs",
+				title: "Getting started with Soroban",
+			}),
+		).toBe("guide");
 	});
 	it("blog posts are articles", () => {
 		expect(docKindOf({ source: "sdf-blog" })).toBe("article");
 	});
 	it("wasm32-unknown-unknown marks content deprecated (the Beacon Q2 case)", () => {
-		expect(docVersionStatus("cargo build --target wasm32-unknown-unknown")).toBe("deprecated");
+		expect(
+			docVersionStatus("cargo build --target wasm32-unknown-unknown"),
+		).toBe("deprecated");
 	});
 	it("wasm32v1-none is current; version-free prose is null, never unknown", () => {
 		expect(docVersionStatus("build with wasm32v1-none")).toBe("current");

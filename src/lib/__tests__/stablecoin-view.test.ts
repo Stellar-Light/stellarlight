@@ -112,3 +112,46 @@ describe("aggregateDaily", () => {
 		expect(aggregateDaily([])).toEqual({ points: [], droppedLowCoverage: 0 });
 	});
 });
+
+describe("aggregateDaily coverage floor is rolling, not all-time", () => {
+	const day = (date: string, n: number) =>
+		Array.from({ length: n }, (_, i) => ({
+			day: date,
+			assetId: `A${i}`,
+			marketCapUSD: 100,
+			holders: 1,
+		}));
+	it("a later roster expansion does not erase earlier days (the 4-bar bug)", () => {
+		const snaps = [
+			...Array.from({ length: 30 }, (_, i) =>
+				day(`2026-02-${String(i + 1).padStart(2, "0")}`, 17),
+			).flat(),
+			...day("2026-03-01", 22),
+			...day("2026-03-02", 19),
+		];
+		const { points, droppedLowCoverage } = aggregateDaily(snaps);
+		expect(points.length).toBe(32);
+		expect(droppedLowCoverage).toBe(0);
+	});
+	it("a lone one-asset day still cannot draw as a cliff", () => {
+		const snaps = [
+			...day("2025-11-28", 1),
+			...Array.from({ length: 20 }, (_, i) =>
+				day(`2026-01-${String(i + 1).padStart(2, "0")}`, 17),
+			).flat(),
+		];
+		const { points } = aggregateDaily(snaps);
+		expect(points.some((p) => p.date === "2025-11-28")).toBe(false);
+		expect(points.length).toBe(20);
+	});
+	it("a genuinely partial day inside a stable roster is still dropped", () => {
+		const snaps = [
+			...Array.from({ length: 10 }, (_, i) =>
+				day(`2026-04-${String(i + 1).padStart(2, "0")}`, 20),
+			).flat(),
+			...day("2026-04-11", 9),
+		];
+		const { points } = aggregateDaily(snaps);
+		expect(points.some((p) => p.date === "2026-04-11")).toBe(false);
+	});
+});

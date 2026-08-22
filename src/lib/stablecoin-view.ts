@@ -164,6 +164,10 @@ export interface DailySeries {
  * measurement gap wearing the costume of a market move.
  */
 const COVERAGE_FLOOR = 0.8;
+/** Days a coverage reference looks back. */
+const ROLLING_WINDOW_DAYS = 14;
+/** A day must also reach this share of the corpus-wide median. */
+const MEDIAN_FLOOR = 0.5;
 
 /**
  * Sum each day's measured assets into one total per day.
@@ -213,7 +217,24 @@ export function aggregateDaily(snapshots: SnapshotPoint[]): DailySeries {
 	const all = [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date));
 	if (all.length === 0) return { points: [], droppedLowCoverage: 0 };
 
-	const best = Math.max(...all.map((p) => p.assetsCounted));
-	const points = all.filter((p) => p.assetsCounted >= best * COVERAGE_FLOOR);
+	// The reference a day is judged against is the best coverage in the
+	// TRAILING window, not the all-time peak. 2026-08-22: the imported
+	// history measured 17 assets a day; one day after the roster grew
+	// measured 22, so an all-time floor of 17.6 erased ten months of history
+	// and the "All" chart drew four bars. A roster expansion must never
+	// rewrite the past. A second, looser floor against the corpus median
+	// keeps a lone one-asset day from drawing as a cliff.
+	const counts = all.map((p) => p.assetsCounted).sort((a, b) => a - b);
+	const median = counts[Math.floor(counts.length / 2)];
+	const points = all.filter((p, i) => {
+		const windowStart = Math.max(0, i - (ROLLING_WINDOW_DAYS - 1));
+		let best = 0;
+		for (let j = windowStart; j <= i; j++)
+			best = Math.max(best, all[j].assetsCounted);
+		return (
+			p.assetsCounted >= best * COVERAGE_FLOOR &&
+			p.assetsCounted >= median * MEDIAN_FLOOR
+		);
+	});
 	return { points, droppedLowCoverage: all.length - points.length };
 }

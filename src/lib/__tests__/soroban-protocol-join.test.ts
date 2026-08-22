@@ -1,10 +1,7 @@
 /** protocolForSdkMajor — the sdk⇄protocol leg of the CAP join. Pins the
  * documented irregularities so table edits can't silently break the join. */
 import { describe, expect, it } from "vitest";
-import {
-	parseSdkMajor,
-	protocolForSdkMajor,
-} from "../soroban-versions";
+import { parseSdkMajor, protocolForSdkMajor } from "../soroban-versions";
 
 describe("protocolForSdkMajor", () => {
 	it("maps the regular majors", () => {
