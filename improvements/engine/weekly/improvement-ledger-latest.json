@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-08-21T06:16:58.919Z",
+	"generatedAt": "2026-08-22T06:14:23.893Z",
 	"total": 409,
-	"open": 312,
-	"closed": 97,
+	"open": 291,
+	"closed": 118,
 	"verified": 7,
-	"cleared": 90,
-	"closingRate": 0.24,
-	"oldestOpenDays": 29,
+	"cleared": 111,
+	"closingRate": 0.29,
+	"oldestOpenDays": 30,
 	"inWave": 0,
-	"highOpen": 23,
+	"highOpen": 2,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -22,11 +22,6 @@
 			"total": 42
 		},
 		{
-			"surface": "contract",
-			"open": 19,
-			"total": 30
-		},
-		{
 			"surface": "consumer",
 			"open": 14,
 			"total": 14
@@ -38,8 +33,13 @@
 		},
 		{
 			"surface": "code",
-			"open": 4,
+			"open": 1,
 			"total": 4
+		},
+		{
+			"surface": "contract",
+			"open": 1,
+			"total": 30
 		},
 		{
 			"surface": "scf",
@@ -52,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 29
+			"days": 30
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 29
+			"days": 30
 		}
 	],
 	"topOpen": [
@@ -76,46 +76,46 @@
 			"severity": "high"
 		},
 		{
-			"id": "nightly-drift:research-row-every-live-field-documented-in-rese",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "research row: every live field documented in ResearchResult",
-			"severity": "high"
+			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "idos in top-3 for 'is idOS live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-field-population:repos-knowledgenotes-curated-creit-dupe-class-fi",
-			"surface": "code",
-			"source": "nightly-field-population",
-			"probe": "repos.knowledgeNotes (curated creit — dupe class fixed in #783/#788)",
-			"severity": "high"
+			"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "nownodes in top-3 for 'is NOWNodes live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-field-population:repos-codeverified-isdeployablecontract-conforma",
-			"surface": "code",
-			"source": "nightly-field-population",
-			"probe": "repos.codeVerified.isDeployableContract (conformance C4, blend)",
-			"severity": "high"
+			"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "lightecho in top-3 for 'is Lightecho live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-field-population:repos-codeverified-protocolcaps-sdk-protocol-cap",
-			"surface": "code",
-			"source": "nightly-field-population",
-			"probe": "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
-			"severity": "high"
+			"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "infstones in top-3 for 'is InfStones live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-drift:status-endpoints-lists-api-vet-idea",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "status.endpoints lists /api/vet-idea",
-			"severity": "high"
+			"id": "engine-a-recall:gatewayfm-in-top-3-for-is-gateway-fm-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "gatewayfm in top-3 for 'is Gateway.fm live'",
+			"severity": "medium"
 		},
 		{
-			"id": "nightly-drift:status-endpoints-lists-api-repos-trust",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "status.endpoints lists /api/repos/trust",
-			"severity": "high"
+			"id": "engine-a-recall:liquify-in-top-3-for-is-liquify-live",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "liquify in top-3 for 'is Liquify live'",
+			"severity": "medium"
 		}
 	]
 }

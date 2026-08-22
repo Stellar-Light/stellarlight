@@ -1,21 +1,5 @@
 {
-	"generatedAt": "2026-08-21T06:06:09.537Z",
+	"generatedAt": "2026-08-22T06:03:00.634Z",
 	"detector": "field-population",
-	"failures": [
-		{
-			"probe": "repos.knowledgeNotes (curated creit — dupe class fixed in #783/#788)",
-			"note": "pinned row fullName=creit-tech/stellar-indexer-sdk not in top 6 (recall regression?)",
-			"surface": "code"
-		},
-		{
-			"probe": "repos.codeVerified.isDeployableContract (conformance C4, blend)",
-			"note": "pinned row fullName=blend-capital/blend-contracts-v2 not in top 6 (recall regression?)",
-			"surface": "code"
-		},
-		{
-			"probe": "repos.codeVerified.protocolCaps (sdk⇄protocol⇄CAP join, blend sdk 22)",
-			"note": "pinned row fullName=blend-capital/blend-contracts-v2 not in top 6 (recall regression?)",
-			"surface": "code"
-		}
-	]
+	"failures": []
 }
