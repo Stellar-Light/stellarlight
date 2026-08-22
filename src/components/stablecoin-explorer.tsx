@@ -26,7 +26,12 @@ import {
 	Table as TableIcon,
 	X,
 } from "lucide-react";
-import { useMotionValue, useSpring } from "motion/react";
+import {
+	AnimatePresence,
+	motion,
+	useMotionValue,
+	useSpring,
+} from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
@@ -306,6 +311,18 @@ export function StablecoinExplorer({
 	// Activity window. "All" by default: the store now holds the imported
 	// history back to 2025-11-28, and a fixed 30-day slice hid every bit of it.
 	const [range, setRange] = useState<"30D" | "90D" | "ALL">("ALL");
+	// Push/pull on the range toggle: widening the window pushes the old bars
+	// left and pulls the new ones in from the right; narrowing goes the other
+	// way, so a range switch reads as movement through time, not a repaint.
+	const RANGE_ORDER = ["30D", "90D", "ALL"] as const;
+	const prevRange = useRef(range);
+	const rangeDir =
+		RANGE_ORDER.indexOf(range) >= RANGE_ORDER.indexOf(prevRange.current)
+			? 1
+			: -1;
+	useEffect(() => {
+		prevRange.current = range;
+	}, [range]);
 	const win = (series: DayPoint[]) =>
 		range === "ALL" ? series : series.slice(-(range === "90D" ? 90 : 30));
 	const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
@@ -504,7 +521,7 @@ export function StablecoinExplorer({
 					</h1>
 					<p
 						className="reveal-wipe text-3xl md:text-4xl italic text-[#666666] font-light mt-1 mb-4"
-						style={{ animationDelay: "120ms" }}
+						style={{ animationDelay: "260ms" }}
 					>
 						transacting globally.
 					</p>
@@ -673,39 +690,51 @@ export function StablecoinExplorer({
 								Collecting data...
 							</div>
 						) : (
-							<BarChart
-								data={c.data as unknown as Record<string, unknown>[]}
-								xDataKey="date"
-								aspectRatio="unset"
-								className="h-20"
-								margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
-								animationDuration={800}
-								barGap={0.08}
-								onHover={(d) => c.setHovered(d ? (d.value as number) : null)}
-							>
-								<Bar
-									dataKey="value"
-									fill={ACCENT}
-									lineCap="round"
-									fadedOpacity={0.35}
-								/>
-								<ChartTooltip
-									showDatePill={false}
-									showDots={false}
-									rows={(p) => [
-										{
-											color: ACCENT,
-											label: c.label,
-											value: c.format(p.value as number),
-										},
-										{
-											color: "transparent",
-											label: "Date",
-											value: p.date as string,
-										},
-									]}
-								/>
-							</BarChart>
+							<AnimatePresence mode="popLayout" initial={false}>
+								<motion.div
+									key={range}
+									initial={{ x: 24 * rangeDir, opacity: 0 }}
+									animate={{ x: 0, opacity: 1 }}
+									exit={{ x: -24 * rangeDir, opacity: 0 }}
+									transition={{ duration: 0.22, ease: [0.15, 0.85, 0.3, 1] }}
+								>
+									<BarChart
+										data={c.data as unknown as Record<string, unknown>[]}
+										xDataKey="date"
+										aspectRatio="unset"
+										className="h-20"
+										margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
+										animationDuration={800}
+										barGap={0.08}
+										onHover={(d) =>
+											c.setHovered(d ? (d.value as number) : null)
+										}
+									>
+										<Bar
+											dataKey="value"
+											fill={ACCENT}
+											lineCap="round"
+											fadedOpacity={0.35}
+										/>
+										<ChartTooltip
+											showDatePill={false}
+											showDots={false}
+											rows={(p) => [
+												{
+													color: ACCENT,
+													label: c.label,
+													value: c.format(p.value as number),
+												},
+												{
+													color: "transparent",
+													label: "Date",
+													value: p.date as string,
+												},
+											]}
+										/>
+									</BarChart>
+								</motion.div>
+							</AnimatePresence>
 						)}
 					</div>
 				))}
@@ -1156,7 +1185,10 @@ export function StablecoinExplorer({
 								</div>
 							</DrawerHeader>
 
-							<div className="p-6 space-y-6 overflow-y-auto">
+							<div
+								key={selectedIssuer.company}
+								className="push-in p-6 space-y-6 overflow-y-auto"
+							>
 								{selectedIssuer.hasEstimate && (
 									<div className="rounded-lg border border-[#2F2F2F] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
 										This total includes at least one asset whose figures are
@@ -1383,7 +1415,10 @@ export function StablecoinExplorer({
 								</div>
 							</DrawerHeader>
 
-							<div className="w-full max-w-5xl mx-auto p-6 space-y-6 overflow-y-auto">
+							<div
+								key={selectedCoin.id}
+								className="push-in w-full max-w-5xl mx-auto p-6 space-y-6 overflow-y-auto"
+							>
 								{selectedCoin.basis !== "live" && selectedCoin.note && (
 									<div className="rounded-lg border border-[#2F2F2F] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
 										{selectedCoin.note}
