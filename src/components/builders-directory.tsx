@@ -309,7 +309,9 @@ function BuilderCard({ r }: { r: BuilderRowData }) {
 									<GitBranch className="w-3 h-3" />
 									{r.repos} Stellar {r.repos === 1 ? "repo" : "repos"}
 									{r.stars > 0 ? `, ${r.stars.toLocaleString()} stars` : ""}
-									{r.lastCommitAt ? `, last commit ${ago(r.lastCommitAt)}` : ""}
+									{r.lastCommitAt
+										? `, last commit ${agoSentence(r.lastCommitAt)}`
+										: ""}
 								</span>
 							)}
 						</div>

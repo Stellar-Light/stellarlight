@@ -265,13 +265,17 @@ export function ago(iso: string | null | undefined): string | null {
 	if (!iso) return null;
 	const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
 	if (!Number.isFinite(d)) return null;
-	// Words, not unit letters — "10d ago" read as unfinished on the profile
-	// card (2026-08-22). Same output everywhere it is shown.
-	if (d <= 0) return "today";
-	if (d === 1) return "yesterday";
-	if (d < 30) return `${d} days ago`;
-	const months = Math.floor(d / 30);
-	if (d < 365) return months === 1 ? "1 month ago" : `${months} months ago`;
-	const years = Math.floor(d / 365);
-	return years === 1 ? "1 year ago" : `${years} years ago`;
+	// Short, capitalised units — these sit in stat cells and table columns
+	// where "10 days ago" breaks the baseline (2026-08-22).
+	if (d <= 0) return "Today";
+	if (d < 30) return `${d}D`;
+	if (d < 365) return `${Math.floor(d / 30)}M`;
+	return `${Math.floor(d / 365)}Y`;
+}
+
+/** Prose form for sentences: "today" / "10D ago". */
+export function agoSentence(iso: string | null | undefined): string | null {
+	const a = ago(iso);
+	if (!a) return null;
+	return a === "Today" ? "today" : `${a} ago`;
 }
