@@ -32,6 +32,11 @@ import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { StablecoinCharts } from "@/components/stablecoin-charts";
+import {
+	ISSUER_LOGOS,
+	IssuerLogo,
+	TOKEN_LOGOS,
+} from "@/components/stablecoin-logos";
 import { StablecoinNewsDock } from "@/components/stablecoin-news-dock";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -110,6 +115,19 @@ interface DefiContext {
 		capped: boolean;
 	} | null;
 	tradeLinks: Array<{ name: string; url: string }>;
+	venues?: {
+		venues: Array<{
+			name: string;
+			poolCount: number;
+			measuredPools: number;
+			assetPooled: number;
+			assetPooledUSD: number | null;
+			largest: { counter: string; assetAmount: number } | null;
+			url: string;
+		}>;
+		unreadable: string[];
+		notIndexed: string[];
+	};
 }
 
 export interface DayPoint {
@@ -128,6 +146,8 @@ interface Props {
 	marketCapByToken: SeriesRow[];
 	holdersByToken: SeriesRow[];
 	totalHoldersSeries: SeriesRow[];
+	/** Per-token daily supply — the issuer drawer's 30-day history. */
+	supplyByToken: SeriesRow[];
 	issuers: IssuerLeader[];
 	news: NewsItem[];
 }
@@ -202,14 +222,22 @@ function CoinIcon({
 	// Same order the explorer used: the issuer's own logo, then the peg's flag
 	// for the assets that never had one (BRLT, ARST, PEN, MXNe, mZAR), then a
 	// letter tile so a row is never iconless.
-	if (coin.logoUrl && !failed.has(coin.id))
+	// 2026-08-22: USDC and PYUSD showed letter tiles because Circle and Paxos
+	// serve no usable image in their stellar.toml — the explorer shipped these
+	// marks as local assets, so they are the second and third rungs here.
+	const bundled =
+		(failed.has(coin.id) ? null : coin.logoUrl) ??
+		TOKEN_LOGOS[coin.ticker] ??
+		ISSUER_LOGOS[coin.company] ??
+		null;
+	if (bundled)
 		return (
 			<div
 				className={`${SIZES[size]} rounded-full overflow-hidden bg-white/5 border border-white/10`}
 			>
 				{/* biome-ignore lint/performance/noImgElement: issuer-hosted logo from their stellar.toml */}
 				<img
-					src={coin.logoUrl}
+					src={bundled}
 					alt={coin.ticker}
 					className="w-full h-full object-cover"
 					onError={() => onFail(coin.id)}
@@ -245,7 +273,7 @@ function BasisTag({ basis }: { basis: string | null }) {
 	if (!basis || basis === "live") return null;
 	return (
 		<span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-[#A3A3A3] border border-[#2F2F2F] whitespace-nowrap">
-			{basis === "curated-static" ? "hand-checked" : "not measured"}
+			{basis === "curated-static" ? "Hand-checked" : "Not measured"}
 		</span>
 	);
 }
@@ -260,6 +288,7 @@ export function StablecoinExplorer({
 	marketCapByToken,
 	holdersByToken,
 	totalHoldersSeries,
+	supplyByToken,
 	issuers,
 	news,
 }: Props) {
@@ -274,12 +303,23 @@ export function StablecoinExplorer({
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hoveredMcap, setHoveredMcap] = useState<number | null>(null);
 	const [hoveredHolders, setHoveredHolders] = useState<number | null>(null);
+	// Activity window. "All" by default: the store now holds the imported
+	// history back to 2025-11-28, and a fixed 30-day slice hid every bit of it.
+	const [range, setRange] = useState<"30D" | "90D" | "ALL">("ALL");
+	const win = (series: DayPoint[]) =>
+		range === "ALL" ? series : series.slice(-(range === "90D" ? 90 : 30));
 	const [assetDrawerOpen, setAssetDrawerOpen] = useState(false);
 	const [toast, setToast] = useState<string | null>(null);
 	const [priceDisplay, setPriceDisplay] = useState<"usd" | "native">("usd");
 	const [selectedIssuer, setSelectedIssuer] = useState<IssuerLeader | null>(
 		null,
 	);
+	const [issuerToken, setIssuerToken] = useState<string>("all");
+	// A new issuer starts on its aggregate, never on the last one's token.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the issuer only
+	useEffect(() => {
+		setIssuerToken("all");
+	}, [selectedIssuer?.company]);
 	const [defi, setDefi] = useState<DefiContext | null>(null);
 	const [defiLoading, setDefiLoading] = useState(false);
 
@@ -574,7 +614,7 @@ export function StablecoinExplorer({
 					[
 						{
 							title: "Total Market Cap",
-							data: marketCapSeries,
+							data: win(marketCapSeries),
 							current: totalMarketCap,
 							hovered: hoveredMcap,
 							setHovered: setHoveredMcap,
@@ -583,7 +623,7 @@ export function StablecoinExplorer({
 						},
 						{
 							title: "Total Holders",
-							data: holdersSeries,
+							data: win(holdersSeries),
 							current: totalHolders,
 							hovered: hoveredHolders,
 							setHovered: setHoveredHolders,
@@ -600,7 +640,22 @@ export function StablecoinExplorer({
 							<h3 className="text-base font-semibold tracking-tight">
 								{c.title}
 							</h3>
-							<span className="text-xs text-muted-foreground">30 days</span>
+							<div className="flex items-center gap-1 text-[11px]">
+								{(["30D", "90D", "ALL"] as const).map((r) => (
+									<button
+										key={r}
+										type="button"
+										onClick={() => setRange(r)}
+										className={`px-2 py-0.5 rounded-md transition-colors ${
+											range === r
+												? "bg-white/[0.08] text-foreground"
+												: "text-muted-foreground hover:text-foreground"
+										}`}
+									>
+										{r === "ALL" ? "All" : r}
+									</button>
+								))}
+							</div>
 						</div>
 						<div className="flex items-baseline gap-2 mb-4">
 							<span className="text-2xl font-semibold text-[#E5E5E5] tabular-nums">
@@ -1045,16 +1100,47 @@ export function StablecoinExplorer({
 						<div className="w-full max-w-5xl mx-auto">
 							<DrawerHeader>
 								<div className="flex items-start justify-between gap-4 w-full">
-									<div className="text-left">
-										<DrawerTitle className="text-3xl">
-											{selectedIssuer.company}
-										</DrawerTitle>
-										<DrawerDescription className="mt-1">
-											{selectedIssuer.tokens.length} asset
-											{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
-											{displayUSD(selectedIssuer.totalMarketCapUSD)} combined
-											market cap
-										</DrawerDescription>
+									<div className="text-left flex items-start gap-4">
+										<IssuerLogo
+											company={selectedIssuer.company}
+											domain={selectedIssuer.domain}
+											size="lg"
+										/>
+										<div>
+											<DrawerTitle className="text-3xl">
+												{selectedIssuer.company}
+											</DrawerTitle>
+											<DrawerDescription className="mt-1">
+												{selectedIssuer.tokens.length} asset
+												{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
+												{displayUSD(selectedIssuer.totalMarketCapUSD)} combined
+												market cap
+											</DrawerDescription>
+											{(() => {
+												const first = coins.find(
+													(c) => c.company === selectedIssuer.company,
+												);
+												const domain =
+													selectedIssuer.domain || first?.issuerDomain;
+												const country = first?.country;
+												if (!domain && !country) return null;
+												return (
+													<div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+														{domain && (
+															<a
+																href={`https://${domain}`}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="hover:text-foreground underline-offset-2 hover:underline"
+															>
+																{domain}
+															</a>
+														)}
+														{country && <span>{country}</span>}
+													</div>
+												);
+											})()}
+										</div>
 									</div>
 									<button
 										type="button"
@@ -1075,6 +1161,113 @@ export function StablecoinExplorer({
 										rows below say which.
 									</div>
 								)}
+
+								{(() => {
+									// 30-day supply history for this issuer (or one of its
+									// tokens): sum the per-token daily supply series.
+									const tokens = selectedIssuer.tokens;
+									const pick = issuerToken === "all" ? tokens : [issuerToken];
+									const rows = supplyByToken
+										.slice(-31)
+										.map((r) => {
+											let total = 0;
+											let counted = 0;
+											for (const t of pick)
+												if (typeof r[t] === "number") {
+													total += r[t] as number;
+													counted++;
+												}
+											return { date: String(r._date), value: total, counted };
+										})
+										.filter((r) => r.counted > 0);
+									const first = rows[0]?.value ?? null;
+									const last = rows[rows.length - 1]?.value ?? null;
+									const change =
+										first !== null && last !== null ? last - first : null;
+									return (
+										<div className="bg-muted rounded-lg p-4">
+											<div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+												<div>
+													<div className="text-sm font-medium">
+														Supply · last 30 days
+													</div>
+													<div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+														{last !== null ? displaySupply(last) : "—"}
+														{change !== null && (
+															<span
+																className={
+																	change >= 0
+																		? "text-emerald-400 ml-2"
+																		: "text-red-400 ml-2"
+																}
+															>
+																{change >= 0 ? "+" : "−"}
+																{displaySupply(Math.abs(change))} over the
+																window
+															</span>
+														)}
+													</div>
+												</div>
+												{tokens.length > 1 && (
+													<div className="flex items-center gap-1 text-[11px]">
+														{["all", ...tokens].map((t) => (
+															<button
+																key={t}
+																type="button"
+																onClick={() => setIssuerToken(t)}
+																className={`px-2 py-0.5 rounded-md transition-colors ${
+																	issuerToken === t
+																		? "bg-white/[0.08] text-foreground"
+																		: "text-muted-foreground hover:text-foreground"
+																}`}
+															>
+																{t === "all" ? "All" : t}
+															</button>
+														))}
+													</div>
+												)}
+											</div>
+											{rows.length < 2 ? (
+												<p className="text-xs text-muted-foreground">
+													Not enough daily points yet to draw a history.
+												</p>
+											) : (
+												<BarChart
+													data={rows as unknown as Record<string, unknown>[]}
+													xDataKey="date"
+													aspectRatio="unset"
+													className="h-20"
+													margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
+													animationDuration={600}
+													barGap={0.08}
+												>
+													<Bar
+														dataKey="value"
+														fill={ACCENT}
+														lineCap="round"
+														fadedOpacity={0.35}
+													/>
+													<ChartTooltip
+														showDatePill={false}
+														showDots={false}
+														rows={(p) => [
+															{
+																color: ACCENT,
+																label: "Supply",
+																value: displaySupply(p.value as number),
+															},
+															{
+																color: "transparent",
+																label: "Date",
+																value: p.date as string,
+															},
+														]}
+													/>
+												</BarChart>
+											)}
+										</div>
+									);
+								})()}
 
 								<div>
 									<h3 className="text-lg font-semibold mb-4">Assets</h3>
@@ -1368,49 +1561,111 @@ export function StablecoinExplorer({
 													</p>
 												) : (
 													<>
-														<div className="flex items-center gap-6 pb-3 mb-3 border-b border-border">
-															<div>
-																<div className="text-xs text-muted-foreground mb-1">
-																	Pooled
-																</div>
-																<div className="text-lg font-semibold tabular-nums">
-																	{displaySupply(defi.liquidity.assetPooled)}{" "}
-																	{selectedCoin.ticker}
-																</div>
-															</div>
-															<div>
-																<div className="text-xs text-muted-foreground mb-1">
-																	Value
-																</div>
-																<div className="text-lg font-semibold tabular-nums">
-																	{displayUSD(defi.liquidity.assetPooledUSD)}
-																</div>
-															</div>
-															<div>
-																<div className="text-xs text-muted-foreground mb-1">
-																	Pools
-																</div>
-																<div className="text-lg font-semibold tabular-nums">
-																	{defi.liquidity.poolCount}
-																	{defi.liquidity.capped ? "+" : ""}
-																</div>
-															</div>
-														</div>
-														<div className="space-y-1.5">
-															{defi.liquidity.topPools.map((pool) => (
-																<div
-																	key={pool.id}
-																	className="flex items-center justify-between text-xs"
-																>
-																	<span className="text-muted-foreground">
-																		{selectedCoin.ticker} / {pool.counterAsset}
-																	</span>
-																	<span className="tabular-nums">
-																		{displaySupply(pool.assetAmount)}
-																	</span>
-																</div>
-															))}
-														</div>
+														{(() => {
+															const v = defi?.venues;
+															const rows = v?.venues ?? [];
+															const pooled = rows.reduce(
+																(x, r) => x + r.assetPooled,
+																0,
+															);
+															const pooledUSD = rows.every(
+																(r) => r.assetPooledUSD === null,
+															)
+																? null
+																: rows.reduce(
+																		(x, r) => x + (r.assetPooledUSD ?? 0),
+																		0,
+																	);
+															const pools = rows.reduce(
+																(x, r) => x + r.poolCount,
+																0,
+															);
+															return (
+																<>
+																	<div className="flex items-center gap-6 pb-3 mb-3 border-b border-border">
+																		<div>
+																			<div className="text-xs text-muted-foreground mb-1">
+																				Pooled
+																			</div>
+																			<div className="text-lg font-semibold tabular-nums">
+																				{displaySupply(pooled)}{" "}
+																				{selectedCoin.ticker}
+																			</div>
+																		</div>
+																		<div>
+																			<div className="text-xs text-muted-foreground mb-1">
+																				Value
+																			</div>
+																			<div className="text-lg font-semibold tabular-nums">
+																				{displayUSD(pooledUSD)}
+																			</div>
+																		</div>
+																		<div>
+																			<div className="text-xs text-muted-foreground mb-1">
+																				Pools
+																			</div>
+																			<div className="text-lg font-semibold tabular-nums">
+																				{pools}
+																			</div>
+																		</div>
+																	</div>
+																	<div className="space-y-2">
+																		{rows.map((r) => (
+																			<a
+																				key={r.name}
+																				href={r.url}
+																				target="_blank"
+																				rel="noopener noreferrer"
+																				className="flex items-center justify-between gap-3 text-sm rounded-md px-2 py-1.5 -mx-2 hover:bg-white/[0.04] transition-colors"
+																			>
+																				<div className="flex items-center gap-2 min-w-0">
+																					<span className="font-medium">
+																						{r.name}
+																					</span>
+																					<span className="text-xs text-muted-foreground">
+																						{r.poolCount} pool
+																						{r.poolCount === 1 ? "" : "s"}
+																						{r.measuredPools < r.poolCount
+																							? ` · top ${r.measuredPools} measured`
+																							: ""}
+																						{r.largest
+																							? ` · largest ${selectedCoin.ticker}/${r.largest.counter}`
+																							: ""}
+																					</span>
+																				</div>
+																				<div className="text-right tabular-nums flex-shrink-0">
+																					<div>
+																						{displaySupply(r.assetPooled)}
+																					</div>
+																					<div className="text-xs text-muted-foreground">
+																						{displayUSD(r.assetPooledUSD)}
+																					</div>
+																				</div>
+																			</a>
+																		))}
+																	</div>
+																	{v &&
+																		(v.unreadable.length > 0 ||
+																			v.notIndexed.length > 0) && (
+																			<p className="text-[11px] text-muted-foreground/70 mt-3">
+																				{v.unreadable.length > 0 && (
+																					<>
+																						Could not read{" "}
+																						{v.unreadable.join(", ")} right now
+																						— not shown, not zero.{" "}
+																					</>
+																				)}
+																				{v.notIndexed.length > 0 && (
+																					<>
+																						Not yet indexed:{" "}
+																						{v.notIndexed.join(", ")}.
+																					</>
+																				)}
+																			</p>
+																		)}
+																</>
+															);
+														})()}
 														<p className="text-[11px] text-muted-foreground/70 mt-3 leading-relaxed">
 															This is the {selectedCoin.ticker} side of each
 															pool only — the other side is priced in tokens we

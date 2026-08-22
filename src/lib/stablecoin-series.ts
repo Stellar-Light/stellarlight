@@ -18,6 +18,7 @@ export interface TokenSnapshot {
 	code?: string | null;
 	marketCapUSD?: number | null;
 	holders?: number | null;
+	supply?: number | null;
 }
 
 /** One row per day: { _date, <TICKER>: value | null, … }. */
@@ -44,7 +45,7 @@ function num(v: unknown): number | null {
  */
 export function pivotByToken(
 	snaps: TokenSnapshot[],
-	metric: "marketCapUSD" | "holders",
+	metric: "marketCapUSD" | "holders" | "supply",
 ): SeriesRow[] {
 	const byDay = new Map<string, SeriesRow>();
 	for (const s of snaps) {
@@ -66,7 +67,7 @@ export function pivotByToken(
 /** Sum every measured token per day → [{ _date, total }]. */
 export function totalPerDay(
 	snaps: TokenSnapshot[],
-	metric: "marketCapUSD" | "holders",
+	metric: "marketCapUSD" | "holders" | "supply",
 ): SeriesRow[] {
 	return pivotByToken(snaps, metric).map((row) => {
 		let total = 0;
@@ -96,6 +97,8 @@ export function tickersIn(rows: SeriesRow[]): string[] {
 
 export interface IssuerLeader {
 	company: string;
+	/** Issuer's domain from the first of its assets — for a logo and a link. */
+	domain: string | null;
 	tokens: string[];
 	totalMarketCapUSD: number;
 	/** True when ANY of the issuer's rows is not a live measurement. */
@@ -116,6 +119,7 @@ export function issuerLeaderboard(
 		ticker: string;
 		marketCapRaw?: number | null;
 		basis?: string | null;
+		issuerDomain?: string | null;
 	}>,
 ): IssuerLeader[] {
 	const by = new Map<string, IssuerLeader>();
@@ -124,6 +128,7 @@ export function issuerLeaderboard(
 		if (!company) continue;
 		const e = by.get(company) ?? {
 			company,
+			domain: r.issuerDomain?.trim() || null,
 			tokens: [],
 			totalMarketCapUSD: 0,
 			hasEstimate: false,

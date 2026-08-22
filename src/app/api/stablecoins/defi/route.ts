@@ -18,6 +18,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	blendListing,
 	fetchLiquidity,
+	fetchVenues,
 	sacContractId,
 	tradeLinks,
 } from "@/lib/stablecoin-defi";
@@ -49,9 +50,10 @@ export async function GET(req: NextRequest) {
 	const priceUSD = price != null && Number.isFinite(price) ? price : null;
 
 	// Independent sources — one being slow or down must not blank the other.
-	const [liquidity, blend] = await Promise.all([
+	const [liquidity, blend, venues] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
 		blendListing(code),
+		fetchVenues(code, issuer, priceUSD),
 	]);
 
 	return NextResponse.json(
@@ -66,6 +68,9 @@ export async function GET(req: NextRequest) {
 			contract: sacContractId(code, issuer),
 			blend,
 			liquidity,
+			// Per-venue view (SDEX, Aquarius, Soroswap), same asset-side rule.
+			// `unreadable` = could not look; `notIndexed` = no readable index yet.
+			venues,
 			tradeLinks: tradeLinks(code, issuer),
 		},
 		{
