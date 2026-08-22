@@ -43,15 +43,20 @@ export default async function StablecoinsPage() {
 			payload.find({ collection: "stablecoins", limit: 200, depth: 0 }),
 			payload.find({
 				collection: "stablecoin-snapshots",
-				limit: 5000,
+				// The whole series, newest first so a cap can never drop the
+				// current days (2026-08-22: the imported Replit history made the
+				// table 3,700 rows; at 20 assets/day a flat 5,000 ran out in
+				// two months). 20,000 ≈ 2.7 years at today's roster.
+				limit: 20000,
 				depth: 0,
-				sort: "day",
+				sort: "-day",
 				select: {
 					day: true,
 					assetId: true,
 					code: true,
 					marketCapUSD: true,
 					holders: true,
+					supply: true,
 				},
 			}),
 		]);
@@ -115,16 +120,24 @@ export default async function StablecoinsPage() {
 			// The dock is supplementary — never take the page down for it.
 		}
 
-		rawSnapshots = snaps.docs;
-		series = aggregateDaily(snaps.docs as SnapshotPoint[]);
+		// Oldest first for everything downstream.
+		const ordered = [...snaps.docs].sort((a, b) =>
+			String((a as SnapshotPoint).day).localeCompare(
+				String((b as SnapshotPoint).day),
+			),
+		);
+		rawSnapshots = ordered;
+		series = aggregateDaily(ordered as SnapshotPoint[]);
 	}
 
 	const totalMarketCap = coins.reduce((s, c) => s + (c.marketCapRaw ?? 0), 0);
 	const totalHolders = coins.reduce((s, c) => s + (c.holdersRaw ?? 0), 0);
 	const totalVolume24h = coins.reduce((s, c) => s + (c.volumeRaw ?? 0), 0);
 
-	// Last 30 days, oldest first — the window the two activity charts label.
-	const last30 = series.points.slice(-30);
+	// The FULL daily series, oldest first. The explorer picks the window
+	// (30D / 90D / All) client-side — the imported history reaches back to
+	// 2025-11-28 and a fixed 30-day slice here hid all of it.
+	const allDays = series.points;
 
 	// Per-token series for the four analytics panels, plus the leaderboard.
 	// The leaderboard needs no history, so it is useful from the first run.
@@ -132,17 +145,19 @@ export default async function StablecoinsPage() {
 	const marketCapByToken = pivotByToken(snapDocs, "marketCapUSD");
 	const holdersByToken = pivotByToken(snapDocs, "holders");
 	const totalHoldersSeries = totalPerDay(snapDocs, "holders");
+	// Per-token supply — the issuer drawer's 30-day supply-change chart.
+	const supplyByToken = pivotByToken(snapDocs, "supply");
 	const issuers = issuerLeaderboard(coins);
 
 	return (
 		<div className="min-h-screen bg-background pt-16">
 			<StablecoinExplorer
 				coins={coins}
-				marketCapSeries={last30.map((p) => ({
+				marketCapSeries={allDays.map((p) => ({
 					date: p.date,
 					value: p.marketCapUSD,
 				}))}
-				holdersSeries={last30.map((p) => ({
+				holdersSeries={allDays.map((p) => ({
 					date: p.date,
 					value: p.holders,
 				}))}
@@ -152,6 +167,7 @@ export default async function StablecoinsPage() {
 				marketCapByToken={marketCapByToken}
 				holdersByToken={holdersByToken}
 				totalHoldersSeries={totalHoldersSeries}
+				supplyByToken={supplyByToken}
 				issuers={issuers}
 				news={news}
 			/>

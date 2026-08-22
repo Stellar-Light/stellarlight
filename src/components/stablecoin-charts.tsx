@@ -15,6 +15,7 @@ import { Grid } from "@/components/charts/grid";
 import { Line, LineChart } from "@/components/charts/line-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { XAxis } from "@/components/charts/x-axis";
+import { IssuerLogo } from "@/components/stablecoin-logos";
 import {
 	colorFor,
 	type IssuerLeader,
@@ -278,11 +279,7 @@ export function StablecoinCharts({
 									onClick={() => onIssuerClick?.(issuer)}
 									className="w-full text-left flex items-center gap-3 p-3 rounded-lg bg-[#1F1F1F] transition-colors hover:bg-[#2A2A2A] cursor-pointer"
 								>
-									<div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center">
-										<span className="text-[#999999] text-xs font-medium">
-											{issuer.company.charAt(0)}
-										</span>
-									</div>
+									<IssuerLogo company={issuer.company} domain={issuer.domain} />
 									<div className="flex-1 min-w-0">
 										<div className="text-[#F5F5F5] font-medium text-sm truncate">
 											{issuer.company}
