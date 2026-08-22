@@ -499,10 +499,13 @@ export function StablecoinExplorer({
 			{/* ── Hero + top-stablecoins rail ─────────────────────────────── */}
 			<div className="mb-12 mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 				<div>
-					<h1 className="text-5xl md:text-6xl font-semibold text-[#E5E5E5] leading-tight">
+					<h1 className="reveal-wipe text-5xl md:text-6xl font-semibold text-[#E5E5E5] leading-tight">
 						Stellar Stablecoins
 					</h1>
-					<p className="text-3xl md:text-4xl italic text-[#666666] font-light mt-1 mb-4">
+					<p
+						className="reveal-wipe text-3xl md:text-4xl italic text-[#666666] font-light mt-1 mb-4"
+						style={{ animationDelay: "120ms" }}
+					>
 						transacting globally.
 					</p>
 					<p className="text-lg text-[#A3A3A3] max-w-xl mb-6">
@@ -564,7 +567,7 @@ export function StablecoinExplorer({
 			{/* ── Overview tiles ──────────────────────────────────────────── */}
 			<div className="mb-8">
 				<h2 className="text-lg font-semibold mb-4">Stablecoin Overview</h2>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div className="stagger-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 					<Card>
 						<CardContent className="p-6">
 							<div className="text-sm text-muted-foreground mb-2">
@@ -904,7 +907,7 @@ export function StablecoinExplorer({
 									<TableHead className="min-w-[120px]">MARKET CAP</TableHead>
 								</TableRow>
 							</TableHeader>
-							<TableBody>
+							<TableBody className="stagger-in">
 								{paged.map((coin) => (
 									<TableRow
 										key={coin.id}
@@ -997,7 +1000,7 @@ export function StablecoinExplorer({
 					</div>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="stagger-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{paged.map((coin) => {
 						const info = countryInfo(coin.country, coin.peg);
 						return (

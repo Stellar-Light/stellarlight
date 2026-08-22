@@ -298,7 +298,7 @@ export default async function BuilderProfilePage({
 					const hasPassport = tiles.some((t) => t.passport);
 					return (
 						<div className="mt-6 border-t border-border pt-5">
-							<div className="grid grid-cols-2 gap-y-5 sm:grid-cols-3 md:flex md:divide-x md:divide-border">
+							<div className="stagger-in grid grid-cols-2 gap-y-5 sm:grid-cols-3 md:flex md:divide-x md:divide-border">
 								{tiles.map((t) => (
 									<div
 										key={t.l}

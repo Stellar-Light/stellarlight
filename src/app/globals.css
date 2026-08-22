@@ -288,3 +288,49 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-scroll-up { animation: none; }
 }
+
+/* ── Entrance motion (2026-08-22) ───────────────────────────────────────
+   Two primitives, techniques after yui540/css-animations (MIT): a clip-path
+   wipe for a headline on load, and a 40 ms stagger for a set of siblings —
+   stat tiles, the first table rows. Restraint is the rule: one reveal per
+   page load, on the design system's swift-out curve, never on scroll or
+   hover, nothing loops. Both are off under prefers-reduced-motion. */
+@keyframes reveal-wipe {
+	from {
+		clip-path: inset(0 100% 0 0);
+		transform: translateX(-6px);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+		transform: translateX(0);
+	}
+}
+@keyframes fade-up-8 {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.reveal-wipe {
+	animation: reveal-wipe 0.45s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+}
+.stagger-in > * {
+	animation: fade-up-8 0.35s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+}
+.stagger-in > :nth-child(2) { animation-delay: 40ms; }
+.stagger-in > :nth-child(3) { animation-delay: 80ms; }
+.stagger-in > :nth-child(4) { animation-delay: 120ms; }
+.stagger-in > :nth-child(5) { animation-delay: 160ms; }
+.stagger-in > :nth-child(6) { animation-delay: 200ms; }
+.stagger-in > :nth-child(7) { animation-delay: 240ms; }
+.stagger-in > :nth-child(8) { animation-delay: 280ms; }
+@media (prefers-reduced-motion: reduce) {
+	.reveal-wipe,
+	.stagger-in > * {
+		animation: none;
+	}
+}
