@@ -48,6 +48,12 @@ type Candidate = {
 
 const isStellar = (n?: string) => !!n && n.toLowerCase().startsWith("stellar");
 
+/** USDC Stellar Asset Contract ids — pubnet and testnet (from @x402/stellar). */
+const USDC_SAC = new Set([
+	"CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+	"CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+]);
+
 /**
  * RFC 2606 / RFC 6761 reserve these names for documentation and testing, so
  * they are guaranteed never to resolve. Sextant's catalog is 20 rows of
@@ -236,7 +242,9 @@ async function probe(url: string): Promise<{
 				accepts.push({
 					network: a.network,
 					asset: a.asset,
-					amount: (a as { maxAmountRequired?: string }).maxAmountRequired,
+					// v1 says maxAmountRequired, v2 says amount
+					amount:
+						(a as { maxAmountRequired?: string }).maxAmountRequired ?? a.amount,
 					scheme: a.scheme,
 				});
 			x402 = true;
@@ -346,8 +354,12 @@ async function main() {
 		if (r.status === "402") paid++;
 		if (acceptsStellar) stellarPayable++;
 		const prev = byUrl.get(c.url);
+		// On Stellar the asset is the USDC Stellar Asset Contract address, not
+		// the string "USDC"; matching the name alone left every Stellar price null.
 		const usd = r.accepts.find(
-			(a) => /usdc|usd/i.test(a.asset ?? "") && a.amount,
+			(a) =>
+				(/usdc|usd/i.test(a.asset ?? "") || USDC_SAC.has(a.asset ?? "")) &&
+				a.amount,
 		);
 		const data: EndpointWrite = {
 			url: c.url,
