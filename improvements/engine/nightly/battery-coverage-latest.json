@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-22T06:14:15.431Z",
+	"generatedAt": "2026-08-23T06:15:03.243Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
@@ -14,7 +14,7 @@
 		},
 		{
 			"probe": "battery:q-ti-java-sdk-wallet-feebump",
-			"note": "top 0.59 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/news/sentora-expands-vaults-stellar-stablecoin-vaults",
+			"note": "top 0.58 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-aug-14-2026",
 			"surface": "corpus"
 		},
 		{
@@ -25,11 +25,6 @@
 		{
 			"probe": "battery:q-tool-leaderboard-open-issues",
 			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Which Stellar projects have the most open issues right now — rank them so I can \" (tooling-infra); best: stellar-registry/contracts",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-tool-soroban-auth-audit-live",
-			"note": "top 0.51 < 0.6 via research/confidence for \"What do the currently indexed primary audits say about Soroban authorization rec\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-aug-7-2026",
 			"surface": "corpus"
 		}
 	]
