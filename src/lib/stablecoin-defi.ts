@@ -256,7 +256,7 @@ export function tradeLinks(code: string, issuer: string) {
 /* ─── AMM venues (Soroban) ───────────────────────────────────────────────── */
 
 export interface VenueLiquidity {
-	name: "SDEX" | "Aquarius" | "Soroswap";
+	name: "SDEX" | "Aquarius" | "Soroswap" | "Phoenix";
 	/** Pools on this venue that hold the asset. */
 	poolCount: number;
 	/** How many of those we actually read reserves from. */
@@ -328,30 +328,159 @@ interface AquaPool {
 }
 let aquaCache: { at: number; pools: AquaPool[] } | null = null;
 
-/** Every Aquarius AMM pool — the list API pages ten at a time, so cache it. */
+/**
+ * Every Aquarius AMM pool.
+ *
+ * Their list API is hard-capped at TEN rows a page and offers no token
+ * filter, so 337 pools is 34 requests. Walking `next` sequentially took ~40s
+ * on a cold lambda and the DeFi panel simply never arrived. The first page
+ * carries `count`, so every remaining page can be fetched at once.
+ */
 async function aquariusPools(): Promise<AquaPool[]> {
 	if (aquaCache && Date.now() - aquaCache.at < 900_000) return aquaCache.pools;
-	const pools: AquaPool[] = [];
-	let url: string | null =
-		"https://amm-api.aqua.network/api/external/v1/pools/";
-	for (let page = 0; url && page < 60; page++) {
-		const res = await fetch(url, {
-			headers: {
-				"User-Agent": "stellar-light/1.0",
-				accept: "application/json",
-			},
-			signal: AbortSignal.timeout(12_000),
-		});
-		if (!res.ok) break;
-		const body = (await res.json()) as {
-			results?: AquaPool[];
-			next?: string | null;
-		};
-		pools.push(...(body.results ?? []));
-		url = body.next ?? null;
-	}
+	const base = "https://amm-api.aqua.network/api/external/v1/pools/";
+	const head = await fetch(base, {
+		headers: { "User-Agent": "stellar-light/1.0", accept: "application/json" },
+		signal: AbortSignal.timeout(12_000),
+	});
+	if (!head.ok) return aquaCache?.pools ?? [];
+	const first = (await head.json()) as { results?: AquaPool[]; count?: number };
+	const pools = [...(first.results ?? [])];
+	const per = first.results?.length || 10;
+	const pages = Math.min(Math.ceil((first.count ?? per) / per), 60);
+	const rest = await mapLimited(
+		Array.from({ length: Math.max(0, pages - 1) }, (_, i) => i + 2),
+		8,
+		async (page) => {
+			try {
+				const r = await fetch(`${base}?page=${page}`, {
+					headers: {
+						"User-Agent": "stellar-light/1.0",
+						accept: "application/json",
+					},
+					signal: AbortSignal.timeout(12_000),
+				});
+				if (!r.ok) return [];
+				return ((await r.json()) as { results?: AquaPool[] }).results ?? [];
+			} catch {
+				return [];
+			}
+		},
+	);
+	for (const r of rest) pools.push(...r);
 	if (pools.length) aquaCache = { at: Date.now(), pools };
 	return pools;
+}
+
+/* ─── Soroswap indexer (one call for every venue) ─────────────────────── */
+
+interface SoroswapPool {
+	protocol?: string;
+	address?: string;
+	tokenA?: string;
+	tokenB?: string;
+	reserveA?: string | number;
+	reserveB?: string | number;
+}
+
+/**
+ * Soroswap's indexer covers soroswap, phoenix, aqua AND sdex on mainnet in a
+ * single authenticated call — strictly better than probing each venue, and
+ * the only source that reaches Phoenix at all. Requires SOROSWAP_API_KEY;
+ * without it (or if the account is not yet activated — their API answers 403
+ * to every request until an admin enables it) we fall back to the per-venue
+ * probes below, so the panel degrades rather than disappears.
+ */
+async function soroswapIndexer(): Promise<SoroswapPool[] | null> {
+	const key = process.env.SOROSWAP_API_KEY?.trim();
+	if (!key) return null;
+	try {
+		const qs = ["SOROSWAP", "PHOENIX", "AQUA", "SDEX"]
+			.map((p) => `protocol=${p}`)
+			.join("&");
+		const r = await fetch(
+			`https://api.soroswap.finance/pools?network=MAINNET&${qs}`,
+			{
+				headers: {
+					Authorization: `Bearer ${key}`,
+					accept: "application/json",
+					"User-Agent": "stellar-light/1.0",
+				},
+				signal: AbortSignal.timeout(15_000),
+			},
+		);
+		if (!r.ok) return null;
+		const body = (await r.json()) as
+			| SoroswapPool[]
+			| { pools?: SoroswapPool[] };
+		return Array.isArray(body) ? body : (body.pools ?? null);
+	} catch {
+		return null;
+	}
+}
+
+/** Venue rows from the Soroswap indexer, when it is reachable. */
+async function indexerVenues(
+	code: string,
+	issuer: string,
+	priceUSD: number | null,
+): Promise<VenueLiquidity[] | null> {
+	const pools = await soroswapIndexer();
+	const mine = sacContractId(code, issuer);
+	if (!pools || !mine) return null;
+	const byProto = new Map<
+		string,
+		{
+			count: number;
+			amount: number;
+			largest: { counter: string; assetAmount: number } | null;
+		}
+	>();
+	for (const p of pools) {
+		const a = String(p.tokenA ?? ""),
+			b = String(p.tokenB ?? "");
+		if (a !== mine && b !== mine) continue;
+		const amt = Number(a === mine ? p.reserveA : p.reserveB) / SEVEN;
+		if (!Number.isFinite(amt)) continue;
+		const name = (p.protocol ?? "unknown").toLowerCase();
+		const row = byProto.get(name) ?? { count: 0, amount: 0, largest: null };
+		row.count++;
+		row.amount += amt;
+		if (!row.largest || amt > row.largest.assetAmount)
+			row.largest = {
+				counter: (a === mine ? b : a).slice(0, 6),
+				assetAmount: amt,
+			};
+		byProto.set(name, row);
+	}
+	if (!byProto.size) return null;
+	const LABEL: Record<string, VenueLiquidity["name"]> = {
+		soroswap: "Soroswap",
+		aqua: "Aquarius",
+		aquarius: "Aquarius",
+		sdex: "SDEX",
+		phoenix: "Phoenix",
+	};
+	const URLS: Record<string, string> = {
+		Soroswap: "https://app.soroswap.finance/pools",
+		Aquarius: `https://aqua.network/pools?search=${encodeURIComponent(code)}`,
+		SDEX: `https://stellar.expert/explorer/public/asset/${code}-${issuer}`,
+		Phoenix: "https://app.phoenix-hub.io/pools",
+	};
+	const out: VenueLiquidity[] = [];
+	for (const [proto, r] of byProto) {
+		const name = LABEL[proto] ?? (proto as VenueLiquidity["name"]);
+		out.push({
+			name,
+			poolCount: r.count,
+			measuredPools: r.count,
+			assetPooled: r.amount,
+			assetPooledUSD: priceUSD != null ? r.amount * priceUSD : null,
+			largest: r.largest,
+			url: URLS[name] ?? "https://app.soroswap.finance/pools",
+		});
+	}
+	return out.sort((a, b) => b.assetPooled - a.assetPooled);
 }
 
 function shortToken(t: string): string {
@@ -485,6 +614,11 @@ export async function fetchVenues(
 	unreadable: string[];
 	notIndexed: string[];
 }> {
+	// One authenticated call covers every venue including Phoenix. Only when
+	// that is unavailable do we fan out to the per-venue probes.
+	const indexed = await indexerVenues(code, issuer, priceUSD);
+	if (indexed) return { venues: indexed, unreadable: [], notIndexed: [] };
+
 	const [sdex, aqua, soro] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
 		aquariusLiquidity(code, issuer, priceUSD),

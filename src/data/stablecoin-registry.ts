@@ -27,7 +27,9 @@ export type StablecoinPeg =
 	| "ZAR"
 	| "MXN"
 	| "PEN"
-	| "NGN";
+	| "NGN"
+	| "CLP"
+	| "UAH";
 
 export interface StablecoinAsset {
 	/** Stellar asset code as issued on mainnet. */
@@ -217,6 +219,85 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "Ondo Finance",
 		peg: "USD",
 		assetType: "Yield Stablecoin",
+	},
+	// ── Coverage audit 2026-08-22 ──────────────────────────────────────────
+	// Found by checking Horizon, CoinGecko's stablecoin category and every
+	// partner stellar.toml we hold against this list. Each issuer below comes
+	// from the partner's OWN SEP-1 file, and each was confirmed on Horizon the
+	// same day (code + issuer + authorized holders + authorized supply).
+	// Absence here reads to an agent as "not on Stellar" (sls-066); these are
+	// demonstrably on it, one of them more widely held than anything we had.
+	//
+	// NOT added, deliberately: BRZ (Transfero, stellar.brztoken.io) shows
+	// 2,000,000,000 authorized across 85 holders — real issuer, but minted
+	// supply at that scale next to 85 holders would rank it second by market
+	// cap on a page about circulating value. It needs a circulating-supply
+	// source before it can sit beside USDC. EURCV / USDM1 / EURAU are Soroban
+	// CONTRACT tokens (no classic issuer), which this registry cannot express
+	// yet. KTB, MEX, NZDSC, CETESZ are live but effectively unissued (<40
+	// holders, ~0 supply).
+	{
+		// 181,426 holders · 6,405,270 ZARZ authorized (Horizon, 2026-08-22).
+		// Issuer from zeam-money's own stellar.toml.
+		code: "ZARZ",
+		issuer: "GAROH4EV3WVVTRQKEY43GZK3XSRBEYETRVZ7SVG5LHWOAANSMCTJBB3U",
+		domain: "zeam.money",
+		company: "Zeam",
+		peg: "ZAR",
+	},
+	{
+		// 5,795 holders · 14,389,575 CLPX authorized (Horizon, 2026-08-22).
+		// Issuer from clpx's own stellar.toml.
+		code: "CLPX",
+		issuer: "GDYSPBVZHPQTYMGSYNOHRZQNLB3ZWFVQ2F7EP7YBOLRGD42XIC3QUX5G",
+		domain: "clpx.finance",
+		company: "CLPX",
+		peg: "CLP",
+	},
+	{
+		// 6,993 holders · 84,984 BRL authorized (Horizon, 2026-08-22).
+		// Issuer from ntokens's own stellar.toml.
+		code: "BRL",
+		issuer: "GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP",
+		domain: "ntokens.com",
+		company: "nTokens",
+		peg: "BRL",
+	},
+	{
+		// 1,801 holders · 161,220,533 APSUSDM authorized (Horizon, 2026-08-22).
+		// Issuer from aps-money's own stellar.toml.
+		code: "APSUSDM",
+		issuer: "GB7OUO5NY5WQKXJJ7PFFZEJOKN4BA7IOEN3Z6SWAY26LGTREJJYZH2ZT",
+		domain: "aps.money",
+		company: "APS Money",
+		peg: "USD",
+	},
+	{
+		// 362 holders · 27,885,917 APSEURM authorized (Horizon, 2026-08-22).
+		// Issuer from aps-money's own stellar.toml.
+		code: "APSEURM",
+		issuer: "GB7OUO5NY5WQKXJJ7PFFZEJOKN4BA7IOEN3Z6SWAY26LGTREJJYZH2ZT",
+		domain: "aps.money",
+		company: "APS Money",
+		peg: "EUR",
+	},
+	{
+		// 831 holders · 330,238 UAH authorized (Horizon, 2026-08-22).
+		// Issuer from transparent-network's own stellar.toml.
+		code: "UAH",
+		issuer: "GCJI3CP2NL6NWSCHM36XBQYCBHOTVVZWEXZALWON34KAYUGF6GEVNRTS",
+		domain: "prozora.network",
+		company: "Transparent Network",
+		peg: "UAH",
+	},
+	{
+		// 69 holders · 98,859 GBPZ authorized (Horizon, 2026-08-22).
+		// Issuer from zeam-money's own stellar.toml.
+		code: "GBPZ",
+		issuer: "GCTG4YT2ZTYRODK5JCXFJ6V7P6HMQ62L27PPG5UGK57VUFDJ7DFDGBPZ",
+		domain: "zeam.money",
+		company: "Zeam",
+		peg: "GBP",
 	},
 ];
 
