@@ -250,8 +250,18 @@ async function main() {
 	const byUrl = new Map(known.map((d) => [d.url, d]));
 
 	const seen = new Map<string, Candidate>();
-	for (const c of [...bazaar, ...sextant])
+	let demoSkipped = 0;
+	for (const c of [...bazaar, ...sextant]) {
+		if (isReservedDemo(c.url)) {
+			demoSkipped++;
+			continue;
+		}
 		if (!seen.has(c.url)) seen.set(c.url, c);
+	}
+	if (demoSkipped)
+		console.log(
+			`skipped ${demoSkipped} reserved/demo host(s) (RFC 2606 — can never resolve)`,
+		);
 	for (const d of known)
 		if (!seen.has(d.url))
 			seen.set(d.url, {
