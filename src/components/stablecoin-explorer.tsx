@@ -1145,7 +1145,7 @@ export function StablecoinExplorer({
 											<DrawerDescription className="mt-1">
 												{selectedIssuer.tokens.length} asset
 												{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
-												{displayUSD(selectedIssuer.totalMarketCapUSD)} combined
+												{displayUSD(selectedIssuer.totalMarketCapUSD)}
 												market cap
 											</DrawerDescription>
 											{(() => {

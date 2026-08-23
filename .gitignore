@@ -67,3 +67,8 @@ test.env
 # local credential files (never committed; see session security notes)
 repowiki.env
 raven.env
+
+# never commit an env backup — .env*.local does NOT match .env.local.bak
+.env*
+!.env.example
+*.bak

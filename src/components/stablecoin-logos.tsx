@@ -18,6 +18,12 @@ export const ISSUER_LOGOS: Record<string, string> = {
 };
 
 export const TOKEN_LOGOS: Record<string, string> = {
+	// Circle's stellar.toml serves no usable image, so USDC and EURC fell
+	// through to the ISSUER mark — the Circle logo on both, which reads as
+	// "Circle" twice instead of as two distinct assets. These are the tokens'
+	// own marks.
+	USDC: "/stablecoins/logos/usdc.png",
+	EURC: "/stablecoins/logos/eurc.png",
 	PYUSD: "/stablecoins/logos/pyusd.png",
 	USDY: "/stablecoins/logos/usdy.png",
 };
