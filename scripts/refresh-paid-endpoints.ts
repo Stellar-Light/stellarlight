@@ -27,6 +27,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import type { PaidEndpoint } from "../src/payload-types";
 
 const EXECUTE = process.argv.includes("--execute");
 const UA = "stellar-light-paid-endpoints/1.0 (+https://stellarlight.xyz)";
@@ -297,7 +298,12 @@ async function main() {
 
 	let paid = 0;
 	let stellarPayable = 0;
-	const writes: Array<{ id?: string; data: Record<string, unknown> }> = [];
+	// The generated collection type is the contract for what we write. A bare
+	// Record<string, unknown> compiles here only because the root tsconfig
+	// excludes scripts/ — which is exactly how a call to an undefined
+	// function shipped on 2026-08-23. See tsconfig.scripts.json.
+	type EndpointWrite = Omit<PaidEndpoint, "id" | "createdAt" | "updatedAt">;
+	const writes: Array<{ id?: string; data: EndpointWrite }> = [];
 	for (const { c, r } of results) {
 		const acceptsStellar = r.accepts.some(
 			(a) => isStellar(a.network) || a.network === "stellar",
@@ -308,7 +314,7 @@ async function main() {
 		const usd = r.accepts.find(
 			(a) => /usdc|usd/i.test(a.asset ?? "") && a.amount,
 		);
-		const data: Record<string, unknown> = {
+		const data: EndpointWrite = {
 			url: c.url,
 			host: (() => {
 				try {
@@ -357,7 +363,10 @@ async function main() {
 			});
 			updated++;
 		} else {
-			await payload.create({ collection: "paid-endpoints", data: w.data });
+			await payload.create({
+				collection: "paid-endpoints",
+				data: w.data,
+			});
 			created++;
 		}
 	}
