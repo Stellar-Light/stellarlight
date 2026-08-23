@@ -381,7 +381,7 @@ async function main() {
 		};
 		writes.push({ id: prev?.id, data });
 		console.log(
-			`  ${r.status.padEnd(5)} ${r.protocol.padEnd(9)} ${acceptsStellar ? "STELLAR" : "       "} ${c.url.slice(0, 68)}`,
+			`  ${r.status.padEnd(5)} ${r.protocol.padEnd(9)} ${acceptsStellar ? "STELLAR" : "       "} ${data.priceUSD != null ? `$${data.priceUSD.toFixed(4)}` : "        "} ${c.url.slice(0, 60)}`,
 		);
 	}
 
