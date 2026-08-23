@@ -42,7 +42,7 @@ type Candidate = {
 	url: string;
 	title?: string;
 	description?: string;
-	source: "bazaar" | "sextant" | "curated";
+	source: "bazaar" | "sextant" | "mpp-router" | "curated";
 	sourceUrl?: string;
 };
 
@@ -132,6 +132,37 @@ async function fromSextant(): Promise<Candidate[]> {
 			description: String(r.description ?? ""),
 			source: "sextant",
 			sourceUrl: "https://sextants.dev",
+		});
+	}
+	return out;
+}
+
+/**
+ * mpp-router (Rozo) — the only Stellar-native router found: ~670 upstream
+ * services behind one host, every 402 answered with stellar:pubnet USDC and
+ * fees sponsored, in both x402 and MPP. Its catalog is a LISTING, so each
+ * entry still goes through the same 402 probe as everything else; only the
+ * probe is evidence. Templated paths ({id}) cannot be probed as-is.
+ */
+async function fromMppRouter(): Promise<Candidate[]> {
+	const d = await jsonOrNull<{
+		base_url?: string;
+		services?: Array<Record<string, unknown>>;
+	}>("https://apiserver.mpprouter.dev/v1/services/catalog", 20_000);
+	const base = String(d?.base_url ?? "https://apiserver.mpprouter.dev").replace(
+		/\/$/,
+		"",
+	);
+	const out: Candidate[] = [];
+	for (const svc of d?.services ?? []) {
+		const path = String(svc.public_path ?? "");
+		if (!path.startsWith("/") || path.includes("{")) continue;
+		out.push({
+			url: base + path,
+			title: String(svc.name ?? ""),
+			description: String(svc.description ?? ""),
+			source: "mpp-router",
+			sourceUrl: "https://apiserver.mpprouter.dev/v1/services/catalog",
 		});
 	}
 	return out;
@@ -246,9 +277,13 @@ async function main() {
 	);
 	const payload = await getPayload({ config: await configPromise });
 
-	const [bazaar, sextant] = await Promise.all([fromBazaar(), fromSextant()]);
+	const [bazaar, sextant, mppRouter] = await Promise.all([
+		fromBazaar(),
+		fromSextant(),
+		fromMppRouter(),
+	]);
 	console.log(
-		`discovered — bazaar (stellar-accepting): ${bazaar.length} · sextant: ${sextant.length}`,
+		`discovered — bazaar (stellar-accepting): ${bazaar.length} · sextant: ${sextant.length} · mpp-router: ${mppRouter.length}`,
 	);
 
 	// Anything already indexed is re-probed too: liveness is the product, and
@@ -270,7 +305,7 @@ async function main() {
 
 	const seen = new Map<string, Candidate>();
 	let demoSkipped = 0;
-	for (const c of [...bazaar, ...sextant]) {
+	for (const c of [...bazaar, ...sextant, ...mppRouter]) {
 		if (isReservedDemo(c.url)) {
 			demoSkipped++;
 			continue;
@@ -328,7 +363,12 @@ async function main() {
 			protocol: r.protocol,
 			acceptsStellar,
 			accepts: r.accepts,
-			priceUSD: usd?.amount ? Number(usd.amount) / 1_000_000 : null,
+			// Base units differ by chain: USDC is 7 decimals on Stellar (SAC),
+			// 6 on EVM and Solana. Dividing everything by 1e6 overstated every
+			// Stellar price tenfold.
+			priceUSD: usd?.amount
+				? Number(usd.amount) / (isStellar(usd.network) ? 10_000_000 : 1_000_000)
+				: null,
 			source: c.source,
 			sourceUrl: c.sourceUrl ?? null,
 			lastStatus: r.status,
