@@ -33,11 +33,11 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-23",
 		surfaces: ["api"],
-		type: "added",
+		type: "changed",
 		summary:
-			"listPaidEndpoints (GET /api/paid-endpoints) — what an agent can actually pay for ON STELLAR, probed rather than listed. x402 and MPP are shared standards, so 'supports x402' tells a Stellar wallet nothing: the 402 challenge names its networks, and a caller holding USDC on Stellar can only pay a door that lists stellar:pubnet.",
+			"listPaidEndpoints is withdrawn from the public API (openapi@1.8.86). The agent-payments index it served is real and still being built, but it moves to a private repo until the lane is less new — the endpoint existed for under two hours and is removed at the cheapest possible moment for downstream catalogs.",
 		detail:
-			"Measured before building it: of 38 pay.sh providers whose challenge could be read, ZERO accept Stellar, and 3 of 1,611 hosts in Coinbase's x402 Bazaar do — the ecosystem has the rails (@x402/stellar, @stellar/mpp, OpenZeppelin Channels, Veridex) and no index of what is purchasable with them. Candidates come from the public registries; LIVENESS comes only from our own probe, because a directory of agent endpoints that is never re-checked is a list of dead links within a quarter. First run: 227 candidate URLs, 209 answering a live 402 and payable on Stellar \u2014 all from three hosts (agent402.tools 176, api.carbon-cashmere.de 19, app.heinrichstech.com 14), none of them Stellar-ecosystem teams. Sextant's 20 rows are every one an .example domain that does not resolve, matching its own health endpoint (27 seeded, 0 live) and demonstrating exactly why a listing is not evidence. `accepts` is the challenge verbatim, never inferred from a README; lastStatus separates 402 (paid, alive) from 200 (free/open), 401/403 (auth-walled, terms unreadable) and transport failure; an endpoint that stops answering is marked goingDark and KEPT, because going quiet is the most useful thing this index can report.",
+			"Removing an operation is expensive drift for a consumer's catalog, so the honest thing is to do it immediately rather than let it settle. Nothing else changes: no other operation, field or behaviour is touched, and no data an existing caller depends on is affected. The work itself continues against the same store, so when it returns it returns with history rather than as a fresh list.",
 	},
 	{
 		date: "2026-08-21",

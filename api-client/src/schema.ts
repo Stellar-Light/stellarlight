@@ -674,26 +674,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/paid-endpoints": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Paid HTTP endpoints an agent can actually pay for ON STELLAR — probed, not listed.
-         * @description What can my agent buy on Stellar right now? x402 and MPP are shared standards, so an endpoint 'supporting x402' tells a Stellar wallet NOTHING: the 402 challenge names which networks it accepts, and a Stellar wallet can only pay a door listing stellar:pubnet — of 38 pay.sh providers whose challenge we read, zero do. Every row is a URL we RE-PROBED, carrying the challenge verbatim: registries supply candidates, only the probe supplies truth. Absence here never proves an endpoint is unpaid; auth-walled ones hide their terms entirely.
-         */
-        get: operations["listPaidEndpoints"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/stablecoins": {
         parameters: {
             query?: never;
@@ -3514,48 +3494,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
-            };
-        };
-    };
-    listPaidEndpoints: {
-        parameters: {
-            query?: {
-                /** @description Only endpoints whose read challenge listed a Stellar network. The usual filter. */
-                stellarOnly?: "1" | "true" | "yes";
-                /** @description Only endpoints whose last probe returned 402. */
-                live?: "1" | "true" | "yes";
-                protocol?: "x402" | "mpp" | "x402+mpp" | "unknown";
-                host?: string;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Probed paid endpoints; meta.counts carries returned/total/acceptsStellar/answering402. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-            /** @description Unknown query param or invalid protocol. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Index unavailable — explicitly NOT a report that no paid endpoints exist on Stellar. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
