@@ -379,8 +379,10 @@ interface SoroswapPool {
 	address?: string;
 	tokenA?: string;
 	tokenB?: string;
+	tokenC?: string;
 	reserveA?: string | number;
 	reserveB?: string | number;
+	reserveC?: string | number;
 }
 
 /**
@@ -395,11 +397,14 @@ async function soroswapIndexer(): Promise<SoroswapPool[] | null> {
 	const key = process.env.SOROSWAP_API_KEY?.trim();
 	if (!key) return null;
 	try {
-		const qs = ["SOROSWAP", "PHOENIX", "AQUA", "SDEX"]
+		// Lowercase, both here and in the protocol list — the API rejects
+		// "MAINNET" with 400 Unsupported network. `sdex` is advertised by
+		// /protocols but /pools returns none, so Horizon still owns SDEX.
+		const qs = ["soroswap", "phoenix", "aqua"]
 			.map((p) => `protocol=${p}`)
 			.join("&");
 		const r = await fetch(
-			`https://api.soroswap.finance/pools?network=MAINNET&${qs}`,
+			`https://api.soroswap.finance/pools?network=mainnet&${qs}`,
 			{
 				headers: {
 					Authorization: `Bearer ${key}`,
@@ -437,20 +442,23 @@ async function indexerVenues(
 		}
 	>();
 	for (const p of pools) {
-		const a = String(p.tokenA ?? ""),
-			b = String(p.tokenB ?? "");
-		if (a !== mine && b !== mine) continue;
-		const amt = Number(a === mine ? p.reserveA : p.reserveB) / SEVEN;
-		if (!Number.isFinite(amt)) continue;
+		// Stable pools carry a third leg, so check all three sides.
+		const sides: Array<[string | undefined, string | number | undefined]> = [
+			[p.tokenA, p.reserveA],
+			[p.tokenB, p.reserveB],
+			[p.tokenC, p.reserveC],
+		];
+		const hit = sides.find(([t]) => t === mine);
+		if (!hit) continue;
+		const amt = Number(hit[1] ?? 0) / SEVEN;
+		if (!Number.isFinite(amt) || amt <= 0) continue;
+		const other = sides.find(([t]) => t && t !== mine)?.[0] ?? "";
 		const name = (p.protocol ?? "unknown").toLowerCase();
 		const row = byProto.get(name) ?? { count: 0, amount: 0, largest: null };
 		row.count++;
 		row.amount += amt;
 		if (!row.largest || amt > row.largest.assetAmount)
-			row.largest = {
-				counter: (a === mine ? b : a).slice(0, 6),
-				assetAmount: amt,
-			};
+			row.largest = { counter: other.slice(0, 6), assetAmount: amt };
 		byProto.set(name, row);
 	}
 	if (!byProto.size) return null;
@@ -602,8 +610,9 @@ async function soroswapLiquidity(
  * Soroswap (factory + RPC). Same measurement rule as fetchLiquidity — the
  * asset's OWN side of each pool, valued at its own price; never whole-pool
  * TVL. A venue that could not be read is omitted and named in `unreadable`,
- * never shown as zero. Phoenix and Sushi have no readable index yet and are
- * named in `notIndexed` so their absence is not mistaken for absence of pools.
+ * never shown as zero. With the Soroswap indexer reachable, Phoenix is
+ * covered too; on the fallback path it stays in `notIndexed` so its absence
+ * is not mistaken for an absence of pools.
  */
 export async function fetchVenues(
 	code: string,
@@ -617,7 +626,28 @@ export async function fetchVenues(
 	// One authenticated call covers every venue including Phoenix. Only when
 	// that is unavailable do we fan out to the per-venue probes.
 	const indexed = await indexerVenues(code, issuer, priceUSD);
-	if (indexed) return { venues: indexed, unreadable: [], notIndexed: [] };
+	if (indexed) {
+		// The indexer returns no SDEX pools, so Horizon still supplies that
+		// venue and the two are merged.
+		const sdexOnly = await fetchLiquidity(code, issuer, priceUSD);
+		const venues = [...indexed];
+		if (sdexOnly) {
+			const largest = sdexOnly.topPools[0];
+			venues.push({
+				name: "SDEX",
+				poolCount: sdexOnly.poolCount,
+				measuredPools: sdexOnly.poolCount,
+				assetPooled: sdexOnly.assetPooled,
+				assetPooledUSD: sdexOnly.assetPooledUSD,
+				largest: largest
+					? { counter: largest.counterAsset, assetAmount: largest.assetAmount }
+					: null,
+				url: `https://stellar.expert/explorer/public/asset/${code}-${issuer}`,
+			});
+		}
+		venues.sort((a, b) => b.assetPooled - a.assetPooled);
+		return { venues, unreadable: sdexOnly ? [] : ["SDEX"], notIndexed: [] };
+	}
 
 	const [sdex, aqua, soro] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
