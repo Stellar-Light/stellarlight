@@ -35,9 +35,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
-			"listPaidEndpoints is withdrawn from the public API (openapi@1.8.86). The agent-payments index it served is real and still being built, but it moves to a private repo until the lane is less new — the endpoint existed for under two hours and is removed at the cheapest possible moment for downstream catalogs.",
+			"listPaidEndpoints is withdrawn from the public API (openapi@1.8.86). The agent-payments index it served is real and still being built, but it stays unadvertised until the lane is less new — the endpoint existed for under two hours and is removed at the cheapest possible moment for downstream catalogs.",
 		detail:
-			"Removing an operation is expensive drift for a consumer's catalog, so the honest thing is to do it immediately rather than let it settle. Nothing else changes: no other operation, field or behaviour is touched, and no data an existing caller depends on is affected. The work itself continues against the same store, so when it returns it returns with history rather than as a fresh list.",
+			"Removing an operation is expensive drift for a consumer's catalog, so the honest thing is to do it immediately rather than let it settle. Nothing else changes: no other operation, field or behaviour is touched, and no data an existing caller depends on is affected. The work itself continues against the same store, so if it returns it returns with history rather than as a fresh list.",
 	},
 	{
 		date: "2026-08-21",
