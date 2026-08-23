@@ -1,0 +1,50 @@
+name: Refresh paid-endpoint index
+
+# The index's whole value is LIVENESS. Agent endpoints are demos far more
+# often than products — the first run found Sextant's entire catalog to be
+# .example hosts that can never resolve — so a listing that is never
+# re-probed becomes a list of dead links within a quarter.
+#
+# Daily is the right cadence: the probe is ~230 plain HTTP requests against
+# the endpoints themselves and touches no rate-limited API, so it never
+# competes with the shared GitHub PAT budget the enrich jobs live on.
+
+on:
+  schedule:
+    # 05:40 UTC — after the builder sweep window, before the morning syncs.
+    - cron: "40 5 * * *"
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Probe
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
+            pnpm exec tsx scripts/refresh-paid-endpoints.ts --execute
+          else
+            pnpm exec tsx scripts/refresh-paid-endpoints.ts
+          fi
