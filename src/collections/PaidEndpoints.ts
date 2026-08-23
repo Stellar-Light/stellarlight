@@ -113,6 +113,7 @@ export const PaidEndpoints: CollectionConfig = {
 			options: [
 				"bazaar",
 				"sextant",
+				"mpp-router",
 				"stellar-directory",
 				"curated",
 				"openapi-discovery",

@@ -2208,7 +2208,7 @@ export interface PaidEndpoint {
   /**
    * Where we learned of the endpoint. Discovery source, never evidence of liveness.
    */
-  source?: ('bazaar' | 'sextant' | 'stellar-directory' | 'curated' | 'openapi-discovery') | null;
+  source?: ('bazaar' | 'sextant' | 'mpp-router' | 'stellar-directory' | 'curated' | 'openapi-discovery') | null;
   /**
    * The listing we found it in, so a caller can go upstream.
    */
