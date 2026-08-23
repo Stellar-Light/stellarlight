@@ -93,7 +93,6 @@ export interface Config {
     'research-docs': ResearchDoc;
     'scout-feedback': ScoutFeedback;
     'community-skills': CommunitySkill;
-    'paid-endpoints': PaidEndpoint;
     'partner-accounts': PartnerAccount;
     'partner-leads': PartnerLead;
     'funding-snapshots': FundingSnapshot;
@@ -137,7 +136,6 @@ export interface Config {
     'research-docs': ResearchDocsSelect<false> | ResearchDocsSelect<true>;
     'scout-feedback': ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
     'community-skills': CommunitySkillsSelect<false> | CommunitySkillsSelect<true>;
-    'paid-endpoints': PaidEndpointsSelect<false> | PaidEndpointsSelect<true>;
     'partner-accounts': PartnerAccountsSelect<false> | PartnerAccountsSelect<true>;
     'partner-leads': PartnerLeadsSelect<false> | PartnerLeadsSelect<true>;
     'funding-snapshots': FundingSnapshotsSelect<false> | FundingSnapshotsSelect<true>;
@@ -2169,68 +2167,6 @@ export interface CommunitySkill {
   createdAt: string;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "paid-endpoints".
- */
-export interface PaidEndpoint {
-  id: string;
-  /**
-   * The resource URL that answers the payment challenge — the natural key.
-   */
-  url: string;
-  host?: string | null;
-  title?: string | null;
-  description?: string | null;
-  /**
-   * Which challenge the endpoint actually returned. `unknown` = we never read one.
-   */
-  protocol?: ('x402' | 'mpp' | 'x402+mpp' | 'unknown') | null;
-  /**
-   * TRUE only when a read challenge listed stellar:pubnet (or an MPP stellar method). The point of the whole index.
-   */
-  acceptsStellar?: boolean | null;
-  /**
-   * Payment options exactly as the challenge stated them. Empty = no challenge read, NEVER 'accepts nothing'.
-   */
-  accepts?:
-    | {
-        network?: string | null;
-        asset?: string | null;
-        amount?: string | null;
-        scheme?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Per-call price when the challenge states one in a USD stablecoin. Null = not stated.
-   */
-  priceUSD?: number | null;
-  /**
-   * Where we learned of the endpoint. Discovery source, never evidence of liveness.
-   */
-  source?: ('bazaar' | 'sextant' | 'stellar-directory' | 'curated' | 'openapi-discovery') | null;
-  /**
-   * The listing we found it in, so a caller can go upstream.
-   */
-  sourceUrl?: string | null;
-  /**
-   * HTTP status of the last probe, or a transport error. 402 = paid and alive.
-   */
-  lastStatus?: string | null;
-  lastCheckedAt?: string | null;
-  /**
-   * Last time this URL actually returned a 402.
-   */
-  lastPaidAt?: string | null;
-  /**
-   * Probes in a row that did not return a challenge. A streak is the going-dark signal.
-   */
-  consecutiveFailures?: number | null;
-  note?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Ecosystem partners with self-service profiles. Manual fields are partner-owned; the 'Verified signals' group is system-owned and overwrites on cron.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2732,10 +2668,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'community-skills';
         value: string | CommunitySkill;
-      } | null)
-    | ({
-        relationTo: 'paid-endpoints';
-        value: string | PaidEndpoint;
       } | null)
     | ({
         relationTo: 'partner-accounts';
@@ -3646,37 +3578,6 @@ export interface CommunitySkillsSelect<T extends boolean = true> {
   approvedAt?: T;
   rejectionReason?: T;
   ipHash?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "paid-endpoints_select".
- */
-export interface PaidEndpointsSelect<T extends boolean = true> {
-  url?: T;
-  host?: T;
-  title?: T;
-  description?: T;
-  protocol?: T;
-  acceptsStellar?: T;
-  accepts?:
-    | T
-    | {
-        network?: T;
-        asset?: T;
-        amount?: T;
-        scheme?: T;
-        id?: T;
-      };
-  priceUSD?: T;
-  source?: T;
-  sourceUrl?: T;
-  lastStatus?: T;
-  lastCheckedAt?: T;
-  lastPaidAt?: T;
-  consecutiveFailures?: T;
-  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
