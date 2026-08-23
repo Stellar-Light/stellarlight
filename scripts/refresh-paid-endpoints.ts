@@ -47,6 +47,24 @@ type Candidate = {
 
 const isStellar = (n?: string) => !!n && n.toLowerCase().startsWith("stellar");
 
+/**
+ * RFC 2606 / RFC 6761 reserve these names for documentation and testing, so
+ * they are guaranteed never to resolve. Sextant's catalog is 20 rows of
+ * `api.fxrates.example`, `mcp.stellartools.example` and friends — its own
+ * /health reports 27 seeded and 0 live — and indexing them would add
+ * permanently dark rows. A demo listing is not supply.
+ */
+const RESERVED_HOST =
+	/(^|\.)(example|test|invalid|localhost)$|(^|\.)example\.(com|net|org)$/i;
+
+function isReservedDemo(url: string): boolean {
+	try {
+		return RESERVED_HOST.test(new URL(url).hostname);
+	} catch {
+		return true;
+	}
+}
+
 async function jsonOrNull<T>(
 	url: string,
 	timeoutMs = 20_000,
