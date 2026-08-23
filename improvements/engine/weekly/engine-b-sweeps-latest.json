@@ -1,7 +1,61 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 5,
+    "count": 35,
     "sample": [
+      {
+        "slug": "hito-wallet",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "hito-wallet",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
+      },
+      {
+        "slug": "hito-wallet",
+        "field": "supportedNetworks",
+        "prose": "bitcoin",
+        "missing": "bitcoin"
+      },
+      {
+        "slug": "hito-wallet",
+        "field": "supportedNetworks",
+        "prose": "near",
+        "missing": "near"
+      },
+      {
+        "slug": "boundless",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "agnostic",
+        "field": "supportedNetworks",
+        "prose": "evm",
+        "missing": "evm"
+      },
+      {
+        "slug": "subquery",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "subquery",
+        "field": "supportedNetworks",
+        "prose": "polkadot",
+        "missing": "polkadot"
+      },
+      {
+        "slug": "python-stellar-sdk",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
       {
         "slug": "trustline",
         "field": "supportedNetworks",
@@ -15,22 +69,88 @@
         "missing": "solana"
       },
       {
+        "slug": "expand-network",
+        "field": "supportedNetworks",
+        "prose": "evm",
+        "missing": "evm"
+      },
+      {
+        "slug": "hana",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "hana",
+        "field": "supportedNetworks",
+        "prose": "avalanche",
+        "missing": "evm"
+      },
+      {
+        "slug": "hana",
+        "field": "supportedNetworks",
+        "prose": "sui",
+        "missing": "sui"
+      },
+      {
+        "slug": "decaf",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
+      },
+      {
+        "slug": "neon-wallet",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "linq",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
+      {
+        "slug": "linq",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
+      },
+      {
+        "slug": "linq",
+        "field": "supportedNetworks",
+        "prose": "sui",
+        "missing": "sui"
+      },
+      {
+        "slug": "linq",
+        "field": "supportedNetworks",
+        "prose": "aptos",
+        "missing": "aptos"
+      },
+      {
+        "slug": "dcent",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
+      {
         "slug": "wowmax",
         "field": "supportedNetworks",
         "prose": "near",
         "missing": "near"
       },
       {
-        "slug": "nulucre-agents",
+        "slug": "automated-finance",
         "field": "supportedNetworks",
-        "prose": "base",
+        "prose": "polygon",
         "missing": "evm"
       },
       {
-        "slug": "pyusd",
+        "slug": "automated-finance",
         "field": "supportedNetworks",
-        "prose": "bitcoin",
-        "missing": "bitcoin"
+        "prose": "base",
+        "missing": "evm"
       }
     ]
   },
@@ -38,7 +158,7 @@
     "Infrastructure": {
       "shortDescription": "99% (194/196)",
       "types": "92% (181/196)",
-      "supportedNetworks": "9% (17/196)",
+      "supportedNetworks": "46% (91/196)",
       "logoUrl": "79% (154/196)"
     },
     "Tooling": {
@@ -47,28 +167,28 @@
       "logoUrl": "80% (140/176)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (365/370)",
-      "types": "93% (345/370)",
-      "supportedNetworks": "7% (27/370)",
-      "logoUrl": "89% (328/370)"
+      "shortDescription": "99% (380/385)",
+      "types": "94% (361/385)",
+      "supportedNetworks": "59% (226/385)",
+      "logoUrl": "85% (328/385)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
       "types": "100% (35/35)",
-      "supportedNetworks": "14% (5/35)",
+      "supportedNetworks": "26% (9/35)",
       "logoUrl": "80% (28/35)"
     },
     "Protocol/Contract": {
       "shortDescription": "100% (142/142)",
       "types": "87% (124/142)",
-      "supportedNetworks": "16% (23/142)",
+      "supportedNetworks": "74% (105/142)",
       "logoUrl": "85% (121/142)",
       "tvlUSD": "9% (13/142)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
       "types": "100% (15/15)",
-      "supportedNetworks": "13% (2/15)",
+      "supportedNetworks": "73% (11/15)",
       "logoUrl": "87% (13/15)"
     },
     "Partner Integration": {
@@ -148,20 +268,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 394,
-    "liveStale365": 146,
+    "liveNoDatedSignal": 403,
+    "liveStale365": 147,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 531,
+        "ageDays": 538,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 899,
+        "ageDays": 906,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -182,7 +302,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2299,
+        "ageDays": 2306,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -293,6 +413,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-16T09:33:15Z",
+  "generatedAt": "2026-08-23T09:34:23Z",
   "evalKey": "engine-b-sweeps"
 }

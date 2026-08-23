@@ -1,7 +1,7 @@
 {
   "frame": {
     "scf": 500,
-    "directory": 935,
+    "directory": 950,
     "matched": 310,
     "roundsChecked": 309
   },
@@ -53,6 +53,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     }
   ],
-  "generatedAt": "2026-08-16T09:33:15Z",
+  "generatedAt": "2026-08-23T09:34:23Z",
   "evalKey": "scf-crosscheck"
 }

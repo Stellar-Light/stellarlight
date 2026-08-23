@@ -1,17 +1,19 @@
 {
   "base": "https://stellarlight.xyz",
-  "specVersion": "1.8.67",
+  "specVersion": "1.8.86",
   "frame": {
-    "ops": 33,
-    "paramsProbed": 25,
-    "fieldsChecked": 532,
+    "ops": 35,
+    "paramsProbed": 23,
+    "fieldsChecked": 525,
     "postChecked": 5,
     "skipped": [
+      "GET /api/projects/resolve (field check: live call 400)",
       "GET /api/changes (field check: live call 400)",
       "GET /api/hackathons/compare (no documented response properties)",
       "GET /api/hackathons/builds (no documented response properties)",
       "GET /api/partners/{slug} (no documented response properties)",
       "GET /api/scf-pitch (field check: live call 400)",
+      "GET /api/hackathon-brief (field check: live call 400)",
       "GET /api/vet-idea (field check: live call 400)",
       "GET /api/repos/trust (field check: live call 400)",
       "GET /api/skills/{name} (no documented response properties)",
@@ -20,6 +22,7 @@
   },
   "silentParams": [],
   "invalidAccepted": [],
+  "rejectedParams": [],
   "missingFields": [],
   "optionalAbsent": [
     {
@@ -100,22 +103,17 @@
     {
       "op": "GET /api/hackathons/{slug}",
       "field": "meta.filters",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema (conditional/unreached), not drift"
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/hackathons/{slug}",
       "field": "meta.warnings",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema (conditional/unreached), not drift"
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/hackathons/{slug}",
       "field": "meta.counts",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
-      "field": "winners[].hackathonPrize",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/hackathons/stellar-hacks-zk) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/builders",
@@ -200,16 +198,6 @@
   ],
   "undocumentedFields": [
     {
-      "op": "GET /api/research",
-      "field": "results[].docKind",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200), missing from the spec's item schema"
-    },
-    {
-      "op": "GET /api/research",
-      "field": "results[].docVersionStatus",
-      "evidence": "served on live rows (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200), missing from the spec's item schema"
-    },
-    {
       "op": "GET /api/analyze",
       "field": "toolchain",
       "evidence": "served live (https://stellarlight.xyz/api/analyze), missing from the spec"
@@ -222,6 +210,6 @@
       "evidence": "all 1 valid value(s) [1] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/partners?limit=200) \u2014 single-value enum: its only value may restate the server default, so inert vs explicit-default is undecidable from outside"
     }
   ],
-  "generatedAt": "2026-08-16T09:33:15Z",
+  "generatedAt": "2026-08-23T09:34:23Z",
   "evalKey": "engine-e-contract"
 }
