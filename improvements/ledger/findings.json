@@ -228,9 +228,9 @@
 		"failureMode": "demand-miss",
 		"severity": "high",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "cleared",
-		"evidenceAt": "2026-08-16T09:33:15Z",
+		"evidenceAt": "2026-08-23T09:34:23Z",
 		"clearedAt": "2026-08-10T22:46:05.684Z"
 	},
 	{
@@ -365,8 +365,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
@@ -376,9 +377,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
@@ -388,9 +389,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
@@ -401,8 +402,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:gatewayfm-in-top-3-for-is-gateway-fm-live",
@@ -412,9 +414,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:liquify-in-top-3-for-is-liquify-live",
@@ -424,9 +426,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:onfinality-in-top-3-for-is-onfinality-live",
@@ -437,8 +439,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:walletconnect-in-top-3-for-tell-me-about-walletc",
@@ -449,8 +452,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:bridge-in-top-3-for-tell-me-about-bridge",
@@ -460,9 +464,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:orally-in-top-3-for-is-orally-live",
@@ -472,9 +476,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:merkl-in-top-3-for-is-merkl-live",
@@ -484,9 +488,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:the-starship-soroban-in-top-3-for-is-the-starshi",
@@ -496,9 +500,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:humantech-in-top-3-for-is-human-tech-live",
@@ -508,9 +512,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:haciendo-stellar-in-top-3-for-is-haciendo-stella",
@@ -520,9 +524,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:flashback-in-top-3-for-is-flashback-live",
@@ -532,9 +536,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:dobprotocol-in-top-3-for-is-dobprotocol-live",
@@ -544,9 +548,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:boundless-in-top-3-for-is-boundless-live",
@@ -556,9 +560,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:baf-in-top-3-for-is-baf-live",
@@ -568,9 +572,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:rise-in-in-top-3-for-tell-me-about-rise-in",
@@ -580,9 +584,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:easya-in-top-3-for-is-easya-live",
@@ -593,8 +597,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:nearx-in-top-3-for-what-is-nearx",
@@ -605,8 +610,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-global-in-top-3-for-is-stellar-global-li",
@@ -616,9 +622,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:mercury-in-top-3-for-is-mercury-live",
@@ -628,9 +634,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lightsail-in-top-3-for-is-lightsail-live",
@@ -640,9 +646,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:dd-in-top-3-for-what-is-dd",
@@ -652,9 +658,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarx-ph-in-top-3-for-stellarx-ph-on-stellar",
@@ -665,8 +671,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:derisk-in-top-3-for-what-is-derisk",
@@ -677,8 +684,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:net-sdk-in-top-3-for-net-sdk-on-stellar",
@@ -688,9 +696,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:rehive-in-top-3-for-is-rehive-live",
@@ -700,9 +708,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:securrency-in-top-3-for-is-securrency-live",
@@ -712,9 +720,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:blockaid-in-top-3-for-is-blockaid-live",
@@ -724,9 +732,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sora-in-top-3-for-is-sora-live",
@@ -736,9 +744,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:dex-tools-in-top-3-for-tell-me-about-dex-tools",
@@ -748,9 +756,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:btq-in-top-3-for-is-btq-live",
@@ -760,9 +768,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:basement-in-top-3-for-is-basement-live",
@@ -772,9 +780,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:astrograph-in-top-3-for-is-astrograph-live",
@@ -784,9 +792,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:arculus-in-top-3-for-is-arculus-live",
@@ -796,9 +804,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:bitt-in-top-3-for-is-bitt-live",
@@ -808,9 +816,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:quasar-in-top-3-for-is-quasar-live",
@@ -820,9 +828,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:constellation-in-top-3-for-is-constellation-live",
@@ -832,9 +840,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-domains-in-top-3-for-what-is-soroban-dom",
@@ -844,9 +852,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarbeat-in-top-3-for-is-stellarbeat-live",
@@ -856,9 +864,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:block-by-block-in-top-3-for-is-block-by-block-li",
@@ -868,9 +876,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:mydatacoin-in-top-3-for-is-mydatacoin-live",
@@ -881,8 +889,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:apay-in-top-3-for-is-apay-live",
@@ -892,9 +901,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-update-in-top-3-for-tell-me-about-stella",
@@ -904,9 +913,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-learn-in-top-3-for-tell-me-about-soroban",
@@ -916,9 +925,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:forge-in-top-3-for-is-forge-live",
@@ -928,9 +937,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:blue-orion-in-top-3-for-blue-orion-on-stellar",
@@ -940,9 +949,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-laboratory-in-top-3-for-is-stellar-labor",
@@ -952,9 +961,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:go-stellar-sdk-in-top-3-for-tell-me-about-go-ste",
@@ -964,9 +973,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ios-stellar-sdk-in-top-3-for-ios-stellar-sdk-on-",
@@ -976,9 +985,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:websoroban-ide-in-top-3-for-is-websoroban-ide-li",
@@ -989,8 +998,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:subs-in-top-3-for-is-subs-live",
@@ -1000,9 +1010,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-c-sdk-in-top-3-for-what-is-stellar-c-sdk",
@@ -1012,9 +1022,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-sdk-tools-in-top-3-for-tell-me-about-sor",
@@ -1024,9 +1034,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:smart-deploy-in-top-3-for-is-smart-deploy-live",
@@ -1036,9 +1046,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:hypernative-in-top-3-for-is-hypernative-live",
@@ -1048,9 +1058,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:flutter-wallet-sdk-in-top-3-for-is-flutter-walle",
@@ -1060,9 +1070,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ctx-in-top-3-for-is-ctx-live",
@@ -1072,9 +1082,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:defarm-in-top-3-for-is-defarm-live",
@@ -1085,8 +1095,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:decentrio-in-top-3-for-is-decentrio-live",
@@ -1096,9 +1107,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:tansu-in-top-3-for-is-tansu-live",
@@ -1108,9 +1119,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:expand-network-in-top-3-for-is-expand-network-li",
@@ -1132,9 +1143,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:loam-in-top-3-for-is-loam-live",
@@ -1144,9 +1155,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-wallets-kit-in-top-3-for-is-stellar-wall",
@@ -1156,9 +1167,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:usher-in-top-3-for-is-usher-live",
@@ -1168,9 +1179,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:teken-in-top-3-for-is-teken-live",
@@ -1180,9 +1191,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarmint-in-top-3-for-is-stellarmint-live",
@@ -1192,9 +1203,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarauth-in-top-3-for-tell-me-about-stellarau",
@@ -1205,8 +1216,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-tools-in-top-3-for-is-stellar-tools-live",
@@ -1216,9 +1228,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sstream-in-top-3-for-is-sstream-live",
@@ -1228,9 +1240,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sorosan-in-top-3-for-is-sorosan-live",
@@ -1240,9 +1252,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sorobuild-in-top-3-for-tell-me-about-sorobuild",
@@ -1253,8 +1265,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:solarkraft-in-top-3-for-is-solarkraft-live",
@@ -1264,9 +1277,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:openzeppelin-in-top-3-for-tell-me-about-openzepp",
@@ -1276,9 +1289,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:planet-pay-in-top-3-for-is-planet-pay-live",
@@ -1288,9 +1301,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:cede-in-top-3-for-is-cede-live",
@@ -1300,9 +1313,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:okashi-in-top-3-for-is-okashi-live",
@@ -1312,9 +1325,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:keizai-in-top-3-for-is-keizai-live",
@@ -1324,9 +1337,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sorscan-in-top-3-for-is-sorscan-live",
@@ -1336,9 +1349,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-decompiler-in-top-3-for-is-soroban-decom",
@@ -1348,9 +1361,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stex-in-top-3-for-what-is-stex",
@@ -1361,8 +1374,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:sorobuilder-in-top-3-for-sorobuilder-on-stellar",
@@ -1373,8 +1387,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:pactta-in-top-3-for-is-pactta-live",
@@ -1384,9 +1399,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:canfy-in-top-3-for-is-canfy-live",
@@ -1396,9 +1411,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-assistant-in-top-3-for-is-soroban-assist",
@@ -1408,9 +1423,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:nebula-in-top-3-for-is-nebula-live",
@@ -1420,9 +1435,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sorobanide-in-top-3-for-what-is-sorobanide",
@@ -1432,9 +1447,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:scorechain-in-top-3-for-is-scorechain-live",
@@ -1444,9 +1459,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:kale-in-top-3-for-is-kale-live",
@@ -1456,9 +1471,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:beans-in-top-3-for-is-beans-live",
@@ -1468,9 +1483,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:decaf-in-top-3-for-is-decaf-live",
@@ -1480,9 +1495,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:klever-in-top-3-for-is-klever-live",
@@ -1492,9 +1507,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-optimistic-oracle-in-top-3-for-is-soroba",
@@ -1504,9 +1519,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:tezoro-in-top-3-for-is-tezoro-live",
@@ -1516,9 +1531,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ibis-in-top-3-for-is-ibis-live",
@@ -1528,9 +1543,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:digibank-in-top-3-for-is-digibank-live",
@@ -1540,9 +1555,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:usdc-swap-in-top-3-for-is-usdc-swap-live",
@@ -1552,9 +1567,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarpay-in-top-3-for-is-stellarpay-live",
@@ -1564,9 +1579,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:spydra-in-top-3-for-is-spydra-live",
@@ -1576,9 +1591,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stables-in-top-3-for-what-is-stables",
@@ -1588,9 +1603,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sentit-in-top-3-for-is-sentit-live",
@@ -1600,9 +1615,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sendin-in-top-3-for-tell-me-about-sendin",
@@ -1613,8 +1628,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:pakananet-in-top-3-for-is-pakana-net-live",
@@ -1624,9 +1640,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:nobak-in-top-3-for-is-nobak-live",
@@ -1636,9 +1652,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:neovestor-in-top-3-for-is-neovestor-live",
@@ -1648,9 +1664,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:metafyed-in-top-3-for-is-metafyed-live",
@@ -1660,9 +1676,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lul-in-top-3-for-is-lul-live",
@@ -1672,9 +1688,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:meria-defi-in-top-3-for-is-meria-defi-live",
@@ -1685,8 +1701,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:onekey-in-top-3-for-tell-me-about-onekey",
@@ -1697,8 +1714,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:irl-in-top-3-for-is-irl-live",
@@ -1708,9 +1726,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:hedgepay-in-top-3-for-is-hedgepay-live",
@@ -1721,8 +1739,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:greeppay-in-top-3-for-is-greeppay-live",
@@ -1732,9 +1751,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:gladius-in-top-3-for-is-gladius-live",
@@ -1744,9 +1763,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:depay-in-top-3-for-is-depay-live",
@@ -1756,9 +1775,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:cartwey-in-top-3-for-is-cartwey-live",
@@ -1768,9 +1787,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:blindpay-in-top-3-for-is-blindpay-live",
@@ -1781,8 +1800,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:unalivio-in-top-3-for-is-unalivio-live",
@@ -1792,9 +1812,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:rehoboth-in-top-3-for-is-rehoboth-live",
@@ -1804,9 +1824,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:peer-in-top-3-for-peer-on-stellar",
@@ -1816,9 +1836,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:meru-in-top-3-for-is-meru-live",
@@ -1828,9 +1848,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lemon-in-top-3-for-is-lemon-live",
@@ -1840,9 +1860,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:kotani-pay-in-top-3-for-is-kotani-pay-live",
@@ -1852,9 +1872,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:clixpesa-in-top-3-for-is-clixpesa-live",
@@ -1864,9 +1884,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:cypher-in-top-3-for-is-cypher-live",
@@ -1876,9 +1896,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:forestio-in-top-3-for-is-forestio-live",
@@ -1888,9 +1908,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:wellspring-in-top-3-for-is-wellspring-live",
@@ -1900,9 +1920,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:fundable-in-top-3-for-is-fundable-live",
@@ -1912,9 +1932,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:figo-in-top-3-for-is-figo-live",
@@ -1924,9 +1944,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:dig-in-top-3-for-dig-on-stellar",
@@ -1936,9 +1956,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:bloccpay-in-top-3-for-is-bloccpay-live",
@@ -1948,9 +1968,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:acta-in-top-3-for-is-acta-live",
@@ -1960,9 +1980,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:wally-in-top-3-for-is-wally-live",
@@ -1972,9 +1992,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:uils-in-top-3-for-is-uils-live",
@@ -1984,9 +2004,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:taskio-in-top-3-for-is-task-io-live",
@@ -1996,9 +2016,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:handlpay-in-top-3-for-is-handlpay-live",
@@ -2009,8 +2029,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-tip-in-top-3-for-is-stellar-tip-live",
@@ -2020,9 +2041,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sendit-in-top-3-for-is-sendit-live",
@@ -2032,9 +2053,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:puenta-in-top-3-for-is-puenta-live",
@@ -2044,9 +2065,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:poma-in-top-3-for-is-poma-live",
@@ -2056,9 +2077,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:mugglepay-in-top-3-for-is-mugglepay-live",
@@ -2069,8 +2090,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:dropzey-in-top-3-for-is-dropzey-live",
@@ -2080,9 +2102,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:copperx-in-top-3-for-is-copperx-live",
@@ -2092,9 +2114,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:chats-in-top-3-for-is-chats-live",
@@ -2104,9 +2126,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:blox-in-top-3-for-is-blox-live",
@@ -2116,9 +2138,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:blocknify-in-top-3-for-is-blocknify-live",
@@ -2128,9 +2150,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:answerly-in-top-3-for-is-answerly-live",
@@ -2140,9 +2162,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:oinc-in-top-3-for-is-oinc-live",
@@ -2152,9 +2174,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ripio-in-top-3-for-is-ripio-live",
@@ -2164,9 +2186,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:emigro-in-top-3-for-is-emigro-live",
@@ -2176,9 +2198,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:changera-in-top-3-for-is-changera-live",
@@ -2188,9 +2210,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:cedar-in-top-3-for-is-cedar-live",
@@ -2200,9 +2222,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:airtm-in-top-3-for-is-airtm-live",
@@ -2212,9 +2234,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:afriex-in-top-3-for-is-afriex-live",
@@ -2224,9 +2246,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:5x-crypto-in-top-3-for-is-5x-crypto-live",
@@ -2236,9 +2258,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:quidroo-in-top-3-for-is-quidroo-live",
@@ -2248,9 +2270,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:opensolar-in-top-3-for-is-opensolar-live",
@@ -2260,9 +2282,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:rigel-in-top-3-for-is-rigel-live",
@@ -2272,9 +2294,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lumens-for-charity-in-top-3-for-tell-me-about-lu",
@@ -2284,9 +2306,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lumenaut-in-top-3-for-is-lumenaut-live",
@@ -2296,9 +2318,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:localcoin-in-top-3-for-what-is-localcoin",
@@ -2309,8 +2331,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:borderdollar-in-top-3-for-what-is-borderdollar",
@@ -2321,8 +2344,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:chaincred-in-top-3-for-is-chaincred-live",
@@ -2332,9 +2356,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:whalestack-in-top-3-for-is-whalestack-live",
@@ -2344,9 +2368,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ars-in-top-3-for-ars-on-stellar",
@@ -2356,9 +2380,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:usdc-in-top-3-for-tell-me-about-usdc",
@@ -2368,9 +2392,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:pen-in-top-3-for-tell-me-about-pen",
@@ -2380,9 +2404,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:gbpx-in-top-3-for-is-gbpx-live",
@@ -2392,9 +2416,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:usdy-in-top-3-for-is-usdy-live",
@@ -2404,9 +2428,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:mbrl-in-top-3-for-is-mbrl-live",
@@ -2416,9 +2440,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:vchf-in-top-3-for-is-vchf-live",
@@ -2428,9 +2452,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:gyen-in-top-3-for-is-gyen-live",
@@ -2441,8 +2465,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:kes-in-top-3-for-tell-me-about-kes",
@@ -2452,9 +2477,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zusd-in-top-3-for-what-is-zusd",
@@ -2465,8 +2490,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:brl-in-top-3-for-what-is-brl",
@@ -2476,9 +2502,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:xusd-in-top-3-for-xusd-on-stellar",
@@ -2489,8 +2515,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:phoenix-in-top-3-for-is-phoenix-live",
@@ -2500,9 +2527,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:etherfuse-in-top-3-for-is-etherfuse-live",
@@ -2512,9 +2539,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:slender-in-top-3-for-is-slender-live",
@@ -2524,9 +2551,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:vaquita-in-top-3-for-is-vaquita-live",
@@ -2536,9 +2563,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zarf-in-top-3-for-is-zarf-live",
@@ -2548,9 +2575,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:velo-in-top-3-for-velo-on-stellar",
@@ -2560,9 +2587,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zig3v2-in-top-3-for-is-zig3v2-live",
@@ -2572,9 +2599,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:yieldbackcash-in-top-3-for-is-yieldback-cash-liv",
@@ -2584,9 +2611,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellars-finance-in-top-3-for-is-stellars-financ",
@@ -2596,9 +2623,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:rango-in-top-3-for-is-rango-live",
@@ -2608,9 +2635,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:normal-in-top-3-for-is-normal-live",
@@ -2620,9 +2647,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:laina-in-top-3-for-is-laina-live",
@@ -2632,9 +2659,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:eara-in-top-3-for-is-eara-live",
@@ -2644,9 +2671,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:bondhive-in-top-3-for-is-bondhive-live",
@@ -2656,9 +2683,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zkcross-in-top-3-for-is-zkcross-live",
@@ -2668,9 +2695,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stbl-in-top-3-for-is-stbl-live",
@@ -2680,9 +2707,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:liquidsfi-in-top-3-for-liquidsfi-on-stellar",
@@ -2704,9 +2731,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lend-in-top-3-for-is-lend-live",
@@ -2716,9 +2743,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:upshift-in-top-3-for-is-upshift-live",
@@ -2728,9 +2755,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:solv-protocol-in-top-3-for-is-solv-protocol-live",
@@ -2740,9 +2767,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:securitize-in-top-3-for-is-securitize-live",
@@ -2752,9 +2779,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:renesis-in-top-3-for-is-renesis-live",
@@ -2764,9 +2791,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:amber-in-top-3-for-is-amber-live",
@@ -2776,9 +2803,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ramm-in-top-3-for-is-ramm-live",
@@ -2788,9 +2815,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:vanna-finance-in-top-3-for-is-vanna-finance-live",
@@ -2800,9 +2827,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:mystic-in-top-3-for-is-mystic-live",
@@ -2812,9 +2839,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ichi-in-top-3-for-is-ichi-live",
@@ -2824,9 +2851,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:soroban-polygon-interop-in-top-3-for-is-soroban-",
@@ -2836,9 +2863,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:hiyield-in-top-3-for-what-is-hiyield",
@@ -2849,8 +2876,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:owny-in-top-3-for-is-owny-live",
@@ -2860,9 +2888,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellarx-in-top-3-for-is-stellarx-live",
@@ -2872,9 +2900,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:octarine-in-top-3-for-is-octarine-live",
@@ -2884,9 +2912,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:the-strategists-in-top-3-for-is-the-strategists-",
@@ -2896,9 +2924,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:moneygram-in-top-3-for-is-moneygram-live",
@@ -2908,9 +2936,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zilt-in-top-3-for-is-zilt-live",
@@ -2920,9 +2948,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:verso-in-top-3-for-is-verso-live",
@@ -2932,9 +2960,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:ping-in-top-3-for-ping-on-stellar",
@@ -2944,9 +2972,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:coins-ph-in-top-3-for-is-coins-ph-live",
@@ -2956,9 +2984,10 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-07-26T00:49:43.892Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "cleared",
-		"clearedAt": "2026-08-08T15:58:05.476Z"
+		"clearedAt": "2026-08-08T15:58:05.476Z",
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:band-in-top-10-its-own-supportednetworks-implies",
@@ -3052,9 +3081,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:devasignhq-soroban-escrow-in-top-5-for-its-own-s",
@@ -3357,9 +3386,9 @@
 		"failureMode": "ambiguous-contract",
 		"severity": "low",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "raven-routing:what-wallets-support-stellar",
@@ -3369,7 +3398,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3381,7 +3410,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3393,7 +3422,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3405,7 +3434,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3417,7 +3446,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3429,7 +3458,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3441,7 +3470,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3453,7 +3482,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3465,7 +3494,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3477,7 +3506,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3489,7 +3518,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3501,7 +3530,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3513,7 +3542,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3525,7 +3554,7 @@
 		"failureMode": "consumer-code-shallow",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T04:05:01.227Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:04:28.776Z"
 	},
@@ -3537,7 +3566,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T04:05:01.227Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
 		"evidenceAt": "2026-07-23T04:05:00.948Z"
 	},
@@ -3718,9 +3747,9 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-08T15:58:05.476Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "cleared",
-		"evidenceAt": "2026-08-03T22:35:26Z",
+		"evidenceAt": "2026-08-23T09:34:23Z",
 		"clearedAt": "2026-08-10T22:46:05.684Z"
 	},
 	{
@@ -3744,9 +3773,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:autoaction-in-top-3-for-tell-me-about-autoaction",
@@ -3757,8 +3786,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-pulse-in-top-3-for-tell-me-about-stellar",
@@ -3768,9 +3798,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:jumpa-in-top-3-for-is-jumpa-live",
@@ -3780,9 +3810,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:link-in-top-3-for-link-on-stellar",
@@ -3792,9 +3822,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-defi-hub-in-top-3-for-what-is-stellar-de",
@@ -3804,9 +3834,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:smart-treasury-in-top-3-for-is-smart-treasury-li",
@@ -3816,9 +3846,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:remi-in-top-3-for-is-remi-live",
@@ -3828,9 +3858,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:for-yield-in-top-3-for-tell-me-about-for-yield",
@@ -3840,9 +3870,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:tricorn-in-top-3-for-is-tricorn-live",
@@ -3852,9 +3882,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:lusty-in-top-3-for-is-lusty-live",
@@ -3864,9 +3894,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:sodax-in-top-3-for-is-sodax-live",
@@ -3876,9 +3906,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:foryield-soroban-yield-vault-in-top-5-for-its-ow",
@@ -3888,9 +3918,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:zerie5-lulpay-campaign-contract-in-top-5-for-its",
@@ -3900,9 +3930,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-08T15:58:05.476Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-d-demand:hummingbot",
@@ -3913,8 +3943,9 @@
 		"severity": "high",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:lolipay",
@@ -3925,8 +3956,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:sidereal",
@@ -3937,8 +3969,9 @@
 		"severity": "high",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:personal-budget-envelope-spending-category",
@@ -3949,8 +3982,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:prepaid-subscription-pause-cancel-refund-consume",
@@ -3961,8 +3995,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:rental-inventory-equipment-tool-borrowing",
@@ -3973,8 +4008,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:solar-energy-household-credits-prepaid-electrici",
@@ -3985,8 +4021,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:anclap-mykobo-clpx-and-ntokens-contacts",
@@ -3997,8 +4034,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:anclap-mykobo-clpx-and-ntokens-outreach",
@@ -4009,8 +4047,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:indonesia-rupiah-idr",
@@ -4021,8 +4060,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:proofescrow",
@@ -4033,8 +4073,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:kelp",
@@ -4045,8 +4086,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:photo",
@@ -4083,8 +4125,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:lumo",
@@ -4133,9 +4176,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:talos-in-top-3-for-is-talos-live",
@@ -4145,9 +4188,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:clevercon-in-top-3-for-is-clevercon-live",
@@ -4158,8 +4201,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-rust-sdk-in-top-3-for-tell-me-about-stel",
@@ -4169,9 +4213,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:stellar-mpp-sdk-in-top-3-for-stellar-mpp-sdk-on-",
@@ -4181,9 +4225,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:passkey-kit-in-top-3-for-is-passkey-kit-live",
@@ -4193,9 +4237,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:cards402-in-top-3-for-is-cards402-live",
@@ -4205,9 +4249,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:x402-in-top-3-for-x402-on-stellar",
@@ -4217,9 +4261,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-10T22:46:05.684Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "nightly-drift:status-endpoints-lists-api-hackathons-builds",
@@ -4307,9 +4351,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-13T07:14:54.914Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-23T06:15:03.243Z"
+		"evidenceAt": "2026-08-24T06:36:48.680Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-gap-compare-hackathons",
@@ -4436,9 +4480,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-13T07:14:54.914Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-23T06:15:03.243Z"
+		"evidenceAt": "2026-08-24T06:36:48.680Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-sdk-repos-discovery",
@@ -4474,9 +4518,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-14T07:10:16.228Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-23T06:15:03.243Z"
+		"evidenceAt": "2026-08-24T06:36:48.680Z"
 	},
 	{
 		"id": "nightly-drift:status-endpoints-lists-api-vet-idea",
@@ -4681,9 +4725,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-23T06:15:03.243Z"
+		"evidenceAt": "2026-08-24T06:36:48.680Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-leaderboard-open-issues",
@@ -4693,9 +4737,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-23T06:15:03.243Z"
+		"evidenceAt": "2026-08-24T06:36:48.680Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-soroban-auth-audit-live",
@@ -4718,9 +4762,9 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-d-demand:for-yield",
@@ -4730,9 +4774,9 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-d-demand:vayyl",
@@ -4743,8 +4787,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:tessel",
@@ -4755,8 +4800,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:crdt",
@@ -4766,9 +4812,9 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-d-demand:etesia",
@@ -4779,8 +4825,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:xland",
@@ -4791,8 +4838,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:octopos",
@@ -4803,8 +4851,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:bullet",
@@ -4815,8 +4864,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:paiflow",
@@ -4827,8 +4877,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:oppia",
@@ -4839,8 +4890,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-d-demand:isidoslive",
@@ -4851,8 +4903,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:deb-in-top-3-for-tell-me-about-deb",
@@ -4862,9 +4915,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:davidmaronio-stellarpay402-in-top-5-for-its-own-",
@@ -4875,8 +4928,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:winsznx-routedock-in-top-5-for-its-own-symbol-in",
@@ -4886,9 +4940,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:xycloo-rs-zephyr-toolkit-in-top-5-for-its-own-sy",
@@ -4898,9 +4952,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:trustless-work-trustlesswork-smart-contract-stel",
@@ -4910,9 +4964,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "engine-a-recall:pulsefy-lumenpulse-in-top-5-for-its-own-symbol-i",
@@ -4923,8 +4977,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-23T06:15:10.758Z",
-		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-16T09:33:15Z",
+		"clearedAt": "2026-08-24T06:36:57.254Z"
 	},
 	{
 		"id": "engine-a-recall:creit-tech-sorobanhub-app-in-top-5-for-its-own-s",
@@ -4934,9 +4989,9 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-23T06:15:10.758Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
 		"status": "open",
-		"evidenceAt": "2026-08-16T09:33:15Z"
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	},
 	{
 		"id": "nightly-drift:status-endpoints-lists-api-hackathon-brief",
@@ -5002,5 +5057,341 @@
 		"status": "cleared",
 		"evidenceAt": "2026-08-21T06:06:02.894Z",
 		"clearedAt": "2026-08-22T06:14:23.892Z"
+	},
+	{
+		"id": "engine-d-demand:tempa",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "tempa",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:planbok",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "planbok",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:e-fectivo",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "e-fectivo",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:what-disbursement-or-payout-providers-can-i-inte",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "what disbursement or payout providers can i integrate on stellar?",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:vigente",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "vigente",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:cointracker",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "cointracker",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:vigente-protocol",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "vigente protocol",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:alypay",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "alypay",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:gnb-coin",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "gnb coin",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:pollar",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "pollar",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:stellar8004",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "stellar8004",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:forepay",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "forepay",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:we-re-following-up-on-the-anchor-matching-you-di",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "we're following up on the anchor matching you did for basilic (b2b aggregator, non-vasp, licensed pa",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:malaysia",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "malaysia",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:thailand",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "thailand",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:instawards",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "instawards",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:relacionamento",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "relacionamento",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:namoro",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "namoro",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:casamento",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "casamento",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:casal",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "casal",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:fiance",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "fiance",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:breakup",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "breakup",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:romantic",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "romantic",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:dating",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "dating",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:marriage",
+		"source": "engine-d-demand",
+		"surface": "retrieval",
+		"probe": "marriage",
+		"failureMode": "demand-miss",
+		"severity": "high",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-d-demand:commitment",
+		"source": "engine-d-demand",
+		"surface": "directory",
+		"probe": "commitment",
+		"failureMode": "coverage-gap",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-a-recall:gecko-fuzz-in-top-3-for-is-gecko-fuzz-live",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "gecko-fuzz in top-3 for 'is Gecko Fuzz live'",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
+	},
+	{
+		"id": "engine-a-recall:honey-coin-in-top-3-for-is-honey-coin-live",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "honey-coin in top-3 for 'is Honey Coin live'",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-24T06:36:57.254Z",
+		"lastSeen": "2026-08-24T06:36:57.254Z",
+		"status": "open",
+		"evidenceAt": "2026-08-23T09:34:23Z"
 	}
 ]

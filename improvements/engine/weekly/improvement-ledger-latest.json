@@ -1,25 +1,25 @@
 {
-	"generatedAt": "2026-08-23T06:15:10.759Z",
-	"total": 409,
-	"open": 290,
-	"closed": 119,
+	"generatedAt": "2026-08-24T06:36:57.256Z",
+	"total": 437,
+	"open": 264,
+	"closed": 173,
 	"verified": 7,
-	"cleared": 112,
-	"closingRate": 0.29,
-	"oldestOpenDays": 31,
+	"cleared": 166,
+	"closingRate": 0.4,
+	"oldestOpenDays": 32,
 	"inWave": 0,
-	"highOpen": 2,
+	"highOpen": 14,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 246,
-			"total": 287
+			"open": 228,
+			"total": 303
 		},
 		{
 			"surface": "directory",
-			"open": 23,
-			"total": 42
+			"open": 15,
+			"total": 54
 		},
 		{
 			"surface": "consumer",
@@ -52,70 +52,70 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 31
+			"days": 32
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 31
+			"days": 32
 		}
 	],
 	"topOpen": [
 		{
-			"id": "engine-d-demand:hummingbot",
+			"id": "engine-d-demand:planbok",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "hummingbot",
+			"probe": "planbok",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:sidereal",
+			"id": "engine-d-demand:e-fectivo",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "sidereal",
+			"probe": "e-fectivo",
 			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:idos-in-top-3-for-is-idos-live",
+			"id": "engine-d-demand:vigente",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "idos in top-3 for 'is idOS live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "vigente",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:nownodes-in-top-3-for-is-nownodes-live",
+			"id": "engine-d-demand:vigente-protocol",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "nownodes in top-3 for 'is NOWNodes live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "vigente protocol",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:lightecho-in-top-3-for-is-lightecho-live",
+			"id": "engine-d-demand:alypay",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "lightecho in top-3 for 'is Lightecho live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "alypay",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:infstones-in-top-3-for-is-infstones-live",
+			"id": "engine-d-demand:relacionamento",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "infstones in top-3 for 'is InfStones live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "relacionamento",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:gatewayfm-in-top-3-for-is-gateway-fm-live",
+			"id": "engine-d-demand:namoro",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "gatewayfm in top-3 for 'is Gateway.fm live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "namoro",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:liquify-in-top-3-for-is-liquify-live",
+			"id": "engine-d-demand:casamento",
 			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "liquify in top-3 for 'is Liquify live'",
-			"severity": "medium"
+			"source": "engine-d-demand",
+			"probe": "casamento",
+			"severity": "high"
 		}
 	]
 }
