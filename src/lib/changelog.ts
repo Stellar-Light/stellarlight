@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-24",
+		surfaces: ["api-client"],
+		version: "api-client@1.9.0",
+		type: "added",
+		summary:
+			"api-client reaches full spec coverage: 17 missing operations added (was 18 of 35).",
+		detail:
+			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
+	},
+	{
 		date: "2026-08-23",
 		surfaces: ["api"],
 		type: "changed",
