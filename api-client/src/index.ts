@@ -219,6 +219,115 @@ export class ScoutClient {
 
 	/* ── transport ──────────────────────────────────────────────────── */
 
+
+	/** Stellar stablecoins ranked by USD market cap (not raw supply). */
+	getStablecoins(
+		params: { sort?: string; peg?: string; limit?: number } = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/stablecoins", params);
+	}
+
+	/** Vet a build idea — competitors, maturity, prior art, gap, funding in one call. */
+	vetIdea(params: { q: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/vet-idea", params);
+	}
+
+	/** SCF pitch prep — live round, funded peers, gap, prior art, angles in one call. */
+	scfPitch(params: { q: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/scf-pitch", params);
+	}
+
+	/** Hackathon brief — vet + starter repos with trust + live contracts + funding. */
+	hackathonBrief(params: { q: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/hackathon-brief", params);
+	}
+
+	/** Search what was BUILT at Stellar hackathons (prior-art over prototypes). */
+	searchHackathonBuilds(
+		params: { q?: string; winnersOnly?: boolean; track?: string; limit?: number } = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/hackathons/builds", params);
+	}
+
+	/** Enumerable registry of Stellar security-audit reports. */
+	listAudits(
+		params: {
+			project?: string;
+			auditor?: string;
+			q?: string;
+			since?: string;
+			limit?: number;
+			offset?: number;
+		} = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/audits", params);
+	}
+
+	/** Evidence-gated registry of verified mainnet Soroban contracts. */
+	listContracts(
+		params: { q?: string; domain?: string; limit?: number; offset?: number } = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/contracts", params);
+	}
+
+	/** Trust report — the code-truth composite for one repo (owner/name). */
+	getRepoTrust(params: { repo: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/repos/trust", params);
+	}
+
+	/** Resolve a historical project name to what it is now. */
+	resolveProject(params: { q: string }): Promise<Record<string, unknown>> {
+		return this.get("/api/projects/resolve", params);
+	}
+
+	/** SDF team / people index. */
+	getPeople(
+		params: { q?: string; section?: string } = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/people", params);
+	}
+
+	/** One partner's full profile by slug. */
+	getPartner(slug: string): Promise<Record<string, unknown>> {
+		return this.get(`/api/partners/${encodeURIComponent(slug)}`);
+	}
+
+	/** AI-rank partners against a plain-language need. */
+	matchPartners(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+		return this.request("/api/partners/match", { method: "POST", body });
+	}
+
+	/** Conversational partner concierge (find OR get listed). */
+	partnerAssistant(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+		return this.request("/api/partners/assistant", { method: "POST", body });
+	}
+
+	/** AI onboarding helpers: interview chat + profile extraction. */
+	partnerOnboard(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+		return this.request("/api/partners/onboard", { method: "POST", body });
+	}
+
+	/** Submit a new-partner listing (or claim an existing one). */
+	submitPartnerListing(
+		body: Record<string, unknown>,
+	): Promise<Record<string, unknown>> {
+		return this.request("/api/partners/submit-listing", { method: "POST", body });
+	}
+
+	/** Change feed: which rows moved since a given time (drift watching). `since` is required. */
+	getChanges(params: {
+		since: string;
+		surfaces?: string;
+		limit?: number;
+	}): Promise<Record<string, unknown>> {
+		return this.get("/api/changes", params);
+	}
+
+	/** The feedback request schema (discovery for submitFeedback). */
+	getFeedbackSchema(): Promise<Record<string, unknown>> {
+		return this.get("/api/feedback");
+	}
+
 	private get<T>(path: string, params?: Record<string, unknown>): Promise<T> {
 		return this.request<T>(path, { method: "GET", params });
 	}

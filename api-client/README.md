@@ -63,9 +63,30 @@ const research = await scout.searchResearch({
 | `getClusters(params)` | `GET /api/clusters` |
 | `analyzeEcosystem(params)` | `GET /api/analyze` |
 | `getLeaderboard(params)` | `GET /api/leaderboard` |
+| `explainRepo(params)` | `GET /api/repos/explain` |
+| `getRepoTrust(params)` | `GET /api/repos/trust` |
+| `resolveProject(params)` | `GET /api/projects/resolve` |
+| `getStablecoins(params)` | `GET /api/stablecoins` |
+| `listAudits(params)` | `GET /api/audits` |
+| `listContracts(params)` | `GET /api/contracts` |
+| `vetIdea(params)` | `GET /api/vet-idea` |
+| `scfPitch(params)` | `GET /api/scf-pitch` |
+| `hackathonBrief(params)` | `GET /api/hackathon-brief` |
+| `searchHackathonBuilds(params)` | `GET /api/hackathons/builds` |
+| `getPeople(params)` | `GET /api/people` |
+| `getPartner(slug)` | `GET /api/partners/{slug}` |
+| `matchPartners(body)` | `POST /api/partners/match` |
+| `partnerAssistant(body)` | `POST /api/partners/assistant` |
+| `partnerOnboard(body)` | `POST /api/partners/onboard` |
+| `submitPartnerListing(body)` | `POST /api/partners/submit-listing` |
+| `getChangelog(params)` | `GET /api/changelog` |
+| `getChanges(params)` | `GET /api/changes` |
+| `getFeedbackSchema()` | `GET /api/feedback` |
 | `submitFeedback(body)` | `POST /api/feedback` |
 
-All endpoints are public, read-only (except feedback), no auth, edge-cached.
+Full coverage of the live OpenAPI spec (35 operations). All endpoints are
+public and read-only except feedback and the partner POST flows; no auth,
+edge-cached.
 
 ## Options
 
