@@ -2292,7 +2292,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                        };
+                        hackathons?: {
+                            slug?: string;
+                            name?: string;
+                            status?: string;
+                            startDate?: string | null;
+                            endDate?: string | null;
+                            externalUrl?: string | null;
+                            source?: string;
+                        }[];
+                        /** @description What differs across the compared events. */
+                        deltas?: {
+                            notes?: string[];
+                        };
+                    };
                 };
             };
         };
@@ -2321,7 +2340,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                        };
+                        builds?: {
+                            name?: string;
+                            description?: string | null;
+                            url?: string | null;
+                            demoUrl?: string | null;
+                            githubUrl?: string | null;
+                            hackathon?: string;
+                            hackathonSlug?: string;
+                            track?: string | null;
+                            placement?: string | null;
+                            award?: string | null;
+                            /** @description Placed in the event; absence of a win is not a quality judgement. */
+                            isWinner?: boolean;
+                            votes?: number | null;
+                            endedAt?: string | null;
+                        }[];
+                    };
                 };
             };
         };
@@ -2477,7 +2518,23 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                        };
+                        partner?: {
+                            slug?: string;
+                            name?: string;
+                            partnerType?: string;
+                            tagline?: string | null;
+                            description?: string | null;
+                            logoUrl?: string | null;
+                            websiteUrl?: string | null;
+                            services?: string[];
+                        };
+                    };
                 };
             };
             /** @description Partner not found or not published */
@@ -2513,7 +2570,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            model?: string;
+                            /** @description The denominator behind the matches. */
+                            candidatesConsidered?: number;
+                            note?: string;
+                        };
+                        need?: string;
+                        matches?: {
+                            /** @description The matched partner row. */
+                            partner?: Record<string, never>;
+                            /** @description Relevance of this partner to the need. */
+                            score?: number;
+                            /** @description Why it matched — safe to surface. */
+                            reason?: string;
+                        }[];
+                        summary?: string | null;
+                    };
                 };
             };
             /** @description Rate limited */
