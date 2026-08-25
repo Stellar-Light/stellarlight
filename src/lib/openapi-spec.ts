@@ -212,6 +212,25 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									required: ["found", "query", "note"],
 									properties: {
+										meta: {
+											type: "object",
+											description:
+												"Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it.",
+											properties: {
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												searched: {
+													type: "integer",
+													description:
+														"How many project records were searched \u2014 the denominator behind a miss.",
+												},
+												methodology: {
+													type: "string",
+													description:
+														"Match order and what a miss does and does not claim. Safe to surface to a user.",
+												},
+											},
+										},
 										query: { type: "string" },
 										found: {
 											type: "boolean",
@@ -230,12 +249,32 @@ export const spec: OpenAPISpec = {
 											nullable: true,
 											description:
 												"The record the query names, which may itself be superseded.",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												status: {
+													type: "string",
+													description:
+														"Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis \u2014 a label alone is not proof.",
+												},
+											},
 										},
 										current: {
 											type: "object",
 											nullable: true,
 											description:
 												"Where to look now. Identical to subject when nothing moved.",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												status: { type: "string" },
+												url: {
+													type: "string",
+													format: "uri",
+													description:
+														"Canonical project page for the CURRENT record.",
+												},
+											},
 										},
 										superseded: { type: "boolean" },
 										evidence: {
@@ -243,6 +282,32 @@ export const spec: OpenAPISpec = {
 											nullable: true,
 											description:
 												"Dated basis for the status. `unsourced: true` means we assert it with no citable source \u2014 our unverified record, not an established fact about a named company.",
+											properties: {
+												statusAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"When the status was OBSERVED, not when the record changed.",
+												},
+												statusBasis: {
+													type: "string",
+													nullable: true,
+													description:
+														"How the status was established (e.g. human-verified, site-liveness, source-inherited). site-liveness means only that a page answered.",
+												},
+												statusSourceUrl: {
+													type: "string",
+													nullable: true,
+													description:
+														"Citable source for the status, when one exists.",
+												},
+												unsourced: {
+													type: "boolean",
+													description:
+														"true = asserted with NO citable source. Do not report it as an established fact about a named company.",
+												},
+											},
 										},
 										note: {
 											type: "string",
