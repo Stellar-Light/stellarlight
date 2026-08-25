@@ -162,3 +162,46 @@ describe("vet-idea vertical path ranks by relevance, not the alphabet", () => {
 		expect(freighter).toBeGreaterThan(airgap);
 	});
 });
+
+/**
+ * Most rows inside a mapped vertical score identically — "wallet" matches
+ * every wallet — so the tie-break IS the answer. It used to be the alphabet,
+ * which returned albedo, beans, bitget-wallet, coca, cypher for "a
+ * non-custodial wallet for Stellar". prominence is the curated "canonical pick
+ * for its category" signal (Freighter = 90).
+ */
+describe("vet-idea tie-break is prominence, not the alphabet", () => {
+	type Doc = { slug: string; name: string; __rel: number; prominence?: number };
+	const audited = new Set<string>();
+	const order = (docs: Doc[]) =>
+		[...docs]
+			.sort((a, b) => {
+				const ar = a.__rel ?? 0;
+				const br = b.__rel ?? 0;
+				const ap = Number(a.prominence ?? 0);
+				const bp = Number(b.prominence ?? 0);
+				const aa = audited.has(a.slug) ? 0 : 1;
+				const bb = audited.has(b.slug) ? 0 : 1;
+				return br - ar || bp - ap || aa - bb || a.name.localeCompare(b.name);
+			})
+			.map((d) => d.slug);
+
+	it("equal relevance: the canonical pick leads, not the alphabet", () => {
+		expect(
+			order([
+				{ slug: "albedo", name: "Albedo", __rel: 2, prominence: 50 },
+				{ slug: "freighter", name: "Freighter", __rel: 2, prominence: 90 },
+				{ slug: "beans", name: "Beans", __rel: 2, prominence: 0 },
+			]),
+		).toEqual(["freighter", "albedo", "beans"]);
+	});
+
+	it("relevance still outranks prominence", () => {
+		expect(
+			order([
+				{ slug: "freighter", name: "Freighter", __rel: 1, prominence: 90 },
+				{ slug: "niche", name: "Niche", __rel: 3, prominence: 0 },
+			]),
+		).toEqual(["niche", "freighter"]);
+	});
+});
