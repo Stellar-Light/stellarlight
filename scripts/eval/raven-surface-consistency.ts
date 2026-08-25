@@ -232,22 +232,32 @@ for (const { c, r, err } of rows) {
 	}
 	// The failure we care about: one side answers, the other says nothing.
 	// Both-zero is agreement (an honest "we hold nothing" on both lanes).
-	// Most pairs fail when one answers and the other does not. The two
-	// enum-coverage cases instead fail when any member is unreachable, which
-	// a zero-vs-nonzero test would miss entirely.
+	// Three failure shapes, because one test cannot see all of them:
+	//  - countPair: an advertised member is unreachable (enum coverage).
+	//  - overlapPair: both sides answer but name DIFFERENT things. This shape
+	//    got past the first version of this guard — vet-idea returned 8 rows
+	//    and the directory 10, so zero-vs-nonzero was satisfied while NONE of
+	//    the actual perps venues appeared in the answer.
+	//  - default: one side answers, the other says nothing.
 	const countPair =
 		c.key === "gaps-axis-vs-type-counts" ||
 		c.key === "typed-rows-are-reachable";
+	const overlapPair = c.a.startsWith("vetIdea");
+	const overlap = r.aSample.filter((x) => r.bSample.includes(x)).length;
 	const disagree = countPair
 		? r.aCount !== r.bCount
-		: (r.aCount === 0) !== (r.bCount === 0);
+		: overlapPair
+			? r.aCount > 0 && r.bCount > 0 && overlap === 0
+			: (r.aCount === 0) !== (r.bCount === 0);
 	if (disagree) disagreements++;
 	console.log(`\n  ${disagree ? "DISAGREE" : "ok      "} ${c.key}   "${c.q}"`);
 	console.log(`         ${c.a}: ${r.aCount}  ${JSON.stringify(r.aSample)}`);
 	console.log(`         ${c.b}: ${r.bCount}  ${JSON.stringify(r.bSample)}`);
 	if (disagree)
 		console.log(
-			`         ^ one surface answered and the other returned none — an agent asking this gets a different answer depending on which op Raven routes to.`,
+			overlapPair && r.aCount > 0 && r.bCount > 0
+				? `         ^ both surfaces answered but share NO rows — an agent gets a different set of competitors depending on which op Raven routes to.`
+				: `         ^ one surface answered and the other returned none — an agent asking this gets a different answer depending on which op Raven routes to.`,
 		);
 }
 console.log(`\n${"=".repeat(72)}`);
