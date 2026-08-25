@@ -1857,6 +1857,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @description Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it. */
+                        meta?: {
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description How many project records were searched — the denominator behind a miss. */
+                            searched?: number;
+                            /** @description Match order and what a miss does and does not claim. Safe to surface to a user. */
+                            methodology?: string;
+                        };
                         query: string;
                         /** @description false = the name is not tracked in this directory. NOT a claim it never existed or is defunct. */
                         found: boolean;
@@ -1866,12 +1877,38 @@ export interface operations {
                          */
                         matchedOn?: "slug" | "canonical-slug" | "alias" | "name" | "repo" | null;
                         /** @description The record the query names, which may itself be superseded. */
-                        subject?: Record<string, never> | null;
+                        subject?: {
+                            slug?: string;
+                            name?: string;
+                            /** @description Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis — a label alone is not proof. */
+                            status?: string;
+                        } | null;
                         /** @description Where to look now. Identical to subject when nothing moved. */
-                        current?: Record<string, never> | null;
+                        current?: {
+                            slug?: string;
+                            name?: string;
+                            status?: string;
+                            /**
+                             * Format: uri
+                             * @description Canonical project page for the CURRENT record.
+                             */
+                            url?: string;
+                        } | null;
                         superseded?: boolean;
                         /** @description Dated basis for the status. `unsourced: true` means we assert it with no citable source — our unverified record, not an established fact about a named company. */
-                        evidence?: Record<string, never> | null;
+                        evidence?: {
+                            /**
+                             * Format: date-time
+                             * @description When the status was OBSERVED, not when the record changed.
+                             */
+                            statusAsOf?: string | null;
+                            /** @description How the status was established (e.g. human-verified, site-liveness, source-inherited). site-liveness means only that a page answered. */
+                            statusBasis?: string | null;
+                            /** @description Citable source for the status, when one exists. */
+                            statusSourceUrl?: string | null;
+                            /** @description true = asserted with NO citable source. Do not report it as an established fact about a named company. */
+                            unsourced?: boolean;
+                        } | null;
                         /** @description Plain-words statement of what was resolved and what it does not claim. */
                         note: string;
                     };

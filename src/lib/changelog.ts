@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
+			"resolveProject's nested objects are typed, so a model can project them (openapi@1.8.88). subject, current and evidence declared only `type: object` with no properties, and the live `meta` envelope was not declared at all — Raven kept the operation UNEXPOSED because the model-facing contract never named the fields a caller must read.",
+		detail:
+			"An operation nobody can safely project is an operation nobody can use. subject (slug/name/status), current (slug/name/status/url) and evidence (statusAsOf/statusBasis/statusSourceUrl/unsourced) now declare their properties, each carrying what the value MEANS rather than just its type — statusAsOf is when the status was observed, statusBasis says how it was established, and unsourced: true marks a claim with no citable source that must not be reported as established fact. The meta envelope (source, generatedAt, searched, methodology) is declared too; `searched` is the denominator behind a miss. The API reference also gains `repo` in the matchedOn vocabulary, which OpenAPI already allowed but the pinned reference omitted. Additive only: no field removed, no behaviour changed.",
+	},
+	{
+		date: "2026-08-25",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
 			"searchRepos and getPartners now say when their rows did NOT match your query (openapi@1.8.87). Both used to answer a query that matched nothing with plausible near-matches and no marker, so an agent reported ranked neighbours as findings — searchProjects already solved this with matchMode, and these now follow it.",
 		detail:
 			'Measured through the live Raven gateway: the query "zzqqxx nonexistent protocol 9999" returned a real repo from searchRepos and five partners from getPartners, with nothing in either response indicating the rows were filler. searchRepos gains meta.matchMode (strict | partial | weak | all | none) + matchModeLabel, derived from how many query terms actually hit the page being served; `weak` states in words that the rows are ranked neighbours and NOT matches, and `none` (search failed) is now distinguishable from a genuine empty result, so a failure can never read as proof of absence. getPartners gains meta.matchMode (scored | weak) — scorePartners deliberately falls back to fresh/accepting partners when a query yields no signal, which is a fine ranking choice and a misleading answer unless labelled. Additive only: no field is removed and no existing caller breaks. A new eval (raven-honest-absence) asks four surfaces an unmatched query through Raven and fails any that returns rows without admitting it.',
