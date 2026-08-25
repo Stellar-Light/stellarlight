@@ -87,3 +87,46 @@ describe("vet-idea competitor consistency with the directory (sls-073)", () => {
 		expect(missed.length).toBe(rows.length);
 	});
 });
+
+/**
+ * sls-073, second half. Making the fallback non-empty was not enough: the
+ * displayed slice was still sorted audited-first, so asking for competitors to
+ * a perpetuals protocol returned audited NON-perps projects (soroswap, equitx)
+ * while the two real perps venues — higher-scoring but unaudited — fell outside
+ * the 8-row window. Relevance has to lead; an audit is a quality signal about a
+ * competitor, not what makes something a competitor.
+ */
+describe("vet-idea competitor ordering (sls-073, ranking half)", () => {
+	type Doc = { slug: string; name: string; __rel: number };
+	const audited = new Set(["soroswap"]);
+	const order = (docs: Doc[]) =>
+		[...docs]
+			.sort((a, b) => {
+				const ar = a.__rel ?? 0;
+				const br = b.__rel ?? 0;
+				const aa = audited.has(a.slug) ? 0 : 1;
+				const bb = audited.has(b.slug) ? 0 : 1;
+				return br - ar || aa - bb || a.name.localeCompare(b.name);
+			})
+			.map((d) => d.slug);
+
+	it("a more relevant unaudited row outranks a less relevant audited one", () => {
+		// Real scores from the shared matcher for the perps query.
+		expect(
+			order([
+				{ slug: "soroswap", name: "Soroswap", __rel: 0 },
+				{ slug: "zenex", name: "Zenex", __rel: 2 },
+				{ slug: "noether", name: "Noether", __rel: 1 },
+			]),
+		).toEqual(["zenex", "noether", "soroswap"]);
+	});
+
+	it("audit still breaks a tie between equally relevant rows", () => {
+		expect(
+			order([
+				{ slug: "aaa-unaudited", name: "AAA", __rel: 2 },
+				{ slug: "soroswap", name: "Soroswap", __rel: 2 },
+			]),
+		).toEqual(["soroswap", "aaa-unaudited"]);
+	});
+});

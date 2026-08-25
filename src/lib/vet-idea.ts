@@ -183,10 +183,14 @@ export async function buildVetIdea(
 		const qTokens = tokenize(q);
 		if (qTokens.length) {
 			projDocs = projDocs
-				.map((p) => ({ p, score: scoreTokens(buildHaystack(p), qTokens) }))
-				.filter((x) => x.score > 0)
-				.sort((a, b) => b.score - a.score)
-				.map((x) => x.p);
+				.map((p) => {
+					// Stash relevance on the doc so the display sort below can put
+					// it FIRST — see the sort comment.
+					p.__rel = scoreTokens(buildHaystack(p), qTokens);
+					return p;
+				})
+				.filter((p) => (p.__rel ?? 0) > 0)
+				.sort((a, b) => (b.__rel ?? 0) - (a.__rel ?? 0));
 		}
 	}
 	// Maturity from verified evidence: audits joined over the FULL matched
@@ -206,11 +210,23 @@ export async function buildVetIdea(
 		for (const a of ares.docs as any[]) auditedSlugs.add(String(a.projectSlug));
 	}
 	const auditedProjects = auditedSlugs.size;
-	// Audited projects lead the displayed slice; the rest alphabetical.
+	// RELEVANCE leads, then audited, then alphabetical.
+	//
+	// Audited-first alone produced a confidently wrong answer: asked for
+	// competitors to a perpetuals protocol it returned audited projects that
+	// are not perps (soroswap, equitx…) while the two real perps venues —
+	// which score higher on the shared matcher but carry no audit — fell
+	// outside the 8-row slice. "Who already does this?" is a relevance
+	// question; an audit is a quality signal about a competitor, not a reason
+	// to call something a competitor. Audit still breaks ties, so among
+	// equally-relevant rows the audited one leads.
 	projDocs.sort((a, b) => {
+		const ar = (a.__rel ?? 0) as number;
+		const br = (b.__rel ?? 0) as number;
 		const aa = auditedSlugs.has(String(a.slug)) ? 0 : 1;
 		const bb = auditedSlugs.has(String(b.slug)) ? 0 : 1;
 		return (
+			br - ar ||
 			aa - bb ||
 			String(a.name ?? a.slug).localeCompare(String(b.name ?? b.slug))
 		);
