@@ -2606,7 +2606,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Human-readable reason, safe to show. */
+                        error?: string;
+                        /** @description Always true here — the feature is off, not the request wrong. */
+                        unavailable?: boolean;
+                    };
                 };
             };
         };
@@ -2637,7 +2642,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description The assistant's next message, plain text. */
+                        reply?: string;
+                        /** @description Partners referenced in the reply — present only when the turn actually grounded on directory rows. */
+                        matches?: Record<string, never>[];
+                        /** @description What the assistant judged the caller is trying to do. */
+                        intent?: string | null;
+                        /** @description Whether the caller is eligible to submit a listing from here. */
+                        canList?: boolean;
+                    };
                 };
             };
             /** @description Rate limited */
@@ -2653,7 +2667,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Human-readable reason, safe to show. */
+                        error?: string;
+                        /** @description Always true here — the feature is off, not the request wrong. */
+                        unavailable?: boolean;
+                    };
                 };
             };
         };
@@ -2685,7 +2704,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description mode=chat: the next assistant turn. */
+                        reply?: string | null;
+                        /** @description mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific. */
+                        profile?: Record<string, never> | null;
+                    };
                 };
             };
             /** @description Rate limited */
@@ -2701,7 +2725,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Human-readable reason, safe to show. */
+                        error?: string;
+                        /** @description Always true here — the feature is off, not the request wrong. */
+                        unavailable?: boolean;
+                    };
                 };
             };
         };
@@ -2734,7 +2763,14 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        ok?: boolean;
+                        /**
+                         * @description draft = a new listing; claim = claiming an existing one.
+                         * @enum {string}
+                         */
+                        mode?: "draft" | "claim";
+                    };
                 };
             };
             /** @description Missing/invalid orgName or contactEmail */
@@ -3209,7 +3245,52 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description The filters actually applied — echoed so a caller can tell a narrow query from an empty corpus. */
+                            filters?: {
+                                project?: string | null;
+                                auditor?: string | null;
+                                q?: string | null;
+                                since?: string | null;
+                                limit?: number;
+                                offset?: number;
+                            };
+                            /** @description matched is the denominator behind returned; total is the whole registry. */
+                            counts?: {
+                                total?: number;
+                                matched?: number;
+                                returned?: number;
+                            };
+                            note?: string;
+                        };
+                        audits?: {
+                            reportId?: number;
+                            title?: string;
+                            reportUrl?: string;
+                            auditor?: string;
+                            protocol?: string;
+                            /** @description Directory project this report is linked to, when the link is hand-verified. */
+                            projectSlug?: string | null;
+                            projectName?: string | null;
+                            /** @description How the project link was established — provenance, not a guess. */
+                            linkBasis?: string | null;
+                            publishedAt?: string | null;
+                            /** @description Where the date came from; absent means we do not know it. */
+                            dateBasis?: string | null;
+                            observedAt?: string | null;
+                            /** @description Null means findings were not extractable from this report, NOT that it found nothing. */
+                            findingsTotal?: number | null;
+                            /** @description Per-severity counts when extraction succeeded. An absent severity means zero of that severity were reported. */
+                            severityCounts?: {
+                                [key: string]: number;
+                            };
+                            engagementId?: string | null;
+                        }[];
+                    };
                 };
             };
         };
@@ -3319,7 +3400,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description Who runs this skill's upstream. */
+                            operator?: string;
+                        };
+                        skill?: {
+                            slug?: string;
+                            name?: string;
+                            description?: string | null;
+                            /** @description skill-md | mcp-server | sdk | cli | agent-kit | tool */
+                            kind?: string;
+                            /** @description The command to install it. */
+                            install?: string | null;
+                            installAlt?: string | null;
+                            homepage?: string | null;
+                            repository?: string | null;
+                            docs?: string | null;
+                            featured?: boolean;
+                            /** @description Agent hosts known to run it. */
+                            compatibility?: string[];
+                            /** @description Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill. */
+                            content?: string | null;
+                        };
+                    };
                 };
             };
             /** @description Skill not found */
@@ -3576,7 +3683,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                        };
+                        schema?: {
+                            method?: string;
+                            contentType?: string;
+                            /** @description Field-by-field description of the POST body, including the allowed kind values. */
+                            body?: Record<string, never>;
+                            /** @description A ready-to-send example body. */
+                            example?: Record<string, never>;
+                            /** @description An example of the vote-shaped variant. */
+                            voteExample?: Record<string, never>;
+                            /** @description The limit in words, so a caller can pace itself. */
+                            rateLimit?: string;
+                        };
+                    };
                 };
             };
         };
