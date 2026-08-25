@@ -43,7 +43,17 @@ type Golden = {
 	mode: "research" | "projects" | "repos";
 	question: string;
 	category?: string;
-	expect: { answerRegex?: string[]; liveSource?: boolean };
+	/** some questions pin the corpus (e.g. source=cap) and their own page size */
+	source?: string;
+	limit?: number;
+	expect: {
+		answerRegex?: string[];
+		liveSource?: boolean;
+		/** the named doc must be rank 1 — an exact identifier is a retrieval KEY */
+		top1UrlIncludes?: string;
+		/** no URL may fill two slots of the page */
+		uniqueUrls?: boolean;
+	};
 };
 const all = (
 	JSON.parse(
@@ -51,8 +61,20 @@ const all = (
 	) as { questions: Golden[] }
 ).questions;
 // liveSource questions are explicitly not answerable from the corpus.
+//
+// Everything else must be MEASURED or COUNTED, never silently dropped. The
+// filter used to require answerRegex, which quietly excluded the four
+// url-graded questions — and those are the exact-identifier retrieval cases
+// (CAP-0038, CAP-0021, CAP-0058, Asset Clawback, all from sls-019). The guard
+// reported "0 unmeasured" while not measuring the very class that keeps
+// breaking: sls-074 was the same defect wearing an audit identifier.
+const gradable = (q: Golden) =>
+	(q.expect?.answerRegex?.length ?? 0) > 0 ||
+	!!q.expect?.top1UrlIncludes ||
+	!!q.expect?.uniqueUrls;
+const skipped = all.filter((q) => !q.expect?.liveSource && !gradable(q));
 const QS = all
-	.filter((q) => !q.expect?.liveSource && (q.expect?.answerRegex?.length ?? 0))
+	.filter((q) => !q.expect?.liveSource && gradable(q))
 	.slice(0, MAX);
 
 let rpcId = 0;
@@ -112,19 +134,31 @@ function batchCode(batch: Golden[]): string {
 		op: OP[q.mode],
 		q: q.question,
 		rx: q.expect.answerRegex ?? [],
+		top1: q.expect.top1UrlIncludes ?? null,
+		uniq: !!q.expect.uniqueUrls,
+		src: q.source ?? null,
+		lim: q.limit ?? 8,
 	}));
 	return `
 const spec = ${JSON.stringify(spec)};
 const out = {};
 for (const s of spec) {
   try {
-    const r = await scout[s.op]({ q: s.q, limit: 8 });
+    const r = await scout[s.op]({ q: s.q, limit: s.lim, ...(s.src ? { source: s.src } : {}) });
     if (!r.ok) { out[s.id] = { err: String(r.error?.kind ?? "err"), rows: 0, pass: false }; continue; }
     const d = r.data ?? {};
     const arr = d.projects ?? d.repos ?? d.results ?? d.research ?? [];
     const hay = JSON.stringify(arr).toLowerCase();
     // EVERY answerRegex must surface, same rule as the direct harness.
-    const pass = s.rx.every(p => new RegExp(p, "i").test(hay));
+    let pass = s.rx.every(p => new RegExp(p, "i").test(hay));
+    // Exact-identifier questions grade on RANK and DEDUP, not on text: the
+    // named doc must be rank 1 and no URL may fill two slots.
+    const urlOf = (x) => String(x.url ?? x.sourceUrl ?? x.link ?? "").toLowerCase();
+    if (pass && s.top1) pass = urlOf(arr[0] ?? {}).includes(s.top1.toLowerCase());
+    if (pass && s.uniq) {
+      const us = arr.map(urlOf).filter(Boolean);
+      pass = new Set(us).size === us.length;
+    }
     out[s.id] = { rows: arr.length, pass };
   } catch (e) { out[s.id] = { err: String(e).slice(0,60), rows: 0, pass: false }; }
 }
@@ -132,13 +166,19 @@ return out;`;
 }
 
 /** Same grading, straight at our HTTP API — the control. */
-async function direct(q: Golden): Promise<{ rows: number; pass: boolean }> {
+async function direct(
+	q: Golden,
+): Promise<{ rows: number; pass: boolean; err?: string }> {
+	// The control must ask the SAME question the sandbox does — same corpus
+	// filter, same page size — or a rank/dedup assertion compares two pages.
+	const lim = q.limit ?? 8;
+	const src = q.source ? `&source=${encodeURIComponent(q.source)}` : "";
 	const path =
 		q.mode === "research"
-			? `/api/research?q=${encodeURIComponent(q.question)}&limit=8`
+			? `/api/research?q=${encodeURIComponent(q.question)}&limit=${lim}${src}`
 			: q.mode === "projects"
-				? `/api/projects/search?q=${encodeURIComponent(q.question)}&limit=8`
-				: `/api/repos/search?q=${encodeURIComponent(q.question)}&limit=8`;
+				? `/api/projects/search?q=${encodeURIComponent(q.question)}&limit=${lim}`
+				: `/api/repos/search?q=${encodeURIComponent(q.question)}&limit=${lim}`;
 	try {
 		const r = await fetch(`${BASE}${path}`, {
 			signal: AbortSignal.timeout(30_000),
@@ -150,14 +190,31 @@ async function direct(q: Golden): Promise<{ rows: number; pass: boolean }> {
 			j.research ??
 			[]) as unknown[];
 		const hay = JSON.stringify(arr).toLowerCase();
-		return {
-			rows: arr.length,
-			pass: (q.expect.answerRegex ?? []).every((p) =>
-				new RegExp(p, "i").test(hay),
-			),
-		};
-	} catch {
-		return { rows: 0, pass: false };
+		let pass = (q.expect.answerRegex ?? []).every((p) =>
+			new RegExp(p, "i").test(hay),
+		);
+		const urlOf = (x: unknown) =>
+			String(
+				(x as Record<string, unknown>)?.url ??
+					(x as Record<string, unknown>)?.sourceUrl ??
+					(x as Record<string, unknown>)?.link ??
+					"",
+			).toLowerCase();
+		if (pass && q.expect.top1UrlIncludes)
+			pass = urlOf(arr[0]).includes(q.expect.top1UrlIncludes.toLowerCase());
+		if (pass && q.expect.uniqueUrls) {
+			const us = arr.map(urlOf).filter(Boolean);
+			pass = new Set(us).size === us.length;
+		}
+		return { rows: arr.length, pass };
+	} catch (e) {
+		// NEVER grade a transport failure as a failed question. This used to
+		// `return { pass: false }` on any throw, so a 30s timeout was reported
+		// as a data gap: three identical runs scored 37, 46 and 51 pass-both
+		// before this was fixed. A flaky guard that gates gets ignored, and an
+		// error reported as a finding is the same lie as a finding reported as
+		// a pass — we do not KNOW the answer, so say that.
+		return { rows: 0, pass: false, err: (e as Error).message.slice(0, 60) };
 	}
 }
 
@@ -180,10 +237,29 @@ for (let i = 0; i < QS.length; i += BATCH) {
 	}
 }
 
+// One retry before believing a transport error — most of the observed variance
+// was a single slow request, not a real difference.
+async function directWithRetry(q: Golden) {
+	const first = await direct(q);
+	if (!first.err) return first;
+	await new Promise((r) => setTimeout(r, 1500));
+	return direct(q);
+}
+
 const rows = await Promise.all(
-	QS.map(async (q) => ({ q, d: await direct(q), r: viaRaven[q.id] })),
+	QS.map(async (q) => ({ q, d: await directWithRetry(q), r: viaRaven[q.id] })),
 );
 
+// A question we cannot grade must be VISIBLE. Silently narrowing the set is
+// how "0 unmeasured" coexisted with four unmeasured questions.
+if (skipped.length) {
+	console.log(
+		`\n  NOT GRADED (${skipped.length}): ${skipped.map((q) => q.id).join(", ")}`,
+	);
+	console.log(
+		"  Add answerRegex, top1UrlIncludes, or uniqueUrls to grade them.",
+	);
+}
 console.log("\nGolden questions: direct HTTP vs through Raven");
 console.log("=".repeat(78));
 const regressions: typeof rows = [];
@@ -191,9 +267,21 @@ let bothPass = 0;
 let bothFail = 0;
 let ravenOnly = 0;
 let unmeasured = 0;
+let transportErrors = 0;
 for (const row of rows) {
 	if (!row.r) {
 		unmeasured++;
+		continue;
+	}
+	// A question whose CONTROL could not be fetched is unmeasured, not failed.
+	// Grading a timeout as a data gap is what made this guard swing between 37
+	// and 51 pass-both across identical runs.
+	if (row.d.err) {
+		transportErrors++;
+		unmeasured++;
+		console.log(
+			`   ! ${row.id ?? row.q.id}: control unreachable (${row.d.err}) — not graded`,
+		);
 		continue;
 	}
 	if (row.d.pass && row.r.pass) bothPass++;
@@ -222,7 +310,7 @@ if (bothFailRows.length) {
 }
 console.log(`\n${"=".repeat(78)}`);
 console.log(
-	`  ${bothPass} pass both · ${regressions.length} RAVEN-ONLY FAILURES · ${bothFail} fail both (data gaps) · ${ravenOnly} pass only via Raven · ${unmeasured} unmeasured`,
+	`  ${bothPass} pass both · ${regressions.length} RAVEN-ONLY FAILURES · ${bothFail} fail both (data gaps) · ${ravenOnly} pass only via Raven · ${unmeasured} unmeasured${transportErrors ? ` (${transportErrors} control unreachable)` : ""}`,
 );
 if (batchErrors)
 	console.error(
