@@ -126,9 +126,7 @@ export async function GET(req: NextRequest) {
 			.split(",")
 			.map((s) => s.trim())
 			.filter(Boolean);
-		const bad = asked.find(
-			(s) => !(SURFACES as readonly string[]).includes(s),
-		);
+		const bad = asked.find((s) => !(SURFACES as readonly string[]).includes(s));
 		if (bad !== undefined) {
 			return NextResponse.json(
 				{ error: `invalid surface '${bad}'`, validSurfaces: SURFACES },

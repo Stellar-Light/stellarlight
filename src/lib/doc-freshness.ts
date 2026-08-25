@@ -42,14 +42,16 @@ export function docKindOf(input: {
 	if (SPEC_SOURCES.has(src)) return "spec";
 	if (DATA_SOURCES.has(src)) return "data";
 	if (ARTICLE_SOURCES.has(src)) return "article";
-	if (GUIDE_HINT.test(`${input.title ?? ""} ${input.url ?? ""}`)) return "guide";
+	if (GUIDE_HINT.test(`${input.title ?? ""} ${input.url ?? ""}`))
+		return "guide";
 	// developers-docs / repo-docs / scf-handbook default: instructional
 	return "guide";
 }
 
 /** Deprecated-idiom markers that outrank any pinned version: content teaching
  * these is stale regardless of the SDK line it names. */
-const DEPRECATED_IDIOMS = /wasm32-unknown-unknown|soroban-cli\s+(?:install|deploy)|--wasm\s+target\/wasm32-unknown-unknown/i;
+const DEPRECATED_IDIOMS =
+	/wasm32-unknown-unknown|soroban-cli\s+(?:install|deploy)|--wasm\s+target\/wasm32-unknown-unknown/i;
 const CURRENT_IDIOMS = /wasm32v1-none/i;
 const SDK_PIN =
 	/soroban-sdk\s*=\s*"?~?\^?(\d+)|@stellar\/stellar-sdk@[~^]?(\d+)|soroban_sdk\s+(\d+)\./i;

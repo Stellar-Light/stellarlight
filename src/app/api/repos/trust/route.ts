@@ -17,11 +17,11 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { getAppUrl } from "@/lib/utils/app-url";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { buildTrustReport } from "@/lib/trust-report";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +65,8 @@ export async function GET(req: NextRequest) {
 	if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
 		return NextResponse.json(
 			{
-				error: "Pass ?repo=owner/name (e.g. reflector-network/reflector-contract).",
+				error:
+					"Pass ?repo=owner/name (e.g. reflector-network/reflector-contract).",
 			},
 			{ status: 400 },
 		);

@@ -10,8 +10,8 @@
  */
 
 import { createHash } from "node:crypto";
-import { docKindOf, docVersionStatus } from "./doc-freshness";
 import type { Payload } from "payload";
+import { docKindOf, docVersionStatus } from "./doc-freshness";
 import { embedBatch } from "./embed";
 
 export const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok

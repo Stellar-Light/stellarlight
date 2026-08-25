@@ -48,7 +48,6 @@ const VALID_DIMENSIONS = [
 	"toolchain",
 ] as const;
 
-
 // One place for the funding methodology label — it is served in the response
 // AND stamped on every persisted snapshot (sls-044), so the two can't drift.
 const FUNDING_METHODOLOGY_VERSION = "funding-v2 (2026-07-05)";
@@ -646,7 +645,8 @@ export async function GET(req: NextRequest) {
 			}> = [];
 			// biome-ignore lint/suspicious/noExplicitAny: select-narrowed docs
 			for (const r of scanned.docs as any[]) {
-				const st = typeof r.versionStatus === "string" ? r.versionStatus : "unknown";
+				const st =
+					typeof r.versionStatus === "string" ? r.versionStatus : "unknown";
 				byStatus[st] = (byStatus[st] ?? 0) + 1;
 				if (typeof r.ciPresent === "boolean") {
 					practiceKnown += 1;

@@ -20,11 +20,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { buildContractsRegistry } from "@/lib/contracts-registry";
-import { getAppUrl } from "@/lib/utils/app-url";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
 
@@ -102,7 +102,12 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/contracts`,
 				generatedAt: new Date().toISOString(),
-				filters: { q: q || null, domain: domain || null, limit: rowLimit, offset },
+				filters: {
+					q: q || null,
+					domain: domain || null,
+					limit: rowLimit,
+					offset,
+				},
 				counts: { returned: contracts.length, total },
 				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet or on-chain enrichment attributed real activity to. Absence is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
 			},

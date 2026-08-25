@@ -137,7 +137,8 @@ export function computeEcosystemGaps(
 	}
 
 	const byType = [...tally.values()].sort(
-		(a, b) => a.total - b.total || a.live - b.live || a.type.localeCompare(b.type),
+		(a, b) =>
+			a.total - b.total || a.live - b.live || a.type.localeCompare(b.type),
 	);
 
 	// Signals restrict to the canonical verticals — a project's stray/legacy

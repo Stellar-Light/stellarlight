@@ -193,7 +193,8 @@ export async function GET(req: NextRequest) {
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,
 						scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
-						successorRepo: typeof d.successorRepo === "string" ? d.successorRepo : null,
+						successorRepo:
+							typeof d.successorRepo === "string" ? d.successorRepo : null,
 						symbols: Array.isArray(d.codeSymbols)
 							? (d.codeSymbols as unknown[])
 									.filter((s): s is string => typeof s === "string")

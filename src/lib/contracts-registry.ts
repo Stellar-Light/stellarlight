@@ -79,7 +79,11 @@ export async function buildContractsRegistry(
 	] as string[];
 	const auditsByProject = new Map<
 		string,
-		{ count: number; latestAuditor: string | null; latestPublishedAt: string | null }
+		{
+			count: number;
+			latestAuditor: string | null;
+			latestPublishedAt: string | null;
+		}
 	>();
 	if (slugs.length) {
 		const audits = await payload.find({
@@ -109,19 +113,26 @@ export async function buildContractsRegistry(
 
 	let rows: ContractRow[] = docs.map((d) => {
 		const iface: string[] = Array.isArray(d.contractInterface)
-			? d.contractInterface.filter((s: unknown): s is string => typeof s === "string")
+			? d.contractInterface.filter(
+					(s: unknown): s is string => typeof s === "string",
+				)
 			: [];
 		const ciu = d.codeInUse;
 		return {
 			contractId: d.mainnetContractId ? String(d.mainnetContractId) : null,
 			repo: { fullName: String(d.fullName), url: d.url ? String(d.url) : null },
 			project: d.projectSlug
-				? { slug: String(d.projectSlug), name: d.projectName ? String(d.projectName) : null }
+				? {
+						slug: String(d.projectSlug),
+						name: d.projectName ? String(d.projectName) : null,
+					}
 				: null,
 			stellarProof: d.stellarProof ? String(d.stellarProof) : null,
 			codeDepth: typeof d.codeDepth === "number" ? d.codeDepth : null,
 			codeDomains: Array.isArray(d.codeDomains)
-				? d.codeDomains.filter((s: unknown): s is string => typeof s === "string")
+				? d.codeDomains.filter(
+						(s: unknown): s is string => typeof s === "string",
+					)
 				: [],
 			interfaceSize: iface.length,
 			interfacePreview: iface.slice(0, 5),
@@ -134,7 +145,9 @@ export async function buildContractsRegistry(
 							asOf: String(ciu.asOf),
 						}
 					: null,
-			audits: d.projectSlug ? (auditsByProject.get(String(d.projectSlug)) ?? null) : null,
+			audits: d.projectSlug
+				? (auditsByProject.get(String(d.projectSlug)) ?? null)
+				: null,
 			successorRepo: d.successorRepo ? String(d.successorRepo) : null,
 			scannedAt: d.codeScannedAt ? String(d.codeScannedAt) : null,
 		};

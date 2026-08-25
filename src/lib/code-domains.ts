@@ -33,7 +33,6 @@ export const CODE_DOMAINS = [
 
 export type CodeDomain = (typeof CODE_DOMAINS)[number];
 
-
 /** Contract-interface trait evidence: fn names that identify an on-chain
  * standard's surface. Conservative — one canonical marker per standard. */
 const IFACE_DOMAINS: Array<[fnName: string, domain: CodeDomain]> = [
