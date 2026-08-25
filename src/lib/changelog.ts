@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
+			"Every remaining opaque response schema now declares its shape (openapi@1.8.91). Zero operations left where the contract says only 'object'.",
+		detail:
+			"Completes the sweep started in 1.8.89. listAudits and getSkill were the two that mattered most — both are exposed to agents and both returned an unprojectable blob: listAudits now declares the whole registry row (20 fields, matching live exactly) including findingsTotal's honest null (extraction failed, NOT zero findings) and counts.matched as the denominator behind a narrow query. getSkill declares content's null (the source ships no SKILL.md, which is not absence of the skill). The partner POST paths declare their success shapes and a shared 503 unavailable contract, and getFeedbackSchema declares the self-describing body it hands callers. Shapes captured from live responses or each route's own documented contract, then diffed against live: no undeclared field, no declared-but-absent field.",
+	},
+	{
+		date: "2026-08-25",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
 			"listSkills now honours its q parameter instead of ignoring it (openapi@1.8.90). ?q=oracle used to return all 43 skills, so an agent read an unfiltered catalog as a filtered answer.",
 		detail:
 			"q was in Raven's tool signature but never applied server-side — the silent-filter trap the partners route already guards against. It now matches over name/tagline/description/tags (all terms), is advertised in unknownParamWarning, and is echoed in meta.filters; an unmatched query returns an honest empty list rather than the whole catalog. Found by sweeping every list endpoint for honest-absence, not by a report.",

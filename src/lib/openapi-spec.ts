@@ -2008,7 +2008,26 @@ export const spec: OpenAPISpec = {
 					"503": {
 						description:
 							"AI backend unavailable — fall back to GET /api/partners",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2071,12 +2090,65 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Assistant reply (+ matches when a need was searched)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One assistant turn, plus any partners it grounded the answer in.",
+									properties: {
+										reply: {
+											type: "string",
+											description: "The assistant's next message, plain text.",
+										},
+										matches: {
+											type: "array",
+											description:
+												"Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
+											items: {
+												type: "object",
+												description: "A public partner record.",
+											},
+										},
+										intent: {
+											type: "string",
+											nullable: true,
+											description:
+												"What the assistant judged the caller is trying to do.",
+										},
+										canList: {
+											type: "boolean",
+											description:
+												"Whether the caller is eligible to submit a listing from here.",
+										},
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {
 						description: "AI backend unavailable",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2120,12 +2192,52 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "`{reply}` (chat mode) or `{fields}` (extract mode)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"mode=chat returns the next assistant turn; mode=extract returns structured partner-owned profile fields. The extract schema contains ONLY partner-owned manual fields — a verified/auto field can never be emitted here, and nothing is written by this endpoint.",
+									properties: {
+										reply: {
+											type: "string",
+											nullable: true,
+											description: "mode=chat: the next assistant turn.",
+										},
+										profile: {
+											type: "object",
+											nullable: true,
+											description:
+												"mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific.",
+										},
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {
 						description: "AI backend unavailable",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2165,7 +2277,24 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "`{ok:true, mode:'draft'|'claim'}`",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Submission accepted for review. Admin review is the only gate to publication, so a submission never surfaces publicly on its own.",
+									properties: {
+										ok: { type: "boolean" },
+										mode: {
+											type: "string",
+											enum: ["draft", "claim"],
+											description:
+												"draft = a new listing; claim = claiming an existing one.",
+										},
+									},
+								},
+							},
+						},
 					},
 					"400": {
 						description: "Missing/invalid orgName or contactEmail",
@@ -3147,7 +3276,95 @@ export const spec: OpenAPISpec = {
 					"400": {
 						description:
 							"Unknown parameter or invalid value (params are never silently ignored)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The structured audit registry — one row per published report, so an agent can enumerate and filter audits instead of hoping vector retrieval surfaces the right chunk.",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													description:
+														"The filters actually applied — echoed so a caller can tell a narrow query from an empty corpus.",
+													properties: {
+														project: { type: "string", nullable: true },
+														auditor: { type: "string", nullable: true },
+														q: { type: "string", nullable: true },
+														since: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
+												},
+												counts: {
+													type: "object",
+													description:
+														"matched is the denominator behind returned; total is the whole registry.",
+													properties: {
+														total: { type: "integer" },
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										audits: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													reportId: { type: "integer" },
+													title: { type: "string" },
+													reportUrl: { type: "string" },
+													auditor: { type: "string" },
+													protocol: { type: "string" },
+													projectSlug: {
+														type: "string",
+														nullable: true,
+														description:
+															"Directory project this report is linked to, when the link is hand-verified.",
+													},
+													projectName: { type: "string", nullable: true },
+													linkBasis: {
+														type: "string",
+														nullable: true,
+														description:
+															"How the project link was established — provenance, not a guess.",
+													},
+													publishedAt: { type: "string", nullable: true },
+													dateBasis: {
+														type: "string",
+														nullable: true,
+														description:
+															"Where the date came from; absent means we do not know it.",
+													},
+													observedAt: { type: "string", nullable: true },
+													findingsTotal: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Null means findings were not extractable from this report, NOT that it found nothing.",
+													},
+													severityCounts: {
+														type: "object",
+														description:
+															"Per-severity counts when extraction succeeded. An absent severity means zero of that severity were reported.",
+														additionalProperties: { type: "integer" },
+													},
+													engagementId: { type: "string", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -3582,7 +3799,62 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Skill detail with content",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One skill's full record, including SKILL.md content for sources that ship one (metadata-only otherwise).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												operator: {
+													type: "string",
+													description: "Who runs this skill's upstream.",
+												},
+											},
+										},
+										skill: {
+											type: "object",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												description: { type: "string", nullable: true },
+												kind: {
+													type: "string",
+													description:
+														"skill-md | mcp-server | sdk | cli | agent-kit | tool",
+												},
+												install: {
+													type: "string",
+													nullable: true,
+													description: "The command to install it.",
+												},
+												installAlt: { type: "string", nullable: true },
+												homepage: { type: "string", nullable: true },
+												repository: { type: "string", nullable: true },
+												docs: { type: "string", nullable: true },
+												featured: { type: "boolean" },
+												compatibility: {
+													type: "array",
+													items: { type: "string" },
+													description: "Agent hosts known to run it.",
+												},
+												content: {
+													type: "string",
+													nullable: true,
+													description:
+														"Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					"404": {
 						description: "Skill not found",
@@ -4257,7 +4529,49 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Feedback request schema",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Self-describing contract for POST /api/feedback — GET it to learn the body shape rather than guessing.",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										schema: {
+											type: "object",
+											properties: {
+												method: { type: "string" },
+												contentType: { type: "string" },
+												body: {
+													type: "object",
+													description:
+														"Field-by-field description of the POST body, including the allowed kind values.",
+												},
+												example: {
+													type: "object",
+													description: "A ready-to-send example body.",
+												},
+												voteExample: {
+													type: "object",
+													description: "An example of the vote-shaped variant.",
+												},
+												rateLimit: {
+													type: "string",
+													description:
+														"The limit in words, so a caller can pace itself.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
