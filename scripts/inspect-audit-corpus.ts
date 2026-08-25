@@ -106,7 +106,9 @@ function promoteAuditHeadings(md: string): string {
 		/^# (Executive\s*Summary|Overview|Scope|Methodology|Disclaimer|Introduction|Appendix|Appendices|Conclusion|Summary\s+of\s+Findings|Detailed\s+Findings)\b/gim,
 		/^# (Critical|High|Medium|Low|Informational|Info|Severity)(\s|$)/gim,
 		/^# (\[[A-Z]?\d+\]\s*)/gm,
-		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm,
+		// Must mirror ingest-soroban-security.ts exactly, or the inspector
+		// reports a corpus shape the ingest does not actually produce.
+		/^# ([A-Z]+(?:-[A-Z]{2,}){2,}-\d+\s*)/gm,
 	];
 	for (const re of promoters) md = md.replace(re, "## $1");
 	return md;
