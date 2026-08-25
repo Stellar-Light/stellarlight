@@ -7,6 +7,14 @@
 # agent, invisible to the existing eval.
 #
 # Also runs the two absence/consistency guards, so one job covers the class.
+#
+# GATING: a scheduled run has no `inputs`, so `inputs.gate` was empty and the
+# daily run passed `--gate` to nothing — all three guards printed findings and
+# exited 0. A detector that cannot go red is indistinguishable from a green one.
+# Scheduled runs now always gate. This adds no new flakiness class: a transient
+# Raven/network failure already exits 1 inside every guard ("an unrun probe is a
+# failure, gate or not"), so the only thing newly failing the build is a real
+# finding about OUR data.
 name: raven-eval-parity
 
 on:
@@ -15,10 +23,10 @@ on:
   workflow_dispatch:
     inputs:
       gate:
-        description: "Exit red on any regression."
+        description: "Exit red on any regression. Scheduled runs ALWAYS gate."
         required: false
         type: boolean
-        default: false
+        default: true
 
 permissions: { contents: read }
 
@@ -37,16 +45,16 @@ jobs:
       - name: Golden questions — direct vs through Raven
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/eval/raven-golden-parity.ts ${{ inputs.gate && '--gate' || '' }}
+        run: pnpm exec tsx scripts/eval/raven-golden-parity.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
 
       - name: Cross-surface consistency (guard A)
         if: always()
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/eval/raven-surface-consistency.ts ${{ inputs.gate && '--gate' || '' }}
+        run: pnpm exec tsx scripts/eval/raven-surface-consistency.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
 
       - name: Honest absence (guard B)
         if: always()
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/eval/raven-honest-absence.ts ${{ inputs.gate && '--gate' || '' }}
+        run: pnpm exec tsx scripts/eval/raven-honest-absence.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
