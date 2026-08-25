@@ -81,10 +81,13 @@ async function main(): Promise<number> {
 				name: d.name ?? null,
 				commits90d: d.activitySignals?.commits90d ?? null,
 			});
-			const existing: string[] = Array.isArray(d.triageTags) ? d.triageTags : [];
+			const existing: string[] = Array.isArray(d.triageTags)
+				? d.triageTags
+				: [];
 			if (existing.length) alreadyTagged += 1;
 			const same =
-				tags.length === existing.length && tags.every((t) => existing.includes(t));
+				tags.length === existing.length &&
+				tags.every((t) => existing.includes(t));
 			if (same) continue;
 			if (tags.length) wouldTag += 1;
 			else cleared += 1;
@@ -127,7 +130,9 @@ async function main(): Promise<number> {
 				const got: string[] = Array.isArray(check?.triageTags)
 					? check.triageTags
 					: [];
-				if (!(got.length === tags.length && tags.every((t) => got.includes(t)))) {
+				if (
+					!(got.length === tags.length && tags.every((t) => got.includes(t)))
+				) {
 					mismatches += 1;
 					console.error(`  ✗ read-back mismatch ${d.fullName}`);
 				}
@@ -152,7 +157,9 @@ async function main(): Promise<number> {
 	if (seen > 5000 && wouldTag === 0 && cleared === 0 && alreadyTagged === 0) {
 		// A corpus this size with ZERO triage changes means derivation broke,
 		// not that 12k repos are all pristine.
-		console.error("RED: zero-work sweep over a corpus known to contain dead tail");
+		console.error(
+			"RED: zero-work sweep over a corpus known to contain dead tail",
+		);
 		return 1;
 	}
 	return 0;

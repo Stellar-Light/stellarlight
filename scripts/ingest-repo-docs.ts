@@ -68,7 +68,8 @@ const SOURCES: Array<{ repo: string; ref: string; include: RegExp }> = [
 	},
 ];
 
-const EXCLUDE = /(changelog|license|contributing|code_of_conduct|security)\.md$/i;
+const EXCLUDE =
+	/(changelog|license|contributing|code_of_conduct|security)\.md$/i;
 const MAX_FILES_PER_REPO = 12;
 const MAX_CHARS_PER_CHUNK = 4000;
 
@@ -173,9 +174,7 @@ async function listDocPaths(src: (typeof SOURCES)[number]): Promise<string[]> {
 	return (tree.tree ?? [])
 		.filter(
 			(e) =>
-				e.type === "blob" &&
-				src.include.test(e.path) &&
-				!EXCLUDE.test(e.path),
+				e.type === "blob" && src.include.test(e.path) && !EXCLUDE.test(e.path),
 		)
 		.map((e) => e.path)
 		.slice(0, MAX_FILES_PER_REPO);
@@ -198,7 +197,10 @@ async function run() {
 		: null;
 
 	// Existing repo-docs chunks for hash-idempotency.
-	const existing = new Map<string, Map<number, { id: string; contentHash: string }>>();
+	const existing = new Map<
+		string,
+		Map<number, { id: string; contentHash: string }>
+	>();
 	if (payload) {
 		const res = await payload.find({
 			collection: "research-docs",
@@ -242,7 +244,13 @@ async function run() {
 					const url = `https://github.com/${src.repo}/blob/${src.ref}/${path}`;
 					const title = `${repoShort}: ${extractTitle(md, path)}`;
 					const tags = ["repo-docs", src.repo.toLowerCase()];
-					for (const chunk of chunkMarkdown(md, parentDocId, title, url, tags)) {
+					for (const chunk of chunkMarkdown(
+						md,
+						parentDocId,
+						title,
+						url,
+						tags,
+					)) {
 						const prev = existing.get(chunk.parentDocId)?.get(chunk.chunkIndex);
 						if (prev && prev.contentHash === chunk.contentHash) {
 							unchanged++;

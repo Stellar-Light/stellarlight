@@ -26,7 +26,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
-import { isAllowlisted } from "../../src/lib/repo-allowlist";
+import { deriveCodeDomains } from "../../src/lib/code-domains";
 import { computeFarmScore } from "../../src/lib/code-signals";
 import {
 	detectSdkCapabilities,
@@ -35,9 +35,9 @@ import {
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
 import { computeJsDepth } from "../../src/lib/js-depth";
-import { computeLangDepth } from "../../src/lib/lang-depth";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
-import { deriveCodeDomains } from "../../src/lib/code-domains";
+import { computeLangDepth } from "../../src/lib/lang-depth";
+import { isAllowlisted } from "../../src/lib/repo-allowlist";
 import { extractStellarDeps } from "../../src/lib/stellar-deps";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
@@ -138,7 +138,9 @@ async function main() {
 				`pool-aware budget: core remaining=${remaining ?? "?"} → budget=${CALL_BUDGET} (reserve 400)`,
 			);
 		} catch {
-			console.log(`rate_limit probe failed — keeping fallback budget=${CALL_BUDGET}`);
+			console.log(
+				`rate_limit probe failed — keeping fallback budget=${CALL_BUDGET}`,
+			);
 		}
 	}
 	console.log(
@@ -368,7 +370,11 @@ async function main() {
 			// 2026-08-15), and the unreadable-blob guard held rs-soroban-sdk
 			// in error since 2026-07-11. Pin proof by language and let depth
 			// compute from whatever WAS readable.
-			if (r && isAllowlisted(full) && (r.proof === "none" || r.outcome !== "ok")) {
+			if (
+				r &&
+				isAllowlisted(full) &&
+				(r.proof === "none" || r.outcome !== "ok")
+			) {
 				const lang = String(doc.primaryLanguage ?? "").toLowerCase();
 				r.proof =
 					lang === "rust"
@@ -452,8 +458,7 @@ async function main() {
 											.filter((l) => l.trim().length > 0).length,
 									0,
 								);
-							if (ld.langSloc > rsSloc)
-								depth = Math.max(depth, ld.langDepth);
+							if (ld.langSloc > rsSloc) depth = Math.max(depth, ld.langDepth);
 						}
 					}
 				}

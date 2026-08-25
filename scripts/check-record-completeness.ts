@@ -40,9 +40,12 @@ const KNOWN_EMPTY_ROUND_AWARDS: Record<string, string> = {
 	// 2026-08-12: merkl/trak/trace/deb/usdc REMOVED — their awarded flags were
 	// matcher poison (another project's page), cleared by fix-scf-rounds
 	// POISON_CLEARS; they are no longer awarded rows, so no allowlist needed.
-	trustswap: "no verifiable official submission record for r36 (sls-063 recheck 2026-08-11)",
-	liqvidxyz: "no verifiable official submission record for r37 (sls-063 recheck 2026-08-11)",
-	fastbuka: "no verifiable official submission record for r9 (sls-063 recheck 2026-08-11)",
+	trustswap:
+		"no verifiable official submission record for r36 (sls-063 recheck 2026-08-11)",
+	liqvidxyz:
+		"no verifiable official submission record for r37 (sls-063 recheck 2026-08-11)",
+	fastbuka:
+		"no verifiable official submission record for r9 (sls-063 recheck 2026-08-11)",
 	pen: "no verifiable official submission record for r43 (sls-063 recheck 2026-08-11)",
 };
 
@@ -120,10 +123,15 @@ async function main() {
 			failures += dangling.length;
 			for (const d of dangling) console.error(`✗ S0 dangling reference: ${d}`);
 			failRows.push(
-				...dangling.map((d) => ({ probe: "S0 referential integrity", note: d })),
+				...dangling.map((d) => ({
+					probe: "S0 referential integrity",
+					note: d,
+				})),
 			);
 		} else {
-			console.log(`✓ S0 referential integrity: ${all.length} projects + ${audits.length} audits, 0 dangling references`);
+			console.log(
+				`✓ S0 referential integrity: ${all.length} projects + ${audits.length} audits, 0 dangling references`,
+			);
 		}
 	}
 
@@ -149,7 +157,9 @@ async function main() {
 		`S1 scfRoundAwards: ${awarded.length} awarded · ${withRounds.length} with rounds · ${withRounds.length - residuals.length - excused.length} populated · ${excused.length} documented-empty · ${residuals.length} RESIDUAL`,
 	);
 	for (const p of residuals) {
-		console.log(`  ✗ ${p.slug} rounds=[${p.scfAwardedRounds.join(",")}] roundAwards empty`);
+		console.log(
+			`  ✗ ${p.slug} rounds=[${p.scfAwardedRounds.join(",")}] roundAwards empty`,
+		);
 		failRows.push({
 			probe: `scfRoundAwards empty: ${p.slug}`,
 			note: `rounds=[${p.scfAwardedRounds.join(",")}]`,
@@ -189,7 +199,8 @@ async function main() {
 	);
 	if (blank) {
 		failures++;
-		for (const slug of blanks) failRows.push({ probe: `statusBasis blank: ${slug}` });
+		for (const slug of blanks)
+			failRows.push({ probe: `statusBasis blank: ${slug}` });
 		if (blank > blanks.length)
 			failRows.push({
 				probe: "statusBasis blanks beyond sample",

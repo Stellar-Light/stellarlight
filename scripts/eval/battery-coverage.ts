@@ -35,8 +35,13 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * (the 492-case sweep exceeded our own 60/min limiter on first run). */
 async function probeJson(url: string): Promise<Record<string, unknown> | null> {
 	for (let attempt = 0; attempt < 2; attempt++) {
-		const res = await fetch(url, { headers: { Accept: "application/json", ...UA } });
-		const body = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+		const res = await fetch(url, {
+			headers: { Accept: "application/json", ...UA },
+		});
+		const body = (await res.json().catch(() => null)) as Record<
+			string,
+			unknown
+		> | null;
 		const limited =
 			res.status === 429 || /rate limit/i.test(String(body?.error ?? ""));
 		if (!limited) return body;
@@ -65,10 +70,14 @@ type Route =
  * service's assignment. */
 function routeOf(surfaces: string[]): Route {
 	const s = surfaces.join(" ");
-	if (s.includes("scout.searchResearch")) return { kind: "research", basis: "confidence" };
-	if (s.includes("scout.searchProjects")) return { kind: "projects", basis: "confidence" };
-	if (s.includes("scout.searchRepos")) return { kind: "repos", basis: "lexical-anchor@top3" };
-	if (s.includes("scout.getHackathons")) return { kind: "hackathons", basis: "presence" };
+	if (s.includes("scout.searchResearch"))
+		return { kind: "research", basis: "confidence" };
+	if (s.includes("scout.searchProjects"))
+		return { kind: "projects", basis: "confidence" };
+	if (s.includes("scout.searchRepos"))
+		return { kind: "repos", basis: "lexical-anchor@top3" };
+	if (s.includes("scout.getHackathons"))
+		return { kind: "hackathons", basis: "presence" };
 	if (/scout\./.test(s)) return { kind: "skip-other" }; // other scout ops: no comparable q-probe yet
 	// skills.lumenloop.* is THEIR skill namespace (e.g. stellar-ecosystem-digest)
 	// — grading our corpus on another service's skill conduct is a category
@@ -80,10 +89,44 @@ function routeOf(surfaces: string[]): Route {
 	return { kind: "skip-other" };
 }
 
-const STOP = new Set(["what", "which", "does", "how", "the", "this", "that", "with", "from", "have", "stellar", "soroban", "contract", "network"]);
+const STOP = new Set([
+	"what",
+	"which",
+	"does",
+	"how",
+	"the",
+	"this",
+	"that",
+	"with",
+	"from",
+	"have",
+	"stellar",
+	"soroban",
+	"contract",
+	"network",
+]);
 /** Load-bearing short tech tokens the 4-char floor would drop. */
-const SHORT_TECH = new Set(["sdk", "zk", "cli", "rpc", "sep", "cap", "amm", "dex", "nft", "kyc", "tvl"]);
-function anchorScore(question: string, rows: Array<{ fullName?: string; name?: string; description?: string | null }>): number {
+const SHORT_TECH = new Set([
+	"sdk",
+	"zk",
+	"cli",
+	"rpc",
+	"sep",
+	"cap",
+	"amm",
+	"dex",
+	"nft",
+	"kyc",
+	"tvl",
+]);
+function anchorScore(
+	question: string,
+	rows: Array<{
+		fullName?: string;
+		name?: string;
+		description?: string | null;
+	}>,
+): number {
 	const toks = (question.toLowerCase().match(/[a-z0-9-]{2,}/g) ?? []).filter(
 		(t) => t.length >= 4 || SHORT_TECH.has(t),
 	);
@@ -102,7 +145,9 @@ async function listCasePaths(): Promise<string[]> {
 		{ headers: { Accept: "application/vnd.github+json", ...UA } },
 	);
 	if (!res.ok) throw new Error(`tree fetch ${res.status}`);
-	const tree = (await res.json()) as { tree?: Array<{ path: string; type: string }> };
+	const tree = (await res.json()) as {
+		tree?: Array<{ path: string; type: string }>;
+	};
 	return (tree.tree ?? [])
 		.filter(
 			(e) =>
@@ -117,9 +162,14 @@ async function main() {
 	console.log(`Battery coverage — ${RAVEN} → ${BASE}\n`);
 	const paths = await listCasePaths();
 	if (paths.length === 0) {
-		console.error("✗ 0 battery cases found — their repo moved or the layout changed (outage, not a clean pass)");
+		console.error(
+			"✗ 0 battery cases found — their repo moved or the layout changed (outage, not a clean pass)",
+		);
 		writeNightlyFindings("battery-coverage", [
-			{ probe: "battery sweep outage", note: "0 cases found at the known path" },
+			{
+				probe: "battery sweep outage",
+				note: "0 cases found at the known path",
+			},
 		]);
 		process.exit(1);
 	}
@@ -162,21 +212,27 @@ async function main() {
 			let score = 0;
 			let best = "none";
 			if (route.kind === "research") {
-				const body = (await probeJson(`${BASE}/api/research?q=${qq}&limit=3`)) as {
+				const body = (await probeJson(
+					`${BASE}/api/research?q=${qq}&limit=3`,
+				)) as {
 					results?: Array<{ confidence?: { score?: number }; url?: string }>;
 				} | null;
 				if (!body) throw new Error("rate-limited after retry");
 				score = body.results?.[0]?.confidence?.score ?? 0;
 				best = body.results?.[0]?.url ?? "none";
 			} else if (route.kind === "projects") {
-				const body = (await probeJson(`${BASE}/api/projects/search?q=${qq}&limit=3`)) as {
+				const body = (await probeJson(
+					`${BASE}/api/projects/search?q=${qq}&limit=3`,
+				)) as {
 					projects?: Array<{ confidence?: { score?: number }; slug?: string }>;
 				} | null;
 				if (!body) throw new Error("rate-limited after retry");
 				score = body.projects?.[0]?.confidence?.score ?? 0;
 				best = body.projects?.[0]?.slug ?? "none";
 			} else if (route.kind === "repos") {
-				const body = (await probeJson(`${BASE}/api/repos/search?q=${qq}&limit=3`)) as {
+				const body = (await probeJson(
+					`${BASE}/api/repos/search?q=${qq}&limit=3`,
+				)) as {
 					repos?: Array<{ fullName?: string; description?: string | null }>;
 				} | null;
 				if (!body) throw new Error("rate-limited after retry");
@@ -200,7 +256,10 @@ async function main() {
 				if (score < 0.75 && rows.length) {
 					const ql = question.toLowerCase();
 					const named = rows.some((h) =>
-						(h.name ?? "").toLowerCase().split(/[:\s]+/).filter((w) => w.length >= 4 && !STOP.has(w))
+						(h.name ?? "")
+							.toLowerCase()
+							.split(/[:\s]+/)
+							.filter((w) => w.length >= 4 && !STOP.has(w))
 							.some((w) => ql.includes(w)),
 					);
 					if (named) score = 0.75;
@@ -210,10 +269,14 @@ async function main() {
 			const basis = "basis" in route ? route.basis : "";
 			if (score >= WEAK_FLOOR) {
 				covered++;
-				console.log(`  ✓ ${String(id).padEnd(48)} ${score.toFixed(2)} [${cat} · ${route.kind}]`);
+				console.log(
+					`  ✓ ${String(id).padEnd(48)} ${score.toFixed(2)} [${cat} · ${route.kind}]`,
+				);
 			} else {
 				weak++;
-				console.log(`  △ ${String(id).padEnd(48)} ${score.toFixed(2)} [${cat} · ${route.kind}] — weak`);
+				console.log(
+					`  △ ${String(id).padEnd(48)} ${score.toFixed(2)} [${cat} · ${route.kind}] — weak`,
+				);
 				failures.push({
 					probe: `battery:${id}`,
 					note: `top ${score.toFixed(2)} < ${WEAK_FLOOR} via ${route.kind}/${basis} for "${question.slice(0, 80)}" (${cat}); best: ${best}`,
@@ -222,7 +285,9 @@ async function main() {
 			}
 		} catch (e) {
 			errored++;
-			console.log(`  ✗ ${id} probe error: ${e instanceof Error ? e.message : e}`);
+			console.log(
+				`  ✗ ${id} probe error: ${e instanceof Error ? e.message : e}`,
+			);
 		}
 	}
 

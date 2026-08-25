@@ -33,20 +33,27 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
 import { isAllowlisted } from "../src/lib/repo-allowlist";
 import { repoGrade } from "../src/lib/repo-grade";
+import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const EXECUTE = args.includes("--execute");
 const BACKFILL = args.includes("--backfill-tiers");
 const SYNC_REMOVALS = args.includes("--sync-removals");
-const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 2000);
-const SKIP = Number(args.find((a) => a.startsWith("--skip="))?.split("=")[1] ?? 0);
-const TAXO_DIR = args.find((a) => a.startsWith("--taxonomy-dir="))?.split("=")[1];
+const LIMIT = Number(
+	args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 2000,
+);
+const SKIP = Number(
+	args.find((a) => a.startsWith("--skip="))?.split("=")[1] ?? 0,
+);
+const TAXO_DIR = args
+	.find((a) => a.startsWith("--taxonomy-dir="))
+	?.split("=")[1];
 
 const GH_TOKEN =
-	process.env.GITHUB_TOKEN?.trim() || process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+	process.env.GITHUB_TOKEN?.trim() ||
+	process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
 const VALID_IDENT = /^[A-Za-z0-9_.-]+$/;
 const STALE_MS = 730 * 86_400_000; // ~24 months
 const ACTIVE_MS = 90 * 86_400_000; // removals guard: fresh commits = manual review
@@ -62,12 +69,19 @@ function ecNetStellarList(): { net: string[]; removed: Set<string> } {
 		console.log("Cloning electric-capital/crypto-ecosystems (shallow)…");
 		execFileSync(
 			"git",
-			["clone", "--depth", "1", "https://github.com/electric-capital/crypto-ecosystems.git", dir],
+			[
+				"clone",
+				"--depth",
+				"1",
+				"https://github.com/electric-capital/crypto-ecosystems.git",
+				dir,
+			],
 			{ stdio: "pipe" },
 		);
 	}
 	const migrations = join(dir, "migrations");
-	if (!existsSync(migrations)) throw new Error(`no migrations dir under ${dir}`);
+	if (!existsSync(migrations))
+		throw new Error(`no migrations dir under ${dir}`);
 	const adds = new Set<string>();
 	const rems = new Set<string>();
 	for (const f of readdirSync(migrations)) {
@@ -82,7 +96,9 @@ function ecNetStellarList(): { net: string[]; removed: Set<string> } {
 	}
 	const toFull = (url: string): string | null => {
 		if (!url.startsWith("https://github.com/")) return null;
-		const [owner, name, ...rest] = url.replace("https://github.com/", "").split("/");
+		const [owner, name, ...rest] = url
+			.replace("https://github.com/", "")
+			.split("/");
 		if (!owner || !name || rest.length) return null;
 		if (!VALID_IDENT.test(owner) || !VALID_IDENT.test(name)) return null;
 		return `${owner}/${name}`;
@@ -118,7 +134,11 @@ interface GhRepo {
  * own budget meter so the run can stop BEFORE starving the shared PAT. */
 async function fetchBatch(
 	fulls: string[],
-): Promise<{ repos: Map<string, GhRepo | null>; remaining: number; resetAt: string }> {
+): Promise<{
+	repos: Map<string, GhRepo | null>;
+	remaining: number;
+	resetAt: string;
+}> {
 	const fields = fulls
 		.map((full, i) => {
 			const [owner, name] = full.split("/");
@@ -141,9 +161,15 @@ async function fetchBatch(
 			query: `query {\nrateLimit { remaining resetAt }\n${fields}\n}`,
 		}),
 	});
-	if (!res.ok) throw new Error(`graphql ${res.status}: ${(await res.text()).slice(0, 200)}`);
+	if (!res.ok)
+		throw new Error(
+			`graphql ${res.status}: ${(await res.text()).slice(0, 200)}`,
+		);
 	// biome-ignore lint/suspicious/noExplicitAny: GraphQL response shape
-	const body = (await res.json()) as { data?: Record<string, any>; errors?: unknown[] };
+	const body = (await res.json()) as {
+		data?: Record<string, any>;
+		errors?: unknown[];
+	};
 	const out = new Map<string, GhRepo | null>();
 	fulls.forEach((full, i) => {
 		const r = body.data?.[`r${i}`];
@@ -155,7 +181,9 @@ async function fetchBatch(
 			fullName: r.nameWithOwner,
 			description: r.description ?? null,
 			// biome-ignore lint/suspicious/noExplicitAny: GraphQL response shape
-			topics: (r.repositoryTopics?.nodes ?? []).map((n: any) => n?.topic?.name).filter(Boolean),
+			topics: (r.repositoryTopics?.nodes ?? [])
+				.map((n: any) => n?.topic?.name)
+				.filter(Boolean),
 			primaryLanguage: r.primaryLanguage?.name ?? null,
 			stars: r.stargazerCount ?? 0,
 			openIssues: r.issues?.totalCount ?? 0,
@@ -182,9 +210,11 @@ function tierOf(d: {
 	repoScoreLabel?: string | null;
 }): "quality" | "community" | "archive" {
 	const stale =
-		!d.lastCommitAt || Date.now() - new Date(d.lastCommitAt).getTime() > STALE_MS;
+		!d.lastCommitAt ||
+		Date.now() - new Date(d.lastCommitAt).getTime() > STALE_MS;
 	const archivable = !isAllowlisted(d.fullName);
-	if (archivable && (d.isArchived || (stale && (d.stars ?? 0) < 3))) return "archive";
+	if (archivable && (d.isArchived || (stale && (d.stars ?? 0) < 3)))
+		return "archive";
 	if (d.repoScoreLabel === "high") return "quality";
 	return "community";
 }
@@ -209,12 +239,16 @@ async function main(): Promise<number> {
 	if (!GH_TOKEN) console.log("⚠ No GITHUB_TOKEN — GraphQL will fail. Set it.");
 
 	const { net, removed } = ecNetStellarList();
-	console.log(`EC net Stellar list: ${net.length} repos (${removed.size} removed historically)`);
+	console.log(
+		`EC net Stellar list: ${net.length} repos (${removed.size} removed historically)`,
+	);
 	if (net.length === 0) {
 		// Empty-sweep red: a zero-row net list means the clone or the parser
 		// broke, not that EC delisted the ecosystem (check-record-completeness
 		// discipline).
-		console.error("RED: EC net list is EMPTY — parser or clone failure, refusing to proceed.");
+		console.error(
+			"RED: EC net list is EMPTY — parser or clone failure, refusing to proceed.",
+		);
 		return 1;
 	}
 
@@ -293,7 +327,11 @@ async function main(): Promise<number> {
 				skippedFresh += 1; // another writer already fixed it
 				continue;
 			}
-			await payload.update({ collection: "repos", id: snap.id, data: { tier: t } });
+			await payload.update({
+				collection: "repos",
+				id: snap.id,
+				data: { tier: t },
+			});
 			const check = (await payload.findByID({
 				collection: "repos",
 				id: snap.id,
@@ -301,7 +339,9 @@ async function main(): Promise<number> {
 			})) as unknown as RepoDocLite | null;
 			if (check?.tier !== t) {
 				stats.readbackMismatch += 1;
-				console.error(`  ✗ read-back mismatch (tier) ${snap.fullName}: wrote ${t}, read ${check?.tier}`);
+				console.error(
+					`  ✗ read-back mismatch (tier) ${snap.fullName}: wrote ${t}, read ${check?.tier}`,
+				);
 			} else {
 				backfilled += 1;
 			}
@@ -319,14 +359,16 @@ async function main(): Promise<number> {
 	if (SYNC_REMOVALS) {
 		const netSet = new Set(net.map((f) => f.toLowerCase()));
 		const candidates = [...existing.values()].filter(
-			(d) => d.source === "ec-taxonomy" && !netSet.has(d.fullName.toLowerCase()),
+			(d) =>
+				d.source === "ec-taxonomy" && !netSet.has(d.fullName.toLowerCase()),
 		);
 		let archived = 0;
 		const reviewList: string[] = [];
 		for (const d of candidates) {
 			if (isAllowlisted(d.fullName)) continue;
 			const active =
-				d.lastCommitAt && Date.now() - new Date(d.lastCommitAt).getTime() < ACTIVE_MS;
+				d.lastCommitAt &&
+				Date.now() - new Date(d.lastCommitAt).getTime() < ACTIVE_MS;
 			if (active) {
 				reviewList.push(d.fullName);
 				continue;
@@ -334,7 +376,11 @@ async function main(): Promise<number> {
 			if (d.tier === "archive") continue;
 			archived += 1;
 			if (!EXECUTE) continue;
-			await payload.update({ collection: "repos", id: d.id, data: { tier: "archive" } });
+			await payload.update({
+				collection: "repos",
+				id: d.id,
+				data: { tier: "archive" },
+			});
 			const check = (await payload.findByID({
 				collection: "repos",
 				id: d.id,
@@ -470,8 +516,10 @@ async function main(): Promise<number> {
 			}
 		}
 		if (stats.budgetStopped) break;
-		if ((i / 50) % 10 === 0) console.log(`  …${SKIP + i + batch.length}/${SKIP + slice.length}`);
-		if (i + 50 < slice.length) await new Promise((r) => setTimeout(r, BATCH_PAUSE_MS));
+		if ((i / 50) % 10 === 0)
+			console.log(`  …${SKIP + i + batch.length}/${SKIP + slice.length}`);
+		if (i + 50 < slice.length)
+			await new Promise((r) => setTimeout(r, BATCH_PAUSE_MS));
 	}
 
 	console.log(`\n${EXECUTE ? "Created" : "Would create"}: ${stats.created}`);
@@ -481,22 +529,30 @@ async function main(): Promise<number> {
 	console.log(
 		`  gone: ${stats.gone} | renamed-dupes: ${stats.renamedDupes} | errors: ${stats.errors} | read-back mismatches: ${stats.readbackMismatch}`,
 	);
-	console.log(`  remaining after this run: ${Math.max(0, fresh.length - SKIP - slice.length)}`);
+	console.log(
+		`  remaining after this run: ${Math.max(0, fresh.length - SKIP - slice.length)}`,
+	);
 	if (!EXECUTE) console.log("\nDry run. --execute to write.");
 
 	// Exit code DERIVED from what happened (no unconditional green — the C3
 	// exit-stomp class). Zero-work-red: attempted work but produced nothing.
 	const attempted = slice.length;
 	if (stats.readbackMismatch > 0) {
-		console.error("RED: read-back mismatches — writes are not persisting as sent.");
+		console.error(
+			"RED: read-back mismatches — writes are not persisting as sent.",
+		);
 		return 1;
 	}
 	if (stats.budgetStopped && stats.batchesDone <= 1) {
-		console.error("RED: BUDGET-STOPPED with ≤1 batch done — zero-work run, PAT starved.");
+		console.error(
+			"RED: BUDGET-STOPPED with ≤1 batch done — zero-work run, PAT starved.",
+		);
 		return 1;
 	}
 	if (attempted > 0 && stats.created === 0 && stats.errors > 0) {
-		console.error("RED: attempted a wave but created nothing and saw errors — zero-work run.");
+		console.error(
+			"RED: attempted a wave but created nothing and saw errors — zero-work run.",
+		);
 		return 1;
 	}
 	if (stats.errors > attempted * 0.3) {

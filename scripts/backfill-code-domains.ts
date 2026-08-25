@@ -66,9 +66,7 @@ async function main(): Promise<number> {
 			if (same) continue;
 			changed += 1;
 			for (const x of next) domainCounts.set(x, (domainCounts.get(x) ?? 0) + 1);
-			console.log(
-				`  ${d.fullName}: [${cur.join(",")}] → [${next.join(",")}]`,
-			);
+			console.log(`  ${d.fullName}: [${cur.join(",")}] → [${next.join(",")}]`);
 			if (!EXECUTE) continue;
 			await payload.update({
 				collection: "repos",
@@ -86,7 +84,9 @@ async function main(): Promise<number> {
 				const got: string[] = Array.isArray(check?.codeDomains)
 					? check.codeDomains
 					: [];
-				if (!(got.length === next.length && next.every((x) => got.includes(x)))) {
+				if (
+					!(got.length === next.length && next.every((x) => got.includes(x)))
+				) {
 					mismatches += 1;
 					console.error(`  ✗ read-back mismatch ${d.fullName}`);
 				}
@@ -106,7 +106,9 @@ async function main(): Promise<number> {
 
 	if (mismatches > 0) return 1;
 	if (seen > 1000 && changed === 0 && alreadyLabeled === 0) {
-		console.error("RED: zero domains across a scanned corpus — derivation broke");
+		console.error(
+			"RED: zero domains across a scanned corpus — derivation broke",
+		);
 		return 1;
 	}
 	return 0;

@@ -66,10 +66,15 @@ async function main(): Promise<number> {
 				})),
 			);
 		}
-		const notes = buildKnowledgeNotes(String(d.fullName), slug, auditsByProject, {
-			lastCommitAt: d.lastCommitAt ?? null,
-			codeInUse: d.codeInUse ?? null,
-		});
+		const notes = buildKnowledgeNotes(
+			String(d.fullName),
+			slug,
+			auditsByProject,
+			{
+				lastCommitAt: d.lastCommitAt ?? null,
+				codeInUse: d.codeInUse ?? null,
+			},
+		);
 		const cur = JSON.stringify(
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 			(d.knowledgeNotes ?? []).map((n: any) => n.note),
@@ -79,7 +84,9 @@ async function main(): Promise<number> {
 			same += 1;
 			continue;
 		}
-		console.log(`  ${d.fullName}: ${(d.knowledgeNotes ?? []).length} → ${notes.length} notes`);
+		console.log(
+			`  ${d.fullName}: ${(d.knowledgeNotes ?? []).length} → ${notes.length} notes`,
+		);
 		if (!EXECUTE) continue;
 		await payload.update({
 			collection: "repos",

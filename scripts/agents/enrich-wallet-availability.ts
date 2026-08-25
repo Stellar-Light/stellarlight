@@ -110,13 +110,17 @@ async function main() {
 		try {
 			html = await (
 				await fetch(site, {
-					headers: { "User-Agent": "stellarlight-curator (availability check)" },
+					headers: {
+						"User-Agent": "stellarlight-curator (availability check)",
+					},
 					redirect: "follow",
 					signal: AbortSignal.timeout(15_000),
 				})
 			).text();
 		} catch (e) {
-			console.log(`  skip ${row.slug}: site unreachable (${e instanceof Error ? e.message : e})`);
+			console.log(
+				`  skip ${row.slug}: site unreachable (${e instanceof Error ? e.message : e})`,
+			);
 			continue;
 		}
 		const text = stripHtml(html);
@@ -157,7 +161,9 @@ Reply with ONLY a JSON object: {"entries":[{"platform":"…","storeUrl":"…","n
 			agentNote?: string | null;
 		} = {};
 		try {
-			parsed = JSON.parse(textOut.slice(textOut.indexOf("{"), textOut.lastIndexOf("}") + 1));
+			parsed = JSON.parse(
+				textOut.slice(textOut.indexOf("{"), textOut.lastIndexOf("}") + 1),
+			);
 		} catch {
 			console.log(`  skip ${row.slug}: unparseable agent reply`);
 			continue;
@@ -166,10 +172,19 @@ Reply with ONLY a JSON object: {"entries":[{"platform":"…","storeUrl":"…","n
 		// AND actually appearing in the fetched page (no invented links).
 		const entries = (parsed.entries ?? [])
 			.filter(
-				(e): e is { platform: (typeof PLATFORMS)[number]; storeUrl: string; note?: string } =>
+				(
+					e,
+				): e is {
+					platform: (typeof PLATFORMS)[number];
+					storeUrl: string;
+					note?: string;
+				} =>
 					PLATFORMS.includes(e.platform as never) &&
 					typeof e.storeUrl === "string" &&
-					(html.includes(e.storeUrl) || e.storeUrl === site || `${e.storeUrl}/` === site || e.storeUrl === `${site}/`),
+					(html.includes(e.storeUrl) ||
+						e.storeUrl === site ||
+						`${e.storeUrl}/` === site ||
+						e.storeUrl === `${site}/`),
 			)
 			.map((e) => ({
 				platform: e.platform,
@@ -191,16 +206,23 @@ Reply with ONLY a JSON object: {"entries":[{"platform":"…","storeUrl":"…","n
 			});
 	}
 
-	const out = join(ROOT, `improvements/drafts/wallet-availability-${today}.json`);
+	const out = join(
+		ROOT,
+		`improvements/drafts/wallet-availability-${today}.json`,
+	);
 	mkdirSync(dirname(out), { recursive: true });
 	writeFileSync(
 		out,
 		`${JSON.stringify({ generatedAt: new Date().toISOString(), model: MODEL, drafts }, null, "\t")}\n`,
 	);
-	console.log(`\n${drafts.length} draft(s) → ${out} — review via PR, land via apply-wallet-availability.ts (dry-run default)`);
+	console.log(
+		`\n${drafts.length} draft(s) → ${out} — review via PR, land via apply-wallet-availability.ts (dry-run default)`,
+	);
 }
 
-main().then(() => process.exit(0)).catch((e) => {
-	console.error("Fatal:", e);
-	process.exit(1);
-});
+main()
+	.then(() => process.exit(0))
+	.catch((e) => {
+		console.error("Fatal:", e);
+		process.exit(1);
+	});

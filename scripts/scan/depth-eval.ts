@@ -27,11 +27,11 @@ import {
 	DEEP_FRONTIER,
 	GATE,
 	JS_DEEP,
-	LANG_DEEP,
-	LANG_SHALLOW,
 	JS_DEEP_FRONTIER,
 	JS_GATE,
 	JS_SHALLOW,
+	LANG_DEEP,
+	LANG_SHALLOW,
 	SHALLOW,
 	SHALLOW_FRONTIER,
 } from "./depth-labels";
@@ -303,7 +303,12 @@ async function main() {
 		// labels are intentionally empty until hand-verified — the floor stops
 		// a regression from sinking the verified flagships back toward 0.3.
 		const scoreLang = async (band: string, list: typeof LANG_DEEP) => {
-			const rows: Array<{ fullName: string; band: string; depth: number; why: string }> = [];
+			const rows: Array<{
+				fullName: string;
+				band: string;
+				depth: number;
+				why: string;
+			}> = [];
 			const failed: string[] = [];
 			for (const { fullName, why } of list) {
 				try {

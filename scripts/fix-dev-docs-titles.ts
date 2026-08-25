@@ -68,7 +68,9 @@ function selfCheck() {
 		"Agentic Payments",
 	];
 	// firstGoodHeading skips the junk H1 and returns the first real section.
-	const salvaged = firstGoodHeading("# On this page\n\n## Charging AI agents\n\ntext");
+	const salvaged = firstGoodHeading(
+		"# On this page\n\n## Charging AI agents\n\ntext",
+	);
 	if (salvaged !== "Charging AI agents") {
 		console.error("SELF-CHECK FAILED — salvage:", salvaged);
 		process.exit(1);

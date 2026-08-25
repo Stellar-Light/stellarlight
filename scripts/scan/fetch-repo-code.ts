@@ -393,7 +393,12 @@ export async function fetchRepoCode(
 	const blobs: DepthBlob[] = [];
 	for (const p of sel.cargos)
 		blobs.push({ path: p, text: cargoText.get(p) ?? null });
-	for (const p of [...sel.sources, ...sel.tests, ...sel.jsSources, ...sel.langSources]) {
+	for (const p of [
+		...sel.sources,
+		...sel.tests,
+		...sel.jsSources,
+		...sel.langSources,
+	]) {
 		const sha = shaByPath.get(p);
 		const txt = sha ? await fetchBlob(gh, owner, name, sha) : null;
 		blobs.push({ path: p, text: txt });
