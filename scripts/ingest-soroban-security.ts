@@ -303,7 +303,13 @@ function promoteAuditHeadings(md: string): string {
 		/^# (Executive\s*Summary|Overview|Scope|Methodology|Disclaimer|Introduction|Appendix|Appendices|Conclusion|Summary\s+of\s+Findings|Detailed\s+Findings)\b/gim,
 		/^# (Critical|High|Medium|Low|Informational|Info|Severity)(\s|$)/gim,
 		/^# (\[[A-Z]?\d+\]\s*)/gm, // "# [A1] Foo"
-		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo"
+		// Finding IDs: 1+ leading letters, then 2+ further alpha groups, then
+		// digits. The previous form required exactly THREE groups of 2+ letters,
+		// so every VERIDISE id was missed — "V-SOR-APP-VUL-003" (four groups,
+		// single-letter prefix) and "V-BLND-VUL-001" alike. Their findings never
+		// became their own chunk, so an exact-identifier lookup reported a
+		// confident MISS for a real audit item (stellarlight#1031).
+		/^# ([A-Z]+(?:-[A-Z]{2,}){2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo", "# V-SOR-APP-VUL-003 Foo"
 		/^# (F-\d{4}-\d+\s*)/gm, // Hacken "# F-2026-15609 Foo"
 		/^# ([A-Z]{3}\d{3}\s+)/gm, // Coinspect "# TRI001 Foo"
 	];
