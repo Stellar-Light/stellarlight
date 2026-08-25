@@ -129,16 +129,17 @@ export async function GET(req: NextRequest) {
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
-	const { repos, total, canonical, searched } = await searchRepos(payload, q, {
-		limit,
-		offset,
-		language,
-		minScore,
-		activity,
-		capability,
-		domain,
-		dependsOn,
-	});
+	const { repos, total, canonical, searched, matchMode, matchModeLabel } =
+		await searchRepos(payload, q, {
+			limit,
+			offset,
+			language,
+			minScore,
+			activity,
+			capability,
+			domain,
+			dependsOn,
+		});
 
 	logApiHit({
 		req,
@@ -171,6 +172,10 @@ export async function GET(req: NextRequest) {
 					limit,
 					offset,
 				},
+				// Honest-absence (guard B): say how well this page actually
+				// matched, so ranked neighbours are never read as hits.
+				matchMode,
+				matchModeLabel,
 				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0

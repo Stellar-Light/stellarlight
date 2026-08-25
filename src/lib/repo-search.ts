@@ -90,6 +90,18 @@ interface RepoDoc {
 	} | null;
 }
 
+/** How well the returned page actually matched the query (honest-absence). */
+export type RepoMatchMode = "strict" | "partial" | "weak" | "all" | "none";
+
+export const MATCH_MODE_LABEL: Record<RepoMatchMode, string> = {
+	strict: "every query term matched",
+	partial: "some query terms matched — rows may be adjacent to the intent",
+	// The one that matters: rows exist but nothing the caller asked for hit.
+	weak: "no query term matched — these are ranked neighbours, NOT matches (verify relevance before relying on them; an empty result would have been the honest answer if none are right)",
+	all: "no query supplied — ranked by repo quality",
+	none: "the search failed; this is not evidence of absence",
+};
+
 export interface RepoResult {
 	fullName: string;
 	owner: string | null;
@@ -987,6 +999,9 @@ export async function searchRepos(
 	total: number;
 	canonical: string[];
 	searched: RepoSearchSearched;
+	/** Honest-absence: how well this page actually matched the query. */
+	matchMode: RepoMatchMode;
+	matchModeLabel: string;
 }> {
 	const {
 		limit = 20,
@@ -1003,7 +1018,16 @@ export async function searchRepos(
 		tokens,
 		expandedTerms: [...new Set(tokens.flatMap(termsForToken))].slice(0, 40),
 	};
-	if (!payload) return { repos: [], total: 0, canonical: [], searched };
+	// No DB handle: an infrastructure failure, NOT an absence proof.
+	if (!payload)
+		return {
+			repos: [],
+			total: 0,
+			canonical: [],
+			searched,
+			matchMode: "none" as RepoMatchMode,
+			matchModeLabel: MATCH_MODE_LABEL.none,
+		};
 	try {
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
 		// repos, not the whole collection. It grew past 2,000 docs and pulling
@@ -1536,13 +1560,37 @@ export async function searchRepos(
 								: "none") as RepoResult["stellarEvidence"],
 				codeVerified: codeVerifiedOf(r),
 			}));
+		// Guard B / honest absence: a row that matched NO query token is a
+		// neighbour, not a hit. searchProjects already says so via matchMode +
+		// matchModeLabel; searchRepos returned the same kind of guess unlabelled,
+		// so an agent reported "zzqqxx nonexistent protocol" results as findings.
+		// Report the quality of the page we are actually serving.
+		const bestMatched = filtered
+			.slice(offset, offset + limit)
+			.reduce((m, x) => Math.max(m, x.matched ?? 0), 0);
+		const matchMode: RepoMatchMode = !tokens.length
+			? "all"
+			: bestMatched === 0
+				? "weak"
+				: bestMatched === tokens.length
+					? "strict"
+					: "partial";
 		return {
 			repos,
 			total,
 			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
 			searched,
+			matchMode,
+			matchModeLabel: MATCH_MODE_LABEL[matchMode],
 		};
 	} catch {
-		return { repos: [], total: 0, canonical: [], searched };
+		return {
+			repos: [],
+			total: 0,
+			canonical: [],
+			searched,
+			matchMode: "none" as RepoMatchMode,
+			matchModeLabel: MATCH_MODE_LABEL.none,
+		};
 	}
 }

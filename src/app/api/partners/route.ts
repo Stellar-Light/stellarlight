@@ -304,6 +304,8 @@ export async function GET(req: NextRequest) {
 	let partners: ReturnType<typeof toPublic>[] = [];
 	let totalMatching = 0;
 	let filteredOutCount = 0;
+	/** null = no query; 0 = nothing matched and rows are filler. */
+	let bestPartnerScore: number | null = null;
 
 	const payload = await getPayloadSafe();
 	if (payload) {
@@ -347,9 +349,20 @@ export async function GET(req: NextRequest) {
 				string,
 				number
 			>;
+			// Honest-absence (guard B): scorePartners deliberately falls back to
+			// "a few accepting/fresh partners" (score 0) when a query yields no
+			// usable signal. That is a reasonable ranking choice and a terrible
+			// ANSWER if we do not say so — measured through Raven, the nonsense
+			// query "zzqqxx nonexistent protocol 9999" came back with 5 partners
+			// and nothing marking them as filler. Capture the best score so the
+			// response can tell the caller which it got.
+			const scored = q ? scorePartners(q, eligible, eligible.length) : null;
+			bestPartnerScore = scored?.length
+				? Math.max(...scored.map((s) => s.score ?? 0))
+				: null;
 			const ordered = q
-				? (scorePartners(q, eligible, eligible.length)
-						.map((s) => bySlug.get(s.partner.slug))
+				? (scored
+						?.map((s) => bySlug.get(s.partner.slug))
 						.filter(Boolean) as typeof eligible)
 				: [...eligible].sort(
 						(a, b) =>
@@ -400,6 +413,23 @@ export async function GET(req: NextRequest) {
 				},
 				...(laneHints("partners", { empty: partners.length === 0 })
 					? { hints: laneHints("partners", { empty: partners.length === 0 }) }
+					: {}),
+				// Honest-absence (guard B): with a query, say whether these rows
+				// actually matched it. scorePartners falls back to filler when a
+				// query yields no signal, and unlabelled filler is read as an
+				// answer — the same defect searchProjects fixed with matchMode.
+				...(q && partners.length > 0
+					? bestPartnerScore === 0
+						? {
+								matchMode: "weak" as const,
+								matchModeLabel:
+									"no partner matched your query — these are fresh/accepting partners shown as a fallback, NOT matches (an empty result would have been the honest answer if none of them fit)",
+							}
+						: {
+								matchMode: "scored" as const,
+								matchModeLabel:
+									"ranked by the shared partner scorer over structured capability fields",
+							}
 					: {}),
 				counts: {
 					returned: partners.length,
