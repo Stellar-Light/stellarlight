@@ -67,9 +67,16 @@ for (const [file, expectation] of Object.entries(WRITERS)) {
 		continue;
 	}
 	if (expectation === "read-back") {
-		if (/from "\.\.\/src\/lib\/utils\/read-back"|from "@\/lib\/utils\/read-back"/.test(src))
+		if (
+			/from "\.\.\/src\/lib\/utils\/read-back"|from "@\/lib\/utils\/read-back"/.test(
+				src,
+			)
+		)
 			ok(`${file} imports read-back`);
-		else bad(`${file} must import the read-back verifier (or document an exemption)`);
+		else
+			bad(
+				`${file} must import the read-back verifier (or document an exemption)`,
+			);
 	} else {
 		ok(`${file} exempt: ${expectation.slice(0, 60)}…`);
 	}
@@ -88,7 +95,9 @@ for (const f of readdirSync(wfDir).filter((f) => f.endsWith(".yml"))) {
 		(s) => s.includes("| tee") && !/^\s*shell: bash\s*$/m.test(s),
 	);
 	if (offending.length)
-		bad(`${f}: ${offending.length} step(s) pipe through tee without shell: bash`);
+		bad(
+			`${f}: ${offending.length} step(s) pipe through tee without shell: bash`,
+		);
 	else ok(`${f}: all tee steps declare shell: bash`);
 }
 
@@ -107,8 +116,13 @@ for (const f of walk("scripts")) {
 	if (f.endsWith("check-writer-conformance.ts")) continue; // self: strings below
 	const src = read(f);
 	// statement-position only — a comment quoting the pattern is not a stomp
-	if (src.includes("process.exitCode") && /^\s*process\.exit\(0\);/m.test(src)) {
-		bad(`${f} sets process.exitCode AND calls process.exit(0) — the stomp class`);
+	if (
+		src.includes("process.exitCode") &&
+		/^\s*process\.exit\(0\);/m.test(src)
+	) {
+		bad(
+			`${f} sets process.exitCode AND calls process.exit(0) — the stomp class`,
+		);
 		c3bad++;
 	}
 }
@@ -123,9 +137,11 @@ const C4_ALLOW: Record<string, string> = {
 		"stored as codeSymbols, served as codeVerified.symbols — probed via the rozo pin (2026-08-12)",
 	codeScanState: "scan-state bookkeeping, not a served fact (2026-08-12)",
 	codeScanNote: "scan-state bookkeeping (2026-08-12)",
-	codeScannedAt: "served as scannedAt; probed via codeConfidence pin (2026-08-12)",
+	codeScannedAt:
+		"served as scannedAt; probed via codeConfidence pin (2026-08-12)",
 	contractMacroCount: "internal fact feeding isDeployableContract (2026-08-12)",
-	hasAuthPatterns: "internal boolean fact, not individually served (2026-08-12)",
+	hasAuthPatterns:
+		"internal boolean fact, not individually served (2026-08-12)",
 	hasStoragePatterns: "internal boolean fact (2026-08-12)",
 	hasEvents: "internal boolean fact (2026-08-12)",
 	usesNoStd: "internal boolean fact (2026-08-12)",
@@ -135,23 +151,42 @@ const C4_ALLOW: Record<string, string> = {
 		"presence fact served on repo rows; probe once weekly re-scans populate the corpus (2026-08-13)",
 	stellarJsDep: "internal fact feeding proof/jsDepth (2026-08-12)",
 	farmFlags: "diagnostic list; farmScore is the served judgment (2026-08-12)",
-	farmScore: "score component of repoGrade, probed via repoScore surfaces (2026-08-12)",
-	codeDepth: "probed implicitly: repoScore + explain both carry it (2026-08-12)",
-	stellarProof: "every scanned row has one by construction (write gate) (2026-08-12)",
-	sorobanSdkVersion: "legitimately null on non-Rust repos; versionStatus probed on Rust pins (2026-08-12)",
-	versionStatus: "enum with honest 'unknown'; blend pin exercises it via protocolCaps (2026-08-12)",
+	farmScore:
+		"score component of repoGrade, probed via repoScore surfaces (2026-08-12)",
+	codeDepth:
+		"probed implicitly: repoScore + explain both carry it (2026-08-12)",
+	stellarProof:
+		"every scanned row has one by construction (write gate) (2026-08-12)",
+	sorobanSdkVersion:
+		"legitimately null on non-Rust repos; versionStatus probed on Rust pins (2026-08-12)",
+	versionStatus:
+		"enum with honest 'unknown'; blend pin exercises it via protocolCaps (2026-08-12)",
 	mainnetContractId: "verified-on-chain only, sparse by design (2026-08-12)",
 };
 const writeShape = read("scripts/scan/write-shape.ts");
-const okStart = writeShape.indexOf("return {", writeShape.indexOf('outcome !== "ok"') + 50);
-const okBranch = writeShape.slice(okStart, writeShape.indexOf("\n\t};", okStart));
+const okStart = writeShape.indexOf(
+	"return {",
+	writeShape.indexOf('outcome !== "ok"') + 50,
+);
+const okBranch = writeShape.slice(
+	okStart,
+	writeShape.indexOf("\n\t};", okStart),
+);
 const emitted = [...okBranch.matchAll(/^\t\t(\w+):/gm)].map((m) => m[1]);
 const probes = read("scripts/check-field-population.ts");
 for (const field of emitted) {
 	if (probes.includes(field)) ok(`${field} → probed`);
-	else if (C4_ALLOW[field]) ok(`${field} → allowlisted: ${C4_ALLOW[field].slice(0, 50)}…`);
-	else bad(`${field} emitted by write-shape but neither probed nor allowlisted — the sdkCapabilities class`);
+	else if (C4_ALLOW[field])
+		ok(`${field} → allowlisted: ${C4_ALLOW[field].slice(0, 50)}…`);
+	else
+		bad(
+			`${field} emitted by write-shape but neither probed nor allowlisted — the sdkCapabilities class`,
+		);
 }
 
-console.log(failures ? `\n✗ FAIL — ${failures} conformance violation(s)` : "\n✓ all writers conform");
+console.log(
+	failures
+		? `\n✗ FAIL — ${failures} conformance violation(s)`
+		: "\n✓ all writers conform",
+);
 process.exit(failures ? 1 : 0);

@@ -273,10 +273,7 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	// resource-server + the @stellar/mpp charge client). Import paths and
 	// concrete identifiers only — a prose mention of "x402" in a comment is
 	// not an implementation.
-	[
-		"x402",
-		/@x402\/|\bX-PAYMENT\b|X402[A-Z][a-z]|[a-z]X402\b|x402[-_][a-z]/,
-	],
+	["x402", /@x402\/|\bX-PAYMENT\b|X402[A-Z][a-z]|[a-z]X402\b|x402[-_][a-z]/],
 	[
 		"mpp",
 		/@stellar\/mpp|\bmpp\/(?:charge|session)\b|\bMpp(?:Charge|Session|Client)\b/,
@@ -285,9 +282,8 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 ];
 
 /** The closed capability tag set, for filter validation + spec enums. */
-export const SDK_CAPABILITY_TAGS: readonly string[] = SDK_CAPABILITY_PATTERNS.map(
-	([tag]) => tag,
-).sort();
+export const SDK_CAPABILITY_TAGS: readonly string[] =
+	SDK_CAPABILITY_PATTERNS.map(([tag]) => tag).sort();
 
 /**
  * Language-frontier capability idioms (2026-08-13 Raven-lens gap: official
@@ -301,22 +297,35 @@ const PY_CONTEXT = /stellar_sdk|from stellar_sdk|import stellar_sdk/;
 const PY_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	["tx-building", /\bTransactionBuilder\b|\.append_[a-z_]*op\(/],
 	["signing", /\bKeypair\.from_secret\b|\.sign\(/],
-	["soroban-rpc", /\bSorobanServer\b|\bsimulate_transaction\b|\bsend_transaction\b/],
+	[
+		"soroban-rpc",
+		/\bSorobanServer\b|\bsimulate_transaction\b|\bsend_transaction\b/,
+	],
 	["horizon", /\bServer\(|\bsubmit_transaction\b|horizon\.stellar\.org/],
-	["contract-invoke", /\binvoke_contract_function\b|\bContractClient\b|\bscval\b|\bInvokeHostFunction\b/],
-	["sep10-auth", /\bbuild_challenge_transaction\b|\bread_challenge_transaction\b|sep-?10|\bWebAuth\b/i],
+	[
+		"contract-invoke",
+		/\binvoke_contract_function\b|\bContractClient\b|\bscval\b|\bInvokeHostFunction\b/,
+	],
+	[
+		"sep10-auth",
+		/\bbuild_challenge_transaction\b|\bread_challenge_transaction\b|sep-?10|\bWebAuth\b/i,
+	],
 	["sep24-ramp", /sep-?24|\binteractive\s*deposit|TransferServer/i],
 	["fee-bump", /fee_bump|FeeBumpTransaction/i],
 ];
 const GO_EXT = /\.go$/i;
-const GO_CONTEXT = /github\.com\/stellar\/go|stellar\/go\/(txnbuild|clients|keypair)/;
+const GO_CONTEXT =
+	/github\.com\/stellar\/go|stellar\/go\/(txnbuild|clients|keypair)/;
 const GO_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	["tx-building", /\btxnbuild\./],
 	["signing", /\bkeypair\.(Parse|MustParse|Random)\b|\.Sign\(/],
 	["horizon", /\bhorizonclient\.|\bSubmitTransaction\b/],
 	["soroban-rpc", /soroban[a-z]*rpc|\bSimulateTransaction\b/i],
 	["contract-invoke", /\bInvokeHostFunction\b/],
-	["sep10-auth", /sep-?10|\bChallengeTransaction\b|\bReadChallengeTx\b|\bwebauth\b/i],
+	[
+		"sep10-auth",
+		/sep-?10|\bChallengeTransaction\b|\bReadChallengeTx\b|\bwebauth\b/i,
+	],
 	["sep24-ramp", /sep-?24|interactive\s*deposit/i],
 	["fee-bump", /\bFeeBumpTransaction\b/],
 ];

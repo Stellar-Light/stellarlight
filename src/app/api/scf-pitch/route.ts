@@ -12,11 +12,11 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { getAppUrl } from "@/lib/utils/app-url";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { buildScfPitch } from "@/lib/scf-pitch";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
 

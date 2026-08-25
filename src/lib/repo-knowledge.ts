@@ -131,7 +131,9 @@ export function buildKnowledgeNotes(
 	if (audits.length) {
 		const dated = audits
 			.filter((a) => a.publishedAt)
-			.sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)));
+			.sort((a, b) =>
+				String(b.publishedAt).localeCompare(String(a.publishedAt)),
+			);
 		const latest = dated[0] ?? audits[0];
 		const latestBit = latest?.auditor
 			? ` (latest: ${latest.auditor}${latest.publishedAt ? `, ${String(latest.publishedAt).slice(0, 10)}` : ""})`
@@ -172,7 +174,8 @@ export function buildKnowledgeNotes(
 	const use = signals?.codeInUse;
 	if (use?.asOf && typeof use.contracts === "number" && use.contracts > 0) {
 		const ev = typeof use.events === "number" ? use.events : null;
-		const evDelta = typeof use.eventsDelta === "number" ? use.eventsDelta : null;
+		const evDelta =
+			typeof use.eventsDelta === "number" ? use.eventsDelta : null;
 		const fmt = (n: number) => n.toLocaleString("en-US");
 		notes.push({
 			note: `Live on mainnet: ${use.contracts} attributed contract${use.contracts === 1 ? "" : "s"}${ev !== null ? `, ${fmt(ev)} lifetime events${evDelta !== null ? ` (${evDelta >= 0 ? "+" : ""}${fmt(evDelta)} since the prior weekly snapshot)` : ""}` : ""} per stellar.expert.`,

@@ -891,6 +891,13 @@ export interface components {
                 validTypes?: string[];
                 /** @description Every value the ramps filter accepts (unknown values 400 with this list). */
                 validRamps?: string[];
+                /**
+                 * @description Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.
+                 * @enum {string}
+                 */
+                matchMode?: "scored" | "weak";
+                /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
+                matchModeLabel?: string;
             };
             partners?: components["schemas"]["Partner"][];
         };
@@ -1423,6 +1430,13 @@ export interface components {
                 canonical?: string | null;
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
+                /**
+                 * @description How well this page matched the query. strict = every query term matched; partial = some did; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat weak/none rows as candidates requiring verification, never as findings.
+                 * @enum {string}
+                 */
+                matchMode?: "strict" | "partial" | "weak" | "all" | "none";
+                /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
+                matchModeLabel?: string;
             };
             repos: components["schemas"]["Repo"][];
         };

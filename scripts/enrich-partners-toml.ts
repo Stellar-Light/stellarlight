@@ -611,12 +611,12 @@ async function main() {
 				// SEPs from declared endpoints
 				const seps: string[] = [];
 				// Provenance trio (SYNTHESIS-2026-08-12 slice 3): which toml, when.
-			// Stamped on EVERY successful parse — not gated on data deltas (the
-			// converged-corpus trap: a delta-gated stamp never reaches rows whose
-			// data stopped changing). Admin edits may postdate the snapshot.
-			update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
-			update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
-			if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
+				// Stamped on EVERY successful parse — not gated on data deltas (the
+				// converged-corpus trap: a delta-gated stamp never reaches rows whose
+				// data stopped changing). Admin edits may postdate the snapshot.
+				update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
+				update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
+				if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
 				if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
 				if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
 				if (seps.length) {

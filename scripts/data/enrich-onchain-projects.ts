@@ -26,8 +26,8 @@
 
 import "../load-env";
 import { getPayload } from "payload";
-import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
+import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 
 const execute = process.argv.includes("--execute");
@@ -117,7 +117,12 @@ async function run() {
 		collection: "repos",
 		limit: 3000,
 		depth: 0,
-		select: { fullName: true, projectSlug: true, codeVerified: true, codeInUse: true },
+		select: {
+			fullName: true,
+			projectSlug: true,
+			codeVerified: true,
+			codeInUse: true,
+		},
 	});
 	// Case-insensitive repo index for the codeInUse write-back (identity
 	// lesson: never trust iteration-spelling equality on fullName).
@@ -479,7 +484,14 @@ async function run() {
 				sent as unknown as Record<string, unknown>,
 				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
 				(back as any).codeInUse,
-				["contracts", "events", "eventsDelta", "subinvocations", "subinvocationsDelta", "asOf"],
+				[
+					"contracts",
+					"events",
+					"eventsDelta",
+					"subinvocations",
+					"subinvocationsDelta",
+					"asOf",
+				],
 			);
 			if (mm.length) {
 				console.error(formatMismatches(mm));

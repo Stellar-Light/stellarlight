@@ -305,7 +305,6 @@ export function normalizeRepoNode(r: any) {
 		releaseTag: (r.latestRelease?.tagName ?? null) as string | null,
 		openPRs: (r.pullRequests?.totalCount ?? null) as number | null,
 	};
-
 }
 
 export type RepoInfo = ReturnType<typeof normalizeRepoNode>;
@@ -324,7 +323,9 @@ export const BATCH_SIZE = 15;
 
 /** Pure query builder (unit-tested): throws on names that could break out
  * of the string literal — GitHub logins/repos are [A-Za-z0-9_.-] only. */
-export function buildBatchQuery(pairs: { owner: string; name: string }[]): string {
+export function buildBatchQuery(
+	pairs: { owner: string; name: string }[],
+): string {
 	const aliases = pairs
 		.map((p, i) => {
 			if (!GH_NAME_RE.test(p.owner) || !GH_NAME_RE.test(p.name))
@@ -337,7 +338,10 @@ export function buildBatchQuery(pairs: { owner: string; name: string }[]): strin
 
 let gqlBatchQueries = 0;
 let gqlBatchRepos = 0;
-export const gqlBatchStats = () => ({ queries: gqlBatchQueries, repos: gqlBatchRepos });
+export const gqlBatchStats = () => ({
+	queries: gqlBatchQueries,
+	repos: gqlBatchRepos,
+});
 
 export type BatchRepoResult = { info: RepoInfo } | { error: string };
 
@@ -402,7 +406,10 @@ export async function fetchRepoInfoBatch(
 				data = parsed;
 			} catch (e) {
 				if (attempt === 0) await new Promise((r) => setTimeout(r, 2000));
-				else console.error(`  batch chunk failed (${e instanceof Error ? e.message : e}) — ${valid.length} repo(s) fall back to per-repo`);
+				else
+					console.error(
+						`  batch chunk failed (${e instanceof Error ? e.message : e}) — ${valid.length} repo(s) fall back to per-repo`,
+					);
 			}
 		}
 		if (!data) continue;

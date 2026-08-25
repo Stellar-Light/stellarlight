@@ -342,7 +342,11 @@ async function run() {
 		const data = {
 			source: "sep" as const,
 			observedAt: new Date().toISOString(),
-			...(chunk.publishedAt ? { publishedAt: chunk.publishedAt } : preamble ? { publishedAt: `${preamble[1]}T00:00:00.000Z` } : {}),
+			...(chunk.publishedAt
+				? { publishedAt: chunk.publishedAt }
+				: preamble
+					? { publishedAt: `${preamble[1]}T00:00:00.000Z` }
+					: {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,

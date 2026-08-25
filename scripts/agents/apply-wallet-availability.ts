@@ -17,7 +17,7 @@
 
 import "../load-env";
 import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
 import config from "../../src/payload.config";
@@ -50,7 +50,9 @@ async function main() {
 		readFileSync(join(ROOT, fileArg), "utf8"),
 	) as DraftFile;
 	if (!file.drafts?.length) {
-		console.error("✗ drafts file holds 0 drafts — nothing to apply is a red, not a pass");
+		console.error(
+			"✗ drafts file holds 0 drafts — nothing to apply is a red, not a pass",
+		);
 		process.exit(1);
 	}
 	console.log(
@@ -65,7 +67,9 @@ async function main() {
 			(e) => !e.storeUrl || !e.checkedAt || e.state !== "available",
 		);
 		if (bad) {
-			console.log(`  ✗ ${d.slug}: entry missing evidence or non-available state — refused`);
+			console.log(
+				`  ✗ ${d.slug}: entry missing evidence or non-available state — refused`,
+			);
 			failed++;
 			continue;
 		}
@@ -84,7 +88,9 @@ async function main() {
 			continue;
 		}
 		if (Array.isArray(doc.availability) && doc.availability.length) {
-			console.log(`  – ${d.slug}: availability already populated — never overwrite, skipped`);
+			console.log(
+				`  – ${d.slug}: availability already populated — never overwrite, skipped`,
+			);
 			skipped++;
 			continue;
 		}
@@ -108,7 +114,9 @@ async function main() {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 			const got = (back as any).availability;
 			if (!Array.isArray(got) || got.length !== d.entries.length) {
-				console.log(`  ✗ ${d.slug}: read-back mismatch — write did not persist as sent`);
+				console.log(
+					`  ✗ ${d.slug}: read-back mismatch — write did not persist as sent`,
+				);
 				failed++;
 				continue;
 			}
@@ -119,7 +127,9 @@ async function main() {
 		`\n${EXECUTE ? "DONE" : "PLAN"}: ${applied} applied · ${skipped} already-populated skips · ${failed} refused`,
 	);
 	if (applied === 0 && failed === 0) {
-		console.error("✗ zero work — every draft was a skip; the drafts file is stale");
+		console.error(
+			"✗ zero work — every draft was a skip; the drafts file is stale",
+		);
 		process.exit(1);
 	}
 	process.exit(failed ? 1 : 0);

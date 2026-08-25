@@ -65,12 +65,24 @@ export interface TrustReport {
 	} | null;
 	audits: {
 		count: number;
-		latest: { auditor: string | null; publishedAt: string | null; title: string | null };
-		reports: Array<{ auditor: string | null; publishedAt: string | null; title: string | null }>;
+		latest: {
+			auditor: string | null;
+			publishedAt: string | null;
+			title: string | null;
+		};
+		reports: Array<{
+			auditor: string | null;
+			publishedAt: string | null;
+			title: string | null;
+		}>;
 	} | null;
 	/** Commits landing AFTER the latest audit report — audited code is not
 	 * necessarily the code running today. Null when unaudited or undated. */
-	auditDrift: { latestAuditAt: string; lastCommitAt: string; daysOfDrift: number } | null;
+	auditDrift: {
+		latestAuditAt: string;
+		lastCommitAt: string;
+		daysOfDrift: number;
+	} | null;
 	succession: { successorRepo: string | null; predecessors: string[] };
 	signals: TrustSignal[];
 }
@@ -91,7 +103,9 @@ export async function buildTrustReport(
 	if (!d) return null;
 
 	const iface: string[] = Array.isArray(d.contractInterface)
-		? d.contractInterface.filter((s: unknown): s is string => typeof s === "string")
+		? d.contractInterface.filter(
+				(s: unknown): s is string => typeof s === "string",
+			)
 		: [];
 	const ciu = d.codeInUse;
 	const usage =
@@ -121,8 +135,11 @@ export async function buildTrustReport(
 				publishedAt: a.publishedAt ? String(a.publishedAt) : null,
 				title: a.title ? String(a.title) : null,
 			}))
-			.sort((a, b) => String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")));
-		if (rows.length) audits = { count: rows.length, latest: rows[0], reports: rows };
+			.sort((a, b) =>
+				String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")),
+			);
+		if (rows.length)
+			audits = { count: rows.length, latest: rows[0], reports: rows };
 	}
 
 	const lastCommitAt = d.lastCommitAt ? String(d.lastCommitAt) : null;
@@ -133,7 +150,9 @@ export async function buildTrustReport(
 					latestAuditAt,
 					lastCommitAt,
 					daysOfDrift: Math.floor(
-						(new Date(lastCommitAt).getTime() - new Date(latestAuditAt).getTime()) / 864e5,
+						(new Date(lastCommitAt).getTime() -
+							new Date(latestAuditAt).getTime()) /
+							864e5,
 					),
 				}
 			: null;
@@ -153,7 +172,8 @@ export async function buildTrustReport(
 	const activityState = activityStateOf(lastCommitAt, !!d.isArchived);
 	const signals: TrustSignal[] = [];
 	if (d.codeScanState === "scanned") signals.push("scanned");
-	if (typeof d.codeDepth === "number" && d.codeDepth >= 0.5) signals.push("deep-code");
+	if (typeof d.codeDepth === "number" && d.codeDepth >= 0.5)
+		signals.push("deep-code");
 	if ((usage?.contracts ?? 0) >= 1) signals.push("live-on-mainnet");
 	if (d.mainnetContractId) signals.push("verified-contract-id");
 	if ((audits?.count ?? 0) >= 1) signals.push("audited");
@@ -174,7 +194,10 @@ export async function buildTrustReport(
 			activityState,
 		},
 		project: d.projectSlug
-			? { slug: String(d.projectSlug), name: d.projectName ? String(d.projectName) : null }
+			? {
+					slug: String(d.projectSlug),
+					name: d.projectName ? String(d.projectName) : null,
+				}
 			: null,
 		codeTruth: {
 			scanState: d.codeScanState ? String(d.codeScanState) : null,
@@ -182,14 +205,20 @@ export async function buildTrustReport(
 			stellarProof: d.stellarProof ? String(d.stellarProof) : null,
 			codeDepth: typeof d.codeDepth === "number" ? d.codeDepth : null,
 			codeDomains: Array.isArray(d.codeDomains)
-				? d.codeDomains.filter((s: unknown): s is string => typeof s === "string")
+				? d.codeDomains.filter(
+						(s: unknown): s is string => typeof s === "string",
+					)
 				: [],
 			sdkCapabilities: Array.isArray(d.sdkCapabilities)
-				? d.sdkCapabilities.filter((s: unknown): s is string => typeof s === "string")
+				? d.sdkCapabilities.filter(
+						(s: unknown): s is string => typeof s === "string",
+					)
 				: [],
 			interfaceSize: iface.length,
 			contractInterface: iface.slice(0, 60),
-			mainnetContractId: d.mainnetContractId ? String(d.mainnetContractId) : null,
+			mainnetContractId: d.mainnetContractId
+				? String(d.mainnetContractId)
+				: null,
 		},
 		usage,
 		audits,

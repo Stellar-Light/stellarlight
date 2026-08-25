@@ -114,7 +114,9 @@ async function main() {
 			console.error("  ✗ read-back: post still present after delete");
 			process.exit(1);
 		}
-		console.log(`  removed "${doc.title ?? REMOVE_SLUG}" (verified by read-back)`);
+		console.log(
+			`  removed "${doc.title ?? REMOVE_SLUG}" (verified by read-back)`,
+		);
 		return;
 	}
 	let files: string[];

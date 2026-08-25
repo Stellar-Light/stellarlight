@@ -4668,6 +4668,17 @@ export const spec: OpenAPISpec = {
 										description:
 											"Every value the ramps filter accepts (unknown values 400 with this list).",
 									},
+									matchMode: {
+										type: "string",
+										enum: ["scored", "weak"],
+										description:
+											"Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.",
+									},
+									matchModeLabel: {
+										type: "string",
+										description:
+											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
 								},
 							},
 						],
@@ -5756,6 +5767,17 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"How to read the results (e.g. code references graded by repoScore 0-100).",
+									},
+									matchMode: {
+										type: "string",
+										enum: ["strict", "partial", "weak", "all", "none"],
+										description:
+											"How well this page matched the query. strict = every query term matched; partial = some did; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat weak/none rows as candidates requiring verification, never as findings.",
+									},
+									matchModeLabel: {
+										type: "string",
+										description:
+											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
 									},
 								},
 							},

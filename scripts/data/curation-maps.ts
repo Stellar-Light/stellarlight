@@ -37,6 +37,39 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// sls-073 (2026-08-25): Zenex's STATUS is already right (Pre-Release) — this
+	// entry does not move it. What it fixes is the PROVENANCE: it was resting on
+	// `site-liveness`, so the next sweep could have churned it off a mere 200.
+	// Verified today at docs.zenex.trade/deployments/contract-addresses — the
+	// page still lists contract addresses as TBD, i.e. nothing is deployed for
+	// users yet. from === to, so the from-guard makes this a no-op on status
+	// and writes only the dated evidence.
+	zenex: {
+		from: "Pre-Release",
+		to: "Pre-Release",
+		note: "Perpetual (leveraged) trading exchange on Stellar/Soroban, formerly Hermes; pre-launch — its deployments page still lists every contract address as TBD.",
+		asOf: "2026-08-25",
+		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
+		basis: "human-verified",
+	},
+	// sls-073 (2026-08-25): Noether was Live on `site-liveness` — the weakest
+	// basis we have, and the same "a 200 is not a business" class as kulipa
+	// below. Its own site says the opposite of Live: "funds are not real",
+	// "Trade on testnet -> Join the mainnet waitlist", and "Noether's mainnet
+	// contracts are being audited. Mainnet opens when the audit completes."
+	// Repo shape agrees — NoetherDEX/noether is 3 stars, last commit
+	// 2026-07-11, alongside a Discord webhook and a scratch repo. SCF-funded
+	// and genuinely being built, so this is Pre-Release, NOT Inactive: the
+	// product is coming, it just is not tradeable with real funds yet.
+	// Flip back to Live when the mainnet contracts are published.
+	noether: {
+		from: "Live",
+		to: "Pre-Release",
+		note: "Perpetual futures DEX on Stellar/Soroban, running on PUBLIC TESTNET only — its own site states funds are not real and mainnet opens after the in-progress audit.",
+		asOf: "2026-08-25",
+		sourceUrl: "https://noether.exchange/",
+		basis: "human-verified",
+	},
 	// Raven #39 (elizabethli-sdf, 2026-08-21): Raven recommended Kulipa FIRST
 	// for "what card services can I integrate on Stellar". Kulipa shut down on
 	// 2026-07-29 (insolvency) — ~20 wallet partners lost card service and

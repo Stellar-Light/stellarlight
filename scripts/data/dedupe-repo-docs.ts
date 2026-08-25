@@ -117,8 +117,7 @@ async function main() {
 		console.log(
 			`${key}\n  keep   ${keeper.fullName} (${keeper.id}) scan=${keeper.codeScanState ?? "-"} notes=${Array.isArray(keeper.knowledgeNotes) ? keeper.knowledgeNotes.length : 0}`,
 		);
-		for (const o of orphans)
-			console.log(`  drop   ${o.fullName} (${o.id})`);
+		for (const o of orphans) console.log(`  drop   ${o.fullName} (${o.id})`);
 		if (Object.keys(promote).length)
 			console.log(`  merge  ${Object.keys(promote).join(", ")}`);
 		if (!EXECUTE) continue;

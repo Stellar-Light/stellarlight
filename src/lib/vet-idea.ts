@@ -22,6 +22,7 @@ import {
 	type TypeCoverage,
 } from "./ecosystem-gaps";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
+import { buildHaystack, scoreTokens, tokenize } from "./project-search-match";
 import { activityStateOf } from "./repo-grade";
 import { contentTokens, searchRepos } from "./repo-search";
 
@@ -130,12 +131,19 @@ export async function buildVetIdea(
 		activityState: activityStateOf(r.lastCommitAt ?? null, !!r.isArchived),
 		stars: r.stars ?? null,
 		// biome-ignore lint/suspicious/noExplicitAny: serve-row extras
-		codeDomains: (((r as any).codeDomains ?? []) as string[]),
+		codeDomains: ((r as any).codeDomains ?? []) as string[],
 	}));
 
 	// Directory projects: active, in the detected vertical (types membership —
 	// `in` + JS post-filter, never `contains` on hasMany). Falls back to a
 	// name/description token pass when no vertical mapped.
+	// sls-073: the no-vertical fallback used to page an ARBITRARY 400 active
+	// rows and filter them with a raw `includes` on `description`. The
+	// directory, for the same query, ranks every active row with the shared
+	// matcher over `shortDescription` + structured fields. So vet-idea returned
+	// [] for ideas the directory answered (live: "perpetuals / derivatives
+	// trading protocol on Stellar" → 0 here, 25 there). Fetch the whole active
+	// set and use the SAME matcher, so the two surfaces cannot disagree.
 	const pres = await payload.find({
 		collection: "projects",
 		where: {
@@ -144,7 +152,7 @@ export async function buildVetIdea(
 				...(vertical ? [{ types: { in: [vertical] } }] : []),
 			],
 		},
-		limit: vertical ? 200 : 400,
+		limit: 0, // 0 = no cap: a truncated window silently loses real matches
 		depth: 0,
 		select: {
 			slug: true,
@@ -152,6 +160,13 @@ export async function buildVetIdea(
 			status: true,
 			types: true,
 			description: true,
+			// buildHaystack reads these — omitting them made the shared matcher
+			// score against a haystack that was mostly empty.
+			shortDescription: true,
+			category: true,
+			supportedNetworks: true,
+			coverage: true,
+			publicGoods: true,
 			scfAwarded: true,
 		},
 	});
@@ -161,11 +176,18 @@ export async function buildVetIdea(
 		projDocs = projDocs.filter(
 			(p) => Array.isArray(p.types) && p.types.includes(vertical),
 		);
-	} else if (tokens.length) {
-		projDocs = projDocs.filter((p) => {
-			const hay = `${p.name ?? ""} ${p.description ?? ""}`.toLowerCase();
-			return tokens.some((t) => hay.includes(t));
-		});
+	} else {
+		// No vertical mapped: rank with the directory's own matcher (synonym
+		// expansion, negation guards, structured fields) instead of a naive
+		// substring pass, and keep only rows that actually score.
+		const qTokens = tokenize(q);
+		if (qTokens.length) {
+			projDocs = projDocs
+				.map((p) => ({ p, score: scoreTokens(buildHaystack(p), qTokens) }))
+				.filter((x) => x.score > 0)
+				.sort((a, b) => b.score - a.score)
+				.map((x) => x.p);
+		}
 	}
 	// Maturity from verified evidence: audits joined over the FULL matched
 	// project set (an arbitrary 8-slice hid blend and reported audited: 0 —
@@ -268,13 +290,13 @@ export async function buildVetIdea(
 			limit: 5000,
 			depth: 0,
 			select: {
-			slug: true,
-			name: true,
-			types: true,
-			status: true,
-			scfAwarded: true,
-			scf: true,
-		},
+				slug: true,
+				name: true,
+				types: true,
+				status: true,
+				scfAwarded: true,
+				scf: true,
+			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		const activeDocs = allActive.docs as any[];

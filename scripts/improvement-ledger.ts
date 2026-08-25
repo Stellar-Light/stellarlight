@@ -485,7 +485,12 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const detected: Finding[] = [];
 	const sources: string[] = [];
 
-	for (const spec of [...SPECS, ...NIGHTLY_SPECS, RAVEN_LOOP_SPEC, RAVEN_ROUTING_SPEC]) {
+	for (const spec of [
+		...SPECS,
+		...NIGHTLY_SPECS,
+		RAVEN_LOOP_SPEC,
+		RAVEN_ROUTING_SPEC,
+	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
 		if (!data) {

@@ -296,7 +296,9 @@ async function main() {
 			},
 		});
 	}
-	log(`  poison-clears planned: ${poisonClears.length}/${Object.keys(POISON_CLEARS).length}`);
+	log(
+		`  poison-clears planned: ${poisonClears.length}/${Object.keys(POISON_CLEARS).length}`,
+	);
 
 	let idx = 0;
 	async function worker() {

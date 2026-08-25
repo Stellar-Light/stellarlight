@@ -101,8 +101,7 @@ const PROBES: Probe[] = [
 			);
 			if (!row) return "reflector row absent";
 			const id = row.contractId ?? row.mainnetContractId ?? "";
-			if (!String(id).startsWith("CAFJZQWSED6Y"))
-				return `contractId ${id}`;
+			if (!String(id).startsWith("CAFJZQWSED6Y")) return `contractId ${id}`;
 			if ((row.audits ?? []).length < 3)
 				return `audits ${(row.audits ?? []).length} (< 3)`;
 			return null;
@@ -175,7 +174,8 @@ const PROBES: Probe[] = [
 		test: (b) => {
 			const d = b.docs?.[0];
 			if (!d) return "row absent";
-			if (d.codeScanState !== "scanned") return `codeScanState ${d.codeScanState}`;
+			if (d.codeScanState !== "scanned")
+				return `codeScanState ${d.codeScanState}`;
 			if (!(Array.isArray(d.codeDomains) && d.codeDomains.includes("oracle")))
 				return `codeDomains ${JSON.stringify(d.codeDomains)}`;
 			if (!((d.codeInUse?.subinvocations ?? 0) > 100_000))
@@ -206,7 +206,9 @@ async function main(): Promise<number> {
 			failed += 1;
 		}
 	}
-	console.log(`\n${PROBES.length - failed}/${PROBES.length} code-truth probes passed`);
+	console.log(
+		`\n${PROBES.length - failed}/${PROBES.length} code-truth probes passed`,
+	);
 	return failed === 0 ? 0 : 1;
 }
 

@@ -25,11 +25,11 @@ import "./load-env";
 import { getPayload } from "payload";
 import { extractFindings } from "../src/lib/audit-findings";
 import {
+	AUDIT_RELATIONS,
 	canonicalAuditor,
 	composeAuditTitle,
 	normalizeIdentityText,
 	resolveAuditProjectSlug,
-	AUDIT_RELATIONS,
 } from "../src/lib/audit-identity";
 import {
 	type AuditSeverity,

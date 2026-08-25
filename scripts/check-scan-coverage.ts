@@ -69,8 +69,7 @@ async function main() {
 
 	const neverScanned = active.filter((r) => !r.codeScannedAt);
 	const staleScanned = active.filter(
-		(r) =>
-			r.codeScannedAt && Date.parse(String(r.codeScannedAt)) < staleBefore,
+		(r) => r.codeScannedAt && Date.parse(String(r.codeScannedAt)) < staleBefore,
 	);
 	const priorityNever = neverScanned.filter(prominent);
 	const priorityStale = staleScanned.filter(prominent);
@@ -89,11 +88,15 @@ async function main() {
 		`scan coverage: ${active.length} active indexed repos · ${neverScanned.length} never-scanned (${priorityNever.length} priority) · ${staleScanned.length} stale >${STALE_DAYS}d (${priorityStale.length} priority)`,
 	);
 	if (priorityNever.length) {
-		console.log(`\n  PRIORITY never-scanned (top ${Math.min(25, priorityNever.length)}):`);
+		console.log(
+			`\n  PRIORITY never-scanned (top ${Math.min(25, priorityNever.length)}):`,
+		);
 		console.log(roster(priorityNever));
 	}
 	if (priorityStale.length) {
-		console.log(`\n  PRIORITY stale-scanned (top ${Math.min(25, priorityStale.length)}):`);
+		console.log(
+			`\n  PRIORITY stale-scanned (top ${Math.min(25, priorityStale.length)}):`,
+		);
 		console.log(roster(priorityStale));
 	}
 	if (priorityNever.length || priorityStale.length) {

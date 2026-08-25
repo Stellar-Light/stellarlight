@@ -367,8 +367,7 @@ async function run() {
 		for (const c of chunks.values()) {
 			if (c.capStatus !== null) continue;
 			const reg =
-				byPid ??
-				REGISTRY_BY_TITLE.get((c.title ?? "").trim().toLowerCase());
+				byPid ?? REGISTRY_BY_TITLE.get((c.title ?? "").trim().toLowerCase());
 			if (!reg || reg.status === null) continue;
 			registryStamped++;
 			if (payload) {

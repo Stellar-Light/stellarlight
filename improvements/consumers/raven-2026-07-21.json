@@ -1,9 +1,7 @@
 {
 	"consumer": "raven",
 	"label": "Raven (agents.stellar.buzz)",
-	"buckets": [
-		"other"
-	],
+	"buckets": ["other"],
 	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
 	"generatedAt": "2026-07-21T16:50:18.443Z",
 	"window": {

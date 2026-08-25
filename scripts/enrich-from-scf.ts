@@ -12,13 +12,13 @@
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
  */
 import "./load-env";
+import { getPayload } from "payload";
 import {
 	cleanTitle as cleanScfTitle,
 	normSpaceless,
 	stemSlugHash,
 	titlePrefixMatch,
 } from "../src/lib/identity";
-import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { parseRoundVerdicts } from "./eval/scf-official";
 
@@ -218,7 +218,9 @@ async function main() {
 	// An EMPTY listing is an outage, not a clean sweep (the silent-params /
 	// empty-vs-empty class): 200-with-zero-rows must not exit green.
 	if (scfProjects.length === 0) {
-		console.error("✗ SCF listing returned 0 projects — outage or contract change; exiting 1.");
+		console.error(
+			"✗ SCF listing returned 0 projects — outage or contract change; exiting 1.",
+		);
 		process.exit(1);
 	}
 
@@ -263,31 +265,31 @@ async function main() {
 		"pelago-airswift-nkm": "airswift",
 		// Soroban → Stellar rename class (product renamed, SCF page didn't).
 		"soroban-security-portal-7ea": "stellar-security-portal",
-	// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
-	// slugs, each page-verified locally — parseRoundVerdicts on the official
-	// page reproduces the finding's exact round + budget before mapping.
-	// vottun disambiguated by evidence: the developer-platform page carries
-	// the r27 award; the wirex-vottun page does not.
-	"allbridge-core-3lc": "allbridge",
-	"obsrvr-prism-fvl": "obsrvr",
-	"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
-	"digibank-non-custodial-n1t": "digibank",
-	"vottun-developer-platform-c2v": "vottun",
-	"upesa-formerly-utoken-pbs": "utoken",
-	"usdc-swap-stellar-cctp-bridge-yv8": "usdc-swap",
-	"transfuse-multichain-asset-bridge-iyi": "transfuse",
-	"catalyst-blockchain-manager-woe": "catalyst",
-	"blade-tradfi-to-defi-bridge-zgq": "blade",
-	// title-prefix rule casualties, same-entity page-verified (2026-08-12):
-	// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
-	// Treasury = Cash Abroad's second submission.
-	"greep-pos-greep-pay-hfe": "greeppay",
-	"zkcrossdex-ipb": "zkcross",
-	"cashabroad-smart-treasury-wla": "cash-abroad",
-	// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
-	// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
-	// `band`, which otherwise matches nothing and would keep stale data.
-	"band-protocol-2ob": "band",
+		// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
+		// slugs, each page-verified locally — parseRoundVerdicts on the official
+		// page reproduces the finding's exact round + budget before mapping.
+		// vottun disambiguated by evidence: the developer-platform page carries
+		// the r27 award; the wirex-vottun page does not.
+		"allbridge-core-3lc": "allbridge",
+		"obsrvr-prism-fvl": "obsrvr",
+		"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
+		"digibank-non-custodial-n1t": "digibank",
+		"vottun-developer-platform-c2v": "vottun",
+		"upesa-formerly-utoken-pbs": "utoken",
+		"usdc-swap-stellar-cctp-bridge-yv8": "usdc-swap",
+		"transfuse-multichain-asset-bridge-iyi": "transfuse",
+		"catalyst-blockchain-manager-woe": "catalyst",
+		"blade-tradfi-to-defi-bridge-zgq": "blade",
+		// title-prefix rule casualties, same-entity page-verified (2026-08-12):
+		// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
+		// Treasury = Cash Abroad's second submission.
+		"greep-pos-greep-pay-hfe": "greeppay",
+		"zkcrossdex-ipb": "zkcross",
+		"cashabroad-smart-treasury-wla": "cash-abroad",
+		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
+		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
+		// `band`, which otherwise matches nothing and would keep stale data.
+		"band-protocol-2ob": "band",
 	};
 
 	const matched: { scf: any; ours: any }[] = [];
@@ -412,11 +414,7 @@ async function main() {
 					),
 				) !==
 					JSON.stringify(
-						detail.roundAwards.map((r) => [
-							r.round,
-							r.amountUSD,
-							r.awardType,
-						]),
+						detail.roundAwards.map((r) => [r.round, r.amountUSD, r.awardType]),
 					));
 
 		// No-resurrect guard (2026-07-11): if this record is already
@@ -584,7 +582,9 @@ async function main() {
 
 	// Failed writes must not exit green (2026-08-08 sweep).
 	if (stats.errors > 0) {
-		console.error(`\n✗ ${stats.errors} write error(s) — exiting 1 so the run shows red.`);
+		console.error(
+			`\n✗ ${stats.errors} write error(s) — exiting 1 so the run shows red.`,
+		);
 		process.exit(1);
 	}
 	process.exit(0);

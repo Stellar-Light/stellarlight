@@ -24,12 +24,14 @@ export type { components, paths };
 
 /** Re-exported component schemas for consumer convenience. */
 export type Project = components["schemas"]["Project"];
-export type ProjectSearchResponse = components["schemas"]["ProjectSearchResponse"];
+export type ProjectSearchResponse =
+	components["schemas"]["ProjectSearchResponse"];
 export type Repo = components["schemas"]["Repo"];
 export type RepoSearchResponse = components["schemas"]["RepoSearchResponse"];
 export type StatusResponse = components["schemas"]["StatusResponse"];
 export type HackathonsResponse = components["schemas"]["HackathonsResponse"];
-export type HackathonDetailResponse = components["schemas"]["HackathonDetailResponse"];
+export type HackathonDetailResponse =
+	components["schemas"]["HackathonDetailResponse"];
 export type FeedbackRequest = components["schemas"]["FeedbackRequest"];
 
 /** Query params, lifted from the generated paths for ergonomic call sites. */
@@ -121,7 +123,9 @@ export class ScoutClient {
 	}
 
 	/** Search 741+ curated Stellar projects (prior art / competitor lookup). */
-	searchProjects(params: SearchProjectsParams = {}): Promise<ProjectSearchResponse> {
+	searchProjects(
+		params: SearchProjectsParams = {},
+	): Promise<ProjectSearchResponse> {
 		return this.get("/api/projects/search", params);
 	}
 
@@ -140,17 +144,24 @@ export class ScoutClient {
 	 * `repo` to auto-route; degrades to `answered:false` + the routed repo if
 	 * DeepWiki hasn't indexed it.
 	 */
-	explainRepo(params: { q: string; repo?: string }): Promise<Record<string, unknown>> {
+	explainRepo(params: {
+		q: string;
+		repo?: string;
+	}): Promise<Record<string, unknown>> {
 		return this.get("/api/repos/explain", params);
 	}
 
 	/** Curated directory of ecosystem partners (audit firms, anchors, on/off-ramps, infra). */
-	getPartners(params: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+	getPartners(
+		params: Record<string, unknown> = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/partners", params);
 	}
 
 	/** Latest-first feed of contract-affecting API/tool changes (`since` / `limit`). */
-	getChangelog(params: { since?: string; limit?: number } = {}): Promise<Record<string, unknown>> {
+	getChangelog(
+		params: { since?: string; limit?: number } = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/changelog", params);
 	}
 
@@ -171,7 +182,9 @@ export class ScoutClient {
 	}
 
 	/** Search Stellar builder profiles (Stellar Passport directory). */
-	getBuilders(params: GetBuildersParams = {}): Promise<Record<string, unknown>> {
+	getBuilders(
+		params: GetBuildersParams = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/builders", params);
 	}
 
@@ -181,7 +194,9 @@ export class ScoutClient {
 	}
 
 	/** Vector search over the 4,541-chunk Stellar research corpus. */
-	searchResearch(params: SearchResearchParams): Promise<Record<string, unknown>> {
+	searchResearch(
+		params: SearchResearchParams,
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/research", params);
 	}
 
@@ -196,17 +211,23 @@ export class ScoutClient {
 	}
 
 	/** Topic clusters with log-scaled crowdedness scores. */
-	getClusters(params: GetClustersParams = {}): Promise<Record<string, unknown>> {
+	getClusters(
+		params: GetClustersParams = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/clusters", params);
 	}
 
 	/** Cross-event analytics rollup (hackathons + categories + funding). */
-	analyzeEcosystem(params: AnalyzeEcosystemParams = {}): Promise<Record<string, unknown>> {
+	analyzeEcosystem(
+		params: AnalyzeEcosystemParams = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/analyze", params);
 	}
 
 	/** Electric Capital developer-activity stats + project leaderboard. */
-	getLeaderboard(params: GetLeaderboardParams = {}): Promise<Record<string, unknown>> {
+	getLeaderboard(
+		params: GetLeaderboardParams = {},
+	): Promise<Record<string, unknown>> {
 		return this.get("/api/leaderboard", params);
 	}
 
@@ -218,7 +239,6 @@ export class ScoutClient {
 	}
 
 	/* ── transport ──────────────────────────────────────────────────── */
-
 
 	/** Stellar stablecoins ranked by USD market cap (not raw supply). */
 	getStablecoins(
@@ -244,7 +264,12 @@ export class ScoutClient {
 
 	/** Search what was BUILT at Stellar hackathons (prior-art over prototypes). */
 	searchHackathonBuilds(
-		params: { q?: string; winnersOnly?: boolean; track?: string; limit?: number } = {},
+		params: {
+			q?: string;
+			winnersOnly?: boolean;
+			track?: string;
+			limit?: number;
+		} = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/hackathons/builds", params);
 	}
@@ -265,7 +290,12 @@ export class ScoutClient {
 
 	/** Evidence-gated registry of verified mainnet Soroban contracts. */
 	listContracts(
-		params: { q?: string; domain?: string; limit?: number; offset?: number } = {},
+		params: {
+			q?: string;
+			domain?: string;
+			limit?: number;
+			offset?: number;
+		} = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/contracts", params);
 	}
@@ -293,17 +323,23 @@ export class ScoutClient {
 	}
 
 	/** AI-rank partners against a plain-language need. */
-	matchPartners(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+	matchPartners(
+		body: Record<string, unknown>,
+	): Promise<Record<string, unknown>> {
 		return this.request("/api/partners/match", { method: "POST", body });
 	}
 
 	/** Conversational partner concierge (find OR get listed). */
-	partnerAssistant(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+	partnerAssistant(
+		body: Record<string, unknown>,
+	): Promise<Record<string, unknown>> {
 		return this.request("/api/partners/assistant", { method: "POST", body });
 	}
 
 	/** AI onboarding helpers: interview chat + profile extraction. */
-	partnerOnboard(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+	partnerOnboard(
+		body: Record<string, unknown>,
+	): Promise<Record<string, unknown>> {
 		return this.request("/api/partners/onboard", { method: "POST", body });
 	}
 
@@ -311,7 +347,10 @@ export class ScoutClient {
 	submitPartnerListing(
 		body: Record<string, unknown>,
 	): Promise<Record<string, unknown>> {
-		return this.request("/api/partners/submit-listing", { method: "POST", body });
+		return this.request("/api/partners/submit-listing", {
+			method: "POST",
+			body,
+		});
 	}
 
 	/** Change feed: which rows moved since a given time (drift watching). `since` is required. */

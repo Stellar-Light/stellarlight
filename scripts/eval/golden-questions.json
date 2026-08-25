@@ -1,713 +1,616 @@
 {
- "$comment": "Stellar Light golden-question retrieval eval. We're the data/index layer, so each question is graded (case-insensitive) over the TOP-K SURFACED CONTENT. `mode` routes to the endpoint: research \u2192 /api/research (content), projects \u2192 /api/projects/search (projects), repos \u2192 /api/repos/search (code references). `answerRegex` = patterns that must EACH surface (the right thing shows up). `forbiddenRegex` = patterns that must NOT surface \u2014 the correctness check: a wrong/stale fact in the top-k FAILS the case even when the topic matched. `liveSource: true` marks live-network facts the static corpus isn't meant to answer (reported N/A). `expectUrlIncludes` = a substring an expected doc URL should contain. `minTopScore` = the best result's score must clear it: for research it's the vector cosine; for repos it's the leading repo's repoScore (0-100) \u2014 a QUALITY FLOOR so junk can't be the #1 code reference for a tech query. Storing isn't enough; the right content has to surface, the wrong content must not, and the top reference has to be quality.",
- "questions": [
-  {
-   "id": "agentic-payments-x402",
-   "category": "agentic-payments",
-   "mode": "research",
-   "question": "How do I charge AI agents per API call on Stellar?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "x402|machine payment|agentic payment"
-    ],
-    "expectUrlIncludes": "agentic-payments",
-    "minTopScore": 0.7
-   }
-  },
-  {
-   "id": "standards-anchor-deposit",
-   "category": "standards",
-   "mode": "research",
-   "question": "Which SEP should an anchor implement for hosted deposits and withdrawals, and how does authentication work?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "sep-?24|hosted deposit|anchor",
-     "sep-?10|authentication|web auth"
-    ]
-   }
-  },
-  {
-   "id": "protocol-trustline",
-   "category": "protocol",
-   "mode": "research",
-   "question": "What is a trustline on Stellar and why do I need one?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "trustline",
-     "asset|issuer"
-    ]
-   }
-  },
-  {
-   "id": "soroban-counter",
-   "category": "soroban-build",
-   "mode": "research",
-   "question": "Write a minimal Soroban contract that stores a counter and increments it.",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "soroban",
-     "contract"
-    ]
-   }
-  },
-  {
-   "id": "dapp-freighter",
-   "category": "dapp-build",
-   "mode": "research",
-   "question": "How do I connect the Freighter wallet in a React app and submit a payment?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "freighter|wallet",
-     "transaction|payment|sign"
-    ]
-   }
-  },
-  {
-   "id": "assets-clawback",
-   "category": "assets",
-   "mode": "research",
-   "question": "How do I issue a regulated asset on Stellar with clawback enabled?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "clawback",
-     "asset|flag|auth"
-    ]
-   }
-  },
-  {
-   "id": "data-rpc-vs-horizon",
-   "category": "chain-data",
-   "mode": "research",
-   "question": "Should I use Horizon or Stellar RPC for a new indexer, and how do I stream contract events?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "rpc|horizon",
-     "event|indexer|stream"
-    ]
-   }
-  },
-  {
-   "id": "orient-remittance",
-   "category": "orient",
-   "mode": "research",
-   "question": "I want to build a USDC remittance app on Stellar for the Philippines corridor. Where do I start?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "anchor|sep-?24|usdc|payment|soroban"
-    ]
-   }
-  },
-  {
-   "id": "dossier-blend-safety",
-   "category": "project-dossier",
-   "mode": "research",
-   "question": "Tell me about the Blend protocol on Stellar \u2014 is it safe to build on?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "blend",
-     "oracle|incident|exploit|attack|audit|security"
-    ],
-    "forbiddenRegex": [
-     "\\bunaudited\\b",
-     "no (public |known )?audits?\\b"
-    ]
-   }
-  },
-  {
-   "id": "audit-reentrancy",
-   "category": "security",
-   "mode": "research",
-   "question": "What reentrancy or auth bugs have auditors found in Soroban contracts?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "audit|finding|vulnerab",
-     "soroban|contract|auth"
-    ]
-   }
-  },
-  {
-   "id": "ecosystem-rwa-map",
-   "category": "ecosystem-map",
-   "mode": "projects",
-   "question": "real-world asset RWA tokenization",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "rwa|real-world|tokeniz|asset"
-    ]
-   }
-  },
-  {
-   "id": "ecosystem-agent-payments-projects",
-   "category": "ecosystem-map",
-   "mode": "projects",
-   "question": "agent payments x402 API monetization",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "agent|payment|x402|api"
-    ]
-   }
-  },
-  {
-   "id": "ecosystem-defi-yield",
-   "category": "ecosystem-map",
-   "mode": "projects",
-   "question": "defi yield aggregator lending",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "defi|yield|lend|aggregat"
-    ]
-   }
-  },
-  {
-   "id": "consensus-scp",
-   "category": "protocol",
-   "mode": "research",
-   "question": "How does the Stellar Consensus Protocol reach agreement across nodes?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "scp|consensus",
-     "quorum|federated|node|validator"
-    ]
-   }
-  },
-  {
-   "id": "soroban-auth",
-   "category": "soroban-build",
-   "mode": "research",
-   "question": "How does require_auth and authorization work in a Soroban contract?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "soroban|contract",
-     "auth"
-    ]
-   }
-  },
-  {
-   "id": "passkeys-smart-wallet",
-   "category": "dapp-build",
-   "mode": "research",
-   "question": "How do passkeys and smart wallets work on Stellar?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "passkey|smart wallet|webauthn|secp256r1|policy signer"
-    ]
-   }
-  },
-  {
-   "id": "fees-inclusion",
-   "category": "protocol",
-   "mode": "research",
-   "question": "How are Stellar transaction fees and the inclusion fee calculated?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "fee",
-     "base fee|inclusion|surge|stroop"
-    ]
-   }
-  },
-  {
-   "id": "path-payments-dex",
-   "category": "protocol",
-   "mode": "research",
-   "question": "How do path payments and the Stellar DEX order book work?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "path payment|dex|order book|offer|liquidity"
-    ]
-   }
-  },
-  {
-   "id": "soroban-events",
-   "category": "chain-data",
-   "mode": "research",
-   "question": "How do I emit events from a Soroban contract and subscribe to them?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "event",
-     "soroban|contract|topic|publish"
-    ]
-   }
-  },
-  {
-   "id": "scf-build-award",
-   "category": "funding",
-   "mode": "research",
-   "question": "How does the Stellar Community Fund Build Award work and what do I submit?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "scf|community fund",
-     "build|award|submission|tranche|milestone"
-    ]
-   }
-  },
-  {
-   "id": "audit-defi-findings",
-   "category": "security",
-   "mode": "research",
-   "question": "What security issues have auditors found in Stellar DeFi or token contracts?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "audit|finding|vulnerab|severity|risk",
-     "soroban|defi|token|contract"
-    ]
-   }
-  },
-  {
-   "id": "ec-developer-count",
-   "category": "ecosystem-stats",
-   "mode": "research",
-   "question": "How many active developers does Stellar have according to Electric Capital?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "developer",
-     "stellar|electric capital|monthly|active"
-    ]
-   }
-  },
-  {
-   "id": "ecosystem-stablecoin-anchor",
-   "category": "ecosystem-map",
-   "mode": "projects",
-   "question": "stablecoin anchor off-ramp USDC",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "stablecoin|anchor|ramp|usdc|payment"
-    ]
-   }
-  },
-  {
-   "id": "ecosystem-wallet-passkey",
-   "category": "ecosystem-map",
-   "mode": "projects",
-   "question": "wallet passkey smart account",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "wallet|passkey|account|smart"
-    ]
-   }
-  },
-  {
-   "id": "protocol-current-base-reserve",
-   "category": "freshness-trap",
-   "mode": "research",
-   "question": "What is the current base reserve on Stellar mainnet?",
-   "expect": {
-    "liveSource": true,
-    "note": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
-   }
-  },
-  {
-   "id": "soroban-sdk-version",
-   "category": "freshness-trap",
-   "mode": "research",
-   "question": "Which version of soroban-sdk should I pin today for a brand-new contract?",
-   "expect": {
-    "liveSource": true,
-    "note": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
-   }
-  },
-  {
-   "id": "repos-zk",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "zk",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "noir|kale-sc|attest|private-payment|zk"
-    ],
-    "minTopScore": 50
-   }
-  },
-  {
-   "id": "repos-x402",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "x402",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "x402|stellarpay402|agentcard|machine.?payment"
-    ],
-    "minTopScore": 60
-   }
-  },
-  {
-   "id": "repos-oracle",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "oracle price feed",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "reflector|oracle|price.?feed"
-    ],
-    "minTopScore": 40
-   }
-  },
-  {
-   "id": "repos-streaming-payments",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "streaming payments",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "fluxity|tide|paystreme|stream"
-    ],
-    "minTopScore": 25
-   }
-  },
-  {
-   "id": "repos-escrow",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "escrow vault",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "escrow|vault|trustless|microvault"
-    ],
-    "minTopScore": 40
-   }
-  },
-  {
-   "id": "repos-soroswap",
-   "category": "code-references",
-   "mode": "repos",
-   "question": "soroswap",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "soroswap/"
-    ],
-    "minTopScore": 45
-   }
-  },
-  {
-   "id": "bridge-evm-to-stellar",
-   "category": "consumer-onboarding",
-   "mode": "research",
-   "question": "bridge assets from EVM to Stellar",
-   "expect": {
-    "answerRegex": [
-     "allbridge",
-     "cctp|circle"
-    ],
-    "forbiddenRegex": [
-     "starbridge"
-    ],
-    "note": "The 2026-07-09 demo miss: Starbridge (2022 research protocol, never productionized) chunks filled the top-K twice over while current routes (CCTP/USDC, Allbridge) sat at ranks 11-20. Guards the research-rank stage: per-doc dedupe + confidence (freshness/authority) ordering. Starbridge surfacing for consumer bridge intent = stale-advice failure, same class as recommending wasm32-unknown-unknown."
-   }
-  },
-  {
-   "id": "bridge-solana-to-stellar",
-   "category": "consumer-onboarding",
-   "mode": "projects",
-   "question": "solana to stellar bridge",
-   "expect": {
-    "answerRegex": [
-     "allbridge",
-     "rozo|cctp|circle"
-    ],
-    "note": "Corridor-matrix guard (2026-07-09): Solana corridors were invisible because supportedNetworks was seeded [stellar, evm] only. Allbridge (docs: Solana live) and Rozo/CCTP (Solana live) must surface for the Solana corridor. Generalizes the bridge-evm-to-stellar research guard to the projects lane + a second chain."
-   }
-  },
-  {
-   "id": "scf-handbook-link",
-   "category": "known-item-source",
-   "mode": "research",
-   "question": "SCF handbook link",
-   "expect": {
-    "answerRegex": [
-     "stellar\\.gitbook\\.io/scf-handbook",
-     "Welcome to the SCF Handbook"
-    ],
-    "note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it. 2026-07-14: the URL regex was JSON-over-escaped (\\\\\\\\. parsed to a regex demanding a literal backslash, which no URL contains) \u2014 the lock could never match even though live serves https://stellar.gitbook.io/scf-handbook at rank 1. Expectation fixed, retrieval was already correct."
-   }
-  },
-  {
-   "id": "cap-lookup",
-   "category": "protocol-concepts",
-   "mode": "research",
-   "question": "CAP-46 Soroban smart contracts proposal",
-   "expect": {
-    "answerRegex": [
-     "cap-0*46|CAP-46"
-    ],
-    "note": "F5a (audit root #5): CAPs were entirely absent from the corpus. Guards the cap source once the first refresh-research-corpus run lands; expected to fail until then."
-   }
-  },
-  {
-   "id": "latest-protocol-release",
-   "category": "protocol-currency",
-   "mode": "research",
-   "question": "latest soroban release",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "protocol\\s*2[6-9]|zipper"
-    ],
-    "minTopScore": 0.5
-   }
-  },
-  {
-   "id": "recent-mainnet-upgrade",
-   "category": "protocol-currency",
-   "mode": "research",
-   "question": "recent mainnet upgrade",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "protocol\\s*2[6-9]|zipper"
-    ],
-    "minTopScore": 0.5
-   }
-  },
-  {
-   "id": "blend-incident-facts",
-   "category": "incident-truth",
-   "mode": "research",
-   "question": "blend oracle manipulation incident",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "february 2026|2026-02|drained"
-    ],
-    "forbiddenRegex": [
-     "may 2026.{0,40}(attempted|contained)",
-     "\\$61 ?m|61 million dollars"
-    ],
-    "minTopScore": 0.4
-   }
-  },
-  {
-   "id": "yieldblox-incident-facts",
-   "category": "incident-truth",
-   "mode": "research",
-   "question": "yieldblox oracle incident",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "2026-02-22|february 2026|2026-02",
-     "61,249,278|61[.,]2 million xlm|10\\.2 million",
-     "quarantin"
-    ],
-    "forbiddenRegex": [
-     "may 2026.{0,40}(attempted|contained)",
-     "\\$61 ?m|61 million dollars"
-    ],
-    "top1UrlIncludes": "blockaid.io",
-    "note": "sls-022 (upstream #513): the incident row served 'May 2026, attempted & contained, $61 million in XLM'. Truth (Blockaid 2026-05-20 + BlockSec 2026-02-26): COMPLETED drain on 2026-02-22 of 61,249,278 XLM + ~1,000,197 USDC (~$10.2M); ~48M XLM later quarantined \u2014 quarantine is not recovery. The corrected curated record (cited to Blockaid) must be the top result; the wrong dating/amount phrasing must not surface. Expected to fail until the next refresh-research-corpus incident run lands."
-   }
-  },
-  {
-   "id": "cap-exact-id-0038",
-   "category": "protocol-concepts",
-   "mode": "research",
-   "question": "CAP-0038",
-   "source": "cap",
-   "limit": 10,
-   "expect": {
-    "top1UrlIncludes": "cap-0038.md",
-    "uniqueUrls": true,
-    "note": "sls-019 (upstream #510): q=CAP-0038&source=cap ranked its own document 23rd \u2014 cross-referencing CAPs won the vector race. An exact canonical identifier is a retrieval KEY: the named doc must be rank 1, and no URL may fill two slots of the page."
-   }
-  },
-  {
-   "id": "cap-exact-id-0021",
-   "category": "protocol-concepts",
-   "mode": "research",
-   "question": "cap-21",
-   "source": "cap",
-   "expect": {
-    "top1UrlIncludes": "cap-0021.md",
-    "note": "sls-019 variant-form lock: the short form cap-21 must normalize to cap-0021 and retrieve it at rank 1 (live rank was 7)."
-   }
-  },
-  {
-   "id": "cap-exact-id-0058",
-   "category": "protocol-concepts",
-   "mode": "research",
-   "question": "CAP 58",
-   "source": "cap",
-   "expect": {
-    "top1UrlIncludes": "cap-0058.md",
-    "note": "sls-019 variant-form lock: the space form CAP 58 must normalize to cap-0058 and retrieve it at rank 1 (live rank was 11)."
-   }
-  },
-  {
-   "id": "cap-dedup-asset-clawback",
-   "category": "protocol-concepts",
-   "mode": "research",
-   "question": "Asset Clawback",
-   "source": "cap",
-   "limit": 10,
-   "expect": {
-    "top1UrlIncludes": "cap-0035.md",
-    "uniqueUrls": true,
-    "note": "sls-019 dedup lock: q=Asset+Clawback&source=cap served cap-0035.md nine times in one 25-slot page \u2014 the source-starved vector pool made the per-doc collapse refill with duplicates. With the widened filtered pool, every URL in the page must be unique while distinct CAP docs exist."
-   }
-  },
-  {
-   "id": "security-program-consolidation",
-   "category": "security-program",
-   "mode": "research",
-   "question": "Effective 7 MAY 2026 SDF consolidated bug bounty single HackerOne Immunefi deprecated",
-   "limit": 3,
-   "expect": {
-    "answerRegex": [
-     "hackerone",
-     "immunefi",
-     "2026-05-07|7 may 2026|may 7,? 2026",
-     "openzeppelin"
-    ],
-    "note": "sls-020 (Tyler's exact transition wording, expected top-3 \u2192 limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
-   }
-  },
-  {
-   "id": "q-org-sdf-structure-mandate",
-   "category": "org-sdf",
-   "mode": "research",
-   "question": "How is the Stellar Development Foundation structured and funded? Is SDF a nonprofit, and does it pay taxes?",
-   "limit": 3,
-   "expect": {
-    "answerRegex": [
-     "self-funded",
-     "pays taxes"
-    ],
-    "expectUrlIncludes": "foundation/mandate",
-    "note": "sls-055 q-org-sdf-structure-mandate (broad lane, no source filter \u2014 mirrors the consumer's own fan-out): the current Mandate page's self-funded/pays-taxes wording must surface top-3 (the Terms page carries the companion Delaware non-profit wording). Expected to fail until the first ingest-sdf-org run lands."
-   }
-  },
-  {
-   "id": "q-org-sdf-enterprise-fund",
-   "category": "org-sdf",
-   "mode": "research",
-   "question": "What is the Stellar Enterprise Fund and how large is its portfolio?",
-   "limit": 3,
-   "expect": {
-    "answerRegex": [
-     "venture-style|portfolio"
-    ],
-    "expectUrlIncludes": "enterprise-fund",
-    "note": "urlIncludes carries the page lock; phrase regex relaxed to intro-chunk content (the $100m phrase lives in a sibling chunk the per-doc collapse drops)"
-   }
-  },
-  {
-   "id": "q-org-sdf-leadership-roles",
-   "category": "org-sdf",
-   "mode": "research",
-   "question": "Who is the Stellar Development Foundation's Chief Scientist, and who leads its Ecosystem team?",
-   "limit": 3,
-   "expect": {
-    "answerRegex": [
-     "Chief Scientist",
-     "VP of Ecosystem"
-    ],
-    "expectUrlIncludes": "foundation/team",
-    "note": "Tyler 2026-07-14 leadership-rendering probe: member ROLES live only in the Team page's embedded __NEXT_DATA__ cards, recovered by the next-data-person-cards extraction (David Mazieres = Founder and Chief Scientist; Justin Rice = VP of Ecosystem). Expected to fail until the ingest-sdf-org re-run with the roster lands."
-   }
-  },
-  {
-   "id": "capability-custody-identity",
-   "category": "capability-ranking",
-   "mode": "projects",
-   "question": "custody with staking",
-   "limit": 3,
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "cobo|bitgo|dfns|mpcvault|fordefi"
-    ]
-   },
-   "$comment": "Mention-vs-identity (2026-07-19; key re-grounded 2026-07-21): 'staking' is deliberate noise \u2014 a custody-IDENTITY record must rank top-3 above records that merely mention custody mid-prose. Key = any custody-identity record in the directory (cobo was the lone one on 07-19; dfns/bitgo/mpcvault/fordefi are now equally correct \u2014 none carries 'staking', by design)."
-  },
-  {
-   "id": "pg-award-recipients",
-   "category": "ecosystem",
-   "mode": "projects",
-   "question": "which projects have received the SCF Public Goods Award",
-   "limit": 12,
-   "expect": {
-    "answerRegex": [
-     "opengrants",
-     "scaffold[ -]stellar",
-     "(php|java|python) sdk"
-    ]
-   }
-  },
-  {
-   "id": "soroban-hosterror-decode",
-   "category": "soroban-dev",
-   "mode": "research",
-   "question": "What does HostError Budget LimitExceeded mean and how do I fix it?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "LimitExceeded",
-     "diagnostic|instructions|resource"
-    ],
-    "expectUrlIncludes": "errors-and-debugging",
-    "minTopScore": 0.65
-   },
-   "_note": "mirrors stellar-raven eval battery q-sor-decode-hosterror-codes (their 6e1f979): our corpus must keep answering the topics their gauntlet grades"
-  },
-  {
-   "id": "soroban-storage-ttl-cap",
-   "category": "soroban-dev",
-   "mode": "research",
-   "question": "What is the maximum TTL for persistent storage entries in Soroban and how does extend_ttl work?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "extend_ttl",
-     "3,?110,?400|180 days|archiv"
-    ],
-    "expectUrlIncludes": "storage",
-    "minTopScore": 0.65
-   },
-   "_note": "mirrors q-sor-persistent-unbounded-collection-cap"
-  },
-  {
-   "id": "soroban-test-event-assertions",
-   "category": "soroban-dev",
-   "mode": "research",
-   "question": "How do I assert on events emitted by a Soroban contract in tests?",
-   "expect": {
-    "liveSource": false,
-    "answerRegex": [
-     "events\\(\\)\\.all\\(\\)",
-     "last contract invocation|filter_by_contract"
-    ],
-    "expectUrlIncludes": "events",
-    "minTopScore": 0.65
-   },
-   "_note": "mirrors q-sor-test-event-assertion-ordering"
-  }
- ]
+	"$comment": "Stellar Light golden-question retrieval eval. We're the data/index layer, so each question is graded (case-insensitive) over the TOP-K SURFACED CONTENT. `mode` routes to the endpoint: research \u2192 /api/research (content), projects \u2192 /api/projects/search (projects), repos \u2192 /api/repos/search (code references). `answerRegex` = patterns that must EACH surface (the right thing shows up). `forbiddenRegex` = patterns that must NOT surface \u2014 the correctness check: a wrong/stale fact in the top-k FAILS the case even when the topic matched. `liveSource: true` marks live-network facts the static corpus isn't meant to answer (reported N/A). `expectUrlIncludes` = a substring an expected doc URL should contain. `minTopScore` = the best result's score must clear it: for research it's the vector cosine; for repos it's the leading repo's repoScore (0-100) \u2014 a QUALITY FLOOR so junk can't be the #1 code reference for a tech query. Storing isn't enough; the right content has to surface, the wrong content must not, and the top reference has to be quality.",
+	"questions": [
+		{
+			"id": "agentic-payments-x402",
+			"category": "agentic-payments",
+			"mode": "research",
+			"question": "How do I charge AI agents per API call on Stellar?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["x402|machine payment|agentic payment"],
+				"expectUrlIncludes": "agentic-payments",
+				"minTopScore": 0.7
+			}
+		},
+		{
+			"id": "standards-anchor-deposit",
+			"category": "standards",
+			"mode": "research",
+			"question": "Which SEP should an anchor implement for hosted deposits and withdrawals, and how does authentication work?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"sep-?24|hosted deposit|anchor",
+					"sep-?10|authentication|web auth"
+				]
+			}
+		},
+		{
+			"id": "protocol-trustline",
+			"category": "protocol",
+			"mode": "research",
+			"question": "What is a trustline on Stellar and why do I need one?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["trustline", "asset|issuer"]
+			}
+		},
+		{
+			"id": "soroban-counter",
+			"category": "soroban-build",
+			"mode": "research",
+			"question": "Write a minimal Soroban contract that stores a counter and increments it.",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroban", "contract"]
+			}
+		},
+		{
+			"id": "dapp-freighter",
+			"category": "dapp-build",
+			"mode": "research",
+			"question": "How do I connect the Freighter wallet in a React app and submit a payment?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["freighter|wallet", "transaction|payment|sign"]
+			}
+		},
+		{
+			"id": "assets-clawback",
+			"category": "assets",
+			"mode": "research",
+			"question": "How do I issue a regulated asset on Stellar with clawback enabled?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["clawback", "asset|flag|auth"]
+			}
+		},
+		{
+			"id": "data-rpc-vs-horizon",
+			"category": "chain-data",
+			"mode": "research",
+			"question": "Should I use Horizon or Stellar RPC for a new indexer, and how do I stream contract events?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["rpc|horizon", "event|indexer|stream"]
+			}
+		},
+		{
+			"id": "orient-remittance",
+			"category": "orient",
+			"mode": "research",
+			"question": "I want to build a USDC remittance app on Stellar for the Philippines corridor. Where do I start?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["anchor|sep-?24|usdc|payment|soroban"]
+			}
+		},
+		{
+			"id": "dossier-blend-safety",
+			"category": "project-dossier",
+			"mode": "research",
+			"question": "Tell me about the Blend protocol on Stellar \u2014 is it safe to build on?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"blend",
+					"oracle|incident|exploit|attack|audit|security"
+				],
+				"forbiddenRegex": ["\\bunaudited\\b", "no (public |known )?audits?\\b"]
+			}
+		},
+		{
+			"id": "audit-reentrancy",
+			"category": "security",
+			"mode": "research",
+			"question": "What reentrancy or auth bugs have auditors found in Soroban contracts?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["audit|finding|vulnerab", "soroban|contract|auth"]
+			}
+		},
+		{
+			"id": "ecosystem-rwa-map",
+			"category": "ecosystem-map",
+			"mode": "projects",
+			"question": "real-world asset RWA tokenization",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["rwa|real-world|tokeniz|asset"]
+			}
+		},
+		{
+			"id": "ecosystem-agent-payments-projects",
+			"category": "ecosystem-map",
+			"mode": "projects",
+			"question": "agent payments x402 API monetization",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["agent|payment|x402|api"]
+			}
+		},
+		{
+			"id": "ecosystem-defi-yield",
+			"category": "ecosystem-map",
+			"mode": "projects",
+			"question": "defi yield aggregator lending",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["defi|yield|lend|aggregat"]
+			}
+		},
+		{
+			"id": "consensus-scp",
+			"category": "protocol",
+			"mode": "research",
+			"question": "How does the Stellar Consensus Protocol reach agreement across nodes?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["scp|consensus", "quorum|federated|node|validator"]
+			}
+		},
+		{
+			"id": "soroban-auth",
+			"category": "soroban-build",
+			"mode": "research",
+			"question": "How does require_auth and authorization work in a Soroban contract?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroban|contract", "auth"]
+			}
+		},
+		{
+			"id": "passkeys-smart-wallet",
+			"category": "dapp-build",
+			"mode": "research",
+			"question": "How do passkeys and smart wallets work on Stellar?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["passkey|smart wallet|webauthn|secp256r1|policy signer"]
+			}
+		},
+		{
+			"id": "fees-inclusion",
+			"category": "protocol",
+			"mode": "research",
+			"question": "How are Stellar transaction fees and the inclusion fee calculated?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["fee", "base fee|inclusion|surge|stroop"]
+			}
+		},
+		{
+			"id": "path-payments-dex",
+			"category": "protocol",
+			"mode": "research",
+			"question": "How do path payments and the Stellar DEX order book work?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["path payment|dex|order book|offer|liquidity"]
+			}
+		},
+		{
+			"id": "soroban-events",
+			"category": "chain-data",
+			"mode": "research",
+			"question": "How do I emit events from a Soroban contract and subscribe to them?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["event", "soroban|contract|topic|publish"]
+			}
+		},
+		{
+			"id": "scf-build-award",
+			"category": "funding",
+			"mode": "research",
+			"question": "How does the Stellar Community Fund Build Award work and what do I submit?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"scf|community fund",
+					"build|award|submission|tranche|milestone"
+				]
+			}
+		},
+		{
+			"id": "audit-defi-findings",
+			"category": "security",
+			"mode": "research",
+			"question": "What security issues have auditors found in Stellar DeFi or token contracts?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"audit|finding|vulnerab|severity|risk",
+					"soroban|defi|token|contract"
+				]
+			}
+		},
+		{
+			"id": "ec-developer-count",
+			"category": "ecosystem-stats",
+			"mode": "research",
+			"question": "How many active developers does Stellar have according to Electric Capital?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["developer", "stellar|electric capital|monthly|active"]
+			}
+		},
+		{
+			"id": "ecosystem-stablecoin-anchor",
+			"category": "ecosystem-map",
+			"mode": "projects",
+			"question": "stablecoin anchor off-ramp USDC",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["stablecoin|anchor|ramp|usdc|payment"]
+			}
+		},
+		{
+			"id": "ecosystem-wallet-passkey",
+			"category": "ecosystem-map",
+			"mode": "projects",
+			"question": "wallet passkey smart account",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["wallet|passkey|account|smart"]
+			}
+		},
+		{
+			"id": "protocol-current-base-reserve",
+			"category": "freshness-trap",
+			"mode": "research",
+			"question": "What is the current base reserve on Stellar mainnet?",
+			"expect": {
+				"liveSource": true,
+				"note": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
+			}
+		},
+		{
+			"id": "soroban-sdk-version",
+			"category": "freshness-trap",
+			"mode": "research",
+			"question": "Which version of soroban-sdk should I pin today for a brand-new contract?",
+			"expect": {
+				"liveSource": true,
+				"note": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
+			}
+		},
+		{
+			"id": "repos-zk",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "zk",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["noir|kale-sc|attest|private-payment|zk"],
+				"minTopScore": 50
+			}
+		},
+		{
+			"id": "repos-x402",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "x402",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["x402|stellarpay402|agentcard|machine.?payment"],
+				"minTopScore": 60
+			}
+		},
+		{
+			"id": "repos-oracle",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "oracle price feed",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["reflector|oracle|price.?feed"],
+				"minTopScore": 40
+			}
+		},
+		{
+			"id": "repos-streaming-payments",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "streaming payments",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["fluxity|tide|paystreme|stream"],
+				"minTopScore": 25
+			}
+		},
+		{
+			"id": "repos-escrow",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "escrow vault",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["escrow|vault|trustless|microvault"],
+				"minTopScore": 40
+			}
+		},
+		{
+			"id": "repos-soroswap",
+			"category": "code-references",
+			"mode": "repos",
+			"question": "soroswap",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["soroswap/"],
+				"minTopScore": 45
+			}
+		},
+		{
+			"id": "bridge-evm-to-stellar",
+			"category": "consumer-onboarding",
+			"mode": "research",
+			"question": "bridge assets from EVM to Stellar",
+			"expect": {
+				"answerRegex": ["allbridge", "cctp|circle"],
+				"forbiddenRegex": ["starbridge"],
+				"note": "The 2026-07-09 demo miss: Starbridge (2022 research protocol, never productionized) chunks filled the top-K twice over while current routes (CCTP/USDC, Allbridge) sat at ranks 11-20. Guards the research-rank stage: per-doc dedupe + confidence (freshness/authority) ordering. Starbridge surfacing for consumer bridge intent = stale-advice failure, same class as recommending wasm32-unknown-unknown."
+			}
+		},
+		{
+			"id": "bridge-solana-to-stellar",
+			"category": "consumer-onboarding",
+			"mode": "projects",
+			"question": "solana to stellar bridge",
+			"expect": {
+				"answerRegex": ["allbridge", "rozo|cctp|circle"],
+				"note": "Corridor-matrix guard (2026-07-09): Solana corridors were invisible because supportedNetworks was seeded [stellar, evm] only. Allbridge (docs: Solana live) and Rozo/CCTP (Solana live) must surface for the Solana corridor. Generalizes the bridge-evm-to-stellar research guard to the projects lane + a second chain."
+			}
+		},
+		{
+			"id": "scf-handbook-link",
+			"category": "known-item-source",
+			"mode": "research",
+			"question": "SCF handbook link",
+			"expect": {
+				"answerRegex": [
+					"stellar\\.gitbook\\.io/scf-handbook",
+					"Welcome to the SCF Handbook"
+				],
+				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it. 2026-07-14: the URL regex was JSON-over-escaped (\\\\\\\\. parsed to a regex demanding a literal backslash, which no URL contains) \u2014 the lock could never match even though live serves https://stellar.gitbook.io/scf-handbook at rank 1. Expectation fixed, retrieval was already correct."
+			}
+		},
+		{
+			"id": "cap-lookup",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "CAP-46 Soroban smart contracts proposal",
+			"expect": {
+				"answerRegex": ["cap-0*46|CAP-46"],
+				"note": "F5a (audit root #5): CAPs were entirely absent from the corpus. Guards the cap source once the first refresh-research-corpus run lands; expected to fail until then."
+			}
+		},
+		{
+			"id": "latest-protocol-release",
+			"category": "protocol-currency",
+			"mode": "research",
+			"question": "latest soroban release",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["protocol\\s*2[6-9]|zipper"],
+				"minTopScore": 0.5
+			}
+		},
+		{
+			"id": "recent-mainnet-upgrade",
+			"category": "protocol-currency",
+			"mode": "research",
+			"question": "recent mainnet upgrade",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["protocol\\s*2[6-9]|zipper"],
+				"minTopScore": 0.5
+			}
+		},
+		{
+			"id": "blend-incident-facts",
+			"category": "incident-truth",
+			"mode": "research",
+			"question": "blend oracle manipulation incident",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["february 2026|2026-02|drained"],
+				"forbiddenRegex": [
+					"may 2026.{0,40}(attempted|contained)",
+					"\\$61 ?m|61 million dollars"
+				],
+				"minTopScore": 0.4
+			}
+		},
+		{
+			"id": "yieldblox-incident-facts",
+			"category": "incident-truth",
+			"mode": "research",
+			"question": "yieldblox oracle incident",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"2026-02-22|february 2026|2026-02",
+					"61,249,278|61[.,]2 million xlm|10\\.2 million",
+					"quarantin"
+				],
+				"forbiddenRegex": [
+					"may 2026.{0,40}(attempted|contained)",
+					"\\$61 ?m|61 million dollars"
+				],
+				"top1UrlIncludes": "blockaid.io",
+				"note": "sls-022 (upstream #513): the incident row served 'May 2026, attempted & contained, $61 million in XLM'. Truth (Blockaid 2026-05-20 + BlockSec 2026-02-26): COMPLETED drain on 2026-02-22 of 61,249,278 XLM + ~1,000,197 USDC (~$10.2M); ~48M XLM later quarantined \u2014 quarantine is not recovery. The corrected curated record (cited to Blockaid) must be the top result; the wrong dating/amount phrasing must not surface. Expected to fail until the next refresh-research-corpus incident run lands."
+			}
+		},
+		{
+			"id": "cap-exact-id-0038",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "CAP-0038",
+			"source": "cap",
+			"limit": 10,
+			"expect": {
+				"top1UrlIncludes": "cap-0038.md",
+				"uniqueUrls": true,
+				"note": "sls-019 (upstream #510): q=CAP-0038&source=cap ranked its own document 23rd \u2014 cross-referencing CAPs won the vector race. An exact canonical identifier is a retrieval KEY: the named doc must be rank 1, and no URL may fill two slots of the page."
+			}
+		},
+		{
+			"id": "cap-exact-id-0021",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "cap-21",
+			"source": "cap",
+			"expect": {
+				"top1UrlIncludes": "cap-0021.md",
+				"note": "sls-019 variant-form lock: the short form cap-21 must normalize to cap-0021 and retrieve it at rank 1 (live rank was 7)."
+			}
+		},
+		{
+			"id": "cap-exact-id-0058",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "CAP 58",
+			"source": "cap",
+			"expect": {
+				"top1UrlIncludes": "cap-0058.md",
+				"note": "sls-019 variant-form lock: the space form CAP 58 must normalize to cap-0058 and retrieve it at rank 1 (live rank was 11)."
+			}
+		},
+		{
+			"id": "cap-dedup-asset-clawback",
+			"category": "protocol-concepts",
+			"mode": "research",
+			"question": "Asset Clawback",
+			"source": "cap",
+			"limit": 10,
+			"expect": {
+				"top1UrlIncludes": "cap-0035.md",
+				"uniqueUrls": true,
+				"note": "sls-019 dedup lock: q=Asset+Clawback&source=cap served cap-0035.md nine times in one 25-slot page \u2014 the source-starved vector pool made the per-doc collapse refill with duplicates. With the widened filtered pool, every URL in the page must be unique while distinct CAP docs exist."
+			}
+		},
+		{
+			"id": "security-program-consolidation",
+			"category": "security-program",
+			"mode": "research",
+			"question": "Effective 7 MAY 2026 SDF consolidated bug bounty single HackerOne Immunefi deprecated",
+			"limit": 3,
+			"expect": {
+				"answerRegex": [
+					"hackerone",
+					"immunefi",
+					"2026-05-07|7 may 2026|may 7,? 2026",
+					"openzeppelin"
+				],
+				"note": "sls-020 (Tyler's exact transition wording, expected top-3 \u2192 limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
+			}
+		},
+		{
+			"id": "q-org-sdf-structure-mandate",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "How is the Stellar Development Foundation structured and funded? Is SDF a nonprofit, and does it pay taxes?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["self-funded", "pays taxes"],
+				"expectUrlIncludes": "foundation/mandate",
+				"note": "sls-055 q-org-sdf-structure-mandate (broad lane, no source filter \u2014 mirrors the consumer's own fan-out): the current Mandate page's self-funded/pays-taxes wording must surface top-3 (the Terms page carries the companion Delaware non-profit wording). Expected to fail until the first ingest-sdf-org run lands."
+			}
+		},
+		{
+			"id": "q-org-sdf-enterprise-fund",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "What is the Stellar Enterprise Fund and how large is its portfolio?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["venture-style|portfolio"],
+				"expectUrlIncludes": "enterprise-fund",
+				"note": "urlIncludes carries the page lock; phrase regex relaxed to intro-chunk content (the $100m phrase lives in a sibling chunk the per-doc collapse drops)"
+			}
+		},
+		{
+			"id": "q-org-sdf-leadership-roles",
+			"category": "org-sdf",
+			"mode": "research",
+			"question": "Who is the Stellar Development Foundation's Chief Scientist, and who leads its Ecosystem team?",
+			"limit": 3,
+			"expect": {
+				"answerRegex": ["Chief Scientist", "VP of Ecosystem"],
+				"expectUrlIncludes": "foundation/team",
+				"note": "Tyler 2026-07-14 leadership-rendering probe: member ROLES live only in the Team page's embedded __NEXT_DATA__ cards, recovered by the next-data-person-cards extraction (David Mazieres = Founder and Chief Scientist; Justin Rice = VP of Ecosystem). Expected to fail until the ingest-sdf-org re-run with the roster lands."
+			}
+		},
+		{
+			"id": "capability-custody-identity",
+			"category": "capability-ranking",
+			"mode": "projects",
+			"question": "custody with staking",
+			"limit": 3,
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["cobo|bitgo|dfns|mpcvault|fordefi"]
+			},
+			"$comment": "Mention-vs-identity (2026-07-19; key re-grounded 2026-07-21): 'staking' is deliberate noise \u2014 a custody-IDENTITY record must rank top-3 above records that merely mention custody mid-prose. Key = any custody-identity record in the directory (cobo was the lone one on 07-19; dfns/bitgo/mpcvault/fordefi are now equally correct \u2014 none carries 'staking', by design)."
+		},
+		{
+			"id": "pg-award-recipients",
+			"category": "ecosystem",
+			"mode": "projects",
+			"question": "which projects have received the SCF Public Goods Award",
+			"limit": 12,
+			"expect": {
+				"answerRegex": [
+					"scaffold[ -]stellar",
+					"(php|java|python)[ -]?(stellar[ -]?)?sdk"
+				],
+				"forbiddenRegex": ["\"slug\"\\s*:\\s*\"pg-atlas\""],
+				"note": "Enumeration question: the answer set is defined by the publicGoods.awardRounds field, not by prose. A row without an award must not rank among recipients (pg-atlas ranked 7th on name alone, 2026-08-25)."
+			}
+		},
+		{
+			"id": "soroban-hosterror-decode",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "What does HostError Budget LimitExceeded mean and how do I fix it?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["LimitExceeded", "diagnostic|instructions|resource"],
+				"expectUrlIncludes": "errors-and-debugging",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors stellar-raven eval battery q-sor-decode-hosterror-codes (their 6e1f979): our corpus must keep answering the topics their gauntlet grades"
+		},
+		{
+			"id": "soroban-storage-ttl-cap",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "What is the maximum TTL for persistent storage entries in Soroban and how does extend_ttl work?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["extend_ttl", "3,?110,?400|180 days|archiv"],
+				"expectUrlIncludes": "storage",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors q-sor-persistent-unbounded-collection-cap"
+		},
+		{
+			"id": "soroban-test-event-assertions",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "How do I assert on events emitted by a Soroban contract in tests?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"events\\(\\)\\.all\\(\\)",
+					"last contract invocation|filter_by_contract"
+				],
+				"expectUrlIncludes": "events",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors q-sor-test-event-assertion-ordering"
+		}
+	]
 }

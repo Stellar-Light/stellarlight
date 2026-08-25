@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchRepoInfo } from "../../src/lib/github";
 
 // Mock fetch globally
@@ -88,18 +88,13 @@ describe("GitHub aggregation", () => {
 				),
 			);
 
-			const lastActivityAt =
-				lastTs > 0 ? new Date(lastTs).toISOString() : null;
+			const lastActivityAt = lastTs > 0 ? new Date(lastTs).toISOString() : null;
 
 			expect(lastActivityAt).toBe("2024-01-15T10:30:00.000Z");
 		});
 
 		it("should sum openIssues across multiple repos", () => {
-			const repos = [
-				{ openIssues: 2 },
-				{ openIssues: 5 },
-				{ openIssues: 3 },
-			];
+			const repos = [{ openIssues: 2 }, { openIssues: 5 }, { openIssues: 3 }];
 
 			const openIssuesTotal = repos.reduce(
 				(sum, r) => sum + (r.openIssues || 0),
@@ -122,8 +117,7 @@ describe("GitHub aggregation", () => {
 				),
 			);
 
-			const lastActivityAt =
-				lastTs > 0 ? new Date(lastTs).toISOString() : null;
+			const lastActivityAt = lastTs > 0 ? new Date(lastTs).toISOString() : null;
 
 			expect(lastActivityAt).toBe("2024-01-12T14:20:00.000Z");
 		});
@@ -163,4 +157,3 @@ describe("GitHub aggregation", () => {
 		});
 	});
 });
-

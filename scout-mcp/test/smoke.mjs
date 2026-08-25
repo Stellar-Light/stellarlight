@@ -28,7 +28,9 @@ function pass(name) {
 function fail(name, reason) {
 	failed += 1;
 	failures.push({ name, reason });
-	process.stdout.write(`  \x1b[31m✗\x1b[0m ${name}\n    \x1b[2m${reason}\x1b[0m\n`);
+	process.stdout.write(
+		`  \x1b[31m✗\x1b[0m ${name}\n    \x1b[2m${reason}\x1b[0m\n`,
+	);
 }
 
 /**
@@ -120,7 +122,11 @@ async function callTool(name, args = {}) {
 	}
 	// Tools that hit the network return JSON-stringified payloads.
 	try {
-		return { isError: resp.result.isError === true, data: JSON.parse(text), raw: text };
+		return {
+			isError: resp.result.isError === true,
+			data: JSON.parse(text),
+			raw: text,
+		};
 	} catch {
 		return { isError: resp.result.isError === true, data: null, raw: text };
 	}
@@ -144,7 +150,10 @@ async function main() {
 	console.log("◆ Tools registry");
 	try {
 		const { readFileSync } = await import("node:fs");
-		const src = readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
+		const src = readFileSync(
+			new URL("../src/index.ts", import.meta.url),
+			"utf8",
+		);
 		const expectedCount = (src.match(/registerTool\(/g) ?? []).length;
 		const resp = await callMcp("tools/list", {});
 		const tools = resp?.result?.tools ?? [];
@@ -184,12 +193,16 @@ async function main() {
 		const got = tools.map((t) => t.name).sort();
 		const missing = expected.filter((n) => !got.includes(n));
 		if (missing.length === 0) pass("every expected tool registered");
-		else fail("every expected tool registered", `missing: ${missing.join(", ")}`);
+		else
+			fail("every expected tool registered", `missing: ${missing.join(", ")}`);
 
 		// Verify each tool has a description + input schema
 		for (const t of tools) {
 			if (!t.description || t.description.length < 40) {
-				fail(`tool '${t.name}' has substantive description`, `len=${t.description?.length}`);
+				fail(
+					`tool '${t.name}' has substantive description`,
+					`len=${t.description?.length}`,
+				);
 			} else {
 				pass(`tool '${t.name}' description present`);
 			}
@@ -215,7 +228,8 @@ async function main() {
 		else fail("filters to source=audit", `first.source=${first?.source}`);
 		if (first?.score && first.score > 0.5) pass("returns relevant score");
 		else fail("returns relevant score", `score=${first?.score}`);
-		if (first?.severity !== undefined) pass("audit chunks include severity field");
+		if (first?.severity !== undefined)
+			pass("audit chunks include severity field");
 		else fail("audit chunks include severity field", "missing");
 	} catch (e) {
 		fail("search_research smoke", e.message);
@@ -227,8 +241,13 @@ async function main() {
 			name: "search_research",
 			arguments: { source: "audit" }, // missing required 'query'
 		});
-		if (resp.error || resp.result?.isError) pass("rejects missing required 'query'");
-		else fail("rejects missing required 'query'", "request unexpectedly succeeded");
+		if (resp.error || resp.result?.isError)
+			pass("rejects missing required 'query'");
+		else
+			fail(
+				"rejects missing required 'query'",
+				"request unexpectedly succeeded",
+			);
 	} catch (e) {
 		// SDK may throw before reaching server — that's also acceptable
 		pass("rejects missing required 'query'");
@@ -242,9 +261,11 @@ async function main() {
 		else fail("ok=true", `ok=${data?.ok}`);
 		if (data?.version) pass(`reports version: ${data.version}`);
 		else fail("reports version", "missing");
-		if (Array.isArray(data?.sources)) pass(`enumerates ${data.sources.length} sources`);
+		if (Array.isArray(data?.sources))
+			pass(`enumerates ${data.sources.length} sources`);
 		else fail("enumerates sources", "missing");
-		if (Array.isArray(data?.endpoints) && data.endpoints.length >= 9) pass(`enumerates ${data.endpoints.length} endpoints`);
+		if (Array.isArray(data?.endpoints) && data.endpoints.length >= 9)
+			pass(`enumerates ${data.endpoints.length} endpoints`);
 		else fail("enumerates endpoints", `got ${data?.endpoints?.length}`);
 	} catch (e) {
 		fail("get_status smoke", e.message);
@@ -272,8 +293,12 @@ async function main() {
 
 	// ── Session 6: get_hackathons (status=completed) ────────────────────────
 	try {
-		const { data } = await callTool("get_hackathons", { status: "completed", limit: 5 });
-		if (data?.hackathons?.length > 0) pass(`returns completed events (${data.hackathons.length})`);
+		const { data } = await callTool("get_hackathons", {
+			status: "completed",
+			limit: 5,
+		});
+		if (data?.hackathons?.length > 0)
+			pass(`returns completed events (${data.hackathons.length})`);
 		else fail("returns completed events", "got 0");
 	} catch (e) {
 		fail("get_hackathons completed", e.message);
@@ -282,15 +307,24 @@ async function main() {
 	// ── Session 7: get_hackathon (curated detail) ───────────────────────────
 	console.log("\n◆ get_hackathon");
 	try {
-		const { data: list } = await callTool("get_hackathons", { status: "completed", limit: 1 });
+		const { data: list } = await callTool("get_hackathons", {
+			status: "completed",
+			limit: 1,
+		});
 		const slug = list?.hackathons?.[0]?.slug;
 		if (!slug) {
 			fail("get_hackathon picks a real slug", "no completed events");
 		} else {
 			const { data } = await callTool("get_hackathon", { slug });
-			if (data?.hackathon?.slug === slug || data?.slug === slug) pass(`returns hackathon detail for ${slug}`);
-			else if (data?.meta?.note) pass(`returns DoraHacks-only with .meta.note for ${slug}`);
-			else fail(`returns hackathon detail for ${slug}`, JSON.stringify(data).slice(0, 150));
+			if (data?.hackathon?.slug === slug || data?.slug === slug)
+				pass(`returns hackathon detail for ${slug}`);
+			else if (data?.meta?.note)
+				pass(`returns DoraHacks-only with .meta.note for ${slug}`);
+			else
+				fail(
+					`returns hackathon detail for ${slug}`,
+					JSON.stringify(data).slice(0, 150),
+				);
 		}
 	} catch (e) {
 		fail("get_hackathon smoke", e.message);
@@ -298,9 +332,16 @@ async function main() {
 
 	// ── Session 8: get_hackathon (invalid slug → 404 / error) ───────────────
 	try {
-		const { isError, data } = await callTool("get_hackathon", { slug: "this-does-not-exist-zzz" });
-		if (isError || data?.error || data === null) pass("invalid slug returns error or null");
-		else fail("invalid slug returns error or null", `data=${JSON.stringify(data).slice(0, 100)}`);
+		const { isError, data } = await callTool("get_hackathon", {
+			slug: "this-does-not-exist-zzz",
+		});
+		if (isError || data?.error || data === null)
+			pass("invalid slug returns error or null");
+		else
+			fail(
+				"invalid slug returns error or null",
+				`data=${JSON.stringify(data).slice(0, 100)}`,
+			);
 	} catch (e) {
 		pass("invalid slug returns error or null");
 	}
@@ -308,13 +349,20 @@ async function main() {
 	// ── Session 9: compare_hackathons ───────────────────────────────────────
 	console.log("\n◆ compare_hackathons");
 	try {
-		const { data: list } = await callTool("get_hackathons", { status: "completed", limit: 3 });
-		const slugs = (list?.hackathons ?? []).slice(0, 2).map((h) => h.slug).filter(Boolean);
+		const { data: list } = await callTool("get_hackathons", {
+			status: "completed",
+			limit: 3,
+		});
+		const slugs = (list?.hackathons ?? [])
+			.slice(0, 2)
+			.map((h) => h.slug)
+			.filter(Boolean);
 		if (slugs.length < 2) {
 			fail("compare_hackathons picks 2 real slugs", "not enough events");
 		} else {
 			const { data } = await callTool("compare_hackathons", { slugs });
-			if (Array.isArray(data?.hackathons) && data.hackathons.length === 2) pass(`compares ${slugs.join(" vs ")}`);
+			if (Array.isArray(data?.hackathons) && data.hackathons.length === 2)
+				pass(`compares ${slugs.join(" vs ")}`);
 			else fail("compares 2 hackathons", `got ${data?.hackathons?.length}`);
 			if (data?.deltas?.notes) pass("includes deltas.notes");
 			else fail("includes deltas.notes", "missing");
@@ -329,7 +377,8 @@ async function main() {
 			name: "compare_hackathons",
 			arguments: { slugs: ["only-one"] },
 		});
-		if (resp.error || resp.result?.isError) pass("compare_hackathons rejects 1 slug");
+		if (resp.error || resp.result?.isError)
+			pass("compare_hackathons rejects 1 slug");
 		else fail("compare_hackathons rejects 1 slug", "unexpectedly succeeded");
 	} catch (e) {
 		pass("compare_hackathons rejects 1 slug");
@@ -339,11 +388,17 @@ async function main() {
 	console.log("\n◆ get_builders");
 	try {
 		const { data } = await callTool("get_builders", { limit: 2 });
-		if (Array.isArray(data?.builders)) pass(`returns builders (${data.builders.length})`);
+		if (Array.isArray(data?.builders))
+			pass(`returns builders (${data.builders.length})`);
 		else fail("returns builders array", "missing");
 		const b = data?.builders?.[0];
-		if (b?.displayName || b?.githubUsername) pass("builder has displayName/githubUsername");
-		else fail("builder has displayName/githubUsername", JSON.stringify(b).slice(0, 100));
+		if (b?.displayName || b?.githubUsername)
+			pass("builder has displayName/githubUsername");
+		else
+			fail(
+				"builder has displayName/githubUsername",
+				JSON.stringify(b).slice(0, 100),
+			);
 	} catch (e) {
 		fail("get_builders smoke", e.message);
 	}
@@ -351,10 +406,15 @@ async function main() {
 	// ── Session 12: search_projects (tiered matchMode) ──────────────────────
 	console.log("\n◆ search_projects");
 	try {
-		const { data } = await callTool("search_projects", { q: "stablecoin", limit: 3 });
-		if (data?.meta?.matchMode) pass(`returns matchMode: ${data.meta.matchMode}`);
+		const { data } = await callTool("search_projects", {
+			q: "stablecoin",
+			limit: 3,
+		});
+		if (data?.meta?.matchMode)
+			pass(`returns matchMode: ${data.meta.matchMode}`);
 		else fail("returns matchMode", "missing");
-		if (Array.isArray(data?.projects)) pass(`returns projects (${data.projects.length})`);
+		if (Array.isArray(data?.projects))
+			pass(`returns projects (${data.projects.length})`);
 		else fail("returns projects array", "missing");
 	} catch (e) {
 		fail("search_projects smoke", e.message);
@@ -366,7 +426,10 @@ async function main() {
 			q: "real time price api soroban",
 			limit: 5,
 		});
-		if (data?.meta?.matchMode && ["strict", "loose-1", "majority"].includes(data.meta.matchMode)) {
+		if (
+			data?.meta?.matchMode &&
+			["strict", "loose-1", "majority"].includes(data.meta.matchMode)
+		) {
 			pass(`multi-word query uses ${data.meta.matchMode} mode`);
 		} else {
 			fail("multi-word query has a tier", `matchMode=${data?.meta?.matchMode}`);
@@ -379,9 +442,11 @@ async function main() {
 	console.log("\n◆ get_rfps");
 	try {
 		const { data } = await callTool("get_rfps", { status: "open" });
-		if (Array.isArray(data?.rfps)) pass(`returns ${data.rfps.length} open RFPs`);
+		if (Array.isArray(data?.rfps))
+			pass(`returns ${data.rfps.length} open RFPs`);
 		else fail("returns rfps array", "missing");
-		if (data?.meta?.activeQuarter) pass(`reports activeQuarter: ${data.meta.activeQuarter}`);
+		if (data?.meta?.activeQuarter)
+			pass(`reports activeQuarter: ${data.meta.activeQuarter}`);
 		else fail("reports activeQuarter", "missing");
 	} catch (e) {
 		fail("get_rfps smoke", e.message);
@@ -391,13 +456,19 @@ async function main() {
 	console.log("\n◆ list_skills + get_skill");
 	try {
 		const { data } = await callTool("list_skills");
-		if (Array.isArray(data?.skills) && data.skills.length >= 5) pass(`returns ${data.skills.length} skills`);
+		if (Array.isArray(data?.skills) && data.skills.length >= 5)
+			pass(`returns ${data.skills.length} skills`);
 		else fail("returns 5+ skills", `got ${data?.skills?.length}`);
 
 		const sample = data?.skills?.[0]?.name ?? "soroban";
 		const { data: skill } = await callTool("get_skill", { name: sample });
-		if (skill?.content || skill?.skill?.content) pass(`get_skill returns content for '${sample}'`);
-		else fail(`get_skill returns content for '${sample}'`, JSON.stringify(skill).slice(0, 150));
+		if (skill?.content || skill?.skill?.content)
+			pass(`get_skill returns content for '${sample}'`);
+		else
+			fail(
+				`get_skill returns content for '${sample}'`,
+				JSON.stringify(skill).slice(0, 150),
+			);
 	} catch (e) {
 		fail("list_skills / get_skill smoke", e.message);
 	}
@@ -408,7 +479,8 @@ async function main() {
 		const { data } = await callTool("get_leaderboard");
 		if (data?.ecosystem) pass("returns ecosystem block");
 		else fail("returns ecosystem block", "missing");
-		if (data?.ecosystem?.activeDevs28d > 0) pass(`reports ${data.ecosystem.activeDevs28d} active devs`);
+		if (data?.ecosystem?.activeDevs28d > 0)
+			pass(`reports ${data.ecosystem.activeDevs28d} active devs`);
 		else fail("reports active devs", "missing or 0");
 	} catch (e) {
 		fail("get_leaderboard smoke", e.message);
@@ -421,7 +493,11 @@ async function main() {
 		if (Array.isArray(data?.clusters) && data.clusters.length > 0) {
 			pass(`returns ${data.clusters.length} category clusters`);
 			const c = data.clusters[0];
-			if (typeof c?.crowdedness === "number" && c.crowdedness >= 1 && c.crowdedness <= 10) {
+			if (
+				typeof c?.crowdedness === "number" &&
+				c.crowdedness >= 1 &&
+				c.crowdedness <= 10
+			) {
 				pass(`crowdedness is log-scaled 1-10 (got ${c.crowdedness})`);
 			} else {
 				fail("crowdedness is 1-10", `got ${c?.crowdedness}`);
@@ -436,11 +512,19 @@ async function main() {
 	// ── Session 18: analyze_ecosystem ───────────────────────────────────────
 	console.log("\n◆ analyze_ecosystem");
 	try {
-		const { data } = await callTool("analyze_ecosystem", { dimension: "funding" });
+		const { data } = await callTool("analyze_ecosystem", {
+			dimension: "funding",
+		});
 		if (data?.funding) pass("dimension=funding returns funding block");
-		else fail("dimension=funding returns funding block", JSON.stringify(data).slice(0, 100));
-		if (data?.hackathons === undefined) pass("dimension=funding excludes other sections");
-		else fail("dimension=funding excludes other sections", "hackathons present");
+		else
+			fail(
+				"dimension=funding returns funding block",
+				JSON.stringify(data).slice(0, 100),
+			);
+		if (data?.hackathons === undefined)
+			pass("dimension=funding excludes other sections");
+		else
+			fail("dimension=funding excludes other sections", "hackathons present");
 	} catch (e) {
 		fail("analyze_ecosystem smoke", e.message);
 	}
@@ -450,11 +534,13 @@ async function main() {
 	try {
 		const { data } = await callTool("submit_feedback", {
 			kind: "other",
-			message: "scout-mcp smoke test — please disregard. This is from the automated test harness.",
+			message:
+				"scout-mcp smoke test — please disregard. This is from the automated test harness.",
 			agentName: "scout-mcp-smoke-test",
 		});
 		if (data?.ok === true) pass(`feedback persisted (id: ${data.id})`);
-		else if (data?.error) fail("feedback POST", JSON.stringify(data).slice(0, 150));
+		else if (data?.error)
+			fail("feedback POST", JSON.stringify(data).slice(0, 150));
 		else fail("feedback POST", "unexpected response shape");
 	} catch (e) {
 		fail("submit_feedback smoke", e.message);
@@ -466,7 +552,8 @@ async function main() {
 			name: "submit_feedback",
 			arguments: { kind: "bug", message: "short" },
 		});
-		if (resp.error || resp.result?.isError) pass("short message rejected by zod");
+		if (resp.error || resp.result?.isError)
+			pass("short message rejected by zod");
 		else fail("short message rejected by zod", "unexpectedly succeeded");
 	} catch (e) {
 		pass("short message rejected by zod");
@@ -475,9 +562,7 @@ async function main() {
 	// ── Summary ─────────────────────────────────────────────────────────────
 	const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
 	console.log(`\n${"─".repeat(60)}`);
-	console.log(
-		`  ${passed} passed · ${failed} failed · ${elapsed}s`,
-	);
+	console.log(`  ${passed} passed · ${failed} failed · ${elapsed}s`);
 	if (failed > 0) {
 		console.log(`\n  Failures:`);
 		for (const f of failures) console.log(`    • ${f.name}: ${f.reason}`);

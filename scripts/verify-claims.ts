@@ -33,10 +33,10 @@
  */
 
 import { readFileSync } from "node:fs";
-import { writeNightlyFindings } from "./nightly-findings";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
+import { writeNightlyFindings } from "./nightly-findings";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PROD = "https://stellarlight.xyz";

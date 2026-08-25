@@ -58,9 +58,7 @@ const STELLAR_CONTEXT =
 
 export function computeLangDepth(input: LangDepthInput): LangDepthResult {
 	const reasons: string[] = [];
-	const langBlobs = input.blobs.filter(
-		(b) => b.text && LANG_EXT.test(b.path),
-	);
+	const langBlobs = input.blobs.filter((b) => b.text && LANG_EXT.test(b.path));
 	const langSloc = langBlobs.reduce(
 		(n, b) =>
 			n + (b.text ?? "").split("\n").filter((l) => l.trim().length > 0).length,

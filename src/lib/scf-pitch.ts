@@ -21,7 +21,11 @@ export interface ScfPitchReport {
 	/** Live round state — never asserts a negative on fetch failure. */
 	round: {
 		source: "live" | "unavailable";
-		open: Array<{ round: number; phase: string | null; submissionDeadline: string | null }>;
+		open: Array<{
+			round: number;
+			phase: string | null;
+			submissionDeadline: string | null;
+		}>;
 		note: string;
 	};
 	/** Already-funded ACTIVE projects in the vertical, largest award first —
@@ -32,7 +36,11 @@ export interface ScfPitchReport {
 		totalAwardedUSD: number | null;
 		lastAwardedRound: number | null;
 	}>;
-	fundingBar: { fundedProjects: number; totalAwardedUSD: number; basis: string };
+	fundingBar: {
+		fundedProjects: number;
+		totalAwardedUSD: number;
+		basis: string;
+	};
 	/** The competitive/gap/prior-art view — same computation as /api/vet-idea. */
 	vet: Pick<VetIdeaReport, "competitors" | "maturity" | "priorArt" | "gap">;
 	/** Deterministic angles — each names the fact it stands on. */
@@ -78,7 +86,13 @@ export async function buildScfPitch(
 			where: { status: { in: [...ACTIVE_PROJECT_STATUSES] } },
 			limit: 5000,
 			depth: 0,
-			select: { slug: true, name: true, types: true, scf: true, scfAwarded: true },
+			select: {
+				slug: true,
+				name: true,
+				types: true,
+				scf: true,
+				scfAwarded: true,
+			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		const docs = res.docs as any[];
@@ -118,7 +132,10 @@ export async function buildScfPitch(
 		);
 	if (vet.gap && vet.gap.total > 3 && fundedPeers.length)
 		angles.push(
-			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedPeers.length} of them (${fundedPeers.slice(0, 3).map((p) => p.slug).join(", ")}) — the pitch must say what they don't do.`,
+			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedPeers.length} of them (${fundedPeers
+				.slice(0, 3)
+				.map((p) => p.slug)
+				.join(", ")}) — the pitch must say what they don't do.`,
 		);
 	if (fundedPeers.length === 0 && vet.vertical)
 		angles.push(

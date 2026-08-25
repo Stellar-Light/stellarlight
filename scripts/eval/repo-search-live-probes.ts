@@ -23,7 +23,15 @@ const PROBES: Array<{ q: string; anyOf: string[] }> = [
 	{ q: "oracle", anyOf: ["reflector-network/reflector-contract"] },
 	{ q: "anchor platform", anyOf: ["stellar/anchor-platform"] },
 	// Canonical wallet-tooling set.
-	{ q: "wallet kit", anyOf: ["kalepail/passkey-kit", "stellar/freighter", "creit-tech/xbull-wallet", "creit-tech/stellar-wallets-kit"] },
+	{
+		q: "wallet kit",
+		anyOf: [
+			"kalepail/passkey-kit",
+			"stellar/freighter",
+			"creit-tech/xbull-wallet",
+			"creit-tech/stellar-wallets-kit",
+		],
+	},
 	// Spaced product-name identity (fixed 2026-08-14): the exact name spoken
 	// with spaces must surface the repo itself.
 	{ q: "stellar wallets kit", anyOf: ["creit-tech/stellar-wallets-kit"] },
@@ -42,18 +50,26 @@ async function main(): Promise<number> {
 		try {
 			const res = await fetch(url);
 			if (!res.ok) throw new Error(`http ${res.status}`);
-			const body = (await res.json()) as { repos?: Array<{ fullName?: string }> };
-			top = (body.repos ?? []).map((r) => String(r.fullName ?? "").toLowerCase());
+			const body = (await res.json()) as {
+				repos?: Array<{ fullName?: string }>;
+			};
+			top = (body.repos ?? []).map((r) =>
+				String(r.fullName ?? "").toLowerCase(),
+			);
 		} catch (err) {
 			console.error(`✗ "${p.q}" — request failed: ${(err as Error).message}`);
 			failed += 1;
 			continue;
 		}
-		const hit = p.anyOf.some((want) => top.some((got) => got.includes(want.toLowerCase())));
+		const hit = p.anyOf.some((want) =>
+			top.some((got) => got.includes(want.toLowerCase())),
+		);
 		if (hit) {
 			console.log(`✓ "${p.q}" → ${top[0]}`);
 		} else {
-			console.error(`✗ "${p.q}" — expected one of [${p.anyOf.join(", ")}] in top 3, got [${top.join(", ")}]`);
+			console.error(
+				`✗ "${p.q}" — expected one of [${p.anyOf.join(", ")}] in top 3, got [${top.join(", ")}]`,
+			);
 			failed += 1;
 		}
 	}

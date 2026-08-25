@@ -72,7 +72,8 @@ export const CAP_REGISTRY: CapRegistryRow[] = ${JSON.stringify(rows, null, "\t")
 `;
 	writeFileSync(OUT, body);
 	const byStatus: Record<string, number> = {};
-	for (const r of rows) byStatus[r.status ?? "null"] = (byStatus[r.status ?? "null"] ?? 0) + 1;
+	for (const r of rows)
+		byStatus[r.status ?? "null"] = (byStatus[r.status ?? "null"] ?? 0) + 1;
 	console.log(`wrote ${OUT} (${rows.length} rows)`, byStatus);
 }
 
