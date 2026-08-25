@@ -3457,6 +3457,14 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					{
+						name: "q",
+						in: "query",
+						description:
+							"Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored — a query returned the full catalog.",
+						schema: { type: "string" },
+					},
+
+					{
 						name: "source",
 						in: "query",
 						description: "Filter by source",

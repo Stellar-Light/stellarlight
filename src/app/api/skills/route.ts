@@ -83,12 +83,16 @@ export async function GET(req: NextRequest) {
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
 	// reads as filtered. Warned, not 400'd — the contract is additive-only.
-	const paramWarning = unknownParamWarning(sp, ["kind", "source"], {
-		advertise: ["kind", "source"],
+	const paramWarning = unknownParamWarning(sp, ["kind", "source", "q"], {
+		advertise: ["kind", "source", "q"],
 		hint: "Skill detail lives on /api/skills/{name}.",
 	});
 	const sourceFilter = sp.get("source");
 	const kindFilter = sp.get("kind");
+	// q was accepted by Raven's tool signature but NEVER applied: `?q=oracle`
+	// returned all 43 skills, so an agent read an unfiltered list as filtered.
+	// Match it over name/tagline/description/tags, the fields a skill is found by.
+	const qFilter = (sp.get("q") ?? "").trim().toLowerCase();
 
 	if (sourceFilter && !VALID_SOURCES.includes(sourceFilter as Source)) {
 		return NextResponse.json(
@@ -163,6 +167,14 @@ export async function GET(req: NextRequest) {
 	if (sourceFilter)
 		filtered = filtered.filter((s) => s.source === sourceFilter);
 	if (kindFilter) filtered = filtered.filter((s) => s.kind === kindFilter);
+	if (qFilter) {
+		const toks = qFilter.split(/\s+/).filter(Boolean);
+		filtered = filtered.filter((s) => {
+			const hay =
+				`${s.name} ${s.tagline ?? ""} ${s.description ?? ""} ${(s.tags ?? []).join(" ")}`.toLowerCase();
+			return toks.every((t) => hay.includes(t));
+		});
+	}
 
 	// Sort: featured first, then by source priority, then alphabetical.
 	// Source priority puts Stellarlight's own products first, then SDF's
@@ -189,7 +201,7 @@ export async function GET(req: NextRequest) {
 	logApiHit({
 		req,
 		endpoint: "/api/skills",
-		filters: { source: sourceFilter, kind: kindFilter },
+		filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 	});
 
 	return NextResponse.json(
@@ -198,7 +210,7 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
-				filters: { source: sourceFilter, kind: kindFilter },
+				filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 				counts: {
 					returned: filtered.length,
 					// No `limit` param: filtering is the only narrowing, so every

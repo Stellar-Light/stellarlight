@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
+			"listSkills now honours its q parameter instead of ignoring it (openapi@1.8.90). ?q=oracle used to return all 43 skills, so an agent read an unfiltered catalog as a filtered answer.",
+		detail:
+			"q was in Raven's tool signature but never applied server-side — the silent-filter trap the partners route already guards against. It now matches over name/tagline/description/tags (all terms), is advertised in unknownParamWarning, and is echoed in meta.filters; an unmatched query returns an honest empty list rather than the whole catalog. Found by sweeping every list endpoint for honest-absence, not by a report.",
+	},
+	{
+		date: "2026-08-25",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
 			"Four agent-facing operations declared their full response shape (openapi@1.8.89). compareHackathons, searchHackathonBuilds, getPartner and matchPartners each declared only `type: object` — an agent could call them and could not project a single field, the same class as the resolver in #1030.",
 		detail:
 			"A sweep of the live spec found 13 fully-opaque response schemas; these four are the ones agents actually reach through Raven, so they are the active harm. Each now declares its real properties (captured from live responses) with what the values mean: build submissions carry name/placement/isWinner/votes and an honest note that a non-win is not a quality judgement; partner matches carry score/reason and candidatesConsidered as the denominator behind a miss. Additive only. The remaining opaque schemas are on operations Raven does not yet expose; typing them is the path to exposure and is tracked separately.",
