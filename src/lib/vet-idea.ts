@@ -164,6 +164,9 @@ export async function buildVetIdea(
 			// score against a haystack that was mostly empty.
 			shortDescription: true,
 			category: true,
+			// Editorial rank (0-100, curated): 90 = the canonical pick for its
+			// category. Needed as a TIE-BREAK — see the sort below.
+			prominence: true,
 			supportedNetworks: true,
 			coverage: true,
 			publicGoods: true,
@@ -235,8 +238,20 @@ export async function buildVetIdea(
 		const br = (b.__rel ?? 0) as number;
 		const aa = auditedSlugs.has(String(a.slug)) ? 0 : 1;
 		const bb = auditedSlugs.has(String(b.slug)) ? 0 : 1;
+		// Relevance, then EDITORIAL PROMINENCE, then audit, then name.
+		//
+		// Most rows in a mapped vertical score identically ("wallet" matches
+		// every wallet), so before this the alphabet decided the answer and the
+		// wallet question returned albedo, beans, bitget-wallet, coca, cypher.
+		// prominence is exactly the curated signal for "the canonical pick for
+		// its category" (Freighter 90), and it is what the directory leans on
+		// to lead with the wallets people actually mean. The alphabet is a last
+		// resort, not a ranking.
+		const ap = Number(a.prominence ?? 0);
+		const bp = Number(b.prominence ?? 0);
 		return (
 			br - ar ||
+			bp - ap ||
 			aa - bb ||
 			String(a.name ?? a.slug).localeCompare(String(b.name ?? b.slug))
 		);
