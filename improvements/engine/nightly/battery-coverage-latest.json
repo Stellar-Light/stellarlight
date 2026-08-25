@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-24T06:36:48.680Z",
+	"generatedAt": "2026-08-25T06:15:44.758Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
@@ -20,11 +20,6 @@
 		{
 			"probe": "battery:q-tool-indexer-repos-discovery",
 			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-tool-leaderboard-open-issues",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Which Stellar projects have the most open issues right now — rank them so I can \" (tooling-infra); best: stellar-registry/contracts",
 			"surface": "corpus"
 		}
 	]
