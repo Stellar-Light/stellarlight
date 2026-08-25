@@ -142,6 +142,49 @@ return { aCount: a.length, bCount: b.length,
   bSample: b.slice(0,4).map(x => x.slug) };`,
 	},
 	{
+		key: "gaps-axis-vs-type-counts",
+		q: "(every vertical on the gaps axis)",
+		a: "analyze?dimension=gaps byType",
+		b: "searchProjects?type=<same>",
+		// The gaps axis claims a supply count per vertical. If a vertical it
+		// reports cannot be filtered for, or returns nothing, the axis is
+		// describing a category the directory cannot actually serve — which is
+		// how "no Perpetuals vertical exists" stayed invisible while four perps
+		// projects sat in the directory.
+		code: () => `
+const g = await scout.analyzeEcosystem({ dimension: "gaps" });
+const byType = g.ok ? ((g.data.gaps ?? g.data).byType ?? []) : [];
+const names = byType.map(x => x.type).filter(Boolean).slice(0, 8);
+const empties = [];
+for (const t of names) {
+  const r = await scout.searchProjects({ type: t, limit: 1 });
+  const n = r.ok ? (r.data.projects ?? []).length : -1;
+  if (n <= 0) empties.push(t + (n < 0 ? " (rejected)" : " (0 rows)"));
+}
+return { aCount: names.length, bCount: names.length - empties.length,
+  aSample: names.slice(0,4), bSample: empties.slice(0,4) };`,
+	},
+	{
+		key: "typed-rows-are-reachable",
+		q: "(a type that rows actually carry)",
+		a: "a type present on real rows",
+		b: "searchProjects?type=<that type>",
+		// A type value that rows carry but the filter will not accept is an
+		// enum shipped half-way. This is the shape of the live Exchange defect:
+		// rows carry it, the filter rejects it, agents get silent zeros.
+		code: () => `
+const d = await scout.searchProjects({ q: "exchange wallet lending", limit: 25 });
+const rows = d.ok ? (d.data.projects ?? []) : [];
+const types = [...new Set(rows.flatMap(p => p.types ?? []))].slice(0, 6);
+const unreachable = [];
+for (const t of types) {
+  const r = await scout.searchProjects({ type: t, limit: 1 });
+  if (!r.ok || (r.data.projects ?? []).length === 0) unreachable.push(t);
+}
+return { aCount: types.length, bCount: types.length - unreachable.length,
+  aSample: types.slice(0,4), bSample: unreachable.slice(0,4) };`,
+	},
+	{
 		key: "partners-vs-directory-audit",
 		q: "smart contract audit firms for Soroban",
 		a: "getPartners",
@@ -189,7 +232,15 @@ for (const { c, r, err } of rows) {
 	}
 	// The failure we care about: one side answers, the other says nothing.
 	// Both-zero is agreement (an honest "we hold nothing" on both lanes).
-	const disagree = (r.aCount === 0) !== (r.bCount === 0);
+	// Most pairs fail when one answers and the other does not. The two
+	// enum-coverage cases instead fail when any member is unreachable, which
+	// a zero-vs-nonzero test would miss entirely.
+	const countPair =
+		c.key === "gaps-axis-vs-type-counts" ||
+		c.key === "typed-rows-are-reachable";
+	const disagree = countPair
+		? r.aCount !== r.bCount
+		: (r.aCount === 0) !== (r.bCount === 0);
 	if (disagree) disagreements++;
 	console.log(`\n  ${disagree ? "DISAGREE" : "ok      "} ${c.key}   "${c.q}"`);
 	console.log(`         ${c.a}: ${r.aCount}  ${JSON.stringify(r.aSample)}`);
