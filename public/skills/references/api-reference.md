@@ -178,7 +178,7 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem — confirmed proble
 ---
 
 ## `GET /api/skills`
-A merged, multi-source AI-skill catalog (~30 entries) — the 7 official SDF skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards) **plus** Stellarlight, lumenloop, and external skills. Filter with `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
+A merged, multi-source AI-skill catalog (~30 entries) — the 7 official SDF skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards) **plus** Stellarlight, lumenloop, and external skills. Filter with `q` (free text over name/tagline/description/tags), `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
 
 ---
 

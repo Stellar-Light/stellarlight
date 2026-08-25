@@ -3269,6 +3269,8 @@ export interface operations {
     listSkills: {
         parameters: {
             query?: {
+                /** @description Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored — a query returned the full catalog. */
+                q?: string;
                 /** @description Filter by source */
                 source?: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
                 /** @description Filter by skill kind */
