@@ -132,9 +132,7 @@ interface GhRepo {
 
 /** Batched GraphQL lookup — 50 repos per query via aliases, plus the API's
  * own budget meter so the run can stop BEFORE starving the shared PAT. */
-async function fetchBatch(
-	fulls: string[],
-): Promise<{
+async function fetchBatch(fulls: string[]): Promise<{
 	repos: Map<string, GhRepo | null>;
 	remaining: number;
 	resetAt: string;

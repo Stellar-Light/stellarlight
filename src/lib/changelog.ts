@@ -41,6 +41,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
 	},
 	{
+		date: "2026-08-25",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"searchRepos and getPartners now say when their rows did NOT match your query (openapi@1.8.87). Both used to answer a query that matched nothing with plausible near-matches and no marker, so an agent reported ranked neighbours as findings — searchProjects already solved this with matchMode, and these now follow it.",
+		detail:
+			'Measured through the live Raven gateway: the query "zzqqxx nonexistent protocol 9999" returned a real repo from searchRepos and five partners from getPartners, with nothing in either response indicating the rows were filler. searchRepos gains meta.matchMode (strict | partial | weak | all | none) + matchModeLabel, derived from how many query terms actually hit the page being served; `weak` states in words that the rows are ranked neighbours and NOT matches, and `none` (search failed) is now distinguishable from a genuine empty result, so a failure can never read as proof of absence. getPartners gains meta.matchMode (scored | weak) — scorePartners deliberately falls back to fresh/accepting partners when a query yields no signal, which is a fine ranking choice and a misleading answer unless labelled. Additive only: no field is removed and no existing caller breaks. A new eval (raven-honest-absence) asks four surfaces an unmatched query through Raven and fails any that returns rows without admitting it.',
+	},
+	{
 		date: "2026-08-23",
 		surfaces: ["api"],
 		type: "changed",
