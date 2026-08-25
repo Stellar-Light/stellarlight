@@ -1,58 +1,48 @@
 {
-  "frame": {
-    "scf": 500,
-    "directory": 950,
-    "matched": 310,
-    "roundsChecked": 309
-  },
-  "overstated": [],
-  "understated": [],
-  "roundsBackfill": [],
-  "roundsOverstated": [],
-  "roundsUnverifiable": [
-    {
-      "slug": "stride",
-      "name": "Stride",
-      "ourRounds": [
-        "33"
-      ],
-      "url": "https://communityfund.stellar.org/project/stride-4uu",
-      "officialAwardedRounds": [],
-      "reason": "no submission verdict found for round(s) #33"
-    },
-    {
-      "slug": "palremit",
-      "name": "Palremit",
-      "ourRounds": [
-        "32"
-      ],
-      "url": "https://communityfund.stellar.org/project/palremit-eks",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
-      "slug": "wellspring",
-      "name": "Wellspring",
-      "ourRounds": [
-        "41"
-      ],
-      "url": "https://communityfund.stellar.org/project/wellspring-xuv",
-      "officialAwardedRounds": [
-        "30"
-      ],
-      "reason": "no submission verdict found for round(s) #41"
-    },
-    {
-      "slug": "autoaction",
-      "name": "AutoAction",
-      "ourRounds": [
-        "29"
-      ],
-      "url": "https://communityfund.stellar.org/project/autoaction-ybl",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    }
-  ],
-  "generatedAt": "2026-08-23T09:34:23Z",
-  "evalKey": "scf-crosscheck"
+	"frame": {
+		"scf": 500,
+		"directory": 950,
+		"matched": 310,
+		"roundsChecked": 309
+	},
+	"overstated": [],
+	"understated": [],
+	"roundsBackfill": [],
+	"roundsOverstated": [],
+	"roundsUnverifiable": [
+		{
+			"slug": "stride",
+			"name": "Stride",
+			"ourRounds": ["33"],
+			"url": "https://communityfund.stellar.org/project/stride-4uu",
+			"officialAwardedRounds": [],
+			"reason": "no submission verdict found for round(s) #33"
+		},
+		{
+			"slug": "palremit",
+			"name": "Palremit",
+			"ourRounds": ["32"],
+			"url": "https://communityfund.stellar.org/project/palremit-eks",
+			"officialAwardedRounds": [],
+			"reason": "no parseable submission cards on the page \u2014 never accuse"
+		},
+		{
+			"slug": "wellspring",
+			"name": "Wellspring",
+			"ourRounds": ["41"],
+			"url": "https://communityfund.stellar.org/project/wellspring-xuv",
+			"officialAwardedRounds": ["30"],
+			"reason": "no submission verdict found for round(s) #41"
+		},
+		{
+			"slug": "autoaction",
+			"name": "AutoAction",
+			"ourRounds": ["29"],
+			"url": "https://communityfund.stellar.org/project/autoaction-ybl",
+			"officialAwardedRounds": [],
+			"reason": "no parseable submission cards on the page \u2014 never accuse"
+		}
+	],
+	"generatedAt": "2026-08-23T09:34:23Z",
+	"evalKey": "scf-crosscheck"
 }

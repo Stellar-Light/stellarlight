@@ -1,0 +1,52 @@
+# Guard C — do our graded answers survive the trip through Raven?
+#
+# The 53 golden questions are asked against stellarlight.xyz directly. Agents
+# never reach us that way. The gap is not hypothetical: searchProjects with
+# type=Exchange returns 0 through Raven and 14 over HTTP, because Raven
+# validates against a stale copy of our enum — correct for us, broken for every
+# agent, invisible to the existing eval.
+#
+# Also runs the two absence/consistency guards, so one job covers the class.
+name: raven-eval-parity
+
+on:
+  schedule:
+    - cron: "30 7 * * *" # daily, after the nightly data jobs
+  workflow_dispatch:
+    inputs:
+      gate:
+        description: "Exit red on any regression."
+        required: false
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Golden questions — direct vs through Raven
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/eval/raven-golden-parity.ts ${{ inputs.gate && '--gate' || '' }}
+
+      - name: Cross-surface consistency (guard A)
+        if: always()
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/eval/raven-surface-consistency.ts ${{ inputs.gate && '--gate' || '' }}
+
+      - name: Honest absence (guard B)
+        if: always()
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/eval/raven-honest-absence.ts ${{ inputs.gate && '--gate' || '' }}

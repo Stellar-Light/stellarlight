@@ -1,507 +1,424 @@
 {
-  "windowDays": 14,
-  "frame": {
-    "loggedHits": 40852,
-    "realHits": 4610,
-    "distinctQueries": 3161,
-    "replayed": 250
-  },
-  "okRate": 84,
-  "misses": [
-    {
-      "endpoint": "/api/research",
-      "query": "test",
-      "hits": 77,
-      "lastSeen": "2026-08-23T06:04:21.385Z",
-      "days": 14,
-      "buckets": [
-        "other"
-      ],
-      "class": "WEAK",
-      "evidence": "top confidence 0.4"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "openx402",
-      "hits": 5,
-      "lastSeen": "2026-08-11T15:18:35.578Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "hypertron",
-      "hits": 4,
-      "lastSeen": "2026-08-17T04:24:59.384Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "tempa",
-      "hits": 3,
-      "lastSeen": "2026-08-22T16:22:27.558Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "planbok",
-      "hits": 3,
-      "lastSeen": "2026-08-20T16:53:00.905Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "e-fectivo",
-      "hits": 3,
-      "lastSeen": "2026-08-20T16:53:03.584Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "for-yield",
-      "hits": 3,
-      "lastSeen": "2026-08-13T15:28:46.047Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "tempa",
-      "hits": 2,
-      "lastSeen": "2026-08-22T16:22:23.510Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "what disbursement or payout providers can i integrate on stellar?",
-      "hits": 2,
-      "lastSeen": "2026-08-21T22:48:37.306Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "vigente",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:53:02.134Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "cointracker",
-      "hits": 2,
-      "lastSeen": "2026-08-20T18:32:42.324Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "vigente protocol",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:19.537Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "vigente protocol",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:19.898Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "alypay",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:18.398Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "planbok",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:19.195Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "alypay",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:18.329Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "gnb coin",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:17.626Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "pollar",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:15.879Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "e-fectivo",
-      "hits": 2,
-      "lastSeen": "2026-08-20T16:52:15.073Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "stellar8004",
-      "hits": 2,
-      "lastSeen": "2026-08-19T15:47:48.281Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "forepay",
-      "hits": 2,
-      "lastSeen": "2026-08-19T15:31:16.935Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "cyphras",
-      "hits": 2,
-      "lastSeen": "2026-08-19T15:03:20.158Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "we're following up on the anchor matching you did for basilic (b2b aggregator, non-vasp, licensed pa",
-      "hits": 2,
-      "lastSeen": "2026-08-19T14:14:46.177Z",
-      "days": 1,
-      "buckets": [
-        "other",
-        "browser"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "crdt",
-      "hits": 2,
-      "lastSeen": "2026-08-19T00:19:52.573Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "malaysia",
-      "hits": 2,
-      "lastSeen": "2026-08-18T00:45:09.339Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "thailand",
-      "hits": 2,
-      "lastSeen": "2026-08-18T00:45:09.310Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "instawards",
-      "hits": 2,
-      "lastSeen": "2026-08-17T18:18:54.290Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "relacionamento",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:04.592Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "namoro",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:04.310Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "casamento",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:04.272Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "casal",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:04.290Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "relacionamento",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:00.378Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "namoro",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:00.193Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "fiance",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:29:42.041Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "casal",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:00.068Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "breakup",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:29:41.994Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "romantic",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:29:41.922Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "dating",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:29:41.921Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "casamento",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:36:00.040Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "marriage",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:29:41.577Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "commitment",
-      "hits": 2,
-      "lastSeen": "2026-08-16T12:28:08.599Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    }
-  ],
-  "generatedAt": "2026-08-23T09:34:23Z",
-  "evalKey": "engine-d-demand"
+	"windowDays": 14,
+	"frame": {
+		"loggedHits": 40852,
+		"realHits": 4610,
+		"distinctQueries": 3161,
+		"replayed": 250
+	},
+	"okRate": 84,
+	"misses": [
+		{
+			"endpoint": "/api/research",
+			"query": "test",
+			"hits": 77,
+			"lastSeen": "2026-08-23T06:04:21.385Z",
+			"days": 14,
+			"buckets": ["other"],
+			"class": "WEAK",
+			"evidence": "top confidence 0.4"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "openx402",
+			"hits": 5,
+			"lastSeen": "2026-08-11T15:18:35.578Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "hypertron",
+			"hits": 4,
+			"lastSeen": "2026-08-17T04:24:59.384Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "tempa",
+			"hits": 3,
+			"lastSeen": "2026-08-22T16:22:27.558Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "planbok",
+			"hits": 3,
+			"lastSeen": "2026-08-20T16:53:00.905Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "e-fectivo",
+			"hits": 3,
+			"lastSeen": "2026-08-20T16:53:03.584Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "for-yield",
+			"hits": 3,
+			"lastSeen": "2026-08-13T15:28:46.047Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "tempa",
+			"hits": 2,
+			"lastSeen": "2026-08-22T16:22:23.510Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "what disbursement or payout providers can i integrate on stellar?",
+			"hits": 2,
+			"lastSeen": "2026-08-21T22:48:37.306Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "vigente",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:53:02.134Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "cointracker",
+			"hits": 2,
+			"lastSeen": "2026-08-20T18:32:42.324Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "vigente protocol",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:19.537Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "vigente protocol",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:19.898Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "alypay",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:18.398Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "planbok",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:19.195Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "alypay",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:18.329Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "gnb coin",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:17.626Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "pollar",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:15.879Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "e-fectivo",
+			"hits": 2,
+			"lastSeen": "2026-08-20T16:52:15.073Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "stellar8004",
+			"hits": 2,
+			"lastSeen": "2026-08-19T15:47:48.281Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "forepay",
+			"hits": 2,
+			"lastSeen": "2026-08-19T15:31:16.935Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "cyphras",
+			"hits": 2,
+			"lastSeen": "2026-08-19T15:03:20.158Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "we're following up on the anchor matching you did for basilic (b2b aggregator, non-vasp, licensed pa",
+			"hits": 2,
+			"lastSeen": "2026-08-19T14:14:46.177Z",
+			"days": 1,
+			"buckets": ["other", "browser"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "crdt",
+			"hits": 2,
+			"lastSeen": "2026-08-19T00:19:52.573Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "malaysia",
+			"hits": 2,
+			"lastSeen": "2026-08-18T00:45:09.339Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "thailand",
+			"hits": 2,
+			"lastSeen": "2026-08-18T00:45:09.310Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "instawards",
+			"hits": 2,
+			"lastSeen": "2026-08-17T18:18:54.290Z",
+			"days": 2,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "relacionamento",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:04.592Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "namoro",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:04.310Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "casamento",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:04.272Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "casal",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:04.290Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "relacionamento",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:00.378Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "namoro",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:00.193Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "fiance",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:29:42.041Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "casal",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:00.068Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "breakup",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:29:41.994Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "romantic",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:29:41.922Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "dating",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:29:41.921Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "casamento",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:36:00.040Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "marriage",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:29:41.577Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "EMPTY",
+			"evidence": "0 results"
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "commitment",
+			"hits": 2,
+			"lastSeen": "2026-08-16T12:28:08.599Z",
+			"days": 1,
+			"buckets": ["other"],
+			"class": "GAP",
+			"evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+		}
+	],
+	"generatedAt": "2026-08-23T09:34:23Z",
+	"evalKey": "engine-d-demand"
 }

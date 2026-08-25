@@ -13,132 +13,81 @@
 	"misses": [
 		{
 			"query": "what wallets support Stellar",
-			"expect": [
-				"getPartners"
-			],
-			"topScout": [
-				"getClusters",
-				"searchResearch",
-				"searchProjects"
-			],
+			"expect": ["getPartners"],
+			"topScout": ["getClusters", "searchResearch", "searchProjects"],
 			"note": "partner directory (wallets)"
 		},
 		{
 			"query": "on and off ramps for Stellar payments",
-			"expect": [
-				"getPartners"
-			],
-			"topScout": [
-				"searchProjects"
-			],
+			"expect": ["getPartners"],
+			"topScout": ["searchProjects"],
 			"note": "anchors/ramps"
 		},
 		{
 			"query": "top Stellar projects by GitHub activity",
-			"expect": [
-				"getLeaderboard"
-			],
-			"topScout": [
-				"searchProjects",
-				"searchRepos"
-			],
+			"expect": ["getLeaderboard"],
+			"topScout": ["searchProjects", "searchRepos"],
 			"note": "activity leaderboard"
 		},
 		{
 			"query": "passkey-kit",
-			"expect": [
-				"searchProjects"
-			],
-			"topScout": [
-				"listSkills",
-				"searchRepos",
-				"getBuilders"
-			],
+			"expect": ["searchProjects"],
+			"topScout": ["listSkills", "searchRepos", "getBuilders"],
 			"note": "demand: project by name"
 		},
 		{
 			"query": "reflector oracle on Stellar",
-			"expect": [
-				"searchProjects"
-			],
-			"topScout": [
-				"searchResearch"
-			],
+			"expect": ["searchProjects"],
+			"topScout": ["searchResearch"],
 			"note": "demand: oracle project"
 		},
 		{
 			"query": "octoplace",
-			"expect": [
-				"searchProjects"
-			],
+			"expect": ["searchProjects"],
 			"topScout": [],
 			"note": "demand: project by name"
 		},
 		{
 			"query": "jobs bounties and freelance work for Stellar contributors",
-			"expect": [
-				"getRfps"
-			],
-			"topScout": [
-				"getBuilders"
-			],
+			"expect": ["getRfps"],
+			"topScout": ["getBuilders"],
 			"note": "demand: jobs/bounties (2×)"
 		},
 		{
 			"query": "submit a Stellar transaction with the JavaScript SDK",
-			"expect": [
-				"searchResearch",
-				"searchRepos"
-			],
-			"topScout": [
-				"explainRepo",
-				"getHackathon"
-			],
+			"expect": ["searchResearch", "searchRepos"],
+			"topScout": ["explainRepo", "getHackathon"],
 			"note": "code: how-to guide"
 		}
 	],
 	"lagging": [
 		{
 			"query": "biggest stablecoins on Stellar by market cap",
-			"expect": [
-				"getStablecoins"
-			]
+			"expect": ["getStablecoins"]
 		},
 		{
 			"query": "which are the largest stablecoins issued on Stellar",
-			"expect": [
-				"getStablecoins"
-			]
+			"expect": ["getStablecoins"]
 		},
 		{
 			"query": "is Blend audited and by whom",
-			"expect": [
-				"listAudits"
-			]
+			"expect": ["listAudits"]
 		},
 		{
 			"query": "security audit reports for Soroban projects",
-			"expect": [
-				"listAudits"
-			]
+			"expect": ["listAudits"]
 		},
 		{
 			"query": "has anyone built a recurring payments protocol at a Stellar hackathon",
-			"expect": [
-				"searchHackathonBuilds"
-			]
+			"expect": ["searchHackathonBuilds"]
 		},
 		{
 			"query": "what prediction markets were built at Stellar hackathons",
-			"expect": [
-				"searchHackathonBuilds"
-			]
+			"expect": ["searchHackathonBuilds"]
 		},
 		{
 			"query": "winning zero-knowledge privacy builds at Stellar hackathons",
-			"expect": [
-				"searchHackathonBuilds"
-			]
+			"expect": ["searchHackathonBuilds"]
 		}
 	],
 	"demandMisses": [

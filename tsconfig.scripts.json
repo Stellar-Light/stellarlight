@@ -1,22 +1,13 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "module": "esnext",
-    "target": "es2022",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "types": [
-      "node"
-    ]
-  },
-  "include": [
-    "scripts/**/*.ts",
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "scout-mcp/**",
-    "api-client/**"
-  ],
-  "_why": "Opt-in typecheck for scripts/, which the root tsconfig excludes. Run `pnpm typecheck:scripts`. NOT a CI gate yet: 29 legacy scripts carry 70 pre-existing errors, so gating on it would be red on arrival. It exists because the root tsc silently passed a script that called an undefined function (refresh-paid-endpoints, 2026-08-23) \u2014 nothing else would have caught it."
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"module": "esnext",
+		"target": "es2022",
+		"moduleResolution": "bundler",
+		"noEmit": true,
+		"types": ["node"]
+	},
+	"include": ["scripts/**/*.ts", "src/**/*.ts"],
+	"exclude": ["node_modules", "scout-mcp/**", "api-client/**"],
+	"_why": "Opt-in typecheck for scripts/, which the root tsconfig excludes. Run `pnpm typecheck:scripts`. NOT a CI gate yet: 29 legacy scripts carry 70 pre-existing errors, so gating on it would be red on arrival. It exists because the root tsc silently passed a script that called an undefined function (refresh-paid-endpoints, 2026-08-23) \u2014 nothing else would have caught it."
 }

@@ -37,7 +37,10 @@ console.log("@stellar-light/api-client smoke test\n");
 await check("getStatus", async () => {
 	const s = await scout.getStatus();
 	assert(s.ok === true, "status not ok");
-	assert(Array.isArray(s.endpoints) && s.endpoints.length >= 14, "endpoint enumeration missing");
+	assert(
+		Array.isArray(s.endpoints) && s.endpoints.length >= 14,
+		"endpoint enumeration missing",
+	);
 });
 
 await check("searchProjects", async () => {
@@ -48,7 +51,11 @@ await check("searchProjects", async () => {
 });
 
 await check("searchProjects scfAwarded filter", async () => {
-	const r = await scout.searchProjects({ q: "payments", scfAwarded: true, limit: 3 });
+	const r = await scout.searchProjects({
+		q: "payments",
+		scfAwarded: true,
+		limit: 3,
+	});
 	assert(Array.isArray(r.projects), "no projects array");
 });
 
@@ -116,7 +123,10 @@ await check("404 raises ScoutApiError", async () => {
 		await scout.getSkill("definitely-not-a-real-skill-slug");
 		throw new Error("expected ScoutApiError, got success");
 	} catch (err) {
-		assert(err instanceof ScoutApiError, `wrong error type: ${err.constructor.name}`);
+		assert(
+			err instanceof ScoutApiError,
+			`wrong error type: ${err.constructor.name}`,
+		);
 		assert(err.status === 404, `expected 404, got ${err.status}`);
 	}
 });
@@ -127,7 +137,10 @@ await check("timeout aborts", async () => {
 		await impatient.getStatus();
 		throw new Error("expected abort");
 	} catch (err) {
-		assert(err.name === "AbortError" || err.name === "TimeoutError", `wrong error: ${err.name}`);
+		assert(
+			err.name === "AbortError" || err.name === "TimeoutError",
+			`wrong error: ${err.name}`,
+		);
 	}
 });
 

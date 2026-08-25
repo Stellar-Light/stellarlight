@@ -563,10 +563,11 @@
 			"limit": 12,
 			"expect": {
 				"answerRegex": [
-					"opengrants",
 					"scaffold[ -]stellar",
-					"(php|java|python) sdk"
-				]
+					"(php|java|python)[ -]?(stellar[ -]?)?sdk"
+				],
+				"forbiddenRegex": ["\"slug\"\\s*:\\s*\"pg-atlas\""],
+				"note": "Enumeration question: the answer set is defined by the publicGoods.awardRounds field, not by prose. A row without an award must not rank among recipients (pg-atlas ranked 7th on name alone, 2026-08-25)."
 			}
 		},
 		{
