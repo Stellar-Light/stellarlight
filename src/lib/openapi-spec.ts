@@ -1294,7 +1294,46 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Comparison rollup",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Side-by-side hackathon comparison (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										hackathons: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													slug: { type: "string" },
+													name: { type: "string" },
+													status: { type: "string" },
+													startDate: { type: "string", nullable: true },
+													endDate: { type: "string", nullable: true },
+													externalUrl: { type: "string", nullable: true },
+													source: { type: "string" },
+												},
+											},
+										},
+										deltas: {
+											type: "object",
+											description: "What differs across the compared events.",
+											properties: {
+												notes: { type: "array", items: { type: "string" } },
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1379,7 +1418,49 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Matching hackathon builds",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Hackathon build submissions (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										builds: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													name: { type: "string" },
+													description: { type: "string", nullable: true },
+													url: { type: "string", nullable: true },
+													demoUrl: { type: "string", nullable: true },
+													githubUrl: { type: "string", nullable: true },
+													hackathon: { type: "string" },
+													hackathonSlug: { type: "string" },
+													track: { type: "string", nullable: true },
+													placement: { type: "string", nullable: true },
+													award: { type: "string", nullable: true },
+													isWinner: {
+														type: "boolean",
+														description:
+															"Placed in the event; absence of a win is not a quality judgement.",
+													},
+													votes: { type: "integer", nullable: true },
+													endedAt: { type: "string", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1805,7 +1886,37 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Partner profile",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One partner's full profile (previously an opaque object).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										partner: {
+											type: "object",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												partnerType: { type: "string" },
+												tagline: { type: "string", nullable: true },
+												description: { type: "string", nullable: true },
+												logoUrl: { type: "string", nullable: true },
+												websiteUrl: { type: "string", nullable: true },
+												services: { type: "array", items: { type: "string" } },
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					"404": {
 						description: "Partner not found or not published",
@@ -1845,7 +1956,53 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Ranked matches with reasons",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"AI partner matches for a stated need (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												model: { type: "string" },
+												candidatesConsidered: {
+													type: "integer",
+													description: "The denominator behind the matches.",
+												},
+												note: { type: "string" },
+											},
+										},
+										need: { type: "string" },
+										matches: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													partner: {
+														type: "object",
+														description: "The matched partner row.",
+													},
+													score: {
+														type: "number",
+														description:
+															"Relevance of this partner to the need.",
+													},
+													reason: {
+														type: "string",
+														description: "Why it matched — safe to surface.",
+													},
+												},
+											},
+										},
+										summary: { type: "string", nullable: true },
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {

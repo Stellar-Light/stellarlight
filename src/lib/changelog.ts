@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
+			"Four agent-facing operations declared their full response shape (openapi@1.8.89). compareHackathons, searchHackathonBuilds, getPartner and matchPartners each declared only `type: object` — an agent could call them and could not project a single field, the same class as the resolver in #1030.",
+		detail:
+			"A sweep of the live spec found 13 fully-opaque response schemas; these four are the ones agents actually reach through Raven, so they are the active harm. Each now declares its real properties (captured from live responses) with what the values mean: build submissions carry name/placement/isWinner/votes and an honest note that a non-win is not a quality judgement; partner matches carry score/reason and candidatesConsidered as the denominator behind a miss. Additive only. The remaining opaque schemas are on operations Raven does not yet expose; typing them is the path to exposure and is tracked separately.",
+	},
+	{
+		date: "2026-08-25",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
 			"resolveProject's nested objects are typed, so a model can project them (openapi@1.8.88). subject, current and evidence declared only `type: object` with no properties, and the live `meta` envelope was not declared at all — Raven kept the operation UNEXPOSED because the model-facing contract never named the fields a caller must read.",
 		detail:
 			"An operation nobody can safely project is an operation nobody can use. subject (slug/name/status), current (slug/name/status/url) and evidence (statusAsOf/statusBasis/statusSourceUrl/unsourced) now declare their properties, each carrying what the value MEANS rather than just its type — statusAsOf is when the status was observed, statusBasis says how it was established, and unsourced: true marks a claim with no citable source that must not be reported as established fact. The meta envelope (source, generatedAt, searched, methodology) is declared too; `searched` is the denominator behind a miss. The API reference also gains `repo` in the matchedOn vocabulary, which OpenAPI already allowed but the pinned reference omitted. Additive only: no field removed, no behaviour changed.",
