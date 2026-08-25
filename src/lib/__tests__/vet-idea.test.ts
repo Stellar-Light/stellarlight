@@ -130,3 +130,35 @@ describe("vet-idea competitor ordering (sls-073, ranking half)", () => {
 		).toEqual(["soroswap", "aaa-unaudited"]);
 	});
 });
+
+/**
+ * The mapped-vertical path had the same defect as the fallback, hidden one
+ * layer down: type membership decided eligibility AND ordering was left to the
+ * alphabet, so "a non-custodial wallet for Stellar" answered airgap, akuna,
+ * albedo. Membership says who is eligible; relevance says who leads.
+ */
+describe("vet-idea vertical path ranks by relevance, not the alphabet", () => {
+	it("a well-matching wallet outranks an alphabetically-earlier one", () => {
+		const toks = tokenize("a non-custodial wallet for Stellar");
+		const airgap = scoreTokens(
+			buildHaystack({
+				slug: "airgap",
+				name: "AirGap",
+				types: ["Wallet"],
+				shortDescription: "Offline signing companion.",
+			} as never),
+			toks,
+		);
+		const freighter = scoreTokens(
+			buildHaystack({
+				slug: "freighter",
+				name: "Freighter",
+				types: ["Wallet"],
+				shortDescription:
+					"Non-custodial Stellar wallet browser extension for Soroban dapps.",
+			} as never),
+			toks,
+		);
+		expect(freighter).toBeGreaterThan(airgap);
+	});
+});

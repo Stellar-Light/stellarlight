@@ -176,6 +176,16 @@ export async function buildVetIdea(
 		projDocs = projDocs.filter(
 			(p) => Array.isArray(p.types) && p.types.includes(vertical),
 		);
+		// Score the vertical path TOO. Membership decides who is eligible; it
+		// does not decide who leads. Without this, __rel is undefined for every
+		// row and the display sort falls through to ALPHABETICAL — which is why
+		// "a non-custodial wallet for Stellar" answered airgap, akuna, albedo
+		// instead of the wallets anyone means. Found by the cross-surface guard
+		// after the same defect was fixed on the fallback path.
+		const vTokens = tokenize(q);
+		if (vTokens.length)
+			for (const p of projDocs)
+				p.__rel = scoreTokens(buildHaystack(p), vTokens);
 	} else {
 		// No vertical mapped: rank with the directory's own matcher (synonym
 		// expansion, negation guards, structured fields) instead of a naive
