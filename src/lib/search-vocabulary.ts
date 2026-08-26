@@ -321,6 +321,34 @@ export const GENERIC_QUERY_TOKENS = new Set([
 	"projects",
 	"way",
 	"sol", // ambiguous: Solana's ticker vs spanish "sol" — never a lone anchor
+	// Liveness/status words describe a STATE, never an identity. "is X live" is
+	// the most natural way to ask about a project, and it was the single worst
+	// query shape we had: "live" counted as an anchor noun, nearly every
+	// project's text says "live", so the F2 anchor rule admitted every row —
+	// at matchMode=majority with HIGH confidence, while the actual named
+	// project was often absent entirely. Every honesty guard is gated on
+	// matchMode==="semantic", so these queries bypassed all of them and
+	// returned confidently-wrong answers instead of an honest refusal.
+	// Making them generic lets the EXISTING anchor rule work: the only anchor
+	// left is the project name, nothing matches it, and the query correctly
+	// falls through to semantic where the confidence cap and the
+	// "neighbours, not matches" advisory fire.
+	"live",
+	"alive",
+	"active",
+	"inactive",
+	"running",
+	"working",
+	"status",
+	"dead",
+	"defunct",
+	"launched",
+	"shipped",
+	"available",
+	"online",
+	"offline",
+	"maintained",
+	"abandoned",
 ]);
 
 /** The intent-bearing (non-generic, non-trivial) tokens of a query. */
