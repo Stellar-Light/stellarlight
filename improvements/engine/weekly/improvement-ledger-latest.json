@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-08-25T06:15:51.120Z",
+	"generatedAt": "2026-08-26T06:30:57.462Z",
 	"total": 437,
 	"open": 263,
 	"closed": 174,
 	"verified": 7,
 	"cleared": 167,
 	"closingRate": 0.4,
-	"oldestOpenDays": 33,
+	"oldestOpenDays": 34,
 	"inWave": 0,
 	"highOpen": 14,
 	"staleHighOpen": 0,
@@ -52,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 33
+			"days": 34
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 33
+			"days": 34
 		}
 	],
 	"topOpen": [
