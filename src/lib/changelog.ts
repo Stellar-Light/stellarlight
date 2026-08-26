@@ -41,6 +41,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
 	},
 	{
+		date: "2026-08-26",
+		surfaces: ["api", "mcp"],
+		type: "fixed",
+		summary:
+			'Asking about a project in a normal sentence no longer costs it its own identity. "tell me about Bridge" returned allbridge, axelar and spacewalk; the record literally named Bridge was absent. Together with the liveness fix, natural-language recall went from 78.3% to 93.9% and total eval failures from 262 to 67.',
+		detail:
+			'Two bugs of the same shape: the machinery was right, its INPUT was wrong. (1) Liveness words were treated as identity anchors — "live" was not in the generic vocabulary, nearly every project\'s prose says it, so "is X live" admitted every row at matchMode=majority with HIGH confidence while the named project was often absent. (2) The exact-name signal is the FIRST key in the result sort, but it was computed against the RAW query string, so ordinary phrasing destroyed it: q=Bridge scored an exact hit and ranked correctly, q="tell me about Bridge" scored zero. It now also considers the query\'s SUBJECT (its anchor tokens), compared both as written and slug-shaped so "Blue Orion" matches blue-orion. The token path promotes only to an exact hit — it never manufactures a weaker prefix match, which is what made prefix/word affinity a late tiebreaker rather than a primary key. Both matter beyond ranking: every honesty guard is gated on matchMode==="semantic", so a query landing in a keyword tier believes it succeeded and bypasses the confidence cap and the neighbours-not-matches advisory — returning a confidently-wrong answer instead of an honest refusal.',
+	},
+	{
 		date: "2026-08-25",
 		surfaces: ["api"],
 		type: "changed",

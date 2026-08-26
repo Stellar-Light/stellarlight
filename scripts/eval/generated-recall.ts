@@ -62,10 +62,30 @@ function tally(bucket: string, ok: boolean, f?: Omit<Failure, "bucket">) {
 	buckets.set(bucket, b);
 }
 
+// Vercel preview deployments sit behind SSO deployment protection, so an
+// unauthenticated probe gets a 302 to vercel.com/sso-api and the eval measures
+// nothing. Vercel's "Protection Bypass for Automation" secret lifts that for
+// automated callers; without it set, this is inert and prod still works.
+const BYPASS = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+
 async function j(path: string): Promise<any> {
 	const res = await fetch(`${BASE}${path}`, {
-		headers: { "User-Agent": "stellarlight-engine-a" },
+		redirect: "manual",
+		headers: {
+			"User-Agent": "stellarlight-engine-a",
+			...(BYPASS ? { "x-vercel-protection-bypass": BYPASS } : {}),
+		},
 	});
+	// A protection redirect is not a result — fail loudly rather than scoring a
+	// login page as a miss, which would silently report a catastrophic run.
+	if (res.status >= 300 && res.status < 400) {
+		const loc = res.headers.get("location") ?? "";
+		if (loc.includes("vercel.com/sso") || loc.includes("_vercel"))
+			throw new Error(
+				`deployment protection blocked ${path} — set VERCEL_AUTOMATION_BYPASS_SECRET (Vercel → Settings → Deployment Protection → Protection Bypass for Automation)`,
+			);
+		throw new Error(`unexpected redirect ${res.status} ${path} -> ${loc}`);
+	}
 	if (!res.ok) throw new Error(`${res.status} ${path}`);
 	return res.json();
 }

@@ -730,3 +730,48 @@ export function structuredHit(
 	}
 	return typeMatch(p, intentTypes);
 }
+
+// Name-lookup rank (sls-009): the standard directory-search contract — a
+// query that IS a project's name must return that project first, regardless
+// of how much authority (prominence/SCF/stars) other keyword matches carry.
+export function nameMatchScore(
+	name: string,
+	slug: string,
+	q: string,
+	aliases?: string[] | null,
+	tokens?: string[],
+): number {
+	const qq = q.trim().toLowerCase();
+	if (!qq) return 0;
+	const n = name.trim().toLowerCase();
+	const sl = slug.toLowerCase();
+	const alias = (v: string) =>
+		(aliases ?? []).some((a) => a.trim().toLowerCase() === v);
+	if (n === qq || sl === qq || alias(qq)) return 3;
+	// The exact-name signal is the FIRST key in the result sort, but it was
+	// computed against the RAW query, so ordinary phrasing destroyed it:
+	// q="tell me about Bridge" never equals "bridge", so the project literally
+	// named Bridge scored 0 here and lost to allbridge/axelar, which merely
+	// MENTION bridging. Asking a natural question should not cost a record its
+	// own identity. The stopword-stripped tokens are the query's real subject,
+	// so an exact hit on those is an exact identity hit too — compared both as
+	// written and slug-shaped, since our slugs hyphenate ("blue orion" ->
+	// "blue-orion"). Deliberately only promotes to 3 (exact); it never
+	// manufactures a weaker prefix/word-boundary match, which is what made
+	// nameRank 2/1 a late tiebreaker rather than a primary key.
+	// The query's SUBJECT is its anchors, not all its tokens: "is Bridge live"
+	// tokenizes to ["bridge","live"], and "bridge live" matches nothing. Generic
+	// words were already demoted out of anchor status (#1041), so reusing that
+	// same vocabulary here keeps one definition of "what this query is about".
+	const joined = anchorTokens(tokens ?? [])
+		.join(" ")
+		.trim();
+	if (joined && joined !== qq) {
+		const hyphen = joined.replace(/\s+/g, "-");
+		if (n === joined || sl === joined || sl === hyphen || alias(joined))
+			return 3;
+	}
+	if (n.startsWith(qq)) return 2;
+	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
+}

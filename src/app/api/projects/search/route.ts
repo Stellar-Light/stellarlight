@@ -30,6 +30,7 @@ import {
 	hitsAnyToken,
 	intentTypesFor,
 	isRampIntent,
+	nameMatchScore,
 	scoreTokens,
 	structuredHit,
 	structuredSelectClauses,
@@ -398,27 +399,6 @@ function pickIdentity(p: any): ProjectRow["identity"] {
 		renamedAt: p.renamedAt ?? null,
 		sourceUrl: p.renameSourceUrl ?? null,
 	};
-}
-
-// Name-lookup rank (sls-009): the standard directory-search contract — a
-// query that IS a project's name must return that project first, regardless
-// of how much authority (prominence/SCF/stars) other keyword matches carry.
-function nameMatchScore(
-	name: string,
-	slug: string,
-	q: string,
-	aliases?: string[] | null,
-): number {
-	const qq = q.trim().toLowerCase();
-	if (!qq) return 0;
-	const n = name.trim().toLowerCase();
-	if (n === qq || slug.toLowerCase() === qq) return 3;
-	// sls-050: an exact former-name hit IS an exact name hit — rename
-	// continuity served as data, not synonym patches.
-	if ((aliases ?? []).some((a) => a.trim().toLowerCase() === qq)) return 3;
-	if (n.startsWith(qq)) return 2;
-	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
 }
 
 // A project's own indexed code repo (compact form, attached per project row).
@@ -1562,7 +1542,7 @@ export async function GET(req: NextRequest) {
 				const nameRank = new Map(
 					filtered.map((p) => [
 						p.id,
-						nameMatchScore(p.name, p.slug, q, p.identity?.aliases),
+						nameMatchScore(p.name, p.slug, q, p.identity?.aliases, tokens),
 					]),
 				);
 				// Primary rank = keyword-match count. Tiebreak by composite
