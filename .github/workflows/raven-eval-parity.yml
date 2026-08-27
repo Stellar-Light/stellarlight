@@ -58,3 +58,9 @@ jobs:
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
         run: pnpm exec tsx scripts/eval/raven-honest-absence.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
+
+      - name: Truth battery (guard D — rotating probes, curated answer key)
+        if: always()
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/eval/raven-truth-battery.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
