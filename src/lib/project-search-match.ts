@@ -359,6 +359,18 @@ export const INTENT_TYPE: Record<string, string> = {
  * its fragments — never a single fragment. Queries with no split words return
  * [] and behave exactly as before.
  */
+/**
+ * Word-boundary hit for identity FRAGMENTS. hitsAnyToken is substring-based
+ * (right for prose recall), but a split identity's fragments are evidence of
+ * a NAME: "block" substring-hitting "blockchain" made every crypto row
+ * satisfy the GetBlockCard group, so the gate excluded nothing. A fragment
+ * counts only as a standalone word.
+ */
+export function hitsWordToken(hay: string, token: string): boolean {
+	const esc = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`(?:^|[^a-z0-9])${esc}(?:[^a-z0-9]|$)`, "i").test(hay);
+}
+
 export function splitIdentityGroups(
 	q: string,
 ): Array<{ joined: string; fragments: string[] }> {
@@ -802,6 +814,16 @@ export function nameMatchScore(
 	if (joined && joined !== qq) {
 		const hyphen = joined.replace(/\s+/g, "-");
 		if (n === joined || sl === joined || sl === hyphen || alias(joined))
+			return 3;
+	}
+	// A camelCase word is its own subject: "tell me about GetBlockCard" -> the
+	// group's joined form "getblockcard" IS the identity being asked about,
+	// but the flat anchor join above ("block card getblockcard") matches
+	// nothing. Try each group's joined form directly — again promoting only
+	// to exact.
+	for (const g of splitIdentityGroups(q)) {
+		const nj = n.replace(/[^a-z0-9]/g, "");
+		if (nj === g.joined || sl.replace(/-/g, "") === g.joined || alias(g.joined))
 			return 3;
 	}
 	if (n.startsWith(qq)) return 2;

@@ -28,6 +28,7 @@ import {
 	chainCorridorHit,
 	corridorMatch,
 	hitsAnyToken,
+	hitsWordToken,
 	intentTypesFor,
 	isRampIntent,
 	nameMatchScore,
@@ -1449,7 +1450,9 @@ export async function GET(req: NextRequest) {
 					idGroups.some(
 						(g) =>
 							hitsAnyToken(p.hay ?? "", [g.joined]) ||
-							g.fragments.every((f) => hitsAnyToken(p.hay ?? "", [f])),
+							// fragments are NAME evidence — word hits only, or "block"
+							// substring-hits "blockchain" and the gate excludes nothing
+							g.fragments.every((f) => hitsWordToken(p.hay ?? "", f)),
 					);
 				if (filtered.length === 0 && tokens.length >= 3) {
 					matchMode = "loose-1";

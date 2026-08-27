@@ -14,6 +14,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+	hitsWordToken,
 	nameMatchScore,
 	splitIdentityGroups,
 	tokenize,
@@ -44,6 +45,40 @@ describe("splitIdentityGroups", () => {
 			rowHay.includes(g[0].joined) ||
 			g[0].fragments.every((f) => rowHay.includes(f));
 		expect(satisfied).toBe(false);
+	});
+});
+
+describe("battery day-2 cases (2026-08-27 --all run)", () => {
+	it("a fragment hits as a word, never a substring", () => {
+		// "block" substring-hit "blockchain", so every crypto row satisfied the
+		// GetBlockCard group and the gate excluded nothing.
+		expect(hitsWordToken("stablecoin blockchain payments", "block")).toBe(
+			false,
+		);
+		expect(hitsWordToken("the block explorer for stellar", "block")).toBe(true);
+	});
+
+	it("a camelCase subject is an exact-name hit via its joined form", () => {
+		// "tell me about GetBlockCard" ranked bridge #1 while we HELD the row.
+		expect(
+			nameMatchScore(
+				"GetBlockCard",
+				"getblockcard",
+				"tell me about GetBlockCard",
+				null,
+				tokenize("tell me about GetBlockCard"),
+			),
+		).toBe(3);
+		// and the group path must not promote a different card project
+		expect(
+			nameMatchScore(
+				"Bridge",
+				"bridge",
+				"tell me about GetBlockCard",
+				null,
+				tokenize("tell me about GetBlockCard"),
+			),
+		).toBeLessThan(3);
 	});
 });
 
