@@ -344,6 +344,39 @@ export const INTENT_TYPE: Record<string, string> = {
 	infrastructure: "Infrastructure",
 };
 
+/**
+ * Identity groups for camelCase/hyphenated words the tokenizer split.
+ *
+ * "is FlurboSwap live" tokenizes to [flurbo, swap, live, flurboswap] — and the
+ * F2 anchor gate ("a relaxed-tier row must hit at least one anchor") was
+ * satisfiable by the FRAGMENT "swap" alone, so a fabricated name containing a
+ * real word returned that word's whole category at a keyword tier: soroswap,
+ * sushi, alchemy for a project that does not exist, confidently, with every
+ * semantic-mode honesty guard bypassed (2026-08-27 through-Raven battery).
+ *
+ * A split word is ONE identity, not a bag of independent anchors: a row
+ * matches the identity only by carrying the joined form ("soroswap") or ALL
+ * its fragments — never a single fragment. Queries with no split words return
+ * [] and behave exactly as before.
+ */
+export function splitIdentityGroups(
+	q: string,
+): Array<{ joined: string; fragments: string[] }> {
+	const groups: Array<{ joined: string; fragments: string[] }> = [];
+	for (const raw of q.split(/\s+/)) {
+		// Only camelCase words are identity-shaped. Hyphenated VOCABULARY
+		// ("non-custodial", "cross-border", "on-ramp") also splits, but those
+		// are topic words — grouping them would demand every fragment and cost
+		// recall on ordinary queries.
+		if (!/[a-z][A-Z]/.test(raw)) continue;
+		const joined = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (!joined) continue;
+		const parts = tokenize(raw).filter((t) => t !== joined);
+		if (parts.length >= 2) groups.push({ joined, fragments: parts });
+	}
+	return groups;
+}
+
 export function intentTypesFor(tokens: string[]): Set<string> {
 	const s = new Set<string>();
 	for (const raw of tokens) {

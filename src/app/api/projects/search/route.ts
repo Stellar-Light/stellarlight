@@ -32,6 +32,7 @@ import {
 	isRampIntent,
 	nameMatchScore,
 	scoreTokens,
+	splitIdentityGroups,
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
@@ -1430,8 +1431,26 @@ export async function GET(req: NextRequest) {
 				// one anchor (non-generic) token; queries that are ALL generic
 				// keep today's behavior.
 				const anchors = anchorTokens(tokens);
+				// A camelCase word the tokenizer split (FlurboSwap -> flurbo+swap+
+				// flurboswap) is ONE identity: its lone fragments must not satisfy
+				// the anchor gate, or a fabricated name containing a real word
+				// returns that word's whole category confidently ("is FlurboSwap
+				// live" -> soroswap, sushi... at loose-1). A row keeps the anchor
+				// via a standalone anchor word, the joined form, or ALL fragments.
+				const idGroups = splitIdentityGroups(q);
+				const grouped = new Set(
+					idGroups.flatMap((g) => [g.joined, ...g.fragments]),
+				);
+				const standalone = anchors.filter((a) => !grouped.has(a));
 				const keepsAnchor = (p: ProjectRow) =>
-					anchors.length === 0 || !p.hay || hitsAnyToken(p.hay, anchors);
+					anchors.length === 0 ||
+					!p.hay ||
+					hitsAnyToken(p.hay, standalone) ||
+					idGroups.some(
+						(g) =>
+							hitsAnyToken(p.hay ?? "", [g.joined]) ||
+							g.fragments.every((f) => hitsAnyToken(p.hay ?? "", [f])),
+					);
 				if (filtered.length === 0 && tokens.length >= 3) {
 					matchMode = "loose-1";
 					filtered = projects
@@ -1998,7 +2017,13 @@ export async function GET(req: NextRequest) {
 			slug: string;
 			identity?: ProjectRow["identity"];
 		}) =>
-			nameMatchScore(p.name ?? "", p.slug ?? "", q, p.identity?.aliases) === 3
+			nameMatchScore(
+				p.name ?? "",
+				p.slug ?? "",
+				q,
+				p.identity?.aliases,
+				tokenize(q),
+			) === 3
 				? 1
 				: 0;
 		const act = (p: { status: string }) => (p.status === "Inactive" ? 0 : 1);
