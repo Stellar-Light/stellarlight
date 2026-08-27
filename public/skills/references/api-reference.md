@@ -135,7 +135,7 @@ Search existing Stellar projects (competitor / overlap lookup). The workhorse fo
 - `majority` — at least ⌈N/2⌉ tokens matched (broadest interpretation; lead with "broader interpretation of {q} — these projects overlap on the main themes")
 - `corrected` — the rows matched **only through a known spelling correction** (e.g. `strupey` → `stroopy`): the query token does not occur in the rows. Name the correction to the user and verify identity before treating the row as evidence about the queried name.
 - `semantic` — NO keyword tier matched; rows are vector-similarity neighbours (confidence capped at medium). Frame as "nothing matched directly — conceptually nearby:" and verify before relying on them.
-- `all` — accompanies results only when a non-`q` filter (`category`/`scfAwarded`) was applied. A bare call with **no `q` AND no filter does NOT return the full directory** — it returns `meta.error: "no_query"` + 0 rows; re-call with `?q=<terms>`.
+- `all` — a non-`q` filter (`category`/`type`/`scfAwarded`) defines the set. **With `?type=` this holds even when `q` is supplied**: type defines membership (the full typed set, stable at any limit/offset) and `q` only ranks within it — the label says so explicitly. A bare call with **no `q` AND no filter does NOT return the full directory** — it returns `meta.error: "no_query"` + 0 rows; re-call with `?q=<terms>`.
 
 This fallback chain means **a multi-word natural query like *"real-time price API for Soroban tokens"* will not dead-end at 0** — the endpoint relaxes to looser tiers until it finds something. Honesty matters: tell the user which tier returned the results so they can judge relevance themselves (`.meta.matchModeLabel` gives a pre-formatted human-readable version).
 

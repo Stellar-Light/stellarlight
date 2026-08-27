@@ -1419,7 +1419,29 @@ export async function GET(req: NextRequest) {
 			//
 			// The .meta.matchMode field tells the caller which tier returned
 			// the results so they can convey relevance honestly to the user.
-			if (tokens.length) {
+			//
+			// sls-033 (count instability, root-caused 2026-08-28): an EXACT-TYPE
+			// enumeration must have limit-independent membership. With q+type,
+			// the tier ladder admitted a q-dependent subset and then the
+			// identity-underfill bypass re-admitted rows GATED ON `limit` — the
+			// same enumeration served 58 uniques at limit=10, 63 at limit=100,
+			// total said 65, and three rows were served twice across pages. The
+			// route already enforces "a count must not depend on how many rows
+			// you asked for" for folds; admission broke it one layer up. So:
+			// when ?type= is present, TYPE DEFINES MEMBERSHIP (the whole typed
+			// set, exactly the no-q pool) and q only RANKS within it — every
+			// tier, bypass, and pad below is membership machinery and is
+			// skipped. matchMode reports "all" with an explicit label, because
+			// "strict" would claim q gated the set.
+			if (tokens.length && typeParam) {
+				matchMode = "all";
+				projects.sort(
+					(a, b) =>
+						b.score - a.score ||
+						rankBoost(b) - rankBoost(a) ||
+						String(a.name ?? "").localeCompare(String(b.name ?? "")),
+				);
+			} else if (tokens.length) {
 				// Structured-signal admission (sls-018/019): a project that IS the
 				// queried category (its `types` match intent) or whose curated
 				// coverage serves a queried corridor is admitted ONE tier looser
@@ -1796,7 +1818,18 @@ export async function GET(req: NextRequest) {
 	// `!didYouMean`: a spelling recovery already resolved the query to ONE
 	// project the user actually meant. Padding that page with vector neighbours
 	// would bury the answer under the same noise the correction just escaped.
-	if (q && offset === 0 && !didYouMean && scored.length < limit && payload) {
+	// !typeParam: an exact-type enumeration's membership is the typed set —
+	// padding it with vector neighbours would re-introduce off-set rows the
+	// belt then strips page-side, recreating the returned<limit ghost pages
+	// this fix removes (sls-033).
+	if (
+		q &&
+		!typeParam &&
+		offset === 0 &&
+		!didYouMean &&
+		scored.length < limit &&
+		payload
+	) {
 		try {
 			// F3: zero keyword hits = rescue mode (lower floor) — the audit's
 			// misspelling/slug-form probes died at total:0 with no fallback.
@@ -2403,6 +2436,12 @@ export async function GET(req: NextRequest) {
 						"no keyword match — semantically similar results (verify relevance before relying on them)",
 					all: "no keyword filter",
 				}[matchMode],
+				...(typeParam && q
+					? {
+							matchModeLabel:
+								"type filter defines the result set (every typed row included); q ranks within it",
+						}
+					: {}),
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything. `semantic` counts
 				// the rows on THIS page served by the vector fallback (also part
