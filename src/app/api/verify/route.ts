@@ -14,10 +14,12 @@ import { getAppUrl } from "@/lib/utils/app-url";
 import {
 	type AuditEvidenceRow,
 	auditVerdict,
+	issuedVerdict,
 	liveVerdict,
 	maintainedVerdict,
 	parseClaim,
 	type RepoFacts,
+	type StablecoinIssuerRow,
 } from "@/lib/verify-claim";
 
 export const revalidate = 300;
@@ -49,6 +51,69 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayload({ config });
 
+	const meta = {
+		source: `${getAppUrl()}/api/verify`,
+		generatedAt: new Date().toISOString(),
+		methodology:
+			"Verdicts assert over OUR indexed corpus, never over the world: supported = evidence on record; contradicted = we hold a dated record saying otherwise; unsupported = no evidence either way (the statement carries the denominator); unresolved = unknown subject.",
+		...(paramWarning ? { warnings: [paramWarning] } : {}),
+	};
+
+	// "issued" verifies against the stablecoin registry — its subject is a
+	// TICKER, so it never goes through project resolution.
+	if (parsed.type === "issued") {
+		if (!parsed.auditor) {
+			return NextResponse.json(
+				{
+					error:
+						'issued claims need the claimed company: ?type=issued&subject=EURC&auditor=Circle, or claim="is EURC issued by Circle".',
+					supportedClaims: [],
+				},
+				{ status: 400 },
+			);
+		}
+		const store = await payload.find({
+			collection: "stablecoins",
+			limit: 200,
+			depth: 0,
+		});
+		const rows = (store.docs as unknown as Array<Record<string, unknown>>)
+			.filter((d) => !d.retiredAt)
+			.map(
+				(d): StablecoinIssuerRow => ({
+					ticker: (d.ticker as string) ?? null,
+					company: (d.company as string) ?? null,
+					issuer: (d.issuer as string) ?? null,
+					issuerDomain: (d.issuerDomain as string) ?? null,
+					verified: (d.verified as boolean) ?? null,
+					updatedAt: (d.updatedAt as string) ?? null,
+				}),
+			);
+		const result = issuedVerdict({
+			ticker: parsed.subject,
+			company: parsed.auditor,
+			rows,
+			corpusTotal: rows.length,
+		});
+		logApiHit({
+			req,
+			endpoint: "/api/verify",
+			filters: { verdict: result.verdict },
+		});
+		return NextResponse.json(
+			{
+				meta: { ...meta, searched: { stablecoins: rows.length } },
+				claim: parsed,
+				...result,
+			},
+			{
+				headers: {
+					"Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+				},
+			},
+		);
+	}
+
 	// Subject resolution through the SAME machinery as /api/projects/resolve —
 	// renames, aliases and canonical slugs are handled there, once.
 	const projects = await payload.find({
@@ -70,14 +135,6 @@ export async function GET(req: NextRequest) {
 		parsed.subject,
 		projects.docs as ResolvableProject[],
 	);
-
-	const meta = {
-		source: `${getAppUrl()}/api/verify`,
-		generatedAt: new Date().toISOString(),
-		methodology:
-			"Verdicts assert over OUR indexed corpus, never over the world: supported = evidence on record; contradicted = we hold a dated record saying otherwise; unsupported = no evidence either way (the statement carries the denominator); unresolved = unknown subject.",
-		...(paramWarning ? { warnings: [paramWarning] } : {}),
-	};
 
 	if (!resolution.found || !resolution.current) {
 		logApiHit({

@@ -43,6 +43,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-28",
 		surfaces: ["api", "mcp"],
+		type: "added",
+		summary:
+			"Stablecoin issuer relations become conflation-proof (openapi@1.8.105): getStablecoins meta gains multiIssuerTickers (EURC is issued by BOTH Circle and MyKobo — attribute by issuer account, never by ticker alone), and /api/verify gains the issued claim family ('is EURC issued by Circle') answered from the hand-verified registry, with the multi-issuer warning attached to every supported verdict.",
+		detail:
+			"The sls-066-class miss this closes: an agent read 'Circle issues USDC and EURC' (true) and attributed MyKobo's EURC to Circle. The registry already held both issuers with distinct accounts — verified on-chain today (home_domain circle.com and mykobo.co on the respective issuer accounts) — but nothing made the multi-issuer axis salient to a caller projecting {ticker}, and nothing let an agent CHECK an attribution. Now the disambiguation lives where the numbers are (computed over the whole inventory, so a peg filter or limit boundary cannot hide it), and the attribution is checkable: supported carries the other issuers as a warning, contradicted fires only when the registry records the ticker under other issuers, and an unknown ticker is honestly 'not in our registry', never 'does not exist'.",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api", "mcp"],
 		type: "fixed",
 		summary:
 			"type=DEX no longer counts Indexers (openapi@1.8.104). Payload contains on the hasMany types field is case-insensitive SUBSTRING per element — 'DEX' matched In-DEX-er, so the DEX enumeration reported total 61 for a 46-row set, with the 15 Indexers stripped page-side into ghost pages. The candidate filter and the intent-type clauses now use `in` (exact element membership).",

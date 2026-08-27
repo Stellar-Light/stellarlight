@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	auditVerdict,
+	issuedVerdict,
 	liveVerdict,
 	maintainedVerdict,
 	parseClaim,
@@ -234,6 +235,76 @@ describe("grammar covers the new claim types", () => {
 		expect(parseClaim({ claim: "is kulipa abandoned?" })).toMatchObject({
 			type: "maintained",
 			subject: "kulipa",
+		});
+	});
+});
+
+describe("issuedVerdict — ticker attribution over the registry (sls-066 class)", () => {
+	const ROWS = [
+		{
+			ticker: "EURC",
+			company: "Circle",
+			issuer: "GDHU...",
+			issuerDomain: "circle.com",
+			updatedAt: "2026-08-28",
+		},
+		{
+			ticker: "EURC",
+			company: "MyKobo",
+			issuer: "GAQR...",
+			issuerDomain: "mykobo.co",
+			updatedAt: "2026-08-28",
+		},
+		{
+			ticker: "USDC",
+			company: "Circle",
+			issuer: "GA5Z...",
+			issuerDomain: "circle.com",
+			updatedAt: "2026-08-28",
+		},
+	];
+	it("supported, with the multi-issuer warning attached", () => {
+		const r = issuedVerdict({
+			ticker: "EURC",
+			company: "Circle",
+			rows: ROWS,
+			corpusTotal: 3,
+		});
+		expect(r.verdict).toBe("supported");
+		expect(r.statement).toContain("also issued by MyKobo");
+		expect(r.statement).toContain("never by ticker alone");
+	});
+	it("contradicted when the ticker is on record under OTHER issuers only", () => {
+		const r = issuedVerdict({
+			ticker: "USDC",
+			company: "Tether",
+			rows: ROWS,
+			corpusTotal: 3,
+		});
+		expect(r.verdict).toBe("contradicted");
+		expect(r.auditorsOnRecord).toEqual(["Circle"]);
+		expect(r.statement).toContain("not the world");
+	});
+	it("unsupported for a ticker outside the registry — never 'does not exist'", () => {
+		const r = issuedVerdict({
+			ticker: "ZORB",
+			company: "Circle",
+			rows: ROWS,
+			corpusTotal: 3,
+		});
+		expect(r.verdict).toBe("unsupported");
+		expect(r.statement).toContain("not proof the asset does not exist");
+	});
+	it("grammar: both phrasings parse to the same claim", () => {
+		expect(parseClaim({ claim: "is EURC issued by Circle" })).toMatchObject({
+			type: "issued",
+			subject: "EURC",
+			auditor: "Circle",
+		});
+		expect(parseClaim({ claim: "does MyKobo issue EURC?" })).toMatchObject({
+			type: "issued",
+			subject: "EURC",
+			auditor: "MyKobo",
 		});
 	});
 });

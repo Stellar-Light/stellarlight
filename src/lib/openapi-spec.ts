@@ -166,9 +166,9 @@ export const spec: OpenAPISpec = {
 				operationId: "verifyClaim",
 				tags: ["Verification"],
 				summary:
-					"Verify a claim (audited / live / maintained) against indexed evidence — verdict + evidence + confidence",
+					"Verify a claim (audited / live / maintained / issued) against indexed evidence — verdict + evidence + confidence",
 				description:
-					"Claim in → verdict out, with dated evidence attached. Claim types: audited (evidence = the audit registry), live (evidence = the status record with its provenance tier — a Pre-Release record CONTRADICTS a live claim, source attached), maintained (evidence = indexed code activity + curated repo knowledgeNotes). Verdicts assert over OUR corpus, never the world: supported / contradicted (a dated record says otherwise) / unsupported (no evidence either way; statement carries the denominator) / unresolved. Every answer carries the full subject card: links, types, status+provenance, prominence.",
+					"Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier — Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle' — the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.",
 				"x-routing": {
 					purpose:
 						"Fact-check an audit claim about a project with dated evidence, instead of inferring from search results.",
@@ -212,7 +212,7 @@ export const spec: OpenAPISpec = {
 						description: "Structured alternative to claim.",
 						schema: {
 							type: "string",
-							enum: ["audited", "live", "maintained"],
+							enum: ["audited", "live", "maintained", "issued"],
 						},
 					},
 					{
@@ -5204,6 +5204,22 @@ export const spec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														multiIssuerTickers: {
+															type: "array",
+															description:
+																"Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity — attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class).",
+															items: {
+																type: "object",
+																properties: {
+																	ticker: { type: "string" },
+																	companies: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	note: { type: "string" },
+																},
+															},
+														},
 														dataAsOf: {
 															type: "string",
 															format: "date-time",
