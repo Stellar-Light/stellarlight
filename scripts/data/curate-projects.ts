@@ -23,6 +23,7 @@ import {
 	PROMINENCE_SET,
 	SEEDS,
 	STATUS_FIX,
+	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
 	WEBSITE_FIXES,
@@ -1657,6 +1658,34 @@ async function main() {
 		}
 		console.log(`  ${slug}: prominence ${d.prominence ?? 0} → ${prominence}`);
 		writes.push({ id: d.id, slug, data: { prominence } });
+	}
+
+	// ── TYPE_ADD: additive type tags (Oracle vertical, guard D 2026-08-27) ──
+	for (const [slug, addTypes] of Object.entries(TYPE_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const current: string[] = Array.isArray(d.types) ? d.types : [];
+		const missing = addTypes.filter((t) => !current.includes(t));
+		if (!missing.length) {
+			console.log(`  ${slug}: types already carry ${addTypes.join(",")}, skip`);
+			continue;
+		}
+		// ADD-only merge — write the full array (hasMany), never a partial.
+		console.log(
+			`  ${slug}: types [${current.join(",")}] +${missing.join(",")}`,
+		);
+		writes.push({ id: d.id, slug, data: { types: [...current, ...missing] } });
 	}
 
 	// ── NAME_FIXES: registered renames (sync-protected via curatedFieldsFor) ──

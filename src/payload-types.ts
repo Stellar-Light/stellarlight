@@ -316,6 +316,7 @@ export interface Project {
 				| "Faucet"
 				| "Card Issuing"
 				| "Exchange"
+				| "Oracle"
 		  )[]
 		| null;
 	/**

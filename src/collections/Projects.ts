@@ -106,6 +106,11 @@ export const Projects: CollectionConfig = {
 				// Centralized exchanges that list XLM (Playbook CEX directory); imported
 				// only with a live CoinGecko XLM market as evidence (2026-08-21).
 				"Exchange",
+				// Price/data oracle providers on Stellar/Soroban. The vertical had
+				// NO enum member at all — reflector, dia, band, redstone-finance,
+				// lightecho, pyth every one carried types:[] and the whole category
+				// was invisible to type browse (truth-battery guard D, 2026-08-27).
+				"Oracle",
 			],
 		},
 		{

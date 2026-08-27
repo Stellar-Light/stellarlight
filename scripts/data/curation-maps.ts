@@ -44,6 +44,22 @@ export const STATUS_FIX: Record<
 	// page still lists contract addresses as TBD, i.e. nothing is deployed for
 	// users yet. from === to, so the from-guard makes this a no-op on status
 	// and writes only the dated evidence.
+	// User report 2026-08-27 ("laina is not live, testnet"): confirmed against
+	// the code itself — src/lib/horizon.ts hardcodes horizon-testnet.stellar.org
+	// and Networks.TESTNET; the only other branch is localhost. No mainnet path
+	// exists. The row's Live rested on site-liveness (a 200 from laina-de.fi's
+	// Astro landing page — a page is not a protocol). Repo laina-defi/laina
+	// last pushed 2026-08-11, so the project is alive as a PROJECT, just not
+	// launched: Pre-Release, not Inactive.
+	laina: {
+		from: "Live",
+		to: "Pre-Release",
+		note: "Single-token lending pools on Soroban; app targets TESTNET only (horizon.ts pins horizon-testnet + Networks.TESTNET; no mainnet branch).",
+		asOf: "2026-08-27",
+		sourceUrl:
+			"https://github.com/laina-defi/laina/blob/main/src/lib/horizon.ts",
+		basis: "human-verified",
+	},
 	zenex: {
 		from: "Pre-Release",
 		to: "Pre-Release",
@@ -629,6 +645,26 @@ export const WEBSITE_FIXES: Record<string, string> = {
 /** Curated seeds — create-if-missing directory entries with human-verified
  * provenance. Never updates an existing row (slug match = skip), so a seed
  * can't clobber later edits. Keep this list SHORT and evidence-quoted. */
+/** Additive type tags for EXISTING rows (truth battery guard D, 2026-08-27):
+ * the Oracle vertical had no enum member, so every oracle provider carried
+ * types:[] and the whole category was invisible to type browse. Each row's
+ * evidence is its own already-sourced description (identity, not liveness —
+ * status/provenance untouched). ADD-only: never removes or replaces types.
+ * Excluded on mention-vs-identity grounds: stellar-oracle-shield (oracle
+ * MONITORING tool), mpcvault (wallet whose prose mentions oracles). */
+export const TYPE_ADD: Record<string, string[]> = {
+	reflector: ["Oracle"], // "decentralized price oracle and data-feed network for Stellar"
+	dia: ["Oracle"], // "cross-chain oracle provider live on Stellar/Soroban"
+	band: ["Oracle"], // "cross-chain data oracle live on Stellar/Soroban"
+	lightecho: ["Oracle"], // "price oracle for Stellar Soroban smart contracts"
+	"redstone-finance": ["Oracle"], // "Modular price oracle live on Stellar/Soroban mainnet"
+	pyth: ["Oracle"], // "decentralized oracle that delivers real-time price feeds"
+	quasar: ["Oracle"], // "price feed oracle grid for Stellar DeFi" (keeps SDK)
+	nebula: ["Oracle"], // same grid family, Inactive — type is identity, not liveness
+	orally: ["Oracle"], // "On-chain oracles with cross-chain capabilities"
+	"soroban-optimistic-oracle": ["Oracle"], // optimistic/arbitration oracle (keeps Infrastructure)
+};
+
 export const SEEDS: Array<{
 	slug: string;
 	name: string;
