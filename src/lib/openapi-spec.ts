@@ -708,7 +708,7 @@ export const spec: OpenAPISpec = {
 										service: { type: "string" },
 										version: { type: "string" },
 										generatedAt: { type: "string", format: "date-time" },
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										entries: {
 											type: "array",
 											items: {
@@ -1216,7 +1216,7 @@ export const spec: OpenAPISpec = {
 												},
 												protocolCaps: {
 													type: "array",
-													items: { type: "object" },
+													items: { type: "object", additionalProperties: true },
 												},
 												stellarDeps: {
 													type: "array",
@@ -1523,6 +1523,7 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 												counts: {
 													type: "object",
+													additionalProperties: true,
 													description:
 														"How many of the requested slugs resolved.",
 												},
@@ -1657,11 +1658,13 @@ export const spec: OpenAPISpec = {
 												},
 												filters: {
 													type: "object",
+													additionalProperties: true,
 													description:
 														"The filters as applied — an echo, so a caller can see what was honoured.",
 												},
 												counts: {
 													type: "object",
+													additionalProperties: true,
 													description:
 														"returned vs total — how much the filters narrowed.",
 												},
@@ -2180,7 +2183,7 @@ export const spec: OpenAPISpec = {
 												tomlFetchedAt: { type: "string", nullable: true },
 												caseStudies: {
 													type: "array",
-													items: { type: "object" },
+													items: { type: "object", additionalProperties: true },
 												},
 												verified: {
 													type: "object",
@@ -2295,6 +2298,7 @@ export const spec: OpenAPISpec = {
 												properties: {
 													partner: {
 														type: "object",
+														additionalProperties: true,
 														description: "The matched partner row.",
 													},
 													score: {
@@ -2418,6 +2422,7 @@ export const spec: OpenAPISpec = {
 												"Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
 											items: {
 												type: "object",
+												additionalProperties: true,
 												description: "A public partner record.",
 											},
 										},
@@ -2517,6 +2522,7 @@ export const spec: OpenAPISpec = {
 										},
 										profile: {
 											type: "object",
+											additionalProperties: true,
 											nullable: true,
 											description:
 												"mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific.",
@@ -2577,6 +2583,7 @@ export const spec: OpenAPISpec = {
 									},
 									fields: {
 										type: "object",
+										additionalProperties: true,
 										description:
 											"Profile fields (typically the /api/partners/onboard extract output)",
 									},
@@ -2893,7 +2900,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										report: {
 											type: "object",
 											properties: {
@@ -2906,16 +2913,25 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															enum: ["live", "unavailable"],
 														},
-														open: { type: "array", items: { type: "object" } },
+														open: {
+															type: "array",
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
+														},
 														note: { type: "string" },
 													},
 												},
 												fundedPeers: {
 													type: "array",
-													items: { type: "object" },
+													items: { type: "object", additionalProperties: true },
 												},
-												fundingBar: { type: "object" },
-												vet: { type: "object" },
+												fundingBar: {
+													type: "object",
+													additionalProperties: true,
+												},
+												vet: { type: "object", additionalProperties: true },
 												angles: {
 													type: "array",
 													items: { type: "string" },
@@ -2987,7 +3003,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										report: {
 											type: "object",
 											properties: {
@@ -3000,6 +3016,7 @@ export const spec: OpenAPISpec = {
 												},
 												vet: {
 													type: "object",
+													additionalProperties: true,
 													description:
 														"Same computation as /api/vet-idea: competitors, maturity, priorArt, gap.",
 												},
@@ -3024,7 +3041,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													description:
 														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
-													items: { type: "object" },
+													items: { type: "object", additionalProperties: true },
 												},
 												liveContracts: {
 													type: "object",
@@ -3038,7 +3055,10 @@ export const spec: OpenAPISpec = {
 														basis: { type: "string" },
 														contracts: {
 															type: "array",
-															items: { type: "object" },
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
 														},
 														note: { type: "string" },
 													},
@@ -3048,14 +3068,21 @@ export const spec: OpenAPISpec = {
 													properties: {
 														round: {
 															type: "object",
+															additionalProperties: true,
 															description:
 																"Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable').",
 														},
 														fundedPeers: {
 															type: "array",
-															items: { type: "object" },
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
 														},
-														fundingBar: { type: "object" },
+														fundingBar: {
+															type: "object",
+															additionalProperties: true,
+														},
 													},
 												},
 												whatNotToClaim: {
@@ -3128,7 +3155,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										report: {
 											type: "object",
 											properties: {
@@ -3142,10 +3169,19 @@ export const spec: OpenAPISpec = {
 												competitors: {
 													type: "object",
 													properties: {
-														repos: { type: "array", items: { type: "object" } },
+														repos: {
+															type: "array",
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
+														},
 														projects: {
 															type: "array",
-															items: { type: "object" },
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
 														},
 														matchMode: {
 															type: "string",
@@ -3167,17 +3203,28 @@ export const spec: OpenAPISpec = {
 												priorArt: {
 													type: "object",
 													properties: {
-														repos: { type: "array", items: { type: "object" } },
+														repos: {
+															type: "array",
+															items: {
+																type: "object",
+																additionalProperties: true,
+															},
+														},
 														note: { type: "string" },
 													},
 												},
 												gap: {
 													type: "object",
+													additionalProperties: true,
 													nullable: true,
 													description:
 														"Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps).",
 												},
-												funding: { type: "object", nullable: true },
+												funding: {
+													type: "object",
+													additionalProperties: true,
+													nullable: true,
+												},
 											},
 										},
 									},
@@ -3240,7 +3287,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										report: {
 											type: "object",
 											properties: {
@@ -3292,8 +3339,16 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
-												usage: { type: "object", nullable: true },
-												audits: { type: "object", nullable: true },
+												usage: {
+													type: "object",
+													additionalProperties: true,
+													nullable: true,
+												},
+												audits: {
+													type: "object",
+													additionalProperties: true,
+													nullable: true,
+												},
 												auditDrift: {
 													type: "object",
 													nullable: true,
@@ -3429,7 +3484,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object" },
+										meta: { type: "object", additionalProperties: true },
 										contracts: {
 											type: "array",
 											items: {
@@ -3469,12 +3524,14 @@ export const spec: OpenAPISpec = {
 													},
 													codeInUse: {
 														type: "object",
+														additionalProperties: true,
 														nullable: true,
 														description:
 															"Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier.",
 													},
 													audits: {
 														type: "object",
+														additionalProperties: true,
 														nullable: true,
 														description:
 															"Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'.",
@@ -4869,15 +4926,18 @@ export const spec: OpenAPISpec = {
 												contentType: { type: "string" },
 												body: {
 													type: "object",
+													additionalProperties: true,
 													description:
 														"Field-by-field description of the POST body, including the allowed kind values.",
 												},
 												example: {
 													type: "object",
+													additionalProperties: true,
 													description: "A ready-to-send example body.",
 												},
 												voteExample: {
 													type: "object",
+													additionalProperties: true,
 													description: "An example of the vote-shaped variant.",
 												},
 												rateLimit: {
@@ -5364,6 +5424,7 @@ export const spec: OpenAPISpec = {
 					score: { type: ["number", "null"] },
 					confidence: {
 						type: "object",
+						additionalProperties: true,
 						description:
 							"0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays",
 					},
@@ -5462,7 +5523,7 @@ export const spec: OpenAPISpec = {
 					caseStudies: {
 						type: "array",
 						nullable: true,
-						items: { type: "object" },
+						items: { type: "object", additionalProperties: true },
 						description:
 							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet.",
 					},
@@ -6285,7 +6346,7 @@ export const spec: OpenAPISpec = {
 				type: "object",
 				properties: {
 					meta: { $ref: "#/components/schemas/Meta" },
-					hackathon: { type: "object" },
+					hackathon: { type: "object", additionalProperties: true },
 					winners: {
 						type: "array",
 						description:
@@ -6341,8 +6402,14 @@ export const spec: OpenAPISpec = {
 						description:
 							"Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded.",
 					},
-					submissions: { type: "array", items: { type: "object" } },
-					tracks: { type: "array", items: { type: "object" } },
+					submissions: {
+						type: "array",
+						items: { type: "object", additionalProperties: true },
+					},
+					tracks: {
+						type: "array",
+						items: { type: "object", additionalProperties: true },
+					},
 				},
 			},
 			Repo: {
