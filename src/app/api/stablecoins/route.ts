@@ -109,6 +109,24 @@ export async function GET(req: NextRequest) {
 	// `tracked` keeps the whole-inventory number, `total` means what the
 	// contract says.
 	const tracked = rows.length;
+	// Computed over the WHOLE inventory before peg-filter and limit — a limit
+	// boundary splitting an EURC pair must not make the disambiguation vanish.
+	const multiIssuerTickers = (() => {
+		const byTicker = new Map<string, Set<string>>();
+		for (const r of rows) {
+			const t = String(r.ticker ?? "").toUpperCase();
+			if (!t) continue;
+			if (!byTicker.has(t)) byTicker.set(t, new Set());
+			if (r.company) byTicker.get(t)?.add(String(r.company));
+		}
+		return [...byTicker.entries()]
+			.filter(([, cs]) => cs.size > 1)
+			.map(([t, cs]) => ({
+				ticker: t,
+				companies: [...cs].sort(),
+				note: `${t} is issued on Stellar by ${cs.size} distinct companies — attribute by issuer account, never by ticker alone.`,
+			}));
+	})();
 	if (pegFilter) {
 		const want = pegFilter.toUpperCase();
 		rows = rows.filter((r) => (r.peg ?? "").toUpperCase() === want);
@@ -140,6 +158,13 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/api/stablecoins",
 				generatedAt: new Date().toISOString(),
 				dataAsOf,
+				// Issuer-relation disambiguation (sls-066 class; the miss that
+				// motivated it attributed MyKobo's EURC to Circle because a prose
+				// source said "Circle issues USDC and EURC"): when one ticker is
+				// issued by MULTIPLE distinct companies, ticker alone is not an
+				// identity — say so where the numbers are, so a caller projecting
+				// {ticker, marketCap} can't silently drop the issuer axis.
+				multiIssuerTickers,
 				filters: { peg: pegFilter ?? null, sort, limit },
 				counts: { tracked, total, returned: rows.length, byBasis },
 				// sls-066: say what this inventory IS. It is a curated registry of

@@ -38,8 +38,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Verify a claim (audited / live / maintained) against indexed evidence — verdict + evidence + confidence
-         * @description Claim in → verdict out, with dated evidence attached. Claim types: audited (evidence = the audit registry), live (evidence = the status record with its provenance tier — a Pre-Release record CONTRADICTS a live claim, source attached), maintained (evidence = indexed code activity + curated repo knowledgeNotes). Verdicts assert over OUR corpus, never the world: supported / contradicted (a dated record says otherwise) / unsupported (no evidence either way; statement carries the denominator) / unresolved. Every answer carries the full subject card: links, types, status+provenance, prominence.
+         * Verify a claim (audited / live / maintained / issued) against indexed evidence — verdict + evidence + confidence
+         * @description Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier — Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle' — the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.
          */
         get: operations["verifyClaim"];
         put?: never;
@@ -1880,7 +1880,7 @@ export interface operations {
                 /** @description Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing. */
                 claim?: string;
                 /** @description Structured alternative to claim. */
-                type?: "audited" | "live" | "maintained";
+                type?: "audited" | "live" | "maintained" | "issued";
                 /** @description Project name, slug, alias, or former name (required with type=). */
                 subject?: string;
                 /** @description Restrict to reports by this firm (case/spacing-insensitive substring). A filtered miss names who DID audit in auditorsOnRecord. */
@@ -4118,6 +4118,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
+                            /** @description Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity — attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class). */
+                            multiIssuerTickers?: {
+                                ticker?: string;
+                                companies?: string[];
+                                note?: string;
+                            }[];
                             /**
                              * Format: date-time
                              * @description The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.

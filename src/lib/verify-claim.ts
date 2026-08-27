@@ -20,7 +20,7 @@
  */
 import { factConfidence } from "./fact-confidence";
 
-export type ClaimType = "audited" | "live" | "maintained";
+export type ClaimType = "audited" | "live" | "maintained" | "issued";
 export type AuditClaim = {
 	type: ClaimType;
 	subject: string;
@@ -34,6 +34,7 @@ const SUPPORTED = [
 	"type=audited&subject=<name|slug> [&auditor=] [&since=YYYY-MM]",
 	'type=live&subject=<name|slug>  (or claim="is X live")',
 	'type=maintained&subject=<name|slug>  (or claim="is X maintained" / "is X abandoned")',
+	'type=issued&subject=<ticker>&auditor=<company>  (or claim="is EURC issued by Circle")',
 ];
 
 /** Structured params first; else a tiny CLOSED grammar. Anything outside it
@@ -47,9 +48,9 @@ export function parseClaim(p: {
 }): AuditClaim | ClaimParseError {
 	if (p.type || p.subject) {
 		const t = p.type ?? "audited";
-		if (t !== "audited" && t !== "live" && t !== "maintained")
+		if (t !== "audited" && t !== "live" && t !== "maintained" && t !== "issued")
 			return {
-				error: `Unsupported claim type '${p.type}'. Supported: audited, live, maintained.`,
+				error: `Unsupported claim type '${p.type}'. Supported: audited, live, maintained, issued.`,
 				supported: SUPPORTED,
 			};
 		if (!p.subject?.trim())
@@ -82,6 +83,24 @@ export function parseClaim(p: {
 			raw,
 		);
 	if (live) return { type: "live", subject: live[1].trim() };
+	const issued =
+		/^(?:is|was)\s+(.+?)\s+issued\s+(?:on\s+stellar\s+)?by\s+(.+?)\s*\??$/i.exec(
+			raw,
+		);
+	if (issued)
+		return {
+			type: "issued",
+			subject: issued[1].trim(),
+			auditor: issued[2].trim(),
+		};
+	const issues =
+		/^does\s+(.+?)\s+issue\s+(.+?)(?:\s+on\s+stellar)?\s*\??$/i.exec(raw);
+	if (issues)
+		return {
+			type: "issued",
+			subject: issues[2].trim(),
+			auditor: issues[1].trim(),
+		};
 	const maint =
 		/^(?:is|was)\s+(.+?)\s+(?:(?:still\s+)?(?:maintained|active(?:ly)?(?:\s+developed)?)|abandoned|dead)\s*\??$/i.exec(
 			raw,
@@ -378,5 +397,80 @@ export function maintainedVerdict(
 		statement: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} (${Math.round(days)} days ago) — quiet, but not provably abandoned. Judge from the dates.`,
 		evidence: ev,
 		confidence: factConfidence("code-scan", newest),
+	};
+}
+
+export interface StablecoinIssuerRow {
+	ticker?: string | null;
+	company?: string | null;
+	issuer?: string | null;
+	issuerDomain?: string | null;
+	assetId?: string | null;
+	verified?: boolean | null;
+	updatedAt?: string | null;
+}
+
+/** "is <ticker> issued by <company>" — answered from the curated stablecoin
+ * registry. The conflation this exists to stop: "Circle issues USDC and
+ * EURC" is TRUE and still must not attribute MyKobo's EURC to Circle — a
+ * ticker issued by multiple companies is not an identity. supported names
+ * the matching row; contradicted fires only when the ticker IS on record
+ * with other issuers and the claimed company is not among them (closed
+ * registry world, stated); unsupported = ticker not in the registry at all. */
+export function issuedVerdict(o: {
+	ticker: string;
+	company: string;
+	rows: StablecoinIssuerRow[];
+	corpusTotal: number;
+}): VerifyResult {
+	const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
+	const t = norm(o.ticker);
+	const tickerRows = o.rows.filter((r) => norm(String(r.ticker ?? "")) === t);
+	const ev = (r: StablecoinIssuerRow): EvidenceItem => ({
+		kind: "curated-note",
+		note: `${String(r.ticker ?? "").toUpperCase()} issued by ${r.company ?? "unknown"} — issuer account ${r.issuer ?? "?"}${r.issuerDomain ? ` (home domain ${r.issuerDomain})` : ""}`,
+		source: `https://stellarlight.xyz/api/stablecoins`,
+		asOf: r.updatedAt ?? null,
+	});
+	if (!tickerRows.length)
+		return {
+			verdict: "unsupported",
+			statement: `${o.ticker.toUpperCase()} is not in our stablecoin registry (${o.corpusTotal} tracked issuances) — a statement about our registry, not proof the asset does not exist.`,
+			evidence: [],
+			confidence: null,
+		};
+	const match = tickerRows.filter(
+		(r) =>
+			norm(String(r.company ?? "")).includes(norm(o.company)) ||
+			norm(o.company).includes(norm(String(r.company ?? ""))),
+	);
+	const others = [
+		...new Set(
+			tickerRows.map((r) => r.company).filter((c): c is string => !!c),
+		),
+	];
+	if (match.length) {
+		const multi = others.length > 1;
+		return {
+			verdict: "supported",
+			statement:
+				`${o.company} issues ${o.ticker.toUpperCase()} on Stellar (issuer account on record).` +
+				(multi
+					? ` NOTE: ${o.ticker.toUpperCase()} is also issued by ${others.filter((c) => !match.some((m) => m.company === c)).join(", ")} — attribute by issuer account, never by ticker alone.`
+					: ""),
+			evidence: tickerRows.map(ev),
+			confidence: factConfidence("human-verified", match[0].updatedAt ?? null),
+			...(multi ? { auditorsOnRecord: others } : {}),
+		};
+	}
+	return {
+		verdict: "contradicted",
+		statement: `Our registry records ${o.ticker.toUpperCase()} issued by ${others.join(", ")} — not by ${o.company}. This asserts our curated registry (${o.corpusTotal} tracked issuances), which is hand-verified but not the world.`,
+		evidence: tickerRows.map(ev),
+		confidence: factConfidence(
+			"human-verified",
+			tickerRows[0].updatedAt ?? null,
+		),
+		auditorsOnRecord: others,
 	};
 }
