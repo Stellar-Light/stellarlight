@@ -1610,9 +1610,21 @@ export async function GET(req: NextRequest) {
 						// (spacewalk = polkadot/kusama). Inert unless the query names
 						// an external chain — 2026-07-21 persona battery.
 						Number(b.chainCorridor ?? true) - Number(a.chainCorridor ?? true) ||
-						b.score - a.score ||
-						// Structured relevance (type-match OR corridor coverage-match)
-						// leads over pure prose matches at the same keyword score.
+						// Effective relevance = prose score + 1 if the row IS the
+						// queried category (type/corridor membership). This mirrors
+						// what admission already believes — admit() lets a typed row
+						// in one prose token below the bar, because structured truth
+						// is worth one description word. Ranking said otherwise:
+						// "lending protocol on Stellar" buried Live typed-Lending
+						// lantern/laina (score 1) beneath prose double-matches
+						// (lucent, xoxno, tezoro at score 2) — guard D, 2026-08-27.
+						// Same axis as sls-019: membership decides eligibility;
+						// HERE it is worth exactly one word, never dominance.
+						b.score +
+							Number(structuredHit(b, intentTypes, tokens, rampIntent)) -
+							(a.score +
+								Number(structuredHit(a, intentTypes, tokens, rampIntent))) ||
+						// …and at equal effective score, the typed row still leads.
 						Number(structuredHit(b, intentTypes, tokens, rampIntent)) -
 							Number(structuredHit(a, intentTypes, tokens, rampIntent)) ||
 						rankBoost(b) - rankBoost(a) ||
