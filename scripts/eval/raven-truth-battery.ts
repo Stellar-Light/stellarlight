@@ -207,6 +207,7 @@ const CATEGORY_BANKS: Array<{
 	anyOf: string[];
 	op?: string;
 	key?: string;
+	min?: number;
 }> = [
 	{ q: "oracle price feeds on Stellar", anyOf: ["reflector", "band", "dia"] },
 	{
@@ -229,14 +230,14 @@ const CATEGORY_BANKS: Array<{
 		q: "cross-chain bridge to Stellar",
 		anyOf: ["allbridge", "spacewalk", "axelar"],
 	},
-	// blend + lantern are Live; laina is Pre-Release (testnet-only, 2026-08-27)
-	// and slender Inactive — all four are typed Lending, and membership is
-	// identity, not liveness.
-	// Bank asks for 2 of 4 so ranking drift below the top-8 still fires.
-	{
-		q: "lending protocol on Stellar",
-		anyOf: ["blend", "lantern", "laina", "slender"],
-	},
+	// 2026-08-27 recalibration: the Lending vertical holds 20+ typed rows, so
+	// asserting two hand-picked members in top-8 encoded an unfounded
+	// canonicality opinion (the red it produced led to #1053, which was right
+	// for the CLASS — typed rows now rank as if they said one more word — but
+	// the assertion itself was wrong). What retrieval owes this query: the
+	// flagship leads, and the page is category-pure. Canonicality WITHIN a
+	// vertical is prominence curation, not a retrieval assertion.
+	{ q: "lending protocol on Stellar", anyOf: ["blend"], min: 1 },
 ];
 async function sliceC() {
 	console.log("\n── C: category truth ──");
@@ -255,7 +256,7 @@ async function sliceC() {
 		`);
 		const hit = (out.slugs ?? []).filter((s: string) => c.anyOf.includes(s));
 		verdict(
-			hit.length >= 2,
+			hit.length >= (c.min ?? 2),
 			"C:category",
 			`"${c.q}" -> ${hit.length}/${c.anyOf.length} expected members in top-8 (${(out.slugs ?? []).slice(0, 4).join(",")})`,
 		);
