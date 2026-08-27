@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-26",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"getPartner now declares its full 31-field profile (openapi@1.8.93) — the earlier declaration covered 9. All 12 operations Raven's drift check flagged were tested against their own declarations: zero declared-but-absent fields anywhere.",
+		detail:
+			"Raven's drift detector (their #67) picked up the schema-declaration wave, so every flagged operation was verified live against its own contract, both directions: nothing we declare is missing from responses, and served-but-undeclared gaps were closed — the partner profile's contact/coverage/verification fields (contactEmail, seps, rampTypes, verified.*, freshness.*) are exactly what a partner-matching agent needs and were invisible in the contract; builds meta now declares upstream/filters/counts and per-row matchedTerms (the evidence behind inclusion); compare meta declares counts. POST paths verified too: matchPartners returns scored matches with reasons and an honest candidatesConsidered denominator; onboard/assistant/submit-listing return precise 400s naming what is required rather than accepting garbage.",
+	},
+	{
+		date: "2026-08-26",
 		surfaces: ["api", "mcp"],
 		type: "fixed",
 		summary:

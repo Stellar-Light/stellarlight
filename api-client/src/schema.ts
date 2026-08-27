@@ -2297,6 +2297,8 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                            /** @description How many of the requested slugs resolved. */
+                            counts?: Record<string, never>;
                         };
                         hackathons?: {
                             slug?: string;
@@ -2345,6 +2347,13 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                            /** @description Where the raw builds came from (DoraHacks). */
+                            upstream?: string;
+                            /** @description The filters as applied — an echo, so a caller can see what was honoured. */
+                            filters?: Record<string, never>;
+                            /** @description returned vs total — how much the filters narrowed. */
+                            counts?: Record<string, never>;
+                            note?: string;
                         };
                         builds?: {
                             name?: string;
@@ -2361,6 +2370,8 @@ export interface operations {
                             isWinner?: boolean;
                             votes?: number | null;
                             endedAt?: string | null;
+                            /** @description Which query terms this build matched — the evidence behind its inclusion. */
+                            matchedTerms?: string[];
                         }[];
                     };
                 };
@@ -2524,6 +2535,7 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                         };
+                        /** @description The full partner profile — every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing. */
                         partner?: {
                             slug?: string;
                             name?: string;
@@ -2532,7 +2544,46 @@ export interface operations {
                             description?: string | null;
                             logoUrl?: string | null;
                             websiteUrl?: string | null;
+                            foundedYear?: number | null;
                             services?: string[];
+                            sectors?: string[];
+                            regions?: string[];
+                            assets?: string[];
+                            /** @description SEP standards the partner implements. */
+                            seps?: string[];
+                            rampTypes?: string[];
+                            country?: string | null;
+                            acceptingClients?: boolean;
+                            typicalEngagement?: string | null;
+                            leadTime?: string | null;
+                            pricingModel?: string | null;
+                            pricingNotes?: string | null;
+                            docsUrl?: string | null;
+                            githubOrg?: string | null;
+                            contactEmail?: string | null;
+                            contactChannel?: string | null;
+                            responseSla?: string | null;
+                            tomlSourceUrl?: string | null;
+                            tomlFetchedAt?: string | null;
+                            caseStudies?: Record<string, never>[];
+                            /** @description Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade. */
+                            verified?: {
+                                githubLastCommitAt?: string | null;
+                                githubCommits90d?: number | null;
+                                onchainActive?: boolean | null;
+                                onchainNote?: string | null;
+                                scfInvolvement?: string | null;
+                                lastAutoVerifyAt?: string | null;
+                            };
+                            /** @description Row-currency signals used by matching. */
+                            freshness?: {
+                                status?: string;
+                                lastPartnerUpdateAt?: string | null;
+                                isCurrent?: boolean;
+                                excludeFromMatching?: boolean;
+                            };
+                            /** @description Canonical stellarlight.xyz profile URL. */
+                            url?: string;
                         };
                     };
                 };

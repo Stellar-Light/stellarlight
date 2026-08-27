@@ -1306,6 +1306,11 @@ export const spec: OpenAPISpec = {
 											properties: {
 												source: { type: "string" },
 												generatedAt: { type: "string", format: "date-time" },
+												counts: {
+													type: "object",
+													description:
+														"How many of the requested slugs resolved.",
+												},
 											},
 										},
 										hackathons: {
@@ -1430,6 +1435,22 @@ export const spec: OpenAPISpec = {
 											properties: {
 												source: { type: "string" },
 												generatedAt: { type: "string", format: "date-time" },
+												upstream: {
+													type: "string",
+													description:
+														"Where the raw builds came from (DoraHacks).",
+												},
+												filters: {
+													type: "object",
+													description:
+														"The filters as applied — an echo, so a caller can see what was honoured.",
+												},
+												counts: {
+													type: "object",
+													description:
+														"returned vs total — how much the filters narrowed.",
+												},
+												note: { type: "string" },
 											},
 										},
 										builds: {
@@ -1454,6 +1475,12 @@ export const spec: OpenAPISpec = {
 													},
 													votes: { type: "integer", nullable: true },
 													endedAt: { type: "string", nullable: true },
+													matchedTerms: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Which query terms this build matched — the evidence behind its inclusion.",
+													},
 												},
 											},
 										},
@@ -1902,6 +1929,8 @@ export const spec: OpenAPISpec = {
 										},
 										partner: {
 											type: "object",
+											description:
+												"The full partner profile — every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
 											properties: {
 												slug: { type: "string" },
 												name: { type: "string" },
@@ -1910,7 +1939,74 @@ export const spec: OpenAPISpec = {
 												description: { type: "string", nullable: true },
 												logoUrl: { type: "string", nullable: true },
 												websiteUrl: { type: "string", nullable: true },
+												foundedYear: { type: "integer", nullable: true },
 												services: { type: "array", items: { type: "string" } },
+												sectors: { type: "array", items: { type: "string" } },
+												regions: { type: "array", items: { type: "string" } },
+												assets: { type: "array", items: { type: "string" } },
+												seps: {
+													type: "array",
+													items: { type: "string" },
+													description: "SEP standards the partner implements.",
+												},
+												rampTypes: { type: "array", items: { type: "string" } },
+												country: { type: "string", nullable: true },
+												acceptingClients: { type: "boolean" },
+												typicalEngagement: { type: "string", nullable: true },
+												leadTime: { type: "string", nullable: true },
+												pricingModel: { type: "string", nullable: true },
+												pricingNotes: { type: "string", nullable: true },
+												docsUrl: { type: "string", nullable: true },
+												githubOrg: { type: "string", nullable: true },
+												contactEmail: { type: "string", nullable: true },
+												contactChannel: { type: "string", nullable: true },
+												responseSla: { type: "string", nullable: true },
+												tomlSourceUrl: { type: "string", nullable: true },
+												tomlFetchedAt: { type: "string", nullable: true },
+												caseStudies: {
+													type: "array",
+													items: { type: "object" },
+												},
+												verified: {
+													type: "object",
+													description:
+														"Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade.",
+													properties: {
+														githubLastCommitAt: {
+															type: "string",
+															nullable: true,
+														},
+														githubCommits90d: {
+															type: "integer",
+															nullable: true,
+														},
+														onchainActive: { type: "boolean", nullable: true },
+														onchainNote: { type: "string", nullable: true },
+														scfInvolvement: { type: "string", nullable: true },
+														lastAutoVerifyAt: {
+															type: "string",
+															nullable: true,
+														},
+													},
+												},
+												freshness: {
+													type: "object",
+													description: "Row-currency signals used by matching.",
+													properties: {
+														status: { type: "string" },
+														lastPartnerUpdateAt: {
+															type: "string",
+															nullable: true,
+														},
+														isCurrent: { type: "boolean" },
+														excludeFromMatching: { type: "boolean" },
+													},
+												},
+												url: {
+													type: "string",
+													description:
+														"Canonical stellarlight.xyz profile URL.",
+												},
 											},
 										},
 									},
