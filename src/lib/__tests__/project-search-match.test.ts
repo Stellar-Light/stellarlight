@@ -259,13 +259,13 @@ describe("review finding 2 — identifier-form queries", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
 	});
 
-	it("F1: type-browse tokens become types-contains candidate clauses", () => {
+	it("F1: type-browse tokens become exact-membership types clauses (in, never contains — contains is substring per element and matched In-DEX-er, 2026-08-28)", () => {
 		const cl = structuredSelectClauses(["decentralized", "exchange"]);
-		expect(cl).toContainEqual({ types: { contains: "DEX" } });
+		expect(cl).toContainEqual({ types: { in: ["DEX"] } });
 		const edu = structuredSelectClauses(["education", "projects"]);
-		expect(edu).toContainEqual({ types: { contains: "Education" } });
+		expect(edu).toContainEqual({ types: { in: ["Education"] } });
 		const si = structuredSelectClauses(["social", "impact"]);
-		expect(si).toContainEqual({ types: { contains: "Social Impact" } });
+		expect(si).toContainEqual({ types: { in: ["Social Impact"] } });
 	});
 
 	it("F1: sep tokens become coverage.seps clauses (hyphen-normalized)", () => {
