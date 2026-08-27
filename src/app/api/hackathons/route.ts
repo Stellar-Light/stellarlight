@@ -27,6 +27,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -298,6 +299,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),

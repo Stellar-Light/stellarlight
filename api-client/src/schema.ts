@@ -1260,6 +1260,12 @@ export interface components {
         };
         HackathonsResponse: {
             meta?: components["schemas"]["Meta"] & {
+                /**
+                 * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                 * @enum {string}
+                 */
+                matchMode?: "all" | "filtered";
+                matchModeLabel?: string;
                 /** @description Present when the query returns 0 events — a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
                     summary?: string;
@@ -2511,6 +2517,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
+                            /**
+                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered";
+                            matchModeLabel?: string;
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
@@ -2579,6 +2591,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * @description How rows matched q: expanded = matched via synonym/stem expansion of the query terms (verify relevance for niche terms); all = no text query.
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "expanded";
+                            matchModeLabel?: string;
                             /** @description What a skill match IS: free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
                             matchBasis?: string;
                         };
@@ -2614,6 +2632,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered";
+                            matchModeLabel?: string;
                             /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
                             source?: string;
                             /**
@@ -3457,6 +3481,13 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
+                            /**
+                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered";
+                            matchModeLabel?: string;
+                        } & {
                             [key: string]: unknown;
                         };
                         contracts?: {
@@ -3520,7 +3551,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: components["schemas"]["Meta"];
+                        meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered";
+                            matchModeLabel?: string;
+                        };
                         audits?: components["schemas"]["Audit"][];
                     };
                 };
@@ -3615,6 +3653,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * @description vector = similarity ranking over embeddings (conceptual, not literal keyword truth); keyword = vector search unavailable, coarse keyword match over title and content.
+                             * @enum {string}
+                             */
+                            matchMode?: "vector" | "keyword";
+                            matchModeLabel?: string;
                             /** @description The query as the server parsed it. */
                             query?: string;
                             /**
@@ -3657,6 +3701,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
+                            /**
+                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered";
+                            matchModeLabel?: string;
                             /** @description Every value the kind filter accepts (unknown values 400 with this list). */
                             validKinds?: string[];
                             /** @description Every value the source filter accepts (unknown values 400 with this list). */

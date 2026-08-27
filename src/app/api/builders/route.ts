@@ -30,6 +30,7 @@ import {
 } from "@/lib/builder-code-derived";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { findPeopleByName } from "@/lib/sdf-people";
@@ -632,6 +633,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "expanded" : "all"),
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
 				filters: { q, location, limit, offset },

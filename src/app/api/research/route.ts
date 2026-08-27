@@ -29,6 +29,7 @@ import {
 	unknownParamWarning,
 } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -981,6 +982,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(mode),
 				...(laneHints("research", { empty: results.length === 0 })
 					? { hints: laneHints("research", { empty: results.length === 0 }) }
 					: {}),

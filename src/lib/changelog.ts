@@ -41,6 +41,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
 	},
 	{
+		date: "2026-08-28",
+		surfaces: ["api", "mcp"],
+		type: "changed",
+		summary:
+			"Every q-taking operation now labels HOW it matched (openapi@1.8.100) — the honesty-layer debt paid with ONE shared vocabulary. audits/contracts/skills/people/hackathons/builds report all|filtered; builders reports expanded (its matching is synonym/stem expansion, and the label now says so); research reports vector|keyword (it already knew which mechanism served you — now the response does too).",
+		detail:
+			"Pays all 8 grandfathered entries in the honesty ratchet (specs/honesty-baseline.json now holds only the 4 exempt ops, which are honest through different declared mechanisms). The shared vocabulary lives in src/lib/match-mode.ts: all = no text query; filtered = rows contain the query terms literally; expanded = synonym/stem expansion (verify relevance for niche terms); keyword = vector search unavailable, coarse fallback; vector = similarity ranking, not literal keyword truth. Labels state the MECHANISM actually used — sls-076's lesson: the lie is the label, not the match. The conformance checker also became $ref-aware (getHackathons declares through a component schema), and /quality gains a build-enforced contract-honesty row showing both ratchets.",
+	},
+	{
 		date: "2026-08-27",
 		surfaces: ["api"],
 		type: "changed",

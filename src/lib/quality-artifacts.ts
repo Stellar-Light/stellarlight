@@ -17,8 +17,6 @@ import ravenDrift from "../../improvements/engine/raven-drift-2026-07-21.json";
 // this is what the SDF agent actually experiences.
 import ravenLoop from "../../improvements/engine/raven-loop-latest.json";
 import scfMembership from "../../improvements/engine/scf-membership-postwave-2026-07-11.json";
-// Weekly evidence — fixed -latest paths committed by engine-c-health every
-// Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.json";
 import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
 import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
@@ -27,6 +25,10 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
+// Weekly evidence — fixed -latest paths committed by engine-c-health every
+// Sunday (see improvements/engine/weekly/README.md); git history = archive.
+import honestyBaseline from "../../specs/honesty-baseline.json";
+import opacityBaseline from "../../specs/opacity-baseline.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
@@ -364,6 +366,30 @@ export function getGuardRows(): GuardRow[] {
 			// the surface it watches is healthy — we can only claim we stopped
 			// looking, and that belongs in the red the page is built to show.
 			ok: L.staleHighOpen === 0 && L.quietSources.length === 0,
+		});
+	}
+
+	// Contract-honesty ratchets (QUALITY.md L1) — enforced by contract:check
+	// on every PR, so these numbers are the CI's word, not a snapshot.
+	{
+		const debt = Object.values(
+			honestyBaseline.operations as Record<string, { exempt: boolean }>,
+		).filter((o) => !o.exempt).length;
+		rows.push({
+			key: "contract-honesty",
+			title: "Contract honesty (build-enforced)",
+			promise:
+				"No silent opacity: every response object declares its shape, and every q-taking operation labels HOW it matched. Both enforced in CI; both ratchets may only move down.",
+			value: `0 / ${debt}`,
+			sub: "silent-opaque schemas / unlabelled q-operations",
+			details: [
+				`${opacityBaseline.openMaps} explicit open maps remain (additionalProperties:true — grandfathered, ratcheted downward)`,
+				"a new operation shipping without shape or a match label fails the build",
+				"check-schema-opacity.ts + check-honesty-layer.ts, wired into contract:check",
+			],
+			asOf: "2026-08-28",
+			artifact: "specs/opacity-baseline.json",
+			ok: true,
 		});
 	}
 

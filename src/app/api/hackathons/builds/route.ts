@@ -33,6 +33,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 } from "@/lib/integrations/dorahacks";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
@@ -119,6 +120,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json({
 		meta: {
+			...matchModeMeta(q ? "filtered" : "all"),
 			source: "https://stellarlight.xyz/api/hackathons/builds",
 			upstream: "dorahacks.io",
 			generatedAt: new Date().toISOString(),

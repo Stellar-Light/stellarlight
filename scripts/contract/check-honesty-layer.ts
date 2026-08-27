@@ -30,13 +30,41 @@ const seen = new Set<string>();
 
 for (const [path, methods] of Object.entries(spec.paths ?? {})) {
 	const op = methods.get as
-		| { operationId?: string; parameters?: Array<{ name?: string }>; responses?: Record<string, unknown> }
+		| {
+				operationId?: string;
+				parameters?: Array<{ name?: string }>;
+				responses?: Record<string, unknown>;
+		  }
 		| undefined;
 	if (!op || typeof op !== "object") continue;
 	const params = (op.parameters ?? []).map((p) => p?.name);
 	if (!params.includes("q")) continue;
 	const oid = op.operationId ?? path;
-	const declares = JSON.stringify(op.responses?.["200"] ?? {}).includes('"matchMode"');
+	// Resolve $refs before checking — an op whose response lives in a
+	// components schema (getHackathons -> HackathonsResponse) declares its
+	// fields THERE; a checker reading only the inline body would force
+	// pointless inlining.
+	const components =
+		(spec as { components?: { schemas?: Record<string, unknown> } }).components
+			?.schemas ?? {};
+	const expand = (node: unknown, depth: number): string => {
+		if (depth > 6 || !node || typeof node !== "object")
+			return JSON.stringify(node) ?? "";
+		if (Array.isArray(node))
+			return node.map((v) => expand(v, depth + 1)).join(",");
+		const o = node as Record<string, unknown>;
+		let out = "";
+		for (const [k, v] of Object.entries(o)) {
+			if (k === "$ref" && typeof v === "string") {
+				const name = v.split("/").at(-1) ?? "";
+				out += expand(components[name], depth + 1);
+			} else out += `"${k}":${expand(v, depth + 1)}`;
+		}
+		return out;
+	};
+	const declares = expand(op.responses?.["200"] ?? {}, 0).includes(
+		'"matchMode"',
+	);
 	const slot = baseline.operations[oid];
 	if (slot) seen.add(oid);
 	if (declares && slot && !slot.exempt) {
