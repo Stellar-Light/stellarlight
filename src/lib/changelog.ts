@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-27",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"Verify v1 (openapi@1.8.97): GET /api/verify — claim in, verdict + evidence + confidence out. Slice 1 verifies audit claims ('is X audited', by=firm, since=date) with three verdicts: supported (reports on record, dated evidence attached), unsupported (nothing in OUR corpus — the statement carries the denominator and never claims the world), unresolved (unknown subject, resolver note served).",
+		detail:
+			"PLAN §5's first slice. Subject resolution shares resolveProject's machinery so renames and aliases work; the auditor filter names who DID audit on a miss; supported verdicts cross the newest report date against the subject's latest code activity and carry a currencyNote when the audit predates the code by >90 days — an audit is a statement about the code as it was. 'contradicted' is deliberately absent from v1: for audit claims we can rarely prove the negative, and a verdict we cannot stand behind is what this API exists to not emit. Free text is a closed grammar; anything else 400s with the supported forms. The skeleton (parse → resolve → evidence → verdict) is the deliverable — contract-liveness and canonical-repo claims drop into the same frame next.",
+	},
+	{
+		date: "2026-08-27",
 		surfaces: ["api", "mcp", "skill"],
 		type: "fixed",
 		summary:

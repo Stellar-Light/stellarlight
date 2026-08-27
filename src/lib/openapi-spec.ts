@@ -161,6 +161,218 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/verify": {
+			get: {
+				operationId: "verifyClaim",
+				tags: ["Verification"],
+				summary:
+					"Verify a claim against indexed evidence — verdict + evidence + confidence",
+				description:
+					"Claim in → verdict out, with the evidence and its dates attached. v1 verifies AUDIT claims ('is X audited', by=firm / since=date). Verdicts assert over OUR corpus, never the world: supported = report(s) on record; unsupported = none on record (statement carries the denominator); unresolved = unknown subject. 'contradicted' is deliberately not emitted in v1. Renames/aliases resolve via the shared resolver; supported responses may carry a currencyNote when the newest report predates the latest code activity. Unknown claim types 400 with the supported list.",
+				"x-routing": {
+					purpose:
+						"Fact-check an audit claim about a project with dated evidence, instead of inferring from search results.",
+					keywords: [
+						"verify",
+						"verification",
+						"fact check",
+						"is it audited",
+						"audit claim",
+						"audited by",
+						"security audit status",
+						"claim",
+						"evidence",
+					],
+					useWhen: [
+						"is <project> audited / was it audited by <firm>",
+						"verifying an audit claim found in a pitch, README, or post",
+						"needs a verdict with evidence and dates, not search rows",
+					],
+					notFor: [
+						"browsing or reading the audit reports themselves -> listAudits",
+						"liveness/status questions ('is X live') -> searchProjects or resolveProject",
+						"code quality or maintenance signals -> getRepoTrust",
+					],
+					exampleQuestions: [
+						"Is Blend audited?",
+						"Was Soroswap audited by OtterSec?",
+					],
+				},
+				parameters: [
+					{
+						name: "claim",
+						in: "query",
+						description:
+							"Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing.",
+						schema: { type: "string" },
+					},
+					{
+						name: "type",
+						in: "query",
+						description:
+							"Structured alternative to claim. v1 accepts only 'audited'.",
+						schema: { type: "string", enum: ["audited"] },
+					},
+					{
+						name: "subject",
+						in: "query",
+						description:
+							"Project name, slug, alias, or former name (required with type=).",
+						schema: { type: "string" },
+					},
+					{
+						name: "auditor",
+						in: "query",
+						description:
+							"Restrict to reports by this firm (case/spacing-insensitive substring). A filtered miss names who DID audit in auditorsOnRecord.",
+						schema: { type: "string" },
+					},
+					{
+						name: "since",
+						in: "query",
+						description:
+							"Only reports with engagement/publication on or after this date (YYYY-MM or YYYY-MM-DD).",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Verdict with evidence (also served for unresolved subjects)",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												methodology: {
+													type: "string",
+													description:
+														"What each verdict asserts — quote it rather than paraphrasing.",
+												},
+												searched: {
+													type: "object",
+													description: "The denominators behind the verdict.",
+													properties: { audits: { type: "integer" } },
+												},
+											},
+										},
+										claim: {
+											type: "object",
+											description: "The parsed claim as understood.",
+											properties: {
+												type: { type: "string", enum: ["audited"] },
+												subject: { type: "string" },
+												auditor: { type: "string" },
+												since: { type: "string" },
+											},
+										},
+										subject: {
+											type: "object",
+											description:
+												"How the subject resolved (absent when verdict=unresolved).",
+											properties: {
+												asked: { type: "string" },
+												resolvedSlug: { type: "string" },
+												resolvedName: { type: "string" },
+												matchedOn: {
+													type: "string",
+													enum: [
+														"slug",
+														"canonical-slug",
+														"alias",
+														"name",
+														"repo",
+													],
+												},
+												status: { type: "string", nullable: true },
+											},
+										},
+										verdict: {
+											type: "string",
+											enum: ["supported", "unsupported", "unresolved"],
+											description:
+												"supported = evidence on record; unsupported = nothing in OUR corpus (never 'false' — see statement); unresolved = unknown subject.",
+										},
+										statement: {
+											type: "string",
+											description:
+												"One-sentence verdict with dates and denominators, safe to relay verbatim.",
+										},
+										evidence: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													kind: { type: "string", enum: ["audit-report"] },
+													auditor: { type: "string", nullable: true },
+													title: { type: "string", nullable: true },
+													reportUrl: { type: "string", nullable: true },
+													engagementEnd: { type: "string", nullable: true },
+													publishedAt: { type: "string", nullable: true },
+													findingsTotal: { type: "integer", nullable: true },
+													dateBasis: { type: "string", nullable: true },
+													observedAt: { type: "string", nullable: true },
+												},
+											},
+										},
+										confidence: {
+											type: "object",
+											nullable: true,
+											description:
+												"factConfidence over the newest evidence (basis × freshness). null when there is no evidence to score.",
+											properties: {
+												score: { type: "number" },
+												label: { type: "string" },
+												ageDays: { type: "integer", nullable: true },
+											},
+										},
+										currencyNote: {
+											type: "string",
+											description:
+												"Present when the newest report predates the subject's latest code activity by >90 days.",
+										},
+										auditorsOnRecord: {
+											type: "array",
+											items: { type: "string" },
+											description:
+												"On an auditor-filtered miss: who DID audit the subject.",
+										},
+										resolution: {
+											type: "object",
+											description:
+												"Only when verdict=unresolved: the resolver's own note.",
+											properties: { note: { type: "string" } },
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Unparseable claim or unsupported claim type",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: { type: "string" },
+										supportedClaims: {
+											type: "array",
+											items: { type: "string" },
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/projects/resolve": {
 			get: {
 				operationId: "resolveProject",
