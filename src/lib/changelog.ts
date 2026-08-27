@@ -41,6 +41,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
 	},
 	{
+		date: "2026-08-27",
+		surfaces: ["api"],
+		type: "added",
+		summary:
+			"Oracle joins the types enum (openapi@1.8.94) — the vertical had NO enum member, so reflector, dia, band, redstone-finance, lightecho and pyth all carried types:[] and the whole category was invisible to type browse. Ten rows gain the type via the curation pass; laina corrected Live → Pre-Release (its app pins Networks.TESTNET — no mainnet path exists).",
+		detail:
+			"Found by truth-battery guard D's row-quality slice: three oracle providers flagged 'no types' in one sample. The fix is the full vertical, done once: enum member in the collection and both contract enum sites, ?type=Oracle accepted by search and leaderboard, oracle/oracles mapped in INTENT_TYPE so category questions admit typed rows, and searchProjects x-routing carries the browse vocabulary. Data lands additively via TYPE_ADD in the curation pass — reflector, dia, band, lightecho, redstone-finance, pyth, quasar, nebula, orally, soroban-optimistic-oracle — each row's evidence being its own already-sourced description; type is identity, not liveness, so statuses and provenance are untouched. Deliberately excluded on mention-vs-identity grounds: stellar-oracle-shield (oracle monitoring), mpcvault (a wallet whose prose mentions oracles). The laina correction is the noether class again: Live rested on a 200 from a landing page while src/lib/horizon.ts hardcodes horizon-testnet and Networks.TESTNET.",
+	},
+	{
 		date: "2026-08-26",
 		surfaces: ["api"],
 		type: "changed",

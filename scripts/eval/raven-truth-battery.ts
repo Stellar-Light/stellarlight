@@ -229,7 +229,9 @@ const CATEGORY_BANKS: Array<{
 		q: "cross-chain bridge to Stellar",
 		anyOf: ["allbridge", "spacewalk", "axelar"],
 	},
-	// blend + lantern + laina are Live and typed Lending; slender is Inactive.
+	// blend + lantern are Live; laina is Pre-Release (testnet-only, 2026-08-27)
+	// and slender Inactive — all four are typed Lending, and membership is
+	// identity, not liveness.
 	// Bank asks for 2 of 4 so ranking drift below the top-8 still fires.
 	{
 		q: "lending protocol on Stellar",

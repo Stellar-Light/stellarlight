@@ -202,6 +202,7 @@ export async function GET(req: NextRequest) {
 		"Faucet",
 		"Card Issuing",
 		"Exchange",
+		"Oracle",
 	] as const;
 	const typeList = sp
 		.getAll("type")

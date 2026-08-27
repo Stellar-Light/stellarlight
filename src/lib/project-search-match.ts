@@ -313,6 +313,9 @@ export const INTENT_TYPE: Record<string, string> = {
 	// Playbook battery: "which centralized exchanges list XLM" is a category.
 	cex: "Exchange",
 	centralized: "Exchange",
+	// Truth battery 2026-08-27: the oracle vertical existed only as prose.
+	oracle: "Oracle",
+	oracles: "Oracle",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",
