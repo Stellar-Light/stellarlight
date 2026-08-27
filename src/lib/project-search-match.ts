@@ -477,6 +477,7 @@ export function isRampIntent(tokens: string[]): boolean {
 // pass raw Payload docs or mapped rows.
 export interface MatchableProject {
 	name?: string | null;
+	slug?: string | null;
 	shortDescription?: string | null;
 	category?: string | null;
 	types?: string[] | null;
@@ -528,7 +529,14 @@ export function buildHaystack(p: MatchableProject): string {
 	const pg = p.publicGoods?.awardRounds?.length
 		? "scf public goods award maintenance pilots"
 		: "";
-	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
+	// The slug IS identity vocabulary. Without it, a row whose slug differs
+	// from its display name is unfindable by its own slug: q="gate-io" scored
+	// 1 of 3 tokens against name "Gate" and fell through to semantic
+	// neighbours (posted-app, steexp) — while q="gate" found it fine. Both the
+	// hyphenated form and its space-split words are included so "gate-io" and
+	// "gate io" phrasings match.
+	const slug = p.slug ? `${p.slug} ${p.slug.replace(/-/g, " ")}` : "";
+	return `${p.name ?? ""} ${slug} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
 }
 
 // Negation guard (2026-07-11 audit): substring matching means "custodial"
