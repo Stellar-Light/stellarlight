@@ -1111,7 +1111,20 @@ export async function GET(req: NextRequest) {
 				payload.find({
 					collection: "projects",
 					where: w,
-					limit: 500,
+					// 0 = no cap. This was 500 with NO sort — an arbitrary window in
+					// whatever order Mongo returned. When a broad multi-token OR
+					// matched more than 500 rows, which candidates got scored was
+					// luck: #1000's 14 new CEX rows pushed Soroswap — the flagship
+					// Soroban AMM, scoring a perfect 4/4 for "AMM decentralized
+					// exchange Soroban" — clean out of its own category query, and
+					// the daily self-audit ran red for five days (issue #1003).
+					// vet-idea hit this exact class (sls-073) and its fix already
+					// carries the rule: a truncated window silently loses real
+					// matches. Admission must depend on the matcher, never on
+					// fetch order. (~1k projects, embedding excluded below — the
+					// heavy-field lesson that made this cap feel necessary is
+					// already handled by the select.)
+					limit: 0,
 					depth: 0,
 					// THE fix: exclude `embedding` from the candidate fetch. It's a json
 					// voyage-3 vector (~KBs/doc); pulling it for up to 500 matched
