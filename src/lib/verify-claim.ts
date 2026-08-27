@@ -20,8 +20,9 @@
  */
 import { factConfidence } from "./fact-confidence";
 
+export type ClaimType = "audited" | "live" | "maintained";
 export type AuditClaim = {
-	type: "audited";
+	type: ClaimType;
 	subject: string;
 	auditor?: string;
 	since?: string;
@@ -31,6 +32,8 @@ export type ClaimParseError = { error: string; supported: string[] };
 
 const SUPPORTED = [
 	"type=audited&subject=<name|slug> [&auditor=] [&since=YYYY-MM]",
+	'type=live&subject=<name|slug>  (or claim="is X live")',
+	'type=maintained&subject=<name|slug>  (or claim="is X maintained" / "is X abandoned")',
 ];
 
 /** Structured params first; else a tiny CLOSED grammar. Anything outside it
@@ -43,18 +46,19 @@ export function parseClaim(p: {
 	since?: string | null;
 }): AuditClaim | ClaimParseError {
 	if (p.type || p.subject) {
-		if ((p.type ?? "audited") !== "audited")
+		const t = p.type ?? "audited";
+		if (t !== "audited" && t !== "live" && t !== "maintained")
 			return {
-				error: `Unsupported claim type '${p.type}' — slice 1 verifies audit claims only.`,
+				error: `Unsupported claim type '${p.type}'. Supported: audited, live, maintained.`,
 				supported: SUPPORTED,
 			};
 		if (!p.subject?.trim())
 			return {
-				error: "subject is required with type=audited.",
+				error: `subject is required with type=${t}.`,
 				supported: SUPPORTED,
 			};
 		return {
-			type: "audited",
+			type: t,
 			subject: p.subject.trim(),
 			...(p.auditor?.trim() ? { auditor: p.auditor.trim() } : {}),
 			...(p.since?.trim() ? { since: p.since.trim() } : {}),
@@ -67,15 +71,25 @@ export function parseClaim(p: {
 		/^(?:is|was|has)\s+(.+?)\s+(?:been\s+)?audited(?:\s+by\s+(.+?))?\s*\??$/i.exec(
 			raw,
 		);
-	if (!m)
+	if (m)
 		return {
-			error: `Cannot parse '${raw}'. Slice 1 verifies audit claims only ("is <project> audited", "was <project> audited by <firm>").`,
-			supported: SUPPORTED,
+			type: "audited",
+			subject: m[1].trim(),
+			...(m[2]?.trim() ? { auditor: m[2].trim() } : {}),
 		};
+	const live =
+		/^(?:is|was)\s+(.+?)\s+(?:live|on\s+mainnet|launched|in\s+production)\s*\??$/i.exec(
+			raw,
+		);
+	if (live) return { type: "live", subject: live[1].trim() };
+	const maint =
+		/^(?:is|was)\s+(.+?)\s+(?:(?:still\s+)?(?:maintained|active(?:ly)?(?:\s+developed)?)|abandoned|dead)\s*\??$/i.exec(
+			raw,
+		);
+	if (maint) return { type: "maintained", subject: maint[1].trim() };
 	return {
-		type: "audited",
-		subject: m[1].trim(),
-		...(m[2]?.trim() ? { auditor: m[2].trim() } : {}),
+		error: `Cannot parse '${raw}'. Supported: "is <project> audited [by <firm>]", "is <project> live", "is <project> maintained".`,
+		supported: SUPPORTED,
 	};
 }
 
@@ -93,22 +107,55 @@ export interface AuditEvidenceRow {
 	observedAt?: string | null;
 }
 
-export type Verdict = "supported" | "unsupported" | "unresolved";
+export type Verdict =
+	| "supported"
+	| "contradicted"
+	| "unsupported"
+	| "unresolved";
+
+export type EvidenceItem =
+	| {
+			kind: "audit-report";
+			auditor: string | null;
+			title: string | null;
+			reportUrl: string | null;
+			engagementEnd: string | null;
+			publishedAt: string | null;
+			findingsTotal: number | null;
+			dateBasis: string | null;
+			observedAt: string | null;
+	  }
+	| {
+			/** The status-provenance trio — the SAME labeled data the directory
+			 * serves, quoted as evidence rather than recomputed. */
+			kind: "status-record";
+			status: string | null;
+			statusBasis: string | null;
+			statusAsOf: string | null;
+			statusSourceUrl: string | null;
+	  }
+	| {
+			kind: "code-activity";
+			repo: string;
+			lastCommitAt: string | null;
+			activityState: string | null;
+			isArchived: boolean;
+			stars: number | null;
+			/** the existing repo quality label — scoring, not recomputed */
+			repoScoreLabel: string | null;
+	  }
+	| {
+			/** repo-intel knowledgeNotes: dated facts with sources, curated. */
+			kind: "curated-note";
+			note: string;
+			source: string;
+			asOf: string | null;
+	  };
 
 export interface VerifyResult {
 	verdict: Verdict;
 	statement: string;
-	evidence: Array<{
-		kind: "audit-report";
-		auditor: string | null;
-		title: string | null;
-		reportUrl: string | null;
-		engagementEnd: string | null;
-		publishedAt: string | null;
-		findingsTotal: number | null;
-		dateBasis: string | null;
-		observedAt: string | null;
-	}>;
+	evidence: EvidenceItem[];
 	confidence: ReturnType<typeof factConfidence>;
 	/** The audits×code join: present when the newest report predates the
 	 * subject's latest code activity by more than 90 days. An audit is a
@@ -205,4 +252,131 @@ export function auditVerdict(o: {
 		}
 	}
 	return result;
+}
+
+export interface SubjectFacts {
+	slug: string;
+	name: string;
+	status: string | null;
+	statusBasis: string | null;
+	statusAsOf: string | null;
+	statusSourceUrl: string | null;
+}
+
+/** "is X live" — answered from the status record and its provenance tier.
+ * supported = status Live (confidence = factConfidence over basis×age, so a
+ * site-liveness Live scores below a human-verified one). contradicted =
+ * Pre-Release/Development/Inactive — we hold a dated record saying what it
+ * IS instead. Never guesses past the record. */
+export function liveVerdict(f: SubjectFacts): VerifyResult {
+	const rec: EvidenceItem = {
+		kind: "status-record",
+		status: f.status,
+		statusBasis: f.statusBasis,
+		statusAsOf: f.statusAsOf,
+		statusSourceUrl: f.statusSourceUrl,
+	};
+	const conf = factConfidence(f.statusBasis, f.statusAsOf);
+	if (f.status === "Live")
+		return {
+			verdict: "supported",
+			statement: `${f.name} is Live on record (basis: ${f.statusBasis ?? "unrecorded"}${f.statusAsOf ? `, as of ${f.statusAsOf.slice(0, 10)}` : ""}).`,
+			evidence: [rec],
+			confidence: conf,
+		};
+	if (
+		f.status === "Pre-Release" ||
+		f.status === "Development" ||
+		f.status === "Inactive"
+	)
+		return {
+			verdict: "contradicted",
+			statement: `${f.name} is ${f.status} on record, not Live${f.statusAsOf ? ` (as of ${f.statusAsOf.slice(0, 10)}` : ""}${f.statusSourceUrl ? `, source: ${f.statusSourceUrl})` : f.statusAsOf ? ")" : ""}.`,
+			evidence: [rec],
+			confidence: conf,
+		};
+	return {
+		verdict: "unsupported",
+		statement: `${f.name} has no lifecycle status on record — this is a gap in our record, not a claim about the project.`,
+		evidence: [rec],
+		confidence: null,
+	};
+}
+
+export interface RepoFacts {
+	fullName: string;
+	lastCommitAt: string | null;
+	activityState: string | null;
+	isArchived: boolean;
+	stars: number | null;
+	repoScoreLabel: string | null;
+	knowledgeNotes?: Array<{ note: string; source: string; asOf: string | null }>;
+}
+
+/** "is X maintained" — answered from indexed code activity plus the repos'
+ * own curated knowledgeNotes (dated facts with sources). supported = a
+ * commit within 180 days on a non-archived repo. contradicted = every repo
+ * archived, or newest commit over a year old. Between the two: unsupported
+ * with the dates served, because staleness is a spectrum and the caller
+ * gets the evidence, not our adjective. */
+export function maintainedVerdict(
+	name: string,
+	repos: RepoFacts[],
+	corpusNote?: string,
+): VerifyResult {
+	const ev: EvidenceItem[] = repos.map((r) => ({
+		kind: "code-activity" as const,
+		repo: r.fullName,
+		lastCommitAt: r.lastCommitAt,
+		activityState: r.activityState,
+		isArchived: r.isArchived,
+		stars: r.stars,
+		repoScoreLabel: r.repoScoreLabel,
+	}));
+	for (const r of repos)
+		for (const n of r.knowledgeNotes ?? [])
+			ev.push({
+				kind: "curated-note",
+				note: n.note,
+				source: n.source,
+				asOf: n.asOf,
+			});
+	if (!repos.length)
+		return {
+			verdict: "unsupported",
+			statement: `No indexed repository is linked to ${name}${corpusNote ? ` (${corpusNote})` : ""} — we hold no code evidence either way.`,
+			evidence: [],
+			confidence: null,
+		};
+	const liveRepos = repos.filter((r) => !r.isArchived);
+	const newest = repos
+		.map((r) => r.lastCommitAt)
+		.filter(Boolean)
+		.sort()
+		.at(-1) as string | null;
+	const days = newest
+		? (Date.now() - Date.parse(newest)) / 86400000
+		: Number.POSITIVE_INFINITY;
+	if (liveRepos.length && days <= 180)
+		return {
+			verdict: "supported",
+			statement: `${name} shows active development — newest commit ${newest?.slice(0, 10)} across ${liveRepos.length} non-archived repo(s).`,
+			evidence: ev,
+			confidence: factConfidence("code-scan", newest),
+		};
+	if (!liveRepos.length || days > 365)
+		return {
+			verdict: "contradicted",
+			statement: !liveRepos.length
+				? `Every indexed repo of ${name} is archived.`
+				: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} — over a year old.`,
+			evidence: ev,
+			confidence: factConfidence("code-scan", newest),
+		};
+	return {
+		verdict: "unsupported",
+		statement: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} (${Math.round(days)} days ago) — quiet, but not provably abandoned. Judge from the dates.`,
+		evidence: ev,
+		confidence: factConfidence("code-scan", newest),
+	};
 }

@@ -166,9 +166,9 @@ export const spec: OpenAPISpec = {
 				operationId: "verifyClaim",
 				tags: ["Verification"],
 				summary:
-					"Verify a claim against indexed evidence — verdict + evidence + confidence",
+					"Verify a claim (audited / live / maintained) against indexed evidence — verdict + evidence + confidence",
 				description:
-					"Claim in → verdict out, with the evidence and its dates attached. v1 verifies AUDIT claims ('is X audited', by=firm / since=date). Verdicts assert over OUR corpus, never the world: supported = report(s) on record; unsupported = none on record (statement carries the denominator); unresolved = unknown subject. 'contradicted' is deliberately not emitted in v1. Renames/aliases resolve via the shared resolver; supported responses may carry a currencyNote when the newest report predates the latest code activity. Unknown claim types 400 with the supported list.",
+					"Claim in → verdict out, with dated evidence attached. Claim types: audited (evidence = the audit registry), live (evidence = the status record with its provenance tier — a Pre-Release record CONTRADICTS a live claim, source attached), maintained (evidence = indexed code activity + curated repo knowledgeNotes). Verdicts assert over OUR corpus, never the world: supported / contradicted (a dated record says otherwise) / unsupported (no evidence either way; statement carries the denominator) / unresolved. Every answer carries the full subject card: links, types, status+provenance, prominence.",
 				"x-routing": {
 					purpose:
 						"Fact-check an audit claim about a project with dated evidence, instead of inferring from search results.",
@@ -209,9 +209,11 @@ export const spec: OpenAPISpec = {
 					{
 						name: "type",
 						in: "query",
-						description:
-							"Structured alternative to claim. v1 accepts only 'audited'.",
-						schema: { type: "string", enum: ["audited"] },
+						description: "Structured alternative to claim.",
+						schema: {
+							type: "string",
+							enum: ["audited", "live", "maintained"],
+						},
 					},
 					{
 						name: "subject",
@@ -265,7 +267,10 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											description: "The parsed claim as understood.",
 											properties: {
-												type: { type: "string", enum: ["audited"] },
+												type: {
+													type: "string",
+													enum: ["audited", "live", "maintained"],
+												},
 												subject: { type: "string" },
 												auditor: { type: "string" },
 												since: { type: "string" },
@@ -274,7 +279,7 @@ export const spec: OpenAPISpec = {
 										subject: {
 											type: "object",
 											description:
-												"How the subject resolved (absent when verdict=unresolved).",
+												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence — the same labeled data the directory serves.",
 											properties: {
 												asked: { type: "string" },
 												resolvedSlug: { type: "string" },
@@ -290,13 +295,36 @@ export const spec: OpenAPISpec = {
 													],
 												},
 												status: { type: "string", nullable: true },
+												statusBasis: { type: "string", nullable: true },
+												statusAsOf: { type: "string", nullable: true },
+												statusSourceUrl: { type: "string", nullable: true },
+												types: { type: "array", items: { type: "string" } },
+												links: {
+													type: "object",
+													properties: {
+														website: { type: "string", nullable: true },
+														github: { type: "string", nullable: true },
+														docs: { type: "string", nullable: true },
+													},
+												},
+												verificationLevel: { type: "string", nullable: true },
+												supportedNetworks: {
+													type: "array",
+													items: { type: "string" },
+												},
+												prominence: { type: "integer", nullable: true },
 											},
 										},
 										verdict: {
 											type: "string",
-											enum: ["supported", "unsupported", "unresolved"],
+											enum: [
+												"supported",
+												"contradicted",
+												"unsupported",
+												"unresolved",
+											],
 											description:
-												"supported = evidence on record; unsupported = nothing in OUR corpus (never 'false' — see statement); unresolved = unknown subject.",
+												"supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false' — see statement); unresolved = unknown subject.",
 										},
 										statement: {
 											type: "string",
@@ -305,10 +333,20 @@ export const spec: OpenAPISpec = {
 										},
 										evidence: {
 											type: "array",
+											description:
+												"Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source).",
 											items: {
 												type: "object",
 												properties: {
-													kind: { type: "string", enum: ["audit-report"] },
+													kind: {
+														type: "string",
+														enum: [
+															"audit-report",
+															"status-record",
+															"code-activity",
+															"curated-note",
+														],
+													},
 													auditor: { type: "string", nullable: true },
 													title: { type: "string", nullable: true },
 													reportUrl: { type: "string", nullable: true },
@@ -317,6 +355,19 @@ export const spec: OpenAPISpec = {
 													findingsTotal: { type: "integer", nullable: true },
 													dateBasis: { type: "string", nullable: true },
 													observedAt: { type: "string", nullable: true },
+													status: { type: "string", nullable: true },
+													statusBasis: { type: "string", nullable: true },
+													statusAsOf: { type: "string", nullable: true },
+													statusSourceUrl: { type: "string", nullable: true },
+													repo: { type: "string" },
+													lastCommitAt: { type: "string", nullable: true },
+													activityState: { type: "string", nullable: true },
+													isArchived: { type: "boolean" },
+													stars: { type: "integer", nullable: true },
+													repoScoreLabel: { type: "string", nullable: true },
+													note: { type: "string" },
+													source: { type: "string" },
+													asOf: { type: "string", nullable: true },
 												},
 											},
 										},

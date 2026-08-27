@@ -38,8 +38,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Verify a claim against indexed evidence — verdict + evidence + confidence
-         * @description Claim in → verdict out, with the evidence and its dates attached. v1 verifies AUDIT claims ('is X audited', by=firm / since=date). Verdicts assert over OUR corpus, never the world: supported = report(s) on record; unsupported = none on record (statement carries the denominator); unresolved = unknown subject. 'contradicted' is deliberately not emitted in v1. Renames/aliases resolve via the shared resolver; supported responses may carry a currencyNote when the newest report predates the latest code activity. Unknown claim types 400 with the supported list.
+         * Verify a claim (audited / live / maintained) against indexed evidence — verdict + evidence + confidence
+         * @description Claim in → verdict out, with dated evidence attached. Claim types: audited (evidence = the audit registry), live (evidence = the status record with its provenance tier — a Pre-Release record CONTRADICTS a live claim, source attached), maintained (evidence = indexed code activity + curated repo knowledgeNotes). Verdicts assert over OUR corpus, never the world: supported / contradicted (a dated record says otherwise) / unsupported (no evidence either way; statement carries the denominator) / unresolved. Every answer carries the full subject card: links, types, status+provenance, prominence.
          */
         get: operations["verifyClaim"];
         put?: never;
@@ -1873,8 +1873,8 @@ export interface operations {
             query?: {
                 /** @description Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing. */
                 claim?: string;
-                /** @description Structured alternative to claim. v1 accepts only 'audited'. */
-                type?: "audited";
+                /** @description Structured alternative to claim. */
+                type?: "audited" | "live" | "maintained";
                 /** @description Project name, slug, alias, or former name (required with type=). */
                 subject?: string;
                 /** @description Restrict to reports by this firm (case/spacing-insensitive substring). A filtered miss names who DID audit in auditorsOnRecord. */
@@ -1909,12 +1909,12 @@ export interface operations {
                         /** @description The parsed claim as understood. */
                         claim?: {
                             /** @enum {string} */
-                            type?: "audited";
+                            type?: "audited" | "live" | "maintained";
                             subject?: string;
                             auditor?: string;
                             since?: string;
                         };
-                        /** @description How the subject resolved (absent when verdict=unresolved). */
+                        /** @description The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence — the same labeled data the directory serves. */
                         subject?: {
                             asked?: string;
                             resolvedSlug?: string;
@@ -1922,17 +1922,30 @@ export interface operations {
                             /** @enum {string} */
                             matchedOn?: "slug" | "canonical-slug" | "alias" | "name" | "repo";
                             status?: string | null;
+                            statusBasis?: string | null;
+                            statusAsOf?: string | null;
+                            statusSourceUrl?: string | null;
+                            types?: string[];
+                            links?: {
+                                website?: string | null;
+                                github?: string | null;
+                                docs?: string | null;
+                            };
+                            verificationLevel?: string | null;
+                            supportedNetworks?: string[];
+                            prominence?: number | null;
                         };
                         /**
-                         * @description supported = evidence on record; unsupported = nothing in OUR corpus (never 'false' — see statement); unresolved = unknown subject.
+                         * @description supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false' — see statement); unresolved = unknown subject.
                          * @enum {string}
                          */
-                        verdict?: "supported" | "unsupported" | "unresolved";
+                        verdict?: "supported" | "contradicted" | "unsupported" | "unresolved";
                         /** @description One-sentence verdict with dates and denominators, safe to relay verbatim. */
                         statement?: string;
+                        /** @description Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source). */
                         evidence?: {
                             /** @enum {string} */
-                            kind?: "audit-report";
+                            kind?: "audit-report" | "status-record" | "code-activity" | "curated-note";
                             auditor?: string | null;
                             title?: string | null;
                             reportUrl?: string | null;
@@ -1941,6 +1954,19 @@ export interface operations {
                             findingsTotal?: number | null;
                             dateBasis?: string | null;
                             observedAt?: string | null;
+                            status?: string | null;
+                            statusBasis?: string | null;
+                            statusAsOf?: string | null;
+                            statusSourceUrl?: string | null;
+                            repo?: string;
+                            lastCommitAt?: string | null;
+                            activityState?: string | null;
+                            isArchived?: boolean;
+                            stars?: number | null;
+                            repoScoreLabel?: string | null;
+                            note?: string;
+                            source?: string;
+                            asOf?: string | null;
                         }[];
                         /** @description factConfidence over the newest evidence (basis × freshness). null when there is no evidence to score. */
                         confidence?: {

@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "changed",
 		summary:
+			"Verify grows to the full claim surface (openapi@1.8.99): audited + live + maintained, a contradicted verdict, and the complete subject card (links, types, status with provenance, prominence) on every answer. The verdicts are joins over data we already label — the status record, indexed code activity with repo quality labels, and each repo's curated knowledgeNotes ride along as evidence.",
+		detail:
+			"'is X live' is now answered from the status record and its provenance tier — a Pre-Release row CONTRADICTS a live claim with the dated source attached (the laina/noether class becomes a first-class verifiable answer instead of a search interpretation). 'is X maintained/abandoned' is answered from indexed code activity: newest commit within 180 days on a non-archived repo supports it; every repo archived or a year-plus of silence contradicts it; between the two the caller gets the dates and no adjective. Evidence rows are typed (audit-report | status-record | code-activity | curated-note) so an agent can discriminate on kind. Nothing is recomputed: factConfidence scores the basis and age, repoScoreLabel is quoted, knowledgeNotes are quoted with their sources.",
+	},
+	{
+		date: "2026-08-27",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
 			"Zero silent opacity in the contract (openapi@1.8.98): every object schema now declares its shape or an explicit additionalProperties open map. A new CI lock makes a bare object schema unshippable, and the 47 explicit open maps are baselined with a ratchet — the count may only decrease.",
 		detail:
 			"The first closure-rule invariant from QUALITY.md. The hand sweeps (#1035, #1040) typed every fully-opaque top-level response; the lock's first run found 37 MORE nested bare objects (meta envelopes, filter echoes, embedded report objects) — the thesis proven on contact: sampling misses what invariants catch. Each is now either properly typed or an explicit additionalProperties:true open map, which is machine-readable as 'deliberately open' rather than silent. Additive only — no field changed shape; consumers see strictly more declared structure.",
