@@ -1435,6 +1435,16 @@ export async function GET(req: NextRequest) {
 			// "strict" would claim q gated the set.
 			if (tokens.length && typeParam) {
 				matchMode = "all";
+				// Membership = the typed CANONICAL set. The q-path deliberately
+				// keeps lineage shadows as candidates (their names must stay
+				// findable for name lookups), but in a type enumeration a shadow
+				// is a duplicate of a row already in the set — the page-side fold
+				// then SWAPPED lone shadows back to their canonicals on later
+				// pages, re-serving rows page 1 already had (the sls-033 ghost:
+				// total 65, page one 63, offset-63 serving three rows twice).
+				projects = projects.filter(
+					(p) => !p.canonicalSlug || p.canonicalSlug === p.slug,
+				);
 				projects.sort(
 					(a, b) =>
 						b.score - a.score ||
