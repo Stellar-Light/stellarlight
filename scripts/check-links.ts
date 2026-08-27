@@ -367,7 +367,7 @@ async function checkUrl(url: string): Promise<CheckResult> {
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
 	try {
-		const res = await fetch(url, {
+		let res = await fetch(url, {
 			method: "HEAD",
 			redirect: "manual",
 			headers: {
@@ -376,6 +376,38 @@ async function checkUrl(url: string): Promise<CheckResult> {
 			},
 			signal: controller.signal,
 		});
+		// A SAME-SITE redirect is a hop, not an outcome. nodies.app answers
+		// 308 -> https://www.nodies.app/ which serves 200 — a perfectly live
+		// site — but "redirect" never stamps lastSuccessAt (link-history.ts),
+		// so every www/apex/https-canonicalizing site sat forever with no
+		// successful check, the basis upgrader skipped it, and its row showed
+		// Live with no source (386 rows on the 2026-08-27 dry run; guard D's
+		// F slice). Follow up to 3 same-site hops and judge the FINAL answer.
+		// An OFFSITE redirect stays a first-class result — the parked-domain /
+		// hijack detector depends on seeing it (45 found in the 08-21 sweep).
+		const sameSite = (a: string, b: string) =>
+			a.replace(/^www\./, "") === b.replace(/^www\./, "");
+		let hops = 0;
+		let cur = url;
+		while (
+			res.status >= 300 &&
+			res.status < 400 &&
+			hops < 3 &&
+			res.headers.get("location")
+		) {
+			// resolve against the CURRENT hop — a relative Location on hop 2+
+			// must not resolve against the original URL
+			const next = new URL(res.headers.get("location") as string, cur);
+			if (!sameSite(new URL(url).hostname, next.hostname)) break;
+			hops++;
+			cur = next.href;
+			res = await fetch(cur, {
+				method: "HEAD",
+				redirect: "manual",
+				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
+				signal: controller.signal,
+			});
+		}
 
 		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
 		// Retry with GET if HEAD says it's broken — but not through a bot wall,
