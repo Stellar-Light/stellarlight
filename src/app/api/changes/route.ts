@@ -239,9 +239,19 @@ export async function GET(req: NextRequest) {
 			meta: {
 				since: sinceIso,
 				asOf: new Date().toISOString(),
+				// generatedAt = asOf, under the standard name every other op uses.
+				// Raven's provenance sidecar (their product lane, 2026-08-26)
+				// captures an exact-path allowlist — generatedAt and counts.total
+				// among them — into the judge-visible SOURCE METADATA block, so a
+				// dialect difference here silently drops our provenance from an
+				// agent's evidence chain even when the data was retrieved.
+				generatedAt: new Date().toISOString(),
 				surfaces,
 				limitPerSurface: perSurface,
-				counts,
+				counts: {
+					...counts,
+					total: Object.values(counts).reduce((a, b) => a + b, 0),
+				},
 				truncated,
 			},
 		},
