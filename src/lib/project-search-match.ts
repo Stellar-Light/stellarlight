@@ -23,6 +23,7 @@ import {
 	anchorTokens,
 	CORE_SYNONYMS,
 	mergeVocabulary,
+	SPELLING_CORRECTIONS,
 } from "./search-vocabulary";
 
 // Project-surface overlay. Core chain/vertical/region vocabulary lives in
@@ -150,6 +151,27 @@ export const SYNONYMS: Record<string, string[]> = mergeVocabulary(
 	CORE_SYNONYMS,
 	PROJECT_SYNONYM_OVERLAY,
 );
+
+/** sls-076: does this row's admission DEPEND on a spelling correction?
+ * True when at least one query token is a known misspelling whose literal
+ * form (and ordinary stemming) misses the haystack while its corrected
+ * expansion hits — i.e. remove the correction and the row no longer earns
+ * that token. The caller downgrades matchMode to "corrected" so an agent
+ * never reads a spelling neighbor as "all keywords matched". */
+export function correctionMediated(hay: string, tokens: string[]): boolean {
+	for (const t of tokens) {
+		const corrected = SPELLING_CORRECTIONS[t];
+		if (!corrected) continue;
+		const withCorrection = termsForToken(t);
+		const literalOnly = withCorrection.filter(
+			(v) => !v.includes(corrected) && !corrected.includes(v),
+		);
+		const hitLiteral = literalOnly.some((v) => hasPositiveHit(hay, v));
+		const hitCorrected = withCorrection.some((v) => hasPositiveHit(hay, v));
+		if (!hitLiteral && hitCorrected) return true;
+	}
+	return false;
+}
 
 export function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);

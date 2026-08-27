@@ -133,6 +133,8 @@ Search existing Stellar projects (competitor / overlap lookup). The workhorse fo
 - `strict` — every query token matched (highest confidence; lead with "I found N exact matches for {q}")
 - `loose-1` — all but one token matched (treat as adjacent; lead with "I couldn't find an exact match, but these are close — N of M keywords match")
 - `majority` — at least ⌈N/2⌉ tokens matched (broadest interpretation; lead with "broader interpretation of {q} — these projects overlap on the main themes")
+- `corrected` — the rows matched **only through a known spelling correction** (e.g. `strupey` → `stroopy`): the query token does not occur in the rows. Name the correction to the user and verify identity before treating the row as evidence about the queried name.
+- `semantic` — NO keyword tier matched; rows are vector-similarity neighbours (confidence capped at medium). Frame as "nothing matched directly — conceptually nearby:" and verify before relying on them.
 - `all` — accompanies results only when a non-`q` filter (`category`/`scfAwarded`) was applied. A bare call with **no `q` AND no filter does NOT return the full directory** — it returns `meta.error: "no_query"` + 0 rows; re-call with `?q=<terms>`.
 
 This fallback chain means **a multi-word natural query like *"real-time price API for Soroban tokens"* will not dead-end at 0** — the endpoint relaxes to looser tiers until it finds something. Honesty matters: tell the user which tier returned the results so they can judge relevance themselves (`.meta.matchModeLabel` gives a pre-formatted human-readable version).
