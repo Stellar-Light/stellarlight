@@ -22,7 +22,12 @@ import {
 	type TypeCoverage,
 } from "./ecosystem-gaps";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
-import { buildHaystack, scoreTokens, tokenize } from "./project-search-match";
+import {
+	anchorTokens,
+	buildHaystack,
+	scoreTokens,
+	tokenize,
+} from "./project-search-match";
 import { activityStateOf } from "./repo-grade";
 import { contentTokens, searchRepos } from "./repo-search";
 
@@ -81,6 +86,11 @@ export interface VetIdeaReport {
 	 * the measurable vertical axis (absence of a mapping, not of a market). */
 	vertical: string | null;
 	competitors: {
+		/** How relevance was established: vertical (typed membership) |
+		 * scored (anchor token matched) | weak (generic words only — the rows
+		 * are neighbours, not evidence a competitor exists). */
+		matchMode?: "vertical" | "scored" | "weak";
+		matchModeLabel?: string;
 		repos: Array<{
 			fullName: string;
 			tier: string | null;
@@ -134,6 +144,11 @@ export async function buildVetIdea(
 		codeDomains: ((r as any).codeDomains ?? []) as string[],
 	}));
 
+	// How competitor relevance was established — served on the block so a
+	// caller can weigh it. "vertical" = typed membership; "scored" = an anchor
+	// token matched; "weak" = only generic words matched (neighbours, NOT
+	// evidence a competitor exists).
+	let competitorMatch: "vertical" | "scored" | "weak" = "weak";
 	// Directory projects: active, in the detected vertical (types membership —
 	// `in` + JS post-filter, never `contains` on hasMany). Falls back to a
 	// name/description token pass when no vertical mapped.
@@ -189,21 +204,34 @@ export async function buildVetIdea(
 		if (vTokens.length)
 			for (const p of projDocs)
 				p.__rel = scoreTokens(buildHaystack(p), vTokens);
+		competitorMatch = "vertical";
 	} else {
 		// No vertical mapped: rank with the directory's own matcher (synonym
 		// expansion, negation guards, structured fields) instead of a naive
 		// substring pass, and keep only rows that actually score.
 		const qTokens = tokenize(q);
 		if (qTokens.length) {
+			// Honesty marker (truth battery round 3, 2026-08-27): "quantum
+			// teleportation of physical goods on Stellar" returned SDKs as
+			// "competitors" — the fallback scores RAW tokens, so the word
+			// "stellar" alone matches most of the directory, and nothing told
+			// the caller these rows are neighbours rather than evidence a
+			// competitor exists. Rows count as SCORED only when a non-generic
+			// anchor token contributed; otherwise the block says "weak".
+			const anchors = anchorTokens(qTokens);
+			let anchorHits = 0;
 			projDocs = projDocs
 				.map((p) => {
 					// Stash relevance on the doc so the display sort below can put
 					// it FIRST — see the sort comment.
-					p.__rel = scoreTokens(buildHaystack(p), qTokens);
+					const hay = buildHaystack(p);
+					p.__rel = scoreTokens(hay, qTokens);
+					if (anchors.length && scoreTokens(hay, anchors) > 0) anchorHits++;
 					return p;
 				})
 				.filter((p) => (p.__rel ?? 0) > 0)
 				.sort((a, b) => (b.__rel ?? 0) - (a.__rel ?? 0));
+			competitorMatch = anchors.length && anchorHits > 0 ? "scored" : "weak";
 		}
 	}
 	// Maturity from verified evidence: audits joined over the FULL matched
@@ -367,7 +395,17 @@ export async function buildVetIdea(
 	return {
 		idea: q,
 		vertical,
-		competitors: { repos: competitorRepos, projects: competitorProjects },
+		competitors: {
+			repos: competitorRepos,
+			projects: competitorProjects,
+			matchMode: competitorMatch,
+			matchModeLabel:
+				competitorMatch === "vertical"
+					? "typed members of the idea's vertical"
+					: competitorMatch === "scored"
+						? "matched the idea's own terms"
+						: "only generic words matched — nearest rows, not evidence a competitor exists",
+		},
 		maturity: {
 			auditedProjects,
 			liveOnMainnetRepos,

@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-27",
+		surfaces: ["api", "mcp"],
+		type: "changed",
+		summary:
+			"vetIdea's competitors block now says HOW it matched (openapi@1.8.95): matchMode vertical | scored | weak. An absurd idea used to return prominent SDK rows as 'competitors' with nothing marking them as neighbours — a caller could read filler as a competitive landscape.",
+		detail:
+			"Found by the hacker-journey battery (round 3): 'quantum teleportation of physical goods on Stellar' returned python-stellar-sdk, stellar-php-sdk and wisdomtree as competitors. The no-vertical fallback scores RAW tokens, so the word 'stellar' alone matches most of the directory. The directory search already serves matchMode for exactly this reason; vet-idea dropped it. Now: vertical = typed membership, scored = a non-generic anchor token contributed, weak = only generic words matched — labelled 'nearest rows, not evidence a competitor exists'. Additive; existing consumers unaffected.",
+	},
+	{
+		date: "2026-08-27",
 		surfaces: ["api"],
 		type: "added",
 		summary:

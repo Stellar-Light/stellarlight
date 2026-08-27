@@ -2935,6 +2935,13 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: { type: "object" },
 														},
+														matchMode: {
+															type: "string",
+															enum: ["vertical", "scored", "weak"],
+															description:
+																"How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.",
+														},
+														matchModeLabel: { type: "string" },
 													},
 												},
 												maturity: {
