@@ -263,9 +263,9 @@ describe("review finding 2 — identifier-form queries", () => {
 		const cl = structuredSelectClauses(["decentralized", "exchange"]);
 		expect(cl).toContainEqual({ types: { in: ["DEX"] } });
 		const edu = structuredSelectClauses(["education", "projects"]);
-		expect(edu).toContainEqual({ types: { contains: "Education" } });
+		expect(edu).toContainEqual({ types: { in: ["Education"] } });
 		const si = structuredSelectClauses(["social", "impact"]);
-		expect(si).toContainEqual({ types: { contains: "Social Impact" } });
+		expect(si).toContainEqual({ types: { in: ["Social Impact"] } });
 	});
 
 	it("F1: sep tokens become coverage.seps clauses (hyphen-normalized)", () => {
