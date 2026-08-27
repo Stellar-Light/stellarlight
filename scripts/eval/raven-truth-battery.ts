@@ -302,7 +302,9 @@ async function sliceE() {
 	// Caveat: search responses are cached per query key (SWR). Right after a
 	// curation lands, one path can briefly serve the pre-curation snapshot —
 	// a red here that self-heals next run is cache staleness, not data loss.
-	// A red that PERSISTS is curation being reverted. (gate-io, 2026-08-27.)
+	// A red that PERSISTS is a real serving defect — gate-io's persistent red
+	// turned out to be the slug missing from the search haystack entirely, not
+	// a cache or a revert. Chase it to root, never wave it off.
 	console.log("\n── E: human-verified statuses hold ──");
 	const d = await http("/api/projects/search?q=stellar&limit=200");
 	const hv = (d.projects ?? []).filter(
