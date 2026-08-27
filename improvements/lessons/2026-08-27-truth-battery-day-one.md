@@ -66,3 +66,39 @@ and link liveness are necessary; they are not sufficient.
 - Oracle-type enum gap: **do not** quick-patch. It needs the enum member, the
   contract bump, intent mapping ("oracle" currently maps to keywords only),
   and a curated data pass over the 4-6 oracle rows — one deliberate change.
+
+## Addendum — waves 3-4, same day
+
+Three more roots found and fixed, and one lesson about the battery itself:
+
+**L7 — The slug was never identity.** `q="gate-io"` returned semantic
+neighbours while the row existed — `buildHaystack` had no slug, so any row
+whose slug differs from its display name was unfindable by its own slug. Two
+probes then misread the neighbours' provenance as the row's own, producing two
+wrong diagnoses (stale cache, curation revert) before the root. Persistent
+guard reds are serving defects; chase them to root (#1051).
+
+**L8 — A same-site redirect is a hop, not an outcome.** `nodies.app → 308 →
+www → 200` never stamped `lastSuccessAt` because the checker treated the bare
+308 as the result — so 386 projects had no evidence and the basis upgrader
+could stamp nothing. The most common site config on earth (www/https
+canonicalization) was structurally excluded from evidence collection (#1052).
+Offsite redirects stay first-class: the hijack detector needs them.
+
+**L9 — Structured membership is worth one word in ranking, as it already is
+in admission.** "lending protocol on Stellar" buried Live typed-Lending rows
+beneath prose double-matches; admission had believed `type ≈ one prose word`
+since sls-018/019 while ranking counted it only as an equal-score tiebreak
+(#1053).
+
+**L10 — An eval assertion must encode what retrieval OWES, not what the
+author prefers.** The lending red survived #1053 because the bank asserted
+two hand-picked members in the top-8 of a 20-row vertical — an ungrounded
+canonicality opinion. The red was still productive (it forced L9), but the
+recalibrated assertion is the honest one: flagship leads, page is
+category-pure. Canonicality within a vertical is prominence curation.
+
+Wave 3 (hacker journey): 23/23 substance; one honesty gap (vetIdea
+competitors carried no matchMode — #1049). Wave 4: 19/21, the two "fails"
+being one opinion-assertion (L10) and one crude grading regex (SEP-41's #1 is
+rightly stellar-protocol — the standard's own text).
