@@ -25,7 +25,7 @@
 		"cron:github": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec tsx scripts/refresh-github.ts",
 		"openapi:lint": "spectral lint https://stellarlight.xyz/api/openapi.json --ruleset .spectral.yaml --fail-severity=error",
 		"contract:write": "tsx scripts/contract/build-contract.ts",
-		"contract:check": "tsx scripts/contract/build-contract.ts --check && tsx scripts/contract/check-schema-opacity.ts",
+		"contract:check": "tsx scripts/contract/build-contract.ts --check && tsx scripts/contract/check-schema-opacity.ts && tsx scripts/contract/check-honesty-layer.ts",
 		"typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json"
 	},
 	"dependencies": {

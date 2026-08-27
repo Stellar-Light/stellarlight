@@ -1,0 +1,53 @@
+{
+ "$comment": "QUALITY.md L1 \u2014 the honesty-layer conformance ratchet. Every GET operation that accepts q must declare, in its response contract, HOW it matched (a matchMode field), or appear here. exempt:true = permanently honest through a DIFFERENT declared mechanism (named in reason). exempt:false = grandfathered DEBT: the op owes a matchMode and the list may only shrink \u2014 check-honesty-layer.ts fails the build if a new op ships without a label, and when a debt op gains one it must be removed here in the same PR.",
+ "operations": {
+  "resolveProject": {
+   "exempt": true,
+   "reason": "honest via found + matchedOn enum \u2014 identity resolution, not tiered search"
+  },
+  "explainRepo": {
+   "exempt": true,
+   "reason": "honest via answered + answerSource \u2014 single-subject Q&A, not a result list"
+  },
+  "hackathonBrief": {
+   "exempt": true,
+   "reason": "composite; its embedded vet block carries matchMode (declared on vetIdea)"
+  },
+  "scfPitch": {
+   "exempt": true,
+   "reason": "composite; its embedded vet block carries matchMode (declared on vetIdea)"
+  },
+  "listAudits": {
+   "exempt": false,
+   "reason": "filters by q with no match-quality label"
+  },
+  "listContracts": {
+   "exempt": false,
+   "reason": "filters by q with no match-quality label"
+  },
+  "listSkills": {
+   "exempt": false,
+   "reason": "q honored since 1.8.90 but unlabelled"
+  },
+  "getBuilders": {
+   "exempt": false,
+   "reason": "q search with no match-quality label"
+  },
+  "getPeople": {
+   "exempt": false,
+   "reason": "q search with no match-quality label"
+  },
+  "getHackathons": {
+   "exempt": false,
+   "reason": "q filter with no match-quality label"
+  },
+  "searchHackathonBuilds": {
+   "exempt": false,
+   "reason": "topic search with no match-quality label"
+  },
+  "searchResearch": {
+   "exempt": false,
+   "reason": "serves vector scores but no mode label in the contract"
+  }
+ }
+}
