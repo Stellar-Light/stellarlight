@@ -80,11 +80,17 @@ export async function GET(req: NextRequest) {
 		const rows = (store.docs as unknown as Array<Record<string, unknown>>)
 			.filter((d) => !d.retiredAt)
 			.map(
+				// Raw collection dialect: the FIELD is `code` (the API's ticker)
+				// and `domain` (the API's issuerDomain) — read the collection's
+				// own names, never the serialized API's (the never-infer-field-
+				// names rule; the first deploy read d.ticker and matched zero
+				// rows, answering 'EURC is not in our registry' about a registry
+				// that holds two EURCs).
 				(d): StablecoinIssuerRow => ({
-					ticker: (d.ticker as string) ?? null,
+					ticker: (d.code as string) ?? null,
 					company: (d.company as string) ?? null,
 					issuer: (d.issuer as string) ?? null,
-					issuerDomain: (d.issuerDomain as string) ?? null,
+					issuerDomain: (d.domain as string) ?? null,
 					verified: (d.verified as boolean) ?? null,
 					updatedAt: (d.updatedAt as string) ?? null,
 				}),
