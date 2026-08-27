@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-28",
+		surfaces: ["api", "mcp"],
+		type: "fixed",
+		summary:
+			"Exact-type enumerations are limit-independent sets (openapi@1.8.102, sls-033's count instability closed at root): with ?type= present, type defines membership and q only ranks within it. One enumeration used to serve 58 uniques at limit=10 and 63 at limit=100, report total 65, and serve three rows twice across pages.",
+		detail:
+			"Root cause: with q+type, the keyword tier ladder gated MEMBERSHIP and the identity-underfill bypass re-admitted rows gated on `limit` — so what the set contained depended on how many rows you asked for, the exact rule the route already enforces for shadow-folds one layer down. Now the typed candidate set IS the result set (identical to the no-q pool), q orders it, the semantic pad is skipped (padding a closed set with vector neighbours recreated the ghost pages), and matchMode reports `all` with an explicit label — a tier would falsely claim q gated the set. Battery slice G (enumeration integrity) pins it daily: closed-set, q-ranks-only, pagination walks the set exactly once, no duplicate normalized names. Slice G ran RED against prod before this deploy (stellar-passport served twice on a limit-17 walk) — the guard predates its own fix.",
+	},
+	{
+		date: "2026-08-28",
 		surfaces: ["api"],
 		type: "changed",
 		summary:

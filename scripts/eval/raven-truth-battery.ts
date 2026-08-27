@@ -333,7 +333,85 @@ const t0 = Date.now();
 console.log(
 	`Raven truth battery → ${BASE} (day ${dayOfYear}, ${ALL ? "ALL banks" : "rotating"})`,
 );
-const slices = [sliceA, sliceB, sliceB2, sliceC, sliceD, sliceE, sliceF];
+// ── Slice G: enumeration integrity (sls-033's count-instability, closed) ──
+// An exact-type enumeration is a SET: membership must not depend on q, limit,
+// or offset. Root-caused 2026-08-28: q+type ran tier admission and a
+// limit-gated bypass, so one enumeration served 58 uniques at limit=10, 63 at
+// limit=100, said total 65, and served three rows twice across pages. Fixed by
+// making type define membership (q ranks only); this slice keeps it fixed.
+async function sliceG() {
+	console.log("\n── G: enumeration integrity (type=Wallet) ──");
+	const base = "https://stellarlight.xyz/api/projects/search";
+	const fetchJson = async (u: string) =>
+		(await (
+			await fetch(u, { headers: { "User-Agent": "stellarlight-battery" } })
+		).json()) as {
+			projects?: Array<{ slug?: string; name?: string }>;
+			meta?: { counts?: { total?: number } };
+		};
+	try {
+		const noQ = await fetchJson(`${base}?type=Wallet&limit=200`);
+		const noQSlugs = (noQ.projects ?? []).map((p) => String(p.slug));
+		const total = noQ.meta?.counts?.total ?? -1;
+		verdict(
+			noQSlugs.length === total,
+			"G:closed-set",
+			`type=Wallet no-q: returned=${noQSlugs.length} total=${total} (must be equal — one page IS the set)`,
+		);
+		// q must not change membership, only order
+		const withQ = await fetchJson(`${base}?type=Wallet&q=wallet&limit=200`);
+		const withQSlugs = new Set(
+			(withQ.projects ?? []).map((p) => String(p.slug)),
+		);
+		const sameSet =
+			withQSlugs.size === noQSlugs.length &&
+			noQSlugs.every((x) => withQSlugs.has(x));
+		verdict(
+			sameSet,
+			"G:q-ranks-only",
+			`q=wallet membership ${withQSlugs.size} vs typed set ${noQSlugs.length} — q must rank, never gate`,
+		);
+		// pagination at a small limit must walk the same set, no dupes, sum=total
+		const walked: string[] = [];
+		for (let off = 0; off < 300; off += 17) {
+			const page = await fetchJson(
+				`${base}?type=Wallet&q=wallet&limit=17&offset=${off}`,
+			);
+			const slugs = (page.projects ?? []).map((p) => String(p.slug));
+			walked.push(...slugs);
+			if (slugs.length < 17) break;
+		}
+		const dupes = walked.filter((x, i) => walked.indexOf(x) !== i);
+		verdict(
+			dupes.length === 0 && walked.length === noQSlugs.length,
+			"G:pagination",
+			`walk at limit=17: ${walked.length} rows, ${dupes.length} dupes ${dupes.length ? JSON.stringify([...new Set(dupes)]) : ""} (must equal the set, once each)`,
+		);
+		// canonical dedup holds: no duplicate normalized names in the set
+		const norm = (n: string) => n.toLowerCase().replace(/[^a-z0-9]/g, "");
+		const names = (noQ.projects ?? []).map((p) => norm(String(p.name ?? "")));
+		const nameDupes = names.filter((x, i) => x && names.indexOf(x) !== i);
+		verdict(
+			nameDupes.length === 0,
+			"G:no-duplicate-names",
+			`duplicate normalized names in the typed set: ${nameDupes.length ? JSON.stringify([...new Set(nameDupes)]) : "none"}`,
+		);
+	} catch (e) {
+		errors++;
+		console.log(`  ERROR in sliceG: ${String(e).slice(0, 120)}`);
+	}
+}
+
+const slices = [
+	sliceA,
+	sliceB,
+	sliceB2,
+	sliceC,
+	sliceD,
+	sliceE,
+	sliceF,
+	sliceG,
+];
 for (const s of slices) {
 	try {
 		await s();
