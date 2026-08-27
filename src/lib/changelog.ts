@@ -43,6 +43,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-27",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"Zero silent opacity in the contract (openapi@1.8.98): every object schema now declares its shape or an explicit additionalProperties open map. A new CI lock makes a bare object schema unshippable, and the 47 explicit open maps are baselined with a ratchet — the count may only decrease.",
+		detail:
+			"The first closure-rule invariant from QUALITY.md. The hand sweeps (#1035, #1040) typed every fully-opaque top-level response; the lock's first run found 37 MORE nested bare objects (meta envelopes, filter echoes, embedded report objects) — the thesis proven on contact: sampling misses what invariants catch. Each is now either properly typed or an explicit additionalProperties:true open map, which is machine-readable as 'deliberately open' rather than silent. Additive only — no field changed shape; consumers see strictly more declared structure.",
+	},
+	{
+		date: "2026-08-27",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"Verify v1 (openapi@1.8.97): GET /api/verify — claim in, verdict + evidence + confidence out. Slice 1 verifies audit claims ('is X audited', by=firm, since=date) with three verdicts: supported (reports on record, dated evidence attached), unsupported (nothing in OUR corpus — the statement carries the denominator and never claims the world), unresolved (unknown subject, resolver note served).",
