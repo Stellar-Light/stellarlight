@@ -113,6 +113,53 @@ service runs at Stage 3+ by default and humans do product, not repair.
   dry→execute→verify data loop agentized · Verify v1 slices 2-3.
 - **P3:** Stage 3 · event-driven freshness (PLAN §5) · steady-state review.
 
+## 5. External calibration — the Raven QA deep-dive (folded in 2026-08-28)
+
+Their five-model research panel over 55 QA misses (`research/qa-deep-dive-2026-08-25/`,
+read in full) plus their shipped product lane changes both of what our answers
+flow through and what is asked of us. The items below are IN the phases above —
+this section records why, so the map carries its own provenance.
+
+**What changed on their side that binds us:**
+- Their host now captures an exact-path allowlist from OUR responses into the
+  judge-visible SOURCE METADATA block: `generatedAt`, `dataAsOf`, `asOf`,
+  `matchMode`, `counts.count/total`. A field absent from `meta` is invisible to
+  their evidence chain even when the agent retrieved it. Our matchMode work is
+  load-bearing there now; dialect gaps (getChanges) are fixed as found.
+- Their answering contract now REQUIRES dating volatile claims, copying exact
+  identifiers, and scoping absence claims — our `asOf`/provenance coverage and
+  exact-ID indexing are graded downstream.
+- Their most adversarial lane (grok-xhigh) cited our live `/api/rfps` as
+  class-A arbitration evidence against their own golden. Endpoints used as
+  truth sources get golden-parity protection.
+
+**Adopted into the phases:**
+- P1: sidecar-dialect census + fixes (getChanges shipped; analyze/vetIdea
+  counts pending honest semantics — a forced `total` that misleads is worse
+  than absence) · eval-bank freeze + sha256 input fingerprints with
+  re-baseline-as-explicit-act (their gates.json discipline) · bank linter for
+  authoring defects (compound predicates, self-referential dates — their
+  R2/R12 classes).
+- P2: canonical entity envelope + enumeration dedup (their top-10 rank 5 ask,
+  our sls-033, open since July — dated identity, lifecycle, availability,
+  dedup status) · stablecoin issuer-relation truth (an issuer credited across
+  another issuer's asset is the sls-066 class) · receipts-in-repo for
+  human-verified corrections (fetch date + ETag + observed value beside the
+  curation entry, their WisdomTree pattern).
+- Watch, do not build: their source-pointer lane (`sources.locate`) is still
+  CHANGES-REQUESTED with open findings. If phase 0 ships, our position is the
+  ecosystem long tail their canonical-only allowlist cannot cover, and
+  pointer-shaped evidence (repo@ref path#symbol) in explainRepo/verify is the
+  move. Their Option-D critique of explainRepo ("an answer, not a pointer")
+  is the requirements doc for that change.
+
+**Meter honesty (grok's essay, our L10 restated harder):** measurement-side
+movement is never booked as product movement. When /quality trends ship (P1),
+bank/golden edits and grading changes are reported in their own column,
+separate from data and serving changes — their ceiling decomposition found
+13.5 of 35.5 lost points were measurement artifacts, and the same discipline
+applies to our own scoreboard.
+
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from
 the same ledger everything already writes to. The only new invention is the

@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-28",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			"getChanges speaks the standard provenance dialect (openapi@1.8.101): meta.generatedAt joins the existing asOf, and counts gains a total alongside the per-surface keys. Raven's host captures an exact-path allowlist (generatedAt, counts.total, matchMode) from responses into its judge-visible evidence block — a dialect difference silently dropped this op's provenance from an agent's evidence chain even when the data was retrieved.",
+		detail:
+			"Found by a census of every operation's meta against the sidecar allowlist their product lane shipped on 2026-08-26. Additive only — asOf and the per-surface counts keys are unchanged. analyze and vet-idea still lack a counts.total deliberately: neither has a single honest 'total' semantic, and a forced number that misleads is worse than absence; both are tracked in QUALITY.md §5.",
+	},
+	{
+		date: "2026-08-28",
 		surfaces: ["api", "mcp"],
 		type: "changed",
 		summary:
