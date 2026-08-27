@@ -133,6 +133,9 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	// (dev-docs Fees + Glossary hold the grounded content).
 	stroopy: ["stroopy", "stroop"],
 	strupey: ["strupey", "stroopy", "stroop"],
+	// ^ "strupey" is also a SPELLING CORRECTION (see below): it may still find
+	// the Stroopy.AI project row, but the response must say the match went
+	// through a correction, never "all keywords matched" (sls-076).
 	oracle: [
 		"oracle",
 		"price feed",
@@ -372,3 +375,16 @@ export function mergeVocabulary(
 	}
 	return out;
 }
+
+/** Query tokens that are known MISSPELLINGS, mapped to the terms the synonym
+ * expansion injects for them. A row admitted ONLY through these terms is a
+ * spelling-corrected match, not a keyword match — sls-076: q="Strupey"
+ * returned Stroopy.AI at matchMode=strict / "all keywords matched" although
+ * neither name nor slug contains "strupey", and two independent agent runs
+ * then promoted the row into identity evidence for an unverified name. The
+ * expansion is deliberate (it finds the right thing); the LABEL was the lie.
+ * Domain synonyms (cex → centralized exchange) are NOT corrections — a row
+ * matching the expanded domain term genuinely answers the query. */
+export const SPELLING_CORRECTIONS: Record<string, string> = {
+	strupey: "stroopy",
+};

@@ -42,6 +42,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	},
 	{
 		date: "2026-08-27",
+		surfaces: ["api", "mcp", "skill"],
+		type: "fixed",
+		summary:
+			"A spelling-corrected match no longer calls itself a keyword match (openapi@1.8.96). q=Strupey returned Stroopy.AI at matchMode=strict / 'all keywords matched' / 0.92 although neither name nor slug contains the token — the admission came from our own curated correction synonym. New matchMode 'corrected' names what happened (sls-076, stellar-raven #1055).",
+		detail:
+			"The correction expansion itself is deliberate and stays — strupey is a real misspelling of the former mascot with 17 asks in 30 days, and routing it to the right row is the point. What was broken is the label: an agent reading strict + 'all keywords matched' treated a spelling neighbour as identity evidence for an unverified name, and two independent Raven runs promoted Stroopy.AI's SCF history onto 'Strupey'. Rows admitted ONLY through a SPELLING_CORRECTIONS entry now report matchMode='corrected' with a label telling the caller the query token does not occur in the rows. Domain synonyms (cex → centralized exchange) are not corrections and keep their tiers. Documented in the spec prose and the pinned reference, which also gains the previously-missing 'semantic' bullet in its matchMode ladder.",
+	},
+	{
+		date: "2026-08-27",
 		surfaces: ["api", "mcp"],
 		type: "changed",
 		summary:

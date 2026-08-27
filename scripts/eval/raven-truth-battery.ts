@@ -175,6 +175,26 @@ const ABSENT_BANKS: string[][] = [
 	["is QuantumPay live", "tell me about NebulaBridge"],
 	["is StellarGizmo live", "what is OrbitMintX"],
 ];
+// sls-076 regression control (their filed requirement): q=Strupey must NEVER
+// come back as a keyword tier — the row it finds (Stroopy.AI) matches only
+// through our curated spelling correction, and two agent runs treated the old
+// strict label as identity evidence for an unverified name. "corrected" (the
+// honest mode) and "semantic" both pass; any keyword tier is the regression.
+async function sliceB2() {
+	console.log("\n── B2: spelling-corrected honesty (sls-076) ──");
+	const out = await raven(`
+		const r = await scout.searchProjects({ q: "Strupey", limit: 3 });
+		return { mode: r.data?.meta?.matchMode ?? null,
+			label: r.data?.meta?.matchModeLabel ?? null,
+			slugs: (r.data?.projects ?? []).map((p) => p.slug) };
+	`);
+	verdict(
+		out.mode === "corrected" || out.mode === "semantic",
+		"B2:corrected",
+		`q=Strupey -> mode=${out.mode} slugs=${JSON.stringify(out.slugs)}`,
+	);
+}
+
 async function sliceB() {
 	console.log("\n── B: absent-entity honesty ──");
 	const qs = ALL
@@ -379,7 +399,7 @@ const t0 = Date.now();
 console.log(
 	`Raven truth battery → ${BASE} (day ${dayOfYear}, ${ALL ? "ALL banks" : "rotating"})`,
 );
-const slices = [sliceA, sliceB, sliceC, sliceD, sliceE, sliceF];
+const slices = [sliceA, sliceB, sliceB2, sliceC, sliceD, sliceE, sliceF];
 for (const s of slices) {
 	try {
 		await s();
