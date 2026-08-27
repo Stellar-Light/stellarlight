@@ -36,17 +36,30 @@ describe("liveness words are state, not identity", () => {
 	});
 
 	it("still anchors on the real subject when one is present", () => {
-		expect(hitsAnyToken("sorobix build tooling", anchorTokens(tokenize("is Sorobix live")))).toBe(true);
+		expect(
+			hitsAnyToken(
+				"sorobix build tooling",
+				anchorTokens(tokenize("is Sorobix live")),
+			),
+		).toBe(true);
 	});
 
 	it("leaves ordinary topic queries alone", () => {
 		// The fix must not strip meaning from queries where the words carry it.
-		expect(anchorTokens(tokenize("non-custodial wallet for Stellar"))).toContain("wallet");
-		expect(anchorTokens(tokenize("cross-border payment corridor"))).toContain("payment");
+		expect(
+			anchorTokens(tokenize("non-custodial wallet for Stellar")),
+		).toContain("wallet");
+		expect(anchorTokens(tokenize("cross-border payment corridor"))).toContain(
+			"payment",
+		);
 	});
 
 	it("covers the sibling status words, not just 'live'", () => {
-		for (const q of ["is Foo active", "is Foo maintained", "is Foo abandoned"]) {
+		for (const q of [
+			"is Foo active",
+			"is Foo maintained",
+			"is Foo abandoned",
+		]) {
 			expect(anchorTokens(tokenize(q)), q).toEqual(["foo"]);
 		}
 	});
