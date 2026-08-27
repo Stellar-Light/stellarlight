@@ -830,7 +830,9 @@ export interface components {
             docVersionStatus?: "current" | "supported" | "deprecated" | null;
             score?: number | null;
             /** @description 0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays */
-            confidence?: Record<string, never>;
+            confidence?: {
+                [key: string]: unknown;
+            };
         };
         /** @description An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained. */
         Partner: {
@@ -877,7 +879,9 @@ export interface components {
             contactChannel?: string | null;
             responseSla?: string | null;
             /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet. */
-            caseStudies?: Record<string, never>[] | null;
+            caseStudies?: {
+                [key: string]: unknown;
+            }[] | null;
             /** @description SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal. */
             verified?: {
                 githubLastCommitAt?: string | null;
@@ -1271,7 +1275,9 @@ export interface components {
         };
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
-            hackathon?: Record<string, never>;
+            hackathon?: {
+                [key: string]: unknown;
+            };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
                 /** @description Stable row id (dorahacks-buidl-{id} for live rows). */
@@ -1298,8 +1304,12 @@ export interface components {
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
-            submissions?: Record<string, never>[];
-            tracks?: Record<string, never>[];
+            submissions?: {
+                [key: string]: unknown;
+            }[];
+            tracks?: {
+                [key: string]: unknown;
+            }[];
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
@@ -2150,7 +2160,9 @@ export interface operations {
                         version?: string;
                         /** Format: date-time */
                         generatedAt?: string;
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         entries?: {
                             /** Format: date */
                             date?: string;
@@ -2301,7 +2313,9 @@ export interface operations {
                             symbols?: string[];
                             contractInterface?: string[];
                             targetProtocol?: number | null;
-                            protocolCaps?: Record<string, never>[];
+                            protocolCaps?: {
+                                [key: string]: unknown;
+                            }[];
                             stellarDeps?: string[];
                             mainnetContractId?: string | null;
                             sdkCapabilities?: string[];
@@ -2423,7 +2437,9 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                             /** @description How many of the requested slugs resolved. */
-                            counts?: Record<string, never>;
+                            counts?: {
+                                [key: string]: unknown;
+                            };
                         };
                         hackathons?: {
                             slug?: string;
@@ -2475,9 +2491,13 @@ export interface operations {
                             /** @description Where the raw builds came from (DoraHacks). */
                             upstream?: string;
                             /** @description The filters as applied — an echo, so a caller can see what was honoured. */
-                            filters?: Record<string, never>;
+                            filters?: {
+                                [key: string]: unknown;
+                            };
                             /** @description returned vs total — how much the filters narrowed. */
-                            counts?: Record<string, never>;
+                            counts?: {
+                                [key: string]: unknown;
+                            };
                             note?: string;
                         };
                         builds?: {
@@ -2690,7 +2710,9 @@ export interface operations {
                             responseSla?: string | null;
                             tomlSourceUrl?: string | null;
                             tomlFetchedAt?: string | null;
-                            caseStudies?: Record<string, never>[];
+                            caseStudies?: {
+                                [key: string]: unknown;
+                            }[];
                             /** @description Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade. */
                             verified?: {
                                 githubLastCommitAt?: string | null;
@@ -2759,7 +2781,9 @@ export interface operations {
                         need?: string;
                         matches?: {
                             /** @description The matched partner row. */
-                            partner?: Record<string, never>;
+                            partner?: {
+                                [key: string]: unknown;
+                            };
                             /** @description Relevance of this partner to the need. */
                             score?: number;
                             /** @description Why it matched — safe to surface. */
@@ -2822,7 +2846,9 @@ export interface operations {
                         /** @description The assistant's next message, plain text. */
                         reply?: string;
                         /** @description Partners referenced in the reply — present only when the turn actually grounded on directory rows. */
-                        matches?: Record<string, never>[];
+                        matches?: {
+                            [key: string]: unknown;
+                        }[];
                         /** @description What the assistant judged the caller is trying to do. */
                         intent?: string | null;
                         /** @description Whether the caller is eligible to submit a listing from here. */
@@ -2884,7 +2910,9 @@ export interface operations {
                         /** @description mode=chat: the next assistant turn. */
                         reply?: string | null;
                         /** @description mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific. */
-                        profile?: Record<string, never> | null;
+                        profile?: {
+                            [key: string]: unknown;
+                        } | null;
                     };
                 };
             };
@@ -2928,7 +2956,9 @@ export interface operations {
                      */
                     contactEmail: string;
                     /** @description Profile fields (typically the /api/partners/onboard extract output) */
-                    fields?: Record<string, never>;
+                    fields?: {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -3088,19 +3118,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         report?: {
                             idea?: string;
                             vertical?: string | null;
                             round?: {
                                 /** @enum {string} */
                                 source?: "live" | "unavailable";
-                                open?: Record<string, never>[];
+                                open?: {
+                                    [key: string]: unknown;
+                                }[];
                                 note?: string;
                             };
-                            fundedPeers?: Record<string, never>[];
-                            fundingBar?: Record<string, never>;
-                            vet?: Record<string, never>;
+                            fundedPeers?: {
+                                [key: string]: unknown;
+                            }[];
+                            fundingBar?: {
+                                [key: string]: unknown;
+                            };
+                            vet?: {
+                                [key: string]: unknown;
+                            };
                             /** @description Deterministic derivations from served facts — each names its evidence; not judgments. */
                             angles?: string[];
                         };
@@ -3135,13 +3175,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         report?: {
                             idea?: string;
                             /** @description Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless. */
                             vertical?: string | null;
                             /** @description Same computation as /api/vet-idea: competitors, maturity, priorArt, gap. */
-                            vet?: Record<string, never>;
+                            vet?: {
+                                [key: string]: unknown;
+                            };
                             /** @description Prototype-layer prior art — DoraHacks submissions matching the idea, winners ranked first, ≤5. */
                             builds?: {
                                 name?: string;
@@ -3153,19 +3197,29 @@ export interface operations {
                                 url?: string | null;
                             }[];
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
-                            startFrom?: Record<string, never>[];
+                            startFrom?: {
+                                [key: string]: unknown;
+                            }[];
                             liveContracts?: {
                                 /** @description Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis. */
                                 domain?: string | null;
                                 basis?: string;
-                                contracts?: Record<string, never>[];
+                                contracts?: {
+                                    [key: string]: unknown;
+                                }[];
                                 note?: string;
                             };
                             funding?: {
                                 /** @description Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable'). */
-                                round?: Record<string, never>;
-                                fundedPeers?: Record<string, never>[];
-                                fundingBar?: Record<string, never>;
+                                round?: {
+                                    [key: string]: unknown;
+                                };
+                                fundedPeers?: {
+                                    [key: string]: unknown;
+                                }[];
+                                fundingBar?: {
+                                    [key: string]: unknown;
+                                };
                             };
                             /** @description Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one. */
                             whatNotToClaim?: string[];
@@ -3215,14 +3269,20 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         report?: {
                             idea?: string;
                             /** @description Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless. */
                             vertical?: string | null;
                             competitors?: {
-                                repos?: Record<string, never>[];
-                                projects?: Record<string, never>[];
+                                repos?: {
+                                    [key: string]: unknown;
+                                }[];
+                                projects?: {
+                                    [key: string]: unknown;
+                                }[];
                                 /**
                                  * @description How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.
                                  * @enum {string}
@@ -3236,12 +3296,18 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                repos?: Record<string, never>[];
+                                repos?: {
+                                    [key: string]: unknown;
+                                }[];
                                 note?: string;
                             };
                             /** @description Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps). */
-                            gap?: Record<string, never> | null;
-                            funding?: Record<string, never> | null;
+                            gap?: {
+                                [key: string]: unknown;
+                            } | null;
+                            funding?: {
+                                [key: string]: unknown;
+                            } | null;
                         };
                     };
                 };
@@ -3274,7 +3340,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         report?: {
                             repo?: {
                                 fullName?: string;
@@ -3301,8 +3369,12 @@ export interface operations {
                                 contractInterface?: string[];
                                 mainnetContractId?: string | null;
                             };
-                            usage?: Record<string, never> | null;
-                            audits?: Record<string, never> | null;
+                            usage?: {
+                                [key: string]: unknown;
+                            } | null;
+                            audits?: {
+                                [key: string]: unknown;
+                            } | null;
                             /** @description Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today. */
                             auditDrift?: {
                                 latestAuditAt?: string;
@@ -3358,7 +3430,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        meta?: Record<string, never>;
+                        meta?: {
+                            [key: string]: unknown;
+                        };
                         contracts?: {
                             /** @description Verified mainnet contract id (C…); null when membership came via usage attribution without a specific id. */
                             contractId?: string | null;
@@ -3376,9 +3450,13 @@ export interface operations {
                             interfaceSize?: number;
                             interfacePreview?: string[];
                             /** @description Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier. */
-                            codeInUse?: Record<string, never> | null;
+                            codeInUse?: {
+                                [key: string]: unknown;
+                            } | null;
                             /** @description Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'. */
-                            audits?: Record<string, never> | null;
+                            audits?: {
+                                [key: string]: unknown;
+                            } | null;
                             successorRepo?: string | null;
                             scannedAt?: string | null;
                         }[];
@@ -3875,11 +3953,17 @@ export interface operations {
                             method?: string;
                             contentType?: string;
                             /** @description Field-by-field description of the POST body, including the allowed kind values. */
-                            body?: Record<string, never>;
+                            body?: {
+                                [key: string]: unknown;
+                            };
                             /** @description A ready-to-send example body. */
-                            example?: Record<string, never>;
+                            example?: {
+                                [key: string]: unknown;
+                            };
                             /** @description An example of the vote-shaped variant. */
-                            voteExample?: Record<string, never>;
+                            voteExample?: {
+                                [key: string]: unknown;
+                            };
                             /** @description The limit in words, so a caller can pace itself. */
                             rateLimit?: string;
                         };

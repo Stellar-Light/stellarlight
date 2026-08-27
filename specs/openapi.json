@@ -834,7 +834,8 @@
 											"format": "date-time"
 										},
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"entries": {
 											"type": "array",
@@ -1433,7 +1434,8 @@
 												"protocolCaps": {
 													"type": "array",
 													"items": {
-														"type": "object"
+														"type": "object",
+														"additionalProperties": true
 													}
 												},
 												"stellarDeps": {
@@ -1776,6 +1778,7 @@
 												},
 												"counts": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "How many of the requested slugs resolved."
 												}
 											}
@@ -1948,10 +1951,12 @@
 												},
 												"filters": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "The filters as applied — an echo, so a caller can see what was honoured."
 												},
 												"counts": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "returned vs total — how much the filters narrowed."
 												},
 												"note": {
@@ -2635,7 +2640,8 @@
 												"caseStudies": {
 													"type": "array",
 													"items": {
-														"type": "object"
+														"type": "object",
+														"additionalProperties": true
 													}
 												},
 												"verified": {
@@ -2779,6 +2785,7 @@
 												"properties": {
 													"partner": {
 														"type": "object",
+														"additionalProperties": true,
 														"description": "The matched partner row."
 													},
 													"score": {
@@ -2916,6 +2923,7 @@
 											"description": "Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
 											"items": {
 												"type": "object",
+												"additionalProperties": true,
 												"description": "A public partner record."
 											}
 										},
@@ -3030,6 +3038,7 @@
 										},
 										"profile": {
 											"type": "object",
+											"additionalProperties": true,
 											"nullable": true,
 											"description": "mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific."
 										}
@@ -3097,6 +3106,7 @@
 									},
 									"fields": {
 										"type": "object",
+										"additionalProperties": true,
 										"description": "Profile fields (typically the /api/partners/onboard extract output)"
 									}
 								}
@@ -3460,7 +3470,8 @@
 									"type": "object",
 									"properties": {
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"report": {
 											"type": "object",
@@ -3485,7 +3496,8 @@
 														"open": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"note": {
@@ -3496,14 +3508,17 @@
 												"fundedPeers": {
 													"type": "array",
 													"items": {
-														"type": "object"
+														"type": "object",
+														"additionalProperties": true
 													}
 												},
 												"fundingBar": {
-													"type": "object"
+													"type": "object",
+													"additionalProperties": true
 												},
 												"vet": {
-													"type": "object"
+													"type": "object",
+													"additionalProperties": true
 												},
 												"angles": {
 													"type": "array",
@@ -3582,7 +3597,8 @@
 									"type": "object",
 									"properties": {
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"report": {
 											"type": "object",
@@ -3597,6 +3613,7 @@
 												},
 												"vet": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "Same computation as /api/vet-idea: competitors, maturity, priorArt, gap."
 												},
 												"builds": {
@@ -3637,7 +3654,8 @@
 													"type": "array",
 													"description": "Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
 													"items": {
-														"type": "object"
+														"type": "object",
+														"additionalProperties": true
 													}
 												},
 												"liveContracts": {
@@ -3654,7 +3672,8 @@
 														"contracts": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"note": {
@@ -3667,16 +3686,19 @@
 													"properties": {
 														"round": {
 															"type": "object",
+															"additionalProperties": true,
 															"description": "Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable')."
 														},
 														"fundedPeers": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"fundingBar": {
-															"type": "object"
+															"type": "object",
+															"additionalProperties": true
 														}
 													}
 												},
@@ -3760,7 +3782,8 @@
 									"type": "object",
 									"properties": {
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"report": {
 											"type": "object",
@@ -3779,13 +3802,15 @@
 														"repos": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"projects": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"matchMode": {
@@ -3822,7 +3847,8 @@
 														"repos": {
 															"type": "array",
 															"items": {
-																"type": "object"
+																"type": "object",
+																"additionalProperties": true
 															}
 														},
 														"note": {
@@ -3832,11 +3858,13 @@
 												},
 												"gap": {
 													"type": "object",
+													"additionalProperties": true,
 													"nullable": true,
 													"description": "Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps)."
 												},
 												"funding": {
 													"type": "object",
+													"additionalProperties": true,
 													"nullable": true
 												}
 											}
@@ -3905,7 +3933,8 @@
 									"type": "object",
 									"properties": {
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"report": {
 											"type": "object",
@@ -4002,10 +4031,12 @@
 												},
 												"usage": {
 													"type": "object",
+													"additionalProperties": true,
 													"nullable": true
 												},
 												"audits": {
 													"type": "object",
+													"additionalProperties": true,
 													"nullable": true
 												},
 												"auditDrift": {
@@ -4158,7 +4189,8 @@
 									"type": "object",
 									"properties": {
 										"meta": {
-											"type": "object"
+											"type": "object",
+											"additionalProperties": true
 										},
 										"contracts": {
 											"type": "array",
@@ -4220,11 +4252,13 @@
 													},
 													"codeInUse": {
 														"type": "object",
+														"additionalProperties": true,
 														"nullable": true,
 														"description": "Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier."
 													},
 													"audits": {
 														"type": "object",
+														"additionalProperties": true,
 														"nullable": true,
 														"description": "Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'."
 													},
@@ -5788,14 +5822,17 @@
 												},
 												"body": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "Field-by-field description of the POST body, including the allowed kind values."
 												},
 												"example": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "A ready-to-send example body."
 												},
 												"voteExample": {
 													"type": "object",
+													"additionalProperties": true,
 													"description": "An example of the vote-shaped variant."
 												},
 												"rateLimit": {
@@ -6405,6 +6442,7 @@
 					},
 					"confidence": {
 						"type": "object",
+						"additionalProperties": true,
 						"description": "0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays"
 					}
 				}
@@ -6583,7 +6621,8 @@
 						"type": "array",
 						"nullable": true,
 						"items": {
-							"type": "object"
+							"type": "object",
+							"additionalProperties": true
 						},
 						"description": "Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet."
 					},
@@ -7735,7 +7774,8 @@
 						"$ref": "#/components/schemas/Meta"
 					},
 					"hackathon": {
-						"type": "object"
+						"type": "object",
+						"additionalProperties": true
 					},
 					"winners": {
 						"type": "array",
@@ -7814,13 +7854,15 @@
 					"submissions": {
 						"type": "array",
 						"items": {
-							"type": "object"
+							"type": "object",
+							"additionalProperties": true
 						}
 					},
 					"tracks": {
 						"type": "array",
 						"items": {
-							"type": "object"
+							"type": "object",
+							"additionalProperties": true
 						}
 					}
 				}
