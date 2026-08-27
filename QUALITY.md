@@ -103,12 +103,16 @@ service runs at Stage 3+ by default and humans do product, not repair.
 
 - **P0 (this week):** this document · opacity lock in CI · class labels in
   the findings ledger · battery lanes adopt the rounds format.
-- **P1 (+2 weeks):** the list-endpoint honesty layer + conformance test
-  (kills classes 2+5 by construction) — *contract half shipped 2026-08-28:
-  check-honesty-layer.ts ratchets 8 debt ops and blocks new unlabelled
-  surface; paying the debt (adding the labels) is the remaining half* ·
-  /quality trend dashboard with ratchets · persona rotation formalized in
-  the existing battery.
+- **P1 (+2 weeks):** the list-endpoint honesty layer + conformance test —
+  *shipped in full 2026-08-28: the ratchet landed (#1060) and the 8-op debt
+  was paid to zero with one shared vocabulary (#1061)* · eval-bank freeze +
+  sha256 fingerprints — *shipped: eval-baselines.json + a vitest gate; any
+  bank/guard/golden edit fails CI until re-baselined in the same PR* · bank
+  linter — *shipped: structure offline + live rot check, daily before the
+  guards; its own first run miscalled four CAP goldens and got its rule
+  corrected, which is the linter linting its author* · persona rotation —
+  *shipped: the wave-3 hacker-buildtime probes joined the rotating category
+  banks* · REMAINING: the /quality trend dashboard with ratchet history.
 - **P2 (+1 month):** Stage 2 autonomy for bounded work · the
   dry→execute→verify data loop agentized · Verify v1 slices 2-3.
 - **P3:** Stage 3 · event-driven freshness (PLAN §5) · steady-state review.
