@@ -30,6 +30,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verify a claim against indexed evidence — verdict + evidence + confidence
+         * @description Claim in → verdict out, with the evidence and its dates attached. v1 verifies AUDIT claims ('is X audited', by=firm / since=date). Verdicts assert over OUR corpus, never the world: supported = report(s) on record; unsupported = none on record (statement carries the denominator); unresolved = unknown subject. 'contradicted' is deliberately not emitted in v1. Renames/aliases resolve via the shared resolver; supported responses may carry a currencyNote when the newest report predates the latest code activity. Unknown claim types 400 with the supported list.
+         */
+        get: operations["verifyClaim"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/resolve": {
         parameters: {
             query?: never;
@@ -1834,6 +1854,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatusResponse"];
+                };
+            };
+        };
+    };
+    verifyClaim: {
+        parameters: {
+            query?: {
+                /** @description Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing. */
+                claim?: string;
+                /** @description Structured alternative to claim. v1 accepts only 'audited'. */
+                type?: "audited";
+                /** @description Project name, slug, alias, or former name (required with type=). */
+                subject?: string;
+                /** @description Restrict to reports by this firm (case/spacing-insensitive substring). A filtered miss names who DID audit in auditorsOnRecord. */
+                auditor?: string;
+                /** @description Only reports with engagement/publication on or after this date (YYYY-MM or YYYY-MM-DD). */
+                since?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Verdict with evidence (also served for unresolved subjects) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description What each verdict asserts — quote it rather than paraphrasing. */
+                            methodology?: string;
+                            /** @description The denominators behind the verdict. */
+                            searched?: {
+                                audits?: number;
+                            };
+                        };
+                        /** @description The parsed claim as understood. */
+                        claim?: {
+                            /** @enum {string} */
+                            type?: "audited";
+                            subject?: string;
+                            auditor?: string;
+                            since?: string;
+                        };
+                        /** @description How the subject resolved (absent when verdict=unresolved). */
+                        subject?: {
+                            asked?: string;
+                            resolvedSlug?: string;
+                            resolvedName?: string;
+                            /** @enum {string} */
+                            matchedOn?: "slug" | "canonical-slug" | "alias" | "name" | "repo";
+                            status?: string | null;
+                        };
+                        /**
+                         * @description supported = evidence on record; unsupported = nothing in OUR corpus (never 'false' — see statement); unresolved = unknown subject.
+                         * @enum {string}
+                         */
+                        verdict?: "supported" | "unsupported" | "unresolved";
+                        /** @description One-sentence verdict with dates and denominators, safe to relay verbatim. */
+                        statement?: string;
+                        evidence?: {
+                            /** @enum {string} */
+                            kind?: "audit-report";
+                            auditor?: string | null;
+                            title?: string | null;
+                            reportUrl?: string | null;
+                            engagementEnd?: string | null;
+                            publishedAt?: string | null;
+                            findingsTotal?: number | null;
+                            dateBasis?: string | null;
+                            observedAt?: string | null;
+                        }[];
+                        /** @description factConfidence over the newest evidence (basis × freshness). null when there is no evidence to score. */
+                        confidence?: {
+                            score?: number;
+                            label?: string;
+                            ageDays?: number | null;
+                        } | null;
+                        /** @description Present when the newest report predates the subject's latest code activity by >90 days. */
+                        currencyNote?: string;
+                        /** @description On an auditor-filtered miss: who DID audit the subject. */
+                        auditorsOnRecord?: string[];
+                        /** @description Only when verdict=unresolved: the resolver's own note. */
+                        resolution?: {
+                            note?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Unparseable claim or unsupported claim type */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: string;
+                        supportedClaims?: string[];
+                    };
                 };
             };
         };
