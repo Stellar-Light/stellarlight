@@ -24,6 +24,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { clampLimit } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -227,6 +228,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/api/audits",
 				generatedAt: new Date().toISOString(),
 				filters: { project, auditor, q, since, limit: limitParam, offset },

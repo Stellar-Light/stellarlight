@@ -26,6 +26,7 @@ import {
 	type CuratedSkillSource,
 } from "@/lib/integrations/curated-skills";
 import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -207,6 +208,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(qFilter ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
 				...(paramWarning ? { warnings: [paramWarning] } : {}),

@@ -1700,6 +1700,13 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												matchMode: {
+													type: "string",
+													enum: ["all", "filtered"],
+													description:
+														"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+												},
+												matchModeLabel: { type: "string" },
 												source: { type: "string" },
 												generatedAt: { type: "string", format: "date-time" },
 												upstream: {
@@ -1870,6 +1877,13 @@ export const spec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "expanded"],
+															description:
+																"How rows matched q: expanded = matched via synonym/stem expansion of the query terms (verify relevance for niche terms); all = no text query.",
+														},
+														matchModeLabel: { type: "string" },
 														matchBasis: {
 															type: "string",
 															description:
@@ -1974,6 +1988,13 @@ export const spec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
 														source: {
 															type: "string",
 															description:
@@ -3535,7 +3556,19 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object", additionalProperties: true },
+										meta: {
+											type: "object",
+											additionalProperties: true,
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: ["all", "filtered"],
+													description:
+														"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+												},
+												matchModeLabel: { type: "string" },
+											},
+										},
 										contracts: {
 											type: "array",
 											items: {
@@ -3689,7 +3722,23 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
+													},
+												},
+											],
+										},
 										audits: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Audit" },
@@ -4018,6 +4067,13 @@ export const spec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["vector", "keyword"],
+															description:
+																"vector = similarity ranking over embeddings (conceptual, not literal keyword truth); keyword = vector search unavailable, coarse keyword match over title and content.",
+														},
+														matchModeLabel: { type: "string" },
 														query: {
 															type: "string",
 															description: "The query as the server parsed it.",
@@ -4153,6 +4209,13 @@ export const spec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
 														validKinds: {
 															type: "array",
 															items: { type: "string" },
@@ -6364,6 +6427,13 @@ export const spec: OpenAPISpec = {
 							{
 								type: "object",
 								properties: {
+									matchMode: {
+										type: "string",
+										enum: ["all", "filtered"],
+										description:
+											"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+									},
+									matchModeLabel: { type: "string" },
 									fallbackChannels: {
 										type: "object",
 										description:

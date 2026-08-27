@@ -21,6 +21,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { buildContractsRegistry } from "@/lib/contracts-registry";
 import { clampLimit } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -100,6 +101,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: `${getAppUrl()}/api/contracts`,
 				generatedAt: new Date().toISOString(),
 				filters: {
