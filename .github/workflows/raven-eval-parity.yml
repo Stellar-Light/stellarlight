@@ -42,6 +42,12 @@ jobs:
         with: { node-version: "24", cache: pnpm }
       - run: pnpm install --frozen-lockfile
 
+      # Bank hygiene BEFORE the guards: authoring defects + live bank rot
+      # (an expected slug that no longer resolves to itself). A rotted bank
+      # fails here as BANK-LINT, never disguised as a service regression.
+      - name: Bank lint (structure + live rot)
+        run: pnpm exec tsx scripts/eval/lint-eval-banks.ts --live
+
       - name: Golden questions — direct vs through Raven
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
