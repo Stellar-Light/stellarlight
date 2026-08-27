@@ -449,10 +449,13 @@ export function intentTypesFor(tokens: string[]): Set<string> {
  */
 export function structuredSelectClauses(
 	tokens: string[],
-): Array<Record<string, { contains: string }>> {
-	const out: Array<Record<string, { contains: string }>> = [];
-	for (const tv of intentTypesFor(tokens))
-		out.push({ types: { contains: tv } });
+): Array<Record<string, { contains: string } | { in: string[] }>> {
+	const out: Array<Record<string, { contains: string } | { in: string[] }>> =
+		[];
+	// `in`, never `contains`: on a hasMany select, contains is case-
+	// insensitive SUBSTRING per element — an intent type of "DEX" would
+	// admit every Indexer as a candidate (2026-08-28 audit).
+	for (const tv of intentTypesFor(tokens)) out.push({ types: { in: [tv] } });
 	for (const t of tokens) {
 		const m = t.match(/^sep-?(\d{1,3})$/);
 		if (m) out.push({ "coverage.seps": { contains: `sep-${m[1]}` } });

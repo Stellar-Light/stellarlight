@@ -1013,9 +1013,15 @@ export async function GET(req: NextRequest) {
 				where.status = { equals: statusParam };
 			}
 			if (typeParam) {
-				// sls-033: `types` is a hasMany select — `contains` is exact array
-				// membership, so ?type=Wallet enumerates only Wallet-typed records.
-				where.types = { contains: typeParam };
+				// sls-033 + 2026-08-28 audit: `types` is a hasMany select and
+				// Payload `contains` is CASE-INSENSITIVE SUBSTRING against each
+				// element — type=DEX matched "In**dex**er", so the enumeration
+				// counted 61 (46 DEX + 15 Indexers), the belt removed the
+				// Indexers page-side, and agents got ghost pages and an
+				// inflated total. `in` is exact element membership — the rule
+				// the memory bank recorded and this file's comment already
+				// claimed while the operator below contradicted it.
+				where.types = { in: [typeParam] };
 			}
 			if (!q) {
 				// Browse mode (no query): lineage shadows are merged-away dupes, not

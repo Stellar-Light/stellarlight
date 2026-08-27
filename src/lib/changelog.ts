@@ -45,6 +45,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api", "mcp"],
 		type: "fixed",
 		summary:
+			"type=DEX no longer counts Indexers (openapi@1.8.104). Payload contains on the hasMany types field is case-insensitive SUBSTRING per element — 'DEX' matched In-DEX-er, so the DEX enumeration reported total 61 for a 46-row set, with the 15 Indexers stripped page-side into ghost pages. The candidate filter and the intent-type clauses now use `in` (exact element membership).",
+		detail:
+			"Found by the build-audit sweep the user asked for: a closed-set check across every enum type flagged DEX (46 of 61) — the one enum pair where one value is a substring of another. The route's own comment claimed contains was exact array membership while the memory bank recorded the substring trap; the operator contradicted both. Battery slice G now pins Wallet AND DEX (the collision witness) into every run with a third type rotating daily, and it ran RED against prod on DEX before this deploy.",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api", "mcp"],
+		type: "fixed",
+		summary:
 			"Typed enumerations exclude lineage shadows from membership (openapi@1.8.103) — the residual half of the sls-033 ghost. The q path keeps shadows as candidates so their NAMES stay findable, but in a type enumeration a shadow duplicates a row already in the set; the page-side fold swapped lone shadows back to their canonicals on later pages, re-serving three rows and inflating total to 65 for a 63-row set.",
 		detail:
 			"Battery slice G caught the residual on the previous deploy's verification run (pagination walked 64, stellar-passport twice) — the guard doing its job against its own fix. With shadows excluded, the q+type pool is byte-identical to the no-q enumeration at any limit/offset: 63 rows, total 63, offset past the end serves zero.",
