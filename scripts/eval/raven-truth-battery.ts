@@ -413,6 +413,40 @@ async function sliceG() {
 	}
 }
 
+// ── Slice H: verify-surface truths (the claim engine grades itself) ──
+// Standing claims pinned to curated truth: a status contradiction (laina,
+// human-verified testnet-only), a multi-issuer attribution (EURC — supported
+// WITH the never-by-ticker-alone warning), a wrong-attribution contradiction
+// (USDC/Tether), and an audit support (blend). Drift = the data moved
+// (update the probe WITH evidence) or verify broke — both worth a red.
+async function sliceH() {
+	console.log("\n── H: verify-surface truths ──");
+	const check = async (claim: string, want: string, mustContain?: string) => {
+		try {
+			const r = (await (
+				await fetch(
+					`https://stellarlight.xyz/api/verify?claim=${encodeURIComponent(claim)}`,
+					{ headers: { "User-Agent": "stellarlight-battery" } },
+				)
+			).json()) as { verdict?: string; statement?: string };
+			const okV = r.verdict === want;
+			const okS = !mustContain || (r.statement ?? "").includes(mustContain);
+			verdict(
+				okV && okS,
+				"H:verify",
+				`"${claim}" -> ${r.verdict}${mustContain && !okS ? ` (statement missing "${mustContain}")` : ""} (want ${want})`,
+			);
+		} catch (e) {
+			errors++;
+			console.log(`  ERROR in sliceH: ${String(e).slice(0, 100)}`);
+		}
+	};
+	await check("is laina live", "contradicted", "Pre-Release");
+	await check("is EURC issued by Circle", "supported", "also issued by MyKobo");
+	await check("is USDC issued by Tether", "contradicted", "Circle");
+	await check("is blend audited", "supported");
+}
+
 const slices = [
 	sliceA,
 	sliceB,
@@ -422,6 +456,7 @@ const slices = [
 	sliceE,
 	sliceF,
 	sliceG,
+	sliceH,
 ];
 for (const s of slices) {
 	try {
