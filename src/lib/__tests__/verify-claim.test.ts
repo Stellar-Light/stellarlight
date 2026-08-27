@@ -1,7 +1,13 @@
 /** Verify v1 slice 1 — the grammar, the verdict semantics, and the honesty
  * rules that make a verdict worth trusting. */
 import { describe, expect, it } from "vitest";
-import { auditVerdict, parseClaim } from "../verify-claim";
+import {
+	auditVerdict,
+	liveVerdict,
+	maintainedVerdict,
+	parseClaim,
+	type RepoFacts,
+} from "../verify-claim";
 
 describe("parseClaim — closed grammar, refusal over guessing", () => {
 	it("parses the three natural forms", () => {
@@ -20,11 +26,14 @@ describe("parseClaim — closed grammar, refusal over guessing", () => {
 		expect(
 			parseClaim({ type: "audited", subject: "blend", auditor: "veridise" }),
 		).toMatchObject({ auditor: "veridise" });
-		const err = parseClaim({ type: "live", subject: "blend" });
-		expect("error" in err && err.error).toMatch(/audit claims only/);
+		expect(parseClaim({ type: "live", subject: "blend" })).toMatchObject({
+			type: "live",
+		});
+		const err = parseClaim({ type: "profitable", subject: "blend" });
+		expect("error" in err && err.error).toMatch(/Unsupported claim type/);
 	});
 	it("refuses claims outside the grammar instead of guessing", () => {
-		const err = parseClaim({ claim: "is blend live" });
+		const err = parseClaim({ claim: "does blend have a token" });
 		expect("error" in err).toBe(true);
 	});
 });
@@ -107,7 +116,8 @@ describe("auditVerdict — semantics", () => {
 			...base,
 		});
 		expect(r.evidence).toHaveLength(1);
-		expect(r.evidence[0].auditor).toBe("OtterSec");
+		const ev = r.evidence[0];
+		expect(ev.kind === "audit-report" && ev.auditor).toBe("OtterSec");
 	});
 	it("currency note fires only when code moved well after the newest audit", () => {
 		const fresh = auditVerdict({
@@ -122,5 +132,108 @@ describe("auditVerdict — semantics", () => {
 			codeLastActiveAt: "2026-03-01",
 		});
 		expect(near.currencyNote).toBeUndefined();
+	});
+});
+
+describe("liveVerdict — the status record IS the evidence", () => {
+	const facts = (
+		status: string | null,
+		basis: string | null = "human-verified",
+	) => ({
+		slug: "x",
+		name: "X",
+		status,
+		statusBasis: basis,
+		statusAsOf: "2026-08-27",
+		statusSourceUrl: "https://src",
+	});
+	it("Live on record → supported, confidence from the basis tier", () => {
+		const r = liveVerdict(facts("Live"));
+		expect(r.verdict).toBe("supported");
+		expect(r.evidence[0].kind).toBe("status-record");
+		expect(r.confidence?.score).toBeGreaterThan(0);
+	});
+	it("Pre-Release contradicts a live claim — with the source", () => {
+		const r = liveVerdict(facts("Pre-Release"));
+		expect(r.verdict).toBe("contradicted");
+		expect(r.statement).toContain("Pre-Release");
+		expect(r.statement).toContain("https://src");
+	});
+	it("no status on record = a gap in OUR record, not a claim", () => {
+		const r = liveVerdict(facts(null, null));
+		expect(r.verdict).toBe("unsupported");
+		expect(r.statement).toContain("gap in our record");
+	});
+});
+
+describe("maintainedVerdict — code activity + curated notes", () => {
+	const repo = (over: Partial<RepoFacts>): RepoFacts => ({
+		fullName: "o/r",
+		lastCommitAt: null,
+		activityState: null,
+		isArchived: false,
+		stars: 5,
+		repoScoreLabel: "solid",
+		...over,
+	});
+	const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+	const stale = new Date(Date.now() - 400 * 86400000).toISOString();
+	it("recent commit on a non-archived repo → supported", () => {
+		const r = maintainedVerdict("X", [repo({ lastCommitAt: recent })]);
+		expect(r.verdict).toBe("supported");
+	});
+	it("all repos archived → contradicted", () => {
+		const r = maintainedVerdict("X", [
+			repo({ isArchived: true, lastCommitAt: stale }),
+		]);
+		expect(r.verdict).toBe("contradicted");
+		expect(r.statement).toContain("archived");
+	});
+	it("year-old newest commit → contradicted with the date", () => {
+		const r = maintainedVerdict("X", [repo({ lastCommitAt: stale })]);
+		expect(r.verdict).toBe("contradicted");
+	});
+	it("no repos on record → unsupported (no evidence either way)", () => {
+		const r = maintainedVerdict("X", []);
+		expect(r.verdict).toBe("unsupported");
+		expect(r.statement).toContain("no code evidence");
+	});
+	it("knowledgeNotes ride along as curated-note evidence", () => {
+		const r = maintainedVerdict("X", [
+			repo({
+				lastCommitAt: recent,
+				knowledgeNotes: [
+					{
+						note: "3 audits on record",
+						source: "https://s",
+						asOf: "2026-08-01",
+					},
+				],
+			}),
+		]);
+		expect(r.evidence.some((e) => e.kind === "curated-note")).toBe(true);
+	});
+});
+
+describe("grammar covers the new claim types", () => {
+	it("live forms", () => {
+		expect(parseClaim({ claim: "is laina live" })).toMatchObject({
+			type: "live",
+			subject: "laina",
+		});
+		expect(parseClaim({ claim: "is Blend on mainnet?" })).toMatchObject({
+			type: "live",
+			subject: "Blend",
+		});
+	});
+	it("maintained forms, including abandoned", () => {
+		expect(parseClaim({ claim: "is kulipa maintained" })).toMatchObject({
+			type: "maintained",
+			subject: "kulipa",
+		});
+		expect(parseClaim({ claim: "is kulipa abandoned?" })).toMatchObject({
+			type: "maintained",
+			subject: "kulipa",
+		});
 	});
 });

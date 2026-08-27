@@ -14,7 +14,10 @@ import { getAppUrl } from "@/lib/utils/app-url";
 import {
 	type AuditEvidenceRow,
 	auditVerdict,
+	liveVerdict,
+	maintainedVerdict,
 	parseClaim,
+	type RepoFacts,
 } from "@/lib/verify-claim";
 
 export const revalidate = 300;
@@ -72,7 +75,7 @@ export async function GET(req: NextRequest) {
 		source: `${getAppUrl()}/api/verify`,
 		generatedAt: new Date().toISOString(),
 		methodology:
-			"Verdicts assert over OUR indexed corpus, never over the world: supported = report(s) on record for the resolved subject; unsupported = none on record (the statement carries the denominator); unresolved = the subject matched no known project. contradicted is deliberately not emitted in v1.",
+			"Verdicts assert over OUR indexed corpus, never over the world: supported = evidence on record; contradicted = we hold a dated record saying otherwise; unsupported = no evidence either way (the statement carries the denominator); unresolved = unknown subject.",
 		...(paramWarning ? { warnings: [paramWarning] } : {}),
 	};
 
@@ -101,6 +104,147 @@ export async function GET(req: NextRequest) {
 	}
 	const slug = resolution.current.slug;
 
+	// The full labeled row for the subject card: links, types, provenance,
+	// prominence — the SAME data the directory serves, so a verify answer
+	// carries the project's info instead of a bare verdict.
+	// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+	let full: any = null;
+	try {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			select: {
+				slug: true,
+				name: true,
+				status: true,
+				statusBasis: true,
+				statusAsOf: true,
+				statusSourceUrl: true,
+				types: true,
+				links: true,
+				prominence: true,
+				verificationLevel: true,
+				supportedNetworks: true,
+			},
+		});
+		full = r.docs[0] ?? null;
+	} catch {}
+
+	const subjectCard = {
+		asked: parsed.subject,
+		resolvedSlug: slug,
+		resolvedName: resolution.current.name ?? slug,
+		matchedOn: resolution.matchedOn,
+		status: full?.status ?? resolution.current.status ?? null,
+		statusBasis: full?.statusBasis ?? null,
+		statusAsOf: full?.statusAsOf ?? null,
+		statusSourceUrl: full?.statusSourceUrl ?? null,
+		types: Array.isArray(full?.types) ? full.types : [],
+		links: {
+			website: full?.links?.website ?? null,
+			github: full?.links?.github ?? null,
+			docs: full?.links?.docs ?? null,
+		},
+		prominence: typeof full?.prominence === "number" ? full.prominence : null,
+		verificationLevel: full?.verificationLevel ?? null,
+		supportedNetworks: Array.isArray(full?.supportedNetworks)
+			? full.supportedNetworks
+			: [],
+	};
+
+	// Repos joined for maintained claims AND the audit currency note — the
+	// existing labels (activityState, repoScoreLabel, knowledgeNotes) ARE the
+	// evidence, quoted rather than recomputed.
+	let repoFacts: RepoFacts[] = [];
+	let codeLastActiveAt: string | null = null;
+	try {
+		const repos = await payload.find({
+			collection: "repos",
+			where: { projectSlug: { equals: slug } },
+			limit: 50,
+			depth: 0,
+			select: {
+				fullName: true,
+				lastCommitAt: true,
+				activityState: true,
+				isArchived: true,
+				stars: true,
+				repoScoreLabel: true,
+				knowledgeNotes: true,
+			},
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: raw Payload docs
+		repoFacts = (repos.docs as any[]).map((r) => ({
+			fullName: String(r.fullName ?? ""),
+			lastCommitAt: r.lastCommitAt ?? null,
+			activityState: r.activityState ?? null,
+			isArchived: !!r.isArchived,
+			stars: typeof r.stars === "number" ? r.stars : null,
+			repoScoreLabel: r.repoScoreLabel ?? null,
+			knowledgeNotes: Array.isArray(r.knowledgeNotes)
+				? r.knowledgeNotes
+						.filter(
+							// biome-ignore lint/suspicious/noExplicitAny: raw rows
+							(n: any) => n?.note && (n.visibility ?? "public") === "public",
+						)
+						// biome-ignore lint/suspicious/noExplicitAny: raw rows
+						.map((n: any) => ({
+							note: String(n.note),
+							source: String(n.source ?? ""),
+							asOf: n.asOf ?? null,
+						}))
+				: [],
+		}));
+		for (const r of repoFacts)
+			if (
+				r.lastCommitAt &&
+				(!codeLastActiveAt || r.lastCommitAt > codeLastActiveAt)
+			)
+				codeLastActiveAt = r.lastCommitAt;
+	} catch {}
+
+	if (parsed.type === "live") {
+		const result = liveVerdict({
+			slug,
+			name: subjectCard.resolvedName,
+			status: subjectCard.status,
+			statusBasis: subjectCard.statusBasis,
+			statusAsOf: subjectCard.statusAsOf,
+			statusSourceUrl: subjectCard.statusSourceUrl,
+		});
+		logApiHit({
+			req,
+			endpoint: "/api/verify",
+			filters: { verdict: result.verdict },
+		});
+		return NextResponse.json(
+			{ meta, claim: parsed, subject: subjectCard, ...result },
+			{
+				headers: {
+					"Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+				},
+			},
+		);
+	}
+	if (parsed.type === "maintained") {
+		const result = maintainedVerdict(subjectCard.resolvedName, repoFacts);
+		logApiHit({
+			req,
+			endpoint: "/api/verify",
+			filters: { verdict: result.verdict },
+		});
+		return NextResponse.json(
+			{ meta, claim: parsed, subject: subjectCard, ...result },
+			{
+				headers: {
+					"Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+				},
+			},
+		);
+	}
+
 	// The audit registry is small — fetch once, filter in JS (never Payload
 	// `contains` on identity strings; substring-vs-membership trap).
 	const audits = await payload.find({
@@ -113,27 +257,6 @@ export async function GET(req: NextRequest) {
 	const subjectRows = allRows.filter(
 		(r) => (r.projectSlug ?? "").toLowerCase() === slug.toLowerCase(),
 	);
-
-	// The audits×code join: the subject's newest dated code activity.
-	let codeLastActiveAt: string | null = null;
-	try {
-		const repos = await payload.find({
-			collection: "repos",
-			where: { projectSlug: { equals: slug } },
-			limit: 50,
-			depth: 0,
-			select: { lastCommitAt: true },
-		});
-		for (const r of repos.docs as Array<{ lastCommitAt?: string | null }>) {
-			if (
-				r.lastCommitAt &&
-				(!codeLastActiveAt || r.lastCommitAt > codeLastActiveAt)
-			)
-				codeLastActiveAt = r.lastCommitAt;
-		}
-	} catch {
-		// evidence enrichment only — a repos hiccup must not fail the verdict
-	}
 
 	const result = auditVerdict({
 		claim: parsed,
@@ -153,13 +276,7 @@ export async function GET(req: NextRequest) {
 		{
 			meta: { ...meta, searched: { audits: audits.totalDocs } },
 			claim: parsed,
-			subject: {
-				asked: parsed.subject,
-				resolvedSlug: slug,
-				resolvedName: resolution.current.name ?? slug,
-				matchedOn: resolution.matchedOn,
-				status: resolution.current.status ?? null,
-			},
+			subject: subjectCard,
 			...result,
 		},
 		{
