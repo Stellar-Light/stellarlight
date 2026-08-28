@@ -51,3 +51,11 @@ jobs:
       # Scheduled runs ALWAYS execute (the whole point of the weekly refresh);
       # manual dispatch stays dry-run unless the execute box is ticked.
       - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+      # The writer guards its own class: a lookup/write key mismatch in the
+      # pass above creates one duplicate row per run and nothing else
+      # red-lines (the 2026-08-28 census found 381 copies this way). Runs
+      # even when the enrich step failed — a partial wave can still have
+      # written duplicates, and blind is not green.
+      - name: Guard — one row per repo
+        if: always()
+        run: pnpm exec tsx scripts/data/check-repo-dupes.ts

@@ -445,31 +445,47 @@ async function main() {
 		// Fetch the existing doc BEFORE grading so the persisted Code-Truth
 		// signals (codeDepth, written by scripts/scan/scan-repo-code.ts) feed the
 		// grade — a code-verified deep contract lifts repoScore even at 0 stars.
-		let existing = (
-			await payload.find({
-				collection: "repos",
-				where: { fullName: { equals: full } },
-				limit: 1,
-				depth: 0,
-			})
-		).docs[0] as Doc | undefined;
+		//
 		// #783: GitHub fullNames are case-insensitive but Mongo equals is not —
-		// case-variant source lists (org-sweep hybrids vs project-list exact)
-		// used to CREATE twin docs. Fall back to a case-insensitive match so
-		// every writer converges on ONE doc. (`like` is substring-insensitive —
+		// case-variant source lists used to CREATE twin docs; the lookup falls
+		// back to a case-insensitive match. (`like` is substring-insensitive —
 		// the JS filter makes it exact; see the contains-substring trap.)
-		if (!existing) {
+		const findRepoDoc = async (key: string): Promise<Doc | undefined> => {
+			const exact = (
+				await payload.find({
+					collection: "repos",
+					where: { fullName: { equals: key } },
+					limit: 1,
+					depth: 0,
+				})
+			).docs[0] as Doc | undefined;
+			if (exact) return exact;
 			const near = await payload.find({
 				collection: "repos",
-				where: { fullName: { like: full } },
+				where: { fullName: { like: key } },
 				limit: 5,
 				depth: 0,
 			});
-			existing = (near.docs as Doc[]).find(
+			return (near.docs as Doc[]).find(
 				(d) =>
 					String((d as { fullName?: string }).fullName ?? "").toLowerCase() ===
-					full.toLowerCase(),
+					key.toLowerCase(),
 			);
+		};
+		let existing = await findRepoDoc(full);
+		// Rename loop (#843's lookup-side twin, found via the 2026-08-28 census:
+		// 381 duplicate rows, some repos stored 20×). When a project record
+		// lists a repo's OLD name, GitHub resolves the redirect and we WRITE the
+		// row under the canonical nameWithOwner — but this lookup only tried the
+		// listed name, so the row we wrote yesterday is unfindable today and
+		// every --execute pass created one more copy. The repo is the same repo
+		// under both names: look it up under the canonical name too.
+		if (!existing && info && info.nameWithOwner !== full) {
+			existing = await findRepoDoc(info.nameWithOwner);
+			if (existing)
+				console.log(
+					`  rename ${full} → ${info.nameWithOwner} (converging on the canonical row)`,
+				);
 		}
 		const grade = info
 			? repoGrade({
@@ -490,16 +506,22 @@ async function main() {
 				})
 			: { score: 0, label: "low" as const };
 
+		// #783: converge on GitHub's canonical casing when we fetched it;
+		// otherwise keep the existing doc's form (no churn between passes).
+		const writtenFullName =
+			info?.nameWithOwner ??
+			(existing as { fullName?: string } | undefined)?.fullName ??
+			full;
 		const data: Doc = {
-			// #783: converge on GitHub's canonical casing when we fetched it;
-			// otherwise keep the existing doc's form (no churn between passes).
-			fullName:
-				info?.nameWithOwner ??
-				(existing as { fullName?: string } | undefined)?.fullName ??
-				full,
-			owner,
-			name,
-			url: info?.url ?? `https://github.com/${full}`,
+			fullName: writtenFullName,
+			// owner/name derive from the fullName actually WRITTEN, not from the
+			// project record's listed name. The census found rows whose fullName
+			// carried the canonical org while `owner` still carried the listed
+			// (pre-rename) org — an internally inconsistent row that defeats any
+			// owner-based join or dedupe heuristic.
+			owner: writtenFullName.split("/")[0] ?? owner,
+			name: writtenFullName.split("/")[1] ?? name,
+			url: info?.url ?? `https://github.com/${writtenFullName}`,
 			...(info
 				? {
 						description: info.description ?? null,

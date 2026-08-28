@@ -30,3 +30,9 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/data/dedupe-repo-docs.ts ${{ inputs.execute && '--execute' || '' }}
+      # Read-back: after an execute, the collection must actually hold one row
+      # per repo — a dedupe that reports success while clusters remain would
+      # be the same silent-drop class the merge step itself defends against.
+      - name: Verify — one row per repo
+        if: inputs.execute
+        run: pnpm exec tsx scripts/data/check-repo-dupes.ts
