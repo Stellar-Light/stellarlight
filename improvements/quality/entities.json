@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-08-28T16:06:45.827Z",
+ "generatedAt": "2026-08-28T16:32:23.215Z",
  "surfaces": [
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
-   "openFindings": 43,
-   "clearedFindings": 260,
+   "openFindings": 40,
+   "clearedFindings": 268,
    "verifiedFindings": 0
   },
   {
@@ -53,15 +53,15 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 446,
-  "open": 79,
-  "cleared": 360,
+  "total": 451,
+  "open": 76,
+  "cleared": 368,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 29,
-    "cleared": 228,
+    "open": 26,
+    "cleared": 236,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -153,15 +153,15 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 35
+    "count": 39
    },
    {
     "bucket": "8–30d",
-    "count": 18
+    "count": 12
    },
    {
     "bucket": "31–60d",
-    "count": 26
+    "count": 25
    },
    {
     "bucket": ">60d",
@@ -170,51 +170,51 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "kutana",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "lumen-later in top-3 for 'what is Lumen Later'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "tomer weller",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "response",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "kalepail",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "foryield/soroban-yield-vault in top-5 for its own symbol 'initialize'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "8004",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "zerie5/lulpay-campaign-contract in top-5 for its own symbol 'initialize'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "tell me about solana",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "winsznx/routedock in top-5 for its own symbol 'initialize'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "is blend audited and by who?",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "xycloo/rs-zephyr-toolkit in top-5 for its own symbol 'from_u32'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "submit a Stellar transaction with the JavaScript SDK",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "Trustless-Work/trustlesswork-smart-contract-stellar in top-5 for its own symbol 'ContractError'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "how does the KALE proof-of-teamwork farming reward mechanism work",
-    "surface": "code",
-    "failureMode": "consumer-code-shallow",
+    "probe": "Creit-Tech/SorobanHub-app in top-5 for its own symbol 'StellarService'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-28"
    }
   ]
@@ -1951,7 +1951,7 @@
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "29 open recall-miss findings",
+   "measurement": "26 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
@@ -1962,7 +1962,7 @@
     "id": "s:engine-a-recall",
     "label": "engine-a-recall",
     "column": 0,
-    "value": 257
+    "value": 262
    },
    {
     "id": "s:engine-d-demand",
@@ -2022,7 +2022,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 303
+    "value": 308
    },
    {
     "id": "f:directory",
@@ -2064,13 +2064,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 360
+    "value": 368
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 79
+    "value": 76
    },
    {
     "id": "o:verified",
@@ -2092,7 +2092,7 @@
     "target": 17,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 260
+    "value": 268
    },
    {
     "source": 1,
@@ -2106,14 +2106,14 @@
     "target": 10,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
-    "value": 257
+    "value": 262
    },
    {
     "source": 10,
     "target": 18,
     "sourceId": "f:retrieval",
     "targetId": "o:open",
-    "value": 43
+    "value": 40
    },
    {
     "source": 5,
