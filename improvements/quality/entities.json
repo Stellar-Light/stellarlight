@@ -1,0 +1,461 @@
+{
+ "generatedAt": "2026-08-28T01:29:51.664Z",
+ "findings": {
+  "total": 437,
+  "open": 263,
+  "cleared": 167,
+  "verified": 7,
+  "byFailureMode": [
+   {
+    "mode": "recall-miss",
+    "open": 214,
+    "cleared": 43,
+    "surface": "retrieval"
+   },
+   {
+    "mode": "coverage-gap",
+    "open": 15,
+    "cleared": 39,
+    "surface": "directory"
+   },
+   {
+    "mode": "demand-miss",
+    "open": 14,
+    "cleared": 30,
+    "surface": "retrieval"
+   },
+   {
+    "mode": "api-drift",
+    "open": 0,
+    "cleared": 22,
+    "surface": "contract"
+   },
+   {
+    "mode": "battery-coverage-weak",
+    "open": 4,
+    "cleared": 14,
+    "surface": "corpus"
+   },
+   {
+    "mode": "scf-round-overclaim",
+    "open": 0,
+    "cleared": 14,
+    "surface": "scf"
+   },
+   {
+    "mode": "routing-miss",
+    "open": 8,
+    "cleared": 0,
+    "surface": "consumer"
+   },
+   {
+    "mode": "missing-field",
+    "open": 0,
+    "cleared": 7,
+    "surface": "contract"
+   },
+   {
+    "mode": "demand-routing-miss",
+    "open": 6,
+    "cleared": 0,
+    "surface": "consumer"
+   },
+   {
+    "mode": "population-miss",
+    "open": 0,
+    "cleared": 3,
+    "surface": "code"
+   },
+   {
+    "mode": "golden-fail",
+    "open": 0,
+    "cleared": 2,
+    "surface": "retrieval"
+   },
+   {
+    "mode": "ambiguous-contract",
+    "open": 1,
+    "cleared": 0,
+    "surface": "contract"
+   },
+   {
+    "mode": "consumer-code-shallow",
+    "open": 1,
+    "cleared": 0,
+    "surface": "code"
+   }
+  ],
+  "openByAge": [
+   {
+    "bucket": "≤7d",
+    "count": 28
+   },
+   {
+    "bucket": "8–30d",
+    "count": 32
+   },
+   {
+    "bucket": "31–60d",
+    "count": 203
+   },
+   {
+    "bucket": ">60d",
+    "count": 0
+   }
+  ],
+  "recentlyCleared": [
+   {
+    "probe": "battery:q-tool-leaderboard-open-issues",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-08-25"
+   },
+   {
+    "probe": "idos in top-3 for 'is idOS live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "infstones in top-3 for 'is InfStones live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "onfinality in top-3 for 'is OnFinality live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "walletconnect in top-3 for 'tell me about WalletConnect'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "easya in top-3 for 'is EasyA live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "nearx in top-3 for 'what is NearX'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   },
+   {
+    "probe": "stellarx-ph in top-3 for 'StellarX PH on stellar'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-24"
+   }
+  ]
+ },
+ "projects": {
+  "sampled": 588,
+  "meanScore": 87,
+  "basisMix": [
+   {
+    "basis": "site-liveness",
+    "count": 454
+   },
+   {
+    "basis": "source-inherited",
+    "count": 90
+   },
+   {
+    "basis": "human-verified",
+    "count": 32
+   },
+   {
+    "basis": "onchain-activity",
+    "count": 6
+   },
+   {
+    "basis": "operator-announcement",
+    "count": 3
+   },
+   {
+    "basis": "unverified",
+    "count": 3
+   }
+  ],
+  "weakest": [
+   {
+    "slug": "benji",
+    "name": "Benji",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 88,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "friendbot",
+    "name": "Friendbot",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 85,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "warmancer",
+    "name": "Warmancer",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 82,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "stellar-laboratory",
+    "name": "Stellar Laboratory",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 80,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "wisdomtree",
+    "name": "WisdomTree",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 80,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "hana",
+    "name": "Hana",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 76,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "liquify",
+    "name": "Liquify",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 72,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "scaffold-stellar",
+    "name": "Scaffold Stellar",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "score": 64,
+    "missing": [
+     "typed"
+    ]
+   },
+   {
+    "slug": "lusty-finance",
+    "name": "Lusty Finance",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "stellar-agent-wallet-skill",
+    "name": "Stellar Agent Wallet Skill",
+    "status": "Development",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "wallet-guru",
+    "name": "Wallet Guru",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "score": 64,
+    "missing": [
+     "sourced"
+    ]
+   },
+   {
+    "slug": "sendit",
+    "name": "Sendit",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "score": 64,
+    "missing": [
+     "linked"
+    ]
+   }
+  ],
+  "missingCounts": [
+   {
+    "field": "provenance",
+    "count": 3
+   },
+   {
+    "field": "dated",
+    "count": 0
+   },
+   {
+    "field": "sourced",
+    "count": 24
+   },
+   {
+    "field": "typed",
+    "count": 40
+   },
+   {
+    "field": "linked",
+    "count": 2
+   }
+  ]
+ },
+ "repos": {
+  "sampled": 259,
+  "withCodeDepth": 256,
+  "withNotes": 23,
+  "withMainnet": 2,
+  "top": [
+   {
+    "fullName": "davidmaronio/StellarPay402",
+    "repoScore": 85,
+    "label": "high",
+    "tier": "community",
+    "activity": "maintained",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 69,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "fredericrezeau/xray-games",
+    "repoScore": 84,
+    "label": "high",
+    "tier": "community",
+    "activity": "dormant",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 78,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "stellar/smart-account-kit",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "stellar/typescript-wallet-sdk",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "lightsail-network/java-stellar-sdk",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "horizontalsystems/stellar-web-sdk",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "stellar/freighter",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "Creit-Tech/xBull-Wallet",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "dormant",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "stellar/freighter-mobile",
+    "repoScore": 80,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 100,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "StellarCN/py-stellar-base",
+    "repoScore": 79,
+    "label": "high",
+    "tier": "community",
+    "activity": "active",
+    "evidence": "code-verified",
+    "notes": 0,
+    "codeDepth": 93,
+    "mainnetContracts": 0
+   }
+  ]
+ }
+}

@@ -27,6 +27,7 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
 // Weekly evidence — fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
+import qualityEntities from "../../improvements/quality/entities.json";
 import qualityHistory from "../../improvements/quality/history.json";
 import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
@@ -439,4 +440,10 @@ export function getTrends(): TrendSeries[] {
 		series("liveNoSource", "Live rows without a source", "down"),
 		series("humanVerified", "Human-verified statuses", "up"),
 	];
+}
+
+/** The committed entity + findings artifact behind /quality's Findings and
+ * Per-entity sections (scripts/quality/build-quality-artifact.ts). */
+export function getEntities() {
+	return qualityEntities;
 }

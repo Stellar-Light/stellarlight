@@ -112,7 +112,15 @@ service runs at Stage 3+ by default and humans do product, not repair.
   guards; its own first run miscalled four CAP goldens and got its rule
   corrected, which is the linter linting its author* · persona rotation —
   *shipped: the wave-3 hacker-buildtime probes joined the rotating category
-  banks* · REMAINING: the /quality trend dashboard with ratchet history.
+  banks* · the /quality dashboard — *rebuilt 2026-08-29 after the first
+  version shipped seven single-dot boxes and no per-entity view: now
+  FINDINGS (263 open / 167 cleared / 7 verified, split by failure mode, aged —
+  the treadmill made visible), ROW QUALITY (five-fact evidence score per
+  project, provenance ramp, the curation queue of weakest prominent rows),
+  REPO QUALITY (score, scan depth, knowledge notes, mainnet joins), and
+  TRENDS as real area charts that refuse to draw a line from one point.
+  Ordinal ramp validated with the dataviz six-checks against the dark
+  surface.*
 - **P2 (+1 month):** Stage 2 autonomy for bounded work · the
   dry→execute→verify data loop agentized · Verify v1 slices 2-3.
 - **P3:** Stage 3 · event-driven freshness (PLAN §5) · steady-state review.
