@@ -303,6 +303,35 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
+			// sls-079: `status: Live` conflates "operating for users" with
+			// "deployed on mainnet" — one label, two facts. This group carries the
+			// SECOND fact separately, and only ever from evidence: a verified
+			// mainnet contract join, an on-chain activity reading, or a curated
+			// receipt (e.g. an operator bundle whose mainnet config is empty).
+			// "unknown" is the honest default — absence of evidence is never proof
+			// of disuse. Written by scripts/data/backfill-deployment.ts and the
+			// curation pass; never inferred from a page answering.
+			name: "deployment",
+			type: "group",
+			fields: [
+				{
+					name: "network",
+					type: "select",
+					options: ["mainnet", "testnet", "unknown"],
+				},
+				{
+					name: "basis",
+					type: "text",
+					admin: {
+						description:
+							"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified",
+					},
+				},
+				{ name: "sourceUrl", type: "text" },
+				{ name: "asOf", type: "date" },
+			],
+		},
+		{
 			// On-chain metrics (2026-07-20): populated by
 			// scripts/data/enrich-onchain-projects.ts from stellar.expert, join
 			// keys hand-verified in src/data/onchain-contracts.ts. Semantics:

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-28",
 		surfaces: ["api"],
+		version: "spec@1.9.4",
+		type: "added",
+		summary:
+			"searchProjects rows carry `deployment` (mainnet | testnet | unknown, evidence-backed) as a separate fact from lifecycle status; `status: Live` is now explicitly defined as NOT a mainnet-deployment claim (sls-079).",
+		detail:
+			"sls-079 showed one label carrying two facts: Stellars Finance returned status Live (basis site-liveness) while the operator's own bundle held an empty mainnet config beside populated testnet contracts. The new `deployment` group is populated only from evidence (verified mainnet contract joins, on-chain activity readings, or human-verified operator artifacts) and serves network 'unknown' explicitly everywhere else — absence of evidence is never read as 'not deployed'. The status field's spec text now defines Live as 'operating for users somewhere' and points deployment questions at the sibling field. Stellars Finance itself is corrected to Pre-Release (human-verified, receipt committed).",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api"],
 		version: "spec@1.9.3",
 		type: "fixed",
 		summary:

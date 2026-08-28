@@ -37,6 +37,18 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// sls-079 (2026-08-28): Live rested on site-liveness while the operator's
+	// own bundle shows a testnet-only deployment (mainnet config empty). By the
+	// hoops precedent, a testnet-only product is Pre-Release. Evidence receipt:
+	// improvements/receipts/stellars-finance-2026-08-28.json.
+	"stellars-finance": {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
+		note: "testnet contracts populated; mainnet addresses empty in the operator bundle",
+	},
 	// sls-073 (2026-08-25): Zenex's STATUS is already right (Pre-Release) — this
 	// entry does not move it. What it fixes is the PROVENANCE: it was resting on
 	// `site-liveness`, so the next sweep could have churned it off a mere 200.
@@ -2403,3 +2415,23 @@ export function curatedSlugs(): string[] {
 // contract-correct — builtBy.slug resolves at /entities/{slug}. Fix
 // builtBy data by fixing the entity record/links; the nightly S0 lane
 // asserts every served builtBy slug resolves in the entity namespace.
+
+/** sls-079: verified DEPLOYMENT facts, separate from lifecycle status.
+ * Only entries a human (or a cited operator artifact) actually evidences.
+ * network "testnet" here means the operator's OWN configuration shows no
+ * mainnet deployment — the strongest honest reading available. */
+export const DEPLOYMENT_VERIFIED: Record<
+	string,
+	{ network: "mainnet" | "testnet"; sourceUrl: string; note: string }
+> = {
+	// sls-079 (2026-08-28, verified in-session byte-for-byte): the operator
+	// bundle defines {local, testnet, mainnet} network configs; testnet holds
+	// four real contract addresses, mainnet holds four EMPTY ones
+	// (address "", startLedger 0). A reachable site is not a mainnet
+	// deployment.
+	"stellars-finance": {
+		network: "testnet",
+		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
+		note: "mainnet config present but empty (4x address:\"\"); testnet fully populated",
+	},
+};
