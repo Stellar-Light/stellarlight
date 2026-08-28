@@ -1276,6 +1276,12 @@ export async function GET(req: NextRequest) {
 					statusAsOf?: string | null;
 					statusSourceUrl?: string | null;
 					statusBasis?: string | null;
+					deployment?: {
+						network?: string | null;
+						basis?: string | null;
+						sourceUrl?: string | null;
+						asOf?: string | null;
+					} | null;
 					tvlUSD?: number | null;
 					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 					onchain?: any;
@@ -1389,6 +1395,14 @@ export async function GET(req: NextRequest) {
 					statusSourceUrl: p.statusSourceUrl ?? null,
 					statusBasis: p.statusBasis ?? null,
 					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+					// sls-079: deployment rides EVERY row builder — the first fix
+					// landed on one of three builders and the served paths missed it.
+					deployment: {
+						network: p.deployment?.network ?? "unknown",
+						basis: p.deployment?.basis ?? null,
+						sourceUrl: p.deployment?.sourceUrl ?? null,
+						asOf: p.deployment?.asOf ?? null,
+					},
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
@@ -2020,6 +2034,13 @@ export async function GET(req: NextRequest) {
 					statusSourceUrl: c.statusSourceUrl ?? null,
 					statusBasis: c.statusBasis ?? null,
 					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
+					// sls-079: from the canonical too, same rule as the fields above
+					deployment: {
+						network: c.deployment?.network ?? "unknown",
+						basis: c.deployment?.basis ?? null,
+						sourceUrl: c.deployment?.sourceUrl ?? null,
+						asOf: c.deployment?.asOf ?? null,
+					},
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
