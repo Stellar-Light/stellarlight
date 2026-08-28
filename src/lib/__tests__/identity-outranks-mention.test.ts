@@ -53,3 +53,33 @@ describe("exact identity survives natural phrasing", () => {
 		expect(score("SwapX", "swapx", "best swap on stellar")).toBeLessThan(2);
 	});
 });
+
+describe("proper-noun promotion (wave-5, the Hermes case)", () => {
+	const score = (name: string, slug: string, q: string, aliases?: string[]) =>
+		nameMatchScore(name, slug, q, aliases ?? null, tokenize(q));
+	it("a capitalized mid-query proper noun matching an ALIAS promotes to exact", () => {
+		expect(
+			score("Zenex", "zenex", "what happened to Hermes exchange on Stellar", [
+				"Hermes",
+			]),
+		).toBe(3);
+	});
+	it("a capitalized mid-query name match promotes too", () => {
+		expect(score("Bridge", "bridge", "tell me what Bridge does")).toBe(3);
+	});
+	it("lowercase category words never fire it", () => {
+		expect(
+			score("Bridge", "bridge", "cross-chain bridge to stellar"),
+		).toBeLessThan(3);
+	});
+	it("network names never fire it, even capitalized", () => {
+		expect(
+			score("Stellar Thing", "stellar", "payments on Stellar today"),
+		).toBeLessThan(3);
+	});
+	it("the FIRST word never fires it (sentence case is not a signal)", () => {
+		expect(
+			score("Bridge", "bridge", "Bridge to other chains comparison"),
+		).toBeLessThan(3);
+	});
+});

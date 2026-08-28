@@ -41,6 +41,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"New wrappers: getStablecoins, vetIdea, scfPitch, hackathonBrief, searchHackathonBuilds, listAudits, listContracts, getRepoTrust, resolveProject, getPeople, getPartner(slug), getChanges, getFeedbackSchema, matchPartners, partnerAssistant, partnerOnboard, submitPartnerListing. getChanges takes a REQUIRED `since`. All GET operations live-verified against production; README method table now lists all 35 ops.",
 	},
 	{
+		date: "2026-08-29",
+		surfaces: ["api", "mcp"],
+		type: "fixed",
+		summary:
+			"Two wave-5 eval finds closed (openapi@1.8.106): the typo-correction registry was a 1000-row window on a 1000+ collection (soroswapp and aquarious silently fell to vector neighbours while blendd recovered — which side of the cutoff a project landed on decided whether its misspelling was correctable), and a capitalized mid-query proper noun matching a record's name or alias now promotes to an exact identity hit (\"what happened to Hermes exchange\" finds zenex via its new Hermes alias).",
+		detail:
+			"The registry truncation is the vet-idea 400-of-500 class in the rung that exists to rescue misspellings — now a full fetch (name+slug only, cheap). The proper-noun promotion fires only on words the USER capitalized mid-query (never the first word — sentence case is not a signal — and never network names, which cap in nearly every query), so lowercase category queries keep their ranking; five tests pin the boundaries. The Hermes alias itself ships as ALIAS_ADD in the curation pass — rename continuity as data (sls-050), never as an invisible synonym patch.",
+	},
+	{
 		date: "2026-08-28",
 		surfaces: ["api", "mcp"],
 		type: "added",
