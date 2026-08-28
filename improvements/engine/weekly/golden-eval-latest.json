@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7614927887916565,
+      "topScore": 0.7614928483963013,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8357759714126587,
+      "topScore": 0.8357760310173035,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -63,7 +63,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8850046396255493,
+      "topScore": 0.8857698440551758,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -71,7 +71,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Increment a counter and store the incremented value."
+      "sample": "Increment a counter and store the incremented value"
     },
     {
       "id": "dapp-freighter",
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7965081930160522,
+      "topScore": 0.7819677591323853,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8034660220146179,
+      "topScore": 0.8034659624099731,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -161,7 +161,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend Protocol — Certora (Blend Security Assessment Report)"
+      "sample": "Blend Protocol \u2014 Certora (Blend Security Assessment Report)"
     },
     {
       "id": "audit-reentrancy",
@@ -171,7 +171,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8371278643608093,
+      "topScore": 0.8371278047561646,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core — Veridise (Auditing Report for Soroban"
+      "sample": "Stellar Soroban Core \u2014 Veridise (Auditing Report for Soroban"
     },
     {
       "id": "ecosystem-rwa-map",
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8247630596160889,
+      "topScore": 0.8247631788253784,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -279,12 +279,12 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8245735168457031,
+      "topScore": 0.824343740940094,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
       "sample": "Embedded Wallets"
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296413421630859,
+      "topScore": 0.8296414017677307,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.821096658706665,
+      "topScore": 0.8214676380157471,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7768945693969727,
+      "topScore": 0.7765418291091919,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -377,7 +377,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "StellarBroker — Runtime Verification (Security Audit Report "
+      "sample": "StellarBroker \u2014 Runtime Verification (Security Audit Report "
     },
     {
       "id": "ec-developer-count",
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8091200590133667,
+      "topScore": 0.8091201782226562,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -431,7 +431,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SocketFi"
+      "sample": "Stellar Passport"
     },
     {
       "id": "protocol-current-base-reserve",
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094740271568298,
+      "topScore": 0.7094740867614746,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -629,7 +629,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Welcome to the SCF Handbook!"
+      "sample": "Welcome to the SCF Handbook"
     },
     {
       "id": "cap-lookup",
@@ -639,7 +639,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7854732275009155,
+      "topScore": 0.785473108291626,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.6 — 27.0.6"
+      "sample": "rs-soroban-sdk v27.0.6 \u2014 27.0.6"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7407729625701904,
+      "topScore": 0.7407969832420349,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -719,7 +719,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038456201553345,
+      "topScore": 0.7038456797599792,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -783,7 +783,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6957978010177612,
+      "topScore": 0.6947882175445557,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535136580467224,
+      "topScore": 0.8535137176513672,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -809,7 +809,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF bug-bounty consolidation (effective 2026-05-07): single "
+      "sample": "SDF bug-bounty consolidation (effective 2026-05-07)"
     },
     {
       "id": "q-org-sdf-structure-mandate",
@@ -819,7 +819,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8588693141937256,
+      "topScore": 0.8588099479675293,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -837,7 +837,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8134868741035461,
+      "topScore": 0.813447117805481,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -845,7 +845,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Enterprise Fund — venture-style fund (stellar.org/en"
+      "sample": "Stellar Enterprise Fund \u2014 venture-style fund (stellar.org/en"
     },
     {
       "id": "q-org-sdf-leadership-roles",
@@ -863,7 +863,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF Team — leadership and board of directors (stellar.org/fo"
+      "sample": "SDF Team \u2014 leadership and board of directors (stellar.org/fo"
     },
     {
       "id": "capability-custody-identity",
@@ -927,7 +927,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8397256135940552,
+      "topScore": 0.8399317264556885,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -945,7 +945,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8499917387962341,
+      "topScore": 0.8496288657188416,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -953,8 +953,9 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Publish events from a smart contract."
+      "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-08-26T06:19:44Z"
+  "generatedAt": "2026-08-28T17:49:28Z",
+  "evalKey": "golden-eval"
 }

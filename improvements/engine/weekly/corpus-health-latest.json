@@ -1,303 +1,134 @@
 {
-	"frame": {
-		"chunks": 10087,
-		"docs": 2061
-	},
-	"s5_junk_urls": {
-		"count": 1,
-		"sample": ["https://developers.stellar.org/meetings/archive"]
-	},
-	"s6_bad_titles": {
-		"count": 102,
-		"byIssue": {
-			"sentence-like (body fragment?)": 69,
-			"html-entities": 22,
-			"overlong (sentence, not a title)": 10,
-			"bare-date": 1
-		},
-		"sample": [
-			{
-				"url": "https://stellar.org/blog/ecosystem/the-worlds-government-debt-is-coming-onchain-its-choosing-stellar",
-				"source": "sdf-blog",
-				"title": "The world's government debt is coming onchain. It's choosing Stellar.",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/america-fifth-largest-bank-us-bancorp-tests-stablecoin",
-				"source": "lumenloop-research",
-				"title": "America&#x27;s fifth-largest bank US Bancorp tests stablecoin on Stellar",
-				"issue": "html-entities"
-			},
-			{
-				"url": "https://lumenloop.com/news/moneygram-gave-60m-people-stablecoin-crypto-couldn-t",
-				"source": "lumenloop-research",
-				"title": "MoneyGram Gave 60M People The Stablecoin Crypto Couldn&#x27;t",
-				"issue": "html-entities"
-			},
-			{
-				"url": "https://lumenloop.com/news/usdc-deposits-withdrawals-now-available-stellar",
-				"source": "lumenloop-research",
-				"title": "USDC deposits and withdrawals now available on Stellar!",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/we-launched-stablecoin-now",
-				"source": "lumenloop-research",
-				"title": "We Launched a Stablecoin. Here&#x27;s Why \u2013 And Why Now.",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/stellar-price-rises-10-usdc-heralds-as-official-chain",
-				"source": "lumenloop-research",
-				"title": "Stellar Price Rises by 10% After USDC Heralds it as &quot;Official Chain&quot;",
-				"issue": "html-entities"
-			},
-			{
-				"url": "https://lumenloop.com/news/new-stellar-anchor-platform-bridges-businesses-blockchain-2",
-				"source": "lumenloop-research",
-				"title": "New Stellar Anchor Platform Bridges Businesses to the Blockchain and to a Global",
-				"issue": "overlong (sentence, not a title)"
-			},
-			{
-				"url": "https://lumenloop.com/news/pyusd-deposits-withdrawals-now-available-stellar",
-				"source": "lumenloop-research",
-				"title": "PYUSD deposits and withdrawals now available on Stellar!",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/drive-stablecoin-innovation-2024",
-				"source": "lumenloop-research",
-				"title": "Who will drive stablecoin innovation in 2024?",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/faraday-vs-point-solutions-comparison-handling-stablecoin",
-				"source": "lumenloop-research",
-				"title": "Faraday vs Point\u2011Solutions: A comparison for handling stablecoin routing, compli",
-				"issue": "overlong (sentence, not a title)"
-			},
-			{
-				"url": "https://lumenloop.com/news/global-consensus-stablecoins-within-reach",
-				"source": "lumenloop-research",
-				"title": "Is Global Consensus on Stablecoins Within Reach?",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/meta-anchors-action-arf-impact-cross-border-finance-kazim",
-				"source": "lumenloop-research",
-				"title": "Meta anchors in action: Arf&#x27;s impact on cross-border finance with kazim ozy",
-				"issue": "html-entities"
-			},
-			{
-				"url": "https://lumenloop.com/news/usdc-coming-stellar",
-				"source": "lumenloop-research",
-				"title": "USDC is Coming to Stellar!",
-				"issue": "sentence-like (body fragment?)"
-			},
-			{
-				"url": "https://lumenloop.com/news/redstone-brings-ondo-usdy-stellar-defi-sep-40-integration",
-				"source": "lumenloop-research",
-				"title": "RedStone Brings Ondo&#x27;s USDY to Stellar DeFi with SEP-40 Integration",
-				"issue": "html-entities"
-			},
-			{
-				"url": "https://lumenloop.com/news/satoshipay-become-first-user-german-bank-euro-stablecoin",
-				"source": "lumenloop-research",
-				"title": "SatoshiPay to Become First User of German Bank&#x27;s Euro Stablecoin",
-				"issue": "html-entities"
-			}
-		]
-	},
-	"s7_coverage": {
-		"dev-docs": {
-			"chunks": 3952,
-			"datedPct": 74,
-			"newestAgeDays": 1,
-			"undated": false,
-			"stalled": false
-		},
-		"sdf-blog": {
-			"chunks": 2214,
-			"datedPct": 100,
-			"newestAgeDays": 2,
-			"undated": false,
-			"stalled": false
-		},
-		"lumenloop-research": {
-			"chunks": 461,
-			"datedPct": 100,
-			"newestAgeDays": 2,
-			"undated": false,
-			"stalled": false
-		},
-		"release": {
-			"chunks": 184,
-			"datedPct": 100,
-			"newestAgeDays": 2,
-			"undated": false,
-			"stalled": false
-		},
-		"cap": {
-			"chunks": 926,
-			"datedPct": 0,
-			"newestAgeDays": null,
-			"undated": true,
-			"stalled": false
-		},
-		"repo-docs": {
-			"chunks": 250,
-			"datedPct": 0,
-			"newestAgeDays": null,
-			"undated": true,
-			"stalled": false
-		},
-		"sdf-org": {
-			"chunks": 80,
-			"datedPct": 29,
-			"newestAgeDays": 153,
-			"undated": false,
-			"stalled": false
-		},
-		"scf-handbook": {
-			"chunks": 120,
-			"datedPct": 0,
-			"newestAgeDays": null,
-			"undated": true,
-			"stalled": false
-		},
-		"sep": {
-			"chunks": 657,
-			"datedPct": 0,
-			"newestAgeDays": null,
-			"undated": true,
-			"stalled": false
-		},
-		"audit": {
-			"chunks": 922,
-			"datedPct": 100,
-			"newestAgeDays": 114,
-			"undated": false,
-			"stalled": false
-		},
-		"security-program": {
-			"chunks": 10,
-			"datedPct": 100,
-			"newestAgeDays": 108,
-			"undated": false,
-			"stalled": false
-		},
-		"incident": {
-			"chunks": 1,
-			"datedPct": 100,
-			"newestAgeDays": 95,
-			"undated": false,
-			"stalled": false
-		},
-		"lumenloop": {
-			"chunks": 246,
-			"datedPct": 62,
-			"newestAgeDays": 70,
-			"undated": false,
-			"stalled": false
-		},
-		"ec-developer-report": {
-			"chunks": 37,
-			"datedPct": 100,
-			"newestAgeDays": 1330,
-			"undated": false,
-			"stalled": false
-		},
-		"paper": {
-			"chunks": 27,
-			"datedPct": 0,
-			"newestAgeDays": null,
-			"undated": true,
-			"stalled": false
-		}
-	},
-	"s7_stalled": [],
-	"s8_mirrors": {
-		"count": 127,
-		"sample": [
-			{
-				"hash": "8dbf979de515",
-				"urls": [
-					"https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/reflector/README.md",
-					"https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/axis-markets/README.md"
-				]
-			},
-			{
-				"hash": "dfe6c5b246eb",
-				"urls": [
-					"https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/reflector/README.md",
-					"https://github.com/Creit-Tech/Stellar-Indexer-SDK/blob/main/src/protocols/blend/README.md"
-				]
-			},
-			{
-				"hash": "204a107f0c9f",
-				"urls": [
-					"https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
-					"https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
-				]
-			},
-			{
-				"hash": "8c714b07acfe",
-				"urls": [
-					"https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
-					"https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
-				]
-			},
-			{
-				"hash": "b1ac13f0df8f",
-				"urls": [
-					"https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
-					"https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
-				]
-			},
-			{
-				"hash": "9425858bfb2c",
-				"urls": [
-					"https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
-					"https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
-				]
-			},
-			{
-				"hash": "e16d74dfa459",
-				"urls": [
-					"https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers",
-					"https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers"
-				]
-			},
-			{
-				"hash": "8da44a4799f8",
-				"urls": [
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0087.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0082.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0080.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0074.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0069.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0068.md",
-					"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0059.md"
-				]
-			},
-			{
-				"hash": "e6d2b910b7a4",
-				"urls": [
-					"https://github.com/stellar/rs-soroban-sdk/releases/tag/v22.0.10",
-					"https://github.com/stellar/rs-soroban-sdk/releases/tag/v23.5.2",
-					"https://github.com/stellar/rs-soroban-sdk/releases/tag/v25.1.1"
-				]
-			},
-			{
-				"hash": "90bf46f7072d",
-				"urls": [
-					"https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep6/integration",
-					"https://developers.stellar.org/docs/platforms/anchor-platform/sep-guide/sep24/integration"
-				]
-			}
-		]
-	},
-	"generatedAt": "2026-08-23T09:34:23Z",
-	"evalKey": "corpus-health"
+  "frame": {
+    "chunks": 10119,
+    "docs": 2067
+  },
+  "s5_junk_urls": {
+    "count": 0,
+    "sample": []
+  },
+  "s6_bad_titles": {
+    "count": 0,
+    "byIssue": {},
+    "sample": []
+  },
+  "s7_coverage": {
+    "release": {
+      "chunks": 193,
+      "datedPct": 100,
+      "newestAgeDays": 2,
+      "undated": false,
+      "stalled": false
+    },
+    "dev-docs": {
+      "chunks": 3959,
+      "datedPct": 74,
+      "newestAgeDays": 3,
+      "undated": false,
+      "stalled": false
+    },
+    "sdf-blog": {
+      "chunks": 2216,
+      "datedPct": 100,
+      "newestAgeDays": 5,
+      "undated": false,
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 936,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
+    "lumenloop-research": {
+      "chunks": 465,
+      "datedPct": 100,
+      "newestAgeDays": 4,
+      "undated": false,
+      "stalled": false
+    },
+    "repo-docs": {
+      "chunks": 250,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
+    "sdf-org": {
+      "chunks": 80,
+      "datedPct": 29,
+      "newestAgeDays": 159,
+      "undated": false,
+      "stalled": false
+    },
+    "scf-handbook": {
+      "chunks": 120,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
+    "sep": {
+      "chunks": 657,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    },
+    "audit": {
+      "chunks": 922,
+      "datedPct": 100,
+      "newestAgeDays": 120,
+      "undated": false,
+      "stalled": false
+    },
+    "security-program": {
+      "chunks": 10,
+      "datedPct": 100,
+      "newestAgeDays": 114,
+      "undated": false,
+      "stalled": false
+    },
+    "incident": {
+      "chunks": 1,
+      "datedPct": 100,
+      "newestAgeDays": 101,
+      "undated": false,
+      "stalled": false
+    },
+    "lumenloop": {
+      "chunks": 246,
+      "datedPct": 62,
+      "newestAgeDays": 76,
+      "undated": false,
+      "stalled": false
+    },
+    "ec-developer-report": {
+      "chunks": 37,
+      "datedPct": 100,
+      "newestAgeDays": 1336,
+      "undated": false,
+      "stalled": false
+    },
+    "paper": {
+      "chunks": 27,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": true,
+      "stalled": false
+    }
+  },
+  "s7_stalled": [],
+  "s8_mirrors": {
+    "count": 0,
+    "sample": [],
+    "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
+    "informational": {
+      "templateSiblings": 8,
+      "boilerplateOverlap": 33
+    }
+  },
+  "generatedAt": "2026-08-28T17:49:28Z",
+  "evalKey": "corpus-health"
 }
