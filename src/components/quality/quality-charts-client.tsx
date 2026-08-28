@@ -349,11 +349,18 @@ export function QualityScatter({
 			>
 				<title>Prominence vs evidence, one dot per directory row</title>
 				{/* work-first region, drawn before the marks */}
+				{/* The region covers the WHOLE facts<=3 band: its top edge sits on
+				     the midpoint between the 3 and 4 gridlines, so jittered dots at
+				     facts=3 land inside the box instead of straddling its border. */}
 				<rect
 					x={px(QUAD.promMin)}
-					y={py(QUAD.factsMax, "") - 6}
+					y={PAD.t + (1 - (QUAD.factsMax + 0.5) / 5) * (H - PAD.t - PAD.b)}
 					width={W - PAD.r - px(QUAD.promMin)}
-					height={H - PAD.b - py(QUAD.factsMax, "") + 6}
+					height={
+						H -
+						PAD.b -
+						(PAD.t + (1 - (QUAD.factsMax + 0.5) / 5) * (H - PAD.t - PAD.b))
+					}
 					fill={ACCENT}
 					fillOpacity="0.05"
 					stroke={ACCENT}
@@ -417,14 +424,16 @@ export function QualityScatter({
 						/>
 					);
 				})}
+				{/* Label lives in the EMPTY lower part of the region, not on the
+				     band where the dots cluster - it was overprinting them. */}
 				<text
-					x={W - PAD.r - 4}
-					y={py(QUAD.factsMax, "") - 12}
+					x={W - PAD.r - 8}
+					y={H - PAD.b - 12}
 					textAnchor="end"
 					className="fill-muted-foreground"
 					style={{ fontSize: 10 }}
 				>
-					prominent + weak evidence: {quadCount} rows, work these first
+					prominent + weak evidence: {quadCount} rows · work these first
 				</text>
 			</svg>
 			<div className="flex justify-between text-[10px] text-muted-foreground mt-1">
@@ -445,6 +454,115 @@ export function QualityScatter({
 					)}
 					<div className="text-muted-foreground mt-0.5">
 						click to open the row
+					</div>
+				</Tip>
+			)}
+		</div>
+	);
+}
+
+// ── Coverage bar ───────────────────────────────────────────────────────────
+
+/** A labeled progress track: the fraction IS the message, the intent line
+ * says what the denominator means, and there is deliberately no
+ * "higher is better" arrow — the intent sentence carries the direction. */
+export function CoverageBar({
+	label,
+	value,
+	of,
+	intent,
+	explain,
+}: {
+	label: string;
+	value: number;
+	of: number;
+	intent: string;
+	explain?: string;
+}) {
+	const pct = of > 0 ? Math.round((value / of) * 100) : 0;
+	return (
+		<div className="flex flex-col gap-1.5" title={explain}>
+			<div className="flex items-baseline justify-between gap-3">
+				<span className="text-xs text-foreground">{label}</span>
+				<span className="text-xs tabular-nums text-foreground">
+					{value.toLocaleString("en-US")}
+					<span className="text-muted-foreground">
+						{" "}
+						/ {of.toLocaleString("en-US")} · {pct}%
+					</span>
+				</span>
+			</div>
+			<div className="h-2 w-full rounded-full bg-[color-mix(in_srgb,currentColor_8%,transparent)] overflow-hidden">
+				<div
+					className="h-full rounded-full transition-[width] duration-300"
+					style={{ width: `${pct}%`, background: ACCENT }}
+				/>
+			</div>
+			<p className="text-[11px] text-muted-foreground leading-relaxed">
+				{intent}
+			</p>
+		</div>
+	);
+}
+
+// ── Mini histogram ─────────────────────────────────────────────────────────
+
+export function MiniHistogram({
+	buckets,
+	height = 120,
+	unit = "repos",
+}: {
+	buckets: Array<{ bucket: string; count: number }>;
+	height?: number;
+	unit?: string;
+}) {
+	const { ref, width } = useMeasuredWidth(420);
+	const [hover, setHover] = useState<number | null>(null);
+	const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
+	const max = Math.max(...buckets.map((b) => b.count), 1);
+	const h = hover !== null ? buckets[hover] : null;
+	return (
+		<div
+			ref={ref}
+			className="relative"
+			onMouseLeave={() => setHover(null)}
+			onMouseMove={(e) => {
+				const box = ref.current?.getBoundingClientRect();
+				if (box) setMouse({ x: e.clientX - box.left, y: e.clientY - box.top });
+			}}
+		>
+			<div className="flex items-end gap-[3px]" style={{ height }}>
+				{buckets.map((b, i) => (
+					<div
+						key={b.bucket}
+						className="flex-1 rounded-t-[3px] transition-opacity duration-100"
+						style={{
+							// 4px floor so an empty bucket is still a visible, hoverable mark
+							height: `${Math.max((b.count / max) * 100, 3)}%`,
+							background: b.count === 0 ? "transparent" : ACCENT,
+							border:
+								b.count === 0
+									? "1px dashed color-mix(in srgb, currentColor 20%, transparent)"
+									: undefined,
+							opacity:
+								hover === null || hover === i
+									? b.count === 0
+										? 0.6
+										: 0.85
+									: 0.3,
+						}}
+						onMouseEnter={() => setHover(i)}
+					/>
+				))}
+			</div>
+			<div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+				<span>{buckets[0]?.bucket}</span>
+				<span>{buckets[buckets.length - 1]?.bucket}</span>
+			</div>
+			{h && mouse && (
+				<Tip x={mouse.x} y={mouse.y} w={width}>
+					<div className="text-foreground tabular-nums">
+						score {h.bucket}: {h.count} {unit}
 					</div>
 				</Tip>
 			)}

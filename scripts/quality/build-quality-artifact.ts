@@ -384,6 +384,40 @@ const out = {
 				},
 			};
 		})(),
+		/** The shape of the CURATED index (the rows a project or builder
+		 * claims), as distributions rather than bare ratios. The tail is kept
+		 * out: mixing ten thousand opportunistically-indexed rows into these
+		 * charts made the curated index look unscanned and dormant when it is
+		 * neither — the same denominator mistake the coverage block fixed. */
+		curatedShape: (() => {
+			const curated = repos.filter((r) => r.source !== "ec-taxonomy");
+			const buckets = Array.from({ length: 10 }, (_, i) => ({
+				bucket: `${i * 10}–${i * 10 + 9}`,
+				count: 0,
+			}));
+			for (const r of curated) {
+				const sc = Math.max(0, Math.min(99, r.repoScore ?? 0));
+				buckets[Math.floor(sc / 10)].count++;
+			}
+			const mix = (key: (r: (typeof repos)[number]) => string | null) => {
+				const m = new Map<string, number>();
+				for (const r of curated) {
+					const k = key(r) ?? "unknown";
+					m.set(k, (m.get(k) ?? 0) + 1);
+				}
+				return [...m.entries()]
+					.map(([label, count]) => ({ label, count }))
+					.sort((a, b) => b.count - a.count);
+			};
+			return {
+				repos: curated.length,
+				scoreHistogram: buckets,
+				/** unknown = no commit date held; not knowing is its own state */
+				activityMix: mix((r) => r.activity),
+				languageMix: mix((r) => r.language).slice(0, 10),
+				languageOther: Math.max(0, mix((r) => r.language).length - 10),
+			};
+		})(),
 		/** retained for existing consumers — whole-census counts with NO
 		 * intent attached; read `coverage` for rates that mean something */
 		withCodeDepth: repos.filter((r) => r.codeDepth != null).length,
