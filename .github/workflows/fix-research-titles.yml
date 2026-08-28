@@ -1,13 +1,21 @@
 name: Fix research titles (manual)
-# Decodes raw HTML entities in research-doc titles against prod
-# (scripts/fix-research-entity-titles.ts — the corpus-health S6 html-entity
-# class). Dry-run by default; set apply=true to write. Safe by construction:
-# only decodes a title, only when the result differs and is non-empty; content
-# is never touched. Inspect the dry-run log BEFORE applying.
+# Repairs the research corpus against prod for the corpus-health sweeps:
+#   - scripts/fix-corpus-titles.ts  — S6 titles (html-entities, sentence-like,
+#     overlong, bare-date, empty) + S5 junk-URL leftover rows. Generalizes the
+#     earlier entity-only pass (scripts/fix-research-entity-titles.ts, kept).
+#   - scripts/fix-corpus-mirrors.ts — S8 mirrored content: deletes ONLY
+#     redirect/dead-proven republication mirrors; template/sibling/ambiguous
+#     classes are enumerated, never touched.
+# Dry-run by default; set apply/apply_mirrors=true to write. Safe by
+# construction: titles only ever change to classifier-clean replacements,
+# junk/mirror deletes are proof-gated, and EVERY write is read back (exit 1 on
+# mismatch); content is never re-embedded. Inspect the dry-run log BEFORE
+# applying.
 on:
   workflow_dispatch:
     inputs:
-      apply: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+      apply: { description: "Write titles + delete junk rows? Leave false for a dry run.", type: boolean, default: false }
+      apply_mirrors: { description: "Delete proven republication mirrors (S8)? Leave false for a dry run.", type: boolean, default: false }
 permissions: { contents: read }
 jobs:
   fix:
@@ -23,4 +31,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/fix-research-entity-titles.ts ${{ inputs.apply && '--apply' || '' }}
+      - name: Titles + junk rows (S5/S6)
+        run: pnpm exec tsx scripts/fix-corpus-titles.ts ${{ inputs.apply && '--execute' || '' }}
+      - name: Mirrors (S8)
+        run: pnpm exec tsx scripts/fix-corpus-mirrors.ts ${{ inputs.apply_mirrors && '--execute' || '' }}
