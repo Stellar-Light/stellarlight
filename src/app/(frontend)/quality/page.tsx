@@ -1,7 +1,14 @@
 import { ArrowUpRight, Check, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import {
+	AreaChart,
+	BarList,
+	SplitBarList,
+	StackedRamp,
+} from "@/components/quality/charts";
+import {
 	evidenceUrl,
+	getEntities,
 	getGuardRows,
 	getNorthStar,
 	getTrends,
@@ -108,92 +115,11 @@ function EvidenceLink({ path }: { path: string }) {
 	);
 }
 
-function Sparkline({ s }: { s: TrendSeries }) {
-	// One series, one ink (dataviz: single hue, recessive chrome, endpoint
-	// emphasized; nulls chart as GAPS, never as zero). Server-rendered SVG —
-	// no client code, no libraries.
-	const W = 220;
-	const H = 40;
-	const pts = s.points;
-	const vals = pts.map((p) => p.value).filter((v): v is number => v != null);
-	const latest = vals.at(-1) ?? null;
-	const first = vals[0] ?? null;
-	const min = Math.min(...vals);
-	const max = Math.max(...vals);
-	const span = max - min || 1;
-	const x = (i: number) =>
-		pts.length === 1 ? W / 2 : (i / (pts.length - 1)) * (W - 8) + 4;
-	const y = (v: number) => H - 6 - ((v - min) / span) * (H - 12);
-	// build segments, breaking at nulls (a gap is a gap)
-	const segs: string[] = [];
-	let seg: string[] = [];
-	pts.forEach((p, i) => {
-		if (p.value == null) {
-			if (seg.length) segs.push(seg.join(" "));
-			seg = [];
-			return;
-		}
-		seg.push(
-			`${seg.length ? "L" : "M"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`,
-		);
-	});
-	if (seg.length) segs.push(seg.join(" "));
-	const lastIdx = pts.map((p) => p.value).lastIndexOf(latest);
-	const delta =
-		latest != null && first != null && vals.length > 1 ? latest - first : null;
-	const improving =
-		delta == null
-			? null
-			: delta === 0
-				? null
-				: delta > 0 === (s.goodWhen === "up");
-	return (
-		<div className="flex flex-col gap-1.5">
-			<div className="flex items-baseline justify-between gap-3">
-				<span className="text-xs text-muted-foreground">{s.title}</span>
-				<span className="text-sm font-semibold text-foreground tabular-nums">
-					{latest ?? "—"}
-					{delta != null && delta !== 0 && (
-						<span className="ml-1.5 text-xs font-normal text-muted-foreground tabular-nums">
-							{delta > 0 ? "+" : ""}
-							{delta} {improving ? "better" : "worse"}
-						</span>
-					)}
-				</span>
-			</div>
-			<svg
-				viewBox={`0 0 ${W} ${H}`}
-				className="w-full h-10 text-foreground"
-				role="img"
-				aria-label={`${s.title}: latest ${latest ?? "not measured"}`}
-			>
-				{segs.map((d) => (
-					<path
-						key={d}
-						d={d}
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="1.5"
-						strokeLinecap="round"
-					/>
-				))}
-				{latest != null && lastIdx >= 0 && (
-					<circle cx={x(lastIdx)} cy={y(latest)} r="2.5" fill="currentColor" />
-				)}
-			</svg>
-			{vals.length === 1 && (
-				<span className="text-[11px] text-muted-foreground">
-					1 observation — the line grows daily
-				</span>
-			)}
-		</div>
-	);
-}
-
 export default function QualityPage() {
 	const northStar = getNorthStar();
 	const guards = getGuardRows();
 	const trends = getTrends();
+	const entities = getEntities();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -267,18 +193,211 @@ export default function QualityPage() {
 				</div>
 			</Card>
 
-			{/* guard grid */}
-			{/* trends — the ratchets and daily counts, as committed history.
-			    A missing day charts as a gap; the numbers may only be written
-			    by the pipeline that measured them. */}
+			{/* ── findings: what we actually found, cleared, and still owe ── */}
 			<Card
-				title="Trends"
-				description="Daily history, appended by the eval pipeline and committed — red days included. Battery probe counts ROTATE with the daily banks, so the pass line wobbles by design; the failure line and the ratchets are the signal. A gap is a day the pipeline did not measure."
+				title="Findings — what the engines caught"
+				description="Every detector writes here. Open means still reproducing; cleared means a later run stopped reproducing it. This is the work queue, not a score."
 				className="mb-6"
 			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
+					<Stat
+						label="open"
+						value={String(entities.findings.open)}
+						sub="still reproducing"
+					/>
+					<Stat
+						label="cleared"
+						value={String(entities.findings.cleared)}
+						sub="stopped reproducing"
+					/>
+					<Stat
+						label="verified closed"
+						value={String(entities.findings.verified)}
+						sub="re-probed after the fix"
+					/>
+				</div>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground">
+							By failure mode — open vs ever-cleared
+						</p>
+						<SplitBarList
+							rows={entities.findings.byFailureMode.slice(0, 8).map((m) => ({
+								label: m.mode,
+								open: m.open,
+								cleared: m.cleared,
+							}))}
+						/>
+					</div>
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground">
+							How long the open ones have been open
+						</p>
+						<BarList
+							rows={entities.findings.openByAge.map((b, i) => ({
+								label: b.bucket,
+								value: b.count,
+							}))}
+							unit="findings"
+						/>
+						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
+							A tall bar on the right is the treadmill this page exists to end:
+							detection outrunning remediation. The closure rule (QUALITY.md)
+							says every finding must terminate in an invariant, an SLO, a
+							probe, or a documented won&apos;t-fix.
+						</p>
+					</div>
+				</div>
+				{entities.findings.recentlyCleared.length > 0 && (
+					<div className="mt-6 pt-5 border-t border-border">
+						<p className="text-xs text-muted-foreground mb-3">
+							Recently cleared
+						</p>
+						<div className="flex flex-col gap-1.5">
+							{entities.findings.recentlyCleared.map((c) => (
+								<div
+									key={`${c.probe}-${c.clearedAt}`}
+									className="flex items-baseline justify-between gap-4 text-xs"
+								>
+									<span className="text-foreground truncate">{c.probe}</span>
+									<span className="text-muted-foreground shrink-0 tabular-nums">
+										{c.failureMode} · {c.clearedAt}
+									</span>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</Card>
+
+			{/* ── per-entity quality: rows and repos, not just totals ── */}
+			<Card
+				title="Row quality — the evidence behind each record"
+				description="Every project row scores on five facts we either hold or don't: a provenance basis, a date, a source URL, a type, and a link. A low score names exactly what is missing."
+				className="mb-6"
+			>
+				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
+					<Stat
+						label="mean row score"
+						value={`${entities.projects.meanScore}%`}
+						sub={`across ${entities.projects.sampled} sampled rows`}
+					/>
+				</div>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground">
+							Status provenance — strongest evidence first
+						</p>
+						<StackedRamp
+							rows={entities.projects.basisMix.map((b) => ({
+								label: b.basis,
+								value: b.count,
+							}))}
+							total={entities.projects.sampled}
+						/>
+						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
+							Most rows rest on{" "}
+							<span className="text-foreground">site-liveness</span> — a page
+							answered. That is the weakest honest basis we serve, and moving
+							rows up this ramp is the standing data job.
+						</p>
+					</div>
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground">
+							What is missing, across sampled rows
+						</p>
+						<BarList
+							rows={entities.projects.missingCounts.map((m) => ({
+								label: m.field,
+								value: m.count,
+							}))}
+							unit="rows missing it"
+						/>
+					</div>
+				</div>
+				<div className="mt-6 pt-5 border-t border-border">
+					<p className="text-xs text-muted-foreground mb-3">
+						Weakest evidence on prominent rows — the curation queue
+					</p>
+					<div className="flex flex-col gap-1.5">
+						{entities.projects.weakest.slice(0, 8).map((p) => (
+							<div
+								key={p.slug}
+								className="flex items-baseline justify-between gap-4 text-xs"
+							>
+								<span className="text-foreground truncate">
+									{p.name}
+									<span className="text-muted-foreground">
+										{" "}
+										· {p.statusBasis ?? "no basis"}
+									</span>
+								</span>
+								<span className="shrink-0 text-muted-foreground tabular-nums">
+									missing {p.missing.join(", ")} · {p.score}%
+								</span>
+							</div>
+						))}
+					</div>
+				</div>
+			</Card>
+
+			{/* ── repo quality ── */}
+			<Card
+				title="Repo quality — code truth"
+				description="Indexed repositories carry their own evidence: a graded score, scan depth, curated knowledge notes, and whether a verified mainnet contract is joined to them."
+				className="mb-6"
+			>
+				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
+					<Stat
+						label="scanned for depth"
+						value={`${entities.repos.withCodeDepth}/${entities.repos.sampled}`}
+						sub="have a code-depth reading"
+					/>
+					<Stat
+						label="with knowledge notes"
+						value={String(entities.repos.withNotes)}
+						sub="dated facts with sources"
+					/>
+					<Stat
+						label="joined to mainnet"
+						value={String(entities.repos.withMainnet)}
+						sub="verified contract on chain"
+					/>
+				</div>
+				<p className="text-xs text-muted-foreground mb-3">
+					Highest-graded sampled repos
+				</p>
+				<div className="flex flex-col gap-1.5">
+					{entities.repos.top.slice(0, 8).map((r) => (
+						<div
+							key={r.fullName}
+							className="flex items-baseline justify-between gap-4 text-xs"
+						>
+							<span className="text-foreground truncate">{r.fullName}</span>
+							<span className="shrink-0 text-muted-foreground tabular-nums">
+								score {r.repoScore} · depth {r.codeDepth ?? "—"}% · {r.notes}{" "}
+								note
+								{r.notes === 1 ? "" : "s"}
+							</span>
+						</div>
+					))}
+				</div>
+			</Card>
+
+			{/* ── trends: real charts, and honest when there is no line yet ── */}
+			<Card
+				title="Trends"
+				description="Daily history appended by the eval pipeline and committed — red days included. Battery probe counts rotate with the daily banks, so the pass line moves by design; the failure line and the ratchets are the signal."
+				className="mb-6"
+			>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
 					{trends.map((t) => (
-						<Sparkline key={t.key} s={t} />
+						<AreaChart
+							key={t.key}
+							label={t.title}
+							goodWhen={t.goodWhen}
+							points={t.points}
+						/>
 					))}
 				</div>
 			</Card>
