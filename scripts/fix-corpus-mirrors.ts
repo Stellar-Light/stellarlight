@@ -30,6 +30,7 @@ import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import {
+	mirrorComponents,
 	classifyMirrorComponent,
 	digitSiblingPaths,
 	mirrorGroups,
@@ -131,25 +132,7 @@ async function main() {
 		`Scanned ${rows.length} chunks — ${groups.length} mirrored hash group(s) (the sweep's S8 count).\n`,
 	);
 
-	// Connected components over URLs sharing any hash.
-	const parent = new Map<string, string>();
-	const find = (x: string): string => {
-		let r = x;
-		while (parent.get(r) !== r) r = parent.get(r) as string;
-		parent.set(x, r);
-		return r;
-	};
-	const union = (a: string, b: string): void => {
-		for (const u of [a, b]) if (!parent.has(u)) parent.set(u, u);
-		parent.set(find(a), find(b));
-	};
-	for (const g of groups)
-		for (let i = 1; i < g.urls.length; i++) union(g.urls[0], g.urls[i]);
-	const components = new Map<string, string[]>();
-	for (const u of parent.keys()) {
-		const r = find(u);
-		components.set(r, [...(components.get(r) ?? []), u]);
-	}
+	const components = mirrorComponents(rows);
 
 	// Per-URL doc shape (all chunks, mirrored or not — whole-doc identity).
 	const byUrl = new Map<string, { source: string; hashes: Set<string> }>();
@@ -164,7 +147,7 @@ async function main() {
 	// Probe only the pairs that could be republications (2-URL, same source,
 	// not digit-siblings) — a handful of requests, not hundreds.
 	const probes = new Map<string, UrlProbe>();
-	for (const urls of components.values()) {
+	for (const urls of components) {
 		if (urls.length !== 2) continue;
 		const [a, b] = urls;
 		if (byUrl.get(a)?.source !== byUrl.get(b)?.source) continue;
@@ -174,7 +157,7 @@ async function main() {
 
 	const tally: Record<string, number> = {};
 	const drops: Array<{ url: string; keep: string; reason: string }> = [];
-	for (const urls of [...components.values()].sort(
+	for (const urls of [...components].sort(
 		(x, y) => y.length - x.length,
 	)) {
 		const groupHashes = groups.filter((g) =>
