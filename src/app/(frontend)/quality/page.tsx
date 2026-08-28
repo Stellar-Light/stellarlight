@@ -6,13 +6,16 @@ import {
 	GapMatrix,
 	Info,
 	Metric,
-	MissFunnel,
 	PhaseProgress,
 	QueueRow,
 	Sankey,
-	SplitBarList,
 	StackedRamp,
 } from "@/components/quality/charts";
+import {
+	QualityScatter,
+	StageBreakdown,
+	StateHeatmap,
+} from "@/components/quality/quality-charts-client";
 import {
 	evidenceUrl,
 	getEntities,
@@ -22,7 +25,6 @@ import {
 	getNorthStar,
 	getProgress,
 	getTrends,
-	type TrendSeries,
 } from "@/lib/quality-artifacts";
 
 /**
@@ -449,7 +451,7 @@ export default function QualityPage() {
 			{/* ── findings: what we actually found, cleared, and still owe ── */}
 			<Card
 				title="Findings: what the engines caught"
-				description="Every detector writes here. Open means still reproducing; cleared means a later run stopped reproducing it. This is the work queue, not a score."
+				description="Every detector writes here. This is the work queue, not a score."
 				className="mb-6"
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
@@ -470,32 +472,23 @@ export default function QualityPage() {
 					/>
 				</div>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mb-5">
-					Open, cleared and verified are disjoint and sum to{" "}
-					{entities.findings.total}. Cleared means a detector stopped
-					reproducing it, which is NOT confirmation the fix works; verified
-					means it was deliberately re-probed after a fix. Stale findings are
-					swept by re-probing each one live, and only a passing probe clears
-					it.
+					The three states are disjoint and sum to {entities.findings.total}.
+					Cleared is NOT confirmation the fix works; only verified means it was
+					deliberately re-probed after a fix.
 				</p>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
-							By failure mode, open vs ever-cleared
+							By failure mode and state
 						</p>
-						<SplitBarList
-							rows={entities.findings.byFailureMode.slice(0, 8).map((m) => ({
-								label: m.mode,
-								open: m.open,
-								cleared: m.cleared,
-							}))}
-						/>
+						<StateHeatmap rows={entities.findings.byFailureMode.slice(0, 9)} />
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
 							How long the open ones have been open
 						</p>
 						<BarList
-							rows={entities.findings.openByAge.map((b, i) => ({
+							rows={entities.findings.openByAge.map((b) => ({
 								label: b.bucket,
 								value: b.count,
 							}))}
@@ -503,11 +496,9 @@ export default function QualityPage() {
 						/>
 						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
 							A tall bar on the right is the treadmill this page exists to end:
-							detection outrunning remediation. An empty right bar right after
-							a stale-findings sweep means old entries were re-probed and
-							cleared, not that they were remediated; the closure rule
-							(QUALITY.md) still owes each one an invariant, an SLO, a probe,
-							or a documented won&apos;t-fix.
+							detection outrunning remediation. An empty right bar just after a
+							stale-findings sweep means old entries were re-probed and cleared,
+							not remediated.
 						</p>
 					</div>
 				</div>
@@ -638,10 +629,10 @@ export default function QualityPage() {
 				</p>
 			</Card>
 
-			{/* ── the miss funnel: WHERE a miss dies, not just how many ── */}
+			{/* ── WHERE a miss dies, not just how many ── */}
 			<Card
-				title="Miss funnel: where a known-item miss actually dies"
-				description="Every open recall finding replayed live and classified at the FIRST stage that fails, so the stages are mutually exclusive. 'We have 200 recall misses' hides four different problems with four different owners."
+				title="Where open recall misses die"
+				description="Each open recall finding replayed live and classified at the FIRST stage that fails - mutually exclusive classes with different owners, not a funnel or a sequence."
 				right={
 					<a
 						href="/api/quality"
@@ -660,12 +651,12 @@ export default function QualityPage() {
 						<span className="text-amber-400">
 							{" "}
 							· {funnel.population.unclassified} more have probe shapes this
-							funnel cannot replay, so its coverage is{" "}
+							replay cannot handle, so its coverage is{" "}
 							{funnel.population.coveragePct}%, not 100%
 						</span>
 					)}
 				</p>
-				<MissFunnel
+				<StageBreakdown
 					stages={funnel.stages}
 					sampled={funnel.population.sampled}
 				/>
@@ -719,12 +710,18 @@ export default function QualityPage() {
 					</div>
 				</div>
 				<div className="mt-6 pt-5 border-t border-border">
+					<p className="text-xs text-muted-foreground mb-3">
+						Every row as one dot. The marked region is the curation queue.
+					</p>
+					<QualityScatter rows={entities.projects.scatter} />
+				</div>
+				<div className="mt-6 pt-5 border-t border-border">
 					<p className="text-xs text-muted-foreground mb-3 inline-flex items-center gap-1.5">
 						Curation queue: rows whose evidence is thinnest, prominent first
 						<Info text="Sorted by evidence score ascending, then by curated prominence, so the most-seen thin rows surface first. Each line names exactly which of the five facts is missing." />
 					</p>
 					<div className="flex flex-col gap-1.5">
-						{entities.projects.weakest.slice(0, 15).map((p) => (
+						{entities.projects.weakest.slice(0, 8).map((p) => (
 							<QueueRow
 								key={p.slug}
 								href={`/project/${p.slug}`}
@@ -944,8 +941,8 @@ export default function QualityPage() {
 			{/* provenance footer */}
 			<footer className="mt-10 text-xs text-muted-foreground leading-relaxed max-w-2xl">
 				<p>
-					How this page works: scheduled runs measure, write their JSON
-					evidence to{" "}
+					How this page works: scheduled runs measure, write their JSON evidence
+					to{" "}
 					<a
 						href={evidenceUrl("improvements")}
 						target="_blank"
@@ -958,9 +955,9 @@ export default function QualityPage() {
 					a number here changes only when a new dated artifact lands. Entity
 					counts are a census of the collections; guard rows are point-in-time
 					measurements that carry their own age and go stale rather than
-					silently reading as current. The consumer-side interlock
-					conventions (spec-as-discovery-index, version handshake, cadence
-					contract) are specified in{" "}
+					silently reading as current. The consumer-side interlock conventions
+					(spec-as-discovery-index, version handshake, cadence contract) are
+					specified in{" "}
 					<a
 						href={evidenceUrl("docs/interlock-spec.md")}
 						target="_blank"

@@ -51,7 +51,11 @@ function Tip({
 	return (
 		<div
 			className="pointer-events-none absolute z-10 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs shadow-md"
-			style={{ left: Math.min(x + 12, w - 210), top: Math.max(y - 44, 0), maxWidth: 230 }}
+			style={{
+				left: Math.min(x + 12, w - 210),
+				top: Math.max(y - 44, 0),
+				maxWidth: 230,
+			}}
 		>
 			{children}
 		</div>
@@ -94,7 +98,11 @@ export function StageBreakdown({
 			}}
 		>
 			{/* one bar, whole population, 2px gaps between segments */}
-			<div className="flex h-8 w-full overflow-hidden rounded-[4px]" role="img" aria-label={stages.map((s) => `${s.stage} ${s.count}`).join(", ")}>
+			<div
+				className="flex h-8 w-full overflow-hidden rounded-[4px]"
+				role="img"
+				aria-label={stages.map((s) => `${s.stage} ${s.count}`).join(", ")}
+			>
 				{nonEmpty.map((s, i) => (
 					<button
 						key={s.stage}
@@ -116,20 +124,30 @@ export function StageBreakdown({
 			</div>
 			{/* one row per stage: what it means, who owns it, real slugs on hover */}
 			<div className="flex flex-col gap-1">
-				{stages.map((s, i) => (
+				{stages.map((s) => (
 					<div
 						key={s.stage}
 						className="flex items-baseline gap-3 rounded px-2 py-1 -mx-2 transition-colors"
 						style={{
 							background:
-								hover === s.stage ? "color-mix(in srgb, currentColor 6%, transparent)" : undefined,
+								hover === s.stage
+									? "color-mix(in srgb, currentColor 6%, transparent)"
+									: undefined,
 						}}
 						onMouseEnter={() => setHover(s.stage)}
 					>
 						<span
 							className="inline-block h-2.5 w-2.5 rounded-[2px] shrink-0 translate-y-px"
 							style={{
-								background: s.count > 0 ? RAMP[Math.min(nonEmpty.findIndex((x) => x.stage === s.stage) + 1, RAMP.length - 1)] : "transparent",
+								background:
+									s.count > 0
+										? RAMP[
+												Math.min(
+													nonEmpty.findIndex((x) => x.stage === s.stage) + 1,
+													RAMP.length - 1,
+												)
+											]
+										: "transparent",
 								border: s.count === 0 ? "1px solid currentColor" : undefined,
 								opacity: s.count === 0 ? 0.25 : 1,
 							}}
@@ -182,7 +200,12 @@ export function StateHeatmap({ rows }: { rows: ModeRow[] }) {
 	const max = Math.max(...rows.flatMap((r) => COLS.map((c) => r[c])), 1);
 	// log-ish steps so 250 cleared does not flatten every other cell to level 0
 	const level = (v: number) =>
-		v === 0 ? -1 : Math.min(Math.floor((Math.log(v + 1) / Math.log(max + 1)) * RAMP.length), RAMP.length - 1);
+		v === 0
+			? -1
+			: Math.min(
+					Math.floor((Math.log(v + 1) / Math.log(max + 1)) * RAMP.length),
+					RAMP.length - 1,
+				);
 	const cell = hover ? rows[hover.r] : null;
 
 	return (
@@ -201,13 +224,19 @@ export function StateHeatmap({ rows }: { rows: ModeRow[] }) {
 			>
 				<span />
 				{COLS.map((c) => (
-					<span key={c} className="text-[10px] text-muted-foreground text-center capitalize">
+					<span
+						key={c}
+						className="text-[10px] text-muted-foreground text-center capitalize"
+					>
 						{c}
 					</span>
 				))}
 				{rows.map((r, ri) => (
 					<Fragment key={r.mode}>
-						<span className="text-[11px] text-muted-foreground truncate pr-2" title={r.mode}>
+						<span
+							className="text-[11px] text-muted-foreground truncate pr-2"
+							title={r.mode}
+						>
 							{r.mode}
 						</span>
 						{COLS.map((c, ci) => {
@@ -220,7 +249,10 @@ export function StateHeatmap({ rows }: { rows: ModeRow[] }) {
 									className="h-7 rounded-[3px] transition-transform duration-100 cursor-default"
 									style={{
 										background: lv < 0 ? "transparent" : RAMP[lv],
-										border: lv < 0 ? "1px solid color-mix(in srgb, currentColor 12%, transparent)" : undefined,
+										border:
+											lv < 0
+												? "1px solid color-mix(in srgb, currentColor 12%, transparent)"
+												: undefined,
 										transform: hovered ? "scale(1.08)" : undefined,
 										opacity: hover && !hovered && hover.r !== ri ? 0.45 : 1,
 									}}
@@ -235,7 +267,11 @@ export function StateHeatmap({ rows }: { rows: ModeRow[] }) {
 			<div className="flex items-center gap-1 mt-3 text-[10px] text-muted-foreground">
 				<span>fewer</span>
 				{RAMP.map((c) => (
-					<span key={c} className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: c }} />
+					<span
+						key={c}
+						className="inline-block h-2.5 w-2.5 rounded-[2px]"
+						style={{ background: c }}
+					/>
 				))}
 				<span>more</span>
 				<span className="ml-3">empty cell = zero</span>
@@ -280,14 +316,16 @@ export function QualityScatter({
 	// deterministic jitter from the slug so the 0-5 bands read as bands, not lines
 	const jitter = (slug: string) => {
 		let h = 0;
-		for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) % 997;
+		for (let i = 0; i < slug.length; i++)
+			h = (h * 31 + slug.charCodeAt(i)) % 997;
 		return (h / 997 - 0.5) * 0.5;
 	};
 	const py = (f: number, slug: string) =>
 		PAD.t + (1 - (f + jitter(slug)) / 5) * (H - PAD.t - PAD.b);
 	// the region this chart exists to show: prominent rows with weak evidence
 	const QUAD = { promMin: 60, factsMax: 3 };
-	const inQuad = (r: ScatterRow) => r.prominence >= QUAD.promMin && r.factsPresent <= QUAD.factsMax;
+	const inQuad = (r: ScatterRow) =>
+		r.prominence >= QUAD.promMin && r.factsPresent <= QUAD.factsMax;
 	const quadCount = rows.filter(inQuad).length;
 	const h = hover !== null ? rows[hover] : null;
 
@@ -301,7 +339,14 @@ export function QualityScatter({
 				if (box) setMouse({ x: e.clientX - box.left, y: e.clientY - box.top });
 			}}
 		>
-			<svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block" role="img" aria-label={`Prominence versus evidence for ${rows.length} rows; ${quadCount} prominent rows have 3 or fewer of 5 evidence facts`}>
+			<svg
+				viewBox={`0 0 ${W} ${H}`}
+				width={W}
+				height={H}
+				className="block"
+				role="img"
+				aria-label={`Prominence versus evidence for ${rows.length} rows; ${quadCount} prominent rows have 3 or fewer of 5 evidence facts`}
+			>
 				<title>Prominence vs evidence, one dot per directory row</title>
 				{/* work-first region, drawn before the marks */}
 				<rect
@@ -318,14 +363,35 @@ export function QualityScatter({
 				{/* y grid: one line per facts count */}
 				{[0, 1, 2, 3, 4, 5].map((f) => (
 					<g key={f}>
-						<line x1={PAD.l} x2={W - PAD.r} y1={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)} y2={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)} stroke="currentColor" strokeOpacity="0.07" />
-						<text x={PAD.l - 8} y={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)} textAnchor="end" dominantBaseline="middle" className="fill-muted-foreground" style={{ fontSize: 9 }}>
+						<line
+							x1={PAD.l}
+							x2={W - PAD.r}
+							y1={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)}
+							y2={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)}
+							stroke="currentColor"
+							strokeOpacity="0.07"
+						/>
+						<text
+							x={PAD.l - 8}
+							y={PAD.t + (1 - f / 5) * (H - PAD.t - PAD.b)}
+							textAnchor="end"
+							dominantBaseline="middle"
+							className="fill-muted-foreground"
+							style={{ fontSize: 9 }}
+						>
 							{f}/5
 						</text>
 					</g>
 				))}
 				{[0, 25, 50, 75, 100].map((p) => (
-					<text key={p} x={px(p)} y={H - 8} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 9 }}>
+					<text
+						key={p}
+						x={px(p)}
+						y={H - 8}
+						textAnchor="middle"
+						className="fill-muted-foreground"
+						style={{ fontSize: 9 }}
+					>
 						{p}
 					</text>
 				))}
@@ -333,7 +399,7 @@ export function QualityScatter({
 					const active = hover === i;
 					const urgent = inQuad(r);
 					return (
-						// biome-ignore lint/a11y/useKeyWithClickEvents: hover-first canvas; the queue list below is the keyboard path
+						// biome-ignore lint/a11y/noStaticElementInteractions: hover-first canvas; the queue list below is the keyboard path
 						<circle
 							key={r.slug}
 							cx={px(r.prominence)}
@@ -351,7 +417,13 @@ export function QualityScatter({
 						/>
 					);
 				})}
-				<text x={W - PAD.r - 4} y={py(QUAD.factsMax, "") - 12} textAnchor="end" className="fill-muted-foreground" style={{ fontSize: 10 }}>
+				<text
+					x={W - PAD.r - 4}
+					y={py(QUAD.factsMax, "") - 12}
+					textAnchor="end"
+					className="fill-muted-foreground"
+					style={{ fontSize: 10 }}
+				>
 					prominent + weak evidence: {quadCount} rows, work these first
 				</text>
 			</svg>
@@ -367,12 +439,15 @@ export function QualityScatter({
 						{h.status ? ` · ${h.status}` : ""}
 					</div>
 					{h.missing.length > 0 && (
-						<div className="text-muted-foreground">missing {h.missing.join(", ")}</div>
+						<div className="text-muted-foreground">
+							missing {h.missing.join(", ")}
+						</div>
 					)}
-					<div className="text-muted-foreground mt-0.5">click to open the row</div>
+					<div className="text-muted-foreground mt-0.5">
+						click to open the row
+					</div>
 				</Tip>
 			)}
 		</div>
 	);
 }
-
