@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-28",
 		surfaces: ["api"],
+		version: "spec@1.9.1",
+		type: "fixed",
+		summary:
+			"getQualityReport repoQuality.coverage: rates against the population each metric targets; mainnet join read the wrong field (2 -> 76).",
+		detail:
+			"The census denominators divided every repo metric by all 12,938 rows including the ~10k ec-taxonomy tail that is scanned opportunistically by design, making the rates meaningless; repoQuality.coverage now reports curatedIndex (project-link + builder-owned), tail (no target attached), knowledgeNotes against the actual curation pool (curated rows with repoScore >= 60), and mainnetJoin against deployable-contract rows only. Also fixed: the mainnet join was read via the search API's serialized field name (codeInUse.contracts) against raw collection rows, undercounting 76 joined repos as 2. Whole-census withCodeDepth/withNotes/withMainnet remain for continuity.",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api"],
 		version: "spec@1.9.0",
 		type: "changed",
 		summary:
