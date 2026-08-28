@@ -27,6 +27,7 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
 // Weekly evidence — fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
+import qualityHistory from "../../improvements/quality/history.json";
 import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
@@ -394,4 +395,48 @@ export function getGuardRows(): GuardRow[] {
 	}
 
 	return rows;
+}
+
+export interface TrendPoint {
+	date: string;
+	value: number | null;
+}
+export interface TrendSeries {
+	key: string;
+	title: string;
+	/** which direction is improvement — labels the delta honestly */
+	goodWhen: "up" | "down";
+	unit?: string;
+	points: TrendPoint[];
+}
+
+/** The committed daily history behind /quality's Trends section. Ratchets
+ * and counts only — every point was measured by the day's pipeline run (a
+ * null is "not measured that day" and charts as a gap, never as zero). */
+export function getTrends(): TrendSeries[] {
+	const h = qualityHistory as Array<Record<string, number | string | null>>;
+	const series = (
+		key: string,
+		title: string,
+		goodWhen: "up" | "down",
+		unit?: string,
+	): TrendSeries => ({
+		key,
+		title,
+		goodWhen,
+		unit,
+		points: h.map((r) => ({
+			date: String(r.date),
+			value: typeof r[key] === "number" ? (r[key] as number) : null,
+		})),
+	});
+	return [
+		series("batteryPass", "Truth battery — probes passing", "up"),
+		series("batteryFail", "Truth battery — failures", "down"),
+		series("parityPass", "Golden parity — pass both paths", "up"),
+		series("openMaps", "Contract open maps (ratchet)", "down"),
+		series("honestyDebt", "Unlabelled q-ops (ratchet)", "down"),
+		series("liveNoSource", "Live rows without a source", "down"),
+		series("humanVerified", "Human-verified statuses", "up"),
+	];
 }

@@ -28,7 +28,7 @@ on:
         type: boolean
         default: true
 
-permissions: { contents: read }
+permissions: { contents: write }
 
 jobs:
   parity:
@@ -69,4 +69,26 @@ jobs:
         if: always()
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/eval/raven-truth-battery.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/eval/raven-truth-battery.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }} | tee /tmp/battery.out
+
+      # Record today's snapshot into the committed trend history — ALWAYS,
+      # red days included: a trend that only records green days is a lie.
+      # Bot data commits do not trigger deploys (the site shows the new point
+      # on the next deploy) and the append is idempotent per date.
+      - name: Record quality snapshot (trend history)
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          BP=$(grep -oE '[0-9]+ pass' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
+          BF=$(grep -oE '[0-9]+ fail' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
+          pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
+            ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF}
+          git config user.name "stellarlight-quality-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/quality/history.json
+          git diff --cached --quiet && exit 0
+          git commit -m "data(quality): daily trend snapshot [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
