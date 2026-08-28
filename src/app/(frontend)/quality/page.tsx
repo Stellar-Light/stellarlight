@@ -15,6 +15,7 @@ import {
 	ComposedTrend,
 	CoverageBar,
 	GuardStateStrip,
+	LibraryCalendar,
 	MiniHistogram,
 	QualityScatter,
 	StageBreakdown,
@@ -902,6 +903,30 @@ export default function QualityPage() {
 				}
 				className="mb-6"
 			>
+				{/* The record as a contribution calendar: a living practice writes
+				     every week; a one-time audit shows one dark stripe. Dates come
+				     from the files themselves. */}
+				<div className="mb-6">
+					<LibraryCalendar
+						entries={[
+							...progress.library.lessons.map((l) => ({
+								date: l.date,
+								label: l.title.replace(/^Lessons?\s*[--]\s*/i, ""),
+								kind: "lesson" as const,
+							})),
+							...progress.library.audits.map((a) => ({
+								date: (a.name.match(/\d{4}-\d{2}-\d{2}/) ?? [""])[0],
+								label: a.name,
+								kind: "audit" as const,
+							})),
+							...progress.library.receipts.map((r) => ({
+								date: r.fetchedAt ?? "",
+								label: r.slug,
+								kind: "receipt" as const,
+							})),
+						].filter((e) => e.date)}
+					/>
+				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
