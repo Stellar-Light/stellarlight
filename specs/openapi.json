@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.2",
+		"version": "1.9.3",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nNone enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -2215,7 +2215,52 @@
 										},
 										"meta": {
 											"type": "object",
-											"additionalProperties": true
+											"properties": {
+												"counts": {
+													"type": "object",
+													"properties": {
+														"returned": {
+															"type": "integer"
+														},
+														"total": {
+															"type": "integer"
+														}
+													}
+												},
+												"returned": {
+													"type": "integer",
+													"deprecated": true,
+													"description": "Deprecated flat copy — read meta.counts.returned."
+												},
+												"total": {
+													"type": "integer",
+													"deprecated": true,
+													"description": "Deprecated flat copy — read meta.counts.total."
+												},
+												"latest": {
+													"type": "string",
+													"format": "date",
+													"nullable": true,
+													"description": "Date of the newest entry."
+												},
+												"filters": {
+													"type": "object",
+													"properties": {
+														"since": {
+															"type": "string",
+															"format": "date",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer",
+															"nullable": true
+														}
+													}
+												},
+												"note": {
+													"type": "string"
+												}
+											}
 										},
 										"entries": {
 											"type": "array",
@@ -2815,7 +2860,21 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"additionalProperties": true
+														"properties": {
+															"cap": {
+																"type": "integer"
+															},
+															"title": {
+																"type": "string"
+															},
+															"status": {
+																"type": "string",
+																"nullable": true
+															},
+															"url": {
+																"type": "string"
+															}
+														}
 													}
 												},
 												"stellarDeps": {
@@ -3158,8 +3217,18 @@
 												},
 												"counts": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "How many of the requested slugs resolved."
+													"description": "How many of the requested slugs resolved.",
+													"properties": {
+														"requested": {
+															"type": "integer"
+														},
+														"returned": {
+															"type": "integer"
+														},
+														"notFound": {
+															"type": "integer"
+														}
+													}
 												}
 											}
 										},
@@ -3347,13 +3416,39 @@
 												},
 												"filters": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "The filters as applied — an echo, so a caller can see what was honoured."
+													"description": "The filters as applied — an echo, so a caller can see what was honoured.",
+													"properties": {
+														"q": {
+															"type": "string",
+															"nullable": true
+														},
+														"winnersOnly": {
+															"type": "boolean"
+														},
+														"track": {
+															"type": "string",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer"
+														}
+													}
 												},
 												"counts": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "returned vs total — how much the filters narrowed."
+													"description": "returned vs total — how much the filters narrowed.",
+													"properties": {
+														"indexedBuilds": {
+															"type": "integer",
+															"description": "Total builds in the index."
+														},
+														"matched": {
+															"type": "integer"
+														},
+														"returned": {
+															"type": "integer"
+														}
+													}
 												},
 												"note": {
 													"type": "string"
@@ -4059,7 +4154,20 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"additionalProperties": true
+														"properties": {
+															"title": {
+																"type": "string"
+															},
+															"url": {
+																"type": "string",
+																"nullable": true
+															},
+															"projectSlug": {
+																"type": "string",
+																"nullable": true,
+																"description": "Slug in the projects directory, when the case study's project is listed there."
+															}
+														}
 													}
 												},
 												"verified": {
@@ -4203,8 +4311,54 @@
 												"properties": {
 													"partner": {
 														"type": "object",
-														"additionalProperties": true,
-														"description": "The matched partner row."
+														"description": "The matched partner row.",
+														"properties": {
+															"slug": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"partnerType": {
+																"type": "string"
+															},
+															"tagline": {
+																"type": "string",
+																"nullable": true
+															},
+															"websiteUrl": {
+																"type": "string",
+																"nullable": true
+															},
+															"acceptingClients": {
+																"type": "boolean",
+																"nullable": true
+															},
+															"sectors": {
+																"type": "array",
+																"items": {
+																	"type": "string"
+																}
+															},
+															"regions": {
+																"type": "array",
+																"items": {
+																	"type": "string"
+																}
+															},
+															"freshness": {
+																"type": "object",
+																"properties": {
+																	"status": {
+																		"type": "string"
+																	}
+																}
+															},
+															"url": {
+																"type": "string",
+																"description": "Public profile page."
+															}
+														}
 													},
 													"score": {
 														"type": "number",
@@ -4341,8 +4495,95 @@
 											"description": "Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
 											"items": {
 												"type": "object",
-												"additionalProperties": true,
-												"description": "A public partner record."
+												"description": "A public partner record.",
+												"properties": {
+													"slug": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"partnerType": {
+														"type": "string"
+													},
+													"tagline": {
+														"type": "string",
+														"nullable": true
+													},
+													"description": {
+														"type": "string",
+														"nullable": true,
+														"description": "Truncated (≤180 chars) — card fallback when tagline is empty."
+													},
+													"websiteUrl": {
+														"type": "string",
+														"nullable": true
+													},
+													"acceptingClients": {
+														"type": "boolean",
+														"nullable": true
+													},
+													"sectors": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														}
+													},
+													"regions": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														}
+													},
+													"assets": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES."
+													},
+													"seps": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "SEP standards implemented (sep-6, sep-24, sep-31)."
+													},
+													"tomlSourceUrl": {
+														"type": "string",
+														"nullable": true
+													},
+													"tomlFetchedAt": {
+														"type": "string",
+														"nullable": true
+													},
+													"rampTypes": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server."
+													},
+													"country": {
+														"type": "string",
+														"nullable": true
+													},
+													"contactable": {
+														"type": "boolean",
+														"description": "True when the partner has a direct contact path (email or channel)."
+													},
+													"logoUrl": {
+														"type": "string",
+														"nullable": true
+													},
+													"freshness": {
+														"type": "string"
+													},
+													"url": {
+														"type": "string",
+														"description": "Public profile page."
+													}
+												}
 											}
 										},
 										"intent": {
@@ -4454,11 +4695,88 @@
 											"nullable": true,
 											"description": "mode=chat: the next assistant turn."
 										},
-										"profile": {
+										"fields": {
 											"type": "object",
-											"additionalProperties": true,
 											"nullable": true,
-											"description": "mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific."
+											"description": "mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific.",
+											"properties": {
+												"partnerType": {
+													"type": "string",
+													"nullable": true,
+													"description": "One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | other. Null when genuinely unclear from the transcript."
+												},
+												"tagline": {
+													"type": "string",
+													"nullable": true
+												},
+												"description": {
+													"type": "string",
+													"nullable": true
+												},
+												"services": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													},
+													"description": "Granular lowercase hyphenated service tags (e.g. 'usdc-off-ramp-mexico')."
+												},
+												"sectors": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												"regions": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												"acceptingClients": {
+													"type": "boolean",
+													"nullable": true
+												},
+												"typicalEngagement": {
+													"type": "string",
+													"nullable": true
+												},
+												"leadTime": {
+													"type": "string",
+													"nullable": true
+												},
+												"pricingModel": {
+													"type": "string",
+													"nullable": true
+												},
+												"pricingNotes": {
+													"type": "string",
+													"nullable": true
+												},
+												"websiteUrl": {
+													"type": "string",
+													"nullable": true
+												},
+												"docsUrl": {
+													"type": "string",
+													"nullable": true
+												},
+												"githubOrg": {
+													"type": "string",
+													"nullable": true
+												},
+												"contactEmail": {
+													"type": "string",
+													"nullable": true
+												},
+												"contactChannel": {
+													"type": "string",
+													"nullable": true
+												},
+												"responseSla": {
+													"type": "string",
+													"nullable": true
+												}
+											}
 										}
 									}
 								}
@@ -4524,8 +4842,120 @@
 									},
 									"fields": {
 										"type": "object",
-										"additionalProperties": true,
-										"description": "Profile fields (typically the /api/partners/onboard extract output)"
+										"description": "Profile fields (typically the /api/partners/onboard extract output). Unknown keys are ignored; enum-checked keys (partnerType, sectors, regions, pricingModel) fall back / are dropped rather than erroring.",
+										"properties": {
+											"partnerType": {
+												"type": "string",
+												"enum": [
+													"anchor",
+													"on-off-ramp",
+													"infrastructure",
+													"tooling",
+													"protocol",
+													"wallet",
+													"audit-firm",
+													"legal",
+													"agency",
+													"other"
+												]
+											},
+											"tagline": {
+												"type": "string",
+												"maxLength": 140
+											},
+											"description": {
+												"type": "string",
+												"maxLength": 4000
+											},
+											"services": {
+												"type": "array",
+												"items": {
+													"type": "string"
+												},
+												"description": "Lowercase hyphenated service tags the matchmaker matches on."
+											},
+											"sectors": {
+												"type": "array",
+												"items": {
+													"type": "string",
+													"enum": [
+														"defi",
+														"payments",
+														"rwa",
+														"stablecoins",
+														"identity",
+														"data",
+														"ai",
+														"gaming",
+														"other"
+													]
+												}
+											},
+											"regions": {
+												"type": "array",
+												"items": {
+													"type": "string",
+													"enum": [
+														"global",
+														"north-america",
+														"latam",
+														"europe",
+														"africa",
+														"mena",
+														"asia",
+														"oceania"
+													]
+												}
+											},
+											"acceptingClients": {
+												"type": "boolean"
+											},
+											"typicalEngagement": {
+												"type": "string",
+												"maxLength": 300
+											},
+											"leadTime": {
+												"type": "string",
+												"maxLength": 300
+											},
+											"pricingModel": {
+												"type": "string",
+												"enum": [
+													"free",
+													"freemium",
+													"subscription",
+													"usage-based",
+													"fixed",
+													"hourly",
+													"rev-share",
+													"custom"
+												]
+											},
+											"pricingNotes": {
+												"type": "string",
+												"maxLength": 1000
+											},
+											"websiteUrl": {
+												"type": "string",
+												"maxLength": 300
+											},
+											"docsUrl": {
+												"type": "string",
+												"maxLength": 300
+											},
+											"githubOrg": {
+												"type": "string",
+												"maxLength": 100
+											},
+											"contactChannel": {
+												"type": "string",
+												"maxLength": 200
+											},
+											"responseSla": {
+												"type": "string",
+												"maxLength": 200
+											}
+										}
 									}
 								}
 							}
@@ -4706,8 +5136,31 @@
 												},
 												"filters": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Echo of the filter values this response was computed under (null = not applied)."
+													"description": "Echo of the filter values this response was computed under (null = not applied).",
+													"properties": {
+														"q": {
+															"type": "string",
+															"nullable": true
+														},
+														"category": {
+															"type": "string",
+															"nullable": true
+														},
+														"quarter": {
+															"type": "string",
+															"nullable": true
+														},
+														"status": {
+															"type": "string",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer"
+														},
+														"offset": {
+															"type": "integer"
+														}
+													}
 												},
 												"counts": {
 													"type": "object",
@@ -4889,7 +5342,18 @@
 									"properties": {
 										"meta": {
 											"type": "object",
-											"additionalProperties": true
+											"properties": {
+												"source": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"note": {
+													"type": "string"
+												}
+											}
 										},
 										"report": {
 											"type": "object",
@@ -4909,13 +5373,27 @@
 															"enum": [
 																"live",
 																"unavailable"
-															]
+															],
+															"description": "unavailable = the live round check failed; open is [] but says nothing about actual round state."
 														},
 														"open": {
 															"type": "array",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"round": {
+																		"type": "integer"
+																	},
+																	"phase": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"submissionDeadline": {
+																		"type": "string",
+																		"nullable": true,
+																		"description": "ISO date (YYYY-MM-DD) when known."
+																	}
+																}
 															}
 														},
 														"note": {
@@ -4927,16 +5405,187 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"additionalProperties": true
+														"properties": {
+															"slug": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string",
+																"nullable": true
+															},
+															"totalAwardedUSD": {
+																"type": "number",
+																"nullable": true
+															},
+															"lastAwardedRound": {
+																"type": "integer",
+																"nullable": true
+															}
+														}
 													}
 												},
 												"fundingBar": {
 													"type": "object",
-													"additionalProperties": true
+													"properties": {
+														"fundedProjects": {
+															"type": "integer"
+														},
+														"totalAwardedUSD": {
+															"type": "number"
+														},
+														"basis": {
+															"type": "string"
+														}
+													}
 												},
 												"vet": {
 													"type": "object",
-													"additionalProperties": true
+													"description": "Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row.",
+													"properties": {
+														"competitors": {
+															"type": "object",
+															"properties": {
+																"matchMode": {
+																	"type": "string",
+																	"enum": [
+																		"vertical",
+																		"scored",
+																		"weak"
+																	],
+																	"description": "How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists)."
+																},
+																"matchModeLabel": {
+																	"type": "string"
+																},
+																"repos": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"fullName": {
+																				"type": "string"
+																			},
+																			"tier": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"activityState": {
+																				"type": "string"
+																			},
+																			"stars": {
+																				"type": "integer",
+																				"nullable": true
+																			},
+																			"codeDomains": {
+																				"type": "array",
+																				"items": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	}
+																},
+																"projects": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"slug": {
+																				"type": "string"
+																			},
+																			"name": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"status": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"types": {
+																				"type": "array",
+																				"items": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														},
+														"maturity": {
+															"type": "object",
+															"properties": {
+																"auditedProjects": {
+																	"type": "integer"
+																},
+																"liveOnMainnetRepos": {
+																	"type": "integer"
+																},
+																"basis": {
+																	"type": "string"
+																}
+															}
+														},
+														"priorArt": {
+															"type": "object",
+															"properties": {
+																"repos": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"fullName": {
+																				"type": "string"
+																			},
+																			"hackathonWinner": {
+																				"type": "boolean"
+																			},
+																			"activityState": {
+																				"type": "string"
+																			},
+																			"lastCommitAt": {
+																				"type": "string",
+																				"format": "date-time",
+																				"nullable": true
+																			}
+																		}
+																	}
+																},
+																"note": {
+																	"type": "string"
+																}
+															}
+														},
+														"gap": {
+															"type": "object",
+															"nullable": true,
+															"description": "SUPPLY-side coverage of the idea's vertical — a gap is not demand. Null when no vertical mapped.",
+															"properties": {
+																"type": {
+																	"type": "string"
+																},
+																"total": {
+																	"type": "integer"
+																},
+																"live": {
+																	"type": "integer"
+																},
+																"inProgress": {
+																	"type": "integer",
+																	"description": "Active-but-not-yet-Live (Development / Pre-Release)."
+																},
+																"scfFunded": {
+																	"type": "integer"
+																},
+																"hackathonWinners": {
+																	"type": "integer"
+																},
+																"basis": {
+																	"type": "string"
+																}
+															}
+														}
+													}
 												},
 												"angles": {
 													"type": "array",
@@ -5016,7 +5665,18 @@
 									"properties": {
 										"meta": {
 											"type": "object",
-											"additionalProperties": true
+											"properties": {
+												"source": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"note": {
+													"type": "string"
+												}
+											}
 										},
 										"report": {
 											"type": "object",
@@ -5031,8 +5691,152 @@
 												},
 												"vet": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Same computation as /api/vet-idea: competitors, maturity, priorArt, gap."
+													"description": "Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row.",
+													"properties": {
+														"competitors": {
+															"type": "object",
+															"properties": {
+																"matchMode": {
+																	"type": "string",
+																	"enum": [
+																		"vertical",
+																		"scored",
+																		"weak"
+																	],
+																	"description": "How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists)."
+																},
+																"matchModeLabel": {
+																	"type": "string"
+																},
+																"repos": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"fullName": {
+																				"type": "string"
+																			},
+																			"tier": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"activityState": {
+																				"type": "string"
+																			},
+																			"stars": {
+																				"type": "integer",
+																				"nullable": true
+																			},
+																			"codeDomains": {
+																				"type": "array",
+																				"items": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	}
+																},
+																"projects": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"slug": {
+																				"type": "string"
+																			},
+																			"name": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"status": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"types": {
+																				"type": "array",
+																				"items": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														},
+														"maturity": {
+															"type": "object",
+															"properties": {
+																"auditedProjects": {
+																	"type": "integer"
+																},
+																"liveOnMainnetRepos": {
+																	"type": "integer"
+																},
+																"basis": {
+																	"type": "string"
+																}
+															}
+														},
+														"priorArt": {
+															"type": "object",
+															"properties": {
+																"repos": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"fullName": {
+																				"type": "string"
+																			},
+																			"hackathonWinner": {
+																				"type": "boolean"
+																			},
+																			"activityState": {
+																				"type": "string"
+																			},
+																			"lastCommitAt": {
+																				"type": "string",
+																				"format": "date-time",
+																				"nullable": true
+																			}
+																		}
+																	}
+																},
+																"note": {
+																	"type": "string"
+																}
+															}
+														},
+														"gap": {
+															"type": "object",
+															"nullable": true,
+															"description": "SUPPLY-side coverage of the idea's vertical — a gap is not demand. Null when no vertical mapped.",
+															"properties": {
+																"type": {
+																	"type": "string"
+																},
+																"total": {
+																	"type": "integer"
+																},
+																"live": {
+																	"type": "integer"
+																},
+																"inProgress": {
+																	"type": "integer",
+																	"description": "Active-but-not-yet-Live (Development / Pre-Release)."
+																},
+																"scfFunded": {
+																	"type": "integer"
+																},
+																"hackathonWinners": {
+																	"type": "integer"
+																},
+																"basis": {
+																	"type": "string"
+																}
+															}
+														}
+													}
 												},
 												"builds": {
 													"type": "array",
@@ -5073,7 +5877,185 @@
 													"description": "Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
 													"items": {
 														"type": "object",
-														"additionalProperties": true
+														"properties": {
+															"repo": {
+																"type": "object",
+																"properties": {
+																	"fullName": {
+																		"type": "string"
+																	},
+																	"url": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"stars": {
+																		"type": "integer",
+																		"nullable": true
+																	},
+																	"lastCommitAt": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"isArchived": {
+																		"type": "boolean"
+																	},
+																	"tier": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"activityState": {
+																		"type": "string"
+																	}
+																}
+															},
+															"project": {
+																"type": "object",
+																"nullable": true,
+																"properties": {
+																	"slug": {
+																		"type": "string"
+																	},
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																}
+															},
+															"codeTruth": {
+																"type": "object",
+																"description": "TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																"properties": {
+																	"scanState": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"scannedAt": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"stellarProof": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"codeDepth": {
+																		"type": "number",
+																		"nullable": true
+																	},
+																	"codeDomains": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	},
+																	"sdkCapabilities": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	},
+																	"interfaceSize": {
+																		"type": "integer"
+																	},
+																	"mainnetContractId": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																}
+															},
+															"usage": {
+																"type": "object",
+																"nullable": true,
+																"properties": {
+																	"contracts": {
+																		"type": "integer"
+																	},
+																	"events": {
+																		"type": "integer",
+																		"nullable": true
+																	},
+																	"eventsDelta": {
+																		"type": "integer",
+																		"nullable": true
+																	},
+																	"subinvocations": {
+																		"type": "integer",
+																		"nullable": true
+																	},
+																	"asOf": {
+																		"type": "string",
+																		"format": "date-time"
+																	}
+																}
+															},
+															"audits": {
+																"type": "object",
+																"nullable": true,
+																"properties": {
+																	"count": {
+																		"type": "integer"
+																	},
+																	"latest": {
+																		"type": "object",
+																		"properties": {
+																			"auditor": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"publishedAt": {
+																				"type": "string",
+																				"format": "date-time",
+																				"nullable": true
+																			},
+																			"title": {
+																				"type": "string",
+																				"nullable": true
+																			}
+																		}
+																	}
+																}
+															},
+															"auditDrift": {
+																"type": "object",
+																"nullable": true,
+																"properties": {
+																	"latestAuditAt": {
+																		"type": "string"
+																	},
+																	"lastCommitAt": {
+																		"type": "string"
+																	},
+																	"daysOfDrift": {
+																		"type": "integer"
+																	}
+																}
+															},
+															"succession": {
+																"type": "object",
+																"properties": {
+																	"successorRepo": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"predecessors": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															"signals": {
+																"type": "array",
+																"items": {
+																	"type": "string"
+																},
+																"description": "Closed deterministic fact vocabulary (same set as /api/repos/trust signals) — not a score."
+															},
+															"fullReport": {
+																"type": "string",
+																"description": "Path to the full /api/repos/trust report (incl. the complete contractInterface)."
+															}
+														}
 													}
 												},
 												"liveContracts": {
@@ -5089,9 +6071,75 @@
 														},
 														"contracts": {
 															"type": "array",
+															"description": "Verified-contract rows for the domain — the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt.",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"contractId": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"repo": {
+																		"type": "object",
+																		"properties": {
+																			"fullName": {
+																				"type": "string"
+																			},
+																			"url": {
+																				"type": "string",
+																				"nullable": true
+																			}
+																		}
+																	},
+																	"project": {
+																		"type": "object",
+																		"nullable": true,
+																		"properties": {
+																			"slug": {
+																				"type": "string"
+																			},
+																			"name": {
+																				"type": "string",
+																				"nullable": true
+																			}
+																		}
+																	},
+																	"stellarProof": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"codeDomains": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	},
+																	"interfaceSize": {
+																		"type": "integer"
+																	},
+																	"codeInUse": {
+																		"type": "object",
+																		"nullable": true,
+																		"description": "On-chain usage attributed to the repo's contract(s); null = no attributed activity on record, never 'unused'.",
+																		"properties": {
+																			"contracts": {
+																				"type": "integer"
+																			},
+																			"events": {
+																				"type": "integer",
+																				"nullable": true
+																			},
+																			"eventsDelta": {
+																				"type": "integer",
+																				"nullable": true
+																			},
+																			"asOf": {
+																				"type": "string",
+																				"format": "date-time"
+																			}
+																		}
+																	}
+																}
 															}
 														},
 														"note": {
@@ -5104,19 +6152,76 @@
 													"properties": {
 														"round": {
 															"type": "object",
-															"additionalProperties": true,
-															"description": "Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable')."
+															"properties": {
+																"source": {
+																	"type": "string",
+																	"enum": [
+																		"live",
+																		"unavailable"
+																	],
+																	"description": "unavailable = the live round check failed; open is [] but says nothing about actual round state."
+																},
+																"open": {
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"round": {
+																				"type": "integer"
+																			},
+																			"phase": {
+																				"type": "string",
+																				"nullable": true
+																			},
+																			"submissionDeadline": {
+																				"type": "string",
+																				"nullable": true,
+																				"description": "ISO date (YYYY-MM-DD) when known."
+																			}
+																		}
+																	}
+																},
+																"note": {
+																	"type": "string"
+																}
+															}
 														},
 														"fundedPeers": {
 															"type": "array",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"slug": {
+																		"type": "string"
+																	},
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"totalAwardedUSD": {
+																		"type": "number",
+																		"nullable": true
+																	},
+																	"lastAwardedRound": {
+																		"type": "integer",
+																		"nullable": true
+																	}
+																}
 															}
 														},
 														"fundingBar": {
 															"type": "object",
-															"additionalProperties": true
+															"properties": {
+																"fundedProjects": {
+																	"type": "integer"
+																},
+																"totalAwardedUSD": {
+																	"type": "number"
+																},
+																"basis": {
+																	"type": "string"
+																}
+															}
 														}
 													}
 												},
@@ -5201,7 +6306,18 @@
 									"properties": {
 										"meta": {
 											"type": "object",
-											"additionalProperties": true
+											"properties": {
+												"source": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"note": {
+													"type": "string"
+												}
+											}
 										},
 										"report": {
 											"type": "object",
@@ -5221,14 +6337,53 @@
 															"type": "array",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"fullName": {
+																		"type": "string"
+																	},
+																	"tier": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"activityState": {
+																		"type": "string"
+																	},
+																	"stars": {
+																		"type": "integer",
+																		"nullable": true
+																	},
+																	"codeDomains": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	}
+																}
 															}
 														},
 														"projects": {
 															"type": "array",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"slug": {
+																		"type": "string"
+																	},
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"status": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"types": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	}
+																}
 															}
 														},
 														"matchMode": {
@@ -5266,7 +6421,22 @@
 															"type": "array",
 															"items": {
 																"type": "object",
-																"additionalProperties": true
+																"properties": {
+																	"fullName": {
+																		"type": "string"
+																	},
+																	"hackathonWinner": {
+																		"type": "boolean"
+																	},
+																	"activityState": {
+																		"type": "string"
+																	},
+																	"lastCommitAt": {
+																		"type": "string",
+																		"format": "date-time",
+																		"nullable": true
+																	}
+																}
 															}
 														},
 														"note": {
@@ -5276,14 +6446,44 @@
 												},
 												"gap": {
 													"type": "object",
-													"additionalProperties": true,
 													"nullable": true,
-													"description": "Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps)."
+													"description": "Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps).",
+													"properties": {
+														"type": {
+															"type": "string"
+														},
+														"total": {
+															"type": "integer"
+														},
+														"live": {
+															"type": "integer"
+														},
+														"inProgress": {
+															"type": "integer",
+															"description": "Active-but-not-yet-Live (Development / Pre-Release)."
+														},
+														"scfFunded": {
+															"type": "integer"
+														},
+														"hackathonWinners": {
+															"type": "integer"
+														},
+														"basis": {
+															"type": "string"
+														}
+													}
 												},
 												"funding": {
 													"type": "object",
-													"additionalProperties": true,
-													"nullable": true
+													"nullable": true,
+													"properties": {
+														"scfAwardedProjects": {
+															"type": "integer"
+														},
+														"basis": {
+															"type": "string"
+														}
+													}
 												}
 											}
 										}
@@ -5352,7 +6552,18 @@
 									"properties": {
 										"meta": {
 											"type": "object",
-											"additionalProperties": true
+											"properties": {
+												"source": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"note": {
+													"type": "string"
+												}
+											}
 										},
 										"report": {
 											"type": "object",
@@ -5449,13 +6660,77 @@
 												},
 												"usage": {
 													"type": "object",
-													"additionalProperties": true,
-													"nullable": true
+													"nullable": true,
+													"properties": {
+														"contracts": {
+															"type": "integer"
+														},
+														"events": {
+															"type": "integer",
+															"nullable": true
+														},
+														"eventsDelta": {
+															"type": "integer",
+															"nullable": true
+														},
+														"subinvocations": {
+															"type": "integer",
+															"nullable": true
+														},
+														"asOf": {
+															"type": "string",
+															"format": "date-time"
+														}
+													}
 												},
 												"audits": {
 													"type": "object",
-													"additionalProperties": true,
-													"nullable": true
+													"nullable": true,
+													"description": "Null = no PUBLISHED audit at our registry — never 'unaudited'.",
+													"properties": {
+														"count": {
+															"type": "integer"
+														},
+														"latest": {
+															"type": "object",
+															"properties": {
+																"auditor": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"publishedAt": {
+																	"type": "string",
+																	"format": "date-time",
+																	"nullable": true
+																},
+																"title": {
+																	"type": "string",
+																	"nullable": true
+																}
+															}
+														},
+														"reports": {
+															"type": "array",
+															"items": {
+																"type": "object",
+																"properties": {
+																	"auditor": {
+																		"type": "string",
+																		"nullable": true
+																	},
+																	"publishedAt": {
+																		"type": "string",
+																		"format": "date-time",
+																		"nullable": true
+																	},
+																	"title": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																}
+															}
+														}
+													}
 												},
 												"auditDrift": {
 													"type": "object",
@@ -5608,7 +6883,6 @@
 									"properties": {
 										"meta": {
 											"type": "object",
-											"additionalProperties": true,
 											"properties": {
 												"matchMode": {
 													"type": "string",
@@ -5619,6 +6893,46 @@
 													"description": "How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only)."
 												},
 												"matchModeLabel": {
+													"type": "string"
+												},
+												"source": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"filters": {
+													"type": "object",
+													"properties": {
+														"q": {
+															"type": "string",
+															"nullable": true
+														},
+														"domain": {
+															"type": "string",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer"
+														},
+														"offset": {
+															"type": "integer"
+														}
+													}
+												},
+												"counts": {
+													"type": "object",
+													"properties": {
+														"returned": {
+															"type": "integer"
+														},
+														"total": {
+															"type": "integer"
+														}
+													}
+												},
+												"note": {
 													"type": "string"
 												}
 											}
@@ -5683,15 +6997,44 @@
 													},
 													"codeInUse": {
 														"type": "object",
-														"additionalProperties": true,
 														"nullable": true,
-														"description": "Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier."
+														"description": "On-chain usage attributed to the repo's contract(s); null = no attributed activity on record, never 'unused'.",
+														"properties": {
+															"contracts": {
+																"type": "integer"
+															},
+															"events": {
+																"type": "integer",
+																"nullable": true
+															},
+															"eventsDelta": {
+																"type": "integer",
+																"nullable": true
+															},
+															"asOf": {
+																"type": "string",
+																"format": "date-time"
+															}
+														}
 													},
 													"audits": {
 														"type": "object",
-														"additionalProperties": true,
 														"nullable": true,
-														"description": "Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'."
+														"description": "Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'.",
+														"properties": {
+															"count": {
+																"type": "integer"
+															},
+															"latestAuditor": {
+																"type": "string",
+																"nullable": true
+															},
+															"latestPublishedAt": {
+																"type": "string",
+																"format": "date-time",
+																"nullable": true
+															}
+														}
 													},
 													"successorRepo": {
 														"type": "string",
@@ -6873,28 +8216,312 @@
 										},
 										"categories": {
 											"type": "object",
-											"additionalProperties": true,
-											"description": "Present for dimension=all|categories: project counts by category over the active population (see meta.population)."
+											"description": "Present for dimension=all|categories: project counts by category over the active population (see meta.population).",
+											"properties": {
+												"totalProjects": {
+													"type": "integer"
+												},
+												"scope": {
+													"type": "string"
+												},
+												"distribution": {
+													"type": "array",
+													"description": "Per-category rollup, largest projectCount first.",
+													"items": {
+														"type": "object",
+														"properties": {
+															"category": {
+																"type": "string"
+															},
+															"projectCount": {
+																"type": "integer"
+															},
+															"scfFundedCount": {
+																"type": "integer"
+															},
+															"scfTotalUSD": {
+																"type": "number"
+															},
+															"hackathonWinnerCount": {
+																"type": "integer"
+															}
+														}
+													}
+												}
+											}
 										},
 										"developers": {
 											"type": "object",
-											"additionalProperties": true,
-											"description": "Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt."
+											"description": "Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt.",
+											"properties": {
+												"asOf": {
+													"type": "string",
+													"format": "date",
+													"description": "Electric Capital snapshot date — cite THIS, not generatedAt."
+												},
+												"source": {
+													"type": "string"
+												},
+												"sourceUrl": {
+													"type": "string",
+													"nullable": true
+												},
+												"monthlyActiveDevs": {
+													"type": "object",
+													"properties": {
+														"total": {
+															"type": "integer"
+														},
+														"exclusive": {
+															"type": "integer",
+															"description": "Devs building ONLY on Stellar — the truer measure of committed builders."
+														},
+														"multichain": {
+															"type": "integer"
+														},
+														"allTimePeak": {
+															"type": "integer"
+														},
+														"allTimePeakDay": {
+															"type": "string",
+															"format": "date"
+														},
+														"trend": {
+															"type": "object",
+															"properties": {
+																"vs30dAgo": {
+																	"type": "integer"
+																},
+																"vs90dAgo": {
+																	"type": "integer"
+																},
+																"vs1yAgo": {
+																	"type": "integer"
+																},
+																"momPct": {
+																	"type": "number",
+																	"nullable": true
+																},
+																"yoyPct": {
+																	"type": "number",
+																	"nullable": true
+																}
+															}
+														}
+													}
+												},
+												"commits28d": {
+													"type": "integer",
+													"nullable": true
+												},
+												"tenure": {
+													"type": "object",
+													"nullable": true,
+													"properties": {
+														"fullTime": {
+															"type": "integer"
+														},
+														"partTime": {
+															"type": "integer"
+														},
+														"oneTime": {
+															"type": "integer"
+														}
+													}
+												},
+												"geography": {
+													"type": "object",
+													"nullable": true,
+													"properties": {
+														"located": {
+															"type": "integer"
+														},
+														"unknown": {
+															"type": "integer"
+														},
+														"topCountries": {
+															"type": "array",
+															"items": {
+																"type": "object",
+																"properties": {
+																	"country": {
+																		"type": "string"
+																	},
+																	"devs": {
+																		"type": "integer"
+																	}
+																}
+															}
+														}
+													}
+												},
+												"peerChains": {
+													"type": "array",
+													"description": "Peer-chain MAD for scale context, not a quality ranking.",
+													"items": {
+														"type": "object",
+														"properties": {
+															"chain": {
+																"type": "string"
+															},
+															"monthlyActiveDevs": {
+																"type": "integer"
+															}
+														}
+													}
+												},
+												"basis": {
+													"type": "string"
+												}
+											}
 										},
 										"gaps": {
 											"type": "object",
-											"additionalProperties": true,
-											"description": "Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof."
+											"description": "Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
+											"properties": {
+												"scope": {
+													"type": "string"
+												},
+												"basis": {
+													"type": "string"
+												},
+												"byType": {
+													"type": "array",
+													"description": "Every vertical (incl. absent ones) with its coverage, thinnest first.",
+													"items": {
+														"type": "object",
+														"properties": {
+															"type": {
+																"type": "string"
+															},
+															"total": {
+																"type": "integer"
+															},
+															"live": {
+																"type": "integer"
+															},
+															"inProgress": {
+																"type": "integer",
+																"description": "Active-but-not-yet-Live (Development / Pre-Release)."
+															},
+															"scfFunded": {
+																"type": "integer"
+															},
+															"hackathonWinners": {
+																"type": "integer"
+															}
+														}
+													}
+												},
+												"signals": {
+													"type": "object",
+													"properties": {
+														"unproven": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														},
+														"underbuilt": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														},
+														"absent": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														}
+													}
+												},
+												"thresholds": {
+													"type": "object",
+													"properties": {
+														"underbuiltMax": {
+															"type": "integer"
+														}
+													}
+												}
+											}
 										},
 										"hackathons": {
 											"type": "object",
-											"additionalProperties": true,
-											"description": "Present for dimension=all|hackathons: cross-event rollup (events, submissions, winners) from the live DoraHacks feed."
+											"description": "Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+											"properties": {
+												"totalEvents": {
+													"type": "integer"
+												},
+												"byStatus": {
+													"type": "object",
+													"properties": {
+														"upcoming": {
+															"type": "integer"
+														},
+														"active": {
+															"type": "integer"
+														},
+														"completed": {
+															"type": "integer"
+														}
+													}
+												},
+												"totalPrizePoolUSD": {
+													"type": "number"
+												},
+												"totalRegisteredHackers": {
+													"type": "integer"
+												}
+											}
 										},
 										"tvl": {
 											"type": "object",
-											"additionalProperties": true,
-											"description": "Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'."
+											"description": "Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'.",
+											"properties": {
+												"totalTvlUSD": {
+													"type": "number"
+												},
+												"trackedProjects": {
+													"type": "integer"
+												},
+												"asOf": {
+													"type": "string",
+													"format": "date-time",
+													"nullable": true,
+													"description": "Most recent per-project tvlAsOf refresh — null when nothing is tracked."
+												},
+												"provider": {
+													"type": "string"
+												},
+												"top10": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"slug": {
+																"type": "string",
+																"nullable": true
+															},
+															"name": {
+																"type": "string",
+																"nullable": true
+															},
+															"tvlUSD": {
+																"type": "number"
+															},
+															"tvlAsOf": {
+																"type": "string",
+																"format": "date-time",
+																"nullable": true
+															}
+														}
+													}
+												},
+												"basis": {
+													"type": "string"
+												}
+											}
 										},
 										"funding": {
 											"type": "object",
@@ -6929,13 +8556,32 @@
 													"description": "Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at.",
 													"items": {
 														"type": "object",
-														"additionalProperties": true
+														"properties": {
+															"round": {
+																"type": "string"
+															},
+															"count": {
+																"type": "integer",
+																"description": "Per-round MEMBERSHIP — a project counts in each round it won, so summing counts exceeds scfAwardedProjects."
+															},
+															"totalUSD": {
+																"type": "number"
+															}
+														}
 													}
 												},
 												"postHackathonStatusFunnel": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Outcome funnel for hackathon-origin awarded projects (still-building / live / inactive)."
+													"description": "Outcome funnel for hackathon-linked active projects. Besides `scope`, keys are post-hackathon status names (Built / In Progress / Abandoned / Unknown, plus any other recorded status) mapping to project counts.",
+													"properties": {
+														"scope": {
+															"type": "string",
+															"description": "Which projects the funnel tallies (hackathon-linked only, with the population size)."
+														}
+													},
+													"additionalProperties": {
+														"type": "integer"
+													}
 												},
 												"projectSetHash": {
 													"type": "string"
@@ -7234,13 +8880,43 @@
 												},
 												"filters": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Echo of the applied sort/range/category/type scope (null = not applied)."
+													"description": "Echo of the applied sort/range/category/type scope (null = not applied).",
+													"properties": {
+														"sort": {
+															"type": "string"
+														},
+														"range": {
+															"type": "string"
+														},
+														"category": {
+															"type": "string",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer"
+														},
+														"type": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															},
+															"nullable": true,
+															"description": "The exact project types kept (EITHER-membership); null = no type filter."
+														}
+													}
 												},
 												"counts": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Row counts for this response (returned rows; population size where stated)."
+													"description": "Row counts for this response (returned rows; population size where stated).",
+													"properties": {
+														"returned": {
+															"type": "integer"
+														},
+														"total": {
+															"type": "integer",
+															"description": "Rows matching the filter pre-slice."
+														}
+													}
 												},
 												"docs": {
 													"type": "string",
@@ -7350,18 +9026,107 @@
 												},
 												"body": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "Field-by-field description of the POST body, including the allowed kind values."
+													"description": "Field-by-field description of the POST body — values are human-readable usage notes, except kind, which lists the allowed values.",
+													"properties": {
+														"kind": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															},
+															"description": "The allowed kind values (the POST field takes ONE of them)."
+														},
+														"message": {
+															"type": "string"
+														},
+														"target": {
+															"type": "object",
+															"properties": {
+																"surface": {
+																	"type": "string"
+																},
+																"slug": {
+																	"type": "string"
+																}
+															}
+														},
+														"context": {
+															"type": "object",
+															"properties": {
+																"query": {
+																	"type": "string"
+																},
+																"endpoint": {
+																	"type": "string"
+																},
+																"skillVersion": {
+																	"type": "string"
+																},
+																"agentName": {
+																	"type": "string"
+																}
+															}
+														}
+													}
 												},
 												"example": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "A ready-to-send example body."
+													"description": "A ready-to-send example body.",
+													"properties": {
+														"kind": {
+															"type": "string"
+														},
+														"message": {
+															"type": "string"
+														},
+														"context": {
+															"type": "object",
+															"properties": {
+																"query": {
+																	"type": "string"
+																},
+																"endpoint": {
+																	"type": "string"
+																},
+																"skillVersion": {
+																	"type": "string"
+																},
+																"agentName": {
+																	"type": "string"
+																}
+															}
+														}
+													}
 												},
 												"voteExample": {
 													"type": "object",
-													"additionalProperties": true,
-													"description": "An example of the vote-shaped variant."
+													"description": "An example of the vote-shaped variant.",
+													"properties": {
+														"kind": {
+															"type": "string"
+														},
+														"target": {
+															"type": "object",
+															"properties": {
+																"surface": {
+																	"type": "string"
+																},
+																"slug": {
+																	"type": "string"
+																}
+															}
+														},
+														"context": {
+															"type": "object",
+															"properties": {
+																"query": {
+																	"type": "string"
+																},
+																"agentName": {
+																	"type": "string"
+																}
+															}
+														}
+													}
 												},
 												"rateLimit": {
 													"type": "string",

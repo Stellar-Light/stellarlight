@@ -1,4 +1,4 @@
 {
- "openMaps": 47,
- "note": "explicit additionalProperties:true schemas \u2014 the ratchet: this number may only DECREASE (each one typed properly lowers it). check-schema-opacity.ts enforces."
+ "openMaps": 0,
+ "note": "explicit additionalProperties:true schemas — the ratchet: this number may only DECREASE (each one typed properly lowers it). check-schema-opacity.ts enforces."
 }
