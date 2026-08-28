@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T21:25:40.538Z",
+ "generatedAt": "2026-08-28T22:03:26.271Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -2241,10 +2241,9 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -9501,11 +9500,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 982
+    "count": 975
    },
    {
     "network": "mainnet",
-    "count": 42
+    "count": 49
    },
    {
     "network": "testnet",
@@ -10267,7 +10266,7 @@
    },
    {
     "field": "typed",
-    "count": 74
+    "count": 73
    },
    {
     "field": "linked",
@@ -11474,7 +11473,7 @@
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "74 of 1025 sampled rows untyped",
+   "measurement": "73 of 1025 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11845,28 +11844,22 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 982,
+    "missing": 975,
     "of": 1025,
-    "share": 95.8,
+    "share": 95.1,
     "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
-    "examplePoolSize": 13,
+    "examplePoolSize": 6,
     "exampleCap": 12,
-    "exampleTruncated": true,
+    "exampleTruncated": false,
     "examples": [
-     "ondo",
      "dia",
-     "axelar",
      "wisdomtree",
      "redstone-finance",
      "spiko",
-     "brale",
-     "stellarterm",
      "redswan",
-     "spacewalk",
-     "circle-cctp-cross-chain-transfer-protocol",
-     "glo-dollar"
+     "spacewalk"
     ]
    },
    {
@@ -11953,13 +11946,13 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 74,
+    "missing": 73,
     "of": 1025,
-    "share": 7.2,
+    "share": 7.1,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 74,
+    "examplePoolSize": 73,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [

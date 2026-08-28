@@ -4,14 +4,14 @@
  "context": "sls-079 deployment queue pass",
  "markers": [
   {
-   "step": "operator toml",
    "found": true,
-   "excerpt": "code=\"USDY\" issuer=\"GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6\""
+   "excerpt": "code=\"USDY\" issuer=\"GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6\"",
+   "marker": "operator toml"
   },
   {
-   "step": "horizon asset (declared issuer)",
    "found": true,
-   "excerpt": "amount 461622361.73, num_accounts 2733"
+   "excerpt": "amount 461622361.73, num_accounts 2733",
+   "marker": "horizon asset (declared issuer)"
   }
  ],
  "url": "https://ondo.finance/.well-known/stellar.toml",
