@@ -1,353 +1,303 @@
 "use client";
 
 import { ParentSize } from "@visx/responsive";
-import { scaleLinear, scaleTime } from "@visx/scale";
-import { bisector } from "d3-array";
+import type { Transition } from "motion/react";
 import {
-	Children,
-	isValidElement,
-	type ReactElement,
-	type ReactNode,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
+  Children,
+  type CSSProperties,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { cn } from "@/lib/utils";
-import { ChartProvider, type LineConfig, type Margin } from "./chart-context";
+import type { LineConfig, Margin } from "./chart-context";
+import { ChartLoadingLabel } from "./chart-loading-label";
+import {
+  type ChartPhase,
+  type ChartStatus,
+  DEFAULT_CHART_STATUS,
+  DEFAULT_Y_DOMAIN_TWEEN_MS,
+  resolveRestingChartPhase,
+} from "./chart-phase";
 import { Line, type LineProps } from "./line";
-import { useChartInteraction } from "./use-chart-interaction";
-
-// Check if a component should render after the mouse overlay (markers need to be on top for interaction)
-function isPostOverlayComponent(child: ReactElement): boolean {
-	const childType = child.type as {
-		displayName?: string;
-		name?: string;
-		__isChartMarkers?: boolean;
-	};
-
-	// Check for static marker property (more reliable than displayName)
-	if (childType.__isChartMarkers) {
-		return true;
-	}
-
-	// Fallback to displayName check
-	const componentName =
-		typeof child.type === "function"
-			? childType.displayName || childType.name || ""
-			: "";
-
-	return componentName === "ChartMarkers" || componentName === "MarkerGroup";
-}
+import { TimeSeriesChartInner } from "./time-series-chart-shell";
 
 export interface LineChartProps {
-	/** Data array - each item should have a date field and numeric values */
-	data: Record<string, unknown>[];
-	/** Key in data for the x-axis (date). Default: "date" */
-	xDataKey?: string;
-	/** Chart margins */
-	margin?: Partial<Margin>;
-	/** Animation duration in milliseconds. Default: 1100 */
-	animationDuration?: number;
-	/** Aspect ratio as "width / height". Default: "2 / 1" */
-	aspectRatio?: string;
-	/** Additional class name for the container */
-	className?: string;
-	/** Child components (Line, Grid, ChartTooltip, etc.) */
-	children: ReactNode;
+  /** Data array - each item should have a date field and numeric values */
+  data: Record<string, unknown>[];
+  /** Key in data for the x-axis (date). Default: "date" */
+  xDataKey?: string;
+  /** Chart margins */
+  margin?: Partial<Margin>;
+  /** Animation duration in milliseconds. Default: 1100 */
+  animationDuration?: number;
+  /** CSS easing for clip-reveal. Default: cubic-bezier(0.85, 0, 0.15, 1) */
+  animationEasing?: string;
+  enterTransition?: Transition;
+  revealSignature?: string;
+  /** Aspect ratio as "width / height". Default: "2 / 1". Omit to fill a sized parent. */
+  aspectRatio?: string;
+  /** Additional class name for the container */
+  className?: string;
+  /** Loading vs ready — drives chart phase and loading chrome. Default: `"ready"`. */
+  status?: ChartStatus;
+  /** Centered shimmer label while loading. */
+  loadingLabel?: string;
+  /** Animate y-domain over this duration (ms) on status transitions. Default: 500. */
+  yDomainTweenDuration?: number;
+  /** Animate y-domain when status or target domain changes. Default: true */
+  yDomainTween?: boolean;
+  /** Visible x-domain for brush zoom. */
+  xDomain?: [Date, Date];
+  /** Full dataset length for x-scale padding when `xDomain` is set. */
+  xDomainSlotCount?: number;
+  /** Tween y-domain when brush changes the visible x-range. Default: false */
+  tweenYDomainOnXDomainChange?: boolean;
+  /** Inline container styles (e.g. fixed height for brush strip). */
+  style?: CSSProperties;
+  /** Fires when the internal chart phase changes (e.g. OG capture readiness). */
+  onPhaseChange?: (phase: ChartPhase) => void;
+  /** Child components (Line, Grid, ChartTooltip, etc.) */
+  children: ReactNode;
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
 
-// Extract line configs from children synchronously to avoid render timing issues
+/** Series renderers that carry a dataKey but must not drive the shared y-domain. */
+const LINE_DOMAIN_EXCLUDED_NAMES = new Set([
+  "ProfitLossLine",
+  "LineSeriesTerminalMarker",
+  "Area",
+  "SeriesBar",
+  "Scatter",
+  "Candlestick",
+  "Bar",
+  "PatternArea",
+]);
+
+function getChildComponentName(child: ReactElement) {
+  const childType = child.type as { displayName?: string; name?: string };
+  return typeof child.type === "function"
+    ? childType.displayName || childType.name || ""
+    : "";
+}
+
+function registersLineDomain(
+  child: ReactElement,
+  props: LineProps | undefined
+) {
+  if (!props?.dataKey) {
+    return false;
+  }
+
+  const componentName = getChildComponentName(child);
+  if (componentName === "Line" || child.type === Line) {
+    return true;
+  }
+  if (LINE_DOMAIN_EXCLUDED_NAMES.has(componentName)) {
+    return false;
+  }
+  // MDX / duplicate bundle instances may not share the same `Line` reference.
+  return typeof props.dataKey === "string" && props.dataKey.length > 0;
+}
+
 function extractLineConfigs(children: ReactNode): LineConfig[] {
-	const configs: LineConfig[] = [];
+  const configs: LineConfig[] = [];
 
-	Children.forEach(children, (child) => {
-		if (!isValidElement(child)) {
-			return;
-		}
+  const visit = (node: ReactNode) => {
+    Children.forEach(node, (child) => {
+      if (!isValidElement(child)) {
+        return;
+      }
 
-		// Check if it's a Line component by displayName, function reference, or props structure
-		const childType = child.type as {
-			displayName?: string;
-			name?: string;
-		};
-		const componentName =
-			typeof child.type === "function"
-				? childType.displayName || childType.name || ""
-				: "";
+      const props = child.props as LineProps | undefined;
 
-		// Check by displayName, or by props having dataKey (duck typing)
-		const props = child.props as LineProps | undefined;
-		const isLineComponent =
-			componentName === "Line" ||
-			child.type === Line ||
-			(props && typeof props.dataKey === "string" && props.dataKey.length > 0);
+      if (registersLineDomain(child, props) && props?.dataKey) {
+        configs.push({
+          dataKey: props.dataKey,
+          stroke: props.stroke || "var(--chart-line-primary)",
+          strokeWidth: props.strokeWidth || 2.5,
+          yAxisId: props.yAxisId,
+        });
+        return;
+      }
 
-		if (isLineComponent && props?.dataKey) {
-			configs.push({
-				dataKey: props.dataKey,
-				stroke: props.stroke || "var(--chart-line-primary)",
-				strokeWidth: props.strokeWidth || 2.5,
-			});
-		}
-	});
+      const childProps = child.props as { children?: ReactNode } | undefined;
+      if (childProps?.children) {
+        visit(childProps.children);
+      }
+    });
+  };
 
-	return configs;
+  visit(children);
+  return configs;
 }
 
 interface ChartInnerProps {
-	width: number;
-	height: number;
-	data: Record<string, unknown>[];
-	xDataKey: string;
-	margin: Margin;
-	animationDuration: number;
-	children: ReactNode;
-	containerRef: React.RefObject<HTMLDivElement | null>;
+  width: number;
+  height: number;
+  data: Record<string, unknown>[];
+  xDataKey: string;
+  margin: Margin;
+  animationDuration: number;
+  animationEasing?: string;
+  enterTransition?: Transition;
+  revealSignature?: string;
+  chartStatus: ChartStatus;
+  loadingLabel?: string;
+  yDomainTweenDuration: number;
+  yDomainTween: boolean;
+  xDomain?: [Date, Date];
+  xDomainSlotCount?: number;
+  tweenYDomainOnXDomainChange?: boolean;
+  children: ReactNode;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  onPhaseChange: (phase: ChartPhase) => void;
 }
 
 function ChartInner({
-	width,
-	height,
-	data,
-	xDataKey,
-	margin,
-	animationDuration,
-	children,
-	containerRef,
+  width,
+  height,
+  data,
+  xDataKey,
+  margin,
+  animationDuration,
+  animationEasing,
+  enterTransition,
+  revealSignature,
+  chartStatus,
+  loadingLabel,
+  yDomainTweenDuration,
+  yDomainTween,
+  xDomain,
+  xDomainSlotCount,
+  tweenYDomainOnXDomainChange,
+  children,
+  containerRef,
+  onPhaseChange,
 }: ChartInnerProps) {
-	const [isLoaded, setIsLoaded] = useState(false);
+  const lines = useMemo(() => extractLineConfigs(children), [children]);
 
-	// Extract line configs synchronously from children
-	const lines = useMemo(() => extractLineConfigs(children), [children]);
-
-	const innerWidth = width - margin.left - margin.right;
-	const innerHeight = height - margin.top - margin.bottom;
-
-	// X accessor function
-	const xAccessor = useCallback(
-		(d: Record<string, unknown>): Date => {
-			const value = d[xDataKey];
-			return value instanceof Date ? value : new Date(value as string | number);
-		},
-		[xDataKey],
-	);
-
-	// Create bisector for finding nearest data point
-	const bisectDate = useMemo(
-		() => bisector<Record<string, unknown>, Date>((d) => xAccessor(d)).left,
-		[xAccessor],
-	);
-
-	// X scale (time) - use exact data domain for tight fit
-	const xScale = useMemo(() => {
-		const dates = data.map((d) => xAccessor(d));
-		const minTime = Math.min(...dates.map((d) => d.getTime()));
-		const maxTime = Math.max(...dates.map((d) => d.getTime()));
-
-		return scaleTime({
-			range: [0, innerWidth],
-			domain: [minTime, maxTime],
-		});
-	}, [innerWidth, data, xAccessor]);
-
-	// Calculate column width (spacing between data points)
-	const columnWidth = useMemo(() => {
-		if (data.length < 2) {
-			return 0;
-		}
-		return innerWidth / (data.length - 1);
-	}, [innerWidth, data.length]);
-
-	// Y scale - computed from extracted line configs (available immediately)
-	const yScale = useMemo(() => {
-		let maxValue = 0;
-		for (const line of lines) {
-			for (const d of data) {
-				const value = d[line.dataKey];
-				if (typeof value === "number" && value > maxValue) {
-					maxValue = value;
-				}
-			}
-		}
-
-		if (maxValue === 0) {
-			maxValue = 100;
-		}
-
-		return scaleLinear({
-			range: [innerHeight, 0],
-			domain: [0, maxValue * 1.1],
-			nice: true,
-		});
-	}, [innerHeight, data, lines]);
-
-	// Pre-compute date labels for ticker animation
-	const dateLabels = useMemo(
-		() =>
-			data.map((d) =>
-				xAccessor(d).toLocaleDateString("en-US", {
-					month: "short",
-					day: "numeric",
-				}),
-			),
-		[data, xAccessor],
-	);
-
-	// Animation timing
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsLoaded(true);
-		}, animationDuration);
-		return () => clearTimeout(timer);
-	}, [animationDuration]);
-
-	const canInteract = isLoaded;
-
-	const {
-		tooltipData,
-		setTooltipData,
-		selection,
-		clearSelection,
-		interactionHandlers,
-		interactionStyle,
-	} = useChartInteraction({
-		xScale,
-		yScale,
-		data,
-		lines,
-		margin,
-		xAccessor,
-		bisectDate,
-		canInteract,
-	});
-
-	// Early return if dimensions not ready
-	if (width < 10 || height < 10) {
-		return null;
-	}
-
-	// Separate children into pre-overlay (Grid, Line) and post-overlay (ChartMarkers)
-	const preOverlayChildren: ReactElement[] = [];
-	const postOverlayChildren: ReactElement[] = [];
-
-	Children.forEach(children, (child) => {
-		if (!isValidElement(child)) {
-			return;
-		}
-
-		if (isPostOverlayComponent(child)) {
-			postOverlayChildren.push(child);
-		} else {
-			preOverlayChildren.push(child);
-		}
-	});
-
-	const contextValue = {
-		data,
-		xScale,
-		yScale,
-		width,
-		height,
-		innerWidth,
-		innerHeight,
-		margin,
-		columnWidth,
-		tooltipData,
-		setTooltipData,
-		containerRef,
-		lines,
-		isLoaded,
-		animationDuration,
-		xAccessor,
-		dateLabels,
-		selection,
-		clearSelection,
-	};
-
-	return (
-		<ChartProvider value={contextValue}>
-			<svg aria-hidden="true" height={height} width={width}>
-				<defs>
-					<clipPath id="chart-grow-clip">
-						<rect
-							height={innerHeight + 20}
-							style={{
-								transition: isLoaded
-									? "none"
-									: `width ${animationDuration}ms cubic-bezier(0.85, 0, 0.15, 1)`,
-							}}
-							width={isLoaded ? innerWidth : 0}
-							x={0}
-							y={0}
-						/>
-					</clipPath>
-				</defs>
-
-				<rect fill="transparent" height={height} width={width} x={0} y={0} />
-
-				<g
-					{...interactionHandlers}
-					style={interactionStyle}
-					transform={`translate(${margin.left},${margin.top})`}
-				>
-					<rect
-						fill="transparent"
-						height={innerHeight}
-						width={innerWidth}
-						x={0}
-						y={0}
-					/>
-
-					{preOverlayChildren}
-					{postOverlayChildren}
-				</g>
-			</svg>
-		</ChartProvider>
-	);
+  return (
+    <TimeSeriesChartInner
+      animationDuration={animationDuration}
+      animationEasing={animationEasing}
+      chartStatus={chartStatus}
+      clipPathId="chart-grow-clip"
+      containerRef={containerRef}
+      data={data}
+      enterTransition={enterTransition}
+      height={height}
+      lines={lines}
+      loadingLabel={loadingLabel}
+      margin={margin}
+      onPhaseChange={onPhaseChange}
+      revealSignature={revealSignature}
+      tweenYDomainOnXDomainChange={tweenYDomainOnXDomainChange}
+      width={width}
+      xDataKey={xDataKey}
+      xDomain={xDomain}
+      xDomainSlotCount={xDomainSlotCount}
+      yDomainTween={yDomainTween}
+      yDomainTweenDuration={yDomainTweenDuration}
+    >
+      {children}
+    </TimeSeriesChartInner>
+  );
 }
 
 export function LineChart({
-	data,
-	xDataKey = "date",
-	margin: marginProp,
-	animationDuration = 1100,
-	aspectRatio = "2 / 1",
-	className = "",
-	children,
+  data,
+  xDataKey = "date",
+  margin: marginProp,
+  animationDuration = 1100,
+  animationEasing,
+  enterTransition,
+  revealSignature,
+  aspectRatio = "2 / 1",
+  className = "",
+  status = DEFAULT_CHART_STATUS,
+  loadingLabel,
+  yDomainTweenDuration = DEFAULT_Y_DOMAIN_TWEEN_MS,
+  yDomainTween = true,
+  xDomain,
+  xDomainSlotCount,
+  tweenYDomainOnXDomainChange = false,
+  style,
+  onPhaseChange,
+  children,
 }: LineChartProps) {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const margin = { ...DEFAULT_MARGIN, ...marginProp };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const margin = { ...DEFAULT_MARGIN, ...marginProp };
+  const [chartPhase, setChartPhase] = useState<ChartPhase>(() =>
+    resolveRestingChartPhase(status)
+  );
+  const handlePhaseChange = useCallback(
+    (phase: ChartPhase) => {
+      setChartPhase(phase);
+      onPhaseChange?.(phase);
+    },
+    [onPhaseChange]
+  );
 
-	return (
-		<div
-			className={cn("relative w-full", className)}
-			ref={containerRef}
-			style={{ aspectRatio, touchAction: "none" }}
-		>
-			<ParentSize debounceTime={10}>
-				{({ width, height }) => (
-					<ChartInner
-						animationDuration={animationDuration}
-						containerRef={containerRef}
-						data={data}
-						height={height}
-						margin={margin}
-						width={width}
-						xDataKey={xDataKey}
-					>
-						{children}
-					</ChartInner>
-				)}
-			</ParentSize>
-		</div>
-	);
+  const showLoadingLabel = Boolean(
+    loadingLabel?.trim() &&
+      (chartPhase === "loading" ||
+        chartPhase === "exiting" ||
+        chartPhase === "gridTweenReady" ||
+        chartPhase === "revealingLoading")
+  );
+
+  return (
+    <div
+      className={cn("relative w-full", className)}
+      ref={containerRef}
+      style={{
+        ...(aspectRatio ? { aspectRatio } : undefined),
+        touchAction: "none",
+        ...style,
+      }}
+    >
+      <ParentSize debounceTime={10}>
+        {({ width, height }) => (
+          <ChartInner
+            animationDuration={animationDuration}
+            animationEasing={animationEasing}
+            chartStatus={status}
+            containerRef={containerRef}
+            data={data}
+            enterTransition={enterTransition}
+            height={height}
+            loadingLabel={loadingLabel}
+            margin={margin}
+            onPhaseChange={handlePhaseChange}
+            revealSignature={revealSignature}
+            tweenYDomainOnXDomainChange={tweenYDomainOnXDomainChange}
+            width={width}
+            xDataKey={xDataKey}
+            xDomain={xDomain}
+            xDomainSlotCount={xDomainSlotCount}
+            yDomainTween={yDomainTween}
+            yDomainTweenDuration={yDomainTweenDuration}
+          >
+            {children}
+          </ChartInner>
+        )}
+      </ParentSize>
+      {showLoadingLabel ? (
+        <ChartLoadingLabel
+          exiting={chartPhase !== "loading"}
+          text={loadingLabel}
+        />
+      ) : null}
+    </div>
+  );
 }
 
-// Re-export Line for convenience
 export { Line, type LineProps } from "./line";
 
 export default LineChart;

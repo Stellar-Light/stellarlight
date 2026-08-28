@@ -12,15 +12,17 @@ import {
 	StatusSplit,
 } from "@/components/quality/charts";
 import {
-	ComposedTrend,
 	CoverageBar,
 	GuardStateStrip,
-	LibraryCalendar,
 	MiniHistogram,
 	QualityScatter,
 	StageBreakdown,
 	StateHeatmap,
 } from "@/components/quality/quality-charts-client";
+import {
+	LibraryComposed,
+	TrendComposed,
+} from "@/components/quality/quality-trend-composed";
 import {
 	evidenceUrl,
 	getEntities,
@@ -597,22 +599,22 @@ export default function QualityPage() {
 							{
 								key: "verified",
 								label: "verified by them",
-								color: "#FDDA24",
+								color: "#c4b5fd",
 							},
 							{
 								key: "fixed-upstream",
 								label: "fixed, awaiting their re-check",
-								color: "#CFAE1C",
+								color: "#a78bfa",
 							},
 							{
 								key: "reported-upstream",
 								label: "open",
-								color: "#9C8318",
+								color: "#7c3aed",
 							},
 							{
 								key: "declined-upstream",
 								label: "declined by them",
-								color: "#6B5A12",
+								color: "#5b21b6",
 								outline: true,
 							},
 						]}
@@ -903,11 +905,11 @@ export default function QualityPage() {
 				}
 				className="mb-6"
 			>
-				{/* The record as a contribution calendar: a living practice writes
-				     every week; a one-time audit shows one dark stripe. Dates come
-				     from the files themselves. */}
+				{/* The record as growth: weekly stacked columns by kind under a
+				     cumulative line that only rises. Weekly buckets keep quiet days
+				     from reading as a dead surface. Dates come from the files. */}
 				<div className="mb-6">
-					<LibraryCalendar
+					<LibraryComposed
 						entries={[
 							...progress.library.lessons.map((l) => ({
 								date: l.date,
@@ -991,7 +993,7 @@ export default function QualityPage() {
 				     battery outcomes as columns, the opacity ratchet as the line,
 				     one shared scale, crosshair tooltip. Honest at any length -
 				     the line waits for its second point. */}
-				<ComposedTrend
+				<TrendComposed
 					rows={qualityHistory.map((r) => ({
 						date: r.date,
 						batteryPass: r.batteryPass ?? null,
