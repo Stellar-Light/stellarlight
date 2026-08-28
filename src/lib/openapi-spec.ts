@@ -216,6 +216,65 @@ export const spec: OpenAPISpec = {
 												apiVersion: { type: "string" },
 												humanPage: { type: "string" },
 												methodology: { type: "string" },
+												cachePolicy: {
+													type: "string",
+													description:
+														"How stale this response may legitimately be (cache + stale-while-revalidate). Read measuredAt, not the clock.",
+												},
+											},
+										},
+										verdict: {
+											type: "object",
+											description:
+												"READ FIRST. Derived from guard states, never authored: counts of guards holding / breached / stale, the one definition of open used everywhere in this document, and two sentence lists, safeToRelyOn and doNotRelyOn.",
+											properties: {
+												guardsHolding: { type: "integer" },
+												guardsBreached: { type: "integer" },
+												guardsStale: { type: "integer" },
+												openFindings: { type: "integer" },
+												openDefinition: { type: "string" },
+												projectRows: { type: "integer" },
+												meanRowEvidence: { type: "integer" },
+												safeToRelyOn: { type: "array", items: { type: "string" } },
+												doNotRelyOn: { type: "array", items: { type: "string" } },
+											},
+										},
+										northStar: {
+											type: "object",
+											description:
+												"The one number the engine system optimizes (full-surface audit ok-rate), served WITH its age. warning is non-null whenever it should not be read as current (stale, below target, or a series measured over changing probe counts).",
+											properties: {
+												target: { type: "integer" },
+												latest: {
+													type: "object",
+													properties: {
+														date: { type: "string" },
+														label: { type: "string" },
+														okRate: { type: "integer" },
+														ok: { type: "integer", nullable: true },
+														probes: { type: "integer" },
+														evidence: { type: "string" },
+													},
+												},
+												series: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															date: { type: "string" },
+															label: { type: "string" },
+															okRate: { type: "integer" },
+															ok: { type: "integer", nullable: true },
+															probes: { type: "integer" },
+															evidence: { type: "string" },
+														},
+													},
+												},
+												ageDays: { type: "integer" },
+												stale: { type: "boolean" },
+												belowTarget: { type: "boolean" },
+												warning: { type: "string", nullable: true },
+												comparableSeries: { type: "boolean" },
 											},
 										},
 										progress: {
@@ -302,6 +361,119 @@ export const spec: OpenAPISpec = {
 												},
 											},
 										},
+										perOperation: {
+											type: "object",
+											description:
+												"Per-OPERATION contract quality, keyed by the operationId a caller invokes. contractProbe: clean (probe reached it, no violations) / violations (reached, listed) / skipped (could not check, reason given) / unmeasured (never reached). An unmeasured operation is NOT a passing one.",
+											properties: {
+												definition: { type: "string" },
+												probedAt: { type: "string" },
+												counts: {
+													type: "object",
+													properties: {
+														clean: { type: "integer" },
+														violations: { type: "integer" },
+														skipped: { type: "integer" },
+														unmeasured: { type: "integer" },
+													},
+												},
+												operations: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															operationId: { type: "string" },
+															method: { type: "string" },
+															path: { type: "string" },
+															contractProbe: {
+																type: "string",
+																enum: ["clean", "violations", "skipped", "unmeasured"],
+															},
+															skipReason: { type: "string", nullable: true },
+															violations: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		kind: { type: "string" },
+																		name: { type: "string" },
+																		evidence: { type: "string" },
+																	},
+																},
+															},
+															fieldDrift: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		kind: { type: "string" },
+																		field: { type: "string" },
+																	},
+																},
+															},
+															probedAt: { type: "string" },
+														},
+													},
+												},
+											},
+										},
+										consumerFindings: {
+											type: "object",
+											description:
+												"Defects filed against this service by its largest agent consumer (stellar-raven), from THEIR evaluation battery. counts is their answer key; ourResponse is our own linked-issue state and is fenced off deliberately, a score computed from a variable we control is not an external grade.",
+											properties: {
+												generatedAt: { type: "string", format: "date-time" },
+												consumer: { type: "string" },
+												definition: { type: "string" },
+												counts: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+													description:
+														"THEIR status vocabulary -> count, verbatim from their records.",
+												},
+												ourResponse: {
+													type: "object",
+													properties: {
+														fixShipped: { type: "integer" },
+														fixShippedIds: {
+															type: "array",
+															items: { type: "string" },
+														},
+														fixApplicable: { type: "integer" },
+														declined: { type: "integer" },
+														distinctIssuesClosed: { type: "integer" },
+														scoredBy: { type: "string" },
+														note: { type: "string" },
+													},
+												},
+												total: { type: "integer" },
+												records: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															title: { type: "string" },
+															status: { type: "string" },
+															discovered: { type: "string", nullable: true },
+															disposition: { type: "string", nullable: true },
+															sourceUrl: { type: "string" },
+															ourIssue: { type: "integer", nullable: true },
+															ourResponse: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	issue: { type: "integer" },
+																	state: { type: "string" },
+																	closedAt: { type: "string", nullable: true },
+																	url: { type: "string" },
+																},
+															},
+														},
+													},
+												},
+											},
+										},
 										flow: {
 											type: "object",
 											description:
@@ -327,6 +499,8 @@ export const spec: OpenAPISpec = {
 														properties: {
 															source: { type: "integer" },
 															target: { type: "integer" },
+															sourceId: { type: "string" },
+															targetId: { type: "string" },
 															value: { type: "integer" },
 														},
 													},
@@ -394,8 +568,13 @@ export const spec: OpenAPISpec = {
 															field: { type: "string" },
 															missing: { type: "integer" },
 															of: { type: "integer" },
+															share: { type: "number" },
 															whyItMatters: { type: "string" },
 															closedBy: { type: "string" },
+															exampleSource: { type: "string" },
+															examplePoolSize: { type: "integer" },
+															exampleCap: { type: "integer" },
+															exampleTruncated: { type: "boolean" },
 															examples: {
 																type: "array",
 																items: { type: "string" },
@@ -520,10 +699,15 @@ export const spec: OpenAPISpec = {
 														properties: {
 															fullName: { type: "string" },
 															repoScore: { type: "integer", nullable: true },
-															label: { type: "string", nullable: true },
 															tier: { type: "string", nullable: true },
-															activity: { type: "string", nullable: true },
-															evidence: { type: "string", nullable: true },
+															activity: {
+																type: "string",
+																nullable: true,
+																description:
+																	"Derived from lastCommitAt: active (<=90d) / slowing (<=365d) / dormant / archived. null = no commit date held; unknown is not dormant.",
+															},
+															language: { type: "string", nullable: true },
+															projectSlug: { type: "string", nullable: true },
 															notes: { type: "integer" },
 															codeDepth: { type: "integer", nullable: true },
 															mainnetContracts: { type: "integer" },
@@ -539,6 +723,10 @@ export const spec: OpenAPISpec = {
 														properties: {
 															fullName: { type: "string" },
 															repoScore: { type: "integer", nullable: true },
+															tier: { type: "string", nullable: true },
+															activity: { type: "string", nullable: true },
+															language: { type: "string", nullable: true },
+															projectSlug: { type: "string", nullable: true },
 															notes: { type: "integer" },
 															codeDepth: { type: "integer", nullable: true },
 															mainnetContracts: { type: "integer" },
@@ -552,15 +740,45 @@ export const spec: OpenAPISpec = {
 										},
 										guards: {
 											type: "array",
+											description:
+												"Every guard with its promise and THREE-state verdict: holding (measured and passing on fresh evidence), breached (measured and failing), stale (evidence older than the guard's own freshness window; neither passing nor failing). holding is true ONLY in the holding state, so a stale guard is never green.",
 											items: {
 												type: "object",
 												properties: {
 													key: { type: "string" },
 													title: { type: "string" },
 													promise: { type: "string" },
+													measure: {
+														type: "object",
+														description:
+															"The headline as numbers, so a consumer never parses prose. of is null for rates and bare counts.",
+														properties: {
+															value: { type: "number" },
+															of: { type: "integer", nullable: true },
+															unit: { type: "string" },
+														},
+													},
 													value: { type: "string" },
+													state: {
+														type: "string",
+														enum: ["holding", "breached", "stale"],
+													},
+													severity: {
+														type: "string",
+														enum: ["high", "medium", "low"],
+													},
 													holding: { type: "boolean" },
 													asOf: { type: "string" },
+													ageDays: { type: "integer" },
+													cadence: {
+														type: "string",
+														enum: ["weekly", "on-deploy", "baseline"],
+													},
+													freshnessDays: { type: "integer" },
+													details: {
+														type: "array",
+														items: { type: "string" },
+													},
 													evidence: { type: "string" },
 												},
 											},
@@ -575,10 +793,17 @@ export const spec: OpenAPISpec = {
 													date: { type: "string" },
 													batteryPass: { type: "integer", nullable: true },
 													batteryFail: { type: "integer", nullable: true },
+													batteryErrors: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Battery slices that CRASHED that day. A crashed slice is not a pass and not a fail; without this counter a crashed run rendered as a perfect green day.",
+													},
 													parityPass: { type: "integer", nullable: true },
 													openMaps: { type: "integer", nullable: true },
 													honestyDebt: { type: "integer", nullable: true },
 													sampled: { type: "integer", nullable: true },
+													population: { type: "integer", nullable: true },
 													liveRows: { type: "integer", nullable: true },
 													liveNoSource: { type: "integer", nullable: true },
 													humanVerified: { type: "integer", nullable: true },

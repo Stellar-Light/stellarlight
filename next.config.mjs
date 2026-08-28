@@ -121,6 +121,10 @@ const nextConfig = {
 			"/api/hackathon-brief",
 			"/api/repos/trust",
 			"/api/contracts",
+			// Drift guard 2026-08-28: the two Verification ops shipped without
+			// CORS or a version header — invisible to browser agents.
+			"/api/quality",
+			"/api/verify",
 		];
 		const corsHeaders = [
 			{ key: "Access-Control-Allow-Origin", value: "*" },
