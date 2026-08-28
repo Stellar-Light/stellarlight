@@ -16,7 +16,7 @@ import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
 // this is what the SDF agent actually experiences.
 import ravenLoop from "../../improvements/engine/raven-loop-latest.json";
-import scfMembership from "../../improvements/engine/scf-membership-postwave-2026-07-11.json";
+import scfMembership from "../../improvements/engine/scf-membership-2026-08-28.json";
 import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.json";
 import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
 import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
@@ -247,10 +247,12 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					`${overstated} overstated / ${understated} understated at project level`,
 					`${roundsOverstated} round-level overclaims across ${frame.roundsChecked} verified claims`,
 				],
-				asOf: "2026-07-11",
+				asOf:
+					(scfMembership as { generatedAt?: string }).generatedAt ??
+					"2026-08-28",
 				cadence: "baseline",
 				severity: "high",
-				artifact: "improvements/engine/scf-membership-postwave-2026-07-11.json",
+				artifact: "improvements/engine/scf-membership-2026-08-28.json",
 				passing: bad === 0,
 			});
 		})(),

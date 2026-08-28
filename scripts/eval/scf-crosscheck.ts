@@ -343,6 +343,7 @@ async function main() {
 	await Promise.all(Array.from({ length: 8 }, membershipWorker));
 
 	const report = {
+		generatedAt: new Date().toISOString(),
 		frame: {
 			scf: scf.length,
 			directory: dir.length,
