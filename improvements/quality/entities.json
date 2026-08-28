@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T23:01:07.685Z",
+ "generatedAt": "2026-08-28T23:32:06.964Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -2241,9 +2241,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -9500,11 +9501,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 975
+    "count": 956
    },
    {
     "network": "mainnet",
-    "count": 49
+    "count": 68
    },
    {
     "network": "testnet",
@@ -10035,7 +10036,7 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
-    "deploymentNetwork": "unknown",
+    "deploymentNetwork": "mainnet",
     "types": [
      "Stablecoin"
     ],
@@ -10266,7 +10267,7 @@
    },
    {
     "field": "typed",
-    "count": 73
+    "count": 74
    },
    {
     "field": "linked",
@@ -11473,7 +11474,7 @@
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "73 of 1025 sampled rows untyped",
+   "measurement": "74 of 1025 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11844,9 +11845,9 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 975,
+    "missing": 956,
     "of": 1025,
-    "share": 95.1,
+    "share": 93.3,
     "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
@@ -11946,13 +11947,13 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 73,
+    "missing": 74,
     "of": 1025,
-    "share": 7.1,
+    "share": 7.2,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 73,
+    "examplePoolSize": 74,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
