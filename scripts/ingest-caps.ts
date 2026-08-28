@@ -22,6 +22,7 @@ import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { CAP_REGISTRY } from "../src/data/cap-registry";
 import { parseCapPreamble } from "../src/lib/cap-preamble";
+import { preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
@@ -63,6 +64,8 @@ interface SepChunk {
 	tags: string[]; // ["cap", "sep-24", ...]
 	capStatus: string | null;
 	capProtocolVersion: number | null;
+	/** Doc-level date from the CAP preamble (Created:; CAPs carry no Updated:). */
+	publishedAt: string | null;
 }
 
 const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
@@ -241,6 +244,7 @@ async function run() {
 				title: string | null;
 				capStatus: string | null;
 				capProtocolVersion: number | null;
+				publishedAt: string | null;
 			}
 		>
 	>();
@@ -267,6 +271,7 @@ async function run() {
 			title?: string | null;
 			capStatus?: string | null;
 			capProtocolVersion?: number | null;
+			publishedAt?: string | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
@@ -277,6 +282,7 @@ async function run() {
 				title: d.title ?? null,
 				capStatus: d.capStatus ?? null,
 				capProtocolVersion: d.capProtocolVersion ?? null,
+				publishedAt: d.publishedAt ?? null,
 			};
 			const prev = slot.get(d.chunkIndex);
 			if (!prev) {
@@ -400,11 +406,15 @@ async function run() {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
 			const preamble = parseCapPreamble(md);
+			// S7: the CAP preamble states Created: (CAPs carry no Updated:) —
+			// one date per doc, stamped on every chunk.
+			const docDate = preambleDate(md);
 			const reg = REGISTRY_BY_CAP.get(capNumOf(parentDocId) ?? -1);
 			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
 				...c,
 				capStatus: reg?.status ?? preamble.status,
 				capProtocolVersion: reg?.protocolVersion ?? preamble.protocolVersion,
+				publishedAt: docDate,
 			}));
 			stats.chunksTotal += chunks.length;
 
@@ -417,10 +427,14 @@ async function run() {
 					// rows through the embed path. Content-identical + drifted
 					// title → update in place, no re-embed. (This script has its
 					// own upsert loop — the shared upsertChunks fix doesn't apply.)
+					const dateDrift =
+						chunk.publishedAt !== null &&
+						(prev.publishedAt ?? "").slice(0, 10) !== chunk.publishedAt;
 					const factsDrifted =
 						(prev.capStatus ?? null) !== (chunk.capStatus ?? null) ||
 						(prev.capProtocolVersion ?? null) !==
-							(chunk.capProtocolVersion ?? null);
+							(chunk.capProtocolVersion ?? null) ||
+						dateDrift;
 					if (payload && ((prev.title ?? "") !== chunk.title || factsDrifted)) {
 						stats.chunksUpdated++;
 						try {
@@ -431,10 +445,13 @@ async function run() {
 									title: chunk.title,
 									capStatus: chunk.capStatus ?? undefined,
 									capProtocolVersion: chunk.capProtocolVersion ?? undefined,
+									...(dateDrift
+										? { publishedAt: toPublishedAt(chunk.publishedAt!) }
+										: {}),
 								},
 							});
 							console.log(
-								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
+								`  metadata fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'${dateDrift ? ` publishedAt→${chunk.publishedAt}` : ""}`,
 							);
 						} catch (err) {
 							console.error(
@@ -498,6 +515,9 @@ async function run() {
 			?.get(chunk.chunkIndex);
 		const data = {
 			source: "cap" as const,
+			...(chunk.publishedAt
+				? { publishedAt: toPublishedAt(chunk.publishedAt) }
+				: {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,

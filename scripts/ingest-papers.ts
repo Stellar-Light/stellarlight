@@ -15,6 +15,7 @@
 import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
+import { paperDate, toPublishedAt } from "../src/lib/doc-dates";
 import {
 	chunkMarkdown,
 	loadExistingChunks,
@@ -97,6 +98,11 @@ async function run() {
 				console.log("  ⚠ PDF text too short, skipping");
 				continue;
 			}
+			// S7: the paper states its own date (the SCP whitepaper's "Draft of
+			// February 25, 2016" page footer) — stamped on every chunk; existing
+			// rows heal via upsertChunks' metadata-drift path, no re-embed.
+			const docDate = paperDate(text);
+			console.log(`  date: ${docDate ?? "none stated"}`);
 			// Synthesize a markdown wrapper so chunkMarkdown can split sensibly.
 			// Treat double-newlines in PDF text as paragraph breaks.
 			const md = `# ${paper.title}\n\n${text}`;
@@ -106,6 +112,7 @@ async function run() {
 				title: paper.title,
 				url: paper.url,
 				tags: paper.tags,
+				publishedAt: docDate ? toPublishedAt(docDate) : undefined,
 			});
 			allChunks.push(...chunks);
 		} catch (err) {

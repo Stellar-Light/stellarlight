@@ -6,9 +6,13 @@ name: Fix research titles (manual)
 #   - scripts/fix-corpus-mirrors.ts — S8 mirrored content: deletes ONLY
 #     redirect/dead-proven republication mirrors; template/sibling/ambiguous
 #     classes are enumerated, never touched.
-# Dry-run by default; set apply/apply_mirrors=true to write. Safe by
-# construction: titles only ever change to classifier-clean replacements,
-# junk/mirror deletes are proof-gated, and EVERY write is read back (exit 1 on
+#   - scripts/backfill-corpus-dates.ts — S7 undated sources: re-derives
+#     publishedAt for sep/cap/paper chunks from the dates their own documents
+#     state (SEP/CAP preamble Created:/Updated:, the SCP paper's page footer).
+# Dry-run by default; set apply/apply_mirrors/apply_dates=true to write. Safe
+# by construction: titles only ever change to classifier-clean replacements,
+# junk/mirror deletes are proof-gated, dates are only ever document-stated
+# (never guessed, never nulled), and EVERY write is read back (exit 1 on
 # mismatch); content is never re-embedded. Inspect the dry-run log BEFORE
 # applying.
 on:
@@ -16,6 +20,7 @@ on:
     inputs:
       apply: { description: "Write titles + delete junk rows? Leave false for a dry run.", type: boolean, default: false }
       apply_mirrors: { description: "Delete proven republication mirrors (S8)? Leave false for a dry run.", type: boolean, default: false }
+      apply_dates: { description: "Stamp document-stated publishedAt on sep/cap/paper chunks (S7)? Leave false for a dry run.", type: boolean, default: false }
 permissions: { contents: read }
 jobs:
   fix:
@@ -35,3 +40,5 @@ jobs:
         run: pnpm exec tsx scripts/fix-corpus-titles.ts ${{ inputs.apply && '--execute' || '' }}
       - name: Mirrors (S8)
         run: pnpm exec tsx scripts/fix-corpus-mirrors.ts ${{ inputs.apply_mirrors && '--execute' || '' }}
+      - name: Dates (S7)
+        run: pnpm exec tsx scripts/backfill-corpus-dates.ts ${{ inputs.apply_dates && '--execute' || '' }}

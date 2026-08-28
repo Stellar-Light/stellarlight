@@ -436,19 +436,37 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			const ch: any = corpusHealth;
 			type Sweep = { key: string; defects: number | null; note: string };
 			const sweeps: Sweep[] = [];
+			// Declared-undateable sources stay visible even when s7 is clean —
+			// an exemption the reader can't see is a silent one.
+			const declared: string[] = [];
 			for (const key of Object.keys(ch).filter((k) => /^s[5-8]_/.test(k))) {
 				const v = ch[key];
 				if (key === "s7_coverage") {
 					// A coverage map's defect signal is its own per-source flags.
+					// A source the sweep DECLARES structurally undateable (upstream
+					// states no date — reason carried in the artifact) is reported,
+					// never counted as a defect.
 					const srcs = Object.values(v ?? {}) as Array<{
 						undated?: boolean;
 						stalled?: boolean;
+						undateable?: boolean;
 					}>;
-					const bad = srcs.filter((x) => x.undated || x.stalled).length;
+					const undateable = srcs.filter((x) => x.undateable).length;
+					const bad = srcs.filter(
+						(x) => !x.undateable && (x.undated || x.stalled),
+					).length;
+					if (undateable && bad === 0 && srcs.length > 0)
+						declared.push(
+							`s7 coverage: ${undateable} source(s) structurally undateable (declared)`,
+						);
 					sweeps.push({
 						key,
 						defects: srcs.length === 0 ? null : bad,
-						note: `${bad} of ${srcs.length} corpus sources undated or stalled`,
+						note:
+							`${bad} of ${srcs.length} corpus sources undated or stalled` +
+							(undateable
+								? ` · ${undateable} structurally undateable (declared)`
+								: ""),
 					});
 				} else if (Array.isArray(v)) {
 					// An empty list is a CLAIM of emptiness, not a missing reading.
@@ -481,6 +499,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					...[...dirty, ...blind].map(
 						(x) => `${x.key.replace(/_/g, " ")}: ${x.note}`,
 					),
+					...declared,
 					...(dirty.length === 0 && blind.length === 0
 						? ["all sweeps clean"]
 						: []),
@@ -732,9 +751,11 @@ export function getOperationQuality(): OperationQuality[] {
 		missingFields: OpFinding[];
 		undocumentedFields: OpFinding[];
 	};
-	const paths = (openapi as unknown as {
-		paths: Record<string, Record<string, { operationId?: string }>>;
-	}).paths;
+	const paths = (
+		openapi as unknown as {
+			paths: Record<string, Record<string, { operationId?: string }>>;
+		}
+	).paths;
 
 	const collect = (list: OpFinding[], key: string) =>
 		list.map((x) => ({

@@ -20,6 +20,7 @@
 import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
+import { preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
@@ -44,6 +45,8 @@ interface SepChunk {
 	content: string; // chunk markdown
 	contentHash: string;
 	tags: string[]; // ["sep", "sep-24", ...]
+	/** Doc-level date from the SEP preamble (Updated over Created), on EVERY chunk. */
+	publishedAt: string | null;
 }
 
 const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
@@ -199,10 +202,18 @@ async function run() {
 
 	const payload = execute ? await getPayload({ config: configPromise }) : null;
 
-	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
+	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title, publishedAt}>
 	const existingBySep = new Map<
 		string,
-		Map<number, { id: string; contentHash: string; title: string | null }>
+		Map<
+			number,
+			{
+				id: string;
+				contentHash: string;
+				title: string | null;
+				publishedAt: string | null;
+			}
+		>
 	>();
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
@@ -218,6 +229,7 @@ async function run() {
 			chunkIndex: number;
 			contentHash: string;
 			title?: string | null;
+			publishedAt?: string | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
@@ -225,6 +237,7 @@ async function run() {
 				id: d.id,
 				contentHash: d.contentHash,
 				title: d.title ?? null,
+				publishedAt: d.publishedAt ?? null,
 			});
 		}
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
@@ -239,7 +252,14 @@ async function run() {
 		try {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
-			const chunks = chunkMarkdown(md, parentDocId, title, url);
+			// S7: the SEP's preamble states its dates (Updated over Created) —
+			// ONE date per doc, stamped on EVERY chunk. The old per-chunk regex
+			// only ever dated the chunk that happened to contain the preamble.
+			const docDate = preambleDate(md);
+			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
+				...c,
+				publishedAt: docDate,
+			}));
 			stats.chunksTotal += chunks.length;
 
 			const existing = existingBySep.get(parentDocId);
@@ -251,16 +271,26 @@ async function run() {
 					// rows through the embed path. Content-identical + drifted
 					// title → update in place, no re-embed. (This script has its
 					// own upsert loop — the shared upsertChunks fix doesn't apply.)
-					if (payload && (prev.title ?? "") !== chunk.title) {
+					// Same for publishedAt: an Updated: bump only changes the
+					// preamble chunk's hash, so sibling chunks date via this path.
+					const dateDrift =
+						chunk.publishedAt !== null &&
+						(prev.publishedAt ?? "").slice(0, 10) !== chunk.publishedAt;
+					if (payload && ((prev.title ?? "") !== chunk.title || dateDrift)) {
 						stats.chunksUpdated++;
 						try {
 							await payload.update({
 								collection: "research-docs",
 								id: prev.id,
-								data: { title: chunk.title },
+								data: {
+									title: chunk.title,
+									...(dateDrift
+										? { publishedAt: toPublishedAt(chunk.publishedAt!) }
+										: {}),
+								},
 							});
 							console.log(
-								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
+								`  metadata fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'${dateDrift ? ` publishedAt→${chunk.publishedAt}` : ""}`,
 							);
 						} catch (err) {
 							console.error(
@@ -316,17 +346,6 @@ async function run() {
 
 	console.log("");
 	console.log("Upserting to Payload…");
-	// sls-064 analog C: SEP rows served publishedAt/observedAt null. The
-	// SEP's own preamble states its dates — one per file, carried by the
-	// preamble chunk; Updated preferred over Created. First match wins.
-	const sepDateOf = new Map<string, string>();
-	for (const c of allChunks) {
-		if (sepDateOf.has(c.parentDocId)) continue;
-		const m =
-			c.content.match(/Updated:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/) ??
-			c.content.match(/Created:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/);
-		if (m) sepDateOf.set(c.parentDocId, m[1]);
-	}
 	for (let i = 0; i < toEmbed.length; i++) {
 		const chunk = toEmbed[i];
 		const embedding = embeddings[i];
@@ -335,18 +354,14 @@ async function run() {
 			?.get(chunk.chunkIndex);
 		// sls-064 analog C: SEP rows served publishedAt/observedAt null — the
 		// provenance-trio gap. observedAt = this crawl; publishedAt = the date
-		// the SEP's own preamble states (Updated preferred over Created).
-		const preamble = chunk.content.match(
-			/(?:Updated|Created):\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/,
-		);
+		// the SEP's own preamble states (Updated preferred over Created),
+		// derived once per doc via preambleDate() and carried on every chunk.
 		const data = {
 			source: "sep" as const,
 			observedAt: new Date().toISOString(),
 			...(chunk.publishedAt
-				? { publishedAt: chunk.publishedAt }
-				: preamble
-					? { publishedAt: `${preamble[1]}T00:00:00.000Z` }
-					: {}),
+				? { publishedAt: toPublishedAt(chunk.publishedAt) }
+				: {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,
