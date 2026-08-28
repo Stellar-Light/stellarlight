@@ -1,10 +1,11 @@
 {
- "generatedAt": "2026-08-28T19:33:43.158Z",
+ "generatedAt": "2026-08-28T21:12:44.181Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
   "reported-upstream": 7,
-  "declined-upstream": 1
+  "declined-upstream": 1,
+  "proposed": 1
  },
  "ourResponse": {
   "fixShipped": 5,
@@ -15,13 +16,13 @@
    "sls-033",
    "sls-073"
   ],
-  "fixApplicable": 7,
+  "fixApplicable": 8,
   "declined": 1,
   "distinctIssuesClosed": 4,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
- "total": 8,
+ "total": 9,
  "records": [
   {
    "id": "sls-023",
@@ -142,6 +143,15 @@
     "closedAt": null,
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1087"
    }
+  },
+  {
+   "id": "sls-079",
+   "title": "Scout project status Live conflates directory listing with mainnet deployment",
+   "status": "proposed",
+   "discovered": "2026-08-28",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-079-project-status-deployment-conflation.md",
+   "ourIssue": null
   }
  ]
 }
