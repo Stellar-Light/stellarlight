@@ -161,6 +161,337 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/quality": {
+			get: {
+				operationId: "getQualityReport",
+				tags: ["Verification"],
+				summary:
+					"This service's own quality report — known limitations, per-surface health, guard state",
+				description:
+					"A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.",
+				"x-routing": {
+					purpose:
+						"Let an agent weigh how much to trust this service's answers, and see what it is measurably weak at.",
+					keywords: [
+						"data quality",
+						"how reliable",
+						"limitations",
+						"known issues",
+						"trust",
+						"confidence in the data",
+						"coverage",
+						"provenance",
+						"self report",
+						"health",
+					],
+					useWhen: [
+						"deciding how much weight to give a result from this service",
+						"a user asks how good or complete this data is",
+						"explaining why an answer is uncertain or a row is thin",
+					],
+					notFor: [
+						"verifying ONE specific claim -> verifyClaim",
+						"the freshness/changelog of the API contract -> getChangelog",
+						"per-row confidence on a search result (already served inline)",
+					],
+					exampleQuestions: [
+						"How reliable is this directory's status data?",
+						"What are the known limitations of this source?",
+					],
+				},
+				responses: {
+					"200": {
+						description: "The quality self-report",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												measuredAt: { type: "string", format: "date-time" },
+												apiVersion: { type: "string" },
+												humanPage: { type: "string" },
+												methodology: { type: "string" },
+											},
+										},
+										knownLimitations: {
+											type: "array",
+											description:
+												"Read first. Each entry is derived from a measurement, not authored: what the limit IS, the number behind it, and what to do instead.",
+											items: {
+												type: "object",
+												properties: {
+													area: { type: "string" },
+													limit: { type: "string" },
+													measurement: { type: "string" },
+													instead: { type: "string" },
+												},
+											},
+										},
+										missFunnel: {
+											type: "object",
+											description:
+												"Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt.",
+											properties: {
+												generatedAt: { type: "string", format: "date-time" },
+												population: {
+													type: "object",
+													properties: {
+														openRecallMisses: { type: "integer" },
+														sampled: { type: "integer" },
+														note: { type: "string" },
+													},
+												},
+												stages: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															stage: {
+																type: "string",
+																enum: [
+																	"passing",
+																	"ranking",
+																	"admission",
+																	"identity",
+																	"corpus",
+																],
+															},
+															label: { type: "string" },
+															owner: { type: "string" },
+															note: { type: "string" },
+															count: { type: "integer" },
+															share: { type: "integer" },
+															examples: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										gapMatrix: {
+											type: "object",
+											description:
+												"Entity x missing-field map with REAL identifiers — the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked.",
+											properties: {
+												definition: { type: "string" },
+												rows: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															entity: {
+																type: "string",
+																enum: ["project", "repo"],
+															},
+															field: { type: "string" },
+															missing: { type: "integer" },
+															of: { type: "integer" },
+															whyItMatters: { type: "string" },
+															closedBy: { type: "string" },
+															examples: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										surfaces: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													surface: { type: "string" },
+													means: { type: "string", nullable: true },
+													openFindings: { type: "integer" },
+													clearedFindings: { type: "integer" },
+												},
+											},
+										},
+										findings: {
+											type: "object",
+											properties: {
+												open: { type: "integer" },
+												cleared: { type: "integer" },
+												verifiedClosed: { type: "integer" },
+												note: { type: "string" },
+												byFailureMode: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															mode: { type: "string" },
+															surface: { type: "string" },
+															open: { type: "integer" },
+															cleared: { type: "integer" },
+														},
+													},
+												},
+												openByAge: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															bucket: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												recentlyCleared: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															probe: { type: "string" },
+															surface: { type: "string" },
+															failureMode: { type: "string" },
+															clearedAt: { type: "string" },
+														},
+													},
+												},
+											},
+										},
+										rowQuality: {
+											type: "object",
+											properties: {
+												sampled: { type: "integer" },
+												meanScore: { type: "integer" },
+												scoreDefinition: { type: "string" },
+												basisStrength: { type: "string" },
+												statusBasisMix: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															basis: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												missingByField: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															field: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												weakestRows: {
+													type: "array",
+													description:
+														"The curation queue: each row's slug, evidence score, and exactly which facts are missing.",
+													items: {
+														type: "object",
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string" },
+															status: { type: "string", nullable: true },
+															statusBasis: { type: "string", nullable: true },
+															prominence: { type: "integer" },
+															score: { type: "integer" },
+															missing: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										repoQuality: {
+											type: "object",
+											properties: {
+												sampled: { type: "integer" },
+												topGraded: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															repoScore: { type: "integer", nullable: true },
+															label: { type: "string", nullable: true },
+															tier: { type: "string", nullable: true },
+															activity: { type: "string", nullable: true },
+															evidence: { type: "string", nullable: true },
+															notes: { type: "integer" },
+															codeDepth: { type: "integer", nullable: true },
+															mainnetContracts: { type: "integer" },
+														},
+													},
+												},
+												thinnestEvidence: {
+													type: "array",
+													description:
+														"Indexed but thinly evidenced — the repo work queue.",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															repoScore: { type: "integer", nullable: true },
+															notes: { type: "integer" },
+															codeDepth: { type: "integer", nullable: true },
+															mainnetContracts: { type: "integer" },
+														},
+													},
+												},
+												withCodeDepth: { type: "integer" },
+												withKnowledgeNotes: { type: "integer" },
+												joinedToMainnetContract: { type: "integer" },
+											},
+										},
+										guards: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													key: { type: "string" },
+													title: { type: "string" },
+													promise: { type: "string" },
+													value: { type: "string" },
+													holding: { type: "boolean" },
+													asOf: { type: "string" },
+													evidence: { type: "string" },
+												},
+											},
+										},
+										trend: {
+											type: "array",
+											description:
+												"Committed daily history; a null metric means it was not measured that day, never zero.",
+											items: {
+												type: "object",
+												properties: {
+													date: { type: "string" },
+													batteryPass: { type: "integer", nullable: true },
+													batteryFail: { type: "integer", nullable: true },
+													parityPass: { type: "integer", nullable: true },
+													openMaps: { type: "integer", nullable: true },
+													honestyDebt: { type: "integer", nullable: true },
+													sampled: { type: "integer", nullable: true },
+													liveRows: { type: "integer", nullable: true },
+													liveNoSource: { type: "integer", nullable: true },
+													humanVerified: { type: "integer", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/verify": {
 			get: {
 				operationId: "verifyClaim",

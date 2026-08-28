@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import {
 	AreaChart,
 	BarList,
+	GapMatrix,
+	Info,
+	Metric,
+	MissFunnel,
 	SplitBarList,
 	StackedRamp,
 } from "@/components/quality/charts";
@@ -10,6 +14,7 @@ import {
 	evidenceUrl,
 	getEntities,
 	getGuardRows,
+	getMissFunnel,
 	getNorthStar,
 	getTrends,
 	type TrendSeries,
@@ -120,6 +125,7 @@ export default function QualityPage() {
 	const guards = getGuardRows();
 	const trends = getTrends();
 	const entities = getEntities();
+	const funnel = getMissFunnel();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -193,6 +199,86 @@ export default function QualityPage() {
 				</div>
 			</Card>
 
+			{/* ── for consumers: read this before trusting a result ── */}
+			<Card
+				title="Known limitations — read before relying on this data"
+				description="Derived from the measurements below, not written by hand: if a number improves, the entry changes or disappears. Each says what to do instead."
+				right={
+					<a
+						href="/api/quality"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						machine-readable
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<div className="flex flex-col gap-4">
+					{entities.knownLimitations.map((l) => (
+						<div key={l.area} className="flex flex-col gap-1">
+							<div className="flex items-baseline gap-2 flex-wrap">
+								<span className="text-xs font-medium text-foreground uppercase tracking-wide">
+									{l.area}
+								</span>
+								<span className="text-[11px] text-muted-foreground tabular-nums">
+									{l.measurement}
+								</span>
+							</div>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								{l.limit}
+							</p>
+							<p className="text-xs text-foreground/80 leading-relaxed">
+								<span className="text-muted-foreground">Instead: </span>
+								{l.instead}
+							</p>
+						</div>
+					))}
+				</div>
+				<div className="mt-5 pt-5 border-t border-border">
+					<p className="text-xs text-muted-foreground mb-3">
+						Open findings by surface — a work queue, not an outage
+					</p>
+					<BarList
+						rows={entities.surfaces.map((s) => ({
+							label: s.surface,
+							value: s.openFindings,
+							note: s.means ?? undefined,
+						}))}
+						unit="open"
+					/>
+					<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
+						An agent can fetch all of this — limitations, surface health, guard
+						state, the score definitions and the trend — from{" "}
+						<a
+							href="/api/quality"
+							className="text-foreground underline underline-offset-2 hover:no-underline"
+						>
+							GET /api/quality
+						</a>
+						, so trust calibration does not require reading a webpage.
+					</p>
+				</div>
+			</Card>
+
+			{/* ── the gap matrix: what is missing, where, and who closes it ── */}
+			<Card
+				title="Gap matrix — what is missing, by entity and field"
+				description="One row per hole. Counts are samples with their denominator, and every row carries real identifiers so the gap can be worked or independently checked."
+				right={
+					<a
+						href="/api/quality"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						same data as JSON
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<GapMatrix rows={entities.gapMatrix.rows} />
+			</Card>
+
 			{/* ── findings: what we actually found, cleared, and still owe ── */}
 			<Card
 				title="Findings — what the engines caught"
@@ -216,6 +302,16 @@ export default function QualityPage() {
 						sub="re-probed after the fix"
 					/>
 				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mb-5">
+					The open count leads reality on purpose: a fix clears findings only
+					when their detector next runs. The miss funnel below replays them live
+					—{" "}
+					<span className="text-foreground">
+						{funnel.stages.find((st) => st.stage === "passing")?.count ?? 0} of{" "}
+						{funnel.population.sampled} sampled no longer reproduce
+					</span>{" "}
+					— so read this number as an upper bound on real debt.
+				</p>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
@@ -270,6 +366,31 @@ export default function QualityPage() {
 				)}
 			</Card>
 
+			{/* ── the miss funnel: WHERE a miss dies, not just how many ── */}
+			<Card
+				title="Miss funnel — where a known-item miss actually dies"
+				description="Every open recall finding replayed live and classified at the FIRST stage that fails, so the stages are mutually exclusive. 'We have 200 recall misses' hides four different problems with four different owners."
+				right={
+					<a
+						href="/api/quality"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						same data as JSON
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<p className="text-xs text-muted-foreground mb-4">
+					{funnel.population.sampled} of {funnel.population.openRecallMisses}{" "}
+					open recall findings replayed · shares are of the sample
+				</p>
+				<MissFunnel
+					stages={funnel.stages}
+					sampled={funnel.population.sampled}
+				/>
+			</Card>
+
 			{/* ── per-entity quality: rows and repos, not just totals ── */}
 			<Card
 				title="Row quality — the evidence behind each record"
@@ -277,10 +398,12 @@ export default function QualityPage() {
 				className="mb-6"
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
-					<Stat
-						label="mean row score"
+					<Metric
+						label="mean row evidence score"
 						value={`${entities.projects.meanScore}%`}
 						sub={`across ${entities.projects.sampled} sampled rows`}
+						goodWhen="higher"
+						explain="Per row: the share of five evidence facts we hold — a provenance basis, a status date, a source URL, at least one type, at least one link. 100% means all five are present; it does NOT rate the project, only how well we can back what we publish about it."
 					/>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -316,11 +439,12 @@ export default function QualityPage() {
 					</div>
 				</div>
 				<div className="mt-6 pt-5 border-t border-border">
-					<p className="text-xs text-muted-foreground mb-3">
-						Weakest evidence on prominent rows — the curation queue
+					<p className="text-xs text-muted-foreground mb-3 inline-flex items-center gap-1.5">
+						Curation queue — rows whose evidence is thinnest, prominent first
+						<Info text="Sorted by evidence score ascending, then by curated prominence, so the most-seen thin rows surface first. Each line names exactly which of the five facts is missing." />
 					</p>
 					<div className="flex flex-col gap-1.5">
-						{entities.projects.weakest.slice(0, 8).map((p) => (
+						{entities.projects.weakest.slice(0, 30).map((p) => (
 							<div
 								key={p.slug}
 								className="flex items-baseline justify-between gap-4 text-xs"
@@ -348,27 +472,33 @@ export default function QualityPage() {
 				className="mb-6"
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
-					<Stat
+					<Metric
 						label="scanned for depth"
 						value={`${entities.repos.withCodeDepth}/${entities.repos.sampled}`}
 						sub="have a code-depth reading"
+						goodWhen="higher"
+						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) — not a quality judgement of the project."
 					/>
-					<Stat
+					<Metric
 						label="with knowledge notes"
-						value={String(entities.repos.withNotes)}
-						sub="dated facts with sources"
+						value={`${entities.repos.withNotes}/${entities.repos.sampled}`}
+						sub="curated dated facts with sources"
+						goodWhen="higher"
+						explain="knowledgeNotes are hand-curated dated facts with a source URL. Absence means nobody curated this repo yet — never a statement about the repo itself."
 					/>
-					<Stat
-						label="joined to mainnet"
-						value={String(entities.repos.withMainnet)}
-						sub="verified contract on chain"
+					<Metric
+						label="joined to a mainnet contract"
+						value={`${entities.repos.withMainnet}/${entities.repos.sampled}`}
+						sub="verified contract attributed"
+						goodWhen="higher"
+						explain="A verified mainnet contract attributed to this repo — the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
 					/>
 				</div>
 				<p className="text-xs text-muted-foreground mb-3">
 					Highest-graded sampled repos
 				</p>
 				<div className="flex flex-col gap-1.5">
-					{entities.repos.top.slice(0, 8).map((r) => (
+					{entities.repos.top.slice(0, 25).map((r) => (
 						<div
 							key={r.fullName}
 							className="flex items-baseline justify-between gap-4 text-xs"

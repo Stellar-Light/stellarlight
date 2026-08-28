@@ -30,6 +30,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/quality": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * This service's own quality report — known limitations, per-surface health, guard state
+         * @description A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.
+         */
+        get: operations["getQualityReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/verify": {
         parameters: {
             query?: never;
@@ -1870,6 +1890,177 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatusResponse"];
+                };
+            };
+        };
+    };
+    getQualityReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The quality self-report */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** Format: date-time */
+                            measuredAt?: string;
+                            apiVersion?: string;
+                            humanPage?: string;
+                            methodology?: string;
+                        };
+                        /** @description Read first. Each entry is derived from a measurement, not authored: what the limit IS, the number behind it, and what to do instead. */
+                        knownLimitations?: {
+                            area?: string;
+                            limit?: string;
+                            measurement?: string;
+                            instead?: string;
+                        }[];
+                        /** @description Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt. */
+                        missFunnel?: {
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            population?: {
+                                openRecallMisses?: number;
+                                sampled?: number;
+                                note?: string;
+                            };
+                            stages?: {
+                                /** @enum {string} */
+                                stage?: "passing" | "ranking" | "admission" | "identity" | "corpus";
+                                label?: string;
+                                owner?: string;
+                                note?: string;
+                                count?: number;
+                                share?: number;
+                                examples?: string[];
+                            }[];
+                        };
+                        /** @description Entity x missing-field map with REAL identifiers — the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked. */
+                        gapMatrix?: {
+                            definition?: string;
+                            rows?: {
+                                /** @enum {string} */
+                                entity?: "project" | "repo";
+                                field?: string;
+                                missing?: number;
+                                of?: number;
+                                whyItMatters?: string;
+                                closedBy?: string;
+                                examples?: string[];
+                            }[];
+                        };
+                        surfaces?: {
+                            surface?: string;
+                            means?: string | null;
+                            openFindings?: number;
+                            clearedFindings?: number;
+                        }[];
+                        findings?: {
+                            open?: number;
+                            cleared?: number;
+                            verifiedClosed?: number;
+                            note?: string;
+                            byFailureMode?: {
+                                mode?: string;
+                                surface?: string;
+                                open?: number;
+                                cleared?: number;
+                            }[];
+                            openByAge?: {
+                                bucket?: string;
+                                count?: number;
+                            }[];
+                            recentlyCleared?: {
+                                probe?: string;
+                                surface?: string;
+                                failureMode?: string;
+                                clearedAt?: string;
+                            }[];
+                        };
+                        rowQuality?: {
+                            sampled?: number;
+                            meanScore?: number;
+                            scoreDefinition?: string;
+                            basisStrength?: string;
+                            statusBasisMix?: {
+                                basis?: string;
+                                count?: number;
+                            }[];
+                            missingByField?: {
+                                field?: string;
+                                count?: number;
+                            }[];
+                            /** @description The curation queue: each row's slug, evidence score, and exactly which facts are missing. */
+                            weakestRows?: {
+                                slug?: string;
+                                name?: string;
+                                status?: string | null;
+                                statusBasis?: string | null;
+                                prominence?: number;
+                                score?: number;
+                                missing?: string[];
+                            }[];
+                        };
+                        repoQuality?: {
+                            sampled?: number;
+                            topGraded?: {
+                                fullName?: string;
+                                repoScore?: number | null;
+                                label?: string | null;
+                                tier?: string | null;
+                                activity?: string | null;
+                                evidence?: string | null;
+                                notes?: number;
+                                codeDepth?: number | null;
+                                mainnetContracts?: number;
+                            }[];
+                            /** @description Indexed but thinly evidenced — the repo work queue. */
+                            thinnestEvidence?: {
+                                fullName?: string;
+                                repoScore?: number | null;
+                                notes?: number;
+                                codeDepth?: number | null;
+                                mainnetContracts?: number;
+                            }[];
+                            withCodeDepth?: number;
+                            withKnowledgeNotes?: number;
+                            joinedToMainnetContract?: number;
+                        };
+                        guards?: {
+                            key?: string;
+                            title?: string;
+                            promise?: string;
+                            value?: string;
+                            holding?: boolean;
+                            asOf?: string;
+                            evidence?: string;
+                        }[];
+                        /** @description Committed daily history; a null metric means it was not measured that day, never zero. */
+                        trend?: {
+                            date?: string;
+                            batteryPass?: number | null;
+                            batteryFail?: number | null;
+                            parityPass?: number | null;
+                            openMaps?: number | null;
+                            honestyDebt?: number | null;
+                            sampled?: number | null;
+                            liveRows?: number | null;
+                            liveNoSource?: number | null;
+                            humanVerified?: number | null;
+                        }[];
+                    };
                 };
             };
         };

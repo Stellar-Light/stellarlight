@@ -199,8 +199,35 @@ const repos = [...repoSeen.values()].map((r) => ({
 	mainnetContracts: r.codeInUse?.contracts ?? 0,
 }));
 
+// Per-surface rollup: the shape a CONSUMER asks about — "how healthy is the
+// surface I'm calling?" — rather than our internal detector names.
+const SURFACE_MEANS: Record<string, string> = {
+	retrieval: "search and ranking across projects, repos, research",
+	directory: "the project rows themselves — fields, types, provenance",
+	contract: "the OpenAPI contract and its generated artifacts",
+	corpus: "indexed research/audit documents and their chunking",
+	scf: "SCF round and award data",
+	consumer: "questions real consumers asked that we answered weakly",
+	code: "repo scanning, code depth, symbol extraction",
+};
+const bySurface = new Map<string, { open: number; cleared: number }>();
+for (const f of findings) {
+	const cur = bySurface.get(f.surface) ?? { open: 0, cleared: 0 };
+	if (f.status === "open") cur.open++;
+	else cur.cleared++;
+	bySurface.set(f.surface, cur);
+}
+
 const out = {
 	generatedAt: new Date().toISOString(),
+	surfaces: [...bySurface.entries()]
+		.map(([surface, v]) => ({
+			surface,
+			means: SURFACE_MEANS[surface] ?? null,
+			openFindings: v.open,
+			clearedFindings: v.cleared,
+		}))
+		.sort((a, b) => b.openFindings - a.openFindings),
 	findings: {
 		total: findings.length,
 		open: findings.filter((f) => f.status === "open").length,
@@ -227,7 +254,7 @@ const out = {
 		weakest: projects
 			.filter((p) => p.score < 100)
 			.sort((a, b) => a.score - b.score || b.prominence - a.prominence)
-			.slice(0, 12),
+			.slice(0, 60),
 		missingCounts: ["provenance", "dated", "sourced", "typed", "linked"].map(
 			(k) => ({
 				field: k,
@@ -243,9 +270,182 @@ const out = {
 		top: repos
 			.filter((r) => r.repoScore != null)
 			.sort((a, b) => (b.repoScore ?? 0) - (a.repoScore ?? 0))
-			.slice(0, 10),
+			.slice(0, 40),
+		/** the repo gap queue: indexed but thinly evidenced */
+		thinnest: repos
+			.filter((r) => r.notes === 0 || r.codeDepth == null)
+			.sort((a, b) => (a.repoScore ?? 0) - (b.repoScore ?? 0))
+			.slice(0, 40),
 	},
 };
+
+/** Honest self-report, derived from the numbers above — the thing a calling
+ * agent should weigh BEFORE trusting a result. Each entry states the limit,
+ * the measurement behind it, and what to do instead. Never hand-written
+ * copy: if the number improves, the sentence changes or disappears. */
+const weakBasis =
+	(out.projects.basisMix.find((b) => b.basis === "site-liveness")?.count ?? 0) +
+	(out.projects.basisMix.find((b) => b.basis === "source-inherited")?.count ??
+		0);
+const limitations: Array<{
+	area: string;
+	limit: string;
+	measurement: string;
+	instead: string;
+}> = [];
+if (weakBasis / Math.max(out.projects.sampled, 1) > 0.5)
+	limitations.push({
+		area: "project status",
+		limit:
+			"Most lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+		measurement: `${weakBasis} of ${out.projects.sampled} sampled rows`,
+		instead:
+			"Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it.",
+	});
+const untyped =
+	out.projects.missingCounts.find((m) => m.field === "typed")?.count ?? 0;
+if (untyped > 0)
+	limitations.push({
+		area: "project types",
+		limit:
+			"Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
+		measurement: `${untyped} of ${out.projects.sampled} sampled rows untyped`,
+		instead:
+			"For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem.",
+	});
+if (out.repos.withNotes < out.repos.sampled / 2)
+	limitations.push({
+		area: "repo knowledge notes",
+		limit:
+			"Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
+		measurement: `${out.repos.withNotes} of ${out.repos.sampled} sampled repos`,
+		instead:
+			"Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields.",
+	});
+const recallOpen =
+	out.findings.byFailureMode.find((m) => m.mode === "recall-miss")?.open ?? 0;
+if (recallOpen > 0)
+	limitations.push({
+		area: "known-item recall",
+		limit:
+			"Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
+		measurement: `${recallOpen} open recall-miss findings`,
+		instead:
+			"For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer.",
+	});
+(out as Record<string, unknown>).knownLimitations = limitations;
+
+/** THE GAP MATRIX — one row per (entity × field) hole, with the count, the
+ * denominator, why it matters to a caller, what closes it, and real examples
+ * so the work is pickup-able. This is the actionable half of the report:
+ * knownLimitations says "be careful", the matrix says "here is the list". */
+const strongBases = new Set([
+	"human-verified",
+	"onchain-activity",
+	"official-record",
+]);
+const weakBasisRows = [...seen.values()].filter(
+	(p) => !strongBases.has(p.statusBasis ?? "unverified"),
+);
+const missing = (field: string) =>
+	projects.filter((p) => p.missing.includes(field));
+const sample = <T>(rows: T[], pick: (r: T) => string) =>
+	rows.slice(0, 12).map(pick);
+
+(out as Record<string, unknown>).gapMatrix = {
+	definition:
+		"One row per (entity type × missing field). count/of is a SAMPLE with its denominator, not a census. examples are real identifiers so the gap can be worked or independently checked.",
+	rows: [
+		{
+			entity: "project",
+			field: "statusSourceUrl",
+			missing: missing("sourced").length,
+			of: projects.length,
+			whyItMatters:
+				"A lifecycle claim with no source cannot be re-checked by a caller — it is our assertion, not evidence.",
+			closedBy:
+				"Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
+			examples: sample(
+				missing("sourced").sort((a, b) => b.prominence - a.prominence),
+				(p) => p.slug,
+			),
+		},
+		{
+			entity: "project",
+			field: "types",
+			missing: missing("typed").length,
+			of: projects.length,
+			whyItMatters:
+				"An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
+			closedBy:
+				"Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
+			examples: sample(
+				missing("typed").sort((a, b) => b.prominence - a.prominence),
+				(p) => p.slug,
+			),
+		},
+		{
+			entity: "project",
+			field: "strong status basis",
+			missing: weakBasisRows.length,
+			of: projects.length,
+			whyItMatters:
+				"site-liveness means only that a page answered; source-inherited means the value came from elsewhere. Neither is observation of the product.",
+			closedBy:
+				"Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
+			examples: sample(
+				weakBasisRows
+					.filter((p) => (p.prominence ?? 0) >= 70)
+					.sort((a, b) => (b.prominence ?? 0) - (a.prominence ?? 0)),
+				(p) => p.slug,
+			),
+		},
+		{
+			entity: "repo",
+			field: "knowledgeNotes",
+			missing: repos.filter((r) => r.notes === 0).length,
+			of: repos.length,
+			whyItMatters:
+				"Curated dated facts are what let an agent cite a repo claim; without them only raw scan fields are available.",
+			closedBy:
+				"The repo-intel enrich pass, which writes dated notes with sources.",
+			examples: sample(
+				repos.filter((r) => r.notes === 0 && (r.repoScore ?? 0) >= 60),
+				(r) => r.fullName,
+			),
+		},
+		{
+			entity: "repo",
+			field: "mainnet contract join",
+			missing: repos.filter((r) => r.mainnetContracts === 0).length,
+			of: repos.length,
+			whyItMatters:
+				"Without a verified contract join we can say code exists, never that it is USED on mainnet.",
+			closedBy:
+				"Contract attribution during the scan wave; absence is absence of a join, never proof of disuse.",
+			examples: sample(
+				repos.filter(
+					(r) => r.mainnetContracts === 0 && (r.repoScore ?? 0) >= 70,
+				),
+				(r) => r.fullName,
+			),
+		},
+		{
+			entity: "repo",
+			field: "code depth reading",
+			missing: repos.filter((r) => r.codeDepth == null).length,
+			of: repos.length,
+			whyItMatters:
+				"No depth reading means the repo was never scanned for real implementation signal.",
+			closedBy: "A scan wave pass over the unscanned tail.",
+			examples: sample(
+				repos.filter((r) => r.codeDepth == null),
+				(r) => r.fullName,
+			),
+		},
+	].sort((a, b) => b.missing / b.of - a.missing / a.of),
+};
+
 writeFileSync(
 	join(process.cwd(), "improvements/quality/entities.json"),
 	`${JSON.stringify(out, null, 1)}\n`,
