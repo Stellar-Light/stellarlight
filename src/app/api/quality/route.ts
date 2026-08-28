@@ -16,6 +16,7 @@ import {
 	getEntities,
 	getGuardRows,
 	getMissFunnel,
+	getProgress,
 } from "@/lib/quality-artifacts";
 import { getAppUrl } from "@/lib/utils/app-url";
 import { API_VERSION } from "@/lib/version";
@@ -44,6 +45,15 @@ export async function GET(req: NextRequest) {
 					"A SELF-REPORT built from committed artifacts: the findings ledger every detector writes to, plus live samples of project rows and indexed repos. knownLimitations is DERIVED from these numbers, not authored — weigh it before trusting a result. Counts are samples, not censuses; each carries its denominator.",
 				...(paramWarning ? { warnings: [paramWarning] } : {}),
 			},
+			/** Where this service is against its own published quality plan.
+			 * Phase state is read from QUALITY.md — it cannot show complete here
+			 * without being complete there — and remaining work is served with
+			 * the same weight as finished work. */
+			progress: getProgress().phases,
+			/** The written record behind the numbers: lesson write-ups per
+			 * defect class, committed fetch receipts for human-verified
+			 * corrections, and audit reports. */
+			library: getProgress().library,
 			/** Read this first: what we are weak at, measured, with the
 			 * recommended alternative for each. */
 			knownLimitations: e.knownLimitations,

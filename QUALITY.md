@@ -101,114 +101,40 @@ service runs at Stage 3+ by default and humans do product, not repair.
 
 ## 4. Phases
 
-- **P0 (this week):** this document · opacity lock in CI · class labels in
-  the findings ledger · battery lanes adopt the rounds format.
-- **P1 (+2 weeks):** the list-endpoint honesty layer + conformance test —
-  *shipped in full 2026-08-28: the ratchet landed (#1060) and the 8-op debt
-  was paid to zero with one shared vocabulary (#1061)* · eval-bank freeze +
-  sha256 fingerprints — *shipped: eval-baselines.json + a vitest gate; any
-  bank/guard/golden edit fails CI until re-baselined in the same PR* · bank
-  linter — *shipped: structure offline + live rot check, daily before the
-  guards; its own first run miscalled four CAP goldens and got its rule
-  corrected, which is the linter linting its author* · persona rotation —
-  *shipped: the wave-3 hacker-buildtime probes joined the rotating category
-  banks* · the /quality dashboard — *rebuilt 2026-08-29 after the first
-  version shipped seven single-dot boxes and no per-entity view: now
-  FINDINGS (263 open / 167 cleared / 7 verified, split by failure mode, aged —
-  the treadmill made visible), ROW QUALITY (five-fact evidence score per
-  project, provenance ramp, the curation queue of weakest prominent rows),
-  REPO QUALITY (score, scan depth, knowledge notes, mainnet joins), and
-  TRENDS as real area charts that refuse to draw a line from one point.
-  Ordinal ramp validated with the dataviz six-checks against the dark
-  surface.*
-- **P2 (+1 month):** Stage 2 autonomy for bounded work · the
-  dry→execute→verify data loop agentized · Verify v1 slices 2-3.
-- **P3:** Stage 3 · event-driven freshness (PLAN §5) · steady-state review.
+- **P0 — Name the classes, lock the first invariant.** `status: done`
+  This document · the opacity lock in CI · class labels in the findings
+  ledger · battery lanes on the rounds format.
+  *Evidence:* `check-schema-opacity.ts` (zero silent opacity, 47 open maps
+  ratcheted), QUALITY.md itself.
 
-## 4b. The consumer surface — what a caller (human or agent) is owed
+- **P1 — Honesty layer, eval integrity, the dashboard.** `status: done`
+  The list-endpoint honesty layer + conformance ratchet (#1060) with the
+  8-op debt paid to zero via one shared vocabulary (#1061) · eval-bank
+  freeze with sha256 fingerprints and a vitest gate (#1063) · the bank
+  linter with live rot detection · persona rotation in the battery banks ·
+  the /quality dashboard with committed trend history (#1075), rebuilt
+  around findings, gap matrix and the miss funnel (#1077, #1078).
+  *Evidence:* `specs/honesty-baseline.json` (debt 0),
+  `scripts/eval/eval-baselines.json`, `improvements/quality/*.json`.
 
-A quality system that only reports to its owners is half a system. Two
-readers, two artifacts, one set of committed numbers:
+- **P2 — Entity truth: dedupe, issuers, receipts.** `status: done`
+  sls-033 closed at root — typed enumerations are limit-independent sets
+  (#1064, #1065) · stablecoin issuer relations made conflation-proof, with
+  the `issued` claim family (#1068, #1069) · receipts-in-repo for
+  human-verified corrections (#1073).
+  *Evidence:* battery slice G (enumeration integrity), slice H (verify
+  grades itself), `improvements/receipts/`.
 
-- **`/quality`** (people): known limitations first, then the gap matrix,
-  findings, per-row and per-repo evidence, and trends. Every figure states
-  its direction (`↑ higher is better`) and carries an info affordance
-  defining what it measures — a bare "87%" is unreadable.
-- **`GET /api/quality`** (agents): the same measurements, machine-readable,
-  so trust calibration never requires parsing a webpage. It leads with
-  `knownLimitations` — **derived from the numbers, never authored** — each
-  carrying its measurement and what to do *instead*.
-
-**The miss funnel is the diagnostic half.** "200 recall misses" hides four
-different problems with four different owners, so every open recall finding
-is replayed live and classified at the FIRST stage that fails: *passing*
-(no longer reproduces), *ranking* (returned, below top-3), *admission* (not
-returned for that phrasing), *identity* (its own exact name misses it),
-*corpus* (not in the directory at all). Only the middle three are debt;
-corpus is a coverage job and passing is staleness. The first run found
-**70 of 80 sampled misses no longer reproduce** — the open count was
-carrying the fixes of the previous week, which is exactly the lie a
-scoreboard of counts tells and a funnel catches.
-
-**The gap matrix is the actionable half.** One row per (entity × missing
-field) with the count, its denominator, why it matters to a caller, what
-closes it, and **real identifiers** so the work can be picked up or the
-claim independently checked. `knownLimitations` says *be careful here*; the
-matrix says *here is the list*. Standing rule: a sample never reports
-without its denominator, and absence is always described as absence of
-OUR evidence, never as a fact about the world.
-
-## 5. External calibration — the Raven QA deep-dive (folded in 2026-08-28)
-
-Their five-model research panel over 55 QA misses (`research/qa-deep-dive-2026-08-25/`,
-read in full) plus their shipped product lane changes both of what our answers
-flow through and what is asked of us. The items below are IN the phases above —
-this section records why, so the map carries its own provenance.
-
-**What changed on their side that binds us:**
-- Their host now captures an exact-path allowlist from OUR responses into the
-  judge-visible SOURCE METADATA block: `generatedAt`, `dataAsOf`, `asOf`,
-  `matchMode`, `counts.count/total`. A field absent from `meta` is invisible to
-  their evidence chain even when the agent retrieved it. Our matchMode work is
-  load-bearing there now; dialect gaps (getChanges) are fixed as found.
-- Their answering contract now REQUIRES dating volatile claims, copying exact
-  identifiers, and scoping absence claims — our `asOf`/provenance coverage and
-  exact-ID indexing are graded downstream.
-- Their most adversarial lane (grok-xhigh) cited our live `/api/rfps` as
-  class-A arbitration evidence against their own golden. Endpoints used as
-  truth sources get golden-parity protection.
-
-**Adopted into the phases:**
-- P1: sidecar-dialect census + fixes (getChanges shipped; analyze/vetIdea
-  counts pending honest semantics — a forced `total` that misleads is worse
-  than absence) · eval-bank freeze + sha256 input fingerprints with
-  re-baseline-as-explicit-act (their gates.json discipline) · bank linter for
-  authoring defects (compound predicates, self-referential dates — their
-  R2/R12 classes).
-- P2: canonical entity envelope + enumeration dedup (their top-10 rank 5 ask,
-  our sls-033, open since July — dated identity, lifecycle, availability,
-  dedup status) · stablecoin issuer-relation truth (an issuer credited across
-  another issuer's asset is the sls-066 class) · receipts-in-repo for
-  human-verified corrections — *shipped 2026-08-29:
-  scripts/data/capture-receipt.ts writes improvements/receipts/ entries
-  (URL, fetch time, ETag, markers with excerpts, body hash) and the four
-  recent human-verified corrections (hoops, laina, noether, zenex) carry
-  theirs, referenced from their curation-map entries. Re-run the script to
-  diff what a page says now against what it said when the correction was
-  made.*
-- Watch, do not build: their source-pointer lane (`sources.locate`) is still
-  CHANGES-REQUESTED with open findings. If phase 0 ships, our position is the
-  ecosystem long tail their canonical-only allowlist cannot cover, and
-  pointer-shaped evidence (repo@ref path#symbol) in explainRepo/verify is the
-  move. Their Option-D critique of explainRepo ("an answer, not a pointer")
-  is the requirements doc for that change.
-
-**Meter honesty (grok's essay, our L10 restated harder):** measurement-side
-movement is never booked as product movement. When /quality trends ship (P1),
-bank/golden edits and grading changes are reported in their own column,
-separate from data and serving changes — their ceiling decomposition found
-13.5 of 35.5 lost points were measurement artifacts, and the same discipline
-applies to our own scoreboard.
+- **P3 — Earned autonomy.** `status: in progress`
+  Stage-2 autonomy for bounded work · event-driven freshness (PLAN §5) ·
+  steady-state review.
+  *Shipped so far:* the daily pipeline now rebuilds its own quality
+  artifacts and commits them, and the stale-finding sweep re-probes the
+  ledger instead of letting counts drift.
+  *Remaining:* no agent yet ACTS on the gap matrix — the gaps are measured,
+  named and served, but closing them is still human-initiated. Stage 2
+  requires N intervention-free weeks before auto-merge opens for bounded
+  lanes, and those weeks have not been served.
 
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from

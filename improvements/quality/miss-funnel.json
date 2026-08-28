@@ -1,8 +1,8 @@
 {
- "generatedAt": "2026-08-28T01:59:02.468Z",
+ "generatedAt": "2026-08-28T02:19:22.778Z",
  "population": {
-  "openRecallMisses": 206,
-  "sampled": 80,
+  "openRecallMisses": 21,
+  "sampled": 21,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
  "stages": [
@@ -11,31 +11,26 @@
    "label": "no longer reproduces",
    "owner": "ledger",
    "note": "Fixed since the finding was filed — these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
-   "count": 70,
-   "share": 88,
-   "examples": [
-    "nownodes",
-    "gatewayfm",
-    "bridge",
-    "merkl",
-    "humantech",
-    "flashback",
-    "boundless",
-    "mercury"
-   ]
+   "count": 0,
+   "share": 0,
+   "examples": []
   },
   {
    "stage": "ranking",
    "label": "returned, but below top-3",
    "owner": "ranking",
    "note": "The row IS retrieved for the query and simply ranks too low. The cheapest class to fix, and the one scoring changes actually move.",
-   "count": 4,
-   "share": 5,
+   "count": 9,
+   "share": 43,
    "examples": [
     "rise-in",
     "stellar-update",
     "ios-stellar-sdk",
-    "stellar-tip"
+    "stellar-tip",
+    "lumens-for-charity",
+    "zkcross",
+    "for-yield",
+    "stellar-rust-sdk"
    ]
   },
   {
@@ -43,15 +38,17 @@
    "label": "not returned for the query at all",
    "owner": "admission / matching",
    "note": "The tier ladder never admitted the row for this phrasing, though its exact name resolves. Vocabulary, anchors, and synonym work live here.",
-   "count": 6,
-   "share": 8,
+   "count": 12,
+   "share": 57,
    "examples": [
+    "the-starship-soroban",
+    "stellar-global",
     "dd",
     "dex-tools",
     "block-by-block",
     "stellar-c-sdk",
-    "stellar-wallets-kit",
-    "stellar-tools"
+    "soroban-sdk-tools",
+    "stellar-wallets-kit"
    ]
   },
   {

@@ -386,7 +386,7 @@ export function GapMatrix({
 					>
 						<div className="flex items-baseline justify-between gap-4 mb-1.5">
 							<span className="text-xs">
-								<span className="text-muted-foreground uppercase tracking-wide">
+								<span className="text-muted-foreground capitalize">
 									{r.entity}
 								</span>{" "}
 								<span className="text-foreground font-medium">{r.field}</span>
@@ -491,5 +491,130 @@ export function MissFunnel({
 				</div>
 			))}
 		</div>
+	);
+}
+
+/** Phase progress — states render with equal weight on purpose. A roadmap
+ * that only shows green is marketing; "in progress" and its remaining work
+ * are the parts a reader actually needs. */
+export function PhaseProgress({
+	phases,
+}: {
+	phases: Array<{
+		id: string;
+		title: string;
+		state: string;
+		evidence: string | null;
+		shippedSoFar: string | null;
+		remaining: string | null;
+	}>;
+}) {
+	const done = phases.filter((p) => p.state === "done").length;
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center gap-3">
+				<div className="flex-1 flex gap-[3px] h-2">
+					{phases.map((p) => (
+						<div
+							key={p.id}
+							className="flex-1 rounded-[2px]"
+							style={{
+								backgroundColor:
+									p.state === "done"
+										? "#FDDA24"
+										: p.state === "in-progress"
+											? "#6B5A12"
+											: "#2F2F2F",
+							}}
+							title={`${p.id} — ${p.title}: ${p.state}`}
+						/>
+					))}
+				</div>
+				<span className="text-xs text-muted-foreground tabular-nums shrink-0">
+					{done} of {phases.length} phases complete
+				</span>
+			</div>
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+				{phases.map((p) => (
+					<div key={p.id} className="flex flex-col gap-1">
+						<span className="flex items-baseline gap-2">
+							<span className="text-xs font-semibold text-foreground">
+								{p.id}
+							</span>
+							<span className="text-xs text-foreground">{p.title}</span>
+							<span
+								className={`text-[10px] px-1.5 py-px rounded-full border shrink-0 ${
+									p.state === "done"
+										? "border-border text-muted-foreground"
+										: p.state === "in-progress"
+											? "border-amber-500/40 text-amber-400"
+											: "border-border text-muted-foreground"
+								}`}
+							>
+								{p.state === "in-progress"
+									? "In progress"
+									: p.state === "done"
+										? "Done"
+										: "Not started"}
+							</span>
+						</span>
+						{p.evidence && (
+							<span className="text-[11px] text-muted-foreground leading-relaxed">
+								<span className="text-foreground/60">Evidence: </span>
+								{p.evidence}
+							</span>
+						)}
+						{p.shippedSoFar && (
+							<span className="text-[11px] text-muted-foreground leading-relaxed">
+								<span className="text-foreground/60">Shipped so far: </span>
+								{p.shippedSoFar}
+							</span>
+						)}
+						{p.remaining && (
+							<span className="text-[11px] leading-relaxed text-amber-400/80">
+								<span className="text-amber-400/60">Remaining: </span>
+								{p.remaining}
+							</span>
+						)}
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+/** A queue row that goes somewhere. Every item in a work queue should be
+ * clickable — a name with no destination is a dead end for the person who
+ * has to act on it. */
+export function QueueRow({
+	href,
+	primary,
+	secondary,
+	trailing,
+}: {
+	href: string;
+	primary: string;
+	secondary?: string;
+	trailing: string;
+}) {
+	return (
+		<a
+			href={href}
+			target={href.startsWith("http") ? "_blank" : undefined}
+			rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+			className="group flex items-baseline justify-between gap-4 text-xs py-1 -mx-2 px-2 rounded hover:bg-muted/40 transition-colors"
+		>
+			<span className="truncate">
+				<span className="text-foreground group-hover:underline underline-offset-2">
+					{primary}
+				</span>
+				{secondary && (
+					<span className="text-muted-foreground"> · {secondary}</span>
+				)}
+			</span>
+			<span className="shrink-0 text-muted-foreground tabular-nums">
+				{trailing}
+			</span>
+		</a>
 	);
 }
