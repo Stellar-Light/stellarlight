@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T16:41:44.849Z",
+ "generatedAt": "2026-08-28T16:54:53.575Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -10153,6 +10153,116 @@
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 76
    }
+  },
+  "curatedShape": {
+   "repos": 2920,
+   "scoreHistogram": [
+    {
+     "bucket": "0–9",
+     "count": 358
+    },
+    {
+     "bucket": "10–19",
+     "count": 906
+    },
+    {
+     "bucket": "20–29",
+     "count": 489
+    },
+    {
+     "bucket": "30–39",
+     "count": 476
+    },
+    {
+     "bucket": "40–49",
+     "count": 181
+    },
+    {
+     "bucket": "50–59",
+     "count": 234
+    },
+    {
+     "bucket": "60–69",
+     "count": 174
+    },
+    {
+     "bucket": "70–79",
+     "count": 80
+    },
+    {
+     "bucket": "80–89",
+     "count": 22
+    },
+    {
+     "bucket": "90–99",
+     "count": 0
+    }
+   ],
+   "activityMix": [
+    {
+     "label": "dormant",
+     "count": 1203
+    },
+    {
+     "label": "slowing",
+     "count": 910
+    },
+    {
+     "label": "active",
+     "count": 714
+    },
+    {
+     "label": "unknown",
+     "count": 60
+    },
+    {
+     "label": "archived",
+     "count": 33
+    }
+   ],
+   "languageMix": [
+    {
+     "label": "TypeScript",
+     "count": 1045
+    },
+    {
+     "label": "Rust",
+     "count": 414
+    },
+    {
+     "label": "unknown",
+     "count": 406
+    },
+    {
+     "label": "JavaScript",
+     "count": 326
+    },
+    {
+     "label": "Go",
+     "count": 107
+    },
+    {
+     "label": "Python",
+     "count": 105
+    },
+    {
+     "label": "Solidity",
+     "count": 97
+    },
+    {
+     "label": "HTML",
+     "count": 82
+    },
+    {
+     "label": "Shell",
+     "count": 37
+    },
+    {
+     "label": "PHP",
+     "count": 24
+    }
+   ],
+   "languageOther": 48
   },
   "withCodeDepth": 6855,
   "withNotes": 263,

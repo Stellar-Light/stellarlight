@@ -12,6 +12,8 @@ import {
 	StackedRamp,
 } from "@/components/quality/charts";
 import {
+	CoverageBar,
+	MiniHistogram,
 	QualityScatter,
 	StageBreakdown,
 	StateHeatmap,
@@ -172,8 +174,8 @@ export default function QualityPage() {
 				const holding = guards.filter((g) => g.state === "holding");
 				return (
 					<Card
-						title="Verdict: what to rely on right now"
-						description="Derived from the guard states below, not written by hand. A guard is HOLDING only when its evidence is both passing and fresh; stale evidence is neither passing nor failing, it is unmeasured."
+						title="Verdict: where this data stands right now"
+						description="Derived from the guard states below, not written by hand. A guard is at target only when its evidence is both passing and fresh; below-target rows carry their own work queue, and aged evidence counts as unmeasured, never as passing."
 						right={
 							<a
 								href="/api/quality"
@@ -187,17 +189,17 @@ export default function QualityPage() {
 					>
 						<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
 							<Stat
-								label="Guards holding"
+								label="At target"
 								value={String(holding.length)}
 								sub="Passing on fresh evidence"
 							/>
 							<Stat
-								label="Breached"
+								label="Below target"
 								value={String(breached.length)}
-								sub="Measured and failing"
+								sub="Measured, with an open work queue"
 							/>
 							<Stat
-								label="Stale"
+								label="Needs re-measure"
 								value={String(stale.length)}
 								sub="Evidence older than its own window"
 							/>
@@ -232,7 +234,7 @@ export default function QualityPage() {
 							</div>
 							<div>
 								<p className="text-xs font-medium text-foreground mb-2">
-									Do not rely on
+									Below target, being worked
 								</p>
 								<ul className="space-y-1.5">
 									{breached.map((g) => (
@@ -241,7 +243,8 @@ export default function QualityPage() {
 											className="text-xs text-muted-foreground leading-relaxed"
 										>
 											<span className="text-foreground">{g.title}</span> is
-											breached: {g.value} {g.measure.unit}, measured {g.asOf}
+											below target: {g.value} {g.measure.unit}, measured{" "}
+											{g.asOf}
 										</li>
 									))}
 									{stale.map((g) => (
@@ -249,8 +252,8 @@ export default function QualityPage() {
 											key={g.key}
 											className="text-xs text-muted-foreground leading-relaxed"
 										>
-											<span className="text-foreground">{g.title}</span> is
-											stale: last measured {g.ageDays}d ago, past its{" "}
+											<span className="text-foreground">{g.title}</span> needs a
+											re-measure: last run {g.ageDays}d ago, past its{" "}
 											{g.freshnessDays}d window, so its {g.value} is a reading
 											of the past, not the present
 										</li>
@@ -736,43 +739,76 @@ export default function QualityPage() {
 
 			{/* ── repo quality ── */}
 			<Card
-				title="Repo quality: code truth"
-				description="Indexed repositories carry their own evidence: a graded score, scan depth, curated knowledge notes, and whether a verified mainnet contract is joined to them."
+				title="The code index: what it holds, how deeply we know it"
+				description="2,920 curated repos (claimed by a project or a tracked builder) plus a 10,018-row Electric Capital tail indexed for completeness. The charts read over the curated index only - mixing the tail in made the curated index look unscanned when it is not."
 				className="mb-6"
 			>
-				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
-					{/* Each rate is measured against the population it TARGETS. The old
-					     tiles divided by all 12,938 rows including the ten-thousand-row
-					     EC-taxonomy tail we deliberately scan only opportunistically,
-					     which made "higher is better" meaningless. */}
-					<Metric
-						label="Curated index scanned for depth"
-						value={`${entities.repos.coverage.curatedIndex.withCodeDepth}/${entities.repos.coverage.curatedIndex.repos}`}
-						sub={`${entities.repos.coverage.curatedIndex.depthPct}% of rows a project or builder claims`}
-						goodWhen="higher"
-						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) - not a quality judgement. Denominator: curated-index rows only (source project-link or builder-owned). The EC-taxonomy tail is scanned opportunistically by design and reported separately, without a target."
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-6 mb-8">
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+							Repo score distribution, curated index
+							<Info text="repoScore (0-100) grades freshness, traction and builder authority. A long low tail is EXPECTED in an open ecosystem - hackathon one-offs and early experiments are real code references worth indexing; the score is what keeps them ranked below production repos." />
+						</p>
+						<MiniHistogram
+							buckets={entities.repos.curatedShape.scoreHistogram}
+							unit="repos"
+						/>
+					</div>
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+							Commit activity, curated index
+							<Info text="Derived from each repo's last commit: active (<=90d), slowing (<=1y), dormant (older), archived, or unknown (no commit date held - not knowing is its own state, never counted as dormant)." />
+						</p>
+						<StackedRamp
+							rows={entities.repos.curatedShape.activityMix.map((m) => ({
+								label: m.label,
+								value: m.count,
+							}))}
+							total={entities.repos.curatedShape.repos}
+						/>
+						<p className="text-xs text-muted-foreground mt-2 inline-flex items-center gap-1.5">
+							Languages
+						</p>
+						<BarList
+							rows={entities.repos.curatedShape.languageMix
+								.slice(0, 6)
+								.map((m) => ({ label: m.label, value: m.count }))}
+							unit="repos"
+						/>
+					</div>
+				</div>
+
+				<p className="text-xs text-muted-foreground mb-3 inline-flex items-center gap-1.5">
+					How deeply we know each layer
+					<Info text="Three different jobs with three different denominators. Depth scanning aims at the whole curated index. Knowledge notes are a hand-curated research layer being built over the highest-scored repos - a small number is early progress, not missing homework. Mainnet joins are deliberately strict: only a verified on-chain attribution counts, so the number grows slowly and every unit of it is proof." />
+				</p>
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-5 mb-6">
+					<CoverageBar
+						label="Depth-scanned"
+						value={entities.repos.coverage.curatedIndex.withCodeDepth}
+						of={entities.repos.coverage.curatedIndex.repos}
+						intent="Curated repos with a code-depth reading (entry files, symbols, SDK usage). The scan waves aim at all of them."
 					/>
-					<Metric
-						label="Curation pool with knowledge notes"
-						value={`${entities.repos.coverage.knowledgeNotes.withNotes}/${entities.repos.coverage.knowledgeNotes.pool}`}
-						sub="Of curated rows with repoScore ≥ 60"
-						goodWhen="higher"
-						explain="knowledgeNotes are hand-curated dated facts with a source URL. Denominator: the pool curation actually targets (curated index, repoScore ≥ 60) - nobody intends to hand-curate ten thousand tail rows, so a whole-census rate would be noise."
+					<CoverageBar
+						label="Deep-researched notes"
+						value={entities.repos.coverage.knowledgeNotes.withNotes}
+						of={entities.repos.coverage.knowledgeNotes.pool}
+						intent="Hand-curated dated facts with sources, written over the top-scored pool one repo at a time. An enrichment layer under construction, newest additions first."
 					/>
-					<Metric
-						label="Deployable contracts joined to mainnet"
-						value={`${entities.repos.coverage.mainnetJoin.joined}/${entities.repos.coverage.mainnetJoin.pool}`}
-						sub="Of rows scanned as deployable contracts"
-						goodWhen="higher"
-						explain="A verified mainnet contract attributed to the repo - the difference between 'code exists' and 'code is used'. Denominator: only rows the scanner marked deployable; a join is not conceivable for an SDK or a frontend. Absence is absence of a join, never proof of disuse."
-					/>
-					<Metric
-						label="Tail scanned (no target)"
-						value={`${entities.repos.coverage.tail.withCodeDepth}/${entities.repos.coverage.tail.repos}`}
-						sub="EC-taxonomy rows, opportunistic by design"
-						explain="Electric Capital taxonomy rows are indexed for completeness and scanned as budget allows. Low coverage here is intended, so this number carries no direction - it is context, not a score."
+					<CoverageBar
+						label="Verified mainnet joins"
+						value={entities.repos.coverage.mainnetJoin.joined}
+						of={entities.repos.coverage.mainnetJoin.pool}
+						intent="Deployable contracts with a PROVEN on-chain attribution. Strict by design: absence is absence of a join, never proof of disuse."
 					/>
 				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mb-6">
+					Plus the Electric Capital tail:{" "}
+					{entities.repos.coverage.tail.withCodeDepth.toLocaleString("en-US")}{" "}
+					of {entities.repos.coverage.tail.repos.toLocaleString("en-US")} rows
+					scanned opportunistically as budget allows - indexed for completeness,
+					no coverage target attached.
+				</p>
 				{(entities.repos.duplicateRows ?? 0) > 0 && (
 					<p className="mb-4 flex items-start gap-2 text-xs leading-relaxed text-amber-400">
 						<TriangleAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
@@ -921,7 +957,15 @@ export default function QualityPage() {
 								) : (
 									<CircleSlash className="h-3 w-3" />
 								)}
-								{g.state}
+								{/* Internal state names stay exact (holding / breached /
+								    stale; the API serves them verbatim). The RENDERED words
+								    are for a community reader, where "breached" reads as an
+								    incident instead of a metric below its committed floor. */}
+								{g.state === "holding"
+									? "at target"
+									: g.state === "breached"
+										? "below target"
+										: "needs re-measure"}
 							</span>
 						</div>
 						<ul className="mt-4 space-y-1.5">
