@@ -1,0 +1,33 @@
+{
+ "slug": "noether",
+ "url": "https://noether.exchange/",
+ "finalUrl": "https://noether.exchange/",
+ "fetchedAt": "2026-08-28T00:39:18.665Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Fri, 28 Aug 2026 00:39:18 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "135142a5311a0187869a3fc6e029db441366a7cf734159c0bd5846f5e96efdaf",
+ "bodyTextChars": 1911,
+ "markers": [
+  {
+   "marker": "funds are not real",
+   "found": true,
+   "excerpt": "Audit in progress | Noether Testnet Skip to content TESTNET — funds are not real NOETHER Audit in progress . Noether&#x27;s mainnet contracts are being audited. Mainnet opens when the audit clears — until then, trade with test funds on our pu"
+  },
+  {
+   "marker": "testnet",
+   "found": true,
+   "excerpt": "Audit in progress | Noether Testnet Skip to content TESTNET — funds are not real NOETHER Audit in progress . Noether&#x27;s mainnet contracts are being audited. Mainnet opens when the audit clears — until the"
+  },
+  {
+   "marker": "waitlist",
+   "found": true,
+   "excerpt": "ns when the audit clears — until then, trade with test funds on our public testnet. Trade on testnet → Join the mainnet waitlist I plan to… (optional) Trade Provide liquidity Both I accept the terms and privacy policy and confirm I am not a resident of a restricted jurisdiction. Join waitlist Alread"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

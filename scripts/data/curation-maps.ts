@@ -59,6 +59,7 @@ export const STATUS_FIX: Record<
 	// "JOIN THE WAITLIST". Testnet products + waitlist = the noether class:
 	// a real, active project that has NOT launched. Pre-Release, not Live,
 	// not Inactive.
+	// receipt: improvements/receipts/hoops-2026-08-28.json
 	hoops: {
 		from: "Live",
 		to: "Pre-Release",
@@ -67,6 +68,7 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://hoops.finance/",
 		basis: "human-verified",
 	},
+	// receipt: improvements/receipts/laina-2026-08-28.json
 	laina: {
 		from: "Live",
 		to: "Pre-Release",
@@ -76,6 +78,7 @@ export const STATUS_FIX: Record<
 			"https://github.com/laina-defi/laina/blob/main/src/lib/horizon.ts",
 		basis: "human-verified",
 	},
+	// receipt: improvements/receipts/zenex-2026-08-28.json
 	zenex: {
 		from: "Pre-Release",
 		to: "Pre-Release",
@@ -94,6 +97,7 @@ export const STATUS_FIX: Record<
 	// and genuinely being built, so this is Pre-Release, NOT Inactive: the
 	// product is coming, it just is not tradeable with real funds yet.
 	// Flip back to Live when the mainnet contracts are published.
+	// receipt: improvements/receipts/noether-2026-08-28.json
 	noether: {
 		from: "Live",
 		to: "Pre-Release",

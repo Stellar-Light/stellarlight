@@ -1,0 +1,28 @@
+{
+ "slug": "laina",
+ "url": "https://raw.githubusercontent.com/laina-defi/laina/main/src/lib/horizon.ts",
+ "finalUrl": "https://raw.githubusercontent.com/laina-defi/laina/main/src/lib/horizon.ts",
+ "fetchedAt": "2026-08-28T00:38:31.554Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Fri, 28 Aug 2026 00:38:31 GMT",
+  "etag": "W/\"1a6cee847690b0507e8de8bc85867fda5892804c4a6685876ec9d95b37dd81d5\"",
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": "7812cd797d38c5558f7b5e34fd5a08a3431a9eb64488268ae6ba67aaa54a92ea",
+ "bodyTextChars": 1425,
+ "markers": [
+  {
+   "marker": "horizon-testnet",
+   "found": true,
+   "excerpt": "zonServer = new Horizon.Server( import.meta.env.PUBLIC_STELLAR_NETWORK === 'local' ? 'http://localhost:8000' : 'https://horizon-testnet.stellar.org/', { allowHttp: import.meta.env.PUBLIC_STELLAR_NETWORK === 'local' }, ); export const getBalances = async (account: string): Promise => { const { balanc"
+  },
+  {
+   "marker": "Networks.TESTNET",
+   "found": true,
+   "excerpt": "count, { networkPassphrase: import.meta.env.PUBLIC_STELLAR_NETWORK === 'local' ? 'Standalone Network ; February 2017' : Networks.TESTNET, fee: '100000', }) .addOperation(Operation.changeTrust({ asset })) .setTimeout(300) // 5 minutes timeout .build(); return transaction; }; export const sendTransact"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
