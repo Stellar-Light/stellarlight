@@ -644,3 +644,218 @@ export function GuardStateStrip({
 		</div>
 	);
 }
+
+// ── Composed trend (bklit composed-chart form) ─────────────────────────────
+
+export interface TrendRow {
+	date: string;
+	batteryPass: number | null;
+	batteryFail: number | null;
+	batteryErrors?: number | null;
+	openMaps: number | null;
+}
+
+/** One time axis, one shared Y scale: stacked daily battery outcomes as
+ * columns with a ratchet line over them (the bklit composed-chart form).
+ * Honest at any length: columns render for the days that exist, the line
+ * needs two points to be a line and renders markers until then. */
+export function ComposedTrend({
+	rows,
+	height = 220,
+}: {
+	rows: TrendRow[];
+	height?: number;
+}) {
+	const { ref, width } = useMeasuredWidth();
+	const [hover, setHover] = useState<number | null>(null);
+	const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
+	const W = width;
+	const H = height;
+	const PAD = { l: 34, r: 14, t: 12, b: 24 };
+	const plotW = W - PAD.l - PAD.r;
+	const plotH = H - PAD.t - PAD.b;
+	const SERIES = [
+		{ key: "batteryPass" as const, label: "battery pass", color: ACCENT },
+		{ key: "batteryFail" as const, label: "battery fail", color: "#f87171" },
+		{
+			key: "batteryErrors" as const,
+			label: "battery errors",
+			color: "#fbbf24",
+		},
+	];
+	const stackTotal = (r: TrendRow) =>
+		SERIES.reduce((a, s) => a + (r[s.key] ?? 0), 0);
+	const yMax = Math.max(
+		...rows.map(stackTotal),
+		...rows.map((r) => r.openMaps ?? 0),
+		1,
+	);
+	const y = (v: number) => PAD.t + (1 - v / yMax) * plotH;
+	// columns own equal time slots; the line snaps to column centers
+	const slot = plotW / Math.max(rows.length, 1);
+	const cx = (i: number) => PAD.l + slot * i + slot / 2;
+	const barW = Math.min(Math.max(slot * 0.5, 6), 40);
+	const linePts = rows
+		.map((r, i) => ({ i, v: r.openMaps }))
+		.filter((p): p is { i: number; v: number } => p.v != null);
+	const h = hover !== null ? rows[hover] : null;
+
+	// ~6 x labels max, always including the first and last day
+	const tickEvery = Math.max(1, Math.ceil(rows.length / 6));
+
+	return (
+		<div
+			ref={ref}
+			className="relative w-full"
+			onMouseLeave={() => setHover(null)}
+			onMouseMove={(e) => {
+				const box = ref.current?.getBoundingClientRect();
+				if (!box) return;
+				setMouse({ x: e.clientX - box.left, y: e.clientY - box.top });
+				const i = Math.floor((e.clientX - box.left - PAD.l) / slot);
+				setHover(i >= 0 && i < rows.length ? i : null);
+			}}
+		>
+			<svg
+				viewBox={`0 0 ${W} ${H}`}
+				width={W}
+				height={H}
+				className="block"
+				role="img"
+				aria-label={`Daily battery outcomes with the open-maps ratchet line, ${rows.length} day(s) from ${rows[0]?.date}`}
+			>
+				<title>Daily eval outcomes and the opacity ratchet</title>
+				{[0, 0.5, 1].map((f) => (
+					<g key={f}>
+						<line
+							x1={PAD.l}
+							x2={W - PAD.r}
+							y1={PAD.t + f * plotH}
+							y2={PAD.t + f * plotH}
+							stroke="currentColor"
+							strokeOpacity="0.07"
+						/>
+						<text
+							x={PAD.l - 8}
+							y={PAD.t + f * plotH}
+							textAnchor="end"
+							dominantBaseline="middle"
+							className="fill-muted-foreground"
+							style={{ fontSize: 9 }}
+						>
+							{Math.round((1 - f) * yMax)}
+						</text>
+					</g>
+				))}
+				{/* crosshair on the hovered column */}
+				{hover !== null && (
+					<rect
+						x={PAD.l + slot * hover}
+						y={PAD.t}
+						width={slot}
+						height={plotH}
+						fill="currentColor"
+						fillOpacity="0.04"
+					/>
+				)}
+				{rows.map((r, i) => {
+					let acc = 0;
+					return (
+						<g key={r.date}>
+							{SERIES.map((s) => {
+								const v = r[s.key] ?? 0;
+								if (v <= 0) return null;
+								const y1 = y(acc + v);
+								const hpx = y(acc) - y(acc + v);
+								acc += v;
+								// top segment gets the rounded cap; a 2px gap separates
+								// stacked segments (the mark spec)
+								const isTop = acc === stackTotal(r);
+								return (
+									<rect
+										key={s.key}
+										x={cx(i) - barW / 2}
+										y={y1}
+										width={barW}
+										height={Math.max(hpx - 2, 1)}
+										rx={isTop ? 3 : 0}
+										fill={s.color}
+										fillOpacity={hover === null || hover === i ? 0.85 : 0.3}
+										style={{ transition: "fill-opacity 100ms" }}
+									/>
+								);
+							})}
+						</g>
+					);
+				})}
+				{/* the ratchet line: straight segments + ring markers; a single
+				    point renders as a marker, never a fake line */}
+				{linePts.length > 1 && (
+					<polyline
+						points={linePts.map((p) => `${cx(p.i)},${y(p.v)}`).join(" ")}
+						fill="none"
+						stroke="currentColor"
+						strokeOpacity="0.7"
+						strokeWidth="2"
+					/>
+				)}
+				{linePts.map((p) => (
+					<circle
+						key={p.i}
+						cx={cx(p.i)}
+						cy={y(p.v)}
+						r={hover === p.i ? 5 : 4}
+						fill="var(--background, #111)"
+						stroke="currentColor"
+						strokeOpacity="0.8"
+						strokeWidth="2"
+					/>
+				))}
+				{rows.map((r, i) =>
+					i % tickEvery === 0 || i === rows.length - 1 ? (
+						<text
+							key={r.date}
+							x={cx(i)}
+							y={H - 8}
+							textAnchor="middle"
+							className="fill-muted-foreground"
+							style={{ fontSize: 9 }}
+						>
+							{r.date.slice(5)}
+						</text>
+					) : null,
+				)}
+			</svg>
+			<div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+				{SERIES.map((s) => (
+					<span
+						key={s.key}
+						className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
+					>
+						<span
+							className="inline-block h-2 w-2 rounded-[2px]"
+							style={{ background: s.color }}
+						/>
+						{s.label}
+					</span>
+				))}
+				<span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+					<span className="inline-block h-[2px] w-4 rounded bg-current opacity-70" />
+					open maps ratchet (line, lower is better)
+				</span>
+			</div>
+			{h && mouse && (
+				<Tip x={mouse.x} y={mouse.y} w={W}>
+					<div className="text-foreground">{h.date}</div>
+					<div className="text-muted-foreground tabular-nums">
+						pass {h.batteryPass ?? "–"} · fail {h.batteryFail ?? "–"}
+						{h.batteryErrors != null ? ` · errors ${h.batteryErrors}` : ""}
+					</div>
+					<div className="text-muted-foreground tabular-nums">
+						open maps {h.openMaps ?? "–"}
+					</div>
+				</Tip>
+			)}
+		</div>
+	);
+}

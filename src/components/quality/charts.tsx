@@ -646,39 +646,6 @@ export function QueueRow({
 // Re-exported here so the page's import surface is unchanged.
 export { Sankey } from "./sankey-client";
 
-/** Evidence age as a filled track against the guard's own freshness window.
- * Static by design (server-rendered inside each guard card): the fill IS the
- * message, and past-the-window never renders here because that flips the
- * card's state to needs-re-measure. */
-export function FreshnessTrack({
-	ageDays,
-	windowDays,
-}: {
-	ageDays: number;
-	windowDays: number;
-}) {
-	const share = Math.min(ageDays / Math.max(windowDays, 1), 1);
-	return (
-		<div
-			className="flex items-center gap-2"
-			title={`evidence is ${ageDays}d old; this guard tolerates ${windowDays}d`}
-		>
-			<div className="h-1 w-24 rounded-full bg-muted/40 overflow-hidden">
-				<div
-					className="h-full rounded-full"
-					style={{
-						width: `${Math.max(share * 100, 3)}%`,
-						backgroundColor: share >= 0.7 ? "#fbbf24" : "#FDDA24",
-					}}
-				/>
-			</div>
-			<span className="text-[10px] text-muted-foreground tabular-nums whitespace-nowrap">
-				{ageDays}d of {windowDays}d window
-			</span>
-		</div>
-	);
-}
-
 /** One 100% bar splitting the consumer's OWN answer key by status, ordered
  * best-first. Identity never rides on color alone: the legend carries the
  * words and counts, and declined gets a distinct outlined treatment. */

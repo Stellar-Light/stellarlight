@@ -1,9 +1,7 @@
 import { ArrowUpRight, Check, CircleSlash, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import {
-	AreaChart,
 	BarList,
-	FreshnessTrack,
 	GapMatrix,
 	Info,
 	Metric,
@@ -14,6 +12,7 @@ import {
 	StatusSplit,
 } from "@/components/quality/charts";
 import {
+	ComposedTrend,
 	CoverageBar,
 	GuardStateStrip,
 	MiniHistogram,
@@ -29,7 +28,7 @@ import {
 	getMissFunnel,
 	getNorthStar,
 	getProgress,
-	getTrends,
+	getTrendHistory,
 } from "@/lib/quality-artifacts";
 
 /**
@@ -135,7 +134,7 @@ function EvidenceLink({ path }: { path: string }) {
 export default function QualityPage() {
 	const northStar = getNorthStar();
 	const guards = getGuardRows();
-	const trends = getTrends();
+	const qualityHistory = getTrendHistory();
 	const entities = getEntities();
 	const funnel = getMissFunnel();
 	const progress = getProgress();
@@ -963,16 +962,29 @@ export default function QualityPage() {
 				description="Daily history appended by the eval pipeline and committed, red days included. Battery probe counts rotate with the daily banks, so the pass line moves by design; the failure line and the ratchets are the signal."
 				className="mb-6"
 			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-					{trends.map((t) => (
-						<AreaChart
-							key={t.key}
-							label={t.title}
-							goodWhen={t.goodWhen}
-							points={t.points}
-						/>
-					))}
-				</div>
+				{/* One composed chart (bklit composed-chart form): stacked daily
+				     battery outcomes as columns, the opacity ratchet as the line,
+				     one shared scale, crosshair tooltip. Honest at any length -
+				     the line waits for its second point. */}
+				<ComposedTrend
+					rows={qualityHistory.map((r) => ({
+						date: r.date,
+						batteryPass: r.batteryPass ?? null,
+						batteryFail: r.batteryFail ?? null,
+						batteryErrors:
+							(r as { batteryErrors?: number | null }).batteryErrors ?? null,
+						openMaps: r.openMaps ?? null,
+					}))}
+				/>
+				{qualityHistory.length < 2 && (
+					<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
+						The series began {qualityHistory[0]?.date}; the ratchet line appears
+						with its second day. Today&apos;s snapshot:{" "}
+						{qualityHistory[0]?.sampled} rows sampled ·{" "}
+						{qualityHistory[0]?.liveRows} Live ·{" "}
+						{qualityHistory[0]?.humanVerified} human-verified.
+					</p>
+				)}
 			</Card>
 
 			<div className="grid sm:grid-cols-2 gap-6">
@@ -984,17 +996,11 @@ export default function QualityPage() {
 						right={<EvidenceLink path={g.artifact} />}
 					>
 						<div className="flex items-start justify-between gap-4">
-							<div className="flex flex-col gap-2">
-								<Stat
-									label={`measured ${g.asOf} · ${g.cadence}`}
-									value={g.value}
-									sub={g.sub}
-								/>
-								<FreshnessTrack
-									ageDays={g.ageDays}
-									windowDays={g.freshnessDays}
-								/>
-							</div>
+							<Stat
+								label={`measured ${g.asOf} · ${g.ageDays}d ago · ${g.cadence}`}
+								value={g.value}
+								sub={g.sub}
+							/>
 							{/* THREE states, not two. Stale evidence renders as its own
 							    thing: a guard we stopped measuring is not a guard that is
 							    holding, and it is not one that is failing either. */}
