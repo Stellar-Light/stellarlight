@@ -4,14 +4,14 @@
  "context": "sls-079 deployment queue pass",
  "markers": [
   {
-   "step": "operator toml",
    "found": true,
-   "excerpt": "code=\"SHX\" issuer=\"GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH\""
+   "excerpt": "code=\"SHX\" issuer=\"GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH\"",
+   "marker": "operator toml"
   },
   {
-   "step": "horizon asset (declared issuer)",
    "found": true,
-   "excerpt": "amount 35512014036.29, num_accounts 91389"
+   "excerpt": "amount 35512014036.29, num_accounts 91389",
+   "marker": "horizon asset (declared issuer)"
   }
  ],
  "url": "https://stronghold.co/.well-known/stellar.toml",

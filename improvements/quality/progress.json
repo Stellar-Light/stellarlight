@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T19:33:37.724Z",
+ "generatedAt": "2026-08-28T22:04:00.026Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -38,6 +38,13 @@
  ],
  "library": {
   "lessons": [
+   {
+    "file": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
+    "date": "2026-08-28",
+    "title": "Lessons: 2026-08-28: the deployment queue pass and the fake-issuer farm",
+    "lessonCount": 3,
+    "bytes": 2801
+   },
    {
     "file": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
     "date": "2026-08-27",
@@ -158,6 +165,35 @@
     ]
    },
    {
+    "file": "improvements/receipts/stronghold-deployment-2026-08-28.json",
+    "slug": "stronghold",
+    "url": "https://stronghold.co/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellarterm-deployment-2026-08-28.json",
+    "slug": "stellarterm",
+    "url": "https://stellarterm.com/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "product class"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellars-finance-2026-08-28.json",
+    "slug": "stellars-finance",
+    "url": "https://stellars.finance/assets/index-3HEaNhUX.js",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "testnet vault contract",
+     "mainnet empty addresses"
+    ]
+   },
+   {
     "file": "improvements/receipts/pluto-loans-2026-08-28.json",
     "slug": "pluto-loans",
     "url": "https://plutoloans.com/",
@@ -175,6 +211,16 @@
     "markers": [
      "Site Not Found",
      "NOT app.letsping.com resolves"
+    ]
+   },
+   {
+    "file": "improvements/receipts/ondo-deployment-2026-08-28.json",
+    "slug": "ondo",
+    "url": "https://ondo.finance/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
     ]
    },
    {
@@ -206,6 +252,46 @@
     "markers": [
      "TESTNET",
      "JOIN THE WAITLIST"
+    ]
+   },
+   {
+    "file": "improvements/receipts/glo-dollar-deployment-2026-08-28.json",
+    "slug": "glo-dollar",
+    "url": "https://horizon.stellar.org/accounts/GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "issuer home_domain (reverse chain)",
+     "horizon asset"
+    ]
+   },
+   {
+    "file": "improvements/receipts/circle-cctp-cross-chain-transfer-protocol-deployment-2026-08-28.json",
+    "slug": "circle-cctp-cross-chain-transfer-protocol",
+    "url": "https://developers.circle.com/cctp/references/stellar-contracts",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator mainnet reference",
+     "stellar.expert public contracts"
+    ]
+   },
+   {
+    "file": "improvements/receipts/brale-deployment-2026-08-28.json",
+    "slug": "brale",
+    "url": "https://brale.xyz/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/axelar-deployment-2026-08-28.json",
+    "slug": "axelar",
+    "url": "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator mainnet reference",
+     "stellar.expert public contract"
     ]
    }
   ]

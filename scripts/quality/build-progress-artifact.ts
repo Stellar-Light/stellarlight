@@ -144,6 +144,9 @@ const receipts = readdirSync(join(root, "improvements/receipts"))
 			// says something without anyone authoring new evidence.
 			markers: (r.markers ?? []).map((m) => {
 				const label = `${m.found ? "" : "NOT "}${m.marker}`;
+			// A malformed receipt (wrong marker key, hand-edited) must never
+				// crash the artifact build — skip it visibly instead.
+				if (typeof m.marker !== "string") return "(malformed marker)";
 				if (m.marker.length > 4 || !m.excerpt) return label;
 				return `${label} ("…${m.excerpt.slice(0, 60).trim()}…")`;
 			}),

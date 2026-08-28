@@ -4,14 +4,14 @@
  "context": "sls-079 deployment queue pass",
  "markers": [
   {
-   "step": "operator mainnet reference",
    "found": true,
-   "excerpt": "Mainnet: TokenMessengerMinter CAE2G5Z77UP7GYPYGFOWFGW7C7J6I4YP2AFGSADRKQY62SYUFLPNFTXL \u00b7 MessageTransmitter CACMENFFJPJMSDAJQLX4R7K3SFZIW2LJSE3R2UMLGSWHFHS353FVXAZV"
+   "excerpt": "Mainnet: TokenMessengerMinter CAE2G5Z77UP7GYPYGFOWFGW7C7J6I4YP2AFGSADRKQY62SYUFLPNFTXL \u00b7 MessageTransmitter CACMENFFJPJMSDAJQLX4R7K3SFZIW2LJSE3R2UMLGSWHFHS353FVXAZV",
+   "marker": "operator mainnet reference"
   },
   {
-   "step": "stellar.expert public contracts",
    "found": true,
-   "excerpt": "both created 2026-04-16"
+   "excerpt": "both created 2026-04-16",
+   "marker": "stellar.expert public contracts"
   }
  ],
  "url": "https://developers.circle.com/cctp/references/stellar-contracts",
