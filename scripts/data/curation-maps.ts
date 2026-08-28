@@ -668,6 +668,15 @@ export const WEBSITE_FIXES: Record<string, string> = {
  * status/provenance untouched). ADD-only: never removes or replaces types.
  * Excluded on mention-vs-identity grounds: stellar-oracle-shield (oracle
  * MONITORING tool), mpcvault (wallet whose prose mentions oracles). */
+/** Additive rename-continuity aliases (sls-050 machinery as DATA): a former
+ * or alternate name a row must stay findable by. ADD-only, never replaces.
+ * zenex: the project launched as Hermes (its own description says
+ * "formerly Hermes"); wave-5 found "what happened to Hermes exchange"
+ * missing zenex entirely because the alias existed only as prose. */
+export const ALIAS_ADD: Record<string, string[]> = {
+	zenex: ["Hermes"],
+};
+
 export const TYPE_ADD: Record<string, string[]> = {
 	reflector: ["Oracle"], // "decentralized price oracle and data-feed network for Stellar"
 	dia: ["Oracle"], // "cross-chain oracle provider live on Stellar/Soroban"

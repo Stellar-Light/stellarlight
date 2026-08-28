@@ -852,6 +852,24 @@ export function nameMatchScore(
 		if (n === joined || sl === joined || sl === hyphen || alias(joined))
 			return 3;
 	}
+	// Proper-noun promotion (wave-5, the Hermes case): "what happened to
+	// Hermes exchange on Stellar" carries ONE capitalized proper noun
+	// mid-sentence, and that word exactly equalling a record's name or
+	// alias is an identity signal the joined-anchors path cannot see (the
+	// join is "happened hermes exchange"). Promote ONLY a word the user
+	// CAPITALIZED mid-query (never the first word — sentence case is not a
+	// signal — and never network names, which appear capitalized in nearly
+	// every query). Lowercase category words ("bridge to stellar") never
+	// fire this, so category queries keep their ranking.
+	const NETWORK_WORDS = new Set(["stellar", "soroban", "lumens", "xlm"]);
+	const capitalized = qq.length
+		? (q.trim().match(/(?<=\s)[A-Z][A-Za-z0-9-]{2,}/g) ?? [])
+		: [];
+	for (const w of capitalized) {
+		const lw = w.toLowerCase();
+		if (NETWORK_WORDS.has(lw)) continue;
+		if (n === lw || sl === lw || alias(lw)) return 3;
+	}
 	// A camelCase word is its own subject: "tell me about GetBlockCard" -> the
 	// group's joined form "getblockcard" IS the identity being asked about,
 	// but the flat anchor join above ("block card getblockcard") matches

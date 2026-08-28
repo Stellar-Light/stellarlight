@@ -16,6 +16,7 @@ import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 import {
+	ALIAS_ADD,
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
 	GITHUB_REPOS_ADD,
@@ -1714,6 +1715,44 @@ async function main() {
 		}
 		console.log(`  ${slug}: prominence ${d.prominence ?? 0} → ${prominence}`);
 		writes.push({ id: d.id, slug, data: { prominence } });
+	}
+
+	// ── ALIAS_ADD: rename-continuity aliases (sls-050 as data) ──
+	for (const [slug, addAliases] of Object.entries(ALIAS_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// aliases is hasMany TEXT — an array of plain strings (write the same
+		// shape back; an object shape would be silently dropped, the
+		// payload-silent-drop trap).
+		const current: string[] = Array.isArray(d.aliases)
+			? d.aliases.filter((a: unknown): a is string => typeof a === "string")
+			: [];
+		const missing = addAliases.filter((a) => !current.includes(a));
+		if (!missing.length) {
+			console.log(
+				`  ${slug}: aliases already carry ${addAliases.join(",")}, skip`,
+			);
+			continue;
+		}
+		console.log(
+			`  ${slug}: aliases [${current.join(",")}] +${missing.join(",")}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { aliases: [...current, ...missing] },
+		});
 	}
 
 	// ── TYPE_ADD: additive type tags (Oracle vertical, guard D 2026-08-27) ──

@@ -1167,9 +1167,17 @@ export async function GET(req: NextRequest) {
 			// (?status, ?type, …) so a correction can't smuggle past them.
 			if (result.docs.length === 0 && tokens.length && offset === 0) {
 				try {
+					// limit: 0 + pagination: false = the WHOLE registry. This was
+					// limit: 1000 on a 1000+ collection — an arbitrary Mongo-order
+					// window, so whether a typo could be corrected depended on
+					// which side of the cutoff its project happened to land:
+					// blendd recovered, soroswapp and aquarious silently fell
+					// through to vector neighbours (wave-5 eval, 2026-08-29).
+					// The vet-idea 400-of-500 truncation class, in the rung that
+					// exists to rescue misspellings.
 					const registry = await payload.find({
 						collection: "projects",
-						limit: 1000,
+						limit: 0,
 						depth: 0,
 						pagination: false,
 						select: { name: true, slug: true },
