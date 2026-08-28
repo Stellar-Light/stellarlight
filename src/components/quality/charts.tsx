@@ -304,3 +304,192 @@ export function AreaChart({
 		</div>
 	);
 }
+
+/** An inline "what does this number mean" affordance. Native title = works
+ * on hover, on focus, and for screen readers, with zero client JS. */
+export function Info({ text }: { text: string }) {
+	return (
+		<span
+			title={text}
+			tabIndex={0}
+			role="note"
+			aria-label={text}
+			className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-border text-[9px] leading-none text-muted-foreground align-middle cursor-help hover:text-foreground hover:border-muted-foreground transition-colors"
+		>
+			i
+		</span>
+	);
+}
+
+/** A metric that states its own direction. "87%" alone is unreadable — the
+ * reader cannot know whether high is good, so every figure carries an arrow
+ * and a plain-language definition. */
+export function Metric({
+	label,
+	value,
+	sub,
+	goodWhen,
+	explain,
+}: {
+	label: string;
+	value: string;
+	sub?: string;
+	goodWhen?: "higher" | "lower";
+	explain?: string;
+}) {
+	return (
+		<div className="flex flex-col gap-0.5">
+			<span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+				{label}
+				{explain && <Info text={explain} />}
+			</span>
+			<span className="text-2xl font-semibold text-foreground tabular-nums leading-tight">
+				{value}
+			</span>
+			<span className="text-[11px] text-muted-foreground">
+				{goodWhen && (
+					<span className="text-foreground/70">
+						{goodWhen === "higher" ? "↑ higher is better" : "↓ lower is better"}
+						{sub ? " · " : ""}
+					</span>
+				)}
+				{sub}
+			</span>
+		</div>
+	);
+}
+
+/** The gap matrix — entity × missing field, with real examples. A table,
+ * because that is the right form: seven rows of mixed text and counts is not
+ * a chart, and an agent reading the same data wants the identifiers. */
+export function GapMatrix({
+	rows,
+}: {
+	rows: Array<{
+		entity: string;
+		field: string;
+		missing: number;
+		of: number;
+		whyItMatters: string;
+		closedBy: string;
+		examples: string[];
+	}>;
+}) {
+	return (
+		<div className="flex flex-col divide-y divide-border">
+			{rows.map((r) => {
+				const pct = Math.round((r.missing / Math.max(r.of, 1)) * 100);
+				return (
+					<div
+						key={`${r.entity}-${r.field}`}
+						className="py-3 first:pt-0 last:pb-0"
+					>
+						<div className="flex items-baseline justify-between gap-4 mb-1.5">
+							<span className="text-xs">
+								<span className="text-muted-foreground uppercase tracking-wide">
+									{r.entity}
+								</span>{" "}
+								<span className="text-foreground font-medium">{r.field}</span>
+							</span>
+							<span className="text-xs tabular-nums shrink-0">
+								<span className="text-foreground font-medium">{r.missing}</span>
+								<span className="text-muted-foreground">
+									{" "}
+									/ {r.of} missing ({pct}%)
+								</span>
+							</span>
+						</div>
+						<div className="h-1.5 rounded-[2px] bg-muted/40 overflow-hidden mb-2">
+							<div
+								className="h-full rounded-[2px]"
+								style={{
+									width: `${Math.max(pct, 1)}%`,
+									backgroundColor: "#FDDA24",
+								}}
+								title={`${r.missing} of ${r.of} sampled ${r.entity}s missing ${r.field}`}
+							/>
+						</div>
+						<p className="text-[11px] text-muted-foreground leading-relaxed">
+							{r.whyItMatters}{" "}
+							<span className="text-foreground/70">
+								Closed by: {r.closedBy}
+							</span>
+						</p>
+						{r.examples.length > 0 && (
+							<p className="text-[11px] text-muted-foreground mt-1 truncate">
+								<span className="text-foreground/60">e.g.</span>{" "}
+								{r.examples.slice(0, 6).join(", ")}
+							</p>
+						)}
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
+/** Miss funnel — where a known-item miss dies. Not a decorative funnel: each
+ * miss is classified at the FIRST stage that failed, so the stages are
+ * mutually exclusive and the widths are real shares of the sample. Ordered by
+ * how far the query got, shallowest failure first, with the owning area and
+ * real examples on every stage. */
+export function MissFunnel({
+	stages,
+	sampled,
+}: {
+	stages: Array<{
+		stage: string;
+		label: string;
+		owner: string;
+		note: string;
+		count: number;
+		share: number;
+		examples: string[];
+	}>;
+	sampled: number;
+}) {
+	const max = Math.max(...stages.map((s) => s.count), 1);
+	return (
+		<div className="flex flex-col gap-4">
+			{stages.map((s, i) => (
+				<div key={s.stage} className="flex flex-col gap-1.5">
+					<div className="flex items-baseline justify-between gap-4">
+						<span className="inline-flex items-baseline gap-2 min-w-0">
+							<span className="text-xs font-medium text-foreground capitalize shrink-0">
+								{s.stage}
+							</span>
+							<span className="text-[11px] text-muted-foreground truncate">
+								{s.label}
+							</span>
+						</span>
+						<span className="text-xs tabular-nums shrink-0">
+							<span className="font-medium text-foreground">{s.count}</span>
+							<span className="text-muted-foreground"> · {s.share}%</span>
+						</span>
+					</div>
+					<div className="flex justify-center">
+						<div
+							className="h-6 rounded-[3px]"
+							style={{
+								width: `${Math.max((s.count / max) * 100, s.count > 0 ? 6 : 2)}%`,
+								backgroundColor: RAMP[Math.min(i, RAMP.length - 1)],
+								opacity: s.count === 0 ? 0.25 : 1,
+							}}
+							title={`${s.stage}: ${s.count} of ${sampled} sampled misses (${s.share}%) — owner: ${s.owner}`}
+						/>
+					</div>
+					<p className="text-[11px] text-muted-foreground leading-relaxed">
+						<span className="text-foreground/70">owner: {s.owner}</span> —{" "}
+						{s.note}
+					</p>
+					{s.examples.length > 0 && (
+						<p className="text-[11px] text-muted-foreground truncate">
+							<span className="text-foreground/60">e.g.</span>{" "}
+							{s.examples.slice(0, 6).join(", ")}
+						</p>
+					)}
+				</div>
+			))}
+		</div>
+	);
+}

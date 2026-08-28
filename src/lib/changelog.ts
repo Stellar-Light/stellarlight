@@ -43,6 +43,33 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-29",
 		surfaces: ["api", "mcp"],
+		type: "added",
+		summary:
+			"Miss funnel on /api/quality and /quality (openapi@1.8.109): every open recall finding replayed live and classified at the FIRST failing stage — passing / ranking / admission / identity / corpus — each naming its owning area. First run: 70 of 80 sampled misses NO LONGER REPRODUCE, so the open finding count was carrying the previous week's fixes as if they were debt.",
+		detail:
+			"'200 recall misses' hides four problems with four owners: a corpus gap no retrieval change can fix, an identity gap where a row's own name misses it, an admission gap where the tier ladder never let it in, and a ranking gap where the row is returned just below the cut. Classifying at the first failing stage makes them mutually exclusive and each independently actionable, with real example slugs per stage. The finding that matters most is the staleness: the open count is now labelled on the page as an upper bound on real debt, with the replay share stated inline rather than left for a reader to discover. The daily pipeline rebuilds both artifacts so neither goes stale itself.",
+	},
+	{
+		date: "2026-08-29",
+		surfaces: ["api", "mcp", "skill"],
+		type: "added",
+		summary:
+			"The quality report gains a GAP MATRIX (openapi@1.8.108) — one row per entity-x-missing-field with real identifiers, so an agent can work or check a gap instead of only being warned about it. Served on /api/quality and rendered on /quality, alongside the curation queue and repo work queue as full lists.",
+		detail:
+			"Today's matrix: 257/259 repos have no verified mainnet contract join, 550/588 rows rest on a weak status basis, 236/259 repos have no curated knowledge notes, 40 rows are untyped, 24 Live rows have no source URL, 3 repos were never scanned for depth. Each row states why it matters to a caller, what closes it, and example slugs. Readability pass on the page: every figure now declares its direction (higher/lower is better) and carries an info affordance defining what it measures — a bare percentage is unreadable — and the entity lists grew from 8 rows to 25-30 with the same data available in full via the API.",
+	},
+	{
+		date: "2026-08-29",
+		surfaces: ["api", "mcp", "skill"],
+		type: "added",
+		summary:
+			"GET /api/quality (openapi@1.8.107) — this service's quality report, machine-readable, so an agent can calibrate trust without reading a webpage. Leads with knownLimitations: DERIVED from our own measurements, each carrying the number behind it and what to do instead.",
+		detail:
+			"Today's four, all computed: most statuses rest on site-liveness or source-inherited (544/588 sampled) — weigh statusBasis, verify a Live claim against statusSourceUrl; 40 rows untyped — an empty ?type= result is a statement about our tagging, not the ecosystem; knowledgeNotes exist on 23 of 259 sampled repos — absence is absence of curation, never evidence about the repo; 214 open recall-miss findings — for a known name prefer an exact slug or the resolver over natural language. Also serves per-surface open-finding counts in consumer terms, the row-quality score definition, statusBasisMix with its strength ordering, repo coverage, every guard with promise+holding, and the trend history. The /quality page gains the same limitations at the top with a link to the endpoint. Sample counts always carry their denominator.",
+	},
+	{
+		date: "2026-08-29",
+		surfaces: ["api", "mcp"],
 		type: "fixed",
 		summary:
 			'Two wave-5 eval finds closed (openapi@1.8.106): the typo-correction registry was a 1000-row window on a 1000+ collection (soroswapp and aquarious silently fell to vector neighbours while blendd recovered — which side of the cutoff a project landed on decided whether its misspelling was correctable), and a capitalized mid-query proper noun matching a record\'s name or alias now promotes to an exact identity hit ("what happened to Hermes exchange" finds zenex via its new Hermes alias).',

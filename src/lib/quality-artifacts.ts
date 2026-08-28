@@ -25,10 +25,11 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
-// Weekly evidence — fixed -latest paths committed by engine-c-health every
-// Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import qualityEntities from "../../improvements/quality/entities.json";
 import qualityHistory from "../../improvements/quality/history.json";
+// Weekly evidence — fixed -latest paths committed by engine-c-health every
+// Sunday (see improvements/engine/weekly/README.md); git history = archive.
+import missFunnel from "../../improvements/quality/miss-funnel.json";
 import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
@@ -446,4 +447,10 @@ export function getTrends(): TrendSeries[] {
  * Per-entity sections (scripts/quality/build-quality-artifact.ts). */
 export function getEntities() {
 	return qualityEntities;
+}
+
+/** Where known-item misses die, measured by replaying every open recall
+ * finding live (scripts/quality/classify-misses.ts). */
+export function getMissFunnel() {
+	return missFunnel;
 }

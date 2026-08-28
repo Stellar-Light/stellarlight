@@ -125,6 +125,39 @@ service runs at Stage 3+ by default and humans do product, not repair.
   dry→execute→verify data loop agentized · Verify v1 slices 2-3.
 - **P3:** Stage 3 · event-driven freshness (PLAN §5) · steady-state review.
 
+## 4b. The consumer surface — what a caller (human or agent) is owed
+
+A quality system that only reports to its owners is half a system. Two
+readers, two artifacts, one set of committed numbers:
+
+- **`/quality`** (people): known limitations first, then the gap matrix,
+  findings, per-row and per-repo evidence, and trends. Every figure states
+  its direction (`↑ higher is better`) and carries an info affordance
+  defining what it measures — a bare "87%" is unreadable.
+- **`GET /api/quality`** (agents): the same measurements, machine-readable,
+  so trust calibration never requires parsing a webpage. It leads with
+  `knownLimitations` — **derived from the numbers, never authored** — each
+  carrying its measurement and what to do *instead*.
+
+**The miss funnel is the diagnostic half.** "200 recall misses" hides four
+different problems with four different owners, so every open recall finding
+is replayed live and classified at the FIRST stage that fails: *passing*
+(no longer reproduces), *ranking* (returned, below top-3), *admission* (not
+returned for that phrasing), *identity* (its own exact name misses it),
+*corpus* (not in the directory at all). Only the middle three are debt;
+corpus is a coverage job and passing is staleness. The first run found
+**70 of 80 sampled misses no longer reproduce** — the open count was
+carrying the fixes of the previous week, which is exactly the lie a
+scoreboard of counts tells and a funnel catches.
+
+**The gap matrix is the actionable half.** One row per (entity × missing
+field) with the count, its denominator, why it matters to a caller, what
+closes it, and **real identifiers** so the work can be picked up or the
+claim independently checked. `knownLimitations` says *be careful here*; the
+matrix says *here is the list*. Standing rule: a sample never reports
+without its denominator, and absence is always described as absence of
+OUR evidence, never as a fact about the world.
+
 ## 5. External calibration — the Raven QA deep-dive (folded in 2026-08-28)
 
 Their five-model research panel over 55 QA misses (`research/qa-deep-dive-2026-08-25/`,

@@ -81,6 +81,17 @@ jobs:
       # red days included: a trend that only records green days is a lie.
       # Bot data commits do not trigger deploys (the site shows the new point
       # on the next deploy) and the append is idempotent per date.
+      # Rebuild the consumer-facing quality artifacts from the freshly-run
+      # ledger + live samples. The miss funnel REPLAYS open recall findings,
+      # so it is what tells the page (and /api/quality) how much of the open
+      # count is stale rather than real debt.
+      - name: Rebuild quality artifacts (entities + miss funnel)
+        if: always() && github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          pnpm exec tsx scripts/quality/build-quality-artifact.ts
+          MISS_SAMPLE=80 pnpm exec tsx scripts/quality/classify-misses.ts
+
       - name: Record quality snapshot (trend history)
         if: always() && github.event_name != 'pull_request'
         run: |
@@ -91,7 +102,7 @@ jobs:
             ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} ${PP:+--parity-pass $PP}
           git config user.name "stellarlight-quality-bot"
           git config user.email "bot@stellarlight.xyz"
-          git add improvements/quality/history.json
+          git add improvements/quality/history.json improvements/quality/entities.json improvements/quality/miss-funnel.json
           git diff --cached --quiet && exit 0
           git commit -m "data(quality): daily trend snapshot [skip ci]"
           git pull --rebase origin main
