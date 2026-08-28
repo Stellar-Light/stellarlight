@@ -69,6 +69,7 @@ jobs:
         if: always()
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        shell: bash
         run: |
           set -o pipefail
           pnpm exec tsx scripts/eval/raven-truth-battery.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }} | tee /tmp/battery.out
