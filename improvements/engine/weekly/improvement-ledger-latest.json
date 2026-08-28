@@ -1,20 +1,25 @@
 {
-	"generatedAt": "2026-08-28T16:32:14.790Z",
-	"total": 451,
-	"open": 76,
-	"closed": 375,
+	"generatedAt": "2026-08-28T22:37:38.494Z",
+	"total": 508,
+	"open": 105,
+	"closed": 403,
 	"verified": 7,
-	"cleared": 368,
-	"closingRate": 0.83,
+	"cleared": 396,
+	"closingRate": 0.79,
 	"oldestOpenDays": 37,
 	"inWave": 0,
-	"highOpen": 14,
+	"highOpen": 50,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
+			"surface": "onchain",
+			"open": 48,
+			"total": 48
+		},
+		{
 			"surface": "retrieval",
-			"open": 40,
-			"total": 308
+			"open": 28,
+			"total": 310
 		},
 		{
 			"surface": "consumer",
@@ -23,8 +28,8 @@
 		},
 		{
 			"surface": "directory",
-			"open": 15,
-			"total": 54
+			"open": 8,
+			"total": 61
 		},
 		{
 			"surface": "corpus",
@@ -51,59 +56,59 @@
 	"quietSources": [],
 	"topOpen": [
 		{
-			"id": "engine-d-demand:planbok",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "planbok",
+			"id": "lookalike-domains:ars-impersonated-via-home-domain-anclap-io-issue",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "ARS impersonated via home_domain anclap.io (issuer GCANCLAPGTMD…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:e-fectivo",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "e-fectivo",
+			"id": "lookalike-domains:pen-impersonated-via-home-domain-anclap-io-issue",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "PEN impersonated via home_domain anclap.io (issuer GCANCLAPGTMD…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:vigente",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "vigente",
+			"id": "lookalike-domains:usdy-impersonated-via-home-domain-finance-ondo-c",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "USDY impersonated via home_domain finance-ondo.com (issuer GCLFMBAFL7RT…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:vigente-protocol",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "vigente protocol",
+			"id": "lookalike-domains:usdc-impersonated-via-home-domain-circle-assets-",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "USDC impersonated via home_domain circle-assets.com (issuer GAAS4J43CLHJ…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:alypay",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "alypay",
+			"id": "lookalike-domains:eurc-impersonated-via-home-domain-circle-assets-",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "EURC impersonated via home_domain circle-assets.com (issuer GAAS4J43CLHJ…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:relacionamento",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "relacionamento",
+			"id": "lookalike-domains:pyusd-impersonated-via-home-domain-paypal-com-is",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "PYUSD impersonated via home_domain paypal.com (issuer GAZZUOGK4X27…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:namoro",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "namoro",
+			"id": "lookalike-domains:pyusd-impersonated-via-home-domain-paypal-dlgita",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "PYUSD impersonated via home_domain paypal.dlgital.com (issuer GBPTPX5HDX7X…, undefined trustlines)",
 			"severity": "high"
 		},
 		{
-			"id": "engine-d-demand:casamento",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "casamento",
+			"id": "lookalike-domains:usdy-impersonated-via-home-domain-blackrock-co-c",
+			"surface": "onchain",
+			"source": "lookalike-domains",
+			"probe": "USDY impersonated via home_domain blackrock.co.com (issuer GD6PQQAIG5FS…, undefined trustlines)",
 			"severity": "high"
 		}
 	]

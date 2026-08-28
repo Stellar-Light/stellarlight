@@ -31,6 +31,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Engine A
         run: pnpm exec tsx scripts/eval/generated-recall.ts --json > /tmp/a.json 2> /tmp/a.log || echo "A_RED=1" >> $GITHUB_ENV
+      - name: Lookalike home-domain sweep (fake-issuer farm)
+        continue-on-error: true
+        run: pnpm exec tsx scripts/eval/lookalike-domains.ts --out=/tmp/lookalike.json > /tmp/lookalike.log 2>&1 || echo "LOOKALIKE_RED=1" >> $GITHUB_ENV
       - name: Engine B
         run: pnpm exec tsx scripts/eval/engine-b-sweeps.ts --json > /tmp/b.json 2> /tmp/b.log
       - name: Engine D (demand-side mining)
@@ -171,7 +174,7 @@ jobs:
             [a]=engine-a-recall [b]=engine-b-sweeps [d]=engine-d-demand
             [corpus]=corpus-health [scf]=scf-crosscheck [golden]=golden-eval
             [e]=engine-e-contract [coverage]=corpus-coverage
-          )
+           [lookalike]=lookalike-domains)
           # Stamp `generatedAt` on the way in. The ledger has to tell "this
           # detector re-confirmed the finding today" from "nobody has looked
           # since" — without a timestamp on the artifact those are the same
@@ -194,7 +197,7 @@ jobs:
               echo "skip ${key}.json (missing or not valid JSON)"
             fi
           done
-          echo "valid artifacts: $copied/8"
+          echo "valid artifacts: $copied/9"
           [ "$copied" -eq 0 ] && { echo "nothing to commit"; exit 0; }
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
