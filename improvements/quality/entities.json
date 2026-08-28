@@ -1,11 +1,18 @@
 {
- "generatedAt": "2026-08-28T22:03:26.271Z",
+ "generatedAt": "2026-08-28T22:37:44.611Z",
  "surfaces": [
+  {
+   "surface": "onchain",
+   "means": null,
+   "openFindings": 48,
+   "clearedFindings": 0,
+   "verifiedFindings": 0
+  },
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
-   "openFindings": 40,
-   "clearedFindings": 268,
+   "openFindings": 28,
+   "clearedFindings": 282,
    "verifiedFindings": 0
   },
   {
@@ -18,8 +25,8 @@
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 15,
-   "clearedFindings": 39,
+   "openFindings": 8,
+   "clearedFindings": 53,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +60,9 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 451,
-  "open": 76,
-  "cleared": 368,
+  "total": 508,
+  "open": 105,
+  "cleared": 396,
   "verified": 7,
   "byFailureMode": [
    {
@@ -67,15 +74,22 @@
    },
    {
     "mode": "coverage-gap",
-    "open": 15,
-    "cleared": 39,
+    "open": 8,
+    "cleared": 53,
     "verified": 0,
     "surface": "directory"
    },
    {
+    "mode": "lookalike-domain",
+    "open": 48,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "onchain"
+   },
+   {
     "mode": "demand-miss",
-    "open": 14,
-    "cleared": 30,
+    "open": 2,
+    "cleared": 44,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -153,11 +167,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 39
+    "count": 70
    },
    {
     "bucket": "8–30d",
-    "count": 12
+    "count": 10
    },
    {
     "bucket": "31–60d",
@@ -170,51 +184,51 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "lumen-later in top-3 for 'what is Lumen Later'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "openx402",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "response",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "for-yield",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "foryield/soroban-yield-vault in top-5 for its own symbol 'initialize'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "tempa",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "zerie5/lulpay-campaign-contract in top-5 for its own symbol 'initialize'",
+    "probe": "planbok",
     "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "failureMode": "demand-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "winsznx/routedock in top-5 for its own symbol 'initialize'",
+    "probe": "e-fectivo",
     "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "failureMode": "demand-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "xycloo/rs-zephyr-toolkit in top-5 for its own symbol 'from_u32'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "what disbursement or payout providers can i integrate on stellar?",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "Trustless-Work/trustlesswork-smart-contract-stellar in top-5 for its own symbol 'ContractError'",
+    "probe": "vigente",
     "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "failureMode": "demand-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "Creit-Tech/SorobanHub-app in top-5 for its own symbol 'StellarService'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "cointracker",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    }
   ]
@@ -11502,7 +11516,13 @@
     "id": "s:engine-d-demand",
     "label": "engine-d-demand",
     "column": 0,
-    "value": 98
+    "value": 107
+   },
+   {
+    "id": "s:lookalike-domains",
+    "label": "lookalike-domains",
+    "column": 0,
+    "value": 48
    },
    {
     "id": "s:raven-routing",
@@ -11556,13 +11576,19 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 308
+    "value": 310
    },
    {
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 54
+    "value": 61
+   },
+   {
+    "id": "f:onchain",
+    "label": "onchain",
+    "column": 1,
+    "value": 48
    },
    {
     "id": "f:contract",
@@ -11598,13 +11624,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 368
+    "value": 396
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 76
+    "value": 105
    },
    {
     "id": "o:verified",
@@ -11615,172 +11641,186 @@
   ],
   "links": [
    {
-    "source": 8,
-    "target": 10,
+    "source": 9,
+    "target": 11,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
     "value": 2
    },
    {
-    "source": 10,
-    "target": 17,
+    "source": 11,
+    "target": 19,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 268
+    "value": 282
    },
    {
     "source": 1,
-    "target": 10,
+    "target": 11,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
-    "value": 44
+    "value": 46
    },
    {
     "source": 0,
-    "target": 10,
+    "target": 11,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
     "value": 262
    },
    {
-    "source": 10,
-    "target": 18,
+    "source": 11,
+    "target": 20,
     "sourceId": "f:retrieval",
     "targetId": "o:open",
-    "value": 40
+    "value": 28
    },
    {
-    "source": 5,
-    "target": 15,
+    "source": 6,
+    "target": 17,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 14
    },
    {
-    "source": 15,
-    "target": 17,
+    "source": 17,
+    "target": 19,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 14
    },
    {
-    "source": 6,
-    "target": 12,
+    "source": 7,
+    "target": 14,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 12,
-    "target": 19,
+    "source": 14,
+    "target": 21,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 12,
-    "target": 18,
+    "source": 14,
+    "target": 20,
     "sourceId": "f:contract",
     "targetId": "o:open",
     "value": 1
    },
    {
-    "source": 2,
-    "target": 13,
+    "source": 3,
+    "target": 15,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 23
    },
    {
-    "source": 13,
-    "target": 18,
+    "source": 15,
+    "target": 20,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 16
    },
    {
-    "source": 13,
-    "target": 17,
+    "source": 15,
+    "target": 19,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 7
    },
    {
-    "source": 9,
-    "target": 16,
+    "source": 10,
+    "target": 18,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 16,
-    "target": 17,
+    "source": 18,
+    "target": 19,
     "sourceId": "f:code",
     "targetId": "o:cleared",
     "value": 4
    },
    {
     "source": 1,
-    "target": 11,
+    "target": 12,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
-    "value": 54
+    "value": 61
    },
    {
-    "source": 11,
-    "target": 17,
+    "source": 12,
+    "target": 19,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 39
+    "value": 53
    },
    {
-    "source": 3,
-    "target": 12,
+    "source": 4,
+    "target": 14,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 22
    },
    {
-    "source": 12,
-    "target": 17,
+    "source": 14,
+    "target": 19,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 22
    },
    {
-    "source": 4,
-    "target": 14,
+    "source": 5,
+    "target": 16,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 14,
-    "target": 17,
+    "source": 16,
+    "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 14
    },
    {
-    "source": 14,
-    "target": 18,
+    "source": 16,
+    "target": 20,
     "sourceId": "f:corpus",
     "targetId": "o:open",
     "value": 4
    },
    {
-    "source": 7,
-    "target": 16,
+    "source": 8,
+    "target": 18,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 3
    },
    {
-    "source": 11,
-    "target": 18,
+    "source": 12,
+    "target": 20,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 15
+    "value": 8
+   },
+   {
+    "source": 2,
+    "target": 13,
+    "sourceId": "s:lookalike-domains",
+    "targetId": "f:onchain",
+    "value": 48
+   },
+   {
+    "source": 13,
+    "target": 20,
+    "sourceId": "f:onchain",
+    "targetId": "o:open",
+    "value": 48
    }
   ]
  },

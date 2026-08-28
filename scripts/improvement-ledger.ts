@@ -417,6 +417,26 @@ const RAVEN_LOOP_SPEC: SourceSpec = {
 // misses on ALREADY-cataloged ops are emitted (the eval skips lagging ops), so
 // a finding here means the op exists in Raven's index but the question doesn't
 // reach it — a description/ranking gap on the consumer path.
+// The lookalike home-domain sweep (scripts/eval/lookalike-domains.ts) — the
+// fake-issuer-farm detector born from the 2026-08-28 sls-079 queue pass.
+// Each finding is an issuer impersonating a known brand via home_domain
+// (wisdomtree.xlmhq.org, blackrock.com.se) with real trustline victims.
+// High severity, period: impersonation with victims is never a backlog item.
+const LOOKALIKE_SPEC: SourceSpec = {
+	source: "lookalike-domains",
+	file: "lookalike-domains-latest.json",
+	arrays: [
+		{
+			key: "lookalikes",
+			surface: "onchain",
+			mode: "lookalike-domain",
+			severity: "high",
+			probe: (r) =>
+				`${str(r?.code)} impersonated via home_domain ${str(r?.homeDomain)} (issuer ${str(r?.issuer).slice(0, 12)}…, ${str(r?.victims)} trustlines)`,
+		},
+	],
+};
+
 const RAVEN_ROUTING_SPEC: SourceSpec = {
 	source: "raven-routing",
 	file: "raven-routing-latest.json",
@@ -490,6 +510,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		...NIGHTLY_SPECS,
 		RAVEN_LOOP_SPEC,
 		RAVEN_ROUTING_SPEC,
+		LOOKALIKE_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
