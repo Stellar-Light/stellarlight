@@ -2429,6 +2429,49 @@ export const DEPLOYMENT_VERIFIED: Record<
 	// four real contract addresses, mainnet holds four EMPTY ones
 	// (address "", startLedger 0). A reachable site is not a mainnet
 	// deployment.
+	// ── 2026-08-28 queue pass: the 13 prominent Live on-chain-product rows.
+	// Verification chain per entry is in improvements/receipts/<slug>-2026-08-28.json.
+	// Six rows stay UNKNOWN deliberately: dia + redstone-finance (support docs
+	// exist, no citable mainnet artifact), wisdomtree + spiko (every on-chain
+	// issuance of their codes is a fake-issuer farm - see the 2026-08-28
+	// lesson), redswan (no toml, no on-chain asset), spacewalk (only a 2023
+	// roadmap graphic). Absence of evidence stays visible.
+	ondo: {
+		network: "mainnet",
+		sourceUrl: "https://ondo.finance/.well-known/stellar.toml",
+		note: "toml declares USDY issuer GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6; Horizon shows 461M supply, 2733 holders",
+	},
+	stronghold: {
+		network: "mainnet",
+		sourceUrl: "https://stronghold.co/.well-known/stellar.toml",
+		note: "toml declares SHX issuer GDSTRSHX…; Horizon shows 35.5B supply, 91,389 holders",
+	},
+	brale: {
+		network: "mainnet",
+		sourceUrl: "https://brale.xyz/.well-known/stellar.toml",
+		note: "toml declares SBC issuer GCQCNWT2…; asset live on Horizon (small but real: 21 holders)",
+	},
+	"glo-dollar": {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/USDGLO-GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
+		note: "issuer account's own home_domain = app.glodollar.org (reverse-verified); 624 holders",
+	},
+	axelar: {
+		network: "mainnet",
+		sourceUrl: "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
+		note: "Axelar's mainnet reference lists Stellar gateway CD6VSKXB4HY2DWU7EP2PUIYTBJBJ36LDJXEZN4NSXFYF5YP37DDFX6NF; contract live on public since 2025-03",
+	},
+	"circle-cctp-cross-chain-transfer-protocol": {
+		network: "mainnet",
+		sourceUrl: "https://developers.circle.com/cctp/references/stellar-contracts",
+		note: "Circle's own reference lists Stellar MAINNET TokenMessengerMinter CAE2G5Z7… + MessageTransmitter CACMENFF…; both live on public since 2026-04-16 (the quickstart page's ids are testnet - do not cite those)",
+	},
+	stellarterm: {
+		network: "mainnet",
+		sourceUrl: "https://stellarterm.com/",
+		note: "self-custodial client of the native Stellar DEX on the PUBLIC network - it deploys no contracts; 'mainnet' here means the product operates against mainnet, which is its entire function",
+	},
 	"stellars-finance": {
 		network: "testnet",
 		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",

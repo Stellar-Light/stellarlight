@@ -1,0 +1,23 @@
+{
+ "slug": "glo-dollar",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "step": "issuer home_domain (reverse chain)",
+   "found": true,
+   "excerpt": "home_domain \"app.glodollar.org\" on the USDGLO issuer account"
+  },
+  {
+   "step": "horizon asset",
+   "found": true,
+   "excerpt": "USDGLO amount 27138.95, num_accounts 624"
+  }
+ ],
+ "url": "https://horizon.stellar.org/accounts/GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet"
+}
