@@ -36,9 +36,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.2",
 		type: "fixed",
 		summary:
-			"Six served-but-undocumented fields documented (getSkill tagline/source/targetUser/tags, analyzeEcosystem toolchain, compareHackathons prizePoolUSD); contract probe re-baselined at 0 violations.",
+			"verifyClaim response enum gains issued (sls-077); getQualityReport routing narrowed to source-calibration questions (sls-078); six served-but-undocumented fields documented; contract probe re-baselined at 0 violations.",
 		detail:
-			"The fresh Engine E sweep (37 ops, 783 fields, spec 1.9.1) confirmed all five 2026-07-11 violations fixed live and surfaced six response fields served but missing from the spec; all six are now documented. The probe artifact also stamps generatedAt and the operations it reached, so a clean bill is distinguishable from never having probed.",
+			"sls-077: the verify request accepted type=issued while the 200 response claim.type enum still read audited/live/maintained; both now project ONE shared enum and a unit test pins them equal, so the drift class cannot reopen. sls-078: getQualityReport carried standalone routing words (trust, coverage, health, limitations) and Raven measured it hijacking 56 of 338 unrelated top-5 routings; every keyword is now anchored to Scout/Stellar Light itself and notFor carries explicit negative controls for technical questions that merely contain those words. Also: the fresh Engine E sweep (37 ops, 783 fields) confirmed all five 2026-07-11 violations fixed live and surfaced six response fields served but missing from the spec (getSkill tagline/source/targetUser/tags, analyzeEcosystem toolchain, compareHackathons prizePoolUSD) — all documented, and the probe artifact stamps generatedAt + opsReached so a clean bill is distinguishable from never having probed.",
 	},
 	{
 		date: "2026-08-28",

@@ -38,8 +38,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * This service's own quality report — known limitations, per-surface health, guard state
-         * @description A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.
+         * Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state
+         * @description Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.
          */
         get: operations["getQualityReport"];
         put?: never;
@@ -2347,7 +2347,7 @@ export interface operations {
                         /** @description The parsed claim as understood. */
                         claim?: {
                             /** @enum {string} */
-                            type?: "audited" | "live" | "maintained";
+                            type?: "audited" | "live" | "maintained" | "issued";
                             subject?: string;
                             auditor?: string;
                             since?: string;

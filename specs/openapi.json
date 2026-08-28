@@ -138,35 +138,35 @@
 				"tags": [
 					"Verification"
 				],
-				"summary": "This service's own quality report — known limitations, per-surface health, guard state",
-				"description": "A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.",
+				"summary": "Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state",
+				"description": "Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.",
 				"x-routing": {
-					"purpose": "Let an agent weigh how much to trust this service's answers, and see what it is measurably weak at.",
+					"purpose": "Source calibration for THIS service only: how trustworthy is Stellar Light / Scout's own data, measured, with its known weak spots.",
 					"keywords": [
-						"data quality",
-						"how reliable",
-						"limitations",
-						"known issues",
-						"trust",
-						"confidence in the data",
-						"coverage",
-						"provenance",
-						"self report",
-						"health"
+						"stellarlight data quality",
+						"scout data quality",
+						"how reliable is this directory",
+						"how reliable is this source",
+						"this source's limitations",
+						"scout quality report",
+						"directory data provenance",
+						"quality of this data set"
 					],
 					"useWhen": [
-						"deciding how much weight to give a result from this service",
-						"a user asks how good or complete this data is",
-						"explaining why an answer is uncertain or a row is thin"
+						"the question is explicitly about Scout / Stellar Light / this directory's own data quality, coverage, or limitations",
+						"deciding how much weight to give THIS service's answers",
+						"explaining why one of THIS service's answers is uncertain or a row is thin"
 					],
 					"notFor": [
+						"any technical, protocol, SDK, or operational question that merely contains words like trust, confidence, source, coverage, health, or limitations without asking about THIS service's data (route to docs/search instead)",
+						"trust or health of a PROJECT or PRODUCT in the directory -> searchProjects / verifyClaim",
 						"verifying ONE specific claim -> verifyClaim",
 						"the freshness/changelog of the API contract -> getChangelog",
 						"per-row confidence on a search result (already served inline)"
 					],
 					"exampleQuestions": [
-						"How reliable is this directory's status data?",
-						"What are the known limitations of this source?"
+						"How reliable is Stellar Light's status data?",
+						"What are the known limitations of the Scout directory?"
 					]
 				},
 				"responses": {
@@ -1530,7 +1530,8 @@
 													"enum": [
 														"audited",
 														"live",
-														"maintained"
+														"maintained",
+														"issued"
 													]
 												},
 												"subject": {
