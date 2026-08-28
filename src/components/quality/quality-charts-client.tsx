@@ -859,3 +859,161 @@ export function ComposedTrend({
 		</div>
 	);
 }
+
+// ── Library calendar (bklit contribution-heatmap form) ─────────────────────
+
+export interface LibraryEntry {
+	date: string; // yyyy-mm-dd
+	label: string;
+	kind: "lesson" | "audit" | "receipt";
+}
+
+/** The written record as a contribution calendar: weeks as columns, Mon-Sun
+ * rows, cell intensity = documents written that day, hover listing them.
+ * The question it answers at a glance: is this a living practice or a
+ * one-time audit? Sparse weeks render honestly as sparse. */
+export function LibraryCalendar({ entries }: { entries: LibraryEntry[] }) {
+	const { ref, width } = useMeasuredWidth(600);
+	const [hover, setHover] = useState<string | null>(null);
+	const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
+
+	const byDay = new Map<string, LibraryEntry[]>();
+	for (const e of entries) {
+		if (!/^\d{4}-\d{2}-\d{2}/.test(e.date)) continue;
+		const k = e.date.slice(0, 10);
+		byDay.set(k, [...(byDay.get(k) ?? []), e]);
+	}
+	const days = [...byDay.keys()].sort();
+	if (days.length === 0) return null;
+
+	// Monday-start weeks from the first document's week through today.
+	const toUTC = (iso: string) => new Date(`${iso}T00:00:00Z`);
+	const mondayOf = (d: Date) => {
+		const x = new Date(d);
+		x.setUTCDate(x.getUTCDate() - ((x.getUTCDay() + 6) % 7));
+		return x;
+	};
+	const start = mondayOf(toUTC(days[0]));
+	const end = new Date();
+	const weeks: string[][] = [];
+	for (let w = new Date(start); w <= end; w.setUTCDate(w.getUTCDate() + 7)) {
+		const col: string[] = [];
+		for (let i = 0; i < 7; i++) {
+			const d = new Date(w);
+			d.setUTCDate(d.getUTCDate() + i);
+			col.push(d.toISOString().slice(0, 10));
+		}
+		weeks.push(col);
+	}
+
+	const max = Math.max(...[...byDay.values()].map((v) => v.length), 1);
+	const level = (n: number) =>
+		n === 0
+			? -1
+			: Math.min(Math.floor((n / max) * RAMP.length), RAMP.length - 1);
+	const today = new Date().toISOString().slice(0, 10);
+	const CELL = 13;
+	const GAP = 3;
+	const hovered = hover ? byDay.get(hover) : null;
+
+	// month label when a column starts a new month
+	const monthLabel = (col: string[], i: number) => {
+		const m = col[0].slice(0, 7);
+		if (i === 0) return col[0].slice(5, 7);
+		return weeks[i - 1][0].slice(0, 7) !== m ? col[0].slice(5, 7) : null;
+	};
+
+	return (
+		<div
+			ref={ref}
+			className="relative"
+			onMouseLeave={() => setHover(null)}
+			onMouseMove={(e) => {
+				const box = ref.current?.getBoundingClientRect();
+				if (box) setMouse({ x: e.clientX - box.left, y: e.clientY - box.top });
+			}}
+		>
+			<div className="overflow-x-auto pb-1">
+				<div className="inline-flex flex-col gap-[3px]">
+					<div className="flex gap-[3px] text-[9px] text-muted-foreground h-3">
+						{weeks.map((col, i) => (
+							<span
+								key={col[0]}
+								style={{ width: CELL }}
+								className="text-center"
+							>
+								{monthLabel(col, i)}
+							</span>
+						))}
+					</div>
+					{[0, 1, 2, 3, 4, 5, 6].map((row) => (
+						<div key={row} className="flex items-center gap-[3px]">
+							{weeks.map((col) => {
+								const day = col[row];
+								const docs = byDay.get(day);
+								const lv = level(docs?.length ?? 0);
+								const future = day > today;
+								return (
+									<div
+										key={day}
+										className="rounded-[3px] transition-transform duration-100"
+										style={{
+											width: CELL,
+											height: CELL,
+											background:
+												lv < 0 ? "transparent" : RAMP[lv + 1 > 4 ? 4 : lv + 1],
+											border:
+												lv < 0 && !future
+													? "1px solid color-mix(in srgb, currentColor 10%, transparent)"
+													: undefined,
+											opacity: future ? 0 : 1,
+											transform:
+												hover === day && docs ? "scale(1.2)" : undefined,
+										}}
+										onMouseEnter={() => setHover(docs ? day : null)}
+										title={docs ? undefined : day}
+									/>
+								);
+							})}
+							<span className="text-[9px] text-muted-foreground w-7 pl-1">
+								{row === 0 ? "Mon" : row === 2 ? "Wed" : row === 4 ? "Fri" : ""}
+							</span>
+						</div>
+					))}
+				</div>
+			</div>
+			<div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
+				<span>less</span>
+				{RAMP.slice(1).map((c) => (
+					<span
+						key={c}
+						className="inline-block h-2.5 w-2.5 rounded-[2px]"
+						style={{ background: c }}
+					/>
+				))}
+				<span>more</span>
+				<span className="ml-3">
+					{entries.length} documents · hover a day for its titles
+				</span>
+			</div>
+			{hovered && hover && mouse && (
+				<Tip x={mouse.x} y={mouse.y} w={width}>
+					<div className="text-foreground">{hover}</div>
+					{hovered.slice(0, 4).map((e) => (
+						<div key={e.label} className="text-muted-foreground truncate">
+							<span className="uppercase text-[9px] tracking-wide">
+								{e.kind}
+							</span>{" "}
+							{e.label}
+						</div>
+					))}
+					{hovered.length > 4 && (
+						<div className="text-muted-foreground">
+							+{hovered.length - 4} more
+						</div>
+					)}
+				</Tip>
+			)}
+		</div>
+	);
+}
