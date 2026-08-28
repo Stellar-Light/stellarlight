@@ -7,6 +7,7 @@
  * crosshair tooltip, axes and grid.
  */
 
+import { curveMonotoneX } from "@visx/curve";
 import { ComposedChart } from "@/components/charts/composed-chart";
 import { Grid } from "@/components/charts/grid";
 import { Line } from "@/components/charts/line";
@@ -18,6 +19,9 @@ import { YAxis } from "@/components/charts/y-axis";
 const VIOLET = "#a78bfa";
 const VIOLET_DEEP = "#7c3aed";
 const VIOLET_BRIGHT = "#c4b5fd";
+/** The cumulative/ratchet line: a TOTAL, not a series — neutral foreground so
+ * it can never be confused with the receipts swatch (#c4b5fd). */
+const LINE_INK = "#e5e5e5";
 const RED = "#f87171";
 const AMBER = "#fbbf24";
 
@@ -72,7 +76,7 @@ export function TrendComposed({ rows }: { rows: TrendRow[] }) {
 				data={data as unknown as Record<string, unknown>[]}
 				xDataKey="date"
 				aspectRatio="4 / 1"
-				margin={{ top: 8, right: 8, bottom: 24, left: 28 }}
+				margin={{ top: 8, right: 36, bottom: 24, left: 36 }}
 				stacked
 				stackGap={2}
 				barSize={22}
@@ -86,8 +90,9 @@ export function TrendComposed({ rows }: { rows: TrendRow[] }) {
 				<SeriesBar dataKey="errors" fill={AMBER} radius={3} />
 				<Line
 					dataKey="openMaps"
-					stroke={VIOLET_BRIGHT}
+					stroke={LINE_INK}
 					strokeWidth={2}
+					curve={curveMonotoneX}
 					animate={false}
 				/>
 				<ChartTooltip
@@ -110,7 +115,7 @@ export function TrendComposed({ rows }: { rows: TrendRow[] }) {
 							value: (p.errors as number) ?? 0,
 						},
 						{
-							color: VIOLET_BRIGHT,
+							color: LINE_INK,
 							label: "open maps",
 							value: (p.openMaps as number) ?? 0,
 						},
@@ -183,7 +188,7 @@ export function LibraryComposed({ entries }: { entries: LibraryEntry[] }) {
 				data={data as unknown as Record<string, unknown>[]}
 				xDataKey="date"
 				aspectRatio="4 / 1"
-				margin={{ top: 8, right: 8, bottom: 24, left: 28 }}
+				margin={{ top: 8, right: 36, bottom: 24, left: 36 }}
 				stacked
 				stackGap={2}
 				barSize={18}
@@ -197,8 +202,9 @@ export function LibraryComposed({ entries }: { entries: LibraryEntry[] }) {
 				<SeriesBar dataKey="receipts" fill={VIOLET_BRIGHT} radius={3} />
 				<Line
 					dataKey="cumulative"
-					stroke={VIOLET_BRIGHT}
+					stroke={LINE_INK}
 					strokeWidth={2}
+					curve={curveMonotoneX}
 					animate={false}
 				/>
 				<ChartTooltip
