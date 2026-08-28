@@ -118,19 +118,21 @@ service runs at Stage 3+ by default and humans do product, not repair.
   *Evidence:* `specs/honesty-baseline.json` (debt 0),
   `scripts/eval/eval-baselines.json`, `improvements/quality/*.json`.
 
-- **P2. Entity truth: issuers, receipts, enumerations.** `status: in progress`
+- **P2. Entity truth: issuers, receipts, enumerations, dedupe.** `status: done`
   sls-033 closed at root, typed enumerations are limit-independent sets
   (#1064, #1065) · stablecoin issuer relations made conflation-proof, with
   the `issued` claim family (#1068, #1069) · receipts-in-repo for
-  human-verified corrections (#1073).
-  *Shipped so far:* everything above.
-  *Remaining:* dedupe. The first full census of the repos collection
-  (2026-08-28) found 381 duplicate rows, some repos stored 20 times, so the
-  dedupe this phase's old title claimed done had in fact never been measured.
-  Done means: duplicate fullName rows = 0 with a guard that keeps them there.
+  human-verified corrections (#1073) · repo dedupe: the 2026-08-28 census
+  found 381 duplicate rows (a rename-loop in enrich-repos creating a fresh
+  copy per pass); root cause fixed with a canonical-name lookup (#1081), the
+  381 orphans merged and deleted (run 33140742611), and the read-back guard
+  (`check-repo-dupes.ts`) verified 12938 rows = 12938 distinct fullNames. The
+  guard now runs after every enrich wave, so the phase stays done only while
+  the collection stays clean.
   *Evidence:* battery slice G (enumeration integrity), slice H (verify
   grades itself), `improvements/receipts/`,
-  `improvements/quality/entities.json` (repos.duplicateRows).
+  `improvements/quality/entities.json` (repos.duplicateRows = 0),
+  `scripts/data/check-repo-dupes.ts` in enrich-repos.yml + dedupe-repos.yml.
 
 - **P3. Earned autonomy.** `status: in progress`
   Stage-2 autonomy for bounded work · event-driven freshness (PLAN §5) ·

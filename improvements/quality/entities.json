@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T03:17:31.798Z",
+ "generatedAt": "2026-08-28T04:13:53.841Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -233,11 +233,11 @@
    },
    {
     "basis": "source-inherited",
-    "count": 171
+    "count": 169
    },
    {
     "basis": "human-verified",
-    "count": 77
+    "count": 79
    },
    {
     "basis": "unverified",
@@ -253,7 +253,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 982,
+  "weakestTotal": 981,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -830,7 +830,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 936
+    "count": 934
    },
    {
     "field": "dated",
@@ -838,11 +838,11 @@
    },
    {
     "field": "sourced",
-    "count": 94
+    "count": 93
    },
    {
     "field": "typed",
-    "count": 74
+    "count": 73
    },
    {
     "field": "linked",
@@ -852,13 +852,13 @@
  },
  "repos": {
   "read": 12938,
-  "population": 13319,
+  "population": 12938,
   "coveragePct": 100,
-  "duplicateRows": 381,
-  "duplicateNote": "381 row(s) in the repos collection duplicate a fullName already stored, one repo appears up to 20 times. Every count below is over DISTINCT repos; the duplicate rows are storage debt, tracked separately.",
+  "duplicateRows": 0,
+  "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
   "sampled": 12938,
-  "withCodeDepth": 6849,
+  "withCodeDepth": 6855,
   "withNotes": 263,
   "withMainnet": 2,
   "top": [
@@ -1105,17 +1105,6 @@
     "mainnetContracts": 0
    },
    {
-    "fullName": "hot-dao/kit",
-    "repoScore": 79,
-    "tier": "community",
-    "activity": "slowing",
-    "language": "TypeScript",
-    "projectSlug": "hot-wallet",
-    "notes": 1,
-    "codeDepth": 98,
-    "mainnetContracts": 0
-   },
-   {
     "fullName": "devasignhq/agent",
     "repoScore": 79,
     "tier": "community",
@@ -1211,6 +1200,17 @@
     "language": "JavaScript",
     "projectSlug": "liquidsfi",
     "notes": 0,
+    "codeDepth": 98,
+    "mainnetContracts": 0
+   },
+   {
+    "fullName": "hot-dao/kit",
+    "repoScore": 79,
+    "tier": "community",
+    "activity": "slowing",
+    "language": "TypeScript",
+    "projectSlug": "hot-wallet",
+    "notes": 1,
     "codeDepth": 98,
     "mainnetContracts": 0
    },
@@ -1750,13 +1750,13 @@
   {
    "area": "project status",
    "limit": "88% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "907 of 1025 rows (census)",
+   "measurement": "905 of 1025 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "74 of 1025 sampled rows untyped",
+   "measurement": "73 of 1025 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -2079,7 +2079,7 @@
     "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "repoScore >= 70 only",
-    "examplePoolSize": 103,
+    "examplePoolSize": 102,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -2106,7 +2106,7 @@
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 253,
+    "examplePoolSize": 252,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -2127,9 +2127,9 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 936,
+    "missing": 934,
     "of": 1025,
-    "share": 91.3,
+    "share": 91.1,
     "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
@@ -2154,40 +2154,40 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6089,
+    "missing": 6083,
     "of": 12938,
-    "share": 47.1,
+    "share": 47,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6089,
+    "examplePoolSize": 6083,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
      "theboycoder/stellar-pay",
      "UmutKDev/bound",
-     "PotLock/grantpicks",
-     "pyved-solution/pyved-engine",
-     "Moon-Launch/flow",
-     "web3-antivirus/soroban-cli-gui",
-     "yripper/stellar-tools",
-     "flarcos/swplug-plugin",
      "rafliad/payoes",
      "peejay-git/stellarswap",
      "orbitlens/stellar-expert-id-keystore-mongodb",
-     "orbitlens/operations-notifier"
+     "orbitlens/operations-notifier",
+     "ofwonogodwin/Market-Connect-Ug",
+     "Obiajulu-gif/Stellar-TrustQuest",
+     "neelpote/Orakel",
+     "Maycon-Rodrigues/rn-latam-anchor-kit",
+     "MattPoblete/soroban-preview-docker",
+     "marwen-abid/meridian-pay-sdp-frontend"
     ]
    },
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 94,
+    "missing": 93,
     "of": 1025,
-    "share": 9.2,
+    "share": 9.1,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 94,
+    "examplePoolSize": 93,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -2208,13 +2208,13 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 74,
+    "missing": 73,
     "of": 1025,
-    "share": 7.2,
+    "share": 7.1,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 74,
+    "examplePoolSize": 73,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
