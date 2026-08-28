@@ -51,7 +51,10 @@ jobs:
       - name: Golden questions — direct vs through Raven
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/eval/raven-golden-parity.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/eval/raven-golden-parity.ts ${{ (github.event_name == 'schedule' || inputs.gate) && '--gate' || '' }} | tee /tmp/parity.out
 
       - name: Cross-surface consistency (guard A)
         if: always()
@@ -83,8 +86,9 @@ jobs:
         run: |
           BP=$(grep -oE '[0-9]+ pass' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
           BF=$(grep -oE '[0-9]+ fail' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
+          PP=$(grep -oE '[0-9]+ pass both' /tmp/parity.out 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)
           pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
-            ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF}
+            ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} ${PP:+--parity-pass $PP}
           git config user.name "stellarlight-quality-bot"
           git config user.email "bot@stellarlight.xyz"
           git add improvements/quality/history.json
