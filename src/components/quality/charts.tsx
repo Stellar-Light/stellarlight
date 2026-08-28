@@ -645,3 +645,96 @@ export function QueueRow({
 // "stuck") and styled hover tooltips, both of which require client state.
 // Re-exported here so the page's import surface is unchanged.
 export { Sankey } from "./sankey-client";
+
+/** Evidence age as a filled track against the guard's own freshness window.
+ * Static by design (server-rendered inside each guard card): the fill IS the
+ * message, and past-the-window never renders here because that flips the
+ * card's state to needs-re-measure. */
+export function FreshnessTrack({
+	ageDays,
+	windowDays,
+}: {
+	ageDays: number;
+	windowDays: number;
+}) {
+	const share = Math.min(ageDays / Math.max(windowDays, 1), 1);
+	return (
+		<div
+			className="flex items-center gap-2"
+			title={`evidence is ${ageDays}d old; this guard tolerates ${windowDays}d`}
+		>
+			<div className="h-1 w-24 rounded-full bg-muted/40 overflow-hidden">
+				<div
+					className="h-full rounded-full"
+					style={{
+						width: `${Math.max(share * 100, 3)}%`,
+						backgroundColor: share >= 0.7 ? "#fbbf24" : "#FDDA24",
+					}}
+				/>
+			</div>
+			<span className="text-[10px] text-muted-foreground tabular-nums whitespace-nowrap">
+				{ageDays}d of {windowDays}d window
+			</span>
+		</div>
+	);
+}
+
+/** One 100% bar splitting the consumer's OWN answer key by status, ordered
+ * best-first. Identity never rides on color alone: the legend carries the
+ * words and counts, and declined gets a distinct outlined treatment. */
+export function StatusSplit({
+	counts,
+	order,
+	total,
+}: {
+	counts: Record<string, number>;
+	order: Array<{
+		key: string;
+		label: string;
+		color: string;
+		outline?: boolean;
+	}>;
+	total: number;
+}) {
+	const present = order.filter((o) => (counts[o.key] ?? 0) > 0);
+	return (
+		<div className="flex flex-col gap-2">
+			<div className="flex h-2.5 w-full overflow-hidden rounded-[3px]">
+				{present.map((o, i) => (
+					<div
+						key={o.key}
+						className="h-full"
+						style={{
+							width: `${((counts[o.key] ?? 0) / Math.max(total, 1)) * 100}%`,
+							background: o.outline ? "transparent" : o.color,
+							border: o.outline ? `1px dashed ${o.color}` : undefined,
+							marginLeft: i === 0 ? 0 : 2,
+							minWidth: 8,
+						}}
+						title={`${o.label}: ${counts[o.key] ?? 0}`}
+					/>
+				))}
+			</div>
+			<div className="flex flex-wrap gap-x-4 gap-y-1">
+				{order.map((o) => (
+					<span
+						key={o.key}
+						className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
+					>
+						<span
+							className="inline-block h-2 w-2 rounded-[2px]"
+							style={{
+								background: o.outline ? "transparent" : o.color,
+								border: o.outline ? `1px dashed ${o.color}` : undefined,
+							}}
+						/>
+						{o.label}
+						<span className="text-foreground tabular-nums">
+							{counts[o.key] ?? 0}
+						</span>
+					</span>
+				))}
+			</div>
+		</div>
+	);
+}

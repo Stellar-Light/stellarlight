@@ -569,3 +569,78 @@ export function MiniHistogram({
 		</div>
 	);
 }
+
+// ── Guard-state strip ──────────────────────────────────────────────────────
+
+/** The whole board as one fingerprint: a segment per guard in board order,
+ * colored by state. The verdict's counts say how many; this says WHICH, and
+ * hover names each without scrolling to the cards. */
+export function GuardStateStrip({
+	guards,
+}: {
+	guards: Array<{
+		key: string;
+		title: string;
+		value: string;
+		state: "holding" | "breached" | "stale";
+	}>;
+}) {
+	const { ref, width } = useMeasuredWidth();
+	const [hover, setHover] = useState<number | null>(null);
+	const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
+	const COLOR: Record<string, string> = {
+		holding: ACCENT,
+		breached: "#f87171",
+		stale: "#fbbf24",
+	};
+	const WORD: Record<string, string> = {
+		holding: "at target",
+		breached: "below target",
+		stale: "needs re-measure",
+	};
+	const h = hover !== null ? guards[hover] : null;
+	return (
+		<div
+			ref={ref}
+			className="relative"
+			onMouseLeave={() => setHover(null)}
+			onMouseMove={(e) => {
+				const box = ref.current?.getBoundingClientRect();
+				if (box) setMouse({ x: e.clientX - box.left, y: e.clientY - box.top });
+			}}
+		>
+			<div
+				className="flex gap-[3px] h-3"
+				role="img"
+				aria-label={guards
+					.map((g) => `${g.title}: ${WORD[g.state]}`)
+					.join("; ")}
+			>
+				{guards.map((g, i) => (
+					<div
+						key={g.key}
+						className="flex-1 rounded-[2px] transition-opacity duration-100"
+						style={{
+							background: COLOR[g.state],
+							opacity:
+								hover === null || hover === i
+									? g.state === "holding"
+										? 0.75
+										: 0.95
+									: 0.25,
+						}}
+						onMouseEnter={() => setHover(i)}
+					/>
+				))}
+			</div>
+			{h && mouse && (
+				<Tip x={mouse.x} y={mouse.y} w={width}>
+					<div className="text-foreground">{h.title}</div>
+					<div className="text-muted-foreground">
+						{WORD[h.state]} · {h.value}
+					</div>
+				</Tip>
+			)}
+		</div>
+	);
+}
