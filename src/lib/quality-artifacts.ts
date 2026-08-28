@@ -33,8 +33,8 @@ import qualityHistory from "../../improvements/quality/history.json";
 import missFunnel from "../../improvements/quality/miss-funnel.json";
 import qualityProgress from "../../improvements/quality/progress.json";
 import honestyBaseline from "../../specs/honesty-baseline.json";
-import openapi from "../../specs/openapi.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
+import openapi from "../../specs/openapi.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
@@ -166,7 +166,6 @@ export interface GuardRow {
 	 * a stale row is never green. */
 	ok: boolean;
 }
-
 
 /** Single construction path for every guard row. Age, state and the rendered
  * headline are DERIVED here, so a row cannot claim green on evidence too old
@@ -357,7 +356,8 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				details:
 					breaches.length > 0
 						? breaches.map(
-								(b) => `${b.bucket} at ${b.rate}% vs floor ${b.floor}%, open red`,
+								(b) =>
+									`${b.bucket} at ${b.rate}% vs floor ${b.floor}%, open red`,
 							)
 						: ["all buckets above floor"],
 				asOf: engineARecall.generatedAt,
@@ -677,40 +677,6 @@ export interface TrendSeries {
 	points: TrendPoint[];
 }
 
-/** The committed daily history behind /quality's Trends section. Ratchets
- * and counts only, every point was measured by the day's pipeline run (a
- * null is "not measured that day" and charts as a gap, never as zero). */
-export function getTrends(): TrendSeries[] {
-	const h = qualityHistory as Array<Record<string, number | string | null>>;
-	const series = (
-		key: string,
-		title: string,
-		goodWhen: "up" | "down",
-		unit?: string,
-	): TrendSeries => ({
-		key,
-		title,
-		goodWhen,
-		unit,
-		points: h.map((r) => ({
-			date: String(r.date),
-			value: typeof r[key] === "number" ? (r[key] as number) : null,
-		})),
-	});
-	return [
-		series("batteryPass", "Truth battery, probes passing", "up"),
-		series("batteryFail", "Truth battery, failures", "down"),
-		// The battery's third counter. Without it a run whose slices CRASHED
-		// recorded "N pass, 0 fail" and rendered as a perfect green day.
-		series("batteryErrors", "Truth battery, slices crashed", "down"),
-		series("parityPass", "Golden parity, pass both paths", "up"),
-		series("openMaps", "Contract open maps (ratchet)", "down"),
-		series("honestyDebt", "Unlabelled q-ops (ratchet)", "down"),
-		series("liveNoSource", "Live rows without a source", "down"),
-		series("humanVerified", "Human-verified statuses", "up"),
-	];
-}
-
 /** The committed entity + findings artifact behind /quality's Findings and
  * Per-entity sections (scripts/quality/build-quality-artifact.ts). */
 
@@ -845,4 +811,9 @@ export function getProgress() {
  * consumer, from that project's own evaluation battery. */
 export function getExternalFindings() {
 	return externalFindings;
+}
+
+/** The raw daily history rows for the composed trend chart. */
+export function getTrendHistory() {
+	return qualityHistory;
 }
