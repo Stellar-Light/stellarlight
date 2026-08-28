@@ -1,9 +1,9 @@
 [
  {
   "date": "2026-08-28",
-  "batteryPass": 108,
+  "batteryPass": 57,
   "batteryFail": 0,
-  "parityPass": 51,
+  "parityPass": null,
   "openMaps": 47,
   "honestyDebt": 0,
   "sampled": 481,
