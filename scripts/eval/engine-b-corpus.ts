@@ -51,6 +51,20 @@ const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 	"lumenloop-research": 30,
 };
 
+/**
+ * Sources whose upstream format states NO publication date anywhere — there
+ * is nothing to extract, so "0% dated" is the correct reading, not a defect.
+ * Declared with a reason so the artifact SAYS why instead of silently
+ * exempting; the /quality reader (src/lib/quality-artifacts.ts) skips these
+ * in its defect count but reports them in the detail line. A source belongs
+ * here only after checking the real upstream pages — dated sources with a
+ * broken extractor (the sep/cap/paper class) get fixed, never declared.
+ */
+const UNDATEABLE_SOURCES: Record<string, string> = {
+	"repo-docs": "GitHub READMEs state no publication date",
+	"scf-handbook": "handbook site pages state no publication date",
+};
+
 // titleIssue (and its calibration history) moved to src/lib/title-quality.ts
 // so this sweep, the ingest choke point (chunkMarkdown → deriveCleanTitle) and
 // the back-fill repair (scripts/fix-corpus-titles.ts) share ONE classifier —
@@ -130,6 +144,8 @@ async function main() {
 			newestAgeDays: number | null;
 			stalled: boolean;
 			undated: boolean;
+			undateable?: true;
+			reason?: string;
 		}
 	> = {};
 	for (const [source, list] of bySource) {
@@ -144,16 +160,23 @@ async function main() {
 		const expect = FRESHNESS_EXPECTATIONS_DAYS[source];
 		// undated ≠ stalled: lumenloop's chunks carry NO publishedAt at all
 		// (an extraction gap of the R2 class) — freshness is UNMEASURABLE
-		// there, which is its own finding, not a stall verdict.
-		const undated = dated.length === 0;
+		// there, which is its own finding, not a stall verdict. And undated ≠
+		// undateable: a DECLARED undateable source (upstream states no date)
+		// reads 0% dated by construction — reported with its reason, never
+		// counted as the extraction-gap defect.
+		const undateableReason = UNDATEABLE_SOURCES[source];
+		const undated = dated.length === 0 && !undateableReason;
 		coverage[source] = {
 			chunks: list.length,
 			datedPct: Math.round((dated.length / list.length) * 100),
 			newestAgeDays,
 			undated,
+			...(undateableReason
+				? { undateable: true as const, reason: undateableReason }
+				: {}),
 			stalled:
 				expect !== undefined &&
-				!undated &&
+				dated.length > 0 &&
 				newestAgeDays !== null &&
 				newestAgeDays > expect,
 		};
@@ -234,7 +257,7 @@ async function main() {
 	console.log("S7 publishedAt coverage / freshness:");
 	for (const [s, c] of Object.entries(coverage))
 		console.log(
-			`   ${s.padEnd(22)} ${String(c.chunks).padStart(5)} chunks | dated ${c.datedPct}% | newest ${c.newestAgeDays ?? "—"}d${c.stalled ? "  ⚠ STALLED" : ""}`,
+			`   ${s.padEnd(22)} ${String(c.chunks).padStart(5)} chunks | dated ${c.datedPct}% | newest ${c.newestAgeDays ?? "—"}d${c.stalled ? "  ⚠ STALLED" : ""}${c.undateable ? `  (undateable: ${c.reason})` : ""}`,
 		);
 	console.log(`S8 mirrored content: ${mirrors.length} hash groups across URLs`);
 	for (const m of mirrors.slice(0, 8)) console.log(`   ${m.urls.join(" ↔ ")}`);
