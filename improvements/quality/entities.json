@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T16:54:53.575Z",
+ "generatedAt": "2026-08-28T19:33:37.111Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -1321,7 +1321,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "lulpay",
@@ -1339,7 +1339,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "liquidsfi",
@@ -1422,7 +1422,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "dd",
@@ -1459,7 +1459,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "arka-fund",
@@ -1469,7 +1469,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "stellarx-ph",
@@ -1994,7 +1994,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "vesseo",
@@ -2341,7 +2341,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "noir",
@@ -3683,7 +3683,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "stellarbroker",
@@ -4091,7 +4091,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "sorobanmath",
@@ -4109,7 +4109,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "sorobanhooks",
@@ -5749,7 +5749,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "hiyield",
@@ -5875,7 +5875,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "getpaid",
@@ -6083,7 +6083,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "every-finance",
@@ -6571,7 +6571,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "coindisco",
@@ -6785,7 +6785,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "cartwey",
@@ -8102,7 +8102,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Inactive"
+    "status": "Live"
    },
    {
     "slug": "paychant",
@@ -9906,7 +9906,7 @@
    {
     "slug": "arka-fund",
     "name": "Arka Fund",
-    "status": "Inactive",
+    "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
     "score": 60,

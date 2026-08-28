@@ -3,12 +3,14 @@
   "date": "2026-08-28",
   "batteryPass": 57,
   "batteryFail": 0,
-  "parityPass": null,
-  "openMaps": 47,
+  "batteryErrors": null,
+  "parityPass": 51,
+  "openMaps": 0,
   "honestyDebt": 0,
-  "sampled": 481,
-  "liveRows": 456,
-  "liveNoSource": 12,
-  "humanVerified": 29
+  "sampled": 1025,
+  "population": 1025,
+  "liveRows": 878,
+  "liveNoSource": 23,
+  "humanVerified": 79
  }
 ]
