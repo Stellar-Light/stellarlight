@@ -258,12 +258,16 @@ export default function QualityPage() {
 											of the past, not the present
 										</li>
 									))}
-									{northStar.warning && (
-										<li className="text-xs text-muted-foreground leading-relaxed">
-											<span className="text-foreground">North star</span>:{" "}
-											{northStar.warning}
-										</li>
-									)}
+									{/* Only RELIABILITY problems belong in this column: staleness
+									     and below-target. The probe-frame comparability caveat is
+									     about how to read the chart, and it renders at the chart. */}
+									{(northStar.stale || northStar.belowTarget) &&
+										northStar.warning && (
+											<li className="text-xs text-muted-foreground leading-relaxed">
+												<span className="text-foreground">North star</span>:{" "}
+												{northStar.warning}
+											</li>
+										)}
 								</ul>
 							</div>
 						</div>
@@ -325,12 +329,19 @@ export default function QualityPage() {
 				right={<EvidenceLink path={northStar.latest.evidence} />}
 				className="mb-6"
 			>
-				{northStar.warning && (
-					<p className="mb-4 flex items-start gap-2 text-xs leading-relaxed text-amber-400">
-						<TriangleAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-						<span>{northStar.warning}</span>
-					</p>
-				)}
+				{/* Amber only for reliability problems (stale / below target). A
+				     comparability caveat alone is a reading note, not an alarm. */}
+				{northStar.warning &&
+					(northStar.stale || northStar.belowTarget ? (
+						<p className="mb-4 flex items-start gap-2 text-xs leading-relaxed text-amber-400">
+							<TriangleAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+							<span>{northStar.warning}</span>
+						</p>
+					) : (
+						<p className="mb-4 text-[11px] leading-relaxed text-muted-foreground">
+							Reading note: {northStar.warning}
+						</p>
+					))}
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4">
 					<Stat
 						label={`latest (${northStar.latest.date})`}
