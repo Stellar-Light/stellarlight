@@ -368,7 +368,14 @@ export function mergeVocabulary(
 	core: Record<string, string[]>,
 	overlay: Record<string, string[]>,
 ): Record<string, string[]> {
-	const out: Record<string, string[]> = {};
+	// Null prototype, because these maps are keyed by USER QUERY TOKENS. On a
+	// plain object, SYNONYMS["constructor"] returns Object.prototype.constructor
+	// (a function, so `?? []` never fires) and the caller's for..of throws —
+	// q=constructor was a live 500 on BOTH search surfaces (Engine A R-SYM,
+	// 2026-08-28). The tokenizer lowercases, so `constructor` is the one
+	// reachable prototype key; killing the prototype kills the class for every
+	// surface that merges its vocabulary here.
+	const out: Record<string, string[]> = Object.create(null);
 	for (const [k, vs] of Object.entries(core)) out[k] = [...vs];
 	for (const [k, vs] of Object.entries(overlay)) {
 		out[k] = [...new Set([...(out[k] ?? []), ...vs])];
@@ -385,6 +392,12 @@ export function mergeVocabulary(
  * expansion is deliberate (it finds the right thing); the LABEL was the lie.
  * Domain synonyms (cex → centralized exchange) are NOT corrections — a row
  * matching the expanded domain term genuinely answers the query. */
-export const SPELLING_CORRECTIONS: Record<string, string> = {
-	strupey: "stroopy",
-};
+// Null prototype for the same reason as mergeVocabulary: keyed by raw query
+// tokens, and SPELLING_CORRECTIONS["constructor"] must be undefined, not a
+// function that then gets treated as a correction string.
+export const SPELLING_CORRECTIONS: Record<string, string> = Object.assign(
+	Object.create(null),
+	{
+		strupey: "stroopy",
+	},
+);

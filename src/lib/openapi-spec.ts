@@ -25,6 +25,13 @@ interface OpenAPISpec {
 	components: Record<string, unknown>;
 }
 
+// sls-077: ONE claim-type enum, used by the verify request param AND the 200
+// response schema. The drift was two hand-maintained copies: `issued` was
+// added to the request enum and forgotten in the response enum, so a
+// generated consumer could not project a valid live response from the
+// contract, and Raven gates exposure of GET /api/verify on exactly that.
+const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
+
 export const spec: OpenAPISpec = {
 	openapi: "3.1.0",
 	info: {
@@ -166,37 +173,43 @@ export const spec: OpenAPISpec = {
 				operationId: "getQualityReport",
 				tags: ["Verification"],
 				summary:
-					"This service's own quality report — known limitations, per-surface health, guard state",
+					"Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state",
 				description:
-					"A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.",
+					"Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.",
+				// sls-078: every keyword ANCHORED to this source. The prior list carried
+				// standalone words (trust, coverage, health, provenance, limitations)
+				// and Raven measured the op hijacking 56 of 338 unrelated top-5
+				// routings — a question about Soroban msg.sender routed HERE. The
+				// op answers questions about Scout/Stellar Light's own data quality
+				// and nothing else, and its routing text now says only that.
 				"x-routing": {
 					purpose:
-						"Let an agent weigh how much to trust this service's answers, and see what it is measurably weak at.",
+						"Source calibration for THIS service only: how trustworthy is Stellar Light / Scout's own data, measured, with its known weak spots.",
 					keywords: [
-						"data quality",
-						"how reliable",
-						"limitations",
-						"known issues",
-						"trust",
-						"confidence in the data",
-						"coverage",
-						"provenance",
-						"self report",
-						"health",
+						"stellarlight data quality",
+						"scout data quality",
+						"how reliable is this directory",
+						"how reliable is this source",
+						"this source's limitations",
+						"scout quality report",
+						"directory data provenance",
+						"quality of this data set",
 					],
 					useWhen: [
-						"deciding how much weight to give a result from this service",
-						"a user asks how good or complete this data is",
-						"explaining why an answer is uncertain or a row is thin",
+						"the question is explicitly about Scout / Stellar Light / this directory's own data quality, coverage, or limitations",
+						"deciding how much weight to give THIS service's answers",
+						"explaining why one of THIS service's answers is uncertain or a row is thin",
 					],
 					notFor: [
+						"any technical, protocol, SDK, or operational question that merely contains words like trust, confidence, source, coverage, health, or limitations without asking about THIS service's data (route to docs/search instead)",
+						"trust or health of a PROJECT or PRODUCT in the directory -> searchProjects / verifyClaim",
 						"verifying ONE specific claim -> verifyClaim",
 						"the freshness/changelog of the API contract -> getChangelog",
 						"per-row confidence on a search result (already served inline)",
 					],
 					exampleQuestions: [
-						"How reliable is this directory's status data?",
-						"What are the known limitations of this source?",
+						"How reliable is Stellar Light's status data?",
+						"What are the known limitations of the Scout directory?",
 					],
 				},
 				responses: {
@@ -978,7 +991,7 @@ export const spec: OpenAPISpec = {
 						description: "Structured alternative to claim.",
 						schema: {
 							type: "string",
-							enum: ["audited", "live", "maintained", "issued"],
+							enum: VERIFY_CLAIM_TYPES,
 						},
 					},
 					{
@@ -1035,7 +1048,7 @@ export const spec: OpenAPISpec = {
 											properties: {
 												type: {
 													type: "string",
-													enum: ["audited", "live", "maintained"],
+													enum: VERIFY_CLAIM_TYPES,
 												},
 												subject: { type: "string" },
 												auditor: { type: "string" },
@@ -2357,6 +2370,12 @@ export const spec: OpenAPISpec = {
 													startDate: { type: "string", nullable: true },
 													endDate: { type: "string", nullable: true },
 													externalUrl: { type: "string", nullable: true },
+													prizePoolUSD: {
+														type: "number",
+														nullable: true,
+														description:
+															"null when the source publishes none: unknown, never zero.",
+													},
 													source: { type: "string" },
 												},
 											},
@@ -5078,6 +5097,18 @@ export const spec: OpenAPISpec = {
 												slug: { type: "string" },
 												name: { type: "string" },
 												description: { type: "string", nullable: true },
+												tagline: { type: "string", nullable: true },
+												source: {
+													type: "string",
+													description:
+														"Which catalog the skill comes from (e.g. sdf-official, stellarlight).",
+												},
+												targetUser: {
+													type: "array",
+													items: { type: "string" },
+													description: "Audiences it serves: dev / founder / agent.",
+												},
+												tags: { type: "array", items: { type: "string" } },
 												kind: {
 													type: "string",
 													description:
@@ -5360,6 +5391,29 @@ export const spec: OpenAPISpec = {
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										toolchain: {
+											type: "object",
+											description:
+												"Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain.",
+											properties: {
+												scannedRepos: { type: "integer" },
+												byVersionStatus: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												deprecatedRepos: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															projectSlug: { type: "string", nullable: true },
+															sorobanSdkVersion: { type: "string", nullable: true },
+														},
+													},
+												},
 											},
 										},
 										categories: {

@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T04:26:47.379Z",
+ "generatedAt": "2026-08-28T16:06:45.827Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -9,17 +9,17 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "consumer",
+   "means": "questions real consumers asked that we answered weakly",
+   "openFindings": 16,
+   "clearedFindings": 7,
+   "verifiedFindings": 0
+  },
+  {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 15,
    "clearedFindings": 39,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "consumer",
-   "means": "questions real consumers asked that we answered weakly",
-   "openFindings": 14,
-   "clearedFindings": 0,
    "verifiedFindings": 0
   },
   {
@@ -37,25 +37,25 @@
    "verifiedFindings": 7
   },
   {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 1,
-   "clearedFindings": 3,
-   "verifiedFindings": 0
-  },
-  {
    "surface": "scf",
    "means": "SCF round and award data",
    "openFindings": 0,
    "clearedFindings": 14,
    "verifiedFindings": 0
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 0,
+   "clearedFindings": 4,
+   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 437,
-  "open": 78,
-  "cleared": 352,
+  "total": 446,
+  "open": 79,
+  "cleared": 360,
   "verified": 7,
   "byFailureMode": [
    {
@@ -101,9 +101,16 @@
     "surface": "scf"
    },
    {
+    "mode": "demand-routing-miss",
+    "open": 7,
+    "cleared": 6,
+    "verified": 0,
+    "surface": "consumer"
+   },
+   {
     "mode": "routing-miss",
-    "open": 8,
-    "cleared": 0,
+    "open": 9,
+    "cleared": 1,
     "verified": 0,
     "surface": "consumer"
    },
@@ -113,13 +120,6 @@
     "cleared": 0,
     "verified": 7,
     "surface": "contract"
-   },
-   {
-    "mode": "demand-routing-miss",
-    "open": 6,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "consumer"
    },
    {
     "mode": "population-miss",
@@ -144,8 +144,8 @@
    },
    {
     "mode": "consumer-code-shallow",
-    "open": 1,
-    "cleared": 0,
+    "open": 0,
+    "cleared": 1,
     "verified": 0,
     "surface": "code"
    }
@@ -153,7 +153,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 26
+    "count": 35
    },
    {
     "bucket": "8–30d",
@@ -161,7 +161,7 @@
    },
    {
     "bucket": "31–60d",
-    "count": 34
+    "count": 26
    },
    {
     "bucket": ">60d",
@@ -170,51 +170,51 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "nownodes in top-3 for 'is NOWNodes live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "kutana",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "lightecho in top-3 for 'is Lightecho live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "tomer weller",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "gatewayfm in top-3 for 'is Gateway.fm live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "kalepail",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "liquify in top-3 for 'is Liquify live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "8004",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "bridge in top-3 for 'tell me about Bridge'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "tell me about solana",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "orally in top-3 for 'is Orally live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "is blend audited and by who?",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "merkl in top-3 for 'is Merkl live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "submit a Stellar transaction with the JavaScript SDK",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-28"
    },
    {
-    "probe": "humantech in top-3 for 'is human.tech live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "how does the KALE proof-of-teamwork farming reward mechanism work",
+    "surface": "code",
+    "failureMode": "consumer-code-shallow",
     "clearedAt": "2026-08-28"
    }
   ]
@@ -1971,6 +1971,12 @@
     "value": 98
    },
    {
+    "id": "s:raven-routing",
+    "label": "raven-routing",
+    "column": 0,
+    "value": 23
+   },
+   {
     "id": "s:nightly-drift",
     "label": "nightly-drift",
     "column": 0,
@@ -1985,12 +1991,6 @@
    {
     "id": "s:scf-crosscheck",
     "label": "scf-crosscheck",
-    "column": 0,
-    "value": 14
-   },
-   {
-    "id": "s:raven-routing",
-    "label": "raven-routing",
     "column": 0,
     "value": 14
    },
@@ -2037,6 +2037,12 @@
     "value": 30
    },
    {
+    "id": "f:consumer",
+    "label": "consumer",
+    "column": 1,
+    "value": 23
+   },
+   {
     "id": "f:corpus",
     "label": "corpus",
     "column": 1,
@@ -2045,12 +2051,6 @@
    {
     "id": "f:scf",
     "label": "scf",
-    "column": 1,
-    "value": 14
-   },
-   {
-    "id": "f:consumer",
-    "label": "consumer",
     "column": 1,
     "value": 14
    },
@@ -2064,13 +2064,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 352
+    "value": 360
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 78
+    "value": 79
    },
    {
     "id": "o:verified",
@@ -2116,14 +2116,14 @@
     "value": 43
    },
    {
-    "source": 4,
-    "target": 14,
+    "source": 5,
+    "target": 15,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 14
    },
    {
-    "source": 14,
+    "source": 15,
     "target": 17,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
@@ -2151,18 +2151,25 @@
     "value": 1
    },
    {
-    "source": 5,
-    "target": 15,
+    "source": 2,
+    "target": 13,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
-    "value": 14
+    "value": 23
    },
    {
-    "source": 15,
+    "source": 13,
     "target": 18,
     "sourceId": "f:consumer",
     "targetId": "o:open",
-    "value": 14
+    "value": 16
+   },
+   {
+    "source": 13,
+    "target": 17,
+    "sourceId": "f:consumer",
+    "targetId": "o:cleared",
+    "value": 7
    },
    {
     "source": 9,
@@ -2173,10 +2180,10 @@
    },
    {
     "source": 16,
-    "target": 18,
+    "target": 17,
     "sourceId": "f:code",
-    "targetId": "o:open",
-    "value": 1
+    "targetId": "o:cleared",
+    "value": 4
    },
    {
     "source": 1,
@@ -2193,7 +2200,7 @@
     "value": 39
    },
    {
-    "source": 2,
+    "source": 3,
     "target": 12,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
@@ -2207,21 +2214,21 @@
     "value": 22
    },
    {
-    "source": 3,
-    "target": 13,
+    "source": 4,
+    "target": 14,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 13,
+    "source": 14,
     "target": 17,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 14
    },
    {
-    "source": 13,
+    "source": 14,
     "target": 18,
     "sourceId": "f:corpus",
     "targetId": "o:open",
@@ -2232,13 +2239,6 @@
     "target": 16,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
-    "value": 3
-   },
-   {
-    "source": 16,
-    "target": 17,
-    "sourceId": "f:code",
-    "targetId": "o:cleared",
     "value": 3
    },
    {

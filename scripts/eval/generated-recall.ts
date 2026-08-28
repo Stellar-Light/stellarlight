@@ -454,8 +454,37 @@ async function main() {
 	const withSyms = repoSeed.filter(
 		(r: any) => (r.codeVerified?.symbols ?? []).length > 0,
 	);
+	// A known-item probe needs a symbol that IDENTIFIES the item. symbols[0]
+	// is almost always contract boilerplate (initialize, __constructor) shared
+	// by dozens of repos, so at most 5 of them can ever be "in top-5 for it" -
+	// those probes were structurally unwinnable, and grading them as recall
+	// misses was eval noise (4 of 9 R-SYM failures on 2026-08-28). Probe the
+	// most distinctive symbol instead: longest wins as the cheap proxy for
+	// rarest, boilerplate excluded outright.
+	const BOILERPLATE_SYMS = new Set([
+		"initialize",
+		"init",
+		"__constructor",
+		"constructor",
+		"new",
+		"default",
+		"upgrade",
+		"version",
+		"balance",
+		"transfer",
+		"approve",
+		"allowance",
+		"mint",
+		"burn",
+	]);
 	await pool(cap(withSyms).slice(0, 30), 4, async (r: any) => {
-		const sym = r.codeVerified.symbols[0];
+		const syms = (r.codeVerified.symbols as string[]).filter(
+			(x) => !BOILERPLATE_SYMS.has(x.toLowerCase()),
+		);
+		// A repo whose EVERY symbol is boilerplate has no discriminative handle;
+		// probing it proves nothing either way.
+		if (syms.length === 0) return;
+		const sym = syms.sort((a, b) => b.length - a.length)[0];
 		const q = encodeURIComponent(sym);
 		try {
 			const d = await j(`/api/repos/search?q=${q}&limit=5`);

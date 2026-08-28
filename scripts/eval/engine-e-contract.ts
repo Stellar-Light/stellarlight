@@ -480,6 +480,10 @@ async function main() {
 
 	const report = {
 		base: BASE,
+		// The guard derives freshness from this stamp. The 07-11 baseline had
+		// none, so its guard row carried a hand-written date that went stale
+		// silently for 48 days while all five violations got fixed.
+		generatedAt: new Date().toISOString(),
 		specVersion: spec.info?.version ?? null,
 		frame: {
 			ops: opsTotal,

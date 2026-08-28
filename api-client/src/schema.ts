@@ -38,8 +38,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * This service's own quality report — known limitations, per-surface health, guard state
-         * @description A SELF-REPORT for calibrating trust before relying on an answer. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what is missing WHERE with real slugs; missFunnel replays open recall findings to say at which STAGE each dies (and how many no longer reproduce). Also: per-surface open findings, the row-score definition, status-basis mix (site-liveness = a page answered), repo coverage, every guard with its promise and whether it holds, and the trend. Counts are samples with denominators. No parameters.
+         * Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state
+         * @description Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.
          */
         get: operations["getQualityReport"];
         put?: never;
@@ -2347,7 +2347,7 @@ export interface operations {
                         /** @description The parsed claim as understood. */
                         claim?: {
                             /** @enum {string} */
-                            type?: "audited" | "live" | "maintained";
+                            type?: "audited" | "live" | "maintained" | "issued";
                             subject?: string;
                             auditor?: string;
                             since?: string;
@@ -2912,6 +2912,8 @@ export interface operations {
                             startDate?: string | null;
                             endDate?: string | null;
                             externalUrl?: string | null;
+                            /** @description null when the source publishes none: unknown, never zero. */
+                            prizePoolUSD?: number | null;
                             source?: string;
                         }[];
                         /** @description What differs across the compared events. */
@@ -4180,6 +4182,12 @@ export interface operations {
                             slug?: string;
                             name?: string;
                             description?: string | null;
+                            tagline?: string | null;
+                            /** @description Which catalog the skill comes from (e.g. sdf-official, stellarlight). */
+                            source?: string;
+                            /** @description Audiences it serves: dev / founder / agent. */
+                            targetUser?: string[];
+                            tags?: string[];
                             /** @description skill-md | mcp-server | sdk | cli | agent-kit | tool */
                             kind?: string;
                             /** @description The command to install it. */
@@ -4271,6 +4279,18 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                        };
+                        /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
+                        toolchain?: {
+                            scannedRepos?: number;
+                            byVersionStatus?: {
+                                [key: string]: number;
+                            };
+                            deprecatedRepos?: {
+                                fullName?: string;
+                                projectSlug?: string | null;
+                                sorobanSdkVersion?: string | null;
+                            }[];
                         };
                         /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
                         categories?: {

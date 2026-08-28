@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-08-28T02:54:36.567Z",
-	"total": 437,
-	"open": 78,
-	"closed": 359,
+	"generatedAt": "2026-08-28T15:54:52.408Z",
+	"total": 446,
+	"open": 79,
+	"closed": 367,
 	"verified": 7,
-	"cleared": 352,
+	"cleared": 360,
 	"closingRate": 0.82,
-	"oldestOpenDays": 36,
+	"oldestOpenDays": 37,
 	"inWave": 0,
 	"highOpen": 14,
 	"staleHighOpen": 0,
@@ -17,14 +17,14 @@
 			"total": 303
 		},
 		{
+			"surface": "consumer",
+			"open": 16,
+			"total": 23
+		},
+		{
 			"surface": "directory",
 			"open": 15,
 			"total": 54
-		},
-		{
-			"surface": "consumer",
-			"open": 14,
-			"total": 14
 		},
 		{
 			"surface": "corpus",
@@ -32,14 +32,14 @@
 			"total": 18
 		},
 		{
-			"surface": "code",
-			"open": 1,
-			"total": 4
-		},
-		{
 			"surface": "contract",
 			"open": 1,
 			"total": 30
+		},
+		{
+			"surface": "code",
+			"open": 0,
+			"total": 4
 		},
 		{
 			"surface": "scf",
@@ -47,19 +47,8 @@
 			"total": 14
 		}
 	],
-	"unverifiedOpen": 15,
-	"quietSources": [
-		{
-			"source": "raven-routing",
-			"open": 14,
-			"days": 36
-		},
-		{
-			"source": "raven-loop",
-			"open": 1,
-			"days": 36
-		}
-	],
+	"unverifiedOpen": 0,
+	"quietSources": [],
 	"topOpen": [
 		{
 			"id": "engine-d-demand:planbok",
