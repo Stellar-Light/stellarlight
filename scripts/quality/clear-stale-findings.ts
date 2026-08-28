@@ -2,7 +2,7 @@
  * Clear findings that no longer reproduce.
  *
  * A detector only clears its own findings when it next runs, so a fix that
- * lands mid-week leaves its findings sitting "open" — and the open count
+ * lands mid-week leaves its findings sitting "open", and the open count
  * reads as debt when it is really staleness. The miss funnel measured this:
  * 88% of a sample no longer reproduced. This replays EVERY open recall
  * finding (not a sample) and clears the ones that now pass.
@@ -62,7 +62,7 @@ const passes = async (slug: string, query: string): Promise<boolean | null> => {
 	}
 };
 
-// small concurrency pool — be polite to prod
+// small concurrency pool, be polite to prod
 let cleared = 0;
 let stillFailing = 0;
 let errored = 0;
@@ -97,7 +97,7 @@ if (EXECUTE) {
 		path,
 		`${JSON.stringify(Array.isArray(raw) ? findings : raw, null, 1)}\n`,
 	);
-	console.log(`  ledger written — ${cleared} findings cleared`);
+	console.log(`  ledger written, ${cleared} findings cleared`);
 } else {
-	console.log("  DRY RUN — re-run with --execute to write the ledger");
+	console.log("  DRY RUN, re-run with --execute to write the ledger");
 }

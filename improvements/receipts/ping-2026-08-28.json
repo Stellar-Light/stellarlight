@@ -1,0 +1,28 @@
+{
+ "slug": "ping",
+ "url": "https://letsping.com/",
+ "finalUrl": "https://letsping.com/",
+ "fetchedAt": "2026-08-28T03:37:48.004Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Fri, 28 Aug 2026 03:37:47 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Framer/6443c08"
+ },
+ "bodyTextSha256": "3133b4bc1082428fe9bd0dfea4c0695645f441d773a48d3a3bfa880d35ffc07e",
+ "bodyTextChars": 83,
+ "markers": [
+  {
+   "marker": "Site Not Found",
+   "found": true,
+   "excerpt": "Site Not Found | Framer Site Not Found There is no site configured at this address."
+  },
+  {
+   "marker": "app.letsping.com resolves",
+   "found": false,
+   "excerpt": "curl https://app.letsping.com returned HTTP 000, zero bytes: the app host does not resolve at all."
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts \u2014 markers are the evidence the correction rests on; re-run to diff what the page says now against this record. Negative-evidence receipt: letsping.com and www serve Framer's 'Site Not Found' unpublished-site page (HTTP 404), and the app subdomain does not resolve. YC's directory still reads 'Active' but that status is founder-reported and lags; the product surfaces themselves are gone. User-reported 2026-08-28, verified same day."
+}

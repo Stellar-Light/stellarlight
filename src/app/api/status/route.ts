@@ -177,6 +177,8 @@ export async function GET() {
 			},
 			endpoints: [
 				"/api/status",
+				"/api/quality",
+				"/api/verify",
 				"/api/audits",
 				"/api/changelog",
 				"/api/changes",

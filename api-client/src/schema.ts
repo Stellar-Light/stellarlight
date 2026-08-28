@@ -1919,6 +1919,45 @@ export interface operations {
                             apiVersion?: string;
                             humanPage?: string;
                             methodology?: string;
+                            /** @description How stale this response may legitimately be (cache + stale-while-revalidate). Read measuredAt, not the clock. */
+                            cachePolicy?: string;
+                        };
+                        /** @description READ FIRST. Derived from guard states, never authored: counts of guards holding / breached / stale, the one definition of open used everywhere in this document, and two sentence lists, safeToRelyOn and doNotRelyOn. */
+                        verdict?: {
+                            guardsHolding?: number;
+                            guardsBreached?: number;
+                            guardsStale?: number;
+                            openFindings?: number;
+                            openDefinition?: string;
+                            projectRows?: number;
+                            meanRowEvidence?: number;
+                            safeToRelyOn?: string[];
+                            doNotRelyOn?: string[];
+                        };
+                        /** @description The one number the engine system optimizes (full-surface audit ok-rate), served WITH its age. warning is non-null whenever it should not be read as current (stale, below target, or a series measured over changing probe counts). */
+                        northStar?: {
+                            target?: number;
+                            latest?: {
+                                date?: string;
+                                label?: string;
+                                okRate?: number;
+                                ok?: number | null;
+                                probes?: number;
+                                evidence?: string;
+                            };
+                            series?: {
+                                date?: string;
+                                label?: string;
+                                okRate?: number;
+                                ok?: number | null;
+                                probes?: number;
+                                evidence?: string;
+                            }[];
+                            ageDays?: number;
+                            stale?: boolean;
+                            belowTarget?: boolean;
+                            warning?: string | null;
+                            comparableSeries?: boolean;
                         };
                         /** @description Where this service stands against its own published quality plan (QUALITY.md). A phase cannot show done here without being done there, and remaining work is served with the same weight as finished work. */
                         progress?: {
@@ -1958,6 +1997,88 @@ export interface operations {
                             measurement?: string;
                             instead?: string;
                         }[];
+                        /** @description Per-OPERATION contract quality, keyed by the operationId a caller invokes. contractProbe: clean (probe reached it, no violations) / violations (reached, listed) / skipped (could not check, reason given) / unmeasured (never reached). An unmeasured operation is NOT a passing one. */
+                        perOperation?: {
+                            definition?: string;
+                            probedAt?: string;
+                            counts?: {
+                                clean?: number;
+                                violations?: number;
+                                skipped?: number;
+                                unmeasured?: number;
+                            };
+                            operations?: {
+                                operationId?: string;
+                                method?: string;
+                                path?: string;
+                                /** @enum {string} */
+                                contractProbe?: "clean" | "violations" | "skipped" | "unmeasured";
+                                skipReason?: string | null;
+                                violations?: {
+                                    kind?: string;
+                                    name?: string;
+                                    evidence?: string;
+                                }[];
+                                fieldDrift?: {
+                                    kind?: string;
+                                    field?: string;
+                                }[];
+                                probedAt?: string;
+                            }[];
+                        };
+                        /** @description Defects filed against this service by its largest agent consumer (stellar-raven), from THEIR evaluation battery. counts is their answer key; ourResponse is our own linked-issue state and is fenced off deliberately, a score computed from a variable we control is not an external grade. */
+                        consumerFindings?: {
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            consumer?: string;
+                            definition?: string;
+                            /** @description THEIR status vocabulary -> count, verbatim from their records. */
+                            counts?: {
+                                [key: string]: number;
+                            };
+                            ourResponse?: {
+                                fixShipped?: number;
+                                fixShippedIds?: string[];
+                                fixApplicable?: number;
+                                declined?: number;
+                                distinctIssuesClosed?: number;
+                                scoredBy?: string;
+                                note?: string;
+                            };
+                            total?: number;
+                            records?: {
+                                id?: string;
+                                title?: string;
+                                status?: string;
+                                discovered?: string | null;
+                                disposition?: string | null;
+                                sourceUrl?: string;
+                                ourIssue?: number | null;
+                                ourResponse?: {
+                                    issue?: number;
+                                    state?: string;
+                                    closedAt?: string | null;
+                                    url?: string;
+                                } | null;
+                            }[];
+                        };
+                        /** @description Findings as a node/link graph: detector -> surface -> outcome, whole-ledger counts (not a sample). nodes carry a column index (0 detector, 1 surface, 2 outcome) and a throughput value; links carry source/target node indexes and the count flowing between them. */
+                        flow?: {
+                            definition?: string;
+                            nodes?: {
+                                id?: string;
+                                label?: string;
+                                column?: number;
+                                value?: number;
+                            }[];
+                            links?: {
+                                source?: number;
+                                target?: number;
+                                sourceId?: string;
+                                targetId?: string;
+                                value?: number;
+                            }[];
+                        };
                         /** @description Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt. */
                         missFunnel?: {
                             /** Format: date-time */
@@ -1987,8 +2108,13 @@ export interface operations {
                                 field?: string;
                                 missing?: number;
                                 of?: number;
+                                share?: number;
                                 whyItMatters?: string;
                                 closedBy?: string;
+                                exampleSource?: string;
+                                examplePoolSize?: number;
+                                exampleCap?: number;
+                                exampleTruncated?: boolean;
                                 examples?: string[];
                             }[];
                         };
@@ -2049,10 +2175,11 @@ export interface operations {
                             topGraded?: {
                                 fullName?: string;
                                 repoScore?: number | null;
-                                label?: string | null;
                                 tier?: string | null;
+                                /** @description Derived from lastCommitAt: active (<=90d) / slowing (<=365d) / dormant / archived. null = no commit date held; unknown is not dormant. */
                                 activity?: string | null;
-                                evidence?: string | null;
+                                language?: string | null;
+                                projectSlug?: string | null;
                                 notes?: number;
                                 codeDepth?: number | null;
                                 mainnetContracts?: number;
@@ -2061,6 +2188,10 @@ export interface operations {
                             thinnestEvidence?: {
                                 fullName?: string;
                                 repoScore?: number | null;
+                                tier?: string | null;
+                                activity?: string | null;
+                                language?: string | null;
+                                projectSlug?: string | null;
                                 notes?: number;
                                 codeDepth?: number | null;
                                 mainnetContracts?: number;
@@ -2069,13 +2200,29 @@ export interface operations {
                             withKnowledgeNotes?: number;
                             joinedToMainnetContract?: number;
                         };
+                        /** @description Every guard with its promise and THREE-state verdict: holding (measured and passing on fresh evidence), breached (measured and failing), stale (evidence older than the guard's own freshness window; neither passing nor failing). holding is true ONLY in the holding state, so a stale guard is never green. */
                         guards?: {
                             key?: string;
                             title?: string;
                             promise?: string;
+                            /** @description The headline as numbers, so a consumer never parses prose. of is null for rates and bare counts. */
+                            measure?: {
+                                value?: number;
+                                of?: number | null;
+                                unit?: string;
+                            };
                             value?: string;
+                            /** @enum {string} */
+                            state?: "holding" | "breached" | "stale";
+                            /** @enum {string} */
+                            severity?: "high" | "medium" | "low";
                             holding?: boolean;
                             asOf?: string;
+                            ageDays?: number;
+                            /** @enum {string} */
+                            cadence?: "weekly" | "on-deploy" | "baseline";
+                            freshnessDays?: number;
+                            details?: string[];
                             evidence?: string;
                         }[];
                         /** @description Committed daily history; a null metric means it was not measured that day, never zero. */
@@ -2083,10 +2230,13 @@ export interface operations {
                             date?: string;
                             batteryPass?: number | null;
                             batteryFail?: number | null;
+                            /** @description Battery slices that CRASHED that day. A crashed slice is not a pass and not a fail; without this counter a crashed run rendered as a perfect green day. */
+                            batteryErrors?: number | null;
                             parityPass?: number | null;
                             openMaps?: number | null;
                             honestyDebt?: number | null;
                             sampled?: number | null;
+                            population?: number | null;
                             liveRows?: number | null;
                             liveNoSource?: number | null;
                             humanVerified?: number | null;

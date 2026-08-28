@@ -1,11 +1,11 @@
 /**
- * Quality-page chart primitives. Server-rendered SVG — no client JS, no chart
+ * Quality-page chart primitives. Server-rendered SVG, no client JS, no chart
  * library. Hover tooltips are native <title> elements, which work everywhere
  * including keyboard/screen-reader paths.
  *
  * Palette: the app's chart tokens (globals.css) plus one ORDINAL ramp for
  * ordered categories (provenance tiers, age bands), validated against the
- * dark chart surface with the dataviz six-checks — single hue, monotone
+ * dark chart surface with the dataviz six-checks, single hue, monotone
  * lightness, adjacent ΔL ≥ 0.06, light end clears the surface at 2.57:1.
  * Do not hand-edit these hexes; re-run the validator if they must change.
  */
@@ -15,7 +15,7 @@ const MUTED = "#525252"; // --chart-line-secondary
 
 const nf = new Intl.NumberFormat("en-US");
 
-/** Horizontal bars — magnitude across named categories, one series.
+/** Horizontal bars, magnitude across named categories, one series.
  * Value labels sit outside the bar so a short bar is still readable. */
 export function BarList({
 	rows,
@@ -47,7 +47,7 @@ export function BarList({
 								width: `${Math.max((r.value / max) * 100, r.value > 0 ? 1.5 : 0)}%`,
 								backgroundColor: color,
 							}}
-							title={`${r.label}: ${nf.format(r.value)}${unit ? ` ${unit}` : ""}${r.note ? ` — ${r.note}` : ""}`}
+							title={`${r.label}: ${nf.format(r.value)}${unit ? ` ${unit}` : ""}${r.note ? ` - ${r.note}` : ""}`}
 						/>
 					</div>
 					<span className="text-xs font-medium text-foreground tabular-nums text-right">
@@ -59,7 +59,7 @@ export function BarList({
 	);
 }
 
-/** Two-series stacked bars (open vs cleared) — the same category compared on
+/** Two-series stacked bars (open vs cleared) - the same category compared on
  * two states. Legend required (2 series); a 2px surface gap separates fills. */
 export function SplitBarList({
 	rows,
@@ -129,7 +129,7 @@ export function SplitBarList({
 	);
 }
 
-/** One part-to-whole bar for ORDERED categories — the ordinal ramp, strongest
+/** One part-to-whole bar for ORDERED categories, the ordinal ramp, strongest
  * evidence first, with a legend carrying counts (identity never color-alone). */
 export function StackedRamp({
 	rows,
@@ -174,7 +174,7 @@ export function StackedRamp({
 }
 
 /** Area chart with gradient fill, recessive grid, y-axis extremes and dated
- * endpoints. Renders ONLY with ≥2 real points — one observation is a number,
+ * endpoints. Renders ONLY with ≥2 real points, one observation is a number,
  * not a line, and pretending otherwise is what made the first version bad. */
 export function AreaChart({
 	points,
@@ -195,11 +195,11 @@ export function AreaChart({
 			<div className="flex flex-col gap-1">
 				<span className="text-xs text-muted-foreground">{label}</span>
 				<span className="text-2xl font-semibold text-foreground tabular-nums leading-tight">
-					{latest ? nf.format(latest.value) : "—"}
+					{latest ? nf.format(latest.value) : "-"}
 				</span>
 				<span className="text-[11px] text-muted-foreground">
 					{latest
-						? `first observation ${latest.date} — a line needs a second day`
+						? `first observation ${latest.date} - a line needs a second day`
 						: "not measured yet"}
 				</span>
 			</div>
@@ -247,14 +247,14 @@ export function AreaChart({
 				role="img"
 				aria-label={`${label}: ${real.map((p) => `${p.date} ${p.value}`).join(", ")}`}
 			>
-				<title>{`${label} — ${real.length} observations, ${real[0].date} to ${real.at(-1)?.date}`}</title>
+				<title>{`${label} - ${real.length} observations, ${real[0].date} to ${real.at(-1)?.date}`}</title>
 				<defs>
 					<linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0%" stopColor={INK} stopOpacity="0.28" />
 						<stop offset="100%" stopColor={INK} stopOpacity="0" />
 					</linearGradient>
 				</defs>
-				{/* recessive grid: min and max only — the two numbers a reader needs */}
+				{/* recessive grid: min and max only, the two numbers a reader needs */}
 				<line
 					x1={PAD_L}
 					y1={y(max)}
@@ -308,20 +308,31 @@ export function AreaChart({
 /** An inline "what does this number mean" affordance. Native title = works
  * on hover, on focus, and for screen readers, with zero client JS. */
 export function Info({ text }: { text: string }) {
+	// A real tooltip panel, not the browser's title attribute: `title` gives a
+	// question-mark cursor and a slow OS tooltip. CSS-only (group-hover +
+	// focus-within) so it stays server-rendered with no client JS, and it is
+	// keyboard reachable.
 	return (
-		<span
-			title={text}
-			tabIndex={0}
-			role="note"
-			aria-label={text}
-			className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-border text-[9px] leading-none text-muted-foreground align-middle cursor-help hover:text-foreground hover:border-muted-foreground transition-colors"
-		>
-			i
+		<span className="group/info relative inline-flex align-middle">
+			<span
+				tabIndex={0}
+				role="note"
+				aria-label={text}
+				className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-border text-[9px] font-medium leading-none text-muted-foreground transition-colors hover:border-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-muted-foreground"
+			>
+				i
+			</span>
+			<span
+				role="tooltip"
+				className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 w-64 -translate-x-1/2 rounded-md border border-border bg-background px-3 py-2 text-[11px] font-normal normal-case leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100 group-focus-within/info:opacity-100"
+			>
+				{text}
+			</span>
 		</span>
 	);
 }
 
-/** A metric that states its own direction. "87%" alone is unreadable — the
+/** A metric that states its own direction. "87%" alone is unreadable, the
  * reader cannot know whether high is good, so every figure carries an arrow
  * and a plain-language definition. */
 export function Metric({
@@ -359,7 +370,7 @@ export function Metric({
 	);
 }
 
-/** The gap matrix — entity × missing field, with real examples. A table,
+/** The gap matrix, entity × missing field, with real examples. A table,
  * because that is the right form: seven rows of mixed text and counts is not
  * a chart, and an agent reading the same data wants the identifiers. */
 export function GapMatrix({
@@ -428,7 +439,7 @@ export function GapMatrix({
 	);
 }
 
-/** Miss funnel — where a known-item miss dies. Not a decorative funnel: each
+/** Miss funnel, where a known-item miss dies. Not a decorative funnel: each
  * miss is classified at the FIRST stage that failed, so the stages are
  * mutually exclusive and the widths are real shares of the sample. Ordered by
  * how far the query got, shallowest failure first, with the owning area and
@@ -475,11 +486,11 @@ export function MissFunnel({
 								backgroundColor: RAMP[Math.min(i, RAMP.length - 1)],
 								opacity: s.count === 0 ? 0.25 : 1,
 							}}
-							title={`${s.stage}: ${s.count} of ${sampled} sampled misses (${s.share}%) — owner: ${s.owner}`}
+							title={`${s.stage}: ${s.count} of ${sampled} sampled misses (${s.share}%) - owner: ${s.owner}`}
 						/>
 					</div>
 					<p className="text-[11px] text-muted-foreground leading-relaxed">
-						<span className="text-foreground/70">owner: {s.owner}</span> —{" "}
+						<span className="text-foreground/70">owner: {s.owner}</span> -{" "}
 						{s.note}
 					</p>
 					{s.examples.length > 0 && (
@@ -494,7 +505,7 @@ export function MissFunnel({
 	);
 }
 
-/** Phase progress — states render with equal weight on purpose. A roadmap
+/** Phase progress, states render with equal weight on purpose. A roadmap
  * that only shows green is marketing; "in progress" and its remaining work
  * are the parts a reader actually needs. */
 export function PhaseProgress({
@@ -526,7 +537,7 @@ export function PhaseProgress({
 											? "#6B5A12"
 											: "#2F2F2F",
 							}}
-							title={`${p.id} — ${p.title}: ${p.state}`}
+							title={`${p.id} - ${p.title}: ${p.state}`}
 						/>
 					))}
 				</div>
@@ -584,7 +595,7 @@ export function PhaseProgress({
 }
 
 /** A queue row that goes somewhere. Every item in a work queue should be
- * clickable — a name with no destination is a dead end for the person who
+ * clickable, a name with no destination is a dead end for the person who
  * has to act on it. */
 export function QueueRow({
 	href,
@@ -616,5 +627,152 @@ export function QueueRow({
 				{trailing}
 			</span>
 		</a>
+	);
+}
+
+/** A real Sankey: nodes sized by throughput, links drawn as bezier ribbons
+ * whose thickness IS the value. Server-rendered SVG, laid out here rather
+ * than by a library so it stays dependency-free.
+ *
+ * Layout: nodes stack per column with a fixed gap, scaled so the tallest
+ * column fills the plot; each link leaves its source at a running offset and
+ * arrives at its target at that target's own running offset, which is what
+ * makes the ribbons braid correctly instead of crossing at random.
+ * Monochrome on purpose, one entity type (a finding) flowing, so hue would
+ * encode nothing. */
+export function Sankey({
+	nodes,
+	links,
+	height = 340,
+}: {
+	nodes: Array<{ id: string; label: string; column: number; value: number }>;
+	links: Array<{ source: number; target: number; value: number }>;
+	height?: number;
+}) {
+	const W = 760;
+	const H = height;
+	const NODE_W = 9;
+	const GAP = 10;
+	const PAD_Y = 6;
+	const columns = [...new Set(nodes.map((n) => n.column))].sort(
+		(a, b) => a - b,
+	);
+
+	// throughput per node: max(in, out) - a node is as tall as the most that
+	// passes through it, so a column never over- or under-states its mass
+	const inSum = new Map<number, number>();
+	const outSum = new Map<number, number>();
+	for (const l of links) {
+		outSum.set(l.source, (outSum.get(l.source) ?? 0) + l.value);
+		inSum.set(l.target, (inSum.get(l.target) ?? 0) + l.value);
+	}
+	const thru = (i: number) => Math.max(inSum.get(i) ?? 0, outSum.get(i) ?? 0);
+
+	const colTotal = (c: number) =>
+		nodes.reduce((a, n, i) => (n.column === c ? a + thru(i) : a), 0);
+	const colCount = (c: number) => nodes.filter((n) => n.column === c).length;
+	const maxMass = Math.max(...columns.map(colTotal), 1);
+	const maxGaps = Math.max(...columns.map((c) => (colCount(c) - 1) * GAP), 0);
+	const scale = (H - PAD_Y * 2 - maxGaps) / maxMass;
+
+	const geom = new Map<number, { x: number; y: number; h: number }>();
+	for (const c of columns) {
+		const x =
+			columns.length === 1
+				? 0
+				: (c / (columns.length - 1)) * (W - NODE_W - 150) + 75;
+		let y = PAD_Y;
+		nodes.forEach((n, i) => {
+			if (n.column !== c) return;
+			const h = Math.max(thru(i) * scale, 2);
+			geom.set(i, { x, y, h });
+			y += h + GAP;
+		});
+	}
+
+	// running offsets so ribbons stack rather than overlap
+	const outAt = new Map<number, number>();
+	const inAt = new Map<number, number>();
+	const ribbons = links
+		.slice()
+		.sort((a, b) => b.value - a.value)
+		.map((l) => {
+			const s = geom.get(l.source);
+			const t = geom.get(l.target);
+			if (!s || !t) return null;
+			const sh = Math.max(l.value * scale, 1);
+			const th = Math.max(l.value * scale, 1);
+			const sy = s.y + (outAt.get(l.source) ?? 0);
+			const ty = t.y + (inAt.get(l.target) ?? 0);
+			outAt.set(l.source, (outAt.get(l.source) ?? 0) + sh);
+			inAt.set(l.target, (inAt.get(l.target) ?? 0) + th);
+			const x0 = s.x + NODE_W;
+			const x1 = t.x;
+			const cx = (x0 + x1) / 2;
+			// two beziers out and back = a filled ribbon
+			const d = [
+				`M${x0},${sy}`,
+				`C${cx},${sy} ${cx},${ty} ${x1},${ty}`,
+				`L${x1},${ty + th}`,
+				`C${cx},${ty + th} ${cx},${sy + sh} ${x0},${sy + sh}`,
+				"Z",
+			].join(" ");
+			return {
+				d,
+				value: l.value,
+				title: `${nodes[l.source].label} → ${nodes[l.target].label}: ${l.value}`,
+			};
+		})
+		.filter((x): x is { d: string; value: number; title: string } => !!x);
+
+	return (
+		<svg
+			viewBox={`0 0 ${W} ${H}`}
+			className="w-full"
+			style={{ height: H }}
+			role="img"
+			aria-label={`Finding flow: ${links.map((l) => `${nodes[l.source].label} to ${nodes[l.target].label} ${l.value}`).join("; ")}`}
+		>
+			<title>Findings traced from detector, through surface, to outcome</title>
+			{ribbons.map((r) => (
+				<path key={r.d} d={r.d} fill="#FDDA24" fillOpacity="0.14">
+					<title>{r.title}</title>
+				</path>
+			))}
+			{nodes.map((n, i) => {
+				const g = geom.get(i);
+				if (!g) return null;
+				const last = n.column === columns[columns.length - 1];
+				return (
+					<g key={n.id}>
+						<rect
+							x={g.x}
+							y={g.y}
+							width={NODE_W}
+							height={g.h}
+							rx="2"
+							fill="#FDDA24"
+							fillOpacity="0.85"
+						>
+							<title>{`${n.label}: ${thru(i)} findings`}</title>
+						</rect>
+						<text
+							x={last ? g.x - 8 : g.x + NODE_W + 8}
+							y={g.y + g.h / 2}
+							textAnchor={last ? "end" : "start"}
+							dominantBaseline="middle"
+							className="fill-muted-foreground"
+							style={{ fontSize: 10 }}
+						>
+							{n.label}
+							<tspan className="fill-foreground" style={{ fontWeight: 500 }}>
+								{"  "}
+								{thru(i)}
+							</tspan>
+						</text>
+					</g>
+				);
+			})}
+		</svg>
 	);
 }

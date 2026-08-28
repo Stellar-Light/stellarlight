@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-28",
+		surfaces: ["api"],
+		version: "spec@1.9.0",
+		type: "changed",
+		summary:
+			"getQualityReport rebuilt after a three-lane adversarial eval: verdict block first, per-operation contract state, honest guard staleness.",
+		detail:
+			"New top-level fields: verdict (guards holding/breached/stale + safeToRelyOn/doNotRelyOn, derived not authored), northStar (with ageDays and a non-null warning when stale/below target), perOperation (contractProbe per operationId: clean/violations/skipped/unmeasured — unmeasured is NOT clean), consumerFindings (their answer key fenced from our issue states). Guards now carry measure/state/severity/ageDays/cadence/freshnessDays; a guard whose evidence is older than its own window reads stale, never green. Entity counts moved from a search-mediated sample to a CENSUS (rowQuality/repoQuality gain read/population/frame; repoQuality publishes duplicateRows). Row scores are five BINARY facts (multiples of 20; the old fractional weighting made published scores unreachable under the published definition). findings gains total + the disjoint-states rule; missFunnel.population names the probes it cannot replay (coveragePct); gapMatrix rows carry share/exampleSource/examplePoolSize/exampleTruncated; flow.links carry sourceId/targetId; trend gains batteryErrors and population; meta gains cachePolicy. No fields were removed except repoQuality.topGraded label/evidence (renamed to the raw collection's language/projectSlug).",
+	},
+	{
 		date: "2026-08-24",
 		surfaces: ["api-client"],
 		version: "api-client@1.9.0",

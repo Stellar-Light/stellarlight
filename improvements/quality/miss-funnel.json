@@ -1,7 +1,44 @@
 {
- "generatedAt": "2026-08-28T02:19:22.778Z",
+ "generatedAt": "2026-08-28T03:18:01.219Z",
  "population": {
-  "openRecallMisses": 21,
+  "openRecallMisses": 29,
+  "replayableOpenRecallMisses": 21,
+  "unclassified": 8,
+  "unclassifiedExamples": [
+   {
+    "id": "engine-a-recall:response",
+    "probe": "response"
+   },
+   {
+    "id": "engine-a-recall:foryield-soroban-yield-vault-in-top-5-for-its-ow",
+    "probe": "foryield/soroban-yield-vault in top-5 for its own symbol 'initialize'"
+   },
+   {
+    "id": "engine-a-recall:zerie5-lulpay-campaign-contract-in-top-5-for-its",
+    "probe": "zerie5/lulpay-campaign-contract in top-5 for its own symbol 'initialize'"
+   },
+   {
+    "id": "engine-a-recall:5-of-top-10-carry-types-ai-51-exist",
+    "probe": "≥5 of top-10 carry types=AI (51 exist)"
+   },
+   {
+    "id": "engine-a-recall:winsznx-routedock-in-top-5-for-its-own-symbol-in",
+    "probe": "winsznx/routedock in top-5 for its own symbol 'initialize'"
+   },
+   {
+    "id": "engine-a-recall:xycloo-rs-zephyr-toolkit-in-top-5-for-its-own-sy",
+    "probe": "xycloo/rs-zephyr-toolkit in top-5 for its own symbol 'from_u32'"
+   },
+   {
+    "id": "engine-a-recall:trustless-work-trustlesswork-smart-contract-stel",
+    "probe": "Trustless-Work/trustlesswork-smart-contract-stellar in top-5 for its own symbol 'ContractError'"
+   },
+   {
+    "id": "engine-a-recall:creit-tech-sorobanhub-app-in-top-5-for-its-own-s",
+    "probe": "Creit-Tech/SorobanHub-app in top-5 for its own symbol 'StellarService'"
+   }
+  ],
+  "coveragePct": 72,
   "sampled": 21,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
@@ -10,7 +47,7 @@
    "stage": "passing",
    "label": "no longer reproduces",
    "owner": "ledger",
-   "note": "Fixed since the finding was filed — these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
+   "note": "Fixed since the finding was filed, these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
    "count": 0,
    "share": 0,
    "examples": []
@@ -55,7 +92,7 @@
    "stage": "identity",
    "label": "own exact name does not return it",
    "owner": "indexing / identity",
-   "note": "The record exists but cannot be found by its own identifier — the slug-in-haystack and split-identity class.",
+   "note": "The record exists but cannot be found by its own identifier, the slug-in-haystack and split-identity class.",
    "count": 0,
    "share": 0,
    "examples": []
