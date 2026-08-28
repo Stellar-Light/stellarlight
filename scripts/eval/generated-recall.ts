@@ -537,7 +537,15 @@ async function main() {
 	});
 
 	if (JSON_OUT) {
-		console.log(JSON.stringify({ base: BASE, board, failures }, null, 1));
+		console.log(
+			JSON.stringify(
+				// generatedAt travels IN the artifact: the guard derives freshness
+				// from it, and a stampless run previously rendered as ageless.
+				{ generatedAt: new Date().toISOString(), base: BASE, board, failures },
+				null,
+				1,
+			),
+		);
 	} else {
 		console.log("\n── Engine A scoreboard ──");
 		for (const b of board)
