@@ -2357,6 +2357,12 @@ export const spec: OpenAPISpec = {
 													startDate: { type: "string", nullable: true },
 													endDate: { type: "string", nullable: true },
 													externalUrl: { type: "string", nullable: true },
+													prizePoolUSD: {
+														type: "number",
+														nullable: true,
+														description:
+															"null when the source publishes none: unknown, never zero.",
+													},
 													source: { type: "string" },
 												},
 											},
@@ -5078,6 +5084,18 @@ export const spec: OpenAPISpec = {
 												slug: { type: "string" },
 												name: { type: "string" },
 												description: { type: "string", nullable: true },
+												tagline: { type: "string", nullable: true },
+												source: {
+													type: "string",
+													description:
+														"Which catalog the skill comes from (e.g. sdf-official, stellarlight).",
+												},
+												targetUser: {
+													type: "array",
+													items: { type: "string" },
+													description: "Audiences it serves: dev / founder / agent.",
+												},
+												tags: { type: "array", items: { type: "string" } },
 												kind: {
 													type: "string",
 													description:
@@ -5360,6 +5378,29 @@ export const spec: OpenAPISpec = {
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										toolchain: {
+											type: "object",
+											description:
+												"Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain.",
+											properties: {
+												scannedRepos: { type: "integer" },
+												byVersionStatus: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												deprecatedRepos: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															projectSlug: { type: "string", nullable: true },
+															sorobanSdkVersion: { type: "string", nullable: true },
+														},
+													},
+												},
 											},
 										},
 										categories: {

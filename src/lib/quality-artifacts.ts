@@ -10,8 +10,8 @@
 
 import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
-import engineE from "../../improvements/engine/engine-e-baseline-2026-07-11.json";
-import ravenDrift from "../../improvements/engine/raven-drift-2026-07-21.json";
+import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
+import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
 // this is what the SDF agent actually experiences.
@@ -277,10 +277,10 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					`${invalid} param(s) accepting values the spec forbids`,
 					`spec ${engineE.specVersion} at measurement; re-run on every deploy`,
 				],
-				asOf: "2026-07-11",
+				asOf: (engineE as { generatedAt?: string }).generatedAt ?? "2026-08-28",
 				cadence: "baseline",
 				severity: "high",
-				artifact: "improvements/engine/engine-e-baseline-2026-07-11.json",
+				artifact: "improvements/engine/engine-e-baseline-2026-08-28.json",
 				passing: silent === 0 && invalid === 0,
 			});
 		})(),
@@ -324,7 +324,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				asOf: ravenDrift.generatedAt,
 				cadence: "on-deploy",
 				severity: "high",
-				artifact: "improvements/engine/raven-drift-2026-07-21.json",
+				artifact: "improvements/engine/raven-drift-2026-08-28.json",
 				passing: missing === 0,
 			});
 		})(),
@@ -531,7 +531,20 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		// The improvement ledger, the spine that unifies every detector above
 		// into one tracked backlog, tagged by surface.
 		(() => {
-			const L = improvementLedger;
+			// A fully healthy artifact commits quietSources: [] and TS infers
+			// never[] from the JSON literal, breaking .source access — the same
+			// empty-array inference the ravenLoop misses cast handles. Omit, not
+			// intersect: never[] & T[] still has never elements.
+			const L = improvementLedger as Omit<
+				typeof improvementLedger,
+				"quietSources"
+			> & {
+				quietSources: Array<{
+					source: string;
+					days: number | null;
+					open: number;
+				}>;
+			};
 			const surfaces = L.bySurface
 				.map((x) => `${x.surface} ${x.open}`)
 				.join(" · ");
@@ -776,7 +789,9 @@ export function getOperationQuality(): OperationQuality[] {
 				skipReason: skipped ? skipped.slice(opKey.length).trim() : null,
 				violations,
 				fieldDrift,
-				probedAt: "2026-07-11",
+				probedAt:
+					(engineE as { generatedAt?: string }).generatedAt?.slice(0, 10) ??
+					"2026-08-28",
 			});
 		}
 	}

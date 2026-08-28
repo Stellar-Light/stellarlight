@@ -1,104 +1,159 @@
 {
-	"generatedAt": "2026-07-23T04:05:00.948Z",
+	"generatedAt": "2026-08-28T15:54:45.259Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
-		"graded": 30,
-		"passed": 22,
-		"failed": 8,
-		"lagging": 7,
+		"graded": 37,
+		"passed": 28,
+		"failed": 9,
+		"lagging": 0,
 		"demandChecked": 15,
-		"demandMissed": 6
+		"demandMissed": 9
 	},
-	"okRate": 0.73,
+	"okRate": 0.76,
 	"misses": [
 		{
 			"query": "what wallets support Stellar",
-			"expect": ["getPartners"],
-			"topScout": ["getClusters", "searchResearch", "searchProjects"],
+			"expect": [
+				"getPartners"
+			],
+			"topScout": [
+				"searchProjects",
+				"getClusters",
+				"searchResearch"
+			],
 			"note": "partner directory (wallets)"
 		},
 		{
 			"query": "on and off ramps for Stellar payments",
-			"expect": ["getPartners"],
-			"topScout": ["searchProjects"],
+			"expect": [
+				"getPartners"
+			],
+			"topScout": [
+				"searchProjects",
+				"searchHackathonBuilds"
+			],
 			"note": "anchors/ramps"
 		},
 		{
 			"query": "top Stellar projects by GitHub activity",
-			"expect": ["getLeaderboard"],
-			"topScout": ["searchProjects", "searchRepos"],
+			"expect": [
+				"getLeaderboard"
+			],
+			"topScout": [
+				"searchProjects",
+				"searchRepos"
+			],
 			"note": "activity leaderboard"
 		},
 		{
 			"query": "passkey-kit",
-			"expect": ["searchProjects"],
-			"topScout": ["listSkills", "searchRepos", "getBuilders"],
+			"expect": [
+				"searchProjects"
+			],
+			"topScout": [
+				"listSkills",
+				"searchRepos",
+				"getBuilders"
+			],
 			"note": "demand: project by name"
 		},
 		{
 			"query": "reflector oracle on Stellar",
-			"expect": ["searchProjects"],
-			"topScout": ["searchResearch"],
+			"expect": [
+				"searchProjects"
+			],
+			"topScout": [
+				"searchResearch",
+				"listContracts"
+			],
 			"note": "demand: oracle project"
 		},
 		{
 			"query": "octoplace",
-			"expect": ["searchProjects"],
+			"expect": [
+				"searchProjects"
+			],
 			"topScout": [],
 			"note": "demand: project by name"
 		},
 		{
 			"query": "jobs bounties and freelance work for Stellar contributors",
-			"expect": ["getRfps"],
-			"topScout": ["getBuilders"],
+			"expect": [
+				"getRfps"
+			],
+			"topScout": [
+				"getBuilders"
+			],
 			"note": "demand: jobs/bounties (2×)"
 		},
 		{
-			"query": "submit a Stellar transaction with the JavaScript SDK",
-			"expect": ["searchResearch", "searchRepos"],
-			"topScout": ["explainRepo", "getHackathon"],
-			"note": "code: how-to guide"
+			"query": "how does the Blend lending pool calculate interest rates in the code",
+			"expect": [
+				"explainRepo",
+				"searchRepos"
+			],
+			"topScout": [
+				"listContracts",
+				"compareHackathons",
+				"vetIdea"
+			],
+			"note": "code: deep repo mechanism (DeepWiki)"
+		},
+		{
+			"query": "how do I write a Soroban smart contract in Rust",
+			"expect": [
+				"searchResearch",
+				"searchRepos"
+			],
+			"topScout": [
+				"listContracts"
+			],
+			"note": "code: how-to (docs or example)"
 		}
 	],
-	"lagging": [
-		{
-			"query": "biggest stablecoins on Stellar by market cap",
-			"expect": ["getStablecoins"]
-		},
-		{
-			"query": "which are the largest stablecoins issued on Stellar",
-			"expect": ["getStablecoins"]
-		},
-		{
-			"query": "is Blend audited and by whom",
-			"expect": ["listAudits"]
-		},
-		{
-			"query": "security audit reports for Soroban projects",
-			"expect": ["listAudits"]
-		},
-		{
-			"query": "has anyone built a recurring payments protocol at a Stellar hackathon",
-			"expect": ["searchHackathonBuilds"]
-		},
-		{
-			"query": "what prediction markets were built at Stellar hackathons",
-			"expect": ["searchHackathonBuilds"]
-		},
-		{
-			"query": "winning zero-knowledge privacy builds at Stellar hackathons",
-			"expect": ["searchHackathonBuilds"]
-		}
-	],
+	"lagging": [],
 	"demandMisses": [
 		{
-			"query": "kutana",
+			"query": "openx402",
+			"hits": 5,
+			"topAll": [
+				"lumenloop.find_content_about_project",
+				"lumenloop.find_content_by_entity",
+				"lumenloop.search_content_semantic"
+			]
+		},
+		{
+			"query": "hypertron",
+			"hits": 4,
+			"topAll": []
+		},
+		{
+			"query": "planbok",
 			"hits": 3,
 			"topAll": []
 		},
 		{
-			"query": "tomer weller",
-			"hits": 3,
+			"query": "what disbursement or payout providers can i integrate on stellar?",
+			"hits": 2,
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.search_docs_in_category",
+				"stellarDocs.search_rpc_horizon_data_docs"
+			]
+		},
+		{
+			"query": "vigente",
+			"hits": 2,
+			"topAll": []
+		},
+		{
+			"query": "cointracker",
+			"hits": 2,
+			"topAll": []
+		},
+		{
+			"query": "alypay",
+			"hits": 2,
 			"topAll": [
 				"lumenloop.find_av_passages",
 				"lumenloop.find_content_about_project",
@@ -106,38 +161,24 @@
 			]
 		},
 		{
-			"query": "kalepail",
-			"hits": 3,
+			"query": "planbok",
+			"hits": 2,
 			"topAll": []
 		},
 		{
-			"query": "8004",
-			"hits": 3,
-			"topAll": []
-		},
-		{
-			"query": "tell me about solana",
+			"query": "alypay",
 			"hits": 2,
 			"topAll": [
+				"lumenloop.find_av_passages",
 				"lumenloop.find_content_about_project",
-				"stellarDocs.search_meeting_notes",
-				"skills.lumenloop.stellar-ecosystem-digest"
-			]
-		},
-		{
-			"query": "is blend audited and by who?",
-			"hits": 2,
-			"topAll": [
-				"lumenloop.find_content_by_entity",
-				"lumenloop.list_documents",
-				"lumenloop.search_directory"
+				"lumenloop.find_content_by_entity"
 			]
 		}
 	],
 	"adversarial": [
 		{
 			"query": "what is the current price of XLM",
-			"top": "scout.searchResearch",
+			"top": "scout.searchProjects",
 			"note": "no price-feed capability — should NOT confidently claim a scout op"
 		},
 		{

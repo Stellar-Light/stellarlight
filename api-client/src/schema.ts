@@ -2912,6 +2912,8 @@ export interface operations {
                             startDate?: string | null;
                             endDate?: string | null;
                             externalUrl?: string | null;
+                            /** @description null when the source publishes none: unknown, never zero. */
+                            prizePoolUSD?: number | null;
                             source?: string;
                         }[];
                         /** @description What differs across the compared events. */
@@ -4180,6 +4182,12 @@ export interface operations {
                             slug?: string;
                             name?: string;
                             description?: string | null;
+                            tagline?: string | null;
+                            /** @description Which catalog the skill comes from (e.g. sdf-official, stellarlight). */
+                            source?: string;
+                            /** @description Audiences it serves: dev / founder / agent. */
+                            targetUser?: string[];
+                            tags?: string[];
                             /** @description skill-md | mcp-server | sdk | cli | agent-kit | tool */
                             kind?: string;
                             /** @description The command to install it. */
@@ -4271,6 +4279,18 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                        };
+                        /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
+                        toolchain?: {
+                            scannedRepos?: number;
+                            byVersionStatus?: {
+                                [key: string]: number;
+                            };
+                            deprecatedRepos?: {
+                                fullName?: string;
+                                projectSlug?: string | null;
+                                sorobanSdkVersion?: string | null;
+                            }[];
                         };
                         /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
                         categories?: {

@@ -100,3 +100,25 @@ describe("mergeVocabulary", () => {
 		expect(merged.c).toEqual(["q"]);
 	});
 });
+
+describe("prototype-key queries (the q=constructor 500)", () => {
+	// Both live search surfaces 500'd on q=constructor: the merged synonym map
+	// was a plain object, so the lookup returned Object.prototype.constructor
+	// (truthy — `?? []` never fired) and the for..of over it threw. The maps
+	// are null-prototype now; a query token must never resolve to anything
+	// but its own entry.
+	it("SYNONYMS lookups on prototype keys are undefined", async () => {
+		const { SYNONYMS } = await import("../repo-search");
+		for (const k of ["constructor", "valueof", "tostring", "__proto__"]) {
+			const v = (SYNONYMS as Record<string, unknown>)[k];
+			expect(v === undefined || Array.isArray(v)).toBe(true);
+			expect(typeof v).not.toBe("function");
+		}
+	});
+	it("SPELLING_CORRECTIONS on prototype keys is undefined", async () => {
+		const { SPELLING_CORRECTIONS } = await import("../search-vocabulary");
+		expect(
+			(SPELLING_CORRECTIONS as Record<string, unknown>).constructor,
+		).toBeUndefined();
+	});
+});

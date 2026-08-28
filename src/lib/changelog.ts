@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-28",
 		surfaces: ["api"],
+		version: "spec@1.9.2",
+		type: "fixed",
+		summary:
+			"Six served-but-undocumented fields documented (getSkill tagline/source/targetUser/tags, analyzeEcosystem toolchain, compareHackathons prizePoolUSD); contract probe re-baselined at 0 violations.",
+		detail:
+			"The fresh Engine E sweep (37 ops, 783 fields, spec 1.9.1) confirmed all five 2026-07-11 violations fixed live and surfaced six response fields served but missing from the spec; all six are now documented. The probe artifact also stamps generatedAt and the operations it reached, so a clean bill is distinguishable from never having probed.",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api"],
 		version: "spec@1.9.1",
 		type: "fixed",
 		summary:

@@ -1,10 +1,12 @@
 {
- "generatedAt": "2026-08-28T03:02:06.831Z",
+ "generatedAt": "2026-08-28T16:07:34.129Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
-  "reported-upstream": 8,
-  "declined-upstream": 1
+  "reported-upstream": 5,
+  "declined-upstream": 1,
+  "fixed-upstream": 3,
+  "verified": 2
  },
  "ourResponse": {
   "fixShipped": 7,
@@ -17,13 +19,13 @@
    "sls-075",
    "sls-076"
   ],
-  "fixApplicable": 8,
+  "fixApplicable": 10,
   "declined": 1,
   "distinctIssuesClosed": 6,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
- "total": 9,
+ "total": 11,
  "records": [
   {
    "id": "sls-023",
@@ -118,7 +120,7 @@
   {
    "id": "sls-074",
    "title": "Include appendix audit identifiers in exact-match indexing",
-   "status": "reported-upstream",
+   "status": "fixed-upstream",
    "discovered": "2026-08-25",
    "disposition": null,
    "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-074-appendix-audit-identifiers-exact-miss.md",
@@ -133,7 +135,7 @@
   {
    "id": "sls-075",
    "title": "Type the project resolver identity, evidence, and meta response fields",
-   "status": "reported-upstream",
+   "status": "fixed-upstream",
    "discovered": "2026-08-25",
    "disposition": null,
    "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-075-project-resolver-response-contract.md",
@@ -148,7 +150,7 @@
   {
    "id": "sls-076",
    "title": "Do not label spelling neighbors as strict project matches",
-   "status": "reported-upstream",
+   "status": "fixed-upstream",
    "discovered": "2026-08-27",
    "disposition": null,
    "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-076-project-search-strict-spelling-neighbor.md",
@@ -159,6 +161,24 @@
     "closedAt": "2026-08-27",
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1055"
    }
+  },
+  {
+   "id": "sls-077",
+   "title": "Declare issued in the verify response claim type enum",
+   "status": "verified",
+   "discovered": "2026-08-27",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-077-verify-issued-response-enum.md",
+   "ourIssue": null
+  },
+  {
+   "id": "sls-078",
+   "title": "Narrow quality-report routing to source-calibration questions",
+   "status": "verified",
+   "discovered": "2026-08-27",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-078-quality-report-routing-capture.md",
+   "ourIssue": null
   }
  ]
 }
