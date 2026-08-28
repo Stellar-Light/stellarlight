@@ -315,7 +315,17 @@ async function sliceF() {
 				});
 				// 403/405/429 on a bare HEAD is bot-blocking (gate-io's Cloudflare),
 				// not a dead site — only genuine not-there codes count.
-				if (h.status >= 400 && ![403, 405, 429].includes(h.status))
+				// class 32 (link-check lesson, applied to the battery's own probe):
+				// a 5xx is the ORIGIN failing — one observation proves nothing
+				// about the row (stellar-passport 530'd for a day and the row was
+				// fine). Bot walls (403/405/429) likewise. Only proven-dead
+				// client statuses fail the row; the weekly link-check's streak
+				// escalation owns chronic origin sickness.
+				if (
+					h.status >= 400 &&
+					h.status < 500 &&
+					![403, 405, 429].includes(h.status)
+				)
 					problems.push(`website ${h.status}`);
 			} catch {
 				problems.push("website unreachable");
