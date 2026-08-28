@@ -110,7 +110,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	},
 	{
 		code: "AUDD",
-		issuer: "GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWWH4GLNFECQVJJLB2EEU",
+		// 2026-08-28: this string carried an extra W since import (57 chars,
+		// Horizon rejects it as invalid) — corrected against audd.digital's own
+		// stellar.toml, the asset's on-chain existence, and the issuer account's
+		// home_domain pointing back at audd.digital.
+		issuer: "GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWH4GLNFECQVJJLB2EEU",
 		domain: "audd.digital",
 		company: "Novatti Group",
 		peg: "AUD",
