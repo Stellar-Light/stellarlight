@@ -139,11 +139,18 @@ service runs at Stage 3+ by default and humans do product, not repair.
   steady-state review.
   *Shipped so far:* the daily pipeline now rebuilds its own quality
   artifacts and commits them, and the stale-finding sweep re-probes the
-  ledger instead of letting counts drift.
-  *Remaining:* no agent yet ACTS on the gap matrix, the gaps are measured,
-  named and served, but closing them is still human-initiated. Stage 2
+  ledger instead of letting counts drift. 2026-08-28: the FIRST bounded
+  agent lane is live — the deployment-evidence gap (sls-079) is worked
+  mechanically by the weekly curation pass via the operator-toml chain
+  (the project's own stellar.toml -> declared code+issuer -> confirmed on
+  Horizon mainnet; full chain or abstain, basis labeled "operator-toml" so
+  a machine stamp never impersonates a human one). The lane reproduces the
+  2026-08-28 hand-worked queue's mechanical half; judgment cases (operator
+  docs, bundles) stay human.
+  *Remaining:* one lane is not a system — the gap matrix's other rows
+  (typed, sourced, knowledge notes) still close by hand, and Stage 2
   requires N intervention-free weeks before auto-merge opens for bounded
-  lanes, and those weeks have not been served.
+  lanes; the count starts now, at zero.
 
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from

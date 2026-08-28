@@ -3,6 +3,14 @@ on:
   workflow_dispatch:
     inputs:
       execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+  # QUALITY.md P3: the first bounded agent lane runs WITHOUT a human pressing
+  # the button. Scheduled runs always execute (mirroring enrich-repos) — the
+  # pass is evidence-only by construction (curated maps + the operator-toml
+  # chain, full-chain-or-abstain), every write is read back, and the census
+  # artifacts record the movement for review. Auto-merge stays closed; this
+  # is data curation within the lane's bounds, not code.
+  schedule:
+    - cron: "30 7 * * 2" # weekly, Tuesday 07:30 UTC
 permissions: { contents: read }
 jobs:
   curate:
@@ -20,8 +28,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Targeted, owner-reviewed project-record edits (DESCRIPTION_FIXES in the
       # script). Dry-run by default; only the listed slugs are touched.
-      - run: pnpm exec tsx scripts/data/curate-projects.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/curate-projects.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
       # sls-079: deployment facts ride the same pass — evidence-derived
       # (mainnet joins, onchain activity, DEPLOYMENT_VERIFIED curation),
       # everything else stays explicitly unknown.
-      - run: pnpm exec tsx scripts/data/backfill-deployment.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/backfill-deployment.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

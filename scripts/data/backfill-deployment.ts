@@ -13,6 +13,17 @@
  *   3. mainnet-contract-join   — a repo attributed to the project carries a
  *                                verified mainnetContractId
  *   4. onchain-activity basis  — statusBasis itself is onchain-activity
+ *   5. operator-toml           — QUALITY.md P3's first BOUNDED AGENT LANE:
+ *                                for gap-pool rows (Live, on-chain product
+ *                                types, deployment unknown) the pass runs
+ *                                the same chain a human ran on the
+ *                                2026-08-28 queue, mechanically: fetch the
+ *                                project's own /.well-known/stellar.toml,
+ *                                take its DECLARED currencies, confirm that
+ *                                exact code+issuer exists on Horizon
+ *                                mainnet. Full chain or abstain — a partial
+ *                                chain never stamps, and the basis label
+ *                                says a machine did it.
  *
  * Everything else is left with NO deployment group (the API serializes that
  * as network "unknown") — absence of evidence is never proof of disuse, and
@@ -28,6 +39,68 @@ import configPromise from "../../src/payload.config";
 import { DEPLOYMENT_VERIFIED } from "./curation-maps";
 
 const EXECUTE = process.argv.includes("--execute");
+
+/** The on-chain product types the gap matrix pools (deployment is a
+ * meaningful question for these; never for an SDK or a wallet). */
+const GAP_TYPES = new Set([
+	"DEX",
+	"DeFi",
+	"Lending",
+	"Derivatives",
+	"Oracle",
+	"Bridge",
+	"Stablecoin",
+	"RWA",
+]);
+
+/** Full-chain-or-nothing: the project's OWN stellar.toml must declare a
+ * currency, and that EXACT code+issuer must exist on Horizon mainnet. The
+ * 2026-08-28 lesson's rule mechanized — an asset_code match alone proves
+ * nothing, and a reachable site proves less. */
+async function tomlChain(
+	website: string,
+): Promise<{ code: string; issuer: string; tomlUrl: string } | null> {
+	const host = website
+		.replace(/^https?:\/\//, "")
+		.split(/[/?#]/)[0]
+		.replace(/^www\./, "");
+	if (!host) return null;
+	const tomlUrl = `https://${host}/.well-known/stellar.toml`;
+	let toml: string;
+	try {
+		const r = await fetch(tomlUrl, {
+			headers: { "User-Agent": "stellarlight-deployment-lane" },
+			signal: AbortSignal.timeout(15000),
+		});
+		if (!r.ok) return null;
+		toml = await r.text();
+	} catch {
+		return null;
+	}
+	const pairs = [
+		...toml.matchAll(
+			/code\s*=\s*"([A-Za-z0-9]{1,12})"[\s\S]{0,200}?issuer\s*=\s*"(G[A-Z0-9]{55})"/g,
+		),
+	];
+	for (const [, code, issuer] of pairs.slice(0, 5)) {
+		try {
+			const r = await fetch(
+				`https://horizon.stellar.org/assets?asset_code=${encodeURIComponent(code)}&asset_issuer=${issuer}`,
+				{
+					headers: { "User-Agent": "stellarlight-deployment-lane" },
+					signal: AbortSignal.timeout(15000),
+				},
+			);
+			if (!r.ok) continue;
+			const d = (await r.json()) as {
+				_embedded?: { records?: unknown[] };
+			};
+			if ((d._embedded?.records ?? []).length > 0)
+				return { code, issuer, tomlUrl };
+		} catch {}
+	}
+	return null;
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: minimal doc shapes
 type Doc = Record<string, any>;
@@ -68,7 +141,10 @@ async function main() {
 			depth: 0,
 			select: {
 				slug: true,
+				status: true,
 				statusBasis: true,
+				types: true,
+				links: true,
 				deployment: true,
 				onchain: true,
 			},
@@ -105,6 +181,21 @@ async function main() {
 		} else if (p.statusBasis === "onchain-activity") {
 			network = "mainnet";
 			basis = "onchain-activity";
+		} else if (
+			p.status === "Live" &&
+			(p.types ?? []).some((t: string) => GAP_TYPES.has(t)) &&
+			p.links?.website
+		) {
+			// Lane 5: the operator-toml chain, bounded and mechanical.
+			const chain = await tomlChain(String(p.links.website));
+			if (chain) {
+				network = "mainnet";
+				basis = "operator-toml";
+				sourceUrl = chain.tomlUrl;
+				console.log(
+					`  toml-chain ${p.slug}: ${chain.code} by ${chain.issuer.slice(0, 10)}… confirmed on Horizon`,
+				);
+			}
 		}
 		if (!network) continue;
 		const cur = p.deployment ?? {};
