@@ -43,6 +43,32 @@ export function mirrorGroups(
 		.map(([hash, urls]) => ({ hash, urls: [...urls] }));
 }
 
+/** Connected components over URLs sharing any mirrored hash — one component
+ * per "these URLs carry the same text" cluster. Shared by the repair script
+ * and the S8 sweep so their group counts can never disagree. */
+export function mirrorComponents(rows: MirrorRowLike[]): string[][] {
+	const groups = mirrorGroups(rows);
+	const parent = new Map<string, string>();
+	const find = (x: string): string => {
+		let r = x;
+		while (parent.get(r) !== r) r = parent.get(r) as string;
+		parent.set(x, r);
+		return r;
+	};
+	const union = (a: string, b: string): void => {
+		for (const u of [a, b]) if (!parent.has(u)) parent.set(u, u);
+		parent.set(find(a), find(b));
+	};
+	for (const g of groups)
+		for (let i = 1; i < g.urls.length; i++) union(g.urls[0], g.urls[i]);
+	const components = new Map<string, string[]>();
+	for (const u of parent.keys()) {
+		const r = find(u);
+		components.set(r, [...(components.get(r) ?? []), u]);
+	}
+	return [...components.values()];
+}
+
 /** Sibling-slug detector: paths identical once digits are stripped are
  * versioned/numbered siblings ("…/releases/tag/v22.0.10" vs "v23.5.2",
  * "…/sep6/integration" vs "…/sep24/integration") — distinct documents by

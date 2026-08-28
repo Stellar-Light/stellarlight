@@ -26,7 +26,10 @@ import "../load-env";
 import { writeFileSync } from "node:fs";
 
 import { getPayload } from "payload";
-import { mirrorGroups } from "../../src/lib/corpus-mirrors";
+import {
+	classifyMirrorComponent,
+	mirrorComponents,
+} from "../../src/lib/corpus-mirrors";
 import { JUNK_URL_RE } from "../../src/lib/research-rank";
 import { titleIssue } from "../../src/lib/title-quality";
 import configPromise from "../../src/payload.config";
@@ -156,12 +159,33 @@ async function main() {
 		};
 	}
 
-	// ── S8 mirrored content (same hash, >1 distinct URL) — grouping shared
-	// with the repair script via src/lib/corpus-mirrors.ts ──
-	const mirrors = mirrorGroups(rows).map((g) => ({
-		hash: g.hash.slice(0, 12),
-		urls: g.urls,
-	}));
+	// ── S8 mirrored content — grouping AND classification shared with the
+	// repair script via src/lib/corpus-mirrors.ts. Raw hash-groups conflated
+	// three different phenomena and only one of them is dirt:
+	//   republication / ambiguous  -> ACTIONABLE (the count below)
+	//   template-siblings          -> distinct docs by construction (sep6 vs
+	//                                 sep24 guides, versioned release notes)
+	//   boilerplate-overlap        -> docs sharing template text, not mirrors
+	// Counting template READMEs as corpus dirt kept this sweep permanently
+	// red over rows nobody should ever delete.
+	const byUrlS8 = new Map<string, { source: string; hashes: Set<string> }>();
+	for (const r of rows) {
+		const d = byUrlS8.get(r.url) ?? { source: r.source, hashes: new Set() };
+		if (r.contentHash) d.hashes.add(r.contentHash);
+		byUrlS8.set(r.url, d);
+	}
+	const s8Kinds = new Map<string, string[][]>();
+	for (const urls of mirrorComponents(rows)) {
+		// offline classification: no probes, so a provable republication shows
+		// up as "ambiguous" here and the repair script's probing settles it
+		const kind = classifyMirrorComponent(urls, byUrlS8).kind;
+		s8Kinds.set(kind, [...(s8Kinds.get(kind) ?? []), urls]);
+	}
+	const s8Actionable = [
+		...(s8Kinds.get("republication") ?? []),
+		...(s8Kinds.get("ambiguous") ?? []),
+	];
+	const mirrors = s8Actionable.map((urls) => ({ urls }));
 
 	const report = {
 		frame: { chunks: rows.length, docs: byDoc.size },
@@ -178,7 +202,16 @@ async function main() {
 		s7_stalled: Object.entries(coverage)
 			.filter(([, c]) => c.stalled)
 			.map(([s]) => s),
-		s8_mirrors: { count: mirrors.length, sample: mirrors.slice(0, 10) },
+		s8_mirrors: {
+			count: mirrors.length,
+			sample: mirrors.slice(0, 10),
+			meaning:
+				"actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
+			informational: {
+				templateSiblings: (s8Kinds.get("template-siblings") ?? []).length,
+				boilerplateOverlap: (s8Kinds.get("boilerplate-overlap") ?? []).length,
+			},
+		},
 	};
 
 	if (OUT_FILE) {
