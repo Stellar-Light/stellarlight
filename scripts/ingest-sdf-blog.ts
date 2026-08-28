@@ -31,12 +31,27 @@ const limit = limitArg ? Number(limitArg.split("=")[1]) : 500;
 
 const BASE = "https://stellar.org";
 
+/** fetch's Response.url carries fragments/query only if the server sent them;
+ * normalize so alias detection compares clean paths. */
+const stripHash = (u: string): string => u.split("#")[0].replace(/\/$/, "");
+
 async function fetchHtml(url: string): Promise<string> {
+	return (await fetchHtmlFinal(url)).html;
+}
+
+/** Fetch AND report where the redirect chain actually landed. The S8 mirror
+ * class resurrected itself here: stellar.org republished an article under a
+ * new slug with a 301 from the old one, our crawl followed the redirect but
+ * stored the post under the REQUESTED old slug, and every refresh re-created
+ * the mirror row the repair had just deleted. The final URL is the identity. */
+async function fetchHtmlFinal(
+	url: string,
+): Promise<{ html: string; finalUrl: string }> {
 	const res = await fetch(url, {
 		headers: { "User-Agent": "stellarlight-scout-ingest" },
 	});
 	if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
-	return res.text();
+	return { html: await res.text(), finalUrl: res.url || url };
 }
 
 /**
@@ -112,7 +127,14 @@ interface Post {
 }
 
 async function fetchPost(url: string): Promise<Post> {
-	const html = await fetchHtml(url);
+	const { html, finalUrl } = await fetchHtmlFinal(url);
+	// A cross-slug redirect means the article LIVES at finalUrl now; the
+	// requested slug is a historical alias. Storing under it creates a mirror
+	// row that the weekly S8 sweep flags and a repair deletes, forever.
+	if (stripHash(finalUrl) !== stripHash(url)) {
+		console.log(`  redirect: ${url} → ${finalUrl} (storing canonical)`);
+		url = stripHash(finalUrl);
+	}
 	const titleMatch =
 		html.match(
 			/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
@@ -185,7 +207,10 @@ async function run() {
 	for (const url of urls) {
 		try {
 			const post = await fetchPost(url);
-			const slug = url.replace(`${BASE}/blog/`, "").replace(/\/$/, "");
+			// Identity comes from the POST (post-redirect canonical), never the
+			// crawl-list entry: an aliased slug must collapse into the canonical
+			// row instead of minting a mirror.
+			const slug = post.url.replace(`${BASE}/blog/`, "").replace(/\/$/, "");
 			if (!post.isArticle) {
 				skippedListings += 1;
 				listingDocIds.push(`blog/${slug}`);
@@ -202,7 +227,7 @@ async function run() {
 				md: `# ${post.title}\n\n${post.body}`,
 				parentDocId: `blog/${slug}`,
 				title: post.title,
-				url,
+				url: post.url,
 				tags: ["sdf-blog", "stellar.org"],
 				publishedAt: post.publishedAt,
 			});
