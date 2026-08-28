@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T16:32:23.215Z",
+ "generatedAt": "2026-08-28T16:41:44.849Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -225,6 +225,9279 @@
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
   "sampled": 1025,
+  "scatter": [
+   {
+    "slug": "moonpay",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "cex-io",
+    "prominence": 20,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "coinone",
+    "prominence": 30,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "crypto-com",
+    "prominence": 30,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "whitebit",
+    "prominence": 50,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "htx",
+    "prominence": 30,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "bitstamp",
+    "prominence": 40,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "gate-io",
+    "prominence": 40,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "kucoin",
+    "prominence": 50,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "bybit",
+    "prominence": 50,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "bithumb",
+    "prominence": 50,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "upbit",
+    "prominence": 60,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "kraken",
+    "prominence": 60,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "coinbase",
+    "prominence": 70,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "binance",
+    "prominence": 70,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "vayyl",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "rendergate",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "nulucre-agents",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "cards402",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "asgcard",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "talos",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "clevercon",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "ai-net",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "pulsar-mcp",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "stellar-agent-wallet-skill",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "x402-mcp-stellar-template",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "tollpay",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "mpp-router",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-agent-search",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "x402",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-8004",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-mpp-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "para",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sozu-faucet-testnet-circle-usdc-sac-cli-agent-skill",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "stellar-indexer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "colibri",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soropass",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "smart-treasury",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sikadesk",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "safu",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "remi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paycashless",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pathpulse-ai",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "offer-hub",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "muney",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lusty",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumenwipe",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "jumpa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "for-yield",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chainless",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "basilic",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ballast-re",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "azza",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "authline",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "amulets",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kryon-protocol",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "sodax",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "raven",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "flutter-stellar-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "neko",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "defa-invoicemate",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "gami-labs",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "sentora",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-defi-hub",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "usdy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-wallets-kit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "routedock",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "smart-account-kit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mgusd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pyusd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ylds",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eurau",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "passkey-kit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sunereum-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "lusty-finance",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "octarine",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-payout-token-suite",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "lumagg",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-decompiler",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "d-fct",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "zilt",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lucent",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-command-insights",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "neftwerk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mydatacoin",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "verso",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "openxswitch",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "feeprime",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elementpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scopuly",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tokeshare",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gameduk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-strategists",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "safu-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "escala",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "prism",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fuul",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tokenpad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bluechip",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "troqpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trustline",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nemorixpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "forestio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "swiftex-wallet",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "spectra-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "wellspring",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stbl",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "inferera",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "terwa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "team-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "talwex",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-token-launchpad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-security-portal",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-oracle-shield",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stabble",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "simplytokenized",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "refractor",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "providencia-onchain",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "proofbridge",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "payala",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "net-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "neon-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "merkle-science",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "meria",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "lulpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "liqvid",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "liquidsfi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lightsail",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ios-mac-stellar-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "investar",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fundable",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "figo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fiatsend",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dig",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "diameter",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "dd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blockroll",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bim",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "arka-fund",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellarx-ph",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "typed",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "matrixdock",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cashlink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "reapp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "linq",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fewticket",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bloccpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bexo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-registry",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "opengrants",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dcent",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cushion",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "acta",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "archax",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arcane",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xoxno",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xccy",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wowmax",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vank",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pipeline",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lend",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-quickstart",
+    "prominence": 78,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-cli",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "friendbot",
+    "prominence": 85,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hubble",
+    "prominence": 88,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "exaion",
+    "prominence": 55,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lightsail-network-quasar",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "getblock",
+    "prominence": 38,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "onfinality",
+    "prominence": 62,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ankr",
+    "prominence": 55,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "net-stellar-sdk",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ios-stellar-sdk",
+    "prominence": 55,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "java-stellar-sdk",
+    "prominence": 75,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "typescript-wallet-sdk",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-rust-sdk",
+    "prominence": 96,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "go-stellar-sdk",
+    "prominence": 88,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "javascript-stellar-sdk",
+    "prominence": 95,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hot-wallet",
+    "prominence": 60,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cactus-link",
+    "prominence": 55,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fordefi",
+    "prominence": 60,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitget-wallet",
+    "prominence": 60,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "klever",
+    "prominence": 60,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "walletconnect",
+    "prominence": 58,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitgo",
+    "prominence": 72,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-disbursement-platform-sdp",
+    "prominence": 72,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "circle-cctp-cross-chain-transfer-protocol",
+    "prominence": 66,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "solar-wallet",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "squid-router",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "validation-cloud",
+    "prominence": 84,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "quicknode",
+    "prominence": 84,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rabet",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zenex",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "typed"
+    ],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "zarf",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "yellowcard",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "xbid-ai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "warpdrive",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "volta",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "vesseo",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "velo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vaquita",
+    "prominence": 4,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "usdm1",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "upshift",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "turbolong",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-signal",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tezoro",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tender",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sushi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "surgepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stronghold",
+    "prominence": 64,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soropg",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-optimistic-oracle",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "solv-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "simbolik",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "securrency",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "securitize",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scaffold-stellar",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sava",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rumble-fish",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "renesis",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rehive",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "redswan",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rain",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rails",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pyth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "privy",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pluto-loans",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "piggy-wallet",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pg-atlas",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paywit",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pagfinance",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "orion",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ondo",
+    "prominence": 85,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "novatti",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "normal-finance",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "noir",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "noether",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "typed"
+    ],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "nethermind",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nectar-network",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mpcvault",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "microvault",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mesh",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "merkl",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumexo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "latch",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kmp-stellar-sdk",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "keybase",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "kalien",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "k2-lend",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ibis",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "huma",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "helix",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "hatom-protocol",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "handlpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "figure",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dtcc",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "drips",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "digitpay-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "digibank",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dashx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cypher",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cyberbrawl",
+    "prominence": 62,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cryptomate",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "credible",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "content-dao",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "conomy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coinme",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "circle",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cheesecake-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "centrifuge",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bridge",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "boundless-bounties",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blockaid",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blend-capital",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "bitso",
+    "prominence": 84,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bim-exchange",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bando",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "backyard",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "axis",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "automated-finance",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arf",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "amber",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alchemy",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "akuna",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-aha-company",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nulucre",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "passport",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "zkliquid",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "zig3v2",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zentra",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "yieldbackcash",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xlmeme",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xlmsh",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xcapit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "womenbiz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wisdomtree",
+    "prominence": 80,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wirex-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "websoroban-ide",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "webacy-inc",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "web3dev",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "web3-antivirus",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "warmancer",
+    "prominence": 82,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wally",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "walletban",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wagent",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wadzzo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vottun",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "volta-circuit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vitreous",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "via-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "verseprop",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "veridise",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "venerez",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "venalabs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "vanna-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "utoken",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "usher",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "usdc-swap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "upwealth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "untangled",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "unstoppable-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "uniblock",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ultra-stellar",
+    "prominence": 74,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "uils",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "typiqo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "tumbl",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tucambio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trustswap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trustless-work",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trustful",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trustedplastic",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trilobyte",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tricorn",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "transfuse",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "transfermole",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trak",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tracee",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trace",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tokenops",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "token-terminal",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tipper",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tip-me",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "timed-transactions-api",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "thexbank",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-starship-soroban",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-hub",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "the-give-hub",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "the-blue-marble",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "templar-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tellus-cooperative",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "teken",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "techfiesta",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "teachmedefi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "taskio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tap4change",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sytemap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "synced",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "swplug",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "switchly",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "swiftex",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "swift-wallet-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "subs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "styx",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "stroopyai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stride",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "streamingfast",
+    "prominence": 72,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "storehouse-gold",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stocken-capital",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stex",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellot",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarstrides",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellarscamreport",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellars-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarprodev",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarport",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarmint",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarguard",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellargpt",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarexpert",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellarcarbon",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellarbroker",
+    "prominence": 74,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarauth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-update",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "stellar-unity-developer-kit",
+    "prominence": 66,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-transaction-visualizer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-tools",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-tip",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-rust-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-router-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-razor-and-blazor-suite",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-qt-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-php-sdk",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-passport",
+    "prominence": 55,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-nest",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-metamask",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-light",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-development-foundation",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-defi-dune-dashboards",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-c-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-battle",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-ai-agent-kit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "steepx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "starloom",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stallion",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stables",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sstream",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "spydra",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "splyce-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "splito",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "spinach",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "spiko",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "spatium",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "space-and-time",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "source-of-tales",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soundness",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorscan",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "sorostarter",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorosplits",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorosorcerer",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "sourced",
+     "typed"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "sorosan",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorodrop",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorobuilder",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "sorobuild",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorobix",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorobanpulse",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "sorobanmath",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorobanhub",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "sorobanhooks",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-timelock-contract",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-security-portal",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "soroban-sdk-tools",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-resource-usage-reporter",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-pre-order-contract",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-polygon-interop",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-optimsitic-oracle",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "soroban-learn",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "soroban-explorer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-elk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-copilot",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-assistant",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "soracle",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sora",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sollpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "solarkraft",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "solang",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "socketfi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "snnac",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "smilepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "smart-deploy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "skopa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "skeeper",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "simple-signer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "silicore",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "siborg",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sgf-solutions",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sfx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sentit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sentinel",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sendit",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sendin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "seevcash",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "securx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scout",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scorechain",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scopex",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "scam-flagging-system",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "scalps",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "saw",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sanctum",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rust-soroban-client-library",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "runtime-verification",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rubic",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rozo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rosen",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rivool-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ripe",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rigel",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "reyts",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rendbit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "remittease",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "relax",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "redstone-finance",
+    "prominence": 80,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "reclaim",
+    "prominence": 85,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "reblue",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "raumfi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "raum-network",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Development"
+   },
+   {
+    "slug": "rarible",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rango",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "range",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rampmedaddy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ramm",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rahat",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "quilltip",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "quidroo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "quarkslab",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "qstn",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "qolaq",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "python-stellar-sdk",
+    "prominence": 85,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "puenta",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "prophe",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "poma",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "polaris-lend",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "plutus",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "plutope",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "planet-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "php-anchor-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "perun",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "peridot-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "peerpesa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "payzoll",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paystreme",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paysapp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "payrit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "payqin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paykit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paygo-crypto",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "palremit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pakananet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "paid",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pactta",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "outbounder",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ottersec",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ortege",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "orbitcdp",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "orally",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "openzeppelin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "opensolar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "open-gamefi-sdk",
+    "prominence": 60,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "onekey",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "one-click",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "omnilumen",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "octo",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "noticias-trading",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "normal",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nodies",
+    "prominence": 82,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nobak",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nicetrade",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "neovestor",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nebulavrf",
+    "prominence": 66,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nauta-land",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mystic",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mxlet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "muwp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "multiclique",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "mugglepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "moonlight",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mojoflower",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mobula-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "minah",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mimoto",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "mica",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "metafyed",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "meria-defi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mercuryo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumosdao",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "lumenshade",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumenscan",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumens-for-charity",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "lumenaut",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "lumen-later",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lul",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "loto-punto",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "loop-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "logistech",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "localcoin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "lobster",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "liqvidxyz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "liquify",
+    "prominence": 72,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lettuce",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "legasi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "legacy-suite",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ledgerstax",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lantern",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "laina",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "kyc-token",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kunst21",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kulipa",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "kryptos",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kript",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kotlin-stellar-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "komunitin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kmac-state-machine-template",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kindfi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "katagames",
+    "prominence": 68,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kasi-money",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "k3-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "juntta",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "js-worker-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "js-capacitor-passkey-kit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "jetpad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "irl",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "involt",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "interstellar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "interlinked",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "instantdao",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "infinity-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "inference",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "indentura",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "idunu",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "idos",
+    "prominence": 88,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ichi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "icanproveit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hypernative",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hurupay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "humantech",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "houdiniswap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hot-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "horizon-as-a-service",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "honeycoin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "hiyield",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hito-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hermes",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "hedgepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "halborn",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "haciendo-stellar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "grip",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "greeppay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "grantpicks",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "grantfox",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "governance-modules-library",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "globachain",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gladius",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "givecredit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "getpaid",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "getblockcard",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "genie-ai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gecko-fuzz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "gearup",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gatewayfm",
+    "prominence": 74,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "galactictalk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fx-swap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "frost-implementation",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "freelii",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "freedom-pay-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "free-voting-platform",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "sourced",
+     "linked"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "forge",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "flux",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "flutter-wallet-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "flipside",
+    "prominence": 60,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "flashback",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "findtruman",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fijicoin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fastbuka",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fairblock",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "extractor",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "expand",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "every-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "estrela",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "equitx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "equilibre",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "eqlab",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "enerdao",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "encode-club",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "empowch",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elsa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elroy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elixir-stellar-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elio-dao",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "edunode",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eascrow",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "earnbit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eara",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ea-kazi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "dropzey",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "domipago",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dolphinze",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dobprotocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "digibank-sdp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "didstellar",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "diameter-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dia",
+    "prominence": 84,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dfns",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dex-tools",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "devtrak",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "devasign",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "depay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "defindex",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "defarm",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "decentrio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "deb",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dcm",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dappradar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dapp-world",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cyvers",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ctx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cryptoconexin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cryptocannoneer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "crypto-link",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cryptix",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "crossmint",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cross-platform-soroban-rpc-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cosmicvote",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "cosmiclink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "copperx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coopstable-v2-yield-sharing-stablecoin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "comunitaria",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "communidao",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "command-robotics",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coinspect",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coinsph",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "coindisco",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "codelnpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "code4rena",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coca",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cobo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "clob",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "clear",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "city-states",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chronospay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chimpdao",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chef",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chats",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chainsatlas",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chainpatrol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chainlink-oracles-relayer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chaincred",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "chaincerts",
+    "prominence": 82,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "certora",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "certik",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "centiiv",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "centaurus",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "cede",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "catalyst",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cashabroad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "cartwey",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cantina",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "canfy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "calimero",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "btq",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bravepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bousol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "boundless",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "boss-revolution",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "borderdollar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "blux",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blue-orion",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "blox",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blocknify",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blockedenxyz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "block-time-financial",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blip",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "blindpay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blade",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitgifty",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitbond",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bevor",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bes-metaverse",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "benkiko",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "ben-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "beamable",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "basement",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "band",
+    "prominence": 82,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "balanced",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "baf",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "b4b",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "axal",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "autowhale",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "autoaction",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aurapay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "attest",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "astrograph",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "astrocore",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "assetdesk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "assemblyscript-soroban-sdk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "artizen",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "art-club",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arrel",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arkafund",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arculus",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "apicharge",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "apay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "answerly",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "anchainai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alula",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alternun",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "almanax",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alfred",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "airgap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aida",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ai-transparency-token",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aha-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "agtrail",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "agnostic",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aerochain",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "adamik",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "accelar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "abroad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "0xauth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tansu",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hoops",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
+   },
+   {
+    "slug": "ledger",
+    "prominence": 62,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trezor",
+    "prominence": 62,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "keystone",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vibrant",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "hana",
+    "prominence": 76,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "beans",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "albedo",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "freighter",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lobstr",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xbull",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blue-marble",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "give-credit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-carbon",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "giveth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "glo-dollar",
+    "prominence": 66,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "veur",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rwf",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mbrl",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eurckobo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "brz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "vchf",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tzs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gyen",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "audd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ars",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "qcad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zusd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kes",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "brl",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "ngnc",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pen",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mxne",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eurs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arst",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eurc",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "usdc",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "glousd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mica-rent",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "tauvlo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "etherfuse",
+    "prominence": 78,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wisdomtree-prime",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "hiyieldhiyield",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "excellar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "benji",
+    "prominence": 88,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "huma-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "owny",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "taurus",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "clickpesa-debt-fund",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "public-node",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nirvana-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nownodes",
+    "prominence": 76,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "infstones",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "obsrvr",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gateway",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "blockdaemon",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zebec",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "yativo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wirecash",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "whalestack",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "wallet-guru",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wagelink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "wave",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "unalivio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "yellow-card",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "oinc",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "triiyo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tribal",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "trace-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "tago-cash",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tala",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "shiga",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stablecorp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "syklo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ripe-money",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "rehoboth",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ripio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pretium",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ping",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "peer",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pakana",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "paychant",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mykobo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "myaza",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mozart-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "moneygram",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "meru",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "local-coin",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "link",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lenme",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lemon",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kura",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kotani-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "joona-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "honey-coin",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "flutterwave",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fluxity",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "fonbnk",
+    "prominence": 76,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "freedom-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "felix-pago",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "emigro",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "elroy-app",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "ebioro",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dollarize",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "decaf",
+    "prominence": 66,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cinko",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coca-wallet",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "coala-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coinsender",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "coins-ph",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "clixpesa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "clickspesa",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chipper",
+    "prominence": 68,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "changera",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cedar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cash-abroad",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bp-ventures",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bidali",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitt",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "brale",
+    "prominence": 72,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bitwage",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "boss-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "borderless",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blox-global",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "bebop",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bingtellar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blaze",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "amero",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "anclap",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aura-pay",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "autify",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "airswift",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "airtm",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "afriex",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alfred-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "lightecho",
+    "prominence": 72,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "reclaim-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "posted-app",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "reflector",
+    "prominence": 90,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
+   },
+   {
+    "slug": "diadata",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "band-protocol",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "skyhitz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "litemint",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ziriz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "orbit-finance",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "bondhive",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "slender",
+    "prominence": 80,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "fxdao",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "xycloans",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "yieldblox",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blend",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "subquery",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "quasar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "mercury",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "goldsky",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "constellation",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "blockeden",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "nebula",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
+    "slug": "digicus",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "okashi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "token-tails",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dogstar",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "onboarding-club",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-quest",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rise-in",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nearx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dfs-labs",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-academy",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "easya",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bigger",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "baf-nework",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "soroban-domains",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumenswap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "balanced-network",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zkcross",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cables",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarterm",
+    "prominence": 72,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "loam",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-react",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "satellite",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stroopy-ai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "chainatlas",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "soroban-hub",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sorobanide",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "keizai",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-laboratory",
+    "prominence": 80,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "expand-network",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pipeops",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sora-cli",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "ortege-ai",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "kwickbit",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "arcturus",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "bitwave",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "soroban-pulse",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-pulse",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dapplooker",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dextools",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "derisk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "alterscope",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarbeat",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-dashboard",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "zettablock",
+    "prominence": 68,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarfolio",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chartui",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "dune",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumos-dao",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "soroban-governor",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "roberto-sanz",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "5x-crypto",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "hi-fifo",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "block-by-block",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "luminary-s-archive",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-global",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lumen-loop",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "xusd",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "usdx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "eurx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "gbpx",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "cubist",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "spacewalk",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "ultra-swap",
+    "prominence": 0,
+    "factsPresent": 2,
+    "missing": [
+     "strongBasis",
+     "dated",
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "axelar",
+    "prominence": 84,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "allbridge",
+    "prominence": 88,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "steexp",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellarchain",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-expert",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "comet",
+    "prominence": 70,
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "wombat",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "sushi-swap",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Draft"
+   },
+   {
+    "slug": "soroswap",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "phoenix",
+    "prominence": 80,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "kale",
+    "prominence": 90,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "aquarius",
+    "prominence": 85,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "tinyamm",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   }
+  ],
   "meanScore": 78,
   "basisMix": [
    {
