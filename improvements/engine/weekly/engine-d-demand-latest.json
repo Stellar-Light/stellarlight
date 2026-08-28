@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 60869,
-    "realHits": 7681,
-    "distinctQueries": 3862,
+    "loggedHits": 63182,
+    "realHits": 7694,
+    "distinctQueries": 3873,
     "replayed": 250
   },
   "okRate": 94,
@@ -11,7 +11,7 @@
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 82,
+      "hits": 81,
       "lastSeen": "2026-08-28T17:44:47.497Z",
       "days": 15,
       "buckets": [
@@ -131,9 +131,9 @@
     {
       "endpoint": "/api/projects/search",
       "query": "crdt",
-      "hits": 5,
-      "lastSeen": "2026-08-26T22:36:45.956Z",
-      "days": 2,
+      "hits": 6,
+      "lastSeen": "2026-08-28T17:57:28.474Z",
+      "days": 3,
       "buckets": [
         "other"
       ],
@@ -175,20 +175,8 @@
       ],
       "class": "EMPTY",
       "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "tempa",
-      "hits": 3,
-      "lastSeen": "2026-08-22T16:22:27.558Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     }
   ],
-  "generatedAt": "2026-08-28T17:49:28Z",
+  "generatedAt": "2026-08-28T18:19:38Z",
   "evalKey": "engine-d-demand"
 }

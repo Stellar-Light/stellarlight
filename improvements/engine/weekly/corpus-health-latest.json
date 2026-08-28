@@ -1,6 +1,6 @@
 {
   "frame": {
-    "chunks": 10119,
+    "chunks": 10124,
     "docs": 2067
   },
   "s5_junk_urls": {
@@ -13,6 +13,13 @@
     "sample": []
   },
   "s7_coverage": {
+    "sdf-blog": {
+      "chunks": 2221,
+      "datedPct": 100,
+      "newestAgeDays": 5,
+      "undated": false,
+      "stalled": false
+    },
     "release": {
       "chunks": 193,
       "datedPct": 100,
@@ -23,22 +30,15 @@
     "dev-docs": {
       "chunks": 3959,
       "datedPct": 74,
-      "newestAgeDays": 3,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-blog": {
-      "chunks": 2216,
-      "datedPct": 100,
-      "newestAgeDays": 5,
+      "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
     "cap": {
       "chunks": 936,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
+      "datedPct": 98,
+      "newestAgeDays": 8,
+      "undated": false,
       "stalled": false
     },
     "lumenloop-research": {
@@ -52,7 +52,9 @@
       "chunks": 250,
       "datedPct": 0,
       "newestAgeDays": null,
-      "undated": true,
+      "undated": false,
+      "undateable": true,
+      "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
     "sdf-org": {
@@ -66,14 +68,16 @@
       "chunks": 120,
       "datedPct": 0,
       "newestAgeDays": null,
-      "undated": true,
+      "undated": false,
+      "undateable": true,
+      "reason": "handbook site pages state no publication date",
       "stalled": false
     },
     "sep": {
       "chunks": 657,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
+      "datedPct": 98,
+      "newestAgeDays": 26,
+      "undated": false,
       "stalled": false
     },
     "audit": {
@@ -113,22 +117,29 @@
     },
     "paper": {
       "chunks": 27,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": true,
+      "datedPct": 100,
+      "newestAgeDays": 3838,
+      "undated": false,
       "stalled": false
     }
   },
   "s7_stalled": [],
   "s8_mirrors": {
-    "count": 0,
-    "sample": [],
+    "count": 1,
+    "sample": [
+      {
+        "urls": [
+          "https://stellar.org/blog/foundation-news/stellar-security-guide-protect-scammers",
+          "https://stellar.org/blog/foundation-news/how-to-protect-yourself-from-scammers"
+        ]
+      }
+    ],
     "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
     "informational": {
       "templateSiblings": 8,
       "boilerplateOverlap": 33
     }
   },
-  "generatedAt": "2026-08-28T17:49:28Z",
+  "generatedAt": "2026-08-28T18:19:38Z",
   "evalKey": "corpus-health"
 }
