@@ -1,0 +1,27 @@
+{
+ "slug": "stellars-finance",
+ "url": "https://stellars.finance/assets/index-3HEaNhUX.js",
+ "fetchedAt": "2026-08-28",
+ "httpStatus": 200,
+ "bytes": 2889255,
+ "sha256_16": "2e166b692d1321be",
+ "verdict": "testnet-only: mainnet network config present with EMPTY contract addresses; testnet fully populated",
+ "markers": [
+  {
+   "marker": "testnet vault contract",
+   "found": true,
+   "excerpt": "rpcUrl:\"https://soroban-testnet.stellar.org\" ... vault:{address:\"CAX5JF7U7WFQDSX7CNEV6DDAQ5J5Q655NLATEUPU5D5GWIWT7T6SGYVO\""
+  },
+  {
+   "marker": "mainnet empty addresses",
+   "found": true,
+   "excerpt": "rpcUrl:\"https://soroban.stellar.org\" networkPassphrase:\"Public Global Stellar Network ; September 2015\" ... address:\"\" x4"
+  }
+ ],
+ "context": "sls-079 verification. The bundle defines {local, testnet, mainnet} network configs; four named contracts (vault, positionManager, configManager, oracleRouter) have real addresses on testnet and empty strings on mainnet.",
+ "decidedStatus": "Pre-Release",
+ "decidedDeployment": {
+  "network": "testnet",
+  "basis": "human-verified"
+ }
+}

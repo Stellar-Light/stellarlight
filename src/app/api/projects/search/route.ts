@@ -93,6 +93,7 @@ async function semanticProjectRows(
 				category: 1,
 				shortDescription: 1,
 				status: 1,
+				deployment: 1,
 				statusAsOf: 1,
 				statusSourceUrl: 1,
 				statusBasis: 1,
@@ -158,6 +159,16 @@ async function semanticProjectRows(
 			statusSourceUrl: p.statusSourceUrl ?? null,
 			statusBasis: p.statusBasis ?? null,
 			statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+			// sls-079: status answers "operating for users?"; THIS answers
+			// "deployed on which network?". Two facts, two fields. unknown is
+			// served explicitly - absence of evidence is never proof of disuse,
+			// and a consumer must see that we do not know rather than guess.
+			deployment: {
+				network: p.deployment?.network ?? "unknown",
+				basis: p.deployment?.basis ?? null,
+				sourceUrl: p.deployment?.sourceUrl ?? null,
+				asOf: p.deployment?.asOf ?? null,
+			},
 			canonicalSlug: p.canonicalSlug ?? null,
 			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
@@ -294,6 +305,13 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	// sls-079: deployment is a SEPARATE fact from lifecycle status.
+	deployment?: {
+		network?: string | null;
+		basis?: string | null;
+		sourceUrl?: string | null;
+		asOf?: string | null;
+	} | null;
 	// sls-024: status provenance — when the label was asserted, the primary
 	// evidence URL, and what kind of evidence it is. Null on legacy rows.
 	statusAsOf?: string | null;

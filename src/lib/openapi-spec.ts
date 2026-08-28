@@ -7609,7 +7609,26 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
 						description:
-							"Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. Status describes the PROJECT/entity lifecycle, not proof that a specific product is deployed on Stellar mainnet — check statusAsOf/statusSourceUrl/statusBasis for the label's provenance, and supportedNetworks/description for deployment scope.",
+							"Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.",
+					},
+					deployment: {
+						type: "object",
+						description:
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+						properties: {
+							network: {
+								type: "string",
+								enum: ["mainnet", "testnet", "unknown"],
+							},
+							basis: {
+								type: "string",
+								nullable: true,
+								description:
+									"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified. Null when network is unknown.",
+							},
+							sourceUrl: { type: "string", nullable: true },
+							asOf: { type: "string", nullable: true },
+						},
 					},
 					statusAsOf: {
 						type: "string",

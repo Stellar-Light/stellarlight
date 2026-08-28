@@ -21,3 +21,7 @@ jobs:
       # Targeted, owner-reviewed project-record edits (DESCRIPTION_FIXES in the
       # script). Dry-run by default; only the listed slugs are touched.
       - run: pnpm exec tsx scripts/data/curate-projects.ts ${{ inputs.execute && '--execute' || '' }}
+      # sls-079: deployment facts ride the same pass — evidence-derived
+      # (mainnet joins, onchain activity, DEPLOYMENT_VERIFIED curation),
+      # everything else stays explicitly unknown.
+      - run: pnpm exec tsx scripts/data/backfill-deployment.ts ${{ inputs.execute && '--execute' || '' }}

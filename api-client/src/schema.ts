@@ -1003,10 +1003,19 @@ export interface components {
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
             shortDescription?: string;
             /**
-             * @description Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. Status describes the PROJECT/entity lifecycle, not proof that a specific product is deployed on Stellar mainnet — check statusAsOf/statusSourceUrl/statusBasis for the label's provenance, and supportedNetworks/description for deployment scope.
+             * @description Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.
              * @enum {string}
              */
             status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
+            /** @description Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact. network 'unknown' means exactly that: no evidence either way, never 'not deployed'. */
+            deployment?: {
+                /** @enum {string} */
+                network?: "mainnet" | "testnet" | "unknown";
+                /** @description Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified. Null when network is unknown. */
+                basis?: string | null;
+                sourceUrl?: string | null;
+                asOf?: string | null;
+            };
             /** @description When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label — treat the status as source-relative, not freshly confirmed. */
             statusAsOf?: string | null;
             /** @description Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows. */
