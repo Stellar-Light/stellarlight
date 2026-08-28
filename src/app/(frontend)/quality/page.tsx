@@ -619,8 +619,10 @@ export default function QualityPage() {
 				}
 				className="mb-6"
 			>
+				{/* min-width only protects label legibility on phones; on anything
+			     wider the chart measures its container and fills it. */}
 				<div className="overflow-x-auto">
-					<div className="min-w-[680px]">
+					<div className="min-w-[560px]">
 						<Sankey
 							nodes={entities.flow.nodes}
 							links={entities.flow.links}

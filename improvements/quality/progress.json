@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T03:18:01.630Z",
+ "generatedAt": "2026-08-28T04:13:54.142Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -21,11 +21,11 @@
   },
   {
    "id": "P2",
-   "title": "Entity truth: issuers, receipts, enumerations",
-   "state": "in-progress",
-   "evidence": "battery slice G (enumeration integrity), slice H (verify grades itself), improvements/receipts/, improvements/quality/entities.json (repos.duplicateRows).",
-   "shippedSoFar": "everything above.",
-   "remaining": "dedupe. The first full census of the repos collection (2026-08-28) found 381 duplicate rows, some repos stored 20 times, so the dedupe this phase's old title claimed done had in fact never been measured. Done means: duplicate fullName rows = 0 with a guard that keeps them there. *Evidence:* battery slice G (enumeration integrity), slice H (verify grades itself), improvements/receipts/, improvements/quality/entities.json (repos.duplicateRows)."
+   "title": "Entity truth: issuers, receipts, enumerations, dedupe",
+   "state": "done",
+   "evidence": "battery slice G (enumeration integrity), slice H (verify grades itself), improvements/receipts/, improvements/quality/entities.json (repos.duplicateRows = 0), scripts/data/check-repo-dupes.ts in enrich-repos.yml + dedupe-repos.yml.",
+   "shippedSoFar": null,
+   "remaining": null
   },
   {
    "id": "P3",
@@ -165,6 +165,16 @@
     "markers": [
      "NOT domain resolves",
      "NOT recent repository activity"
+    ]
+   },
+   {
+    "file": "improvements/receipts/ping-2026-08-28.json",
+    "slug": "ping",
+    "url": "https://letsping.com/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "Site Not Found",
+     "NOT app.letsping.com resolves"
     ]
    },
    {
