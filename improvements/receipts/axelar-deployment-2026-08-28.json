@@ -1,0 +1,23 @@
+{
+ "slug": "axelar",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "step": "operator mainnet reference",
+   "found": true,
+   "excerpt": "Stellar AMPLIFIER \u00b7 Gateway Contract CD6VSKXB4HY2DWU7EP2PUIYTBJBJ36LDJXEZN4NSXFYF5YP37DDFX6NF"
+  },
+  {
+   "step": "stellar.expert public contract",
+   "found": true,
+   "excerpt": "created 2025-03-11"
+  }
+ ],
+ "url": "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet"
+}

@@ -1,0 +1,24 @@
+{
+ "slug": "ondo",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "step": "operator toml",
+   "found": true,
+   "excerpt": "code=\"USDY\" issuer=\"GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6\""
+  },
+  {
+   "step": "horizon asset (declared issuer)",
+   "found": true,
+   "excerpt": "amount 461622361.73, num_accounts 2733"
+  }
+ ],
+ "url": "https://ondo.finance/.well-known/stellar.toml",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet (asset issuance, operator-declared issuer confirmed on-chain)",
+ "trap": "12-char issuer-prefix collision with a fake (GAJMPX5NBOG6HNT\u2026) \u2014 full-string match only"
+}

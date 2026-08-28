@@ -1,0 +1,18 @@
+{
+ "slug": "stellarterm",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "step": "product class",
+   "found": true,
+   "excerpt": "self-custodial web client of the native Stellar DEX on the public network; deploys no contracts"
+  }
+ ],
+ "url": "https://stellarterm.com/",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet (operates against the public network by function)"
+}

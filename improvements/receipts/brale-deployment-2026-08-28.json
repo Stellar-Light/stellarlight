@@ -1,0 +1,23 @@
+{
+ "slug": "brale",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "step": "operator toml",
+   "found": true,
+   "excerpt": "code=\"SBC\" issuer=\"GCQCNWT22JDLENQAVIE6DRJGHWAQ6EX2H5ABGPV55EJUPPZM5UA7KHZR\""
+  },
+  {
+   "step": "horizon asset (declared issuer)",
+   "found": true,
+   "excerpt": "amount 20279.2, num_accounts 21"
+  }
+ ],
+ "url": "https://brale.xyz/.well-known/stellar.toml",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet (small but real issuance)"
+}
