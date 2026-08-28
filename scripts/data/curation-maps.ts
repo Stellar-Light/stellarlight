@@ -51,17 +51,21 @@ export const STATUS_FIX: Record<
 	// Astro landing page — a page is not a protocol). Repo laina-defi/laina
 	// last pushed 2026-08-11, so the project is alive as a PROJECT, just not
 	// launched: Pre-Release, not Inactive.
-	// Battery F-row rotation 2026-08-29: hoops was Live on source-inherited
-	// with NO source URL. Verified today: hoops.finance serves the actual
-	// product page (Hoops Finance org schema + product content, not a parked
-	// page). Status unchanged — this writes only the dated evidence.
+	// User report 2026-08-29 ("hoops is not live, testnet") — and a lesson
+	// re-learned the same week it was written: the previous entry here
+	// stamped Live evidence off a 200 WITHOUT reading the page. The page
+	// itself says it: products are labelled TESTNET ("Incentivized liquidity
+	// pools ... TESTNET", "Hoops Vaults ... TESTNET") and the hero says
+	// "JOIN THE WAITLIST". Testnet products + waitlist = the noether class:
+	// a real, active project that has NOT launched. Pre-Release, not Live,
+	// not Inactive.
 	hoops: {
 		from: "Live",
-		to: "Live",
-		note: "AMM analytics + DEX aggregation for Stellar; product page live at hoops.finance.",
+		to: "Pre-Release",
+		note: "DeFi savings/pools platform for Stellar; site is live but its products are labelled TESTNET and the hero is a waitlist — pre-launch.",
 		asOf: "2026-08-29",
 		sourceUrl: "https://hoops.finance/",
-		basis: "site-liveness",
+		basis: "human-verified",
 	},
 	laina: {
 		from: "Live",
