@@ -80,6 +80,29 @@ async function deriveDate(
 	}
 }
 
+/** Retry transient Mongo/Atlas network failures (pool-cleared, TLS alerts,
+ * resets) with backoff. Two consecutive Action runs died FATAL on
+ * "tlsv1 alert internal error" from the shared Atlas shard mid-run — the
+ * flake is environmental and self-heals in seconds, so a bounded retry is
+ * the difference between a rerun-the-whole-workflow night and a log line. */
+const TRANSIENT =
+	/PoolClearedError|MongoNetworkError|ECONNRESET|tlsv1|topology.*closed|ETIMEDOUT/i;
+async function withRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
+	const delays = [2000, 8000, 20000];
+	for (let attempt = 0; ; attempt++) {
+		try {
+			return await fn();
+		} catch (err) {
+			const msg = String((err as Error)?.message ?? err);
+			if (attempt >= delays.length || !TRANSIENT.test(msg)) throw err;
+			console.error(
+				`  ~ transient (${label}, attempt ${attempt + 1}): ${msg.slice(0, 90)} — retrying in ${delays[attempt] / 1000}s`,
+			);
+			await new Promise((r) => setTimeout(r, delays[attempt]));
+		}
+	}
+}
+
 async function run() {
 	console.log(
 		`Corpus date backfill (S7) — ${EXECUTE ? "EXECUTE (writes + read-backs)" : "DRY RUN"}`,
@@ -89,21 +112,23 @@ async function run() {
 	const rows: Row[] = [];
 	for (const source of SOURCES) {
 		for (let page = 1; ; page++) {
-			const r = await payload.find({
-				collection: "research-docs",
-				where: { source: { equals: source } },
-				limit: 1000,
-				page,
-				depth: 0,
-				select: {
-					url: true,
-					source: true,
-					parentDocId: true,
-					chunkIndex: true,
-					content: true,
-					publishedAt: true,
-				},
-			});
+			const r = await withRetry(`read ${source} p${page}`, () =>
+				payload.find({
+					collection: "research-docs",
+					where: { source: { equals: source } },
+					limit: 1000,
+					page,
+					depth: 0,
+					select: {
+						url: true,
+						source: true,
+						parentDocId: true,
+						chunkIndex: true,
+						content: true,
+						publishedAt: true,
+					},
+				}),
+			);
 			// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
 			rows.push(...(r.docs as any[]));
 			if (!r.hasNextPage) break;
@@ -154,17 +179,21 @@ async function run() {
 	const failed: string[] = [];
 	for (const p of plan) {
 		try {
-			await payload.update({
-				collection: "research-docs",
-				id: p.id,
-				data: { publishedAt: toPublishedAt(p.to) },
-			});
-			const back = await payload.findByID({
-				collection: "research-docs",
-				id: p.id,
-				depth: 0,
-				select: { publishedAt: true },
-			});
+			await withRetry(`write ${p.id}`, () =>
+				payload.update({
+					collection: "research-docs",
+					id: p.id,
+					data: { publishedAt: toPublishedAt(p.to) },
+				}),
+			);
+			const back = await withRetry(`read-back ${p.id}`, () =>
+				payload.findByID({
+					collection: "research-docs",
+					id: p.id,
+					depth: 0,
+					select: { publishedAt: true },
+				}),
+			);
 			// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
 			const got = String((back as any)?.publishedAt ?? "").slice(0, 10);
 			if (got !== p.to) throw new Error(`read-back mismatch: got "${got}"`);
