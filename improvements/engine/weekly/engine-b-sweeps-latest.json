@@ -281,7 +281,7 @@
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 911,
+        "ageDays": 912,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -413,6 +413,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-28T18:19:38Z",
+  "generatedAt": "2026-08-28T18:38:05Z",
   "evalKey": "engine-b-sweeps"
 }

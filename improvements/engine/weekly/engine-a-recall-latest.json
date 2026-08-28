@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T18:19:38Z",
+  "generatedAt": "2026-08-28T18:38:05Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
@@ -141,16 +141,16 @@
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20Stellar%20C%20SDK&limit=3",
-      "expected": "stellar-c-sdk in top-3 for 'what is Stellar C SDK'",
-      "observed": "python-stellar-sdk, soroban-rust-sdk, javascript-stellar-sdk"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Rust%20SDK&limit=3",
+      "expected": "stellar-rust-sdk in top-3 for 'tell me about Stellar Rust SDK'",
+      "observed": "soroban-rust-sdk, lumenwipe, authline"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Rust%20SDK&limit=3",
-      "expected": "stellar-rust-sdk in top-3 for 'tell me about Stellar Rust SDK'",
-      "observed": "soroban-rust-sdk, lumenwipe, authline"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20Stellar%20C%20SDK&limit=3",
+      "expected": "stellar-c-sdk in top-3 for 'what is Stellar C SDK'",
+      "observed": "python-stellar-sdk, soroban-rust-sdk, javascript-stellar-sdk"
     },
     {
       "bucket": "P-PHRASE",

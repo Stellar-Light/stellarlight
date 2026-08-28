@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 63182,
-    "realHits": 7694,
-    "distinctQueries": 3873,
+    "loggedHits": 65649,
+    "realHits": 7707,
+    "distinctQueries": 3884,
     "replayed": 250
   },
   "okRate": 94,
@@ -177,6 +177,6 @@
       "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-08-28T18:19:38Z",
+  "generatedAt": "2026-08-28T18:38:05Z",
   "evalKey": "engine-d-demand"
 }
