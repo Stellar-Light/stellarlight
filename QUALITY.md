@@ -104,8 +104,9 @@ service runs at Stage 3+ by default and humans do product, not repair.
 - **P0. Name the classes, lock the first invariant.** `status: done`
   This document · the opacity lock in CI · class labels in the findings
   ledger · battery lanes on the rounds format.
-  *Evidence:* `check-schema-opacity.ts` (zero silent opacity, 47 open maps
-  ratcheted), QUALITY.md itself.
+  *Evidence:* `check-schema-opacity.ts` (47 open maps BASELINED, the build
+  fails if the count rises; none paid down yet, that work is P3's), QUALITY.md
+  itself.
 
 - **P1. Honesty layer, eval integrity, the dashboard.** `status: done`
   The list-endpoint honesty layer + conformance ratchet (#1060) with the
@@ -117,13 +118,19 @@ service runs at Stage 3+ by default and humans do product, not repair.
   *Evidence:* `specs/honesty-baseline.json` (debt 0),
   `scripts/eval/eval-baselines.json`, `improvements/quality/*.json`.
 
-- **P2. Entity truth: dedupe, issuers, receipts.** `status: done`
+- **P2. Entity truth: issuers, receipts, enumerations.** `status: in progress`
   sls-033 closed at root, typed enumerations are limit-independent sets
   (#1064, #1065) · stablecoin issuer relations made conflation-proof, with
   the `issued` claim family (#1068, #1069) · receipts-in-repo for
   human-verified corrections (#1073).
+  *Shipped so far:* everything above.
+  *Remaining:* dedupe. The first full census of the repos collection
+  (2026-08-28) found 381 duplicate rows, some repos stored 20 times, so the
+  dedupe this phase's old title claimed done had in fact never been measured.
+  Done means: duplicate fullName rows = 0 with a guard that keeps them there.
   *Evidence:* battery slice G (enumeration integrity), slice H (verify
-  grades itself), `improvements/receipts/`.
+  grades itself), `improvements/receipts/`,
+  `improvements/quality/entities.json` (repos.duplicateRows).
 
 - **P3. Earned autonomy.** `status: in progress`
   Stage-2 autonomy for bounded work · event-driven freshness (PLAN §5) ·

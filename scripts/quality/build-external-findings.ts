@@ -92,6 +92,14 @@ for (const r of records) {
 	} catch {}
 }
 
+/** A declined record has no fix to ship, so it can never count toward one. */
+const fixApplicable = records.filter((r) => r.status !== "declined-upstream");
+const fixShipped = fixApplicable.filter(
+	(r) =>
+		((r as Record<string, unknown>).ourResponse as { state?: string })?.state ===
+		"closed",
+);
+
 const byStatus = records.reduce<Record<string, number>>((acc, r) => {
 	acc[r.status] = (acc[r.status] ?? 0) + 1;
 	return acc;
@@ -106,13 +114,24 @@ writeFileSync(
 			definition:
 				"Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
 			counts: byStatus,
+			// THEIR answer key is `counts` above. This block is OUR side of each
+			// record, and it is deliberately fenced off: a score computed from a
+			// variable we control is not an external grade. The old count lied two
+			// ways. It counted records the consumer DECLINED, where there is no fix
+			// to ship so a closed issue proves nothing. And it counted one closed
+			// issue once per record when two records shared the same issue.
 			ourResponse: {
-				fixShipped: records.filter(
-					(r) =>
-						(r as Record<string, unknown>).ourResponse &&
-						((r as Record<string, unknown>).ourResponse as { state: string })
-							.state === "closed",
-				).length,
+				fixShipped: fixShipped.length,
+				fixShippedIds: fixShipped.map((r) => r.id),
+				/** records where a fix is even applicable, declined ones are not */
+				fixApplicable: fixApplicable.length,
+				declined: records.filter((r) => r.status === "declined-upstream").length,
+				/** distinct issues behind fixShipped: N records can share one */
+				distinctIssuesClosed: new Set(
+					fixShipped.map((r) => r.ourIssue).filter(Boolean),
+				).size,
+				scoredBy:
+					"our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
 				note: "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other.",
 			},
 			total: records.length,

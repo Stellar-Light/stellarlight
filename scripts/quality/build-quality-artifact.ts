@@ -10,6 +10,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
 const UA = { "User-Agent": "stellarlight-quality-artifact" };
 const api = async <T>(path: string): Promise<T> =>
@@ -38,17 +39,23 @@ const ledger = JSON.parse(
 ) as Finding[] | { findings: Finding[] };
 const findings: Finding[] = Array.isArray(ledger) ? ledger : ledger.findings;
 
+// cleared and verified are NEVER folded together. Two eval lanes independently
+// found byFailureMode summing to 359 cleared while findings.cleared said 352,
+// the difference being exactly the 7 verified rows, counted as cleared here and
+// as their own state there. The three states partition the ledger exactly once.
 const byMode = new Map<
 	string,
-	{ open: number; cleared: number; surface: string }
+	{ open: number; cleared: number; verified: number; surface: string }
 >();
 for (const f of findings) {
 	const cur = byMode.get(f.failureMode) ?? {
 		open: 0,
 		cleared: 0,
+		verified: 0,
 		surface: f.surface,
 	};
 	if (f.status === "open") cur.open++;
+	else if (f.status === "verified") cur.verified++;
 	else cur.cleared++;
 	byMode.set(f.failureMode, cur);
 }
@@ -92,54 +99,45 @@ type Project = {
 /** Per-row quality = how much EVIDENCE stands behind what we publish about it.
  * Five equal components, each a fact we either hold or don't, no weighting
  * opinions, so a low score always reads as a specific missing thing. */
-const BASIS_RANK: Record<string, number> = {
-	"human-verified": 1,
-	"onchain-activity": 0.9,
-	"official-record": 0.9,
-	"operator-announcement": 0.7,
-	"site-liveness": 0.5,
-	"source-inherited": 0.2,
-	unverified: 0,
-};
+// ONE definition of a strong basis, used by every count in this file. Two
+// eval lanes independently found 544 vs 550 for "rows on a weak basis"
+// because two call sites disagreed about operator-announcement and
+// unverified. Membership is now explicit and shared.
+const STRONG_BASES = [
+	"human-verified",
+	"onchain-activity",
+	"official-record",
+] as const;
+const isStrongBasis = (b: string | null | undefined) =>
+	!!b && (STRONG_BASES as readonly string[]).includes(b);
 const projectQuality = (p: Project) => {
-	const parts = {
-		provenance: BASIS_RANK[p.statusBasis ?? "unverified"] ?? 0,
+	// FIVE BINARY FACTS. Previously provenance contributed a fraction, so
+	// published scores (64, 70) were unreachable under the published
+	// definition "the share of five facts present" - the definition was a
+	// lie and the mean was flattering. Every fact is now present-or-absent,
+	// scores land on multiples of 20, and the definition is checkable.
+	const parts: Record<string, 0 | 1> = {
+		strongBasis: isStrongBasis(p.statusBasis) ? 1 : 0,
 		dated: p.statusAsOf ? 1 : 0,
 		sourced: p.statusSourceUrl ? 1 : 0,
 		typed: (p.types?.length ?? 0) > 0 ? 1 : 0,
 		linked: p.links?.website || p.links?.github ? 1 : 0,
 	};
-	const score = Math.round(
-		(Object.values(parts).reduce((a, b) => a + b, 0) / 5) * 100,
-	);
-	const missing = Object.entries(parts)
-		.filter(([, v]) => v === 0)
-		.map(([k]) => k);
-	return { score, missing };
+	const present = Object.values(parts).reduce<number>((a, b) => a + b, 0);
+	return {
+		score: present * 20,
+		factsPresent: present,
+		factsTotal: 5,
+		missing: Object.entries(parts)
+			.filter(([, v]) => v === 0)
+			.map(([k]) => k),
+	};
 };
 
+const { rows: censusRows, total: projectPopulation } = await censusProjects();
 const seen = new Map<string, Project>();
-for (const q of [
-	"stellar",
-	"wallet",
-	"defi",
-	"payment",
-	"soroban",
-	"oracle",
-	"exchange",
-	"lending",
-	"bridge",
-	"anchor",
-	"nft",
-	"rwa",
-]) {
-	try {
-		const d = await api<{ projects?: Project[] }>(
-			`/api/projects/search?q=${q}&limit=100`,
-		);
-		for (const p of d.projects ?? []) if (p.slug) seen.set(p.slug, p);
-	} catch {}
-}
+for (const p of censusRows) if (p.slug) seen.set(p.slug, p as unknown as Project);
+
 const projects = [...seen.values()].map((p) => ({
 	slug: p.slug,
 	name: p.name,
@@ -157,45 +155,53 @@ for (const p of seen.values())
 	);
 
 // ── repos ──
+// Field names here are the RAW collection's, which differ from the search
+// API's serialization: raw carries `codeDepth` as a top-level 0-1 float where
+// search nests it under `codeVerified`, and raw has no `activityState` or
+// `repoScoreLabel` at all (both are derived in the search route). Reading raw
+// means deriving activity ourselves rather than reporting null for every row.
 type Repo = {
 	fullName: string;
 	repoScore?: number;
-	repoScoreLabel?: string | null;
 	tier?: string | null;
-	activityState?: string | null;
-	stellarEvidence?: string | null;
 	knowledgeNotes?: unknown[];
-	codeVerified?: { codeDepth?: number; isDeployableContract?: boolean } | null;
+	codeDepth?: number | null;
 	codeInUse?: { contracts?: number } | null;
+	lastCommitAt?: string | null;
+	isArchived?: boolean;
+	primaryLanguage?: string | null;
+	projectSlug?: string | null;
 };
+const { rows: repoCensusRows, total: repoPopulation } = await censusRepos();
 const repoSeen = new Map<string, Repo>();
-for (const q of [
-	"soroban contract",
-	"stellar sdk",
-	"wallet",
-	"oracle",
-	"amm",
-	"anchor",
-]) {
-	try {
-		const d = await api<{ repos?: Repo[] }>(
-			`/api/repos/search?q=${encodeURIComponent(q)}&limit=50`,
-		);
-		for (const r of d.repos ?? []) if (r.fullName) repoSeen.set(r.fullName, r);
-	} catch {}
-}
+for (const r of repoCensusRows)
+	if (r.fullName) repoSeen.set(r.fullName, r as unknown as Repo);
+// The census reads every ROW; the map holds every distinct repo. The gap is
+// duplicate rows for the same fullName, up to 20 copies of one repo. That is a
+// real storage defect, and the old 6-search-term sample could not see it at
+// all, so it is published rather than quietly collapsed.
+const repoDuplicateRows = repoCensusRows.length - repoSeen.size;
+
+/** null when we have no commit date at all: not knowing is its own state and
+ * must not collapse into "dormant". */
+const activityOf = (r: Repo): string | null => {
+	if (r.isArchived) return "archived";
+	if (!r.lastCommitAt) return null;
+	const days = (now - Date.parse(r.lastCommitAt)) / DAY;
+	if (!Number.isFinite(days)) return null;
+	return days <= 90 ? "active" : days <= 365 ? "slowing" : "dormant";
+};
+
 const repos = [...repoSeen.values()].map((r) => ({
 	fullName: r.fullName,
 	repoScore: r.repoScore ?? null,
-	label: r.repoScoreLabel ?? null,
 	tier: r.tier ?? null,
-	activity: r.activityState ?? null,
-	evidence: r.stellarEvidence ?? null,
+	activity: activityOf(r),
+	language: r.primaryLanguage ?? null,
+	projectSlug: r.projectSlug ?? null,
 	notes: Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes.length : 0,
 	codeDepth:
-		typeof r.codeVerified?.codeDepth === "number"
-			? Math.round(r.codeVerified.codeDepth * 100)
-			: null,
+		typeof r.codeDepth === "number" ? Math.round(r.codeDepth * 100) : null,
 	mainnetContracts: r.codeInUse?.contracts ?? 0,
 }));
 
@@ -210,13 +216,25 @@ const SURFACE_MEANS: Record<string, string> = {
 	consumer: "questions real consumers asked that we answered weakly",
 	code: "repo scanning, code depth, symbol extraction",
 };
-const bySurface = new Map<string, { open: number; cleared: number }>();
+// cleared and verified are NEVER folded together. Two eval lanes independently
+// found byFailureMode summing to 359 cleared while findings.cleared said 352,
+// the difference being exactly the 7 verified rows, counted as cleared here and
+// as their own state there. The three states partition the ledger exactly once.
+const bySurface = new Map<
+	string,
+	{ open: number; cleared: number; verified: number }
+>();
 for (const f of findings) {
-	const cur = bySurface.get(f.surface) ?? { open: 0, cleared: 0 };
+	const cur = bySurface.get(f.surface) ?? { open: 0, cleared: 0, verified: 0 };
 	if (f.status === "open") cur.open++;
+	else if (f.status === "verified") cur.verified++;
 	else cur.cleared++;
 	bySurface.set(f.surface, cur);
 }
+const surfaceMass = (k: string) => {
+	const v = bySurface.get(k);
+	return (v?.open ?? 0) + (v?.cleared ?? 0) + (v?.verified ?? 0);
+};
 
 const out = {
 	generatedAt: new Date().toISOString(),
@@ -226,16 +244,25 @@ const out = {
 			means: SURFACE_MEANS[surface] ?? null,
 			openFindings: v.open,
 			clearedFindings: v.cleared,
+			verifiedFindings: v.verified,
 		}))
 		.sort((a, b) => b.openFindings - a.openFindings),
 	findings: {
+		/** open + cleared + verified = total, with no double counting.
+		 * "cleared" means a detector stopped reproducing it. That is NOT
+		 * confirmation the fix works. "verified" means it was deliberately
+		 * re-probed after the fix and the probe passed. */
+		states: "open + cleared + verified = total, disjoint",
 		total: findings.length,
 		open: findings.filter((f) => f.status === "open").length,
 		cleared: findings.filter((f) => f.status === "cleared").length,
 		verified: findings.filter((f) => f.status === "verified").length,
 		byFailureMode: [...byMode.entries()]
 			.map(([mode, v]) => ({ mode, ...v }))
-			.sort((a, b) => b.open + b.cleared - (a.open + a.cleared)),
+			.sort(
+				(a, b) =>
+					b.open + b.cleared + b.verified - (a.open + a.cleared + a.verified),
+			),
 		openByAge: ["≤7d", "8–30d", "31–60d", ">60d"].map((b) => ({
 			bucket: b,
 			count: openAges.get(b) ?? 0,
@@ -243,6 +270,16 @@ const out = {
 		recentlyCleared,
 	},
 	projects: {
+		/** `read` is how many rows this run actually enumerated; `population` is
+		 * how many exist. They should be equal, and a gap is a censoring bug, not
+		 * a sampling choice, so both are published rather than one "sampled". */
+		read: projects.length,
+		population: projectPopulation,
+		coveragePct: Math.round(
+			(projects.length / Math.max(projectPopulation, 1)) * 100,
+		),
+		frame: FRAME_METHOD,
+		/** retained so existing consumers keep working; equals `read` */
 		sampled: projects.length,
 		meanScore: Math.round(
 			projects.reduce((a, p) => a + p.score, 0) / Math.max(projects.length, 1),
@@ -251,11 +288,22 @@ const out = {
 			.map(([basis, count]) => ({ basis, count }))
 			.sort((a, b) => b.count - a.count),
 		/** the gap queue: prominent rows with the weakest evidence */
+		// Sorted by facts present ASCENDING so the genuinely worst rows lead.
+		// The prior sort surfaced only single-miss rows and hid every row
+		// missing provenance, which are the least trustworthy rows we serve.
+		weakestReturned: 40,
+		weakestTotal: projects.filter((p) => p.factsPresent < 5).length,
+		weakestTruncated: projects.filter((p) => p.factsPresent < 5).length > 40,
 		weakest: projects
-			.filter((p) => p.score < 100)
-			.sort((a, b) => a.score - b.score || b.prominence - a.prominence)
-			.slice(0, 60),
-		missingCounts: ["provenance", "dated", "sourced", "typed", "linked"].map(
+			.filter((p) => p.factsPresent < 5)
+			.sort(
+				(a, b) =>
+					a.factsPresent - b.factsPresent ||
+					b.prominence - a.prominence ||
+					a.slug.localeCompare(b.slug),
+			)
+			.slice(0, 40),
+		missingCounts: ["strongBasis", "dated", "sourced", "typed", "linked"].map(
 			(k) => ({
 				field: k,
 				count: projects.filter((p) => p.missing.includes(k)).length,
@@ -263,6 +311,17 @@ const out = {
 		),
 	},
 	repos: {
+		/** distinct repos after collapsing duplicate rows */
+		read: repos.length,
+		/** rows in the collection, duplicates included */
+		population: repoPopulation,
+		coveragePct: 100,
+		duplicateRows: repoDuplicateRows,
+		duplicateNote:
+			repoDuplicateRows > 0
+				? `${repoDuplicateRows} row(s) in the repos collection duplicate a fullName already stored, one repo appears up to 20 times. Every count below is over DISTINCT repos; the duplicate rows are storage debt, tracked separately.`
+				: "no duplicate fullName rows",
+		frame: FRAME_METHOD,
 		sampled: repos.length,
 		withCodeDepth: repos.filter((r) => r.codeDepth != null).length,
 		withNotes: repos.filter((r) => r.notes > 0).length,
@@ -293,12 +352,18 @@ const limitations: Array<{
 	measurement: string;
 	instead: string;
 }> = [];
-if (weakBasis / Math.max(out.projects.sampled, 1) > 0.5)
+// No cliff edges: the old test was >50%, so at 49% weak-basis the warning
+// silently vanished while nearly half the rows still rested on the weakest
+// bases. The limitation now appears whenever the share is material and the
+// sentence carries the share itself.
+const weakShare = Math.round(
+	(weakBasis / Math.max(out.projects.sampled, 1)) * 100,
+);
+if (weakShare >= 20)
 	limitations.push({
 		area: "project status",
-		limit:
-			"Most lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-		measurement: `${weakBasis} of ${out.projects.sampled} sampled rows`,
+		limit: `${weakShare}% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).`,
+		measurement: `${weakBasis} of ${out.projects.sampled} rows (census)`,
 		instead:
 			"Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it.",
 	});
@@ -344,13 +409,18 @@ const strongBases = new Set([
 	"onchain-activity",
 	"official-record",
 ]);
-const weakBasisRows = [...seen.values()].filter(
-	(p) => !strongBases.has(p.statusBasis ?? "unverified"),
-);
+const weakBasisRows = [...seen.values()].filter((p) => !isStrongBasis(p.statusBasis));
 const missing = (field: string) =>
 	projects.filter((p) => p.missing.includes(field));
+const SAMPLE_CAP = 12;
+/** A silently truncated list reads as a complete one. Every caller publishes
+ * the cap and whether it bit, alongside the values. */
 const sample = <T>(rows: T[], pick: (r: T) => string) =>
-	rows.slice(0, 12).map(pick);
+	rows.slice(0, SAMPLE_CAP).map(pick);
+const sampleMeta = (n: number) => ({
+	exampleCap: SAMPLE_CAP,
+	exampleTruncated: n > SAMPLE_CAP,
+});
 
 /** SANKEY FLOW, every finding traced detector -> surface -> outcome.
  * This is the "where do our defects come from and where do they end up"
@@ -390,10 +460,7 @@ const sample = <T>(rows: T[], pick: (r: T) => string) =>
 		.map(([k]) => k);
 	for (const src of sources) addNode(`s:${src}`, src, 0);
 	for (const surf of [...bySurface.keys()].sort(
-		(a, b) =>
-			(bySurface.get(b)?.open ?? 0) +
-			(bySurface.get(b)?.cleared ?? 0) -
-			((bySurface.get(a)?.open ?? 0) + (bySurface.get(a)?.cleared ?? 0)),
+		(a, b) => surfaceMass(b) - surfaceMass(a),
 	))
 		addNode(`f:${surf}`, surf, 1);
 	for (const o of ["cleared", "open", "verified"])
@@ -409,116 +476,162 @@ const sample = <T>(rows: T[], pick: (r: T) => string) =>
 		nodes[a].value++;
 		nodes[c].value++;
 	}
-	for (const [, n] of [...bySurface.entries()].entries()) void n;
-	for (const n of nodes)
-		if (n.column === 1)
-			n.value =
-				(bySurface.get(n.label)?.open ?? 0) +
-				(bySurface.get(n.label)?.cleared ?? 0);
+	for (const n of nodes) if (n.column === 1) n.value = surfaceMass(n.label);
 
 	(out as Record<string, unknown>).flow = {
 		definition:
 			"Every finding traced detector -> surface -> outcome. Whole-ledger counts, not a sample. Read it to see which detector produces which defects, where they land, and whether they close.",
 		nodes,
+		// Links carry node IDs as well as indexes. An index-only graph rewires
+		// silently the moment a consumer filters or re-sorts the node list.
 		links: [...linkMap.entries()].map(([k, value]) => {
 			const [source, target] = k.split(":").map(Number);
-			return { source, target, value };
+			return {
+				source,
+				target,
+				sourceId: nodes[source].id,
+				targetId: nodes[target].id,
+				value,
+			};
 		}),
 	};
 }
 
+/** One construction path for every gap row, so the count, the example pool and
+ * the truncation flag can never disagree with each other. Six hand-written
+ * rows had drifted: examples were drawn from a prominence-filtered subset while
+ * `missing` counted the whole population, with nothing saying so. */
+const gapRow = <T>(r: {
+	entity: string;
+	field: string;
+	all: T[];
+	of: number;
+	pick: (x: T) => string;
+	/** the examples are drawn from this narrower pool when we only want to
+	 * hand a consumer the ones worth working first */
+	pool?: { rows: T[]; why: string };
+	whyItMatters: string;
+	closedBy: string;
+}) => {
+	const pool = r.pool?.rows ?? r.all;
+	return {
+		entity: r.entity,
+		field: r.field,
+		missing: r.all.length,
+		of: r.of,
+		share: Math.round((r.all.length / Math.max(r.of, 1)) * 1000) / 10,
+		whyItMatters: r.whyItMatters,
+		closedBy: r.closedBy,
+		exampleSource: r.pool?.why ?? "all rows missing this field",
+		examplePoolSize: pool.length,
+		...sampleMeta(pool.length),
+		examples: sample(pool, r.pick),
+	};
+};
+
+const byProminence = <T extends { prominence?: number | null }>(rows: T[]) =>
+	[...rows].sort((a, b) => (b.prominence ?? 0) - (a.prominence ?? 0));
+const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
+	[...rows].sort((a, b) => (b.repoScore ?? 0) - (a.repoScore ?? 0));
+
 (out as Record<string, unknown>).gapMatrix = {
 	definition:
-		"One row per (entity type × missing field). count/of is a SAMPLE with its denominator, not a census. examples are real identifiers so the gap can be worked or independently checked.",
+		"One row per (entity type x missing field). `missing` and `of` are whole-population counts over the rows this run read. `examples` are real identifiers drawn from `examplePoolSize` candidates, capped at `exampleCap`; `exampleTruncated` says whether the cap bit. Every example is a live slug or full name, so any claim here can be independently checked.",
 	rows: [
-		{
+		gapRow({
 			entity: "project",
-			field: "statusSourceUrl",
-			missing: missing("sourced").length,
+			field: "sourced",
+			all: missing("sourced"),
 			of: projects.length,
+			pick: (p) => p.slug,
+			pool: {
+				rows: byProminence(missing("sourced")),
+				why: "highest-prominence rows missing a source URL",
+			},
 			whyItMatters:
-				"A lifecycle claim with no source cannot be re-checked by a caller, it is our assertion, not evidence.",
+				"A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
 			closedBy:
 				"Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
-			examples: sample(
-				missing("sourced").sort((a, b) => b.prominence - a.prominence),
-				(p) => p.slug,
-			),
-		},
-		{
+		}),
+		gapRow({
 			entity: "project",
-			field: "types",
-			missing: missing("typed").length,
+			field: "typed",
+			all: missing("typed"),
 			of: projects.length,
+			pick: (p) => p.slug,
+			pool: {
+				rows: byProminence(missing("typed")),
+				why: "highest-prominence rows carrying no type",
+			},
 			whyItMatters:
 				"An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
 			closedBy:
 				"Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
-			examples: sample(
-				missing("typed").sort((a, b) => b.prominence - a.prominence),
-				(p) => p.slug,
-			),
-		},
-		{
+		}),
+		gapRow({
 			entity: "project",
-			field: "strong status basis",
-			missing: weakBasisRows.length,
+			field: "strongBasis",
+			all: weakBasisRows,
 			of: projects.length,
+			pick: (p) => p.slug,
+			pool: {
+				rows: byProminence(
+					weakBasisRows.filter((p) => (p.prominence ?? 0) >= 70),
+				),
+				why: "prominence >= 70 only, the rows a consumer is most likely to hit",
+			},
 			whyItMatters:
-				"site-liveness means only that a page answered; source-inherited means the value came from elsewhere. Neither is observation of the product.",
+				"site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
 			closedBy:
 				"Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
-			examples: sample(
-				weakBasisRows
-					.filter((p) => (p.prominence ?? 0) >= 70)
-					.sort((a, b) => (b.prominence ?? 0) - (a.prominence ?? 0)),
-				(p) => p.slug,
-			),
-		},
-		{
+		}),
+		gapRow({
 			entity: "repo",
 			field: "knowledgeNotes",
-			missing: repos.filter((r) => r.notes === 0).length,
+			all: repos.filter((r) => r.notes === 0),
 			of: repos.length,
+			pick: (r) => r.fullName,
+			pool: {
+				rows: byRepoScore(
+					repos.filter((r) => r.notes === 0 && (r.repoScore ?? 0) >= 60),
+				),
+				why: "repoScore >= 60 only",
+			},
 			whyItMatters:
-				"Curated dated facts are what let an agent cite a repo claim; without them only raw scan fields are available.",
+				"Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
 			closedBy:
 				"The repo-intel enrich pass, which writes dated notes with sources.",
-			examples: sample(
-				repos.filter((r) => r.notes === 0 && (r.repoScore ?? 0) >= 60),
-				(r) => r.fullName,
-			),
-		},
-		{
+		}),
+		gapRow({
 			entity: "repo",
 			field: "mainnet contract join",
-			missing: repos.filter((r) => r.mainnetContracts === 0).length,
+			all: repos.filter((r) => r.mainnetContracts === 0),
 			of: repos.length,
+			pick: (r) => r.fullName,
+			pool: {
+				rows: byRepoScore(
+					repos.filter(
+						(r) => r.mainnetContracts === 0 && (r.repoScore ?? 0) >= 70,
+					),
+				),
+				why: "repoScore >= 70 only",
+			},
 			whyItMatters:
 				"Without a verified contract join we can say code exists, never that it is USED on mainnet.",
 			closedBy:
-				"Contract attribution during the scan wave; absence is absence of a join, never proof of disuse.",
-			examples: sample(
-				repos.filter(
-					(r) => r.mainnetContracts === 0 && (r.repoScore ?? 0) >= 70,
-				),
-				(r) => r.fullName,
-			),
-		},
-		{
+				"Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
+		}),
+		gapRow({
 			entity: "repo",
 			field: "code depth reading",
-			missing: repos.filter((r) => r.codeDepth == null).length,
+			all: repos.filter((r) => r.codeDepth == null),
 			of: repos.length,
+			pick: (r) => r.fullName,
 			whyItMatters:
 				"No depth reading means the repo was never scanned for real implementation signal.",
 			closedBy: "A scan wave pass over the unscanned tail.",
-			examples: sample(
-				repos.filter((r) => r.codeDepth == null),
-				(r) => r.fullName,
-			),
-		},
-	].sort((a, b) => b.missing / b.of - a.missing / a.of),
+		}),
+	].sort((a, b) => b.share - a.share),
 };
 
 writeFileSync(

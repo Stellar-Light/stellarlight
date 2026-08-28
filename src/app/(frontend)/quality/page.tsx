@@ -1,4 +1,4 @@
-import { ArrowUpRight, Check, TriangleAlert } from "lucide-react";
+import { ArrowUpRight, Check, CircleSlash, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import {
 	AreaChart,
@@ -161,6 +161,111 @@ export default function QualityPage() {
 				</p>
 			</header>
 
+			{/* ── THE VERDICT, first. A reader deciding whether to trust a result
+			     should not need 900 lines of breakdowns to find out. Derived from
+			     the same guard states the cards at the bottom render. ── */}
+			{(() => {
+				const breached = guards.filter((g) => g.state === "breached");
+				const stale = guards.filter((g) => g.state === "stale");
+				const holding = guards.filter((g) => g.state === "holding");
+				return (
+					<Card
+						title="Verdict: what to rely on right now"
+						description="Derived from the guard states below, not written by hand. A guard is HOLDING only when its evidence is both passing and fresh; stale evidence is neither passing nor failing, it is unmeasured."
+						right={
+							<a
+								href="/api/quality"
+								className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+							>
+								same block as JSON
+								<ArrowUpRight className="h-3 w-3" />
+							</a>
+						}
+						className="mb-6"
+					>
+						<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
+							<Stat
+								label="Guards holding"
+								value={String(holding.length)}
+								sub="Passing on fresh evidence"
+							/>
+							<Stat
+								label="Breached"
+								value={String(breached.length)}
+								sub="Measured and failing"
+							/>
+							<Stat
+								label="Stale"
+								value={String(stale.length)}
+								sub="Evidence older than its own window"
+							/>
+							<Stat
+								label="Open findings"
+								value={String(entities.findings.open)}
+								sub="Still reproducing on the latest run"
+							/>
+						</div>
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							<div>
+								<p className="text-xs font-medium text-foreground mb-2">
+									Safe to rely on
+								</p>
+								<ul className="space-y-1.5">
+									{holding.map((g) => (
+										<li
+											key={g.key}
+											className="text-xs text-muted-foreground leading-relaxed"
+										>
+											<span className="text-foreground">{g.title}</span> ·{" "}
+											{g.value} · measured {g.asOf}
+										</li>
+									))}
+									<li className="text-xs text-muted-foreground leading-relaxed">
+										<span className="text-foreground">Row coverage</span> · this
+										page reads all {entities.projects.population} project rows
+										from the unranked listing, a census, so no row hides by
+										being hard to retrieve
+									</li>
+								</ul>
+							</div>
+							<div>
+								<p className="text-xs font-medium text-foreground mb-2">
+									Do not rely on
+								</p>
+								<ul className="space-y-1.5">
+									{breached.map((g) => (
+										<li
+											key={g.key}
+											className="text-xs text-muted-foreground leading-relaxed"
+										>
+											<span className="text-foreground">{g.title}</span> is
+											breached: {g.value} {g.measure.unit}, measured {g.asOf}
+										</li>
+									))}
+									{stale.map((g) => (
+										<li
+											key={g.key}
+											className="text-xs text-muted-foreground leading-relaxed"
+										>
+											<span className="text-foreground">{g.title}</span> is
+											stale: last measured {g.ageDays}d ago, past its{" "}
+											{g.freshnessDays}d window, so its {g.value} is a reading
+											of the past, not the present
+										</li>
+									))}
+									{northStar.warning && (
+										<li className="text-xs text-muted-foreground leading-relaxed">
+											<span className="text-foreground">North star</span>:{" "}
+											{northStar.warning}
+										</li>
+									)}
+								</ul>
+							</div>
+						</div>
+					</Card>
+				);
+			})()}
+
 			{/* ── where we are against the stated plan, and how an agent reads this ── */}
 			<Card
 				title="Progress against the quality plan"
@@ -189,10 +294,13 @@ export default function QualityPage() {
 							Reading this as an agent?
 						</p>
 						<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-							Every number on this page is served as JSON, known limitations
-							first, then the gap matrix with real identifiers, the miss funnel,
-							per-surface findings, guard state and the trend history. No
-							parameters, no key, cached hourly.
+							Every number on this page is served as JSON: the verdict block
+							first, then the north star with its age, per-operation contract
+							state, known limitations, the gap matrix with real identifiers,
+							the miss funnel, consumer findings, guard state and the trend
+							history. No parameters, no key. Cached one hour and served stale
+							up to a day while revalidating, so read meta.measuredAt, not the
+							clock.
 						</p>
 					</div>
 					<a
@@ -205,13 +313,19 @@ export default function QualityPage() {
 				</div>
 			</div>
 
-			{/* north star */}
+			{/* north star — its own age check must render, not just exist in JSON */}
 			<Card
 				title="North star: full-surface audit ok-rate"
 				description="Hundreds of cold, natural probes across every retrieval surface, graded against ground truth. The one number the whole engine system optimizes."
 				right={<EvidenceLink path={northStar.latest.evidence} />}
 				className="mb-6"
 			>
+				{northStar.warning && (
+					<p className="mb-4 flex items-start gap-2 text-xs leading-relaxed text-amber-400">
+						<TriangleAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+						<span>{northStar.warning}</span>
+					</p>
+				)}
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4">
 					<Stat
 						label={`latest (${northStar.latest.date})`}
@@ -223,6 +337,8 @@ export default function QualityPage() {
 						}
 					/>
 					<div className="flex items-end gap-3 pb-1">
+						{/* labelled per-point, NOT drawn as a line: the probe counts differ
+						    (597/648/198) so these are separate measurements, not a trend */}
 						{northStar.series.map((p) => (
 							<a
 								key={`${p.date}-${p.label}`}
@@ -242,7 +358,7 @@ export default function QualityPage() {
 									{p.okRate}%
 								</div>
 								<div className="text-[10px] text-muted-foreground mt-1">
-									{p.date.slice(5)}
+									{p.date.slice(5)} · n={p.probes}
 								</div>
 							</a>
 						))}
@@ -354,14 +470,12 @@ export default function QualityPage() {
 					/>
 				</div>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mb-5">
-					The open count leads reality on purpose: a fix clears findings only
-					when their detector next runs. The miss funnel below replays them live
-					-{" "}
-					<span className="text-foreground">
-						{funnel.stages.find((st) => st.stage === "passing")?.count ?? 0} of{" "}
-						{funnel.population.sampled} sampled no longer reproduce
-					</span>{" "}
-					- so read this number as an upper bound on real debt.
+					Open, cleared and verified are disjoint and sum to{" "}
+					{entities.findings.total}. Cleared means a detector stopped
+					reproducing it, which is NOT confirmation the fix works; verified
+					means it was deliberately re-probed after a fix. Stale findings are
+					swept by re-probing each one live, and only a passing probe clears
+					it.
 				</p>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
@@ -389,9 +503,11 @@ export default function QualityPage() {
 						/>
 						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
 							A tall bar on the right is the treadmill this page exists to end:
-							detection outrunning remediation. The closure rule (QUALITY.md)
-							says every finding must terminate in an invariant, an SLO, a
-							probe, or a documented won&apos;t-fix.
+							detection outrunning remediation. An empty right bar right after
+							a stale-findings sweep means old entries were re-probed and
+							cleared, not that they were remediated; the closure rule
+							(QUALITY.md) still owes each one an invariant, an SLO, a probe,
+							or a documented won&apos;t-fix.
 						</p>
 					</div>
 				</div>
@@ -439,11 +555,17 @@ export default function QualityPage() {
 						explain="Each is a defect their evaluation battery reproduced against a live surface of ours, with the probe and evidence recorded in their repository."
 					/>
 					<Metric
-						label="Fix shipped"
-						value={`${external.ourResponse.fixShipped}/${external.total}`}
-						sub="Our linked issue is closed"
+						label="Their answer key"
+						value={`${(external.counts as Record<string, number>)["reported-upstream"] ?? 0} open`}
+						sub={`${(external.counts as Record<string, number>)["declined-upstream"] ?? 0} declined by them`}
+						explain="Status as THEIR records state it. A record stays reported-upstream until their re-verification runs; we never mark their findings closed."
+					/>
+					<Metric
+						label="Fix shipped (our side)"
+						value={`${external.ourResponse.fixShipped}/${external.ourResponse.fixApplicable}`}
+						sub="Of the findings a fix applies to"
 						goodWhen="higher"
-						explain={external.ourResponse.note}
+						explain={`Scored by ${external.ourResponse.scoredBy} ${external.ourResponse.note}`}
 					/>
 				</div>
 				<div className="flex flex-col">
@@ -531,7 +653,15 @@ export default function QualityPage() {
 			>
 				<p className="text-xs text-muted-foreground mb-4">
 					{funnel.population.sampled} of {funnel.population.openRecallMisses}{" "}
-					open recall findings replayed · shares are of the sample
+					open recall findings replayed
+					{(funnel.population.unclassified ?? 0) > 0 && (
+						<span className="text-amber-400">
+							{" "}
+							· {funnel.population.unclassified} more have probe shapes this
+							funnel cannot replay, so its coverage is{" "}
+							{funnel.population.coveragePct}%, not 100%
+						</span>
+					)}
 				</p>
 				<MissFunnel
 					stages={funnel.stages}
@@ -549,9 +679,9 @@ export default function QualityPage() {
 					<Metric
 						label="Mean row evidence score"
 						value={`${entities.projects.meanScore}%`}
-						sub={`across ${entities.projects.sampled} sampled rows`}
+						sub={`across all ${entities.projects.population} rows, a census, not a sample`}
 						goodWhen="higher"
-						explain="Per row: the share of five evidence facts we hold, a provenance basis, a status date, a source URL, at least one type, at least one link. 100% means all five are present; it does NOT rate the project, only how well we can back what we publish about it."
+						explain="Per row: the count of five BINARY evidence facts present, times 20 - a strong provenance basis, a status date, a source URL, at least one type, at least one link. Scores land only on 0/20/40/60/80/100. 100 means all five present; it does NOT rate the project, only how well we can back what we publish about it."
 					/>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -564,7 +694,7 @@ export default function QualityPage() {
 								label: b.basis,
 								value: b.count,
 							}))}
-							total={entities.projects.sampled}
+							total={entities.projects.population}
 						/>
 						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
 							Most rows rest on{" "}
@@ -575,7 +705,7 @@ export default function QualityPage() {
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
-							What is missing, across sampled rows
+							What is missing, across all rows
 						</p>
 						<BarList
 							rows={entities.projects.missingCounts.map((m) => ({
@@ -592,7 +722,7 @@ export default function QualityPage() {
 						<Info text="Sorted by evidence score ascending, then by curated prominence, so the most-seen thin rows surface first. Each line names exactly which of the five facts is missing." />
 					</p>
 					<div className="flex flex-col gap-1.5">
-						{entities.projects.weakest.slice(0, 30).map((p) => (
+						{entities.projects.weakest.slice(0, 15).map((p) => (
 							<QueueRow
 								key={p.slug}
 								href={`/project/${p.slug}`}
@@ -634,11 +764,17 @@ export default function QualityPage() {
 						explain="A verified mainnet contract attributed to this repo, the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
 					/>
 				</div>
+				{(entities.repos.duplicateRows ?? 0) > 0 && (
+					<p className="mb-4 flex items-start gap-2 text-xs leading-relaxed text-amber-400">
+						<TriangleAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+						<span>{entities.repos.duplicateNote}</span>
+					</p>
+				)}
 				<p className="text-xs text-muted-foreground mb-3">
-					Highest-graded sampled repos
+					Highest-graded repos
 				</p>
 				<div className="flex flex-col gap-1.5">
-					{entities.repos.top.slice(0, 25).map((r) => (
+					{entities.repos.top.slice(0, 10).map((r) => (
 						<QueueRow
 							key={r.fullName}
 							href={`https://github.com/${r.fullName}`}
@@ -679,7 +815,7 @@ export default function QualityPage() {
 									href={evidenceUrl(l.file)}
 									primary={l.title.replace(/^Lessons?\s*[--]\s*/i, "")}
 									trailing={
-										l.lessonCount > 0
+										l.lessonCount != null
 											? `${l.date} · ${l.lessonCount} lessons`
 											: l.date
 									}
@@ -747,20 +883,36 @@ export default function QualityPage() {
 						right={<EvidenceLink path={g.artifact} />}
 					>
 						<div className="flex items-start justify-between gap-4">
-							<Stat label={`as of ${g.asOf}`} value={g.value} sub={g.sub} />
+							<Stat
+								label={`measured ${g.asOf} · ${g.ageDays}d ago · ${g.cadence}`}
+								value={g.value}
+								sub={g.sub}
+							/>
+							{/* THREE states, not two. Stale evidence renders as its own
+							    thing: a guard we stopped measuring is not a guard that is
+							    holding, and it is not one that is failing either. */}
 							<span
-								className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border ${
-									g.ok
+								className={`mt-0.5 inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+									g.state === "holding"
 										? "border-border text-foreground"
-										: "border-amber-500/40 text-amber-400"
+										: g.state === "breached"
+											? "border-red-500/40 text-red-400"
+											: "border-amber-500/40 text-amber-400"
 								}`}
-								title={g.ok ? "guard holding" : "open finding"}
+								title={
+									g.state === "stale"
+										? `evidence is ${g.ageDays} days old, past this guard's ${g.freshnessDays}-day window`
+										: g.state
+								}
 							>
-								{g.ok ? (
-									<Check className="h-3.5 w-3.5" strokeWidth={3} />
+								{g.state === "holding" ? (
+									<Check className="h-3 w-3" strokeWidth={3} />
+								) : g.state === "breached" ? (
+									<TriangleAlert className="h-3 w-3" />
 								) : (
-									<TriangleAlert className="h-3.5 w-3.5" />
+									<CircleSlash className="h-3 w-3" />
 								)}
+								{g.state}
 							</span>
 						</div>
 						<ul className="mt-4 space-y-1.5">
@@ -780,7 +932,8 @@ export default function QualityPage() {
 			{/* provenance footer */}
 			<footer className="mt-10 text-xs text-muted-foreground leading-relaxed max-w-2xl">
 				<p>
-					How this page works: engine runs commit their raw JSON evidence to{" "}
+					How this page works: scheduled runs measure, write their JSON
+					evidence to{" "}
 					<a
 						href={evidenceUrl("improvements")}
 						target="_blank"
@@ -789,8 +942,11 @@ export default function QualityPage() {
 					>
 						improvements/
 					</a>{" "}
-					and this page statically renders those files, a number here can only
-					change when a new dated artifact lands. The consumer-side interlock
+					and commit it; this page statically renders those committed files, so
+					a number here changes only when a new dated artifact lands. Entity
+					counts are a census of the collections; guard rows are point-in-time
+					measurements that carry their own age and go stale rather than
+					silently reading as current. The consumer-side interlock
 					conventions (spec-as-discovery-index, version handshake, cadence
 					contract) are specified in{" "}
 					<a

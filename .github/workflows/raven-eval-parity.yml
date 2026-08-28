@@ -88,23 +88,38 @@ jobs:
       - name: Rebuild quality artifacts (entities + miss funnel)
         if: always() && github.event_name != 'pull_request'
         continue-on-error: true
+        env:
+          # build-external-findings reads our issue states via `gh`
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Clear findings that no longer reproduce BEFORE measuring, so the
-          # open count is real debt rather than last week's fixes waiting for
-          # their detector to run again.
+          # ORDER MATTERS. The funnel's first stage replays the byte-identical
+          # probe the stale-sweep uses to decide what to clear. Running the
+          # sweep first therefore GUARANTEES the funnel reports "0 passing",
+          # and the page then cited that structural zero as live evidence that
+          # the open count is an upper bound. Classify first, so `passing` is a
+          # real measurement (exactly the set the sweep is about to clear),
+          # then sweep, then build the artifacts off the swept ledger.
+          MISS_SAMPLE=80 pnpm exec tsx scripts/quality/classify-misses.ts
           pnpm exec tsx scripts/quality/clear-stale-findings.ts --execute
           pnpm exec tsx scripts/quality/build-quality-artifact.ts
-          MISS_SAMPLE=80 pnpm exec tsx scripts/quality/classify-misses.ts
           pnpm exec tsx scripts/quality/build-progress-artifact.ts
+          # Refresh the consumer-findings section (their records + our issue
+          # states) so the Raven card cannot drift from either side's truth.
+          pnpm exec tsx scripts/quality/build-external-findings.ts || echo "external-findings refresh failed (non-fatal)"
 
       - name: Record quality snapshot (trend history)
         if: always() && github.event_name != 'pull_request'
         run: |
           BP=$(grep -oE '[0-9]+ pass' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
           BF=$(grep -oE '[0-9]+ fail' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
+          # The battery's THIRD counter. Dropping it made a run whose slices
+          # crashed record as "N pass, 0 fail" — a perfect green day built out
+          # of code that never executed.
+          BE=$(grep -oE '[0-9]+ error' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
           PP=$(grep -oE '[0-9]+ pass both' /tmp/parity.out 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)
           pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
-            ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} ${PP:+--parity-pass $PP}
+            ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} \
+            ${BE:+--battery-errors $BE} ${PP:+--parity-pass $PP}
           git config user.name "stellarlight-quality-bot"
           git config user.email "bot@stellarlight.xyz"
           git add improvements/quality/ improvements/ledger/findings.json

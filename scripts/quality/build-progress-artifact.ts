@@ -21,21 +21,35 @@ const quality = readFileSync(join(root, "QUALITY.md"), "utf8");
 const phaseBlock = (id: string): string => {
 	const i = quality.indexOf(`- **${id}`);
 	if (i < 0) return "";
-	const next = quality.indexOf("\n- **P", i + 4);
-	return quality.slice(i, next < 0 ? quality.indexOf("\n\n", i) : next);
+	// The block ends at the NEXT PHASE HEADER, matched strictly as
+	// `- **P<digit>` at a line start. The old lookup matched any `- **P…`
+	// bullet, so a line like `- **PR #1075…** ` truncated the block and could
+	// silently drop the phase's own status marker.
+	const next = quality.slice(i + 4).search(/\n- \*\*P\d/);
+	return next < 0
+		? quality.slice(i, quality.indexOf("\n\n", i))
+		: quality.slice(i, i + 4 + next);
 };
 const PHASES = ["P0", "P1", "P2", "P3"].map((id) => {
 	const block = phaseBlock(id);
-	// The doc states its own status; this script never infers one. If the
-	// marker is missing the phase reads "unknown" rather than being guessed.
-	const state = /`status:\s*done`/.test(block)
-		? "done"
-		: /`status:\s*in progress`/.test(block)
-			? "in-progress"
-			: /`status:\s*not started`/.test(block)
-				? "not-started"
-				: "unknown";
-	const titleMatch = /\*\*P\d+\s*-\s*([^.*]+)\.?\*\*/.exec(block);
+	// The doc states its own status; this script never infers one, and it reads
+	// ONLY the marker on the phase's own header line. The old test ran over the
+	// whole block with `done` checked first, so the words "status: done"
+	// appearing anywhere in the prose (for example inside *Remaining:* text
+	// describing a future state) marked the phase green.
+	const headerLine = block.split("\n", 1)[0] ?? "";
+	const marker = /`status:\s*(done|in progress|not started)`/.exec(headerLine);
+	const state =
+		marker?.[1] === "done"
+			? "done"
+			: marker?.[1] === "in progress"
+				? "in-progress"
+				: marker?.[1] === "not started"
+					? "not-started"
+					: "unknown";
+	// Headers write `**P0. Title.**` (dot) but historically used `**P0 - Title**`
+	// (dash); accept either so a punctuation edit cannot blank every title.
+	const titleMatch = /\*\*P\d+\s*[-.]\s*([^*]+?)\.?\*\*/.exec(block);
 	const evidence = /\*Evidence:\*\s*([\s\S]*?)(?:\n\n|$)/.exec(block);
 	const remaining = /\*Remaining:\*\s*([\s\S]*?)(?:\n\n|$)/.exec(block);
 	const shippedSoFar =
@@ -71,8 +85,21 @@ const lessons = readdirSync(lessonsDir)
 		)
 			.replace(/\s+\u2014\s+/g, ": ")
 			.replace(/\u2014/g, "-");
-		// count the numbered lessons inside (L1, L2, … or bold leads)
-		const count = (body.match(/\*\*L\d+\s*[\u2014-]/g) ?? []).length;
+		// Count the numbered lessons inside where a countable convention
+		// exists (L1/L2 markers or numbered ## sections). The files are
+		// heterogeneous, and for one with no recognizable structure the count
+		// is NULL, not zero: zero asserts "an empty write-up", which is a
+		// claim this parser cannot make. (The old bold-only pattern matched
+		// one file in fourteen and published 0 for the rest.)
+		const ids = new Set([
+			...[...body.matchAll(/(?:\*\*|#{2,4}\s*)L(\d+)\s*[\u2014:.\-]/g)].map(
+				(m) => `L${m[1]}`,
+			),
+			...[...body.matchAll(/^#{2,3}\s*(\d+)[.)]\s+\S/gm)].map(
+				(m) => `n${m[1]}`,
+			),
+		]);
+		const count = ids.size > 0 ? ids.size : null;
 		return {
 			file: `improvements/lessons/${f}`,
 			date: f.slice(0, 10),
@@ -102,14 +129,24 @@ const receipts = readdirSync(join(root, "improvements/receipts"))
 			slug: string;
 			url: string;
 			fetchedAt: string;
-			markers?: Array<{ marker: string; found: boolean }>;
+			markers?: Array<{ marker: string; found: boolean; excerpt?: string }>;
 		};
 		return {
 			file: `improvements/receipts/${f}`,
 			slug: r.slug,
 			url: r.url,
 			fetchedAt: r.fetchedAt.slice(0, 10),
-			markers: (r.markers ?? []).filter((m) => m.found).map((m) => m.marker),
+			// NEGATIVE markers are evidence too. A receipt proving a site is dead
+			// has found:false on every marker, and the old found-only filter
+			// rendered it as a receipt with no evidence at all. Publish each
+			// marker WITH its polarity, and when the marker text alone is opaque
+			// ("TBD"), carry a slice of the receipt's own excerpt so the line
+			// says something without anyone authoring new evidence.
+			markers: (r.markers ?? []).map((m) => {
+				const label = `${m.found ? "" : "NOT "}${m.marker}`;
+				if (m.marker.length > 4 || !m.excerpt) return label;
+				return `${label} ("…${m.excerpt.slice(0, 60).trim()}…")`;
+			}),
 		};
 	});
 

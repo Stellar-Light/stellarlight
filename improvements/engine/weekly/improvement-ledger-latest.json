@@ -1,19 +1,19 @@
 {
-	"generatedAt": "2026-08-26T06:30:57.462Z",
+	"generatedAt": "2026-08-28T02:54:36.567Z",
 	"total": 437,
-	"open": 263,
-	"closed": 174,
+	"open": 78,
+	"closed": 359,
 	"verified": 7,
-	"cleared": 167,
-	"closingRate": 0.4,
-	"oldestOpenDays": 34,
+	"cleared": 352,
+	"closingRate": 0.82,
+	"oldestOpenDays": 36,
 	"inWave": 0,
 	"highOpen": 14,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 228,
+			"open": 43,
 			"total": 303
 		},
 		{
@@ -52,12 +52,12 @@
 		{
 			"source": "raven-routing",
 			"open": 14,
-			"days": 34
+			"days": 36
 		},
 		{
 			"source": "raven-loop",
 			"open": 1,
-			"days": 34
+			"days": 36
 		}
 	],
 	"topOpen": [

@@ -180,6 +180,11 @@ async function main() {
 	const undocumentedFields: Finding[] = [];
 	const ambiguous: Finding[] = [];
 	const skipped: string[] = [];
+	// Which operations this probe ACTUALLY reached. Without this the report
+	// could only say "24 ops" as a number, so a consumer asking "was
+	// searchProjects checked?" had to infer it from the absence of a finding —
+	// and absence of a finding from an unprobed op is not a clean bill.
+	const opsReached = new Set<string>();
 	let paramsProbed = 0;
 	let fieldsChecked = 0;
 	let opsTotal = 0;
@@ -355,6 +360,7 @@ async function main() {
 		}
 		const baseline = baselineFor(path);
 		if (baseline === null) continue; // already noted in param phase
+		opsReached.add(opId);
 		const hasLimit = (op.parameters ?? [])
 			.map((p: Json) => deref(spec, p))
 			.some((p: Json) => p?.name === "limit");
@@ -481,6 +487,9 @@ async function main() {
 			fieldsChecked,
 			postChecked,
 			skipped,
+			/** the operations this run actually probed, so a clean bill can be
+			 * distinguished from never having looked */
+			opsReached: [...opsReached].sort(),
 		},
 		silentParams,
 		invalidAccepted,

@@ -11,10 +11,11 @@
  * measured today", recorded as null, and the chart shows the gap).
  *
  *   pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
- *     [--battery-pass N --battery-fail N] [--parity-pass N]
+ *     [--battery-pass N --battery-fail N --battery-errors N] [--parity-pass N]
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { censusProjects } from "./sample-frame";
 
 const arg = (name: string): number | null => {
 	const i = process.argv.indexOf(name);
@@ -33,48 +34,24 @@ const honestyDebt = Object.values(honesty.operations).filter(
 	(o) => !o.exempt,
 ).length;
 
-// Live provenance sample, the same broad sweep the audits used.
+// Provenance CENSUS. This used to fire its own hand-picked list of search
+// terms, which differed from the sibling script's list by three terms, so the
+// dashboard published two irreconcilable answers to "how many human-verified
+// rows do we have" (32 and 29) with nothing saying they were different frames.
+// Both scripts now enumerate the same collection through the same module.
 async function provenance(): Promise<{
 	sampled: number;
+	population: number;
 	liveRows: number;
 	liveNoSource: number;
 	humanVerified: number;
 } | null> {
 	try {
-		const seen = new Map<
-			string,
-			{ status?: string; statusSourceUrl?: string; statusBasis?: string }
-		>();
-		for (const q of [
-			"stellar",
-			"wallet",
-			"defi",
-			"payment",
-			"soroban",
-			"oracle",
-			"exchange",
-			"lending",
-			"bridge",
-			"game",
-		]) {
-			const r = await fetch(
-				`https://stellarlight.xyz/api/projects/search?q=${q}&limit=100`,
-				{ headers: { "User-Agent": "stellarlight-quality-snapshot" } },
-			);
-			const d = (await r.json()) as {
-				projects?: Array<{
-					slug?: string;
-					status?: string;
-					statusSourceUrl?: string;
-					statusBasis?: string;
-				}>;
-			};
-			for (const p of d.projects ?? []) if (p.slug) seen.set(p.slug, p);
-		}
-		const rows = [...seen.values()];
+		const { rows, total } = await censusProjects();
 		const live = rows.filter((p) => p.status === "Live");
 		return {
 			sampled: rows.length,
+			population: total,
 			liveRows: live.length,
 			liveNoSource: live.filter((p) => !p.statusSourceUrl).length,
 			humanVerified: rows.filter((p) => p.statusBasis === "human-verified")
@@ -91,11 +68,16 @@ const row = {
 	date,
 	batteryPass: arg("--battery-pass"),
 	batteryFail: arg("--battery-fail"),
+	// The battery reports three counters and this row used to drop the third.
+	// A run where slices CRASH recorded "57 pass, 0 fail" and landed as a
+	// perfect green day, which is the exact lie the trend exists to prevent.
+	batteryErrors: arg("--battery-errors"),
 	parityPass: arg("--parity-pass"),
 	openMaps: opacity.openMaps,
 	honestyDebt,
 	...(prov ?? {
 		sampled: null,
+		population: null,
 		liveRows: null,
 		liveNoSource: null,
 		humanVerified: null,

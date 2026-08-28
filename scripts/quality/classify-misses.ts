@@ -46,13 +46,23 @@ const led = JSON.parse(
 const all: Finding[] = Array.isArray(led) ? led : led.findings;
 
 // probe text looks like: `nownodes in top-3 for 'is NOWNodes live'`
-const parsed = all
-	.filter((f) => f.status === "open" && f.source === "engine-a-recall")
+const openRecall = all.filter(
+	(f) => f.status === "open" && f.source === "engine-a-recall",
+);
+const parsed = openRecall
 	.map((f) => {
 		const m = /^(\S+)\s+in top-3 for '(.+)'$/.exec(f.probe);
 		return m ? { id: f.id, slug: m[1], query: m[2] } : null;
 	})
 	.filter((x): x is { id: string; slug: string; query: string } => !!x);
+
+// The funnel can only replay probes it can parse. Every probe it CANNOT parse
+// is a real open finding that this funnel is silently blind to, and publishing
+// "21 of 21 replayed" while 29 are open reads as full coverage when it is 72%.
+// Name the excluded set, with its probe shapes, so the blind spot is visible.
+const unparseable = openRecall.filter(
+	(f) => !/^(\S+)\s+in top-3 for '(.+)'$/.test(f.probe),
+);
 
 // deterministic sample: every Nth, so a rerun covers the same set
 const step = Math.max(1, Math.floor(parsed.length / SAMPLE));
@@ -133,7 +143,19 @@ const ORDER: Stage[] = [
 const out = {
 	generatedAt: new Date().toISOString(),
 	population: {
-		openRecallMisses: parsed.length,
+		/** every open recall-miss finding, the true population */
+		openRecallMisses: openRecall.length,
+		/** the subset this funnel can parse and therefore replay */
+		replayableOpenRecallMisses: parsed.length,
+		/** open recall misses this funnel CANNOT classify, and why */
+		unclassified: unparseable.length,
+		unclassifiedExamples: unparseable.slice(0, 8).map((f) => ({
+			id: f.id,
+			probe: f.probe,
+		})),
+		coveragePct: Math.round(
+			(parsed.length / Math.max(openRecall.length, 1)) * 100,
+		),
 		sampled: sample.length,
 		note: "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE.",
 	},
@@ -150,5 +172,5 @@ writeFileSync(
 	`${JSON.stringify(out, null, 1)}\n`,
 );
 console.log(
-	`miss-funnel: ${sample.length} of ${parsed.length} replayed, ${ORDER.map((s) => `${s} ${stages[s].length}`).join(" · ")}`,
+	`miss-funnel: ${sample.length} of ${parsed.length} replayable (${openRecall.length} open, ${unparseable.length} unclassified), ${ORDER.map((s) => `${s} ${stages[s].length}`).join(" · ")}`,
 );
