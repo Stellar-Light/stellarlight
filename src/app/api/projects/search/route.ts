@@ -1276,6 +1276,12 @@ export async function GET(req: NextRequest) {
 					statusAsOf?: string | null;
 					statusSourceUrl?: string | null;
 					statusBasis?: string | null;
+					deployment?: {
+						network?: string | null;
+						basis?: string | null;
+						sourceUrl?: string | null;
+						asOf?: string | null;
+					} | null;
 					tvlUSD?: number | null;
 					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 					onchain?: any;
