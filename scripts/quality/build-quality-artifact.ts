@@ -94,6 +94,7 @@ type Project = {
 	links?: { website?: string | null; github?: string | null };
 	availability?: unknown[];
 	prominence?: number;
+	deployment?: { network?: string | null; basis?: string | null } | null;
 };
 
 /** Per-row quality = how much EVIDENCE stands behind what we publish about it.
@@ -136,7 +137,8 @@ const projectQuality = (p: Project) => {
 
 const { rows: censusRows, total: projectPopulation } = await censusProjects();
 const seen = new Map<string, Project>();
-for (const p of censusRows) if (p.slug) seen.set(p.slug, p as unknown as Project);
+for (const p of censusRows)
+	if (p.slug) seen.set(p.slug, p as unknown as Project);
 
 const projects = [...seen.values()].map((p) => ({
 	slug: p.slug,
@@ -144,6 +146,8 @@ const projects = [...seen.values()].map((p) => ({
 	status: p.status ?? null,
 	statusBasis: p.statusBasis ?? null,
 	prominence: typeof p.prominence === "number" ? p.prominence : 0,
+	deploymentNetwork: p.deployment?.network ?? "unknown",
+	types: p.types ?? [],
 	...projectQuality(p),
 }));
 
@@ -301,6 +305,17 @@ const out = {
 		meanScore: Math.round(
 			projects.reduce((a, p) => a + p.score, 0) / Math.max(projects.length, 1),
 		),
+		/** sls-079: the deployment fact's coverage. unknown is the honest
+		 * default, so this mix is a WORK QUEUE reading, not a score — the
+		 * mainnet/testnet counts grow only as evidence lands. */
+		deploymentMix: (() => {
+			const m = new Map<string, number>();
+			for (const p of projects)
+				m.set(p.deploymentNetwork, (m.get(p.deploymentNetwork) ?? 0) + 1);
+			return [...m.entries()]
+				.map(([network, count]) => ({ network, count }))
+				.sort((a, b) => b.count - a.count);
+		})(),
 		basisMix: [...basisMix.entries()]
 			.map(([basis, count]) => ({ basis, count }))
 			.sort((a, b) => b.count - a.count),
@@ -361,7 +376,8 @@ const out = {
 			return {
 				curatedIndex: {
 					repos: curated.length,
-					means: "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
+					means:
+						"rows a directory record or tracked builder claims (source: project-link, builder-owned)",
 					withCodeDepth: depth(curated),
 					depthPct: Math.round(
 						(depth(curated) / Math.max(curated.length, 1)) * 100,
@@ -369,17 +385,20 @@ const out = {
 				},
 				tail: {
 					repos: tail.length,
-					means: "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
+					means:
+						"Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
 					withCodeDepth: depth(tail),
 				},
 				knowledgeNotes: {
 					pool: notesPool.length,
-					poolMeans: "curated-index rows with repoScore >= 60, the set curation actually targets",
+					poolMeans:
+						"curated-index rows with repoScore >= 60, the set curation actually targets",
 					withNotes: notesPool.filter((r) => r.notes > 0).length,
 				},
 				mainnetJoin: {
 					pool: deployable.length,
-					poolMeans: "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
+					poolMeans:
+						"rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
 					joined: repos.filter((r) => r.mainnetJoined).length,
 				},
 			};
@@ -507,7 +526,9 @@ const strongBases = new Set([
 	"onchain-activity",
 	"official-record",
 ]);
-const weakBasisRows = [...seen.values()].filter((p) => !isStrongBasis(p.statusBasis));
+const weakBasisRows = [...seen.values()].filter(
+	(p) => !isStrongBasis(p.statusBasis),
+);
 const missing = (field: string) =>
 	projects.filter((p) => p.missing.includes(field));
 const SAMPLE_CAP = 12;
@@ -684,6 +705,44 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 				"Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
 		}),
 		gapRow({
+			entity: "project",
+			field: "deployment evidence",
+			all: projects.filter((p) => p.deploymentNetwork === "unknown"),
+			of: projects.length,
+			pick: (p) => p.slug,
+			pool: {
+				// Deployment is a meaningful question for products whose value IS
+				// on-chain — not for an SDK, a wallet, or a CLI (the same lesson as
+				// the mainnet-join denominator). The pool leads with the rows an
+				// agent will actually ask "is this on mainnet?" about.
+				rows: byProminence(
+					projects.filter(
+						(p) =>
+							p.deploymentNetwork === "unknown" &&
+							p.status === "Live" &&
+							(p.prominence ?? 0) >= 60 &&
+							(p as { types?: string[] }).types?.some((t) =>
+								[
+									"DEX",
+									"DeFi",
+									"Lending",
+									"Derivatives",
+									"Oracle",
+									"Bridge",
+									"Stablecoin",
+									"RWA",
+								].includes(t),
+							),
+					),
+				),
+				why: "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
+			},
+			whyItMatters:
+				"sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
+			closedBy:
+				"Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
+		}),
+		gapRow({
 			entity: "repo",
 			field: "knowledgeNotes",
 			all: repos.filter((r) => r.notes === 0),
@@ -712,8 +771,7 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 			pool: {
 				rows: byRepoScore(
 					repos.filter(
-						(r) =>
-							r.deployable && !r.mainnetJoined && (r.repoScore ?? 0) >= 70,
+						(r) => r.deployable && !r.mainnetJoined && (r.repoScore ?? 0) >= 70,
 					),
 				),
 				why: "deployable contracts with repoScore >= 70 only",

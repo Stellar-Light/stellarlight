@@ -21,6 +21,7 @@ import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { pickDeployment } from "@/lib/project-deployment";
 import {
 	anchorIdentityHit,
 	anchorTokens,
@@ -163,12 +164,7 @@ async function semanticProjectRows(
 			// "deployed on which network?". Two facts, two fields. unknown is
 			// served explicitly - absence of evidence is never proof of disuse,
 			// and a consumer must see that we do not know rather than guess.
-			deployment: {
-				network: p.deployment?.network ?? "unknown",
-				basis: p.deployment?.basis ?? null,
-				sourceUrl: p.deployment?.sourceUrl ?? null,
-				asOf: p.deployment?.asOf ?? null,
-			},
+			deployment: pickDeployment(p.deployment),
 			canonicalSlug: p.canonicalSlug ?? null,
 			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
@@ -1397,12 +1393,7 @@ export async function GET(req: NextRequest) {
 					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
 					// sls-079: deployment rides EVERY row builder — the first fix
 					// landed on one of three builders and the served paths missed it.
-					deployment: {
-						network: p.deployment?.network ?? "unknown",
-						basis: p.deployment?.basis ?? null,
-						sourceUrl: p.deployment?.sourceUrl ?? null,
-						asOf: p.deployment?.asOf ?? null,
-					},
+					deployment: pickDeployment(p.deployment),
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
@@ -2035,12 +2026,7 @@ export async function GET(req: NextRequest) {
 					statusBasis: c.statusBasis ?? null,
 					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
 					// sls-079: from the canonical too, same rule as the fields above
-					deployment: {
-						network: c.deployment?.network ?? "unknown",
-						basis: c.deployment?.basis ?? null,
-						sourceUrl: c.deployment?.sourceUrl ?? null,
-						asOf: c.deployment?.asOf ?? null,
-					},
+					deployment: pickDeployment(c.deployment),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not

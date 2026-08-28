@@ -750,6 +750,21 @@ export default function QualityPage() {
 							}))}
 							total={entities.projects.population}
 						/>
+						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1 inline-flex items-start gap-1.5">
+							<span>
+								Deployment fact (sls-079):{" "}
+								{entities.projects.deploymentMix.map((m, i) => (
+									<span key={m.network}>
+										{i > 0 && " · "}
+										<span className="text-foreground tabular-nums">
+											{m.count}
+										</span>{" "}
+										{m.network}
+									</span>
+								))}
+							</span>
+							<Info text="Which network a product is deployed on, as a separate fact from lifecycle status. Populated ONLY from evidence (verified mainnet contract joins, on-chain readings, human-verified operator artifacts); unknown is the honest default and a work queue, never a score. The gap matrix carries the prominent rows to work first." />
+						</p>
 						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
 							Most rows rest on{" "}
 							<span className="text-foreground">site-liveness</span> - a page
