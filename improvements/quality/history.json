@@ -1,0 +1,14 @@
+[
+ {
+  "date": "2026-08-28",
+  "batteryPass": 108,
+  "batteryFail": 0,
+  "parityPass": 51,
+  "openMaps": 47,
+  "honestyDebt": 0,
+  "sampled": 481,
+  "liveRows": 456,
+  "liveNoSource": 12,
+  "humanVerified": 29
+ }
+]

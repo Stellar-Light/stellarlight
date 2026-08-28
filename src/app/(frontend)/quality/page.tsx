@@ -4,6 +4,8 @@ import {
 	evidenceUrl,
 	getGuardRows,
 	getNorthStar,
+	getTrends,
+	type TrendSeries,
 } from "@/lib/quality-artifacts";
 
 /**
@@ -106,9 +108,92 @@ function EvidenceLink({ path }: { path: string }) {
 	);
 }
 
+function Sparkline({ s }: { s: TrendSeries }) {
+	// One series, one ink (dataviz: single hue, recessive chrome, endpoint
+	// emphasized; nulls chart as GAPS, never as zero). Server-rendered SVG —
+	// no client code, no libraries.
+	const W = 220;
+	const H = 40;
+	const pts = s.points;
+	const vals = pts.map((p) => p.value).filter((v): v is number => v != null);
+	const latest = vals.at(-1) ?? null;
+	const first = vals[0] ?? null;
+	const min = Math.min(...vals);
+	const max = Math.max(...vals);
+	const span = max - min || 1;
+	const x = (i: number) =>
+		pts.length === 1 ? W / 2 : (i / (pts.length - 1)) * (W - 8) + 4;
+	const y = (v: number) => H - 6 - ((v - min) / span) * (H - 12);
+	// build segments, breaking at nulls (a gap is a gap)
+	const segs: string[] = [];
+	let seg: string[] = [];
+	pts.forEach((p, i) => {
+		if (p.value == null) {
+			if (seg.length) segs.push(seg.join(" "));
+			seg = [];
+			return;
+		}
+		seg.push(
+			`${seg.length ? "L" : "M"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`,
+		);
+	});
+	if (seg.length) segs.push(seg.join(" "));
+	const lastIdx = pts.map((p) => p.value).lastIndexOf(latest);
+	const delta =
+		latest != null && first != null && vals.length > 1 ? latest - first : null;
+	const improving =
+		delta == null
+			? null
+			: delta === 0
+				? null
+				: delta > 0 === (s.goodWhen === "up");
+	return (
+		<div className="flex flex-col gap-1.5">
+			<div className="flex items-baseline justify-between gap-3">
+				<span className="text-xs text-muted-foreground">{s.title}</span>
+				<span className="text-sm font-semibold text-foreground tabular-nums">
+					{latest ?? "—"}
+					{delta != null && delta !== 0 && (
+						<span className="ml-1.5 text-xs font-normal text-muted-foreground tabular-nums">
+							{delta > 0 ? "+" : ""}
+							{delta} {improving ? "better" : "worse"}
+						</span>
+					)}
+				</span>
+			</div>
+			<svg
+				viewBox={`0 0 ${W} ${H}`}
+				className="w-full h-10 text-foreground"
+				role="img"
+				aria-label={`${s.title}: latest ${latest ?? "not measured"}`}
+			>
+				{segs.map((d) => (
+					<path
+						key={d}
+						d={d}
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="1.5"
+						strokeLinecap="round"
+					/>
+				))}
+				{latest != null && lastIdx >= 0 && (
+					<circle cx={x(lastIdx)} cy={y(latest)} r="2.5" fill="currentColor" />
+				)}
+			</svg>
+			{vals.length === 1 && (
+				<span className="text-[11px] text-muted-foreground">
+					1 observation — the line grows daily
+				</span>
+			)}
+		</div>
+	);
+}
+
 export default function QualityPage() {
 	const northStar = getNorthStar();
 	const guards = getGuardRows();
+	const trends = getTrends();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -183,6 +268,21 @@ export default function QualityPage() {
 			</Card>
 
 			{/* guard grid */}
+			{/* trends — the ratchets and daily counts, as committed history.
+			    A missing day charts as a gap; the numbers may only be written
+			    by the pipeline that measured them. */}
+			<Card
+				title="Trends"
+				description="Daily history, appended by the eval pipeline and committed — ratchets may only move down, counts may only be earned. A gap is a day the pipeline did not measure."
+				className="mb-6"
+			>
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+					{trends.map((t) => (
+						<Sparkline key={t.key} s={t} />
+					))}
+				</div>
+			</Card>
+
 			<div className="grid sm:grid-cols-2 gap-6">
 				{guards.map((g) => (
 					<Card
