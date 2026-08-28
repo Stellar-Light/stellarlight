@@ -194,6 +194,10 @@ export async function GET(req: NextRequest) {
 			repoQuality: {
 				read: e.repos.read,
 				population: e.repos.population,
+				/** rates measured against the population each one TARGETS —
+				 * whole-census withCodeDepth/withNotes/withMainnet remain below
+				 * for continuity but carry no intent */
+				coverage: e.repos.coverage,
 				duplicateRows: e.repos.duplicateRows,
 				duplicateNote: e.repos.duplicateNote,
 				frame: e.repos.frame,

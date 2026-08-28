@@ -2085,6 +2085,14 @@ export interface operations {
                             generatedAt?: string;
                             population?: {
                                 openRecallMisses?: number;
+                                replayableOpenRecallMisses?: number;
+                                /** @description Open recall findings whose probe shape this funnel cannot replay. Real findings the funnel is blind to, not cleared ones. */
+                                unclassified?: number;
+                                unclassifiedExamples?: {
+                                    id?: string;
+                                    probe?: string;
+                                }[];
+                                coveragePct?: number;
                                 sampled?: number;
                                 note?: string;
                             };
@@ -2123,17 +2131,22 @@ export interface operations {
                             means?: string | null;
                             openFindings?: number;
                             clearedFindings?: number;
+                            verifiedFindings?: number;
                         }[];
                         findings?: {
                             open?: number;
                             cleared?: number;
                             verifiedClosed?: number;
+                            total?: number;
+                            /** @description The partition rule: open + cleared + verified = total, disjoint. */
+                            states?: string;
                             note?: string;
                             byFailureMode?: {
                                 mode?: string;
                                 surface?: string;
                                 open?: number;
                                 cleared?: number;
+                                verified?: number;
                             }[];
                             openByAge?: {
                                 bucket?: string;
@@ -2147,9 +2160,17 @@ export interface operations {
                             }[];
                         };
                         rowQuality?: {
+                            read?: number;
+                            /** @description Total rows in the collection. read should equal it; the counts here are a census, not a sample. */
+                            population?: number;
+                            coveragePct?: number;
+                            frame?: string;
                             sampled?: number;
+                            weakestTotal?: number;
+                            weakestTruncated?: boolean;
                             meanScore?: number;
                             scoreDefinition?: string;
+                            strongBases?: string[];
                             basisStrength?: string;
                             statusBasisMix?: {
                                 basis?: string;
@@ -2167,10 +2188,42 @@ export interface operations {
                                 statusBasis?: string | null;
                                 prominence?: number;
                                 score?: number;
+                                factsPresent?: number;
+                                factsTotal?: number;
                                 missing?: string[];
                             }[];
                         };
                         repoQuality?: {
+                            read?: number;
+                            population?: number;
+                            /** @description Coverage rates against the population each metric TARGETS. Two populations with different intent: the curated index (project-link + builder-owned rows a directory record claims) and the ec-taxonomy tail (indexed for completeness, scanned opportunistically, low coverage there is intended). Whole-census withCodeDepth/withNotes/withMainnet remain for continuity but carry no intent. */
+                            coverage?: {
+                                curatedIndex?: {
+                                    repos?: number;
+                                    means?: string;
+                                    withCodeDepth?: number;
+                                    depthPct?: number;
+                                };
+                                tail?: {
+                                    repos?: number;
+                                    means?: string;
+                                    withCodeDepth?: number;
+                                };
+                                knowledgeNotes?: {
+                                    pool?: number;
+                                    poolMeans?: string;
+                                    withNotes?: number;
+                                };
+                                mainnetJoin?: {
+                                    pool?: number;
+                                    poolMeans?: string;
+                                    joined?: number;
+                                };
+                            };
+                            /** @description Rows whose fullName duplicates another row. Storage debt, tracked here until zero; all counts are over DISTINCT repos. */
+                            duplicateRows?: number;
+                            duplicateNote?: string;
+                            frame?: string;
                             sampled?: number;
                             topGraded?: {
                                 fullName?: string;
@@ -2180,9 +2233,13 @@ export interface operations {
                                 activity?: string | null;
                                 language?: string | null;
                                 projectSlug?: string | null;
+                                source?: string | null;
                                 notes?: number;
                                 codeDepth?: number | null;
-                                mainnetContracts?: number;
+                                /** @description the scanner marked this row a deployable contract */
+                                deployable?: boolean;
+                                /** @description a verified mainnet contract is attributed to this repo (raw field mainnetContractId) */
+                                mainnetJoined?: boolean;
                             }[];
                             /** @description Indexed but thinly evidenced — the repo work queue. */
                             thinnestEvidence?: {
@@ -2194,7 +2251,10 @@ export interface operations {
                                 projectSlug?: string | null;
                                 notes?: number;
                                 codeDepth?: number | null;
-                                mainnetContracts?: number;
+                                /** @description the scanner marked this row a deployable contract */
+                                deployable?: boolean;
+                                /** @description a verified mainnet contract is attributed to this repo (raw field mainnetContractId) */
+                                mainnetJoined?: boolean;
                             }[];
                             withCodeDepth?: number;
                             withKnowledgeNotes?: number;

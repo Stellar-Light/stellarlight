@@ -64,9 +64,14 @@ export type CensusRepo = {
 	fullName?: string;
 	repoScore?: number;
 	tier?: string | null;
+	source?: string | null;
 	knowledgeNotes?: unknown[];
 	codeDepth?: number | null;
-	codeInUse?: { contracts?: number } | null;
+	/** the RAW collection's mainnet join — the search API serializes this as
+	 * codeInUse.contracts, and reading the serialized name against raw rows
+	 * silently produced 2/12938 where the truth was 76 */
+	mainnetContractId?: string | null;
+	isDeployableContract?: boolean | null;
 	lastCommitAt?: string | null;
 	isArchived?: boolean;
 	primaryLanguage?: string | null;
@@ -97,9 +102,11 @@ export const censusRepos = (origin = "https://stellarlight.xyz") =>
 			"fullName",
 			"repoScore",
 			"tier",
+			"source",
 			"knowledgeNotes",
 			"codeDepth",
-			"codeInUse",
+			"mainnetContractId",
+			"isDeployableContract",
 			"lastCommitAt",
 			"isArchived",
 			"primaryLanguage",

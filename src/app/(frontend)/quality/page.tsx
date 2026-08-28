@@ -744,26 +744,36 @@ export default function QualityPage() {
 				className="mb-6"
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
+					{/* Each rate is measured against the population it TARGETS. The old
+					     tiles divided by all 12,938 rows including the ten-thousand-row
+					     EC-taxonomy tail we deliberately scan only opportunistically,
+					     which made "higher is better" meaningless. */}
 					<Metric
-						label="Scanned for depth"
-						value={`${entities.repos.withCodeDepth}/${entities.repos.sampled}`}
-						sub="Have a code-depth reading"
+						label="Curated index scanned for depth"
+						value={`${entities.repos.coverage.curatedIndex.withCodeDepth}/${entities.repos.coverage.curatedIndex.repos}`}
+						sub={`${entities.repos.coverage.curatedIndex.depthPct}% of rows a project or builder claims`}
 						goodWhen="higher"
-						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) - not a quality judgement of the project."
+						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) - not a quality judgement. Denominator: curated-index rows only (source project-link or builder-owned). The EC-taxonomy tail is scanned opportunistically by design and reported separately, without a target."
 					/>
 					<Metric
-						label="With knowledge notes"
-						value={`${entities.repos.withNotes}/${entities.repos.sampled}`}
-						sub="Curated dated facts with sources"
+						label="Curation pool with knowledge notes"
+						value={`${entities.repos.coverage.knowledgeNotes.withNotes}/${entities.repos.coverage.knowledgeNotes.pool}`}
+						sub="Of curated rows with repoScore ≥ 60"
 						goodWhen="higher"
-						explain="knowledgeNotes are hand-curated dated facts with a source URL. Absence means nobody curated this repo yet, never a statement about the repo itself."
+						explain="knowledgeNotes are hand-curated dated facts with a source URL. Denominator: the pool curation actually targets (curated index, repoScore ≥ 60) - nobody intends to hand-curate ten thousand tail rows, so a whole-census rate would be noise."
 					/>
 					<Metric
-						label="Joined to a mainnet contract"
-						value={`${entities.repos.withMainnet}/${entities.repos.sampled}`}
-						sub="Verified contract attributed"
+						label="Deployable contracts joined to mainnet"
+						value={`${entities.repos.coverage.mainnetJoin.joined}/${entities.repos.coverage.mainnetJoin.pool}`}
+						sub="Of rows scanned as deployable contracts"
 						goodWhen="higher"
-						explain="A verified mainnet contract attributed to this repo, the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
+						explain="A verified mainnet contract attributed to the repo - the difference between 'code exists' and 'code is used'. Denominator: only rows the scanner marked deployable; a join is not conceivable for an SDK or a frontend. Absence is absence of a join, never proof of disuse."
+					/>
+					<Metric
+						label="Tail scanned (no target)"
+						value={`${entities.repos.coverage.tail.withCodeDepth}/${entities.repos.coverage.tail.repos}`}
+						sub="EC-taxonomy rows, opportunistic by design"
+						explain="Electric Capital taxonomy rows are indexed for completeness and scanned as budget allows. Low coverage here is intended, so this number carries no direction - it is context, not a score."
 					/>
 				</div>
 				{(entities.repos.duplicateRows ?? 0) > 0 && (

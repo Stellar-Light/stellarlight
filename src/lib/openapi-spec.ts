@@ -517,6 +517,23 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														openRecallMisses: { type: "integer" },
+														replayableOpenRecallMisses: { type: "integer" },
+														unclassified: {
+															type: "integer",
+															description:
+																"Open recall findings whose probe shape this funnel cannot replay. Real findings the funnel is blind to, not cleared ones.",
+														},
+														unclassifiedExamples: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	probe: { type: "string" },
+																},
+															},
+														},
+														coveragePct: { type: "integer" },
 														sampled: { type: "integer" },
 														note: { type: "string" },
 													},
@@ -593,6 +610,7 @@ export const spec: OpenAPISpec = {
 													means: { type: "string", nullable: true },
 													openFindings: { type: "integer" },
 													clearedFindings: { type: "integer" },
+													verifiedFindings: { type: "integer" },
 												},
 											},
 										},
@@ -602,6 +620,12 @@ export const spec: OpenAPISpec = {
 												open: { type: "integer" },
 												cleared: { type: "integer" },
 												verifiedClosed: { type: "integer" },
+												total: { type: "integer" },
+												states: {
+													type: "string",
+													description:
+														"The partition rule: open + cleared + verified = total, disjoint.",
+												},
 												note: { type: "string" },
 												byFailureMode: {
 													type: "array",
@@ -612,6 +636,7 @@ export const spec: OpenAPISpec = {
 															surface: { type: "string" },
 															open: { type: "integer" },
 															cleared: { type: "integer" },
+															verified: { type: "integer" },
 														},
 													},
 												},
@@ -642,9 +667,23 @@ export const spec: OpenAPISpec = {
 										rowQuality: {
 											type: "object",
 											properties: {
+												read: { type: "integer" },
+												population: {
+													type: "integer",
+													description:
+														"Total rows in the collection. read should equal it; the counts here are a census, not a sample.",
+												},
+												coveragePct: { type: "integer" },
+												frame: { type: "string" },
 												sampled: { type: "integer" },
+												weakestTotal: { type: "integer" },
+												weakestTruncated: { type: "boolean" },
 												meanScore: { type: "integer" },
 												scoreDefinition: { type: "string" },
+												strongBases: {
+													type: "array",
+													items: { type: "string" },
+												},
 												basisStrength: { type: "string" },
 												statusBasisMix: {
 													type: "array",
@@ -679,6 +718,8 @@ export const spec: OpenAPISpec = {
 															statusBasis: { type: "string", nullable: true },
 															prominence: { type: "integer" },
 															score: { type: "integer" },
+															factsPresent: { type: "integer" },
+															factsTotal: { type: "integer" },
 															missing: {
 																type: "array",
 																items: { type: "string" },
@@ -691,6 +732,55 @@ export const spec: OpenAPISpec = {
 										repoQuality: {
 											type: "object",
 											properties: {
+												read: { type: "integer" },
+												population: { type: "integer" },
+												coverage: {
+													type: "object",
+													description:
+														"Coverage rates against the population each metric TARGETS. Two populations with different intent: the curated index (project-link + builder-owned rows a directory record claims) and the ec-taxonomy tail (indexed for completeness, scanned opportunistically, low coverage there is intended). Whole-census withCodeDepth/withNotes/withMainnet remain for continuity but carry no intent.",
+													properties: {
+														curatedIndex: {
+															type: "object",
+															properties: {
+																repos: { type: "integer" },
+																means: { type: "string" },
+																withCodeDepth: { type: "integer" },
+																depthPct: { type: "integer" },
+															},
+														},
+														tail: {
+															type: "object",
+															properties: {
+																repos: { type: "integer" },
+																means: { type: "string" },
+																withCodeDepth: { type: "integer" },
+															},
+														},
+														knowledgeNotes: {
+															type: "object",
+															properties: {
+																pool: { type: "integer" },
+																poolMeans: { type: "string" },
+																withNotes: { type: "integer" },
+															},
+														},
+														mainnetJoin: {
+															type: "object",
+															properties: {
+																pool: { type: "integer" },
+																poolMeans: { type: "string" },
+																joined: { type: "integer" },
+															},
+														},
+													},
+												},
+												duplicateRows: {
+													type: "integer",
+													description:
+														"Rows whose fullName duplicates another row. Storage debt, tracked here until zero; all counts are over DISTINCT repos.",
+												},
+												duplicateNote: { type: "string" },
+												frame: { type: "string" },
 												sampled: { type: "integer" },
 												topGraded: {
 													type: "array",
@@ -708,9 +798,19 @@ export const spec: OpenAPISpec = {
 															},
 															language: { type: "string", nullable: true },
 															projectSlug: { type: "string", nullable: true },
+															source: { type: "string", nullable: true },
 															notes: { type: "integer" },
 															codeDepth: { type: "integer", nullable: true },
-															mainnetContracts: { type: "integer" },
+															deployable: {
+																type: "boolean",
+																description:
+																	"the scanner marked this row a deployable contract",
+															},
+															mainnetJoined: {
+																type: "boolean",
+																description:
+																	"a verified mainnet contract is attributed to this repo (raw field mainnetContractId)",
+															},
 														},
 													},
 												},
@@ -729,7 +829,16 @@ export const spec: OpenAPISpec = {
 															projectSlug: { type: "string", nullable: true },
 															notes: { type: "integer" },
 															codeDepth: { type: "integer", nullable: true },
-															mainnetContracts: { type: "integer" },
+															deployable: {
+																type: "boolean",
+																description:
+																	"the scanner marked this row a deployable contract",
+															},
+															mainnetJoined: {
+																type: "boolean",
+																description:
+																	"a verified mainnet contract is attributed to this repo (raw field mainnetContractId)",
+															},
 														},
 													},
 												},

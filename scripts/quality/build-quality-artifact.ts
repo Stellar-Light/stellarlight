@@ -164,9 +164,11 @@ type Repo = {
 	fullName: string;
 	repoScore?: number;
 	tier?: string | null;
+	source?: string | null;
 	knowledgeNotes?: unknown[];
 	codeDepth?: number | null;
-	codeInUse?: { contracts?: number } | null;
+	mainnetContractId?: string | null;
+	isDeployableContract?: boolean | null;
 	lastCommitAt?: string | null;
 	isArchived?: boolean;
 	primaryLanguage?: string | null;
@@ -196,13 +198,18 @@ const repos = [...repoSeen.values()].map((r) => ({
 	fullName: r.fullName,
 	repoScore: r.repoScore ?? null,
 	tier: r.tier ?? null,
+	source: r.source ?? null,
 	activity: activityOf(r),
 	language: r.primaryLanguage ?? null,
 	projectSlug: r.projectSlug ?? null,
 	notes: Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes.length : 0,
 	codeDepth:
 		typeof r.codeDepth === "number" ? Math.round(r.codeDepth * 100) : null,
-	mainnetContracts: r.codeInUse?.contracts ?? 0,
+	// The RAW collection's join field. Reading the search API's serialized
+	// name (codeInUse.contracts) against raw rows returned 2 where the truth
+	// was 76 — the exact raw-vs-serialized trap this repo has hit before.
+	deployable: r.isDeployableContract === true,
+	mainnetJoined: !!r.mainnetContractId,
 }));
 
 // Per-surface rollup: the shape a CONSUMER asks about, "how healthy is the
@@ -323,9 +330,55 @@ const out = {
 				: "no duplicate fullName rows",
 		frame: FRAME_METHOD,
 		sampled: repos.length,
+		/** The index is TWO populations with different intent, and coverage
+		 * rates only mean something against the population they target:
+		 * - curated (project-link + builder-owned): rows a directory record or
+		 *   tracked person claims — depth scans and curation AIM at these.
+		 * - tail (ec-taxonomy): Electric Capital's public list, indexed for
+		 *   completeness and scanned opportunistically — low coverage here is
+		 *   a choice, not a gap, so no "higher is better" applies to it. */
+		coverage: (() => {
+			const curated = repos.filter((r) => r.source !== "ec-taxonomy");
+			const tail = repos.filter((r) => r.source === "ec-taxonomy");
+			const depth = (rs: typeof repos) =>
+				rs.filter((r) => r.codeDepth != null).length;
+			// notes coverage is measured against the CURATION POOL (the gap
+			// matrix's own target: curated rows with repoScore >= 60), because
+			// nobody intends to hand-curate ten thousand tail repos.
+			const notesPool = curated.filter((r) => (r.repoScore ?? 0) >= 60);
+			// a mainnet join is only conceivable for deployable contracts
+			const deployable = repos.filter((r) => r.deployable);
+			return {
+				curatedIndex: {
+					repos: curated.length,
+					means: "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
+					withCodeDepth: depth(curated),
+					depthPct: Math.round(
+						(depth(curated) / Math.max(curated.length, 1)) * 100,
+					),
+				},
+				tail: {
+					repos: tail.length,
+					means: "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
+					withCodeDepth: depth(tail),
+				},
+				knowledgeNotes: {
+					pool: notesPool.length,
+					poolMeans: "curated-index rows with repoScore >= 60, the set curation actually targets",
+					withNotes: notesPool.filter((r) => r.notes > 0).length,
+				},
+				mainnetJoin: {
+					pool: deployable.length,
+					poolMeans: "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
+					joined: repos.filter((r) => r.mainnetJoined).length,
+				},
+			};
+		})(),
+		/** retained for existing consumers — whole-census counts with NO
+		 * intent attached; read `coverage` for rates that mean something */
 		withCodeDepth: repos.filter((r) => r.codeDepth != null).length,
 		withNotes: repos.filter((r) => r.notes > 0).length,
-		withMainnet: repos.filter((r) => r.mainnetContracts > 0).length,
+		withMainnet: repos.filter((r) => r.mainnetJoined).length,
 		top: repos
 			.filter((r) => r.repoScore != null)
 			.sort((a, b) => (b.repoScore ?? 0) - (a.repoScore ?? 0))
@@ -378,12 +431,13 @@ if (untyped > 0)
 		instead:
 			"For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem.",
 	});
-if (out.repos.withNotes < out.repos.sampled / 2)
+const notesCov = out.repos.coverage.knowledgeNotes;
+if (notesCov.withNotes < notesCov.pool)
 	limitations.push({
 		area: "repo knowledge notes",
 		limit:
 			"Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-		measurement: `${out.repos.withNotes} of ${out.repos.sampled} sampled repos`,
+		measurement: `${notesCov.withNotes} of ${notesCov.pool} rows in the curation pool (curated index, repoScore >= 60)`,
 		instead:
 			"Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields.",
 	});
@@ -605,16 +659,20 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 		gapRow({
 			entity: "repo",
 			field: "mainnet contract join",
-			all: repos.filter((r) => r.mainnetContracts === 0),
-			of: repos.length,
+			// A join is only conceivable for a deployable contract, so the gap
+			// is deployable-but-unjoined — not "all repos without a join", which
+			// swept SDKs and frontends into a gap they can never close.
+			all: repos.filter((r) => r.deployable && !r.mainnetJoined),
+			of: repos.filter((r) => r.deployable).length,
 			pick: (r) => r.fullName,
 			pool: {
 				rows: byRepoScore(
 					repos.filter(
-						(r) => r.mainnetContracts === 0 && (r.repoScore ?? 0) >= 70,
+						(r) =>
+							r.deployable && !r.mainnetJoined && (r.repoScore ?? 0) >= 70,
 					),
 				),
-				why: "repoScore >= 70 only",
+				why: "deployable contracts with repoScore >= 70 only",
 			},
 			whyItMatters:
 				"Without a verified contract join we can say code exists, never that it is USED on mainnet.",
