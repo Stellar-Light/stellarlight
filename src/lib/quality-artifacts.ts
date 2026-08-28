@@ -1,9 +1,9 @@
 /**
- * /quality artifact reader — the ONLY data source for the public scoreboard.
+ * /quality artifact reader, the ONLY data source for the public scoreboard.
  *
  * Hard rule (improvements/ideas/idea-scale-model.md): NO hand-set numbers.
  * Every figure on /quality is statically imported from a committed artifact in
- * improvements/ — the page cannot drift from what the engines measured, and it
+ * improvements/, the page cannot drift from what the engines measured, and it
  * only changes when a new artifact lands (commit → deploy). Each row carries
  * the artifact path so every number links to its reproducible evidence.
  */
@@ -12,7 +12,7 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-07-11.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-07-21.json";
-// Through-Raven consumer path — golden questions graded via the REAL gateway
+// Through-Raven consumer path, golden questions graded via the REAL gateway
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
 // this is what the SDF agent actually experiences.
 import ravenLoop from "../../improvements/engine/raven-loop-latest.json";
@@ -21,13 +21,14 @@ import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.
 import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
 import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
 import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json";
-// The improvement ledger — the spine: every detector's findings normalized into
+// The improvement ledger, the spine: every detector's findings normalized into
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
 import qualityEntities from "../../improvements/quality/entities.json";
+import externalFindings from "../../improvements/quality/external-findings.json";
 import qualityHistory from "../../improvements/quality/history.json";
-// Weekly evidence — fixed -latest paths committed by engine-c-health every
+// Weekly evidence, fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import missFunnel from "../../improvements/quality/miss-funnel.json";
 import qualityProgress from "../../improvements/quality/progress.json";
@@ -76,7 +77,7 @@ export interface GuardRow {
 	value: string;
 	/** Qualifier under the headline. */
 	sub: string;
-	/** Detail bullets — every one grounded in the artifact. */
+	/** Detail bullets, every one grounded in the artifact. */
 	details: string[];
 	/** Measurement date (the artifact's own date, NOT "now"). */
 	asOf: string;
@@ -89,7 +90,7 @@ export interface GuardRow {
 export function getGuardRows(): GuardRow[] {
 	const rows: GuardRow[] = [];
 
-	// SCF membership cross-check — data-truth vs communityfund.stellar.org.
+	// SCF membership cross-check, data-truth vs communityfund.stellar.org.
 	{
 		const frame = scfMembership.frame;
 		const overstated = scfMembership.overstated.length;
@@ -113,7 +114,7 @@ export function getGuardRows(): GuardRow[] {
 		});
 	}
 
-	// Engine E — contract honesty baseline (params/fields behave as documented).
+	// Engine E, contract honesty baseline (params/fields behave as documented).
 	{
 		const frame = engineE.frame;
 		const silent = engineE.silentParams.length;
@@ -122,7 +123,7 @@ export function getGuardRows(): GuardRow[] {
 			key: "contract-honesty",
 			title: "Contract honesty probe",
 			promise:
-				"Documented params do something, undocumented values are rejected — the contract a stranger hits behaves as written.",
+				"Documented params do something, undocumented values are rejected, the contract a stranger hits behaves as written.",
 			value: `${frame.paramsProbed + frame.fieldsChecked}`,
 			sub: `params + fields probed across ${frame.ops} operations`,
 			details: [
@@ -143,14 +144,14 @@ export function getGuardRows(): GuardRow[] {
 		sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled)`,
 		details: [
 			`${deepwiki.disagreements.length} disagreements`,
-			`${deepwiki.frame.unindexed} sampled repos had no independent index to compare (small-n baseline — grows as coverage does)`,
+			`${deepwiki.frame.unindexed} sampled repos had no independent index to compare (small-n baseline, grows as coverage does)`,
 		],
 		asOf: "2026-07-10",
 		artifact: "improvements/engine/deepwiki-calibration-2026-07-10.json",
 		ok: deepwiki.disagreements.length === 0,
 	});
 
-	// Raven interlock — the consumer's discovery index vs our live contract.
+	// Raven interlock, the consumer's discovery index vs our live contract.
 	{
 		const lagging = ravenDrift.laggingInCatalog.length;
 		const missing = ravenDrift.missingFromCatalog.length;
@@ -160,7 +161,7 @@ export function getGuardRows(): GuardRow[] {
 			key: "raven-interlock",
 			title: "Consumer interlock (Raven)",
 			promise:
-				"The #1 consumer's discovery index tracks our contract — checked from OUR side too, with grace for their re-baseline cadence.",
+				"The #1 consumer's discovery index tracks our contract, checked from OUR side too, with grace for their re-baseline cadence.",
 			value: `${cataloged} / ${expected}`,
 			sub: "operations discoverable in the consumer catalog",
 			details: [
@@ -176,7 +177,7 @@ export function getGuardRows(): GuardRow[] {
 
 	// ── Weekly evidence rows (fixed -latest artifacts, committed by CI) ─────
 
-	// Engine A — recall matrix vs per-bucket floors (the red-line guard).
+	// Engine A, recall matrix vs per-bucket floors (the red-line guard).
 	{
 		const board = engineARecall.board as Array<{
 			bucket: string;
@@ -192,14 +193,13 @@ export function getGuardRows(): GuardRow[] {
 			key: "engine-a-recall",
 			title: "Recall floors (Engine A)",
 			promise:
-				"Generated known-item probes per bucket stay above their red-line floors — recall can't silently erode.",
+				"Generated known-item probes per bucket stay above their red-line floors, recall can't silently erode.",
 			value: `${board.length - breaches.length}/${board.length}`,
 			sub: `buckets at/above floor · ${probes.toLocaleString("en-US")} probes`,
 			details:
 				breaches.length > 0
 					? breaches.map(
-							(b) =>
-								`${b.bucket} at ${b.rate}% vs floor ${b.floor}% — open red`,
+							(b) => `${b.bucket} at ${b.rate}% vs floor ${b.floor}%, open red`,
 						)
 					: ["all buckets above floor"],
 			asOf: "latest weekly run",
@@ -208,31 +208,31 @@ export function getGuardRows(): GuardRow[] {
 		});
 	}
 
-	// Engine D — OK-rate on REAL consumer demand (replayed, not log-time).
+	// Engine D. OK-rate on REAL consumer demand (replayed, not log-time).
 	{
 		const frame = engineDDemand.frame;
 		rows.push({
 			key: "engine-d-demand",
 			title: "Real-demand OK-rate (Engine D)",
 			promise:
-				"The queries real consumers actually sent are replayed live — a miss on real demand outranks any synthetic finding.",
+				"The queries real consumers actually sent are replayed live, a miss on real demand outranks any synthetic finding.",
 			value: `${engineDDemand.okRate}%`,
 			sub: `top ${frame.replayed} of ${frame.distinctQueries.toLocaleString("en-US")} distinct real queries`,
 			details: [
 				`${frame.realHits.toLocaleString("en-US")} real-consumer calls in the ${engineDDemand.windowDays}-day window`,
-				`${(engineDDemand.misses as unknown[]).length} queries missing today — the standing fix queue`,
+				`${(engineDDemand.misses as unknown[]).length} queries missing today, the standing fix queue`,
 			],
 			asOf: "latest weekly run",
 			artifact: "improvements/engine/weekly/engine-d-demand-latest.json",
-			ok: true, // informational — no committed floor; misses feed the queue
+			ok: true, // informational, no committed floor; misses feed the queue
 		});
 	}
 
-	// Golden retrieval eval — correctness against a ground-truth answer key.
+	// Golden retrieval eval, correctness against a ground-truth answer key.
 	// N/A = liveSource questions the static corpus is NOT meant to answer;
 	// run-golden excludes them from scoring and so does this row (counting
 	// them as failures was the same rows-only grader bug the consumer report
-	// had — read the eval's own semantics, don't re-grade them).
+	// had, read the eval's own semantics, don't re-grade them).
 	{
 		const graded = goldenEval.graded as Array<{ status: string }>;
 		const scored = graded.filter((g) => g.status !== "N/A");
@@ -248,7 +248,7 @@ export function getGuardRows(): GuardRow[] {
 			details: [
 				passed === scored.length
 					? "full pass"
-					: `${scored.length - passed} failing — each names its expected evidence`,
+					: `${scored.length - passed} failing, each names its expected evidence`,
 				...(na > 0
 					? [
 							`${na} N/A by design (live-source questions the static corpus doesn't answer)`,
@@ -262,7 +262,7 @@ export function getGuardRows(): GuardRow[] {
 		});
 	}
 
-	// Corpus health — S5-S8 hygiene sweeps over the research corpus.
+	// Corpus health. S5-S8 hygiene sweeps over the research corpus.
 	{
 		const frame = corpusHealth.frame;
 		// biome-ignore lint/suspicious/noExplicitAny: sweep keys are dynamic (s5_…s8_)
@@ -278,13 +278,13 @@ export function getGuardRows(): GuardRow[] {
 			key: "corpus-health",
 			title: "Corpus hygiene (S5–S8)",
 			promise:
-				"The research corpus stays clean — junk URLs, broken titles, staleness and mirror drift are swept weekly.",
+				"The research corpus stays clean, junk URLs, broken titles, staleness and mirror drift are swept weekly.",
 			value: `${sweeps.length - dirty.length}/${sweeps.length}`,
 			sub: `sweeps clean · ${frame.chunks.toLocaleString("en-US")} chunks / ${frame.docs.toLocaleString("en-US")} docs`,
 			details:
 				dirty.length > 0
 					? dirty.map(
-							(s) => `${s.key.replace(/_/g, " ")}: ${s.count} flagged — queued`,
+							(s) => `${s.key.replace(/_/g, " ")}: ${s.count} flagged, queued`,
 						)
 					: ["all sweeps clean"],
 			asOf: "latest weekly run",
@@ -293,13 +293,13 @@ export function getGuardRows(): GuardRow[] {
 		});
 	}
 
-	// Through-Raven consumer path — the golden questions run through the LIVE
+	// Through-Raven consumer path, the golden questions run through the LIVE
 	// Raven gateway (routing + our op + envelope + coaching), not our direct API.
 	// This is the co-verified measure interlock-spec promises: what the SDF agent
 	// actually gets.
 	{
 		const rl = ravenLoop;
-		// misses infers `never[]` when the committed artifact has none — cast it.
+		// misses infers `never[]` when the committed artifact has none, cast it.
 		const misses = rl.misses as Array<{
 			query: string;
 			mode: string;
@@ -309,14 +309,14 @@ export function getGuardRows(): GuardRow[] {
 			key: "raven-consumer-path",
 			title: "Consumer path (through Raven)",
 			promise:
-				"The canonical questions answer correctly through the REAL Raven gateway — routing, our op, the response envelope and coaching — not just our direct API.",
+				"The canonical questions answer correctly through the REAL Raven gateway, routing, our op, the response envelope and coaching, not just our direct API.",
 			value: `${rl.frame.passed}/${rl.frame.graded}`,
 			sub: `golden Qs answered through the live gateway · ${Math.round(rl.okRate * 100)}%`,
 			details:
 				misses.length > 0
 					? misses.map(
 							(m) =>
-								`${m.mode}: "${m.query.slice(0, 48)}" — ${m.failureMode} → consumer finding`,
+								`${m.mode}: "${m.query.slice(0, 48)}", ${m.failureMode} → consumer finding`,
 						)
 					: [
 							`every gradeable golden question answers correctly through Raven (${rl.frame.graded} checked)`,
@@ -327,7 +327,7 @@ export function getGuardRows(): GuardRow[] {
 		});
 	}
 
-	// Improvement ledger — the spine that unifies every detector above into one
+	// Improvement ledger, the spine that unifies every detector above into one
 	// tracked backlog (detect → wave → verified → lesson), tagged by surface so
 	// "where are we weakest?" is answerable across retrieval/scf/contract/… .
 	{
@@ -339,18 +339,18 @@ export function getGuardRows(): GuardRow[] {
 			key: "improvement-ledger",
 			title: "Improvement ledger",
 			promise:
-				"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure — that's this row's red line.",
+				"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure, that's this row's red line.",
 			value: `${L.open} open`,
 			sub: `${L.highOpen} high · ${L.inWave} in a wave · ${Math.round(L.closingRate * 100)}% closed`,
 			details: [
 				`open by surface: ${surfaces}`,
 				`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
 				L.staleHighOpen > 0
-					? `${L.staleHighOpen} high-severity finding(s) stale >30d — work them down`
+					? `${L.staleHighOpen} high-severity finding(s) stale >30d, work them down`
 					: "no high-severity finding neglected past 30 days",
 				// A quiet detector is a DIFFERENT failure from bad data, and the
 				// board must never render them alike. Open findings whose detector
-				// has gone silent aren't confirmed problems — they're unchecked
+				// has gone silent aren't confirmed problems, they're unchecked
 				// ones, and counting them as fires points the next wave at a fire
 				// that may already be out (measured: 13 of 24 highs were).
 				L.quietSources.length > 0
@@ -361,19 +361,19 @@ export function getGuardRows(): GuardRow[] {
 							)
 							.join(
 								", ",
-							)} — evidence past the ${EVIDENCE_GRACE_DAYS}d window; ${L.unverifiedOpen} open finding(s) unconfirmed`
-					: `all detectors reporting within ${EVIDENCE_GRACE_DAYS}d — every open finding is a confirmed one`,
+							)}, evidence past the ${EVIDENCE_GRACE_DAYS}d window; ${L.unverifiedOpen} open finding(s) unconfirmed`
+					: `all detectors reporting within ${EVIDENCE_GRACE_DAYS}d, every open finding is a confirmed one`,
 			],
 			asOf: L.generatedAt.slice(0, 10),
 			artifact: "improvements/ledger/findings.json",
 			// Blind is not green. If a detector stopped reporting we cannot claim
-			// the surface it watches is healthy — we can only claim we stopped
+			// the surface it watches is healthy, we can only claim we stopped
 			// looking, and that belongs in the red the page is built to show.
 			ok: L.staleHighOpen === 0 && L.quietSources.length === 0,
 		});
 	}
 
-	// Contract-honesty ratchets (QUALITY.md L1) — enforced by contract:check
+	// Contract-honesty ratchets (QUALITY.md L1), enforced by contract:check
 	// on every PR, so these numbers are the CI's word, not a snapshot.
 	{
 		const debt = Object.values(
@@ -387,7 +387,7 @@ export function getGuardRows(): GuardRow[] {
 			value: `0 / ${debt}`,
 			sub: "silent-opaque schemas / unlabelled q-operations",
 			details: [
-				`${opacityBaseline.openMaps} explicit open maps remain (additionalProperties:true — grandfathered, ratcheted downward)`,
+				`${opacityBaseline.openMaps} explicit open maps remain (additionalProperties:true, grandfathered, ratcheted downward)`,
 				"a new operation shipping without shape or a match label fails the build",
 				"check-schema-opacity.ts + check-honesty-layer.ts, wired into contract:check",
 			],
@@ -407,14 +407,14 @@ export interface TrendPoint {
 export interface TrendSeries {
 	key: string;
 	title: string;
-	/** which direction is improvement — labels the delta honestly */
+	/** which direction is improvement, labels the delta honestly */
 	goodWhen: "up" | "down";
 	unit?: string;
 	points: TrendPoint[];
 }
 
 /** The committed daily history behind /quality's Trends section. Ratchets
- * and counts only — every point was measured by the day's pipeline run (a
+ * and counts only, every point was measured by the day's pipeline run (a
  * null is "not measured that day" and charts as a gap, never as zero). */
 export function getTrends(): TrendSeries[] {
 	const h = qualityHistory as Array<Record<string, number | string | null>>;
@@ -434,9 +434,9 @@ export function getTrends(): TrendSeries[] {
 		})),
 	});
 	return [
-		series("batteryPass", "Truth battery — probes passing", "up"),
-		series("batteryFail", "Truth battery — failures", "down"),
-		series("parityPass", "Golden parity — pass both paths", "up"),
+		series("batteryPass", "Truth battery, probes passing", "up"),
+		series("batteryFail", "Truth battery, failures", "down"),
+		series("parityPass", "Golden parity, pass both paths", "up"),
 		series("openMaps", "Contract open maps (ratchet)", "down"),
 		series("honestyDebt", "Unlabelled q-ops (ratchet)", "down"),
 		series("liveNoSource", "Live rows without a source", "down"),
@@ -460,4 +460,10 @@ export function getMissFunnel() {
  * from QUALITY.md and the repo (scripts/quality/build-progress-artifact.ts). */
 export function getProgress() {
 	return qualityProgress;
+}
+
+/** Defects filed against this service by stellar-raven, its largest agent
+ * consumer, from that project's own evaluation battery. */
+export function getExternalFindings() {
+	return externalFindings;
 }

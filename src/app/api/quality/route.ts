@@ -57,6 +57,10 @@ export async function GET(req: NextRequest) {
 			/** Read this first: what we are weak at, measured, with the
 			 * recommended alternative for each. */
 			knownLimitations: e.knownLimitations,
+			/** Every finding traced detector -> surface -> outcome, as a node/link
+			 * graph. Whole-ledger counts. Read it to see which detector produces
+			 * which defects, where they land, and whether they close. */
+			flow: e.flow,
 			/** Where known-item misses die: every open recall finding replayed
 			 * live and classified at the FIRST failing stage, so the stages are
 			 * mutually exclusive and each names its owner. A high "passing"

@@ -1,20 +1,20 @@
 /**
- * Miss funnel — WHERE a known-item miss dies, measured per finding.
+ * Miss funnel. WHERE a known-item miss dies, measured per finding.
  *
  * "214 recall misses" is not actionable: those four words hide four
  * different problems with four different owners. Every open recall-miss is
  * replayed through the stages a query passes, and classified at the FIRST
  * stage that fails:
  *
- *   corpus      the entity is not in the directory at all — retrieval
+ *   corpus      the entity is not in the directory at all, retrieval
  *               cannot fix this; it is a coverage job
- *   identity    it exists but its own exact slug does not return it —
+ *   identity    it exists but its own exact slug does not return it -
  *               indexing/identity, the sls-033 / slug-in-haystack class
- *   admission   the natural-language query returns nothing keyword-tier —
+ *   admission   the natural-language query returns nothing keyword-tier -
  *               the tier ladder never let it in
- *   ranking     it IS returned for the query, just not in the top 3 —
+ *   ranking     it IS returned for the query, just not in the top 3 -
  *               a scoring problem, the cheapest class to fix
- *   passing     no longer reproduces — the finding is stale and should clear
+ *   passing     no longer reproduces, the finding is stale and should clear
  *
  * Sampled, not exhaustive (each probe is 2-3 live calls); the output
  * carries its denominator.
@@ -99,7 +99,7 @@ const MEANING: Record<Stage, { label: string; owner: string; note: string }> = {
 	passing: {
 		label: "no longer reproduces",
 		owner: "ledger",
-		note: "Fixed since the finding was filed — these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
+		note: "Fixed since the finding was filed, these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
 	},
 	ranking: {
 		label: "returned, but below top-3",
@@ -114,7 +114,7 @@ const MEANING: Record<Stage, { label: string; owner: string; note: string }> = {
 	identity: {
 		label: "own exact name does not return it",
 		owner: "indexing / identity",
-		note: "The record exists but cannot be found by its own identifier — the slug-in-haystack and split-identity class.",
+		note: "The record exists but cannot be found by its own identifier, the slug-in-haystack and split-identity class.",
 	},
 	corpus: {
 		label: "not in the directory at all",
@@ -150,5 +150,5 @@ writeFileSync(
 	`${JSON.stringify(out, null, 1)}\n`,
 );
 console.log(
-	`miss-funnel: ${sample.length} of ${parsed.length} replayed — ${ORDER.map((s) => `${s} ${stages[s].length}`).join(" · ")}`,
+	`miss-funnel: ${sample.length} of ${parsed.length} replayed, ${ORDER.map((s) => `${s} ${stages[s].length}`).join(" · ")}`,
 );

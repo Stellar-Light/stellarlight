@@ -90,7 +90,7 @@ type Project = {
 };
 
 /** Per-row quality = how much EVIDENCE stands behind what we publish about it.
- * Five equal components, each a fact we either hold or don't — no weighting
+ * Five equal components, each a fact we either hold or don't, no weighting
  * opinions, so a low score always reads as a specific missing thing. */
 const BASIS_RANK: Record<string, number> = {
 	"human-verified": 1,
@@ -199,11 +199,11 @@ const repos = [...repoSeen.values()].map((r) => ({
 	mainnetContracts: r.codeInUse?.contracts ?? 0,
 }));
 
-// Per-surface rollup: the shape a CONSUMER asks about — "how healthy is the
-// surface I'm calling?" — rather than our internal detector names.
+// Per-surface rollup: the shape a CONSUMER asks about, "how healthy is the
+// surface I'm calling?", rather than our internal detector names.
 const SURFACE_MEANS: Record<string, string> = {
 	retrieval: "search and ranking across projects, repos, research",
-	directory: "the project rows themselves — fields, types, provenance",
+	directory: "the project rows themselves, fields, types, provenance",
 	contract: "the OpenAPI contract and its generated artifacts",
 	corpus: "indexed research/audit documents and their chunking",
 	scf: "SCF round and award data",
@@ -279,7 +279,7 @@ const out = {
 	},
 };
 
-/** Honest self-report, derived from the numbers above — the thing a calling
+/** Honest self-report, derived from the numbers above, the thing a calling
  * agent should weigh BEFORE trusting a result. Each entry states the limit,
  * the measurement behind it, and what to do instead. Never hand-written
  * copy: if the number improves, the sentence changes or disappears. */
@@ -335,7 +335,7 @@ if (recallOpen > 0)
 	});
 (out as Record<string, unknown>).knownLimitations = limitations;
 
-/** THE GAP MATRIX — one row per (entity × field) hole, with the count, the
+/** THE GAP MATRIX, one row per (entity × field) hole, with the count, the
  * denominator, why it matters to a caller, what closes it, and real examples
  * so the work is pickup-able. This is the actionable half of the report:
  * knownLimitations says "be careful", the matrix says "here is the list". */
@@ -352,6 +352,81 @@ const missing = (field: string) =>
 const sample = <T>(rows: T[], pick: (r: T) => string) =>
 	rows.slice(0, 12).map(pick);
 
+/** SANKEY FLOW, every finding traced detector -> surface -> outcome.
+ * This is the "where do our defects come from and where do they end up"
+ * view: which detector caught it, which surface it lives on, and whether it
+ * closed. Node and link values are whole-ledger counts, not samples. */
+{
+	const nodeOf = new Map<string, number>();
+	const nodes: Array<{
+		id: string;
+		label: string;
+		column: number;
+		value: number;
+	}> = [];
+	const addNode = (id: string, label: string, column: number) => {
+		if (nodeOf.has(id)) return nodeOf.get(id) as number;
+		nodeOf.set(id, nodes.length);
+		nodes.push({ id, label, column, value: 0 });
+		return nodes.length - 1;
+	};
+	const linkMap = new Map<string, number>();
+	const bump = (from: number, to: number) => {
+		const k = `${from}:${to}`;
+		linkMap.set(k, (linkMap.get(k) ?? 0) + 1);
+	};
+	const OUTCOME: Record<string, string> = {
+		open: "Open",
+		cleared: "Cleared",
+		verified: "Verified",
+	};
+	// stable ordering: biggest detectors first so the diagram does not
+	// reshuffle between runs
+	const bySource = new Map<string, number>();
+	for (const f of findings)
+		bySource.set(f.source, (bySource.get(f.source) ?? 0) + 1);
+	const sources = [...bySource.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.map(([k]) => k);
+	for (const src of sources) addNode(`s:${src}`, src, 0);
+	for (const surf of [...bySurface.keys()].sort(
+		(a, b) =>
+			(bySurface.get(b)?.open ?? 0) +
+			(bySurface.get(b)?.cleared ?? 0) -
+			((bySurface.get(a)?.open ?? 0) + (bySurface.get(a)?.cleared ?? 0)),
+	))
+		addNode(`f:${surf}`, surf, 1);
+	for (const o of ["cleared", "open", "verified"])
+		addNode(`o:${o}`, OUTCOME[o], 2);
+
+	for (const f of findings) {
+		const a = nodeOf.get(`s:${f.source}`);
+		const b = nodeOf.get(`f:${f.surface}`);
+		const c = nodeOf.get(`o:${f.status}`);
+		if (a == null || b == null || c == null) continue;
+		bump(a, b);
+		bump(b, c);
+		nodes[a].value++;
+		nodes[c].value++;
+	}
+	for (const [, n] of [...bySurface.entries()].entries()) void n;
+	for (const n of nodes)
+		if (n.column === 1)
+			n.value =
+				(bySurface.get(n.label)?.open ?? 0) +
+				(bySurface.get(n.label)?.cleared ?? 0);
+
+	(out as Record<string, unknown>).flow = {
+		definition:
+			"Every finding traced detector -> surface -> outcome. Whole-ledger counts, not a sample. Read it to see which detector produces which defects, where they land, and whether they close.",
+		nodes,
+		links: [...linkMap.entries()].map(([k, value]) => {
+			const [source, target] = k.split(":").map(Number);
+			return { source, target, value };
+		}),
+	};
+}
+
 (out as Record<string, unknown>).gapMatrix = {
 	definition:
 		"One row per (entity type × missing field). count/of is a SAMPLE with its denominator, not a census. examples are real identifiers so the gap can be worked or independently checked.",
@@ -362,7 +437,7 @@ const sample = <T>(rows: T[], pick: (r: T) => string) =>
 			missing: missing("sourced").length,
 			of: projects.length,
 			whyItMatters:
-				"A lifecycle claim with no source cannot be re-checked by a caller — it is our assertion, not evidence.",
+				"A lifecycle claim with no source cannot be re-checked by a caller, it is our assertion, not evidence.",
 			closedBy:
 				"Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
 			examples: sample(

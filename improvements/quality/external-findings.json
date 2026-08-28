@@ -1,0 +1,151 @@
+{
+ "generatedAt": "2026-08-28T02:46:12.856Z",
+ "consumer": "stellar-experimental/stellar-raven",
+ "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
+ "counts": {
+  "reported-upstream": 8,
+  "declined-upstream": 1
+ },
+ "ourResponse": {
+  "fixShipped": 8,
+  "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
+ },
+ "total": 9,
+ "records": [
+  {
+   "id": "sls-023",
+   "title": "rwa product deployment status",
+   "status": "reported-upstream",
+   "discovered": "2026-07-10",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-023-rwa-product-deployment-status.md",
+   "ourIssue": 494,
+   "ourResponse": {
+    "issue": 494,
+    "state": "closed",
+    "closedAt": "2026-08-11",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/494"
+   }
+  },
+  {
+   "id": "sls-024",
+   "title": "project lifecycle operator conflicts",
+   "status": "reported-upstream",
+   "discovered": "2026-07-10",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-024-project-lifecycle-operator-conflicts.md",
+   "ourIssue": 494,
+   "ourResponse": {
+    "issue": 494,
+    "state": "closed",
+    "closedAt": "2026-08-11",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/494"
+   }
+  },
+  {
+   "id": "sls-029",
+   "title": "oracle product network evidence",
+   "status": "reported-upstream",
+   "discovered": "2026-07-10",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-029-oracle-product-network-evidence.md",
+   "ourIssue": 514,
+   "ourResponse": {
+    "issue": 514,
+    "state": "closed",
+    "closedAt": "2026-07-14",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/514"
+   }
+  },
+  {
+   "id": "sls-033",
+   "title": "wallet type enumeration availability",
+   "status": "reported-upstream",
+   "discovered": "2026-07-10",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-033-wallet-type-enumeration-availability.md",
+   "ourIssue": 519,
+   "ourResponse": {
+    "issue": 519,
+    "state": "closed",
+    "closedAt": "2026-07-14",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/519"
+   }
+  },
+  {
+   "id": "sls-039",
+   "title": "project tvl history capability",
+   "status": "declined-upstream",
+   "discovered": "2026-07-10",
+   "disposition": "Accept provider-hosted history as the upstream design boundary; keep consumer guidance directing trend and peak questions to tvlMethodUrl and do not request duplicated in-API history without new evidence.",
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-039-project-tvl-history-capability.md",
+   "ourIssue": 522,
+   "ourResponse": {
+    "issue": 522,
+    "state": "closed",
+    "closedAt": "2026-07-14",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/522"
+   }
+  },
+  {
+   "id": "sls-073",
+   "title": "vet-idea returns an empty report.competitors.projects array for an idea the directory does match",
+   "status": "reported-upstream",
+   "discovered": "2026-08-21",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-073-perps-vetidea-project-consistency.md",
+   "ourIssue": 1025,
+   "ourResponse": {
+    "issue": 1025,
+    "state": "closed",
+    "closedAt": "2026-08-25",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1025"
+   }
+  },
+  {
+   "id": "sls-074",
+   "title": "Include appendix audit identifiers in exact-match indexing",
+   "status": "reported-upstream",
+   "discovered": "2026-08-25",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-074-appendix-audit-identifiers-exact-miss.md",
+   "ourIssue": 1031,
+   "ourResponse": {
+    "issue": 1031,
+    "state": "open",
+    "closedAt": null,
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1031"
+   }
+  },
+  {
+   "id": "sls-075",
+   "title": "Type the project resolver identity, evidence, and meta response fields",
+   "status": "reported-upstream",
+   "discovered": "2026-08-25",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-075-project-resolver-response-contract.md",
+   "ourIssue": 1030,
+   "ourResponse": {
+    "issue": 1030,
+    "state": "closed",
+    "closedAt": "2026-08-25",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1030"
+   }
+  },
+  {
+   "id": "sls-076",
+   "title": "Do not label spelling neighbors as strict project matches",
+   "status": "reported-upstream",
+   "discovered": "2026-08-27",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-076-project-search-strict-spelling-neighbor.md",
+   "ourIssue": 1055,
+   "ourResponse": {
+    "issue": 1055,
+    "state": "closed",
+    "closedAt": "2026-08-27",
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1055"
+   }
+  }
+ ]
+}

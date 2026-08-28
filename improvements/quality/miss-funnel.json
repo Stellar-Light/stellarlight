@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T02:19:22.778Z",
+ "generatedAt": "2026-08-28T02:46:04.592Z",
  "population": {
   "openRecallMisses": 21,
   "sampled": 21,
@@ -10,7 +10,7 @@
    "stage": "passing",
    "label": "no longer reproduces",
    "owner": "ledger",
-   "note": "Fixed since the finding was filed — these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
+   "note": "Fixed since the finding was filed, these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
    "count": 0,
    "share": 0,
    "examples": []
@@ -55,7 +55,7 @@
    "stage": "identity",
    "label": "own exact name does not return it",
    "owner": "indexing / identity",
-   "note": "The record exists but cannot be found by its own identifier — the slug-in-haystack and split-identity class.",
+   "note": "The record exists but cannot be found by its own identifier, the slug-in-haystack and split-identity class.",
    "count": 0,
    "share": 0,
    "examples": []

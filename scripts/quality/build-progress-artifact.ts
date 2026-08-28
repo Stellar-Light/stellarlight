@@ -4,7 +4,7 @@
  * Two things a scoreboard of current numbers cannot show: are we moving
  * toward the stated goals, and where is the reasoning written down.
  *
- * Progress is read from QUALITY.md's own phase list — the doc is the source
+ * Progress is read from QUALITY.md's own phase list, the doc is the source
  * of truth, so a phase cannot be marked done here without being done there.
  * Each phase carries the EVIDENCE (shipped invariants, ratchets) and, when
  * it is not done, what remains. Honesty rule: "in progress" and "not
@@ -35,7 +35,7 @@ const PHASES = ["P0", "P1", "P2", "P3"].map((id) => {
 			: /`status:\s*not started`/.test(block)
 				? "not-started"
 				: "unknown";
-	const titleMatch = /\*\*P\d+\s*—\s*([^.*]+)\.?\*\*/.exec(block);
+	const titleMatch = /\*\*P\d+\s*-\s*([^.*]+)\.?\*\*/.exec(block);
 	const evidence = /\*Evidence:\*\s*([\s\S]*?)(?:\n\n|$)/.exec(block);
 	const remaining = /\*Remaining:\*\s*([\s\S]*?)(?:\n\n|$)/.exec(block);
 	const shippedSoFar =
@@ -61,13 +61,18 @@ const lessons = readdirSync(lessonsDir)
 	.reverse()
 	.map((f) => {
 		const body = readFileSync(join(lessonsDir, f), "utf8");
-		const title =
+		// Titles come from the lesson documents themselves; normalise their
+		// punctuation for display rather than rewriting the source files.
+		const title = (
 			body
 				.split("\n")
 				.find((l) => l.startsWith("# "))
-				?.replace(/^#\s*/, "") ?? f.replace(/\.md$/, "");
+				?.replace(/^#\s*/, "") ?? f.replace(/\.md$/, "")
+		)
+			.replace(/\s+\u2014\s+/g, ": ")
+			.replace(/\u2014/g, "-");
 		// count the numbered lessons inside (L1, L2, … or bold leads)
-		const count = (body.match(/\*\*L\d+\s*—/g) ?? []).length;
+		const count = (body.match(/\*\*L\d+\s*[\u2014-]/g) ?? []).length;
 		return {
 			file: `improvements/lessons/${f}`,
 			date: f.slice(0, 10),
@@ -114,7 +119,7 @@ writeFileSync(
 		{
 			generatedAt: new Date().toISOString(),
 			source: "QUALITY.md",
-			note: "Phase state is derived from QUALITY.md's own phase list — a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
+			note: "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
 			phases: PHASES,
 			library: { lessons, audits, receipts },
 		},

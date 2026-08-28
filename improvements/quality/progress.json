@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-08-28T02:20:35.554Z",
+ "generatedAt": "2026-08-28T02:47:19.514Z",
  "source": "QUALITY.md",
- "note": "Phase state is derived from QUALITY.md's own phase list — a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
+ "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
   {
    "id": "P0",
-   "title": "Name the classes, lock the first invariant",
+   "title": "P0",
    "state": "done",
    "evidence": "check-schema-opacity.ts (zero silent opacity, 47 open maps ratcheted), QUALITY.md itself.",
    "shippedSoFar": null,
@@ -13,7 +13,7 @@
   },
   {
    "id": "P1",
-   "title": "Honesty layer, eval integrity, the dashboard",
+   "title": "P1",
    "state": "done",
    "evidence": "specs/honesty-baseline.json (debt 0), scripts/eval/eval-baselines.json, improvements/quality/*.json.",
    "shippedSoFar": null,
@@ -21,7 +21,7 @@
   },
   {
    "id": "P2",
-   "title": "Entity truth: dedupe, issuers, receipts",
+   "title": "P2",
    "state": "done",
    "evidence": "battery slice G (enumeration integrity), slice H (verify grades itself), improvements/receipts/.",
    "shippedSoFar": null,
@@ -29,11 +29,11 @@
   },
   {
    "id": "P3",
-   "title": "Earned autonomy",
+   "title": "P3",
    "state": "in-progress",
    "evidence": null,
    "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift.",
-   "remaining": "no agent yet ACTS on the gap matrix — the gaps are measured, named and served, but closing them is still human-initiated. Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes, and those weeks have not been served."
+   "remaining": "no agent yet ACTS on the gap matrix, the gaps are measured, named and served, but closing them is still human-initiated. Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes, and those weeks have not been served."
   }
  ],
  "library": {
@@ -41,42 +41,42 @@
    {
     "file": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
     "date": "2026-08-27",
-    "title": "Lesson — the truth battery's first two runs (2026-08-27)",
+    "title": "Lesson: the truth battery's first two runs (2026-08-27)",
     "lessonCount": 11,
     "bytes": 7314
    },
    {
     "file": "improvements/lessons/2026-08-14-advisory-calibration-and-battery-fidelity.md",
     "date": "2026-08-14",
-    "title": "2026-08-14 — Three calibrations to one honest signal (+ the battery's four probe lessons)",
+    "title": "2026-08-14: Three calibrations to one honest signal (+ the battery's four probe lessons)",
     "lessonCount": 0,
     "bytes": 4420
    },
    {
     "file": "improvements/lessons/2026-08-12-advertised-but-never-persisted.md",
     "date": "2026-08-12",
-    "title": "2026-08-12 — Advertised but never persisted: the sdkCapabilities hole",
+    "title": "2026-08-12: Advertised but never persisted: the sdkCapabilities hole",
     "lessonCount": 0,
     "bytes": 10018
    },
    {
     "file": "improvements/lessons/2026-08-08-zero-work-green-and-population-truth.md",
     "date": "2026-08-08",
-    "title": "2026-08-08 — Zero-work green runs, and shape ≠ population",
+    "title": "2026-08-08: Zero-work green runs, and shape ≠ population",
     "lessonCount": 0,
     "bytes": 4066
    },
    {
     "file": "improvements/lessons/2026-07-19-improvement-day.md",
     "date": "2026-07-19",
-    "title": "2026-07-19 — the improvement day (classes 27–30)",
+    "title": "2026-07-19: the improvement day (classes 27–30)",
     "lessonCount": 0,
     "bytes": 3256
    },
    {
     "file": "improvements/lessons/2026-07-16-slice-truth-floors-and-windows.md",
     "date": "2026-07-16",
-    "title": "2026-07-16 — slice truth, gated floors, windowed guards (quality-week lessons)",
+    "title": "2026-07-16: slice truth, gated floors, windowed guards (quality-week lessons)",
     "lessonCount": 0,
     "bytes": 4142
    },
@@ -104,35 +104,35 @@
    {
     "file": "improvements/lessons/2026-07-09-research-rank-starbridge.md",
     "date": "2026-07-09",
-    "title": "2026-07-09 — stale-but-close outranks current (Starbridge)",
+    "title": "2026-07-09: stale-but-close outranks current (Starbridge)",
     "lessonCount": 0,
     "bytes": 2415
    },
    {
     "file": "improvements/lessons/2026-07-09-curation-writes-and-identity.md",
     "date": "2026-07-09",
-    "title": "2026-07-09 — the corridor-matrix day: three write-path classes + one process class",
+    "title": "2026-07-09: the corridor-matrix day: three write-path classes + one process class",
     "lessonCount": 0,
     "bytes": 4389
    },
    {
     "file": "improvements/lessons/2026-07-08-verify-before-advertise-npm.md",
     "date": "2026-07-08",
-    "title": "2026-07-08 — The changelog advertised a package version that didn't exist",
+    "title": "2026-07-08: The changelog advertised a package version that didn't exist",
     "lessonCount": 0,
     "bytes": 1436
    },
    {
     "file": "improvements/lessons/2026-07-08-structured-recall-etherfuse-sushi.md",
     "date": "2026-07-08",
-    "title": "2026-07-08 — Structured truth must drive INCLUSION, not just ranking",
+    "title": "2026-07-08: Structured truth must drive INCLUSION, not just ranking",
     "lessonCount": 0,
     "bytes": 2353
    },
    {
     "file": "improvements/lessons/2026-07-08-schema-drift-contract-as-code.md",
     "date": "2026-07-08",
-    "title": "2026-07-08 — Schema drift: the spec lied about the live API",
+    "title": "2026-07-08: Schema drift: the spec lied about the live API",
     "lessonCount": 0,
     "bytes": 2633
    }
@@ -156,6 +156,13 @@
     "markers": [
      "TBD"
     ]
+   },
+   {
+    "file": "improvements/receipts/pluto-loans-2026-08-29.json",
+    "slug": "pluto-loans",
+    "url": "https://plutoloans.com/",
+    "fetchedAt": "2026-08-29",
+    "markers": []
    },
    {
     "file": "improvements/receipts/noether-2026-08-28.json",

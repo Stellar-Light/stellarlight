@@ -302,6 +302,37 @@ export const spec: OpenAPISpec = {
 												},
 											},
 										},
+										flow: {
+											type: "object",
+											description:
+												"Findings as a node/link graph: detector -> surface -> outcome, whole-ledger counts (not a sample). nodes carry a column index (0 detector, 1 surface, 2 outcome) and a throughput value; links carry source/target node indexes and the count flowing between them.",
+											properties: {
+												definition: { type: "string" },
+												nodes: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															label: { type: "string" },
+															column: { type: "integer" },
+															value: { type: "integer" },
+														},
+													},
+												},
+												links: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															source: { type: "integer" },
+															target: { type: "integer" },
+															value: { type: "integer" },
+														},
+													},
+												},
+											},
+										},
 										missFunnel: {
 											type: "object",
 											description:

@@ -1,13 +1,13 @@
 /**
  * Append today's quality snapshot to the committed trend history
- * (improvements/quality/history.json) — the data feed for /quality's Trends
+ * (improvements/quality/history.json), the data feed for /quality's Trends
  * section (QUALITY.md P1, the last item).
  *
  * One row per UTC date, idempotent (a re-run replaces today's row, so the
  * daily workflow and a manual run cannot double-append). Ratchet numbers
  * come from their committed baselines; provenance numbers from a live
  * directory sample; battery/parity counts are passed in by the workflow
- * that just measured them (never fabricated here — absent means "not
+ * that just measured them (never fabricated here, absent means "not
  * measured today", recorded as null, and the chart shows the gap).
  *
  *   pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
@@ -33,7 +33,7 @@ const honestyDebt = Object.values(honesty.operations).filter(
 	(o) => !o.exempt,
 ).length;
 
-// Live provenance sample — the same broad sweep the audits used.
+// Live provenance sample, the same broad sweep the audits used.
 async function provenance(): Promise<{
 	sampled: number;
 	liveRows: number;

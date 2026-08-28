@@ -9,12 +9,14 @@ import {
 	MissFunnel,
 	PhaseProgress,
 	QueueRow,
+	Sankey,
 	SplitBarList,
 	StackedRamp,
 } from "@/components/quality/charts";
 import {
 	evidenceUrl,
 	getEntities,
+	getExternalFindings,
 	getGuardRows,
 	getMissFunnel,
 	getNorthStar,
@@ -24,10 +26,10 @@ import {
 } from "@/lib/quality-artifacts";
 
 /**
- * /quality — the public quality scoreboard (idea-scale-model deliverable 1).
+ * /quality, the public quality scoreboard (idea-scale-model deliverable 1).
  *
  * Every number on this page is statically imported from a COMMITTED artifact
- * in improvements/ (see src/lib/quality-artifacts.ts) — no hand-set figures,
+ * in improvements/ (see src/lib/quality-artifacts.ts) - no hand-set figures,
  * no live recomputation. The page changes only when a new engine run commits
  * its evidence. Each stat links the artifact that produced it.
  *
@@ -38,7 +40,7 @@ import {
 export const metadata: Metadata = {
 	title: "Data Quality | Stellar Light",
 	description:
-		"The StellarLight quality scoreboard — measured recall, data-truth cross-checks, contract honesty and consumer-interlock guards, every number linked to its reproducible run.",
+		"The StellarLight quality scoreboard, measured recall, data-truth cross-checks, contract honesty and consumer-interlock guards, every number linked to its reproducible run.",
 	robots: {
 		index: false,
 		follow: false,
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
 	},
 };
 
-/** Borderless stat — same idiom as /analytics. */
+/** Borderless stat, same idiom as /analytics. */
 function Stat({
 	label,
 	value,
@@ -67,7 +69,7 @@ function Stat({
 	);
 }
 
-/** bklit-style card with corner crosshair dots — same idiom as /analytics. */
+/** bklit-style card with corner crosshair dots, same idiom as /analytics. */
 function Card({
 	title,
 	description,
@@ -130,6 +132,7 @@ export default function QualityPage() {
 	const entities = getEntities();
 	const funnel = getMissFunnel();
 	const progress = getProgress();
+	const external = getExternalFindings();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -142,10 +145,10 @@ export default function QualityPage() {
 					Data quality
 				</h1>
 				<p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-					Every number below is read from a committed engine artifact — this
-					page cannot say anything the runs didn&apos;t measure. Each stat links
-					its reproducible evidence; each figure carries the date it was
-					measured. The standing promises behind these guards live in{" "}
+					Every number below is read from a committed engine artifact, this page
+					cannot say anything the runs didn&apos;t measure. Each stat links its
+					reproducible evidence; each figure carries the date it was measured.
+					The standing promises behind these guards live in{" "}
 					<a
 						href={evidenceUrl("DATA_SLA.md")}
 						target="_blank"
@@ -161,7 +164,7 @@ export default function QualityPage() {
 			{/* ── where we are against the stated plan, and how an agent reads this ── */}
 			<Card
 				title="Progress against the quality plan"
-				description="Phase status is read from QUALITY.md itself — a phase cannot show green here without being green there. Remaining work is shown in the same weight as completed work."
+				description="Phase status is read from QUALITY.md itself, a phase cannot show green here without being green there. Remaining work is shown in the same weight as completed work."
 				right={
 					<a
 						href="https://github.com/Stellar-Light/stellarlight/blob/main/QUALITY.md"
@@ -178,7 +181,7 @@ export default function QualityPage() {
 				<PhaseProgress phases={progress.phases} />
 			</Card>
 
-			{/* ── the agent door — deliberately at the top, not a footnote ── */}
+			{/* ── the agent door, deliberately at the top, not a footnote ── */}
 			<div className="mb-6 rounded-lg border border-border bg-card/40 p-4 sm:p-5">
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div className="min-w-0">
@@ -186,7 +189,7 @@ export default function QualityPage() {
 							Reading this as an agent?
 						</p>
 						<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-							Every number on this page is served as JSON — known limitations
+							Every number on this page is served as JSON, known limitations
 							first, then the gap matrix with real identifiers, the miss funnel,
 							per-surface findings, guard state and the trend history. No
 							parameters, no key, cached hourly.
@@ -204,7 +207,7 @@ export default function QualityPage() {
 
 			{/* north star */}
 			<Card
-				title="North star — full-surface audit ok-rate"
+				title="North star: full-surface audit ok-rate"
 				description="Hundreds of cold, natural probes across every retrieval surface, graded against ground truth. The one number the whole engine system optimizes."
 				right={<EvidenceLink path={northStar.latest.evidence} />}
 				className="mb-6"
@@ -226,7 +229,7 @@ export default function QualityPage() {
 								href={evidenceUrl(p.evidence)}
 								target="_blank"
 								rel="noopener noreferrer"
-								title={`${p.label} — ${p.date}`}
+								title={`${p.label} - ${p.date}`}
 								className="group text-center"
 							>
 								<div
@@ -249,7 +252,7 @@ export default function QualityPage() {
 
 			{/* ── for consumers: read this before trusting a result ── */}
 			<Card
-				title="Known limitations — read before relying on this data"
+				title="Known limitations: read before relying on this data"
 				description="Derived from the measurements below, not written by hand: if a number improves, the entry changes or disappears. Each says what to do instead."
 				right={
 					<a
@@ -285,7 +288,7 @@ export default function QualityPage() {
 				</div>
 				<div className="mt-5 pt-5 border-t border-border">
 					<p className="text-xs text-muted-foreground mb-3">
-						Open findings by surface — a work queue, not an outage
+						Open findings by surface. A work queue, not an outage
 					</p>
 					<BarList
 						rows={entities.surfaces.map((s) => ({
@@ -296,8 +299,8 @@ export default function QualityPage() {
 						unit="open"
 					/>
 					<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
-						An agent can fetch all of this — limitations, surface health, guard
-						state, the score definitions and the trend — from{" "}
+						An agent can fetch all of this, limitations, surface health, guard
+						state, the score definitions and the trend, from{" "}
 						<a
 							href="/api/quality"
 							className="text-foreground underline underline-offset-2 hover:no-underline"
@@ -311,7 +314,7 @@ export default function QualityPage() {
 
 			{/* ── the gap matrix: what is missing, where, and who closes it ── */}
 			<Card
-				title="Gap matrix — what is missing, by entity and field"
+				title="Gap matrix: what is missing, by entity and field"
 				description="One row per hole. Counts are samples with their denominator, and every row carries real identifiers so the gap can be worked or independently checked."
 				right={
 					<a
@@ -329,7 +332,7 @@ export default function QualityPage() {
 
 			{/* ── findings: what we actually found, cleared, and still owe ── */}
 			<Card
-				title="Findings — what the engines caught"
+				title="Findings: what the engines caught"
 				description="Every detector writes here. Open means still reproducing; cleared means a later run stopped reproducing it. This is the work queue, not a score."
 				className="mb-6"
 			>
@@ -353,17 +356,17 @@ export default function QualityPage() {
 				<p className="text-[11px] text-muted-foreground leading-relaxed mb-5">
 					The open count leads reality on purpose: a fix clears findings only
 					when their detector next runs. The miss funnel below replays them live
-					—{" "}
+					-{" "}
 					<span className="text-foreground">
 						{funnel.stages.find((st) => st.stage === "passing")?.count ?? 0} of{" "}
 						{funnel.population.sampled} sampled no longer reproduce
 					</span>{" "}
-					— so read this number as an upper bound on real debt.
+					- so read this number as an upper bound on real debt.
 				</p>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
-							By failure mode — open vs ever-cleared
+							By failure mode, open vs ever-cleared
 						</p>
 						<SplitBarList
 							rows={entities.findings.byFailureMode.slice(0, 8).map((m) => ({
@@ -411,9 +414,109 @@ export default function QualityPage() {
 				)}
 			</Card>
 
+			{/* ── what our biggest consumer files against us ── */}
+			<Card
+				title="Consumer findings from Raven"
+				description="Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours."
+				right={
+					<a
+						href="https://github.com/stellar-experimental/stellar-raven/tree/main/improvements/stellar-light-scout"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						Their records
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
+					<Metric
+						label="Filed against us"
+						value={String(external.total)}
+						sub="Across the project's lifetime"
+						explain="Each is a defect their evaluation battery reproduced against a live surface of ours, with the probe and evidence recorded in their repository."
+					/>
+					<Metric
+						label="Fix shipped"
+						value={`${external.ourResponse.fixShipped}/${external.total}`}
+						sub="Our linked issue is closed"
+						goodWhen="higher"
+						explain={external.ourResponse.note}
+					/>
+				</div>
+				<div className="flex flex-col">
+					{external.records.map((r) => {
+						const resp = (
+							r as {
+								ourResponse?: {
+									state: string;
+									url: string;
+									closedAt: string | null;
+								};
+							}
+						).ourResponse;
+						const shipped = resp?.state === "closed";
+						return (
+							<QueueRow
+								key={r.id}
+								href={resp?.url ?? r.sourceUrl}
+								primary={`${r.id.toUpperCase()} ${r.title}`}
+								secondary={r.discovered ? `filed ${r.discovered}` : undefined}
+								trailing={
+									r.status === "declined-upstream"
+										? "Declined by them"
+										: shipped
+											? `Fix shipped ${resp?.closedAt ?? ""}`
+											: "Open on our side"
+								}
+							/>
+						);
+					})}
+				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
+					{external.ourResponse.note}
+				</p>
+			</Card>
+
+			{/* ── the flow: where defects come from and where they end up ── */}
+			<Card
+				title="Defect flow: detector to surface to outcome"
+				description="Every finding in the ledger traced through the system: which detector caught it, which surface it lives on, and whether it closed. Ribbon thickness is the count; whole-ledger, not a sample."
+				right={
+					<a
+						href={evidenceUrl("improvements/ledger/findings.json")}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						The ledger
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<div className="overflow-x-auto">
+					<div className="min-w-[680px]">
+						<Sankey
+							nodes={entities.flow.nodes}
+							links={entities.flow.links}
+							height={360}
+						/>
+					</div>
+				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
+					Read left to right: a detector produces findings, they land on a
+					surface, and they end Cleared, Open, or Verified. A fat ribbon into
+					Open is a surface carrying real debt; a fat ribbon into Cleared is a
+					detector whose class has been closed.
+				</p>
+			</Card>
+
 			{/* ── the miss funnel: WHERE a miss dies, not just how many ── */}
 			<Card
-				title="Miss funnel — where a known-item miss actually dies"
+				title="Miss funnel: where a known-item miss actually dies"
 				description="Every open recall finding replayed live and classified at the FIRST stage that fails, so the stages are mutually exclusive. 'We have 200 recall misses' hides four different problems with four different owners."
 				right={
 					<a
@@ -438,7 +541,7 @@ export default function QualityPage() {
 
 			{/* ── per-entity quality: rows and repos, not just totals ── */}
 			<Card
-				title="Row quality — the evidence behind each record"
+				title="Row quality: the evidence behind each record"
 				description="Every project row scores on five facts we either hold or don't: a provenance basis, a date, a source URL, a type, and a link. A low score names exactly what is missing."
 				className="mb-6"
 			>
@@ -448,13 +551,13 @@ export default function QualityPage() {
 						value={`${entities.projects.meanScore}%`}
 						sub={`across ${entities.projects.sampled} sampled rows`}
 						goodWhen="higher"
-						explain="Per row: the share of five evidence facts we hold — a provenance basis, a status date, a source URL, at least one type, at least one link. 100% means all five are present; it does NOT rate the project, only how well we can back what we publish about it."
+						explain="Per row: the share of five evidence facts we hold, a provenance basis, a status date, a source URL, at least one type, at least one link. 100% means all five are present; it does NOT rate the project, only how well we can back what we publish about it."
 					/>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
-							Status provenance — strongest evidence first
+							Status provenance, strongest evidence first
 						</p>
 						<StackedRamp
 							rows={entities.projects.basisMix.map((b) => ({
@@ -465,7 +568,7 @@ export default function QualityPage() {
 						/>
 						<p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
 							Most rows rest on{" "}
-							<span className="text-foreground">site-liveness</span> — a page
+							<span className="text-foreground">site-liveness</span> - a page
 							answered. That is the weakest honest basis we serve, and moving
 							rows up this ramp is the standing data job.
 						</p>
@@ -485,7 +588,7 @@ export default function QualityPage() {
 				</div>
 				<div className="mt-6 pt-5 border-t border-border">
 					<p className="text-xs text-muted-foreground mb-3 inline-flex items-center gap-1.5">
-						Curation queue — rows whose evidence is thinnest, prominent first
+						Curation queue: rows whose evidence is thinnest, prominent first
 						<Info text="Sorted by evidence score ascending, then by curated prominence, so the most-seen thin rows surface first. Each line names exactly which of the five facts is missing." />
 					</p>
 					<div className="flex flex-col gap-1.5">
@@ -504,7 +607,7 @@ export default function QualityPage() {
 
 			{/* ── repo quality ── */}
 			<Card
-				title="Repo quality — code truth"
+				title="Repo quality: code truth"
 				description="Indexed repositories carry their own evidence: a graded score, scan depth, curated knowledge notes, and whether a verified mainnet contract is joined to them."
 				className="mb-6"
 			>
@@ -514,21 +617,21 @@ export default function QualityPage() {
 						value={`${entities.repos.withCodeDepth}/${entities.repos.sampled}`}
 						sub="Have a code-depth reading"
 						goodWhen="higher"
-						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) — not a quality judgement of the project."
+						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) - not a quality judgement of the project."
 					/>
 					<Metric
 						label="With knowledge notes"
 						value={`${entities.repos.withNotes}/${entities.repos.sampled}`}
 						sub="Curated dated facts with sources"
 						goodWhen="higher"
-						explain="knowledgeNotes are hand-curated dated facts with a source URL. Absence means nobody curated this repo yet — never a statement about the repo itself."
+						explain="knowledgeNotes are hand-curated dated facts with a source URL. Absence means nobody curated this repo yet, never a statement about the repo itself."
 					/>
 					<Metric
 						label="Joined to a mainnet contract"
 						value={`${entities.repos.withMainnet}/${entities.repos.sampled}`}
 						sub="Verified contract attributed"
 						goodWhen="higher"
-						explain="A verified mainnet contract attributed to this repo — the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
+						explain="A verified mainnet contract attributed to this repo, the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
 					/>
 				</div>
 				<p className="text-xs text-muted-foreground mb-3">
@@ -540,7 +643,7 @@ export default function QualityPage() {
 							key={r.fullName}
 							href={`https://github.com/${r.fullName}`}
 							primary={r.fullName}
-							trailing={`score ${r.repoScore} · depth ${r.codeDepth ?? "—"}% · ${r.notes} note${r.notes === 1 ? "" : "s"}`}
+							trailing={`score ${r.repoScore} · depth ${r.codeDepth ?? "-"}% · ${r.notes} note${r.notes === 1 ? "" : "s"}`}
 						/>
 					))}
 				</div>
@@ -574,7 +677,7 @@ export default function QualityPage() {
 								<QueueRow
 									key={l.file}
 									href={evidenceUrl(l.file)}
-									primary={l.title.replace(/^Lessons?\s*[—-]\s*/i, "")}
+									primary={l.title.replace(/^Lessons?\s*[--]\s*/i, "")}
 									trailing={
 										l.lessonCount > 0
 											? `${l.date} · ${l.lessonCount} lessons`
@@ -620,7 +723,7 @@ export default function QualityPage() {
 			{/* ── trends: real charts, and honest when there is no line yet ── */}
 			<Card
 				title="Trends"
-				description="Daily history appended by the eval pipeline and committed — red days included. Battery probe counts rotate with the daily banks, so the pass line moves by design; the failure line and the ratchets are the signal."
+				description="Daily history appended by the eval pipeline and committed, red days included. Battery probe counts rotate with the daily banks, so the pass line moves by design; the failure line and the ratchets are the signal."
 				className="mb-6"
 			>
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
@@ -686,7 +789,7 @@ export default function QualityPage() {
 					>
 						improvements/
 					</a>{" "}
-					and this page statically renders those files — a number here can only
+					and this page statically renders those files, a number here can only
 					change when a new dated artifact lands. The consumer-side interlock
 					conventions (spec-as-discovery-index, version handshake, cadence
 					contract) are specified in{" "}

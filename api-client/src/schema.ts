@@ -1958,6 +1958,21 @@ export interface operations {
                             measurement?: string;
                             instead?: string;
                         }[];
+                        /** @description Findings as a node/link graph: detector -> surface -> outcome, whole-ledger counts (not a sample). nodes carry a column index (0 detector, 1 surface, 2 outcome) and a throughput value; links carry source/target node indexes and the count flowing between them. */
+                        flow?: {
+                            definition?: string;
+                            nodes?: {
+                                id?: string;
+                                label?: string;
+                                column?: number;
+                                value?: number;
+                            }[];
+                            links?: {
+                                source?: number;
+                                target?: number;
+                                value?: number;
+                            }[];
+                        };
                         /** @description Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt. */
                         missFunnel?: {
                             /** Format: date-time */

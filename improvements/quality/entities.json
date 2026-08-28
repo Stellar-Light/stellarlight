@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T02:19:03.639Z",
+ "generatedAt": "2026-08-28T02:45:35.037Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -9,7 +9,7 @@
   },
   {
    "surface": "directory",
-   "means": "the project rows themselves — fields, types, provenance",
+   "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 15,
    "clearedFindings": 39
   },
@@ -1828,6 +1828,253 @@
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
+ "flow": {
+  "definition": "Every finding traced detector -> surface -> outcome. Whole-ledger counts, not a sample. Read it to see which detector produces which defects, where they land, and whether they close.",
+  "nodes": [
+   {
+    "id": "s:engine-a-recall",
+    "label": "engine-a-recall",
+    "column": 0,
+    "value": 257
+   },
+   {
+    "id": "s:engine-d-demand",
+    "label": "engine-d-demand",
+    "column": 0,
+    "value": 98
+   },
+   {
+    "id": "s:nightly-drift",
+    "label": "nightly-drift",
+    "column": 0,
+    "value": 22
+   },
+   {
+    "id": "s:nightly-battery",
+    "label": "nightly-battery",
+    "column": 0,
+    "value": 18
+   },
+   {
+    "id": "s:scf-crosscheck",
+    "label": "scf-crosscheck",
+    "column": 0,
+    "value": 14
+   },
+   {
+    "id": "s:raven-routing",
+    "label": "raven-routing",
+    "column": 0,
+    "value": 14
+   },
+   {
+    "id": "s:engine-e-contract",
+    "label": "engine-e-contract",
+    "column": 0,
+    "value": 8
+   },
+   {
+    "id": "s:nightly-field-population",
+    "label": "nightly-field-population",
+    "column": 0,
+    "value": 3
+   },
+   {
+    "id": "s:golden-eval",
+    "label": "golden-eval",
+    "column": 0,
+    "value": 2
+   },
+   {
+    "id": "s:raven-loop",
+    "label": "raven-loop",
+    "column": 0,
+    "value": 1
+   },
+   {
+    "id": "f:retrieval",
+    "label": "retrieval",
+    "column": 1,
+    "value": 303
+   },
+   {
+    "id": "f:directory",
+    "label": "directory",
+    "column": 1,
+    "value": 54
+   },
+   {
+    "id": "f:contract",
+    "label": "contract",
+    "column": 1,
+    "value": 30
+   },
+   {
+    "id": "f:corpus",
+    "label": "corpus",
+    "column": 1,
+    "value": 18
+   },
+   {
+    "id": "f:scf",
+    "label": "scf",
+    "column": 1,
+    "value": 14
+   },
+   {
+    "id": "f:consumer",
+    "label": "consumer",
+    "column": 1,
+    "value": 14
+   },
+   {
+    "id": "f:code",
+    "label": "code",
+    "column": 1,
+    "value": 4
+   },
+   {
+    "id": "o:cleared",
+    "label": "Cleared",
+    "column": 2,
+    "value": 352
+   },
+   {
+    "id": "o:open",
+    "label": "Open",
+    "column": 2,
+    "value": 78
+   },
+   {
+    "id": "o:verified",
+    "label": "Verified",
+    "column": 2,
+    "value": 7
+   }
+  ],
+  "links": [
+   {
+    "source": 8,
+    "target": 10,
+    "value": 2
+   },
+   {
+    "source": 10,
+    "target": 17,
+    "value": 260
+   },
+   {
+    "source": 1,
+    "target": 10,
+    "value": 44
+   },
+   {
+    "source": 0,
+    "target": 10,
+    "value": 257
+   },
+   {
+    "source": 10,
+    "target": 18,
+    "value": 43
+   },
+   {
+    "source": 4,
+    "target": 14,
+    "value": 14
+   },
+   {
+    "source": 14,
+    "target": 17,
+    "value": 14
+   },
+   {
+    "source": 6,
+    "target": 12,
+    "value": 8
+   },
+   {
+    "source": 12,
+    "target": 19,
+    "value": 7
+   },
+   {
+    "source": 12,
+    "target": 18,
+    "value": 1
+   },
+   {
+    "source": 5,
+    "target": 15,
+    "value": 14
+   },
+   {
+    "source": 15,
+    "target": 18,
+    "value": 14
+   },
+   {
+    "source": 9,
+    "target": 16,
+    "value": 1
+   },
+   {
+    "source": 16,
+    "target": 18,
+    "value": 1
+   },
+   {
+    "source": 1,
+    "target": 11,
+    "value": 54
+   },
+   {
+    "source": 11,
+    "target": 17,
+    "value": 39
+   },
+   {
+    "source": 2,
+    "target": 12,
+    "value": 22
+   },
+   {
+    "source": 12,
+    "target": 17,
+    "value": 22
+   },
+   {
+    "source": 3,
+    "target": 13,
+    "value": 18
+   },
+   {
+    "source": 13,
+    "target": 17,
+    "value": 14
+   },
+   {
+    "source": 13,
+    "target": 18,
+    "value": 4
+   },
+   {
+    "source": 7,
+    "target": 16,
+    "value": 3
+   },
+   {
+    "source": 16,
+    "target": 17,
+    "value": 3
+   },
+   {
+    "source": 11,
+    "target": 18,
+    "value": 15
+   }
+  ]
+ },
  "gapMatrix": {
   "definition": "One row per (entity type × missing field). count/of is a SAMPLE with its denominator, not a census. examples are real identifiers so the gap can be worked or independently checked.",
   "rows": [
@@ -1924,7 +2171,7 @@
     "field": "statusSourceUrl",
     "missing": 24,
     "of": 588,
-    "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller — it is our assertion, not evidence.",
+    "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller, it is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "examples": [
      "benji",
