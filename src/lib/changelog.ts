@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-28",
 		surfaces: ["api"],
+		version: "spec@1.9.3",
+		type: "fixed",
+		summary:
+			"Opacity ratchet paid off: all 47 grandfathered open maps (additionalProperties:true) in operation schemas replaced with real property declarations observed from live responses; ratchet baseline lowered 47 → 0. Also fixes partnerOnboard's extract response key: the spec said `profile`, the route serves `fields`.",
+		detail:
+			"Every response object whose shape the contract previously refused to declare is now typed from live observation plus the serializer's own TS interface: the one-shot report metas (scf-pitch, hackathon-brief, vet-idea, repos/trust — {source, generatedAt, note}), the full vet block (competitors incl. matchMode, maturity, priorArt, gap) shared by vetIdea/scfPitch/hackathonBrief, SCF round/fundedPeers/fundingBar, hackathonBrief startFrom trust summaries and liveContracts rows, repos/trust usage + audits, contracts meta/codeInUse/audits, every analyze dimension block (categories, developers, gaps, hackathons, tvl, funding.byRound), changelog meta (incl. the deprecated flat returned/total), filter/count echoes on hackathons/builds, hackathons/compare, rfps and leaderboard (leaderboard filters.type is string[]|null, not string), repos/explain protocolCaps rows, partner caseStudies rows, partners/match + /assistant public-partner rows, partnerOnboard extract fields, submitPartnerListing accepted fields, and the feedback GET self-description. One key correction surfaced by the pass: partnerOnboard mode=extract returns `fields` — the spec's `profile` property never existed in a live response. analyze funding.postHackathonStatusFunnel stays a map by design (keys are recorded post-hackathon status names) but now declares scope + a typed integer value schema instead of additionalProperties:true. specs/opacity-baseline.json openMaps: 47 → 0 — the ratchet now fails the build if ANY operation schema reintroduces an untyped open map.",
+	},
+	{
+		date: "2026-08-28",
+		surfaces: ["api"],
 		version: "spec@1.9.2",
 		type: "fixed",
 		summary:

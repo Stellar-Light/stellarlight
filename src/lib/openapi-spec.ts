@@ -32,6 +32,213 @@ interface OpenAPISpec {
 // contract, and Raven gates exposure of GET /api/verify on exactly that.
 const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
 
+// ── Shared response fragments (opacity ratchet burn-down) ──────────────────
+// Each fragment mirrors a serializer that several operations share, typed
+// from live observation + the serializer's own TS interface. Keeping ONE
+// schema per shared shape here is what keeps the copies from drifting.
+
+/** One-shot report meta — {source, generatedAt, note} (scf-pitch,
+ * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
+const REPORT_META_SCHEMA = {
+	type: "object",
+	properties: {
+		source: { type: "string" },
+		generatedAt: { type: "string", format: "date-time" },
+		note: { type: "string" },
+	},
+};
+
+/** ScfPitchReport["round"] — live SCF round state; never asserts a negative
+ * on fetch failure (source: "unavailable" = verify yourself). */
+const SCF_ROUND_SCHEMA = {
+	type: "object",
+	properties: {
+		source: {
+			type: "string",
+			enum: ["live", "unavailable"],
+			description:
+				"unavailable = the live round check failed; open is [] but says nothing about actual round state.",
+		},
+		open: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					round: { type: "integer" },
+					phase: { type: "string", nullable: true },
+					submissionDeadline: {
+						type: "string",
+						nullable: true,
+						description: "ISO date (YYYY-MM-DD) when known.",
+					},
+				},
+			},
+		},
+		note: { type: "string" },
+	},
+};
+
+/** ScfPitchReport["fundedPeers"] items — awarded ACTIVE projects in the
+ * vertical, largest award first. */
+const SCF_FUNDED_PEER_SCHEMA = {
+	type: "object",
+	properties: {
+		slug: { type: "string" },
+		name: { type: "string", nullable: true },
+		totalAwardedUSD: { type: "number", nullable: true },
+		lastAwardedRound: { type: "integer", nullable: true },
+	},
+};
+
+/** ScfPitchReport["fundingBar"]. */
+const SCF_FUNDING_BAR_SCHEMA = {
+	type: "object",
+	properties: {
+		fundedProjects: { type: "integer" },
+		totalAwardedUSD: { type: "number" },
+		basis: { type: "string" },
+	},
+};
+
+/** Vertical coverage row (TypeCoverage in ecosystem-gaps.ts) — shared by
+ * analyze `gaps.byType` and (with `basis`) the vet-idea `gap` block. */
+const TYPE_COVERAGE_PROPS = {
+	type: { type: "string" },
+	total: { type: "integer" },
+	live: { type: "integer" },
+	inProgress: {
+		type: "integer",
+		description: "Active-but-not-yet-Live (Development / Pre-Release).",
+	},
+	scfFunded: { type: "integer" },
+	hackathonWinners: { type: "integer" },
+};
+
+/** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
+ * computation /api/vet-idea serves, embedded by scf-pitch + hackathon-brief. */
+const VET_BLOCK_SCHEMA = {
+	type: "object",
+	description:
+		"Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row.",
+	properties: {
+		competitors: {
+			type: "object",
+			properties: {
+				matchMode: {
+					type: "string",
+					enum: ["vertical", "scored", "weak"],
+					description:
+						"How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
+				},
+				matchModeLabel: { type: "string" },
+				repos: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							fullName: { type: "string" },
+							tier: { type: "string", nullable: true },
+							activityState: { type: "string" },
+							stars: { type: "integer", nullable: true },
+							codeDomains: { type: "array", items: { type: "string" } },
+						},
+					},
+				},
+				projects: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							slug: { type: "string" },
+							name: { type: "string", nullable: true },
+							status: { type: "string", nullable: true },
+							types: { type: "array", items: { type: "string" } },
+						},
+					},
+				},
+			},
+		},
+		maturity: {
+			type: "object",
+			properties: {
+				auditedProjects: { type: "integer" },
+				liveOnMainnetRepos: { type: "integer" },
+				basis: { type: "string" },
+			},
+		},
+		priorArt: {
+			type: "object",
+			properties: {
+				repos: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							fullName: { type: "string" },
+							hackathonWinner: { type: "boolean" },
+							activityState: { type: "string" },
+							lastCommitAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+						},
+					},
+				},
+				note: { type: "string" },
+			},
+		},
+		gap: {
+			type: "object",
+			nullable: true,
+			description:
+				"SUPPLY-side coverage of the idea's vertical — a gap is not demand. Null when no vertical mapped.",
+			properties: {
+				...TYPE_COVERAGE_PROPS,
+				basis: { type: "string" },
+			},
+		},
+	},
+};
+
+/** TrustReport["usage"] — on-chain enrichment rollup (null = no attributed
+ * on-chain activity on record). */
+const TRUST_USAGE_SCHEMA = {
+	type: "object",
+	nullable: true,
+	properties: {
+		contracts: { type: "integer" },
+		events: { type: "integer", nullable: true },
+		eventsDelta: { type: "integer", nullable: true },
+		subinvocations: { type: "integer", nullable: true },
+		asOf: { type: "string", format: "date-time" },
+	},
+};
+
+/** ContractRow["codeInUse"] — same enrichment rollup minus subinvocations. */
+const CONTRACT_CODE_IN_USE_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"On-chain usage attributed to the repo's contract(s); null = no attributed activity on record, never 'unused'.",
+	properties: {
+		contracts: { type: "integer" },
+		events: { type: "integer", nullable: true },
+		eventsDelta: { type: "integer", nullable: true },
+		asOf: { type: "string", format: "date-time" },
+	},
+};
+
+/** One audit-report row ({auditor, publishedAt, title}, all nullable). */
+const AUDIT_REPORT_ROW_SCHEMA = {
+	type: "object",
+	properties: {
+		auditor: { type: "string", nullable: true },
+		publishedAt: { type: "string", format: "date-time", nullable: true },
+		title: { type: "string", nullable: true },
+	},
+};
+
 export const spec: OpenAPISpec = {
 	openapi: "3.1.0",
 	info: {
@@ -1538,7 +1745,48 @@ export const spec: OpenAPISpec = {
 										service: { type: "string" },
 										version: { type: "string" },
 										generatedAt: { type: "string", format: "date-time" },
-										meta: { type: "object", additionalProperties: true },
+										meta: {
+											type: "object",
+											properties: {
+												counts: {
+													type: "object",
+													properties: {
+														returned: { type: "integer" },
+														total: { type: "integer" },
+													},
+												},
+												returned: {
+													type: "integer",
+													deprecated: true,
+													description:
+														"Deprecated flat copy — read meta.counts.returned.",
+												},
+												total: {
+													type: "integer",
+													deprecated: true,
+													description:
+														"Deprecated flat copy — read meta.counts.total.",
+												},
+												latest: {
+													type: "string",
+													format: "date",
+													nullable: true,
+													description: "Date of the newest entry.",
+												},
+												filters: {
+													type: "object",
+													properties: {
+														since: {
+															type: "string",
+															format: "date",
+															nullable: true,
+														},
+														limit: { type: "integer", nullable: true },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
 										entries: {
 											type: "array",
 											items: {
@@ -2046,7 +2294,15 @@ export const spec: OpenAPISpec = {
 												},
 												protocolCaps: {
 													type: "array",
-													items: { type: "object", additionalProperties: true },
+													items: {
+														type: "object",
+														properties: {
+															cap: { type: "integer" },
+															title: { type: "string" },
+															status: { type: "string", nullable: true },
+															url: { type: "string" },
+														},
+													},
 												},
 												stellarDeps: {
 													type: "array",
@@ -2353,9 +2609,13 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 												counts: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"How many of the requested slugs resolved.",
+													properties: {
+														requested: { type: "integer" },
+														returned: { type: "integer" },
+														notFound: { type: "integer" },
+													},
 												},
 											},
 										},
@@ -2501,15 +2761,27 @@ export const spec: OpenAPISpec = {
 												},
 												filters: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"The filters as applied — an echo, so a caller can see what was honoured.",
+													properties: {
+														q: { type: "string", nullable: true },
+														winnersOnly: { type: "boolean" },
+														track: { type: "string", nullable: true },
+														limit: { type: "integer" },
+													},
 												},
 												counts: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"returned vs total — how much the filters narrowed.",
+													properties: {
+														indexedBuilds: {
+															type: "integer",
+															description: "Total builds in the index.",
+														},
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+													},
 												},
 												note: { type: "string" },
 											},
@@ -3040,7 +3312,19 @@ export const spec: OpenAPISpec = {
 												tomlFetchedAt: { type: "string", nullable: true },
 												caseStudies: {
 													type: "array",
-													items: { type: "object", additionalProperties: true },
+													items: {
+														type: "object",
+														properties: {
+															title: { type: "string" },
+															url: { type: "string", nullable: true },
+															projectSlug: {
+																type: "string",
+																nullable: true,
+																description:
+																	"Slug in the projects directory, when the case study's project is listed there.",
+															},
+														},
+													},
 												},
 												verified: {
 													type: "object",
@@ -3155,8 +3439,36 @@ export const spec: OpenAPISpec = {
 												properties: {
 													partner: {
 														type: "object",
-														additionalProperties: true,
 														description: "The matched partner row.",
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string" },
+															partnerType: { type: "string" },
+															tagline: { type: "string", nullable: true },
+															websiteUrl: { type: "string", nullable: true },
+															acceptingClients: {
+																type: "boolean",
+																nullable: true,
+															},
+															sectors: {
+																type: "array",
+																items: { type: "string" },
+															},
+															regions: {
+																type: "array",
+																items: { type: "string" },
+															},
+															freshness: {
+																type: "object",
+																properties: {
+																	status: { type: "string" },
+																},
+															},
+															url: {
+																type: "string",
+																description: "Public profile page.",
+															},
+														},
 													},
 													score: {
 														type: "number",
@@ -3279,8 +3591,64 @@ export const spec: OpenAPISpec = {
 												"Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
 											items: {
 												type: "object",
-												additionalProperties: true,
 												description: "A public partner record.",
+												properties: {
+													slug: { type: "string" },
+													name: { type: "string" },
+													partnerType: { type: "string" },
+													tagline: { type: "string", nullable: true },
+													description: {
+														type: "string",
+														nullable: true,
+														description:
+															"Truncated (≤180 chars) — card fallback when tagline is empty.",
+													},
+													websiteUrl: { type: "string", nullable: true },
+													acceptingClients: {
+														type: "boolean",
+														nullable: true,
+													},
+													sectors: {
+														type: "array",
+														items: { type: "string" },
+													},
+													regions: {
+														type: "array",
+														items: { type: "string" },
+													},
+													assets: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES.",
+													},
+													seps: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"SEP standards implemented (sep-6, sep-24, sep-31).",
+													},
+													tomlSourceUrl: { type: "string", nullable: true },
+													tomlFetchedAt: { type: "string", nullable: true },
+													rampTypes: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server.",
+													},
+													country: { type: "string", nullable: true },
+													contactable: {
+														type: "boolean",
+														description:
+															"True when the partner has a direct contact path (email or channel).",
+													},
+													logoUrl: { type: "string", nullable: true },
+													freshness: { type: "string" },
+													url: {
+														type: "string",
+														description: "Public profile page.",
+													},
+												},
 											},
 										},
 										intent: {
@@ -3377,12 +3745,52 @@ export const spec: OpenAPISpec = {
 											nullable: true,
 											description: "mode=chat: the next assistant turn.",
 										},
-										profile: {
+										fields: {
 											type: "object",
-											additionalProperties: true,
 											nullable: true,
 											description:
-												"mode=extract: partner-owned fields only. A null value means the partner did not say it — never a fabricated specific.",
+												"mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific.",
+											properties: {
+												partnerType: {
+													type: "string",
+													nullable: true,
+													description:
+														"One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | other. Null when genuinely unclear from the transcript.",
+												},
+												tagline: { type: "string", nullable: true },
+												description: { type: "string", nullable: true },
+												services: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Granular lowercase hyphenated service tags (e.g. 'usdc-off-ramp-mexico').",
+												},
+												sectors: {
+													type: "array",
+													items: { type: "string" },
+												},
+												regions: {
+													type: "array",
+													items: { type: "string" },
+												},
+												acceptingClients: {
+													type: "boolean",
+													nullable: true,
+												},
+												typicalEngagement: {
+													type: "string",
+													nullable: true,
+												},
+												leadTime: { type: "string", nullable: true },
+												pricingModel: { type: "string", nullable: true },
+												pricingNotes: { type: "string", nullable: true },
+												websiteUrl: { type: "string", nullable: true },
+												docsUrl: { type: "string", nullable: true },
+												githubOrg: { type: "string", nullable: true },
+												contactEmail: { type: "string", nullable: true },
+												contactChannel: { type: "string", nullable: true },
+												responseSla: { type: "string", nullable: true },
+											},
 										},
 									},
 								},
@@ -3440,9 +3848,88 @@ export const spec: OpenAPISpec = {
 									},
 									fields: {
 										type: "object",
-										additionalProperties: true,
 										description:
-											"Profile fields (typically the /api/partners/onboard extract output)",
+											"Profile fields (typically the /api/partners/onboard extract output). Unknown keys are ignored; enum-checked keys (partnerType, sectors, regions, pricingModel) fall back / are dropped rather than erroring.",
+										properties: {
+											partnerType: {
+												type: "string",
+												enum: [
+													"anchor",
+													"on-off-ramp",
+													"infrastructure",
+													"tooling",
+													"protocol",
+													"wallet",
+													"audit-firm",
+													"legal",
+													"agency",
+													"other",
+												],
+											},
+											tagline: { type: "string", maxLength: 140 },
+											description: { type: "string", maxLength: 4000 },
+											services: {
+												type: "array",
+												items: { type: "string" },
+												description:
+													"Lowercase hyphenated service tags the matchmaker matches on.",
+											},
+											sectors: {
+												type: "array",
+												items: {
+													type: "string",
+													enum: [
+														"defi",
+														"payments",
+														"rwa",
+														"stablecoins",
+														"identity",
+														"data",
+														"ai",
+														"gaming",
+														"other",
+													],
+												},
+											},
+											regions: {
+												type: "array",
+												items: {
+													type: "string",
+													enum: [
+														"global",
+														"north-america",
+														"latam",
+														"europe",
+														"africa",
+														"mena",
+														"asia",
+														"oceania",
+													],
+												},
+											},
+											acceptingClients: { type: "boolean" },
+											typicalEngagement: { type: "string", maxLength: 300 },
+											leadTime: { type: "string", maxLength: 300 },
+											pricingModel: {
+												type: "string",
+												enum: [
+													"free",
+													"freemium",
+													"subscription",
+													"usage-based",
+													"fixed",
+													"hourly",
+													"rev-share",
+													"custom",
+												],
+											},
+											pricingNotes: { type: "string", maxLength: 1000 },
+											websiteUrl: { type: "string", maxLength: 300 },
+											docsUrl: { type: "string", maxLength: 300 },
+											githubOrg: { type: "string", maxLength: 100 },
+											contactChannel: { type: "string", maxLength: 200 },
+											responseSla: { type: "string", maxLength: 200 },
+										},
 									},
 								},
 							},
@@ -3594,9 +4081,16 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 												filters: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"Echo of the filter values this response was computed under (null = not applied).",
+													properties: {
+														q: { type: "string", nullable: true },
+														category: { type: "string", nullable: true },
+														quarter: { type: "string", nullable: true },
+														status: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
 												},
 												counts: {
 													type: "object",
@@ -3757,38 +4251,19 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object", additionalProperties: true },
+										meta: REPORT_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
 												idea: { type: "string" },
 												vertical: { type: "string", nullable: true },
-												round: {
-													type: "object",
-													properties: {
-														source: {
-															type: "string",
-															enum: ["live", "unavailable"],
-														},
-														open: {
-															type: "array",
-															items: {
-																type: "object",
-																additionalProperties: true,
-															},
-														},
-														note: { type: "string" },
-													},
-												},
+												round: SCF_ROUND_SCHEMA,
 												fundedPeers: {
 													type: "array",
-													items: { type: "object", additionalProperties: true },
+													items: SCF_FUNDED_PEER_SCHEMA,
 												},
-												fundingBar: {
-													type: "object",
-													additionalProperties: true,
-												},
-												vet: { type: "object", additionalProperties: true },
+												fundingBar: SCF_FUNDING_BAR_SCHEMA,
+												vet: VET_BLOCK_SCHEMA,
 												angles: {
 													type: "array",
 													items: { type: "string" },
@@ -3860,7 +4335,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object", additionalProperties: true },
+										meta: REPORT_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
@@ -3871,12 +4346,7 @@ export const spec: OpenAPISpec = {
 													description:
 														"Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless.",
 												},
-												vet: {
-													type: "object",
-													additionalProperties: true,
-													description:
-														"Same computation as /api/vet-idea: competitors, maturity, priorArt, gap.",
-												},
+												vet: VET_BLOCK_SCHEMA,
 												builds: {
 													type: "array",
 													description:
@@ -3898,7 +4368,112 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													description:
 														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
-													items: { type: "object", additionalProperties: true },
+													items: {
+														type: "object",
+														properties: {
+															repo: {
+																type: "object",
+																properties: {
+																	fullName: { type: "string" },
+																	url: { type: "string", nullable: true },
+																	stars: { type: "integer", nullable: true },
+																	lastCommitAt: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	isArchived: { type: "boolean" },
+																	tier: { type: "string", nullable: true },
+																	activityState: { type: "string" },
+																},
+															},
+															project: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	slug: { type: "string" },
+																	name: { type: "string", nullable: true },
+																},
+															},
+															codeTruth: {
+																type: "object",
+																description:
+																	"TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																properties: {
+																	scanState: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	scannedAt: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	stellarProof: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	codeDepth: {
+																		type: "number",
+																		nullable: true,
+																	},
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	sdkCapabilities: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	interfaceSize: { type: "integer" },
+																	mainnetContractId: {
+																		type: "string",
+																		nullable: true,
+																	},
+																},
+															},
+															usage: TRUST_USAGE_SCHEMA,
+															audits: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	count: { type: "integer" },
+																	latest: AUDIT_REPORT_ROW_SCHEMA,
+																},
+															},
+															auditDrift: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	latestAuditAt: { type: "string" },
+																	lastCommitAt: { type: "string" },
+																	daysOfDrift: { type: "integer" },
+																},
+															},
+															succession: {
+																type: "object",
+																properties: {
+																	successorRepo: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	predecessors: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
+															},
+															signals: {
+																type: "array",
+																items: { type: "string" },
+																description:
+																	"Closed deterministic fact vocabulary (same set as /api/repos/trust signals) — not a score.",
+															},
+															fullReport: {
+																type: "string",
+																description:
+																	"Path to the full /api/repos/trust report (incl. the complete contractInterface).",
+															},
+														},
+													},
 												},
 												liveContracts: {
 													type: "object",
@@ -3912,9 +4487,47 @@ export const spec: OpenAPISpec = {
 														basis: { type: "string" },
 														contracts: {
 															type: "array",
+															description:
+																"Verified-contract rows for the domain — the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt.",
 															items: {
 																type: "object",
-																additionalProperties: true,
+																properties: {
+																	contractId: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	repo: {
+																		type: "object",
+																		properties: {
+																			fullName: { type: "string" },
+																			url: {
+																				type: "string",
+																				nullable: true,
+																			},
+																		},
+																	},
+																	project: {
+																		type: "object",
+																		nullable: true,
+																		properties: {
+																			slug: { type: "string" },
+																			name: {
+																				type: "string",
+																				nullable: true,
+																			},
+																		},
+																	},
+																	stellarProof: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	interfaceSize: { type: "integer" },
+																	codeInUse: CONTRACT_CODE_IN_USE_SCHEMA,
+																},
 															},
 														},
 														note: { type: "string" },
@@ -3923,23 +4536,12 @@ export const spec: OpenAPISpec = {
 												funding: {
 													type: "object",
 													properties: {
-														round: {
-															type: "object",
-															additionalProperties: true,
-															description:
-																"Live SCF round state — never asserts a negative on fetch failure (source: 'unavailable').",
-														},
+														round: SCF_ROUND_SCHEMA,
 														fundedPeers: {
 															type: "array",
-															items: {
-																type: "object",
-																additionalProperties: true,
-															},
+															items: SCF_FUNDED_PEER_SCHEMA,
 														},
-														fundingBar: {
-															type: "object",
-															additionalProperties: true,
-														},
+														fundingBar: SCF_FUNDING_BAR_SCHEMA,
 													},
 												},
 												whatNotToClaim: {
@@ -4012,7 +4614,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object", additionalProperties: true },
+										meta: REPORT_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
@@ -4030,14 +4632,34 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: {
 																type: "object",
-																additionalProperties: true,
+																properties: {
+																	fullName: { type: "string" },
+																	tier: { type: "string", nullable: true },
+																	activityState: { type: "string" },
+																	stars: { type: "integer", nullable: true },
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
 															},
 														},
 														projects: {
 															type: "array",
 															items: {
 																type: "object",
-																additionalProperties: true,
+																properties: {
+																	slug: { type: "string" },
+																	name: { type: "string", nullable: true },
+																	status: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	types: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
 															},
 														},
 														matchMode: {
@@ -4064,7 +4686,16 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: {
 																type: "object",
-																additionalProperties: true,
+																properties: {
+																	fullName: { type: "string" },
+																	hackathonWinner: { type: "boolean" },
+																	activityState: { type: "string" },
+																	lastCommitAt: {
+																		type: "string",
+																		format: "date-time",
+																		nullable: true,
+																	},
+																},
 															},
 														},
 														note: { type: "string" },
@@ -4072,15 +4703,21 @@ export const spec: OpenAPISpec = {
 												},
 												gap: {
 													type: "object",
-													additionalProperties: true,
 													nullable: true,
 													description:
 														"Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps).",
+													properties: {
+														...TYPE_COVERAGE_PROPS,
+														basis: { type: "string" },
+													},
 												},
 												funding: {
 													type: "object",
-													additionalProperties: true,
 													nullable: true,
+													properties: {
+														scfAwardedProjects: { type: "integer" },
+														basis: { type: "string" },
+													},
 												},
 											},
 										},
@@ -4144,7 +4781,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { type: "object", additionalProperties: true },
+										meta: REPORT_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
@@ -4196,15 +4833,20 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
-												usage: {
-													type: "object",
-													additionalProperties: true,
-													nullable: true,
-												},
+												usage: TRUST_USAGE_SCHEMA,
 												audits: {
 													type: "object",
-													additionalProperties: true,
 													nullable: true,
+													description:
+														"Null = no PUBLISHED audit at our registry — never 'unaudited'.",
+													properties: {
+														count: { type: "integer" },
+														latest: AUDIT_REPORT_ROW_SCHEMA,
+														reports: {
+															type: "array",
+															items: AUDIT_REPORT_ROW_SCHEMA,
+														},
+													},
 												},
 												auditDrift: {
 													type: "object",
@@ -4343,7 +4985,6 @@ export const spec: OpenAPISpec = {
 									properties: {
 										meta: {
 											type: "object",
-											additionalProperties: true,
 											properties: {
 												matchMode: {
 													type: "string",
@@ -4352,6 +4993,28 @@ export const spec: OpenAPISpec = {
 														"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
 												},
 												matchModeLabel: { type: "string" },
+												source: { type: "string" },
+												generatedAt: {
+													type: "string",
+													format: "date-time",
+												},
+												filters: {
+													type: "object",
+													properties: {
+														q: { type: "string", nullable: true },
+														domain: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
+												},
+												counts: {
+													type: "object",
+													properties: {
+														returned: { type: "integer" },
+														total: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
 											},
 										},
 										contracts: {
@@ -4391,19 +5054,24 @@ export const spec: OpenAPISpec = {
 														type: "array",
 														items: { type: "string" },
 													},
-													codeInUse: {
-														type: "object",
-														additionalProperties: true,
-														nullable: true,
-														description:
-															"Live on-chain usage attributed to this repo's contract(s) — the strongest evidence tier.",
-													},
+													codeInUse: CONTRACT_CODE_IN_USE_SCHEMA,
 													audits: {
 														type: "object",
-														additionalProperties: true,
 														nullable: true,
 														description:
 															"Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'.",
+														properties: {
+															count: { type: "integer" },
+															latestAuditor: {
+																type: "string",
+																nullable: true,
+															},
+															latestPublishedAt: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+														},
 													},
 													successorRepo: { type: "string", nullable: true },
 													scannedAt: { type: "string", nullable: true },
@@ -5418,33 +6086,203 @@ export const spec: OpenAPISpec = {
 										},
 										categories: {
 											type: "object",
-											additionalProperties: true,
 											description:
 												"Present for dimension=all|categories: project counts by category over the active population (see meta.population).",
+											properties: {
+												totalProjects: { type: "integer" },
+												scope: { type: "string" },
+												distribution: {
+													type: "array",
+													description:
+														"Per-category rollup, largest projectCount first.",
+													items: {
+														type: "object",
+														properties: {
+															category: { type: "string" },
+															projectCount: { type: "integer" },
+															scfFundedCount: { type: "integer" },
+															scfTotalUSD: { type: "number" },
+															hackathonWinnerCount: { type: "integer" },
+														},
+													},
+												},
+											},
 										},
 										developers: {
 											type: "object",
-											additionalProperties: true,
 											description:
 												"Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt.",
+											properties: {
+												asOf: {
+													type: "string",
+													format: "date",
+													description:
+														"Electric Capital snapshot date — cite THIS, not generatedAt.",
+												},
+												source: { type: "string" },
+												sourceUrl: { type: "string", nullable: true },
+												monthlyActiveDevs: {
+													type: "object",
+													properties: {
+														total: { type: "integer" },
+														exclusive: {
+															type: "integer",
+															description:
+																"Devs building ONLY on Stellar — the truer measure of committed builders.",
+														},
+														multichain: { type: "integer" },
+														allTimePeak: { type: "integer" },
+														allTimePeakDay: {
+															type: "string",
+															format: "date",
+														},
+														trend: {
+															type: "object",
+															properties: {
+																vs30dAgo: { type: "integer" },
+																vs90dAgo: { type: "integer" },
+																vs1yAgo: { type: "integer" },
+																momPct: { type: "number", nullable: true },
+																yoyPct: { type: "number", nullable: true },
+															},
+														},
+													},
+												},
+												commits28d: { type: "integer", nullable: true },
+												tenure: {
+													type: "object",
+													nullable: true,
+													properties: {
+														fullTime: { type: "integer" },
+														partTime: { type: "integer" },
+														oneTime: { type: "integer" },
+													},
+												},
+												geography: {
+													type: "object",
+													nullable: true,
+													properties: {
+														located: { type: "integer" },
+														unknown: { type: "integer" },
+														topCountries: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	country: { type: "string" },
+																	devs: { type: "integer" },
+																},
+															},
+														},
+													},
+												},
+												peerChains: {
+													type: "array",
+													description:
+														"Peer-chain MAD for scale context, not a quality ranking.",
+													items: {
+														type: "object",
+														properties: {
+															chain: { type: "string" },
+															monthlyActiveDevs: { type: "integer" },
+														},
+													},
+												},
+												basis: { type: "string" },
+											},
 										},
 										gaps: {
 											type: "object",
-											additionalProperties: true,
 											description:
 												"Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
+											properties: {
+												scope: { type: "string" },
+												basis: { type: "string" },
+												byType: {
+													type: "array",
+													description:
+														"Every vertical (incl. absent ones) with its coverage, thinnest first.",
+													items: {
+														type: "object",
+														properties: TYPE_COVERAGE_PROPS,
+													},
+												},
+												signals: {
+													type: "object",
+													properties: {
+														unproven: {
+															type: "array",
+															items: { type: "string" },
+														},
+														underbuilt: {
+															type: "array",
+															items: { type: "string" },
+														},
+														absent: {
+															type: "array",
+															items: { type: "string" },
+														},
+													},
+												},
+												thresholds: {
+													type: "object",
+													properties: {
+														underbuiltMax: { type: "integer" },
+													},
+												},
+											},
 										},
 										hackathons: {
 											type: "object",
-											additionalProperties: true,
 											description:
-												"Present for dimension=all|hackathons: cross-event rollup (events, submissions, winners) from the live DoraHacks feed.",
+												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+											properties: {
+												totalEvents: { type: "integer" },
+												byStatus: {
+													type: "object",
+													properties: {
+														upcoming: { type: "integer" },
+														active: { type: "integer" },
+														completed: { type: "integer" },
+													},
+												},
+												totalPrizePoolUSD: { type: "number" },
+												totalRegisteredHackers: { type: "integer" },
+											},
 										},
 										tvl: {
 											type: "object",
-											additionalProperties: true,
 											description:
 												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'.",
+											properties: {
+												totalTvlUSD: { type: "number" },
+												trackedProjects: { type: "integer" },
+												asOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"Most recent per-project tvlAsOf refresh — null when nothing is tracked.",
+												},
+												provider: { type: "string" },
+												top10: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															slug: { type: "string", nullable: true },
+															name: { type: "string", nullable: true },
+															tvlUSD: { type: "number" },
+															tvlAsOf: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+														},
+													},
+												},
+												basis: { type: "string" },
+											},
 										},
 										funding: {
 											type: "object",
@@ -5478,13 +6316,31 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													description:
 														"Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at.",
-													items: { type: "object", additionalProperties: true },
+													items: {
+														type: "object",
+														properties: {
+															round: { type: "string" },
+															count: {
+																type: "integer",
+																description:
+																	"Per-round MEMBERSHIP — a project counts in each round it won, so summing counts exceeds scfAwardedProjects.",
+															},
+															totalUSD: { type: "number" },
+														},
+													},
 												},
 												postHackathonStatusFunnel: {
 													type: "object",
-													additionalProperties: true,
 													description:
-														"Outcome funnel for hackathon-origin awarded projects (still-building / live / inactive).",
+														"Outcome funnel for hackathon-linked active projects. Besides `scope`, keys are post-hackathon status names (Built / In Progress / Abandoned / Unknown, plus any other recorded status) mapping to project counts.",
+													properties: {
+														scope: {
+															type: "string",
+															description:
+																"Which projects the funnel tallies (hackathon-linked only, with the population size).",
+														},
+													},
+													additionalProperties: { type: "integer" },
 												},
 												projectSetHash: { type: "string" },
 												snapshotAsOf: {
@@ -5752,15 +6608,34 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 												filters: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"Echo of the applied sort/range/category/type scope (null = not applied).",
+													properties: {
+														sort: { type: "string" },
+														range: { type: "string" },
+														category: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														type: {
+															type: "array",
+															items: { type: "string" },
+															nullable: true,
+															description:
+																"The exact project types kept (EITHER-membership); null = no type filter.",
+														},
+													},
 												},
 												counts: {
 													type: "object",
-													additionalProperties: true,
 													description:
 														"Row counts for this response (returned rows; population size where stated).",
+													properties: {
+														returned: { type: "integer" },
+														total: {
+															type: "integer",
+															description:
+																"Rows matching the filter pre-slice.",
+														},
+													},
 												},
 												docs: {
 													type: "string",
@@ -5860,19 +6735,71 @@ export const spec: OpenAPISpec = {
 												contentType: { type: "string" },
 												body: {
 													type: "object",
-													additionalProperties: true,
 													description:
-														"Field-by-field description of the POST body, including the allowed kind values.",
+														"Field-by-field description of the POST body — values are human-readable usage notes, except kind, which lists the allowed values.",
+													properties: {
+														kind: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"The allowed kind values (the POST field takes ONE of them).",
+														},
+														message: { type: "string" },
+														target: {
+															type: "object",
+															properties: {
+																surface: { type: "string" },
+																slug: { type: "string" },
+															},
+														},
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																endpoint: { type: "string" },
+																skillVersion: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
 												},
 												example: {
 													type: "object",
-													additionalProperties: true,
 													description: "A ready-to-send example body.",
+													properties: {
+														kind: { type: "string" },
+														message: { type: "string" },
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																endpoint: { type: "string" },
+																skillVersion: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
 												},
 												voteExample: {
 													type: "object",
-													additionalProperties: true,
 													description: "An example of the vote-shaped variant.",
+													properties: {
+														kind: { type: "string" },
+														target: {
+															type: "object",
+															properties: {
+																surface: { type: "string" },
+																slug: { type: "string" },
+															},
+														},
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
 												},
 												rateLimit: {
 													type: "string",
