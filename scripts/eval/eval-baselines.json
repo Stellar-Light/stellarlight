@@ -1,13 +1,13 @@
 {
- "$comment": "sha256 fingerprints of every eval input (banks, guards, goldens, linter). The vitest gate (eval-fingerprints.test.ts) fails when reality drifts from this file, so ANY eval change carries its re-baseline in the same diff — reviewers see 'the meter moved' explicitly. Regenerate: pnpm exec tsx scripts/eval/update-eval-baselines.ts",
- "baselinedAt": "2026-08-28T00:11:13.979Z",
- "files": {
-  "scripts/eval/battery-banks.ts": "76c38a354c6802fa290366bdfa409f0eafbc8c5ec57e9ad7ab5db7160b431649",
-  "scripts/eval/raven-truth-battery.ts": "781c8bc84590261b447734f99bc40af60e93a247b20b7154d88654c22c515b64",
-  "scripts/eval/raven-golden-parity.ts": "b4488e0b1eba90809867ec872e89fb787ca41f96ef4ffc5d36be7ab669f0059d",
-  "scripts/eval/raven-surface-consistency.ts": "0463048b6e0aab9da7cb04713f2e28351d2101c7b763a47c366b8e40d60feac5",
-  "scripts/eval/raven-honest-absence.ts": "ac9270df9ed0f7390b274cd6279696b20a6f43ca361eea27c99eda6a755985e0",
-  "scripts/eval/golden-questions.json": "f46d43ab16faf88add0c4b83387b4ff2bee9108c62eaf6277676fb0f9aee7592",
-  "scripts/eval/lint-eval-banks.ts": "71ce80d74e1589af6441ac9650b1485e9b882fb38eefbfd10748d4528ba7b925"
- }
+	"$comment": "sha256 fingerprints of every eval input (banks, guards, goldens, linter). The vitest gate (eval-fingerprints.test.ts) fails when reality drifts from this file, so ANY eval change carries its re-baseline in the same diff — reviewers see 'the meter moved' explicitly. Regenerate: pnpm exec tsx scripts/eval/update-eval-baselines.ts",
+	"baselinedAt": "2026-08-28T00:11:13.979Z",
+	"files": {
+		"scripts/eval/battery-banks.ts": "76c38a354c6802fa290366bdfa409f0eafbc8c5ec57e9ad7ab5db7160b431649",
+		"scripts/eval/raven-truth-battery.ts": "781c8bc84590261b447734f99bc40af60e93a247b20b7154d88654c22c515b64",
+		"scripts/eval/raven-golden-parity.ts": "b4488e0b1eba90809867ec872e89fb787ca41f96ef4ffc5d36be7ab669f0059d",
+		"scripts/eval/raven-surface-consistency.ts": "0463048b6e0aab9da7cb04713f2e28351d2101c7b763a47c366b8e40d60feac5",
+		"scripts/eval/raven-honest-absence.ts": "ac9270df9ed0f7390b274cd6279696b20a6f43ca361eea27c99eda6a755985e0",
+		"scripts/eval/golden-questions.json": "f46d43ab16faf88add0c4b83387b4ff2bee9108c62eaf6277676fb0f9aee7592",
+		"scripts/eval/lint-eval-banks.ts": "71ce80d74e1589af6441ac9650b1485e9b882fb38eefbfd10748d4528ba7b925"
+	}
 }
