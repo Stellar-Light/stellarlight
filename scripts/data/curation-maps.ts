@@ -73,6 +73,22 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://github.com/plutodao/loans-sdk",
 		basis: "human-verified",
 	},
+	// receipt: improvements/receipts/ping-2026-08-28.json
+	// User report 2026-08-28 ("i think they shutdown"), verified same day:
+	// letsping.com and www serve Framer's "Site Not Found" unpublished-site
+	// page (HTTP 404, ~6.9KB shell) and app.letsping.com does not resolve at
+	// all (HTTP 000, zero bytes). Every product surface is gone. YC's company
+	// directory still reads "Active", but that status is founder-reported and
+	// lags; it does not outweigh the product's own hosts. Status rested on
+	// source-inherited, the weakest basis we serve.
+	ping: {
+		from: "Live",
+		to: "Inactive",
+		note: "Neo-bank for Latin American freelancers (letsping.com); the site is unpublished (Framer 'Site Not Found') and the app host no longer resolves.",
+		asOf: "2026-08-28",
+		sourceUrl: "https://letsping.com/",
+		basis: "human-verified",
+	},
 	// receipt: improvements/receipts/hoops-2026-08-28.json
 	hoops: {
 		from: "Live",
