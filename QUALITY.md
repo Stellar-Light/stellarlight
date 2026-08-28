@@ -148,8 +148,13 @@ this section records why, so the map carries its own provenance.
   our sls-033, open since July — dated identity, lifecycle, availability,
   dedup status) · stablecoin issuer-relation truth (an issuer credited across
   another issuer's asset is the sls-066 class) · receipts-in-repo for
-  human-verified corrections (fetch date + ETag + observed value beside the
-  curation entry, their WisdomTree pattern).
+  human-verified corrections — *shipped 2026-08-29:
+  scripts/data/capture-receipt.ts writes improvements/receipts/ entries
+  (URL, fetch time, ETag, markers with excerpts, body hash) and the four
+  recent human-verified corrections (hoops, laina, noether, zenex) carry
+  theirs, referenced from their curation-map entries. Re-run the script to
+  diff what a page says now against what it said when the correction was
+  made.*
 - Watch, do not build: their source-pointer lane (`sources.locate`) is still
   CHANGES-REQUESTED with open findings. If phase 0 ships, our position is the
   ecosystem long tail their canonical-only allowlist cannot cover, and
