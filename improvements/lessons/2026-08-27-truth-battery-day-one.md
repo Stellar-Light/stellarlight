@@ -102,3 +102,15 @@ Wave 3 (hacker journey): 23/23 substance; one honesty gap (vetIdea
 competitors carried no matchMode — #1049). Wave 4: 19/21, the two "fails"
 being one opinion-assertion (L10) and one crude grading regex (SEP-41's #1 is
 rightly stellar-protocol — the standard's own text).
+
+**L11 — Manual curation must pass the same evidence gates as automation
+(2026-08-29, the hoops confession).** The "a 200 is not a business" class was
+closed for the automated path (page verdicts, basis-upgrader refusals) — and
+then the operator hand-stamped a `Live` + `site-liveness` curation entry off
+a 200 whose page literally said TESTNET and "JOIN THE WAITLIST". A closed
+class stays closed only if EVERY path into the data passes through its gate:
+curate-projects now fetches the sourceUrl of any machine-basis Live stamp at
+apply time and refuses on pre-launch markers, in dry-run and execute alike.
+`human-verified` entries pass with a warning on contradiction — that basis
+means a person owns the claim. Fire-checked against the original mistake:
+the gate refuses it.

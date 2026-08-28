@@ -1601,7 +1601,63 @@ async function main() {
 	}
 
 	console.log("\n── Status fixes (from-guarded) ──");
+	// ── The curator gate (2026-08-29, the hoops confession) ────────────────
+	// The automated path already enforces "a 200 is not a business": the
+	// weekly link-check reads what a 2xx SERVED and the basis upgrader
+	// refuses non-product pages. Manual curation BYPASSED that whole layer —
+	// a hand-written site-liveness Live stamp shipped off a 200 whose page
+	// literally said TESTNET and "JOIN THE WAITLIST". Per the closure rule,
+	// the fix is not "read more carefully": it is making this path unable to
+	// repeat it. Any STATUS_FIX asserting Live on a machine basis
+	// (site-liveness) has its sourceUrl FETCHED and scanned for pre-launch
+	// markers at apply time; a hit refuses the entry loudly, in dry-run and
+	// execute alike. human-verified entries still pass — that basis is a
+	// person taking responsibility for having actually read the page — but
+	// the marker scan warns on them too, so the diff shows the contradiction.
+	const PRELAUNCH_MARKERS =
+		/\b(testnet[- ]?only|available on testnet|on testnet|TESTNET|join the waitlist|joins? our waitlist|coming soon|mainnet (opens|soon|launch)|funds are not real|not yet (live|launched)|pre-?launch)\b/i;
+	const prelaunchScan = async (
+		url: string,
+	): Promise<{ hit: string | null; ok: boolean }> => {
+		try {
+			const res = await fetch(url, {
+				headers: { "User-Agent": "stellarlight-curator-gate" },
+				redirect: "follow",
+			});
+			if (!res.ok) return { hit: null, ok: false };
+			const text = (await res.text())
+				.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+				.replace(/<[^>]+>/g, " ")
+				.replace(/\s+/g, " ");
+			const m = PRELAUNCH_MARKERS.exec(text);
+			return { hit: m ? m[0] : null, ok: true };
+		} catch {
+			return { hit: null, ok: false };
+		}
+	};
+
 	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
+		if (fix.to === "Live" && fix.sourceUrl && fix.basis !== "human-verified") {
+			const scan = await prelaunchScan(fix.sourceUrl);
+			if (scan.hit) {
+				console.error(
+					`  REFUSED ${slug}: Live stamp on ${fix.basis}, but ${fix.sourceUrl} carries pre-launch marker "${scan.hit}" — a 200 is not a business. Read the page; if Live is still right, use basis human-verified and own it.`,
+				);
+				process.exitCode = 1;
+				continue;
+			}
+			if (!scan.ok)
+				console.log(
+					`  WARN ${slug}: could not verify ${fix.sourceUrl} for the Live stamp (fetch failed) — entry proceeds, but the evidence is unconfirmed`,
+				);
+		} else if (fix.to === "Live" && fix.sourceUrl) {
+			const scan = await prelaunchScan(fix.sourceUrl);
+			if (scan.hit)
+				console.log(
+					`  WARN ${slug}: human-verified Live, but the page carries "${scan.hit}" — the human owns this contradiction`,
+				);
+		}
+
 		const r = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: slug } },
