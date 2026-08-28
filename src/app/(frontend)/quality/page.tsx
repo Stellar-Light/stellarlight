@@ -273,7 +273,7 @@ export default function QualityPage() {
 			    by the pipeline that measured them. */}
 			<Card
 				title="Trends"
-				description="Daily history, appended by the eval pipeline and committed — ratchets may only move down, counts may only be earned. A gap is a day the pipeline did not measure."
+				description="Daily history, appended by the eval pipeline and committed — red days included. Battery probe counts ROTATE with the daily banks, so the pass line wobbles by design; the failure line and the ratchets are the signal. A gap is a day the pipeline did not measure."
 				className="mb-6"
 			>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
