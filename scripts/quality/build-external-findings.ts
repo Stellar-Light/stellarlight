@@ -96,8 +96,8 @@ for (const r of records) {
 const fixApplicable = records.filter((r) => r.status !== "declined-upstream");
 const fixShipped = fixApplicable.filter(
 	(r) =>
-		((r as Record<string, unknown>).ourResponse as { state?: string })?.state ===
-		"closed",
+		((r as Record<string, unknown>).ourResponse as { state?: string })
+			?.state === "closed",
 );
 
 const byStatus = records.reduce<Record<string, number>>((acc, r) => {
@@ -125,7 +125,8 @@ writeFileSync(
 				fixShippedIds: fixShipped.map((r) => r.id),
 				/** records where a fix is even applicable, declined ones are not */
 				fixApplicable: fixApplicable.length,
-				declined: records.filter((r) => r.status === "declined-upstream").length,
+				declined: records.filter((r) => r.status === "declined-upstream")
+					.length,
 				/** distinct issues behind fixShipped: N records can share one */
 				distinctIssuesClosed: new Set(
 					fixShipped.map((r) => r.ourIssue).filter(Boolean),

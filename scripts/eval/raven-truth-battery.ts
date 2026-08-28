@@ -457,6 +457,56 @@ async function sliceH() {
 	await check("is blend audited", "supported");
 }
 
+/** Slice I — sls-079: deployment is a separate, evidence-backed fact.
+ * The answer key is SELF-UPDATING like D-F: whatever DEPLOYMENT_VERIFIED
+ * curation and the evidence backfill wrote must serve exactly that, every
+ * unevidenced row must say "unknown" (never a guess), and an unknown must
+ * never carry stray provenance. */
+async function sliceI() {
+	console.log("\n── I: deployment fact (evidence-only, unknown is honest) ──");
+	// curated case: the operator bundle proved testnet-only (sls-079 receipt)
+	const sf = await http("/api/projects/search?q=stellars%20finance&limit=1");
+	const sfRow = (sf.projects ?? [])[0] ?? {};
+	verdict(
+		sfRow.deployment?.network === "testnet" &&
+			sfRow.deployment?.basis === "human-verified",
+		"I:curated",
+		`stellars-finance -> ${JSON.stringify(sfRow.deployment)}`,
+	);
+	// evidence case: onchain-activity rows must serve mainnet
+	const rf = await http("/api/projects/search?q=reflector&limit=1");
+	const rfDep = ((rf.projects ?? [])[0] ?? {}).deployment;
+	verdict(
+		rfDep?.network === "mainnet",
+		"I:evidenced",
+		`reflector -> ${JSON.stringify(rfDep)}`,
+	);
+	// honesty case: rows without evidence carry an explicit unknown with NO
+	// provenance attached, on every row of a broad page
+	const page = await http("/api/projects/search?q=wallet&limit=25");
+	let missing = 0;
+	let strayProvenance = 0;
+	for (const p of page.projects ?? []) {
+		const dep = p.deployment;
+		if (!dep || typeof dep.network !== "string") missing++;
+		else if (
+			dep.network === "unknown" &&
+			(dep.basis !== null || dep.sourceUrl !== null)
+		)
+			strayProvenance++;
+	}
+	verdict(
+		missing === 0,
+		"I:present",
+		`${missing} of ${(page.projects ?? []).length} rows missing the deployment field`,
+	);
+	verdict(
+		strayProvenance === 0,
+		"I:unknown-clean",
+		`${strayProvenance} unknown row(s) carrying stray provenance`,
+	);
+}
+
 const slices = [
 	sliceA,
 	sliceB,
@@ -467,6 +517,7 @@ const slices = [
 	sliceF,
 	sliceG,
 	sliceH,
+	sliceI,
 ];
 for (const s of slices) {
 	try {

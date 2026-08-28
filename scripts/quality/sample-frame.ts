@@ -58,6 +58,7 @@ export type CensusProject = {
 	types?: string[];
 	links?: { website?: string; github?: string };
 	prominence?: number;
+	deployment?: { network?: string | null; basis?: string | null } | null;
 };
 
 export type CensusRepo = {
@@ -91,6 +92,7 @@ export const censusProjects = (origin = "https://stellarlight.xyz") =>
 			"types",
 			"links",
 			"prominence",
+			"deployment",
 		],
 		origin,
 	);

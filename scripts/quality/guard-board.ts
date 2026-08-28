@@ -1,4 +1,5 @@
 import { getGuardRows } from "../../src/lib/quality-artifacts";
+
 const rows = getGuardRows();
 for (const r of rows)
 	console.log(

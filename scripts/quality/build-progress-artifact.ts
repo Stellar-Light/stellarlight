@@ -92,7 +92,7 @@ const lessons = readdirSync(lessonsDir)
 		// claim this parser cannot make. (The old bold-only pattern matched
 		// one file in fourteen and published 0 for the rest.)
 		const ids = new Set([
-			...[...body.matchAll(/(?:\*\*|#{2,4}\s*)L(\d+)\s*[\u2014:.\-]/g)].map(
+			...[...body.matchAll(/(?:\*\*|#{2,4}\s*)L(\d+)\s*[\u2014:.-]/g)].map(
 				(m) => `L${m[1]}`,
 			),
 			...[...body.matchAll(/^#{2,3}\s*(\d+)[.)]\s+\S/gm)].map(

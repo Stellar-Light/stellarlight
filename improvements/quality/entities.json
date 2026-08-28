@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T19:33:37.111Z",
+ "generatedAt": "2026-08-28T21:25:40.538Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -1321,7 +1321,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "lulpay",
@@ -1339,7 +1339,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "liquidsfi",
@@ -1422,7 +1422,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "dd",
@@ -1459,7 +1459,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "arka-fund",
@@ -1469,7 +1469,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "stellarx-ph",
@@ -1994,7 +1994,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "vesseo",
@@ -2241,9 +2241,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -2341,7 +2342,7 @@
      "strongBasis",
      "typed"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "noir",
@@ -3607,11 +3608,9 @@
    {
     "slug": "stellars-finance",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Pre-Release"
    },
    {
     "slug": "stellarprodev",
@@ -3683,7 +3682,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "stellarbroker",
@@ -4091,7 +4090,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "sorobanmath",
@@ -4109,7 +4108,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "sorobanhooks",
@@ -5749,7 +5748,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "hiyield",
@@ -5875,7 +5874,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "getpaid",
@@ -6083,7 +6082,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "every-finance",
@@ -6571,7 +6570,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "coindisco",
@@ -6785,7 +6784,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "cartwey",
@@ -8102,7 +8101,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "paychant",
@@ -9499,10 +9498,24 @@
    }
   ],
   "meanScore": 78,
+  "deploymentMix": [
+   {
+    "network": "unknown",
+    "count": 982
+   },
+   {
+    "network": "mainnet",
+    "count": 42
+   },
+   {
+    "network": "testnet",
+    "count": 1
+   }
+  ],
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 736
+    "count": 735
    },
    {
     "basis": "source-inherited",
@@ -9510,7 +9523,7 @@
    },
    {
     "basis": "human-verified",
-    "count": 79
+    "count": 80
    },
    {
     "basis": "unverified",
@@ -9526,7 +9539,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 981,
+  "weakestTotal": 980,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9535,6 +9548,10 @@
     "status": "Inactive",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "NFT"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9550,6 +9567,10 @@
     "status": "Inactive",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9565,6 +9586,10 @@
     "status": "Draft",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9580,6 +9605,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9595,6 +9624,10 @@
     "status": "Draft",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9610,6 +9643,10 @@
     "status": "Draft",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9625,6 +9662,11 @@
     "status": "Inactive",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Analytics",
+     "AI"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9640,6 +9682,10 @@
     "status": "Inactive",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9655,6 +9701,8 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9670,6 +9718,11 @@
     "status": "Inactive",
     "statusBasis": null,
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Bridge",
+     "Payments"
+    ],
     "score": 40,
     "factsPresent": 2,
     "factsTotal": 5,
@@ -9685,6 +9738,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 88,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "RWA"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9699,6 +9756,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 88,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9713,6 +9772,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 85,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Faucet"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9727,6 +9790,12 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 82,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Gaming",
+     "NFT",
+     "AI"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9741,6 +9810,11 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK",
+     "Explorer"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9755,6 +9829,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RWA"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9769,6 +9847,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 78,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9783,6 +9863,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 76,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Wallet"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9797,6 +9881,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 72,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9811,6 +9899,11 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 60,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Analytics",
+     "Indexer"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9825,6 +9918,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 38,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9839,6 +9934,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 4,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9853,6 +9950,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9867,6 +9966,11 @@
     "status": "Development",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments",
+     "Infrastructure"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9881,6 +9985,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9895,6 +10001,11 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Anchor",
+     "Stablecoin"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9906,9 +10017,11 @@
    {
     "slug": "arka-fund",
     "name": "Arka Fund",
-    "status": "Live",
+    "status": "Inactive",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9923,6 +10036,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Stablecoin"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9937,6 +10054,10 @@
     "status": "Development",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9951,6 +10072,11 @@
     "status": "Draft",
     "statusBasis": "unverified",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments",
+     "Anchor"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9965,6 +10091,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9979,6 +10107,10 @@
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -9993,6 +10125,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10007,6 +10141,8 @@
     "status": "Draft",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10021,6 +10157,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10035,6 +10173,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10049,6 +10189,12 @@
     "status": "Development",
     "statusBasis": "source-inherited",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments",
+     "SDK",
+     "Card Issuing"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10063,6 +10209,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10077,6 +10225,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10091,6 +10241,8 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
@@ -10103,7 +10255,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 934
+    "count": 933
    },
    {
     "field": "dated",
@@ -10115,7 +10267,7 @@
    },
    {
     "field": "typed",
-    "count": 73
+    "count": 74
    },
    {
     "field": "linked",
@@ -11316,13 +11468,13 @@
   {
    "area": "project status",
    "limit": "88% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "905 of 1025 rows (census)",
+   "measurement": "904 of 1025 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "73 of 1025 sampled rows untyped",
+   "measurement": "74 of 1025 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11692,10 +11844,37 @@
    },
    {
     "entity": "project",
-    "field": "strongBasis",
-    "missing": 934,
+    "field": "deployment evidence",
+    "missing": 982,
     "of": 1025,
-    "share": 91.1,
+    "share": 95.8,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
+    "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
+    "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
+    "examplePoolSize": 13,
+    "exampleCap": 12,
+    "exampleTruncated": true,
+    "examples": [
+     "ondo",
+     "dia",
+     "axelar",
+     "wisdomtree",
+     "redstone-finance",
+     "spiko",
+     "brale",
+     "stellarterm",
+     "redswan",
+     "spacewalk",
+     "circle-cctp-cross-chain-transfer-protocol",
+     "glo-dollar"
+    ]
+   },
+   {
+    "entity": "project",
+    "field": "strongBasis",
+    "missing": 933,
+    "of": 1025,
+    "share": 91,
     "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
@@ -11774,13 +11953,13 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 73,
+    "missing": 74,
     "of": 1025,
-    "share": 7.1,
+    "share": 7.2,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 73,
+    "examplePoolSize": 74,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
