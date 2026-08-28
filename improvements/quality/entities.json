@@ -1,13 +1,6 @@
 {
- "generatedAt": "2026-08-28T22:37:44.611Z",
+ "generatedAt": "2026-08-28T22:54:25.784Z",
  "surfaces": [
-  {
-   "surface": "onchain",
-   "means": null,
-   "openFindings": 48,
-   "clearedFindings": 0,
-   "verifiedFindings": 0
-  },
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
@@ -44,6 +37,13 @@
    "verifiedFindings": 7
   },
   {
+   "surface": "onchain",
+   "means": null,
+   "openFindings": 1,
+   "clearedFindings": 0,
+   "verifiedFindings": 0
+  },
+  {
    "surface": "scf",
    "means": "SCF round and award data",
    "openFindings": 0,
@@ -60,8 +60,8 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 508,
-  "open": 105,
+  "total": 461,
+  "open": 58,
   "cleared": 396,
   "verified": 7,
   "byFailureMode": [
@@ -78,13 +78,6 @@
     "cleared": 53,
     "verified": 0,
     "surface": "directory"
-   },
-   {
-    "mode": "lookalike-domain",
-    "open": 48,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "onchain"
    },
    {
     "mode": "demand-miss",
@@ -162,12 +155,19 @@
     "cleared": 1,
     "verified": 0,
     "surface": "code"
+   },
+   {
+    "mode": "canonical-conflict",
+    "open": 1,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "onchain"
    }
   ],
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 70
+    "count": 23
    },
    {
     "bucket": "8–30d",
@@ -11519,12 +11519,6 @@
     "value": 107
    },
    {
-    "id": "s:lookalike-domains",
-    "label": "lookalike-domains",
-    "column": 0,
-    "value": 48
-   },
-   {
     "id": "s:raven-routing",
     "label": "raven-routing",
     "column": 0,
@@ -11573,6 +11567,12 @@
     "value": 1
    },
    {
+    "id": "s:canonical-assets",
+    "label": "canonical-assets",
+    "column": 0,
+    "value": 1
+   },
+   {
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
@@ -11583,12 +11583,6 @@
     "label": "directory",
     "column": 1,
     "value": 61
-   },
-   {
-    "id": "f:onchain",
-    "label": "onchain",
-    "column": 1,
-    "value": 48
    },
    {
     "id": "f:contract",
@@ -11621,6 +11615,12 @@
     "value": 4
    },
    {
+    "id": "f:onchain",
+    "label": "onchain",
+    "column": 1,
+    "value": 1
+   },
+   {
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
@@ -11630,7 +11630,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 105
+    "value": 58
    },
    {
     "id": "o:verified",
@@ -11641,7 +11641,7 @@
   ],
   "links": [
    {
-    "source": 9,
+    "source": 8,
     "target": 11,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
@@ -11676,70 +11676,70 @@
     "value": 28
    },
    {
-    "source": 6,
-    "target": 17,
+    "source": 5,
+    "target": 16,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 14
    },
    {
-    "source": 17,
+    "source": 16,
     "target": 19,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 14
    },
    {
-    "source": 7,
-    "target": 14,
+    "source": 6,
+    "target": 13,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 14,
+    "source": 13,
     "target": 21,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 14,
+    "source": 13,
     "target": 20,
     "sourceId": "f:contract",
     "targetId": "o:open",
     "value": 1
    },
    {
-    "source": 3,
-    "target": 15,
+    "source": 2,
+    "target": 14,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 23
    },
    {
-    "source": 15,
+    "source": 14,
     "target": 20,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 16
    },
    {
-    "source": 15,
+    "source": 14,
     "target": 19,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 7
    },
    {
-    "source": 10,
-    "target": 18,
+    "source": 9,
+    "target": 17,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 18,
+    "source": 17,
     "target": 19,
     "sourceId": "f:code",
     "targetId": "o:cleared",
@@ -11760,43 +11760,43 @@
     "value": 53
    },
    {
-    "source": 4,
-    "target": 14,
+    "source": 3,
+    "target": 13,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 22
    },
    {
-    "source": 14,
+    "source": 13,
     "target": 19,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 22
    },
    {
-    "source": 5,
-    "target": 16,
+    "source": 4,
+    "target": 15,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 16,
+    "source": 15,
     "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 14
    },
    {
-    "source": 16,
+    "source": 15,
     "target": 20,
     "sourceId": "f:corpus",
     "targetId": "o:open",
     "value": 4
    },
    {
-    "source": 8,
-    "target": 18,
+    "source": 7,
+    "target": 17,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 3
@@ -11809,18 +11809,18 @@
     "value": 8
    },
    {
-    "source": 2,
-    "target": 13,
-    "sourceId": "s:lookalike-domains",
+    "source": 10,
+    "target": 18,
+    "sourceId": "s:canonical-assets",
     "targetId": "f:onchain",
-    "value": 48
+    "value": 1
    },
    {
-    "source": 13,
+    "source": 18,
     "target": 20,
     "sourceId": "f:onchain",
     "targetId": "o:open",
-    "value": 48
+    "value": 1
    }
   ]
  },

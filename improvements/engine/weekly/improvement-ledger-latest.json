@@ -1,21 +1,16 @@
 {
-	"generatedAt": "2026-08-28T22:37:38.494Z",
-	"total": 508,
-	"open": 105,
+	"generatedAt": "2026-08-28T22:53:50.745Z",
+	"total": 461,
+	"open": 58,
 	"closed": 403,
 	"verified": 7,
 	"cleared": 396,
-	"closingRate": 0.79,
+	"closingRate": 0.87,
 	"oldestOpenDays": 37,
 	"inWave": 0,
-	"highOpen": 50,
+	"highOpen": 3,
 	"staleHighOpen": 0,
 	"bySurface": [
-		{
-			"surface": "onchain",
-			"open": 48,
-			"total": 48
-		},
 		{
 			"surface": "retrieval",
 			"open": 28,
@@ -37,6 +32,11 @@
 			"total": 18
 		},
 		{
+			"surface": "onchain",
+			"open": 1,
+			"total": 1
+		},
+		{
 			"surface": "contract",
 			"open": 1,
 			"total": 30
@@ -56,60 +56,60 @@
 	"quietSources": [],
 	"topOpen": [
 		{
-			"id": "lookalike-domains:ars-impersonated-via-home-domain-anclap-io-issue",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "ARS impersonated via home_domain anclap.io (issuer GCANCLAPGTMD…, undefined trustlines)",
+			"id": "engine-d-demand:flurbomatic-quantifold-widgetron-on-stellar",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "flurbomatic quantifold widgetron on stellar",
 			"severity": "high"
 		},
 		{
-			"id": "lookalike-domains:pen-impersonated-via-home-domain-anclap-io-issue",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "PEN impersonated via home_domain anclap.io (issuer GCANCLAPGTMD…, undefined trustlines)",
+			"id": "engine-d-demand:subfy",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "subfy",
 			"severity": "high"
 		},
 		{
-			"id": "lookalike-domains:usdy-impersonated-via-home-domain-finance-ondo-c",
+			"id": "canonical-assets:audd-audd-digital-well-known-stellar-toml-declar",
 			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "USDY impersonated via home_domain finance-ondo.com (issuer GCLFMBAFL7RT…, undefined trustlines)",
+			"source": "canonical-assets",
+			"probe": "AUDD: audd.digital/.well-known/stellar.toml declares AUDD issuer(s) GDC7X2MXTY… (live on-chain) but our registry serves GDC7X2MXTY… — OUR canonical answer may be poisoning consumers",
 			"severity": "high"
 		},
 		{
-			"id": "lookalike-domains:usdc-impersonated-via-home-domain-circle-assets-",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "USDC impersonated via home_domain circle-assets.com (issuer GAAS4J43CLHJ…, undefined trustlines)",
-			"severity": "high"
+			"id": "engine-a-recall:the-starship-soroban-in-top-3-for-is-the-starshi",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "the-starship-soroban in top-3 for 'is The Starship Soroban live'",
+			"severity": "medium"
 		},
 		{
-			"id": "lookalike-domains:eurc-impersonated-via-home-domain-circle-assets-",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "EURC impersonated via home_domain circle-assets.com (issuer GAAS4J43CLHJ…, undefined trustlines)",
-			"severity": "high"
+			"id": "engine-a-recall:rise-in-in-top-3-for-tell-me-about-rise-in",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "rise-in in top-3 for 'tell me about Rise In'",
+			"severity": "medium"
 		},
 		{
-			"id": "lookalike-domains:pyusd-impersonated-via-home-domain-paypal-com-is",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "PYUSD impersonated via home_domain paypal.com (issuer GAZZUOGK4X27…, undefined trustlines)",
-			"severity": "high"
+			"id": "engine-a-recall:stellar-global-in-top-3-for-is-stellar-global-li",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "stellar-global in top-3 for 'is Stellar Global live'",
+			"severity": "medium"
 		},
 		{
-			"id": "lookalike-domains:pyusd-impersonated-via-home-domain-paypal-dlgita",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "PYUSD impersonated via home_domain paypal.dlgital.com (issuer GBPTPX5HDX7X…, undefined trustlines)",
-			"severity": "high"
+			"id": "engine-a-recall:dd-in-top-3-for-what-is-dd",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "dd in top-3 for 'what is DD'",
+			"severity": "medium"
 		},
 		{
-			"id": "lookalike-domains:usdy-impersonated-via-home-domain-blackrock-co-c",
-			"surface": "onchain",
-			"source": "lookalike-domains",
-			"probe": "USDY impersonated via home_domain blackrock.co.com (issuer GD6PQQAIG5FS…, undefined trustlines)",
-			"severity": "high"
+			"id": "engine-a-recall:dex-tools-in-top-3-for-tell-me-about-dex-tools",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "dex-tools in top-3 for 'tell me about Dex Tools'",
+			"severity": "medium"
 		}
 	]
 }

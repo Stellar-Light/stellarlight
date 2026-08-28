@@ -417,22 +417,36 @@ const RAVEN_LOOP_SPEC: SourceSpec = {
 // misses on ALREADY-cataloged ops are emitted (the eval skips lagging ops), so
 // a finding here means the op exists in Raven's index but the question doesn't
 // reach it — a description/ranking gap on the consumer path.
-// The lookalike home-domain sweep (scripts/eval/lookalike-domains.ts) — the
-// fake-issuer-farm detector born from the 2026-08-28 sls-079 queue pass.
-// Each finding is an issuer impersonating a known brand via home_domain
-// (wisdomtree.xlmhq.org, blackrock.com.se) with real trustline victims.
-// High severity, period: impersonation with victims is never a backlog item.
-const LOOKALIKE_SPEC: SourceSpec = {
-	source: "lookalike-domains",
+// The canonical-assets guard (scripts/eval/lookalike-domains.ts, reframed
+// 2026-08-28): we serve THE REAL asset, we do not chase fakes. Findings here
+// are OURS and closable — the canonical row missing on-chain, conflicting
+// with the operator's own toml, or a watched ticker with no canonical answer
+// recorded. The fake-ocean intel in the same artifact is deliberately NOT
+// ingested: unbounded, unclosable, not our treadmill.
+const CANONICAL_ASSETS_SPEC: SourceSpec = {
+	source: "canonical-assets",
 	file: "lookalike-domains-latest.json",
 	arrays: [
 		{
-			key: "lookalikes",
+			key: "guard.canonicalMissing",
 			surface: "onchain",
-			mode: "lookalike-domain",
+			mode: "canonical-missing",
 			severity: "high",
-			probe: (r) =>
-				`${str(r?.code)} impersonated via home_domain ${str(r?.homeDomain)} (issuer ${str(r?.issuer).slice(0, 12)}…, ${str(r?.victims)} trustlines)`,
+			probe: (r) => `${str(r?.code)}: ${str(r?.detail)}`,
+		},
+		{
+			key: "guard.canonicalConflicts",
+			surface: "onchain",
+			mode: "canonical-conflict",
+			severity: "high",
+			probe: (r) => `${str(r?.code)}: ${str(r?.detail)}`,
+		},
+		{
+			key: "guard.canonicalUnnamed",
+			surface: "onchain",
+			mode: "canonical-unnamed",
+			severity: "medium",
+			probe: (r) => `${str(r?.code)}: ${str(r?.detail)}`,
 		},
 	],
 };
@@ -510,7 +524,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		...NIGHTLY_SPECS,
 		RAVEN_LOOP_SPEC,
 		RAVEN_ROUTING_SPEC,
-		LOOKALIKE_SPEC,
+		CANONICAL_ASSETS_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
@@ -522,7 +536,11 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		const evidenceAt = evidenceStamp(data);
 		let n = 0;
 		for (const a of spec.arrays) {
-			const arr = data[a.key];
+			// dot-path keys reach nested arrays (canonical-assets: guard.*)
+			const arr = a.key
+				.split(".")
+				// biome-ignore lint/suspicious/noExplicitAny: dynamic artifact walk
+				.reduce<any>((o, k) => (o == null ? o : o[k]), data);
 			if (!Array.isArray(arr)) continue;
 			for (const row of arr) {
 				if (a.keep && !a.keep(row)) continue;

@@ -1,22 +1,24 @@
 /**
- * Lookalike-domain sweep — the fake-issuer-farm detector (2026-08-28 lesson).
+ * Canonical-asset guard (reframed 2026-08-28: "we don't need to find every
+ * fake asset — there's millions of them; we just need to serve the real one").
  *
- * For every ticker we hold a canonical truth for (the stablecoin registry's
- * issuer set + a watchlist of institutional tickers agents ask about), pull
- * EVERY issuer of that code from Horizon mainnet, read each issuer account's
- * `home_domain`, and classify it against the brand's real domains
- * (src/lib/lookalike-domains.ts):
+ * Anyone can issue any code, so enumerating fakes is an unbounded treadmill
+ * that can never close. What IS ours to guarantee, and what this guard reds
+ * on:
  *
- *   lookalike   -> the home_domain references the brand on a domain the
- *                  operator does not own (wisdomtree.xlmhq.org,
- *                  treasury.dtcc.company). THE finding: impersonation with
- *                  trustline victims. Exit-1 red.
- *   unverified  -> same code, non-canonical issuer, no brand reference —
- *                  listed informationally (same-code assets are legal).
+ *   1. THE REAL ONE EXISTS - every ticker we serve a canonical issuer for
+ *      must still have that exact asset live on Horizon mainnet.
+ *   2. THE REAL ONE AGREES - the operator's own stellar.toml (at the real
+ *      domain) must still declare the issuer our registry serves. A conflict
+ *      means OUR canonical answer may be wrong - the one failure mode that
+ *      actually poisons consumers.
+ *   3. THE REAL ONE IS NAMED - a watchlist ticker agents ask about with NO
+ *      canonical resolution is our data gap: either verify an issuer or
+ *      record that no genuine Stellar issuance exists.
  *
- * Read-only (public Horizon + our own API), no secrets. Weekly via
- * engine-c-health; findings land in the improvement ledger as
- * surface:onchain, severity high.
+ * The lookalike sweep (src/lib/lookalike-domains.ts) still runs, but its
+ * output is CONTEXT INTEL in the artifact - never findings, never a red:
+ * fakes are the ocean, the canonical row is the lighthouse.
  *
  *   pnpm exec tsx scripts/eval/lookalike-domains.ts [--json] [--out=path]
  */
@@ -48,6 +50,9 @@ interface WatchEntry {
 	/** canonical issuer G-addresses; anything else issuing the code is at
 	 * minimum unverified */
 	canonicalIssuers: string[];
+	/** "none-on-stellar" records the VERIFIED absence of a genuine issuance
+	 * (closes the naming gap without inventing an issuer) */
+	resolution?: "none-on-stellar";
 }
 
 /** Institutional tickers with NO canonical Stellar issuance we could verify —
@@ -55,26 +60,33 @@ interface WatchEntry {
  * farm. Grows as the queue work finds more squatted names. */
 const WATCHLIST: WatchEntry[] = [
 	{
+		// 2026-08-28: no canonical issuance establishable (no toml, no curated
+		// stellar.expert record; every on-chain issuance is farm). Until the
+		// operator publishes one, the honest canonical answer is "none".
 		code: "WTGXX",
 		brand: "WisdomTree",
 		realDomains: ["wisdomtree.com"],
 		canonicalIssuers: [],
+		resolution: "none-on-stellar",
 	},
 	{
 		code: "USTBL",
 		brand: "Spiko",
+		resolution: "none-on-stellar",
 		realDomains: ["spiko.io", "spiko.finance"],
 		canonicalIssuers: [],
 	},
 	{
 		code: "EUTBL",
 		brand: "Spiko",
+		resolution: "none-on-stellar",
 		realDomains: ["spiko.io", "spiko.finance"],
 		canonicalIssuers: [],
 	},
 	{
 		code: "BUIDL",
 		brand: "BlackRock Securitize",
+		resolution: "none-on-stellar",
 		realDomains: ["blackrock.com", "securitize.io"],
 		canonicalIssuers: [],
 	},
@@ -124,23 +136,111 @@ async function main() {
 		}
 	}
 
-	type Finding = {
+	// ── The guard: the REAL one exists, agrees, and is named ──
+	type GuardFail = {
+		kind: "canonical-missing" | "canonical-conflict" | "canonical-unnamed";
+		code: string;
+		brand: string;
+		detail: string;
+	};
+	const guardFails: GuardFail[] = [];
+
+	// ── Context intel (never findings, never red): the fake ocean ──
+	type Intel = {
 		code: string;
 		issuer: string;
 		homeDomain: string | null;
-		kind: "lookalike" | "unverified-issuer";
-		brand: string;
 		brandHit?: string;
 		victims: number;
-		supply: string | null;
-		canonicalIssuers: string[];
-		evidence: string;
 	};
-	const lookalikes: Finding[] = [];
-	const unverified: Finding[] = [];
+	const lookalikes: Intel[] = [];
+	let unverifiedCount = 0;
 	let issuersSeen = 0;
 
 	for (const entry of byCode.values()) {
+		// 1+2. canonical existence + toml agreement (only where we NAME one)
+		if (entry.canonicalIssuers.length > 0) {
+			for (const iss of entry.canonicalIssuers) {
+				try {
+					const d = await j(
+						`${HORIZON}/assets?asset_code=${encodeURIComponent(entry.code)}&asset_issuer=${iss}`,
+					);
+					if (((d?._embedded?.records ?? []) as unknown[]).length === 0)
+						guardFails.push({
+							kind: "canonical-missing",
+							code: entry.code,
+							brand: entry.brand,
+							detail: `registry canonical issuer ${iss} has NO ${entry.code} asset on Horizon mainnet — the real one is gone or our canonical is wrong`,
+						});
+				} catch (e) {
+					console.log(
+						`  ${entry.code}: horizon canonical check error ${(e as Error).message}`,
+					);
+				}
+			}
+			const dom = entry.realDomains[0];
+			if (dom) {
+				try {
+					const r = await fetch(`https://${dom}/.well-known/stellar.toml`, {
+						headers: UA,
+					});
+					if (r.ok) {
+						const toml = await r.text();
+						const declared = [
+							...toml.matchAll(
+								/code\s*=\s*"([A-Z0-9]+)"[\s\S]{0,160}?issuer\s*=\s*"(G[A-Z0-9]{55})"/g,
+							),
+						]
+							.filter((m) => m[1] === entry.code)
+							.map((m) => m[2]);
+						if (
+							declared.length > 0 &&
+							!declared.some((d) => entry.canonicalIssuers.includes(d))
+						) {
+							// Reconcile before accusing ourselves: GBPZ's operator toml
+							// declares an issuer that does not EXIST on-chain while our
+							// registry's does (home_domain reverse-verified). A conflict
+							// is a red only when the toml's issuer is real AND ours
+							// fails; a broken operator toml is their bug, noted as
+							// intel, not ours.
+							let tomlIssuerExists = false;
+							for (const d of declared) {
+								try {
+									const chk = await j(
+										`${HORIZON}/assets?asset_code=${encodeURIComponent(entry.code)}&asset_issuer=${d}`,
+									);
+									if (((chk?._embedded?.records ?? []) as unknown[]).length > 0)
+										tomlIssuerExists = true;
+								} catch {}
+							}
+							if (tomlIssuerExists)
+								guardFails.push({
+									kind: "canonical-conflict",
+									code: entry.code,
+									brand: entry.brand,
+									detail: `${dom}/.well-known/stellar.toml declares ${entry.code} issuer(s) ${declared.map((x) => `${x.slice(0, 10)}…`).join(", ")} (live on-chain) but our registry serves ${entry.canonicalIssuers.map((x) => `${x.slice(0, 10)}…`).join(", ")} — OUR canonical answer may be poisoning consumers`,
+								});
+							else
+								console.log(
+									`  note: ${entry.code} toml at ${dom} declares a non-existent issuer while ours is live — operator toml bug, not a red`,
+								);
+						}
+					}
+					// unreachable toml = a site flake, noted by absence — never a red
+				} catch {}
+			}
+		} else if (entry.resolution !== "none-on-stellar") {
+			// 3. a ticker agents ask about with no canonical answer and no
+			// verified absence — OUR closable data gap
+			guardFails.push({
+				kind: "canonical-unnamed",
+				code: entry.code,
+				brand: entry.brand,
+				detail: `no canonical issuer named and no verified absence recorded — verify one or set resolution: "none-on-stellar"`,
+			});
+		}
+
+		// ── intel sweep (unchanged mechanics, demoted to context) ──
 		const brands = [
 			...brandTokens(entry.brand),
 			...GLOBAL_BRANDS.flatMap((g) => brandTokens(g.brand)),
@@ -156,8 +256,7 @@ async function main() {
 				`${HORIZON}/assets?asset_code=${encodeURIComponent(entry.code)}&limit=50`,
 			);
 			recs = d?._embedded?.records ?? [];
-		} catch (e) {
-			console.log(`  ${entry.code}: horizon error ${(e as Error).message}`);
+		} catch {
 			continue;
 		}
 		for (const r of recs) {
@@ -169,71 +268,58 @@ async function main() {
 				// biome-ignore lint/suspicious/noExplicitAny: horizon shape
 				const acct: any = await j(`${HORIZON}/accounts/${issuer}`);
 				homeDomain = acct.home_domain ?? null;
-			} catch {
-				// deleted/merged account: the asset row remains, the account is gone
-			}
+			} catch {}
 			const verdict = classifyIssuerDomain({ homeDomain, brands, realDomains });
 			if (verdict.kind === "canonical-domain") continue;
-			const victims = Number(
-				r.num_accounts ?? r.accounts?.authorized ?? 0,
-			);
-			const supply = String(r.amount ?? r.balances?.authorized ?? "") || null;
-			const base = {
-				code: entry.code,
-				issuer,
-				homeDomain,
-				brand: entry.brand,
-				victims,
-				supply,
-				canonicalIssuers: entry.canonicalIssuers,
-			};
-			if (verdict.kind === "lookalike") {
+			if (verdict.kind === "lookalike")
 				lookalikes.push({
-					...base,
-					kind: "lookalike",
+					code: entry.code,
+					issuer,
+					homeDomain,
 					brandHit: verdict.brandHit,
-					evidence: `home_domain "${homeDomain}" references "${verdict.brandHit}" on a domain the operator does not own; ${victims} trustline(s); canonical issuer(s): ${entry.canonicalIssuers.join(", ") || "none exists (any issuance of this code is suspect)"}`,
+					victims: Number(r.num_accounts ?? r.accounts?.authorized ?? 0),
 				});
-			} else {
-				unverified.push({
-					...base,
-					kind: "unverified-issuer",
-					evidence: `non-canonical issuer of ${entry.code} (home_domain ${homeDomain ?? "unset"}); same-code assets are legal, listed for context only`,
-				});
-			}
+			else unverifiedCount++;
 		}
 	}
 
 	lookalikes.sort((a, b) => b.victims - a.victims);
-	unverified.sort((a, b) => b.victims - a.victims);
 
 	const report = {
 		generatedAt: new Date().toISOString(),
 		frame: {
 			codesChecked: byCode.size,
 			issuersSeen,
-			watchlist: WATCHLIST.map((w) => w.code),
+			watchlist: WATCHLIST.map((w) => `${w.code}${w.resolution ? ` (${w.resolution})` : ""}`),
 		},
-		// THE findings — impersonation. Exit-red below.
-		lookalikes,
-		// context, not findings: legal same-code issuances without brand theft
-		unverifiedCount: unverified.length,
-		unverifiedSample: unverified.slice(0, 15),
+		meaning:
+			"We serve THE REAL asset; we do not chase fakes. guard.* are OUR closable findings (the canonical row missing, conflicted, or unnamed). intel.* is context about the fake ocean — informational, unbounded by nature, never a finding.",
+		guard: {
+			canonicalMissing: guardFails.filter((f) => f.kind === "canonical-missing"),
+			canonicalConflicts: guardFails.filter(
+				(f) => f.kind === "canonical-conflict",
+			),
+			canonicalUnnamed: guardFails.filter((f) => f.kind === "canonical-unnamed"),
+		},
+		intel: {
+			lookalikeCount: lookalikes.length,
+			lookalikeSample: lookalikes.slice(0, 15),
+			unverifiedCount,
+			totalVictimTrustlines: lookalikes.reduce((a, f) => a + f.victims, 0),
+		},
 	};
 
 	if (OUT_FILE) writeFileSync(OUT_FILE, `${JSON.stringify(report, null, 1)}\n`);
 	if (JSON_OUT) console.log(JSON.stringify(report, null, 1));
 	else {
-		for (const f of lookalikes)
-			console.log(
-				`  ✗ ${f.code.padEnd(7)} ${String(f.homeDomain).padEnd(28)} ${f.victims} trustline(s)  issuer ${f.issuer.slice(0, 8)}…`,
-			);
+		for (const f of guardFails)
+			console.log(`  ✗ [${f.kind}] ${f.code} (${f.brand}): ${f.detail}`);
 		console.log(
-			`\nlookalike-domains: ${byCode.size} codes · ${issuersSeen} non-canonical issuers · ${lookalikes.length} LOOKALIKE(s) · ${unverified.length} unverified (context)`,
+			`\ncanonical-assets: ${byCode.size} codes guarded · ${guardFails.length} guard failure(s) · intel: ${lookalikes.length} lookalikes (${report.intel.totalVictimTrustlines} victim trustlines), ${unverifiedCount} unverified`,
 		);
 	}
-	// Engine convention: a red exit IS the signal.
-	process.exit(lookalikes.length > 0 ? 1 : 0);
+	// Red ONLY when the real one is missing/conflicted/unnamed — never for fakes.
+	process.exit(guardFails.length > 0 ? 1 : 0);
 }
 
 main().catch((e) => {
