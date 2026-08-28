@@ -9,8 +9,10 @@
  * lightness, adjacent ΔL ≥ 0.06, light end clears the surface at 2.57:1.
  * Do not hand-edit these hexes; re-run the validator if they must change.
  */
-export const RAMP = ["#FFF3B8", "#FDDA24", "#CFAE1C", "#9C8318", "#6B5A12"];
-const INK = "#FDDA24"; // --chart-line-primary
+// Positional-emphasis ramp, violet, BRIGHT -> DIM: index 0 is the row that
+// should pop (strongest basis, top stage), later rows recede.
+export const RAMP = ["#c4b5fd", "#a78bfa", "#8b5cf6", "#7c3aed", "#5b21b6"];
+const INK = "#a78bfa"; // violet accent (quality surfaces)
 const MUTED = "#525252"; // --chart-line-secondary
 
 const nf = new Intl.NumberFormat("en-US");
@@ -415,7 +417,7 @@ export function GapMatrix({
 								className="h-full rounded-[2px]"
 								style={{
 									width: `${Math.max(pct, 1)}%`,
-									backgroundColor: "#FDDA24",
+									backgroundColor: "#a78bfa",
 								}}
 								title={`${r.missing} of ${r.of} sampled ${r.entity}s missing ${r.field}`}
 							/>
@@ -532,9 +534,9 @@ export function PhaseProgress({
 							style={{
 								backgroundColor:
 									p.state === "done"
-										? "#FDDA24"
+										? "#a78bfa"
 										: p.state === "in-progress"
-											? "#6B5A12"
+											? "#5b21b6"
 											: "#2F2F2F",
 							}}
 							title={`${p.id} - ${p.title}: ${p.state}`}

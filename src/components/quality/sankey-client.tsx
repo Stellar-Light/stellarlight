@@ -169,15 +169,15 @@ export function Sankey({
 				role="img"
 				aria-label={`Finding flow: ${links.map((l) => `${nodes[l.source].label} to ${nodes[l.target].label} ${l.value}`).join("; ")}`}
 			>
-				<title>Findings traced from detector, through surface, to outcome</title>
+				<title>
+					Findings traced from detector, through surface, to outcome
+				</title>
 				{ribbons.map((r) => (
 					<path
 						key={r.d}
 						d={r.d}
-						fill="#FDDA24"
-						fillOpacity={
-							linkActive(r) ? 0.45 : anyHover ? 0.05 : 0.14
-						}
+						fill="#a78bfa"
+						fillOpacity={linkActive(r) ? 0.45 : anyHover ? 0.05 : 0.14}
 						style={{ transition: "fill-opacity 120ms" }}
 						onMouseEnter={() => {
 							setHoverLink(r.li);
@@ -219,9 +219,12 @@ export function Sankey({
 								width={NODE_W}
 								height={g.h}
 								rx="2"
-								fill="#FDDA24"
+								fill="#a78bfa"
 								fillOpacity={active ? 1 : anyHover ? 0.5 : 0.85}
-								style={{ transition: "fill-opacity 120ms", pointerEvents: "none" }}
+								style={{
+									transition: "fill-opacity 120ms",
+									pointerEvents: "none",
+								}}
 							>
 								<title>{`${n.label}: ${thru(i)} findings`}</title>
 							</rect>
