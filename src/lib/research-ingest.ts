@@ -13,6 +13,7 @@ import { createHash } from "node:crypto";
 import type { Payload } from "payload";
 import { docKindOf, docVersionStatus } from "./doc-freshness";
 import { embedBatch } from "./embed";
+import { deriveCleanTitle } from "./title-quality";
 
 export const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
 
@@ -178,7 +179,13 @@ export function chunkMarkdown(opts: {
 	tags: string[];
 	publishedAt?: string;
 }): ResearchChunk[] {
-	const { md, parentDocId, title, url, tags, publishedAt } = opts;
+	const { md, parentDocId, url, tags, publishedAt } = opts;
+	// S6 title hygiene at the ONE point every ingester passes through: decode
+	// entities, strip trailing sentence punctuation, clamp overlong titles,
+	// never a bare date (falls back to the humanized URL slug). Content is
+	// untouched, so an improved title reaches existing rows via the
+	// metadata-drift path in upsertChunks — no re-embed.
+	const title = deriveCleanTitle(opts.title, url);
 	const lines = md.split("\n");
 	const sections: Array<{ heading: string | null; body: string[] }> = [];
 	let current: { heading: string | null; body: string[] } = {

@@ -26,7 +26,9 @@ import "../load-env";
 import { writeFileSync } from "node:fs";
 
 import { getPayload } from "payload";
+import { mirrorGroups } from "../../src/lib/corpus-mirrors";
 import { JUNK_URL_RE } from "../../src/lib/research-rank";
+import { titleIssue } from "../../src/lib/title-quality";
 import configPromise from "../../src/payload.config";
 
 const JSON_OUT = process.argv.includes("--json");
@@ -46,31 +48,10 @@ const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 	"lumenloop-research": 30,
 };
 
-const BARE_DATE_RE = /^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\w+ \d{1,2}, \d{4})$/;
-
-/**
- * Evidence-calibrated (first live run): 'starts-lowercase' false-positived
- * on CLI/RPC reference pages whose titles ARE lowercase identifiers
- * ('tx sign and tx send', 'request_trust'). Meeting recaps USED to be
- * excused as "inherently date-titled" — no longer: the ingester now
- * synthesizes "Stellar Protocol Meeting YYYY-MM-DD" titles, so a bare-date
- * meeting title is a regression this sweep must catch (same bar as
- * run-golden's BAD-TITLE).
- */
-function titleIssue(title: string, _url: string): string | null {
-	const t = (title ?? "").trim();
-	if (!t) return "empty";
-	if (BARE_DATE_RE.test(t)) return "bare-date";
-	if (t.length > 110) return "overlong (sentence, not a title)";
-	// Run-3 evidence: word-count flagged 296 legit SEO-style docs titles
-	// ('Issue an Asset on Stellar: Set Trustlines…'). A body fragment ENDS
-	// like a sentence; length alone doesn't make one.
-	if (/[.!?]$/.test(t)) return "sentence-like (body fragment?)";
-	// Run-3 samples surfaced this class: '&amp;' served raw in titles —
-	// the ingester never decodes entities from <title>.
-	if (/&(amp|lt|gt|quot|#\d+|#x[0-9a-f]+);/i.test(t)) return "html-entities";
-	return null;
-}
+// titleIssue (and its calibration history) moved to src/lib/title-quality.ts
+// so this sweep, the ingest choke point (chunkMarkdown → deriveCleanTitle) and
+// the back-fill repair (scripts/fix-corpus-titles.ts) share ONE classifier —
+// the rule and the fix can't drift apart.
 
 async function main() {
 	console.error("Engine B (corpus) — research-docs sweeps");
@@ -175,17 +156,12 @@ async function main() {
 		};
 	}
 
-	// ── S8 mirrored content (same hash, >1 distinct URL) ──
-	const byHash = new Map<string, Set<string>>();
-	for (const r of rows) {
-		if (!r.contentHash) continue;
-		const set = byHash.get(r.contentHash) ?? new Set<string>();
-		set.add(r.url);
-		byHash.set(r.contentHash, set);
-	}
-	const mirrors = [...byHash.entries()]
-		.filter(([, urls]) => urls.size > 1)
-		.map(([hash, urls]) => ({ hash: hash.slice(0, 12), urls: [...urls] }));
+	// ── S8 mirrored content (same hash, >1 distinct URL) — grouping shared
+	// with the repair script via src/lib/corpus-mirrors.ts ──
+	const mirrors = mirrorGroups(rows).map((g) => ({
+		hash: g.hash.slice(0, 12),
+		urls: g.urls,
+	}));
 
 	const report = {
 		frame: { chunks: rows.length, docs: byDoc.size },
