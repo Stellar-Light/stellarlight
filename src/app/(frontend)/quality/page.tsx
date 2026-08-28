@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import {
 	AreaChart,
 	BarList,
+	FreshnessTrack,
 	GapMatrix,
 	Info,
 	Metric,
@@ -10,9 +11,11 @@ import {
 	QueueRow,
 	Sankey,
 	StackedRamp,
+	StatusSplit,
 } from "@/components/quality/charts";
 import {
 	CoverageBar,
+	GuardStateStrip,
 	MiniHistogram,
 	QualityScatter,
 	StageBreakdown,
@@ -187,6 +190,16 @@ export default function QualityPage() {
 						}
 						className="mb-6"
 					>
+						<div className="mb-5">
+							<GuardStateStrip
+								guards={guards.map((g) => ({
+									key: g.key,
+									title: g.title,
+									value: g.value,
+									state: g.state,
+								}))}
+							/>
+						</div>
 						<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
 							<Stat
 								label="At target"
@@ -573,6 +586,38 @@ export default function QualityPage() {
 						explain={`Scored by ${external.ourResponse.scoredBy} ${external.ourResponse.note}`}
 					/>
 				</div>
+				<div className="mb-5">
+					<p className="text-xs text-muted-foreground mb-2">
+						Their answer key, by status
+					</p>
+					<StatusSplit
+						counts={external.counts as Record<string, number>}
+						total={external.total}
+						order={[
+							{
+								key: "verified",
+								label: "verified by them",
+								color: "#FDDA24",
+							},
+							{
+								key: "fixed-upstream",
+								label: "fixed, awaiting their re-check",
+								color: "#CFAE1C",
+							},
+							{
+								key: "reported-upstream",
+								label: "open",
+								color: "#9C8318",
+							},
+							{
+								key: "declined-upstream",
+								label: "declined by them",
+								color: "#6B5A12",
+								outline: true,
+							},
+						]}
+					/>
+				</div>
 				<div className="flex flex-col">
 					{external.records.map((r) => {
 						const resp = (
@@ -939,11 +984,17 @@ export default function QualityPage() {
 						right={<EvidenceLink path={g.artifact} />}
 					>
 						<div className="flex items-start justify-between gap-4">
-							<Stat
-								label={`measured ${g.asOf} · ${g.ageDays}d ago · ${g.cadence}`}
-								value={g.value}
-								sub={g.sub}
-							/>
+							<div className="flex flex-col gap-2">
+								<Stat
+									label={`measured ${g.asOf} · ${g.cadence}`}
+									value={g.value}
+									sub={g.sub}
+								/>
+								<FreshnessTrack
+									ageDays={g.ageDays}
+									windowDays={g.freshnessDays}
+								/>
+							</div>
 							{/* THREE states, not two. Stale evidence renders as its own
 							    thing: a guard we stopped measuring is not a guard that is
 							    holding, and it is not one that is failing either. */}
