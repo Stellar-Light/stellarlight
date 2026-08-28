@@ -53,10 +53,23 @@ const GAP_TYPES = new Set([
 	"RWA",
 ]);
 
-/** Full-chain-or-nothing: the project's OWN stellar.toml must declare a
- * currency, and that EXACT code+issuer must exist on Horizon mainnet. The
- * 2026-08-28 lesson's rule mechanized — an asset_code match alone proves
- * nothing, and a reachable site proves less. */
+const TWO_PART_TLDS = new Set(["co.uk", "com.au", "com.br", "co.jp"]);
+function registrable(host: string): string | null {
+	const h = host.trim().toLowerCase().replace(/\.$/, "");
+	if (!h.includes(".")) return null;
+	const l = h.split(".");
+	const two = l.slice(-2).join(".");
+	return TWO_PART_TLDS.has(two) && l.length >= 3 ? l.slice(-3).join(".") : two;
+}
+
+/** Full-chain-or-nothing, BOTH directions: the project's OWN stellar.toml
+ * must declare a currency, that EXACT code+issuer must exist on Horizon
+ * mainnet, AND the issuer account's own home_domain must point back at the
+ * project's domain. The reverse link is what stops a copied toml block from
+ * stamping someone else's asset as this project's deployment (first dry run:
+ * usdc-swap's toml declared Circle's USDC and would have passed the
+ * half-chain). An asset_code match alone proves nothing, a reachable site
+ * proves less, and a declared-but-unowned issuer proves nothing either. */
 async function tomlChain(
 	website: string,
 ): Promise<{ code: string; issuer: string; tomlUrl: string } | null> {
@@ -95,7 +108,16 @@ async function tomlChain(
 			const d = (await r.json()) as {
 				_embedded?: { records?: unknown[] };
 			};
-			if ((d._embedded?.records ?? []).length > 0)
+			if ((d._embedded?.records ?? []).length === 0) continue;
+			// reverse link: the issuer must claim the project's domain back
+			const ar = await fetch(`https://horizon.stellar.org/accounts/${issuer}`, {
+				headers: { "User-Agent": "stellarlight-deployment-lane" },
+				signal: AbortSignal.timeout(15000),
+			});
+			if (!ar.ok) continue;
+			const acct = (await ar.json()) as { home_domain?: string };
+			const issuerReg = registrable(String(acct.home_domain ?? ""));
+			if (issuerReg && issuerReg === registrable(host))
 				return { code, issuer, tomlUrl };
 		} catch {}
 	}
