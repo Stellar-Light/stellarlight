@@ -51,6 +51,18 @@ export const STATUS_FIX: Record<
 	// Astro landing page — a page is not a protocol). Repo laina-defi/laina
 	// last pushed 2026-08-11, so the project is alive as a PROJECT, just not
 	// launched: Pre-Release, not Inactive.
+	// Battery F-row rotation 2026-08-29: hoops was Live on source-inherited
+	// with NO source URL. Verified today: hoops.finance serves the actual
+	// product page (Hoops Finance org schema + product content, not a parked
+	// page). Status unchanged — this writes only the dated evidence.
+	hoops: {
+		from: "Live",
+		to: "Live",
+		note: "AMM analytics + DEX aggregation for Stellar; product page live at hoops.finance.",
+		asOf: "2026-08-29",
+		sourceUrl: "https://hoops.finance/",
+		basis: "site-liveness",
+	},
 	laina: {
 		from: "Live",
 		to: "Pre-Release",
@@ -663,6 +675,9 @@ export const TYPE_ADD: Record<string, string[]> = {
 	nebula: ["Oracle"], // same grid family, Inactive — type is identity, not liveness
 	orally: ["Oracle"], // "On-chain oracles with cross-chain capabilities"
 	"soroban-optimistic-oracle": ["Oracle"], // optimistic/arbitration oracle (keeps Infrastructure)
+	// Battery F-row rotation 2026-08-29: prominent row with types:[] — it is
+	// the Go SDK for Stellar (stellar/go-stellar-sdk, repo verified live).
+	"go-stellar-sdk": ["SDK"],
 };
 
 export const SEEDS: Array<{
