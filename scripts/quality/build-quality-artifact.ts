@@ -288,6 +288,16 @@ const out = {
 		frame: FRAME_METHOD,
 		/** retained so existing consumers keep working; equals `read` */
 		sampled: projects.length,
+		/** every row as one compact point for the prominence-vs-evidence
+		 * scatter: the top-right of that chart (prominent, weak) IS the
+		 * curation queue, and a chart over a 40-row sample would hide it */
+		scatter: projects.map((p) => ({
+			slug: p.slug,
+			prominence: p.prominence,
+			factsPresent: p.factsPresent,
+			missing: p.missing,
+			status: p.status,
+		})),
 		meanScore: Math.round(
 			projects.reduce((a, p) => a + p.score, 0) / Math.max(projects.length, 1),
 		),
