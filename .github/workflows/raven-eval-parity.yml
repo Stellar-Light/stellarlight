@@ -89,8 +89,13 @@ jobs:
         if: always() && github.event_name != 'pull_request'
         continue-on-error: true
         run: |
+          # Clear findings that no longer reproduce BEFORE measuring, so the
+          # open count is real debt rather than last week's fixes waiting for
+          # their detector to run again.
+          pnpm exec tsx scripts/quality/clear-stale-findings.ts --execute
           pnpm exec tsx scripts/quality/build-quality-artifact.ts
           MISS_SAMPLE=80 pnpm exec tsx scripts/quality/classify-misses.ts
+          pnpm exec tsx scripts/quality/build-progress-artifact.ts
 
       - name: Record quality snapshot (trend history)
         if: always() && github.event_name != 'pull_request'
@@ -102,7 +107,7 @@ jobs:
             ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} ${PP:+--parity-pass $PP}
           git config user.name "stellarlight-quality-bot"
           git config user.email "bot@stellarlight.xyz"
-          git add improvements/quality/history.json improvements/quality/entities.json improvements/quality/miss-funnel.json
+          git add improvements/quality/ improvements/ledger/findings.json
           git diff --cached --quiet && exit 0
           git commit -m "data(quality): daily trend snapshot [skip ci]"
           git pull --rebase origin main

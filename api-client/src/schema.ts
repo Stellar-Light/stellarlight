@@ -1920,6 +1920,37 @@ export interface operations {
                             humanPage?: string;
                             methodology?: string;
                         };
+                        /** @description Where this service stands against its own published quality plan (QUALITY.md). A phase cannot show done here without being done there, and remaining work is served with the same weight as finished work. */
+                        progress?: {
+                            id?: string;
+                            title?: string;
+                            /** @enum {string} */
+                            state?: "done" | "in-progress" | "not-started" | "unknown";
+                            evidence?: string | null;
+                            shippedSoFar?: string | null;
+                            remaining?: string | null;
+                        }[];
+                        /** @description The written record behind the numbers — lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative. */
+                        library?: {
+                            lessons?: {
+                                file?: string;
+                                date?: string;
+                                title?: string;
+                                lessonCount?: number;
+                                bytes?: number;
+                            }[];
+                            audits?: {
+                                file?: string;
+                                name?: string;
+                            }[];
+                            receipts?: {
+                                file?: string;
+                                slug?: string;
+                                url?: string;
+                                fetchedAt?: string;
+                                markers?: string[];
+                            }[];
+                        };
                         /** @description Read first. Each entry is derived from a measurement, not authored: what the limit IS, the number behind it, and what to do instead. */
                         knownLimitations?: {
                             area?: string;

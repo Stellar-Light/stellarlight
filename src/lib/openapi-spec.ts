@@ -218,6 +218,76 @@ export const spec: OpenAPISpec = {
 												methodology: { type: "string" },
 											},
 										},
+										progress: {
+											type: "array",
+											description:
+												"Where this service stands against its own published quality plan (QUALITY.md). A phase cannot show done here without being done there, and remaining work is served with the same weight as finished work.",
+											items: {
+												type: "object",
+												properties: {
+													id: { type: "string" },
+													title: { type: "string" },
+													state: {
+														type: "string",
+														enum: [
+															"done",
+															"in-progress",
+															"not-started",
+															"unknown",
+														],
+													},
+													evidence: { type: "string", nullable: true },
+													shippedSoFar: { type: "string", nullable: true },
+													remaining: { type: "string", nullable: true },
+												},
+											},
+										},
+										library: {
+											type: "object",
+											description:
+												"The written record behind the numbers — lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative.",
+											properties: {
+												lessons: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															date: { type: "string" },
+															title: { type: "string" },
+															lessonCount: { type: "integer" },
+															bytes: { type: "integer" },
+														},
+													},
+												},
+												audits: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															name: { type: "string" },
+														},
+													},
+												},
+												receipts: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															slug: { type: "string" },
+															url: { type: "string" },
+															fetchedAt: { type: "string" },
+															markers: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
 										knownLimitations: {
 											type: "array",
 											description:

@@ -43,6 +43,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-29",
 		surfaces: ["api", "mcp"],
+		type: "changed",
+		summary:
+			"The open-findings count is now real: 185 findings that no longer reproduced were re-probed live and cleared, taking open from 263 to 78 (openapi@1.8.110). /api/quality also serves phase progress read from QUALITY.md and the written library — lesson write-ups, correction receipts, audit reports.",
+		detail:
+			"A detector only clears its own findings when it next runs, so fixes landing mid-week left their findings sitting open and the count read as debt. The sweep replays every open recall finding against live search and clears only on a pass observed right now, writing clearedAt and clearedBy so the reason is auditable; it runs daily before the artifacts are rebuilt. With the staleness gone the miss funnel became readable and actionable: 21 real findings, 9 ranking (returned but below top-3) and 12 admission (not returned for that phrasing), zero corpus and zero identity gaps. Phase progress is derived from QUALITY.md's own status markers — a phase cannot show done on the dashboard without being done in the plan — and P3 states plainly what is missing: no agent yet ACTS on the gap matrix.",
+	},
+	{
+		date: "2026-08-29",
+		surfaces: ["api", "mcp"],
 		type: "added",
 		summary:
 			"Miss funnel on /api/quality and /quality (openapi@1.8.109): every open recall finding replayed live and classified at the FIRST failing stage — passing / ranking / admission / identity / corpus — each naming its owning area. First run: 70 of 80 sampled misses NO LONGER REPRODUCE, so the open finding count was carrying the previous week's fixes as if they were debt.",

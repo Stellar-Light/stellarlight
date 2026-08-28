@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-08-28T01:53:48.386Z",
+ "generatedAt": "2026-08-28T02:19:03.639Z",
  "surfaces": [
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
-   "openFindings": 228,
-   "clearedFindings": 75
+   "openFindings": 43,
+   "clearedFindings": 260
   },
   {
    "surface": "directory",
@@ -46,14 +46,14 @@
  ],
  "findings": {
   "total": 437,
-  "open": 263,
-  "cleared": 167,
+  "open": 78,
+  "cleared": 352,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 214,
-    "cleared": 43,
+    "open": 29,
+    "cleared": 228,
     "surface": "retrieval"
    },
    {
@@ -132,15 +132,15 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 28
+    "count": 26
    },
    {
     "bucket": "8–30d",
-    "count": 32
+    "count": 18
    },
    {
     "bucket": "31–60d",
-    "count": 203
+    "count": 34
    },
    {
     "bucket": ">60d",
@@ -149,52 +149,52 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "battery:q-tool-leaderboard-open-issues",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-08-25"
-   },
-   {
-    "probe": "idos in top-3 for 'is idOS live'",
+    "probe": "nownodes in top-3 for 'is NOWNodes live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "infstones in top-3 for 'is InfStones live'",
+    "probe": "lightecho in top-3 for 'is Lightecho live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "onfinality in top-3 for 'is OnFinality live'",
+    "probe": "gatewayfm in top-3 for 'is Gateway.fm live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "walletconnect in top-3 for 'tell me about WalletConnect'",
+    "probe": "liquify in top-3 for 'is Liquify live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "easya in top-3 for 'is EasyA live'",
+    "probe": "bridge in top-3 for 'tell me about Bridge'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "nearx in top-3 for 'what is NearX'",
+    "probe": "orally in top-3 for 'is Orally live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
    },
    {
-    "probe": "stellarx-ph in top-3 for 'StellarX PH on stellar'",
+    "probe": "merkl in top-3 for 'is Merkl live'",
     "surface": "retrieval",
     "failureMode": "recall-miss",
-    "clearedAt": "2026-08-24"
+    "clearedAt": "2026-08-28"
+   },
+   {
+    "probe": "humantech in top-3 for 'is human.tech live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-28"
    }
   ]
  },
@@ -1824,7 +1824,7 @@
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "214 open recall-miss findings",
+   "measurement": "29 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],

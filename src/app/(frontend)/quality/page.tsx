@@ -7,6 +7,8 @@ import {
 	Info,
 	Metric,
 	MissFunnel,
+	PhaseProgress,
+	QueueRow,
 	SplitBarList,
 	StackedRamp,
 } from "@/components/quality/charts";
@@ -16,6 +18,7 @@ import {
 	getGuardRows,
 	getMissFunnel,
 	getNorthStar,
+	getProgress,
 	getTrends,
 	type TrendSeries,
 } from "@/lib/quality-artifacts";
@@ -126,6 +129,7 @@ export default function QualityPage() {
 	const trends = getTrends();
 	const entities = getEntities();
 	const funnel = getMissFunnel();
+	const progress = getProgress();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -153,6 +157,50 @@ export default function QualityPage() {
 					.
 				</p>
 			</header>
+
+			{/* ── where we are against the stated plan, and how an agent reads this ── */}
+			<Card
+				title="Progress against the quality plan"
+				description="Phase status is read from QUALITY.md itself — a phase cannot show green here without being green there. Remaining work is shown in the same weight as completed work."
+				right={
+					<a
+						href="https://github.com/Stellar-Light/stellarlight/blob/main/QUALITY.md"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						The plan
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<PhaseProgress phases={progress.phases} />
+			</Card>
+
+			{/* ── the agent door — deliberately at the top, not a footnote ── */}
+			<div className="mb-6 rounded-lg border border-border bg-card/40 p-4 sm:p-5">
+				<div className="flex flex-wrap items-center justify-between gap-4">
+					<div className="min-w-0">
+						<p className="text-sm font-medium text-foreground mb-1">
+							Reading this as an agent?
+						</p>
+						<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+							Every number on this page is served as JSON — known limitations
+							first, then the gap matrix with real identifiers, the miss funnel,
+							per-surface findings, guard state and the trend history. No
+							parameters, no key, cached hourly.
+						</p>
+					</div>
+					<a
+						href="/api/quality"
+						className="inline-flex items-center gap-1.5 shrink-0 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-foreground hover:border-muted-foreground transition-colors"
+					>
+						GET /api/quality
+						<ArrowUpRight className="h-3.5 w-3.5" />
+					</a>
+				</div>
+			</div>
 
 			{/* north star */}
 			<Card
@@ -218,7 +266,7 @@ export default function QualityPage() {
 					{entities.knownLimitations.map((l) => (
 						<div key={l.area} className="flex flex-col gap-1">
 							<div className="flex items-baseline gap-2 flex-wrap">
-								<span className="text-xs font-medium text-foreground uppercase tracking-wide">
+								<span className="text-xs font-medium text-foreground capitalize">
 									{l.area}
 								</span>
 								<span className="text-[11px] text-muted-foreground tabular-nums">
@@ -287,19 +335,19 @@ export default function QualityPage() {
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
 					<Stat
-						label="open"
+						label="Open"
 						value={String(entities.findings.open)}
-						sub="still reproducing"
+						sub="Still reproducing"
 					/>
 					<Stat
-						label="cleared"
+						label="Cleared"
 						value={String(entities.findings.cleared)}
 						sub="stopped reproducing"
 					/>
 					<Stat
-						label="verified closed"
+						label="Verified closed"
 						value={String(entities.findings.verified)}
-						sub="re-probed after the fix"
+						sub="Re-probed after the fix"
 					/>
 				</div>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mb-5">
@@ -351,15 +399,12 @@ export default function QualityPage() {
 						</p>
 						<div className="flex flex-col gap-1.5">
 							{entities.findings.recentlyCleared.map((c) => (
-								<div
+								<QueueRow
 									key={`${c.probe}-${c.clearedAt}`}
-									className="flex items-baseline justify-between gap-4 text-xs"
-								>
-									<span className="text-foreground truncate">{c.probe}</span>
-									<span className="text-muted-foreground shrink-0 tabular-nums">
-										{c.failureMode} · {c.clearedAt}
-									</span>
-								</div>
+									href={evidenceUrl("improvements/ledger/findings.json")}
+									primary={c.probe}
+									trailing={`${c.failureMode} · ${c.clearedAt}`}
+								/>
 							))}
 						</div>
 					</div>
@@ -399,7 +444,7 @@ export default function QualityPage() {
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
 					<Metric
-						label="mean row evidence score"
+						label="Mean row evidence score"
 						value={`${entities.projects.meanScore}%`}
 						sub={`across ${entities.projects.sampled} sampled rows`}
 						goodWhen="higher"
@@ -445,21 +490,13 @@ export default function QualityPage() {
 					</p>
 					<div className="flex flex-col gap-1.5">
 						{entities.projects.weakest.slice(0, 30).map((p) => (
-							<div
+							<QueueRow
 								key={p.slug}
-								className="flex items-baseline justify-between gap-4 text-xs"
-							>
-								<span className="text-foreground truncate">
-									{p.name}
-									<span className="text-muted-foreground">
-										{" "}
-										· {p.statusBasis ?? "no basis"}
-									</span>
-								</span>
-								<span className="shrink-0 text-muted-foreground tabular-nums">
-									missing {p.missing.join(", ")} · {p.score}%
-								</span>
-							</div>
+								href={`/project/${p.slug}`}
+								primary={p.name}
+								secondary={p.statusBasis ?? "no basis"}
+								trailing={`missing ${p.missing.join(", ")} · ${p.score}%`}
+							/>
 						))}
 					</div>
 				</div>
@@ -473,23 +510,23 @@ export default function QualityPage() {
 			>
 				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-6">
 					<Metric
-						label="scanned for depth"
+						label="Scanned for depth"
 						value={`${entities.repos.withCodeDepth}/${entities.repos.sampled}`}
-						sub="have a code-depth reading"
+						sub="Have a code-depth reading"
 						goodWhen="higher"
 						explain="Code depth is a scan-derived measure of real implementation signal (entry files, symbols, SDK usage) — not a quality judgement of the project."
 					/>
 					<Metric
-						label="with knowledge notes"
+						label="With knowledge notes"
 						value={`${entities.repos.withNotes}/${entities.repos.sampled}`}
-						sub="curated dated facts with sources"
+						sub="Curated dated facts with sources"
 						goodWhen="higher"
 						explain="knowledgeNotes are hand-curated dated facts with a source URL. Absence means nobody curated this repo yet — never a statement about the repo itself."
 					/>
 					<Metric
-						label="joined to a mainnet contract"
+						label="Joined to a mainnet contract"
 						value={`${entities.repos.withMainnet}/${entities.repos.sampled}`}
-						sub="verified contract attributed"
+						sub="Verified contract attributed"
 						goodWhen="higher"
 						explain="A verified mainnet contract attributed to this repo — the difference between 'code exists' and 'code is used'. Absence is absence of a join, never proof of disuse."
 					/>
@@ -499,18 +536,84 @@ export default function QualityPage() {
 				</p>
 				<div className="flex flex-col gap-1.5">
 					{entities.repos.top.slice(0, 25).map((r) => (
-						<div
+						<QueueRow
 							key={r.fullName}
-							className="flex items-baseline justify-between gap-4 text-xs"
-						>
-							<span className="text-foreground truncate">{r.fullName}</span>
-							<span className="shrink-0 text-muted-foreground tabular-nums">
-								score {r.repoScore} · depth {r.codeDepth ?? "—"}% · {r.notes}{" "}
-								note
-								{r.notes === 1 ? "" : "s"}
-							</span>
-						</div>
+							href={`https://github.com/${r.fullName}`}
+							primary={r.fullName}
+							trailing={`score ${r.repoScore} · depth ${r.codeDepth ?? "—"}% · ${r.notes} note${r.notes === 1 ? "" : "s"}`}
+						/>
 					))}
+				</div>
+			</Card>
+
+			{/* ── the written record: why things are the way they are ── */}
+			<Card
+				title="Lessons and research"
+				description="Every recurring defect class was written up when it was found, and every human-verified correction carries a committed receipt. These are the documents behind the numbers above."
+				right={
+					<a
+						href={evidenceUrl("improvements/lessons")}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+					>
+						All lessons
+						<ArrowUpRight className="h-3 w-3" />
+					</a>
+				}
+				className="mb-6"
+			>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+							Lesson write-ups
+							<Info text="Each file records defects found on one day: what broke, the root cause, and the invariant or probe added so the class cannot silently return." />
+						</p>
+						<div className="flex flex-col">
+							{progress.library.lessons.slice(0, 8).map((l) => (
+								<QueueRow
+									key={l.file}
+									href={evidenceUrl(l.file)}
+									primary={l.title.replace(/^Lessons?\s*[—-]\s*/i, "")}
+									trailing={
+										l.lessonCount > 0
+											? `${l.date} · ${l.lessonCount} lessons`
+											: l.date
+									}
+								/>
+							))}
+						</div>
+					</div>
+					<div className="flex flex-col gap-3">
+						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+							Correction receipts
+							<Info text="A human-verified status change commits its evidence: the URL fetched, the time, response identity headers, and the exact markers on the page that decided the verdict. Re-run the capture to diff what a page says now against what it said then." />
+						</p>
+						<div className="flex flex-col">
+							{progress.library.receipts.map((r) => (
+								<QueueRow
+									key={r.file}
+									href={evidenceUrl(r.file)}
+									primary={r.slug}
+									secondary={r.markers.slice(0, 2).join(", ") || undefined}
+									trailing={r.fetchedAt}
+								/>
+							))}
+						</div>
+						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 mt-3">
+							Audits
+						</p>
+						<div className="flex flex-col">
+							{progress.library.audits.slice(0, 4).map((a) => (
+								<QueueRow
+									key={a.file}
+									href={evidenceUrl(a.file)}
+									primary={a.name}
+									trailing="report"
+								/>
+							))}
+						</div>
+					</div>
 				</div>
 			</Card>
 

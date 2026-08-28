@@ -30,6 +30,7 @@ import qualityHistory from "../../improvements/quality/history.json";
 // Weekly evidence — fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import missFunnel from "../../improvements/quality/miss-funnel.json";
+import qualityProgress from "../../improvements/quality/progress.json";
 import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
@@ -453,4 +454,10 @@ export function getEntities() {
  * finding live (scripts/quality/classify-misses.ts). */
 export function getMissFunnel() {
 	return missFunnel;
+}
+
+/** Phase progress + the written library (lessons, audits, receipts), read
+ * from QUALITY.md and the repo (scripts/quality/build-progress-artifact.ts). */
+export function getProgress() {
+	return qualityProgress;
 }
