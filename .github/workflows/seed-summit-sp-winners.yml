@@ -12,6 +12,10 @@ on:
         description: "Write to the DB? Leave false for a dry run."
         type: boolean
         default: false
+      unwind_event:
+        description: "Delete the summit's hackathons row + clear the relation on winner rows (owner call 2026-08-29: winners are not a submission list)"
+        type: boolean
+        default: false
 
 permissions: { contents: read }
 
@@ -29,4 +33,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/data/seed-summit-sp-winners.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/seed-summit-sp-winners.ts ${{ inputs.unwind_event && '--unwind-event' || '' }} ${{ inputs.execute && '--execute' || '' }}
