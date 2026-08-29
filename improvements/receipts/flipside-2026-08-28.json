@@ -1,0 +1,20 @@
+{
+ "slug": "flipside",
+ "fetchedAt": "2026-08-28",
+ "context": "sourced-queue pass: provenance fill turned up a pivot",
+ "url": "https://flipsidecrypto.xyz/",
+ "markers": [
+  {
+   "marker": "xyz redirects to edisyl",
+   "found": true,
+   "excerpt": "GET https://flipsidecrypto.xyz/about -> 200 at https://www.edisyl.com/ \u00b7 <title>edisyl - The knowledge layer for enterprise AI</title>"
+  },
+  {
+   "marker": "com redirects too",
+   "found": true,
+   "excerpt": "GET https://flipsidecrypto.com -> 200 at https://www.edisyl.com/ (same destination \u2014 the whole brand moved, not one page)"
+  }
+ ],
+ "decidedStatus": "Inactive",
+ "verdict": "crypto-analytics product gone; company pivoted to enterprise AI (edisyl)"
+}

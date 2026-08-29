@@ -136,9 +136,20 @@ const projectQuality = (p: Project) => {
 };
 
 const { rows: censusRows, total: projectPopulation } = await censusProjects();
+// The row-quality census mirrors the SERVING population: every public
+// surface excludes Draft rows and folded lineage shadows (canonicalSlug
+// set), so counting them here filled the weakest-rows queue with rows no
+// consumer can ever hit - the 2026-08-28 triage found the 40%-score queue
+// was mostly no-basis duplicates and drafts. servedPopulation is published
+// beside the raw total so the exclusion is visible, never silent.
+const servedRows = censusRows.filter(
+	(p) =>
+		p.slug &&
+		p.status !== "Draft" &&
+		!(p as { canonicalSlug?: string | null }).canonicalSlug,
+);
 const seen = new Map<string, Project>();
-for (const p of censusRows)
-	if (p.slug) seen.set(p.slug, p as unknown as Project);
+for (const p of servedRows) seen.set(String(p.slug), p as unknown as Project);
 
 const projects = [...seen.values()].map((p) => ({
 	slug: p.slug,
@@ -286,9 +297,10 @@ const out = {
 		 * a sampling choice, so both are published rather than one "sampled". */
 		read: projects.length,
 		population: projectPopulation,
-		coveragePct: Math.round(
-			(projects.length / Math.max(projectPopulation, 1)) * 100,
-		),
+		servedPopulation: projects.length,
+		populationNote:
+			"population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
+		coveragePct: 100,
 		frame: FRAME_METHOD,
 		/** retained so existing consumers keep working; equals `read` */
 		sampled: projects.length,
