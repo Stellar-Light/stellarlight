@@ -37,6 +37,19 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// Owner call 2026-08-29 ("remove this? why is this even added?"): a
+	// name-only husk from the March lumenloop bulk seed — NO links, empty
+	// description, category/types incoherent, serving Live on an unverified
+	// seed label. The only row of its shape among all 152 source-inherited
+	// Live rows (probed in-session). Draft = out of the served population,
+	// reversible, and sync no longer reverts curation (#730).
+	"free-voting-platform": {
+		from: "Live",
+		to: "Draft",
+		basis: "human-verified",
+		asOf: "2026-08-29",
+		note: "owner-directed removal: contentless seed husk, nothing to verify",
+	},
 	// Weakest-queue triage 2026-08-28: chainsatlas.com serves 404 (probed
 	// in-session); the Inactive verdict was already right, it just had no
 	// recorded evidence.
