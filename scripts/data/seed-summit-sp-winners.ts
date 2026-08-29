@@ -184,8 +184,96 @@ const CONTENT_WINNERS = [
 // biome-ignore lint/suspicious/noExplicitAny: minimal doc shapes
 type Doc = Record<string, any>;
 
+/**
+ * --unwind-event (owner call 2026-08-29): the hackathons DB row made
+ * /hackathons/stellar-builder-summit-2026 render our 9 winner rows under a
+ * "Submitted projects" framing — but they are the PAID WINNERS of a ~100
+ * builder event, not its submissions, and we hold no submission list. The
+ * unwind deletes the event row (the detail page 404s again, as before the
+ * seed) and nulls the dangling hackathon relation on the winner rows. The
+ * scalar facts (hackathonPlacement / Prize / PrizeTrack / Status) and the
+ * descriptions naming the summit STAY — they are true; only the page that
+ * misframed them goes.
+ */
+async function unwindEvent(payload: Awaited<ReturnType<typeof getPayload>>) {
+	const event = (
+		await payload.find({
+			collection: "hackathons",
+			where: { slug: { equals: EVENT_SLUG } },
+			limit: 1,
+			depth: 0,
+		})
+	).docs[0] as Doc | undefined;
+	if (!event) {
+		console.log(`event row ${EVENT_SLUG} not found — nothing to unwind.`);
+		return;
+	}
+	const linked = (
+		await payload.find({
+			collection: "projects",
+			where: { hackathon: { equals: event.id } },
+			limit: 100,
+			depth: 0,
+			select: { slug: true },
+		})
+	).docs as Doc[];
+	console.log(
+		`unwind: event ${EVENT_SLUG} (${event.id}) · ${linked.length} row(s) carry the relation`,
+	);
+	for (const p of linked)
+		console.log(`  clear hackathon relation on ${p.slug}`);
+	console.log(`  delete hackathons row ${EVENT_SLUG}`);
+	if (!EXECUTE) {
+		console.log("DRY RUN — nothing written. Re-run with --execute.");
+		return;
+	}
+	let failed = 0;
+	for (const p of linked) {
+		await payload.update({
+			collection: "projects",
+			id: p.id,
+			data: { hackathon: null },
+		});
+		const back = (await payload.findByID({
+			collection: "projects",
+			id: p.id,
+			depth: 0,
+			select: { hackathon: true },
+		})) as Doc;
+		if (back.hackathon != null) {
+			console.error(`  ✗ ${p.slug}: relation still set after clear`);
+			failed++;
+		}
+	}
+	await payload.delete({ collection: "hackathons", id: event.id });
+	const gone =
+		(
+			await payload.find({
+				collection: "hackathons",
+				where: { slug: { equals: EVENT_SLUG } },
+				limit: 1,
+				depth: 0,
+			})
+		).docs.length === 0;
+	if (!gone) {
+		console.error("  ✗ event row still present after delete");
+		failed++;
+	}
+	console.log(
+		`UNWIND DONE: ${linked.length - failed}/${linked.length} relations cleared · event row ${gone ? "deleted" : "STILL PRESENT"}.`,
+	);
+	if (failed) process.exitCode = 1;
+}
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
+	if (process.argv.includes("--unwind-event")) {
+		console.log(
+			`seed-summit-sp-winners --unwind-event — ${EXECUTE ? "EXECUTE" : "DRY RUN"}\n`,
+		);
+		await unwindEvent(payload);
+		return;
+	}
 	console.log(
 		`seed-summit-sp-winners — ${EXECUTE ? "EXECUTE (writes + read-backs)" : "DRY RUN"}\n`,
 	);

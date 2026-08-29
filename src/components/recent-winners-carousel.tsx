@@ -26,9 +26,10 @@ function WinnerCard({
 	fallbackHref,
 }: {
 	winner: RecentWinner;
-	fallbackHref: string;
+	fallbackHref: string | null;
 }) {
-	const href = winner.dorahacksBuidlUrl ?? fallbackHref;
+	const href = winner.dorahacksBuidlUrl ?? fallbackHref ?? undefined;
+	const isExternalDora = !!href?.includes("dorahacks.io");
 
 	return (
 		<a
@@ -78,7 +79,7 @@ function WinnerCard({
 					{winner.prizeUsd.toLocaleString()}
 				</span>
 				<span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors inline-flex items-center gap-1">
-					DoraHacks
+					{isExternalDora ? "DoraHacks" : "View project"}
 					<ArrowUpRight className="w-3 h-3" />
 				</span>
 			</div>
@@ -91,7 +92,13 @@ export function RecentWinnersCarousel({
 }: {
 	data?: RecentHackathonWinners;
 }) {
-	const winnerPage = `https://dorahacks.io/hackathon/${data.hackathonUname}/winner`;
+	// null = the event has no external winners page (never ran on DoraHacks);
+	// undefined = live-derived DoraHacks data, construct the deep-link.
+	const winnerPage =
+		data.winnersPageUrl === null
+			? null
+			: (data.winnersPageUrl ??
+				`https://dorahacks.io/hackathon/${data.hackathonUname}/winner`);
 	const [api, setApi] = useState<CarouselApi | undefined>();
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
@@ -125,15 +132,17 @@ export function RecentWinnersCarousel({
 						{data.hackathonName}
 					</p>
 				</div>
-				<a
-					href={winnerPage}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors mt-1"
-				>
-					See all on DoraHacks
-					<ArrowUpRight className="w-3.5 h-3.5" />
-				</a>
+				{winnerPage && (
+					<a
+						href={winnerPage}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors mt-1"
+					>
+						See all on DoraHacks
+						<ArrowUpRight className="w-3.5 h-3.5" />
+					</a>
+				)}
 			</div>
 
 			{/* Carousel */}

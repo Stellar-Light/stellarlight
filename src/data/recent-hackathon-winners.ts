@@ -22,6 +22,12 @@ export interface RecentHackathonWinners {
 	hackathonUname: string; // for the DoraHacks deep-link
 	endedAt: string; // ISO date
 	totalPrizePool: number;
+	/** External "all winners" page. undefined = construct the DoraHacks URL
+	 * from hackathonUname (live-derived data); null = the event has NO
+	 * external winners page (e.g. Builder Summit SP 26, which never ran on
+	 * DoraHacks) — the carousel hides its header link instead of shipping a
+	 * dead one. */
+	winnersPageUrl?: string | null;
 	winners: RecentWinner[];
 }
 
@@ -34,6 +40,11 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 	hackathonUname: "stellar-builder-summit-2026",
 	endedAt: "2026-08-07",
 	totalPrizePool: 10000,
+	// Not a DoraHacks event — there is no external winners page, and the
+	// hackathonUname-constructed URL 404s. Cards deep-link to our own
+	// project pages instead (dorahacksBuidlUrl predates non-DoraHacks
+	// events; it is simply the card's destination).
+	winnersPageUrl: null,
 	// The 12 build-bounty winners. Five content-bounty winners (tutorial /
 	// video tracks, $100 each, no repos) complete the $10k pool but are not
 	// product builds, so the product highlight omits them:
@@ -47,6 +58,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			description:
 				"Confidential-token, private-payment wallet built on OpenZeppelin's Stellar stack.",
 			prizeUsd: 1250,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/openzeppelin-stellar-privacy-wallet",
 		},
 		{
 			rank: 1,
@@ -55,6 +67,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "coderipper",
 			description: "Agentic payments over x402/MPP on Stellar.",
 			prizeUsd: 1000,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/stellarpay-x402",
 		},
 		{
 			rank: 1,
@@ -63,6 +76,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "ACTA",
 			description: "Brazil-first ramps and regional integration kit.",
 			prizeUsd: 1000,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/acta",
 		},
 		{
 			rank: 1,
@@ -71,6 +85,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Kaptan_web3",
 			description: "Enterprise compliance and RWA build.",
 			prizeUsd: 1000,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/quietbook",
 		},
 		{
 			rank: 1,
@@ -79,6 +94,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Raiz Protocol",
 			description: "Memory CLI plugin for Stellar agents.",
 			prizeUsd: 750,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/stellar-memory",
 		},
 		{
 			rank: 1,
@@ -87,6 +103,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Truway",
 			description: "Brazil-first emerging-market yield build.",
 			prizeUsd: 750,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/truway-yield",
 		},
 		{
 			rank: 2,
@@ -95,6 +112,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "El Guri",
 			description: "Agentic payments build over x402/MPP.",
 			prizeUsd: 750,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/sextant-agent",
 		},
 		{
 			rank: 2,
@@ -103,6 +121,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "TrustlessWork",
 			description: "LatAm on/off-ramp integration kit.",
 			prizeUsd: 750,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/trustless-work",
 		},
 		{
 			rank: 2,
@@ -111,6 +130,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "aguilar1x",
 			description: "SDK for confidential tokens on Stellar.",
 			prizeUsd: 750,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/stellar-confidential-token-sdk",
 		},
 		{
 			rank: 2,
@@ -119,6 +139,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Always Cooking",
 			description: "CLI plugin for Stellar agents.",
 			prizeUsd: 500,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/teji",
 		},
 		{
 			rank: 2,
@@ -127,6 +148,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Fenix",
 			description: "Brazilian treasury-yield energy-payments build.",
 			prizeUsd: 500,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/energypay-tesouro-yield",
 		},
 		{
 			rank: 2,
@@ -135,6 +157,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Green Road",
 			description: "Privacy proof-of-concept on Trustless Work.",
 			prizeUsd: 500,
+			dorahacksBuidlUrl: "https://stellarlight.xyz/project/trustless-work",
 		},
 	],
 };
