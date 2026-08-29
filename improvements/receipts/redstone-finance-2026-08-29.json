@@ -1,0 +1,28 @@
+{
+ "slug": "redstone-finance",
+ "url": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+ "finalUrl": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+ "fetchedAt": "2026-08-29T04:12:20.366Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 04:12:20 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "nginx"
+ },
+ "bodyTextSha256": "6f82573be50bcd69e4f75e207427174c40518aea5b724a0f1543881cc61e5f75",
+ "bodyTextChars": 8742,
+ "markers": [
+  {
+   "marker": "Stellar mainnet",
+   "found": true,
+   "excerpt": "es for innovative protocols. Today, that changes. RedStone is bringing institutional-grade oracle infrastructure to the Stellar mainnet. The Infrastructure Constraint Here&#8217;s the problem Stellar developers have been living with: you can have the best payment infrastructure in the world, but wit"
+  },
+  {
+   "marker": "price feeds",
+   "found": true,
+   "excerpt": "ellar developers have been living with: you can have the best payment infrastructure in the world, but without reliable price feeds, you can&#8217;t build the DeFi products that leverage those payment flows. Lending protocols need accurate collateral prices. If you can&#8217;t trust that the BTC col"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
