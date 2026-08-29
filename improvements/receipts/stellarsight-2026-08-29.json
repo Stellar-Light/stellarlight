@@ -1,0 +1,28 @@
+{
+ "slug": "stellarsight",
+ "url": "https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
+ "finalUrl": "https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
+ "fetchedAt": "2026-08-29T17:44:15.907Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 17:42:43 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "ad07cc630e03c3e15c15b8427294afcfe27b19f809b1f848918c6731d27540cb",
+ "bodyTextChars": 11987,
+ "markers": [
+  {
+   "marker": "x402Version",
+   "found": true,
+   "excerpt": "{ \"x402Version\": 2, \"resources\": [ { \"resource\": \"https://stellarsight.xyz/v1/fx/usd-brl\", \"type\": \"http\", \"x402Version\": 2, \"accepts\": [ { \"scheme\": \"exact\", \"network\": \"stellar:test"
+  },
+  {
+   "marker": "stellar:testnet",
+   "found": true,
+   "excerpt": "ttps://stellarsight.xyz/v1/fx/usd-brl\", \"type\": \"http\", \"x402Version\": 2, \"accepts\": [ { \"scheme\": \"exact\", \"network\": \"stellar:testnet\", \"asset\": \"CAYCPWN5YZEHKPGZOXGU3O7R2Q5H7LT7SZ45YIO26VMFM47VBUHOGPO2\", \"amount\": \"100000\", \"payTo\": \"GCWHOZD7PS6EJOJ3EEGDVWPWQKU7RCKRK6WTTQPI5Q3TGX7XLH7GKG3O\", \"max"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
