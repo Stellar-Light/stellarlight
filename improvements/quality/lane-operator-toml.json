@@ -1,0 +1,95 @@
+{
+ "lane": "operator-toml",
+ "generatedAt": "2026-08-29T02:55:00.240Z",
+ "stage": 1,
+ "cleanWeeks": 0,
+ "stageEntryThresholdWeeks": 2,
+ "lastRun": {
+  "id": 33223843478,
+  "at": "2026-08-29T00:32:40Z",
+  "event": "workflow_dispatch",
+  "conclusion": "success"
+ },
+ "lastCountedRunId": null,
+ "stamps": [
+  {
+   "slug": "agtrail",
+   "network": "mainnet"
+  },
+  {
+   "slug": "ars",
+   "network": "mainnet"
+  },
+  {
+   "slug": "coopstable-v2-yield-sharing-stablecoin",
+   "network": "mainnet"
+  },
+  {
+   "slug": "estrela",
+   "network": "mainnet"
+  },
+  {
+   "slug": "eurckobo",
+   "network": "mainnet"
+  },
+  {
+   "slug": "eurs",
+   "network": "mainnet"
+  },
+  {
+   "slug": "lumenswap",
+   "network": "mainnet"
+  },
+  {
+   "slug": "mxne",
+   "network": "mainnet"
+  },
+  {
+   "slug": "normal",
+   "network": "mainnet"
+  },
+  {
+   "slug": "pen",
+   "network": "mainnet"
+  },
+  {
+   "slug": "reyts",
+   "network": "mainnet"
+  },
+  {
+   "slug": "scopuly",
+   "network": "mainnet"
+  },
+  {
+   "slug": "sodax",
+   "network": "mainnet"
+  },
+  {
+   "slug": "stellar-carbon",
+   "network": "mainnet"
+  },
+  {
+   "slug": "stellarport",
+   "network": "mainnet"
+  },
+  {
+   "slug": "usdy",
+   "network": "mainnet"
+  },
+  {
+   "slug": "xlmeme",
+   "network": "mainnet"
+  },
+  {
+   "slug": "ylds",
+   "network": "mainnet"
+  },
+  {
+   "slug": "zusd",
+   "network": "mainnet"
+  }
+ ],
+ "upgrades": [],
+ "corrections": [],
+ "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
+}

@@ -106,6 +106,10 @@ jobs:
           # Refresh the consumer-findings section (their records + our issue
           # states) so the Raven card cannot drift from either side's truth.
           pnpm exec tsx scripts/quality/build-external-findings.ts || echo "external-findings refresh failed (non-fatal)"
+          # QUALITY.md §3: the autonomy ladder's intervention-free counter —
+          # lane run conclusion (GitHub API) + live write-set diff vs the
+          # committed snapshot. Non-fatal: an API hiccup must not sink the step.
+          pnpm exec tsx scripts/quality/build-lane-scoreboard.ts || echo "lane scoreboard failed (non-fatal)"
 
       - name: Record quality snapshot (trend history)
         if: always() && github.event_name != 'pull_request'
