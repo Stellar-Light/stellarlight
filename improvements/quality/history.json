@@ -15,7 +15,7 @@
  },
  {
   "date": "2026-08-29",
-  "batteryPass": 63,
+  "batteryPass": 65,
   "batteryFail": 0,
   "batteryErrors": null,
   "parityPass": 51,
@@ -23,8 +23,8 @@
   "honestyDebt": 0,
   "sampled": 1034,
   "population": 1034,
-  "liveRows": 860,
-  "liveNoSource": 15,
-  "humanVerified": 89
+  "liveRows": 858,
+  "liveNoSource": 11,
+  "humanVerified": 106
  }
 ]

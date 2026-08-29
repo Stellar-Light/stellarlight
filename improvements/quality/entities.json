@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-29T02:34:46.340Z",
+ "generatedAt": "2026-08-29T04:49:03.092Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -271,91 +271,83 @@
   }
  },
  "projects": {
-  "read": 959,
+  "read": 958,
   "population": 1034,
-  "servedPopulation": 959,
+  "servedPopulation": 958,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 959,
+  "sampled": 958,
   "scatter": [
    {
     "slug": "quietbook",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "energypay-tesouro-yield",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "truway-yield",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "stellar-confidential-token-sdk",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "openzeppelin-stellar-privacy-wallet",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "teji",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "stellar-memory",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
    {
     "slug": "sextant-agent",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
@@ -491,31 +483,22 @@
    {
     "slug": "cards402",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
     "slug": "asgcard",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
     "slug": "talos",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
@@ -528,31 +511,22 @@
    {
     "slug": "ai-net",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
     "slug": "pulsar-mcp",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
     "slug": "stellar-agent-wallet-skill",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
@@ -971,12 +945,9 @@
    {
     "slug": "lusty-finance",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Development"
    },
    {
     "slug": "octarine",
@@ -1090,11 +1061,8 @@
    {
     "slug": "feeprime",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1714,20 +1682,17 @@
    {
     "slug": "stellar-quickstart",
     "prominence": 78,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "stellar-cli",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1740,10 +1705,9 @@
    {
     "slug": "hubble",
     "prominence": 88,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1768,10 +1732,9 @@
    {
     "slug": "getblock",
     "prominence": 38,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1832,10 +1795,8 @@
    {
     "slug": "soroban-rust-sdk",
     "prominence": 96,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1850,10 +1811,8 @@
    {
     "slug": "javascript-stellar-sdk",
     "prominence": 95,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2040,10 +1999,9 @@
    {
     "slug": "vaquita",
     "prominence": 4,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2264,9 +2222,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -2655,10 +2614,8 @@
    {
     "slug": "circle",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2910,11 +2867,8 @@
    {
     "slug": "webacy-inc",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3000,10 +2954,8 @@
    {
     "slug": "vitreous",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -5787,17 +5739,6 @@
     "status": "Live"
    },
    {
-    "slug": "free-voting-platform",
-    "prominence": 0,
-    "factsPresent": 2,
-    "missing": [
-     "strongBasis",
-     "sourced",
-     "linked"
-    ],
-    "status": "Live"
-   },
-   {
     "slug": "forge",
     "prominence": 0,
     "factsPresent": 4,
@@ -7156,28 +7097,22 @@
    {
     "slug": "freighter",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "lobstr",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "xbull",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8841,10 +8776,8 @@
    {
     "slug": "comet",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -8902,33 +8835,33 @@
     "status": "Live"
    }
   ],
-  "meanScore": 79,
+  "meanScore": 80,
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 890
+    "count": 887
    },
    {
     "network": "mainnet",
-    "count": 68
+    "count": 69
    },
    {
     "network": "testnet",
-    "count": 1
+    "count": 2
    }
   ],
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 679
+    "count": 672
    },
    {
     "basis": "source-inherited",
-    "count": 169
+    "count": 158
    },
    {
     "basis": "human-verified",
-    "count": 88
+    "count": 104
    },
    {
     "basis": "onchain-activity",
@@ -8936,7 +8869,7 @@
    },
    {
     "basis": "unverified",
-    "count": 8
+    "count": 9
    },
    {
     "basis": "operator-announcement",
@@ -8944,28 +8877,9 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 906,
+  "weakestTotal": 887,
   "weakestTruncated": true,
   "weakest": [
-   {
-    "slug": "free-voting-platform",
-    "name": "Free Voting Platform",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "SDK"
-    ],
-    "score": 40,
-    "factsPresent": 2,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced",
-     "linked"
-    ]
-   },
    {
     "slug": "stellarx-ph",
     "name": "StellarX PH",
@@ -8984,70 +8898,6 @@
     ]
    },
    {
-    "slug": "hubble",
-    "name": "Hubble",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 88,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "stellar-quickstart",
-    "name": "Stellar Quickstart",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 78,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "getblock",
-    "name": "GetBlock",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 38,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "vaquita",
-    "name": "Vaquita",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 4,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
     "slug": "acta",
     "name": "ACTA",
     "status": "Live",
@@ -9061,25 +8911,6 @@
     "missing": [
      "strongBasis",
      "typed"
-    ]
-   },
-   {
-    "slug": "ai-net",
-    "name": "AI-Net",
-    "status": "Development",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments",
-     "Infrastructure"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
     ]
    },
    {
@@ -9126,24 +8957,6 @@
     "deploymentNetwork": "mainnet",
     "types": [
      "Stablecoin"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
-    "slug": "asgcard",
-    "name": "ASGCard",
-    "status": "Development",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -9236,26 +9049,6 @@
     ]
    },
    {
-    "slug": "cards402",
-    "name": "Cards402",
-    "status": "Development",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments",
-     "SDK",
-     "Card Issuing"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
     "slug": "chainless",
     "name": "Chainless",
     "status": "Live",
@@ -9344,40 +9137,6 @@
     "deploymentNetwork": "unknown",
     "types": [
      "Analytics"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
-    "slug": "energypay-tesouro-yield",
-    "name": "EnergyPay Tesouro Yield",
-    "status": "Development",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "feeprime",
-    "name": "FeePrime",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -9550,24 +9309,6 @@
     ]
    },
    {
-    "slug": "lusty-finance",
-    "name": "Lusty Finance",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "DEX"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
     "slug": "mbrl",
     "name": "MBRL",
     "status": "Live",
@@ -9616,12 +9357,193 @@
      "strongBasis",
      "typed"
     ]
+   },
+   {
+    "slug": "muney",
+    "name": "Muney",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "mydatacoin",
+    "name": "MyDataCoin",
+    "status": "Development",
+    "statusBasis": "unverified",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security",
+     "Lending"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "nectar-network",
+    "name": "Nectar Network",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "noir",
+    "name": "Noir",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "normal",
+    "name": "Normal",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "DEX"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "novatti",
+    "name": "Novatti",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "offer-hub",
+    "name": "Offer Hub",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "pagfinance",
+    "name": "PagFinance",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "pathpulse-ai",
+    "name": "PathPulse AI",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "paycashless",
+    "name": "Paycashless",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "paywit",
+    "name": "Paywit",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 859
+    "count": 842
    },
    {
     "field": "dated",
@@ -9629,31 +9551,31 @@
    },
    {
     "field": "sourced",
-    "count": 67
+    "count": 55
    },
    {
     "field": "typed",
-    "count": 70
+    "count": 59
    },
    {
     "field": "linked",
-    "count": 7
+    "count": 6
    }
   ]
  },
  "repos": {
-  "read": 12939,
-  "population": 12939,
+  "read": 12961,
+  "population": 12961,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 12939,
+  "sampled": 12961,
   "coverage": {
    "curatedIndex": {
-    "repos": 2921,
+    "repos": 2943,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2139,
+    "withCodeDepth": 2150,
     "depthPct": 73
    },
    "tail": {
@@ -9662,54 +9584,54 @@
     "withCodeDepth": 4716
    },
    "knowledgeNotes": {
-    "pool": 276,
+    "pool": 284,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 27
+    "withNotes": 28
    },
    "mainnetJoin": {
-    "pool": 3343,
+    "pool": 3348,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 76
    }
   },
   "curatedShape": {
-   "repos": 2921,
+   "repos": 2943,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 358
+     "count": 357
     },
     {
      "bucket": "10–19",
-     "count": 906
+     "count": 910
     },
     {
      "bucket": "20–29",
-     "count": 489
+     "count": 488
     },
     {
      "bucket": "30–39",
-     "count": 477
+     "count": 478
     },
     {
      "bucket": "40–49",
-     "count": 181
+     "count": 183
     },
     {
      "bucket": "50–59",
-     "count": 234
+     "count": 243
     },
     {
      "bucket": "60–69",
-     "count": 174
+     "count": 178
     },
     {
      "bucket": "70–79",
-     "count": 80
+     "count": 83
     },
     {
      "bucket": "80–89",
-     "count": 22
+     "count": 23
     },
     {
      "bucket": "90–99",
@@ -9719,15 +9641,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1203
+     "count": 1202
     },
     {
      "label": "slowing",
-     "count": 910
+     "count": 902
     },
     {
      "label": "active",
-     "count": 715
+     "count": 745
     },
     {
      "label": "unknown",
@@ -9735,37 +9657,37 @@
     },
     {
      "label": "archived",
-     "count": 33
+     "count": 34
     }
    ],
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1046
+     "count": 1056
     },
     {
      "label": "Rust",
-     "count": 414
+     "count": 417
     },
     {
      "label": "unknown",
-     "count": 406
+     "count": 409
     },
     {
      "label": "JavaScript",
-     "count": 326
+     "count": 331
     },
     {
      "label": "Go",
-     "count": 107
+     "count": 108
     },
     {
      "label": "Python",
-     "count": 105
+     "count": 104
     },
     {
      "label": "Solidity",
-     "count": 97
+     "count": 98
     },
     {
      "label": "HTML",
@@ -9782,8 +9704,8 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 6855,
-  "withNotes": 263,
+  "withCodeDepth": 6866,
+  "withNotes": 265,
   "withMainnet": 76,
   "top": [
    {
@@ -9939,6 +9861,19 @@
     "projectSlug": null,
     "notes": 0,
     "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "armandocodecr/latam-ramp-kit",
+    "repoScore": 80,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "TypeScript",
+    "projectSlug": "trustless-work",
+    "notes": 1,
+    "codeDepth": 100,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10197,7 +10132,7 @@
     "activity": "slowing",
     "language": "TypeScript",
     "projectSlug": "hot-wallet",
-    "notes": 1,
+    "notes": 0,
     "codeDepth": 98,
     "deployable": false,
     "mainnetJoined": false
@@ -10226,6 +10161,19 @@
     "notes": 0,
     "codeDepth": 98,
     "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/stellar-tools",
+    "repoScore": 78,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "dormant",
+    "language": "TypeScript",
+    "projectSlug": "stellar-tools",
+    "notes": 0,
+    "codeDepth": 97,
+    "deployable": false,
     "mainnetJoined": false
    },
    {
@@ -10276,32 +10224,6 @@
     "language": "TypeScript",
     "projectSlug": "stellar-agent-wallet-skill",
     "notes": 0,
-    "codeDepth": 96,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Hoops-Finance/calypso-x402",
-    "repoScore": 77,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "slowing",
-    "language": "TypeScript",
-    "projectSlug": "hoops",
-    "notes": 0,
-    "codeDepth": 96,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "zenith-protocols/vault-ui",
-    "repoScore": 77,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "dormant",
-    "language": "TypeScript",
-    "projectSlug": "orbitcdp",
-    "notes": 1,
     "codeDepth": 96,
     "deployable": false,
     "mainnetJoined": false
@@ -10833,20 +10755,20 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "88% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "848 of 959 rows (census)",
+   "limit": "87% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "830 of 958 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "70 of 959 sampled rows untyped",
+   "measurement": "59 of 958 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "27 of 276 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "28 of 284 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -11157,13 +11079,13 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 3281,
-    "of": 3343,
+    "missing": 3286,
+    "of": 3348,
     "share": 98.1,
     "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "deployable contracts with repoScore >= 70 only",
-    "examplePoolSize": 27,
+    "examplePoolSize": 29,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11184,13 +11106,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12676,
-    "of": 12939,
+    "missing": 12696,
+    "of": 12961,
     "share": 98,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 252,
+    "examplePoolSize": 259,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11211,19 +11133,17 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 890,
-    "of": 959,
-    "share": 92.8,
+    "missing": 887,
+    "of": 958,
+    "share": 92.6,
     "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
-    "examplePoolSize": 6,
+    "examplePoolSize": 4,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
-     "dia",
      "wisdomtree",
-     "redstone-finance",
      "spiko",
      "redswan",
      "spacewalk"
@@ -11232,109 +11152,109 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 859,
-    "of": 959,
-    "share": 89.6,
+    "missing": 842,
+    "of": 958,
+    "share": 87.9,
     "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 66,
+    "examplePoolSize": 59,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "soroban-rust-sdk",
-     "javascript-stellar-sdk",
-     "stellar-cli",
-     "circle",
-     "freighter",
-     "lobstr",
-     "xbull",
      "moneygram",
      "blend",
      "soroswap",
      "kale",
-     "hubble"
+     "hubble",
+     "go-stellar-sdk",
+     "idos",
+     "allbridge",
+     "ondo",
+     "reclaim",
+     "python-stellar-sdk",
+     "aquarius"
     ]
    },
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6084,
-    "of": 12939,
+    "missing": 6095,
+    "of": 12961,
     "share": 47,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6084,
+    "examplePoolSize": 6095,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "yripper/stellarpay",
-     "theboycoder/stellar-pay",
-     "UmutKDev/bound",
-     "rafliad/payoes",
-     "peejay-git/stellarswap",
-     "orbitlens/stellar-expert-id-keystore-mongodb",
-     "orbitlens/operations-notifier",
-     "ofwonogodwin/Market-Connect-Ug",
-     "Obiajulu-gif/Stellar-TrustQuest",
-     "neelpote/Orakel",
-     "Maycon-Rodrigues/rn-latam-anchor-kit",
-     "MattPoblete/soroban-preview-docker"
+     "lumenloop/lumenloop-ng-skills",
+     "blaze-xyz/blaze-grok-plugin",
+     "Bevor-Protocol/Bevor-Skills",
+     "blindpaylabs/skills",
+     "gateway-fm/lez-atomic-swaps",
+     "gateway-fm/oz-policy-builder",
+     "withObsrvr/rs-stellar-history-archive-hasher",
+     "SentinelFi/stellar-metamask-snap",
+     "57blocks/agentsmith-x402",
+     "stellar/friendbot",
+     "Stellar-Light/stellar-pay",
+     "ContentDAO/public"
     ]
    },
    {
     "entity": "project",
     "field": "typed",
-    "missing": 70,
-    "of": 959,
-    "share": 7.3,
+    "missing": 59,
+    "of": 958,
+    "share": 6.2,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 70,
+    "examplePoolSize": 59,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "hubble",
-     "stellar-quickstart",
-     "getblock",
-     "vaquita",
-     "quietbook",
-     "energypay-tesouro-yield",
-     "truway-yield",
-     "stellar-confidential-token-sdk",
-     "openzeppelin-stellar-privacy-wallet",
-     "teji",
-     "stellar-memory",
-     "sextant-agent"
+     "stellarpay-x402",
+     "smart-treasury",
+     "sikadesk",
+     "paycashless",
+     "pathpulse-ai",
+     "offer-hub",
+     "muney",
+     "lusty",
+     "for-yield",
+     "chainless",
+     "amulets",
+     "stellar-defi-hub"
     ]
    },
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 67,
-    "of": 959,
-    "share": 7,
+    "missing": 55,
+    "of": 958,
+    "share": 5.7,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 67,
+    "examplePoolSize": 55,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "comet",
-     "cards402",
-     "asgcard",
-     "talos",
-     "ai-net",
-     "pulsar-mcp",
-     "stellar-agent-wallet-skill",
-     "lusty-finance",
      "mydatacoin",
-     "feeprime",
-     "webacy-inc",
-     "vitreous"
+     "venalabs",
+     "typiqo",
+     "transfermole",
+     "the-blue-marble",
+     "swplug",
+     "stellarstrides",
+     "stellar-update",
+     "sorscan",
+     "sorosorcerer",
+     "sorobuilder",
+     "soroban-assistant"
     ]
    }
   ]

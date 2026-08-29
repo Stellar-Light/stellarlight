@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-29T01:24:28.060Z",
+ "generatedAt": "2026-08-29T04:49:03.686Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -7,7 +7,7 @@
    "id": "P0",
    "title": "Name the classes, lock the first invariant",
    "state": "done",
-   "evidence": "check-schema-opacity.ts (47 open maps BASELINED, the build fails if the count rises; none paid down yet, that work is P3's), QUALITY.md itself.",
+   "evidence": "check-schema-opacity.ts (the 47 baselined open maps were paid down to ZERO in #1092; the ratchet now holds the floor at 0), QUALITY.md itself.",
    "shippedSoFar": null,
    "remaining": null
   },
@@ -32,7 +32,7 @@
    "title": "Earned autonomy",
    "state": "in-progress",
    "evidence": null,
-   "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift. 2026-08-28: the FIRST bounded agent lane is live — the deployment-evidence gap (sls-079) is worked mechanically by the weekly curation pass via the operator-toml chain (the project's own stellar.toml -> declared code+issuer -> confirmed on Horizon mainnet; full chain or abstain, basis labeled \"operator-toml\" so a machine stamp never impersonates a human one). The lane reproduces the 2026-08-28 hand-worked queue's mechanical half; judgment cases (operator docs, bundles) stay human.",
+   "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift. 2026-08-28: the FIRST bounded agent lane is live — the deployment-evidence gap (sls-079) is worked mechanically by the weekly curation pass via the operator-toml chain (the project's own stellar.toml -> declared code+issuer -> confirmed on Horizon mainnet; full chain or abstain, basis labeled \"operator-toml\" so a machine stamp never impersonates a human one). The lane reproduces the 2026-08-28 hand-worked queue's mechanical half; judgment cases (operator docs, bundles) stay human. 2026-08-29: the closure rule's METRIC exists — repeat-class rate is computed from the ledger and published on /quality (first measurement: 30-day rate 100%, 168/168 new findings in already-seen classes; lifetime 98.7% across 6 classes + meta-eval. The treadmill, now with a number).",
    "remaining": "one lane is not a system — the gap matrix's other rows (typed, sourced, knowledge notes) still close by hand, and Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes; the count starts now, at zero."
   }
  ],
@@ -165,6 +165,16 @@
     ]
    },
    {
+    "file": "improvements/receipts/xbull-2026-08-29.json",
+    "slug": "xbull",
+    "url": "https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "xBull Wallet",
+     "Updated"
+    ]
+   },
+   {
     "file": "improvements/receipts/stronghold-deployment-2026-08-28.json",
     "slug": "stronghold",
     "url": "https://stronghold.co/.well-known/stellar.toml",
@@ -191,6 +201,16 @@
     "markers": [
      "testnet vault contract",
      "mainnet empty addresses"
+    ]
+   },
+   {
+    "file": "improvements/receipts/redstone-finance-2026-08-29.json",
+    "slug": "redstone-finance",
+    "url": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "Stellar mainnet",
+     "price feeds"
     ]
    },
    {
@@ -235,6 +255,16 @@
     ]
    },
    {
+    "file": "improvements/receipts/lobstr-2026-08-29.json",
+    "slug": "lobstr",
+    "url": "https://lobstr.co/",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "LOBSTR for iOS",
+     "Stellar"
+    ]
+   },
+   {
     "file": "improvements/receipts/laina-2026-08-28.json",
     "slug": "laina",
     "url": "https://raw.githubusercontent.com/laina-defi/laina/main/src/lib/horizon.ts",
@@ -275,6 +305,16 @@
     ]
    },
    {
+    "file": "improvements/receipts/dia-2026-08-29.json",
+    "slug": "dia",
+    "url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "DIA (\"…UASBVEJNE5C2MCFWVIXL4Z7DMD7PJJMF Testnet To learn more about…\")",
+     "testnet"
+    ]
+   },
+   {
     "file": "improvements/receipts/circle-cctp-cross-chain-transfer-protocol-deployment-2026-08-28.json",
     "slug": "circle-cctp-cross-chain-transfer-protocol",
     "url": "https://developers.circle.com/cctp/references/stellar-contracts",
@@ -282,6 +322,16 @@
     "markers": [
      "operator mainnet reference",
      "stellar.expert public contracts"
+    ]
+   },
+   {
+    "file": "improvements/receipts/circle-2026-08-29.json",
+    "slug": "circle",
+    "url": "https://developers.circle.com/cctp/references/stellar-contracts",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "Stellar",
+     "Mainnet"
     ]
    },
    {
