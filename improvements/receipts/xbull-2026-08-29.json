@@ -1,0 +1,28 @@
+{
+ "slug": "xbull",
+ "url": "https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+ "finalUrl": "https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+ "fetchedAt": "2026-08-29T04:22:50.881Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 04:22:50 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "ESF"
+ },
+ "bodyTextSha256": "9687e30178e6dbbaf994d98532ec7b48e6e6674a898280b5adb8e389b3bd523b",
+ "bodyTextChars": 6494,
+ "markers": [
+  {
+   "marker": "xBull Wallet",
+   "found": true,
+   "excerpt": "xBull Wallet - Chrome Web Store Skip to main content Chrome Web Store My extensions &amp; themes Appearance Developer Dashboard Give feedback Sign in Discover Extensions Themes xBu"
+  },
+  {
+   "marker": "Updated",
+   "found": true,
+   "excerpt": "isher has a good record with no history of violations. Learn more. Creit Technologies LLP 4.0 ( 4 ratings ) Ratings are updated daily and may not reflect the most recent reviews. Share Extension Workflow &amp; Planning 1,000 users Add to Chrome Overview A powerful but easy to use Stellar network wal"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

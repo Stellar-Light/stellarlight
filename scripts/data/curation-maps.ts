@@ -470,9 +470,15 @@ export const STATUS_FIX: Record<
 	// sls-030: standalone venue stale; implementation lives on embedded as
 	// Blend's 80/20 BLND:USDC backstop pool. Historical funded project.
 	comet: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10; rewritten from==to as a source
+		// fill (gap-matrix sourced pool 2026-08-29) — apply matches on current
+		// status, so the old `from: Live` skipped forever.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Standalone Comet venue is no longer maintained; its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/CometDEX/comet-contracts-v1",
+		basis: "human-verified",
+		note: "Standalone Comet venue is no longer maintained (only org repo last pushed 2024-05-02); its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
 	},
 	venalabs: {
 		from: "Live",
@@ -673,9 +679,13 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): typiqo.it has no DNS record, typiqo.com redirects to a domain-for-sale listing (brandbucket), newest footprint is 2021 press.",
 	},
 	vitreous: {
-		from: "Live",
+		// Flip applied 2026-07-10; from==to source fill 2026-08-29 (see comet).
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (no NS/A records); only footprint is a years-old SCF profile piece on stellar.org/blog with nothing newer anywhere.",
+		asOf: "2026-08-29",
+		sourceUrl: "http://web.archive.org/web/20240511015520/https://vitreous.co/",
+		basis: "human-verified",
+		note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (NXDOMAIN re-confirmed 2026-08-29; last live Wayback capture 2024-05-11); only footprint is a years-old SCF profile piece on stellar.org/blog.",
 	},
 	whalestack: {
 		from: "Live",
@@ -756,6 +766,21 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Operator page verified 2026-08-29: shipping iOS + Android wallet apps (receipt improvements/receipts/lobstr-2026-08-29.json).",
 	},
+	// Owner correction 2026-08-29: "xbull is not stale." My earlier skip keyed
+	// on ONE dormant repo (xBull-Wallet, last commit 2025-08) and an
+	// unreadable Framer shell — the wrong signals. The operator (Creit-Tech)
+	// is actively shipping: Stellar-Wallets-Kit pushed 2026-08-28, three more
+	// Stellar SDKs pushed this month; the Chrome Web Store listing is live
+	// (receipt improvements/receipts/xbull-2026-08-29.json). A working wallet
+	// needs no repo churn — judge the operator, not one repo.
+	xbull: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/Creit-Tech",
+		basis: "human-verified",
+		note: "Owner-affirmed live; operator Creit-Tech actively shipping (Stellar-Wallets-Kit pushed 2026-08-28); Chrome Web Store listing live (receipt xbull-2026-08-29.json).",
+	},
 	circle: {
 		from: "Live",
 		to: "Live",
@@ -763,6 +788,98 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://developers.circle.com/cctp/references/stellar-contracts",
 		basis: "human-verified",
 		note: "Circle's own reference lists live Stellar MAINNET CCTP contracts (receipt improvements/receipts/circle-2026-08-29.json); USDC issuance on Stellar is Circle-operated.",
+	},
+	// ── 2026-08-29 gap-matrix pass: sourced pool (12 example rows — statuses
+	// with no re-checkable source). Research chain per row ran read-only
+	// against operator artifacts (repos/releases/npm/own blogs); every claim
+	// below carries its dated artifact. comet + vitreous rewritten in place
+	// above (same pass).
+	cards402: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/CTX-com/Cards402",
+		basis: "human-verified",
+		note: "Operator repo (pushed 2026-07-26): Rust contract + backend watcher, fulfillment engine private — working codebase, not an operating product.",
+	},
+	asgcard: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://www.npmjs.com/package/@asgcard/cli",
+		basis: "human-verified",
+		note: "Published CLI (0.7.8, 2026-04-08) + asgcard.dev product site; no repo/npm activity since ~2026-04-09 — watch for drift.",
+	},
+	talos: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/enliven17/talos-stellar",
+		basis: "human-verified",
+		note: "Operator README (repo pushed 2026-08-28): registry contract and agent flows 'all on Stellar testnet' — explicitly testnet-stage.",
+	},
+	"ai-net": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/Epta-Node/ai-net",
+		basis: "human-verified",
+		note: "Operator repo (pushed 2026-08-29): testnet-only deploy tooling and prerequisites — actively developed, testnet-stage.",
+	},
+	"pulsar-mcp": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/benelabs/pulsar",
+		basis: "human-verified",
+		note: "Repo pushed 2026-05-03; README says npx works 'once the package is published' — unpublished dev tool, ~4 months quiet, watch for drift.",
+	},
+	"stellar-agent-wallet-skill": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl:
+			"https://github.com/mpprouter/stellar-agent-wallet-skill/releases/tag/v1.8.2",
+		basis: "human-verified",
+		note: "v1.8.2 released 2026-08-11, ClawHub-listed with mainnet support — a shipped tool, but code-published ≠ product-operating, so Development stands.",
+	},
+	"lusty-finance": {
+		// The pool's one real correction: stored Live, operator says testnet.
+		from: "Live",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/utkurock/Lusty",
+		basis: "human-verified",
+		note: "Operator README (repo pushed 2026-08-29) states 'Network: Stellar Testnet'; positions settled end-to-end on testnet; LUSD distributor backs the testnet faucet only. A testnet venue is not Live. Development, not Inactive — work is current.",
+	},
+	mydatacoin: {
+		// Keep the label, admit the basis: no artifact evidences the described
+		// Stellar product. mydatacoin.io is a dead Azure 404 with broken TLS;
+		// the org's active repos are the EVM Atria RWA suite (zero
+		// stellar/soroban refs); Stellar-era repos last pushed 2023–2024-11.
+		// Candidate for a human Inactive-on-Stellar review — no operator
+		// statement exists, so never-accuse holds the label.
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		basis: "unverified",
+		note: "No artifact evidences the described Stellar ZK-lending/KYC product: site dead (Azure 404), operator's active work is the EVM Atria suite. Basis downgraded to unverified 2026-08-29; flagged for human review.",
+	},
+	feeprime: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://feeprime.com/marketplace/en?module=news",
+		basis: "human-verified",
+		note: "Operating SME platform: tenant news posts dated through 2026-08-20, named paying tenants. Caveat recorded: Live verified for the business; the Stellar integration from the SCF pitch is not visible on-site, and app.feeprime.com is NXDOMAIN.",
+	},
+	"webacy-inc": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://www.webacy.com/blog/webacy-is-now-soc-2",
+		basis: "human-verified",
+		note: "Operator announcement 2026-08-17 (SOC 2) + operating product app; dd.xyz now redirects to dapp.webacy.com (product consolidation).",
 	},
 };
 
@@ -810,6 +927,9 @@ export const PROMINENCE_SET: Record<string, number> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// Gap-matrix sourced pass 2026-08-29: row had no website; asgcard.dev is
+	// the operator's live product site (full landing, no pre-launch markers).
+	asgcard: "https://asgcard.dev",
 	// Liveness sweep 2026-08-21: sorobansecurity.com 301s to
 	// stellarsecurityportal.com (the host move the research corpus was
 	// migrated to in sls-003); the project row still pointed at the old host.
