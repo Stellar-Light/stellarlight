@@ -72,6 +72,19 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		peg: "USD",
 	},
 	{
+		// Tether's omnichain USDT (LayerZero burn-and-mint, 1:1 backed), live
+		// on Stellar 2026-08 — Horizon-verified 2026-08-29: 5,434 authorized
+		// trustlines, ~52,140 issued. The issuer publishes NO home_domain (the
+		// address is published on usdt0.to/ecosystem/stellar instead), so
+		// toml-chain checks won't confirm this one — the operator page is the
+		// anchor. Owner-flagged same day.
+		code: "USDT0",
+		issuer: "GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+		domain: "usdt0.to",
+		company: "Tether (USDT0)",
+		peg: "USD",
+	},
+	{
 		code: "PYUSD",
 		issuer: "GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5",
 		domain: "paxos.com",
