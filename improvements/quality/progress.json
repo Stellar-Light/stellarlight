@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-28T23:08:21.020Z",
+ "generatedAt": "2026-08-29T01:24:28.060Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -262,6 +262,16 @@
     "markers": [
      "issuer home_domain (reverse chain)",
      "horizon asset"
+    ]
+   },
+   {
+    "file": "improvements/receipts/flipside-2026-08-28.json",
+    "slug": "flipside",
+    "url": "https://flipsidecrypto.xyz/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "xyz redirects to edisyl",
+     "com redirects too"
     ]
    },
    {
