@@ -1021,12 +1021,14 @@ export const TYPE_ADD: Record<string, string[]> = {
 	hubble: ["Analytics", "Indexer"], // SDF's BigQuery data warehouse: full historical ledger record for analytics
 	"stellar-quickstart": ["Infrastructure"], // official Docker image bundling Core+Horizon+RPC for local dev
 	getblock: ["RPC", "Infrastructure"], // node-as-a-service: managed Stellar RPC endpoints
-	vaquita: ["DeFi"], // save-to-earn DeFi savings protocol on Soroban
+	// "DeFi" is NOT an enum value (the GAP_VERTICALS trap again — execute run
+	// failed validation): use the real verticals.
+	vaquita: ["Lending"], // save-to-earn savings protocol on Soroban (deposit-yield = the Lending vertical)
 	// Summit SP 26 winner rows (seeded 2026-08-29 with types deliberately
 	// empty; typing them IS the human lane, done here):
 	quietbook: ["RWA"], // enterprise compliance + RWA build
 	"energypay-tesouro-yield": ["Payments", "RWA"], // Brazilian treasury-yield (tesouro) energy payments
-	"truway-yield": ["DeFi"], // Brazil-first emerging-market yield product
+	"truway-yield": ["Payments", "RWA"], // tesouro.pix: tokenized Brazilian sovereign debt (Etherfuse TESOURO) sold at PIX payment time
 	"stellar-confidential-token-sdk": ["SDK"], // SDK for confidential tokens
 	"openzeppelin-stellar-privacy-wallet": ["Wallet"], // confidential-token private-payment wallet
 	teji: ["AI"], // CLI plugin for Stellar agents
