@@ -52,11 +52,17 @@ export const metadata: Metadata = {
 const getCachedDoraHackathons = unstable_cache(
 	async () => {
 		const hackathons = await fetchAllDoraHacksHackathons();
+		// Newest wins across BOTH sources: the live DoraHacks pick keeps its
+		// auto-update property, but a curated event that ended more recently
+		// (e.g. Builder Summit SP 26, which never ran on DoraHacks) is not
+		// shadowed by an older DoraHacks event forever. ISO dates compare as
+		// strings.
+		const live = await fetchLatestHackathonWinners(hackathons);
 		const recentWinners =
-			(await fetchLatestHackathonWinners(hackathons)) ?? LATEST_WINNERS;
+			live && live.endedAt > LATEST_WINNERS.endedAt ? live : LATEST_WINNERS;
 		return { hackathons, recentWinners };
 	},
-	["hackathons:dora-merge:v2"],
+	["hackathons:dora-merge:v3"],
 	{ revalidate: 3600, tags: ["hackathons"] },
 );
 
