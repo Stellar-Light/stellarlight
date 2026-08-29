@@ -1081,7 +1081,10 @@ export const SEEDS: Array<{
 		},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: "2026-08-29",
-		statusSourceUrl: "https://stellarsight.xyz/",
+		// The homepage is a JS shell; the discovery API is the server-rendered
+		// evidence (x402Version 2 + stellar:testnet in the response body).
+		statusSourceUrl:
+			"https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
 		statusBasis: "human-verified",
 	},
 	{
