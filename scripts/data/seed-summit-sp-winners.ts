@@ -259,7 +259,10 @@ async function main() {
 					category: "Protocol/Contract",
 					shortDescription: r.shortDescription,
 					status: "Development",
-					statusBasis: "official-record",
+					// The Development label is carried from the summit's paid-winners
+					// export, not from probing the project — source-inherited is the
+					// honest enum fit ("official-record" is not a statusBasis value).
+					statusBasis: "source-inherited",
 					statusAsOf: ASOF,
 					statusSourceUrl: eventUrl || null,
 					links: { github: `https://github.com/${r.repo.owner}/${r.repo.name}` },
