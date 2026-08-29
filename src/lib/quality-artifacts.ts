@@ -25,6 +25,7 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
+import laneOperatorToml from "../../improvements/quality/lane-operator-toml.json";
 import qualityEntities from "../../improvements/quality/entities.json";
 import externalFindings from "../../improvements/quality/external-findings.json";
 import qualityHistory from "../../improvements/quality/history.json";
@@ -793,6 +794,13 @@ export function getOperationQuality(): OperationQuality[] {
 
 export function getEntities() {
 	return qualityEntities;
+}
+
+/** The autonomy ladder's per-lane scoreboard (QUALITY.md §3), rebuilt daily
+ * by scripts/quality/build-lane-scoreboard.ts: intervention-free weeks are
+ * MEASURED (lane run conclusion + write-set diff), never asserted. */
+export function getLanes() {
+	return [laneOperatorToml];
 }
 
 /** Where known-item misses die, measured by replaying every open recall

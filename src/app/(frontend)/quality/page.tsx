@@ -26,6 +26,7 @@ import {
 import {
 	evidenceUrl,
 	getEntities,
+	getLanes,
 	getExternalFindings,
 	getGuardRows,
 	getMissFunnel,
@@ -475,6 +476,49 @@ export default function QualityPage() {
 				className="mb-6"
 			>
 				<GapMatrix rows={entities.gapMatrix.rows} />
+			</Card>
+
+			{/* ── the autonomy ladder: bounded agent lanes, counters measured ── */}
+			<Card
+				title="Agent lanes: autonomy earned, not assumed"
+				description="A lane is a bounded, evidence-only job an agent runs on schedule. Advancement is measured — a lane earns auto-merge only after consecutive weeks where a human reviewed and changed nothing."
+				className="mb-6"
+			>
+				{getLanes().map((lane) => (
+					<div key={lane.lane} className="flex flex-wrap items-end gap-x-8 gap-y-4">
+						<Stat
+							label={`Lane: ${lane.lane}`}
+							value={`${lane.stamps.length} stamps`}
+							sub="deployment facts, full-chain-or-abstain"
+						/>
+						<Stat
+							label="Intervention-free weeks"
+							value={`${lane.cleanWeeks} / ${lane.stageEntryThresholdWeeks}`}
+							sub="to Stage 2 (auto-merge for bounded work)"
+						/>
+						<Stat
+							label="Last run"
+							value={lane.lastRun ? lane.lastRun.conclusion : "unknown"}
+							sub={
+								lane.lastRun
+									? `${lane.lastRun.event} · ${lane.lastRun.at.slice(0, 10)}`
+									: "no run recorded"
+							}
+						/>
+						<Stat
+							label="Corrections"
+							value={String(lane.corrections.length)}
+							sub="human had to fix a stamp — resets the counter"
+						/>
+					</div>
+				))}
+				<p className="text-[11px] text-muted-foreground leading-relaxed mt-4">
+					Weeks are counted only from successful scheduled runs, and the counter
+					is derived daily from the lane&apos;s live write-set diffed against
+					the committed snapshot — a quiet failure reads as a red week, never a
+					clean one. A stamp a human upgrades to human-verified stays clean;
+					a stamp a human removes or changes resets the count to zero.
+				</p>
 			</Card>
 
 			{/* ── findings: what we actually found, cleared, and still owe ── */}
