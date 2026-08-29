@@ -37,6 +37,90 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// Weakest-queue triage 2026-08-28: chainsatlas.com serves 404 (probed
+	// in-session); the Inactive verdict was already right, it just had no
+	// recorded evidence.
+	chainatlas: {
+		from: "Inactive",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://chainsatlas.com/",
+		note: "site 404s on root; Inactive stands, provenance filled",
+	},
+	// ── Sourced-queue pass 2026-08-28: the prominent source-inherited Live
+	// rows get real provenance (from==to entries move nothing; they fix the
+	// evidence, the zenex precedent). Each probed in-session; flipside is the
+	// one genuine status event found.
+	benji: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://benjiinvestments.com/",
+		note: "FT digital-assets platform live (BENJI); the page's 'coming soon' is a portfolio footer, not a product gate",
+	},
+	friendbot: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://friendbot.stellar.org/",
+		note: "service operating: responds with structured 400 asking for ?addr= — an API answering correctly, not a dead page",
+	},
+	warmancer: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://www.warmancer.com/",
+		note: "game live at warmancer.com (the .io in the row 404s — WEBSITE_FIXES moves it)",
+	},
+	wisdomtree: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://wisdomtreeprime.com/",
+		note: "WisdomTree Prime app live ('Get the app', funded-account promo). Status only — deployment stays unknown per the 2026-08-28 fake-issuer finding",
+	},
+	"stellar-laboratory": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://laboratory.stellar.org/",
+		note: "SDF's Stellar Lab serving normally",
+	},
+	hana: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://www.hana.money/",
+		note: "live wallet app; hanawallet.io 308s to hana.money (WEBSITE_FIXES moves the row)",
+	},
+	liquify: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://liquify.com/",
+		note: "infrastructure provider site serving normally",
+	},
+	// The one genuine status event in the queue: BOTH flipsidecrypto.xyz and
+	// flipsidecrypto.com redirect to edisyl.com ("the knowledge layer for
+	// enterprise AI") — the crypto-analytics product this row exists for is
+	// gone; the company pivoted. Receipt:
+	// improvements/receipts/flipside-2026-08-28.json.
+	flipside: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://flipsidecrypto.xyz/",
+		note: "company pivoted to edisyl (enterprise AI); both flipside domains redirect there — the analytics product is gone",
+	},
 	// sls-079 (2026-08-28): Live rested on site-liveness while the operator's
 	// own bundle shows a testnet-only deployment (mainnet config empty). By the
 	// hoops precedent, a testnet-only product is Pre-Release. Evidence receipt:
@@ -670,6 +754,13 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	rain: "https://www.rain.xyz/",
 	// Afriex operates today at afriex.com (200; afriexapp.com www even redirects there) with active App Store/Google Play listings; only the recorded afriexapp.com…
 	afriex: "https://www.afriex.com/",
+	// Sourced-queue pass 2026-08-28: warmancer.io 404s on root and www while
+	// warmancer.com serves the game ("Warmancer" <title>) — the project moved
+	// domains and the row kept the dead one.
+	warmancer: "https://www.warmancer.com/",
+	// hanawallet.io 308s to hana.money (the operator's own redirect); the row
+	// should carry the destination, not the alias.
+	hana: "https://www.hana.money/",
 	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
 	arst: "https://www.arst.finance/en",
 	// boss-pay's recorded bossmoney.africa lapsed and was re-registered by

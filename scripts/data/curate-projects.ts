@@ -966,6 +966,23 @@ const DUPE_MERGES: Array<{
 	fill?: { shortDescription?: string; github?: string };
 	copyScf?: boolean;
 }> = [
+	// ── Weakest-queue triage 2026-08-28: the dashboard's 40%-score rows were
+	// mostly no-basis DUPLICATES of already-triaged rows. Folding removes them
+	// from every serving surface and from the queue.
+	// same thebluemarble.io; canonical already Inactive human-verified (the
+	// lapsed domain now serves a Vietnamese gambling site - noted 2026-08-28)
+	{ dupe: "blue-marble", canonical: "the-blue-marble" },
+	// the OLD domain-move row (sorobansecurity.com) of the project that now
+	// lives at stellarsecurityportal.com (see WEBSITE_FIXES)
+	{ dupe: "soroban-security-portal", canonical: "stellar-security-portal" },
+	// same ortege.ai, with CONFLICTING statuses across the pair (Live vs
+	// Inactive) - the canonical keeps Live pending a deeper look (site
+	// currently TLS-broken, 2026-08-28)
+	{ dupe: "ortege-ai", canonical: "ortege" },
+	// lumosdao.io 308s to lumoscore.com - same project, rebranded. Both rows
+	// Draft; owner assessment 2026-08-28: "not a good project at all" - keep
+	// Draft, do NOT promote in future passes.
+	{ dupe: "lumos-dao", canonical: "lumosdao" },
 	// Raven #39 sweep: coca-wallet is an empty Inactive shadow of coca
 	// (same coca.xyz site, no description, no basis).
 	{ dupe: "coca-wallet", canonical: "coca" },
