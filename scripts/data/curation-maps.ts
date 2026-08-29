@@ -1067,6 +1067,28 @@ export const SEEDS: Array<{
 		// x402-track 2nd place). Development, not Live: testnet-only, listing
 		// is write-token gated, repo 20 days old. NOT a stellarlight lookalike
 		// despite the name — a real, Apache-2.0, working product.
+		// Owner-flagged 2026-08-29: Tether's omnichain USDT live on Stellar.
+		// Horizon-verified same day: asset USDT0 by GATISXX6…HN6Q, 5,434
+		// authorized trustlines, ~52,140 issued; operator page publishes the
+		// issuer (usdt0.to/ecosystem/stellar); LayerZero burn-and-mint, no
+		// wrapped token. Issuer carries no home_domain — the operator page is
+		// the anchor. Registry row added in src/data/stablecoin-registry.ts.
+		slug: "usdt0",
+		name: "USDT0",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Stablecoin", "Bridge"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"USDT0 is Tether's omnichain USDT, live on Stellar: a unified, 1:1-backed USDT that moves across chains via LayerZero burn-and-mint (no wrapped tokens, no external bridges, 0 bps protocol fee). Stellar issuance verified on Horizon (issuer GATISXX6…HN6Q).",
+		links: { website: "https://usdt0.to/ecosystem/stellar" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-29",
+		statusSourceUrl:
+			"https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+		statusBasis: "onchain-activity",
+	},
+	{
 		slug: "stellarsight",
 		name: "StellarSight",
 		category: "Infrastructure",

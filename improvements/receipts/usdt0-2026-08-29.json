@@ -1,0 +1,28 @@
+{
+ "slug": "usdt0",
+ "url": "https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+ "finalUrl": "https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+ "fetchedAt": "2026-08-29T23:01:27.118Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 23:01:27 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": "274743c7f17c7cdd3d9deb291dbfbc5dac7176bb0cf5ff7079af0960a0dbf9a7",
+ "bodyTextChars": 1668,
+ "markers": [
+  {
+   "marker": "USDT0",
+   "found": true,
+   "excerpt": "{ \"_links\": { \"self\": { \"href\": \"https://horizon.stellar.org/assets?asset_code=USDT0\\u0026asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q\\u0026cursor=\\u0026limit=10\\u0026order=asc\" }, \"next\": { \"href\": \"https://horizon.stellar.org/assets"
+  },
+  {
+   "marker": "GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+   "found": true,
+   "excerpt": "{ \"_links\": { \"self\": { \"href\": \"https://horizon.stellar.org/assets?asset_code=USDT0\\u0026asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q\\u0026cursor=\\u0026limit=10\\u0026order=asc\" }, \"next\": { \"href\": \"https://horizon.stellar.org/assets?asset_code=USDT0\\u0026a"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
