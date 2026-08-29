@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-08-28T23:01:01.792Z",
+	"generatedAt": "2026-08-29T12:00:13.625Z",
 	"total": 460,
-	"open": 57,
-	"closed": 403,
+	"open": 56,
+	"closed": 404,
 	"verified": 7,
-	"cleared": 396,
+	"cleared": 397,
 	"closingRate": 0.88,
-	"oldestOpenDays": 37,
+	"oldestOpenDays": 38,
 	"inWave": 0,
 	"highOpen": 2,
 	"staleHighOpen": 0,
@@ -28,7 +28,7 @@
 		},
 		{
 			"surface": "corpus",
-			"open": 4,
+			"open": 3,
 			"total": 18
 		},
 		{

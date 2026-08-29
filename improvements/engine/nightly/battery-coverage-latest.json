@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-26T06:30:49.066Z",
+	"generatedAt": "2026-08-29T12:00:05.302Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
@@ -13,13 +13,13 @@
 			"surface": "corpus"
 		},
 		{
-			"probe": "battery:q-ti-java-sdk-wallet-feebump",
-			"note": "top 0.58 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-aug-14-2026",
+			"probe": "battery:q-tool-indexer-repos-discovery",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
 			"surface": "corpus"
 		},
 		{
-			"probe": "battery:q-tool-indexer-repos-discovery",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
+			"probe": "battery:q-tool-leaderboard-open-issues",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Which Stellar projects have the most open issues right now — rank them so I can \" (tooling-infra); best: stellar-registry/contracts",
 			"surface": "corpus"
 		}
 	]
