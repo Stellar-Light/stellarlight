@@ -192,7 +192,7 @@ async function main() {
 	console.log(`content-bounty winners (not projects, skipped by design):`);
 	for (const c of CONTENT_WINNERS) console.log(`  · ${c}`);
 
-	const event = (
+	let event = (
 		await payload.find({
 			collection: "hackathons",
 			where: { slug: { equals: EVENT_SLUG } },
@@ -200,7 +200,32 @@ async function main() {
 			depth: 0,
 		})
 	).docs[0] as Doc | undefined;
-	if (!event) throw new Error(`hackathon ${EVENT_SLUG} not found`);
+	if (!event) {
+		// The summit lives only in src/data/curated-hackathons.ts (the /hackathons
+		// page merges that static list with DoraHacks); the relationship field
+		// needs a real DB row, so create it from the curated entry's facts.
+		const data = {
+			name: "Stellar Builder Summit 2026",
+			slug: EVENT_SLUG,
+			description:
+				"NearX's week-long team build sprint in São Paulo (about 100 builders): payments, tokenization, DeFi, contracts, AI, developer tools and confidential tokens, closing at Stellar House SP.",
+			startDate: "2026-07-30",
+			endDate: "2026-08-06",
+			externalUrl:
+				"https://cointelegraph.com.br/news/brazil-hosts-global-stellar",
+			status: "completed",
+		};
+		if (EXECUTE) {
+			event = (await payload.create({
+				collection: "hackathons",
+				data,
+			})) as Doc;
+			console.log(`\ncreated hackathon row ${EVENT_SLUG} (${event.id})`);
+		} else {
+			console.log(`\nDRY: would create hackathon row ${EVENT_SLUG}`);
+			event = { ...data, id: "(dry-run)" };
+		}
+	}
 	const eventUrl = String(event.externalUrl ?? "");
 	console.log(`\nevent: ${event.name} (${event.id}) · ${eventUrl}`);
 
