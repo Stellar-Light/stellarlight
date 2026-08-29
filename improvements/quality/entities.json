@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-29T01:24:27.526Z",
+ "generatedAt": "2026-08-29T02:34:46.340Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -217,7 +217,58 @@
     "failureMode": "coverage-gap",
     "clearedAt": "2026-08-28"
    }
-  ]
+  ],
+  "closure": {
+   "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
+   "last30d": {
+    "newFindings": 168,
+    "repeats": 168,
+    "ratePct": 100
+   },
+   "lifetime": {
+    "newFindings": 460,
+    "repeats": 454,
+    "ratePct": 98.7
+   },
+   "byClass": [
+    {
+     "class": "identity",
+     "total": 287,
+     "open": 42,
+     "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "taxonomy-coverage",
+     "total": 107,
+     "open": 10,
+     "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "contract-completeness",
+     "total": 23,
+     "open": 1,
+     "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "meta-eval",
+     "total": 19,
+     "open": 4,
+     "firstSeen": "2026-07-23"
+    },
+    {
+     "class": "cross-surface-consistency",
+     "total": 14,
+     "open": 0,
+     "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "evidence-population",
+     "total": 10,
+     "open": 0,
+     "firstSeen": "2026-07-22"
+    }
+   ]
+  }
  },
  "projects": {
   "read": 959,
@@ -9591,16 +9642,16 @@
   ]
  },
  "repos": {
-  "read": 12938,
-  "population": 12938,
+  "read": 12939,
+  "population": 12939,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 12938,
+  "sampled": 12939,
   "coverage": {
    "curatedIndex": {
-    "repos": 2920,
+    "repos": 2921,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
     "withCodeDepth": 2139,
     "depthPct": 73
@@ -9622,7 +9673,7 @@
    }
   },
   "curatedShape": {
-   "repos": 2920,
+   "repos": 2921,
    "scoreHistogram": [
     {
      "bucket": "0–9",
@@ -9638,7 +9689,7 @@
     },
     {
      "bucket": "30–39",
-     "count": 476
+     "count": 477
     },
     {
      "bucket": "40–49",
@@ -9676,7 +9727,7 @@
     },
     {
      "label": "active",
-     "count": 714
+     "count": 715
     },
     {
      "label": "unknown",
@@ -9690,7 +9741,7 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1045
+     "count": 1046
     },
     {
      "label": "Rust",
@@ -11133,8 +11184,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12675,
-    "of": 12938,
+    "missing": 12676,
+    "of": 12939,
     "share": 98,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11208,16 +11259,17 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6083,
-    "of": 12938,
+    "missing": 6084,
+    "of": 12939,
     "share": 47,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6083,
+    "examplePoolSize": 6084,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
+     "yripper/stellarpay",
      "theboycoder/stellar-pay",
      "UmutKDev/bound",
      "rafliad/payoes",
@@ -11228,8 +11280,7 @@
      "Obiajulu-gif/Stellar-TrustQuest",
      "neelpote/Orakel",
      "Maycon-Rodrigues/rn-latam-anchor-kit",
-     "MattPoblete/soroban-preview-docker",
-     "marwen-abid/meridian-pay-sdp-frontend"
+     "MattPoblete/soroban-preview-docker"
     ]
    },
    {

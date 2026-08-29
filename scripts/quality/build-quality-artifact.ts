@@ -80,6 +80,82 @@ const recentlyCleared = findings
 		clearedAt: String(f.clearedAt).slice(0, 10),
 	}));
 
+// ── the closure rule's metric (QUALITY.md §1): repeat-class rate ──
+// Detectors stamp a detector-specific failureMode; the §0 classes are
+// DERIVED here through a total, reviewable map instead of migrating labels
+// onto 460 historical rows. A finding is a REPEAT when any earlier finding
+// (by firstSeen) already carried its class — the weekly déjà vu the closure
+// rule exists to end. The lifetime rate can only ratchet toward 100% as the
+// ledger grows, so the number that steers is the trailing-30d rate over
+// newly-first-seen findings; steady state is that rate at zero (new findings
+// only ever open NEW classes).
+const CLASS_OF: Record<string, string> = {
+	// §0.1 identity — a name/question should find its thing
+	"recall-miss": "identity",
+	"routing-miss": "identity",
+	"demand-routing-miss": "identity",
+	"golden-fail": "identity",
+	// §0.3 evidence population — the field exists, rows are empty
+	"missing-field": "evidence-population",
+	"population-miss": "evidence-population",
+	// §0.4 taxonomy coverage — a demanded vertical that is invisible
+	"demand-miss": "taxonomy-coverage",
+	"coverage-gap": "taxonomy-coverage",
+	// §0.5 contract completeness — spec and live surface disagree
+	"api-drift": "contract-completeness",
+	"ambiguous-contract": "contract-completeness",
+	// §0.6 cross-surface consistency — our answer vs the official record
+	"scf-round-overclaim": "cross-surface-consistency",
+	// findings about our EVAL machinery, not the product; §0 says six
+	// classes cover NEARLY everything — this is the honest remainder.
+	"battery-coverage-weak": "meta-eval",
+	"consumer-code-shallow": "meta-eval",
+};
+const classOf = (f: Finding) => CLASS_OF[f.failureMode] ?? "unclassified";
+{
+	const unmapped = new Set(
+		findings.map((f) => f.failureMode).filter((m) => !(m in CLASS_OF)),
+	);
+	if (unmapped.size)
+		console.warn(
+			`⚠ unclassified failureModes (extend CLASS_OF): ${[...unmapped].join(", ")}`,
+		);
+}
+const repeatIds = new Set<string>();
+const classAgg = new Map<
+	string,
+	{ total: number; open: number; firstSeen: string }
+>();
+for (const f of [...findings].sort((a, b) =>
+	a.firstSeen.localeCompare(b.firstSeen),
+)) {
+	const c = classOf(f);
+	const cur = classAgg.get(c);
+	if (cur) {
+		repeatIds.add(f.id);
+		cur.total++;
+		if (f.status === "open") cur.open++;
+	} else {
+		classAgg.set(c, {
+			total: 1,
+			open: f.status === "open" ? 1 : 0,
+			firstSeen: f.firstSeen.slice(0, 10),
+		});
+	}
+}
+const closureWindow = (days: number) => {
+	const cutoff = new Date(now - days * DAY).toISOString();
+	const fresh = findings.filter((f) => f.firstSeen >= cutoff);
+	const repeats = fresh.filter((f) => repeatIds.has(f.id)).length;
+	return {
+		newFindings: fresh.length,
+		repeats,
+		ratePct: fresh.length
+			? Math.round((repeats / fresh.length) * 1000) / 10
+			: 0,
+	};
+};
+
 // ── per-entity quality ──
 type Project = {
 	slug: string;
@@ -290,6 +366,26 @@ const out = {
 			count: openAges.get(b) ?? 0,
 		})),
 		recentlyCleared,
+		/** QUALITY.md §1's "metric that matters". A repeat = a finding whose
+		 * §0 class already had a prior finding; steady state = the trailing
+		 * rate at zero (new findings only open new classes). Classes are
+		 * derived from failureMode via CLASS_OF in the builder — a total,
+		 * reviewable map, not per-row hand labels. */
+		closure: {
+			definition:
+				"repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
+			last30d: closureWindow(30),
+			lifetime: {
+				newFindings: findings.length,
+				repeats: repeatIds.size,
+				ratePct: findings.length
+					? Math.round((repeatIds.size / findings.length) * 1000) / 10
+					: 0,
+			},
+			byClass: [...classAgg.entries()]
+				.map(([cls, v]) => ({ class: cls, ...v }))
+				.sort((a, b) => b.total - a.total),
+		},
 	},
 	projects: {
 		/** `read` is how many rows this run actually enumerated; `population` is
