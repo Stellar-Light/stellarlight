@@ -1,0 +1,28 @@
+{
+ "slug": "stellarsight",
+ "url": "https://stellarsight.xyz/",
+ "finalUrl": "https://stellarsight.xyz/",
+ "fetchedAt": "2026-08-29T17:43:55.344Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 17:43:55 GMT",
+  "etag": "W/\"35d9d4ef2fdc7c673560af5d7bdebda9\"",
+  "lastModified": "Sat, 29 Aug 2026 17:37:43 GMT",
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "54a424b4f7e2a1f8d7cb13b7952b01c2fe45e02e4c5ccdfc49c2272776755681",
+ "bodyTextChars": 46,
+ "markers": [
+  {
+   "marker": "facilitator-side Bazaar",
+   "found": false,
+   "excerpt": null
+  },
+  {
+   "marker": "stellar:testnet",
+   "found": false,
+   "excerpt": null
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

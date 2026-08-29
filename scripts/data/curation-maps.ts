@@ -1059,6 +1059,32 @@ export const SEEDS: Array<{
 		| "source-inherited";
 }> = [
 	{
+		// Owner-flagged 2026-08-29, probed live same day: the facilitator-side
+		// x402 Bazaar for Stellar (discovery/search + auto-cataloging), running
+		// end-to-end on TESTNET with real settled x402 payments (95, self-
+		// labeled "none of it organic demand" — their honesty, kept here).
+		// Builder = pedro-pelicioni (also sextant-agent, Builder Summit SP 26
+		// x402-track 2nd place). Development, not Live: testnet-only, listing
+		// is write-token gated, repo 20 days old. NOT a stellarlight lookalike
+		// despite the name — a real, Apache-2.0, working product.
+		slug: "stellarsight",
+		name: "StellarSight",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Infrastructure", "AI"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Facilitator-side x402 Bazaar discovery layer for Stellar: a hosted public index where agents advertise paid APIs, search them in plain language, and settle in one HTTP round trip. Live on testnet (x402 v2, spec-conformant discovery/search API) with real settled testnet payments; by Sextant's builder (Builder Summit SP 26).",
+		links: {
+			website: "https://stellarsight.xyz/",
+			github: "https://github.com/pedro-pelicioni/stellarsight",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-29",
+		statusSourceUrl: "https://stellarsight.xyz/",
+		statusBasis: "human-verified",
+	},
+	{
 		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
 		// 8 live XLM market(s), last trade <24h, 24h volume ≈ $47,848,168.
 		slug: "binance",
