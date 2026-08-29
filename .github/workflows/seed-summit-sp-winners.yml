@@ -1,0 +1,32 @@
+name: Seed Summit SP 26 winners (manual)
+
+# One-shot seed of the Stellar Builder Summit SP 26 bounty winners into the
+# projects directory (scripts/data/seed-summit-sp-winners.ts). Idempotent:
+# skip-if-exists on every row and attach. Dry-run by default — inspect the
+# log, then dispatch with execute=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+permissions: { contents: read }
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/data/seed-summit-sp-winners.ts ${{ inputs.execute && '--execute' || '' }}

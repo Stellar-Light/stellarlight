@@ -30,58 +30,115 @@ export interface RecentHackathonWinners {
  * Update this when a newer one finishes.
  */
 export const LATEST_WINNERS: RecentHackathonWinners = {
-	hackathonName: "Stellar Hacks: Agents",
-	hackathonUname: "stellar-agents-x402-stripe-mpp",
-	endedAt: "2026-04-13",
+	hackathonName: "Stellar Builder Summit SP 26",
+	hackathonUname: "stellar-builder-summit-2026",
+	endedAt: "2026-08-07",
 	totalPrizePool: 10000,
+	// The 12 build-bounty winners. Five content-bounty winners (tutorial /
+	// video tracks, $100 each, no repos) complete the $10k pool but are not
+	// product builds, so the product highlight omits them:
+	// ChatPay Go Labs, FASIS (×3 tracks), Block Girls.
 	winners: [
 		{
 			rank: 1,
-			placementLabel: "1st Place",
-			projectName: "Cards402",
-			builder: "Ash Francis",
+			placementLabel: "1st — Confidential Wallets",
+			projectName: "OpenZeppelin Stellar Privacy Wallet",
+			builder: "coderipper",
 			description:
-				"Stellar-powered wallets for AI agents with instant virtual Visa card issuance.",
-			prizeUsd: 5000,
-			dorahacksBuidlUrl: "https://dorahacks.io/buidl/42819",
-		},
-		{
-			rank: 2,
-			placementLabel: "2nd Place",
-			projectName: "clevercon",
-			builder: "Bosun",
-			description:
-				"Trustless AI agent marketplace with Soroban-secured USDC payments.",
-			prizeUsd: 2000,
-		},
-		{
-			rank: 3,
-			placementLabel: "3rd Place",
-			projectName: "RenderGate",
-			builder: "tantk",
-			description: "Website rendering for AI agents — pay per render via x402.",
+				"Confidential-token, private-payment wallet built on OpenZeppelin's Stellar stack.",
 			prizeUsd: 1250,
 		},
 		{
-			rank: 4,
-			placementLabel: "4th Place",
-			projectName: "x402-mcp-stellar-template",
-			builder: "Fabian Farinas",
-			description:
-				"Drop-in x402 middleware for Node and Python — minimal setup for paid MCP servers on Stellar.",
+			rank: 1,
+			placementLabel: "1st — Agentic Payments (x402/MPP)",
+			projectName: "StellarPay (x402)",
+			builder: "coderipper",
+			description: "Agentic payments over x402/MPP on Stellar.",
 			prizeUsd: 1000,
 		},
 		{
-			rank: 5,
-			placementLabel: "5th Place",
-			projectName: "TollPay",
-			builder: "Raj Karia",
-			description:
-				"Stripe for MCP servers — per-call USDC micropayments on Stellar for AI tool usage.",
+			rank: 1,
+			placementLabel: "1st — Brazil Ramps & Regional Kits",
+			projectName: "ACTA Brazil Regional Kit",
+			builder: "ACTA",
+			description: "Brazil-first ramps and regional integration kit.",
+			prizeUsd: 1000,
+		},
+		{
+			rank: 1,
+			placementLabel: "1st — Enterprise, Compliance & RWA",
+			projectName: "QuietBook",
+			builder: "Kaptan_web3",
+			description: "Enterprise compliance and RWA build.",
+			prizeUsd: 1000,
+		},
+		{
+			rank: 1,
+			placementLabel: "1st — CLI Plugins for Agents",
+			projectName: "Stellar Memory",
+			builder: "Raiz Protocol",
+			description: "Memory CLI plugin for Stellar agents.",
 			prizeUsd: 750,
+		},
+		{
+			rank: 1,
+			placementLabel: "1st — Emerging-Market Yield",
+			projectName: "Truway",
+			builder: "Truway",
+			description: "Brazil-first emerging-market yield build.",
+			prizeUsd: 750,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — Agentic Payments (x402/MPP)",
+			projectName: "Sextant",
+			builder: "El Guri",
+			description: "Agentic payments build over x402/MPP.",
+			prizeUsd: 750,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — Brazil Ramps & Regional Kits",
+			projectName: "LatAm Ramp Kit",
+			builder: "TrustlessWork",
+			description: "LatAm on/off-ramp integration kit.",
+			prizeUsd: 750,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — Confidential Wallets",
+			projectName: "Stellar Confidential Token SDK",
+			builder: "aguilar1x",
+			description: "SDK for confidential tokens on Stellar.",
+			prizeUsd: 750,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — CLI Plugins for Agents",
+			projectName: "Teji",
+			builder: "Always Cooking",
+			description: "CLI plugin for Stellar agents.",
+			prizeUsd: 500,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — Emerging-Market Yield",
+			projectName: "EnergyPay Tesouro Yield",
+			builder: "Fenix",
+			description: "Brazilian treasury-yield energy-payments build.",
+			prizeUsd: 500,
+		},
+		{
+			rank: 2,
+			placementLabel: "2nd — Enterprise, Compliance & RWA",
+			projectName: "Trustless Work privacy PoC",
+			builder: "Green Road",
+			description: "Privacy proof-of-concept on Trustless Work.",
+			prizeUsd: 500,
 		},
 	],
 };
+
 
 /**
  * Fallback when a winner doesn't have a direct BUIDL URL — link to the
