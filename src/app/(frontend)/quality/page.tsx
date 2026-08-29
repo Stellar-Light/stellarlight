@@ -505,6 +505,32 @@ export default function QualityPage() {
 					Cleared is NOT confirmation the fix works; only verified means it was
 					deliberately re-probed after a fix.
 				</p>
+				{/* The closure rule's metric (QUALITY.md §1): findings whose class
+				    already had a prior finding. Zero = new findings only ever open
+				    NEW classes; every recurrence means a fix landed on the instance
+				    instead of the class. */}
+				<div className="mb-6 pb-5 border-b border-border">
+					<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-3">
+						<Stat
+							label="Repeat-class rate (30d)"
+							value={`${entities.findings.closure.last30d.ratePct}%`}
+							sub={`${entities.findings.closure.last30d.repeats} of ${entities.findings.closure.last30d.newFindings} new findings`}
+						/>
+						<Stat
+							label="Lifetime"
+							value={`${entities.findings.closure.lifetime.ratePct}%`}
+							sub={`across ${entities.findings.closure.lifetime.newFindings} findings, ${entities.findings.closure.byClass.length} classes`}
+						/>
+					</div>
+					<p className="text-[11px] text-muted-foreground leading-relaxed">
+						A repeat is a finding whose class (identity, taxonomy coverage,
+						contract completeness…) already had a prior finding — the measure of
+						whether fixes land on the class or just the instance. Steady state
+						is the 30-day rate at zero: new findings only ever open new
+						classes. This number is expected to start ugly; publishing it is
+						the point.
+					</p>
+				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="flex flex-col gap-3">
 						<p className="text-xs text-muted-foreground">
