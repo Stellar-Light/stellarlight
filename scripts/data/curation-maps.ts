@@ -709,6 +709,61 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Keybase was a Stellar wallet integration (2018-2020). Zoom acquired Keybase in May 2020; the Stellar features are legacy and unmaintained. The keybase/client repo remains active for the chat client only. Marked Inactive on owner review 2026-08-17.",
 	},
+	// ── 2026-08-29 gap-matrix pass: strongBasis pool, 6 of the 8 top-prominence
+	// examples upgraded from site-liveness with a dated operator artifact each
+	// (from==to = provenance fill, the zenex pattern). Honest skips: xbull
+	// (site is an unreadable JS shell, wallet repo last commit 2025-08-13 —
+	// no current-operation artifact located) and moneygram (homepage evidences
+	// MoneyGram the company, not the Stellar Ramps product; the ramps page is
+	// an unreadable JS shell). Never stamp human-verified off an unread page.
+	"soroban-rust-sdk": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/rs-soroban-sdk/releases",
+		basis: "human-verified",
+		note: "v27.0.6 released 2026-08-13 — actively shipped by stellar org.",
+	},
+	"javascript-stellar-sdk": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/js-stellar-sdk/releases",
+		basis: "human-verified",
+		note: "v17.0.1 released 2026-08-25 — actively shipped by stellar org.",
+	},
+	"stellar-cli": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/stellar-cli/releases",
+		basis: "human-verified",
+		note: "v28.0.0 released 2026-08-26 — actively shipped by stellar org.",
+	},
+	freighter: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/freighter/releases",
+		basis: "human-verified",
+		note: "5.46.0 released 2026-08-26 — the extension ships continuously.",
+	},
+	lobstr: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://lobstr.co/",
+		basis: "human-verified",
+		note: "Operator page verified 2026-08-29: shipping iOS + Android wallet apps (receipt improvements/receipts/lobstr-2026-08-29.json).",
+	},
+	circle: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://developers.circle.com/cctp/references/stellar-contracts",
+		basis: "human-verified",
+		note: "Circle's own reference lists live Stellar MAINNET CCTP contracts (receipt improvements/receipts/circle-2026-08-29.json); USDC issuance on Stellar is Circle-operated.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -841,6 +896,22 @@ export const TYPE_ADD: Record<string, string[]> = {
 	// Battery F-row rotation 2026-08-29: prominent row with types:[] — it is
 	// the Go SDK for Stellar (stellar/go-stellar-sdk, repo verified live).
 	"go-stellar-sdk": ["SDK"],
+	// ── 2026-08-29 gap-matrix pass: the typed pool's 12 example rows (highest-
+	// prominence untyped). Evidence = each row's own stored description.
+	hubble: ["Analytics", "Indexer"], // SDF's BigQuery data warehouse: full historical ledger record for analytics
+	"stellar-quickstart": ["Infrastructure"], // official Docker image bundling Core+Horizon+RPC for local dev
+	getblock: ["RPC", "Infrastructure"], // node-as-a-service: managed Stellar RPC endpoints
+	vaquita: ["DeFi"], // save-to-earn DeFi savings protocol on Soroban
+	// Summit SP 26 winner rows (seeded 2026-08-29 with types deliberately
+	// empty; typing them IS the human lane, done here):
+	quietbook: ["RWA"], // enterprise compliance + RWA build
+	"energypay-tesouro-yield": ["Payments", "RWA"], // Brazilian treasury-yield (tesouro) energy payments
+	"truway-yield": ["DeFi"], // Brazil-first emerging-market yield product
+	"stellar-confidential-token-sdk": ["SDK"], // SDK for confidential tokens
+	"openzeppelin-stellar-privacy-wallet": ["Wallet"], // confidential-token private-payment wallet
+	teji: ["AI"], // CLI plugin for Stellar agents
+	"stellar-memory": ["AI"], // memory CLI plugin for Stellar agents
+	"sextant-agent": ["AI", "Payments"], // agentic payments over x402/MPP
 };
 
 export const SEEDS: Array<{
@@ -2580,5 +2651,22 @@ export const DEPLOYMENT_VERIFIED: Record<
 		network: "testnet",
 		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
 		note: "mainnet config present but empty (4x address:\"\"); testnet fully populated",
+	},
+	// ── 2026-08-29 gap-matrix pass: the 6-row deployment pool. Two evidenced,
+	// four stay honestly unknown (receipts improvements/receipts/<slug>-2026-08-29.json):
+	// wisdomtree/spiko/redswan — NO real-operator Stellar issuance exists
+	// (stellar.expert by their real domains returns only lookalike-farm squats:
+	// wisdomtree.co.com, lumenvaultx.org, stellarxlm.online — never cite those);
+	// spacewalk — bridge operates from Pendulum; no Stellar-side artifact located.
+	dia: {
+		network: "testnet",
+		sourceUrl: "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		note: "Stellar's own oracle-providers reference lists DIA with a TESTNET contract only (CAEDPEZD…); no mainnet address documented anywhere",
+	},
+	"redstone-finance": {
+		network: "mainnet",
+		sourceUrl:
+			"https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+		note: "operator announcement 2026-03-04: 'bringing institutional-grade oracle infrastructure to the Stellar mainnet', 10 feeds live; their monorepo chain-configs declares stellar-mainnet (isMainnet:true, mainnet RPCs); SEP-40 feeds in production for Centrifuge RWAs",
 	},
 };
