@@ -102,10 +102,12 @@ service runs at Stage 3+ by default and humans do product, not repair.
 ## 4. Phases
 
 - **P0. Name the classes, lock the first invariant.** `status: done`
-  This document · the opacity lock in CI · class labels in the findings
-  ledger · battery lanes on the rounds format.
-  *Evidence:* `check-schema-opacity.ts` (47 open maps BASELINED, the build
-  fails if the count rises; none paid down yet, that work is P3's), QUALITY.md
+  This document · the opacity lock in CI · §0 class labels DERIVED from
+  every finding's failureMode (CLASS_OF in build-quality-artifact.ts — a
+  total, reviewable map; unmapped modes warn) · battery lanes on the rounds
+  format.
+  *Evidence:* `check-schema-opacity.ts` (the 47 baselined open maps were
+  paid down to ZERO in #1092; the ratchet now holds the floor at 0), QUALITY.md
   itself.
 
 - **P1. Honesty layer, eval integrity, the dashboard.** `status: done`
@@ -147,6 +149,10 @@ service runs at Stage 3+ by default and humans do product, not repair.
   a machine stamp never impersonates a human one). The lane reproduces the
   2026-08-28 hand-worked queue's mechanical half; judgment cases (operator
   docs, bundles) stay human.
+  2026-08-29: the closure rule's METRIC exists — repeat-class rate is
+  computed from the ledger and published on /quality (first measurement:
+  30-day rate 100%, 168/168 new findings in already-seen classes; lifetime
+  98.7% across 6 classes + meta-eval. The treadmill, now with a number).
   *Remaining:* one lane is not a system — the gap matrix's other rows
   (typed, sourced, knowledge notes) still close by hand, and Stage 2
   requires N intervention-free weeks before auto-merge opens for bounded
