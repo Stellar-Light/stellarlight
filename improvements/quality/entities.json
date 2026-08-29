@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-29T04:49:03.092Z",
+ "generatedAt": "2026-08-29T13:20:26.641Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -25,8 +25,8 @@
   {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
-   "openFindings": 4,
-   "clearedFindings": 14,
+   "openFindings": 3,
+   "clearedFindings": 15,
    "verifiedFindings": 0
   },
   {
@@ -54,8 +54,8 @@
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
   "total": 460,
-  "open": 57,
-  "cleared": 396,
+  "open": 56,
+  "cleared": 397,
   "verified": 7,
   "byFailureMode": [
    {
@@ -88,8 +88,8 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 4,
-    "cleared": 14,
+    "open": 3,
+    "cleared": 15,
     "verified": 0,
     "surface": "corpus"
    },
@@ -157,7 +157,7 @@
    },
    {
     "bucket": "8–30d",
-    "count": 10
+    "count": 9
    },
    {
     "bucket": "31–60d",
@@ -169,6 +169,12 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "battery:q-ti-java-sdk-wallet-feebump",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-08-29"
+   },
    {
     "probe": "openx402",
     "surface": "directory",
@@ -210,12 +216,6 @@
     "surface": "retrieval",
     "failureMode": "demand-miss",
     "clearedAt": "2026-08-28"
-   },
-   {
-    "probe": "cointracker",
-    "surface": "directory",
-    "failureMode": "coverage-gap",
-    "clearedAt": "2026-08-28"
    }
   ],
   "closure": {
@@ -252,7 +252,7 @@
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 4,
+     "open": 3,
      "firstSeen": "2026-07-23"
     },
     {
@@ -9575,7 +9575,7 @@
    "curatedIndex": {
     "repos": 2943,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2150,
+    "withCodeDepth": 2163,
     "depthPct": 73
    },
    "tail": {
@@ -9589,7 +9589,7 @@
     "withNotes": 28
    },
    "mainnetJoin": {
-    "pool": 3348,
+    "pool": 3350,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 76
    }
@@ -9704,7 +9704,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 6866,
+  "withCodeDepth": 6879,
   "withNotes": 265,
   "withMainnet": 76,
   "top": [
@@ -10887,13 +10887,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 396
+    "value": 397
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 57
+    "value": 56
    },
    {
     "id": "o:verified",
@@ -11048,14 +11048,14 @@
     "target": 17,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 14
+    "value": 15
    },
    {
     "source": 14,
     "target": 18,
     "sourceId": "f:corpus",
     "targetId": "o:open",
-    "value": 4
+    "value": 3
    },
    {
     "source": 7,
@@ -11079,8 +11079,8 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 3286,
-    "of": 3348,
+    "missing": 3288,
+    "of": 3350,
     "share": 98.1,
     "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
@@ -11179,28 +11179,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6095,
+    "missing": 6082,
     "of": 12961,
-    "share": 47,
+    "share": 46.9,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6095,
+    "examplePoolSize": 6082,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "lumenloop/lumenloop-ng-skills",
-     "blaze-xyz/blaze-grok-plugin",
-     "Bevor-Protocol/Bevor-Skills",
-     "blindpaylabs/skills",
-     "gateway-fm/lez-atomic-swaps",
-     "gateway-fm/oz-policy-builder",
-     "withObsrvr/rs-stellar-history-archive-hasher",
-     "SentinelFi/stellar-metamask-snap",
-     "57blocks/agentsmith-x402",
-     "stellar/friendbot",
-     "Stellar-Light/stellar-pay",
-     "ContentDAO/public"
+     "theboycoder/stellar-pay",
+     "UmutKDev/bound",
+     "rafliad/payoes",
+     "peejay-git/stellarswap",
+     "orbitlens/stellar-expert-id-keystore-mongodb",
+     "orbitlens/operations-notifier",
+     "ofwonogodwin/Market-Connect-Ug",
+     "Obiajulu-gif/Stellar-TrustQuest",
+     "neelpote/Orakel",
+     "Maycon-Rodrigues/rn-latam-anchor-kit",
+     "MattPoblete/soroban-preview-docker",
+     "marwen-abid/meridian-pay-sdp-frontend"
     ]
    },
    {
