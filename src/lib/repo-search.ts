@@ -928,6 +928,20 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 
 // Curated flagship repos for a query, priority order, deduped. Empty for queries
 // that don't hit a curated vertical (so normal queries are untouched).
+/** Every repo the curated maps can inject, flattened and deduped.
+ *
+ * Exported so a GUARD can verify the list against the corpus. These names are
+ * hand-maintained authored truth: `canonicalFor` will float them to the top of
+ * a result set, so a name that is stale (upstream renamed it) or absent (never
+ * ingested) silently degrades the exact queries curation exists to fix. Nothing
+ * re-verified them until scripts/check-curated-canonical.ts. */
+export const CURATED_CANONICAL_REPOS: string[] = [
+	...new Set([
+		...CANONICAL.flatMap((c) => c.repos),
+		...VERTICAL_FLAGSHIPS.flatMap((c) => c.repos),
+	]),
+];
+
 export function flagshipsFor(q: string): string[] {
 	const hay = wordy(q);
 	const out: string[] = [];
