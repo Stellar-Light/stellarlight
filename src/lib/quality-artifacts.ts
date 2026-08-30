@@ -8,6 +8,7 @@
  * the artifact path so every number links to its reproducible evidence.
  */
 
+import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
@@ -25,10 +26,10 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
-import laneOperatorToml from "../../improvements/quality/lane-operator-toml.json";
 import qualityEntities from "../../improvements/quality/entities.json";
 import externalFindings from "../../improvements/quality/external-findings.json";
 import qualityHistory from "../../improvements/quality/history.json";
+import laneOperatorToml from "../../improvements/quality/lane-operator-toml.json";
 // Weekly evidence, fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import missFunnel from "../../improvements/quality/miss-funnel.json";
@@ -286,6 +287,37 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				passing: silent === 0 && invalid === 0,
 			});
 		})(),
+
+		// Curated canonical integrity — the hand-maintained list that decides
+		// WHICH repo is authoritative. It is authored truth: nothing derives it,
+		// so nothing caught that 10 of its names matched no row at all (mixed
+		// casing vs a case-sensitive `equals`, plus two upstream renames). A
+		// curated name that matches nothing degrades exactly the queries
+		// curation exists to fix, silently.
+		g({
+			key: "curated-canonical",
+			title: "Curated canonical repos resolve",
+			promise:
+				"Every repo we call authoritative is indexed and carries code signals — a curated name that matches no row silently degrades the query it was written for.",
+			measure: {
+				value: curatedCanonical.scanned,
+				of: curatedCanonical.curatedTotal,
+				unit: "repos",
+			},
+			sub: `${curatedCanonical.scanned}/${curatedCanonical.curatedTotal} curated canonical repos indexed and code-scanned`,
+			details: [
+				`${curatedCanonical.absent.length} absent (curated name matches no row)`,
+				`${curatedCanonical.unscanned.length} indexed but no code signals — invisible to code-evidence ranking and to the tier gate`,
+				...curatedCanonical.unscanned
+					.slice(0, 4)
+					.map((u) => `${u.name} (${u.state}, ${u.stars}★)`),
+			],
+			asOf: curatedCanonical.asOf.slice(0, 10),
+			cadence: "baseline",
+			severity: curatedCanonical.absent.length > 0 ? "high" : "medium",
+			artifact: "improvements/audits/curated-canonical-latest.json",
+			passing: curatedCanonical.findings === 0,
+		}),
 
 		g({
 			key: "deepwiki-calibration",
