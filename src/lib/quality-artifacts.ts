@@ -127,6 +127,11 @@ export type GuardCadence = "weekly" | "on-deploy" | "baseline";
  * `baseline` is a one-off measurement of a thing that does not change on its
  * own (a probe of documented behaviour, a calibration against a fixed sample);
  * it still ages, just far more slowly than a weekly sweep. */
+/** Minimum co-graded repos before an agreement RATE is evidence rather than
+ * an anecdote. Chosen so one disagreement cannot move the headline by more
+ * than ~5 points; at n=3 it moved it by 33. */
+export const DEEPWIKI_MIN_GRADED = 20;
+
 export const GUARD_FRESHNESS: Record<GuardCadence, number> = {
 	weekly: 10,
 	"on-deploy": 14,
@@ -323,18 +328,30 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "deepwiki-calibration",
 			title: "Code-depth calibration",
 			promise:
-				"Repo depth grades agree with independent code analysis where both exist.",
+				"Repo depth grades agree with independent code analysis where both exist — on a sample large enough for the rate to mean something.",
 			measure: { value: deepwiki.agreementRate, of: null, unit: "%" },
-			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled)`,
+			// The headline CARRIES its n. "100%" on three repos read as a strong
+			// result at a glance while the sample sat in the subtitle nobody
+			// reads; a rate without its denominator is not a measurement.
+			value: `${deepwiki.agreementRate}% (n=${deepwiki.frame.graded})`,
+			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled, ${deepwiki.frame.unindexed} with no independent index)`,
 			details: [
 				`${deepwiki.disagreements.length} disagreements`,
-				`${deepwiki.frame.unindexed} sampled repos had no independent index to compare (small-n baseline, grows as coverage does)`,
+				`${deepwiki.frame.unindexed}/${deepwiki.frame.total} sampled repos had no independent index to compare against — independent coverage of our corpus, not our agreement with it, is the binding constraint here`,
+				deepwiki.frame.graded < DEEPWIKI_MIN_GRADED
+					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement — re-run against a sample with more co-gradeable repos.`
+					: `sample meets the ${DEEPWIKI_MIN_GRADED}-repo floor`,
 			],
 			asOf: "2026-07-10",
 			cadence: "baseline",
 			severity: "low",
 			artifact: "improvements/engine/deepwiki-calibration-2026-07-10.json",
-			passing: deepwiki.disagreements.length === 0,
+			// A guard that CANNOT be breached is not a guard. With n=3 a single
+			// disagreement would swing the rate 33 points, so green here asserted
+			// far more than the evidence supports. Insufficient sample fails.
+			passing:
+				deepwiki.disagreements.length === 0 &&
+				deepwiki.frame.graded >= DEEPWIKI_MIN_GRADED,
 		}),
 
 		// Raven interlock, the consumer's discovery index vs our live contract.
