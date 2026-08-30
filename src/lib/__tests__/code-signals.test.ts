@@ -69,6 +69,35 @@ describe("versionStatusOf — the constant that must never be wrong", () => {
 });
 
 describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
+	it("Gradle VERSION CATALOG → lang-sdk (SDF's own kotlin-wallet-sdk) (KEEP)", () => {
+		// Real shape: build.gradle.kts says `api(libs.java.stellar.sdk)` and
+		// contains no Stellar string; the coordinate lives in the catalog.
+		const s = scanOf({
+			"gradle/libs.versions.toml":
+				'java-stellar-sdk = { module = "network.lightsail:stellar-sdk", version.ref = "java-stellar-sdk" }\n',
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Maven pom with a Stellar groupId → lang-sdk (KEEP)", () => {
+		const s = scanOf({
+			"pom.xml":
+				"<project><dependencies><dependency><groupId>network.lightsail</groupId><artifactId>stellar-sdk</artifactId></dependency></dependencies></project>",
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("a pom NAMED stellar-* but with no Stellar dep stays none (DROP)", () => {
+		// openMF/stellar-connector is named stellar-connector and depends on
+		// Spring, not on a Stellar SDK. Matching artifactId would have been a
+		// false positive; we match dependency groupId only.
+		const s = scanOf({
+			"pom.xml":
+				"<project><groupId>org.mifos</groupId><artifactId>stellar-connector</artifactId><dependencies><dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter</artifactId></dependency></dependencies></project>",
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	it("PHP anchor SDK composer.json → lang-sdk, not none (KEEP)", () => {
 		// Real manifest: Argo-Navis-Dev/php-anchor-sdk requires
 		// soneso/stellar-php-sdk. 94% of scanned PHP repos read none before

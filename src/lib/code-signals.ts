@@ -166,6 +166,16 @@ const LANG_SDK_MARKERS: {
 	// `soneso/stellar-php-sdk`. composer.json was ALSO absent from the
 	// fetcher's manifest list, so there was nothing to match even with a
 	// marker; both halves are fixed together.
+	// Java / Maven. pom.xml was never fetched, so every Maven project read
+	// none regardless of its dependencies. Matches dependency COORDINATES
+	// (groupId), never a project's own artifactId — openMF/stellar-connector
+	// is named "stellar-connector" and does not depend on a Stellar SDK, so a
+	// name match would have been a false positive.
+	{
+		lang: "java-maven",
+		file: (n) => n === "pom.xml",
+		re: /<groupId>\s*(org\.stellar|network\.lightsail|com\.soneso)[^<]*<\/groupId>/i,
+	},
 	{
 		lang: "php",
 		file: (n) => n === "composer.json",
@@ -192,7 +202,16 @@ const LANG_SDK_MARKERS: {
 	},
 	{
 		lang: "kotlin",
-		file: (n) => n === "build.gradle" || n === "build.gradle.kts",
+		// libs.versions.toml: Gradle VERSION CATALOGS put the coordinate in a
+		// separate file, so a build.gradle.kts reads `api(libs.java.stellar.sdk)`
+		// and contains no Stellar string at all. stellar/kotlin-wallet-sdk —
+		// SDF's own — read proof=none for exactly this reason. The existing
+		// regex already matches `network.lightsail:stellar`; it simply never
+		// saw the file holding it.
+		file: (n) =>
+			n === "build.gradle" ||
+			n === "build.gradle.kts" ||
+			n === "libs.versions.toml",
 		re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i,
 	},
 	{
