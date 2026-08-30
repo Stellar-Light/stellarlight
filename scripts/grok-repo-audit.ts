@@ -18,6 +18,15 @@
  *   node scripts/grok-repo-audit.ts --repos a/b,c/d       # explicit set
  *   node scripts/grok-repo-audit.ts --limit 30 --json     # artifact to stdout
  *
+ * HONEST LIMITATION (measured 2026-08-30): single-shot `grok -p` with a forced
+ * JSON schema does NOT reliably investigate — it often answers from priors and
+ * sometimes emits a HIGH-confidence verdict with a placeholder reason
+ * ("gathering evidence before classifying"). Both a confidence floor AND a
+ * placeholder-reason filter are needed, and even then this is a fast prior-
+ * knowledge SANITY check, not deep investigation. For real repo investigation
+ * (the "deep code" capability), Grok must run agentic — more turns, higher
+ * cost — which is a separate, heavier lane not built here.
+ *
  * Cost: ~$0.014/repo (Grok 4, measured). A 30-repo calibration run is ~$0.40.
  * Needs `grok` on PATH and authenticated (grok login).
  */
@@ -34,7 +43,9 @@ const MIN_CONFIDENCE = 0.5; // below this, Grok is guessing from priors, not
 // the deepwiki n=3 mistake: a number that cannot be wrong measures nothing.
 const reposArg = process.argv.indexOf("--repos");
 const EXPLICIT =
-	reposArg >= 0 ? (process.argv[reposArg + 1] ?? "").split(",").filter(Boolean) : [];
+	reposArg >= 0
+		? (process.argv[reposArg + 1] ?? "").split(",").filter(Boolean)
+		: [];
 
 type Row = {
 	fullName: string;
@@ -140,10 +151,20 @@ async function main() {
 	for (const row of rows) {
 		const g = await askGrokRetrying(row.fullName);
 		if (!g) continue;
-		if (g.confidence < MIN_CONFIDENCE) {
+		// TWO gates, because confidence alone lies. Measured 2026-08-30: Grok
+		// returned classification=dead at confidence 0.85 with the reason
+		// "Placeholder; gathering actual repo evidence before classifying" — a
+		// confident verdict it had not investigated. The REASON text is the
+		// honest signal: a placeholder phrase means single-shot mode answered
+		// before its agentic fetch ran. Skip both.
+		const placeholder =
+			/placeholder|gathering|before classifying|need to (inspect|investigate)|will (check|investigate)|pending .* evidence/i.test(
+				g.reason,
+			);
+		if (g.confidence < MIN_CONFIDENCE || placeholder) {
 			if (!JSON_OUT)
 				console.log(
-					`  · ${row.fullName.padEnd(42)} SKIPPED (grok confidence ${g.confidence} — did not investigate)`,
+					`  · ${row.fullName.padEnd(42)} SKIPPED (${placeholder ? "placeholder reason" : `confidence ${g.confidence}`} — did not investigate)`,
 				);
 			continue;
 		}
