@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-29T13:20:27.230Z",
+ "generatedAt": "2026-08-30T13:10:17.986Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -175,6 +175,16 @@
     ]
    },
    {
+    "file": "improvements/receipts/usdt0-2026-08-29.json",
+    "slug": "usdt0",
+    "url": "https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "USDT0",
+     "GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q"
+    ]
+   },
+   {
     "file": "improvements/receipts/stronghold-deployment-2026-08-28.json",
     "slug": "stronghold",
     "url": "https://stronghold.co/.well-known/stellar.toml",
@@ -191,6 +201,16 @@
     "fetchedAt": "2026-08-28",
     "markers": [
      "product class"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellarsight-2026-08-29.json",
+    "slug": "stellarsight",
+    "url": "https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "x402Version",
+     "stellar:testnet"
     ]
    },
    {
