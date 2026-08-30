@@ -144,6 +144,23 @@ const LANG_SDK_MARKERS: {
 		file: (n) => n === "cargo.toml",
 		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
 	},
+	// AssemblyScript Soroban contracts. Verified against the real manifests in
+	// Soneso/as-soroban-examples: each contract's package.json depends on
+	// `as-soroban-sdk` and its asconfig.json extends `as-soroban-sdk/sdkasconfig`.
+	// We key off package.json because that is what the fetcher pulls.
+	//
+	// Why this matters beyond one repo: an AssemblyScript contract imports
+	// neither Rust `soroban-sdk` nor JS `@stellar/stellar-sdk`, so it read as
+	// proof=none — "confidently not Stellar" — and `none` is a key in the
+	// two-key archive rule. The 2026-08-30 tier dry run duly proposed archiving
+	// Soneso/as-soroban-examples, AssemblyScript examples from a Stellar SDK
+	// vendor, on `none+farm:1`. A silence the engine cannot break is not
+	// evidence of absence.
+	{
+		lang: "assemblyscript",
+		file: (n) => n === "package.json",
+		re: /"as-soroban-sdk"\s*:/,
+	},
 	{
 		lang: "swift",
 		file: (n) => n === "package.swift",

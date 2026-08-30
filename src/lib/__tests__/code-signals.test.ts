@@ -69,6 +69,28 @@ describe("versionStatusOf — the constant that must never be wrong", () => {
 });
 
 describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
+	it("AssemblyScript Soroban contract → lang-sdk, not none (KEEP)", () => {
+		// Verified against Soneso/as-soroban-examples: each contract's
+		// package.json depends on as-soroban-sdk. It imports neither Rust
+		// soroban-sdk nor @stellar/stellar-sdk, so before this marker it read
+		// as proof=none — and `none` is a key in the two-key ARCHIVE rule, so a
+		// tier run proposed archiving a Stellar SDK vendor's own examples.
+		const s = scanOf({
+			"add/package.json":
+				'{"name":"add","devDependencies":{"assemblyscript":"^0.28.3"},"dependencies":{"as-soroban-sdk":"^1.2.0"}}',
+		});
+		const r = detectStellarProof(s);
+		expect(r.proof).toBe("lang-sdk");
+		expect(r.outcome).toBe("ok");
+	});
+
+	it("a package.json with no Stellar dep stays none (DROP)", () => {
+		const s = scanOf({
+			"package.json": '{"name":"x","dependencies":{"lodash":"^4.17.21"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	it("FIXTURE #1: workspace-inherited soroban-sdk → cargo-sdk (KEEP)", () => {
 		// member crate inherits, root declares the real dep under [workspace.dependencies]
 		const s = scanOf({
