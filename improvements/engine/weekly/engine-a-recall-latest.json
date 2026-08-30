@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-08-28T18:38:05Z",
+  "generatedAt": "2026-08-30T14:26:24Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 950,
-      "total": 950,
+      "ok": 960,
+      "total": 960,
       "rate": 100,
       "floor": 90,
       "status": "OK "
     },
     {
       "bucket": "P-TYPE",
-      "ok": 19,
+      "ok": 20,
       "total": 20,
-      "rate": 95,
+      "rate": 100,
       "floor": 75,
       "status": "OK "
     },
@@ -28,17 +28,17 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 924,
-      "total": 950,
-      "rate": 97.3,
+      "ok": 932,
+      "total": 960,
+      "rate": 97.1,
       "floor": 60,
       "status": "OK "
     },
     {
       "bucket": "P-ATTR",
-      "ok": 45,
-      "total": 46,
-      "rate": 97.8,
+      "ok": 46,
+      "total": 47,
+      "rate": 97.9,
       "floor": 70,
       "status": "OK "
     },
@@ -68,13 +68,6 @@
     }
   ],
   "failures": [
-    {
-      "bucket": "P-TYPE",
-      "area": "AI",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=ai%20agents&limit=10",
-      "expected": "\u22655 of top-10 carry types=AI (51 exist)",
-      "observed": "4 carry it"
-    },
     {
       "bucket": "P-PHRASE",
       "area": "Infrastructure",
@@ -182,6 +175,20 @@
     },
     {
       "bucket": "P-PHRASE",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Pulse&limit=3",
+      "expected": "stellar-pulse in top-3 for 'tell me about Stellar Pulse'",
+      "observed": "pathpulse-ai, soroban-pulse"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Soroban%20Optimistic%20Oracle%20live&limit=3",
+      "expected": "soroban-optimistic-oracle in top-3 for 'is Soroban Optimistic Oracle live'",
+      "observed": "reflector, dia, band"
+    },
+    {
+      "bucket": "P-PHRASE",
       "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=is%20USDC%20Swap%20live&limit=3",
       "expected": "usdc-swap in top-3 for 'is USDC Swap live'",
@@ -199,7 +206,7 @@
       "area": "User-Facing App",
       "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20K2%20Lend&limit=3",
       "expected": "k2-lend in top-3 for 'tell me about K2 Lend'",
-      "observed": "blend, lucent, xoxno"
+      "observed": "blend, vaquita, lucent"
     },
     {
       "bucket": "P-PHRASE",
@@ -239,16 +246,16 @@
     {
       "bucket": "P-PHRASE",
       "area": "Protocol/Contract",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellars%20Finance%20live&limit=3",
-      "expected": "stellars-finance in top-3 for 'is Stellars Finance live'",
-      "observed": "redstone-finance, trustswap, trustline"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20zkCross%20live&limit=3",
+      "expected": "zkcross in top-3 for 'is zkCross live'",
+      "observed": "dia, band, axelar"
     },
     {
       "bucket": "P-PHRASE",
       "area": "Protocol/Contract",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20zkCross%20live&limit=3",
-      "expected": "zkcross in top-3 for 'is zkCross live'",
-      "observed": "dia, band, axelar"
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Stellars%20Finance%20live&limit=3",
+      "expected": "stellars-finance in top-3 for 'is Stellars Finance live'",
+      "observed": "redstone-finance, trustswap, trustline"
     },
     {
       "bucket": "P-PHRASE",

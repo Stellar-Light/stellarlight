@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-28T18:38:05Z",
+  "generatedAt": "2026-08-30T14:26:24Z",
   "frame": {
     "scf": 500,
-    "directory": 950,
+    "directory": 960,
     "matched": 310,
     "roundsChecked": 309
   },

@@ -1,19 +1,19 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 65649,
-    "realHits": 7707,
-    "distinctQueries": 3884,
+    "loggedHits": 64163,
+    "realHits": 7949,
+    "distinctQueries": 3764,
     "replayed": 250
   },
-  "okRate": 94,
+  "okRate": 95,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 81,
-      "lastSeen": "2026-08-28T17:44:47.497Z",
-      "days": 15,
+      "hits": 74,
+      "lastSeen": "2026-08-30T10:43:08.851Z",
+      "days": 14,
       "buckets": [
         "other"
       ],
@@ -23,33 +23,9 @@
     {
       "endpoint": "/api/projects/search",
       "query": "what is orbitmintx",
-      "hits": 22,
-      "lastSeen": "2026-08-28T00:54:38.067Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is stellargizmo live",
-      "hits": 22,
-      "lastSeen": "2026-08-28T00:54:37.426Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is flurboswap live",
-      "hits": 19,
-      "lastSeen": "2026-08-28T01:14:41.157Z",
-      "days": 2,
+      "hits": 23,
+      "lastSeen": "2026-08-30T13:09:13.378Z",
+      "days": 3,
       "buckets": [
         "other"
       ],
@@ -59,9 +35,9 @@
     {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 18,
-      "lastSeen": "2026-08-28T01:14:33.956Z",
-      "days": 4,
+      "hits": 23,
+      "lastSeen": "2026-08-30T13:09:06.897Z",
+      "days": 6,
       "buckets": [
         "other"
       ],
@@ -70,10 +46,10 @@
     },
     {
       "endpoint": "/api/projects/search",
-      "query": "what is zorblend",
-      "hits": 17,
-      "lastSeen": "2026-08-28T01:14:41.839Z",
-      "days": 2,
+      "query": "is stellargizmo live",
+      "hits": 23,
+      "lastSeen": "2026-08-30T13:09:12.403Z",
+      "days": 3,
       "buckets": [
         "other"
       ],
@@ -83,9 +59,9 @@
     {
       "endpoint": "/api/projects/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 15,
-      "lastSeen": "2026-08-28T01:14:33.482Z",
-      "days": 4,
+      "hits": 20,
+      "lastSeen": "2026-08-30T13:09:06.630Z",
+      "days": 6,
       "buckets": [
         "other"
       ],
@@ -94,21 +70,9 @@
     },
     {
       "endpoint": "/api/projects/search",
-      "query": "tell me about nebulabridge",
-      "hits": 15,
-      "lastSeen": "2026-08-28T00:54:36.884Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is quantumpay live",
-      "hits": 15,
-      "lastSeen": "2026-08-28T00:54:36.212Z",
+      "query": "is flurboswap live",
+      "hits": 20,
+      "lastSeen": "2026-08-28T19:32:38.351Z",
       "days": 2,
       "buckets": [
         "other"
@@ -119,9 +83,9 @@
     {
       "endpoint": "/api/projects/search",
       "query": "zzqqxx nonexistent protocol 9999",
-      "hits": 14,
-      "lastSeen": "2026-08-28T01:14:30.341Z",
-      "days": 4,
+      "hits": 19,
+      "lastSeen": "2026-08-30T13:09:05.070Z",
+      "days": 6,
       "buckets": [
         "other"
       ],
@@ -130,9 +94,9 @@
     },
     {
       "endpoint": "/api/projects/search",
-      "query": "crdt",
-      "hits": 6,
-      "lastSeen": "2026-08-28T17:57:28.474Z",
+      "query": "tell me about nebulabridge",
+      "hits": 18,
+      "lastSeen": "2026-08-29T13:19:20.890Z",
       "days": 3,
       "buckets": [
         "other"
@@ -142,9 +106,9 @@
     },
     {
       "endpoint": "/api/projects/search",
-      "query": "hypertron",
-      "hits": 4,
-      "lastSeen": "2026-08-17T04:24:59.384Z",
+      "query": "what is zorblend",
+      "hits": 18,
+      "lastSeen": "2026-08-28T19:32:38.835Z",
       "days": 2,
       "buckets": [
         "other"
@@ -154,10 +118,34 @@
     },
     {
       "endpoint": "/api/projects/search",
+      "query": "is quantumpay live",
+      "hits": 17,
+      "lastSeen": "2026-08-29T13:19:20.200Z",
+      "days": 3,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "crdt",
+      "hits": 8,
+      "lastSeen": "2026-08-30T01:40:40.770Z",
+      "days": 4,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/projects/search",
       "query": "finclusive",
-      "hits": 3,
-      "lastSeen": "2026-08-28T17:41:40.982Z",
-      "days": 2,
+      "hits": 4,
+      "lastSeen": "2026-08-30T01:26:51.096Z",
+      "days": 3,
       "buckets": [
         "other"
       ],
@@ -166,9 +154,9 @@
     },
     {
       "endpoint": "/api/repos/search",
-      "query": "subfy",
+      "query": "warmancer",
       "hits": 3,
-      "lastSeen": "2026-08-25T17:05:26.176Z",
+      "lastSeen": "2026-08-28T23:58:11.884Z",
       "days": 2,
       "buckets": [
         "other"
@@ -177,6 +165,6 @@
       "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-08-28T18:38:05Z",
+  "generatedAt": "2026-08-30T14:26:24Z",
   "evalKey": "engine-d-demand"
 }

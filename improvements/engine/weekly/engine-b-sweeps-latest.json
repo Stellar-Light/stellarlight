@@ -156,21 +156,21 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (194/196)",
-      "types": "95% (187/196)",
-      "supportedNetworks": "46% (91/196)",
-      "logoUrl": "79% (154/196)"
+      "shortDescription": "99% (196/198)",
+      "types": "96% (190/198)",
+      "supportedNetworks": "47% (93/198)",
+      "logoUrl": "78% (154/198)"
     },
     "Tooling": {
       "shortDescription": "98% (173/177)",
-      "types": "95% (168/177)",
+      "types": "95% (169/177)",
       "logoUrl": "80% (141/177)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (379/384)",
-      "types": "94% (360/384)",
-      "supportedNetworks": "59% (225/384)",
-      "logoUrl": "85% (327/384)"
+      "shortDescription": "99% (379/383)",
+      "types": "94% (359/383)",
+      "supportedNetworks": "59% (225/383)",
+      "logoUrl": "85% (327/383)"
     },
     "Asset": {
       "shortDescription": "31% (11/35)",
@@ -179,11 +179,11 @@
       "logoUrl": "80% (28/35)"
     },
     "Protocol/Contract": {
-      "shortDescription": "100% (142/142)",
-      "types": "87% (124/142)",
-      "supportedNetworks": "74% (105/142)",
-      "logoUrl": "85% (121/142)",
-      "tvlUSD": "9% (13/142)"
+      "shortDescription": "100% (151/151)",
+      "types": "88% (133/151)",
+      "supportedNetworks": "70% (105/151)",
+      "logoUrl": "80% (121/151)",
+      "tvlUSD": "9% (13/151)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -268,20 +268,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 402,
-    "liveStale365": 145,
+    "liveNoDatedSignal": 398,
+    "liveStale365": 144,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 543,
+        "ageDays": 545,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 912,
+        "ageDays": 913,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -302,7 +302,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2311,
+        "ageDays": 2313,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -413,6 +413,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-28T18:38:05Z",
+  "generatedAt": "2026-08-30T14:26:24Z",
   "evalKey": "engine-b-sweeps"
 }
