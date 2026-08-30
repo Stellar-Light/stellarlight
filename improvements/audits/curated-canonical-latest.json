@@ -1,26 +1,10 @@
 {
-  "asOf": "2026-08-30T19:32:18.153Z",
+  "asOf": "2026-08-30T19:49:29.825Z",
   "source": "scripts/check-curated-canonical.ts",
-  "curatedTotal": 46,
-  "scanned": 31,
-  "absent": [
-    "stellar/soroban-rpc",
-    "stellar/java-stellar-anchor-sdk",
-    "rozoai/rozo-intents-contracts",
-    "phoenix-protocol-group/phoenix-contracts",
-    "simplytokenized/soroban-smart-contracts",
-    "shamba-records-limited/microvault",
-    "creit-tech/xbull-wallet",
-    "creit-tech/stellar-wallets-kit",
-    "argo-navis-dev/php-anchor-sdk",
-    "rahimklaber/sstream"
-  ],
+  "curatedTotal": 44,
+  "scanned": 39,
+  "absent": [],
   "unscanned": [
-    {
-      "name": "stellar/js-stellar-base",
-      "state": "pending",
-      "stars": 122
-    },
     {
       "name": "devasignhq/soroban-escrow",
       "state": "error",
@@ -37,10 +21,15 @@
       "stars": 0
     },
     {
+      "name": "Argo-Navis-Dev/php-anchor-sdk",
+      "state": "pending",
+      "stars": 6
+    },
+    {
       "name": "luanlabs/fluxity-interface",
       "state": "pending",
       "stars": 0
     }
   ],
-  "findings": 15
+  "findings": 5
 }

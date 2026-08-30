@@ -695,7 +695,7 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// RPC
 	{
 		test: /\b(soroban[\s-]*)?rpc\b/,
-		repos: ["stellar/stellar-rpc", "stellar/soroban-rpc"],
+		repos: ["stellar/stellar-rpc", "stellar/stellar-rpc"],
 	},
 	// XDR
 	{
@@ -744,7 +744,7 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// anchor / SEP infra
 	{
 		test: /\banchor\s*platform\b/,
-		repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"],
+		repos: ["stellar/anchor-platform", "stellar/anchor-platform"],
 	},
 	// quickstart / run a node
 	{
@@ -807,7 +807,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bbridges?\b|\bcross[\s-]?chain\b|\binteroperab/,
 		repos: [
 			"allbridge-io/allbridge-core-soroban-contracts",
-			"rozoai/rozo-intents-contracts",
+			"RozoAI/rozo-intents-contracts",
 			"lightsail-network/crossmesh-ingress-contracts",
 			"axelarnetwork/axelar-amplifier-stellar",
 			"allbridge-io/allbridge-core-js-sdk",
@@ -837,7 +837,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// the bridge vertical, which is fine — both are legitimately relevant.
 	{
 		test: /\bamms?\b|\bdex\b|\bdecentralized\s*exchange\b|\bswaps?\b|\bliquidity\s*pools?\b/,
-		repos: ["soroswap/core", "phoenix-protocol-group/phoenix-contracts"],
+		repos: ["soroswap/core", "Phoenix-Protocol-Group/phoenix-contracts"],
 	},
 	// DAO / governance. A DeFi vault (dogstarapps/arka.fund) + an agent wallet
 	// (OrbitSafe) led on authority over soroban-governor — the canonical Soroban
@@ -859,8 +859,8 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	{
 		test: /\brwa\b|\breal[\s-]?world[\s-]?assets?\b|\btokeniz(?:ation|ed)\b/,
 		repos: [
-			"simplytokenized/soroban-smart-contracts",
-			"shamba-records-limited/microvault",
+			"SimplyTokenized/soroban-smart-contracts",
+			"Shamba-Records-Limited/microvault",
 		],
 	},
 	// lending / money-market. Boxy-ordered (2026-07-06): Blend is THE flagship
@@ -886,9 +886,9 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bwallets?\b|\bsmart[\s-]?wallets?\b/,
 		repos: [
 			"stellar/freighter",
-			"creit-tech/xbull-wallet",
+			"Creit-Tech/xBull-Wallet",
 			"kalepail/passkey-kit",
-			"creit-tech/stellar-wallets-kit",
+			"Creit-Tech/Stellar-Wallets-Kit",
 		],
 	},
 	// anchors / ramps (2026-07-19 eval): flagship anchor OPERATORS are closed-
@@ -901,7 +901,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		repos: [
 			"stellar/anchor-platform",
 			"stellar/stellar-anchor-tests",
-			"argo-navis-dev/php-anchor-sdk",
+			"Argo-Navis-Dev/php-anchor-sdk",
 		],
 	},
 	// streaming payments / money streaming (golden repos-streaming-payments,
@@ -920,7 +920,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\b(?:stream|streaming)\s+(?:payments?|money|tokens?)\b|\b(?:payments?|money|token)[\s-]?stream(?:ing|s)?\b/,
 		repos: [
 			"luanlabs/fluxity-v1-core",
-			"rahimklaber/sstream",
+			"rahimklaber/SStream",
 			"luanlabs/fluxity-interface",
 		],
 	},
