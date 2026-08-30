@@ -66,9 +66,19 @@ import "./load-env";
 
 import { getPayload } from "payload";
 import { codeProofTier } from "../src/lib/code-signals";
+import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
+/** Demotions are OFF unless asked for. Promotions are provably safe — they
+ * come from the curated list, which a human maintains. Demotions come from
+ * `proof === "none"`, and the proof engine has a LANGUAGE BLIND SPOT: it looks
+ * for Rust `soroban-sdk` and JS `@stellar/stellar-sdk`, so an AssemblyScript
+ * Soroban contract reads as none. The dry run duly proposed archiving
+ * Soneso/as-soroban-examples — AssemblyScript examples from a well-known
+ * Stellar SDK vendor — on `none+farm:1`. Until proof covers the languages we
+ * actually index, an archive decision made on its silence is a guess. */
+const WITH_DEMOTIONS = process.argv.includes("--include-demotions");
 /** Abort rather than write if a run wants to archive more than this share. */
 const ARCHIVE_CAP = 0.05;
 const PAGE = 500;
@@ -99,8 +109,19 @@ type Row = {
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	const changes: Array<{ full: string; from: string; to: string; why: string }> =
-		[];
+	// Lowercased: the corpus stores GitHub's canonical casing and Mongo `equals`
+	// is case-sensitive — the exact trap that left 8 curated names matching zero
+	// rows. Compare case-insensitively here so a casing drift cannot silently
+	// drop a repo out of the top tier.
+	const canonical = new Set(
+		CURATED_CANONICAL_REPOS.map((n) => n.toLowerCase()),
+	);
+	const changes: Array<{
+		full: string;
+		from: string;
+		to: string;
+		why: string;
+	}> = [];
 	let seen = 0;
 	let page = 1;
 
@@ -136,18 +157,53 @@ async function main() {
 			});
 			// null = "no change" (doubt). Never invent a tier from a bad scan.
 			if (!verdict) continue;
-			if (verdict.tier === (d.tier ?? "")) continue; // only-write-if-different
+
+			// CANONICALITY OVERRIDE — the fix for the inverted rule.
+			//
+			// codeProofTier's `quality` branch asks "does this repo use the SDK
+			// deeply?", which an application answers better than the SDK itself:
+			// a dry run promoted 1,330 repos and not one was canonical, while
+			// js-stellar-sdk, rs-soroban-sdk and stellar-cli all failed. Depth is
+			// the wrong question for a tier whose job is "must not be displaced".
+			//
+			// So `quality` is decided by CURATION — the same hand-maintained list
+			// canonicalFor already floats to the top of a result set — and
+			// codeProofTier keeps deciding archive/community, where its two-key
+			// over-filter safety is exactly right. Curated repos are additionally
+			// never archived here, matching isProtected's intent.
+			const isCanonical = canonical.has((d.fullName ?? "").toLowerCase());
+			// `quality` means CURATED, full stop. Without the second clause the
+			// depth-based branch still fires for everything else and we are back
+			// to 1,330 promotions led by student dApps — the inversion this
+			// override exists to remove. Non-curated repos top out at community;
+			// archive still comes from codeProofTier's two-key safety.
+			const tier = isCanonical
+				? "quality"
+				: verdict.tier === "quality"
+					? "community"
+					: verdict.tier;
+			const why = isCanonical
+				? "curated-canonical"
+				: verdict.tier === "quality"
+					? "code-proven (not curated → community)"
+					: verdict.reason.join("+");
+			if (tier === (d.tier ?? "")) continue; // only-write-if-different
 			changes.push({
 				full: d.fullName ?? d.id,
 				from: d.tier ?? "(unset)",
-				to: verdict.tier,
-				why: verdict.reason.join("+"),
+				to: tier,
+				why,
 			});
 		}
 		if (!res.hasNextPage) break;
 		page++;
 	}
 
+	// Split before anything is written, so the safe half can land alone.
+	const applied = WITH_DEMOTIONS
+		? changes
+		: changes.filter((c) => c.to === "quality");
+	const withheld = changes.length - applied.length;
 	const promote = changes.filter((c) => c.to === "quality");
 	const archive = changes.filter((c) => c.to === "archive");
 	const demote = changes.filter((c) => c.to === "community");
@@ -156,12 +212,16 @@ async function main() {
 	console.log(
 		`proposed: ${promote.length} → quality · ${demote.length} → community · ${archive.length} → archive`,
 	);
-	for (const c of changes.slice(0, 15))
+	if (withheld)
+		console.log(
+			`  (${withheld} demotions WITHHELD — pass --include-demotions once the proof engine covers AssemblyScript/other languages)`,
+		);
+	for (const c of applied.slice(0, 15))
 		console.log(`  ${c.full}: ${c.from} → ${c.to}  (${c.why})`);
-	if (changes.length > 15) console.log(`  … ${changes.length - 15} more`);
+	if (applied.length > 15) console.log(`  … ${applied.length - 15} more`);
 
-  // Zero-work RED: silence over a corpus known to contain qualifying repos is
-  // a broken derivation, not a clean corpus.
+	// Zero-work RED: silence over a corpus known to contain qualifying repos is
+	// a broken derivation, not a clean corpus.
 	if (changes.length === 0) {
 		console.error(
 			"\nRED: zero proposals over the whole corpus. 1,333 repos match cargo-sdk + codeDepth>=0.6, so a derivation that changes nothing is broken, not clean.",
@@ -183,7 +243,7 @@ async function main() {
 
 	let wrote = 0;
 	let mismatched = 0;
-	for (const c of changes) {
+	for (const c of applied) {
 		const found = await payload.find({
 			collection: "repos",
 			where: { fullName: { equals: c.full } },
@@ -210,10 +270,12 @@ async function main() {
 		if ((back as unknown as Row).tier === c.to) wrote++;
 		else {
 			mismatched++;
-			console.error(`  read-back MISMATCH ${c.full}: still ${(back as unknown as Row).tier}`);
+			console.error(
+				`  read-back MISMATCH ${c.full}: still ${(back as unknown as Row).tier}`,
+			);
 		}
 	}
-	console.log(`\nwrote ${wrote}/${changes.length} (read-back verified)`);
+	console.log(`\nwrote ${wrote}/${applied.length} (read-back verified)`);
 	if (mismatched) {
 		console.error(`${mismatched} writes did not stick`);
 		process.exit(1);
