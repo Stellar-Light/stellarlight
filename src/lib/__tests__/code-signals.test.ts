@@ -69,6 +69,34 @@ describe("versionStatusOf — the constant that must never be wrong", () => {
 });
 
 describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
+	it("PHP anchor SDK composer.json → lang-sdk, not none (KEEP)", () => {
+		// Real manifest: Argo-Navis-Dev/php-anchor-sdk requires
+		// soneso/stellar-php-sdk. 94% of scanned PHP repos read none before
+		// this, and composer.json was not even fetched.
+		const s = scanOf({
+			"composer.json":
+				'{"name":"argonavis/php-anchor-sdk","require":{"php":"^8.2","soneso/stellar-php-sdk":"^1.8"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Dart/Flutter Stellar SDK pubspec → lang-sdk, not none (KEEP)", () => {
+		// pubspec.yaml was already fetched and discarded — no marker read it.
+		const s = scanOf({
+			"pubspec.yaml":
+				"name: stellar_flutter_sdk\ndescription: A Stellar SDK for Flutter\nversion: 3.6.0\n",
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("a PHP project with no Stellar dep stays none (DROP)", () => {
+		const s = scanOf({
+			"composer.json":
+				'{"name":"acme/site","require":{"php":"^8.2","monolog/monolog":"^3"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	it("AssemblyScript Soroban contract → lang-sdk, not none (KEEP)", () => {
 		// Verified against Soneso/as-soroban-examples: each contract's
 		// package.json depends on as-soroban-sdk. It imports neither Rust

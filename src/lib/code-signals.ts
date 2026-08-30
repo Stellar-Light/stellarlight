@@ -161,6 +161,25 @@ const LANG_SDK_MARKERS: {
 		file: (n) => n === "package.json",
 		re: /"as-soroban-sdk"\s*:/,
 	},
+	// PHP. 29 of 31 scanned PHP repos (94%) read as proof=none, and we curate
+	// Argo-Navis-Dev/php-anchor-sdk as canonical — whose composer.json requires
+	// `soneso/stellar-php-sdk`. composer.json was ALSO absent from the
+	// fetcher's manifest list, so there was nothing to match even with a
+	// marker; both halves are fixed together.
+	{
+		lang: "php",
+		file: (n) => n === "composer.json",
+		re: /"(soneso\/stellar-php-sdk|zulucrypto\/stellar-api|argonavis\/[a-z0-9_-]*stellar[a-z0-9_-]*)"/i,
+	},
+	// Dart / Flutter. pubspec.yaml was ALREADY being fetched and then thrown
+	// away — no marker consumed it — while 39% of Dart repos read none.
+	// Matches both the SDK itself (`name: stellar_flutter_sdk`) and anything
+	// depending on it.
+	{
+		lang: "dart",
+		file: (n) => n === "pubspec.yaml",
+		re: /^\s*(name|stellar_flutter_sdk|stellar_sdk)\s*:\s*.*stellar|^\s*stellar_(flutter_)?sdk\s*:/im,
+	},
 	{
 		lang: "swift",
 		file: (n) => n === "package.swift",
