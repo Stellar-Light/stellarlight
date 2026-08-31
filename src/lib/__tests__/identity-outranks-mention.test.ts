@@ -230,3 +230,25 @@ describe("articles and shopping words mark the category (wave-7b)", () => {
 		expect(q("The Signal", "the-signal", "what is The Signal")).toBe(3);
 	});
 });
+
+// A single content token IS the subject even below the anchor length floor:
+// "what is DD" tokenizes to ["dd"], anchorTokens dropped the 2-char token, and
+// the record literally named DD could never win its own phrase (engine-a
+// P-PHRASE miss, open 07-22 → 08-31). Equality-only: a short token must still
+// EQUAL a name/slug/alias, and the article/shopping vetoes still apply.
+describe("single short token is still the query's subject (dd P-PHRASE)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it("what-is phrasing promotes a 2-char name to exact", () => {
+		expect(q("DD", "dd", "what is DD")).toBe(3);
+		expect(q("DD", "dd", "tell me about dd")).toBe(3);
+	});
+	it("a short token that matches no identity scores nothing", () => {
+		expect(q("Blend", "blend", "what is de")).toBe(0);
+	});
+	it("article and shopping vetoes still hold for short names", () => {
+		expect(q("DD", "dd", "what is a dd")).toBeLessThan(3);
+		expect(q("DD", "dd", "best dd on stellar")).toBeLessThan(3);
+	});
+});
