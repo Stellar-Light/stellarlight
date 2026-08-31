@@ -1,13 +1,13 @@
 {
-	"generatedAt": "2026-08-31T02:57:13.642Z",
+	"generatedAt": "2026-08-31T03:03:49.031Z",
 	"total": 461,
-	"open": 48,
-	"closed": 413,
+	"open": 54,
+	"closed": 407,
 	"verified": 7,
-	"cleared": 406,
-	"clearedByReprobe": 186,
-	"clearedOnSilence": 220,
-	"closingRate": 0.9,
+	"cleared": 400,
+	"clearedByReprobe": 182,
+	"clearedOnSilence": 218,
+	"closingRate": 0.88,
 	"oldestOpenDays": 39,
 	"inWave": 0,
 	"highOpen": 1,
@@ -15,7 +15,7 @@
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 26,
+			"open": 31,
 			"total": 311
 		},
 		{
@@ -25,7 +25,7 @@
 		},
 		{
 			"surface": "corpus",
-			"open": 3,
+			"open": 4,
 			"total": 18
 		},
 		{

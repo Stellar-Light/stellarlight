@@ -85,6 +85,19 @@ Phases are sequenced by dependency, not by calendar.
   the board for something nobody could fix, which is how a board stops
   being read. **Absence of evidence gets reported as inconclusive — a
   sweep that could not measure writes no number.**
+- **Silence closed findings and noise did not reopen them.** (Added
+  2026-08-31.) `upsertFindings` auto-`cleared` a finding when its detector
+  stopped reporting it, and the re-raised branch preserved `status` — so a
+  cleared finding the detector raised AGAIN stayed cleared. The ledger could
+  record a regression and never show one. Measured before the fix: **191 of
+  406 cleared findings had a `lastSeen` after their `clearedAt`**, meaning a
+  detector had re-raised them while the board counted them closed. Six were
+  live at the moment of the fix, `usdc-swap` and `stellars-finance` among
+  them — the exact queries whose page-size defect this same branch repairs.
+  `cleared` now reopens on re-detection; the deliberate states (in-wave,
+  fixed, verified) still never auto-change, because a person asserted those.
+  **A closure statistic that only moves one way is a measure of question
+  frequency, not of repair.**
 - **`quality` has exactly ONE writer.** Two authorities over the same
   field is how curation gets silently reverted by sync (#730). Verified
   2026-08-30: a second writer would have demoted 34 of 39 curated rows

@@ -340,4 +340,39 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 		const out = upsertFindings(prior, detected, ["s"], iso(0));
 		expect(hasFreshEvidence(out[0], Date.now())).toBe(true);
 	});
+
+	// The other half of auto-clear, and the half that was missing. Silence
+	// closed a finding and noise did not reopen it, so "closed" meant "nobody
+	// asked recently" in both directions. Measured on real data before the fix:
+	// 191 of 406 cleared findings had been re-raised while still counted closed.
+	it("REOPENS an auto-cleared finding the detector raises again", () => {
+		const prior = [
+			f({
+				id: "s:x",
+				source: "s",
+				status: "cleared",
+				clearedAt: iso(3),
+				clearedBy: "stale-sweep: re-probed live and passing",
+			}),
+		];
+		const out = upsertFindings(prior, [f({ id: "s:x", source: "s" })], ["s"], iso(0));
+		expect(out[0]?.status).toBe("open");
+		expect(out[0]?.reopenedAt).toBe(iso(0));
+		// the old clearance is not evidence about the new state
+		expect(out[0]?.clearedAt).toBeUndefined();
+		expect(out[0]?.clearedBy).toBeUndefined();
+	});
+
+	it("does NOT reopen a deliberate close — a person asserted that one", () => {
+		for (const status of ["verified", "fixed", "in-wave"] as const) {
+			const prior = [f({ id: "s:x", source: "s", status })];
+			const out = upsertFindings(
+				prior,
+				[f({ id: "s:x", source: "s" })],
+				["s"],
+				iso(0),
+			);
+			expect(out[0]?.status).toBe(status);
+		}
+	});
 });
