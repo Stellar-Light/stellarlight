@@ -284,11 +284,14 @@ measured, not inferred.
    red with extra steps. Two error classes dominate and both are
    mechanical: `Options<>` mismatches on `payload.update/find` calls, and
    `string | null` passed where `string` is required. Worth one pass.
-4. **`triageTags` and `tierReason` are named debt in `KNOWN_DEAD`.** Each
-   needs a decision, not code: whether internal triage verdicts should
-   reach a serving path at all, and whether a tier provenance field earns
-   a writer. The list only turns one way — a field may leave it, never
-   join it.
+4. **`triageTags` and `tierReason` are named debt in `KNOWN_DEAD`.**
+   `tierReason` needs a decision: whether a tier provenance field earns a
+   writer. `triageTags` does NOT — §3 of this plan already names its
+   consumer, "scan-wave prioritization learns to skip internally-triaged
+   repos". So it is not a delete-or-keep question at all; the consumer was
+   specified and never built, which reclassifies it from debt to unfinished
+   P3 work. The list only turns one way — a field may leave it, never join
+   it.
 5. **`what is DD` stays an open recall miss on purpose.** A two-letter
    all-caps token is how people write categories, and there is no acronym
    vocabulary to gate it on. Reopen it if a curated acronym list appears.
@@ -304,12 +307,24 @@ measured, not inferred.
    ranking -> getLeaderboard) shipped; the cut needs a measured before/after.
    Note the inverse pathology in the same system: listContracts fails by
    term CONCENTRATION, searchProjects by DILUTION.
-7. **Re-probe the 220 cleared on silence.** 413 of 461 findings are closed,
-   and the basis splits three ways: 7 verified deliberately, 186 cleared by a
-   live re-probe that PASSED (the stale sweep stamps `clearedBy`, and it
-   clears on nothing else), and **220 cleared only because a detector stopped
-   reporting**. The first two are evidence. The third is the backlog, and it
-   is where the bad rows are. Spot-checked 2026-08-31: engine-d's
+7. **Re-probe the 218 cleared on silence — 69 of them are high-severity.**
+   413 of 461 findings are closed, and the basis splits three ways: 7 verified
+   deliberately, 186 cleared by a live re-probe that PASSED (the stale sweep
+   stamps `clearedBy`, and it clears on nothing else), and **218 cleared only
+   because a detector stopped reporting**. The first two are evidence. The
+   third is the backlog, and it is not small debris — 73 are high severity, of
+   which 69 are genuine (4 are our own canaries); 131 medium; 14 low. By
+   source: engine-d-demand 105, engine-a-recall 50, nightly-drift 22,
+   scf-crosscheck 14, nightly-battery 14, raven-routing 7. By surface:
+   retrieval 98, directory 59, contract 22, scf 14, corpus 14.
+   All 218 carry a probe string, so the lane is mechanical: replay each probe,
+   re-clear what passes with `clearedBy` set, reopen what does not.
+   `scripts/quality/clear-stale-findings.ts` already does exactly this for
+   `engine-a-recall` and is the model — it needs widening to the other
+   sources, not inventing. Now that re-detection reopens, anything genuinely
+   broken returns on its own; the number to watch is how many of the 218
+   survive a re-probe, which is the true measure of how much the closed column
+   was overstating. Spot-checked 2026-08-31: engine-d's
    `kutana`, `etesia` and `octopos` are all cleared, all still return
    semantic-mode no-match on the live API, and all carry SCF round badges.
    Nobody asked again, so the ledger called it closed. The board no longer
