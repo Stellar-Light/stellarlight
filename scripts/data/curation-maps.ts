@@ -50,6 +50,17 @@ export const STATUS_FIX: Record<
 	// API serves neither — the diagnostic added the same day proved the
 	// status). Both were verified in the review; un-drafting is what the
 	// approved "create" verdict means for a row that already exists.
+	// Third instance of the hidden-Draft trap in one day: the communidao seed
+	// skipped on an existing Draft row, exactly like fxdao and enerdao before
+	// it. Un-draft to the seed's own verdict — Inactive with history.
+	communidao: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+		note: "Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023. Served as an Inactive row so the funded history is answerable.",
+	},
 	fxdao: {
 		from: "Draft",
 		to: "Live",

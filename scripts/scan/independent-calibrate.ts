@@ -26,7 +26,7 @@
  * grok is a metered external service, not a thread pool.
  */
 import { execFile } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { promisify } from "node:util";
 import { askDeepWiki } from "../../src/lib/deepwiki";
 import {
@@ -78,14 +78,26 @@ interface Row {
 }
 
 function classifyText(answer: string): Verdict {
-	const a = answer.toLowerCase();
-	const sub =
-		/substantial|full implementation|real logic|production|complete implementation|working implementation/.test(
-			a,
+	// Negations and comparisons first: "not merely a template", "rather than a
+	// starter" are SUBSTANTIAL-side evidence, and the naive both-words-present
+	// rule filed them UNCLEAR — FxDAO-SC's answer opened with "appears to be a
+	// substantial..." and still scored UNCLEAR because "example" appeared once
+	// in a contrast clause. Strip negated/contrastive template mentions, then
+	// judge by which side's vocabulary appears FIRST, which in practice is the
+	// answer's verdict sentence.
+	const a = answer
+		.toLowerCase()
+		.replace(
+			/\b(not|isn'?t|rather than|more than|beyond|instead of)\s+(just\s+|merely\s+|simply\s+|a\s+|an\s+)*(template|starter|scaffold|example( set)?|tutorial|boilerplate)s?\b/g,
+			" ",
 		);
-	const tmpl = /template|starter|scaffold|example|tutorial|boilerplate/.test(a);
-	if (sub && !tmpl) return "SUBSTANTIAL";
-	if (tmpl && !sub) return "TEMPLATE";
+	const SUB =
+		/substantial|full implementation|real logic|production|complete implementation|working implementation|fully[- ]fledged|feature[- ]complete/;
+	const TMPL = /template|starter|scaffold|example|tutorial|boilerplate/;
+	const si = a.search(SUB);
+	const ti = a.search(TMPL);
+	if (si >= 0 && (ti < 0 || si < ti)) return "SUBSTANTIAL";
+	if (ti >= 0 && (si < 0 || ti < si)) return "TEMPLATE";
 	return "UNCLEAR";
 }
 
@@ -148,6 +160,24 @@ async function main() {
 
 	const rows: Row[] = [];
 	let grokUsed = 0;
+	// --reuse-grok: carry PRIOR grok verdicts forward instead of re-buying
+	// them. The balance is metered (and currently 402-exhausted); a grok
+	// verdict does not rot on the grader's side, so a deepwiki-only re-run
+	// keeps the nine paid answers and only refreshes the free grader.
+	const reuse = new Map<string, Row>();
+	if (process.argv.includes("--reuse-grok")) {
+		try {
+			const prior = JSON.parse(
+				readFileSync(
+					"improvements/engine/independent-calibration-latest.json",
+					"utf8",
+				),
+			) as { rows?: Row[] };
+			for (const r of prior.rows ?? [])
+				if (r.grader === "grok" && r.agree !== null) reuse.set(r.fullName, r);
+			console.error(`  reusing ${reuse.size} prior grok verdict(s)`);
+		} catch {}
+	}
 	for (const { repo, label } of key) {
 		const expected: Verdict = label === "DEEP" ? "SUBSTANTIAL" : "TEMPLATE";
 		// Grader 1: DeepWiki, for the few it has indexed.
@@ -167,7 +197,14 @@ async function main() {
 			console.error(`  deepwiki ${repo.fullName}: ${v}`);
 			continue;
 		}
-		// Grader 2: Grok, budgeted.
+		// Grader 2: prior grok verdict, if we bought one already.
+		const prior = reuse.get(repo.fullName);
+		if (prior) {
+			rows.push(prior);
+			console.error(`  grok(reused) ${repo.fullName}: ${prior.verdict}`);
+			continue;
+		}
+		// Grader 3: fresh Grok, budgeted.
 		if (grokUsed >= LIMIT) {
 			rows.push({
 				fullName: repo.fullName,
