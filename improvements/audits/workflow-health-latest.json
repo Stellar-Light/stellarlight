@@ -1,19 +1,9 @@
 {
-	"asOf": "2026-08-31T02:45:20.848Z",
+	"asOf": "2026-08-31T03:15:28.549Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 78,
-	"healthy": 75,
+	"checked": 77,
+	"healthy": 76,
 	"broken": [
-		{
-			"file": "raven-eval-parity.yml",
-			"state": "failing",
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Truth battery (guard D — rotating probes, curated answer key)\""
-		},
-		{
-			"file": "seed-blog-posts.yml",
-			"state": "failing",
-			"why": "1 failed run(s) since its last green 16d ago — it is trying and losing, not idle"
-		},
 		{
 			"file": "sync-scout-mcp.yml",
 			"state": "failing",
@@ -187,17 +177,6 @@
 			"why": "last green 29d ago"
 		},
 		{
-			"file": "consumption-guard.yml",
-			"name": "consumption-guard",
-			"cron": "23 6 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 13,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "content-freshness.yml",
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
@@ -213,10 +192,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"lastSuccessAt": "2026-08-31T03:10:21Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -279,10 +258,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"lastSuccessAt": "2026-08-31T03:13:56Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 86,
+			"runs": 94,
 			"why": "last green 0d ago"
 		},
 		{
@@ -381,7 +360,7 @@
 			"lastSuccessAt": "2026-08-30T19:46:03Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 26,
+			"runs": 16,
 			"why": "last green 0d ago"
 		},
 		{
@@ -445,10 +424,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 77,
+			"ageDays": 78,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 77d ago (manual tool — age not judged)"
+			"why": "last green 78d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "import-replit-stablecoin-history.yml",
@@ -554,11 +533,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"lastSuccessAt": "2026-08-31T03:10:21Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 82,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
+			"runs": 72,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -576,10 +555,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"lastSuccessAt": "2026-08-31T03:13:57Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -612,7 +591,7 @@
 			"lastSuccessAt": "2026-08-28T21:34:31Z",
 			"ageDays": 2,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 86,
 			"why": "last green 2d ago"
 		},
 		{
@@ -652,12 +631,12 @@
 			"file": "raven-eval-parity.yml",
 			"name": "raven-eval-parity",
 			"cron": "30 7 * * *",
-			"state": "failing",
+			"state": "ok",
 			"lastSuccessAt": "2026-08-29T13:17:50Z",
 			"ageDays": 1,
 			"graceDays": 4,
 			"runs": 3,
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Truth battery (guard D — rotating probes, curated answer key)\""
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "recent-api-usage.yml",
@@ -718,12 +697,12 @@
 			"file": "seed-blog-posts.yml",
 			"name": "Publish ecosystem reports",
 			"cron": null,
-			"state": "failing",
+			"state": "ok",
 			"lastSuccessAt": "2026-08-14T23:41:25Z",
 			"ageDays": 16,
 			"graceDays": 45,
-			"runs": 2,
-			"why": "1 failed run(s) since its last green 16d ago — it is trying and losing, not idle"
+			"runs": 1,
+			"why": "last green 16d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "seed-i3-mock.yml",
@@ -821,7 +800,7 @@
 			"lastSuccessAt": "2026-08-30T12:21:01Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 43,
+			"runs": 38,
 			"why": "last green 0d ago"
 		},
 		{
@@ -851,7 +830,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"lastSuccessAt": "2026-08-31T03:13:56Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
