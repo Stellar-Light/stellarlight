@@ -308,8 +308,8 @@ measured, not inferred.
    Note the inverse pathology in the same system: listContracts fails by
    term CONCENTRATION, searchProjects by DILUTION.
 7. **Re-probe the 218 cleared on silence — 69 of them are high-severity.**
-   413 of 461 findings are closed, and the basis splits three ways: 7 verified
-   deliberately, 186 cleared by a live re-probe that PASSED (the stale sweep
+   434 of 461 findings are closed, and the basis splits three ways: 7 verified
+   deliberately, 209 cleared by a live re-probe that PASSED (the stale sweep
    stamps `clearedBy`, and it clears on nothing else), and **218 cleared only
    because a detector stopped reporting**. The first two are evidence. The
    third is the backlog, and it is not small debris — 73 are high severity, of
