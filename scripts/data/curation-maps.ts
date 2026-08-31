@@ -2750,6 +2750,39 @@ export const SEEDS: Array<{
 		statusBasis: "human-verified",
 		statusSourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
 	},
+	// ── 2026-08-31: two COMPLETED education programs from the SCF absence
+	// review's "unclear" pile, identified by parsing their submission pages.
+	// One-time funded cohorts, finished — served as Inactive rows so an agent
+	// asking about them gets the history instead of a hole.
+	{
+		slug: "west-african-ambassadors",
+		name: "West African Ambassadors",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education", "Social Impact"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded ambassador program empowering West African builders through blockchain education, collaboration and adoption. Completed cohort program (also known as WAA).",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb",
+	},
+	{
+		slug: "study-stellar-sdk-soroban",
+		name: "Study Stellar SDK & Soroban",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded study-group program: six Stellar SDK and Soroban sessions teaching Spanish-speaking students. Completed cohort.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
+	},
+
 
 ];
 

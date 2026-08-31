@@ -263,7 +263,10 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
  * entry names its evidence; an absent slug NOT in this map is unreviewed and
  * keeps the row red.
  */
-const REVIEWED_ABSENT: Record<string, { verdict: string; evidence: string }> = {
+const REVIEWED_ABSENT: Record<
+	string,
+	{ verdict: string; evidence: string; servedAs?: string }
+> = {
 	"dockingzone-a18": {
 		verdict: "wound-down — served as an Inactive row (docking-zone)",
 		evidence: "DNS dead; last Wayback capture 2025-11-09",
@@ -277,9 +280,10 @@ const REVIEWED_ABSENT: Record<string, { verdict: string; evidence: string }> = {
 		evidence: "https://www.enerdao.org/ up, repo silent — review's own verdict",
 	},
 	"soroban-contract-source-verification-service-bax": {
-		verdict: "unidentifiable — cannot honestly create a row",
+		verdict: "served under stellar-expert — the RFP's deliverable is StellarExpert's contract source validation",
 		evidence:
-			"the submission's own website field points back at the SCF handbook; no product identity to serve",
+			"stellar-expert/soroban-build-workflow (the reproducible-build verification pipeline behind stellar.expert's verified-contract badges); row stellar-expert exists",
+		servedAs: "stellar-expert",
 	},
 	"west-african-ambassadors-waa-syb": {
 		verdict: "community program, not a product — no row",
@@ -292,6 +296,7 @@ const REVIEWED_ABSENT: Record<string, { verdict: string; evidence: string }> = {
 	"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh": {
 		verdict: "served under soroban-decompiler; page carries no product link for the matcher",
 		evidence: "same author (salaheldinsoliman); the row exists and is scanned",
+		servedAs: "soroban-decompiler",
 	},
 	"ctxcom-evm": {
 		verdict: "served under ctx (aliased + rounds linked)",
@@ -388,6 +393,19 @@ async function main() {
 	const stillAbsent = absent.filter((e) => {
 		let hit: { slug: string; name: string } | undefined;
 		let matchedOn = "";
+		// A human review that names the serving row IS a match — stronger than
+		// any string heuristic, and named in the artifact like every other
+		// match so it stays reviewable. Only verdicts with servedAs count;
+		// wound-down/no-product verdicts still show as reviewed absences.
+		const rv = REVIEWED_ABSENT[e.scfSlug];
+		if (rv?.servedAs) {
+			domainMatched.push({
+				scf: e.scfSlug,
+				slug: rv.servedAs,
+				domain: `human-review: ${rv.evidence.slice(0, 60)}`,
+			});
+			return false;
+		}
 		for (const link of e.websites ?? []) {
 			const pp = platPath(link);
 			if (pp && byPlatPath.has(pp)) {
