@@ -456,10 +456,11 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		// the code scan and none dating the answer. Nearby dates are worse than
 		// no dates: they invite a specific wrong inference.
 		//
-		// The number is DEBT. 40 of 55 served values have no date in their own
+		// The number is DEBT. 48 of 100 served values have no date in their own
 		// scope; the guard freezes that and fails on new ones. It reads the
-		// CONTRACT, so it measures what a consumer is TOLD — which is the
-		// surface the report was about.
+		// CONTRACT — with $refs resolved, so named schemas (Project, Repo,
+		// Partner…) are examined too — so it measures what a consumer is TOLD,
+		// which is the surface the report was about.
 		g({
 			key: "answer-dating",
 			title: "Served values a consumer can date",
@@ -473,7 +474,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			sub: `${answerDating.valuesChecked - answerDating.undated}/${answerDating.valuesChecked} served values are dated in their own scope, or documented as undatable`,
 			details: [
 				"explainRepo.answerAsOf is the pattern: NULL for a DeepWiki answer, because DeepWiki exposes no index date and inventing one would make an unknown look measured",
-				"the naive rule — 'response has several dates and a value' — flags 12 endpoints and is mostly wrong: verifyClaim carries five dates and is correct, because confidence.ageDays dates the verdict itself",
+				"scoping cuts both ways: verifyClaim's confidence.ageDays dates the numbers inside confidence but NOT the root-level verdict beside it — so verifyClaim.verdict is carried as named debt, not excused; an admission only counts when the description speaks to datability itself ('no index date'), never bare 'null' or 'unknown'",
 				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only — a value with NO date in scope while other objects in the response carry dates",
 			],
 			asOf: answerDating.asOf.slice(0, 10),
