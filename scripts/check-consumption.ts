@@ -48,6 +48,16 @@ const ENGINES = [
 	"src/lib/code-depth.ts",
 	"src/lib/repo-triage.ts",
 	"src/lib/repo-allowlist.ts",
+	// The scan wave. PLAN §3 names this consumer for triageTags — "scan-wave
+	// prioritization learns to skip internally-triaged repos" — and it EXISTS:
+	// scan-repo-code.ts reads triageTags (under context.internal, or the
+	// afterRead hook strips it) and routes wave budget away from triaged repos.
+	// Its output is the code signals ranking serves, so the transitive argument
+	// is the same as farmScore -> tier. The guard listed triageTags as dead for
+	// a day because this list did not include the one file the plan said would
+	// read it. Scripts stay out of SERVING on principle; an engine is different
+	// because its output lands in the DB that serving paths read.
+	"scripts/scan/scan-repo-code.ts",
 ];
 
 const SERVING = [
@@ -109,7 +119,7 @@ const CHECKS: Check[] = [
  *
  * The ratchet only turns one way: a field may leave this list, never join it.
  * Anything dead and not named here fails the build. */
-const KNOWN_DEAD = new Set(["triageTags", "tierReason"]);
+const KNOWN_DEAD = new Set(["tierReason"]);
 
 /** Strip comments before searching.
  *
