@@ -389,12 +389,69 @@ async function everyPageRenders() {
 	}
 }
 
+/** `total` must not depend on page size.
+ *
+ * route.ts states this invariant in prose twice and nothing checked it, which
+ * is how a 2026-07-21 comment claiming the page-size dependence was fixed
+ * outlived the fix by five weeks. `is USDC Swap live` reported 6 results at
+ * limit=3 and 79 at limit=4, with the correct answer appearing only above the
+ * threshold — an agent asking for three got a different corpus than one asking
+ * for four.
+ *
+ * Measured against the KEYWORD-admitted set. The semantic top-up is a separate,
+ * still-limit-dependent path (it is gated on `scored.length < limit` and sized
+ * by the remainder), so asserting over the raw total would fail a correctly
+ * fixed route. `meta.counts.semanticAdds` is subtracted where the API reports
+ * it; a probe that cannot subtract is skipped rather than guessed at.
+ */
+async function totalIsLimitIndependent() {
+	console.log("\ntotal is the same at every limit");
+	for (const q of [
+		"is USDC Swap live",
+		"is Stellars Finance live",
+		"is Stellar Wallets Kit live",
+	]) {
+		const seen = new Map<number, number>();
+		let skipped = false;
+		for (const limit of [3, 4, 7, 20]) {
+			const { status, body } = await getJson(
+				`/api/projects/search?q=${encodeURIComponent(q)}&limit=${limit}`,
+			);
+			if (status !== 200 || !body?.meta?.counts) {
+				bad(`limit-independence: ${q}`, `HTTP ${status} at limit=${limit}`);
+				skipped = true;
+				break;
+			}
+			const total = Number(body.meta.counts.total ?? Number.NaN);
+			const semantic = Number(body.meta.counts.semanticAdds ?? 0);
+			if (!Number.isFinite(total)) {
+				skipped = true;
+				break;
+			}
+			seen.set(limit, total - (Number.isFinite(semantic) ? semantic : 0));
+		}
+		if (skipped) continue;
+		const values = [...new Set(seen.values())];
+		if (values.length === 1) {
+			ok(`${q} — keyword total ${values[0]} at every limit`);
+		} else {
+			bad(
+				`limit-independence: ${q}`,
+				`keyword total changes with page size: ${[...seen]
+					.map(([l, t]) => `limit=${l} -> ${t}`)
+					.join(", ")}`,
+			);
+		}
+	}
+}
+
 (async () => {
 	console.log(`Live canary against ${BASE}`);
 	await silentEmpty();
 	await renderReachability();
 	await knownAssetCoverage();
 	await everyPageRenders();
+	await totalIsLimitIndependent();
 	console.log(`\n${passes} passed, ${failures} failed`);
 	writeNightlyFindings("live-canary", failRows);
 	process.exit(failures > 0 ? 1 : 0);

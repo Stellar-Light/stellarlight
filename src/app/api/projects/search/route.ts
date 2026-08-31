@@ -1581,16 +1581,29 @@ export async function GET(req: NextRequest) {
 				// matchMode reports "majority" — the page now carries majority-
 				// admitted rows, and saying "strict" would be a lie.
 				//
-				// Gate fix (2026-07-21, golden capability-custody-identity): the
-				// original `filtered.length < limit` gate made admission depend on
-				// PAGE SIZE — at limit=3 a page full of prose-mentioners blocked
-				// the bypass while limit=50 fired it. What matters is whether the
-				// page already carries identity-grade rows, not whether it's full:
-				// fire while fewer than `limit` admitted rows anchor-hit identity.
-				const identityRows = filtered.filter(
-					(p) => p.anchorIdentity === true,
-				).length;
-				if (filtered.length > 0 && identityRows < limit && tokens.length >= 2) {
+				// PAGE SIZE MUST NOT DECIDE MEMBERSHIP. A first attempt at this
+				// (2026-07-21) replaced `filtered.length < limit` with
+				// `identityRows < limit` and recorded the dependence as fixed. It
+				// changed the numerator and kept `limit` as the threshold, so the
+				// same bug shipped for another five weeks behind a comment saying
+				// it was gone. Measured live before this edit:
+				//
+				//   is USDC Swap live         limit=3 -> total 6,  top1 soroswap
+				//   is USDC Swap live         limit=4 -> total 79, top1 usdc-swap
+				//   is Stellars Finance live  limit=6 -> total 6,  top1 redstone-finance
+				//   is Stellars Finance live  limit=7 -> total 59, top1 stellars-finance
+				//
+				// `total` is documented as the same number at every limit twice in
+				// this file, and an agent asking for three results got a different
+				// corpus than one asking for four.
+				//
+				// The threshold is gone rather than re-derived. Default limit is 20,
+				// so the bypass already fires for essentially every real call; the
+				// only callers it was ever withheld from are the small-limit ones
+				// that most needed it. Every substantive guard is untouched —
+				// anchorIdentity, chainCorridor, majorityAdmit still decide who gets
+				// in. Only the arbitrary count is gone.
+				if (filtered.length > 0 && tokens.length >= 2) {
 					const majorityAdmit = admit(Math.ceil(tokens.length / 2));
 					const have = new Set(filtered.map((p) => p.id));
 					let added = 0;
