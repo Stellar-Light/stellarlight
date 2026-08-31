@@ -1107,6 +1107,30 @@ export const SEEDS: Array<{
 		| "source-inherited";
 }> = [
 	{
+		// Consumer-demand gap (raven gateway, 4 real queries, engine-d 2026-08-28):
+		// verified 2026-08-31 — site live (www.hypertron.space 200), presented as
+		// an official guest at the SDF developer meeting 2026-07-23 ("Hypertron —
+		// Private Payments and Operations for Businesses", 18 mentions on the
+		// meeting page). NOT SCF-funded: its SCF #44 submission ("B2B Payments &
+		// Agentic Operations") reads "Panel Review Failed" on the round page
+		// (communityfund.stellar.org/awards/rec4FnYypcsKpBRB4) — do NOT attach an
+		// award from that page; the $113K figure there belongs to a DIFFERENT
+		// submission on the same round listing.
+		slug: "hypertron",
+		name: "Hypertron",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Hypertron is a private-payments and operations layer for businesses on Stellar: B2B payments, treasury and compliance workflows with opt-in privacy (shielded amounts, selective disclosure for auditors) built on Protocol 25 (X-Ray) primitives (BLS12-381, Poseidon). Presented at the official Stellar developer meeting (2026-07-23); in development on testnet.",
+		links: { website: "https://www.hypertron.space" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-31",
+		statusSourceUrl: "https://developers.stellar.org/meetings/2026/07/23",
+		statusBasis: "human-verified",
+	},
+	{
 		// Owner-flagged 2026-08-29, probed live same day: the facilitator-side
 		// x402 Bazaar for Stellar (discovery/search + auto-cataloging), running
 		// end-to-end on TESTNET with real settled x402 payments (95, self-

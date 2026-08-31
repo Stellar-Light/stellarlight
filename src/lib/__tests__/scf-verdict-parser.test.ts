@@ -191,4 +191,53 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 		);
 		expect(v.awards).toEqual([{ round: 29, budgetUSD: null, awardType: null }]);
 	});
+
+	it("an RSC chunk-split PREFIX-fragment id merges into its full card, never sums (prism-dxb #44)", () => {
+		// The resolved embed's id was cut at a stream boundary and re-matched as
+		// "r" — same round, type and budget as the intact embed. Before the fix
+		// this summed #44 to exactly 2× the page's own Total awarded.
+		const v = parseRoundVerdicts(
+			'{"id":"recpWygA3kmg3NsZx","status":"Awarded","roundName":"SCF #44","awardType":"Build","budget":124600}\n' +
+				'{"id":"r","status":"Awarded","roundName":"SCF #44","awardType":"Build","budget":124600}',
+		);
+		expect(v.awards).toEqual([
+			{ round: 44, budgetUSD: 124600, awardType: "Build" },
+		]);
+		expect(v.awardedAnyCount).toBe(1);
+		expect(v.submissions).toBe(1);
+	});
+
+	it("distinct same-round cards whose ids do NOT prefix each other still sum", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":90000}\n' +
+				'{"id":"recBBBBBBBBBBBBBB","status":"Awarded","roundName":"SCF #31","awardType":"Build Award","budget":15000}',
+		);
+		expect(v.awards).toEqual([
+			{ round: 31, budgetUSD: 105000, awardType: "Build Award" },
+		]);
+		expect(v.awardedAnyCount).toBe(2);
+	});
+
+	it("a page whose own Awarded-Submissions counter disagrees with the parse nulls budgets (never a summed guess)", () => {
+		// Two well-formed awarded cards but the rendered page says 1 — some
+		// embed slipped past dedup, so award DETAIL is unreliable: membership
+		// stays, budgets/types null.
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #36","awardType":"Build","budget":85000}\n' +
+				'{"id":"recCCCCCCCCCCCCCC","status":"Awarded","roundName":"SCF #36","awardType":"Build","budget":85000}\n' +
+				'<div class="mb-2">Awarded Submissions</div><div class="font-schabo">1</div>',
+		);
+		expect(v.awards).toEqual([{ round: 36, budgetUSD: null, awardType: null }]);
+		expect([...v.awarded]).toEqual(["36"]);
+	});
+
+	it("a page whose counter AGREES keeps the parsed budgets", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #44","awardType":"Build","budget":120000}\n' +
+				'<div class="mb-2">Awarded Submissions</div><div class="font-schabo">1</div>',
+		);
+		expect(v.awards).toEqual([
+			{ round: 44, budgetUSD: 120000, awardType: "Build" },
+		]);
+	});
 });
