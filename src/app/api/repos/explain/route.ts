@@ -283,6 +283,16 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
+				// Say it in `warnings` too, not only in the field. An absent
+				// `answerAsOf` is easy to skim past; a warning naming the three
+				// fields that do NOT date the answer is not.
+				...(dwAnswer
+					? {
+							warnings: [
+								"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer — a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+							],
+						}
+					: {}),
 				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
 			},
 			q,
@@ -307,6 +317,30 @@ export async function GET(req: NextRequest) {
 				: scanAnswer
 					? "stellarlight-code-scan"
 					: null,
+			// WHEN THE ANSWER WAS TRUE — which is not when we fetched it, and not
+			// when we scanned the code.
+			//
+			// Raven filed this (issue #1134) with three independent reproductions:
+			// `explainRepo` on stellar/stellar-horizon returned
+			// `MaxSupportedProtocolVersion = 25` while the source at our own
+			// `codeVerified.scannedRef` (82660510) defines 28. Verified again here
+			// against raw.githubusercontent at that ref and at 2abda012 — both say
+			// 28. DeepWiki's index is simply behind.
+			//
+			// The stale number is DeepWiki's to fix. Ours is that the response
+			// carried three dates — meta.generatedAt, codeVerified.scannedAt,
+			// repoMeta.lastCommitAt — every one of them describing the code scan,
+			// and none of them dating the ANSWER. A consumer reading
+			// "scannedAt: 2026-08-14" beside "answerSource: deepwiki" reasonably
+			// concludes the answer reflects the code as of that scan. It does not.
+			//
+			// DeepWikiAnswer carries { repo, answer, searchUrl } and the MCP
+			// envelope exposes no index date, so for the deepwiki path this is
+			// NULL — an admission, not a guess. Inventing a timestamp here would
+			// be worse than the original defect: it would make the unknown look
+			// measured. The scan-derived path CAN be dated, because there the
+			// answer IS the scan.
+			answerAsOf: dwAnswer ? null : scanAnswer ? (codeVerified?.scannedAt ?? null) : null,
 			sources: {
 				repoUrl: `https://github.com/${repo}`,
 				deepWikiUrl: `https://deepwiki.com/${repo}`,
