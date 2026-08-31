@@ -1,12 +1,12 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-08-30T13:10:24.916Z",
+ "generatedAt": "2026-08-31T15:18:53.037Z",
  "stage": 1,
  "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 33280283425,
-  "at": "2026-08-29T23:08:56Z",
+  "id": 33406422183,
+  "at": "2026-08-31T15:05:25Z",
   "event": "workflow_dispatch",
   "conclusion": "success"
  },
