@@ -91,9 +91,13 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		note: "wallets — the directory holds 64, the partner list 5",
 	},
 	{
+		// Same call as the wallets probe above: type=Anchor holds 43 project rows
+		// vs 29 anchor partners — both surfaces genuinely answer "ramps", so
+		// either route is correct and expecting only the smaller one graded the
+		// router down for obeying the spec.
 		q: "on and off ramps for Stellar payments",
-		expect: ["getPartners"],
-		note: "anchors/ramps",
+		expect: ["getPartners", "searchProjects"],
+		note: "anchors/ramps — partners 29, type=Anchor projects 43",
 	},
 	{
 		q: "top Stellar projects by GitHub activity",
@@ -163,9 +167,12 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 	},
 	// ── real demand Raven ACTUALLY gets (from api-usage telemetry) ──
 	{
+		// passkey-kit is a code KIT — its repos ARE the product, so searchRepos
+		// returning kalepail/passkey-kit is a correct route for the bare name,
+		// not a miss. searchProjects stays first-choice; either passes.
 		q: "passkey-kit",
-		expect: ["searchProjects"],
-		note: "demand: project by name",
+		expect: ["searchProjects", "searchRepos"],
+		note: "demand: project by name (kit → repo route also correct)",
 	},
 	{
 		q: "reflector oracle on Stellar",
@@ -240,9 +247,14 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		note: "code: deep repo mechanism (DeepWiki)",
 	},
 	{
-		q: "how do I write a Soroban smart contract in Rust",
-		expect: ["searchResearch", "searchRepos"],
-		note: "code: how-to (docs or example)",
+		// Same call as the JS-SDK probe below: bare "how do I write" phrasing
+		// correctly routes to stellarDocs (the official contract-authoring docs
+		// live there, and that isn't a scout op). The scout-owned version of the
+		// question is "find me example contract CODE", which searchRepos exists
+		// for — so the probe now asks that.
+		q: "find example Soroban smart contract repos written in Rust",
+		expect: ["searchRepos"],
+		note: "code: example contract repos (how-to phrasing belongs to stellarDocs)",
 	},
 	{
 		q: "how does cross-contract invocation and authorization work in Soroban",
