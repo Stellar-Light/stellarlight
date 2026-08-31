@@ -125,14 +125,10 @@ export function parseRoundVerdicts(html: string): {
 	}>;
 } {
 	const txt = html.replace(/\\"/g, '"');
-	const awarded = new Set<string>();
-	const negative = new Set<string>();
 	const awardByRound = new Map<
 		number,
 		{ round: number; budgetUSD: number | null; awardType: string | null }
 	>();
-	let submissions = 0;
-	let awardedAnyCount = 0;
 	// Field order within one submission object: status … roundName … awardType
 	// … budget (verified on fluxity-mez 2026-08-03). The [^{}] guards keep every
 	// capture inside a single object — a missing awardType/budget fails to null,
@@ -144,58 +140,110 @@ export function parseRoundVerdicts(html: string): {
 	// TRUNCATED budget (bondhive #29: 100 vs the resolved 100000). Keep the MAX
 	// budget per card id across embeds — resolved ≥ reference always, and
 	// agreeing embeds are a no-op. Rounds are folded from cards afterwards.
-	const cardById = new Map<
-		string,
-		{ round: number; budgetUSD: number | null; awardType: string | null }
-	>();
+	interface Card {
+		id: string;
+		isAward: boolean;
+		roundNum: number | null;
+		budgetUSD: number | null;
+		awardType: string | null;
+	}
+	const cardByKey = new Map<string, Card>();
+	const mergeInto = (prev: Card, next: Card) => {
+		prev.budgetUSD =
+			prev.budgetUSD !== null && next.budgetUSD !== null
+				? Math.max(prev.budgetUSD, next.budgetUSD)
+				: (prev.budgetUSD ?? next.budgetUSD);
+		prev.awardType = prev.awardType ?? next.awardType;
+	};
 	for (const m of txt.matchAll(re)) {
-		const cardId = m[1];
 		const status = m[2];
 		const isAward = status === "Awarded";
-		const isNegative = isNegativeVerdict(status);
-		if (!isAward && !isNegative) continue; // neutral — verdicts nothing
-		submissions++;
-		if (isAward) awardedAnyCount++;
+		if (!isAward && !isNegativeVerdict(status)) continue; // neutral — verdicts nothing
 		const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
-		if (!num) continue;
-		const round = String(Number(num));
-		if (isAward) {
-			awarded.add(round);
-			const rn = Number(num);
-			const budget = m[5] ? Number(m[5]) : null;
-			const type = m[4] ? m[4] : null;
-			const prev = cardById.get(cardId);
-			if (!prev) {
-				cardById.set(cardId, { round: rn, budgetUSD: budget, awardType: type });
-			} else {
-				cardById.set(cardId, {
-					round: rn,
-					budgetUSD:
-						prev.budgetUSD !== null && budget !== null
-							? Math.max(prev.budgetUSD, budget)
-							: (prev.budgetUSD ?? budget),
-					awardType: prev.awardType ?? type,
-				});
-			}
-		} else negative.add(round);
+		const card: Card = {
+			id: m[1],
+			isAward,
+			roundNum: num ? Number(num) : null,
+			budgetUSD: isAward && m[5] ? Number(m[5]) : null,
+			awardType: isAward && m[4] ? m[4] : null,
+		};
+		const key = `${card.isAward ? "A" : "N"}|${card.id}`;
+		const prev = cardByKey.get(key);
+		if (!prev) cardByKey.set(key, card);
+		else mergeInto(prev, card);
+	}
+	// RSC chunk boundaries can split a card's id VALUE mid-string, so the same
+	// card re-matches under a truncated id and double-counts (prism-dxb: the
+	// resolved embed matched as id "r" beside "recpWygA3kmg3NsZx", summing #44
+	// to exactly 2× the page's own Total awarded). A fragment id is always a
+	// PREFIX of the full id (the regex needs the literal `"id":"` before the
+	// capture, which only survives on the head side of the split). So: a card
+	// whose id is a proper prefix of another same-polarity card's id, with the
+	// same round and award type, is that card's other embed — merge, never sum.
+	const cards: Card[] = [];
+	for (const card of cardByKey.values()) {
+		const host = [...cardByKey.values()].find(
+			(other) =>
+				other !== card &&
+				other.isAward === card.isAward &&
+				other.id.length > card.id.length &&
+				other.id.startsWith(card.id) &&
+				other.roundNum === card.roundNum &&
+				(other.awardType === card.awardType ||
+					other.awardType === null ||
+					card.awardType === null),
+		);
+		if (host) mergeInto(host, card);
+		else cards.push(card);
+	}
+	const awarded = new Set<string>();
+	const negative = new Set<string>();
+	let submissions = 0;
+	let awardedAnyCount = 0;
+	for (const c of cards) {
+		submissions++;
+		if (c.isAward) awardedAnyCount++;
+		if (c.roundNum === null) continue;
+		const round = String(c.roundNum);
+		if (c.isAward) awarded.add(round);
+		else negative.add(round);
 	}
 	const notAwarded = new Set([...negative].filter((r) => !awarded.has(r)));
 	// Fold per-card records into per-round records: a round with multiple
 	// awarded CARDS sums their budgets; one budget-less card nulls the round
 	// (a partial sum lies).
-	for (const c of cardById.values()) {
-		const prev = awardByRound.get(c.round);
+	for (const c of cards) {
+		if (!c.isAward || c.roundNum === null) continue;
+		const prev = awardByRound.get(c.roundNum);
 		if (!prev) {
-			awardByRound.set(c.round, { ...c });
+			awardByRound.set(c.roundNum, {
+				round: c.roundNum,
+				budgetUSD: c.budgetUSD,
+				awardType: c.awardType,
+			});
 		} else {
-			awardByRound.set(c.round, {
-				round: c.round,
+			awardByRound.set(c.roundNum, {
+				round: c.roundNum,
 				budgetUSD:
 					prev.budgetUSD !== null && c.budgetUSD !== null
 						? prev.budgetUSD + c.budgetUSD
 						: null,
 				awardType: prev.awardType ?? c.awardType,
 			});
+		}
+	}
+	// Reconciliation against the page's OWN rendered counter ("Awarded
+	// Submissions: N"). If our deduped awarded-card count still disagrees, the
+	// parse is unreliable for award DETAIL on this page — null every round's
+	// budget/type rather than serve a summed guess (membership stays: the
+	// verdict sets dedupe by round and fix-scf-rounds has its own guards).
+	const counter = html.match(
+		/Awarded Submissions<\/div><div[^>]*>(\d+)</,
+	)?.[1];
+	if (counter !== undefined && Number(counter) !== awardedAnyCount) {
+		for (const rec of awardByRound.values()) {
+			rec.budgetUSD = null;
+			rec.awardType = null;
 		}
 	}
 	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
