@@ -8,6 +8,7 @@
  * the artifact path so every number links to its reproducible evidence.
  */
 
+import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
@@ -322,6 +323,40 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			severity: curatedCanonical.absent.length > 0 ? "high" : "medium",
 			artifact: "improvements/audits/curated-canonical-latest.json",
 			passing: curatedCanonical.findings === 0,
+		}),
+
+		// SCF coverage — the external roster vs what we actually serve. The
+		// gap matrix (report-coverage-gaps.ts) has run monthly and opened an
+		// ISSUE, but its headline never reached this board: 49 SCF-FUNDED
+		// projects, every one carrying a round badge, that the directory does
+		// not serve. Surfacing it is the quality move; filling it is
+		// human-gated curation (the workflow forbids bulk-create).
+		g({
+			key: "scf-coverage",
+			title: "SCF-funded projects served",
+			promise:
+				"Every SCF-funded project (round-badged, so provably funded) is in the directory an agent searches.",
+			measure: {
+				value: coverageGaps.scf.served,
+				of: coverageGaps.scf.total,
+				unit: "projects",
+			},
+			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served — ${coverageGaps.scf.absent} absent, all carrying a funding-round badge`,
+			details: [
+				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
+				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,
+				"absent entries are human-reviewed SEEDS, never bulk-created",
+				...coverageGaps.scf.sample
+					.slice(0, 3)
+					.map(
+						(x) => `absent: ${x.scfSlug} (round ${(x.rounds || []).join(",")})`,
+					),
+			],
+			asOf: coverageGaps.asOf.slice(0, 10),
+			cadence: "weekly",
+			severity: coverageGaps.scf.absent > 25 ? "high" : "medium",
+			artifact: "improvements/audits/coverage-gaps-latest.json",
+			passing: coverageGaps.scf.absent === 0,
 		}),
 
 		g({

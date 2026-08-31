@@ -1,0 +1,101 @@
+{
+  "asOf": "2026-08-30T23:05:13.944Z",
+  "source": "scripts/report-coverage-gaps.ts",
+  "scf": {
+    "total": 500,
+    "absent": 49,
+    "served": 451,
+    "absentWithRoundBadge": 49,
+    "sample": [
+      {
+        "scfSlug": "loop-cashback-everywhere-with-stellar-zom",
+        "rounds": [
+          "40"
+        ],
+        "url": "https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom"
+      },
+      {
+        "scfSlug": "dockingzone-a18",
+        "rounds": [
+          "37",
+          "35"
+        ],
+        "url": "https://communityfund.stellar.org/project/dockingzone-a18"
+      },
+      {
+        "scfSlug": "a-real-estate-tokenization-platform-ss1",
+        "rounds": [
+          "33",
+          "32",
+          "31"
+        ],
+        "url": "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1"
+      },
+      {
+        "scfSlug": "anticipatory-aid-on-soroban-f7j",
+        "rounds": [
+          "31",
+          "22"
+        ],
+        "url": "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j"
+      },
+      {
+        "scfSlug": "ctxcom-evm",
+        "rounds": [
+          "19"
+        ],
+        "url": "https://communityfund.stellar.org/project/ctxcom-evm"
+      },
+      {
+        "scfSlug": "crediolabsai-ut9",
+        "rounds": [
+          "44"
+        ],
+        "url": "https://communityfund.stellar.org/project/crediolabsai-ut9"
+      },
+      {
+        "scfSlug": "policywright-j8x",
+        "rounds": [
+          "44",
+          "42"
+        ],
+        "url": "https://communityfund.stellar.org/project/policywright-j8x"
+      },
+      {
+        "scfSlug": "vrf-soroban-8yl",
+        "rounds": [
+          "44"
+        ],
+        "url": "https://communityfund.stellar.org/project/vrf-soroban-8yl"
+      },
+      {
+        "scfSlug": "soroban-contract-source-verification-service-bax",
+        "rounds": [
+          "44"
+        ],
+        "url": "https://communityfund.stellar.org/project/soroban-contract-source-verification-service-bax"
+      },
+      {
+        "scfSlug": "soroban-disassembler-working-title-ply",
+        "rounds": [
+          "41"
+        ],
+        "url": "https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply"
+      }
+    ]
+  },
+  "defillama": {
+    "stellarListed": 42,
+    "matched": 32,
+    "missing": 0,
+    "belowFloor": 2
+  },
+  "summary": {
+    "missingDefillama": 0,
+    "missingScf": 49,
+    "partnerDocsWithoutOwnContent": 3,
+    "staleCollections": 0,
+    "staleOrEmptyResearchSources": 1,
+    "refreshUnmeasurableSources": 3
+  }
+}
