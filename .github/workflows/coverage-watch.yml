@@ -151,6 +151,9 @@ jobs:
             # finding that is not named here reaches no consumer, which is the
             # exact class this repo keeps re-learning.
             "corroboratedAbsent": g.get('corroboratedAbsent', []),
+            "domainMatched": g['lanes']['scf'].get('domainMatched', []),
+            "reviewedAbsent": g['lanes']['scf'].get('reviewedAbsent', []),
+            "unreviewedAbsent": g['lanes']['scf'].get('unreviewedAbsent'),
             "summary": g.get('summary'),
           }, open('improvements/audits/coverage-gaps-latest.json', 'w'), indent=2)
           PY

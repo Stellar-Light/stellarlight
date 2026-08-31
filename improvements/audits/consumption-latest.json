@@ -1,14 +1,8 @@
 {
-  "asOf": "2026-08-31T04:29:54.908Z",
+  "asOf": "2026-08-31T15:06:49.535Z",
   "source": "scripts/check-consumption.ts",
   "checked": 9,
-  "consumed": 8,
-  "dead": [
-    {
-      "field": "tierReason",
-      "why": "provenance for a tier verdict (evidenced+dated is the pitch)",
-      "writtenIn": 3
-    }
-  ],
+  "consumed": 9,
+  "dead": [],
   "note": "A field written by our machinery but read by no serving path cannot change any answer an agent receives."
 }

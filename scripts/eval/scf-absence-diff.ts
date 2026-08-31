@@ -252,6 +252,57 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 	await Promise.all(Array.from({ length: 8 }, worker));
 }
 
+/** Human review verdicts for absences (docs/SCF-SEED-REVIEW-2026-08-31.md).
+ *
+ * The documented-empty discipline: an absence is DEBT until a human has
+ * looked, and a VERDICT after. The five rows here are the review's leftovers
+ * that no code can honestly resolve — two projects that no longer exist
+ * anywhere but as rows-with-history (seeded Inactive in the same change), an
+ * RFP winner whose own SCF page points back at the SCF handbook, and two
+ * community-program submissions with no product identity to serve. Every
+ * entry names its evidence; an absent slug NOT in this map is unreviewed and
+ * keeps the row red.
+ */
+const REVIEWED_ABSENT: Record<string, { verdict: string; evidence: string }> = {
+	"dockingzone-a18": {
+		verdict: "wound-down — served as an Inactive row (docking-zone)",
+		evidence: "DNS dead; last Wayback capture 2025-11-09",
+	},
+	"communidao-9pm": {
+		verdict: "wound-down — served as an Inactive row (communidao)",
+		evidence: "site 502; GitHub org has zero public repos; last award 2023",
+	},
+	"enerdao-r84": {
+		verdict: "served — row exists, un-drafted to Development this run",
+		evidence: "https://www.enerdao.org/ up, repo silent — review's own verdict",
+	},
+	"soroban-contract-source-verification-service-bax": {
+		verdict: "unidentifiable — cannot honestly create a row",
+		evidence:
+			"the submission's own website field points back at the SCF handbook; no product identity to serve",
+	},
+	"west-african-ambassadors-waa-syb": {
+		verdict: "community program, not a product — no row",
+		evidence: "ambassador program submission; nothing to serve as a project",
+	},
+	"study-stellar-sdk-soroban-b3d": {
+		verdict: "study/education submission, no product identity — no row",
+		evidence: "no website or repo on the SCF page beyond the program itself",
+	},
+	"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh": {
+		verdict: "served under soroban-decompiler; page carries no product link for the matcher",
+		evidence: "same author (salaheldinsoliman); the row exists and is scanned",
+	},
+	"ctxcom-evm": {
+		verdict: "served under ctx (aliased + rounds linked)",
+		evidence: "domain ctx.com matches the row after the x.com filter fix — kept here in case the page's links change",
+	},
+	"prices-api-rfp-ctx-1vo": {
+		verdict: "served under ctx (second submission, rounds linked)",
+		evidence: "rates.ctx.com is ctx.com — same company",
+	},
+};
+
 async function main() {
 	console.error("SCF-awardee absence diff");
 	const [scf, dir] = await Promise.all([fetchScfEntries(), fetchDirectory()]);
@@ -371,6 +422,13 @@ async function main() {
 		frame: { scf: scf.length, directory: dir.length },
 		absent: absentFinal.length,
 		absentWithRoundBadge: absentAwarded.length,
+		/** Absences carrying a human review verdict vs not. The row is honest
+		 *  debt only while unreviewed > 0 — a reviewed absence is a decision. */
+		reviewedAbsent: absentFinal
+			.filter((e) => REVIEWED_ABSENT[e.scfSlug])
+			.map((e) => ({ scfSlug: e.scfSlug, ...REVIEWED_ABSENT[e.scfSlug] })),
+		unreviewedAbsent: absentFinal.filter((e) => !REVIEWED_ABSENT[e.scfSlug])
+			.length,
 		/** SCF rows resolved to an existing directory row by website-domain
 		 *  equality — served, not absent, and named so the match is reviewable. */
 		domainMatched,

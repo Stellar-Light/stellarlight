@@ -119,7 +119,12 @@ const CHECKS: Check[] = [
  *
  * The ratchet only turns one way: a field may leave this list, never join it.
  * Anything dead and not named here fails the build. */
-const KNOWN_DEAD = new Set(["tierReason"]);
+// EMPTY — the ratchet finished its journey on 2026-08-31. codeProofTier,
+// triageTags, tier, tierReason, knowledgeNotes: every field the 08-30 audit
+// found dead now has a writer AND a serving-path reader. The set stays as the
+// mechanism (a future field may be carried briefly), but nothing may be added
+// without the same named-debt justification the originals carried.
+const KNOWN_DEAD = new Set<string>([]);
 
 /** Strip comments before searching.
  *

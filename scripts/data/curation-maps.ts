@@ -2719,6 +2719,38 @@ export const SEEDS: Array<{
 		statusBasis: "human-verified",
 		statusSourceUrl: "https://fxdao.io",
 	},
+	// ── 2026-08-31 wound-down pair from the SCF absence review. The packet's
+	// own rule: a dead funded project becomes a ROW with a dated non-Live
+	// status — absence hides the history, an Inactive row serves it.
+	{
+		slug: "docking-zone",
+		name: "Docking Zone",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Gaming"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded gaming project (round 18 era). Wound down: docking.zone DNS is dead; last Wayback capture 2025-11-09.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://web.archive.org/web/2025*/docking.zone",
+	},
+	{
+		slug: "communidao",
+		name: "CommuniDAO",
+		category: "Protocol/Contract",
+		status: "Inactive",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded DAO tooling. Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+	},
+
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

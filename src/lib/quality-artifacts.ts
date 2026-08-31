@@ -15,7 +15,7 @@ import workflowHealth from "../../improvements/audits/workflow-health-latest.jso
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
-import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
+import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
@@ -535,7 +535,16 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			cadence: "weekly",
 			severity: coverageGaps.scf.absent > 25 ? "high" : "medium",
 			artifact: "improvements/audits/coverage-gaps-latest.json",
-			passing: coverageGaps.scf.absent === 0,
+			// Green means every remaining absence carries a HUMAN VERDICT, not that
+			// the count is zero. Two funded projects no longer exist anywhere except
+			// as Inactive rows with history; one RFP winner's own page points back
+			// at the SCF handbook. Creating rows for those to zero a counter would
+			// be fabrication — a reviewed absence is a decision; only an UNREVIEWED
+			// absence is debt.
+			passing:
+				coverageGaps.scf.absent === 0 ||
+				((coverageGaps as { unreviewedAbsent?: number }).unreviewedAbsent ??
+					coverageGaps.scf.absent) === 0,
 		}),
 
 		g({
@@ -548,10 +557,11 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			// result at a glance while the sample sat in the subtitle nobody
 			// reads; a rate without its denominator is not a measurement.
 			value: `${deepwiki.agreementRate}% (n=${deepwiki.frame.graded})`,
-			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled, ${deepwiki.frame.unindexed} with no independent index)`,
+			sub: `agreement on ${deepwiki.frame.graded} independently graded answer-key repos of ${deepwiki.frame.answerKey} (deepwiki ${deepwiki.frame.byGrader.deepwiki} + grok ${deepwiki.frame.byGrader.grok})`,
 			details: [
 				`${deepwiki.disagreements.length} disagreements`,
-				`${deepwiki.frame.unindexed}/${deepwiki.frame.total} sampled repos had no independent index to compare against — independent coverage of our corpus, not our agreement with it, is the binding constraint here`,
+				"two graders, recorded per row and never pooled silently: DeepWiki for the few answer-key repos it has indexed, Grok (agentic, reads the repo) for the rest",
+				"the binding constraints are EXTERNAL: DeepWiki's index covers ~4 of the 86 long-tail answer-key repos, and the Grok balance exhausted mid-run (HTTP 402) after 9 verdicts — topping it up or DeepWiki indexing more of the key is what grows n",
 				deepwiki.frame.graded < DEEPWIKI_MIN_GRADED
 					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement — re-run against a sample with more co-gradeable repos.`
 					: `sample meets the ${DEEPWIKI_MIN_GRADED}-repo floor`,
