@@ -299,6 +299,7 @@ export interface Project {
         | 'Card Issuing'
         | 'Exchange'
         | 'Oracle'
+        | 'Yield'
       )[]
     | null;
   /**

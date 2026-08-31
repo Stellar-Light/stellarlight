@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.13",
+		type: "added",
+		summary:
+			"New project type `Yield` — yield/asset-management products (vaults, strategy allocators, structured yield). `?type=Yield` on projects/search and leaderboard; 'yield'/'vault(s)' route to the type in search intents.",
+		detail:
+			"The P4 untyped census found the vertical had no enum member: five rows (arka-fund, cushion, meria + class) stayed honestly untyped rather than be force-fitted into Lending, and vault products that DID get typed were approximated (defindex, backyard, normal-finance as Lending/Stablecoin). Same class gap as Oracle (2026-08-27) and Card Issuing (2026-08-21): a vertical without an enum member is invisible to type browse regardless of how many rows exist. Rows are typed in the follow-up curation pass; until it lands, ?type=Yield returning few rows is the tagging lag, not the vertical's size.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.12",
 		type: "changed",
 		summary:
