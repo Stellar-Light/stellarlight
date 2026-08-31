@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-31",
+		surfaces: ["api"],
+		version: "spec@1.9.5",
+		type: "fixed",
+		summary:
+			"listContracts stops capturing how-to questions: its x-routing.notFor now names searchResearch/searchRepos for 'how do I write/deploy/test a contract', explainRepo for 'how does X work in the code', and getPartners for 'who should audit my contract'.",
+		detail:
+			"All eight of listContracts' routing keywords contain the token 'contract', so a short blob with total term concentration outscored longer, more diffuse blobs on any query carrying that word, whatever the intent. Measured against the field-weighted scorer, listContracts won 'how do I write a Soroban smart contract in Rust' (204, vs searchRepos 163 at rank 3), 'how do I deploy a contract' (192), 'how to test a Soroban contract' (188), 'audit my smart contract' (91) and 'who can audit my contract' (95) — the last beating getPartners at 65 despite getPartners carrying that exact phrase in its own keywords. It correctly won only the two entity-shaped probes. The keywords stay entity-shaped, which is what they are for; the notFor entries name where the how-to families belong, in the spec's documented '<question shape> -> <operationId>' form. No schema or response change — routing metadata only.",
+	},
+	{
 		date: "2026-08-28",
 		surfaces: ["api"],
 		version: "spec@1.9.4",

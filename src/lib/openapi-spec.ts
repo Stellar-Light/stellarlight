@@ -4935,6 +4935,20 @@ export const spec: OpenAPISpec = {
 					notFor: [
 						"repo-level discovery (searchRepos) or full audit rows (listAudits)",
 						"any claim about contracts we have NOT verified — absence is not nonexistence",
+						// This operation is ENTITY-shaped — "which contracts exist" —
+						// and every one of its keywords contains the token "contract",
+						// so a short blob with total term concentration outscores
+						// longer, diffuse blobs on any query carrying that word,
+						// whatever the intent. Measured against Raven's own scorer it
+						// won "how do I write a Soroban smart contract in Rust" (204 vs
+						// searchRepos 163), "how do I deploy a contract" (192), "how to
+						// test a Soroban contract" (188), and "who can audit my
+						// contract" (95) — the last beating getPartners at 65 despite
+						// getPartners carrying that literal phrase. Keywords stay
+						// entity-shaped; these name where the how-to families belong.
+						"how do I write / deploy / test a contract -> searchResearch (docs, SEPs, guides) or searchRepos (working examples)",
+						"how does X work in the code / where is X implemented -> explainRepo",
+						"who should audit my contract / which firms audit -> getPartners (type=audit-firm)",
 					],
 				},
 				parameters: [
