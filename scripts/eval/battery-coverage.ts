@@ -181,8 +181,21 @@ async function main() {
 	let errored = 0;
 	let skippedLumenloop = 0;
 	let skippedOther = 0;
+	let skippedConduct = 0;
 	for (const path of paths) {
 		const cat = path.split("/").slice(-2, -1)[0];
+		// Adapter-CONDUCT questions (their edge-behavior category) grade how a
+		// SERVICE should report soft-empties/filters — not whether a corpus
+		// holds content. Probing our research corpus with them files phantom
+		// ingest backlog: q-edge-doc-category-filter-empty sat open 17 days
+		// asking our corpus to answer stellarDocs' category-filter contract.
+		// Conduct is what the conduct lanes test (engine E, the battery
+		// envelope slices); coverage skips the category — counted, never
+		// silent.
+		if (cat === "edge-behavior") {
+			skippedConduct++;
+			continue;
+		}
 		let q: CaseFile = {};
 		try {
 			q = (await (
@@ -293,7 +306,7 @@ async function main() {
 
 	writeNightlyFindings("battery-coverage", failures);
 	console.log(
-		`\n${covered} covered · ${weak} weak · ${errored} errored · ${skippedLumenloop} lumenloop-routed + ${skippedOther} non-comparable skipped, of ${paths.length} — weak cases are ingest backlog, filed via the ledger`,
+		`\n${covered} covered · ${weak} weak · ${errored} errored · ${skippedLumenloop} lumenloop-routed + ${skippedOther} non-comparable + ${skippedConduct} conduct-category skipped, of ${paths.length} — weak cases are ingest backlog, filed via the ledger`,
 	);
 	// Weak coverage is backlog, not red; only a broken sweep is red.
 	process.exit(errored === paths.length ? 1 : 0);

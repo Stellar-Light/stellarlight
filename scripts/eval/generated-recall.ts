@@ -327,8 +327,24 @@ async function main() {
 	});
 
 	// P-ATTR — records with structured attributes imply attribute queries.
+	// An INACTIVE record implies none: ranking down-ranks Inactive by design
+	// (defunct rows must not surface as active), so "its own coverage implies
+	// 'Argentina anchor'" manufactures a permanent miss the day the subject
+	// dies — ping went Inactive (human-verified, dead site) on 2026-08-28 and
+	// its P-ATTR probe fired nightly ever since. Same idiom as the lineage-
+	// shadow exclusion above: skip, count, say so. Name-identity probes
+	// (P-PHRASE) deliberately KEEP Inactive subjects — a name lookup must
+	// return the record regardless of status.
+	const inactiveAttrSkips = projects.filter(
+		(p) => p.status === "Inactive",
+	).length;
+	if (inactiveAttrSkips)
+		console.error(
+			`P-ATTR: ${inactiveAttrSkips} Inactive record(s) excluded from attribute-implication probes`,
+		);
 	const attrProbes: Array<{ p: any; q: string; area: string }> = [];
 	for (const p of projects) {
+		if (p.status === "Inactive") continue;
 		const c = p.coverage ?? {};
 		if (c.countries?.[0] && (p.types ?? []).includes("Anchor"))
 			attrProbes.push({
