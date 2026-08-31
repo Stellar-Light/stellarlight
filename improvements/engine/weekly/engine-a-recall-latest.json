@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-31T03:34:29Z",
+  "generatedAt": "2026-08-31T23:17:55Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 960,
-      "total": 960,
-      "rate": 100,
+      "ok": 983,
+      "total": 984,
+      "rate": 99.9,
       "floor": 90,
       "status": "OK "
     },
@@ -28,17 +28,17 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 959,
-      "total": 960,
+      "ok": 983,
+      "total": 984,
       "rate": 99.9,
       "floor": 60,
       "status": "OK "
     },
     {
       "bucket": "P-ATTR",
-      "ok": 46,
-      "total": 47,
-      "rate": 97.9,
+      "ok": 55,
+      "total": 63,
+      "rate": 87.3,
       "floor": 70,
       "status": "OK "
     },
@@ -52,42 +52,147 @@
     },
     {
       "bucket": "B-USER",
-      "ok": 100,
+      "ok": 92,
       "total": 100,
-      "rate": 100,
+      "rate": 92,
       "floor": 85,
       "status": "OK "
     },
     {
       "bucket": "R-SYM",
-      "ok": 27,
-      "total": 28,
-      "rate": 96.4,
+      "ok": 30,
+      "total": 30,
+      "rate": 100,
       "floor": 75,
       "status": "OK "
     }
   ],
   "failures": [
     {
+      "bucket": "P-KNOWN",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=CredioLabs.AI&limit=3",
+      "expected": "crediolabs-ai in top-3 for its own name",
+      "observed": "untangled, ortege, dd"
+    },
+    {
       "bucket": "P-PHRASE",
-      "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20DD&limit=3",
-      "expected": "dd in top-3 for 'what is DD'",
-      "observed": "lobstr, beamable, phoenix"
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20CredioLabs.AI%20live&limit=3",
+      "expected": "crediolabs-ai in top-3 for 'is CredioLabs.AI live'",
+      "observed": "crossmint, xbid-ai, webacy-inc"
     },
     {
       "bucket": "P-ATTR",
-      "area": "coverage.countries",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Argentina%20anchor&limit=13",
-      "expected": "ping in top-13 of 52 matches (its own coverage.countries implies 'Argentina anchor')",
-      "observed": "bitso, anclap, moneygram, mykobo, yellow-card"
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20security&limit=10",
+      "expected": "komet in top-10 of 36 matches (its own supportedNetworks implies 'Stellar security')",
+      "observed": "fordefi, stellar-security-portal, trustline, inferera, team-finance"
     },
     {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=contractErrorCodeFromNumber&limit=5",
-      "expected": "ACTA-Team/did-stellar in top-5 for its own symbol 'contractErrorCodeFromNumber'",
-      "observed": "stellar/stellar-core, stellar/go, stellar/js-stellar-sdk, stellar/rs-soroban-sdk, reflector-network/reflector-contract"
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "P-ATTR",
+      "area": "supportedNetworks",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20payments&limit=10",
+      "expected": "\u22653 of the 7 records implying 'Stellar payments' in top-10",
+      "observed": "beans, yellow-card, decaf, stellar-disbursement-platform-sdp, felix-pago"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=FabianSanchezD",
+      "expected": "FabianSanchezD retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=EnsarEness",
+      "expected": "EnsarEness retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=EnesKeremAYDIN",
+      "expected": "EnesKeremAYDIN retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=whiterrabbit",
+      "expected": "whiterrabbit retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=leonardoevmacc",
+      "expected": "leonardoevmacc retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=SuhanJK",
+      "expected": "SuhanJK retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=murat48",
+      "expected": "murat48 retrievable by own username",
+      "observed": "0 rows, absent"
+    },
+    {
+      "bucket": "B-USER",
+      "area": "builders",
+      "probe": "https://stellarlight.xyz/api/builders?q=UmutKDev",
+      "expected": "UmutKDev retrievable by own username",
+      "observed": "0 rows, absent"
     }
   ],
   "evalKey": "engine-a-recall"

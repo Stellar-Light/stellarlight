@@ -1,18 +1,18 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 64163,
-    "realHits": 7949,
-    "distinctQueries": 3764,
+    "loggedHits": 73360,
+    "realHits": 8985,
+    "distinctQueries": 4080,
     "replayed": 250
   },
-  "okRate": 95,
+  "okRate": 99,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 74,
-      "lastSeen": "2026-08-30T10:43:08.851Z",
+      "hits": 93,
+      "lastSeen": "2026-08-31T23:08:57.360Z",
       "days": 14,
       "buckets": [
         "other"
@@ -21,143 +21,11 @@
       "evidence": "top confidence 0.4"
     },
     {
-      "endpoint": "/api/projects/search",
-      "query": "what is orbitmintx",
-      "hits": 23,
-      "lastSeen": "2026-08-30T13:09:13.378Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 23,
-      "lastSeen": "2026-08-30T13:09:06.897Z",
-      "days": 6,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is stellargizmo live",
-      "hits": 23,
-      "lastSeen": "2026-08-30T13:09:12.403Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 20,
-      "lastSeen": "2026-08-30T13:09:06.630Z",
-      "days": 6,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is flurboswap live",
-      "hits": 20,
-      "lastSeen": "2026-08-28T19:32:38.351Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "zzqqxx nonexistent protocol 9999",
-      "hits": 19,
-      "lastSeen": "2026-08-30T13:09:05.070Z",
-      "days": 6,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "tell me about nebulabridge",
-      "hits": 18,
-      "lastSeen": "2026-08-29T13:19:20.890Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "what is zorblend",
-      "hits": 18,
-      "lastSeen": "2026-08-28T19:32:38.835Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "is quantumpay live",
-      "hits": 17,
-      "lastSeen": "2026-08-29T13:19:20.200Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "crdt",
-      "hits": 8,
-      "lastSeen": "2026-08-30T01:40:40.770Z",
-      "days": 4,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "finclusive",
-      "hits": 4,
-      "lastSeen": "2026-08-30T01:26:51.096Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "warmancer",
-      "hits": 3,
-      "lastSeen": "2026-08-28T23:58:11.884Z",
-      "days": 2,
+      "hits": 24,
+      "lastSeen": "2026-08-31T15:18:06.364Z",
+      "days": 7,
       "buckets": [
         "other"
       ],
@@ -165,6 +33,6 @@
       "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-08-30T14:26:24Z",
+  "generatedAt": "2026-08-31T23:17:55Z",
   "evalKey": "engine-d-demand"
 }

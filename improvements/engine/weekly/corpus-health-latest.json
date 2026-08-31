@@ -1,7 +1,7 @@
 {
   "frame": {
     "chunks": 10132,
-    "docs": 2069
+    "docs": 2070
   },
   "s5_junk_urls": {
     "count": 0,
@@ -16,35 +16,35 @@
     "release": {
       "chunks": 195,
       "datedPct": 100,
-      "newestAgeDays": 2,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
     "lumenloop-research": {
       "chunks": 476,
       "datedPct": 100,
-      "newestAgeDays": 2,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
       "chunks": 3959,
       "datedPct": 74,
-      "newestAgeDays": 4,
+      "newestAgeDays": 5,
       "undated": false,
       "stalled": false
     },
     "sdf-blog": {
       "chunks": 2216,
       "datedPct": 100,
-      "newestAgeDays": 7,
+      "newestAgeDays": 8,
       "undated": false,
       "stalled": false
     },
     "cap": {
       "chunks": 936,
       "datedPct": 98,
-      "newestAgeDays": 10,
+      "newestAgeDays": 11,
       "undated": false,
       "stalled": false
     },
@@ -60,7 +60,7 @@
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 161,
+      "newestAgeDays": 162,
       "undated": false,
       "stalled": false
     },
@@ -76,49 +76,49 @@
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 28,
+      "newestAgeDays": 29,
       "undated": false,
       "stalled": false
     },
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 122,
+      "newestAgeDays": 123,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 116,
+      "newestAgeDays": 117,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 103,
+      "newestAgeDays": 104,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 78,
+      "newestAgeDays": 79,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1338,
+      "newestAgeDays": 1339,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3840,
+      "newestAgeDays": 3841,
       "undated": false,
       "stalled": false
     }
@@ -133,6 +133,6 @@
       "boilerplateOverlap": 33
     }
   },
-  "generatedAt": "2026-08-30T14:26:24Z",
+  "generatedAt": "2026-08-31T23:17:55Z",
   "evalKey": "corpus-health"
 }

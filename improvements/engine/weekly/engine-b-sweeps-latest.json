@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 35,
+    "count": 36,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -67,6 +67,12 @@
         "field": "supportedNetworks",
         "prose": "solana",
         "missing": "solana"
+      },
+      {
+        "slug": "simbolik",
+        "field": "supportedNetworks",
+        "prose": "ethereum",
+        "missing": "evm"
       },
       {
         "slug": "expand-network",
@@ -145,55 +151,49 @@
         "field": "supportedNetworks",
         "prose": "polygon",
         "missing": "evm"
-      },
-      {
-        "slug": "automated-finance",
-        "field": "supportedNetworks",
-        "prose": "base",
-        "missing": "evm"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (196/198)",
-      "types": "96% (190/198)",
-      "supportedNetworks": "47% (93/198)",
-      "logoUrl": "78% (154/198)"
+      "shortDescription": "99% (198/200)",
+      "types": "100% (200/200)",
+      "supportedNetworks": "49% (97/200)",
+      "logoUrl": "78% (155/200)"
     },
     "Tooling": {
-      "shortDescription": "98% (173/177)",
-      "types": "95% (169/177)",
-      "logoUrl": "80% (141/177)"
+      "shortDescription": "98% (177/181)",
+      "types": "100% (181/181)",
+      "logoUrl": "80% (145/181)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (379/383)",
-      "types": "94% (359/383)",
-      "supportedNetworks": "59% (225/383)",
-      "logoUrl": "85% (327/383)"
+      "shortDescription": "99% (391/395)",
+      "types": "99% (393/395)",
+      "supportedNetworks": "61% (239/395)",
+      "logoUrl": "86% (338/395)"
     },
     "Asset": {
-      "shortDescription": "31% (11/35)",
-      "types": "100% (35/35)",
-      "supportedNetworks": "26% (9/35)",
-      "logoUrl": "80% (28/35)"
+      "shortDescription": "33% (12/36)",
+      "types": "100% (36/36)",
+      "supportedNetworks": "28% (10/36)",
+      "logoUrl": "78% (28/36)"
     },
     "Protocol/Contract": {
-      "shortDescription": "100% (151/151)",
-      "types": "88% (133/151)",
-      "supportedNetworks": "70% (105/151)",
-      "logoUrl": "80% (121/151)",
-      "tvlUSD": "9% (13/151)"
+      "shortDescription": "100% (155/155)",
+      "types": "100% (155/155)",
+      "supportedNetworks": "71% (110/155)",
+      "logoUrl": "81% (125/155)",
+      "tvlUSD": "9% (14/155)"
     },
     "Anchor": {
-      "shortDescription": "93% (14/15)",
-      "types": "100% (15/15)",
-      "supportedNetworks": "73% (11/15)",
-      "logoUrl": "87% (13/15)"
+      "shortDescription": "94% (15/16)",
+      "types": "100% (16/16)",
+      "supportedNetworks": "75% (12/16)",
+      "logoUrl": "81% (13/16)"
     },
     "Partner Integration": {
       "shortDescription": "100% (1/1)",
-      "types": "0% (0/1)",
+      "types": "100% (1/1)",
       "logoUrl": "0% (0/1)"
     }
   },
@@ -203,7 +203,7 @@
     "groups": []
   },
   "s3b_domain_duplicates": {
-    "count": 4,
+    "count": 6,
     "groups": [
       {
         "apex": "jsr.io",
@@ -216,6 +216,51 @@
           {
             "slug": "stellar-indexer",
             "name": "Stellar Indexer",
+            "scfAwarded": false
+          }
+        ]
+      },
+      {
+        "apex": "youtube.com",
+        "records": [
+          {
+            "slug": "roberto-sanz-criptomonedas",
+            "name": "Roberto Sanz Criptomonedas",
+            "scfAwarded": true
+          },
+          {
+            "slug": "roberto-sanz",
+            "name": "Roberto Sanz",
+            "scfAwarded": false
+          },
+          {
+            "slug": "5x-crypto",
+            "name": "5x Crypto",
+            "scfAwarded": false
+          },
+          {
+            "slug": "hi-fifo",
+            "name": "Hi Fifo",
+            "scfAwarded": false
+          },
+          {
+            "slug": "luminary-s-archive",
+            "name": "Luminary's Archive",
+            "scfAwarded": false
+          }
+        ]
+      },
+      {
+        "apex": "loopfinance.io",
+        "records": [
+          {
+            "slug": "loop",
+            "name": "Loop",
+            "scfAwarded": true
+          },
+          {
+            "slug": "loop-finance",
+            "name": "Loop Finance",
             "scfAwarded": false
           }
         ]
@@ -268,20 +313,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 398,
+    "liveNoDatedSignal": 411,
     "liveStale365": 144,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 545,
+        "ageDays": 546,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 913,
+        "ageDays": 915,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -302,7 +347,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2313,
+        "ageDays": 2314,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -413,6 +458,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-30T14:26:24Z",
+  "generatedAt": "2026-08-31T23:17:55Z",
   "evalKey": "engine-b-sweeps"
 }
