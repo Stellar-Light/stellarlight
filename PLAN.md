@@ -67,6 +67,14 @@ Phases are sequenced by dependency, not by calendar.
   Guard: `scripts/check-scripts-types.ts`, ratcheted against a frozen
   63-error baseline, on `/quality` as `scripts-types`.
   **Ask what a passing check did NOT look at.**
+  Its first version then failed CI while passing locally, for the sharper
+  version of the same thing: the config pulled in `src/**`, which reaches the
+  Payload admin routes, which import `importMap.js` — a file Payload
+  GENERATES and `.gitignore` excludes. It exists in every working tree and no
+  fresh checkout. **A guard whose inputs include generated or ignored files
+  is measuring the developer's laptop, not the repo.** Reproduce a
+  local-passes/CI-fails split in a fresh clone before theorising; four
+  theories were wrong before that clone answered it in one run.
 - **A detector that reports on missing evidence manufactures fires.**
   (Added 2026-08-31.) The workflow-health sweep hit a GitHub rate limit,
   read the 403 as "cannot tell", and reported a lane broken that had been
