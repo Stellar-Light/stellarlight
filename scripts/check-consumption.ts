@@ -134,6 +134,27 @@ function stripComments(src: string): string {
 		.replace(/(^|[^:])\/\/[^\n]*/g, "$1 "); // line comments (not URLs)
 }
 
+/** Strip string-literal CONTENTS (quotes stay, so syntax stays parseable).
+ *
+ * Applied ONLY to the ENGINES scan, and deliberately NOT to SERVING: in an
+ * OpenAPI spec or skill description, a field named inside a string IS the
+ * consumption — it is the promise an agent reads. In an engine, only an
+ * actual code read counts, and scan-repo-code.ts proved the hazard: its log
+ * line "tier/unverified/repoScore writes: 0" contains `tier`, so if the
+ * engine ever stopped reading `tier` the pass would stay green off a string
+ * that literally asserts the script does NOT write it.
+ *
+ * One alternation pass, leftmost-first, so a quote inside one kind of
+ * literal cannot open another. Template-literal interpolation contents are
+ * dropped too — fine for this purpose (a field read inside ${...} that
+ * appears nowhere else in the file is not engine wiring worth crediting). */
+function stripStrings(src: string): string {
+	return src.replace(
+		/"(?:[^"\\\n]|\\[\s\S])*"|'(?:[^'\\\n]|\\[\s\S])*'|`(?:[^`\\]|\\[\s\S])*`/g,
+		(m) => m[0] + m[0],
+	);
+}
+
 function filesUnder(paths: string[]): string[] {
 	try {
 		const out = execFileSync("git", ["ls-files", "--", ...paths], {
@@ -157,12 +178,13 @@ function filesUnder(paths: string[]): string[] {
 const SELF = "scripts/check-consumption.ts";
 
 /** Number of files whose CODE (not comments) references the field. */
-function grepCount(pattern: string, paths: string[]): number {
+function grepCount(pattern: string, paths: string[], noStrings = false): number {
 	let n = 0;
 	for (const f of filesUnder(paths)) {
 		if (f === SELF) continue;
 		try {
-			const code = stripComments(readFileSync(f, "utf8"));
+			let code = stripComments(readFileSync(f, "utf8"));
+			if (noStrings) code = stripStrings(code);
 			if (code.includes(pattern)) n++;
 		} catch {
 			// unreadable file — not evidence of consumption
@@ -186,7 +208,7 @@ async function main() {
 		const written = grepCount(c.field, ["scripts", "src"]);
 		// read by something that shapes an agent-visible answer
 		const read = grepCount(c.field, SERVING);
-		const viaEngine = read === 0 ? grepCount(c.field, ENGINES) : 0;
+		const viaEngine = read === 0 ? grepCount(c.field, ENGINES, true) : 0;
 		results.push({
 			field: c.field,
 			why: c.why,
@@ -250,8 +272,11 @@ async function main() {
 	const revived = [...KNOWN_DEAD].filter(
 		(f) => !dead.some((r) => r.field === f),
 	);
+	// Advisories go to STDERR: --json stdout is redirected into
+	// improvements/audits/consumption-latest.json, which quality-artifacts.ts
+	// imports as JSON at build time — a stray stdout line corrupts it.
 	if (revived.length)
-		console.log(
+		console.error(
 			`\nCONSUMED NOW — remove from KNOWN_DEAD in this file: ${revived.join(", ")}`,
 		);
 	if (unexpected.length) {
@@ -262,7 +287,7 @@ async function main() {
 	}
 	if (revived.length) process.exit(1);
 	if (dead.length)
-		console.log(
+		console.error(
 			`\n${dead.length} known-dead field(s) carried as debt — visible on /quality, not blocking.`,
 		);
 	if (!JSON_OUT)
