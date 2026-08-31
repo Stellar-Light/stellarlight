@@ -158,6 +158,36 @@ service runs at Stage 3+ by default and humans do product, not repair.
   requires N intervention-free weeks before auto-merge opens for bounded
   lanes; the count starts now, at zero.
 
+- **P4. Basis strength at scale.** `status: not started`
+  The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
+  on the weakest honest bases (site-liveness, source-inherited). P3 proved
+  one bounded lane (operator-toml); P4 runs the basis-upgrade lanes across
+  the population — operator-toml wherever a toml exists, onchain-activity
+  from Horizon for issuer/contract rows, dated operator announcements
+  where a human already verified one — and pays the 59 untyped rows to
+  zero so exact type enumerations see the whole population. A machine
+  stamp never impersonates a human one: basis labels stay honest per the
+  P3 lane rule.
+  *Checks (live before the phase starts):* rowQuality.statusBasisMix +
+  basisStrength on /quality measure the weak-basis share — the phase
+  ratchet is that share, which may only FALL; done when weak bases are
+  under 50% of rows. The untyped count is published in knownLimitations;
+  done at 0.
+
+- **P5. The knowledge layer consumers keep asking for.** `status: not started`
+  The consumer-measured gap, not a wishlist: knowledgeNotes exist on 16 of
+  206 curated-pool repos; supersededBy/deprecatedAt exist nowhere;
+  contracts join rows only where the P3 lane reached; builder/org identity
+  is thinner than project identity. P5 = curated, DATED repo facts
+  (supersededBy, deprecatedAt, migration notes) across the curated pool;
+  contracts as first-class joined entities; builder/org coverage held to
+  the same standard as project rows.
+  *Checks (live before the phase starts):* repoQuality.withKnowledgeNotes
+  and joinedToMainnetContract are already served on /quality — committed
+  as floors that may only RISE. Every fact carries the date that covers
+  IT: the answer-dating guard already enforces the dating contract, so an
+  undated note never counts toward the floor.
+
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from
 the same ledger everything already writes to. The only new invention is the

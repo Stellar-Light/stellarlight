@@ -30,7 +30,15 @@ const phaseBlock = (id: string): string => {
 		? quality.slice(i, quality.indexOf("\n\n", i))
 		: quality.slice(i, i + 4 + next);
 };
-const PHASES = ["P0", "P1", "P2", "P3"].map((id) => {
+// The roster comes from the doc itself (every `- **P<n>.` header in order),
+// so adding a phase to QUALITY.md is sufficient — a hardcoded list here
+// silently dropped P4/P5 the day they were written.
+const PHASE_IDS = [
+	...new Set(
+		[...quality.matchAll(/^- \*\*(P\d+)[.\s-]/gm)].map((m) => m[1]),
+	),
+];
+const PHASES = PHASE_IDS.map((id) => {
 	const block = phaseBlock(id);
 	// The doc states its own status; this script never infers one, and it reads
 	// ONLY the marker on the phase's own header line. The old test ran over the

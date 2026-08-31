@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-31T15:18:45.745Z",
+ "generatedAt": "2026-08-31T20:37:36.749Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -34,6 +34,22 @@
    "evidence": null,
    "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift. 2026-08-28: the FIRST bounded agent lane is live — the deployment-evidence gap (sls-079) is worked mechanically by the weekly curation pass via the operator-toml chain (the project's own stellar.toml -> declared code+issuer -> confirmed on Horizon mainnet; full chain or abstain, basis labeled \"operator-toml\" so a machine stamp never impersonates a human one). The lane reproduces the 2026-08-28 hand-worked queue's mechanical half; judgment cases (operator docs, bundles) stay human. 2026-08-29: the closure rule's METRIC exists — repeat-class rate is computed from the ledger and published on /quality (first measurement: 30-day rate 100%, 168/168 new findings in already-seen classes; lifetime 98.7% across 6 classes + meta-eval. The treadmill, now with a number).",
    "remaining": "one lane is not a system — the gap matrix's other rows (typed, sourced, knowledge notes) still close by hand, and Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes; the count starts now, at zero."
+  },
+  {
+   "id": "P4",
+   "title": "Basis strength at scale",
+   "state": "not-started",
+   "evidence": null,
+   "shippedSoFar": null,
+   "remaining": null
+  },
+  {
+   "id": "P5",
+   "title": "The knowledge layer consumers keep asking for",
+   "state": "not-started",
+   "evidence": null,
+   "shippedSoFar": null,
+   "remaining": null
   }
  ],
  "library": {
