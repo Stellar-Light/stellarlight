@@ -4,6 +4,11 @@
 # upstream action releases a new major, a PAT expires, a cron stops firing. The
 # lane it was written for (consumption-guard) broke the day pnpm 11 shipped and
 # stayed broken silently, because nothing was watching the watchers.
+#
+# The meta-case of the script's own convention: a red at "Report" is the board
+# carrying a finding about SOME OTHER lane — this lane doing its job. A red at
+# the artifact or commit steps is this lane itself broken:
+# workflow-health: signal-steps: ^Report$
 name: workflow-health
 
 on:

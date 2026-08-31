@@ -1,6 +1,11 @@
 # Drift guard — asserts the live API, the OpenAPI spec, and the skill docs
 # still agree. Created after a downstream consumer (2026-06-20) found the three
 # had silently diverged as endpoints/params were added. Runs daily + on demand.
+#
+# A red at this step is the drift detector reporting a finding, not the lane
+# breaking. Deliberately NOT declared: the field-population and skill-reference
+# steps — a red there flags the lane (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 name: API drift guard
 
 on:

@@ -6,6 +6,10 @@ name: Self-audit (data-quality guard)
 # an Issue with the reproducible output so the regression is actionable. It
 # never runs adversarial "find the worst" judging (that manufactures problems).
 # Complements api-drift.yml (API ⇄ spec ⇄ docs consistency).
+#
+# A red at this step is the audit reporting a finding into its issue, not the
+# lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Fail the job so the regression is visible$
 
 on:
   schedule:

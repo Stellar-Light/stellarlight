@@ -2,6 +2,10 @@
 # live data itself (every record's fields imply its queries) and scores
 # recall per bucket. Red = a bucket fell below its floor; the rolling-issue
 # step files/updates one tracked issue and closes it again on green.
+#
+# A red at this step is the detector reporting a finding, not the lane
+# breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 name: generated-recall
 on:
   schedule:
