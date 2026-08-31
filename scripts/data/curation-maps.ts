@@ -3102,6 +3102,15 @@ export const TYPES_ADD: Record<string, string[]> = {
 };
 
 export const TYPES_SET: Record<string, string[]> = {
+	// ── Canonical-row corrections (2026-08-31): the Yield census typed the
+	// FOLD-SIBLING copies (meria/arka-fund/normal-finance carry canonicalSlug
+	// → these rows), while the canonical, search-served rows sat mislabeled
+	// as DEX — none of the three is a DEX. Exact-sync so the wrong label
+	// actually leaves.
+	"meria-defi": ["Yield", "Analytics"], // staking/yield aggregator + portfolio monitor (meria.com); DEX label was wrong
+	arkafund: ["Yield"], // on-chain asset-management/fund protocol (arka.fund); DEX label was wrong
+	normal: ["Stablecoin", "Yield"], // self-custody USDC savings via DeFindex + Blend (normalfinance.io); DEX label was wrong
+
 	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
 	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
 	// evidence per row). Bridge removed; remaining types verified.
