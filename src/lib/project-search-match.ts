@@ -864,9 +864,17 @@ export function nameMatchScore(
 		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
 		return new RegExp(`\\ban?\\s+${flexible}([^a-z0-9]|$)`, "i").test(qq);
 	};
-	const joined = anchorTokens(tokens ?? [])
+	let joined = anchorTokens(tokens ?? [])
 		.join(" ")
 		.trim();
+	// A single content token IS the query's subject even when anchor vocabulary
+	// drops it for length: "what is DD" tokenizes to ["dd"], and anchorTokens'
+	// sub-3-char guard (right for fragment noise in multi-token queries) left
+	// the subject empty, so the record literally named DD could never win its
+	// own phrase while prominent rows filled the page (engine-a P-PHRASE miss,
+	// open since 07-22). Equality-only promotion preserves the guard's purpose:
+	// a 2-char token still has to EQUAL a name/slug/alias to score anything.
+	if (!joined && (tokens ?? []).length === 1) joined = tokens?.[0] ?? "";
 	if (joined && joined !== qq && !mentionVeto(joined)) {
 		const hyphen = joined.replace(/\s+/g, "-");
 		if (n === joined || sl === joined || sl === hyphen || alias(joined))
