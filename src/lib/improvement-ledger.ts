@@ -73,6 +73,8 @@ export interface Finding {
 	verifiedAt?: string;
 	/** Set automatically when a detector stops reporting it. */
 	clearedAt?: string;
+	/** Set only by the stale sweep, which clears on a live PASS. */
+	clearedBy?: string | null;
 	/** memory/lesson slug that generalized this finding, if any. */
 	lessonRef?: string;
 	/**
@@ -205,6 +207,14 @@ export interface LedgerSummary {
 	closed: number;
 	verified: number;
 	cleared: number;
+	/** Cleared because a live re-probe PASSED — evidence, not silence. The
+	 *  stale sweep stamps `clearedBy`, so this is a count of real checks. */
+	clearedByReprobe: number;
+	/** Cleared because a detector stopped reporting. That is NOT the same as
+	 *  fixed, and conflating the two is how 3 SCF-funded projects we still do
+	 *  not hold (kutana, etesia, octopos) sat in the closed column. This is the
+	 *  re-probe backlog. */
+	clearedOnSilence: number;
 	/** Fraction of all findings ever seen that are now closed (verified+cleared). */
 	closingRate: number;
 	/** Age of the oldest still-open finding, in whole days. */
@@ -250,7 +260,14 @@ export function summarizeLedger(
 	const total = findings.length;
 	const open = findings.filter(isOpen).length;
 	const verified = findings.filter((f) => f.status === "verified").length;
-	const cleared = findings.filter((f) => f.status === "cleared").length;
+	const clearedRows = findings.filter((f) => f.status === "cleared");
+	const cleared = clearedRows.length;
+	// `clearedBy` is stamped only by the stale sweep, which clears solely on a
+	// PASS observed live. Its absence means the ledger's own auto-clear fired —
+	// the detector went quiet, which is indistinguishable from nobody asking
+	// again.
+	const clearedByReprobe = clearedRows.filter((f) => !!f.clearedBy).length;
+	const clearedOnSilence = cleared - clearedByReprobe;
 	const inWave = findings.filter(
 		(f) => f.status === "in-wave" || f.status === "fixed",
 	).length;
@@ -325,6 +342,8 @@ export function summarizeLedger(
 		closed,
 		verified,
 		cleared,
+		clearedByReprobe,
+		clearedOnSilence,
 		closingRate: total > 0 ? Math.round((closed / total) * 100) / 100 : 1,
 		oldestOpenDays: Math.round(oldestOpenDays),
 		inWave,

@@ -291,9 +291,12 @@ measured, not inferred.
    ranking -> getLeaderboard) shipped; the cut needs a measured before/after.
    Note the inverse pathology in the same system: listContracts fails by
    term CONCENTRATION, searchProjects by DILUTION.
-7. **Re-probe the auto-cleared.** 413 of 461 findings are closed and SEVEN
-   were verified; the other 406 are `cleared`, which means only that a
-   detector stopped reporting them. Spot-checked 2026-08-31: engine-d's
+7. **Re-probe the 220 cleared on silence.** 413 of 461 findings are closed,
+   and the basis splits three ways: 7 verified deliberately, 186 cleared by a
+   live re-probe that PASSED (the stale sweep stamps `clearedBy`, and it
+   clears on nothing else), and **220 cleared only because a detector stopped
+   reporting**. The first two are evidence. The third is the backlog, and it
+   is where the bad rows are. Spot-checked 2026-08-31: engine-d's
    `kutana`, `etesia` and `octopos` are all cleared, all still return
    semantic-mode no-match on the live API, and all carry SCF round badges.
    Nobody asked again, so the ledger called it closed. The board no longer

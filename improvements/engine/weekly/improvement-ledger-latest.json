@@ -1,10 +1,12 @@
 {
-	"generatedAt": "2026-08-31T01:50:05.267Z",
+	"generatedAt": "2026-08-31T02:57:13.642Z",
 	"total": 461,
 	"open": 48,
 	"closed": 413,
 	"verified": 7,
 	"cleared": 406,
+	"clearedByReprobe": 186,
+	"clearedOnSilence": 220,
 	"closingRate": 0.9,
 	"oldestOpenDays": 39,
 	"inWave": 0,

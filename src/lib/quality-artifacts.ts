@@ -802,11 +802,12 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				//
 				// The qualifier belongs in the headline, not one line below it in
 				// the details where it already sat and changed nothing.
-				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${L.closed} closed, ${L.verified} of them verified`,
+				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${L.closed} closed, ${L.verified + (L.clearedByReprobe ?? 0)} on evidence`,
 				details: [
 					`open by surface: ${surfaces}`,
 					`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
-					`auto-cleared is NOT fixed: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31 — kutana, etesia and octopos are cleared and still absent from the directory, each carrying SCF round badges.`,
+					`closure basis: ${L.verified} verified deliberately · ${L.clearedByReprobe ?? 0} cleared on a live re-probe that PASSED · ${L.clearedOnSilence ?? 0} cleared only because a detector stopped reporting`,
+					`that last group is the re-probe backlog, not a result: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31 — kutana, etesia and octopos sit in it, are still absent from the directory, and each carries SCF round badges.`,
 					L.staleHighOpen > 0
 						? `${L.staleHighOpen} high-severity finding(s) stale >30d, work them down`
 						: "no high-severity finding neglected past 30 days",
