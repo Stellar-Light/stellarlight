@@ -418,9 +418,13 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			title: "Type errors in scripts/",
 			promise:
 				"The scripts that write to the production database are type-checked, and the backlog of known errors only shrinks.",
+			// No denominator. Every other row on this board reads x/y as
+			// good-of-total, and "63/63" here would say the opposite of what it
+			// means — 63 is the DEBT, and the only direction it should ever move
+			// is down.
 			measure: {
 				value: scriptsTypes.total,
-				of: scriptsTypes.baselined,
+				of: null,
 				unit: "errors",
 			},
 			sub: `${scriptsTypes.total} type errors in scripts/, ${scriptsTypes.baselined} of them baselined — new ones fail the build`,
