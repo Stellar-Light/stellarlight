@@ -55,6 +55,7 @@ interface ScfEntry {
 	rounds: string[];
 	url: string;
 	website?: string | null;
+	websites?: string[];
 }
 
 async function fetchScfEntries(): Promise<ScfEntry[]> {
@@ -217,14 +218,32 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 				// The submission's own website link, for the domain-equality pass.
 				// First external http(s) link that is not an SCF/social/platform
 				// domain — the page's product-website field renders as exactly that.
-				const links = [...html.matchAll(/https?:\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s"'<)]*/gi)].map((m) => m[0]);
-				e.website =
-					links.find(
-						(u) =>
-							!/stellar\.org|stellar\.expert|github\.com|twitter\.com|x\.com|linkedin\.com|discord|t\.me|youtube\.com|medium\.com|docs\.google|airtable|notion\.so|vercel\.app\/api|fonts\.|cdn\.|googleapis|gstatic|cloudfront/i.test(
-								u,
-							),
-					) ?? null;
+				//
+				// UNESCAPE FIRST. The first run of this pass matched ZERO of 25
+				// while the human review had domain-resolved 23 of 47 — because
+				// these pages embed their data in an RSC payload where every URL
+				// arrives \/-escaped or \u002F-escaped. A regex that only knows
+				// literal slashes reads a page full of links and finds none.
+				const unescaped = html
+					.replace(/\\u002[fF]/g, "/")
+					.replace(/\\\//g, "/");
+				const links = [...unescaped.matchAll(/https?:\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s\\"'<)]*/gi)].map((m) => m[0]);
+				// ALL surviving external links, not the first. The first-pick
+				// version matched 7 of ~14 known-duplicate pages: the product
+				// site is not reliably the first link in the RSC payload (decks,
+				// forms and secondary links precede it on several pages). The
+				// domain-intersection downstream is unordered anyway.
+				e.websites = [
+					...new Set(
+						links.filter(
+							(u) =>
+								!/stellar\.org|stellar\.expert|twitter\.com|\/\/x\.com|\/\/www\.x\.com|linkedin\.com|discord|t\.me|medium\.com|docs\.google|airtable|notion\.so|vercel\.app\/api|fonts\.|cdn\.|googleapis|gstatic|cloudfront|w3\.org|sanity\.io|googletagmanager|visualwebsiteoptimizer|gitbook\.io|schema\.org|sentry|segment\.|hotjar|plausible|posthog|apple\.com|play\.google|google\.com|dappradar|defillama|coinmarketcap|coingecko|crunchbase|producthunt|typeform|calendly|mailchimp|substack/i.test(
+									u,
+								),
+						),
+					),
+				].slice(0, 12);
+				e.website = e.websites[0] ?? null;
 			} catch {
 				/* stays as listed */
 			}
@@ -271,6 +290,11 @@ async function main() {
 		if (!u) return null;
 		try {
 			const h = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+			// Hosted-subdomain platforms: the SUBDOMAIN is the identity.
+			// Collapsing foo.github.io to github.io matched a disassembler RFP
+			// to an unrelated project that also publishes on github.io.
+			if (/\.(github\.io|vercel\.app|netlify\.app|pages\.dev|onrender\.com|webflow\.io|framer\.website)$/.test(h))
+				return h;
 			const parts = h.split(".");
 			return parts.length <= 2 ? h : parts.slice(-2).join(".");
 		} catch {
@@ -278,15 +302,56 @@ async function main() {
 		}
 	};
 	const byDomain = new Map<string, { slug: string; name: string }>();
+	// github.com must never domain-match (half the corpus lives there) — but a
+	// submission whose website IS a github repo identifies exactly one project,
+	// so those match on the full owner/repo path instead.
+	// PLATFORM hosts identify a project by PATH, never by domain — github,
+	// jsr, npm, crates, pypi and youtube host half the ecosystem each, and the
+	// first version domain-matched jsr.io straight into the wrong package
+	// (meta-contracts -> stellar-indexer instead of stellar-router-sdk).
+	const PLATFORM =
+		/^(github\.com|jsr\.io|npmjs\.com|crates\.io|pypi\.org|youtube\.com)$/;
+	const platPath = (u: string | null | undefined): string | null => {
+		if (!u) return null;
+		try {
+			const url = new URL(u);
+			const host = url.hostname.toLowerCase().replace(/^www\./, "");
+			if (!PLATFORM.test(host)) return null;
+			const segs = url.pathname.split("/").filter(Boolean).slice(0, 2);
+			if (!segs.length) return null;
+			return `${host}/${segs.join("/").toLowerCase().replace(/\.git$/, "")}`;
+		} catch {
+			return null;
+		}
+	};
+	const byPlatPath = new Map<string, { slug: string; name: string }>();
 	for (const d of dir) {
 		const dom = regDomain(d.website);
-		if (dom) byDomain.set(dom, { slug: d.slug, name: d.name });
+		if (dom && !PLATFORM.test(dom))
+			byDomain.set(dom, { slug: d.slug, name: d.name });
+		const pp = platPath(d.website);
+		if (pp) byPlatPath.set(pp, { slug: d.slug, name: d.name });
 	}
 	const domainMatched: Array<{ scf: string; slug: string; domain: string }> =
 		[];
 	const stillAbsent = absent.filter((e) => {
-		const dom = regDomain(e.website);
-		const hit = dom ? byDomain.get(dom) : undefined;
+		let hit: { slug: string; name: string } | undefined;
+		let matchedOn = "";
+		for (const link of e.websites ?? []) {
+			const pp = platPath(link);
+			if (pp && byPlatPath.has(pp)) {
+				hit = byPlatPath.get(pp);
+				matchedOn = pp;
+				break;
+			}
+			const dom = regDomain(link);
+			if (dom && !PLATFORM.test(dom) && byDomain.has(dom)) {
+				hit = byDomain.get(dom);
+				matchedOn = dom;
+				break;
+			}
+		}
+		const dom = matchedOn;
 		if (hit) {
 			domainMatched.push({ scf: e.scfSlug, slug: hit.slug, domain: dom as string });
 			return false;

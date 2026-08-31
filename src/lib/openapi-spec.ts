@@ -8492,6 +8492,20 @@ export const spec: OpenAPISpec = {
 							"Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
 					},
 					repoScoreLabel: { type: "string", nullable: true },
+					tierReason: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"WHY the tier is what it is — the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict.",
+					},
+					tierChangedAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When the tier last changed — the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.",
+					},
 					tier: {
 						type: "string",
 						enum: ["quality", "community", "archive"],

@@ -45,6 +45,27 @@ export const STATUS_FIX: Record<
 	// seed label. The only row of its shape among all 152 source-inherited
 	// Live rows (probed in-session). Draft = out of the served population,
 	// reversible, and sync no longer reverts curation (#730).
+	// ── 2026-08-31 SCF absence review: two REAL projects sitting as hidden
+	// Draft rows, blocking their own seeds ("exists, skip" while the public
+	// API serves neither — the diagnostic added the same day proved the
+	// status). Both were verified in the review; un-drafting is what the
+	// approved "create" verdict means for a row that already exists.
+	fxdao: {
+		from: "Draft",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-08-31",
+		sourceUrl: "https://fxdao.io",
+		note: "Soroban-native stablecoin protocol; site 200, org repos active 2025-09; SCF round 13 already on the row. Hidden as Draft while the review found it 'genuinely absent' — it was hidden, not absent.",
+	},
+	enerdao: {
+		from: "Draft",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/enerdao-r84",
+		note: "Tokenized renewable-energy debt on Soroban; site 200 but repo silent — the review's own verdict was shaky, so Development, not Live.",
+	},
 	"free-voting-platform": {
 		from: "Live",
 		to: "Draft",

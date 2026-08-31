@@ -1,0 +1,43 @@
+# The tier write path, armed at last.
+#
+# PLAN §6b item 1: the rule is fixed (quality = CURATED, never code-depth
+# alone), backfill-code-tier.ts is written, dry-runs were clean — and no lane
+# existed to run it, so `tier` stayed the schema default corpus-wide and
+# tierReason spent a month on /quality as the canonical dead field. The script
+# writes the full provenance suite (tier, tierReason, tierPrev, tierChangedAt,
+# tierRunId) with per-write read-back and an archive-rate circuit breaker;
+# demotions stay gated behind --include-demotions, which this workflow
+# deliberately does not expose — enabling demotions is a human edit here, on
+# purpose.
+name: Backfill code tier (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-code-tier
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  tier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Backfill tier${{ inputs.execute && ' (EXECUTE)' || ' (dry run)' }}
+        run: pnpm exec tsx scripts/backfill-code-tier.ts ${{ inputs.execute && '--execute' || '' }}

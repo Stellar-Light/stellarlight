@@ -1,80 +1,80 @@
 {
-	"asOf": "2026-08-31T04:34:10.298Z",
+	"asOf": "2026-08-31T13:02:21.715Z",
 	"source": "scripts/scan/independent-calibrate.ts",
 	"frame": {
 		"answerKey": 86,
-		"graded": 0,
+		"graded": 9,
 		"byGrader": {
 			"deepwiki": 0,
-			"grok": 0
+			"grok": 9
 		}
 	},
-	"agreementRate": 0,
+	"agreementRate": 100,
 	"disagreements": [],
 	"rows": [
 		{
 			"fullName": "hoops-finance/contracts",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Fetching the repository to inspect actual source rather than README claims."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "Original adapters (aqua/comet/soroswap/phoenix lib.rs) implement real AMM swap/LP/quote logic plus router quoting and adapter integration tests; only swap() and some discover_* are stubs"
 		},
 		{
 			"fullName": "allbridge-io/allbridge-core-soroban-contracts",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Fetching the repository contents to inspect actual code before classifying."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "Real Allbridge Core Soroban stack: contracts/bridge swap_and_bridge/receive_tokens, pool get_y/get_d AMM, messenger secp256k1 dual-sig, plus tests/ and operational Makefile"
 		},
 		{
 			"fullName": "phoenix-protocol-group/phoenix-nft-marketplace",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Fetching the repository and inspecting actual source before classifying."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "Real auction/collection/deployer contracts in contracts/auctions/src/contract.rs, collections/src/contract.rs, deployer/src/lib.rs plus non-stub tests (bids.rs, finalize_auction.rs); only token/ is th"
 		},
 		{
 			"fullName": "bp-ventures/lightecho-stellar-oracle",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Starting repository inspection."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "contract_light.rs + utils.rs packed u128 keys, test_light.rs, server.py, feed_bulk_from_db.py, Python/JS SDKs; is_template=false, 585 commits"
 		},
 		{
 			"fullName": "rozoai/rozo-intents-contracts",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Inspecting the repository source before classifying."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "Original escrow/bridge logic in v2/stellar/intent_bridge/src/lib.rs and forwarder/src/lib.rs (audited), plus full fill-and-notify implementations in stellar/contracts/rozo-intents/src/lib.rs, evm/src/"
 		},
 		{
 			"fullName": "YieldBack-Cash/amm",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Starting the audit of YieldBack-Cash/amm by inspecting the GitHub repo structure and source, not README claims."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "YieldBack-Cash/amm 404s; ybc-contracts/contracts/amm/amm has 787-line contract.rs + curve.rs logit/implied-rate math, YM-priced flash swaps, proptests+fuzz — not a scaffold"
 		},
 		{
 			"fullName": "warp-driver/Phoenix-Blend-Pool",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Fetching the repository to inspect actual code rather than README claims."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "contracts/automation-handler/src/contract.rs + tests.rs implement rebalance/harvest/unwind with mocks; circuit/phoenix.rs filters Phoenix events; not a template"
 		},
 		{
 			"fullName": "Bond-Hive/soroban_contracts",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Inspecting the repository contents and code structure first."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "bond_contract/src/lib.rs and farm_contract/src/lib.rs implement custom quote/maturity/redemption and dual-reward farm logic with scenario tests; only examples/token_interface.rs is a copied Soroban to"
 		},
 		{
 			"fullName": "CometDEX/comet-contracts-v1",
@@ -82,15 +82,15 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository contains a substantial working implementation of a Comet DEX system, which is an Automated Market Maker (AMM) built on the Soroban platform.  It"
+			"reason": "This repository, `CometDEX/comet-contracts-v1`, appears to be a substantial working implementation of a decentralized exchange (DEX) system, specifically an Aut"
 		},
 		{
 			"fullName": "excellar-labs/excellar-contracts",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository audit."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "FxDAO/FxDAO-SC",
@@ -98,7 +98,7 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `FxDAO/FxDAO-SC`, contains substantial working implementations of smart contracts with real logic, specifically for a \"Locking Pool\" and \"Vault"
+			"reason": "This repository, FxDAO/FxDAO-SC, contains a substantial working implementation of a decentralized finance (DeFi) platform, not a template or tutorial scaffold. "
 		},
 		{
 			"fullName": "zenith-protocols/orbit-contracts",
@@ -112,25 +112,25 @@
 			"fullName": "reflector-network/reflector-dao-contract",
 			"label": "DEEP",
 			"grader": "grok",
-			"verdict": "UNCLEAR",
-			"agree": null,
-			"reason": "Starting repository audit of reflector-network/reflector-dao-contract by inspecting the actual source, not README claims."
+			"verdict": "SUBSTANTIAL",
+			"agree": true,
+			"reason": "src/lib.rs implements real DAO unlock/claim/ballot/vote/refund logic with types, env storage, tests, and a Certora audit PDF"
 		},
 		{
 			"fullName": "reflector-network/reflector-subscription-contract",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual source, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "script3/soroban-governor",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual code before classifying."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "soroswap/aggregator",
@@ -138,7 +138,7 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `soroswap/aggregator`, is a substantial working implementation with its own real logic, rather than a template or scaffold.   It implements a d"
+			"reason": "This repository contains a substantial working implementation of a decentralized exchange (DEX) aggregator, not merely a template or example set.   It includes "
 		},
 		{
 			"fullName": "paltalabs/defindex",
@@ -146,23 +146,23 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository is a substantial working implementation with real logic, specifically a decentralized finance (DeFi) protocol called DeFindex. It includes smart"
+			"reason": "This repository, `paltalabs/defindex`, is a substantial working implementation of a decentralized finance (DeFi) protocol, specifically a Soroban-based vault pr"
 		},
 		{
 			"fullName": "PotLock/grantpicks",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of PotLock/grantpicks by inspecting the actual repository structure and source, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "axelarnetwork/axelar-amplifier-stellar",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository audit."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "untangledfinance/soroban-vault-contract",
@@ -170,7 +170,7 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `untangledfinance/soroban-vault-contract`, contains a substantial working implementation of a Soroban smart contract for a token vault system, "
+			"reason": "This repository contains a substantial working implementation of a Soroban smart contract called `Vault` . It is designed to manage token deposits, redemptions,"
 		},
 		{
 			"fullName": "EquitXCompany/equitx-project",
@@ -178,63 +178,63 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository is a substantial working implementation with real logic, not a template or scaffold. It contains a complete decentralized finance (DeFi) applica"
+			"reason": "This repository contains a substantial working implementation with real logic, specifically a decentralized finance (DeFi) protocol for synthetic assets on the "
 		},
 		{
 			"fullName": "Crossmint/stellar-smart-account",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `Crossmint/stellar-smart-account`, is a substantial working implementation of a smart account system, not a template or tutorial scaffold. It f"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "Trustless-Work/trustlesswork-smart-contract-stellar",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Inspecting the repository contents and implementation before classifying."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "The-Brookes-Project/soroban-sc",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual code rather than README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "xycloo/xycloans",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual code before classifying."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "VestingLabs/stellar_vesting",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository audit."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "icon-project/xcall-multi",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of icon-project/xcall-multi from the actual repository contents."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "blend-capital/blend-contracts",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Inspecting blend-capital/blend-contracts now to judge the actual code, not the README."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "blend-capital/blend-contracts-v2",
@@ -242,239 +242,239 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `blend-capital/blend-contracts-v2`, appears to be a substantial working implementation of a decentralized finance (DeFi) lending and borrowing "
+			"reason": "This repository, `blend-capital/blend-contracts-v2`, appears to be a substantial working implementation of a decentralized finance (DeFi) protocol, specifically"
 		},
 		{
 			"fullName": "soroswap/core",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `soroswap/core`, is a substantial working implementation of a decentralized exchange (DEX) protocol, specifically an Automated Market Maker (AM"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "reflector-network/reflector-contract",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `reflector-network/reflector-contract`, is a substantial working implementation of a decentralized oracle system, not a template or scaffold.  "
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "kalepail/passkey-kit",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository is a substantial working implementation with its own logic, rather than a template or scaffold. It provides a comprehensive SDK for building pas"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "eq-lab/slender",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of eq-lab/slender against actual code, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "phoenix-protocol-group/phoenix-contracts",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of phoenix-protocol-group/phoenix-contracts by inspecting the actual source, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "laina-defi/laina",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository contains a substantial working implementation of a DeFi lending platform, not a template or scaffold. It includes real logic for smart contracts"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "sentinelfi/sentinel_soroban_v3",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository inspection."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "normalfinance/normal-stellar-amm",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `normalfinance/normal-stellar-amm`, appears to be a substantial working implementation of a decentralized finance (DeFi) protocol, specifically"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "perun-network/perun-soroban-contract",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of the repository source, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "creit-tech/xbull-wallet",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository and inspecting the actual source, not README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "stellarterm/stellarterm",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Inspecting the actual repository contents before classifying."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "blend-capital/blend-sdk-js",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `blend-capital/blend-sdk-js`, appears to be a substantial working implementation with real logic, rather than a template or scaffold. It provid"
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "stellar-broker/ui",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of stellar-broker/ui; inspecting the repository contents next."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "RozoAI/rozo-rewards-miniapp",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository and inspecting source before classifying."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "diadata-org/soroban-oracle-feeders",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of diadata-org/soroban-oracle-feeders by inspecting the actual repository contents rather than README claims."
+			"reason": "grok failed twice"
 		},
 		{
 			"fullName": "NoetherDEX/noether",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of NoetherDEX/noether by inspecting the actual repository contents rather than README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "Nectar-Network/nectar",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository audit."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "dfns/dfns-sdk-ts",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `dfns/dfns-sdk-ts`, appears to be a substantial working implementation of an SDK, not a template or example set. It provides client classes and"
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "glo-foundation/glo-wallet",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of glo-foundation/glo-wallet from GitHub source, not README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "idos-network/idos-sdk-js",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Need to inspect the actual source of idos-network/idos-sdk-js before classifying it as a working implementation or a scaffold."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "reflector-network/reflector-node",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository and inspecting source, not README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "chatch/stellarexplorer",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `chatch/stellarexplorer`, is a substantial working implementation of a Stellar network explorer, not a template or tutorial scaffold.  It featu"
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "lobstrco/lobstr-browser-extension",
 			"label": "DEEP",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting repository audit of lobstrco/lobstr-browser-extension against actual source, not README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "allbridge-io/allbridge-core-js-sdk",
 			"label": "DEEP",
-			"grader": "deepwiki",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `allbridge-io/allbridge-core-js-sdk`, is a substantial working implementation of a JavaScript SDK for interacting with the Allbridge Core proto"
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "nrxschool/stellar-bootcamp",
 			"label": "SHALLOW",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting a code-first audit of nrxschool/stellar-bootcamp before classifying it."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "warp-driver/oracle-demo",
 			"label": "SHALLOW",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual code rather than README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "HatomProtocol/hatom-sc-proxies",
 			"label": "SHALLOW",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Need to inspect the actual repository contents before classifying."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "bigger-tech/template-stellar-smart-contract",
 			"label": "SHALLOW",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Starting audit of bigger-tech/template-stellar-smart-contract by inspecting the actual repository contents rather than README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "k3-labs/k3-template-rust",
 			"label": "SHALLOW",
-			"grader": "grok",
+			"grader": "none",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "Fetching the repository to inspect actual code rather than README claims."
+			"reason": "not DeepWiki-indexed; grok budget exhausted"
 		},
 		{
 			"fullName": "axelarnetwork/stellar-gmp-example",
@@ -530,7 +530,7 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `stellar/soroban-examples`, is primarily a collection of example smart contracts designed to illustrate key features and concepts of Soroban. I"
+			"reason": "This repository, `stellar/soroban-examples`, is a collection of example smart contracts designed to illustrate various features and concepts of the Soroban plat"
 		},
 		{
 			"fullName": "stellar/soroban-quickstart",
@@ -546,7 +546,7 @@
 			"grader": "deepwiki",
 			"verdict": "UNCLEAR",
 			"agree": null,
-			"reason": "This repository, `stellar/soroban-example-dapp`, is a substantial working implementation of a decentralized application (dApp) with real logic, rather than a me"
+			"reason": "This repository, `stellar/soroban-example-dapp`, is a substantial working implementation of a decentralized application (dApp) with its own logic, rather than a"
 		},
 		{
 			"fullName": "stellar/soroban-template-astro",

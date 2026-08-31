@@ -3,17 +3,10 @@
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 500,
-    "absent": 47,
-    "served": 453,
-    "absentWithRoundBadge": 47,
+    "absent": 7,
+    "served": 493,
+    "absentWithRoundBadge": 7,
     "sample": [
-      {
-        "scfSlug": "loop-cashback-everywhere-with-stellar-zom",
-        "rounds": [
-          "40"
-        ],
-        "url": "https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom"
-      },
       {
         "scfSlug": "dockingzone-a18",
         "rounds": [
@@ -23,52 +16,6 @@
         "url": "https://communityfund.stellar.org/project/dockingzone-a18"
       },
       {
-        "scfSlug": "a-real-estate-tokenization-platform-ss1",
-        "rounds": [
-          "33",
-          "32",
-          "31"
-        ],
-        "url": "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1"
-      },
-      {
-        "scfSlug": "anticipatory-aid-on-soroban-f7j",
-        "rounds": [
-          "31",
-          "22"
-        ],
-        "url": "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j"
-      },
-      {
-        "scfSlug": "ctxcom-evm",
-        "rounds": [
-          "19"
-        ],
-        "url": "https://communityfund.stellar.org/project/ctxcom-evm"
-      },
-      {
-        "scfSlug": "crediolabsai-ut9",
-        "rounds": [
-          "44"
-        ],
-        "url": "https://communityfund.stellar.org/project/crediolabsai-ut9"
-      },
-      {
-        "scfSlug": "policywright-j8x",
-        "rounds": [
-          "44",
-          "42"
-        ],
-        "url": "https://communityfund.stellar.org/project/policywright-j8x"
-      },
-      {
-        "scfSlug": "vrf-soroban-8yl",
-        "rounds": [
-          "44"
-        ],
-        "url": "https://communityfund.stellar.org/project/vrf-soroban-8yl"
-      },
-      {
         "scfSlug": "soroban-contract-source-verification-service-bax",
         "rounds": [
           "44"
@@ -76,11 +23,41 @@
         "url": "https://communityfund.stellar.org/project/soroban-contract-source-verification-service-bax"
       },
       {
-        "scfSlug": "soroban-disassembler-working-title-ply",
+        "scfSlug": "rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
         "rounds": [
           "41"
         ],
-        "url": "https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply"
+        "url": "https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh"
+      },
+      {
+        "scfSlug": "communidao-9pm",
+        "rounds": [
+          "14",
+          "20",
+          "16"
+        ],
+        "url": "https://communityfund.stellar.org/project/communidao-9pm"
+      },
+      {
+        "scfSlug": "west-african-ambassadors-waa-syb",
+        "rounds": [
+          "29"
+        ],
+        "url": "https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb"
+      },
+      {
+        "scfSlug": "study-stellar-sdk-soroban-b3d",
+        "rounds": [
+          "27"
+        ],
+        "url": "https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d"
+      },
+      {
+        "scfSlug": "enerdao-r84",
+        "rounds": [
+          "24"
+        ],
+        "url": "https://communityfund.stellar.org/project/enerdao-r84"
       }
     ]
   },
@@ -98,5 +75,97 @@
     "staleCollections": 0,
     "staleOrEmptyResearchSources": 1,
     "refreshUnmeasurableSources": 3
-  }
+  },
+  "domainMatched": [
+    {
+      "scf": "a-real-estate-tokenization-platform-ss1",
+      "slug": "verseprop",
+      "domain": "verseprop.com"
+    },
+    {
+      "scf": "anticipatory-aid-on-soroban-f7j",
+      "slug": "coala-pay",
+      "domain": "coalapay.org"
+    },
+    {
+      "scf": "ctxcom-evm",
+      "slug": "ctx",
+      "domain": "ctx.com"
+    },
+    {
+      "scf": "soroban-disassembler-working-title-ply",
+      "slug": "inference",
+      "domain": "inferara.com"
+    },
+    {
+      "scf": "prices-api-rfp-ctx-1vo",
+      "slug": "ctx",
+      "domain": "ctx.com"
+    },
+    {
+      "scf": "advanced-debugging-for-soroban-contracts-5sr",
+      "slug": "runtime-verification",
+      "domain": "runtimeverification.com"
+    },
+    {
+      "scf": "confidential-transfers-and-balances-hdt",
+      "slug": "fairblock",
+      "domain": "fairblock.network"
+    },
+    {
+      "scf": "stellar-women-bootcamp-r5v",
+      "slug": "womenbiz",
+      "domain": "hiwomenbiz.com"
+    },
+    {
+      "scf": "social-podcast-ini",
+      "slug": "roberto-sanz-criptomonedas",
+      "domain": "youtube.com/@robertosanzcriptomonedas"
+    },
+    {
+      "scf": "embedded-collective-investment-via-soroban-syi",
+      "slug": "escala",
+      "domain": "escalahq.com"
+    },
+    {
+      "scf": "seasonal-workers-payroll-lru",
+      "slug": "tucambio",
+      "domain": "tucambio.app"
+    },
+    {
+      "scf": "institutional-liquidity-infrastructure-for-stellar-k5c",
+      "slug": "lobster",
+      "domain": "lobster-protocol.com"
+    },
+    {
+      "scf": "smart-account-onboarding-8yr",
+      "slug": "the-aha-company",
+      "domain": "theaha.co"
+    },
+    {
+      "scf": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+      "slug": "pagcrypto",
+      "domain": "pagcrypto.finance"
+    },
+    {
+      "scf": "fxdao-xov",
+      "slug": "gbpx",
+      "domain": "fxdao.io"
+    },
+    {
+      "scf": "post-quantum-secure-wallets-for-stellar-97o",
+      "slug": "soundness",
+      "domain": "soundness.xyz"
+    },
+    {
+      "scf": "institutional-treasury-xlm-wyu",
+      "slug": "arrel",
+      "domain": "arreltech.com"
+    },
+    {
+      "scf": "meta-contracts-in-stellar-p4c",
+      "slug": "stellar-router-sdk",
+      "domain": "jsr.io/@creit-tech/stellar-router-sdk"
+    }
+  ]
 }

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.10",
+		type: "added",
+		summary:
+			"searchRepos rows serve `tierReason` and `tierChangedAt` beside `tier` — the tier's basis and its date. Null until the code-tier lane has judged the row: a bare tier means the schema default, not a verdict.",
+		detail:
+			"tierReason, tierPrev, tierChangedAt and tierRunId have existed in the Repos schema since the CTL design and were never written — tierReason spent a month on /quality as the canonical dead field of the consumption guard. The backfill lane now writes the full provenance suite (reasons array, previous tier, change timestamp, run id) with per-write read-back, and the search row serves the two consumer-facing halves. This is class 33 applied to our own machinery: a verdict without its basis beside it invites a reader to infer one from the nearest other field, and tierChangedAt is the date that covers tier — not scannedAt, not lastCommitAt, which describe the scan and the repo.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.9",
 		type: "fixed",
 		summary:

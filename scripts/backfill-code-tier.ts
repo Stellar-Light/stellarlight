@@ -70,6 +70,7 @@ import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
+const RUN_ID = `ctl-${new Date().toISOString().slice(0, 10)}-${Math.abs(Date.now() % 100000)}`;
 /** Demotions are OFF unless asked for. Promotions are provably safe — they
  * come from the curated list, which a human maintains. Demotions come from
  * `proof === "none"`, and the proof engine has a LANGUAGE BLIND SPOT: it looks
@@ -256,7 +257,19 @@ async function main() {
 		await payload.update({
 			collection: "repos",
 			id: doc.id,
-			data: { tier: c.to },
+			// The full provenance suite, not just the verdict. tierReason,
+			// tierPrev, tierChangedAt and tierRunId have existed in the schema
+			// since the CTL design and were never written — tierReason spent a
+			// month on /quality as the canonical dead field. A tier carrying its
+			// reasons and its date is the evidenced-and-dated pitch, applied to
+			// our own machinery; a bare tier is a verdict wearing no basis.
+			data: {
+				tier: c.to,
+				tierReason: c.why.split("+"),
+				tierPrev: c.from,
+				tierChangedAt: new Date().toISOString(),
+				tierRunId: RUN_ID,
+			},
 			context: { internal: true },
 		});
 		// READ-BACK: payload.update() reports success while silently dropping an
