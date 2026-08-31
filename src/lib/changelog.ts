@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.11",
+		type: "changed",
+		summary:
+			"Routing vocabulary restored to five operation DESCRIPTIONS (getPartners, getLeaderboard, getRfps, searchProjects, explainRepo) — the text consumers actually index. No parameter, shape, or behavior changes.",
+		detail:
+			"Live interrogation of the #1 consumer's discovery index showed it embeds ONLY summary+description: the x-routing keyword blocks (split out in sls-051) never reach it, so a month of routing vocabulary was invisible to the consumer it was written for. Measured misses this fixes the vocabulary for: 'on and off ramps' (getPartners now spells the phrase out beside on/off-ramp, and says Stellar, which the description never contained), 'top Stellar projects by GitHub activity' (getLeaderboard now leads with top/most-active phrasing), 'jobs bounties and freelance work' (getRfps carries the worker-side words — the spec had an inline comment DOCUMENTING this exact gap without applying it), bare 'oracle/wallet/anchor' vocabulary (searchProjects enumerates sample type values), and ecosystem-repo mechanism questions (explainRepo says it also routes any indexed ecosystem repo — true since the graded-index fallback landed). Descriptions stay within the routing-surface budget; x-routing blocks remain for consumers that do read them.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.10",
 		type: "added",
 		summary:
