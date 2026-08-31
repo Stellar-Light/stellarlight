@@ -99,6 +99,56 @@ const SCF_LEGACY_AWARDS: Record<
 	},
 };
 
+/** SCF submission linkage from the 2026-08-31 absence review
+ * (docs/SCF-SEED-REVIEW-2026-08-31.md). Promote-only, rounds WITHOUT
+ * amounts: every entry's evidence is its SCF project page, opened and read
+ * during the review — the page proves the submission and its rounds, but
+ * per-round dollar figures are the crosscheck lanes' job and are never
+ * invented here. Merges awarded:true + rounds; never removes, never touches
+ * totals. Rows listed with "?" rounds in the review are deliberately absent. */
+const SCF_SUBMISSION_LINKS: Record<
+	string,
+	{ rounds: number[]; evidence: string }
+> = {
+	// the 19 approved creates (seeded this run — SEEDS runs first)
+	loop: { rounds: [40], evidence: "https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom" },
+	"crediolabs-ai": { rounds: [44], evidence: "https://communityfund.stellar.org/project/crediolabsai-ut9" },
+	policywright: { rounds: [42, 44], evidence: "https://communityfund.stellar.org/project/policywright-j8x" },
+	"vrf-soroban": { rounds: [44], evidence: "https://communityfund.stellar.org/project/vrf-soroban-8yl" },
+	komet: { rounds: [28, 30], evidence: "https://communityfund.stellar.org/project/komet-formal-verification-o0s" },
+	"roberto-sanz-criptomonedas": { rounds: [22, 24], evidence: "https://communityfund.stellar.org/project/social-podcast-ini" },
+	janus: { rounds: [45], evidence: "https://communityfund.stellar.org/project/janus-m2t" },
+	kutana: { rounds: [38, 39, 43, 44, 45], evidence: "https://communityfund.stellar.org/project/kutana-9ti" },
+	sorted: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/sorted-jqh" },
+	sendana: { rounds: [40, 44, 45], evidence: "https://communityfund.stellar.org/project/sendana-axa" },
+	"account-demolisher": { rounds: [29, 41, 44], evidence: "https://communityfund.stellar.org/project/account-demolisher-bfe" },
+	etesia: { rounds: [44], evidence: "https://communityfund.stellar.org/project/etesia-rgj" },
+	"nouns-builder-protocol": { rounds: [44], evidence: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7" },
+	yolat: { rounds: [44], evidence: "https://communityfund.stellar.org/project/yolat-bl5" },
+	crebit: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril" },
+	pagcrypto: { rounds: [42], evidence: "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu" },
+	upesa: { rounds: [41, 42], evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq" },
+	fxdao: { rounds: [13], evidence: "https://communityfund.stellar.org/project/fxdao-xov" },
+	// the duplicates whose rounds the review read off their SCF pages
+	verseprop: { rounds: [31, 32, 33], evidence: "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1" },
+	ctx: { rounds: [19, 41], evidence: "https://communityfund.stellar.org/project/prices-api-rfp-ctx-1vo" },
+	inferera: { rounds: [41], evidence: "https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply" },
+	simbolik: { rounds: [41], evidence: "https://communityfund.stellar.org/project/advanced-debugging-for-soroban-contracts-5sr" },
+	fairblock: { rounds: [40], evidence: "https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt" },
+	tucambio: { rounds: [37, 43], evidence: "https://communityfund.stellar.org/project/seasonal-workers-payroll-lru" },
+	womenbiz: { rounds: [29], evidence: "https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v" },
+	fastbuka: { rounds: [35, 38, 44], evidence: "https://communityfund.stellar.org/project/choppaddi-vmf" },
+	untangled: { rounds: [41], evidence: "https://communityfund.stellar.org/project/octopos-g6i" },
+	"coala-pay": { rounds: [22, 31], evidence: "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j" },
+	escala: { rounds: [42, 43, 44], evidence: "https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi" },
+	lobster: { rounds: [42], evidence: "https://communityfund.stellar.org/project/institutional-liquidity-infrastructure-for-stellar-k5c" },
+	"dfs-labs": { rounds: [24], evidence: "https://communityfund.stellar.org/project/stellar-surge-1gh" },
+	ichi: { rounds: [26], evidence: "https://communityfund.stellar.org/project/solo-labs-iy1" },
+	"the-aha-company": { rounds: [41], evidence: "https://communityfund.stellar.org/project/smart-account-onboarding-8yr" },
+	"soroban-decompiler": { rounds: [41], evidence: "https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh" },
+};
+
+
 const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 	"stellar-php-sdk": {
 		rounds: ["2025Q4", "2026Q1"],
@@ -1732,6 +1782,52 @@ async function main() {
 		}
 		console.log(`  ${slug}: prominence ${d.prominence ?? 0} → ${prominence}`);
 		writes.push({ id: d.id, slug, data: { prominence } });
+	}
+
+	// ── SCF submission linkage (2026-08-31 review) — promote-only, no amounts ──
+	console.log("\n── SCF submission linkage (absence review, promote-only) ──");
+	for (const [slug, a] of Object.entries(SCF_SUBMISSION_LINKS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped (seed missing?)`);
+			continue;
+		}
+		const scf = d.scf ?? {};
+		const rounds: number[] = Array.isArray(scf.awardedRounds)
+			? scf.awardedRounds.map(Number)
+			: [];
+		const nextRounds = [...new Set([...rounds, ...a.rounds])].sort(
+			(x, y) => x - y,
+		);
+		if (scf.awarded && nextRounds.length === rounds.length) {
+			console.log(`  ${slug}: already awarded w/ all rounds, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: scfAwarded ${!!scf.awarded} → true, rounds [${rounds.join(", ")}] → [${nextRounds.join(", ")}] (${a.evidence})`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					awarded: true,
+					awardedRounds: nextRounds,
+					lastAwardedRound: Math.max(
+						Number(scf.lastAwardedRound) || 0,
+						...a.rounds,
+					),
+				},
+			},
+		});
 	}
 
 	// ── ALIAS_ADD: rename-continuity aliases (sls-050 as data) ──
