@@ -355,9 +355,14 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 				clearedBy: "stale-sweep: re-probed live and passing",
 			}),
 		];
-		const out = upsertFindings(prior, [f({ id: "s:x", source: "s" })], ["s"], iso(0));
+		// `iso(0)` is Date.now() — calling it twice returns two different strings
+		// a millisecond apart. Passing one call as the input and comparing against
+		// a SECOND call is a coin flip that lands heads on a fast machine: it
+		// passed locally and failed on the CI runner. Capture it once.
+		const now = iso(0);
+		const out = upsertFindings(prior, [f({ id: "s:x", source: "s" })], ["s"], now);
 		expect(out[0]?.status).toBe("open");
-		expect(out[0]?.reopenedAt).toBe(iso(0));
+		expect(out[0]?.reopenedAt).toBe(now);
 		// the old clearance is not evidence about the new state
 		expect(out[0]?.clearedAt).toBeUndefined();
 		expect(out[0]?.clearedBy).toBeUndefined();
