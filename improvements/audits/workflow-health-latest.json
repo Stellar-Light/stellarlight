@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-08-31T21:50:02.662Z",
+	"asOf": "2026-08-31T23:42:02.866Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 77,
 	"healthy": 76,
@@ -7,7 +7,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "always-red",
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
+			"why": "2 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
 		}
 	],
 	"rows": [
@@ -50,10 +50,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T22:07:42Z",
-			"ageDays": 77,
+			"ageDays": 78,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 77d ago (manual tool — age not judged)"
+			"why": "last green 78d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "apply-wallet-availability.yml",
@@ -61,10 +61,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T22:24:00Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -83,10 +83,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-15T22:34:25Z",
-			"ageDays": 15,
+			"ageDays": 16,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 15d ago (manual tool — age not judged)"
+			"why": "last green 16d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-knowledge-notes.yml",
@@ -127,10 +127,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 19,
+			"ageDays": 20,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 19d ago (manual tool — age not judged)"
+			"why": "last green 20d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -149,10 +149,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-13T23:34:58Z",
-			"ageDays": 78,
+			"ageDays": 79,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 78d ago (manual tool — age not judged)"
+			"why": "last green 79d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "check-links.yml",
@@ -181,10 +181,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:46:03Z",
+			"lastSuccessAt": "2026-08-31T23:20:06Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 39,
+			"runs": 53,
 			"why": "last green 0d ago"
 		},
 		{
@@ -203,10 +203,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:48:20Z",
+			"lastSuccessAt": "2026-08-31T23:20:06Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 42,
+			"runs": 55,
 			"why": "last green 0d ago"
 		},
 		{
@@ -215,20 +215,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-21T22:38:30Z",
-			"ageDays": 9,
+			"ageDays": 10,
 			"graceDays": 45,
 			"runs": 20,
-			"why": "last green 9d ago (manual tool — age not judged)"
+			"why": "last green 10d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "curate-projects.yml",
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:32:30Z",
+			"lastSuccessAt": "2026-08-31T22:17:38Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 19,
+			"runs": 23,
 			"why": "last green 0d ago"
 		},
 		{
@@ -237,10 +237,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T22:13:42Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "db-space.yml",
@@ -324,11 +324,11 @@
 			"name": "Enrich on-chain metrics",
 			"cron": "0 6 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-25T06:57:45Z",
-			"ageDays": 6,
+			"lastSuccessAt": "2026-08-31T22:21:47Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 21,
-			"why": "last green 6d ago"
+			"runs": 24,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "enrich-partner-onchain.yml",
@@ -533,7 +533,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:31:41Z",
+			"lastSuccessAt": "2026-08-31T21:55:10Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 80,
@@ -544,10 +544,10 @@
 			"name": "Nightly health (detectors → issue)",
 			"cron": "45 5 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T11:50:43Z",
+			"lastSuccessAt": "2026-08-31T23:20:15Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 13,
+			"runs": 15,
 			"why": "last green 0d ago"
 		},
 		{
@@ -555,10 +555,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T20:47:33Z",
+			"lastSuccessAt": "2026-08-31T21:58:26Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 6,
+			"runs": 8,
 			"why": "last green 0d ago"
 		},
 		{
@@ -588,10 +588,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:29:07Z",
+			"lastSuccessAt": "2026-08-31T21:58:26Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 6,
+			"runs": 7,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -665,10 +665,10 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T14:04:22Z",
+			"lastSuccessAt": "2026-08-31T22:54:53Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 52,
+			"runs": 53,
 			"why": "last green 0d ago"
 		},
 		{
@@ -676,7 +676,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "0 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T18:48:11Z",
+			"lastSuccessAt": "2026-08-31T23:37:22Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 97,
@@ -688,10 +688,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T23:41:25Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "seed-i3-mock.yml",
@@ -808,7 +808,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:48:20Z",
+			"lastSuccessAt": "2026-08-31T23:20:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -819,10 +819,10 @@
 			"name": "Upgrade status basis from on-chain evidence (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:48:30Z",
+			"lastSuccessAt": "2026-08-31T21:49:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -841,7 +841,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:25:50Z",
+			"lastSuccessAt": "2026-08-31T21:55:10Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -855,8 +855,8 @@
 			"lastSuccessAt": null,
 			"ageDays": null,
 			"graceDays": 21,
-			"runs": 1,
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
+			"runs": 2,
+			"why": "2 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
 		}
 	]
 }
