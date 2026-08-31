@@ -1,14 +1,10 @@
 {
- "generatedAt": "2026-08-30T13:10:12.267Z",
+ "generatedAt": "2026-08-31T15:18:40.507Z",
  "population": {
-  "openRecallMisses": 26,
-  "replayableOpenRecallMisses": 23,
-  "unclassified": 3,
+  "openRecallMisses": 3,
+  "replayableOpenRecallMisses": 1,
+  "unclassified": 2,
   "unclassifiedExamples": [
-   {
-    "id": "engine-a-recall:5-of-top-10-carry-types-ai-51-exist",
-    "probe": "≥5 of top-10 carry types=AI (51 exist)"
-   },
    {
     "id": "engine-a-recall:ping-in-top-13-of-52-matches-its-own-coverage-co",
     "probe": "ping in top-13 of 52 matches (its own coverage.countries implies 'Argentina anchor')"
@@ -18,8 +14,8 @@
     "probe": "ACTA-Team/did-stellar in top-5 for its own symbol 'contractErrorCodeFromNumber'"
    }
   ],
-  "coveragePct": 88,
-  "sampled": 23,
+  "coveragePct": 33,
+  "sampled": 1,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
  "stages": [
@@ -37,35 +33,19 @@
    "label": "returned, but below top-3",
    "owner": "ranking",
    "note": "The row IS retrieved for the query and simply ranks too low. The cheapest class to fix, and the one scoring changes actually move.",
-   "count": 10,
-   "share": 43,
-   "examples": [
-    "rise-in",
-    "stellar-update",
-    "ios-stellar-sdk",
-    "stellar-tip",
-    "lumens-for-charity",
-    "zkcross",
-    "for-yield",
-    "stellar-rust-sdk"
-   ]
+   "count": 0,
+   "share": 0,
+   "examples": []
   },
   {
    "stage": "admission",
    "label": "not returned for the query at all",
    "owner": "admission / matching",
    "note": "The tier ladder never admitted the row for this phrasing, though its exact name resolves. Vocabulary, anchors, and synonym work live here.",
-   "count": 13,
-   "share": 57,
+   "count": 1,
+   "share": 100,
    "examples": [
-    "the-starship-soroban",
-    "stellar-global",
-    "dd",
-    "dex-tools",
-    "block-by-block",
-    "stellar-c-sdk",
-    "soroban-sdk-tools",
-    "stellar-wallets-kit"
+    "dd"
    ]
   },
   {

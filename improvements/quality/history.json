@@ -40,5 +40,19 @@
   "liveRows": 875,
   "liveNoSource": 11,
   "humanVerified": 107
+ },
+ {
+  "date": "2026-08-31",
+  "batteryPass": 65,
+  "batteryFail": 0,
+  "batteryErrors": null,
+  "parityPass": 51,
+  "openMaps": 0,
+  "honestyDebt": 0,
+  "sampled": 1053,
+  "population": 1053,
+  "liveRows": 874,
+  "liveNoSource": 11,
+  "humanVerified": 113
  }
 ]
