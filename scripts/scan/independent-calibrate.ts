@@ -93,38 +93,43 @@ async function askGrok(fullName: string): Promise<{
 	classification: Verdict;
 	reason: string;
 } | null> {
-	const prompt = `Audit the GitHub repo ${fullName}. ${QUESTION} JSON only.`;
+	// AGENTIC, not single-shot. The first run of this script graded 0/86:
+	// every grok verdict came back UNCLEAR with reason "Starting audit ..."
+	// and stopReason "cancelled" — single-shot -p with a forced --json-schema
+	// answers before it investigates, exactly the HONEST LIMITATION
+	// grok-repo-audit.ts measured on 2026-08-30. A calibration grade that
+	// never read the repo is worse than none, so this runs grok with turns
+	// and asks for a trailing JSON object it can emit after actually looking.
+	const prompt = `Inspect the GitHub repository ${fullName} (fetch its README and key source files from github.com). ${QUESTION} After investigating, end your reply with EXACTLY one JSON object on its own line: {"classification":"SUBSTANTIAL"|"TEMPLATE"|"UNCLEAR","confidence":0..1,"reason":"<one line naming specific files/evidence>"}`;
 	for (let attempt = 0; attempt < 2; attempt++) {
 		try {
 			const { stdout } = await pexec(
 				"grok",
-				[
-					"-p",
-					prompt,
-					"--json-schema",
-					JSON.stringify(SCHEMA),
-					"--output-format",
-					"json",
-				],
-				{ maxBuffer: 10 * 1024 * 1024, timeout: 150_000 },
+				["--max-turns", "12", "--always-approve", "-p", prompt],
+				{ maxBuffer: 10 * 1024 * 1024, timeout: 300_000 },
 			);
-			const outer = JSON.parse(stdout) as { text?: string };
-			const parsed = JSON.parse(outer.text ?? "{}") as {
+			// last JSON object in the output wins
+			const matches = stdout.match(/\{[^{}]*"classification"[^{}]*\}/g);
+			const last = matches?.[matches.length - 1];
+			if (!last) continue;
+			const parsed = JSON.parse(last) as {
 				classification?: string;
+				confidence?: number;
 				reason?: string;
 			};
+			const reason = (parsed.reason ?? "").slice(0, 200);
+			// The measured failure modes: placeholder reasons and no-look verdicts.
+			if (/starting audit|gathering evidence|before classifying/i.test(reason))
+				continue;
+			if ((parsed.confidence ?? 0) < 0.5) continue;
 			if (
 				parsed.classification === "SUBSTANTIAL" ||
 				parsed.classification === "TEMPLATE" ||
 				parsed.classification === "UNCLEAR"
 			)
-				return {
-					classification: parsed.classification,
-					reason: (parsed.reason ?? "").slice(0, 200),
-				};
+				return { classification: parsed.classification, reason };
 		} catch {
-			// retry once, then give up on this repo — an unreadable repo is
-			// ungraded, never a verdict.
+			// retry once; an unreadable repo stays ungraded, never a verdict
 		}
 	}
 	return null;
