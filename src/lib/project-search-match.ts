@@ -871,13 +871,6 @@ export function nameMatchScore(
 	// the question is about that record. Word boundaries are load-bearing — a
 	// bare substring test would match "dd" inside "sudden" and promote a
 	// two-letter name onto half the corpus.
-	// A name only claims identity if it is DISTINCTIVE. A single generic token
-	// must never fire this: the project literally named "Bridge" cannot own
-	// "cross-chain bridge to stellar", and slug "stellar" cannot own "payments
-	// on Stellar today". That is the mention-vs-identity rule a prior audit
-	// established, and it is exactly what an unrestricted containment test
-	// would destroy — reusing GENERIC_QUERY_TOKENS keeps ONE definition of
-	// "generic" across the file instead of inventing a second.
 	// MULTI-WORD ONLY, and that restriction is the whole safety argument.
 	//
 	// A single word appearing in a question is a MENTION, not an identity
@@ -915,7 +908,29 @@ export function nameMatchScore(
 	const capitalized = qq.length
 		? (q.trim().match(/(?<=\s)[A-Z][A-Za-z0-9-]{2,}/g) ?? [])
 		: [];
-	for (const w of capitalized) {
+	// A capital INSIDE a word is a casing nobody produces by accident. That
+	// makes it a stronger identity signal than the rule above, and it needs
+	// neither of that rule's two conditions: sentence case cannot capitalise a
+	// letter mid-word, so the first-word exclusion is unnecessary, and the
+	// capital need not come first. "is zkCross live" matched nothing precisely
+	// because the regex above wants the capital in position 0 and zkCross's is
+	// in position 2.
+	//
+	// A lowercase letter must PRECEDE the capital, which is what separates
+	// "zkCross" from "DEX". Acronyms are how people write categories — a
+	// question about "NFT tooling" is not a claim about a project named NFT —
+	// and GENERIC_QUERY_TOKENS holds 44 words, none of them acronyms, so there
+	// is nothing here to gate them on. They stay out.
+	const intercaps = (q.trim().match(/[A-Za-z][A-Za-z0-9-]*/g) ?? []).filter(
+		(w) => {
+			const upper = w.slice(1).search(/[A-Z]/);
+			return upper >= 0 && /[a-z]/.test(w.slice(0, upper + 1));
+		},
+	);
+	// Both branches promote only on EXACT equality to a name, slug or alias —
+	// this is not the containment test above, so a false positive requires the
+	// user to have typed the whole name.
+	for (const w of [...capitalized, ...intercaps]) {
 		const lw = w.toLowerCase();
 		if (NETWORK_WORDS.has(lw)) continue;
 		if (n === lw || sl === lw || alias(lw)) return 3;
