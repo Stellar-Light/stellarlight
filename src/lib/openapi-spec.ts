@@ -3238,8 +3238,8 @@ export const spec: OpenAPISpec = {
 						name: "accepting",
 						in: "query",
 						description:
-							"Set to 1 to return only partners currently accepting new clients",
-						schema: { type: "string", enum: ["1"] },
+							"1 = only partners currently accepting new clients; 0 = only partners NOT accepting (an empty page here is the honest answer when every published partner accepts). Omit for no filter. `meta.filters.accepting` echoes the applied value, null when omitted.",
+						schema: { type: "string", enum: ["1", "0"] },
 					},
 					{
 						// Param-level doc ONLY — the operation description above is
