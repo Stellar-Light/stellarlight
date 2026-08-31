@@ -64,10 +64,15 @@ jobs:
           # push on 2026-08-31 — non-fast-forward, step failed, and the lane
           # would have flagged ITSELF as FAILING on the next weekly sweep. The
           # artifact is a fresh measurement, so replaying it on top of whatever
-          # landed first is always correct.
+          # landed first is always correct. -X theirs covers the OTHER race —
+          # two runs of this lane both rewriting the artifact is a rebase
+          # CONFLICT, and on a rebase "theirs" is the commit being replayed,
+          # i.e. OUR fresh artifact; without it the worktree wedged mid-rebase
+          # and every retry failed (cross-vendor audit, 2026-08-31). The abort
+          # keeps a failed rebase from poisoning the next loop iteration.
           for i in 1 2 3; do
             git push && exit 0
-            git pull --rebase && continue
+            git pull --rebase -X theirs || git rebase --abort
           done
           git push
 

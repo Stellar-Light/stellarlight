@@ -874,7 +874,18 @@ export function nameMatchScore(
 	// own phrase while prominent rows filled the page (engine-a P-PHRASE miss,
 	// open since 07-22). Equality-only promotion preserves the guard's purpose:
 	// a 2-char token still has to EQUAL a name/slug/alias to score anything.
-	if (!joined && (tokens ?? []).length === 1) joined = tokens?.[0] ?? "";
+	// Cross-vendor audit (2026-08-31): anchorTokens also drops tokens for
+	// GENERICITY, and this rescue was re-promoting those — "what is sol"
+	// scored 3 against a row named Sol, bypassing the vocabulary's own
+	// design note that sol is never a lone anchor (Solana ambiguity). Only a
+	// LENGTH-dropped token is rescued; a generic word stays a category
+	// mention, exactly what its demotion decided.
+	if (
+		!joined &&
+		(tokens ?? []).length === 1 &&
+		!GENERIC_QUERY_TOKENS.has(tokens?.[0] ?? "")
+	)
+		joined = tokens?.[0] ?? "";
 	if (joined && joined !== qq && !mentionVeto(joined)) {
 		const hyphen = joined.replace(/\s+/g, "-");
 		if (n === joined || sl === joined || sl === hyphen || alias(joined))

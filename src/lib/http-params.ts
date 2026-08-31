@@ -59,6 +59,20 @@ export function strictBoolParam(raw: string | null): boolean | "invalid" {
 }
 
 /**
+ * Tri-state boolean param: `undefined` = absent (and `?flag=` with no value)
+ * means NO filter, distinct from an explicit false. strictBoolParam maps null
+ * to false, which conflates "omitted" with "=0" — exactly what made the
+ * partners `accepting` filter a single-value enum engine E called undecidable
+ * from outside. Garbage values stay "invalid" for the caller's 400.
+ */
+export function triStateBoolParam(
+	raw: string | null,
+): boolean | "invalid" | undefined {
+	if (raw === null || !raw.trim()) return undefined;
+	return strictBoolParam(raw);
+}
+
+/**
  * Field selection (?fields=name,slug,score) — response-row projection so
  * agents fetch only what they need (projects/search rows carry TVL/onchain/
  * routes/repos blocks a routing query never reads).
