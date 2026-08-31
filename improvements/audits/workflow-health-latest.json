@@ -1,9 +1,15 @@
 {
-	"asOf": "2026-08-31T21:30:54.728Z",
+	"asOf": "2026-08-31T21:50:02.662Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 75,
-	"healthy": 75,
-	"broken": [],
+	"checked": 77,
+	"healthy": 76,
+	"broken": [
+		{
+			"file": "workflow-health.yml",
+			"state": "always-red",
+			"why": "1 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
+		}
+	],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -175,10 +181,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:25:50Z",
+			"lastSuccessAt": "2026-08-31T21:46:03Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 33,
+			"runs": 39,
 			"why": "last green 0d ago"
 		},
 		{
@@ -197,10 +203,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:29:07Z",
+			"lastSuccessAt": "2026-08-31T21:48:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 36,
+			"runs": 42,
 			"why": "last green 0d ago"
 		},
 		{
@@ -527,7 +533,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:25:50Z",
+			"lastSuccessAt": "2026-08-31T21:31:41Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 80,
@@ -582,11 +588,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:10:11Z",
+			"lastSuccessAt": "2026-08-31T21:29:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 5,
-			"why": "last green 0d ago"
+			"runs": 6,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -802,11 +808,22 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T21:29:07Z",
+			"lastSuccessAt": "2026-08-31T21:48:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
 			"why": "last green 0d ago"
+		},
+		{
+			"file": "upgrade-basis-onchain.yml",
+			"name": "Upgrade status basis from on-chain evidence (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-08-31T21:48:30Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 1,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -829,6 +846,17 @@
 			"graceDays": 21,
 			"runs": 100,
 			"why": "last green 0d ago"
+		},
+		{
+			"file": "workflow-health.yml",
+			"name": "workflow-health",
+			"cron": "41 6 * * 1",
+			"state": "always-red",
+			"lastSuccessAt": null,
+			"ageDays": null,
+			"graceDays": 21,
+			"runs": 1,
+			"why": "1 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
 		}
 	]
 }
