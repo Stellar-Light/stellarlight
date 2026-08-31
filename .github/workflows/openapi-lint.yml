@@ -7,6 +7,10 @@
 # serving check (catches a deploy that drifted from the repo).
 # Complements scripts/check-api-drift.ts (live⇄spec agreement) and
 # contract-gate.yml (snapshot freshness).
+#
+# A red at this step is the lint reporting a finding, not the lane breaking
+# (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 name: OpenAPI lint
 
 on:

@@ -39,10 +39,26 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 		expect((m?.[1] ?? "").trim()).toBe("null");
 	});
 
+	it("the scan arm dates from the scan and nothing else", () => {
+		// The audit's point: the first four tests constrained only the deepwiki
+		// arm, so `dwAnswer ? null : (repoMeta?.lastCommitAt ?? null)` — dating
+		// scan answers with the precise wrong timestamp #1134 was about — passed
+		// every one. Pin the whole ternary.
+		const m = /answerAsOf:\s*dwAnswer\s*\?\s*null\s*:\s*([^,\n]+)[,\n]/.exec(
+			ROUTE,
+		);
+		expect(m, "the full answerAsOf ternary must be present").toBeTruthy();
+		const scanArm = (m?.[1] ?? "").trim();
+		expect(scanArm).toMatch(/scannedAt/);
+		expect(scanArm).not.toMatch(/lastCommitAt|generatedAt/);
+	});
+
 	it("never dates a deepwiki answer from the scan", () => {
 		// scannedAt may appear (the scan path legitimately uses it) but must not
-		// be reachable from the deepwiki branch.
-		const line = /answerAsOf:[^\n]*\n?[^\n]*/.exec(ROUTE)?.[0] ?? "";
+		// be reachable from the deepwiki branch. Anchor on the dwAnswer ternary:
+		// the unroutable envelope now carries a literal `answerAsOf: null` earlier
+		// in the file, which would otherwise be the first (wrong) match.
+		const line = /answerAsOf:\s*dwAnswer[^\n]*\n?[^\n]*/.exec(ROUTE)?.[0] ?? "";
 		const dwBranch = line.split(":")[1] ?? "";
 		expect(dwBranch).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
 	});

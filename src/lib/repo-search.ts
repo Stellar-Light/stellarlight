@@ -796,7 +796,13 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bescrows?\b|\bmilestone/,
 		repos: [
 			"Trustless-Work/trustlesswork-smart-contract-stellar",
-			"devasignhq/soroban-escrow",
+			// Was devasignhq/soroban-escrow, which 404s as of 2026-08-31 —
+			// deleted or renamed WITHOUT a redirect, so the curated guard's
+			// rescan could only ever record `error`. The org's live successor
+			// is bounty-escrow: verified by reading its Cargo.toml (package
+			// devasign_task_escrow, soroban-sdk =23.5.3, cdylib) — a real
+			// Soroban escrow contract, not a name coincidence.
+			"devasignhq/bounty-escrow",
 		],
 	},
 	// cross-chain bridges. Verified in-index 2026-07-06 (descriptions confirm each
@@ -1556,6 +1562,15 @@ export async function searchRepos(
 				repoScore: r.repoScore ?? 0,
 				repoScoreLabel: r.repoScoreLabel ?? null,
 				tier: (r as { tier?: string }).tier ?? "community",
+				// The tier's basis and date, beside the tier — a verdict without
+				// its reasons is class 33's shape (provenance elsewhere inviting a
+				// wrong inference), and tierChangedAt is what dates `tier` for the
+				// answer-dating contract. Null until the CTL has judged the row.
+				tierReason: Array.isArray((r as { tierReason?: unknown }).tierReason)
+					? ((r as unknown as { tierReason: string[] }).tierReason)
+					: null,
+				tierChangedAt:
+					(r as { tierChangedAt?: string | null }).tierChangedAt ?? null,
 				source: (r as { source?: string }).source ?? "project-link",
 				score,
 				deepWikiUrl: `https://deepwiki.com/${r.fullName}`,

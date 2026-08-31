@@ -166,3 +166,67 @@ describe("intercaps is an identity signal (wave-6)", () => {
 		expect(q("Stellar Thing", "stellar", "payments on Stellar today")).toBeLessThan(3);
 	});
 });
+
+// Containment needed a third rule, found by adversarial audit (2026-08-31):
+// a multi-word name appearing in order is also just English. The scorer was
+// handing rank-1 identity to Rise In for "what is the rise in TVL on
+// Stellar" and to for-yield for "best protocol for yield on stellar"
+// (confirmed live). The rule: after stripping the query to content tokens
+// and removing the name's own tokens, everything left must be generic
+// scaffolding — the query must be about nothing but the name.
+describe("a name used as English is a mention (wave-7, the audit colliders)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it.each([
+		["Rise In", "rise-in", "what is the rise in TVL on Stellar"],
+		["Give Credit", "give-credit", "give credit to the auditors"],
+		["Block by Block", "block-by-block", "walk through the transaction block by block"],
+		["For Yield", "for-yield", "how do I farm for yield on aquarius"],
+	])("%s does not own \"%s\"", (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBeLessThan(3);
+	});
+
+	it("the same names still answer questions that are about them", () => {
+		expect(q("Rise In", "rise-in", "tell me about Rise In")).toBe(3);
+		expect(q("Block by Block", "block-by-block", "is Block by Block live")).toBe(3);
+		expect(q("For Yield", "for-yield", "is For Yield live")).toBe(3);
+	});
+
+	it("a shorter name no longer shadows a longer one", () => {
+		// "Stellar Wallets" leaves {kit, live} for the Kit query; kit is not
+		// generic, so the shorter name is a mention and only the full name wins.
+		expect(
+			q("Stellar Wallets", "stellar-wallets", "is Stellar Wallets Kit live"),
+		).toBeLessThan(3);
+	});
+});
+
+// Round two of the audit colliders: the tell-tale word is a STOPWORD, so the
+// leftover rule never saw it. An article before the span ("what is a hot
+// wallet") marks the category — English never puts a/an before a proper name.
+// A shopping word anywhere ("best", "cheapest", "options") means the category
+// should be ranked, not the like-named project served. Both vetoes sit on BOTH
+// identity branches: "best hot wallet for stellar" reached rank 3 through the
+// OLDER anchors-equality door after the containment door was closed.
+describe("articles and shopping words mark the category (wave-7b)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it.each([
+		["HOT Wallet", "hot-wallet", "what is a hot wallet"],
+		["HOT Wallet", "hot-wallet", "best hot wallet for stellar"],
+		["DEX Tools", "dex-tools", "best dex tools on stellar"],
+		["For Yield", "for-yield", "best options for yield on stellar"],
+		["One Click", "one-click", "buy xlm in one click"],
+		["USDC Swap", "usdc-swap", "cheapest usdc swap on stellar"],
+	])("%s does not own \"%s\"", (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBeLessThan(3);
+	});
+
+	it("identity questions without those signals still promote", () => {
+		expect(q("HOT Wallet", "hot-wallet", "is HOT Wallet live")).toBe(3);
+		expect(q("USDC Swap", "usdc-swap", "is USDC Swap live")).toBe(3);
+		expect(q("The Signal", "the-signal", "what is The Signal")).toBe(3);
+	});
+});

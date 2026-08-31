@@ -27,6 +27,8 @@ type Finding = {
 	status: string;
 	clearedAt?: string | null;
 	clearedBy?: string | null;
+	reopenedAt?: string | null;
+	evidenceAt?: string | null;
 };
 const path = join(process.cwd(), "improvements/ledger/findings.json");
 const raw = JSON.parse(readFileSync(path, "utf8")) as
@@ -83,6 +85,15 @@ const worker = async () => {
 				item.f.status = "cleared";
 				item.f.clearedAt = now;
 				item.f.clearedBy = "stale-sweep: re-probed live and passing";
+				// evidenceAt must date the evidence FOR the current status — the
+				// PASS this sweep just observed — not the failing run that opened
+				// the finding. Left alone, a closed row keeps pointing at the
+				// FAILURE artifact as its "evidence" (seen live: usdc-swap cleared
+				// on a pass, evidenceAt still the failing run).
+				item.f.evidenceAt = now;
+				// A re-cleared row is closed; a leftover reopenedAt reads as
+				// open-ish history on it.
+				delete item.f.reopenedAt;
 			}
 		} else stillFailing++;
 	}

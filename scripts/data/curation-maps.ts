@@ -7,6 +7,8 @@
  * evidence without importing a script whose module body runs main().
  * No data changed in the move; edit rows HERE and both consumers see them.
  */
+const ASOF_SEED = "2026-08-31";
+
 
 export type StatusBasis =
 	| "operator-announcement"
@@ -43,6 +45,38 @@ export const STATUS_FIX: Record<
 	// seed label. The only row of its shape among all 152 source-inherited
 	// Live rows (probed in-session). Draft = out of the served population,
 	// reversible, and sync no longer reverts curation (#730).
+	// ── 2026-08-31 SCF absence review: two REAL projects sitting as hidden
+	// Draft rows, blocking their own seeds ("exists, skip" while the public
+	// API serves neither — the diagnostic added the same day proved the
+	// status). Both were verified in the review; un-drafting is what the
+	// approved "create" verdict means for a row that already exists.
+	// Third instance of the hidden-Draft trap in one day: the communidao seed
+	// skipped on an existing Draft row, exactly like fxdao and enerdao before
+	// it. Un-draft to the seed's own verdict — Inactive with history.
+	communidao: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+		note: "Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023. Served as an Inactive row so the funded history is answerable.",
+	},
+	fxdao: {
+		from: "Draft",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-08-31",
+		sourceUrl: "https://fxdao.io",
+		note: "Soroban-native stablecoin protocol; site 200, org repos active 2025-09; SCF round 13 already on the row. Hidden as Draft while the review found it 'genuinely absent' — it was hidden, not absent.",
+	},
+	enerdao: {
+		from: "Draft",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/enerdao-r84",
+		note: "Tokenized renewable-energy debt on Soroban; site 200 but repo silent — the review's own verdict was shaky, so Development, not Live.",
+	},
 	"free-voting-platform": {
 		from: "Live",
 		to: "Draft",
@@ -1000,6 +1034,20 @@ export const WEBSITE_FIXES: Record<string, string> = {
  * missing zenex entirely because the alias existed only as prose. */
 export const ALIAS_ADD: Record<string, string[]> = {
 	zenex: ["Hermes"],
+	// ── 2026-08-31 SCF absence review (docs/SCF-SEED-REVIEW-2026-08-31.md):
+	// product names their SCF submissions use, verified by website-domain
+	// equality between the SCF page and the row. Only PRODUCT names — the
+	// descriptive submission titles ("a real estate tokenization platform")
+	// are not identities and are not aliased.
+	fastbuka: ["Choppaddi"], // row's own site is choppaddi.com, desc says "FKA FastBuka"
+	obsrvr: ["Flow"], // OBSRVR's pipeline product; SCF site = withobsrvr.com
+	untangled: ["OctoPos"], // Untangled's vault infra submission (stellar.untangled.finance)
+	"dfs-labs": ["Stellar Surge"], // row desc literally describes Surge; dfslab.net
+	ichi: ["Solo Labs"], // SCF desc: "through the ICHI Automated Liquidity Manager"
+	"bp-ventures": ["StellarMesh", "BPV"], // BPV = BP Ventures; bpventures.us
+	"stellar-router-sdk": ["Meta Contracts"], // exact jsr.io/@creit-tech/stellar-router-sdk match
+	reclaim: ["zkFetch"], // row desc already names its zkFetch SDK
+	inferera: ["Inferara"], // our slug spells it differently than inferara.com
 };
 
 export const TYPE_ADD: Record<string, string[]> = {
@@ -2409,6 +2457,344 @@ export const SEEDS: Array<{
 			"https://stellar.expert/explorer/testnet/tx/5c898eb489265c142baee086d502e25b87a5536e4386e5ccdf69edc2515c0ef6",
 		statusBasis: "onchain-activity",
 	},
+
+	// ── 2026-08-31: the 19 human-approved creates from the SCF absence review
+	// (docs/SCF-SEED-REVIEW-2026-08-31.md — every row researched: SCF page
+	// fetched, dupe-probed against the live API, site/repo liveness checked;
+	// approved by the operator before this commit). Rounds/awarded are stamped
+	// by SCF_SUBMISSION_LINKS in curate-projects.ts in the same run; amounts
+	// stay unset for the crosscheck lanes — no invented dollars.
+	{
+		slug: "loop",
+		name: "Loop",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Cashback and discounted gift-card payments app settling on Stellar.",
+		links: { website: "https://loopfinance.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://loopfinance.io/",
+	},
+	{
+		slug: "crediolabs-ai",
+		name: "CredioLabs.AI",
+		category: "Tooling",
+		status: "Live",
+		types: ["AI", "Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "OpenZeppelin Accounts policy builder — an MCP server and Claude skill for composing smart-account policies (by the Untangled team; distinct product).",
+		links: { website: "https://crediolabs.ai/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://crediolabs.ai/",
+	},
+	{
+		slug: "policywright",
+		name: "Policywright",
+		category: "Tooling",
+		status: "Development",
+		types: ["AI", "Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "AI least-privilege policy synthesizer for OpenZeppelin smart accounts on Stellar.",
+		links: { github: "https://github.com/kunaldrall29/policywright" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/kunaldrall29/policywright",
+	},
+	{
+		slug: "vrf-soroban",
+		name: "VRF-Soroban",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "ECVRF plus Drand verifiable randomness for Soroban contracts.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/vrf-soroban-8yl",
+	},
+	{
+		slug: "komet",
+		name: "Komet",
+		category: "Tooling",
+		status: "Live",
+		types: ["Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Runtime Verification's formal-verification tool for Soroban smart contracts (K framework).",
+		links: { github: "https://github.com/runtimeverification/komet" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/runtimeverification/komet",
+	},
+	{
+		slug: "roberto-sanz-criptomonedas",
+		name: "Roberto Sanz Criptomonedas",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Education"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Spanish-language YouTube and podcast education channel covering Stellar (26.5k subscribers).",
+		links: { website: "https://www.youtube.com/@RobertoSanzCriptomonedas" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.youtube.com/@RobertoSanzCriptomonedas",
+	},
+	{
+		slug: "janus",
+		name: "Janus",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Freight-forwarder B2B payments platform (Hamburg) settling on Stellar.",
+		links: { website: "https://janus.solutions/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://janus.solutions/",
+	},
+	{
+		slug: "kutana",
+		name: "Kutana",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "StashPay cross-border payments for Ghana (GHS corridors) on Stellar; five SCF award rounds.",
+		links: { website: "https://www.kutanapay.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.kutanapay.com/",
+	},
+	{
+		slug: "sorted",
+		name: "Sorted",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Fintech digital-asset app on Stellar.",
+		links: { website: "https://sorted.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://sorted.io",
+	},
+	{
+		slug: "sendana",
+		name: "Sendana",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Stablecoin banking for Global-South freelancers on Stellar.",
+		links: { website: "http://www.usesendana.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "http://www.usesendana.com",
+	},
+	{
+		slug: "account-demolisher",
+		name: "Account Demolisher",
+		category: "Tooling",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Reclaims stranded XLM reserves from stale accounts.",
+		links: { github: "https://github.com/bytemaster333/account-demolisher" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/bytemaster333/account-demolisher",
+	},
+	{
+		slug: "etesia",
+		name: "Etesia",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["RWA"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Risk-parity, all-weather-style crypto portfolio product on Stellar.",
+		links: { website: "https://www.etesiar.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.etesiar.com/",
+	},
+	{
+		slug: "nouns-builder-protocol",
+		name: "Nouns Builder Protocol",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Infrastructure", "NFT"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Builder DAO port of the on-chain Nouns DAO and auction protocol to Stellar.",
+		links: { website: "https://nouns.build" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+	},
+	{
+		slug: "yolat",
+		name: "Yolat",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "African remittance rails on Stellar, by the ex-Venture Garden Group team.",
+		links: { website: "https://www.yolat.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.yolat.com",
+	},
+	{
+		slug: "crebit",
+		name: "Crebit",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Payments", "Lending"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Rate-lock financial protocol on Stellar.",
+		links: { website: "https://crebitpay.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://crebitpay.com",
+	},
+	{
+		slug: "pagcrypto",
+		name: "PagCrypto",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin", "Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Regulated BRL settlement token (BRLP) for FX and institutional payments on Stellar.",
+		links: { website: "https://pagcrypto.finance/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://pagcrypto.finance/",
+	},
+	{
+		slug: "upesa",
+		name: "Upesa",
+		category: "Anchor",
+		status: "Live",
+		types: ["Anchor", "Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Liquid by Upesa: anchor-based cross-border liquidity and payouts for African SMEs.",
+		links: { website: "https://upesa.app/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://upesa.app/",
+	},
+	{
+		slug: "enerdao",
+		name: "EnerDAO",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Tokenized renewable-energy project debt on Soroban.",
+		links: { website: "https://www.enerdao.org/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/enerdao-r84",
+	},
+	{
+		slug: "fxdao",
+		name: "FxDAO",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Stablecoin", "Lending"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Soroban-native decentralized stablecoin protocol (USDx and currency vaults).",
+		links: { website: "https://fxdao.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://fxdao.io",
+	},
+	// ── 2026-08-31 wound-down pair from the SCF absence review. The packet's
+	// own rule: a dead funded project becomes a ROW with a dated non-Live
+	// status — absence hides the history, an Inactive row serves it.
+	{
+		slug: "docking-zone",
+		name: "Docking Zone",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Gaming"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded gaming project (round 18 era). Wound down: docking.zone DNS is dead; last Wayback capture 2025-11-09.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://web.archive.org/web/2025*/docking.zone",
+	},
+	{
+		slug: "communidao",
+		name: "CommuniDAO",
+		category: "Protocol/Contract",
+		status: "Inactive",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded DAO tooling. Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+	},
+	// ── 2026-08-31: two COMPLETED education programs from the SCF absence
+	// review's "unclear" pile, identified by parsing their submission pages.
+	// One-time funded cohorts, finished — served as Inactive rows so an agent
+	// asking about them gets the history instead of a hole.
+	{
+		slug: "west-african-ambassadors",
+		name: "West African Ambassadors",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education", "Social Impact"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded ambassador program empowering West African builders through blockchain education, collaboration and adoption. Completed cohort program (also known as WAA).",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb",
+	},
+	{
+		slug: "study-stellar-sdk-soroban",
+		name: "Study Stellar SDK & Soroban",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "SCF-funded study-group program: six Stellar SDK and Soroban sessions teaching Spanish-speaking students. Completed cohort.",
+		links: {  },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
+	},
+
+
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

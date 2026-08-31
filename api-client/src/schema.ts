@@ -759,7 +759,7 @@ export interface components {
                 total?: number | null;
                 /** @description Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field. */
                 totalBasis?: string;
-                /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses. */
+                /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset — it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference. */
                 semantic?: number;
             };
         };
@@ -1413,6 +1413,13 @@ export interface components {
             /** @description Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos. */
             repoScore: number;
             repoScoreLabel?: string | null;
+            /** @description WHY the tier is what it is — the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict. */
+            tierReason?: string[] | null;
+            /**
+             * Format: date-time
+             * @description When the tier last changed — the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.
+             */
+            tierChangedAt?: string | null;
             /**
              * @description Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.
              * @enum {string}
@@ -2775,12 +2782,14 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                             note?: string;
+                            /** @description THIS OPERATION ONLY: present on deepwiki-grounded answers, carrying the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters. */
+                            warnings?: string[];
                         };
                         q?: string;
                         repo?: string | null;
                         /** @description How the repo was chosen: explicit | canonical | search. null when nothing routed. */
                         routedVia?: string | null;
-                        /** @description Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed. */
+                        /** @description Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
                             /** Format: date-time */
                             lastCommitAt?: string | null;

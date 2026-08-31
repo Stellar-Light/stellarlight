@@ -2419,7 +2419,17 @@ export async function GET(req: NextRequest) {
 	// folds counted over that WHOLE set (foldedFromTotal, computed pre-slice) —
 	// not minus the folds that happened to land on this page, which made the
 	// same query report a different total at a different limit.
-	const totalCount = totalMatching + semanticAdds.length - foldedFromTotal;
+	//
+	// SEMANTIC ROWS ARE NOT IN `total`. They used to be — and because the
+	// semantic top-up only runs at offset 0, the SAME query reported total 17
+	// on page one and 6 on page two (audit-proven live, 2026-08-31). A number
+	// documented as "lets paging consumers know when they've seen everything"
+	// that changes between pages is worse than no number. `total` is now the
+	// keyword match set, stable across limit AND offset; the page-one bonus
+	// rows are counted separately in `counts.semantic`, each tagged
+	// via:"semantic" — so `returned` can legitimately exceed `total` on page
+	// one, and the counts say exactly why.
+	const totalCount = totalMatching - foldedFromTotal;
 
 	logApiHit({
 		req,

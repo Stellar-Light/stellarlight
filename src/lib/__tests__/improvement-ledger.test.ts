@@ -175,6 +175,28 @@ describe("summarizeLedger — the /quality numbers", () => {
 		expect(s.bySurface.find((x) => x.surface === "scf")?.open).toBe(1);
 	});
 
+	it("splits closed exactly: verified + clearedByReprobe + clearedOnSilence", () => {
+		const s = summarizeLedger(
+			[
+				f({ id: "a", source: "s", status: "verified" }),
+				f({
+					id: "b",
+					source: "s",
+					status: "cleared",
+					clearedBy: "stale-sweep: re-probed live and passing",
+				}),
+				f({ id: "c", source: "s", status: "cleared" }), // silence, no clearedBy
+				f({ id: "d", source: "s", status: "open" }),
+			],
+			now,
+		);
+		expect(s.clearedByReprobe).toBe(1);
+		expect(s.clearedOnSilence).toBe(1);
+		// the invariant: the three closed buckets partition closed, nothing
+		// double-counted or dropped
+		expect(s.verified + s.clearedByReprobe + s.clearedOnSilence).toBe(s.closed);
+	});
+
 	it("counts in-wave (work in progress) separately from closed", () => {
 		const s = summarizeLedger(
 			[
@@ -366,6 +388,35 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 		// the old clearance is not evidence about the new state
 		expect(out[0]?.clearedAt).toBeUndefined();
 		expect(out[0]?.clearedBy).toBeUndefined();
+	});
+
+	// A closed row's stamps must describe its CURRENT status: no reopenedAt
+	// left over from the failure, and evidenceAt dating the run that closed it
+	// — not the failing run that opened it (seen live on the usdc-swap row:
+	// re-cleared with evidenceAt still pointing at the failure artifact).
+	it("re-clearing a reopened finding drops reopenedAt and re-dates evidenceAt", () => {
+		const cleared = f({
+			id: "s:x",
+			source: "s",
+			status: "cleared",
+			clearedAt: iso(3),
+		});
+		const reopenNow = iso(0);
+		// the detector re-raises it → reopened, stamped with the failure's evidence
+		const reopened = upsertFindings(
+			[cleared],
+			[f({ id: "s:x", source: "s", evidenceAt: reopenNow })],
+			["s"],
+			reopenNow,
+		);
+		expect(reopened[0]?.status).toBe("open");
+		expect(reopened[0]?.reopenedAt).toBe(reopenNow);
+		// next run the detector is quiet again → auto-cleared
+		const clearNow = new Date(Date.now() + 1000).toISOString();
+		const recleared = upsertFindings(reopened, [], ["s"], clearNow);
+		expect(recleared[0]?.status).toBe("cleared");
+		expect(recleared[0]?.reopenedAt).toBeUndefined();
+		expect(recleared[0]?.evidenceAt).toBe(clearNow); // dates the quiet run, not the failure
 	});
 
 	it("does NOT reopen a deliberate close — a person asserted that one", () => {

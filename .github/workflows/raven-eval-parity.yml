@@ -15,6 +15,12 @@
 # Raven/network failure already exits 1 inside every guard ("an unrun probe is a
 # failure, gate or not"), so the only thing newly failing the build is a real
 # finding about OUR data.
+#
+# A red at any of the five guard steps is a detector reporting a finding —
+# tracked by the trend history and /quality, standing reds are the work
+# queue — not the lane breaking. A red anywhere else (setup, the snapshot
+# commit) IS the lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^(Bank lint|Golden questions|Cross-surface consistency|Honest absence|Truth battery)
 name: raven-eval-parity
 
 on:

@@ -4,6 +4,11 @@
 # upstream action releases a new major, a PAT expires, a cron stops firing. The
 # lane it was written for (consumption-guard) broke the day pnpm 11 shipped and
 # stayed broken silently, because nothing was watching the watchers.
+#
+# The meta-case of the script's own convention: a red at "Report" is the board
+# carrying a finding about SOME OTHER lane — this lane doing its job. A red at
+# the artifact or commit steps is this lane itself broken:
+# workflow-health: signal-steps: ^Report$
 name: workflow-health
 
 on:
@@ -56,6 +61,17 @@ jobs:
           git diff --cached --quiet && echo "no change" && exit 0
           git commit -m "chore(quality): workflow health [skip ci]"
           git push
+
+      # The scout-mcp mirror, watched WITHOUT a secret. The sync automation is
+      # retired (operator declined to mint a credential after the PAT died);
+      # the mirror is pushed manually, and this read-only tree comparison is
+      # what notices it falling behind. A red HERE is this lane working as
+      # designed — but it is a real drift someone must fix, so it is NOT a
+      # declared signal step.
+      - name: Mirror drift (scout-mcp)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-mirror-drift.ts
 
       - name: Report
         env:

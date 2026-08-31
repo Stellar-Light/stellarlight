@@ -429,8 +429,19 @@ export function upsertFindings(
 				evidenceAt: still.evidenceAt,
 			});
 		} else if (runSources.has(p.source) && p.status === "open") {
-			// this run covered p's detector but didn't re-raise it → soft-fixed
-			out.push({ ...p, status: "cleared", clearedAt: nowIso });
+			// this run covered p's detector but didn't re-raise it → soft-fixed.
+			// evidenceAt must date the evidence FOR the current status — here,
+			// "the detector went quiet on THIS run" — not the failing run that
+			// opened the finding. And a closed row must not carry reopenedAt:
+			// left in place, a reopen-then-reclear cycle reads as open-ish
+			// history on a closed row.
+			out.push({
+				...p,
+				status: "cleared",
+				clearedAt: nowIso,
+				evidenceAt: nowIso,
+				reopenedAt: undefined,
+			});
 		} else {
 			out.push(p); // a detector we didn't run this time, or already closed
 		}

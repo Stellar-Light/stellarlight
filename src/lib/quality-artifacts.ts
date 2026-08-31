@@ -15,7 +15,7 @@ import workflowHealth from "../../improvements/audits/workflow-health-latest.jso
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
-import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
+import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
@@ -318,7 +318,16 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			details: [
 				`${curatedCanonical.absent.length} absent (curated name matches no row)`,
 				`${curatedCanonical.unscanned.length} indexed but no code signals — invisible to code-evidence ranking and to the tier gate`,
-				...curatedCanonical.unscanned
+				// The JSON import types an empty array as never[], so a green
+				// artifact — [] for the first time on 2026-08-31 — broke the build
+				// while a red one compiled. Explicit element type, not a cast.
+				...(
+					curatedCanonical.unscanned as Array<{
+						name: string;
+						state: string;
+						stars: number;
+					}>
+				)
 					.slice(0, 4)
 					.map((u) => `${u.name} (${u.state}, ${u.stars}★)`),
 			],
@@ -456,10 +465,13 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		// the code scan and none dating the answer. Nearby dates are worse than
 		// no dates: they invite a specific wrong inference.
 		//
-		// The number is DEBT. 40 of 55 served values have no date in their own
+		// The number is DEBT read from the artifact — never restated here, where
+		// it would rot: two committed counts of one quantity is the class the
+		// artifact-agreement guard exists for.
 		// scope; the guard freezes that and fails on new ones. It reads the
-		// CONTRACT, so it measures what a consumer is TOLD — which is the
-		// surface the report was about.
+		// CONTRACT — with $refs resolved, so named schemas (Project, Repo,
+		// Partner…) are examined too — so it measures what a consumer is TOLD,
+		// which is the surface the report was about.
 		g({
 			key: "answer-dating",
 			title: "Served values a consumer can date",
@@ -473,14 +485,20 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			sub: `${answerDating.valuesChecked - answerDating.undated}/${answerDating.valuesChecked} served values are dated in their own scope, or documented as undatable`,
 			details: [
 				"explainRepo.answerAsOf is the pattern: NULL for a DeepWiki answer, because DeepWiki exposes no index date and inventing one would make an unknown look measured",
-				"the naive rule — 'response has several dates and a value' — flags 12 endpoints and is mostly wrong: verifyClaim carries five dates and is correct, because confidence.ageDays dates the verdict itself",
+				"scoping cuts both ways: verifyClaim's confidence.ageDays dates the numbers inside confidence but NOT the root-level verdict beside it — so verifyClaim.verdict is carried as named debt, not excused; an admission only counts when the description speaks to datability itself ('no index date'), never bare 'null' or 'unknown'",
 				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only — a value with NO date in scope while other objects in the response carry dates",
 			],
 			asOf: answerDating.asOf.slice(0, 10),
 			cadence: "on-deploy",
 			severity: "medium",
 			artifact: "improvements/audits/answer-dating-latest.json",
-			passing: answerDating.undated === 0,
+			// Same bar as the scripts-types ratchet, deliberately: this row is a
+			// RATCHET — the baseline is named debt that only shrinks, and the gate
+			// blocks NEW undated values. Demanding undated === 0 here while the
+			// sibling ratchet passes on no-new-debt was one mechanism wearing two
+			// bars; a board that grades identical disciplines differently teaches
+			// readers to trust neither.
+			passing: answerDating.added.length === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The
@@ -504,7 +522,17 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
 				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,
 				"absent entries are human-reviewed SEEDS, never bulk-created",
-				...coverageGaps.scf.sample
+				// Explicit element type: the 500/500 artifact's first-ever EMPTY
+				// sample types as never[] from the JSON import, so the board
+				// compiled on every red artifact and broke on the green one — the
+				// same trap the curated-canonical row hit hours earlier. Reaching
+				// the target must never be the thing that breaks the build.
+				...(
+					coverageGaps.scf.sample as Array<{
+						scfSlug: string;
+						rounds?: Array<string | number>;
+					}>
+				)
 					.slice(0, 3)
 					.map(
 						(x) => `absent: ${x.scfSlug} (round ${(x.rounds || []).join(",")})`,
@@ -523,7 +551,16 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			cadence: "weekly",
 			severity: coverageGaps.scf.absent > 25 ? "high" : "medium",
 			artifact: "improvements/audits/coverage-gaps-latest.json",
-			passing: coverageGaps.scf.absent === 0,
+			// Green means every remaining absence carries a HUMAN VERDICT, not that
+			// the count is zero. Two funded projects no longer exist anywhere except
+			// as Inactive rows with history; one RFP winner's own page points back
+			// at the SCF handbook. Creating rows for those to zero a counter would
+			// be fabrication — a reviewed absence is a decision; only an UNREVIEWED
+			// absence is debt.
+			passing:
+				coverageGaps.scf.absent === 0 ||
+				((coverageGaps as { unreviewedAbsent?: number }).unreviewedAbsent ??
+					coverageGaps.scf.absent) === 0,
 		}),
 
 		g({
@@ -536,10 +573,11 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			// result at a glance while the sample sat in the subtitle nobody
 			// reads; a rate without its denominator is not a measurement.
 			value: `${deepwiki.agreementRate}% (n=${deepwiki.frame.graded})`,
-			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled, ${deepwiki.frame.unindexed} with no independent index)`,
+			sub: `agreement on ${deepwiki.frame.graded} independently graded answer-key repos of ${deepwiki.frame.answerKey} (deepwiki ${deepwiki.frame.byGrader.deepwiki} + grok ${deepwiki.frame.byGrader.grok})`,
 			details: [
 				`${deepwiki.disagreements.length} disagreements`,
-				`${deepwiki.frame.unindexed}/${deepwiki.frame.total} sampled repos had no independent index to compare against — independent coverage of our corpus, not our agreement with it, is the binding constraint here`,
+				"two graders, recorded per row and never pooled silently: DeepWiki for the few answer-key repos it has indexed, Grok (agentic, reads the repo) for the rest",
+				"the binding constraints are EXTERNAL: DeepWiki's index covers ~4 of the 86 long-tail answer-key repos, and the Grok balance exhausted mid-run (HTTP 402) after 9 verdicts — topping it up or DeepWiki indexing more of the key is what grows n",
 				deepwiki.frame.graded < DEEPWIKI_MIN_GRADED
 					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement — re-run against a sample with more co-gradeable repos.`
 					: `sample meets the ${DEEPWIKI_MIN_GRADED}-repo floor`,
