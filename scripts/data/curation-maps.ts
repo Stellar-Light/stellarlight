@@ -2977,6 +2977,14 @@ export const GITHUB_REPOS_ADD: Record<
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
+	// ── Yield cohort (2026-08-31): the enum member the P4 census forced into
+	// existence (spec 1.9.13) applied to the rows that stayed honestly untyped
+	// rather than be force-fitted (the four already-typed vault products get
+	// Yield appended on their own entries below).
+	"arka-fund": ["Yield"], // on-chain asset-management/fund protocol (site title confirms)
+	cushion: ["Yield"], // SEP-56 structured-product / capital-protection quant vaults
+	meria: ["Yield"], // multi-chain staking/yield aggregator + portfolio monitor
+
 	// ── P4 untyped-to-zero batch (2026-08-31): the 58 rows the typed-
 	// reachability census flagged, each researched (desc first, site/repo
 	// where thin) with the reason inline. Five rows stayed honestly
@@ -2991,10 +2999,10 @@ export const TYPES_ADD: Record<string, string[]> = {
 	"offer-hub": ["Payments"], // freelance marketplace whose on-chain core is crypto payments/escrow
 	muney: ["Payments", "Stablecoin"], // B2B stablecoin payment infrastructure converting USDC to local value
 	lusty: ["Exchange"], // options venue (covered calls/puts), server-settled today
-	"for-yield": ["Stablecoin", "Lending"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
+	"for-yield": ["Stablecoin", "Lending", "Yield"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
 	chainless: ["Wallet"], // self-custody MPC wallet investment app (Web3Auth, Pix on-ramp)
 	amulets: ["Wallet", "Card Issuing", "Stablecoin"], // stablecoin banking app: dollar account, swaps, Visa card spend
-	"stellar-defi-hub": ["Lending"], // deposit surface for incentivized Sentora vaults (Blend-based lending strategies, site)
+	"stellar-defi-hub": ["Lending", "Yield"], // deposit surface for incentivized Sentora vaults (Blend-based lending strategies, site)
 	wellspring: ["Payments", "Stablecoin"], // institutional treasury + fiat/stablecoin payments platform with yield
 	refractor: ["Infrastructure"], // shared multisig transaction storage / signature-coordination service
 	"providencia-onchain": ["Social Impact", "Payments"], // conservation-funding transparency via the Stellar Disbursement Platform
@@ -3021,7 +3029,7 @@ export const TYPES_ADD: Record<string, string[]> = {
 	paywit: ["Payments", "Stablecoin"], // merchant stablecoin-payment layer: hosted checkout + drop-in SDKs
 	pagfinance: ["Stablecoin", "Payments"], // BRLP regulated BRL settlement token for institutional FX/payments
 	novatti: ["Stablecoin", "Payments"], // payments company whose Stellar footprint is issuing the AUDD stablecoin
-	"normal-finance": ["Stablecoin", "Lending"], // pivoted to self-custody USDC savings powered by DeFindex + Blend (site)
+	"normal-finance": ["Stablecoin", "Lending", "Yield"], // pivoted to self-custody USDC savings powered by DeFindex + Blend (site)
 	noir: ["SDK"], // ZK-circuit language + developer toolchain used for Soroban privacy verification
 	noether: ["DEX"], // Soroban-native decentralized perpetual futures exchange (10x leverage)
 	"nectar-network": ["Infrastructure"], // keeper/automation layer executing liquidations, compounding, oracle updates
@@ -3033,7 +3041,7 @@ export const TYPES_ADD: Record<string, string[]> = {
 	"hatom-protocol": ["Lending"], // over-collateralized supply/borrow lending liquidity hub
 	cryptomate: ["Payments", "Infrastructure"], // embeddable web3/fintech APIs; LatAm crypto payment rails (site)
 	coinme: ["Exchange", "Payments"], // licensed cash on/off-ramp kiosk exchange powering USDC P2P payments
-	backyard: ["Stablecoin", "Lending"], // user-built stablecoin yield strategies allocating across Blend/Spiko vaults
+	backyard: ["Stablecoin", "Lending", "Yield"], // user-built stablecoin yield strategies allocating across Blend/Spiko vaults
 	"automated-finance": ["Payments"], // visual workflow automation for on-chain payments/DeFi/treasury (site)
 	"the-aha-company": ["SDK"], // open-source reference implementation/standard for smart-account onboarding
 	xlmsh: ["Infrastructure"], // gateway serving decentralized .xlm-domain websites from Stellar/IPFS
@@ -3161,7 +3169,7 @@ export const TYPES_SET: Record<string, string[]> = {
 	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
 	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
 	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
-	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
+	defindex: ["Infrastructure", "SDK", "Yield"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks (Yield added with spec 1.9.13).
 	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
 	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
 	// Held-queue resolutions after a closer look (boxy 2026-07-15).
