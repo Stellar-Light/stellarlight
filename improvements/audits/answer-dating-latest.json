@@ -1,25 +1,13 @@
 {
-	"asOf": "2026-08-31T03:55:50.106Z",
+	"asOf": "2026-08-31T04:31:44.887Z",
 	"source": "scripts/check-answer-dating.ts",
-	"valuesChecked": 55,
-	"undated": 40,
+	"valuesChecked": 100,
+	"undated": 48,
 	"findings": [
 		{
 			"op": "getQualityReport",
 			"value": "verdict",
 			"where": "(root)",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "getQualityReport",
-			"value": "label",
-			"where": "northStar.latest",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "getQualityReport",
-			"value": "label",
-			"where": "northStar.series",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -77,6 +65,18 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
+			"op": "verifyClaim",
+			"value": "verdict",
+			"where": "(root)",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "verifyClaim",
+			"value": "confidence",
+			"where": "(root)",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
 			"op": "resolveProject",
 			"value": "status",
 			"where": "subject",
@@ -89,15 +89,63 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
-			"op": "getChangelog",
+			"op": "searchProjects",
 			"value": "summary",
-			"where": "entries",
+			"where": "meta.advisory",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "searchProjects",
+			"value": "status",
+			"where": "projects.repos.codeVerified.protocolCaps",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "searchProjects",
+			"value": "status",
+			"where": "codeReferences.codeVerified.protocolCaps",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "searchRepos",
+			"value": "status",
+			"where": "repos.codeVerified.protocolCaps",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
 			"op": "explainRepo",
 			"value": "status",
 			"where": "codeVerified.protocolCaps",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getHackathons",
+			"value": "summary",
+			"where": "meta.fallbackChannels",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getBuilders",
+			"value": "status",
+			"where": "builders.projects",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getBuilders",
+			"value": "basis",
+			"where": "builders.match",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getPartners",
+			"value": "score",
+			"where": "partners.trust",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getPartners",
+			"value": "label",
+			"where": "partners.trust",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -122,6 +170,12 @@
 			"op": "getRfps",
 			"value": "status",
 			"where": "meta.filters",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getRfps",
+			"value": "status",
+			"where": "rfps",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -221,21 +275,15 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
-			"op": "analyzeEcosystem",
-			"value": "basis",
-			"where": "developers",
+			"op": "listSkills",
+			"value": "label",
+			"where": "skills.installAlt",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
 			"op": "analyzeEcosystem",
 			"value": "basis",
 			"where": "gaps",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "analyzeEcosystem",
-			"value": "basis",
-			"where": "tvl",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
