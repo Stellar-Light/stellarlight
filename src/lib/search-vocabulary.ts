@@ -296,6 +296,10 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
  * repo search so the identity rule means the same thing on both surfaces.
  */
 export const GENERIC_QUERY_TOKENS = new Set([
+	// "is X still live/maintained/building" — pure question scaffolding in any
+	// query; content in none. Added when the mention-vs-identity leftover rule
+	// found it blocking "does <name> still build" (2026-08-31).
+	"still",
 	"buy",
 	"sell",
 	"get",

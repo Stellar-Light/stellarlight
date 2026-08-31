@@ -21,6 +21,7 @@
 import { contentTokens, isContentStopword } from "./repo-search";
 import {
 	anchorTokens,
+	GENERIC_QUERY_TOKENS,
 	CORE_SYNONYMS,
 	mergeVocabulary,
 	SPELLING_CORRECTIONS,
@@ -885,13 +886,55 @@ export function nameMatchScore(
 	// record; "bridge" appearing in one is not.
 	const distinctive = (needle: string): boolean =>
 		needle.split(/[\s-]+/).filter(Boolean).length > 1;
+	// THE QUERY MUST BE ABOUT NOTHING BUT THE NAME. Containment alone turned
+	// out to promote ordinary English: an adversarial audit ran the exported
+	// scorer against the live directory and found "what is the rise in TVL on
+	// Stellar" handing rank-1 identity to the project named Rise In, "give
+	// credit to the auditors" to Give Credit, "walk through the transaction
+	// block by block" to Block by Block — confirmed live before this fix
+	// ("best protocol for yield on stellar" returned for-yield at #1). A
+	// multi-word name appearing in order is not a coincidence, but it IS how
+	// English works; the difference between naming a project and using its
+	// words is whether the query carries any OTHER subject.
+	//
+	// So: strip the query to content tokens, remove the name's own tokens, and
+	// require everything left to be generic question-scaffolding ("live",
+	// "maintained", "tools"). "is Stellar Wallets Kit live" leaves {live} —
+	// generic, promote. "what is the rise in TVL" leaves {tvl} — a real
+	// subject, reject. This also stops a SHORTER name shadowing a longer one:
+	// a project named "Stellar Wallets" leaves {kit, live} for the Kit query,
+	// and kit is not generic.
+	//
+	// Known residual, deliberate: a query that IS the name plus scaffolding
+	// ("best dex tools on stellar" for a project named DEX Tools) still
+	// promotes — after stripping, nothing distinguishes it from asking about
+	// the project, and refusing it would reopen the recall class this branch
+	// exists to fix.
+	const queryIsOnlyAbout = (needle: string): boolean => {
+		const nameToks = new Set(needle.split(/[\s-]+/).filter(Boolean));
+		// contentTokens keeps a hyphenated compound whole ("stellar-wallets-kit")
+		// and splits camelCase into fragments ("DeFi" -> de, fi; "iOS" -> os), so
+		// a token also counts as the name's own when every hyphen part is — or
+		// when it is a fragment of the name's compact form. Without the fragment
+		// check, "what is Stellar DeFi Hub" left {de, fi} uncovered and the rule
+		// rejected the exact recall probe this branch exists to serve.
+		const compact = needle.replace(/[^a-z0-9]/g, "");
+		const covered = (t: string): boolean =>
+			nameToks.has(t) ||
+			GENERIC_QUERY_TOKENS.has(t) ||
+			(t.length >= 2 && compact.includes(t)) ||
+			t.split("-").every((p) => !p || nameToks.has(p) || GENERIC_QUERY_TOKENS.has(p));
+		return contentTokens(q).every(covered);
+	};
 	const bounded = (needle: string): boolean => {
 		if (needle.length < 2) return false;
 		if (!distinctive(needle)) return false;
 		const esc = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 		// slugs hyphenate what the query spaces: match either separator
 		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
-		return new RegExp(`(^|[^a-z0-9])${flexible}([^a-z0-9]|$)`, "i").test(qq);
+		if (!new RegExp(`(^|[^a-z0-9])${flexible}([^a-z0-9]|$)`, "i").test(qq))
+			return false;
+		return queryIsOnlyAbout(needle);
 	};
 	if (bounded(n) || bounded(sl) || (aliases ?? []).some((a) => bounded(a.trim().toLowerCase())))
 		return 3;

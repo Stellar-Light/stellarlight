@@ -423,12 +423,24 @@ async function totalIsLimitIndependent() {
 				break;
 			}
 			const total = Number(body.meta.counts.total ?? Number.NaN);
-			const semantic = Number(body.meta.counts.semanticAdds ?? 0);
+			// `counts.semantic`, which the route actually emits — the first
+			// version read `counts.semanticAdds`, a field that exists only as an
+			// internal variable name in route.ts, so `?? 0` meant it never
+			// subtracted and never skipped: the probe was green without ever
+			// exercising the exclusion it documents. Audit finding, 2026-08-31.
+			const semRaw = body.meta.counts.semantic;
 			if (!Number.isFinite(total)) {
 				skipped = true;
 				break;
 			}
-			seen.set(limit, total - (Number.isFinite(semantic) ? semantic : 0));
+			// The route omits the field when no semantic rows were added; treat a
+			// non-numeric presence as "cannot subtract" and skip, per the header.
+			if (semRaw !== undefined && typeof semRaw !== "number" && typeof semRaw !== "boolean") {
+				skipped = true;
+				break;
+			}
+			const semantic = typeof semRaw === "number" ? semRaw : 0;
+			seen.set(limit, total - semantic);
 		}
 		if (skipped) continue;
 		const values = [...new Set(seen.values())];
