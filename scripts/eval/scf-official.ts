@@ -206,7 +206,20 @@ export function parseRoundVerdicts(html: string): {
 			cards.push(card);
 			continue;
 		}
+		// Host preference (cross-vendor audit round 2): the type check in
+		// isFragmentOf tolerates null on either side, so a type-less fragment
+		// could attach across award types. Budget agreement already prevents
+		// inflation (the merge is a Math.max of equal budgets), but the type
+		// attribution should still land on the right card: same-type +
+		// budget-equal beats budget-equal beats budget-unknown.
 		const agreeing =
+			hosts.find(
+				(h) =>
+					h.awardType !== null &&
+					h.awardType === card.awardType &&
+					h.budgetUSD !== null &&
+					h.budgetUSD === card.budgetUSD,
+			) ??
 			hosts.find(
 				(h) => h.budgetUSD !== null && h.budgetUSD === card.budgetUSD,
 			) ??

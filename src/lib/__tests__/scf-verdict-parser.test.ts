@@ -308,3 +308,21 @@ describe("fragment hardening (wrong-host + reconciliation gates)", () => {
 		expect([...v.awarded]).toEqual(["36"]);
 	});
 });
+
+// Cross-vendor audit round 2: a type-less fragment must land on the
+// budget-matching host, never smear its merge across award types.
+describe("fragment host preference (round-2 audit)", () => {
+	it("a null-type fragment merges into the budget-matching host across types", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #33","awardType":"Build","budget":50000}\n' +
+				'{"id":"recBBBBBBBBBBBBBB","status":"Awarded","roundName":"SCF #33","awardType":"Audit","budget":90000}\n' +
+				'{"id":"r","status":"Awarded","roundName":"SCF #33","budget":90000}\n' +
+				'<div class="mb-2">Awarded Submissions</div><div class="font-schabo">2</div>\n' +
+				'<div class="mb-2">Total awarded</div><div class="font-schabo">$140.0K</div>',
+		);
+		expect(v.awardedAnyCount).toBe(2);
+		expect(v.awards).toEqual([
+			{ round: 33, budgetUSD: 140000, awardType: "Build" },
+		]);
+	});
+});
