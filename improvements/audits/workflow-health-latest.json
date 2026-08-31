@@ -1,18 +1,13 @@
 {
-	"asOf": "2026-08-31T15:15:15.200Z",
+	"asOf": "2026-08-31T15:18:38.167Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 72,
+	"checked": 71,
 	"healthy": 70,
 	"broken": [
 		{
 			"file": "consumption-guard.yml",
 			"state": "failing",
 			"why": "2 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
-		},
-		{
-			"file": "sync-scout-mcp.yml",
-			"state": "failing",
-			"why": "19 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Push scout-mcp/ to Stellar-Light/scout-mcp\""
 		}
 	],
 	"rows": [
@@ -752,17 +747,6 @@
 			"graceDays": 4,
 			"runs": 39,
 			"why": "last green 0d ago"
-		},
-		{
-			"file": "sync-scout-mcp.yml",
-			"name": "Sync scout-mcp to distribution repo",
-			"cron": null,
-			"state": "failing",
-			"lastSuccessAt": "2026-07-03T16:18:33Z",
-			"ageDays": 58,
-			"graceDays": 45,
-			"runs": 29,
-			"why": "19 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Push scout-mcp/ to Stellar-Light/scout-mcp\""
 		},
 		{
 			"file": "sync-scout-skill.yml",
