@@ -62,6 +62,17 @@ jobs:
           git commit -m "chore(quality): workflow health [skip ci]"
           git push
 
+      # The scout-mcp mirror, watched WITHOUT a secret. The sync automation is
+      # retired (operator declined to mint a credential after the PAT died);
+      # the mirror is pushed manually, and this read-only tree comparison is
+      # what notices it falling behind. A red HERE is this lane working as
+      # designed — but it is a real drift someone must fix, so it is NOT a
+      # declared signal step.
+      - name: Mirror drift (scout-mcp)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-mirror-drift.ts
+
       - name: Report
         env:
           GITHUB_TOKEN: ${{ github.token }}
