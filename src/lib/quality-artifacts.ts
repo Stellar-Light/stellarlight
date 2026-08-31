@@ -9,6 +9,7 @@
  */
 
 import consumption from "../../improvements/audits/consumption-latest.json";
+import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
@@ -356,6 +357,47 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			severity: "high",
 			artifact: "improvements/audits/consumption-latest.json",
 			passing: consumption.dead.length === 0,
+		}),
+
+		// Does the machinery that guards everything else actually RUN?
+		//
+		// The consumption row above went onto this board the day its lane was
+		// written — and that lane installed pnpm with `npm i -g pnpm`, drew
+		// pnpm 11 against an engines field of "^9 || ^10", and died at the
+		// install step every time. Three runs, zero completions. The board
+		// showed a guard we did not have, which is worse than showing nothing,
+		// because a named guard is a reason to stop looking.
+		//
+		// Two lessons already written down — "an armed schedule is not moved
+		// data", "a quiet detector looks identical to a live fire" — and neither
+		// could fail a build. This row asks GitHub what our lanes actually did.
+		// It reports only what a person can act on: a lane that dies before its
+		// own logic runs, or one whose green has aged past its cadence. A
+		// detector that exits 1 on a finding is working, and is not counted.
+		g({
+			key: "workflow-health",
+			title: "Guard lanes that actually run",
+			promise:
+				"Every automated lane in the repo has completed a real run recently — a guard that never executes is a promise, not a check.",
+			measure: {
+				value: workflowHealth.healthy,
+				of: workflowHealth.checked,
+				unit: "lanes",
+			},
+			sub: `${workflowHealth.healthy}/${workflowHealth.checked} automated lanes have a green run inside their own cadence`,
+			details: [
+				...workflowHealth.broken.map(
+					(b: { file: string; state: string; why: string }) =>
+						`${b.state.toUpperCase()}: ${b.file} — ${b.why}`,
+				),
+				"judged against the workflow file as it stands: runs from a since-edited or never-merged version are ignored, so a fixed lane stops being red",
+				"a lane that exits 1 to report a finding is the guard working, and is not counted here",
+			],
+			asOf: workflowHealth.asOf.slice(0, 10),
+			cadence: "weekly",
+			severity: "high",
+			artifact: "improvements/audits/workflow-health-latest.json",
+			passing: workflowHealth.broken.length === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The

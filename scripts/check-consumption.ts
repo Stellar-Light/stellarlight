@@ -90,6 +90,27 @@ const CHECKS: Check[] = [
 	{ field: "statusBasis", why: "why a project's status is what it is" },
 ];
 
+/** The debt that already existed when this guard was written.
+ *
+ * A ratchet, not an amnesty. The guard's job is to stop NEW dead machinery
+ * landing, and on its first green run it found two fields that predate it:
+ *
+ *   triageTags   written for 12,961 repos and stripped again by an afterRead
+ *                hook in Repos.ts — internal by construction, read by nothing.
+ *   tierReason   declared in the write shape and in the collection, and left
+ *                null by the writer built for it.
+ *
+ * Neither can be honestly cleared inside the change that found them: one needs
+ * a decision about exposing internal triage verdicts, the other needs a writer
+ * and a consumer. Blocking every unrelated PR on them would have exactly one
+ * outcome — the gate gets removed — so they are named here instead, where the
+ * list itself is the debt. The /quality board still reads the raw count, so
+ * this file cannot make the number look better than it is.
+ *
+ * The ratchet only turns one way: a field may leave this list, never join it.
+ * Anything dead and not named here fails the build. */
+const KNOWN_DEAD = new Set(["triageTags", "tierReason"]);
+
 /** Strip comments before searching.
  *
  * The first version used a bare `git grep`, and immediately fooled itself: the
@@ -187,9 +208,38 @@ async function main() {
 			);
 		}
 	}
-	if (dead.length) process.exit(1);
+	// Fail on anything dead that is NOT pre-existing debt, and fail just as hard
+	// if a named field is quietly resurrected — a stale entry here would hide a
+	// real regression behind an old excuse.
+	const unexpected = dead.filter((r) => !KNOWN_DEAD.has(r.field));
+	const revived = [...KNOWN_DEAD].filter(
+		(f) => !dead.some((r) => r.field === f),
+	);
+	if (revived.length)
+		console.log(
+			`\nCONSUMED NOW — remove from KNOWN_DEAD in this file: ${revived.join(", ")}`,
+		);
+	if (unexpected.length) {
+		console.error(
+			`\nRED: ${unexpected.length} NEW dead field(s): ${unexpected.map((r) => r.field).join(", ")}`,
+		);
+		process.exit(1);
+	}
+	if (revived.length) process.exit(1);
+	if (dead.length)
+		console.log(
+			`\n${dead.length} known-dead field(s) carried as debt — visible on /quality, not blocking.`,
+		);
 	if (!JSON_OUT)
-		console.log("\nGREEN: every checked field reaches a serving path.");
+		// Say which green this is. Printing "every checked field reaches a serving
+		// path" directly beneath a list of fields that don't is how a passing
+		// build stops meaning anything — and this guard exists because a report
+		// once said a thing was fine while the thing was not fine.
+		console.log(
+			dead.length
+				? `\nGREEN: no NEW dead machinery. ${dead.length} field(s) still dead, carried as named debt.`
+				: "\nGREEN: every checked field reaches a serving path.",
+		);
 }
 
 main().catch((e) => {
