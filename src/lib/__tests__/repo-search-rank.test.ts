@@ -898,3 +898,93 @@ describe("dependsOn filter (dependency-graph reverse read)", () => {
 		expect(repos[0].fullName).toBe("team/dapp");
 	});
 });
+
+// R-SYM class (acta, 2026-08-31): a single-word camelCase/snake identifier is
+// the symbol lookup the symbols feature advertises — the repo DEFINING it must
+// win, and concept/flagship floats must not fire off its wordy fragments
+// (did-stellar scored 32.3 and ranked 7th under score-0 canonicals).
+describe("identifier queries reach the defining repo", () => {
+	it("the repo whose codeSymbols carry the identifier outranks fragment matchers", async () => {
+		const famous = doc({
+			fullName: "bigorg/core-node",
+			description: "error code handling and result codes for the network core",
+			repoScore: 95,
+			stars: 5000,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const definer = doc({
+			fullName: "acta-team/did-stellar",
+			description: "DID method for Stellar",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+			codeSymbols: ["contract_error_code_from_number", "resolve_did"],
+			stars: 3,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([famous, definer]),
+			"contractErrorCodeFromNumber",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("acta-team/did-stellar");
+	});
+
+	it("canonicalFor and flagshipsFor map identifiers to nothing", async () => {
+		const { canonicalFor } = await import("../repo-search");
+		expect(canonicalFor("contractErrorCodeFromNumber")).toEqual([]);
+		expect(canonicalFor("release_escrow")).toEqual([]);
+		expect(flagshipsFor("contractErrorCodeFromNumber")).toEqual([]);
+	});
+});
+
+// Ecosystem words confer no identity when a more specific anchor exists
+// (battery q-tool-indexer case: a `soroban` topic tag gave a score-5 oracle
+// the same identity credit as the score-20.8 indexer it then outranked via
+// the inUse tier).
+describe("ecosystem words are not identity when specific anchors exist", () => {
+	it("soroban-only zone hit loses identity; the specific hit keeps it", async () => {
+		const { repoAnchorIdentity } = await import("../repo-search");
+		const tokens = ["soroban", "event", "indexer"];
+		expect(repoAnchorIdentity(tokens, ["reflector oracle soroban contract"])).toBe(
+			false,
+		);
+		expect(
+			repoAnchorIdentity(tokens, ["contract event indexer for stellar"]),
+		).toBe(true);
+		// a query that is ONLY ecosystem words keeps them as anchors
+		expect(repoAnchorIdentity(["soroban"], ["soroban examples"])).toBe(true);
+	});
+});
+
+// Curated dated facts are searchable at description strength: an advisory
+// note must let the SDK repo match a security question its README never
+// mentions (battery q-soroban-sdk-cve).
+describe("knowledgeNotes are description-strength match evidence", () => {
+	it("a repo matches a query only its knowledge note answers", async () => {
+		const sdk = doc({
+			fullName: "stellar/rs-soroban-sdk",
+			description: "Rust SDK for Soroban contracts",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+			knowledgeNotes: [
+				{
+					note: "Security advisories: CVE-2026-24889 (GHSA-96xm-fv9w-pf3f) fixed in 25.0.2/23.5.1/22.0.9",
+					source: "https://github.com/advisories/GHSA-96xm-fv9w-pf3f",
+					asOf: "2026-08-31",
+				},
+			],
+		});
+		const bystander = doc({
+			fullName: "someone/defi-tool",
+			description: "a defi tool for soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([sdk, bystander]),
+			"security advisories",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("stellar/rs-soroban-sdk");
+	});
+});

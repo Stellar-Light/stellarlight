@@ -439,8 +439,17 @@ function positiveIdentityHit(hay: string, term: string): boolean {
  * demoting everything (same contract as project search).
  */
 export function repoAnchorIdentity(tokens: string[], zones: string[]): boolean {
-	const anchors = anchorTokens(tokens);
-	if (!anchors.length) return true;
+	const all = anchorTokens(tokens);
+	if (!all.length) return true;
+	// Ecosystem words confer no identity when a more specific anchor exists:
+	// for "soroban event indexer" a repo whose only zone hit is a `soroban`
+	// topic tag was earning the same identity credit as the one whose name IS
+	// the indexer — and the inUse tier below identity then floated verified
+	// contracts above every actual indexer (battery q-tool-indexer case:
+	// reflector at score 5 outranked SoroTrail at 20.8). A query that is ONLY
+	// ecosystem words keeps them — there is nothing more specific to be.
+	const specific = all.filter((t) => t !== "stellar" && t !== "soroban");
+	const anchors = specific.length ? specific : all;
 	return anchors.some((t) =>
 		termsForToken(t).some((v) => zones.some((z) => positiveIdentityHit(z, v))),
 	);
@@ -764,6 +773,13 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
 export function canonicalFor(q: string): string[] {
+	// An IDENTIFIER is not a concept phrase: a single-word camelCase/snake_case
+	// query (`contractErrorCodeFromNumber`) wordy-splits into concept
+	// vocabulary ("error code") and floated stellar-core above the repo that
+	// DEFINES the symbol. Concept mapping reads phrases people type; an
+	// identifier belongs to the symbol index, so it maps to nothing here.
+	const w = q.trim();
+	if (w && !/\s/.test(w) && /[a-z][A-Z]|_/.test(w)) return [];
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const c of CANONICAL) {
@@ -949,6 +965,11 @@ export const CURATED_CANONICAL_REPOS: string[] = [
 ];
 
 export function flagshipsFor(q: string): string[] {
+	// Same identifier guard as canonicalFor: a single-word camelCase/snake
+	// symbol query is not a vertical phrase — its wordy split must not fire
+	// flagship floats off fragment vocabulary.
+	const w = q.trim();
+	if (w && !/\s/.test(w) && /[a-z][A-Z]|_/.test(w)) return [];
 	const hay = wordy(q);
 	const out: string[] = [];
 	const firedTests: RegExp[] = [];
@@ -1034,6 +1055,25 @@ export async function searchRepos(
 		dependsOn = "",
 	} = opts;
 	const tokens = contentTokens(q);
+	// Single-word IDENTIFIER queries (camelCase/snake_case symbols — the R-SYM
+	// class): contentTokens splits `contractErrorCodeFromNumber` into concept
+	// fragments [contract, error, code, number], so the repo DEFINING the
+	// symbol competes on fragment luck while symbolsHaystack's raw joined form
+	// (kept for exactly this lookup) never sees the query — ACTA-Team/
+	// did-stellar scored 32.3 and ranked 7th under score-0 canonicals. Mirror
+	// the project-side single-word rebuild: keep discriminating fragments,
+	// append the joined form.
+	const rawWord = q.trim();
+	if (rawWord && !/\s/.test(rawWord) && /[a-z][A-Z]|_/.test(rawWord)) {
+		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (joined.length > 2 && !(tokens.length === 1 && tokens[0] === joined)) {
+			const kept = tokens.filter(
+				(t) => t.length >= 3 && !isContentStopword(t) && t !== joined,
+			);
+			tokens.length = 0;
+			tokens.push(...kept, joined);
+		}
+	}
 	const searched: RepoSearchSearched = {
 		tokens,
 		expandedTerms: [...new Set(tokens.flatMap(termsForToken))].slice(0, 40),
@@ -1264,6 +1304,11 @@ export async function searchRepos(
 			const tops = wordy(topics.join(" "));
 			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
 			const readme = wordy(r.readmeExcerpt ?? "");
+			const notes = wordy(
+				(Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes : [])
+					.map((n) => (typeof n?.note === "string" ? n.note : ""))
+					.join(" "),
+			);
 			// Snake/camel split so \b matching works on symbol names (regex \b
 			// treats _ as a word char — "escrow" never hits "release_escrow" raw).
 			const syms = symbolsHaystack(r.codeSymbols);
@@ -1308,7 +1353,11 @@ export async function searchRepos(
 					// repo IMPLEMENTS the concept than a description mention — but a
 					// name/topic hit stays highest (it's the repo's own claimed identity).
 					else if (hit(syms)) best = 4;
-					else if (hit(desc) || hit(ownerHay)) best = 3;
+					// Curated, dated repo facts (knowledgeNotes) are description-
+					// strength evidence: a note recording "security advisories
+					// CVE-… fixed in …" must let the SDK repo match an advisory
+					// question the README never mentions.
+					else if (hit(desc) || hit(ownerHay) || hit(notes)) best = 3;
 					// A manifest dependency on the queried package is real usage
 					// evidence (the reverse dependency-graph read) — above a README
 					// mention, below identity: reflector outranks its consumers on
