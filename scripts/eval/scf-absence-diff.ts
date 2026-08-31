@@ -54,6 +54,7 @@ interface ScfEntry {
 	base: string;
 	rounds: string[];
 	url: string;
+	website?: string | null;
 }
 
 async function fetchScfEntries(): Promise<ScfEntry[]> {
@@ -88,7 +89,7 @@ async function fetchScfEntries(): Promise<ScfEntry[]> {
 }
 
 async function fetchDirectory(): Promise<
-	Array<{ slug: string; name: string; aliases: string[] }>
+	Array<{ slug: string; name: string; aliases: string[]; website: string | null }>
 > {
 	let cats: string[] = [];
 	try {
@@ -97,7 +98,12 @@ async function fetchDirectory(): Promise<
 			((await bad.json()) as { validCategories?: string[] }).validCategories ??
 			[];
 	} catch {}
-	const rows: Array<{ slug: string; name: string; aliases: string[] }> = [];
+	const rows: Array<{
+		slug: string;
+		name: string;
+		aliases: string[];
+		website: string | null;
+	}> = [];
 	for (const c of cats) {
 		for (let offset = 0; ; offset += 100) {
 			const res = await fetch(
@@ -118,12 +124,14 @@ async function fetchDirectory(): Promise<
 						slug: string;
 						name: string;
 						identity?: { aliases?: unknown };
+						links?: { website?: string | null };
 					}) => ({
 						slug: p.slug,
 						name: p.name,
 						aliases: Array.isArray(p.identity?.aliases)
 							? (p.identity.aliases as string[])
 							: [],
+						website: p.links?.website ?? null,
 					}),
 				),
 			);
@@ -206,6 +214,17 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 				e.rounds = [
 					...new Set([...html.matchAll(/SCF\s*#(\d+)/g)].map((m) => m[1])),
 				];
+				// The submission's own website link, for the domain-equality pass.
+				// First external http(s) link that is not an SCF/social/platform
+				// domain — the page's product-website field renders as exactly that.
+				const links = [...html.matchAll(/https?:\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s"'<)]*/gi)].map((m) => m[0]);
+				e.website =
+					links.find(
+						(u) =>
+							!/stellar\.org|stellar\.expert|github\.com|twitter\.com|x\.com|linkedin\.com|discord|t\.me|youtube\.com|medium\.com|docs\.google|airtable|notion\.so|vercel\.app\/api|fonts\.|cdn\.|googleapis|gstatic|cloudfront/i.test(
+								u,
+							),
+					) ?? null;
 			} catch {
 				/* stays as listed */
 			}
@@ -239,12 +258,58 @@ async function main() {
 		`  unmatched: ${absent.length} — fetching detail pages for award rounds…`,
 	);
 	await enrichRounds(absent);
-	const absentAwarded = absent.filter((e) => e.rounds.length > 0);
+
+	// ── DOMAIN-EQUALITY PASS ──────────────────────────────────────────────
+	// The 2026-08-31 human review of 47 "absent" rows found 23 (49%) were
+	// projects we already serve under another name — and nearly every one was
+	// resolvable by comparing the SCF page's website to the row's website.
+	// Names lie (descriptive submission titles, rebrands); a registrable
+	// domain both sides publish is the strongest identity signal this lane
+	// can check without a human. Runs only on the still-unmatched set, whose
+	// detail pages enrichRounds just fetched anyway.
+	const regDomain = (u: string | null | undefined): string | null => {
+		if (!u) return null;
+		try {
+			const h = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+			const parts = h.split(".");
+			return parts.length <= 2 ? h : parts.slice(-2).join(".");
+		} catch {
+			return null;
+		}
+	};
+	const byDomain = new Map<string, { slug: string; name: string }>();
+	for (const d of dir) {
+		const dom = regDomain(d.website);
+		if (dom) byDomain.set(dom, { slug: d.slug, name: d.name });
+	}
+	const domainMatched: Array<{ scf: string; slug: string; domain: string }> =
+		[];
+	const stillAbsent = absent.filter((e) => {
+		const dom = regDomain(e.website);
+		const hit = dom ? byDomain.get(dom) : undefined;
+		if (hit) {
+			domainMatched.push({ scf: e.scfSlug, slug: hit.slug, domain: dom as string });
+			return false;
+		}
+		return true;
+	});
+	if (domainMatched.length) {
+		console.error(
+			`  domain-equality pass: ${domainMatched.length} resolved to existing rows:`,
+		);
+		for (const m of domainMatched)
+			console.error(`    ${m.scf} -> ${m.slug} (${m.domain})`);
+	}
+	const absentFinal = stillAbsent;
+	const absentAwarded = absentFinal.filter((e) => e.rounds.length > 0);
 	const report = {
 		frame: { scf: scf.length, directory: dir.length },
-		absent: absent.length,
+		absent: absentFinal.length,
 		absentWithRoundBadge: absentAwarded.length,
-		sample: absent.slice(0, 40).map((e) => ({
+		/** SCF rows resolved to an existing directory row by website-domain
+		 *  equality — served, not absent, and named so the match is reviewable. */
+		domainMatched,
+		sample: absentFinal.slice(0, 40).map((e) => ({
 			scfSlug: e.scfSlug,
 			rounds: e.rounds,
 			url: e.url,
@@ -254,7 +319,7 @@ async function main() {
 		// cannot use a truncated one — report-coverage-gaps.ts needs to ask "is
 		// this DefiLlama protocol also on the SCF absent list", and FxDAO sits at
 		// position 42. Slugs are cheap; the cap was only ever about detail rows.
-		absentSlugs: absent.map((e) => e.scfSlug),
+		absentSlugs: absentFinal.map((e) => e.scfSlug),
 	};
 	if (OUT_FILE) {
 		writeFileSync(OUT_FILE, JSON.stringify(report, null, 1));
