@@ -83,3 +83,45 @@ describe("proper-noun promotion (wave-5, the Hermes case)", () => {
 		).toBeLessThan(3);
 	});
 });
+
+// The other half of the same judgement, found 2026-08-30 by replaying /quality's
+// open findings against the live directory: the proper-noun path above decides
+// SINGLE words, and nothing decided multi-word ones. nameMatchScore reduced the
+// QUERY through anchorTokens ("is Stellar Tools live" -> "tools") and then
+// compared that against the UNREDUCED name ("stellar tools"), so a name whose
+// own words include a reduced token could never match itself. "is Stellar
+// Wallets Kit live" ranked hot-wallet, hana and albedo above the record the
+// question names.
+//
+// Multi-word is the whole safety argument, and these two blocks are the pair
+// that pins it: a single word in a question is a MENTION (guarded above), while
+// several words appearing intact and in order are not a coincidence. Both
+// directions are asserted here so a future widening of one breaks the other.
+describe("multi-word names identify themselves (wave-6, the recall misses)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it.each([
+		["Stellar Wallets Kit", "stellar-wallets-kit", "is Stellar Wallets Kit live"],
+		["Stellar Tools", "stellar-tools", "is Stellar Tools live"],
+		["Rise In", "rise-in", "what is Rise In"],
+		["Block by Block", "block-by-block", "tell me about Block by Block"],
+		[
+			"Stellar Asset Sandbox",
+			"stellar-asset-sandbox",
+			"is the Stellar Asset Sandbox maintained",
+		],
+	])("%s is found by the question that names it", (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBe(3);
+	});
+
+	it("matches on word boundaries, not substrings", () => {
+		// "Rise In" must not be claimed by "surprise incident" — the containment
+		// test is anchored, so a name buried inside longer words does not count.
+		expect(q("Rise In", "rise-in", "a surprise incident report")).toBeLessThan(3);
+	});
+
+	it("tolerates the hyphen/space split the slug and the name disagree on", () => {
+		expect(q("Stellar Wallets Kit", "stellar-wallets-kit", "does stellar-wallets-kit still build")).toBe(3);
+	});
+});

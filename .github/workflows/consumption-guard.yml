@@ -27,10 +27,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 } # git grep needs history-free but full tree
+      # The repo-wide setup block, copied verbatim from the workflows that pass.
+      # `npm i -g pnpm` was here and installed pnpm 11, which engines.pnpm
+      # (^9 || ^10) rejects — an install that was correct the week it was
+      # written and broke on upstream's release schedule.
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
       - uses: actions/setup-node@v4
-        with: { node-version: 24 }
-      - run: npm i -g pnpm && pnpm install --frozen-lockfile
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
       # Exits 1 when a computed field reaches no serving path. That is the
       # merge gate: dead machinery does not land.
       - name: Every computed value must reach a serving path
