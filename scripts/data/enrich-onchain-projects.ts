@@ -259,13 +259,30 @@ async function run() {
 				console.log(`  registry ${a.code} (${dom}): no directory row — skip`);
 				continue;
 			}
-			if (slugs.size > 1) {
-				console.log(
-					`  registry ${a.code} (${dom}): AMBIGUOUS → ${[...slugs].join(", ")} — skip`,
+			// Multi-asset issuers keep per-asset directory rows on ONE domain
+			// (vnx.li → veur + vchf; stablecoin.z.com → gyen + zusd; circle.com
+			// → usdc + eurc + …). The first dry run skipped every one of these
+			// as AMBIGUOUS while the disambiguator was in the row itself: the
+			// asset-code-named row IS the asset's row. Exact canon(code) ==
+			// canon(slug) wins within the domain set; with no code-named row a
+			// single domain match joins as before; anything else stays an
+			// honest skip.
+			let slug: string;
+			if (slugs.size === 1) {
+				slug = [...slugs][0];
+			} else {
+				const codeCanon = a.code.toLowerCase().replace(/[^a-z0-9]/g, "");
+				const codeMatches = [...slugs].filter(
+					(s) => s.toLowerCase().replace(/[^a-z0-9]/g, "") === codeCanon,
 				);
-				continue;
+				if (codeMatches.length !== 1) {
+					console.log(
+						`  registry ${a.code} (${dom}): AMBIGUOUS → ${[...slugs].join(", ")} — skip`,
+					);
+					continue;
+				}
+				slug = codeMatches[0];
 			}
-			const slug = [...slugs][0];
 			const entry = bySlug.get(slug) ?? { contracts: [] };
 			if (entry.asset) {
 				console.log(
