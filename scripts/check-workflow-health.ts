@@ -33,8 +33,9 @@
  *
  * A failed run is a SIGNAL iff its failing step's name matches the lane's
  * declared regex. Everything else — no declaration, or a failure at any other
- * step, setup included — is the lane broken. This replaced a file-level
- * /continue-on-error: true/ test that let ONE optional step anywhere
+ * step, setup included — is the lane broken. Two earlier heuristics died here:
+ * step POSITION (non-setup step = signal) hid chronically broken lanes, and a
+ * file-level /continue-on-error: true/ test let ONE optional step anywhere
  * launder every real failure in its lane — coverage-watch marks only "Fetch
  * previous month's artifact", yet a crash in its report step was classed
  * self-managed; api-drift marks only the drift step, yet a red
@@ -169,37 +170,29 @@ async function sameBlob(file: string, sha: string): Promise<boolean> {
 	}
 }
 
-/** The steps every lane runs before its own logic. Failing inside this prefix
- * means the lane never got to say anything. */
-// `install` on its own, not just "pnpm install": seven lanes give the step an
-// explicit name that the auto-generated form never produces — "Install
-// dependencies", "Install deps", "Install duckdb". Missing them classified a
-// broken install as a detector doing its job, which is exactly the failure this
-// file exists to catch, on dedup-projects.yml — the lane used as its own
-// worked example.
-const SETUP = /checkout|action-setup|setup-node|setup-python|install|npm ci/i;
-const isSetupStep = (name: string) => SETUP.test(name);
-
-/** Did this run actually produce jobs? Distinguishes "Actions refused the
- * workflow file" (no jobs, a real finding) from "we could not read the jobs"
- * (retention, a transient error — not evidence of anything). */
-async function runHadJobs(jobRunId: number): Promise<boolean> {
+/** One jobs lookup, two answers about a failed run: the first failing step's
+ * name, and how many jobs the run produced. `jobCount: null` means the lookup
+ * itself failed (job-log retention, a transient error) — no evidence, and
+ * distinct from 0, which is how Actions reports a workflow file it refused to
+ * parse: registered, "failed", ran nothing. The two used to be separate
+ * functions fetching the same endpoint twice — and worse, "failed run WITH
+ * jobs but no step concluded failure" fell between them and was skipped
+ * entirely, so a lane dying at the job level (runner death, bad `runs-on`)
+ * never reached the board. */
+async function failedStepInfo(
+	runId: number,
+): Promise<{ step: string | null; jobCount: number | null }> {
 	try {
-		const jobs = await gh(`/repos/${REPO}/actions/runs/${jobRunId}/jobs`);
-		return Array.isArray(jobs?.jobs) && jobs.jobs.length === 0;
-	} catch {
-		return false; // could not tell — do not report
-	}
-}
-
-async function firstFailedStep(jobRunId: number): Promise<string | null> {
-	try {
-		const jobs = await gh(`/repos/${REPO}/actions/runs/${jobRunId}/jobs`);
-		for (const j of jobs.jobs ?? [])
+		const jobs = await gh(`/repos/${REPO}/actions/runs/${runId}/jobs`);
+		if (!Array.isArray(jobs?.jobs)) return { step: null, jobCount: null };
+		for (const j of jobs.jobs)
 			for (const st of j.steps ?? [])
-				if (st.conclusion === "failure") return st.name as string;
-	} catch {}
-	return null;
+				if (st.conclusion === "failure")
+					return { step: st.name as string, jobCount: jobs.jobs.length };
+		return { step: null, jobCount: jobs.jobs.length };
+	} catch {
+		return { step: null, jobCount: null };
+	}
 }
 
 /** Refuse to run in a shallow checkout.
@@ -402,24 +395,28 @@ async function main() {
 			const ranSameFile = await sameBlob(file, latest.head_sha);
 			if (!ranSameFile) continue;
 
-			// SECOND: is failing what this lane DOES? Several of ours end in a
-			// deliberate `exit 1` that propagates a finding — generated-recall.yml
-			// has a step literally named "Propagate the red". A checker that calls
-			// those broken is telling people to silence their own detectors. The
-			// line is where the failure happens: a lane that dies in checkout,
-			// pnpm setup, node setup or install never reached its own logic and is
-			// broken infrastructure; one that dies later is doing its job.
-			const step = await firstFailedStep(latest.id);
-			if (step && !isSetupStep(step)) continue;
-			// No identifiable failing step has TWO causes and they are opposite:
-			// a run that produced no jobs (how Actions reports a file it refused
-			// to parse — a real finding), or a jobs lookup that failed, e.g. a run
-			// past job-log retention. Only the first is evidence. `stepsSeen` is
-			// false only when the lookup itself came back empty or errored.
-			if (!step && !(await runHadJobs(latest.id))) continue;
-			// No identifiable failing step means the run produced no jobs at all —
-			// how Actions reports a file it refused to parse. Real when the file on
-			// disk is the one that failed, which sameBlob has just confirmed.
+			// SECOND: is failing what this lane DOES? Only its own declaration can
+			// say so (see header): the red is a SIGNAL iff the failing step matches
+			// the lane's signal-steps regex. The old rule here — skip on ANY
+			// non-setup step — assumed a fail-by-design lane, and on a busy lane
+			// that had been red for 100+ runs (no green left in the window) it made
+			// a chronically broken lane vanish from the board entirely.
+			const { step, jobCount } = await failedStepInfo(latest.id);
+			if (step && signalRe?.test(step)) continue;
+			// No identifiable failing step has three causes, and only one is
+			// silence-worthy: jobCount null = the jobs lookup itself failed
+			// (retention, transient error) — no evidence, claim nothing. 0 = how
+			// Actions reports a file it refused to parse (real — sameBlob has just
+			// confirmed the file on disk is the one that failed). >0 = the run HAD
+			// jobs yet no step concluded failure (job-level death: runner loss, bad
+			// `runs-on`) — still zero greens, still real; skipping it hid the lane.
+			if (!step && jobCount === null) continue;
+			// A full page means the window may have cut an older green off — say
+			// so, rather than asserting a "never" the query cannot see.
+			const windowNote =
+				runs.length >= 100
+					? " (window capped at 100 runs — any older green is beyond it)"
+					: "";
 			rows.push({
 				file,
 				name: meta.name,
@@ -429,7 +426,13 @@ async function main() {
 				ageDays: null,
 				graceDays: grace,
 				runs: conclusive.length,
-				why: `${conclusive.length} runs since this file was last edited, zero successes — dies at "${step ?? "an unknown step"}", before its own logic runs`,
+				why: `${conclusive.length} runs since this file was last edited, zero successes — ${
+					step
+						? `dies at "${step}", not a declared signal step`
+						: jobCount === 0
+							? "runs produce no jobs, how Actions reports a workflow file it refused to parse"
+							: `dies at an unknown step (${jobCount} job(s), none reports a failing step)`
+				}${windowNote}`,
 			});
 			continue;
 		}
@@ -464,7 +467,7 @@ async function main() {
 		// is a signal. No declaration, an unreadable jobs list, or a failure at
 		// any other step — setup included — is the lane broken.
 		const failStep = failedSinceGreen.length
-			? await firstFailedStep(failedSinceGreen[0].id)
+			? (await failedStepInfo(failedSinceGreen[0].id)).step
 			: null;
 		const failing =
 			failedSinceGreen.length > 0 &&
