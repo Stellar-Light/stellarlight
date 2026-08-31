@@ -694,7 +694,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -3762,7 +3762,7 @@
 		"failureMode": "ambiguous-contract",
 		"severity": "low",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -3800,9 +3800,9 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T19:50:35.530Z"
+		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
 	{
 		"id": "raven-routing:passkey-kit",
@@ -3825,9 +3825,9 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T19:50:35.530Z"
+		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
 	{
 		"id": "raven-routing:octoplace",
@@ -3850,9 +3850,9 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T19:50:35.530Z"
+		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
 	{
 		"id": "raven-routing:kutana",
@@ -4777,7 +4777,7 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-13T07:14:54.914Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
@@ -4945,7 +4945,7 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-14T07:10:16.228Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
@@ -5152,7 +5152,7 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
@@ -5243,7 +5243,7 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -5869,9 +5869,9 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T19:50:35.530Z"
+		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
 	{
 		"id": "raven-routing:how-do-i-write-a-soroban-smart-contract-in-rust",
@@ -6027,7 +6027,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -6039,7 +6039,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -6142,7 +6142,7 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T22:37:38.494Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -6167,7 +6167,7 @@
 		"failureMode": "demand-miss",
 		"severity": "high",
 		"firstSeen": "2026-08-31T01:50:05.267Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -6179,7 +6179,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6191,7 +6191,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6203,7 +6203,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6215,7 +6215,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6227,7 +6227,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6239,7 +6239,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6251,7 +6251,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6263,7 +6263,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6275,7 +6275,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6287,7 +6287,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6299,7 +6299,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6311,7 +6311,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6323,7 +6323,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6335,7 +6335,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6347,7 +6347,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6359,7 +6359,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6371,7 +6371,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6383,7 +6383,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6395,7 +6395,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6407,7 +6407,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6419,7 +6419,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6431,7 +6431,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6443,7 +6443,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6455,7 +6455,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6467,7 +6467,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6479,7 +6479,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6491,7 +6491,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6503,7 +6503,7 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	},
@@ -6515,8 +6515,8 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T19:51:18.114Z",
-		"lastSeen": "2026-08-31T19:51:18.114Z",
+		"lastSeen": "2026-08-31T23:07:47.416Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T19:50:35.530Z"
+		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	}
 ]
