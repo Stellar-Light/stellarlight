@@ -1921,6 +1921,7 @@ export const spec: OpenAPISpec = {
 						"raw GitHub source repos ranked by code quality -> searchRepos",
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
 						"category counts or whitespace -> getClusters",
+						"ranking projects by GitHub activity / stars / commits -> getLeaderboard",
 						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)",
 					],
 					exampleQuestions: [
@@ -2886,6 +2887,7 @@ export const spec: OpenAPISpec = {
 						"a funded project/product or 'who built X (the company)' -> searchProjects",
 						"the GitHub repo/code itself -> searchRepos",
 						"ecosystem-wide dev counts/activity stats -> getLeaderboard",
+						"paid work / jobs / bounties FOR a contributor (worker side, not who-to-hire) -> getRfps",
 						"SCF-tier or award-track filtering (unsupported — no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
@@ -3998,6 +4000,19 @@ export const spec: OpenAPISpec = {
 						"closed",
 						"kelp",
 						"hummingbot",
+						// WORKER SIDE. Every term above is written from the funder's
+						// vocabulary — rfp, brief, grant, round — and none of "jobs",
+						// "freelance" or "paid work" appeared anywhere in this
+						// 9,000-line spec. So "jobs bounties and freelance work for
+						// Stellar contributors" routed to getBuilders, which answers
+						// "who can I hire": it returned a list of people TO the person
+						// looking for work, the exact inverse of the intent.
+						"jobs",
+						"freelance",
+						"paid work",
+						"where can I earn",
+						"get paid to build",
+						"contract work",
 					],
 					useWhen: [
 						"what RFPs/bounties/grants match my idea / are open",
@@ -5360,8 +5375,23 @@ export const spec: OpenAPISpec = {
 						"incident",
 						"post-mortem",
 						"oracle manipulation",
-						"yieldblox",
-						"reflector",
+						// QUALIFIED, not bare. These are directory projects, and a
+						// bare project name on someone else's operation makes that
+						// operation the router's answer for the project itself:
+						// "reflector oracle on Stellar" ranked searchResearch 97 over
+						// searchProjects 81, for a project we hold at confidence 0.97.
+						// The security cluster wants the INCIDENTS, so the phrases say
+						// so and the names stop being attractors.
+						//
+						// A sweep of all 287 single-token routing keywords found 17
+						// that are directory project names. The other 15 are on the
+						// operation that SERVES them — audit firms on listAudits,
+						// stablecoins on getStablecoins, Soroswap and Stellarchain on
+						// searchProjects — which is correct and left alone. The defect
+						// is a name on a DIFFERENT operation, and that was these two
+						// plus "dune" on getLeaderboard.
+						"yieldblox oracle manipulation incident",
+						"reflector oracle manipulation incident",
 						"reentrancy",
 						"soroban-sdk security advisories",
 						"cve",
@@ -6482,7 +6512,10 @@ export const spec: OpenAPISpec = {
 						"open issues",
 						"backlog",
 						"csv",
-						"dune",
+						// "Dune" here means Dune-style analytics export, but the bare
+						// token also names a project in our directory, so it competed
+						// for "what is Dune". Qualified to the intent it was added for.
+						"dune-style analytics export",
 						"export",
 						"developer counts",
 						"active devs",

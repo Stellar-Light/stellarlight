@@ -271,7 +271,19 @@ measured, not inferred.
 5. **`what is DD` stays an open recall miss on purpose.** A two-letter
    all-caps token is how people write categories, and there is no acronym
    vocabulary to gate it on. Reopen it if a curated acronym list appears.
-6. **The mid-sentence acronym hole.** Proper-noun promotion takes any
+6. **Cut searchProjects' question phrases — but measure first.** Its
+   `x-routing` blob is 2,409 chars against a median of 515, and 77 keywords
+   include whole question phrases ("which providers support stellar", "what
+   services can I integrate") rather than nouns. The dilution is measurable:
+   getPartners scores 75 on the bare query `wallet` and 23 on "what wallets
+   support Stellar". The phrases belong in `exampleQuestions`, which the
+   contract scores as a separate field — but the scorer's field weighting is
+   not published, so cutting 77 keywords without re-measuring scout-only rank
+   is a guess that could cost real recall. The directional `notFor` (activity
+   ranking -> getLeaderboard) shipped; the cut needs a measured before/after.
+   Note the inverse pathology in the same system: listContracts fails by
+   term CONCENTRATION, searchProjects by DILUTION.
+7. **The mid-sentence acronym hole.** Proper-noun promotion takes any
    capitalised 3+-char word, so "best DEX on stellar" hands rank 1 to a
    project named DEX — the same mention-vs-identity error the lowercase
    guards prevent, surviving where the category word is conventionally

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.6",
+		type: "fixed",
+		summary:
+			"Three routing-vocabulary fixes: project names no longer sit bare on operations that do not serve them, getRfps gains worker-side terms (jobs, freelance, paid work) that appeared nowhere in the spec, and searchProjects defers GitHub-activity ranking to getLeaderboard.",
+		detail:
+			"(1) A bare project name on another operation makes that operation the router's answer for the project itself: 'reflector oracle on Stellar' ranked searchResearch 97 above searchProjects 81, for a project the directory holds at confidence 0.97. `reflector` and `yieldblox` sat bare in searchResearch's oracle-manipulation security cluster and are now the phrases that cluster meant — 'reflector oracle manipulation incident'. A sweep of all 287 single-token routing keywords against the live directory found 17 that are project names; the other 15 sit on the operation that SERVES them (audit firms on listAudits, stablecoins on getStablecoins, Soroswap and Stellarchain on searchProjects) and are correct. One more was qualified: `dune` on getLeaderboard meant Dune-style analytics export, and now says so. (2) getRfps described itself entirely in the funder's vocabulary — rfp, brief, grant, round — and the words 'jobs', 'freelance' and 'paid work' appeared nowhere in the 9,000-line spec, so 'jobs bounties and freelance work for Stellar contributors' routed to getBuilders and returned a list of people TO the person looking for work. getRfps gains the worker-side terms and getBuilders gains the directional notFor. (3) searchProjects now defers activity ranking to getLeaderboard, which declares that question shape in its own exampleQuestions and was losing it at rank 3. Routing metadata only; no schema or response change.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.5",
 		type: "fixed",
 		summary:
