@@ -277,11 +277,15 @@ async function main() {
 			(await gh(`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=100`))
 				.workflow_runs ?? [];
 		const since = fileChangedAt(file);
+		// CONCLUSIVE means the lane reached a verdict of its own. A run someone
+		// CANCELLED is a person changing their mind, and reading it as a failure
+		// put seed-blog-posts.yml on the board for a run a human stopped on
+		// 2026-08-14. `neutral` and `action_required` are equally not verdicts
+		// about whether the lane works.
+		const VERDICTS = new Set(["success", "failure", "timed_out"]);
 		const conclusive = runs.filter(
 			(r) =>
-				r.conclusion &&
-				r.conclusion !== "skipped" &&
-				Date.parse(r.created_at) >= since,
+				VERDICTS.has(r.conclusion ?? "") && Date.parse(r.created_at) >= since,
 		);
 		const success = conclusive.find((r) => r.conclusion === "success");
 
@@ -368,7 +372,27 @@ async function main() {
 				r.conclusion !== "success" &&
 				Date.parse(r.created_at) > Date.parse(success.created_at),
 		);
-		const failing = failedSinceGreen.length > 0;
+		// Does this lane DECLARE that its own red is a signal?
+		//
+		// Step position is the wrong discriminator here, and trying it proved so
+		// in both directions: raven-eval-parity fails at "Truth battery (guard
+		// D)", a detector exiting 1 on a finding — not setup, and not a defect —
+		// while sync-scout-mcp fails at a push step that is also not setup and IS
+		// a defect (a missing secret). The step tells you nothing.
+		//
+		// What separates them is that a signal lane says so in its own YAML: it
+		// runs the detector under `continue-on-error` and decides for itself what
+		// to do with the outcome. A lane with no such declaration has no opinion
+		// about failing, so when it fails, it is broken. Measured across the
+		// three: raven-eval-parity and generated-recall declare it, sync-scout-mcp
+		// and seed-blog-posts do not.
+		const selfManagesFailure = /continue-on-error:\s*true/.test(src);
+		const failStep = failedSinceGreen.length
+			? await firstFailedStep(failedSinceGreen[0].id)
+			: null;
+		const failing =
+			failedSinceGreen.length > 0 &&
+			(!selfManagesFailure || !failStep || isSetupStep(failStep));
 		const stale = automatic && age > grace && hadWorkSince && !failing;
 		rows.push({
 			file,
@@ -381,9 +405,7 @@ async function main() {
 			runs: conclusive.length,
 			why: failing
 				? `${failedSinceGreen.length} failed run(s) since its last green ${age}d ago — it is trying and losing, not idle${
-						(await firstFailedStep(failedSinceGreen[0].id))
-							? `; dies at "${await firstFailedStep(failedSinceGreen[0].id)}"`
-							: ""
+						failStep ? `; dies at "${failStep}"` : ""
 					}`
 				: stale
 					? `last green ${age}d ago, past its ${grace}d window${cron ? ` (cron "${cron}")` : ""}`
