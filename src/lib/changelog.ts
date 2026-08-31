@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.8",
+		type: "added",
+		summary:
+			"explainRepo serves `answerAsOf` beside `answerSource`. It is NULL for every DeepWiki answer — DeepWiki exposes no index date, so the age of that answer is unknown and we will not infer one from the code scan.",
+		detail:
+			"Raven reported (issue #1134, three independent reproductions) that explainRepo answered `MaxSupportedProtocolVersion = 25` for stellar/stellar-horizon while the source at our own codeVerified.scannedRef (82660510) defines 28; re-verified here against raw.githubusercontent at that ref and at 2abda012, both 28. The stale number is DeepWiki's index. OUR defect was that the response carried three timestamps — meta.generatedAt, codeVerified.scannedAt, repoMeta.lastCommitAt — every one describing the source scan and none dating the answer, so a consumer reading scannedAt beside answerSource 'deepwiki' would reasonably conclude the answer was as fresh as the scan. `answerAsOf` is now explicit: null on the deepwiki path (an admission, since DeepWikiAnswer carries only {repo, answer, searchUrl} and the MCP envelope exposes no index date — inventing a timestamp would make an unknown look measured), and populated from scannedAt on the stellarlight-code-scan path, where the answer IS the scan. A meta.warnings entry names the three fields that do NOT date the answer, because an absent field is easy to skim past. The spec says the same and tells readers not to substitute the scan dates. Not done, and deliberately: verifying numeric constants in an answer against scannedRef content would need per-request source fetches, which is a different and much larger change than making the dating honest." ,
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.7",
 		type: "fixed",
 		summary:

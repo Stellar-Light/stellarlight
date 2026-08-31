@@ -12,9 +12,9 @@ name: consumption-guard
 on:
   push:
     branches: [main]
-    paths: ["src/**", "scripts/**"]
+    paths: ["src/**", "scripts/**", "improvements/**"]
   pull_request:
-    paths: ["src/**", "scripts/**"]
+    paths: ["src/**", "scripts/**", "improvements/**"]
   schedule:
     - cron: "23 6 * * 1"
   workflow_dispatch:
@@ -48,6 +48,13 @@ jobs:
       # nothing new lands.
       - name: No new type errors in scripts/
         run: pnpm exec tsx scripts/check-scripts-types.ts
+
+      # Two artifacts reporting the same quantity must agree. /quality showed
+      # "Open findings 56" as its headline directly above a row reading
+      # "27 open" — neither artifact wrong about itself, nothing requiring them
+      # to be refreshed together, and nothing noticing they had diverged.
+      - name: Cross-artifact quantities agree
+        run: pnpm exec tsx scripts/check-artifact-agreement.ts
 
       # Fable's audit finding #4: check-curated-canonical.ts was written to
       # "exit 1 so a lane can gate on it" — and no lane existed. The curated

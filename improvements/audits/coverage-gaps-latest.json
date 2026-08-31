@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-08-30T23:05:13.944Z",
+  "asOf": "2026-08-31T04:04:10.197Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 500,
-    "absent": 49,
-    "served": 451,
-    "absentWithRoundBadge": 49,
+    "absent": 47,
+    "served": 453,
+    "absentWithRoundBadge": 47,
     "sample": [
       {
         "scfSlug": "loop-cashback-everywhere-with-stellar-zom",
@@ -90,9 +90,10 @@
     "missing": 0,
     "belowFloor": 2
   },
+  "corroboratedAbsent": [],
   "summary": {
     "missingDefillama": 0,
-    "missingScf": 49,
+    "missingScf": 47,
     "partnerDocsWithoutOwnContent": 3,
     "staleCollections": 0,
     "staleOrEmptyResearchSources": 1,

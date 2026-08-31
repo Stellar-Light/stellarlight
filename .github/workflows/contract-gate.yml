@@ -41,6 +41,12 @@ jobs:
         run: pnpm exec tsx scripts/check-writer-conformance.ts
       - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
         run: pnpm exec tsx scripts/eval/routing-surface-check.ts
+
+      # Every served value must be datable, or say it is not. Raven #1134: a
+      # DeepWiki answer sat beside three dates that all described the code scan
+      # and none dated the answer. Ratcheted at 40 — new ones fail.
+      - name: Served values are datable
+        run: pnpm exec tsx scripts/check-answer-dating.ts
       - name: Route files export only handlers + config (2026-07-21 — non-handler exports break next build, tsc/vitest miss it)
         run: pnpm exec tsx scripts/eval/route-exports-check.ts
       - name: Changelog⇄contract assertion (sls-054)
