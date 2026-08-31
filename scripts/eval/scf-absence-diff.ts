@@ -135,13 +135,29 @@ async function fetchDirectory(): Promise<
 
 function matches(
 	e: ScfEntry,
-	dir: Array<{ slug: string; name: string; c: string; t: Set<string> }>,
+	dir: Array<{
+		slug: string;
+		name: string;
+		kind: "name" | "alias";
+		c: string;
+		t: Set<string>;
+	}>,
 ): boolean {
 	const cb = canon(e.base);
 	const first = e.base.split("-")[0];
 	const tb = tokens(e.base.replace(/-/g, " "));
 	for (const d of dir) {
 		if (d.slug === e.base || d.c === cb) return true;
+		// An alias is a WEAKER identity claim than a name — a former name, an
+		// abbreviation, a rebrand — so it earns only the strictest branches:
+		// exact equality (above) and whole-token equality (here). Never
+		// first-token, never prefix, never substring containment: an alias
+		// "Vibrant" must not claim every SCF slug whose first token happens to
+		// be "vibrant".
+		if (d.kind === "alias") {
+			if (d.c.length >= 4 && tb.has(d.c)) return true;
+			continue;
+		}
 		// SCF titles are descriptive ('sfx-super-money-app'); the product name
 		// is usually the FIRST token or a prefix ('cocaxyz' → coca).
 		if (first.length >= 3 && d.c === first) return true;
@@ -205,10 +221,18 @@ async function main() {
 	// One index row per IDENTITY STRING, not per project — the shape
 	// report-coverage-gaps.ts already uses. A project answering to two names is
 	// two chances to match, which is the point of carrying aliases at all.
+	// Each row is TAGGED name|alias: matches() grants alias rows only the
+	// strictest branches, because an alias is a weaker identity claim.
 	const dirIdx = dir.flatMap((d) =>
-		[d.name, ...d.aliases]
-			.filter((n): n is string => typeof n === "string" && n.trim().length > 0)
-			.map((n) => ({ ...d, c: canon(n), t: tokens(n) })),
+		[
+			{ n: d.name, kind: "name" as const },
+			...d.aliases.map((n) => ({ n, kind: "alias" as const })),
+		]
+			.filter(
+				(x): x is { n: string; kind: "name" | "alias" } =>
+					typeof x.n === "string" && x.n.trim().length > 0,
+			)
+			.map((x) => ({ ...d, kind: x.kind, c: canon(x.n), t: tokens(x.n) })),
 	);
 	const absent = scf.filter((e) => !matches(e, dirIdx));
 	console.error(
