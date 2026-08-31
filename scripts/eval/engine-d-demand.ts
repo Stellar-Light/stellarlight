@@ -207,9 +207,16 @@ function classify(endpoint: string, r: Replay): MissClass {
  * script, so this adds a lookup, not a dependency.
  */
 async function answeredElsewhere(query: string): Promise<string | null> {
+	// Partners belongs here too: service providers live on /api/partners BY
+	// DESIGN (the projects meta hint says so), so a provider name like
+	// `finclusive` replayed against the projects endpoint read as a directory
+	// coverage gap while the corpus served it all along. Partners q-matching is
+	// strict (probed 2026-08-31: zorblend/crdt/warmancer → 0 rows, finclusive
+	// → its row), so this can't suppress a real gap with a loose neighbour.
 	for (const [surface, path] of [
 		["repos", "/api/repos/search"],
 		["research", "/api/research"],
+		["partners", "/api/partners"],
 	] as const) {
 		try {
 			const res = await fetch(
@@ -222,7 +229,7 @@ async function answeredElsewhere(query: string): Promise<string | null> {
 			if (!res.ok) continue;
 			const d: any = await res.json();
 			const rows: unknown[] =
-				d?.repos ?? d?.results ?? d?.research ?? d?.items ?? [];
+				d?.repos ?? d?.results ?? d?.research ?? d?.partners ?? d?.items ?? [];
 			// Semantic neighbours are not answers — the same rule this engine
 			// already applies to the projects endpoint.
 			if (Array.isArray(rows) && rows.length > 0 && d?.meta?.matchMode !== "semantic")
