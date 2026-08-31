@@ -8,6 +8,11 @@ name: Live canary
 #
 # Hourly on purpose: the failure class here is "quiet and looks like a
 # legitimate empty result", so a daily check means a working day of dark.
+#
+# A red at this step is the canary reporting a prod outage — the lane doing
+# its job, tracked by its rolling issue — not the lane breaking (read by
+# scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 
 on:
   schedule:

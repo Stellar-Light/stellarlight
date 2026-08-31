@@ -13,17 +13,33 @@
  * fire" — and never given a detector. A prose lesson cannot fail a build. So:
  * for every workflow file in the repo, ask GitHub what its runs actually did.
  *
- * Three states are reported, and only the first two are failures:
+ * Four states are reported, and only STALE is not an outright failure:
  *
  *   NEVER-RAN   the file exists and GitHub has no conclusive run for it. Either
  *               it is broken at the setup step, or its triggers never fire.
- *   ALWAYS-RED  it has run and has never once succeeded.
+ *   ALWAYS-RED  it has run and has never once succeeded (within the run window).
+ *   FAILING     it has an older green and has lost every run since.
  *   STALE       it last succeeded longer ago than its own cadence allows.
  *
- * Deliberately NOT a failure: a lane whose most recent run is red while an
- * older one was green. Several of ours are detectors that exit 1 BY DESIGN when
- * they find something — a red there is the guard working, and a checker that
- * called that broken would train everyone to ignore it.
+ * SIGNAL LANES — the `# workflow-health: signal-steps: <regex>` declaration.
+ *
+ * Several lanes exit 1 BY DESIGN when their detector finds something — a red
+ * there is the guard working, and a checker that called it broken would train
+ * everyone to ignore the board. Such a lane must DECLARE that, with one comment
+ * line anywhere in its own YAML naming (as a regex over step names) the steps
+ * where its deliberate red happens:
+ *
+ *   # workflow-health: signal-steps: ^Propagate the red$
+ *
+ * A failed run is a SIGNAL iff its failing step's name matches the lane's
+ * declared regex. Everything else — no declaration, or a failure at any other
+ * step, setup included — is the lane broken. This replaced a file-level
+ * /continue-on-error: true/ test that let ONE optional step anywhere
+ * launder every real failure in its lane — coverage-watch marks only "Fetch
+ * previous month's artifact", yet a crash in its report step was classed
+ * self-managed; api-drift marks only the drift step, yet a red
+ * field-population step got the same free pass. Only a declaration says which
+ * red is designed, and only the named steps inherit the exemption.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -249,6 +265,25 @@ async function main() {
 	const rows: Row[] = [];
 	for (const file of files.sort()) {
 		const src = readFileSync(join(DIR, file), "utf8");
+		// The lane's own declaration that it reds by design, and where — see the
+		// header. First declaration wins; one per file is the convention. An
+		// unparseable regex is a config defect, not an absence: reading it as "no
+		// declaration" would silently flip a signal lane to FAILING, the exact
+		// quiet misclassification this file exists to catch. So: no verdict.
+		const sigDecl = /^\s*#\s*workflow-health:\s*signal-steps:\s*(\S.*?)\s*$/m.exec(
+			src,
+		);
+		let signalRe: RegExp | null = null;
+		if (sigDecl) {
+			try {
+				signalRe = new RegExp(sigDecl[1]);
+			} catch {
+				console.error(
+					`INCONCLUSIVE: ${file} declares "workflow-health: signal-steps:" with an invalid regex: ${sigDecl[1]}`,
+				);
+				process.exit(2);
+			}
+		}
 		let doc: any = {};
 		try {
 			doc = yaml.load(src) ?? {};
@@ -418,25 +453,22 @@ async function main() {
 		);
 		// Does this lane DECLARE that its own red is a signal?
 		//
-		// Step position is the wrong discriminator here, and trying it proved so
-		// in both directions: raven-eval-parity fails at "Truth battery (guard
-		// D)", a detector exiting 1 on a finding — not setup, and not a defect —
-		// while sync-scout-mcp fails at a push step that is also not setup and IS
-		// a defect (a missing secret). The step tells you nothing.
-		//
-		// What separates them is that a signal lane says so in its own YAML: it
-		// runs the detector under `continue-on-error` and decides for itself what
-		// to do with the outcome. A lane with no such declaration has no opinion
-		// about failing, so when it fails, it is broken. Measured across the
-		// three: raven-eval-parity and generated-recall declare it, sync-scout-mcp
-		// and seed-blog-posts do not.
-		const selfManagesFailure = /continue-on-error:\s*true/.test(src);
+		// Step position was the wrong discriminator (raven-eval-parity's truth
+		// battery and sync-scout-mcp's push step both fail mid-lane; one is a
+		// finding, one a missing secret). A file-level /continue-on-error: true/
+		// test was too, in the other direction: ONE optional step anywhere —
+		// coverage-watch's "Fetch previous month's artifact", api-drift's drift
+		// step — exempted every real failure in the rest of that lane. So the
+		// lane itself must NAME the steps that red by design, via the
+		// signal-steps declaration (header), and only a failure at a named step
+		// is a signal. No declaration, an unreadable jobs list, or a failure at
+		// any other step — setup included — is the lane broken.
 		const failStep = failedSinceGreen.length
 			? await firstFailedStep(failedSinceGreen[0].id)
 			: null;
 		const failing =
 			failedSinceGreen.length > 0 &&
-			(!selfManagesFailure || !failStep || isSetupStep(failStep));
+			!(signalRe && failStep && signalRe.test(failStep));
 		const stale = automatic && age > grace && hadWorkSince && !failing;
 		rows.push({
 			file,

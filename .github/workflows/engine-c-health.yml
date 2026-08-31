@@ -1,6 +1,10 @@
 # Engine C — the weekly self-improvement loop. Runs Engine A (recall matrix)
 # + Engine B (data sweeps), builds one rolling "Retrieval health" tracker
 # issue (edited each week = week-over-week state), red on any A floor breach.
+#
+# A red at this step is a floor breach reported into the tracker issue, not
+# the lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Fail run on floor breach$
 name: engine-c-health
 on:
   schedule:
