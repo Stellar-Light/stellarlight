@@ -21,6 +21,30 @@ Phases are sequenced by dependency, not by calendar.
 - **A quiet detector looks like a live one.** Every lane must fail loud
   on zero work; every claim must carry its date; every write must prove
   itself by read-back.
+- **Machinery nobody consumes is not a feature — it is a liability.**
+  (Added 2026-08-30 after two independent cross-vendor audits.) The
+  dominant defect class here is NOT bad logic. It is correct, tested
+  logic whose output nothing reads:
+    `codeProofTier`   tested, called only by a read-only report
+    `triageTags`      derived for 12,961 repos, read by no serving path
+    `tier=quality`    written to prod, and no ranker reads it
+    `tierReason`      schema field the write built for it leaves null
+    `knowledgeNotes`  8 notes / 7,000 repos, no writer, no cadence
+  Each looked finished. None changed a single answer an agent receives.
+  **Before building a value, name its consumer. A change that adds a
+  field without a reader is not done — it is dead on arrival.**
+- **A lesson in a doc is not a guard; only a lane that fails loud is.**
+  We wrote the line above into this file and then produced four fresh
+  instances of the same class within hours. Docs cannot fail a build.
+  The guard is `scripts/check-consumption.ts`, gating in CI
+  (`.github/workflows/consumption-guard.yml`) and rendered on `/quality`
+  as the `consumption` row. If a future defect belongs to a class we
+  have already named, the correct response is not another note — it is
+  to ask why no lane caught it, and build that lane.
+- **`quality` has exactly ONE writer.** Two authorities over the same
+  field is how curation gets silently reverted by sync (#730). Verified
+  2026-08-30: a second writer would have demoted 34 of 39 curated rows
+  and confirmed the clobber as success via its own read-back.
 
 ## 1. Coverage — the substrate (in flight)
 

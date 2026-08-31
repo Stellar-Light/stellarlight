@@ -8,6 +8,7 @@
  * the artifact path so every number links to its reproducible evidence.
  */
 
+import consumption from "../../improvements/audits/consumption-latest.json";
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
@@ -323,6 +324,38 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			severity: curatedCanonical.absent.length > 0 ? "high" : "medium",
 			artifact: "improvements/audits/curated-canonical-latest.json",
 			passing: curatedCanonical.findings === 0,
+		}),
+
+		// THE META-ROW. Every significant defect of 2026-08-30 was one shape:
+		// machinery exists, is tested, produces a value, and NOTHING CONSUMES
+		// IT. codeProofTier called only by a report. triageTags derived for
+		// 12,961 repos, read by no serving path. tier=quality armed on prod
+		// with no ranker reading it. We wrote that lesson into PLAN.md and then
+		// produced four fresh instances of it the same day, because a lesson in
+		// a doc cannot fail and a lane can. Catching this class BEFORE an audit
+		// does is the entire point of this board.
+		g({
+			key: "consumption",
+			title: "Computed values reach a serving path",
+			promise:
+				"Every field our machinery computes is read by something that shapes an agent's answer — a value nothing consumes cannot change what anyone is told.",
+			measure: {
+				value: consumption.consumed,
+				of: consumption.checked,
+				unit: "fields",
+			},
+			sub: `${consumption.consumed}/${consumption.checked} computed fields reach a serving path, or an engine whose output is served`,
+			details: [
+				...consumption.dead.map(
+					(d: { field: string; why: string }) => `DEAD: ${d.field} — ${d.why}`,
+				),
+				"a script or a test does not count as consumption — that is how codeProofTier passed for months while only a report called it",
+			],
+			asOf: consumption.asOf.slice(0, 10),
+			cadence: "on-deploy",
+			severity: "high",
+			artifact: "improvements/audits/consumption-latest.json",
+			passing: consumption.dead.length === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The
