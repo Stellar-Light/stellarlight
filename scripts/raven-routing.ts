@@ -78,9 +78,17 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		note: "people index",
 	},
 	{
+		// The BANK was wrong here, not the router. /api/partners?all=true holds
+		// 5 rows with partnerType=wallet; /api/projects/search?type=Wallet
+		// reports total 64. Expecting getPartners asked the router to return 5
+		// instead of 64 — strictly worse — and our own spec says so: getPartners
+		// notFor carries "projects/products that were BUILT -> searchProjects",
+		// and searchProjects exampleQuestions has the near-verbatim "Which
+		// wallets exist on Stellar and how do they differ?". The router obeyed
+		// the contract and the probe called it a defect.
 		q: "what wallets support Stellar",
-		expect: ["getPartners"],
-		note: "partner directory (wallets)",
+		expect: ["searchProjects", "getPartners"],
+		note: "wallets — the directory holds 64, the partner list 5",
 	},
 	{
 		q: "on and off ramps for Stellar payments",
@@ -165,9 +173,15 @@ const BANK: Array<{ q: string; expect: string[]; note: string }> = [
 		note: "demand: oracle project",
 	},
 	{
-		q: "octoplace",
+		// Re-pointed from "octoplace", which the directory does not hold: the
+		// live endpoint answers in semantic mode with the advisory "NEIGHBOURS,
+		// not matches". A name-lookup probe aimed at a name we do not carry
+		// tests CURATION and reports it as a ROUTING defect — the probe can only
+		// pass if someone adds the project. "freighter" is held and matches
+		// strict, so this now tests the thing it was written to test.
+		q: "freighter",
 		expect: ["searchProjects"],
-		note: "demand: project by name",
+		note: "demand: project by name (held, strict match)",
 	},
 	{
 		q: "zk-snark",

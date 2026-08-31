@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.7",
+		type: "fixed",
+		summary:
+			"getPartners and searchProjects both declared ramp vocabulary with no tiebreaker; the split is now stated on both sides — rampTypes (direction, corridor) is a partner fact, the larger anchor roster is a directory fact.",
+		detail:
+			"\"on and off ramps for Stellar payments\" was contested by construction: getPartners keywords carried on-ramp/off-ramp/ramps/anchors, searchProjects carried anchors and on/off-ramps, and neither notFor named the other. The un-brokered overlap was the defect, not the route taken. The split follows the data — 29 anchor-typed partners of which 9 have rampTypes populated, against 42 type=Anchor projects — so getPartners useWhen now claims the case it uniquely serves (which anchors on-ramp vs off-ramp, in which corridor) and searchProjects notFor points ramp direction and corridor questions at it. Routing metadata only.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.6",
 		type: "fixed",
 		summary:

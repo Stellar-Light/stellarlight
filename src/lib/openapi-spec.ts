@@ -1922,6 +1922,7 @@ export const spec: OpenAPISpec = {
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
 						"category counts or whitespace -> getClusters",
 						"ranking projects by GitHub activity / stars / commits -> getLeaderboard",
+						"ramp DIRECTION or corridor for a specific anchor (on-ramp vs off-ramp, which country) -> getPartners, which carries rampTypes",
 						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)",
 					],
 					exampleQuestions: [
@@ -3156,6 +3157,16 @@ export const spec: OpenAPISpec = {
 						"'who should audit my Soroban contract' (type=audit-firm)",
 						"find an anchor or on/off-ramp in {region}",
 						"partner discovery for an integration",
+						// THE TIEBREAKER. Both this operation and searchProjects
+						// declared ramp vocabulary — on-ramp / off-ramp / ramps /
+						// anchors here, anchors / on-off-ramps there — with nothing in
+						// either notFor to break the tie, so "on and off ramps for
+						// Stellar payments" was contested by construction. The split
+						// follows the data: 29 anchor-typed partners here, 9 of them
+						// with rampTypes populated, against 42 type=Anchor projects in
+						// the directory. Direction and corridor are the facts only this
+						// side holds; the roster is larger on the other.
+						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
 					],
 					notFor: [
 						"projects/products that were BUILT -> searchProjects",
