@@ -1,5 +1,118 @@
 {
-	"generatedAt": "2026-08-30T10:43:18.366Z",
+	"generatedAt": "2026-08-31T11:52:58.726Z",
 	"detector": "record-completeness",
-	"failures": []
+	"failures": [
+		{
+			"probe": "scfRoundAwards empty: upesa",
+			"note": "rounds=[41,42]"
+		},
+		{
+			"probe": "scfRoundAwards empty: pagcrypto",
+			"note": "rounds=[42]"
+		},
+		{
+			"probe": "scfRoundAwards empty: crebit",
+			"note": "rounds=[44,45]"
+		},
+		{
+			"probe": "scfRoundAwards empty: yolat",
+			"note": "rounds=[44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: etesia",
+			"note": "rounds=[44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: account-demolisher",
+			"note": "rounds=[29,41,44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: sendana",
+			"note": "rounds=[40,44,45]"
+		},
+		{
+			"probe": "scfRoundAwards empty: sorted",
+			"note": "rounds=[44,45]"
+		},
+		{
+			"probe": "scfRoundAwards empty: kutana",
+			"note": "rounds=[38,39,43,44,45]"
+		},
+		{
+			"probe": "scfRoundAwards empty: janus",
+			"note": "rounds=[45]"
+		},
+		{
+			"probe": "scfRoundAwards empty: roberto-sanz-criptomonedas",
+			"note": "rounds=[22,24]"
+		},
+		{
+			"probe": "scfRoundAwards empty: komet",
+			"note": "rounds=[28,30]"
+		},
+		{
+			"probe": "scfRoundAwards empty: crediolabs-ai",
+			"note": "rounds=[44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: loop",
+			"note": "rounds=[40]"
+		},
+		{
+			"probe": "scfRoundAwards empty: inferera",
+			"note": "rounds=[41]"
+		},
+		{
+			"probe": "scfRoundAwards empty: simbolik",
+			"note": "rounds=[41]"
+		},
+		{
+			"probe": "scfRoundAwards empty: the-aha-company",
+			"note": "rounds=[41]"
+		},
+		{
+			"probe": "scfRoundAwards empty: womenbiz",
+			"note": "rounds=[29]"
+		},
+		{
+			"probe": "scfRoundAwards empty: verseprop",
+			"note": "rounds=[31,32,33]"
+		},
+		{
+			"probe": "scfRoundAwards empty: ichi",
+			"note": "rounds=[26]"
+		},
+		{
+			"probe": "scfRoundAwards empty: fairblock",
+			"note": "rounds=[40]"
+		},
+		{
+			"probe": "scfRoundAwards empty: coala-pay",
+			"note": "rounds=[22,31]"
+		},
+		{
+			"probe": "scfRoundAwards empty: dfs-labs",
+			"note": "rounds=[24]"
+		},
+		{
+			"probe": "scfRoundAwards empty: nouns-builder-protocol",
+			"note": "rounds=[44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: vrf-soroban",
+			"note": "rounds=[44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: policywright",
+			"note": "rounds=[42,44]"
+		},
+		{
+			"probe": "scfRoundAwards empty: soroban-decompiler",
+			"note": "rounds=[41]"
+		},
+		{
+			"probe": "scfRoundAwards empty: escala",
+			"note": "rounds=[42,43,44]"
+		}
+	]
 }

@@ -694,7 +694,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -3762,7 +3762,7 @@
 		"failureMode": "ambiguous-contract",
 		"severity": "low",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -3774,7 +3774,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3786,7 +3786,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3798,7 +3798,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3810,7 +3810,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3822,7 +3822,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3834,7 +3834,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -3846,7 +3846,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -4773,9 +4773,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-13T07:14:54.914Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
-		"evidenceAt": "2026-08-30T10:53:17.055Z"
+		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-gap-compare-hackathons",
@@ -4941,9 +4941,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-14T07:10:16.228Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
-		"evidenceAt": "2026-08-30T10:53:17.055Z"
+		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
 	{
 		"id": "nightly-drift:status-endpoints-lists-api-vet-idea",
@@ -5148,9 +5148,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
-		"evidenceAt": "2026-08-30T10:53:17.055Z"
+		"evidenceAt": "2026-08-31T12:03:45.437Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-leaderboard-open-issues",
@@ -5161,9 +5161,10 @@
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
 		"lastSeen": "2026-08-31T03:34:47.831Z",
-		"status": "open",
+		"status": "cleared",
 		"evidenceAt": "2026-08-30T10:53:17.055Z",
-		"reopenedAt": "2026-08-31T03:03:49.030Z"
+		"reopenedAt": "2026-08-31T03:03:49.030Z",
+		"clearedAt": "2026-08-31T12:03:52.595Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-soroban-auth-audit-live",
@@ -5238,7 +5239,7 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -5864,7 +5865,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5876,7 +5877,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5888,7 +5889,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5900,7 +5901,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5912,7 +5913,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5924,7 +5925,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5936,7 +5937,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5948,7 +5949,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -5960,7 +5961,7 @@
 		"failureMode": "demand-routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-28T15:54:45.259Z"
 	},
@@ -6014,7 +6015,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -6026,7 +6027,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T03:34:29Z"
 	},
@@ -6129,7 +6130,7 @@
 		"failureMode": "coverage-gap",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T22:37:38.494Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
 	},
@@ -6154,8 +6155,344 @@
 		"failureMode": "demand-miss",
 		"severity": "high",
 		"firstSeen": "2026-08-31T01:50:05.267Z",
-		"lastSeen": "2026-08-31T03:34:47.831Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
 		"status": "open",
 		"evidenceAt": "2026-08-30T14:26:24Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-upesa",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: upesa",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-pagcrypto",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: pagcrypto",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-crebit",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: crebit",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-yolat",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: yolat",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-etesia",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: etesia",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-account-demolisher",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: account-demolisher",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-sendana",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: sendana",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-sorted",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: sorted",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-kutana",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: kutana",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-janus",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: janus",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-roberto-sanz-criptomonedas",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: roberto-sanz-criptomonedas",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-komet",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: komet",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-crediolabs-ai",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: crediolabs-ai",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-loop",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: loop",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-inferera",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: inferera",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-simbolik",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: simbolik",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-the-aha-company",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: the-aha-company",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-womenbiz",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: womenbiz",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-verseprop",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: verseprop",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-ichi",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: ichi",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-fairblock",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: fairblock",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-coala-pay",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: coala-pay",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-dfs-labs",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: dfs-labs",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-nouns-builder-protocol",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: nouns-builder-protocol",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-vrf-soroban",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: vrf-soroban",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-policywright",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: policywright",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-soroban-decompiler",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: soroban-decompiler",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
+	},
+	{
+		"id": "nightly-completeness:scfroundawards-empty-escala",
+		"source": "nightly-completeness",
+		"surface": "directory",
+		"probe": "scfRoundAwards empty: escala",
+		"failureMode": "completeness-residual",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T12:03:52.595Z",
+		"lastSeen": "2026-08-31T12:03:52.595Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T11:52:58.726Z"
 	}
 ]

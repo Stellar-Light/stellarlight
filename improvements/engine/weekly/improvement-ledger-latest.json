@@ -1,18 +1,23 @@
 {
-	"generatedAt": "2026-08-31T03:34:47.831Z",
-	"total": 461,
-	"open": 27,
-	"closed": 434,
+	"generatedAt": "2026-08-31T12:03:52.596Z",
+	"total": 489,
+	"open": 54,
+	"closed": 435,
 	"verified": 7,
-	"cleared": 427,
+	"cleared": 428,
 	"clearedByReprobe": 209,
-	"clearedOnSilence": 218,
-	"closingRate": 0.94,
-	"oldestOpenDays": 39,
+	"clearedOnSilence": 219,
+	"closingRate": 0.89,
+	"oldestOpenDays": 40,
 	"inWave": 0,
 	"highOpen": 1,
 	"staleHighOpen": 0,
 	"bySurface": [
+		{
+			"surface": "directory",
+			"open": 30,
+			"total": 89
+		},
 		{
 			"surface": "consumer",
 			"open": 16,
@@ -25,13 +30,8 @@
 		},
 		{
 			"surface": "corpus",
-			"open": 4,
+			"open": 3,
 			"total": 18
-		},
-		{
-			"surface": "directory",
-			"open": 2,
-			"total": 61
 		},
 		{
 			"surface": "contract",
