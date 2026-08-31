@@ -421,17 +421,45 @@ async function main() {
 	let demand: Array<{ query: string; hits: number }> = [];
 	try {
 		const dd = JSON.parse(readFileSync(DEMAND, "utf8")) as {
-			misses?: Array<{ query?: string; hits?: number }>;
+			misses?: Array<{ query?: string; hits?: number; class?: string }>;
 		};
 		demand = (dd.misses ?? [])
-			.map((m) => ({ query: String(m.query ?? ""), hits: Number(m.hits ?? 0) }))
+			.map((m) => ({
+				query: String(m.query ?? ""),
+				hits: Number(m.hits ?? 0),
+				// engine-d already decided whether each miss is a ranking problem
+				// or a hole in the corpus. Dropping that verdict here re-graded
+				// every curation gap as a consumer routing defect.
+				cls: String(m.class ?? ""),
+			}))
 			.filter(
 				(m) =>
 					m.query &&
 					!isSyntheticQuery(m.query) &&
 					// same fabricated-canary filter the ledger uses — this lane
 					// reads engine-d's misses, so it inherits the same six
-					!isFabricatedProbe(m.query),
+					!isFabricatedProbe(m.query) &&
+					// A BARE NAME we do not hold is not a routing defect. Six rows
+					// — openx402, hypertron, planbok, vigente, cointracker, alypay —
+					// sat open on the routing surface as consumer defects no routing
+					// change could ever close. Verified live: each returns
+					// matchMode "semantic" with the advisory "NEIGHBOURS, not
+					// matches ... the answer is no". Routing to searchProjects was
+					// correct; we simply do not have the project. They stay as
+					// engine-d curation findings, which is the surface that can act.
+					//
+					// Length is the discriminator, and it is doing real work rather
+					// than approximating: engine-d stamps GAP by probing the live API
+					// with the whole literal sentence against a substring-matched
+					// `q`, so a natural-language question is stamped GAP even when we
+					// hold the answer. "what disbursement or payout providers can i
+					// integrate on stellar?" is GAP and yet returns five rows (SDP,
+					// DCM, ElementPay) — a genuine routing finding that must survive
+					// this filter. Only short bare names are skipped.
+					!(
+						(m.cls === "GAP" || m.cls === "EMPTY") &&
+						m.query.trim().split(/\s+/).length <= 2
+					),
 			)
 			.sort((a, b) => b.hits - a.hits)
 			.slice(0, 15);
