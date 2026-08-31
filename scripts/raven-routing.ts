@@ -23,6 +23,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isSyntheticQuery } from "../src/lib/improvement-ledger";
+import { isFabricatedProbe } from "./eval/battery-banks";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "improvements/engine/raven-routing-latest.json");
@@ -424,7 +425,14 @@ async function main() {
 		};
 		demand = (dd.misses ?? [])
 			.map((m) => ({ query: String(m.query ?? ""), hits: Number(m.hits ?? 0) }))
-			.filter((m) => m.query && !isSyntheticQuery(m.query))
+			.filter(
+				(m) =>
+					m.query &&
+					!isSyntheticQuery(m.query) &&
+					// same fabricated-canary filter the ledger uses — this lane
+					// reads engine-d's misses, so it inherits the same six
+					!isFabricatedProbe(m.query),
+			)
 			.sort((a, b) => b.hits - a.hits)
 			.slice(0, 15);
 	} catch {}

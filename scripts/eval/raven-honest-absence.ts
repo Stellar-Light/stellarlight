@@ -80,10 +80,7 @@ function leadingJson<T>(text: string): T {
  * token any Stellar record could legitimately contain. Anything returned for
  * these is by construction a near-match, never a hit.
  */
-const NONSENSE = [
-	"zzqqxx nonexistent protocol 9999",
-	"flurbomatic quantifold widgetron on Stellar",
-];
+const NONSENSE = NONSENSE_PROBES;
 
 type Probe = {
 	surface: string;

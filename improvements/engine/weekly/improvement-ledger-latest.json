@@ -1,20 +1,20 @@
 {
-	"generatedAt": "2026-08-30T10:53:22.680Z",
-	"total": 460,
-	"open": 56,
-	"closed": 404,
+	"generatedAt": "2026-08-31T01:50:05.267Z",
+	"total": 461,
+	"open": 48,
+	"closed": 413,
 	"verified": 7,
-	"cleared": 397,
-	"closingRate": 0.88,
-	"oldestOpenDays": 38,
+	"cleared": 406,
+	"closingRate": 0.9,
+	"oldestOpenDays": 39,
 	"inWave": 0,
-	"highOpen": 2,
+	"highOpen": 1,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 28,
-			"total": 310
+			"open": 26,
+			"total": 311
 		},
 		{
 			"surface": "consumer",
@@ -22,14 +22,14 @@
 			"total": 23
 		},
 		{
-			"surface": "directory",
-			"open": 8,
-			"total": 61
-		},
-		{
 			"surface": "corpus",
 			"open": 3,
 			"total": 18
+		},
+		{
+			"surface": "directory",
+			"open": 2,
+			"total": 61
 		},
 		{
 			"surface": "contract",
@@ -51,17 +51,10 @@
 	"quietSources": [],
 	"topOpen": [
 		{
-			"id": "engine-d-demand:flurbomatic-quantifold-widgetron-on-stellar",
+			"id": "engine-d-demand:warmancer",
 			"surface": "retrieval",
 			"source": "engine-d-demand",
-			"probe": "flurbomatic quantifold widgetron on stellar",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:subfy",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "subfy",
+			"probe": "warmancer",
 			"severity": "high"
 		},
 		{
@@ -104,6 +97,13 @@
 			"surface": "retrieval",
 			"source": "engine-a-recall",
 			"probe": "block-by-block in top-3 for 'is Block by Block live'",
+			"severity": "medium"
+		},
+		{
+			"id": "engine-a-recall:stellar-update-in-top-3-for-tell-me-about-stella",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "stellar-update in top-3 for 'tell me about Stellar Update'",
 			"severity": "medium"
 		}
 	]
