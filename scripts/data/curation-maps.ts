@@ -2984,7 +2984,6 @@ export const TYPES_ADD: Record<string, string[]> = {
 	"arka-fund": ["Yield"], // on-chain asset-management/fund protocol (site title confirms)
 	cushion: ["Yield"], // SEP-56 structured-product / capital-protection quant vaults
 	meria: ["Yield"], // multi-chain staking/yield aggregator + portfolio monitor
-	defindex: ["Yield"], // THE vault infra: strategy vaults over Blend et al (retro-fit)
 
 	// ── P4 untyped-to-zero batch (2026-08-31): the 58 rows the typed-
 	// reachability census flagged, each researched (desc first, site/repo
@@ -3170,7 +3169,7 @@ export const TYPES_SET: Record<string, string[]> = {
 	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
 	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
 	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
-	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
+	defindex: ["Infrastructure", "SDK", "Yield"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks (Yield added with spec 1.9.13).
 	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
 	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
 	// Held-queue resolutions after a closer look (boxy 2026-07-15).
