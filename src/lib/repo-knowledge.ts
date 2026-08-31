@@ -33,6 +33,17 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// Verified 2026-08-31 against the GitHub Advisory Database (gh api
+	// /advisories/<ghsa>): three repository advisories, severities and patched
+	// versions confirmed from the records themselves. Dated facts, not a
+	// permanent list — the note says to re-check the live feed.
+	"stellar/rs-soroban-sdk": [
+		{
+			note: "Security advisories (as of 2026-08-31, check the live advisory feed — this list is dated, not permanent): CVE-2026-24889 / GHSA-96xm-fv9w-pf3f, medium — overflow in Bytes::slice, Vec::slice, GenRange::gen_range (soroban-sdk; fixed in 25.0.2 / 23.5.1 / 22.0.9); CVE-2026-26267 / GHSA-4chv-4c6w-w254, high — #[contractimpl] macro calls inherent function instead of trait (soroban-sdk-macros; fixed in 25.1.1 / 23.5.2 / 22.0.10); CVE-2026-32322 / GHSA-x2hw-px52-wp4m, medium — Fr scalar field equality bypasses modular reduction (soroban-sdk; fixed in 25.3.0 / 23.5.3 / 22.0.11). Impact conditions differ per advisory; upgrade to a patched supported branch and recompile affected deployed code.",
+			source: "curated",
+			asOf: "2026-08-31",
+		},
+	],
 	// Verified 2026-08-01 (SDF Discord thread with earrietadev + our indexing
 	// work): per-protocol extension docs live in subdirectory READMEs.
 	"creit-tech/stellar-indexer-sdk": [
