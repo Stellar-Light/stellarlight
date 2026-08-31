@@ -1,13 +1,13 @@
 {
-	"generatedAt": "2026-08-31T15:22:53.790Z",
-	"total": 489,
-	"open": 54,
-	"closed": 435,
+	"generatedAt": "2026-08-31T19:51:18.114Z",
+	"total": 490,
+	"open": 43,
+	"closed": 447,
 	"verified": 7,
-	"cleared": 428,
+	"cleared": 440,
 	"clearedByReprobe": 209,
-	"clearedOnSilence": 219,
-	"closingRate": 0.89,
+	"clearedOnSilence": 231,
+	"closingRate": 0.91,
 	"oldestOpenDays": 40,
 	"inWave": 0,
 	"highOpen": 1,
@@ -20,8 +20,8 @@
 		},
 		{
 			"surface": "consumer",
-			"open": 16,
-			"total": 23
+			"open": 5,
+			"total": 24
 		},
 		{
 			"surface": "retrieval",
@@ -67,31 +67,10 @@
 			"severity": "medium"
 		},
 		{
-			"id": "raven-routing:what-wallets-support-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "what wallets support Stellar",
-			"severity": "medium"
-		},
-		{
-			"id": "raven-routing:on-and-off-ramps-for-stellar-payments",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "on and off ramps for Stellar payments",
-			"severity": "medium"
-		},
-		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "top Stellar projects by GitHub activity",
-			"severity": "medium"
-		},
-		{
-			"id": "raven-routing:passkey-kit",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "passkey-kit",
 			"severity": "medium"
 		},
 		{
@@ -102,10 +81,31 @@
 			"severity": "medium"
 		},
 		{
-			"id": "raven-routing:octoplace",
+			"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
 			"surface": "consumer",
 			"source": "raven-routing",
-			"probe": "octoplace",
+			"probe": "jobs bounties and freelance work for Stellar contributors",
+			"severity": "medium"
+		},
+		{
+			"id": "engine-d-demand:crdt",
+			"surface": "directory",
+			"source": "engine-d-demand",
+			"probe": "crdt",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "how does the Blend lending pool calculate interest rates in the code",
+			"severity": "medium"
+		},
+		{
+			"id": "engine-a-recall:ping-in-top-13-of-52-matches-its-own-coverage-co",
+			"surface": "retrieval",
+			"source": "engine-a-recall",
+			"probe": "ping in top-13 of 52 matches (its own coverage.countries implies 'Argentina anchor')",
 			"severity": "medium"
 		}
 	]

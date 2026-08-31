@@ -1,39 +1,16 @@
 {
-	"generatedAt": "2026-08-28T15:54:45.259Z",
+	"generatedAt": "2026-08-31T19:50:35.530Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 37,
-		"passed": 28,
-		"failed": 9,
+		"passed": 32,
+		"failed": 5,
 		"lagging": 0,
-		"demandChecked": 15,
-		"demandMissed": 9
+		"demandChecked": 0,
+		"demandMissed": 0
 	},
-	"okRate": 0.76,
+	"okRate": 0.86,
 	"misses": [
-		{
-			"query": "what wallets support Stellar",
-			"expect": [
-				"getPartners"
-			],
-			"topScout": [
-				"searchProjects",
-				"getClusters",
-				"searchResearch"
-			],
-			"note": "partner directory (wallets)"
-		},
-		{
-			"query": "on and off ramps for Stellar payments",
-			"expect": [
-				"getPartners"
-			],
-			"topScout": [
-				"searchProjects",
-				"searchHackathonBuilds"
-			],
-			"note": "anchors/ramps"
-		},
 		{
 			"query": "top Stellar projects by GitHub activity",
 			"expect": [
@@ -44,18 +21,6 @@
 				"searchRepos"
 			],
 			"note": "activity leaderboard"
-		},
-		{
-			"query": "passkey-kit",
-			"expect": [
-				"searchProjects"
-			],
-			"topScout": [
-				"listSkills",
-				"searchRepos",
-				"getBuilders"
-			],
-			"note": "demand: project by name"
 		},
 		{
 			"query": "reflector oracle on Stellar",
@@ -69,12 +34,12 @@
 			"note": "demand: oracle project"
 		},
 		{
-			"query": "octoplace",
+			"query": "freighter",
 			"expect": [
 				"searchProjects"
 			],
 			"topScout": [],
-			"note": "demand: project by name"
+			"note": "demand: project by name (held, strict match)"
 		},
 		{
 			"query": "jobs bounties and freelance work for Stellar contributors",
@@ -98,83 +63,10 @@
 				"vetIdea"
 			],
 			"note": "code: deep repo mechanism (DeepWiki)"
-		},
-		{
-			"query": "how do I write a Soroban smart contract in Rust",
-			"expect": [
-				"searchResearch",
-				"searchRepos"
-			],
-			"topScout": [
-				"listContracts"
-			],
-			"note": "code: how-to (docs or example)"
 		}
 	],
 	"lagging": [],
-	"demandMisses": [
-		{
-			"query": "openx402",
-			"hits": 5,
-			"topAll": [
-				"lumenloop.find_content_about_project",
-				"lumenloop.find_content_by_entity",
-				"lumenloop.search_content_semantic"
-			]
-		},
-		{
-			"query": "hypertron",
-			"hits": 4,
-			"topAll": []
-		},
-		{
-			"query": "planbok",
-			"hits": 3,
-			"topAll": []
-		},
-		{
-			"query": "what disbursement or payout providers can i integrate on stellar?",
-			"hits": 2,
-			"topAll": [
-				"skills.lumenloop.stellar-integration-finder",
-				"stellarDocs.search_docs_in_category",
-				"stellarDocs.search_rpc_horizon_data_docs"
-			]
-		},
-		{
-			"query": "vigente",
-			"hits": 2,
-			"topAll": []
-		},
-		{
-			"query": "cointracker",
-			"hits": 2,
-			"topAll": []
-		},
-		{
-			"query": "alypay",
-			"hits": 2,
-			"topAll": [
-				"lumenloop.find_av_passages",
-				"lumenloop.find_content_about_project",
-				"lumenloop.find_content_by_entity"
-			]
-		},
-		{
-			"query": "planbok",
-			"hits": 2,
-			"topAll": []
-		},
-		{
-			"query": "alypay",
-			"hits": 2,
-			"topAll": [
-				"lumenloop.find_av_passages",
-				"lumenloop.find_content_about_project",
-				"lumenloop.find_content_by_entity"
-			]
-		}
-	],
+	"demandMisses": [],
 	"adversarial": [
 		{
 			"query": "what is the current price of XLM",
