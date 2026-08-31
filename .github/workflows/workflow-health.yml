@@ -60,6 +60,15 @@ jobs:
           git add improvements/audits/workflow-health-latest.json
           git diff --cached --quiet && echo "no change" && exit 0
           git commit -m "chore(quality): workflow health [skip ci]"
+          # Rebase-and-retry: a dispatched run of this lane raced a deploy-nudge
+          # push on 2026-08-31 — non-fast-forward, step failed, and the lane
+          # would have flagged ITSELF as FAILING on the next weekly sweep. The
+          # artifact is a fresh measurement, so replaying it on top of whatever
+          # landed first is always correct.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase && continue
+          done
           git push
 
       # The scout-mcp mirror, watched WITHOUT a secret. The sync automation is
