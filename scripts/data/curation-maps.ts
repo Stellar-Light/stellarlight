@@ -2977,6 +2977,70 @@ export const GITHUB_REPOS_ADD: Record<
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
+	// ── P4 untyped-to-zero batch (2026-08-31): the 58 rows the typed-
+	// reachability census flagged, each researched (desc first, site/repo
+	// where thin) with the reason inline. Five rows stayed honestly
+	// untyped: the yield/asset-management vertical has NO enum value yet
+	// (arka-fund, cushion, meria + class) — that's a taxonomy gap, not a
+	// tagging gap, tracked for its own contract change.
+	"stellarpay-x402": ["Payments", "AI"], // agentic-payments Builder Summit build (x402/MPP) for AI-agent payment flows
+	"smart-treasury": ["Payments", "Wallet"], // policy-driven programmable treasury account automating org payments/approvals
+	sikadesk: ["Exchange", "Stablecoin"], // OTC desk / stablecoin liquidity platform for high-volume access in Africa
+	paycashless: ["Payments"], // payments + financial management platform for Nigerian SMEs
+	"pathpulse-ai": ["AI"], // on-device-AI road intelligence from crowdsourced driver cameras
+	"offer-hub": ["Payments"], // freelance marketplace whose on-chain core is crypto payments/escrow
+	muney: ["Payments", "Stablecoin"], // B2B stablecoin payment infrastructure converting USDC to local value
+	lusty: ["Exchange"], // options venue (covered calls/puts), server-settled today
+	"for-yield": ["Stablecoin", "Lending"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
+	chainless: ["Wallet"], // self-custody MPC wallet investment app (Web3Auth, Pix on-ramp)
+	amulets: ["Wallet", "Card Issuing", "Stablecoin"], // stablecoin banking app: dollar account, swaps, Visa card spend
+	"stellar-defi-hub": ["Lending"], // deposit surface for incentivized Sentora vaults (Blend-based lending strategies, site)
+	wellspring: ["Payments", "Stablecoin"], // institutional treasury + fiat/stablecoin payments platform with yield
+	refractor: ["Infrastructure"], // shared multisig transaction storage / signature-coordination service
+	"providencia-onchain": ["Social Impact", "Payments"], // conservation-funding transparency via the Stellar Disbursement Platform
+	investar: ["Payments", "Stablecoin"], // remittance-to-investment rails over cross-border USDC transfers
+	fundable: ["Payments"], // automated payouts, payment streaming, crypto-to-fiat offramping
+	blockroll: ["Payments", "Stablecoin", "Card Issuing"], // USDC payments + DeFindex yield + Visa card funded from Stellar USDC
+	"stellarx-ph": ["Education"], // developer education/community program (Soroban workshops, roadshows)
+	acta: ["Security"], // decentralized identity / verifiable credentials — the directory's Security typing for identity (idOS, Chaincerts precedent)
+	xccy: ["DEX"], // decentralized fixed-income markets via on-chain interest-rate swaps
+	"squid-router": ["Bridge"], // cross-chain swap/bridge aggregator on Axelar routing assets to Stellar
+	zenex: ["DEX"], // decentralized perpetuals exchange on Soroban (pool model + oracle pricing)
+	volta: ["Wallet"], // non-custodial smart-contract multisig wallet / enterprise asset control panel
+	turbolong: ["Lending"], // leveraged longs built as atomic recursive Blend lending loops
+	soropg: ["SDK"], // browser IDE/playground for Soroban contracts (Okashi SDK-typing precedent)
+	"scaffold-stellar": ["SDK"], // developer boilerplate/framework + CLI plugins for Stellar dApps
+	sava: ["Stablecoin"], // TRY-in/TRY-out consumer savings app earning yield via USDC (site)
+	"rumble-fish": ["Explorer", "Infrastructure"], // dev agency whose Stellar footprint is a Soroban-first block explorer + network Prices API
+	rehive: ["Infrastructure", "Wallet"], // white-label fintech/wallet app platform (modular ledger) on Stellar
+	rails: ["Exchange"], // crypto perpetuals trading platform with regulated vaults (site)
+	pyth: ["Oracle"], // decentralized real-time price-feed oracle serving Stellar
+	privy: ["Wallet", "Infrastructure"], // embedded-wallet APIs (onboarding/auth) with Stellar support
+	"pluto-loans": ["Lending"], // self-repaying loans against future yield
+	"piggy-wallet": ["Wallet", "Education"], // family finance/wallet app teaching kids money via gamified chores
+	paywit: ["Payments", "Stablecoin"], // merchant stablecoin-payment layer: hosted checkout + drop-in SDKs
+	pagfinance: ["Stablecoin", "Payments"], // BRLP regulated BRL settlement token for institutional FX/payments
+	novatti: ["Stablecoin", "Payments"], // payments company whose Stellar footprint is issuing the AUDD stablecoin
+	"normal-finance": ["Stablecoin", "Lending"], // pivoted to self-custody USDC savings powered by DeFindex + Blend (site)
+	noir: ["SDK"], // ZK-circuit language + developer toolchain used for Soroban privacy verification
+	noether: ["DEX"], // Soroban-native decentralized perpetual futures exchange (10x leverage)
+	"nectar-network": ["Infrastructure"], // keeper/automation layer executing liquidations, compounding, oracle updates
+	microvault: ["Lending", "Social Impact"], // USSD microlending to East-African smallholder farmers via SEP-56 vaults
+	merkl: ["Infrastructure"], // onchain yield/rewards distribution infrastructure (Circle, PayPal, Coinbase)
+	"k2-lend": ["Lending"], // lending protocol: pooled, isolated, gated markets
+	ibis: ["Wallet", "Payments", "Stablecoin"], // stablecoin neobank: self-custody wallet + USDC-to-bolivar payout API
+	huma: ["Payments", "Lending"], // PayFi network: liquidity/financing for global payments
+	"hatom-protocol": ["Lending"], // over-collateralized supply/borrow lending liquidity hub
+	cryptomate: ["Payments", "Infrastructure"], // embeddable web3/fintech APIs; LatAm crypto payment rails (site)
+	coinme: ["Exchange", "Payments"], // licensed cash on/off-ramp kiosk exchange powering USDC P2P payments
+	backyard: ["Stablecoin", "Lending"], // user-built stablecoin yield strategies allocating across Blend/Spiko vaults
+	"automated-finance": ["Payments"], // visual workflow automation for on-chain payments/DeFi/treasury (site)
+	"the-aha-company": ["SDK"], // open-source reference implementation/standard for smart-account onboarding
+	xlmsh: ["Infrastructure"], // gateway serving decentralized .xlm-domain websites from Stellar/IPFS
+	"stellar-razor-and-blazor-suite": ["SDK"], // .NET Razor/Blazor UI component library (identity, MFA, keypair abstraction)
+	"stellar-development-foundation": ["Infrastructure"], // network steward org building/maintaining core Stellar infrastructure
+	sorosorcerer: ["SDK"], // Soroban smart-contract development tool with vetted code templates
+	ledgerstax: ["Analytics"], // Stellar transaction-history export/reporting for taxes
 	// Raven #39 (2026-08-21): the Stellar Playbook's debit-cards page lists
 	// Bridge, Kulipa, Rain and Wirex as card ISSUERS a builder integrates.
 	// "Card Issuing" is that category — card-program infrastructure, not a
