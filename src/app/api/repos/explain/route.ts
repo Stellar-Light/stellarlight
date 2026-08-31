@@ -99,6 +99,11 @@ export async function GET(req: NextRequest) {
 			alternateRepos: nearMisses,
 			answer: null,
 			answered: false,
+			// Explicit nulls, not omitted keys: `answerAsOf === null` is the
+			// documented "age unknown" check, and an absent key is undefined — a
+			// client's null-check would silently never fire on this envelope.
+			answerSource: null,
+			answerAsOf: null,
 			sources: {
 				repoUrl: null,
 				deepWikiUrl: null,
