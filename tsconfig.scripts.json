@@ -9,8 +9,23 @@
 // tsconfig: Next builds from that one, and pulling ~200 node-side scripts into
 // the app's program changes what the build compiles. Kept separate, run by its
 // own guard (scripts/check-scripts-types.ts).
+//
+// `include` is scripts/** ONLY, and that is load-bearing. It first read
+// ["scripts/**", "src/**"], which pulled the Payload admin routes into the
+// program — and those import `importMap.js`, a file Payload GENERATES and
+// .gitignore excludes. It exists in a working tree and not in a fresh
+// checkout, so the guard passed locally and failed in CI with three TS2307s,
+// and the baseline had been recorded in an environment the check never runs
+// in. A guard whose answer depends on files git does not carry is measuring
+// the developer's laptop, not the repo.
+//
+// Narrowing costs nothing: tsc still follows every import out of scripts/ and
+// type-checks what it finds, which is exactly this guard's scope. The rest of
+// src/ is the main tsconfig's job and the build already runs it. Verified in a
+// fresh clone with no generated files: the same 63 signatures, all under
+// scripts/, byte-identical to the committed baseline.
 {
 	"extends": "./tsconfig.json",
-	"include": ["scripts/**/*.ts", "src/**/*.ts", "src/**/*.tsx"],
+	"include": ["scripts/**/*.ts"],
 	"exclude": ["node_modules", "scout-mcp/**", "api-client/**"]
 }
