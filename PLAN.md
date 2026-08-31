@@ -41,6 +41,42 @@ Phases are sequenced by dependency, not by calendar.
   as the `consumption` row. If a future defect belongs to a class we
   have already named, the correct response is not another note — it is
   to ask why no lane caught it, and build that lane.
+- **A lane that never runs is not a guard either.** (Added 2026-08-31,
+  one day after the line above.) `consumption-guard.yml` — the lane built
+  to enforce "a lesson in a doc is not a guard" — installed pnpm with
+  `npm i -g pnpm`, drew pnpm 11 against an `engines.pnpm` of `^9 || ^10`,
+  and died at the install step. Three runs, zero completions. It was on
+  `/quality` as a named guard the entire time, which is worse than absent:
+  a listed guard is a reason to stop looking. Two lessons already written
+  down cover it — "an armed schedule is not moved data", "a quiet detector
+  looks like a live one" — and neither could fail a build.
+  The lane is `scripts/check-workflow-health.ts`, on `/quality` as
+  `workflow-health`. It asks GitHub what our lanes actually did, and it
+  found two more: `generated-recall.yml` had never run since the day it
+  was added (2026-07-09), and `sync-scout-mcp.yml` has been red since
+  2026-07-03 on a missing secret, so the npm mirror is two months stale.
+  **A guard counts from its first green run, not from its merge.**
+- **A gate that is only as wide as its config.** (Added 2026-08-31.)
+  `tsconfig.json` excludes `scripts/**`, so `tsc --noEmit` reported a
+  clean tree while ~200 node-side scripts went unchecked — including
+  `enrich-repos.ts`, which writes repo grades to the production database.
+  Two broken scripts shipped in consecutive commits behind a fully green
+  CI run, both one-line mistakes a compiler catches for free. Every
+  check has a scope, the scope is invisible in its output, and "green"
+  means nothing until you know what was in it.
+  Guard: `scripts/check-scripts-types.ts`, ratcheted against a frozen
+  63-error baseline, on `/quality` as `scripts-types`.
+  **Ask what a passing check did NOT look at.**
+- **A detector that reports on missing evidence manufactures fires.**
+  (Added 2026-08-31.) The workflow-health sweep hit a GitHub rate limit,
+  read the 403 as "cannot tell", and reported a lane broken that had been
+  correctly cleared minutes earlier. Three separate versions of the same
+  error in one sitting: judging a current file by runs of a since-fixed
+  version, counting runs from branches that never merged, and calling a
+  deliberate `exit 1` a failure. Each would have put a permanent red on
+  the board for something nobody could fix, which is how a board stops
+  being read. **Absence of evidence gets reported as inconclusive — a
+  sweep that could not measure writes no number.**
 - **`quality` has exactly ONE writer.** Two authorities over the same
   field is how curation gets silently reverted by sync (#730). Verified
   2026-08-30: a second writer would have demoted 34 of 39 curated rows
@@ -204,6 +240,45 @@ and is either half-built or unbuilt. Ordered by what unblocks the most.
    this-predates-protocol-20 — lives here, and needs a re-verification cadence
    from day one because authored truth has no upstream to re-derive from.
 
+## 6c. Scheduled from the 2026-08-31 lane audit
+
+Found by pointing the new `workflow-health` lane at our own repo. Each is
+measured, not inferred.
+
+1. **`sync-scout-mcp.yml` has been red since 2026-07-03** — the workflow's
+   own guard reports `STELLAR_LIGHT_SCOUT_MCP_TOKEN` missing, so the npm
+   mirror at `Stellar-Light/scout-mcp` is two months stale while the
+   monorepo has moved on. Needs a secret only a human can set, and it
+   should be a **deploy key rather than a PAT**: the last time this mirror
+   died silently for a month it was also PAT expiry, and #945 moved the
+   sibling sync to a deploy key for exactly this reason. Until it is set,
+   anything installing the published package gets July's code.
+2. **`generated-recall.yml` never ran once.** It used
+   `pnpm/action-setup@v4` with no version, and `package.json` carries no
+   `packageManager` field for it to read, so Engine A's weekly lane died at
+   setup from the day it was added (2026-07-09). Pinned to 10; it stays
+   flagged until a green run proves it, because a fix is not a fact.
+3. **Retire the 63-error scripts baseline.** `scripts-types` is a ratchet
+   with a frozen list, and a ratchet that never moves is just a permanent
+   red with extra steps. Two error classes dominate and both are
+   mechanical: `Options<>` mismatches on `payload.update/find` calls, and
+   `string | null` passed where `string` is required. Worth one pass.
+4. **`triageTags` and `tierReason` are named debt in `KNOWN_DEAD`.** Each
+   needs a decision, not code: whether internal triage verdicts should
+   reach a serving path at all, and whether a tier provenance field earns
+   a writer. The list only turns one way — a field may leave it, never
+   join it.
+5. **`what is DD` stays an open recall miss on purpose.** A two-letter
+   all-caps token is how people write categories, and there is no acronym
+   vocabulary to gate it on. Reopen it if a curated acronym list appears.
+6. **The mid-sentence acronym hole.** Proper-noun promotion takes any
+   capitalised 3+-char word, so "best DEX on stellar" hands rank 1 to a
+   project named DEX — the same mention-vs-identity error the lowercase
+   guards prevent, surviving where the category word is conventionally
+   capitalised. Pinned as a standing `.fails` test in
+   `identity-outranks-mention.test.ts` so fixing it breaks the test and
+   tells the fixer to promote it to a real assertion.
+
 **The pattern the audit found, worth stating once.** Every defect above is the
 same shape: the machinery exists, is tested, produces a value — and nothing
 consumes it. `codeProofTier` tested and called only by a report. `triageTags`
@@ -211,6 +286,15 @@ derived for 12,961 repos and read by no serving path. The curated canonical
 list floated in search but never verified, so 10 of its names matched zero
 rows for months. A lesson recorded in a doc is not a guard; only a lane that
 fails loud is. Prefer adding the guard to writing the note.
+
+**And the recursion, found the next day.** The lane written to enforce that
+sentence had never completed a run. Every rung of this ladder fails the same
+way — a note nobody reads, a lane nobody runs, a check whose config excludes
+the files that matter, a sweep that reports a finding when it simply could not
+measure. Each rung is a narrower version of the same question, so ask it at
+every level: *what would this look like if it were not working, and would we
+be able to tell?* If the answer is "identical", the guard is decoration.
+`workflow-health` and `scripts-types` are the two rungs added on 2026-08-31.
 
 ## 7. Open decisions (defaults chosen, flag to reverse)
 
