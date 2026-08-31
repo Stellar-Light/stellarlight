@@ -1,5 +1,31 @@
 # Quality findings queue — the 56 open ledger rows
 
+> **STATUS 2026-08-31 — most of this is done.** Worked in PR #1133; each item
+> below is annotated where it was actioned. Summary of what changed and what
+> was deliberately not:
+>
+> | cause | verdict |
+> |---|---|
+> | C1 `nameMatchScore` | FIXED. Measured against all 30 recorded failures rather than estimated: 27 now score 3. The proposed unrestricted containment would have broken the existing mention-vs-identity guards, so the rule is multi-word-only, plus an intercaps branch for `zkCross`. |
+> | C2 limit-dependence | FIXED, and the missing consumer added — the live canary now asserts limit-independence over the keyword-admitted set, and was confirmed to catch the bug before the fix landed. |
+> | C3 fabricated canaries | FIXED. Ledger re-run and the diff inspected: exactly those 7 cleared, 56 → 48 open. |
+> | C4 routing drops `class` | FIXED, gated on length so the one genuine sentence-shaped routing finding survives. |
+> | C5 `listContracts` | FIXED via `notFor`, keywords left entity-shaped. |
+> | C6 mis-specified probes | FIXED. `octoplace` re-pointed to `freighter` rather than deleted; the ramps row got the tiebreaker instead of a changed expectation. |
+> | C7 leaked project names | FIXED, and the class swept: all 287 single-token keywords checked live, 17 are project names, 15 correctly sit on the op that serves them. `dune` on getLeaderboard was the third defect. |
+> | C8 `getRfps` worker vocabulary | FIXED. |
+> | C9 `searchProjects` dilution | PARTIAL, deliberately. The directional `notFor` shipped; cutting 77 keywords needs a measured before/after against a scorer whose field weighting is not published. Scheduled in PLAN §6c. |
+> | C10 bare-name routing | NOT DONE. The queue itself says "measure before editing" and the measurement needs Raven's scorer. Scheduled. |
+> | C11 GAP means one surface | FIXED. Sibling surfaces are checked before a GAP is filed. |
+> | gap matrix, 2 matcher defects | FIXED and verified live: the absence list moved 49 → 47, exactly as predicted. |
+> | FxDAO cross-lane join | BUILT, and it found something different. FxDAO is not below the DefiLlama floor today — it is counted as MATCHED, because three rows we hold (usdx, eurx, gbpx) share the domain `fxdao.io`. Those are the protocol's assets, not the protocol. Of 16 domain-only matches, 14 are legitimate (Blend Pools → blend, Sushi Stellar → sushi), so flagging all of them would create 14 false findings. |
+>
+> Two things this queue got wrong, worth recording: the C1 fix as proposed
+> fails three existing tests, and the C2 caveat about the semantic top-up was
+> right and load-bearing — a naive limit-independence assertion fails a
+> correctly-fixed route.
+
+
 Measured 2026-08-30/31 against `origin/main` `improvements/ledger/findings.json` and the live API at
 `https://stellarlight.xyz`. Worktree: `/Users/shubhbrar/Downloads/sl-iso`. Read-only throughout — no edits,
 no commits, no `--write`.
