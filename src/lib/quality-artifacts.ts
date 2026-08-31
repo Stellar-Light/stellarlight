@@ -9,6 +9,7 @@
  */
 
 import consumption from "../../improvements/audits/consumption-latest.json";
+import answerDating from "../../improvements/audits/answer-dating-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
@@ -445,6 +446,41 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			severity: "medium",
 			artifact: "improvements/audits/scripts-types-latest.json",
 			passing: scriptsTypes.added.length === 0,
+		}),
+
+		// Can a consumer date what we told them?
+		//
+		// Raven filed #1134: explainRepo returned a DeepWiki answer stating a
+		// protocol version of 25 while the source at our own scannedRef defined
+		// 28 — and the response carried three timestamps, every one describing
+		// the code scan and none dating the answer. Nearby dates are worse than
+		// no dates: they invite a specific wrong inference.
+		//
+		// The number is DEBT. 40 of 55 served values have no date in their own
+		// scope; the guard freezes that and fails on new ones. It reads the
+		// CONTRACT, so it measures what a consumer is TOLD — which is the
+		// surface the report was about.
+		g({
+			key: "answer-dating",
+			title: "Served values a consumer can date",
+			promise:
+				"Every value we serve carries a date that covers IT — or says plainly that it cannot be dated. A value wearing a neighbour's timestamp is a wrong answer with a citation.",
+			measure: {
+				value: answerDating.valuesChecked - answerDating.undated,
+				of: answerDating.valuesChecked,
+				unit: "values",
+			},
+			sub: `${answerDating.valuesChecked - answerDating.undated}/${answerDating.valuesChecked} served values are dated in their own scope, or documented as undatable`,
+			details: [
+				"explainRepo.answerAsOf is the pattern: NULL for a DeepWiki answer, because DeepWiki exposes no index date and inventing one would make an unknown look measured",
+				"the naive rule — 'response has several dates and a value' — flags 12 endpoints and is mostly wrong: verifyClaim carries five dates and is correct, because confidence.ageDays dates the verdict itself",
+				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only — a value with NO date in scope while other objects in the response carry dates",
+			],
+			asOf: answerDating.asOf.slice(0, 10),
+			cadence: "on-deploy",
+			severity: "medium",
+			artifact: "improvements/audits/answer-dating-latest.json",
+			passing: answerDating.undated === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The

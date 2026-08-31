@@ -1,0 +1,248 @@
+{
+	"asOf": "2026-08-31T03:55:50.106Z",
+	"source": "scripts/check-answer-dating.ts",
+	"valuesChecked": 55,
+	"undated": 40,
+	"findings": [
+		{
+			"op": "getQualityReport",
+			"value": "verdict",
+			"where": "(root)",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "label",
+			"where": "northStar.latest",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "label",
+			"where": "northStar.series",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "state",
+			"where": "progress",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "status",
+			"where": "consumerFindings.records",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "label",
+			"where": "flow.nodes",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "label",
+			"where": "missFunnel.stages",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "basis",
+			"where": "rowQuality.statusBasisMix",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "status",
+			"where": "rowQuality.weakestRows",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "score",
+			"where": "rowQuality.weakestRows",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "tier",
+			"where": "repoQuality.topGraded",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getQualityReport",
+			"value": "tier",
+			"where": "repoQuality.thinnestEvidence",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "resolveProject",
+			"value": "status",
+			"where": "subject",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "resolveProject",
+			"value": "status",
+			"where": "current",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getChangelog",
+			"value": "summary",
+			"where": "entries",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "explainRepo",
+			"value": "status",
+			"where": "codeVerified.protocolCaps",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "matchPartners",
+			"value": "summary",
+			"where": "(root)",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "matchPartners",
+			"value": "score",
+			"where": "matches",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "matchPartners",
+			"value": "status",
+			"where": "matches.partner.freshness",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getRfps",
+			"value": "status",
+			"where": "meta.filters",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "scfPitch",
+			"value": "basis",
+			"where": "report.fundingBar",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "scfPitch",
+			"value": "tier",
+			"where": "report.vet.competitors.repos",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "scfPitch",
+			"value": "status",
+			"where": "report.vet.competitors.projects",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "scfPitch",
+			"value": "basis",
+			"where": "report.vet.maturity",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "scfPitch",
+			"value": "basis",
+			"where": "report.vet.gap",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "tier",
+			"where": "report.vet.competitors.repos",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "status",
+			"where": "report.vet.competitors.projects",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "basis",
+			"where": "report.vet.maturity",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "basis",
+			"where": "report.vet.gap",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "basis",
+			"where": "report.liveContracts",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "hackathonBrief",
+			"value": "basis",
+			"where": "report.funding.fundingBar",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "vetIdea",
+			"value": "tier",
+			"where": "report.competitors.repos",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "vetIdea",
+			"value": "status",
+			"where": "report.competitors.projects",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "vetIdea",
+			"value": "basis",
+			"where": "report.maturity",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "vetIdea",
+			"value": "basis",
+			"where": "report.gap",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "vetIdea",
+			"value": "basis",
+			"where": "report.funding",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "analyzeEcosystem",
+			"value": "basis",
+			"where": "developers",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "analyzeEcosystem",
+			"value": "basis",
+			"where": "gaps",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "analyzeEcosystem",
+			"value": "basis",
+			"where": "tvl",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		},
+		{
+			"op": "getStablecoins",
+			"value": "basis",
+			"where": "meta.coverage",
+			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
+		}
+	]
+}
