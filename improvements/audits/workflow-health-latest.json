@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-08-31T15:18:38.167Z",
+	"asOf": "2026-08-31T15:24:35.409Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 71,
-	"healthy": 70,
+	"checked": 72,
+	"healthy": 71,
 	"broken": [
 		{
 			"file": "consumption-guard.yml",
@@ -258,10 +258,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T11:47:49Z",
+			"lastSuccessAt": "2026-08-31T15:11:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 95,
+			"runs": 96,
 			"why": "last green 0d ago"
 		},
 		{
@@ -593,6 +593,17 @@
 			"graceDays": 21,
 			"runs": 1,
 			"why": "last green 5d ago"
+		},
+		{
+			"file": "raven-eval-parity.yml",
+			"name": "raven-eval-parity",
+			"cron": "30 7 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-08-31T15:16:48Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "recent-api-usage.yml",
