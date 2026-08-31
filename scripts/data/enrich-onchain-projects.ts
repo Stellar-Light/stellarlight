@@ -27,6 +27,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
+import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 
@@ -214,8 +215,73 @@ async function run() {
 		console.log(`partner-asset join skipped: ${(e as Error).message}`);
 	}
 
+	// Stablecoin-registry auto-join (P4 evidence expansion, 2026-08-31): the
+	// registry's 29 hand-verified (code, issuer) identities carry the issuer's
+	// home domain. Joined to directory rows by registered-host equality against
+	// links.website — a registry asset joins ONLY when exactly one project
+	// matches its domain, and only fills an EMPTY asset slot (seeds, repo- and
+	// partner-derived keys outrank). Every join and every ambiguity is printed
+	// so the dry run shows the mapping before anything writes. This is what
+	// lets the basis upgrader see issuer-class rows: evidence first, label
+	// after, one weekly observation apart (deltas need two readings).
+	let registryDerived = 0;
+	{
+		const allProjects = await payload.find({
+			collection: "projects",
+			limit: 5000,
+			depth: 0,
+			select: { slug: true, links: true },
+		});
+		const host = (u?: string | null) => {
+			if (!u) return null;
+			try {
+				return new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+			} catch {
+				return null;
+			}
+		};
+		const byHost = new Map<string, string[]>();
+		for (const p of allProjects.docs as unknown as Array<{
+			slug?: string;
+			links?: { website?: string | null } | null;
+		}>) {
+			const h = host(p.links?.website);
+			if (!h || !p.slug) continue;
+			byHost.set(h, [...(byHost.get(h) ?? []), p.slug]);
+		}
+		for (const a of STABLECOIN_REGISTRY) {
+			const dom = a.domain.toLowerCase().replace(/^www\./, "");
+			// exact host, or the project site living on a subdomain of it
+			const slugs = new Set<string>();
+			for (const [h, ss] of byHost)
+				if (h === dom || h.endsWith(`.${dom}`)) for (const s of ss) slugs.add(s);
+			if (slugs.size === 0) {
+				console.log(`  registry ${a.code} (${dom}): no directory row — skip`);
+				continue;
+			}
+			if (slugs.size > 1) {
+				console.log(
+					`  registry ${a.code} (${dom}): AMBIGUOUS → ${[...slugs].join(", ")} — skip`,
+				);
+				continue;
+			}
+			const slug = [...slugs][0];
+			const entry = bySlug.get(slug) ?? { contracts: [] };
+			if (entry.asset) {
+				console.log(
+					`  registry ${a.code} (${dom}): ${slug} already keyed (${entry.asset.code}) — skip`,
+				);
+				continue;
+			}
+			entry.asset = { code: a.code, issuer: a.issuer };
+			bySlug.set(slug, entry);
+			registryDerived += 1;
+			console.log(`  registry ${a.code} (${dom}) → ${slug}`);
+		}
+	}
+
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset + ${registryDerived} registry → ${bySlug.size} projects\n`,
 	);
 
 	let updated = 0;
