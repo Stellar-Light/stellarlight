@@ -522,7 +522,17 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
 				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,
 				"absent entries are human-reviewed SEEDS, never bulk-created",
-				...coverageGaps.scf.sample
+				// Explicit element type: the 500/500 artifact's first-ever EMPTY
+				// sample types as never[] from the JSON import, so the board
+				// compiled on every red artifact and broke on the green one — the
+				// same trap the curated-canonical row hit hours earlier. Reaching
+				// the target must never be the thing that breaks the build.
+				...(
+					coverageGaps.scf.sample as Array<{
+						scfSlug: string;
+						rounds?: Array<string | number>;
+					}>
+				)
 					.slice(0, 3)
 					.map(
 						(x) => `absent: ${x.scfSlug} (round ${(x.rounds || []).join(",")})`,
