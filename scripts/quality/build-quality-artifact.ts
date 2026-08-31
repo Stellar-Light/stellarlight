@@ -98,6 +98,10 @@ const CLASS_OF: Record<string, string> = {
 	// §0.3 evidence population — the field exists, rows are empty
 	"missing-field": "evidence-population",
 	"population-miss": "evidence-population",
+	// nightly record-completeness residuals (S1 scfRoundAwards / S2 statusBasis
+	// sweeps): promised official-record fields empty on specific rows — the
+	// same class as the population misses above, found by a different sweep.
+	"completeness-residual": "evidence-population",
 	// §0.4 taxonomy coverage — a demanded vertical that is invisible
 	"demand-miss": "taxonomy-coverage",
 	"coverage-gap": "taxonomy-coverage",
