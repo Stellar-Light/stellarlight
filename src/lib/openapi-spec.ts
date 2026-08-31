@@ -2216,6 +2216,12 @@ export const spec: OpenAPISpec = {
 												source: { type: "string" },
 												generatedAt: { type: "string", format: "date-time" },
 												note: { type: "string" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"THIS OPERATION ONLY: present on deepwiki-grounded answers, carrying the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters.",
+												},
 											},
 										},
 										q: { type: "string" },
@@ -2230,7 +2236,7 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											nullable: true,
 											description:
-												"Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.",
+												"Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed.",
 											properties: {
 												lastCommitAt: {
 													type: "string",

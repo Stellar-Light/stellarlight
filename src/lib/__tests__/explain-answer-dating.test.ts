@@ -41,8 +41,10 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 
 	it("never dates a deepwiki answer from the scan", () => {
 		// scannedAt may appear (the scan path legitimately uses it) but must not
-		// be reachable from the deepwiki branch.
-		const line = /answerAsOf:[^\n]*\n?[^\n]*/.exec(ROUTE)?.[0] ?? "";
+		// be reachable from the deepwiki branch. Anchor on the dwAnswer ternary:
+		// the unroutable envelope now carries a literal `answerAsOf: null` earlier
+		// in the file, which would otherwise be the first (wrong) match.
+		const line = /answerAsOf:\s*dwAnswer[^\n]*\n?[^\n]*/.exec(ROUTE)?.[0] ?? "";
 		const dwBranch = line.split(":")[1] ?? "";
 		expect(dwBranch).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
 	});

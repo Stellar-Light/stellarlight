@@ -178,6 +178,10 @@ async function main() {
 			where: { fullName: { equals: ONLY } },
 			limit: 1,
 			depth: 0,
+			// The #896 class recurring in a second call site (audit 2026-08-31):
+			// without context.internal the afterRead privacy hook strips triageTags,
+			// so the notTriaged() filter above could never see them on --only runs.
+			context: { internal: true },
 		});
 		docs = res.docs;
 		eligible = res.docs.length;

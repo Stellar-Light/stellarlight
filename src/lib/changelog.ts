@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.9",
+		type: "fixed",
+		summary:
+			"explainRepo answer-dating residuals: repoMeta's description no longer instructs consumers to attach lastCommitAt as the answer's as-of date; unroutable responses carry explicit `answerSource: null` / `answerAsOf: null` instead of omitting the keys; and the operation's meta.warnings is declared as the answer-dating disclaimer.",
+		detail:
+			"Adversarial-audit residuals of #1134 (a value wearing provenance that does not cover it). (1) The spec's repoMeta description still said 'attach lastCommitAt as the as-of date when citing the answer' — the exact wrong inference #1134 reported; it now says repoMeta dates the INDEX's view of the repo, not the answer, and points at answerAsOf. (2) The unroutable-200 envelope emitted answered: false but omitted answerSource/answerAsOf entirely, so a client checking `answerAsOf === null` (the documented 'age unknown' signal) read undefined and never took that branch; both keys are now explicit nulls. (3) explainRepo's meta.warnings carries the deepwiki answer-dating disclaimer, but the shared Meta.warnings is documented as ignored-query-param disclosure — the operation now declares its own warnings schema so a generated consumer cannot misread the disclaimer as 'you sent a bad param'.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.8",
 		type: "added",
 		summary:
