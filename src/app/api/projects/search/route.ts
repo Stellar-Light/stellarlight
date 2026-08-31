@@ -873,6 +873,7 @@ export async function GET(req: NextRequest) {
 		"Card Issuing",
 		"Exchange",
 		"Oracle",
+		"Yield",
 	] as const;
 	if (typeParam && !(VALID_TYPES as readonly string[]).includes(typeParam)) {
 		return NextResponse.json(

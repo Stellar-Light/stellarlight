@@ -111,6 +111,13 @@ export const Projects: CollectionConfig = {
 				// lightecho, pyth every one carried types:[] and the whole category
 				// was invisible to type browse (truth-battery guard D, 2026-08-27).
 				"Oracle",
+				// Yield/asset-management products: vaults, strategy allocators,
+				// structured yield (defindex, arka-fund, cushion, meria, backyard,
+				// normal-finance…). The P4 untyped census (2026-08-31) found the
+				// vertical had no enum member — five rows stayed honestly untyped
+				// rather than be force-fitted into Lending, the same class gap as
+				// Oracle/Card Issuing before it.
+				"Yield",
 			],
 		},
 		{

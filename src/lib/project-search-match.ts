@@ -339,6 +339,12 @@ export const INTENT_TYPE: Record<string, string> = {
 	// Truth battery 2026-08-27: the oracle vertical existed only as prose.
 	oracle: "Oracle",
 	oracles: "Oracle",
+	// P4 untyped census 2026-08-31: the yield/asset-management vertical had no
+	// enum member — "yield vaults on Stellar" browsed nothing while defindex,
+	// cushion and the vault cohort sat untyped or approximated as Lending.
+	yield: "Yield",
+	vault: "Yield",
+	vaults: "Yield",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",
