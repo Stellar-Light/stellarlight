@@ -1064,6 +1064,12 @@ export async function searchRepos(
 	// the project-side single-word rebuild: keep discriminating fragments,
 	// append the joined form.
 	const rawWord = q.trim();
+	// When the rebuild fires, the joined form IS the query's identity subject:
+	// fragments stay for recall/scoring, but letting them confer identity gave
+	// mainnet contracts an anchorIdentity tie off the word "contract" inside
+	// the identifier, and the inUse tier then floated them above the defining
+	// repo (live: reflector 10.4 / blend 3 above did-stellar 46.2).
+	let identifierJoined = "";
 	if (rawWord && !/\s/.test(rawWord) && /[a-z][A-Z]|_/.test(rawWord)) {
 		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
 		if (joined.length > 2 && !(tokens.length === 1 && tokens[0] === joined)) {
@@ -1072,6 +1078,7 @@ export async function searchRepos(
 			);
 			tokens.length = 0;
 			tokens.push(...kept, joined);
+			identifierJoined = joined;
 		}
 	}
 	const searched: RepoSearchSearched = {
@@ -1333,12 +1340,12 @@ export async function searchRepos(
 			const descLead = wordy(
 				(r.description ?? "").slice(0, IDENTITY_LEAD_CHARS),
 			);
-			const anchorIdentity = repoAnchorIdentity(tokens, [
-				name,
-				tops,
-				syms,
-				descLead,
-			])
+			// Identifier queries: identity is the JOINED symbol, never its
+			// fragments (see the rebuild above).
+			const anchorIdentity = repoAnchorIdentity(
+				identifierJoined ? [identifierJoined] : tokens,
+				[name, tops, syms, descLead],
+			)
 				? 1
 				: 0;
 			let score = 0;
