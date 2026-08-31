@@ -1,0 +1,63 @@
+# Ask GitHub what our own lanes actually did.
+#
+# Weekly, because the failure it catches arrives without any edit of ours: an
+# upstream action releases a new major, a PAT expires, a cron stops firing. The
+# lane it was written for (consumption-guard) broke the day pnpm 11 shipped and
+# stayed broken silently, because nothing was watching the watchers.
+name: workflow-health
+
+on:
+  schedule:
+    - cron: "41 6 * * 1"
+  # Also on any change to the workflows themselves — a new lane should be
+  # verified against reality, not just against a YAML parser.
+  push:
+    branches: [main]
+    paths: [".github/workflows/**", "scripts/check-workflow-health.ts"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: workflow-health
+  cancel-in-progress: true
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Full history: the check compares each workflow's blob against the
+      # version that ran, and asks git when the file last changed.
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      # --json writes the artifact and exits 0; the human-readable run below is
+      # what turns the finding into a red. Splitting them means a bad exit code
+      # can never cost us the artifact the board reads.
+      - name: Write the /quality artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-workflow-health.ts --json
+
+      - name: Commit it
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/workflow-health-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): workflow health [skip ci]"
+          git push
+
+      - name: Report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-workflow-health.ts

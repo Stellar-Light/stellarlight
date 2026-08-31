@@ -20,6 +20,7 @@
  *
  *   RAVEN_MCP=… RAVEN_TOKEN=… pnpm exec tsx scripts/eval/raven-honest-absence.ts [--gate]
  */
+import { NONSENSE_PROBES } from "./battery-banks";
 
 const RAVEN_URL = process.env.RAVEN_MCP ?? "https://agents.stellar.buzz/mcp";
 const TOKEN = process.env.RAVEN_TOKEN;
@@ -80,10 +81,7 @@ function leadingJson<T>(text: string): T {
  * token any Stellar record could legitimately contain. Anything returned for
  * these is by construction a near-match, never a hit.
  */
-const NONSENSE = [
-	"zzqqxx nonexistent protocol 9999",
-	"flurbomatic quantifold widgetron on Stellar",
-];
+const NONSENSE = NONSENSE_PROBES;
 
 type Probe = {
 	surface: string;

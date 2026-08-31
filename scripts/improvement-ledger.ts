@@ -18,6 +18,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { isFabricatedProbe } from "./eval/battery-banks";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -128,7 +129,14 @@ const SPECS: SourceSpec[] = [
 				// it as a HIGH fire manufactures a finding on our own probe traffic.
 				keep: (r) => {
 					const q = str(r?.query) ?? str(r?.q) ?? str(r?.question);
-					return !!q && !isSyntheticQuery(q);
+					// Also drop our OWN fabricated canaries. isSyntheticQuery cannot
+					// see them: it matches literal-nonsense shapes, and the absent-
+					// banks are built to read as real Stellar projects. The battery
+					// fires them through Raven, whose adapter sends no User-Agent, so
+					// engine-d counts them as genuine Raven demand. Six such rows sat
+					// open on the board — findings whose only possible fix was to
+					// invent a fake project.
+					return !!q && !isSyntheticQuery(q) && !isFabricatedProbe(q);
 				},
 				probe: (r) => str(r?.query) ?? str(r?.q) ?? str(r?.question),
 			},

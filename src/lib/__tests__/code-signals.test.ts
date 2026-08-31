@@ -69,6 +69,85 @@ describe("versionStatusOf — the constant that must never be wrong", () => {
 });
 
 describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
+	it("Gradle VERSION CATALOG → lang-sdk (SDF's own kotlin-wallet-sdk) (KEEP)", () => {
+		// Real shape: build.gradle.kts says `api(libs.java.stellar.sdk)` and
+		// contains no Stellar string; the coordinate lives in the catalog.
+		const s = scanOf({
+			"gradle/libs.versions.toml":
+				'java-stellar-sdk = { module = "network.lightsail:stellar-sdk", version.ref = "java-stellar-sdk" }\n',
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Maven pom with a Stellar groupId → lang-sdk (KEEP)", () => {
+		const s = scanOf({
+			"pom.xml":
+				"<project><dependencies><dependency><groupId>network.lightsail</groupId><artifactId>stellar-sdk</artifactId></dependency></dependencies></project>",
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("a pom NAMED stellar-* but with no Stellar dep stays none (DROP)", () => {
+		// openMF/stellar-connector is named stellar-connector and depends on
+		// Spring, not on a Stellar SDK. Matching artifactId would have been a
+		// false positive; we match dependency groupId only.
+		const s = scanOf({
+			"pom.xml":
+				"<project><groupId>org.mifos</groupId><artifactId>stellar-connector</artifactId><dependencies><dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter</artifactId></dependency></dependencies></project>",
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
+	it("PHP anchor SDK composer.json → lang-sdk, not none (KEEP)", () => {
+		// Real manifest: Argo-Navis-Dev/php-anchor-sdk requires
+		// soneso/stellar-php-sdk. 94% of scanned PHP repos read none before
+		// this, and composer.json was not even fetched.
+		const s = scanOf({
+			"composer.json":
+				'{"name":"argonavis/php-anchor-sdk","require":{"php":"^8.2","soneso/stellar-php-sdk":"^1.8"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("Dart/Flutter Stellar SDK pubspec → lang-sdk, not none (KEEP)", () => {
+		// pubspec.yaml was already fetched and discarded — no marker read it.
+		const s = scanOf({
+			"pubspec.yaml":
+				"name: stellar_flutter_sdk\ndescription: A Stellar SDK for Flutter\nversion: 3.6.0\n",
+		});
+		expect(detectStellarProof(s).proof).toBe("lang-sdk");
+	});
+
+	it("a PHP project with no Stellar dep stays none (DROP)", () => {
+		const s = scanOf({
+			"composer.json":
+				'{"name":"acme/site","require":{"php":"^8.2","monolog/monolog":"^3"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
+	it("AssemblyScript Soroban contract → lang-sdk, not none (KEEP)", () => {
+		// Verified against Soneso/as-soroban-examples: each contract's
+		// package.json depends on as-soroban-sdk. It imports neither Rust
+		// soroban-sdk nor @stellar/stellar-sdk, so before this marker it read
+		// as proof=none — and `none` is a key in the two-key ARCHIVE rule, so a
+		// tier run proposed archiving a Stellar SDK vendor's own examples.
+		const s = scanOf({
+			"add/package.json":
+				'{"name":"add","devDependencies":{"assemblyscript":"^0.28.3"},"dependencies":{"as-soroban-sdk":"^1.2.0"}}',
+		});
+		const r = detectStellarProof(s);
+		expect(r.proof).toBe("lang-sdk");
+		expect(r.outcome).toBe("ok");
+	});
+
+	it("a package.json with no Stellar dep stays none (DROP)", () => {
+		const s = scanOf({
+			"package.json": '{"name":"x","dependencies":{"lodash":"^4.17.21"}}',
+		});
+		expect(detectStellarProof(s).proof).toBe("none");
+	});
+
 	it("FIXTURE #1: workspace-inherited soroban-sdk → cargo-sdk (KEEP)", () => {
 		// member crate inherits, root declares the real dep under [workspace.dependencies]
 		const s = scanOf({

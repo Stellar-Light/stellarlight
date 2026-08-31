@@ -236,7 +236,7 @@ export function selectDepthPaths(
 	// code-signals can fire the lang-sdk proof instead of wrongly reading a
 	// mobile wallet / native SDK as `none`. Kept shallow (≤3 deep) + capped.
 	const OTHER_MANIFEST =
-		/(^|\/)(package\.json|stellar\.toml|package\.swift|podfile|build\.gradle(\.kts)?|pubspec\.yaml|go\.mod|requirements\.txt|pyproject\.toml|setup\.py|setup\.cfg)$/i;
+		/(^|\/)(package\.json|stellar\.toml|package\.swift|podfile|build\.gradle(\.kts)?|pubspec\.yaml|composer\.json|pom\.xml|libs\.versions\.toml|go\.mod|requirements\.txt|pyproject\.toml|setup\.py|setup\.cfg)$/i;
 	const others = tree
 		.filter((e) => e.type === "blob" && OTHER_MANIFEST.test(e.path))
 		.filter((e) => e.path.split("/").length <= 3)

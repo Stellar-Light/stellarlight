@@ -38,6 +38,41 @@ export const ABSENT_BANKS: string[][] = [
 	["is StellarGizmo live", "what is OrbitMintX"],
 ];
 
+/** The nonsense strings raven-honest-absence probes with. Kept here beside
+ * ABSENT_BANKS so there is ONE list of names we know we invented. */
+export const NONSENSE_PROBES = [
+	"zzqqxx nonexistent protocol 9999",
+	"flurbomatic quantifold widgetron on Stellar",
+];
+
+/** Did WE make this name up?
+ *
+ * The absent-banks are fabricated project names the battery fires at the API to
+ * prove it says "no record held" instead of hallucinating. They are designed to
+ * look exactly like real Stellar projects, because a canary that reads as fake
+ * tests nothing.
+ *
+ * That design is why they came back as consumer demand. The battery runs
+ * THROUGH the Raven gateway, whose adapter sends no User-Agent, so engine-d
+ * cannot separate it from genuine Raven traffic; and isSyntheticQuery only
+ * matches literal-nonsense shapes, so it cannot see a plausible brand name. Six
+ * of our own canaries were mined into the ledger as unmet demand — findings
+ * that could only be "fixed" by inventing a fake project.
+ *
+ * The bank is the authoritative list of what we invented, so the filter reads
+ * it directly and self-maintains when the bank changes. Deliberately NOT a
+ * regex over name shapes: these names are by construction indistinguishable
+ * from real ones, and a pattern that caught them would eat real demand too.
+ */
+export function isFabricatedProbe(q: string): boolean {
+	const s = q.trim().toLowerCase();
+	if (!s) return false;
+	for (const bank of ABSENT_BANKS)
+		for (const probe of bank) if (s === probe.toLowerCase()) return true;
+	for (const probe of NONSENSE_PROBES) if (s === probe.toLowerCase()) return true;
+	return false;
+}
+
 export const CATEGORY_BANKS: Array<{
 	q: string;
 	anyOf: string[];

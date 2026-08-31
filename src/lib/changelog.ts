@@ -31,6 +31,36 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-08-31",
+		surfaces: ["api"],
+		version: "spec@1.9.7",
+		type: "fixed",
+		summary:
+			"getPartners and searchProjects both declared ramp vocabulary with no tiebreaker; the split is now stated on both sides — rampTypes (direction, corridor) is a partner fact, the larger anchor roster is a directory fact.",
+		detail:
+			"\"on and off ramps for Stellar payments\" was contested by construction: getPartners keywords carried on-ramp/off-ramp/ramps/anchors, searchProjects carried anchors and on/off-ramps, and neither notFor named the other. The un-brokered overlap was the defect, not the route taken. The split follows the data — 29 anchor-typed partners of which 9 have rampTypes populated, against 42 type=Anchor projects — so getPartners useWhen now claims the case it uniquely serves (which anchors on-ramp vs off-ramp, in which corridor) and searchProjects notFor points ramp direction and corridor questions at it. Routing metadata only.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
+		version: "spec@1.9.6",
+		type: "fixed",
+		summary:
+			"Three routing-vocabulary fixes: project names no longer sit bare on operations that do not serve them, getRfps gains worker-side terms (jobs, freelance, paid work) that appeared nowhere in the spec, and searchProjects defers GitHub-activity ranking to getLeaderboard.",
+		detail:
+			"(1) A bare project name on another operation makes that operation the router's answer for the project itself: 'reflector oracle on Stellar' ranked searchResearch 97 above searchProjects 81, for a project the directory holds at confidence 0.97. `reflector` and `yieldblox` sat bare in searchResearch's oracle-manipulation security cluster and are now the phrases that cluster meant — 'reflector oracle manipulation incident'. A sweep of all 287 single-token routing keywords against the live directory found 17 that are project names; the other 15 sit on the operation that SERVES them (audit firms on listAudits, stablecoins on getStablecoins, Soroswap and Stellarchain on searchProjects) and are correct. One more was qualified: `dune` on getLeaderboard meant Dune-style analytics export, and now says so. (2) getRfps described itself entirely in the funder's vocabulary — rfp, brief, grant, round — and the words 'jobs', 'freelance' and 'paid work' appeared nowhere in the 9,000-line spec, so 'jobs bounties and freelance work for Stellar contributors' routed to getBuilders and returned a list of people TO the person looking for work. getRfps gains the worker-side terms and getBuilders gains the directional notFor. (3) searchProjects now defers activity ranking to getLeaderboard, which declares that question shape in its own exampleQuestions and was losing it at rank 3. Routing metadata only; no schema or response change.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
+		version: "spec@1.9.5",
+		type: "fixed",
+		summary:
+			"listContracts stops capturing how-to questions: its x-routing.notFor now names searchResearch/searchRepos for 'how do I write/deploy/test a contract', explainRepo for 'how does X work in the code', and getPartners for 'who should audit my contract'.",
+		detail:
+			"All eight of listContracts' routing keywords contain the token 'contract', so a short blob with total term concentration outscored longer, more diffuse blobs on any query carrying that word, whatever the intent. Measured against the field-weighted scorer, listContracts won 'how do I write a Soroban smart contract in Rust' (204, vs searchRepos 163 at rank 3), 'how do I deploy a contract' (192), 'how to test a Soroban contract' (188), 'audit my smart contract' (91) and 'who can audit my contract' (95) — the last beating getPartners at 65 despite getPartners carrying that exact phrase in its own keywords. It correctly won only the two entity-shaped probes. The keywords stay entity-shaped, which is what they are for; the notFor entries name where the how-to families belong, in the spec's documented '<question shape> -> <operationId>' form. No schema or response change — routing metadata only.",
+	},
+	{
 		date: "2026-08-28",
 		surfaces: ["api"],
 		version: "spec@1.9.4",

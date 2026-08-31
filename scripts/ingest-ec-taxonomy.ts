@@ -213,7 +213,22 @@ function tierOf(d: {
 	const archivable = !isAllowlisted(d.fullName);
 	if (archivable && (d.isArchived || (stale && (d.stars ?? 0) < 3)))
 		return "archive";
-	if (d.repoScoreLabel === "high") return "quality";
+	// NEVER promotes to quality. This said `repoScoreLabel === "high" → quality`,
+	// which is POPULARITY, not canonicality — repoScore is `0.1 + 0.7*codeDepth`,
+	// i.e. how heavily a repo USES the SDK, which is how student dApps outrank
+	// stellar/js-stellar-sdk.
+	//
+	// `quality` now has exactly ONE writer: the curated canonical list
+	// (scripts/backfill-code-tier.ts). Leaving this second authority armed meant
+	// one `--backfill-tiers` dispatch would demote 34 of the 39 curated rows
+	// (verified live 2026-08-30 — Stellar-Wallets-Kit, passkey-kit, stellar-xdr
+	// all carry label != high) and promote ~101 popularity-scored rows in their
+	// place, with this script's own read-back confirming the clobber as success.
+	// That is the "curation silently reverted by sync" class (#730) we have
+	// already lived through once.
+	//
+	// This lane may still ARCHIVE (the two-key rule above) and may return a row
+	// to community. It may not crown one.
 	return "community";
 }
 

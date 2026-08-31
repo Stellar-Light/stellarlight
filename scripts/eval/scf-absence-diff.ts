@@ -88,7 +88,7 @@ async function fetchScfEntries(): Promise<ScfEntry[]> {
 }
 
 async function fetchDirectory(): Promise<
-	Array<{ slug: string; name: string }>
+	Array<{ slug: string; name: string; aliases: string[] }>
 > {
 	let cats: string[] = [];
 	try {
@@ -97,7 +97,7 @@ async function fetchDirectory(): Promise<
 			((await bad.json()) as { validCategories?: string[] }).validCategories ??
 			[];
 	} catch {}
-	const rows: Array<{ slug: string; name: string }> = [];
+	const rows: Array<{ slug: string; name: string; aliases: string[] }> = [];
 	for (const c of cats) {
 		for (let offset = 0; ; offset += 100) {
 			const res = await fetch(
@@ -107,11 +107,25 @@ async function fetchDirectory(): Promise<
 			// biome-ignore lint/suspicious/noExplicitAny: narrow use
 			const d: any = await res.json();
 			const page = d.projects ?? [];
+			// ALIASES. report-coverage-gaps.ts — the sibling lane in this same
+			// report — has always read identity.aliases; this lane mapped only
+			// {slug, name}, so an SCF row whose title uses a project's former name
+			// counted as absent. hermes-isy (round 32) was reported missing while
+			// we serve `zenex` with identity.aliases ['Hermes'] and scfAwarded true.
 			rows.push(
-				...page.map((p: { slug: string; name: string }) => ({
-					slug: p.slug,
-					name: p.name,
-				})),
+				...page.map(
+					(p: {
+						slug: string;
+						name: string;
+						identity?: { aliases?: unknown };
+					}) => ({
+						slug: p.slug,
+						name: p.name,
+						aliases: Array.isArray(p.identity?.aliases)
+							? (p.identity.aliases as string[])
+							: [],
+					}),
+				),
 			);
 			if (page.length < 100) break;
 		}
@@ -138,6 +152,16 @@ function matches(
 			d.c.length >= 5
 		)
 			return true;
+		// A short name that is a WHOLE TOKEN of the SCF title, rather than a
+		// substring of it. "identity-operating-system-idos" contains "idos", but
+		// canon("idOS") is 4 chars and the containment floor above requires 5.
+		//
+		// The floor is not the bug and must not be lowered: relaxing it to 4 was
+		// measured and produced new FALSE matches —
+		// soroban-disassembler-working-title-ply -> "band",
+		// bpv-stellarmesh-anchor-afq -> "mesh". Those are substrings; this is a
+		// token boundary, which is why it catches idOS and rejects both.
+		if (d.c.length >= 4 && tb.has(d.c)) return true;
 		// all significant SCF-name tokens present in the directory name
 		if (tb.size > 0 && [...tb].every((t) => d.t.has(t))) return true;
 	}
@@ -178,11 +202,14 @@ async function main() {
 	console.error("SCF-awardee absence diff");
 	const [scf, dir] = await Promise.all([fetchScfEntries(), fetchDirectory()]);
 	console.error(`  SCF listing: ${scf.length} | directory: ${dir.length}`);
-	const dirIdx = dir.map((d) => ({
-		...d,
-		c: canon(d.name),
-		t: tokens(d.name),
-	}));
+	// One index row per IDENTITY STRING, not per project — the shape
+	// report-coverage-gaps.ts already uses. A project answering to two names is
+	// two chances to match, which is the point of carrying aliases at all.
+	const dirIdx = dir.flatMap((d) =>
+		[d.name, ...d.aliases]
+			.filter((n): n is string => typeof n === "string" && n.trim().length > 0)
+			.map((n) => ({ ...d, c: canon(n), t: tokens(n) })),
+	);
 	const absent = scf.filter((e) => !matches(e, dirIdx));
 	console.error(
 		`  unmatched: ${absent.length} — fetching detail pages for award rounds…`,
@@ -198,6 +225,12 @@ async function main() {
 			rounds: e.rounds,
 			url: e.url,
 		})),
+		// The FULL list, uncapped. `sample` is 40 rows of detail and that is
+		// fine for reading, but a consumer that wants to JOIN against this list
+		// cannot use a truncated one — report-coverage-gaps.ts needs to ask "is
+		// this DefiLlama protocol also on the SCF absent list", and FxDAO sits at
+		// position 42. Slugs are cheap; the cap was only ever about detail rows.
+		absentSlugs: absent.map((e) => e.scfSlug),
 	};
 	if (OUT_FILE) {
 		writeFileSync(OUT_FILE, JSON.stringify(report, null, 1));

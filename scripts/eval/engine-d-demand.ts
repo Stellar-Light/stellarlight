@@ -192,6 +192,46 @@ function classify(endpoint: string, r: Replay): MissClass {
 	return "OK";
 }
 
+/** Does a SIBLING surface already answer this?
+ *
+ * `GAP` means "the endpoint the consumer hit holds no such record" — not "the
+ * corpus holds none". A consumer asking the PROJECTS endpoint about `crdt` got
+ * a GAP, which the ledger maps to surface `directory`, failureMode
+ * `coverage-gap`, and it reads as "the directory should contain a project
+ * called CRDT". It should not: /api/repos/search?q=crdt returns
+ * calimero-network/core, /api/research?q=crdt returns three rows, and the
+ * projects response was already carrying the repo in its own codeReferences.
+ *
+ * A query the corpus answers on another surface is not a finding on any
+ * surface. Both endpoints checked here are already probed elsewhere in this
+ * script, so this adds a lookup, not a dependency.
+ */
+async function answeredElsewhere(query: string): Promise<string | null> {
+	for (const [surface, path] of [
+		["repos", "/api/repos/search"],
+		["research", "/api/research"],
+	] as const) {
+		try {
+			const res = await fetch(
+				`${BASE}${path}?q=${encodeURIComponent(query)}&limit=3`,
+				{
+					headers: { "User-Agent": "stellarlight-engine-d" },
+					signal: AbortSignal.timeout(20_000),
+				},
+			);
+			if (!res.ok) continue;
+			const d: any = await res.json();
+			const rows: unknown[] =
+				d?.repos ?? d?.results ?? d?.research ?? d?.items ?? [];
+			// Semantic neighbours are not answers — the same rule this engine
+			// already applies to the projects endpoint.
+			if (Array.isArray(rows) && rows.length > 0 && d?.meta?.matchMode !== "semantic")
+				return surface;
+		} catch {}
+	}
+	return null;
+}
+
 async function main() {
 	console.error(`Engine D — demand-side mining (last ${DAYS}d) → ${BASE}`);
 	const payload = await getPayload({ config: await configPromise });
@@ -237,7 +277,7 @@ async function main() {
 	const byKey = new Map<string, Demand>();
 	for (const r of real) {
 		const query = (r.query ?? "").trim().replace(/\s+/g, " ");
-		const key = `${r.endpoint} ${query}`;
+		const key = `${r.endpoint}\u0000${query}`;
 		const d = byKey.get(key) ?? {
 			endpoint: r.endpoint,
 			query,
@@ -274,8 +314,17 @@ async function main() {
 			const d = toReplay[i];
 			const r = await replay(d.endpoint, d.query);
 			if (!r) continue; // endpoint error — skip, don't misreport
-			const cls = classify(d.endpoint, r);
-			const evidence =
+			let cls = classify(d.endpoint, r);
+			// A GAP on one surface is only a finding if the corpus is silent on
+			// ALL of them.
+			let elsewhere: string | null = null;
+			if (cls === "GAP") {
+				elsewhere = await answeredElsewhere(d.query);
+				if (elsewhere) cls = "OK";
+			}
+			const evidence = elsewhere
+				? `no project row, but /api/${elsewhere} answers it — the corpus holds this, so it is not a directory coverage gap`
+				:
 				cls === "EMPTY"
 					? "0 results"
 					: cls === "FALLBACK"

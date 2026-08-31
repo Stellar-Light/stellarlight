@@ -83,3 +83,86 @@ describe("proper-noun promotion (wave-5, the Hermes case)", () => {
 		).toBeLessThan(3);
 	});
 });
+
+// The other half of the same judgement, found 2026-08-30 by replaying /quality's
+// open findings against the live directory: the proper-noun path above decides
+// SINGLE words, and nothing decided multi-word ones. nameMatchScore reduced the
+// QUERY through anchorTokens ("is Stellar Tools live" -> "tools") and then
+// compared that against the UNREDUCED name ("stellar tools"), so a name whose
+// own words include a reduced token could never match itself. "is Stellar
+// Wallets Kit live" ranked hot-wallet, hana and albedo above the record the
+// question names.
+//
+// Multi-word is the whole safety argument, and these two blocks are the pair
+// that pins it: a single word in a question is a MENTION (guarded above), while
+// several words appearing intact and in order are not a coincidence. Both
+// directions are asserted here so a future widening of one breaks the other.
+describe("multi-word names identify themselves (wave-6, the recall misses)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it.each([
+		["Stellar Wallets Kit", "stellar-wallets-kit", "is Stellar Wallets Kit live"],
+		["Stellar Tools", "stellar-tools", "is Stellar Tools live"],
+		["Rise In", "rise-in", "what is Rise In"],
+		["Block by Block", "block-by-block", "tell me about Block by Block"],
+		[
+			"Stellar Asset Sandbox",
+			"stellar-asset-sandbox",
+			"is the Stellar Asset Sandbox maintained",
+		],
+	])("%s is found by the question that names it", (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBe(3);
+	});
+
+	it("matches on word boundaries, not substrings", () => {
+		// "Rise In" must not be claimed by "surprise incident" — the containment
+		// test is anchored, so a name buried inside longer words does not count.
+		expect(q("Rise In", "rise-in", "a surprise incident report")).toBeLessThan(3);
+	});
+
+	it("tolerates the hyphen/space split the slug and the name disagree on", () => {
+		expect(q("Stellar Wallets Kit", "stellar-wallets-kit", "does stellar-wallets-kit still build")).toBe(3);
+	});
+});
+
+// The single-word half, same measurement pass. Two of the 30 recorded recall
+// failures were not multi-word and so were untouched by the block above:
+// "is zkCross live" and "what is DD". zkCross is the fixable one — the
+// proper-noun regex wanted the capital in position 0. DD stays open on
+// purpose: a two-letter all-caps token is how people write categories, and
+// promoting it would trade one recall miss for an unknown number of
+// mention-as-identity errors.
+describe("intercaps is an identity signal (wave-6)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it("a capital mid-word promotes, wherever it sits in the query", () => {
+		expect(q("zkCross", "zkcross", "is zkCross live")).toBe(3);
+		expect(q("zkCross", "zkcross", "zkCross bridge fees")).toBe(3);
+	});
+
+	it("acronyms are categories, so intercaps does not admit them", () => {
+		// First position, so the older mid-sentence rule cannot fire and this
+		// isolates the branch added here: an all-caps token has no lowercase
+		// before its capital and is rejected.
+		expect(q("DEX", "dex", "DEX aggregators on stellar")).toBeLessThan(3);
+		expect(q("NFT", "nft", "NFT marketplaces here")).toBeLessThan(3);
+	});
+
+	it.fails("KNOWN HOLE: mid-sentence acronyms still promote", () => {
+		// Pre-existing, not introduced here, and left alone deliberately: the
+		// mid-sentence rule takes any capitalised word of 3+ chars, so "best DEX
+		// on stellar" hands rank 1 to a project named DEX. It is the same
+		// mention-vs-identity error the lowercase guards above prevent, surviving
+		// in the one case where the category word is conventionally capitalised.
+		// Marked `.fails` so it is a standing, visible red rather than a comment
+		// nobody reads — and so the day someone fixes it, this test breaks and
+		// tells them to promote it to a real assertion.
+		expect(q("DEX", "dex", "best DEX on stellar")).toBeLessThan(3);
+	});
+
+	it("ordinary capitalisation still needs the mid-sentence rule", () => {
+		expect(q("Stellar Thing", "stellar", "payments on Stellar today")).toBeLessThan(3);
+	});
+});

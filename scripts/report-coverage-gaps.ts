@@ -200,6 +200,14 @@ async function laneDefillama(dir: DirRow[]) {
 		matched,
 		missing: itemized,
 		belowFloor: missing.length - itemized.length, // no silent caps
+		// The rows behind that count. A per-lane relevance floor fires BEFORE any
+		// cross-lane join, so a protocol both rosters can see gets dropped by one
+		// of them and never reaches the other: FxDAO has chainTvls.Stellar = 0,
+		// lands here, and is simultaneously on the SCF absent list as fxdao-xov.
+		// Each lane was individually correct and the pair reported nothing.
+		belowFloorRows: missing.filter(
+			(m) => m.stellarTvlUSD < TVL_REPORT_FLOOR_USD,
+		),
 	};
 }
 
@@ -432,11 +440,40 @@ async function main() {
 	console.error("lane: scf roster (delegated diff, slow)...");
 	const scf = laneScf();
 
+	// CROSS-LANE JOIN. Neither lane can raise this alone: DefiLlama drops FxDAO
+	// under its TVL floor, and the SCF lane reports it as one of 47 slugs with
+	// no external corroboration attached. A protocol that TWO independent
+	// rosters list and we do not hold is a stronger signal than either lane's
+	// own threshold, so the floor must not silence it.
+	const scfAbsentSet = new Set<string>(
+		(Array.isArray((scf as { absentSlugs?: unknown }).absentSlugs)
+			? ((scf as { absentSlugs: string[] }).absentSlugs)
+			: []
+		).map((s) => s.toLowerCase().replace(/[^a-z0-9]/g, "")),
+	);
+	const corroborated = (defillama.belowFloorRows ?? []).filter(
+		(m: { name: string; slug: string }) =>
+			scfAbsentSet.has(m.name.toLowerCase().replace(/[^a-z0-9]/g, "")) ||
+			[...scfAbsentSet].some((a) =>
+				a.startsWith(m.slug.toLowerCase().replace(/[^a-z0-9]/g, "")),
+			),
+	);
+
 	const report = {
 		generatedAt: new Date().toISOString(),
 		base: BASE,
 		directoryRecords: dir.length,
 		lanes: { defillama, scf, partnerDocs, freshness },
+		/** Below DefiLlama's TVL floor AND on the SCF absent list — two rosters
+		 *  agree we are missing it, so neither lane's threshold should hide it. */
+		corroboratedAbsent: corroborated.map(
+			(m: { name: string; slug: string; stellarTvlUSD: number; url: string | null }) => ({
+				name: m.name,
+				slug: m.slug,
+				stellarTvlUSD: m.stellarTvlUSD,
+				url: m.url,
+			}),
+		),
 		summary: {
 			missingDefillama: defillama.missing.length,
 			missingScf: typeof scf.absent === "number" ? scf.absent : null,
@@ -486,6 +523,21 @@ async function main() {
 	console.log(
 		`\n## SCF roster: ${scf.absent ?? "?"} unmatched (${scf.absentWithRoundBadge ?? "?"} with award badge)${scf.error ? ` - lane error: ${scf.error}` : ""}\n`,
 	);
+
+	if (corroborated.length) {
+		console.log(
+			`\n## Corroborated by BOTH rosters (${corroborated.length}) - below the DefiLlama floor and on the SCF absent list\n`,
+		);
+		console.log("| protocol | TVL on Stellar | site |");
+		console.log("|---|---|---|");
+		for (const m of corroborated)
+			console.log(
+				`| ${m.name} (${m.slug}) | $${m.stellarTvlUSD.toLocaleString()} | ${m.url ?? "-"} |`,
+			);
+		console.log(
+			"\nA $0 Stellar TVL may mean wound down rather than missing - each needs a dated liveness check before it becomes a directory row.\n",
+		);
+	}
 
 	console.log("## Partner doc surfaces (raven#18)\n");
 	console.log("| partner | surface | verdict |");

@@ -19,7 +19,8 @@ concurrency:
   cancel-in-progress: false
 permissions:
   issues: write
-  contents: read
+  # write: the job now COMMITS the /quality artifact (see below)
+  contents: write
 jobs:
   watch:
     runs-on: ubuntu-latest
@@ -122,6 +123,47 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file /tmp/watch.md
           fi
+      # Commit the artifact /quality actually reads. The uploaded evidence
+      # below expires in 45 days and lives behind the Actions UI, so the
+      # scoreboard row would freeze at whatever date it was first written —
+      # a stale number that still renders. Same discipline as every other
+      # /quality row: the page reads a COMMITTED artifact, and the run that
+      # produced it is the only thing that can change it.
+      - name: Commit the /quality artifact
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p improvements/audits
+          python3 - <<'PY'
+          import json
+          g = json.load(open('/tmp/coverage.json'))
+          scf, dl = g['lanes']['scf'], g['lanes']['defillama']
+          json.dump({
+            "asOf": g['generatedAt'],
+            "source": "scripts/report-coverage-gaps.ts",
+            "scf": {"total": scf['frame']['scf'], "absent": scf['absent'],
+                    "served": scf['frame']['scf'] - scf['absent'],
+                    "absentWithRoundBadge": scf.get('absentWithRoundBadge'),
+                    "sample": scf.get('sample', [])[:10]},
+            "defillama": {"stellarListed": dl['stellarListed'], "matched": dl['matched'],
+                          "missing": len(dl.get('missing', [])), "belowFloor": dl.get('belowFloor')},
+            # Protocols BOTH external rosters list and we do not hold. Carried
+            # through explicitly: this transform selects fields by name, so a new
+            # finding that is not named here reaches no consumer, which is the
+            # exact class this repo keeps re-learning.
+            "corroboratedAbsent": g.get('corroboratedAbsent', []),
+            "summary": g.get('summary'),
+          }, open('improvements/audits/coverage-gaps-latest.json', 'w'), indent=2)
+          PY
+          if ! git diff --quiet improvements/audits/coverage-gaps-latest.json; then
+            git config user.name "stellarlight bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add improvements/audits/coverage-gaps-latest.json
+            git commit -m "data: refresh coverage-gap artifact (SCF coverage row on /quality)"
+            git push
+          else
+            echo "coverage artifact unchanged — nothing to commit"
+          fi
+
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4

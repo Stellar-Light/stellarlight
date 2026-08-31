@@ -1921,6 +1921,8 @@ export const spec: OpenAPISpec = {
 						"raw GitHub source repos ranked by code quality -> searchRepos",
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
 						"category counts or whitespace -> getClusters",
+						"ranking projects by GitHub activity / stars / commits -> getLeaderboard",
+						"ramp DIRECTION or corridor for a specific anchor (on-ramp vs off-ramp, which country) -> getPartners, which carries rampTypes",
 						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)",
 					],
 					exampleQuestions: [
@@ -2886,6 +2888,7 @@ export const spec: OpenAPISpec = {
 						"a funded project/product or 'who built X (the company)' -> searchProjects",
 						"the GitHub repo/code itself -> searchRepos",
 						"ecosystem-wide dev counts/activity stats -> getLeaderboard",
+						"paid work / jobs / bounties FOR a contributor (worker side, not who-to-hire) -> getRfps",
 						"SCF-tier or award-track filtering (unsupported — no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
@@ -3154,6 +3157,16 @@ export const spec: OpenAPISpec = {
 						"'who should audit my Soroban contract' (type=audit-firm)",
 						"find an anchor or on/off-ramp in {region}",
 						"partner discovery for an integration",
+						// THE TIEBREAKER. Both this operation and searchProjects
+						// declared ramp vocabulary — on-ramp / off-ramp / ramps /
+						// anchors here, anchors / on-off-ramps there — with nothing in
+						// either notFor to break the tie, so "on and off ramps for
+						// Stellar payments" was contested by construction. The split
+						// follows the data: 29 anchor-typed partners here, 9 of them
+						// with rampTypes populated, against 42 type=Anchor projects in
+						// the directory. Direction and corridor are the facts only this
+						// side holds; the roster is larger on the other.
+						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
 					],
 					notFor: [
 						"projects/products that were BUILT -> searchProjects",
@@ -3998,6 +4011,19 @@ export const spec: OpenAPISpec = {
 						"closed",
 						"kelp",
 						"hummingbot",
+						// WORKER SIDE. Every term above is written from the funder's
+						// vocabulary — rfp, brief, grant, round — and none of "jobs",
+						// "freelance" or "paid work" appeared anywhere in this
+						// 9,000-line spec. So "jobs bounties and freelance work for
+						// Stellar contributors" routed to getBuilders, which answers
+						// "who can I hire": it returned a list of people TO the person
+						// looking for work, the exact inverse of the intent.
+						"jobs",
+						"freelance",
+						"paid work",
+						"where can I earn",
+						"get paid to build",
+						"contract work",
 					],
 					useWhen: [
 						"what RFPs/bounties/grants match my idea / are open",
@@ -4935,6 +4961,20 @@ export const spec: OpenAPISpec = {
 					notFor: [
 						"repo-level discovery (searchRepos) or full audit rows (listAudits)",
 						"any claim about contracts we have NOT verified — absence is not nonexistence",
+						// This operation is ENTITY-shaped — "which contracts exist" —
+						// and every one of its keywords contains the token "contract",
+						// so a short blob with total term concentration outscores
+						// longer, diffuse blobs on any query carrying that word,
+						// whatever the intent. Measured against Raven's own scorer it
+						// won "how do I write a Soroban smart contract in Rust" (204 vs
+						// searchRepos 163), "how do I deploy a contract" (192), "how to
+						// test a Soroban contract" (188), and "who can audit my
+						// contract" (95) — the last beating getPartners at 65 despite
+						// getPartners carrying that literal phrase. Keywords stay
+						// entity-shaped; these name where the how-to families belong.
+						"how do I write / deploy / test a contract -> searchResearch (docs, SEPs, guides) or searchRepos (working examples)",
+						"how does X work in the code / where is X implemented -> explainRepo",
+						"who should audit my contract / which firms audit -> getPartners (type=audit-firm)",
 					],
 				},
 				parameters: [
@@ -5346,8 +5386,23 @@ export const spec: OpenAPISpec = {
 						"incident",
 						"post-mortem",
 						"oracle manipulation",
-						"yieldblox",
-						"reflector",
+						// QUALIFIED, not bare. These are directory projects, and a
+						// bare project name on someone else's operation makes that
+						// operation the router's answer for the project itself:
+						// "reflector oracle on Stellar" ranked searchResearch 97 over
+						// searchProjects 81, for a project we hold at confidence 0.97.
+						// The security cluster wants the INCIDENTS, so the phrases say
+						// so and the names stop being attractors.
+						//
+						// A sweep of all 287 single-token routing keywords found 17
+						// that are directory project names. The other 15 are on the
+						// operation that SERVES them — audit firms on listAudits,
+						// stablecoins on getStablecoins, Soroswap and Stellarchain on
+						// searchProjects — which is correct and left alone. The defect
+						// is a name on a DIFFERENT operation, and that was these two
+						// plus "dune" on getLeaderboard.
+						"yieldblox oracle manipulation incident",
+						"reflector oracle manipulation incident",
 						"reentrancy",
 						"soroban-sdk security advisories",
 						"cve",
@@ -6468,7 +6523,10 @@ export const spec: OpenAPISpec = {
 						"open issues",
 						"backlog",
 						"csv",
-						"dune",
+						// "Dune" here means Dune-style analytics export, but the bare
+						// token also names a project in our directory, so it competed
+						// for "what is Dune". Qualified to the intent it was added for.
+						"dune-style analytics export",
 						"export",
 						"developer counts",
 						"active devs",

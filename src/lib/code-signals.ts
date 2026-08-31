@@ -144,6 +144,52 @@ const LANG_SDK_MARKERS: {
 		file: (n) => n === "cargo.toml",
 		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
 	},
+	// AssemblyScript Soroban contracts. Verified against the real manifests in
+	// Soneso/as-soroban-examples: each contract's package.json depends on
+	// `as-soroban-sdk` and its asconfig.json extends `as-soroban-sdk/sdkasconfig`.
+	// We key off package.json because that is what the fetcher pulls.
+	//
+	// Why this matters beyond one repo: an AssemblyScript contract imports
+	// neither Rust `soroban-sdk` nor JS `@stellar/stellar-sdk`, so it read as
+	// proof=none — "confidently not Stellar" — and `none` is a key in the
+	// two-key archive rule. The 2026-08-30 tier dry run duly proposed archiving
+	// Soneso/as-soroban-examples, AssemblyScript examples from a Stellar SDK
+	// vendor, on `none+farm:1`. A silence the engine cannot break is not
+	// evidence of absence.
+	{
+		lang: "assemblyscript",
+		file: (n) => n === "package.json",
+		re: /"as-soroban-sdk"\s*:/,
+	},
+	// PHP. 29 of 31 scanned PHP repos (94%) read as proof=none, and we curate
+	// Argo-Navis-Dev/php-anchor-sdk as canonical — whose composer.json requires
+	// `soneso/stellar-php-sdk`. composer.json was ALSO absent from the
+	// fetcher's manifest list, so there was nothing to match even with a
+	// marker; both halves are fixed together.
+	// Java / Maven. pom.xml was never fetched, so every Maven project read
+	// none regardless of its dependencies. Matches dependency COORDINATES
+	// (groupId), never a project's own artifactId — openMF/stellar-connector
+	// is named "stellar-connector" and does not depend on a Stellar SDK, so a
+	// name match would have been a false positive.
+	{
+		lang: "java-maven",
+		file: (n) => n === "pom.xml",
+		re: /<groupId>\s*(org\.stellar|network\.lightsail|com\.soneso)[^<]*<\/groupId>/i,
+	},
+	{
+		lang: "php",
+		file: (n) => n === "composer.json",
+		re: /"(soneso\/stellar-php-sdk|zulucrypto\/stellar-api|argonavis\/[a-z0-9_-]*stellar[a-z0-9_-]*)"/i,
+	},
+	// Dart / Flutter. pubspec.yaml was ALREADY being fetched and then thrown
+	// away — no marker consumed it — while 39% of Dart repos read none.
+	// Matches both the SDK itself (`name: stellar_flutter_sdk`) and anything
+	// depending on it.
+	{
+		lang: "dart",
+		file: (n) => n === "pubspec.yaml",
+		re: /^\s*(name|stellar_flutter_sdk|stellar_sdk)\s*:\s*.*stellar|^\s*stellar_(flutter_)?sdk\s*:/im,
+	},
 	{
 		lang: "swift",
 		file: (n) => n === "package.swift",
@@ -156,7 +202,16 @@ const LANG_SDK_MARKERS: {
 	},
 	{
 		lang: "kotlin",
-		file: (n) => n === "build.gradle" || n === "build.gradle.kts",
+		// libs.versions.toml: Gradle VERSION CATALOGS put the coordinate in a
+		// separate file, so a build.gradle.kts reads `api(libs.java.stellar.sdk)`
+		// and contains no Stellar string at all. stellar/kotlin-wallet-sdk —
+		// SDF's own — read proof=none for exactly this reason. The existing
+		// regex already matches `network.lightsail:stellar`; it simply never
+		// saw the file holding it.
+		file: (n) =>
+			n === "build.gradle" ||
+			n === "build.gradle.kts" ||
+			n === "libs.versions.toml",
 		re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i,
 	},
 	{

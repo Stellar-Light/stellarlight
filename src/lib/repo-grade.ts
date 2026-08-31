@@ -19,6 +19,10 @@ export interface RepoGradeInput {
 	scfAwarded?: boolean; // owning project is SCF-funded
 	projectProminence?: number; // 0-100 curated prominence of the owning project
 	builderReputation?: number; // 0-1, from the owning builder's Stellar Passport (SCF tier / featured / activity)
+	/** on the hand-maintained canonical list (src/lib/repo-search.ts) — the
+	 * strongest external validation we have: a human said this repo IS the
+	 * answer for a concept. */
+	curatedCanonical?: boolean;
 	// Own-merit signals so a flagship org's throwaway sub-repo can't inherit the
 	// parent's full authority (e.g. reflector's 0-star node-orchestrator).
 	hasDescription?: boolean;
@@ -168,11 +172,39 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// Code depth trumps heuristics too — parallel to judgeScore. A code-verified
 	// deployable contract (codeDepth ~1.0) becomes a strong reference even at 0
 	// stars, fixing star-dominance for the long tail of real-but-unstarred repos.
-	// Take the better of heuristic vs code-driven (a repo that's both deep AND
-	// popular can still climb past code-only).
+	// That intent is right and is preserved.
+	//
+	// But UNGATED it was inverted, and this is the field agents actually rank
+	// on. codeDepth measures how heavily a repo USES the Stellar SDK — which an
+	// APPLICATION answers better than the SDK itself, because a library does not
+	// import itself. Measured live 2026-08-30, sorted by repoScore:
+	//
+	//     85  Andy00L/x402-autopilot        (0 stars, no project)
+	//     85  ashfrancis/chickenz           (0 stars, no project)
+	//     85  xaviersharwin10/soroban_node_0
+	//     ...
+	//     76  stellar/js-stellar-sdk
+	//
+	// Student dApps outranking SDF's own SDK, on the number Scout tells agents
+	// to trust. So the code-driven lift is now SCALED BY EXTERNAL VALIDATION —
+	// does anything outside the repo's own source say it is an answer? This is
+	// the same discipline already applied to `authority` above ("a no-merit
+	// peripheral repo only gets ~30% of its parent's authority"): deep code is
+	// evidence a repo is REAL, not evidence it is CANONICAL.
+	//
+	// Deliberately NOT gated on stars alone — that would reinstate the star
+	// dominance this branch exists to fix. A curated or SCF-funded or
+	// project-linked repo keeps the full lift at zero stars.
 	if (typeof input.codeDepth === "number" && Number.isFinite(input.codeDepth)) {
 		const c = Math.max(0, Math.min(1, input.codeDepth));
-		const codeDriven = 0.1 + 0.7 * c; // 0 → 0.1, 1 → 0.8
+		const validated = input.curatedCanonical
+			? 1 // a human named it the canonical answer
+			: input.scfAwarded || (input.projectProminence ?? 0) > 0
+				? 0.85 // funded, or linked to a curated project
+				: (input.stargazerCount ?? 0) >= 10
+					? 0.7 // the ecosystem noticed it
+					: 0.45; // deep code and nothing else vouching for it
+		const codeDriven = (0.1 + 0.7 * c) * validated;
 		composite = Math.max(composite, codeDriven);
 	}
 

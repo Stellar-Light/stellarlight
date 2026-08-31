@@ -418,11 +418,15 @@ describe("staleness vs org authority (2026-07-19 answer-key eval)", () => {
 	});
 });
 
+// Casing is LOAD-BEARING: the corpus stores GitHub's canonical casing and
+// Mongo `equals` is case-sensitive, so the lowercase spellings these tests used
+// to assert matched ZERO rows in production for months while the tests passed.
+// The tests encoded the bug. Assert what GitHub actually serves.
 describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", () => {
 	it("q=wallet floats the verified flagship wallets", () => {
 		const f = flagshipsFor("wallet");
 		expect(f).toContain("stellar/freighter");
-		expect(f).toContain("creit-tech/xbull-wallet");
+		expect(f).toContain("Creit-Tech/xBull-Wallet");
 		expect(f).toContain("kalepail/passkey-kit");
 	});
 	it("smart wallet queries hit the wallet vertical too", () => {
@@ -449,7 +453,7 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 		expect(flagshipsFor("passkey smart wallet kit")[0]).toBe(
 			"kalepail/passkey-kit",
 		);
-		expect(flagshipsFor("xbull wallet")[0]).toBe("creit-tech/xbull-wallet");
+		expect(flagshipsFor("xbull wallet")[0]).toBe("Creit-Tech/xBull-Wallet");
 	});
 	it("identity tokens absent → curated order holds on the tie", () => {
 		expect(flagshipsFor("anchor integration")[0]).toBe(

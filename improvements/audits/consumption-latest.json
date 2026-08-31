@@ -1,0 +1,19 @@
+{
+  "asOf": "2026-08-31T00:06:54.608Z",
+  "source": "scripts/check-consumption.ts",
+  "checked": 9,
+  "consumed": 7,
+  "dead": [
+    {
+      "field": "triageTags",
+      "why": "internal dead/farm/template verdicts for 12,961 repos",
+      "writtenIn": 6
+    },
+    {
+      "field": "tierReason",
+      "why": "provenance for a tier verdict (evidenced+dated is the pitch)",
+      "writtenIn": 4
+    }
+  ],
+  "note": "A field written by our machinery but read by no serving path cannot change any answer an agent receives."
+}

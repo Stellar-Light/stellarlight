@@ -73,6 +73,11 @@ export interface Finding {
 	verifiedAt?: string;
 	/** Set automatically when a detector stops reporting it. */
 	clearedAt?: string;
+	/** Set when an auto-cleared finding was raised again — the ledger CAN show
+	 *  a regression, and this is the paper trail that it did. */
+	reopenedAt?: string;
+	/** Set only by the stale sweep, which clears on a live PASS. */
+	clearedBy?: string | null;
 	/** memory/lesson slug that generalized this finding, if any. */
 	lessonRef?: string;
 	/**
@@ -205,6 +210,14 @@ export interface LedgerSummary {
 	closed: number;
 	verified: number;
 	cleared: number;
+	/** Cleared because a live re-probe PASSED — evidence, not silence. The
+	 *  stale sweep stamps `clearedBy`, so this is a count of real checks. */
+	clearedByReprobe: number;
+	/** Cleared because a detector stopped reporting. That is NOT the same as
+	 *  fixed, and conflating the two is how 3 SCF-funded projects we still do
+	 *  not hold (kutana, etesia, octopos) sat in the closed column. This is the
+	 *  re-probe backlog. */
+	clearedOnSilence: number;
 	/** Fraction of all findings ever seen that are now closed (verified+cleared). */
 	closingRate: number;
 	/** Age of the oldest still-open finding, in whole days. */
@@ -250,7 +263,14 @@ export function summarizeLedger(
 	const total = findings.length;
 	const open = findings.filter(isOpen).length;
 	const verified = findings.filter((f) => f.status === "verified").length;
-	const cleared = findings.filter((f) => f.status === "cleared").length;
+	const clearedRows = findings.filter((f) => f.status === "cleared");
+	const cleared = clearedRows.length;
+	// `clearedBy` is stamped only by the stale sweep, which clears solely on a
+	// PASS observed live. Its absence means the ledger's own auto-clear fired —
+	// the detector went quiet, which is indistinguishable from nobody asking
+	// again.
+	const clearedByReprobe = clearedRows.filter((f) => !!f.clearedBy).length;
+	const clearedOnSilence = cleared - clearedByReprobe;
 	const inWave = findings.filter(
 		(f) => f.status === "in-wave" || f.status === "fixed",
 	).length;
@@ -325,6 +345,8 @@ export function summarizeLedger(
 		closed,
 		verified,
 		cleared,
+		clearedByReprobe,
+		clearedOnSilence,
 		closingRate: total > 0 ? Math.round((closed / total) * 100) / 100 : 1,
 		oldestOpenDays: Math.round(oldestOpenDays),
 		inWave,
@@ -369,11 +391,43 @@ export function upsertFindings(
 		seen.add(p.id);
 		const still = detectedById.get(p.id);
 		if (still) {
-			// Re-raised: take THIS run's evidence stamp. `lastSeen` alone can't say
-			// whether the detector genuinely re-ran or the orchestrator just re-read
-			// a stale artifact — `evidenceAt` comes from the artifact itself, so it
-			// only advances when the detector actually did.
-			out.push({ ...p, lastSeen: nowIso, evidenceAt: still.evidenceAt });
+			// RE-RAISED. A finding the detector is reporting again is not closed.
+			//
+			// This branch preserved `status`, so an auto-`cleared` finding that
+			// came back stayed cleared forever — the ledger could record a
+			// regression but never show one. Measured 2026-08-31 before the fix:
+			// 191 of 406 cleared findings had a `lastSeen` AFTER their
+			// `clearedAt`, meaning the detector had re-raised them while the board
+			// counted them closed. usdc-swap and stellars-finance were cleared on
+			// 08-28 and re-detected on 08-31, still sitting in the closed column.
+			//
+			// Combined with auto-clear-on-silence, the pair made "closed" mean
+			// "nobody asked recently" in both directions: silence closes, and
+			// noise does not reopen.
+			//
+			// Only `cleared` reopens. The deliberate states — in-wave, fixed,
+			// verified — are a human's assertion and are never auto-changed;
+			// that rule predates this and is right. A wave that says "verified"
+			// on something still failing is a different problem, and one a person
+			// has put their name to.
+			const reopens = p.status === "cleared";
+			out.push({
+				...p,
+				...(reopens
+					? {
+							status: "open" as const,
+							clearedAt: undefined,
+							clearedBy: undefined,
+							reopenedAt: nowIso,
+						}
+					: {}),
+				// Re-raised: take THIS run's evidence stamp. `lastSeen` alone can't
+				// say whether the detector genuinely re-ran or the orchestrator just
+				// re-read a stale artifact — `evidenceAt` comes from the artifact
+				// itself, so it only advances when the detector actually did.
+				lastSeen: nowIso,
+				evidenceAt: still.evidenceAt,
+			});
 		} else if (runSources.has(p.source) && p.status === "open") {
 			// this run covered p's detector but didn't re-raise it → soft-fixed
 			out.push({ ...p, status: "cleared", clearedAt: nowIso });

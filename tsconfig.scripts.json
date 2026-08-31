@@ -1,13 +1,31 @@
+// scripts/** is excluded from the main tsconfig, so `tsc --noEmit` reports a
+// clean tree while every script that writes to the production database goes
+// unchecked. On 2026-08-30 that let two broken scripts ship in consecutive
+// commits — an undefined identifier in enrich-repos.ts (which writes repo
+// grades to prod) and a missing import in an eval probe — with vitest, the
+// main tsc, and a full CI run all green.
+//
+// This config type-checks them. It cannot simply be folded into the main
+// tsconfig: Next builds from that one, and pulling ~200 node-side scripts into
+// the app's program changes what the build compiles. Kept separate, run by its
+// own guard (scripts/check-scripts-types.ts).
+//
+// `include` is scripts/** ONLY, and that is load-bearing. It first read
+// ["scripts/**", "src/**"], which pulled the Payload admin routes into the
+// program — and those import `importMap.js`, a file Payload GENERATES and
+// .gitignore excludes. It exists in a working tree and not in a fresh
+// checkout, so the guard passed locally and failed in CI with three TS2307s,
+// and the baseline had been recorded in an environment the check never runs
+// in. A guard whose answer depends on files git does not carry is measuring
+// the developer's laptop, not the repo.
+//
+// Narrowing costs nothing: tsc still follows every import out of scripts/ and
+// type-checks what it finds, which is exactly this guard's scope. The rest of
+// src/ is the main tsconfig's job and the build already runs it. Verified in a
+// fresh clone with no generated files: the same 63 signatures, all under
+// scripts/, byte-identical to the committed baseline.
 {
 	"extends": "./tsconfig.json",
-	"compilerOptions": {
-		"module": "esnext",
-		"target": "es2022",
-		"moduleResolution": "bundler",
-		"noEmit": true,
-		"types": ["node"]
-	},
-	"include": ["scripts/**/*.ts", "src/**/*.ts"],
-	"exclude": ["node_modules", "scout-mcp/**", "api-client/**"],
-	"_why": "Opt-in typecheck for scripts/, which the root tsconfig excludes. Run `pnpm typecheck:scripts`. NOT a CI gate yet: 29 legacy scripts carry 70 pre-existing errors, so gating on it would be red on arrival. It exists because the root tsc silently passed a script that called an undefined function (refresh-paid-endpoints, 2026-08-23) \u2014 nothing else would have caught it."
+	"include": ["scripts/**/*.ts"],
+	"exclude": ["node_modules", "scout-mcp/**", "api-client/**"]
 }

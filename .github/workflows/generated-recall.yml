@@ -19,7 +19,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      # No version, and package.json has no packageManager field for it to
+      # read — the action exits before installing anything. Every other lane
+      # pins the major here.
       - uses: pnpm/action-setup@v4
+        with: { version: 10 }
       - uses: actions/setup-node@v4
         with:
           node-version: 24

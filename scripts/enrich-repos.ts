@@ -27,6 +27,7 @@ import {
 } from "../src/lib/repo-knowledge";
 import { repoNameOwner } from "../src/lib/repo-org-attribution";
 import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
+import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
@@ -150,6 +151,12 @@ function builderRep(b: Doc): number {
 	else if (commits >= 10) r = Math.max(r, 0.55);
 	return Math.min(1, r);
 }
+
+/** Lowercased: the corpus stores GitHub's canonical casing and our own list has
+ * drifted from it twice (10 names matched zero rows for months). Compare
+ * case-insensitively so a casing change cannot silently strip a canonical
+ * repo's score lift. */
+const CURATED = new Set(CURATED_CANONICAL_REPOS.map((n) => n.toLowerCase()));
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -503,6 +510,17 @@ async function main() {
 					commits90d: info.commits90d ?? null,
 					codeDepth:
 						typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
+					// The code-driven lift is gated on external validation (see
+					// repo-grade.ts). Curated-canonical is the strongest such
+					// signal — a human named this repo THE answer for a concept —
+					// so it must reach the grader, or the canonical repos lose
+					// the very lift the gate was designed to preserve for them.
+					// `info.nameWithOwner` over `full`: after a rename the curated
+					// list names the canonical repo, and the block just above has
+					// already converged the row onto it.
+					curatedCanonical: CURATED.has(
+						(info.nameWithOwner ?? full).toLowerCase(),
+					),
 				})
 			: { score: 0, label: "low" as const };
 

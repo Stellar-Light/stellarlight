@@ -852,6 +852,49 @@ export function nameMatchScore(
 		if (n === joined || sl === joined || sl === hyphen || alias(joined))
 			return 3;
 	}
+	// THE NAME APPEARS VERBATIM IN THE QUERY (the 2026-08-30 recall-miss class).
+	//
+	// The path above reduces the QUERY through anchorTokens and then compares it
+	// to the UNREDUCED name — so any name containing a word that reduction
+	// strips can never match itself. "is Stellar Tools live" reduces to "tools",
+	// which is not "stellar tools"; the project literally named Stellar Tools
+	// scored 0 for its own name. Reproduced live before the fix, top-3 for each:
+	//   "is Stellar Tools live"       -> beamable, trustswap, trustline
+	//   "is Stellar Wallets Kit live" -> hot-wallet, hana, albedo
+	//   "tell me about Rise In"       -> scorechain, alchemy, xoxno
+	//   "is Block by Block live"      -> exaion, fastbuka, nethermind
+	// This score is the FIRST sort key, so the record lost on its own identity
+	// and unrelated rows won. 26 of the 56 open ledger findings are this.
+	//
+	// The fix compares against the RAW query instead, which needs no reduction
+	// to stay honest: if the full name occurs in the question as WHOLE WORDS,
+	// the question is about that record. Word boundaries are load-bearing — a
+	// bare substring test would match "dd" inside "sudden" and promote a
+	// two-letter name onto half the corpus.
+	// MULTI-WORD ONLY, and that restriction is the whole safety argument.
+	//
+	// A single word appearing in a question is a MENTION, not an identity
+	// claim: the project named "Bridge" must not own "cross-chain bridge to
+	// stellar", and slug "stellar" must not own "payments on Stellar today".
+	// Single-word identity already has a path — the proper-noun promotion
+	// below, which requires capitalisation MID-SENTENCE, so sentence case
+	// cannot fake it. This containment test deliberately does not duplicate
+	// that judgement; it only handles what that path structurally cannot see:
+	// a multi-word name, whose co-occurrence in order is not a coincidence.
+	// "Stellar Wallets Kit" appearing intact in a question is about that
+	// record; "bridge" appearing in one is not.
+	const distinctive = (needle: string): boolean =>
+		needle.split(/[\s-]+/).filter(Boolean).length > 1;
+	const bounded = (needle: string): boolean => {
+		if (needle.length < 2) return false;
+		if (!distinctive(needle)) return false;
+		const esc = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		// slugs hyphenate what the query spaces: match either separator
+		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
+		return new RegExp(`(^|[^a-z0-9])${flexible}([^a-z0-9]|$)`, "i").test(qq);
+	};
+	if (bounded(n) || bounded(sl) || (aliases ?? []).some((a) => bounded(a.trim().toLowerCase())))
+		return 3;
 	// Proper-noun promotion (wave-5, the Hermes case): "what happened to
 	// Hermes exchange on Stellar" carries ONE capitalized proper noun
 	// mid-sentence, and that word exactly equalling a record's name or
@@ -865,7 +908,29 @@ export function nameMatchScore(
 	const capitalized = qq.length
 		? (q.trim().match(/(?<=\s)[A-Z][A-Za-z0-9-]{2,}/g) ?? [])
 		: [];
-	for (const w of capitalized) {
+	// A capital INSIDE a word is a casing nobody produces by accident. That
+	// makes it a stronger identity signal than the rule above, and it needs
+	// neither of that rule's two conditions: sentence case cannot capitalise a
+	// letter mid-word, so the first-word exclusion is unnecessary, and the
+	// capital need not come first. "is zkCross live" matched nothing precisely
+	// because the regex above wants the capital in position 0 and zkCross's is
+	// in position 2.
+	//
+	// A lowercase letter must PRECEDE the capital, which is what separates
+	// "zkCross" from "DEX". Acronyms are how people write categories — a
+	// question about "NFT tooling" is not a claim about a project named NFT —
+	// and GENERIC_QUERY_TOKENS holds 44 words, none of them acronyms, so there
+	// is nothing here to gate them on. They stay out.
+	const intercaps = (q.trim().match(/[A-Za-z][A-Za-z0-9-]*/g) ?? []).filter(
+		(w) => {
+			const upper = w.slice(1).search(/[A-Z]/);
+			return upper >= 0 && /[a-z]/.test(w.slice(0, upper + 1));
+		},
+	);
+	// Both branches promote only on EXACT equality to a name, slug or alias —
+	// this is not the containment test above, so a false positive requires the
+	// user to have typed the whole name.
+	for (const w of [...capitalized, ...intercaps]) {
 		const lw = w.toLowerCase();
 		if (NETWORK_WORDS.has(lw)) continue;
 		if (n === lw || sl === lw || alias(lw)) return 3;

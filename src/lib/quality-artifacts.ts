@@ -8,6 +8,11 @@
  * the artifact path so every number links to its reproducible evidence.
  */
 
+import consumption from "../../improvements/audits/consumption-latest.json";
+import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
+import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
+import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
+import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
 import deepwiki from "../../improvements/engine/deepwiki-calibration-2026-07-10.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
@@ -25,10 +30,10 @@ import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
-import laneOperatorToml from "../../improvements/quality/lane-operator-toml.json";
 import qualityEntities from "../../improvements/quality/entities.json";
 import externalFindings from "../../improvements/quality/external-findings.json";
 import qualityHistory from "../../improvements/quality/history.json";
+import laneOperatorToml from "../../improvements/quality/lane-operator-toml.json";
 // Weekly evidence, fixed -latest paths committed by engine-c-health every
 // Sunday (see improvements/engine/weekly/README.md); git history = archive.
 import missFunnel from "../../improvements/quality/miss-funnel.json";
@@ -126,6 +131,11 @@ export type GuardCadence = "weekly" | "on-deploy" | "baseline";
  * `baseline` is a one-off measurement of a thing that does not change on its
  * own (a probe of documented behaviour, a calibration against a fixed sample);
  * it still ages, just far more slowly than a weekly sweep. */
+/** Minimum co-graded repos before an agreement RATE is evidence rather than
+ * an anecdote. Chosen so one disagreement cannot move the headline by more
+ * than ~5 points; at n=3 it moved it by 33. */
+export const DEEPWIKI_MIN_GRADED = 20;
+
 export const GUARD_FRESHNESS: Record<GuardCadence, number> = {
 	weekly: 10,
 	"on-deploy": 14,
@@ -287,22 +297,227 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			});
 		})(),
 
+		// Curated canonical integrity — the hand-maintained list that decides
+		// WHICH repo is authoritative. It is authored truth: nothing derives it,
+		// so nothing caught that 10 of its names matched no row at all (mixed
+		// casing vs a case-sensitive `equals`, plus two upstream renames). A
+		// curated name that matches nothing degrades exactly the queries
+		// curation exists to fix, silently.
+		g({
+			key: "curated-canonical",
+			title: "Curated canonical repos resolve",
+			promise:
+				"Every repo we call authoritative is indexed and carries code signals — a curated name that matches no row silently degrades the query it was written for.",
+			measure: {
+				value: curatedCanonical.scanned,
+				of: curatedCanonical.curatedTotal,
+				unit: "repos",
+			},
+			sub: `${curatedCanonical.scanned}/${curatedCanonical.curatedTotal} curated canonical repos indexed and code-scanned`,
+			details: [
+				`${curatedCanonical.absent.length} absent (curated name matches no row)`,
+				`${curatedCanonical.unscanned.length} indexed but no code signals — invisible to code-evidence ranking and to the tier gate`,
+				...curatedCanonical.unscanned
+					.slice(0, 4)
+					.map((u) => `${u.name} (${u.state}, ${u.stars}★)`),
+			],
+			asOf: curatedCanonical.asOf.slice(0, 10),
+			cadence: "baseline",
+			severity: curatedCanonical.absent.length > 0 ? "high" : "medium",
+			artifact: "improvements/audits/curated-canonical-latest.json",
+			passing: curatedCanonical.findings === 0,
+		}),
+
+		// THE META-ROW. Every significant defect of 2026-08-30 was one shape:
+		// machinery exists, is tested, produces a value, and NOTHING CONSUMES
+		// IT. codeProofTier called only by a report. triageTags derived for
+		// 12,961 repos, read by no serving path. tier=quality armed on prod
+		// with no ranker reading it. We wrote that lesson into PLAN.md and then
+		// produced four fresh instances of it the same day, because a lesson in
+		// a doc cannot fail and a lane can. Catching this class BEFORE an audit
+		// does is the entire point of this board.
+		g({
+			key: "consumption",
+			title: "Computed values reach a serving path",
+			promise:
+				"Every field our machinery computes is read by something that shapes an agent's answer — a value nothing consumes cannot change what anyone is told.",
+			measure: {
+				value: consumption.consumed,
+				of: consumption.checked,
+				unit: "fields",
+			},
+			sub: `${consumption.consumed}/${consumption.checked} computed fields reach a serving path, or an engine whose output is served`,
+			details: [
+				...consumption.dead.map(
+					(d: { field: string; why: string }) => `DEAD: ${d.field} — ${d.why}`,
+				),
+				"a script or a test does not count as consumption — that is how codeProofTier passed for months while only a report called it",
+			],
+			asOf: consumption.asOf.slice(0, 10),
+			cadence: "on-deploy",
+			severity: "high",
+			artifact: "improvements/audits/consumption-latest.json",
+			passing: consumption.dead.length === 0,
+		}),
+
+		// Does the machinery that guards everything else actually RUN?
+		//
+		// The consumption row above went onto this board the day its lane was
+		// written — and that lane installed pnpm with `npm i -g pnpm`, drew
+		// pnpm 11 against an engines field of "^9 || ^10", and died at the
+		// install step every time. Three runs, zero completions. The board
+		// showed a guard we did not have, which is worse than showing nothing,
+		// because a named guard is a reason to stop looking.
+		//
+		// Two lessons already written down — "an armed schedule is not moved
+		// data", "a quiet detector looks identical to a live fire" — and neither
+		// could fail a build. This row asks GitHub what our lanes actually did.
+		// It reports only what a person can act on: a lane that dies before its
+		// own logic runs, or one whose green has aged past its cadence. A
+		// detector that exits 1 on a finding is working, and is not counted.
+		g({
+			key: "workflow-health",
+			title: "Guard lanes that actually run",
+			promise:
+				"Every automated lane in the repo has completed a real run recently — a guard that never executes is a promise, not a check.",
+			measure: {
+				value: workflowHealth.healthy,
+				of: workflowHealth.checked,
+				unit: "lanes",
+			},
+			sub: `${workflowHealth.healthy}/${workflowHealth.checked} automated lanes have a green run inside their own cadence`,
+			details: [
+				...workflowHealth.broken.map(
+					(b: { file: string; state: string; why: string }) =>
+						`${b.state.toUpperCase()}: ${b.file} — ${b.why}`,
+				),
+				"judged against the workflow file as it stands: runs from a since-edited or never-merged version are ignored, so a fixed lane stops being red",
+				"a lane that exits 1 to report a finding is the guard working, and is not counted here",
+			],
+			asOf: workflowHealth.asOf.slice(0, 10),
+			cadence: "weekly",
+			severity: "high",
+			artifact: "improvements/audits/workflow-health-latest.json",
+			passing: workflowHealth.broken.length === 0,
+		}),
+
+		// The scripts that write to production, type-checked at last.
+		//
+		// tsconfig excludes scripts/**, so the repo's own `tsc --noEmit` reports
+		// a clean tree while ~200 node-side scripts go unchecked — including
+		// enrich-repos, which writes repo grades to the live database. Two
+		// broken scripts shipped in consecutive commits on 2026-08-30, each a
+		// one-line mistake a compiler catches for free, behind a CI run that was
+		// green on every other lane.
+		//
+		// The number here is DEBT, not health: 63 errors that predate the guard,
+		// frozen by identity so nothing new can land and a fixed one cannot be
+		// traded for a fresh one elsewhere. It should only ever go down.
+		g({
+			key: "scripts-types",
+			title: "Type errors in scripts/",
+			promise:
+				"The scripts that write to the production database are type-checked, and the backlog of known errors only shrinks.",
+			// No denominator. Every other row on this board reads x/y as
+			// good-of-total, and "63/63" here would say the opposite of what it
+			// means — 63 is the DEBT, and the only direction it should ever move
+			// is down.
+			measure: {
+				value: scriptsTypes.total,
+				of: null,
+				unit: "errors",
+			},
+			sub: `${scriptsTypes.total} type errors in scripts/, ${scriptsTypes.baselined} of them baselined — new ones fail the build`,
+			details: [
+				...(scriptsTypes.added.length
+					? [`NEW (blocking): ${scriptsTypes.added.join("; ")}`]
+					: []),
+				...(scriptsTypes.fixed.length
+					? [
+							`fixed but still baselined — re-run with --update: ${scriptsTypes.fixed.join("; ")}`,
+						]
+					: []),
+				"identity is file + error code + message, without line numbers, so an unrelated edit above an error does not read as a regression",
+				"a count of 0 here means the ratchet is finished and the guard can become a plain tsc gate",
+			],
+			asOf: scriptsTypes.asOf.slice(0, 10),
+			cadence: "on-deploy",
+			severity: "medium",
+			artifact: "improvements/audits/scripts-types-latest.json",
+			passing: scriptsTypes.added.length === 0,
+		}),
+
+		// SCF coverage — the external roster vs what we actually serve. The
+		// gap matrix (report-coverage-gaps.ts) has run monthly and opened an
+		// ISSUE, but its headline never reached this board: 49 SCF-FUNDED
+		// projects, every one carrying a round badge, that the directory does
+		// not serve. Surfacing it is the quality move; filling it is
+		// human-gated curation (the workflow forbids bulk-create).
+		g({
+			key: "scf-coverage",
+			title: "SCF-funded projects served",
+			promise:
+				"Every SCF-funded project (round-badged, so provably funded) is in the directory an agent searches.",
+			measure: {
+				value: coverageGaps.scf.served,
+				of: coverageGaps.scf.total,
+				unit: "projects",
+			},
+			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served — ${coverageGaps.scf.absent} absent, all carrying a funding-round badge`,
+			details: [
+				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
+				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,
+				"absent entries are human-reviewed SEEDS, never bulk-created",
+				...coverageGaps.scf.sample
+					.slice(0, 3)
+					.map(
+						(x) => `absent: ${x.scfSlug} (round ${(x.rounds || []).join(",")})`,
+					),
+				// Two independent rosters agreeing is a stronger signal than either
+				// lane's own threshold. Rendered only when non-empty, so it costs
+				// nothing on a quiet week.
+				...((coverageGaps as { corroboratedAbsent?: Array<{ name: string; slug: string }> })
+					.corroboratedAbsent ?? []
+				).map(
+					(c) =>
+						`corroborated by BOTH rosters — ${c.name} (${c.slug}) is on the SCF absent list AND listed by DefiLlama on Stellar, below the TVL floor that hid it`,
+				),
+			],
+			asOf: coverageGaps.asOf.slice(0, 10),
+			cadence: "weekly",
+			severity: coverageGaps.scf.absent > 25 ? "high" : "medium",
+			artifact: "improvements/audits/coverage-gaps-latest.json",
+			passing: coverageGaps.scf.absent === 0,
+		}),
+
 		g({
 			key: "deepwiki-calibration",
 			title: "Code-depth calibration",
 			promise:
-				"Repo depth grades agree with independent code analysis where both exist.",
+				"Repo depth grades agree with independent code analysis where both exist — on a sample large enough for the rate to mean something.",
 			measure: { value: deepwiki.agreementRate, of: null, unit: "%" },
-			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled)`,
+			// The headline CARRIES its n. "100%" on three repos read as a strong
+			// result at a glance while the sample sat in the subtitle nobody
+			// reads; a rate without its denominator is not a measurement.
+			value: `${deepwiki.agreementRate}% (n=${deepwiki.frame.graded})`,
+			sub: `agreement on ${deepwiki.frame.graded} co-graded repos (${deepwiki.frame.total} sampled, ${deepwiki.frame.unindexed} with no independent index)`,
 			details: [
 				`${deepwiki.disagreements.length} disagreements`,
-				`${deepwiki.frame.unindexed} sampled repos had no independent index to compare (small-n baseline, grows as coverage does)`,
+				`${deepwiki.frame.unindexed}/${deepwiki.frame.total} sampled repos had no independent index to compare against — independent coverage of our corpus, not our agreement with it, is the binding constraint here`,
+				deepwiki.frame.graded < DEEPWIKI_MIN_GRADED
+					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement — re-run against a sample with more co-gradeable repos.`
+					: `sample meets the ${DEEPWIKI_MIN_GRADED}-repo floor`,
 			],
 			asOf: "2026-07-10",
 			cadence: "baseline",
 			severity: "low",
 			artifact: "improvements/engine/deepwiki-calibration-2026-07-10.json",
-			passing: deepwiki.disagreements.length === 0,
+			// A guard that CANNOT be breached is not a guard. With n=3 a single
+			// disagreement would swing the rate 33 points, so green here asserted
+			// far more than the evidence supports. Insufficient sample fails.
+			passing:
+				deepwiki.disagreements.length === 0 &&
+				deepwiki.frame.graded >= DEEPWIKI_MIN_GRADED,
 		}),
 
 		// Raven interlock, the consumer's discovery index vs our live contract.
@@ -577,10 +792,22 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure, that's this row's red line.",
 				measure: { value: L.open, of: L.total, unit: "findings" },
 				value: `${L.open} open`,
-				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${Math.round(L.closingRate * 100)}% closed`,
+				// "90% closed" was the most misleading number on this page. 413 of
+				// 461 findings are closed and SEVEN of them were verified; the
+				// other 406 are `cleared`, which means only that a detector
+				// stopped reporting them. Spot-checked 2026-08-31: engine-d's
+				// kutana, etesia and octopos are all cleared and all still return
+				// semantic-mode no-match on the live API, with SCF round badges.
+				// Nobody asked again, so the ledger called it closed.
+				//
+				// The qualifier belongs in the headline, not one line below it in
+				// the details where it already sat and changed nothing.
+				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${L.closed} closed, ${L.verified + (L.clearedByReprobe ?? 0)} on evidence`,
 				details: [
 					`open by surface: ${surfaces}`,
 					`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
+					`closure basis: ${L.verified} verified deliberately · ${L.clearedByReprobe ?? 0} cleared on a live re-probe that PASSED · ${L.clearedOnSilence ?? 0} cleared only because a detector stopped reporting`,
+					`that last group is the re-probe backlog, not a result: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31 — kutana, etesia and octopos sit in it, are still absent from the directory, and each carries SCF round badges.`,
 					L.staleHighOpen > 0
 						? `${L.staleHighOpen} high-severity finding(s) stale >30d, work them down`
 						: "no high-severity finding neglected past 30 days",
