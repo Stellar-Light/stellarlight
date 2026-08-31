@@ -30,6 +30,7 @@
  * Exits 1 on any unconsumed field, so it can gate a merge. Read-only.
  */
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const JSON_OUT = process.argv.includes("--json");
 const API = process.env.STELLARLIGHT_API ?? "https://stellarlight.xyz";
@@ -69,28 +70,62 @@ type Check = {
 
 /** The fields whose whole purpose is to change what an agent is told. */
 const CHECKS: Check[] = [
-	{ field: "triageTags", why: "internal dead/farm/template verdicts for 12,961 repos" },
+	{
+		field: "triageTags",
+		why: "internal dead/farm/template verdicts for 12,961 repos",
+	},
 	{ field: "tier", why: "the anti-long-tail gate PLAN.md relies on" },
-	{ field: "tierReason", why: "provenance for a tier verdict (evidenced+dated is the pitch)" },
+	{
+		field: "tierReason",
+		why: "provenance for a tier verdict (evidenced+dated is the pitch)",
+	},
 	{ field: "knowledgeNotes", why: "the agent-facing orientation layer (P3)" },
 	{ field: "stellarDeps", why: "the dependency graph — who builds on whom" },
 	{ field: "codeDepth", why: "the code-truth signal repoScore is built on" },
-	{ field: "stellarProof", why: "proof kind; a key in the two-key archive rule" },
+	{
+		field: "stellarProof",
+		why: "proof kind; a key in the two-key archive rule",
+	},
 	{ field: "farmScore", why: "farm fingerprint; the other archive key" },
 	{ field: "statusBasis", why: "why a project's status is what it is" },
 ];
 
-function grepCount(pattern: string, paths: string[]): number {
+/** Strip comments before searching.
+ *
+ * The first version used a bare `git grep`, and immediately fooled itself: the
+ * meta-row's own COMMENT in quality-artifacts.ts mentions `triageTags`, so the
+ * guard counted its own prose as consumption and flipped a dead field to
+ * green. A guard that can be satisfied by documentation is worse than none —
+ * it is the doc-instead-of-lane failure wearing a lane's clothes. Code only. */
+function stripComments(src: string): string {
+	return src
+		.replace(/\/\*[\s\S]*?\*\//g, " ") // block comments
+		.replace(/(^|[^:])\/\/[^\n]*/g, "$1 "); // line comments (not URLs)
+}
+
+function filesUnder(paths: string[]): string[] {
 	try {
-		const out = execFileSync(
-			"git",
-			["grep", "-l", "--", pattern, ...paths],
-			{ encoding: "utf8" },
-		);
-		return out.split("\n").filter(Boolean).length;
+		const out = execFileSync("git", ["ls-files", "--", ...paths], {
+			encoding: "utf8",
+		});
+		return out.split("\n").filter((f) => /\.tsx?$/.test(f));
 	} catch {
-		return 0; // git grep exits 1 on no match
+		return [];
 	}
+}
+
+/** Number of files whose CODE (not comments) references the field. */
+function grepCount(pattern: string, paths: string[]): number {
+	let n = 0;
+	for (const f of filesUnder(paths)) {
+		try {
+			const code = stripComments(readFileSync(f, "utf8"));
+			if (code.includes(pattern)) n++;
+		} catch {
+			// unreadable file — not evidence of consumption
+		}
+	}
+	return n;
 }
 
 async function main() {
@@ -126,7 +161,11 @@ async function main() {
 		source: "scripts/check-consumption.ts",
 		checked: results.length,
 		consumed: results.filter((r) => r.consumed).length,
-		dead: dead.map((d) => ({ field: d.field, why: d.why, writtenIn: d.writtenIn })),
+		dead: dead.map((d) => ({
+			field: d.field,
+			why: d.why,
+			writtenIn: d.writtenIn,
+		})),
 		note: "A field written by our machinery but read by no serving path cannot change any answer an agent receives.",
 	};
 
@@ -139,7 +178,9 @@ async function main() {
 				`  ${r.field.padEnd(15)} ${String(r.writtenIn).padStart(5)}  ${String(r.readBySurfaces).padStart(13)}  ${r.readBySurfaces > 0 ? "consumed" : r.viaEngine > 0 ? "consumed (via engine)" : "*** DEAD ***"}`,
 			);
 		if (dead.length) {
-			console.log(`\nDEAD MACHINERY (${dead.length}) — computed, never consumed:`);
+			console.log(
+				`\nDEAD MACHINERY (${dead.length}) — computed, never consumed:`,
+			);
 			for (const d of dead) console.log(`  ${d.field}: ${d.why}`);
 			console.log(
 				"\nThis is the class that produced every major finding of 2026-08-30.",
@@ -147,7 +188,8 @@ async function main() {
 		}
 	}
 	if (dead.length) process.exit(1);
-	if (!JSON_OUT) console.log("\nGREEN: every checked field reaches a serving path.");
+	if (!JSON_OUT)
+		console.log("\nGREEN: every checked field reaches a serving path.");
 }
 
 main().catch((e) => {
