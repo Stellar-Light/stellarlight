@@ -405,54 +405,58 @@ async function everyPageRenders() {
  * it; a probe that cannot subtract is skipped rather than guessed at.
  */
 async function totalIsLimitIndependent() {
-	console.log("\ntotal is the same at every limit");
+	console.log("\ntotal is the same at every limit AND offset");
+	// Two invariants, both audit-born. (1) `total` must not move with limit —
+	// the identityRows<limit gate made membership a function of page size for
+	// five weeks behind a comment saying it was fixed. (2) `total` must not
+	// move with OFFSET — the semantic top-up ran only at offset 0 and was added
+	// to total, so page one promised 17 and page two reported 6. The route now
+	// excludes semantic rows from `total` entirely (counts.semantic carries
+	// them), so the assertion is on the RAW total: no subtraction, and nothing
+	// to silently mis-subtract — the first version of this probe subtracted
+	// `counts.semanticAdds`, a field the API never emitted, and `?? 0` made it
+	// a permanent no-op that proved nothing.
 	for (const q of [
 		"is USDC Swap live",
 		"is Stellars Finance live",
 		"is Stellar Wallets Kit live",
+		"latest stellar update",
 	]) {
-		const seen = new Map<number, number>();
-		let skipped = false;
-		for (const limit of [3, 4, 7, 20]) {
+		const seen: string[] = [];
+		let bad = false;
+		for (const [limit, offset] of [
+			[3, 0],
+			[7, 0],
+			[20, 0],
+			[20, 3],
+		] as Array<[number, number]>) {
 			const { status, body } = await getJson(
-				`/api/projects/search?q=${encodeURIComponent(q)}&limit=${limit}`,
+				`/api/projects/search?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`,
 			);
 			if (status !== 200 || !body?.meta?.counts) {
-				bad(`limit-independence: ${q}`, `HTTP ${status} at limit=${limit}`);
-				skipped = true;
+				bad = true;
+				seen.push(`limit=${limit}&offset=${offset} -> HTTP ${status}`);
 				break;
 			}
 			const total = Number(body.meta.counts.total ?? Number.NaN);
-			// `counts.semantic`, which the route actually emits — the first
-			// version read `counts.semanticAdds`, a field that exists only as an
-			// internal variable name in route.ts, so `?? 0` meant it never
-			// subtracted and never skipped: the probe was green without ever
-			// exercising the exclusion it documents. Audit finding, 2026-08-31.
-			const semRaw = body.meta.counts.semantic;
 			if (!Number.isFinite(total)) {
-				skipped = true;
+				bad = true;
+				seen.push(`limit=${limit}&offset=${offset} -> total not a number`);
 				break;
 			}
-			// The route omits the field when no semantic rows were added; treat a
-			// non-numeric presence as "cannot subtract" and skip, per the header.
-			if (semRaw !== undefined && typeof semRaw !== "number" && typeof semRaw !== "boolean") {
-				skipped = true;
-				break;
-			}
-			const semantic = typeof semRaw === "number" ? semRaw : 0;
-			seen.set(limit, total - semantic);
+			seen.push(`limit=${limit}&offset=${offset} -> ${total}`);
 		}
-		if (skipped) continue;
-		const values = [...new Set(seen.values())];
-		if (values.length === 1) {
-			ok(`${q} — keyword total ${values[0]} at every limit`);
+		const values = new Set(seen.map((x) => x.split("-> ")[1]));
+		if (!bad && values.size === 1) {
+			ok(`${q} — total ${[...values][0]} at every limit/offset`);
 		} else {
-			bad(
-				`limit-independence: ${q}`,
-				`keyword total changes with page size: ${[...seen]
-					.map(([l, t]) => `limit=${l} -> ${t}`)
-					.join(", ")}`,
-			);
+			failRows.push({
+				probe: `limit-offset-independence: ${q}`,
+				note: seen.join(", "),
+				surface: "api",
+			});
+			failures++;
+			console.log(`  ✗ ${q}\n      ${seen.join(", ")}`);
 		}
 	}
 }

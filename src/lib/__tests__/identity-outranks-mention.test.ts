@@ -201,3 +201,32 @@ describe("a name used as English is a mention (wave-7, the audit colliders)", ()
 		).toBeLessThan(3);
 	});
 });
+
+// Round two of the audit colliders: the tell-tale word is a STOPWORD, so the
+// leftover rule never saw it. An article before the span ("what is a hot
+// wallet") marks the category — English never puts a/an before a proper name.
+// A shopping word anywhere ("best", "cheapest", "options") means the category
+// should be ranked, not the like-named project served. Both vetoes sit on BOTH
+// identity branches: "best hot wallet for stellar" reached rank 3 through the
+// OLDER anchors-equality door after the containment door was closed.
+describe("articles and shopping words mark the category (wave-7b)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it.each([
+		["HOT Wallet", "hot-wallet", "what is a hot wallet"],
+		["HOT Wallet", "hot-wallet", "best hot wallet for stellar"],
+		["DEX Tools", "dex-tools", "best dex tools on stellar"],
+		["For Yield", "for-yield", "best options for yield on stellar"],
+		["One Click", "one-click", "buy xlm in one click"],
+		["USDC Swap", "usdc-swap", "cheapest usdc swap on stellar"],
+	])("%s does not own \"%s\"", (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBeLessThan(3);
+	});
+
+	it("identity questions without those signals still promote", () => {
+		expect(q("HOT Wallet", "hot-wallet", "is HOT Wallet live")).toBe(3);
+		expect(q("USDC Swap", "usdc-swap", "is USDC Swap live")).toBe(3);
+		expect(q("The Signal", "the-signal", "what is The Signal")).toBe(3);
+	});
+});

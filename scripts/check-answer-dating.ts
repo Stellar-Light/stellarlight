@@ -68,7 +68,16 @@ const JSON_OUT = process.argv.includes("--json");
 
 /** Fields whose value a consumer would want dated. */
 const VALUE =
-	/^(answer|verdict|status|score|confidence|label|tier|grade|summary|explanation|basis|state|result)$/i;
+	// `basis` is deliberately NOT here. The cross-vendor audit ruled on it:
+	// every basis field in the contract is a constant methodology string
+	// compiled into the code ("Supply-side coverage of ACTIVE directory
+	// projects…") — it changes only when the code changes, so it cannot go
+	// stale the way a measured value can, and stamping a date on it would
+	// MANUFACTURE the wrong inference this guard exists to prevent (a reader
+	// dating the METHOD and believing they dated the numbers). The dateable
+	// things are the quantities beside it, which is what the rest of this
+	// regex names.
+	/^(answer|verdict|status|score|confidence|label|tier|grade|summary|explanation|state|result)$/i;
 /** A field that dates something. Two rules with DELIBERATELY different case
  * handling — one case-insensitive regex over both would be wrong twice:
  *

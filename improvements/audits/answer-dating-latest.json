@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-08-31T04:31:44.887Z",
+	"asOf": "2026-08-31T04:51:57.446Z",
 	"source": "scripts/check-answer-dating.ts",
-	"valuesChecked": 100,
-	"undated": 48,
+	"valuesChecked": 80,
+	"undated": 34,
 	"findings": [
 		{
 			"op": "getQualityReport",
@@ -32,12 +32,6 @@
 			"op": "getQualityReport",
 			"value": "label",
 			"where": "missFunnel.stages",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "getQualityReport",
-			"value": "basis",
-			"where": "rowQuality.statusBasisMix",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -131,12 +125,6 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
-			"op": "getBuilders",
-			"value": "basis",
-			"where": "builders.match",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
 			"op": "getPartners",
 			"value": "score",
 			"where": "partners.trust",
@@ -180,12 +168,6 @@
 		},
 		{
 			"op": "scfPitch",
-			"value": "basis",
-			"where": "report.fundingBar",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "scfPitch",
 			"value": "tier",
 			"where": "report.vet.competitors.repos",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
@@ -194,18 +176,6 @@
 			"op": "scfPitch",
 			"value": "status",
 			"where": "report.vet.competitors.projects",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "scfPitch",
-			"value": "basis",
-			"where": "report.vet.maturity",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "scfPitch",
-			"value": "basis",
-			"where": "report.vet.gap",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -218,30 +188,6 @@
 			"op": "hackathonBrief",
 			"value": "status",
 			"where": "report.vet.competitors.projects",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "basis",
-			"where": "report.vet.maturity",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "basis",
-			"where": "report.vet.gap",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "basis",
-			"where": "report.liveContracts",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "basis",
-			"where": "report.funding.fundingBar",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
@@ -257,39 +203,9 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
-			"op": "vetIdea",
-			"value": "basis",
-			"where": "report.maturity",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "vetIdea",
-			"value": "basis",
-			"where": "report.gap",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "vetIdea",
-			"value": "basis",
-			"where": "report.funding",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
 			"op": "listSkills",
 			"value": "label",
 			"where": "skills.installAlt",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "analyzeEcosystem",
-			"value": "basis",
-			"where": "gaps",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "getStablecoins",
-			"value": "basis",
-			"where": "meta.coverage",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		}
 	]

@@ -465,7 +465,9 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		// the code scan and none dating the answer. Nearby dates are worse than
 		// no dates: they invite a specific wrong inference.
 		//
-		// The number is DEBT. 48 of 100 served values have no date in their own
+		// The number is DEBT read from the artifact — never restated here, where
+		// it would rot: two committed counts of one quantity is the class the
+		// artifact-agreement guard exists for.
 		// scope; the guard freezes that and fails on new ones. It reads the
 		// CONTRACT — with $refs resolved, so named schemas (Project, Repo,
 		// Partner…) are examined too — so it measures what a consumer is TOLD,
