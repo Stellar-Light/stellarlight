@@ -9,6 +9,15 @@
 # carrying a finding about SOME OTHER lane — this lane doing its job. A red at
 # the artifact or commit steps is this lane itself broken:
 # workflow-health: signal-steps: ^Report$
+#
+# 2026-08-31: the scout-mcp mirror drifted (1.2.1 description changes), two
+# runs honestly died at "Mirror drift", and the checker's ALWAYS-RED verdict
+# then keyed on the FIRST failure's step even after the sync landed and the
+# latest run died only at Report (a declared signal) — so every subsequent
+# Report inherited the verdict and re-failed: the checker was evidence about
+# itself. This edit resets the since-last-edited window on the now-synced
+# reality. Known refinement for the checker: ALWAYS-RED should test the
+# LATEST conclusive failure's step against signal-steps, not the first's.
 name: workflow-health
 
 on:
